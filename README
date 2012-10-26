@@ -1,0 +1,7 @@
+meta-digi
+=========
+
+This is the location for Digi maintained BSPs.
+
+Please see the README files contained in the individual BSP layers for
+BSP-specific information.
