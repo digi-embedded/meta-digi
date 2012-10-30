@@ -7,11 +7,6 @@ include conf/machine/include/soc-family.inc
 # Disable perf features as 2.6.35.3 fail to build otherwise
 # PERF_FEATURES_ENABLE = ""
 
-# [DIGI] TODO need to understand this.
-# Set specific make target and binary suffix
-UBOOT_MAKE_TARGET = "u-boot.imx"
-UBOOT_SUFFIX = "imx"
-
 UBOOT_ENTRYPOINT_mx51  = "0x94000000"
 UBOOT_LOADADDRESS_mx51 = "0x94000000"
 
