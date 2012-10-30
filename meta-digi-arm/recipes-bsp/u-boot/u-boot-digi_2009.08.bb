@@ -5,7 +5,7 @@
 DESCRIPTION = "bootloader for Digi platforms"
 require recipes-bsp/u-boot/u-boot.inc
 
-PROVIDES += "u-boot-digi"
+PROVIDES += "u-boot"
 
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=4c6cde5df68eff615d36789dc18edd3b"
