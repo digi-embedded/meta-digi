@@ -49,7 +49,7 @@ PREFERRED_PROVIDER_virtual/libgles2_mx5 ?= "amd-gpu-x11-bin-mx51"
 EXTRA_IMAGEDEPENDS = "u-boot"
 
 SDCARD_ROOTFS ?= "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.ext3"
-IMAGE_FSTYPES ?= "tar.bz2 ext3 sdcard"
+IMAGE_FSTYPES ?= "jffs2 tar.bz2 ext3 sdcard"
 
 SERIAL_CONSOLE = "115200 ttymxc0"
 
