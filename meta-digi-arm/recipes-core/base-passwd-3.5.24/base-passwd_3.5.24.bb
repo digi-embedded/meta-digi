@@ -1,0 +1,106 @@
+SUMMARY = "Base system master password/group files."
+DESCRIPTION = "The master copies of the user database files (/etc/passwd and /etc/group).  The update-passwd tool is also provided to keep the system databases synchronized with these master files."
+SECTION = "base"
+PR = "r1"
+LICENSE = "GPLv2+"
+LIC_FILES_CHKSUM = "file://COPYING;md5=eb723b61539feef013de476e68b5c50a"
+
+SRC_URI = "${DEBIAN_MIRROR}/main/b/base-passwd/base-passwd_${PV}.tar.gz \
+           file://nobash.patch \
+           file://root-home.patch \
+           file://add-shadow-file.patch"
+
+SRC_URI[md5sum] = "8f6b9420c50e90edaff41eb2fb7e9e16"
+SRC_URI[sha256sum] = "196083d6f675190d4e2cede0a5fa6b3c91088705c5386f76292fec8e74b6369e"
+
+S = "${WORKDIR}/base-passwd"
+
+inherit autotools
+
+SSTATEPOSTINSTFUNCS += "base_passwd_sstate_postinst"
+
+do_install () {
+	install -d -m 755 ${D}${sbindir}
+	install -o root -g root -p -m 755 update-passwd ${D}${sbindir}/
+	install -d -m 755 ${D}${mandir}/man8 ${D}${mandir}/pl/man8
+	install -p -m 644 man/update-passwd.8 ${D}${mandir}/man8/
+	install -p -m 644 man/update-passwd.pl.8 \
+		${D}${mandir}/pl/man8/update-passwd.8
+	gzip -9 ${D}${mandir}/man8/* ${D}${mandir}/pl/man8/*
+	install -d -m 755 ${D}${datadir}/base-passwd
+	install -o root -g root -p -m 644 passwd.master ${D}${datadir}/base-passwd/
+	install -o root -g root -p -m 644 group.master ${D}${datadir}/base-passwd/
+	install -o root -g shadow -p -m 644 shadow.master ${D}${datadir}/base-passwd/
+
+	install -d -m 755 ${D}${docdir}/${BPN}
+	install -p -m 644 debian/changelog ${D}${docdir}/${BPN}/
+	gzip -9 ${D}${docdir}/${BPN}/*
+	install -p -m 644 README ${D}${docdir}/${BPN}/
+	install -p -m 644 debian/copyright ${D}${docdir}/${BPN}/
+}
+
+base_passwd_sstate_postinst() {
+	if [ "${BB_CURRENTTASK}" = "populate_sysroot" -o "${BB_CURRENTTASK}" = "populate_sysroot_setscene" ]
+	then
+		# Staging does not copy ${sysconfdir} files into the
+		# target sysroot, so we need to do so manually. We
+		# put these files in the target sysroot so they can
+		# be used by recipes which use custom user/group
+		# permissions.
+		install -d -m 755 ${STAGING_DIR_TARGET}${sysconfdir}
+		install -p -m 644 ${STAGING_DIR_TARGET}${datadir}/base-passwd/passwd.master ${STAGING_DIR_TARGET}${sysconfdir}/passwd
+		install -p -m 644 ${STAGING_DIR_TARGET}${datadir}/base-passwd/group.master ${STAGING_DIR_TARGET}${sysconfdir}/group
+		install -p -m 644 ${STAGING_DIR_TARGET}${datadir}/base-passwd/shadow.master ${STAGING_DIR_TARGET}${sysconfdir}/shadow
+	fi
+}
+
+python populate_packages_prepend() {
+	# Add in the preinst function for ${PN}
+	# We have to do this here as prior to this, passwd/group.master
+	# would be unavailable. We need to create these files at preinst
+	# time before the files from the package may be available, hence
+	# storing the data from the files in the preinst directly.
+
+	f = open(d.expand("${STAGING_DATADIR}/base-passwd/passwd.master"), 'r')
+	passwd = "".join(f.readlines())
+	f.close()
+	f = open(d.expand("${STAGING_DATADIR}/base-passwd/group.master"), 'r')
+	group = "".join(f.readlines())
+	f.close()
+	f = open(d.expand("${STAGING_DATADIR}/base-passwd/shadow.master"), 'r')
+	shadow = "".join(f.readlines())
+	f.close()
+
+	preinst = """#!/bin/sh
+if [ ! -e $D${sysconfdir}/passwd ]; then
+	cat << EOF > $D${sysconfdir}/passwd
+""" + passwd + """EOF
+fi
+if [ ! -e $D${sysconfdir}/group ]; then
+	cat << EOF > $D${sysconfdir}/group
+""" + group + """EOF
+fi
+if [ ! -e $D${sysconfdir}/shadow ]; then
+	cat << EOF > $D${sysconfdir}/shadow
+""" + shadow + """EOF
+fi
+chmod 640 $D${sysconfdir}/shadow
+chgrp shadow $D${sysconfdir}/shadow
+"""
+	d.setVar('pkg_preinst_${PN}', preinst)
+}
+
+addtask do_package after do_populate_sysroot
+
+ALLOW_EMPTY_${PN} = "1"
+
+PACKAGES =+ "${PN}-update"
+FILES_${PN}-update = "${sbindir}/* ${datadir}/${PN}"
+
+pkg_postinst_${PN}-update () {
+#!/bin/sh
+if [ -n "$D" ]; then
+	exit 0
+fi
+${sbindir}/update-passwd
+}

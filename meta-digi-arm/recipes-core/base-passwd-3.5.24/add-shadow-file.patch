@@ -1,0 +1,38 @@
+From ac7746a741e005df07f35cf19bcf25ffff517750 Mon Sep 17 00:00:00 2001
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Fri, 16 Nov 2012 12:05:15 +0100
+Subject: [PATCH] shadow.master: Adding shadow file.
+
+The root password is "root" when debug-tweaks is not enabled. Otherwise
+the password is empty.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ shadow.master |   18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+ create mode 100644 shadow.master
+
+diff --git a/shadow.master b/shadow.master
+new file mode 100644
+index 0000000..856efb0
+--- /dev/null
++++ b/shadow.master
+@@ -0,0 +1,18 @@
++root:\$1\$o/c1Q/E4\$jLGsldHxRdlYpEI3v6Sdv1::0:::::
++daemon:*::0:::::
++bin:*::0:::::
++sys:*::0:::::
++sync:*::0:::::
++games:*::0:::::
++man:*::0:::::
++lp:*::0:::::
++mail:*::0:::::
++news:*::0:::::
++uucp:*::0:::::
++proxy:*::0:::::
++www-data:*::0:::::
++backup:*::0:::::
++list:*::0:::::
++irc:*::0:::::
++gnats:*::0:::::
++nobody:*::0:::::
