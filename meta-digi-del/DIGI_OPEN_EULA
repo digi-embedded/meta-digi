@@ -1,0 +1,75 @@
+            THIRD PARTY AND OPEN SOURCE LICENSE NOTICE
+                        DIGI EMBEDDED LINUX
+                           (PN 93000719)
+
+
+The product with which this notice was originally transmitted
+contains a combination of hardware, software and documentary components
+("Components").  The Components are provided for use under various
+licenses that are unique to each Component.
+
+
+THIRD PARTY COMPONENTS
+
+OpenSSL is subject to the terms and conditions of the OpenSSL/SSLeay
+License ("OpenSSL License").  The OpenSSL/SSLeay Components are
+provided under the terms of the OpenSSL/SSLeay License, and any use
+of such OpenSSL/SSLeay Components shall comply with the terms and
+conditions of that license. A copy of the OpenSSL/SSLeay license is
+available in the license.txt file accompanying the Components and at
+http://www.openssl.org/source/license.html
+
+The WPA/WPA2 supplicant is dual-licensed under both the GPL version
+2 and BSD license, and any use of such Components shall comply with
+the terms and conditions of those licenses.
+
+The Qt Components ("Qt Components") are provided under the terms
+of the GNU Lesser General Public License version 2.1 ("LGPL"),
+and any use of such Qt Components shall comply with the terms and
+conditions of that license. For Qt production licensing, refer to
+http://qt.nokia.com/products/licensing for detailed information.
+
+Use of Components that are subject to one of the versions of the
+GNU General Public License ("GPL") shall comply with the terms and
+conditions of those licenses.  Copies of the GPL licenses are available
+at http://www.gnu.org/licenses/licenses.html.
+
+
+DIGI COMPONENTS
+
+The Components that are not the property of a third party are the
+property of Digi International Inc.  Unless otherwise noted, Digi
+Components are provided pursuant to a Digi End-User License Agreement.
+
+The WPA supplicant has been modified by Digi, and the modification
+is distributed under the terms of the BSD License set forth below:
+
+*****************
+Copyright (c) Digi International, Inc.
+All rights reserved.
+
+* Redistributions of source code must retain the above copyright
+  notice, this list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright
+  notice, this list of conditions and the following disclaimer in the
+  documentation and/or other materials provided with the distribution.
+
+* Neither the name of the Digi International Inc. nor the names of
+  its contributors may be used to endorse or promote products derived
+  from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*****************
+
