@@ -10,8 +10,10 @@ IMAGE_LINGUAS = " "
 LICENSE = "MIT"
 
 inherit core-image
+inherit del-image
 
 IMAGE_FEATURES = "core-ssh-dropbear"
+IMAGE_FEATURES += "del-audio"
 
 # core-image disables the root password if debug-tweak is not enabled.
 # This override will use the shadow file instead.
