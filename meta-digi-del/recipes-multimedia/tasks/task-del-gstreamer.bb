@@ -17,6 +17,12 @@ PACKAGES = "\
 RDEPENDS_task-del-gstreamer = "\
     fsl-mm-codeclib \
     imx-lib \
+    gstreamer \
+    gst-plugins-base \
+    gst-plugins-good \
+    gst-plugins-bad \
+    gst-plugins-ugly \
+    gst-ffmpeg \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
 RRECOMMENDS_task-del-gstreamer = "\
