@@ -14,6 +14,7 @@ inherit del-image
 
 IMAGE_FEATURES = "core-ssh-dropbear"
 IMAGE_FEATURES += "del-audio"
+IMAGE_FEATURES += "del-gstreamer"
 
 # core-image disables the root password if debug-tweak is not enabled.
 # This override will use the shadow file instead.
