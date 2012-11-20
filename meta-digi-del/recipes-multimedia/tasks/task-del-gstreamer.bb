@@ -17,6 +17,7 @@ PACKAGES = "\
 RDEPENDS_task-del-gstreamer = "\
     fsl-mm-codeclib \
     fsl-mm-flv-codeclib \
+    fsl-mm-mp3enc-codeclib \
     imx-lib \
     gstreamer \
     gst-plugins-base \
