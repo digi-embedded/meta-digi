@@ -15,10 +15,9 @@ PACKAGES = "\
     "
 
 RDEPENDS_task-del-gstreamer = "\
-    fsl-mm-core \
+    fsl-mm-codeclib \
+    imx-lib \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
 RRECOMMENDS_task-del-gstreamer = "\
     ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS}"
-
-
