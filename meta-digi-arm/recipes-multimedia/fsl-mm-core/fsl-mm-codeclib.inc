@@ -7,7 +7,7 @@ SECTION = "multimedia"
 LICENSE = "Proprietary"
 DEPENDS = "pkgconfig"
 
-LIC_FILES_CHKSUM = "file://${LAYERDIR}/FSL_MMK_EULA;md5=da9b44d371e7f1f2d2fa1cad0db90ef7"
+LIC_FILES_CHKSUM := "file://${FSL_MMK_EULA_FILE};md5=da9b44d371e7f1f2d2fa1cad0db90ef7"
 
 INC_PR = "r1"
 
