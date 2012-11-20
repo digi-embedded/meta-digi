@@ -29,7 +29,6 @@ do_install () {
 	find ${D} -type f -exec chmod a-x '{}' ';'
 }
 
-FILES_${PN} += "${libdir}/${SOLIBS}"
-FILES_${PN}-dev += "${libdir}/${SOLIBSDEV}"
+FILES_${PN} += "${libdir}/*.so*"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
