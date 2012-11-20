@@ -1,0 +1,29 @@
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Thu, 3 May 2012 18:05:09 +0200
+Subject: [PATCH] imx-lib: Do not error if no VPU IRAM present.
+
+When the kernel is configured with no VPU IRAM, the vpu encoder prints
+an error message. Transform it into a warning as functionally everything
+works fine with no VPU IRAM.
+
+CCORE_MX53_EXTENSIONS-85
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ vpu/vpu_util.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/vpu/vpu_util.c b/vpu/vpu_util.c
+index fba9434..e042206 100644
+--- a/vpu/vpu_util.c
++++ b/vpu/vpu_util.c
+@@ -1005,7 +1005,7 @@ void SetEncSecondAXIIRAM(SecAxiUse *psecAxiIramInfo, SetIramParam *parm)
+ 		psecAxiIramInfo->searchRamAddr = iram.start;
+ 		size -= psecAxiIramInfo->searchRamSize;
+ 	} else {
+-		err_msg("VPU iram is less than search ram size\n");
++		warn_msg("VPU iram is less than search ram size\n");
+ 		goto out;
+ 	}
+ 
+
