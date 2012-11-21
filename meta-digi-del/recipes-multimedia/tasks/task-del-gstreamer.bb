@@ -14,16 +14,40 @@ PACKAGES = "\
 	task-del-gstreamer-dev \
     "
 
+VIRTUAL_RUNTIME_gst-fsl-plugin = "\
+	gst-fsl-plugin \
+	gst-fsl-plugin-gplay \
+	"
+
+VIRTUAL_RUNTIME_gst-plugins-base = "\
+	gst-plugins-base \
+	gst-plugins-base-playbin \
+	gst-plugins-base-alsa \
+	"
+
+VIRTUAL_RUNTIME_gst-plugins-good = "\
+	gst-plugins-good \
+	"
+
+VIRTUAL_RUNTIME_gst-plugins-bad = "\
+	gst-plugins-bad \
+	"
+
+VIRTUAL_RUNTIME_gst-plugins-ugly = "\
+	gst-plugins-ugly \
+	"
+
 RDEPENDS_task-del-gstreamer = "\
     fsl-mm-codeclib \
     fsl-mm-flv-codeclib \
     fsl-mm-mp3enc-codeclib \
+    ${VIRTUAL_RUNTIME_gst-fsl-plugin} \
     imx-lib \
     gstreamer \
-    gst-plugins-base \
-    gst-plugins-good \
-    gst-plugins-bad \
-    gst-plugins-ugly \
+    ${VIRTUAL_RUNTIME_gst-plugins-base} \
+    ${VIRTUAL_RUNTIME_gst-plugins-good} \
+    ${VIRTUAL_RUNTIME_gst-plugins-bad} \
+    ${VIRTUAL_RUNTIME_gst-plugins-ugly} \
     gst-ffmpeg \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
