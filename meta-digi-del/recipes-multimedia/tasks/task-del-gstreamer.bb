@@ -23,6 +23,9 @@ VIRTUAL_RUNTIME_gst-plugins-base = "\
 	gst-plugins-base \
 	gst-plugins-base-playbin \
 	gst-plugins-base-alsa \
+	gst-plugins-base-encodebin \
+	gst-plugins-base-decodebin \
+	gst-plugins-base-decodebin2 \
 	"
 
 VIRTUAL_RUNTIME_gst-plugins-good = "\
@@ -43,6 +46,7 @@ RDEPENDS_task-del-gstreamer = "\
     fsl-mm-mp3enc-codeclib \
     ${VIRTUAL_RUNTIME_gst-fsl-plugin} \
     imx-lib \
+    imx-firmware \
     gstreamer \
     ${VIRTUAL_RUNTIME_gst-plugins-base} \
     ${VIRTUAL_RUNTIME_gst-plugins-good} \
