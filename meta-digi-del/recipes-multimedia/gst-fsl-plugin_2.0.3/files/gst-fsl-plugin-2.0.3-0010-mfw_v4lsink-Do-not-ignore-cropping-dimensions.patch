@@ -1,0 +1,57 @@
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Wed, 2 May 2012 10:53:19 +0200
+Subject: [PATCH] mfw_v4lsink: Do not ignore cropping dimensions.
+
+When the sink issues a S_CROP followed by a S_OUTPUT, the later resets the
+crop dimensions to full screen. In order to keep the cropping dimensions,
+a new S_CROP needs to be issued after the S_OUTPUT.
+
+This change reuses an init call that was only called in the case of X11
+which reissues the crop. It also needs to make sure that the previous
+crop information is erased, otherwise the cropping function will decide
+that it won't perform a crop if the dimensions have not changed.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ src/misc/v4l_sink/src/mfw_gst_v4lsink.c |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
+index e4f6aa0..b30f390 100755
+--- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
++++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
+@@ -1852,6 +1852,7 @@ mfw_gst_v4lsink_buffer_alloc (GstBaseSink * bsink, guint64 offset,
+     gint frame_buffer_size;
+     gint max_frames;
+     gint hwbuffernumforcodec;
++    struct v4l2_crop *prevCrop = &v4l_info->prevCrop;
+ 
+     gboolean result = FALSE;
+ 
+@@ -1990,7 +1991,6 @@ mfw_gst_v4lsink_buffer_alloc (GstBaseSink * bsink, guint64 offset,
+             return GST_FLOW_ERROR;
+         }
+ 
+-#ifdef USE_X11
+         /* Two cases:
+          * 1. VPU will request buffer first, when pipeline enter running state,
+          *    every parameter is ready.
+@@ -1999,13 +1999,15 @@ mfw_gst_v4lsink_buffer_alloc (GstBaseSink * bsink, guint64 offset,
+          */
+ 
+         if (element->current_state == GST_STATE_PLAYING) {
++#ifdef USE_X11
+             GST_INFO("element state already switch to PLAYING, create event thread");
+             mfw_gst_v4lsink_create_event_thread(v4l_info);
+ 
++#endif
++            // Digi: Force the crop to take effect by losing the previous crop info
++	    memset(prevCrop,0,sizeof(struct v4l2_crop));
+             mfw_gst_v4l2_display_init(v4l_info, v4l_info->disp_width, v4l_info->disp_height);
+-
+         }
+-#endif
+ 
+         /*
+          *   The software H264 decoder need check the "num-buffers-required"
+

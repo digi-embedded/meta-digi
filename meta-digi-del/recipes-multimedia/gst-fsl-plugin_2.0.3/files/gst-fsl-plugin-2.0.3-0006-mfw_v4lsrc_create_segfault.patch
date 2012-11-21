@@ -1,0 +1,25 @@
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Tue, 3 Apr 2012 13:54:50 +0200
+Subject: [PATCH] mfw_v4lsrc_create_segfault
+
+Fix a segfault that happend when the create function returns GST_FLOW_OK
+but the returned buffer is NULL.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ src/misc/v4l_source/src/mfw_gst_v4lsrc.c |    2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/misc/v4l_source/src/mfw_gst_v4lsrc.c b/src/misc/v4l_source/src/mfw_gst_v4lsrc.c
+index 968deb7..9388edd 100755
+--- a/src/misc/v4l_source/src/mfw_gst_v4lsrc.c
++++ b/src/misc/v4l_source/src/mfw_gst_v4lsrc.c
+@@ -1195,6 +1195,8 @@ static GstFlowReturn mfw_gst_v4lsrc_create (GstPushSrc * src, GstBuffer ** buf)
+ {
+   MFWGstV4LSrc *v4l_src = MFW_GST_V4LSRC(src);
+   *buf = mfw_gst_v4lsrc_buffer_new (v4l_src);
++  if(*buf == NULL)
++	  return GST_FLOW_ERROR;
+   return GST_FLOW_OK;
+ 
+ }

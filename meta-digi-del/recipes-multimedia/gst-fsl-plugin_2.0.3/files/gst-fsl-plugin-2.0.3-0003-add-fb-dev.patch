@@ -1,0 +1,185 @@
+From 1767c2d99895b682a79a0b874379811e83f6f147 Mon Sep 17 00:00:00 2001
+From: Alejandro Gonzalez <alex.gonzalez@digi.com>
+Date: Tue, 13 Mar 2012 19:20:02 +0100
+Subject: [PATCH] add-fb-dev
+
+Add framebuffer select functionality to sink
+
+To support displaying to the second monitor, the mfw_v4lsink sink
+element needs to accept a device parameter specifying the framebuffer
+device to use as output.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ src/misc/v4l_sink/src/mfw_gst_fb.c      |   15 +++++++++------
+ src/misc/v4l_sink/src/mfw_gst_fb.h      |    1 -
+ src/misc/v4l_sink/src/mfw_gst_v4l.c     |    4 ++++
+ src/misc/v4l_sink/src/mfw_gst_v4lsink.c |   27 +++++++++++++++++++++++++--
+ src/misc/v4l_sink/src/mfw_gst_v4lsink.h |    3 ++-
+ 5 files changed, 40 insertions(+), 10 deletions(-)
+
+diff --git a/src/misc/v4l_sink/src/mfw_gst_fb.c b/src/misc/v4l_sink/src/mfw_gst_fb.c
+index 8c251da..fb13489 100755
+--- a/src/misc/v4l_sink/src/mfw_gst_fb.c
++++ b/src/misc/v4l_sink/src/mfw_gst_fb.c
+@@ -199,16 +199,19 @@ POST-CONDITIONS:    None
+ IMPORTANT NOTES:    None
+ =============================================================================*/
+ 
+-gboolean mfw_gst_fb0_open(gint *fb)
++gboolean mfw_gst_fb0_open(MFW_GST_V4LSINK_INFO_T * v4l_info)
+ {
+     gboolean retval = TRUE;
+     gchar fb_device[100] = FB_DEIVCE;
+ 
+-	if ((*fb =
+-	     open(fb_device, O_RDWR, 0)) < 0) {
+-	    g_print("Unable to open %s %d\n", fb_device, *fb);
+-        *fb = 0;
+-	    retval = FALSE;
++    if (v4l_info->device != NULL && v4l_info->device[0] != '\0')
++        strcpy(fb_device , v4l_info->device);
++
++    GST_DEBUG_OBJECT (v4l_info, "opened framebuffer %s", v4l_info->device);
++    if ((v4l_info->fd_fb = open(fb_device, O_RDWR, 0)) < 0) {
++        g_print("Unable to open %s %d\n", fb_device, v4l_info->fd_fb);
++        v4l_info->fd_fb = 0;
++        retval = FALSE;
+     }
+     return retval;
+ 
+diff --git a/src/misc/v4l_sink/src/mfw_gst_fb.h b/src/misc/v4l_sink/src/mfw_gst_fb.h
+index 01321d6..4876b73 100755
+--- a/src/misc/v4l_sink/src/mfw_gst_fb.h
++++ b/src/misc/v4l_sink/src/mfw_gst_fb.h
+@@ -50,7 +50,6 @@
+ 
+ gboolean mfw_gst_set_gbl_alpha(gint fb, gint alphaVal);
+ gboolean mfw_gst_fb0_set_colorkey(gint fb,gulong *colorSrc);
+-gboolean mfw_gst_fb0_open(gint *fb);
+ gboolean mfw_gst_fb0_close(gint *fb);
+ 
+ #if ((defined (_MX37) || defined (_MX51)) && defined (LOC_ALPHA_SUPPORT))
+diff --git a/src/misc/v4l_sink/src/mfw_gst_v4l.c b/src/misc/v4l_sink/src/mfw_gst_v4l.c
+index b85879a..d773f6a 100755
+--- a/src/misc/v4l_sink/src/mfw_gst_v4l.c
++++ b/src/misc/v4l_sink/src/mfw_gst_v4l.c
+@@ -540,6 +540,10 @@ mfw_gst_v4l2_mx37_mx51_tv_close (MFW_GST_V4LSINK_INFO_T * v4l_info)
+ 
+     gint out = 3;
+ 
++    if (v4l_info->device && !strcmp(v4l_info->device, "/dev/fb1"))
++        out = 5;
++    g_free(v4l_info->device);
++
+     // mfw_gst_v4l2_mx37_mx51_tv_setblank (v4l_info);
+ 
+     v4l_info->tv_mode = NV_MODE;
+diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
+index b2c7b3d..d7943c1 100755
+--- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
++++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
+@@ -137,6 +137,7 @@ enum
+     TV_OUT,
+     TV_MODE,
+ #endif
++    DEVICE,
+     DUMP_LOCATION,
+     ADDITIONAL_BUFFER_DEPTH,
+     SETPARA,
+@@ -741,6 +742,11 @@ mfw_gst_v4lsink_set_property (GObject * object, guint prop_id,
+     case DUMP_LOCATION:
+         dumpfile_set_location (v4l_info, g_value_get_string (value));
+         break;
++
++    case DEVICE:
++        v4l_info->device = g_strdup (g_value_get_string (value));
++        break;
++
+     case SETPARA:
+         v4l_info->setpara |= g_value_get_int (value);
+         break;
+@@ -848,6 +854,10 @@ mfw_gst_v4lsink_get_property (GObject * object, guint prop_id,
+     case DUMP_LOCATION:
+         g_value_set_string (value, v4l_info->dump_location);
+         break;
++
++    case DEVICE:
++        g_value_set_string (value, v4l_info->device);
++        break;
+     case SETPARA:
+         g_value_set_int (value, v4l_info->setpara);
+         break;
+@@ -1497,6 +1507,12 @@ mfw_gst_v4lsink_finalize (GObject * object)
+ 
+ }
+ 
++static void mfw_gst_v4lsink_start(GstBaseSink * bsink)
++{
++    MFW_GST_V4LSINK_INFO_T *v4l_info = MFW_GST_V4LSINK(bsink);
++    mfw_gst_fb0_open(v4l_info);
++}
++
+ /*=============================================================================
+ FUNCTION:           mfw_gst_v4lsink_init
+ 
+@@ -1541,6 +1557,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
+     v4l_info->dump_location = NULL;
+     v4l_info->dumpfile = NULL;
+     v4l_info->dump_length = 0;
++    v4l_info->device = NULL;
+     v4l_info->cr_left_bypixel_orig = 0;
+     v4l_info->cr_right_bypixel_orig = 0;
+     v4l_info->cr_top_bypixel_orig = 0;
+@@ -1573,8 +1590,6 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
+     memset (&v4l_info->crop, 0, sizeof (struct v4l2_crop));
+     memset (&v4l_info->prevCrop, 0, sizeof (struct v4l2_crop));
+ 
+-    mfw_gst_fb0_open (&v4l_info->fd_fb);
+-
+     v4l_info->chipcode = getChipCode();
+     v4l_info->v4l_id = -1;
+ 
+@@ -1626,6 +1641,7 @@ mfw_gst_v4lsink_class_init (MFW_GST_V4LSINK_INFO_CLASS_T * klass)
+     
+     parent_class = g_type_class_peek_parent (klass);
+ 
++    gstvs_class->start = GST_DEBUG_FUNCPTR (mfw_gst_v4lsink_start);
+     gobject_class->set_property = mfw_gst_v4lsink_set_property;
+     gobject_class->get_property = mfw_gst_v4lsink_get_property;
+     gobject_class->finalize = mfw_gst_v4lsink_finalize;
+@@ -1730,6 +1746,13 @@ mfw_gst_v4lsink_class_init (MFW_GST_V4LSINK_INFO_CLASS_T * klass)
+                                                           NULL,
+                                                           G_PARAM_READWRITE));
+ 
++    g_object_class_install_property (gobject_class, DEVICE,
++                                     g_param_spec_string ("device",
++                                                          "Framebuffer device",
++                                                          "Framebuffer device to display output."
++                                                          "/dev/fb0,/dev/fb1",
++                                                          NULL,
++                                                          G_PARAM_READWRITE));
+ 
+     g_object_class_install_property (gobject_class, PROP_FORCE_ASPECT_RATIO,
+                                      g_param_spec_boolean
+diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.h b/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
+index 504e06f..4764868 100755
+--- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
++++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
+@@ -279,6 +279,7 @@ typedef struct MFW_GST_V4LSINK_INFO_S
+     FILE *dumpfile;
+     guint64 dump_length;
+ 
++    gchar *device;
+ 
+     gint qbuff_count;           /* buffer counter, increase when frame queued to v4l device */
+ 
+@@ -367,7 +368,7 @@ typedef struct MFW_GST_V4LSINK_INFO_CLASS_S
+ =============================================================================*/
+ 
+ extern GType mfw_gst_v4lsink_get_type (void);
+-
++gboolean mfw_gst_fb0_open(MFW_GST_V4LSINK_INFO_T * v4l_info);
+ 
+ 
+ 

@@ -1,0 +1,29 @@
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Tue, 10 Apr 2012 12:21:29 +0200
+Subject: [PATCH] gst-fsl-plugin: Clear framebuffer of spurious content.
+
+When starting a video right after boot, there is some content in the
+framebuffer which remains. The blank/unblank operation gets rid of it.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ libs/vss/vss_common.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+diff --git a/libs/vss/vss_common.c b/libs/vss/vss_common.c
+index c6ac428..fb80f42 100755
+--- a/libs/vss/vss_common.c
++++ b/libs/vss/vss_common.c
+@@ -486,6 +486,11 @@ int _initVideoDevice(VideoDevice * vd, int mode_idx)
+ 
+     vd->fbvar = fb_var;
+ 
++	// Clear framebuffer from spurious content
++	VS_MESSAGE("Blanking device /dev/fb%d.\n",vd->fbidx);
++	VS_IOCTL(fd, FBIOBLANK, error, FB_BLANK_POWERDOWN);
++	VS_IOCTL(fd, FBIOBLANK, error, FB_BLANK_UNBLANK);
++
+     if ((vd->resX==0) || (vd->resY==0))
+         goto error;
+ 
+

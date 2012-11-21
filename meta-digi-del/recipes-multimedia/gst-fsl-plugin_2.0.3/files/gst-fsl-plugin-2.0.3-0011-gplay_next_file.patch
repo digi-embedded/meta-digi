@@ -1,0 +1,28 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Thu, 10 May 2012 19:54:52 +0200
+Subject: [PATCH] gplay_next_file
+
+Add 'send_message_exit' to avoid blocking forever.
+
+This fixes 'gplay' not exiting when you run 'play next file [>]' command
+on the last file of the playlist.
+
+CCORE_MX53_EXTENSIONS-142
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ tools/gplay/mfw_gplay.c |    1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tools/gplay/mfw_gplay.c b/tools/gplay/mfw_gplay.c
+index ee65100..de11e68 100755
+--- a/tools/gplay/mfw_gplay.c
++++ b/tools/gplay/mfw_gplay.c
+@@ -876,6 +876,7 @@ int main(int argc,char *argv[])
+             case '>': // Play next file
+                 printf("next\n");
+                 if (playlist_next(pplayer, opt)==NULL){
++                    pplayer->klass->send_message_exit(pplayer);
+                     player_exit(pplayer);
+                 }
+                 break;

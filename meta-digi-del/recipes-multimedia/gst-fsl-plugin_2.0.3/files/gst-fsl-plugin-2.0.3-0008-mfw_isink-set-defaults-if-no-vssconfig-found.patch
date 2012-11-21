@@ -1,0 +1,37 @@
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Mon, 9 Apr 2012 18:20:01 +0200
+Subject: [PATCH] mfw_isink: Set defaults if no vssconfig found.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ libs/vss/vss_common.c |   16 ++++++++++++++++
+ 1 files changed, 16 insertions(+), 0 deletions(-)
+
+diff --git a/libs/vss/vss_common.c b/libs/vss/vss_common.c
+index 757c2fc..c6ac428 100755
+--- a/libs/vss/vss_common.c
++++ b/libs/vss/vss_common.c
+@@ -390,6 +390,22 @@ next:
+         cs = cs->next;
+     }
+ 
++	if( cs == NULL ){
++		for (i=0;i<VD_MAX;i++){
++			VideoDevice * vd;
++
++			VS_MESSAGE("No vssconfig, setting defaults.\n");
++			vd = &control->devices[i];
++			vd->fbidx = i;
++			vd->main_fbidx = i;
++			vd->fmt = fmt_from_str("RGBP");
++			sprintf(vd->name, "DISP%d", i);
++			vd->vsmax = 4;
++			vd->mode_num = 0;
++			_getVideoDeviceInfo(vd);
++		}
++	}
++
+     sconf_free_cs(css);
+ 
+ }
+

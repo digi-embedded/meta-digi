@@ -1,0 +1,56 @@
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Tue, 3 Apr 2012 13:51:45 +0200
+Subject: [PATCH] mfw_v4lsrc_uyvy
+
+Change the default pixelformat used by the plugin to uyvy which is
+supported by the mt9v111 driver.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ src/misc/v4l_source/src/mfw_gst_v4lsrc.c |   19 ++++---------------
+ 1 file changed, 4 insertions(+), 15 deletions(-)
+
+diff --git a/src/misc/v4l_source/src/mfw_gst_v4lsrc.c b/src/misc/v4l_source/src/mfw_gst_v4lsrc.c
+index 8ff9b6f..d1057e3 100755
+--- a/src/misc/v4l_source/src/mfw_gst_v4lsrc.c
++++ b/src/misc/v4l_source/src/mfw_gst_v4lsrc.c
+@@ -425,11 +425,8 @@ static gint mfw_gst_v4lsrc_capture_setup(MFWGstV4LSrc *v4l_src)
+         in_height = v4l_src->capture_height;
+     }
+     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+-#ifdef MX51
+-    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_NV12;
+-#else
+-    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUV420;
+-#endif
++
++	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_UYVY;
+     fmt.fmt.pix.width = in_width;
+     fmt.fmt.pix.height = in_height;
+ 
+@@ -1225,11 +1222,7 @@ static GstCaps *mfw_gst_v4lsrc_get_caps (GstBaseSrc * src)
+     GstCaps *capslist;
+     GstPadTemplate *src_template = NULL;
+     gint i;
+-#ifndef MX51    
+-    guint32 format = GST_MAKE_FOURCC('I', '4', '2', '0');
+-#else
+-    guint32 format = GST_MAKE_FOURCC('N', 'V', '1', '2');
+-#endif
++	guint32 format = GST_MAKE_FOURCC('U', 'Y', 'V', 'Y');
+ 
+     capslist = gst_caps_new_empty();
+ 
+@@ -1273,11 +1266,7 @@ static void mfw_gst_v4lsrc_fixate(GstPad * pad, GstCaps * caps)
+     GstStructure *structure=NULL;
+     MFWGstV4LSrc *v4l_src =	
+         MFW_GST_V4LSRC(gst_pad_get_parent (pad));
+-#ifndef MX51    
+-    guint32 fourcc = GST_MAKE_FOURCC('I', '4', '2', '0');
+-#else
+-    guint32 fourcc = GST_MAKE_FOURCC('N', 'V', '1', '2');
+-#endif
++	guint32 fourcc = GST_MAKE_FOURCC('U', 'Y', 'V', 'Y');
+ 
+     const GValue *v=NULL;
+     for (i = 0; i < gst_caps_get_size (caps); ++i) {
