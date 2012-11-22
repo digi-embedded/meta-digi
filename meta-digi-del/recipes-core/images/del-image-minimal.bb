@@ -12,7 +12,7 @@ LICENSE = "MIT"
 inherit core-image
 inherit del-image
 
-IMAGE_FEATURES = "core-ssh-dropbear"
+IMAGE_FEATURES = "ssh-server-dropbear"
 IMAGE_FEATURES += "del-audio"
 IMAGE_FEATURES += "del-gstreamer"
 
