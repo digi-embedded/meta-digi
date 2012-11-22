@@ -1,0 +1,24 @@
+EXTRA_OECONF += "\
+		--disable-bayer \
+		--disable-camerabin \
+		--disable-cdxaparse \
+		--disable-dccp \
+		--disable-debugutils \
+		--disable-dtmf \
+		--disable-dvb \
+		--disable-dvdnav \
+		--disable-dvdspu \
+		--disable-festival \
+		--disable-frei0r \
+		--disable-librfb \
+		--disable-mve \
+		--disable-mxf \
+		--disable-neon \
+		--disable-nsf \
+		--disable-pcapparse \
+		--disable-rtpmux \
+		--disable-siren \
+		--disable-vcd \
+		--disable-videosignal \
+		--without-x \
+		"
