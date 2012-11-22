@@ -1,4 +1,9 @@
+# Overwrite DEPENDS to avoid livrsvg dependency
+# which brings in gtk+
+DEPENDS = "gst-plugins-base libmusicbrainz tremor curl"
+
 EXTRA_OECONF += "\
+		--disable-rsvg \
 		--disable-bayer \
 		--disable-camerabin \
 		--disable-cdxaparse \
