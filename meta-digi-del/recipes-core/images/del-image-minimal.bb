@@ -12,9 +12,14 @@ LICENSE = "MIT"
 inherit core-image
 inherit del-image
 
+# These features will move to the project's local.conf
+# where they can be customized by platform.
+
+# Only common features to remain here.
 IMAGE_FEATURES = "ssh-server-dropbear"
 IMAGE_FEATURES += "del-audio"
 IMAGE_FEATURES += "del-gstreamer"
+IMAGE_FEATURES += "del-network"
 
 # core-image disables the root password if debug-tweak is not enabled.
 # This override will use the shadow file instead.
