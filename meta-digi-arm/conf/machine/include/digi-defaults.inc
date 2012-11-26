@@ -11,4 +11,4 @@ IMAGE_CLASSES += "image_types_digi"
 
 # Digi BSP default versions
 
-PREFERRED_VERSION_udev = "173"
+PREFERRED_VERSION_udev = "175"
