@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend_del := "${THISDIR}/files"
+FILESEXTRAPATHS_prepend_del := "${THISDIR}/files:"
 SRC_URI_append_del += "file://defconfig-del"
 PR_append_del = "+${DISTRO}.0"
 

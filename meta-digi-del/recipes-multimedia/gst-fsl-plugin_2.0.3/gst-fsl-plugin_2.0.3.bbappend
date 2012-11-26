@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend_del := "${THISDIR}/files"
+FILESEXTRAPATHS_prepend_del := "${THISDIR}/files:"
 SRC_URI_append_del += "file://gst-fsl-plugin-2.0.3-0001-ltmain.patch"
 SRC_URI_append_del += "file://gst-fsl-plugin-2.0.3-0002-gplay_fullscreen.patch"
 SRC_URI_append_del += "file://gst-fsl-plugin-2.0.3-0003-add-fb-dev.patch"
