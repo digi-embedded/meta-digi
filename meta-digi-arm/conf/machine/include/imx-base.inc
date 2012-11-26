@@ -41,10 +41,7 @@ MACHINE_EXTRA_RRECOMMENDS += "imx-audio \
 # Gstreamer plugin
 MACHINE_GSTREAMER_PLUGIN ?= "gst-fsl-plugin"
 
-# [DIGI] TODO This may be amd-gpu-bin-mx51
-PREFERRED_PROVIDER_virtual/egl_mx5 ?= "amd-gpu-x11-bin-mx51"
-PREFERRED_PROVIDER_virtual/libgles1_mx5 ?= "amd-gpu-x11-bin-mx51"
-PREFERRED_PROVIDER_virtual/libgles2_mx5 ?= "amd-gpu-x11-bin-mx51"
+PREFERRED_PROVIDER_virtual/libgl_mx5 ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'amd-gpu-x11-bin-mx51', 'amd-gpu-bin-mx51', d)}"
 
 EXTRA_IMAGEDEPENDS = "u-boot"
 
