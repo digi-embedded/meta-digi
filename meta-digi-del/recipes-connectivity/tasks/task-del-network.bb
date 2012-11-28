@@ -26,7 +26,7 @@ VIRTUAL-RUNTIME_network-utils ?= "ethtool"
 #VIRTUAL-RUNTIME_network-utils ?= "net-tools"
 
 VIRTUAL-RUNTIME_snmp-manager ?= ""
-#VIRTUAL-RUNTIME_snmp-manager ?= "net-snmp-server net-snmp-client"
+#VIRTUAL-RUNTIME_snmp-manager ?= "net-snmp-server"
 
 PACKAGES = "\
 	task-del-network \
