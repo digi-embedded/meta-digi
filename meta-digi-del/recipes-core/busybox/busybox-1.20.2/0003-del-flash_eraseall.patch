@@ -1,0 +1,65 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Fri, 17 Jun 2011 15:00:09 -0500
+Subject: [PATCH] del-flash_eraseall
+
+flash_eraseall: disable JFFS2 clean markers for some platforms
+
+Some platforms (i.MX5X, CPX2) require atomic access to OOB otherwise
+the JFFS2 information in the OOB leads to errors when mounting the
+file system.
+
+For these platforms, disable the possibility of writing JFFS2 clean
+markers when erasing the flash.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ Makefile.flags             |  4 ++++
+ miscutils/flash_eraseall.c | 13 +++++++++++++
+ 2 files changed, 17 insertions(+)
+
+diff --git a/Makefile.flags b/Makefile.flags
+index c43c8dc..6735e97 100644
+--- a/Makefile.flags
++++ b/Makefile.flags
+@@ -138,6 +138,10 @@ ifeq ($(CONFIG_DMALLOC),y)
+ LDLIBS += dmalloc
+ endif
+ 
++ifeq ($(CONFIG_FLASH_ERASEALL),y)
++LDLIBS += digi
++endif
++
+ # If a flat binary should be built, CFLAGS_busybox="-elf2flt"
+ # env var should be set for make invocation.
+ # Here we check whether CFLAGS_busybox indeed contains that flag.
+diff --git a/miscutils/flash_eraseall.c b/miscutils/flash_eraseall.c
+index 0598371..ea5b969 100644
+--- a/miscutils/flash_eraseall.c
++++ b/miscutils/flash_eraseall.c
+@@ -21,6 +21,8 @@
+ #include <mtd/mtd-user.h>
+ #include <linux/jffs2.h>
+ 
++#include "libdigi/digi-platforms.h"     // is_nand_oob_atomic
++
+ #define OPTION_J  (1 << 0)
+ #define OPTION_Q  (1 << 1)
+ #define IS_NAND   (1 << 2)
+@@ -84,6 +86,17 @@ int flash_eraseall_main(int argc UNUSED_PARAM, char **argv)
+ 	if (meminfo.type == MTD_NANDFLASH)
+ 		flags |= IS_NAND;
+ 
++	/*
++	 * Some platforms (i.MX5X, CPX2) require atomic access to OOB, otherwise
++	 * the JFFS2 information in the OOB leads to errors when mounting the
++	 * file system.
++	 * For those platforms, disable clean-markers option (-j).
++	 */
++	if ((flags & OPTION_J) && is_nand_oob_atomic()) {
++		flags &= (~0 - OPTION_J);
++		bb_info_msg("%s: JFFS2 doesn't use OOB in this platform", applet_name);
++	}
++
+ 	clmpos = 0;
+ 	clmlen = 8;
+ 	if (flags & OPTION_J) {

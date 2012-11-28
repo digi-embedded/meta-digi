@@ -1,0 +1,38 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Mon, 10 Sep 2012 14:13:18 +0200
+Subject: [PATCH] kernel_ver
+
+Upstream patch
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ libbb/kernel_version.c | 11 ++++-------
+ 1 file changed, 4 insertions(+), 7 deletions(-)
+
+diff --git a/libbb/kernel_version.c b/libbb/kernel_version.c
+index a168a1e..738ed02 100644
+--- a/libbb/kernel_version.c
++++ b/libbb/kernel_version.c
+@@ -20,18 +20,15 @@
+ int FAST_FUNC get_linux_version_code(void)
+ {
+ 	struct utsname name;
+-	char *s;
++	char *s, *t;
+ 	int i, r;
+ 
+-	if (uname(&name) == -1) {
+-		bb_perror_msg("can't get system information");
+-		return 0;
+-	}
+-
++	uname(&name); /* never fails */
+ 	s = name.release;
+ 	r = 0;
+ 	for (i = 0; i < 3; i++) {
+-		r = r * 256 + atoi(strtok(s, "."));
++		t = strtok(s, ".");
++		r = r * 256 + (t ? atoi(t) : 0);
+ 		s = NULL;
+ 	}
+ 	return r;
