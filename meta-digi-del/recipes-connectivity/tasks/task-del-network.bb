@@ -36,7 +36,6 @@ PACKAGES = "\
 
 RDEPENDS_task-del-network = "\
 	bridge-utils \
-	socat \
 	ppp \
 	iproute2 \
 	${VIRTUAL-RUNTIME_ftp-server} \
