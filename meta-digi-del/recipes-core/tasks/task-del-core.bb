@@ -33,6 +33,7 @@ RDEPENDS_task-del-core = "\
     base-files \
     base-passwd \
     busybox \
+    busybox-mdev \
     ${VIRTUAL-RUNTIME_passwd_manager} \
     ${VIRTUAL-RUNTIME_initscripts} \
     ${@base_contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
