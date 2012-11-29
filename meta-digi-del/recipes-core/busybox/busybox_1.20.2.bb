@@ -20,9 +20,27 @@ SRC_URI = "http://www.busybox.net/downloads/busybox-${PV}.tar.bz2;name=tarball \
            file://busybox-udhcpc \
            file://mdev \
            file://mdev.conf \
+           file://adc \
+           file://mmc \
+           file://sd \
+           file://ts \
            "
 
 SRC_URI[tarball.md5sum] = "e025414bc6cd79579cc7a32a45d3ae1c"
 SRC_URI[tarball.sha256sum] = "eb13ff01dae5618ead2ef6f92ba879e9e0390f9583bd545d8789d27cf39b6882"
 
+FILES_${PN}-mdev += "${base_libdir}/mdev/adc ${base_libdir}/mdev/mmc ${base_libdir}/mdev/sd ${base_libdir}/mdev/ts"
+
 EXTRA_OEMAKE += "ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET_PREFIX}"
+
+do_install_append() {
+	if grep "CONFIG_MDEV=y" ${WORKDIR}/defconfig; then
+		if grep "CONFIG_FEATURE_MDEV_CONF=y" ${WORKDIR}/defconfig; then
+			install -d ${D}${base_libdir}/mdev
+			install -m 0755 ${WORKDIR}/adc ${D}${base_libdir}/mdev/adc
+			install -m 0755 ${WORKDIR}/mmc ${D}${base_libdir}/mdev/mmc
+			install -m 0755 ${WORKDIR}/sd ${D}${base_libdir}/mdev/sd
+			install -m 0755 ${WORKDIR}/ts ${D}${base_libdir}/mdev/ts
+		fi
+	fi
+}

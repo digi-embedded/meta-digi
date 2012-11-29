@@ -1,0 +1,41 @@
+#!/bin/sh
+#===============================================================================
+#
+#  ts
+#
+#  Copyright (C) 2010 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: symlink touchscreen devices
+#
+#       i.MX5X:
+#           ts0 -> mxc_ts         (i.MX51)
+#           ts0 -> da9052-tsi     (i.MX53)
+#           ts1 -> ADS784x	  (Fusion and ADS cannot be enabled simultaneously)
+#           ts1 -> Fusion touch
+#
+#===============================================================================
+
+# ${ACTION} is empty on scanning mode (mdev -s), exit otherwise
+[ -n "${ACTION}" ] && exit
+
+mdev=$(basename ${MDEV})
+
+if echo "${DEL_PLATFORM}" | grep -qs 'mx5'; then
+	if grep -qs 'mxc_ts' /sys/class/input/${mdev}/device/name; then
+		ln -sf ${mdev} /dev/input/ts0
+	elif grep -qs 'tsi' /sys/class/input/${mdev}/device/name; then
+		ln -sf ${mdev} /dev/input/ts0
+	elif grep -qs 'ADS784x' /sys/class/input/${mdev}/device/name; then
+		ln -sf ${mdev} /dev/input/ts1
+	elif grep -qs 'fusion' /sys/class/input/${mdev}/device/name; then
+		ln -sf ${mdev} /dev/input/ts1
+	fi
+else
+	grep -qs '[Tt]ouch' /sys/class/input/${mdev}/device/name && ln -sf ${mdev} /dev/input/ts0
+fi
