@@ -11,11 +11,11 @@ SRC_URI[sha256sum] = "0061fb46a47fe1aa7e44099fe0e98e1ec7de68f91541c9cf867ffc6ca9
 FILES_${PN} = ""
 FILES_${PN} = "/lib/firmware/vpu/vpu_fw_imx53.bin"
 
-# [DIGI] The linux-digi kernel does not use the sdma bin from user space
-# [DIGI] It's hardcoded in sdma_code_mx51 and sdma_code_mx53
+# The linux-digi kernel does not use the sdma bin from user space
+# It's hardcoded in sdma_code_mx51 and sdma_code_mx53
 #FILES_${PN} += "/lib/firmware/sdma/sdma-imx53-to1.bin"
 
-# [DIGI] These are not used by Digi hardware
+# These are not used by Digi hardware
 #FILES_${PN} += "/lib/firmware/ath6k/*"
 #FILES_${PN} += "/lib/firmware/ar3k/*"
 
