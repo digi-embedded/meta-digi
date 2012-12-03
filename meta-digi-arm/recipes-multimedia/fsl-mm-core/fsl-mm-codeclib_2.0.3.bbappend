@@ -9,3 +9,5 @@ SRC_URI_ccxmx51js[md5sum] = "c33df24405ef54cc55029d1f4a6c6230"
 SRC_URI_ccxmx51js[sha256sum] = "2bb006d8eccb2938da868acc62f2d7620dffb40b070bf7b24479450da494a2a0"
 
 FILES_${PN} += "${libdir}/lib_ogg_parser*"
+
+INSANE_SKIP_${PN} += "dev-deps"
