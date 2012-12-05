@@ -43,6 +43,7 @@ RDEPENDS_task-del-core = "\
     ${VIRTUAL-RUNTIME_init_manager} \
     ${VIRTUAL-RUNTIME_dev_manager} \
     ${VIRTUAL-RUNTIME_update-alternatives} \
+    usbutils \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
 RRECOMMENDS_task-del-core = "\
