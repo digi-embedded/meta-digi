@@ -4,7 +4,7 @@ DESCRIPTION = "bootloader for Digi platforms"
 
 PR_append = "+digi.0"
 
-SRC_URI = "git://log-sln-git.digi.com/u-boot-denx.git;tag=agonzal/yocto"
+SRC_URI = "${DIGI_LOG_GIT}u-boot-denx.git;tag=agonzal/yocto"
 
 EXTRA_OEMAKE += 'HOSTSTRIP=true'
 

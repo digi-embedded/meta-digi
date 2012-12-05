@@ -5,7 +5,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}_${PV}"
 SRCREV_ccxmx51js = "agonzal/yocto"
 SRCREV_ccxmx53js = "agonzal/yocto"
 SRCREV_ccardxmx28js = "agonzal/yocto"
-SRC_URI = "git://log-sln-git.digi.com/linux-2.6.git \
+SRC_URI = "${DIGI_LOG_GIT}linux-2.6.git \
            file://defconfig \
 "
 
