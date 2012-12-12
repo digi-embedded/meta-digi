@@ -20,6 +20,7 @@ IMAGE_FEATURES = "ssh-server-dropbear"
 IMAGE_FEATURES += "del-audio"
 IMAGE_FEATURES += "del-gstreamer"
 IMAGE_FEATURES += "del-network"
+IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "wifi", "del-wireless", "", d)}'
 
 # core-image disables the root password if debug-tweak is not enabled.
 # This override will use the shadow file instead.

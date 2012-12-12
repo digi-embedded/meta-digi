@@ -1,0 +1,117 @@
+#!/bin/sh -l
+#===============================================================================
+#
+#  redpine_pre-up
+#
+#  Copyright (C) 2012 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Load Redpine's wireless driver
+#
+#===============================================================================
+
+set -e
+
+# Driver Mode
+#  (1) WiFi mode
+#  (2) RF Eval mode
+#DRIVER_MODE="1"
+
+# BT Coexistence
+#  (0) disable
+#  (1) enable
+#BT_COEXISTENCE="0"
+
+# SDIO Clock frequency (MHz)
+#SDIO_CLK="20"
+
+# High speed mode
+#  (0) disable
+#  (1) enable
+#ENABLE_HIGH_SPEED="0"
+
+# TCP/UDP checksum offload
+#  (0) disable
+#  (1) enable
+#TCP_CSUM_OFFLD="1"
+
+# Debug Level
+#  (0) quiet
+#  (debug mask)
+#DEBUG="0"
+
+## == Nothing to customize below this line == ##
+
+[ "${IFACE}" != "wlan0" ] && exit 0
+
+FIRMWARE_DIR="/lib/firmware/redpine/"
+
+#MAC_ADDR="$(nvram print module ethaddr2 | sed 's,ethaddr2=,,g')"
+
+# TODO: Hardcoded until passed to kernel command line from U-Boot.
+MAC_ADDR="00:04:F3:AA:BB:05"
+
+# TODO: Read wdmode from NVRAM or pass in kernel command line.
+# Driver mode variable in u-boot takes precedence (for test purposes)
+#wdmode="$(ubootenv -p wdmode | sed 's,^wdmode=,,g')"
+#[ "${wdmode}" = "1" -o "${wdmode}" = "2" ] && DRIVER_MODE="${wdmode}"
+
+# Crystal frequency depends on the platform and HW revision.
+#
+#         +---------------------+--------------+
+#         | platform            | crystal_freq |
+#         +---------------------+--------------+
+#         | cwme9210js          |   20000000   |
+#         | ccwmx51js (rev = 0) |   20000000   |
+#         | ccwmx51js (rev > 0) |   40000000   |
+#         | ccwmx53js           |   40000000   |
+#         +---------------------+--------------+
+#
+# Default is 20MHz, so in that case we don't need to set the parameter on load.
+read -r platform < /sys/kernel/machine/name
+if [ "${platform}" = "ccxmx53" ]; then
+	CRYSTAL_FREQ=40000000
+else
+	mod_rev="/sys/kernel/ccwmx51/mod_rev"
+	[ -f "${mod_rev}" ] && [ "$(cat ${mod_rev})" -gt "0" ] && CRYSTAL_FREQ=40000000
+fi
+
+# Master module kernel parameters
+[ -n "${DRIVER_MODE}" ] && \
+	master_params="${master_params} driver_mode=${DRIVER_MODE}"
+[ -n "${BT_COEXISTENCE}" ] && \
+	master_params="${master_params} BT_Coexistence=${BT_COEXISTENCE}"
+[ -n "${SDIO_CLK}" ] && \
+	master_params="${master_params} sdio_clock=${SDIO_CLK}"
+[ -n "${ENABLE_HIGH_SPEED}" ] && \
+	master_params="${master_params} enable_high_speed=${ENABLE_HIGH_SPEED}"
+[ -n "${TCP_CSUM_OFFLD}" ] && \
+	master_params="${master_params} tcp_csumoffld_enable=${TCP_CSUM_OFFLD}"
+[ -n "${FIRMWARE_DIR}" ] && \
+	master_params="${master_params} firmware_path=${FIRMWARE_DIR}"
+[ -n "${DEBUG}" ] && \
+	master_params="${master_params} dbg_level=${DEBUG}"
+
+# Client module kernel parameters
+[ -n "${CRYSTAL_FREQ}" ] && \
+	client_params="${client_params} crystal_freq=${CRYSTAL_FREQ}"
+[ -n "${MAC_ADDR}" ] && \
+	client_params="${client_params} macaddr=${MAC_ADDR}"
+
+# Load the client module
+grep -qs rsi_client /proc/modules || \
+	/sbin/modprobe -q rsi_client ${client_params} || \
+		echo "Loading rsi_client module: [FAILED]"
+
+# Load the master module
+grep -qs rsi_master /proc/modules || \
+	/sbin/modprobe -q rsi_master ${master_params} || \
+		echo "Loading rsi_master module: [FAILED]"
+
+# Delay required so the interface 'wlan0' is settled down before trying to configure it.
+sleep 1
