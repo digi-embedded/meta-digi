@@ -1,5 +1,5 @@
 # Copyright (C) 2012 Digi International
-PR_append = "+digi.0"
+PR_append = "+del.r0"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}_${PV}"
 SRCREV_ccxmx51js = "agonzal/yocto"

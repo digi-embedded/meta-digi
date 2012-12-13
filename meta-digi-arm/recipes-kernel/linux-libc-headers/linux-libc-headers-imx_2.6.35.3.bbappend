@@ -1,5 +1,5 @@
 # Copyright (C) 2012 Digi International
-PR_append = "+digi.0"
+PR_append = "+del.r0"
 
 SRCREV_ccardxmx28js = "agonzal/yocto"
 SRCREV_ccxmx53js = "agonzal/yocto"

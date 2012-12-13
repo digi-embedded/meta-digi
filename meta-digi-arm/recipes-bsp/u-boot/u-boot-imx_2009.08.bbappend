@@ -2,7 +2,7 @@
 
 DESCRIPTION = "bootloader for Digi platforms"
 
-PR_append = "+digi.0"
+PR_append = "+del.r0"
 
 SRC_URI = "${DIGI_LOG_GIT}u-boot-denx.git;tag=agonzal/yocto"
 
