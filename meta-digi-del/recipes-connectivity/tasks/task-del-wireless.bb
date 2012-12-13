@@ -23,6 +23,7 @@ PACKAGES = "\
 RDEPENDS_task-del-wireless = "\
 	wpa-supplicant \
 	wireless-tools \
+        crda \
 	${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
 RRECOMMENDS_task-del-wireless = "\
