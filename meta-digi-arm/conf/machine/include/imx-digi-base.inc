@@ -9,4 +9,7 @@ include conf/machine/include/digi-defaults.inc
 UBOOT_MAKE_TARGET = "u-boot.bin"
 UBOOT_SUFFIX = "bin"
 
+# Sector size 128 KiB
+JFFS2_ERASEBLOCK = "0x20000"
+
 IMAGE_FSTYPES = "jffs2 tar.bz2 ext3 sdcard"
