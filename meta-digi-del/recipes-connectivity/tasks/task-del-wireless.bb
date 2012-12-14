@@ -24,6 +24,7 @@ RDEPENDS_task-del-wireless = "\
 	wpa-supplicant \
 	wireless-tools \
         crda \
+	iw \
 	${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
 RRECOMMENDS_task-del-wireless = "\
