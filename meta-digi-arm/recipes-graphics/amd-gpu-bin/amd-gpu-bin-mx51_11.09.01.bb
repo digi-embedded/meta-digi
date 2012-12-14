@@ -11,8 +11,7 @@ PR = "r11"
 LIC_FILES_CHKSUM = "file://usr/include/VG/openvg.h;endline=30;md5=b0109611dd76961057d4c45ae6519802"
 
 DEPENDS = "libz160"
-DEPENDS += "${@base_contains('DISTRO_FEATURES', 'x11', 'virtual/libx11', '', d)}"
-PROVIDES = "virtual/libgl"
+PROVIDES = "virtual/egl virtual/libgles1 virtual/libgles2"
 RDEPENDS = "libz160"
 
 SRC_URI = "${DIGI_LOG_MIRROR}/amd-gpu-bin-mx51-${PV}.tar.gz"
