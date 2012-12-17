@@ -13,7 +13,28 @@ SRC_URI = "${DIGI_LOG_GIT}linux-modules/redpine.git;protocol=git \
 
 S = "${WORKDIR}/git"
 
-EXTRA_OEMAKE += "-C ${STAGING_KERNEL_DIR} M=${S} CONFIG_DEL_KMOD_REDPINE=y"
+EXTRA_OEMAKE = "-C ${STAGING_KERNEL_DIR}"
+EXTRAMAKEFLAGS = "M=${S} CONFIG_DEL_KMOD_REDPINE=y"
+
+module_do_compile() {
+        unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
+        oe_runmake KERNEL_PATH=${STAGING_KERNEL_DIR}   \
+                   KERNEL_SRC=${STAGING_KERNEL_DIR}    \
+                   KERNEL_VERSION=${KERNEL_VERSION}    \
+                   CC="${KERNEL_CC}" LD="${KERNEL_LD}" \
+                   AR="${KERNEL_AR}" \
+		   ${EXTRAMAKEFLAGS} \
+                   ${MAKE_TARGETS}
+}
+
+module_do_install() {
+        unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
+        oe_runmake DEPMOD=echo INSTALL_MOD_PATH="${D}" \
+                   KERNEL_SRC=${STAGING_KERNEL_DIR} \
+                   CC="${KERNEL_CC}" LD="${KERNEL_LD}" \
+		   ${EXTRAMAKEFLAGS} \
+                   modules_install
+}
 
 do_install_append() {
 	install -d ${D}${sysconfdir}/network/if-pre-up.d
