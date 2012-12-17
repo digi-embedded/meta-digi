@@ -17,9 +17,11 @@ inherit del-image
 
 # Only common features to remain here.
 IMAGE_FEATURES = "ssh-server-dropbear"
-IMAGE_FEATURES += "del-audio"
-IMAGE_FEATURES += "del-gstreamer"
 IMAGE_FEATURES += "del-network"
+
+# Machine dependant features
+IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "alsa", "del-audio", "", d)}'
+IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "accel-video", "del-gstreamer", "", d)}'
 IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "wifi", "del-wireless", "", d)}'
 
 # core-image disables the root password if debug-tweak is not enabled.
