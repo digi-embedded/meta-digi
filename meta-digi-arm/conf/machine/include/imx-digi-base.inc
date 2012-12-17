@@ -9,7 +9,15 @@ include conf/machine/include/digi-defaults.inc
 UBOOT_MAKE_TARGET = "u-boot.bin"
 UBOOT_SUFFIX = "bin"
 
+# Flash image types
+IMAGE_FSTYPES += "sum.jffs2 ubifs"
+
 # Sector size 128 KiB
 JFFS2_ERASEBLOCK = "0x20000"
 
-IMAGE_FSTYPES = "jffs2 tar.bz2 ext3 sdcard"
+# Use the common short option for 'mkfs.jffs2' and 'sumtool'
+JFFS2_ENDIANNESS = "-l"
+EXTRA_IMAGECMD_sum.jffs2 = "${EXTRA_IMAGECMD_jffs2}"
+
+# mkfs.ubifs parameters
+MKUBIFS_ARGS = "-m 2048 -e 129024 -c 4095"
