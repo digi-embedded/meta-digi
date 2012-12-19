@@ -12,4 +12,4 @@ UBOOT_MAKE_TARGET = "u-boot.bin"
 UBOOT_SUFFIX = "bin"
 UBOOT_PADDING = "2"
 
-
+COMPATIBLE_MACHINE = "(ccardxmx28js|ccxmx51js|ccxmx53js)"
