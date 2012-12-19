@@ -12,3 +12,9 @@ LOCALVERSION_mx5 = "mx5+agonzal_yocto"
 SRC_URI = "${DIGI_LOG_GIT}linux-2.6.git \
            file://defconfig \
 "
+
+# Override 'ccardxmx28js' SRC_URI so the 'SRC_URI_append_mxs' patches
+# from FSL layer are *not* applied
+SRC_URI_ccardxmx28js_mxs = "${DIGI_LOG_GIT}linux-2.6.git \
+           file://defconfig \
+"
