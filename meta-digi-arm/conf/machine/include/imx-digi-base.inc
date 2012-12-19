@@ -1,7 +1,7 @@
-# Provides the i.MX architecture common settings
+# Provides the i.MXC architecture common settings
 include conf/machine/include/imx-base.inc
 
-# Overrides the default fsl settings
+# Overrides the default FSL settings
 
 # Single override file for settings, versions and providers.
 include conf/machine/include/digi-defaults.inc
