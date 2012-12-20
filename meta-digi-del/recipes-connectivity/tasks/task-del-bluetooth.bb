@@ -21,6 +21,7 @@ PACKAGES = "\
     "
 
 RDEPENDS_task-del-bluetooth = "\
+	btfilter \
 	bluez4 \
 	${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
