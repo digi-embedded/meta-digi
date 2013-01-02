@@ -16,7 +16,7 @@ inherit del-image
 # where they can be customized by platform.
 
 # Only common features to remain here.
-IMAGE_FEATURES = "ssh-server-dropbear"
+IMAGE_FEATURES += "ssh-server-dropbear"
 IMAGE_FEATURES += "del-network"
 
 # Machine dependant features

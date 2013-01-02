@@ -11,13 +11,13 @@ LICENSE = "MIT"
 
 inherit core-image
 
-IMAGE_FEATURES = "core-ssh-dropbear"
+IMAGE_FEATURES += "core-ssh-dropbear"
 IMAGE_FEATURES += "dev-pkgs"
 
 # Adding debug-tweaks will enable empty password login.
 # Note that adding debug-tweaks to EXTRA_IMAGE_FEATURES will not
 # allow for empty password logins.
-IMAGE_FEATURES =+ "debug-tweaks"
+IMAGE_FEATURES += "debug-tweaks"
 
 # core-image disables the root password if debug-tweak is not enabled.
 # This override will use the shadow file instead.
