@@ -24,14 +24,7 @@ IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "alsa", "del-audio", "",
 IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "accel-video", "del-gstreamer", "", d)}'
 IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "wifi", "del-wireless", "", d)}'
 
-# core-image disables the root password if debug-tweak is not enabled.
-# This override will use the shadow file instead.
-zap_root_password () {
-        sed 's%^root:[^:]*:%root:x:%' < ${IMAGE_ROOTFS}/etc/passwd >${IMAGE_ROOTFS}/etc/passwd.new
-        mv ${IMAGE_ROOTFS}/etc/passwd.new ${IMAGE_ROOTFS}/etc/passwd
-}
-
 IMAGE_ROOTFS_SIZE = "8192"
 
 # remove not needed ipkg informations
-ROOTFS_POSTPROCESS_COMMAND += "remove_packaging_data_files ; "
+ROOTFS_POSTPROCESS_COMMAND += "remove_packaging_data_files; del_rootfs_tuning;"
