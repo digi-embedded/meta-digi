@@ -3,7 +3,7 @@
 #
 DESCRIPTION = "DEL busybox based image (non graphical) suitable for development work."
 
-IMAGE_INSTALL = "task-del-core ${ROOTFS_PKGMANAGE} ${CORE_IMAGE_EXTRA_INSTALL}"
+IMAGE_INSTALL = "packagegroup-del-core ${ROOTFS_PKGMANAGE} ${CORE_IMAGE_EXTRA_INSTALL}"
 
 IMAGE_LINGUAS = " "
 

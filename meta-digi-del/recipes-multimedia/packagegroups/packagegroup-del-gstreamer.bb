@@ -1,7 +1,7 @@
 #
 # Copyright (C) 2012 Digi International.
 #
-DESCRIPTION = "Gstreamer framework task for DEL image"
+DESCRIPTION = "Gstreamer framework packagegroup for DEL image"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=3f40d7994397109285ec7b81fdeb3b58"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -9,9 +9,9 @@ ALLOW_EMPTY = "1"
 PR = "r0"
 
 PACKAGES = "\
-	task-del-gstreamer \
-	task-del-gstreamer-dbg \
-	task-del-gstreamer-dev \
+	packagegroup-del-gstreamer \
+	packagegroup-del-gstreamer-dbg \
+	packagegroup-del-gstreamer-dev \
     "
 
 VIRTUAL_RUNTIME_gst-fsl-plugin = "\
@@ -199,7 +199,7 @@ VIRTUAL_RUNTIME_gst-plugins-ugly = "\
 	${PACKAGE_gst-plugins-ugly-video} \
 	"
 
-RDEPENDS_task-del-gstreamer = "\
+RDEPENDS_${PN} = "\
     fsl-mm-codeclib \
     fsl-mm-flv-codeclib \
     fsl-mm-mp3enc-codeclib \
@@ -214,5 +214,5 @@ RDEPENDS_task-del-gstreamer = "\
     gst-ffmpeg \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
-RRECOMMENDS_task-del-gstreamer = "\
+RRECOMMENDS_${PN} = "\
     ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS}"

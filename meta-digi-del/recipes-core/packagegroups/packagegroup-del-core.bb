@@ -1,7 +1,7 @@
 #
 # Copyright (C) 2012 Digi International.
 #
-DESCRIPTION = "Core task for DEL image"
+DESCRIPTION = "Core packagegroup for DEL image"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=3f40d7994397109285ec7b81fdeb3b58"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -24,12 +24,12 @@ VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 VIRTUAL-RUNTIME_keymaps ?= "keymaps"
 
 PACKAGES = "\
-	task-del-core \
-	task-del-core-dbg \
-	task-del-core-dev \
+	packagegroup-del-core \
+	packagegroup-del-core-dbg \
+	packagegroup-del-core-dev \
     "
 
-RDEPENDS_task-del-core = "\
+RDEPENDS_${PN} = "\
     base-files \
     base-passwd \
     busybox \
@@ -47,7 +47,5 @@ RDEPENDS_task-del-core = "\
     usbutils \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
-RRECOMMENDS_task-del-core = "\
+RRECOMMENDS_${PN} = "\
     ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS}"
-
-
