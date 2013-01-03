@@ -9,6 +9,7 @@ PR = "r0"
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 SRCREV = "del-5.9.2.1"
 SRC_URI = "${DIGI_LOG_GIT}linux-modules/redpine.git;protocol=git \
+	  file://0001-redpine-allow-to-build-with-gcc-4.7.patch \
 	  file://redpine"
 
 S = "${WORKDIR}/git"

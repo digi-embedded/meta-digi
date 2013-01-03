@@ -1,0 +1,35 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Thu, 3 Jan 2013 14:38:07 +0100
+Subject: [PATCH] redpine: allow to build with gcc-4.7
+
+Otherwise it fails with:
+
+error: inlining failed in call to always_inline 'ganges_bufferfull_acquire_lock': function body not available
+error: inlining failed in call to always_inline 'ganges_bufferfull_release_lock': function body not available
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+
+Conflicts:
+	RS.GENR.LNX.SD_NON_GPL/include/Linux/ganges_mgmt.h
+---
+ RS.GENR.LNX.SD_NON_GPL/include/Linux/ganges_mgmt.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/RS.GENR.LNX.SD_NON_GPL/include/Linux/ganges_mgmt.h b/RS.GENR.LNX.SD_NON_GPL/include/Linux/ganges_mgmt.h
+index c75c22b..92420db 100644
+--- a/RS.GENR.LNX.SD_NON_GPL/include/Linux/ganges_mgmt.h
++++ b/RS.GENR.LNX.SD_NON_GPL/include/Linux/ganges_mgmt.h
+@@ -1075,11 +1075,11 @@ INT32 ganges_start_per_tx(PGANGES_CLIENT Adapter,UINT8 *ptr);
+ GANGES_STATUS ganges_do_continuous_send(PGANGES_CLIENT Adapter, UINT16  mode);
+ 
+ VOID ganges_fsm_compute_snr(PGANGES_CLIENT Adapter,PScanConfirm scanConfirm,UINT8 mode);
+-inline VOID ganges_bufferfull_acquire_lock(
++VOID ganges_bufferfull_acquire_lock(
+          VOID (*fptr)(PVOID sem,DWORD delay_msec),
+          PGANGES_CLIENT Adapter);
+ 
+-inline BOOLEAN
++BOOLEAN
+ ganges_bufferfull_release_lock
+   (
+     BOOLEAN (*fptr)(PVOID sem),
