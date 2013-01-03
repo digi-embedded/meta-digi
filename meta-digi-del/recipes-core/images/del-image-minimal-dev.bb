@@ -12,7 +12,8 @@ LICENSE = "MIT"
 inherit core-image
 inherit del-image
 
-IMAGE_FEATURES += "core-ssh-dropbear"
+# Only common features to remain here.
+IMAGE_FEATURES += "ssh-server-dropbear"
 IMAGE_FEATURES += "dev-pkgs"
 
 # Adding debug-tweaks will enable empty password login.
