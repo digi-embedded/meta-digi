@@ -8,17 +8,13 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 ALLOW_EMPTY = "1"
 PR = "r0"
 
+inherit packagegroup
+
 #
 # Set by the machine configuration with packages essential for device bootup
 #
 MACHINE_ESSENTIAL_EXTRA_RDEPENDS ?= ""
 MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS ?= ""
-
-PACKAGES = "\
-	packagegroup-del-wireless \
-	packagegroup-del-wireless-dbg \
-	packagegroup-del-wireless-dev \
-    "
 
 RDEPENDS_${PN} = "\
 	wpa-supplicant \

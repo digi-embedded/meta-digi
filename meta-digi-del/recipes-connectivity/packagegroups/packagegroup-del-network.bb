@@ -8,6 +8,8 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 ALLOW_EMPTY = "1"
 PR = "r0"
 
+inherit packagegroup
+
 #
 # Set by the machine configuration with packages essential for device bootup
 #
@@ -27,12 +29,6 @@ VIRTUAL-RUNTIME_network-utils ?= "ethtool"
 
 VIRTUAL-RUNTIME_snmp-manager ?= ""
 #VIRTUAL-RUNTIME_snmp-manager ?= "net-snmp-server"
-
-PACKAGES = "\
-	packagegroup-del-network \
-	packagegroup-del-network-dbg \
-	packagegroup-del-network-dev \
-    "
 
 RDEPENDS_${PN} = "\
 	bridge-utils \

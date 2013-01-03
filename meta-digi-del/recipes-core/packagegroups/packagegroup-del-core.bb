@@ -9,6 +9,8 @@ DEPENDS = "virtual/kernel"
 ALLOW_EMPTY = "1"
 PR = "r0"
 
+inherit packagegroup
+
 #
 # Set by the machine configuration with packages essential for device bootup
 #
@@ -22,12 +24,6 @@ VIRTUAL-RUNTIME_passwd_manager ?= "shadow"
 VIRTUAL-RUNTIME_init_manager ?= "sysvinit"
 VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 VIRTUAL-RUNTIME_keymaps ?= "keymaps"
-
-PACKAGES = "\
-	packagegroup-del-core \
-	packagegroup-del-core-dbg \
-	packagegroup-del-core-dev \
-    "
 
 RDEPENDS_${PN} = "\
     base-files \

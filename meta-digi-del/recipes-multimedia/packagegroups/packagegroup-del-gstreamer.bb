@@ -8,11 +8,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 ALLOW_EMPTY = "1"
 PR = "r0"
 
-PACKAGES = "\
-	packagegroup-del-gstreamer \
-	packagegroup-del-gstreamer-dbg \
-	packagegroup-del-gstreamer-dev \
-    "
+inherit packagegroup
 
 VIRTUAL_RUNTIME_gst-fsl-plugin = "\
 	gst-fsl-plugin \

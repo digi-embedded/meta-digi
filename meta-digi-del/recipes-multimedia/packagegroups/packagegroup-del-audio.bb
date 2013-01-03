@@ -8,11 +8,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 ALLOW_EMPTY = "1"
 PR = "r0"
 
-PACKAGES = "\
-	packagegroup-del-audio \
-	packagegroup-del-audio-dbg \
-	packagegroup-del-audio-dev \
-    "
+inherit packagegroup
 
 RDEPENDS_${PN} = "\
     alsa-lib \
