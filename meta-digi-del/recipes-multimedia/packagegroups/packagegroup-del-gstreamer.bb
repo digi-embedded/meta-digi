@@ -201,7 +201,7 @@ RDEPENDS_${PN} = "\
     fsl-mm-mp3enc-codeclib \
     ${VIRTUAL_RUNTIME_gst-fsl-plugin} \
     imx-lib \
-    imx-firmware \
+    ${MACHINE_FIRMWARE} \
     gstreamer \
     ${VIRTUAL_RUNTIME_gst-plugins-base} \
     ${VIRTUAL_RUNTIME_gst-plugins-good} \
