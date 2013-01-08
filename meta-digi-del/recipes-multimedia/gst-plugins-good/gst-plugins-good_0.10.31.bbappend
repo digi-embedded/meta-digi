@@ -1,3 +1,7 @@
+DEPENDS_no_X := "${@oe_filter_out('gconf', '${DEPENDS}', d)}"
+DEPENDS_del := "${@base_contains('DISTRO_FEATURES', 'x11', '${DEPENDS}', '${DEPENDS_no_X}', d)}"
+
+EXTRA_OECONF_no_X := "--disable-gconf --disable-x --disable-xshm --disable-xvideo"
 EXTRA_OECONF_del += "\
 		 --disable-aalibtest \
 		 --disable-audiofx \
@@ -24,7 +28,5 @@ EXTRA_OECONF_del += "\
 		 --disable-speex \
 		 --disable-sunaudio \
 		 --disable-valgrind \
-		 --disable-x \
-		 --disable-xshm \
-		 --disable-xvideo \
+		 ${@base_contains('DISTRO_FEATURES', 'x11', '', '${EXTRA_OECONF_no_X}', d)} \
 		"
