@@ -7,7 +7,7 @@ PACKAGE_GROUP_del-gstreamer = "packagegroup-del-gstreamer"
 PACKAGE_GROUP_del-network = "packagegroup-del-network"
 PACKAGE_GROUP_del-wireless = "packagegroup-del-wireless"
 PACKAGE_GROUP_del-debug = "packagegroup-del-debug"
-PACKAGE_GROUP_del-bluetooth = "task-del-bluetooth"
+PACKAGE_GROUP_del-bluetooth = "packagegroup-del-bluetooth"
 
 ## DEL rootfs final tuning
 del_rootfs_tuning() {
