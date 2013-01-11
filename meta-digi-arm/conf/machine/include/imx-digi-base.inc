@@ -21,3 +21,5 @@ EXTRA_IMAGECMD_sum.jffs2 = "${EXTRA_IMAGECMD_jffs2}"
 
 # mkfs.ubifs parameters
 MKUBIFS_ARGS = "-m 2048 -e 129024 -c 4095"
+
+PREFERRED_VERSION_wpa-supplicant = "1.0"
