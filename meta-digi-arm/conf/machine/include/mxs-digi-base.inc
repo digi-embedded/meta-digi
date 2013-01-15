@@ -14,14 +14,4 @@ SDCARD_ROOTFS ?= "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.ext3"
 IMAGE_FSTYPES ?= "tar.bz2"
 IMAGE_FSTYPES += "sum.jffs2 ubifs"
 
-# Sector size 128 KiB
-JFFS2_ERASEBLOCK = "0x20000"
-
-# Use the common short option for 'mkfs.jffs2' and 'sumtool'
-JFFS2_ENDIANNESS = "-l"
-EXTRA_IMAGECMD_sum.jffs2 = "${EXTRA_IMAGECMD_jffs2}"
-
-# mkfs.ubifs parameters
-MKUBIFS_ARGS = "-m 2048 -e 126976 -c 2047"
-
 PREFERRED_VERSION_wpa-supplicant = "6ffdc2f"
