@@ -6,10 +6,11 @@ PR_append = "+del.r0"
 
 SRC_URI = "${DIGI_LOG_GIT}u-boot-denx.git;tag=hpalacio/del-6.x"
 
-EXTRA_OEMAKE += 'HOSTSTRIP=true'
+DEPENDS_ccardxmx28js += "imx-bootlets-del"
 
-UBOOT_MAKE_TARGET = "u-boot.bin"
-UBOOT_SUFFIX = "bin"
-UBOOT_PADDING = "2"
+UBOOT_MAKE_TARGET_ccardxmx28js = "u-boot-ivt.sb"
+
+BOOTLETSDIR_mxs = "BOOTLETS_DIR=${STAGING_DIR_TARGET}/boot/"
+EXTRA_OEMAKE += '${BOOTLETSDIR}'
 
 COMPATIBLE_MACHINE = "(ccardxmx28js|ccxmx51js|ccxmx53js)"
