@@ -40,6 +40,7 @@ RDEPENDS_${PN} = "\
     ${VIRTUAL-RUNTIME_init_manager} \
     ${VIRTUAL-RUNTIME_dev_manager} \
     ${VIRTUAL-RUNTIME_update-alternatives} \
+    update-flash \
     usbutils \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
