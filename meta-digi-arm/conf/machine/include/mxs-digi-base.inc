@@ -9,6 +9,8 @@ include conf/machine/include/digi-defaults.inc
 # Flash image types
 SDCARD_ROOTFS ?= "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.ext3"
 
+EXTRA_IMAGEDEPENDS = "u-boot"
+
 # [TODO] add SDCARD support
 # At the moment it's failing due to wrong u-boot image
 IMAGE_FSTYPES ?= "tar.bz2"
