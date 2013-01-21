@@ -11,3 +11,6 @@ IMAGE_CLASSES += "image_types_digi"
 
 # Digi BSP default versions
 PREFERRED_VERSION_udev = "175"
+
+# Do not enable console on VT (see sysvinit-inittab recipe)
+USE_VT = "0"
