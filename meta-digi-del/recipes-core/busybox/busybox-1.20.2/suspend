@@ -1,0 +1,110 @@
+#!/bin/sh
+#===============================================================================
+#
+#  suspend
+#
+#  Copyright (C) 2009-2013 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: suspend system to RAM
+#
+#===============================================================================
+
+scriptname="$(basename ${0})"
+syspower="/sys/power/state"
+
+usage() {
+	printf "\nSuspend system to RAM memory\n"
+	printf "\nUsage: ${scriptname} [OPTIONS]\n
+	-h      Show this help
+	\n"
+}
+
+suspend_system_time() {
+	if [ "$(echo /sys/class/rtc/rtc*)" != "/sys/class/rtc/rtc*" ]; then
+		hwclock -w
+	fi
+}
+
+suspend_interfaces() {
+	# 'wlan0' interface on some platforms (ccwmx5xjs, cwme9210, ccardwmx28js)
+	# has problems on suspend-resume, so we workaround it by bringing the
+	# interface down before suspend and bring it up again after resume.
+	# (#35777, #40082)
+	if grep -qs 'wlan0' /proc/net/dev; then
+		if grep -qs '^wlan0' /var/run/ifstate; then
+			ifdown wlan0 && up_wlan_on_resume="1"
+		fi
+	fi
+}
+
+resume_storage_devices() {
+	# remove disk devices and run coldplug mdev to scan for nodes in
+	# case any device was plugged while the system was suspended
+	rm -f /dev/sd[a-z] /dev/mmcblk[0-9] && mdev -s
+
+	# for partition nodes fire hotplug ADD event or umount file system
+	# in case the real hardware is not present
+	for i in /dev/sd[a-z][0-9]* /dev/mmcblk[0-9]p[0-9]*; do
+		[ "${i}" = "/dev/sd[a-z][0-9]*" ] && continue
+		[ "${i}" = "/dev/mmcblk[0-9]p[0-9]*" ] && continue
+
+		dev_path=$(ls -d /sys/block/*/${i#/dev/} 2>/dev/null)
+		if [ -f "${dev_path}/uevent" ]; then
+			printf "add" > ${dev_path}/uevent
+		else
+			if grep -q "${i}[[:blank:]]" /proc/mounts; then
+				mdir=$(sed -ne "s,${i}[[:blank:]]\+\([^[:blank:]]\+\)[[:blank:]].*,\1,g;T;p" /proc/mounts)
+				umount "${mdir}"
+				rmdir -- "${mdir}" 2>/dev/null
+				rm -f "${i}"
+			fi
+		fi
+
+	done
+}
+
+resume_interfaces() {
+	# 'wlan0' interface on some platforms (ccwmx5xjs, cwme9210, ccardwmx28js)
+	# has problems on suspend-resume, so we workaround it by bringing the
+	# interface down before suspend and bring it up again after resume.
+	# (#35777, #40082)
+	if grep -qs 'wlan0' /proc/net/dev; then
+		if ! grep -qs '^wlan0' /var/run/ifstate; then
+			[ -n "${up_wlan_on_resume}" ] && ifup wlan0
+		fi
+	fi
+}
+
+resume_system_time() {
+	if [ "$(echo /sys/class/rtc/rtc*)" != "/sys/class/rtc/rtc*" ]; then
+		hwclock -s
+	fi
+}
+
+while getopts "h" c; do
+	case "${c}" in
+		h) usage; exit;;
+	esac
+done
+
+if [ -f "${syspower}" ]; then
+	# Pre-suspend actions
+	suspend_system_time
+	suspend_interfaces
+
+	# Suspend the device
+	printf "mem" > ${syspower}
+
+	# Post-resume actions
+	resume_storage_devices
+	resume_interfaces
+	resume_system_time
+else
+	printf "\n[ERROR] File ${syspower} not found\n\n"
+fi
