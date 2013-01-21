@@ -1,0 +1,104 @@
+state.ccardxmx28 {
+	control.1 {
+		comment.access 'read write'
+		comment.type ENUMERATED
+		comment.count 1
+		comment.item.0 '0dB'
+		comment.item.1 '20dB'
+		comment.item.2 '30dB'
+		comment.item.3 '40dB'
+		iface MIXER
+		name 'MIC GAIN'
+		value '0dB'
+	}
+	control.2 {
+		comment.access 'read write'
+		comment.type INTEGER
+		comment.count 2
+		comment.range '0 - 15'
+		iface MIXER
+		name 'Capture Volume'
+		value.0 15
+		value.1 15
+	}
+	control.3 {
+		comment.access 'read write'
+		comment.type ENUMERATED
+		comment.count 1
+		comment.item.0 'No Change'
+		comment.item.1 'Reduced by 6dB'
+		iface MIXER
+		name 'Capture Vol Reduction'
+		value 'No Change'
+	}
+	control.4 {
+		comment.access 'read write'
+		comment.type INTEGER
+		comment.count 2
+		comment.range '0 - 192'
+		iface MIXER
+		name 'Playback Volume'
+		value.0 132
+		value.1 132
+	}
+	control.5 {
+		comment.access 'read write'
+		comment.type INTEGER
+		comment.count 2
+		comment.range '0 - 127'
+		iface MIXER
+		name 'Headphone Volume'
+		value.0 103
+		value.1 103
+	}
+	control.6 {
+		comment.access 'read write'
+		comment.type ENUMERATED
+		comment.count 1
+		comment.item.0 DAC
+		comment.item.1 LINE_IN
+		iface MIXER
+		name 'DAC Mux'
+		value DAC
+	}
+	control.7 {
+		comment.access 'read write'
+		comment.type ENUMERATED
+		comment.count 1
+		comment.item.0 MIC_IN
+		comment.item.1 LINE_IN
+		iface MIXER
+		name 'ADC Mux'
+		value MIC_IN
+	}
+#	control.8 {
+#		comment.access 'read write'
+#		comment.type ENUMERATED
+#		comment.count 1
+#		comment.item.0 off
+#		comment.item.1 on
+#		iface MIXER
+#		name 'Jack Function'
+#		value on
+#	}
+#	control.9 {
+#		comment.access 'read write'
+#		comment.type ENUMERATED
+#		comment.count 1
+#		comment.item.0 off
+#		comment.item.1 on
+#		iface MIXER
+#		name 'Speaker Function'
+#		value on
+#	}
+#	control.10 {
+#		comment.access 'read write'
+#		comment.type ENUMERATED
+#		comment.count 1
+#		comment.item.0 off
+#		comment.item.1 on
+#		iface MIXER
+#		name 'Line In Function'
+#		value on
+#	}
+}
