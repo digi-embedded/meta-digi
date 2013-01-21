@@ -6,7 +6,7 @@ PR_append = "+del.r0"
 
 SRC_URI = "${DIGI_LOG_GIT}u-boot-denx.git;tag=hpalacio/del-6.x"
 
-DEPENDS_ccardxmx28js += "imx-bootlets-del"
+DEPENDS_mxs_ccardxmx28js += "elftosb-native imx-bootlets-del"
 
 UBOOT_MAKE_TARGET_ccardxmx28js = "u-boot-ivt.sb"
 
