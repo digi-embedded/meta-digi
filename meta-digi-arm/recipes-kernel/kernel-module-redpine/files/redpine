@@ -67,9 +67,9 @@ MAC_ADDR="00:04:F3:AA:BB:05"
 #         | platform            | crystal_freq |
 #         +---------------------+--------------+
 #         | cwme9210js          |   20000000   |
-#         | ccwmx51js (rev = 0) |   20000000   |
-#         | ccwmx51js (rev > 0) |   40000000   |
-#         | ccwmx53js           |   40000000   |
+#         | ccxmx51js (rev = 0) |   20000000   |
+#         | ccxmx51js (rev > 0) |   40000000   |
+#         | ccxmx53js           |   40000000   |
 #         +---------------------+--------------+
 #
 # Default is 20MHz, so in that case we don't need to set the parameter on load.
@@ -77,7 +77,7 @@ read -r platform < /sys/kernel/machine/name
 if [ "${platform}" = "ccxmx53" ]; then
 	CRYSTAL_FREQ=40000000
 else
-	mod_rev="/sys/kernel/ccwmx51/mod_rev"
+	mod_rev="/sys/kernel/ccxmx51/mod_rev"
 	[ -f "${mod_rev}" ] && [ "$(cat ${mod_rev})" -gt "0" ] && CRYSTAL_FREQ=40000000
 fi
 
