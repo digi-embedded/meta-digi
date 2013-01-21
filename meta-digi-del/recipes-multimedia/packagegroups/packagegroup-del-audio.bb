@@ -13,6 +13,8 @@ inherit packagegroup
 RDEPENDS_${PN} = "\
     alsa-lib \
     alsa-utils \
+    alsa-state \
+    alsa-states \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
 RRECOMMENDS_${PN} = "\
