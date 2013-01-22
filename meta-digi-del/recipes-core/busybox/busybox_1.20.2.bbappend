@@ -6,8 +6,6 @@ DEPENDS += "libdigi"
 SRC_URI += "file://0001-del-baudrates.patch \
             file://0002-del-mdev_regulatory.patch \
             file://0003-del-flash_eraseall.patch \
-            file://defconfig \
-            file://mdev.conf \
             file://adc \
             file://mmc \
             file://sd \
