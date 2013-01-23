@@ -18,8 +18,8 @@ MACHINE_ESSENTIAL_EXTRA_RDEPENDS ?= ""
 MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS ?= ""
 
 # Distro can override the following VIRTUAL-RUNTIME providers:
-VIRTUAL-RUNTIME_dev_manager ?= ""
-VIRTUAL-RUNTIME_login_manager ?= "tinylogin"
+VIRTUAL-RUNTIME_dev_manager ?= "busybox-mdev"
+VIRTUAL-RUNTIME_login_manager ?= ""
 VIRTUAL-RUNTIME_passwd_manager ?= "shadow"
 VIRTUAL-RUNTIME_init_manager ?= "sysvinit"
 VIRTUAL-RUNTIME_initscripts ?= "initscripts"
@@ -29,7 +29,6 @@ RDEPENDS_${PN} = "\
     base-files \
     base-passwd \
     busybox \
-    busybox-mdev \
     ${VIRTUAL-RUNTIME_passwd_manager} \
     ${VIRTUAL-RUNTIME_initscripts} \
     ${@base_contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
