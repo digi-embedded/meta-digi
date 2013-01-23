@@ -24,6 +24,9 @@ MDEV="/sbin/mdev"
 # MAKEDEVS="/sbin/makedevs"
 # CONFIG="/etc/makedevs.d/${DEL_PLATFORM}"
 
+# Create shared memory mount point
+mkdir -p /dev/shm
+
 # Register mdev as hotplug to create devices.
 if [ -f /proc/sys/kernel/hotplug ]; then
 	echo > /dev/mdev.seq
