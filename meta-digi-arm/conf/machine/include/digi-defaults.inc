@@ -9,8 +9,5 @@ PREFERRED_PROVIDER_virtual/libgles2_mx5 = "${@base_contains('DISTRO_FEATURES', '
 # Digi BSP default settings
 IMAGE_CLASSES += "image_types_digi"
 
-# Digi BSP default versions
-PREFERRED_VERSION_udev = "175"
-
 # Do not enable console on VT (see sysvinit-inittab recipe)
 USE_VT = "0"
