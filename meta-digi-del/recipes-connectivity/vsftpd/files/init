@@ -10,7 +10,6 @@
 #  under the terms of the GNU General Public License version 2 as published by
 #  the Free Software Foundation.
 #
-#
 #  !Description: vsftpd bootscript
 #
 #===============================================================================
@@ -29,22 +28,22 @@ pidfile="/var/run/vsftpd.pid"
 
 case "${1}" in
 start)
-	[ -z "${quietboot}" ] && echo -n "Starting vsftpd server: "
+	echo -n "Starting vsftpd server: "
 	if [ -s "${pidfile}" ]; then
 		pid="$(cat ${pidfile})"
 		if kill -0 "${pid}" 2>/dev/null; then
-			[ -z "${quietboot}" ] && echo " already running."
+			echo " already running."
 			exit 0
 		fi
 	fi
 	start-stop-daemon -S -b -m -p "${pidfile}" -x "${daemon}"
-	[ -z "${quietboot}" ] && echo "OK"
+	echo "done"
 	;;
 stop)
 	echo -n "Stopping vsftpd server: "
 	start-stop-daemon -K -q -p "${pidfile}"
 	rm "${pidfile}"
-	echo "OK"
+	echo "done"
 	;;
 *)
 	echo "Usage: $0 {start|stop}"
