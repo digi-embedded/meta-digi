@@ -1,0 +1,65 @@
+From: Jo-Philipp Wich <jow@openwrt.org>
+Date: Tue, 25 Sep 2012 14:06:13 +0200
+Subject: [PATCH] ntpd: indefinitely try to resolve peer addresses
+
+Signed-off-by: Jo-Philipp Wich <jow@openwrt.org>
+(cherry picked from commit c5daea7ba5200158fae2e68714725c6bf7ee6dbb)
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+
+Conflicts:
+	networking/ntpd.c
+---
+ networking/ntpd.c | 25 +++++++++++++++++++++++--
+ 1 file changed, 23 insertions(+), 2 deletions(-)
+
+diff --git a/networking/ntpd.c b/networking/ntpd.c
+index 34b649f..49fb58b 100644
+--- a/networking/ntpd.c
++++ b/networking/ntpd.c
+@@ -221,6 +221,7 @@ typedef struct {
+ typedef struct {
+ 	len_and_sockaddr *p_lsa;
+ 	char             *p_dotted;
++	char             *p_hostname;
+ 	/* when to send new query (if p_fd == -1)
+ 	 * or when receive times out (if p_fd >= 0): */
+ 	int              p_fd;
+@@ -708,8 +709,9 @@ add_peers(char *s)
+ 	peer_t *p;
+ 
+ 	p = xzalloc(sizeof(*p));
+-	p->p_lsa = xhost2sockaddr(s, 123);
+-	p->p_dotted = xmalloc_sockaddr2dotted_noport(&p->p_lsa->u.sa);
++	p->p_hostname = s;
++	p->p_lsa = NULL;
++	p->p_dotted = NULL;
+ 	p->p_fd = -1;
+ 	p->p_xmt_msg.m_status = MODE_CLIENT | (NTP_VERSION << 3);
+ 	p->next_action_time = G.cur_time; /* = set_next(p, 0); */
+@@ -758,6 +760,25 @@ send_query_to_peer(peer_t *p)
+ 	 *
+ 	 * Uncomment this and use strace to see it in action:
+ 	 */
++
++	/* See if the peer hostname already resolved yet, if not, retry to resolv and return on failure */
++	if (!p->p_lsa)
++	{
++		p->p_lsa = host2sockaddr(p->p_hostname, 123);
++
++		if (p->p_lsa)
++		{
++			p->p_dotted = xmalloc_sockaddr2dotted_noport(&p->p_lsa->u.sa);
++			VERB1 bb_error_msg("resolved peer %s to %s", p->p_hostname, p->p_dotted);
++		}
++		else
++		{
++			set_next(p, RETRY_INTERVAL);
++			VERB1 bb_error_msg("could not resolve peer %s, skipping", p->p_hostname);
++			return;
++		}
++	}
++
+ #define PROBE_LOCAL_ADDR /* { len_and_sockaddr lsa; lsa.len = LSA_SIZEOF_SA; getsockname(p->query.fd, &lsa.u.sa, &lsa.len); } */
+ 
+ 	if (p->p_fd == -1) {

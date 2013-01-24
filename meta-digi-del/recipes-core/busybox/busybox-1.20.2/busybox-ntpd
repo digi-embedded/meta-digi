@@ -1,0 +1,54 @@
+#!/bin/sh
+#===============================================================================
+#
+#  busybox-ntpd
+#
+#  Copyright (C) 2013 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#  !Description: Busybox NTP bootscript
+#
+#===============================================================================
+
+set -e
+
+DAEMON="/usr/sbin/ntpd"
+NAME="ntpd"
+DESC="Busybox NTP client/server"
+ARGS="-n -p pool.ntp.org"
+
+[ -x "${DAEMON}" ] || exit 0
+
+case "$1" in
+	start)
+		echo -n "Starting $DESC: "
+		start-stop-daemon -S -b -n $NAME -a $DAEMON -- $ARGS
+		echo "done"
+		;;
+	stop)
+		echo -n "Stopping $DESC: "
+		start-stop-daemon -K -n $NAME
+		echo "done"
+		;;
+	restart)
+		echo -n "Restarting $DESC: "
+		$0 stop
+		$0 start
+		echo "done"
+		;;
+	reload)
+		echo -n "Reloading $DESC: "
+		killall -HUP $(basename ${DAEMON})
+		echo "done"
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart|reload}"
+		exit 1
+		;;
+esac
+
+exit 0
