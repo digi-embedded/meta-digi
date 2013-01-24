@@ -13,7 +13,11 @@ SRC_URI += "file://0001-del-baudrates.patch \
             file://suspend \
            "
 
+# Add device handlers to 'mdev' package
 FILES_${PN}-mdev += "${base_libdir}/mdev/adc ${base_libdir}/mdev/mmc ${base_libdir}/mdev/sd ${base_libdir}/mdev/ts"
+
+# hwclock bootscript init parameters
+INITSCRIPT_PARAMS_${PN}-hwclock = "start 20 S . stop 20 0 6 ."
 
 do_install_append() {
 	if grep "CONFIG_MDEV=y" ${WORKDIR}/defconfig; then
