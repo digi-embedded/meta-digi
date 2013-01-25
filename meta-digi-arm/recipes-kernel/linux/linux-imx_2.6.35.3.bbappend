@@ -18,3 +18,4 @@ SRC_URI = "${DIGI_LOG_GIT}linux-2.6.git \
 SRC_URI_ccardxmx28js_mxs = "${DIGI_LOG_GIT}linux-2.6.git \
            file://defconfig \
 "
+FILES_kernel-image += "/boot/config*"
