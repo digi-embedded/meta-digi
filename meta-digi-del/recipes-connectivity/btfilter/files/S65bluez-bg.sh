@@ -35,11 +35,10 @@ ccardwmx28js_bt_init() {
 	# value if the address has not been set.
 	#
 	
-	# TODO: Hardcoded until passed to kernel command line from U-Boot.
-	#BTADDR="$(nvram print module btaddr1 | sed 's,btaddr1=,,g')"
-	#if [ -z "${BTADDR}" -o "${BTADDR}" = "00:00:00:00:00:00" ]; then
+	BTADDR=`cat /proc/cmdline | sed 's/\s/\n/g' | awk '/btaddr1/ {print}' | sed 's/btaddr1=//g'`
+	if [ -z "${BTADDR}" -o "${BTADDR}" = "00:00:00:00:00:00" ]; then
 		BTADDR="00:04:F3:FF:FF:BB"
-	#fi
+	fi
 
 	#
 	# We need to write the Bluetooth MAC address to ar3kbdaddr.pst in
