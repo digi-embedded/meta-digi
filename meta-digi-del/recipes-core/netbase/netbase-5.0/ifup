@@ -1,0 +1,48 @@
+#!/bin/sh -l
+#===============================================================================
+#
+#  ifup
+#
+#  Copyright (C) 2013 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Set network interfaces MAC addresses.
+#
+#===============================================================================
+
+set -e
+
+# loopback methods are directly handled by ifup
+[ "${METHOD}" = "loopback" ] && exit 0
+
+# Do nothing if interface does not exist
+[ !  -h /sys/class/net/${IFACE} ] && exit 0
+
+if [ -h /sys/class/net/eth0 ]; then
+    driver="$(readlink -f -n /sys/class/net/eth0 | sed 's,\/,\n,g' | awk '/fec/ {print}')"
+    case ${driver} in
+        fec.*)
+           macaddr=`cat /proc/cmdline | sed 's,\s,\n,g' | awk '/ethaddr1/ {print}' | sed 's,ethaddr1=,,g'`
+            ;;
+        sms.*)
+            macaddr=`cat /proc/cmdline | sed 's,\s,\n,g' | awk '/ethaddr3/ {print}' | sed 's,ethaddr3=,,g'`
+            ;;
+    esac
+    if [ "${macaddr}" ]; then
+    /sbin/ifconfig eth0 hw ether ${macaddr}
+    fi
+fi
+
+if [ -h /sys/class/net/eth1 ]; then
+    macaddr=`cat /proc/cmdline | sed 's,\s,\n,g' | awk '/ethaddr3/ {print}' | sed 's,ethaddr3=,,g'`
+    if [ "${macaddr}" ]; then
+    /sbin/ifconfig eth1 hw ether ${macaddr}
+    fi
+fi
+
+exit 0
