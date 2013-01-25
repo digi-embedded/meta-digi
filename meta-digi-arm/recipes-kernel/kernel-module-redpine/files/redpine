@@ -51,15 +51,14 @@ set -e
 
 FIRMWARE_DIR="/lib/firmware/redpine/"
 
-#MAC_ADDR="$(nvram print module ethaddr2 | sed 's,ethaddr2=,,g')"
+MAC_ADDR=`cat /proc/cmdline | sed 's/\s/\n/g' | awk '/ethaddr2/ {print}' | sed 's/ethaddr2=//g'`
+if [ -z "${MAC_ADDR}" -o "${MAC_ADDR}" = "00:00:00:00:00:00" ]; then
+	MAC_ADDR="00:04:F3:AA:BB:05"
+fi
 
-# TODO: Hardcoded until passed to kernel command line from U-Boot.
-MAC_ADDR="00:04:F3:AA:BB:05"
-
-# TODO: Read wdmode from NVRAM or pass in kernel command line.
 # Driver mode variable in u-boot takes precedence (for test purposes)
-#wdmode="$(ubootenv -p wdmode | sed 's,^wdmode=,,g')"
-#[ "${wdmode}" = "1" -o "${wdmode}" = "2" ] && DRIVER_MODE="${wdmode}"
+wdmode=`cat /proc/cmdline | sed 's/\s/\n/g' | awk '/wdmode/ {print}' | sed 's/wdmode=//g'`
+[ "${wdmode}" = "1" -o "${wdmode}" = "2" ] && DRIVER_MODE="${wdmode}"
 
 # Crystal frequency depends on the platform and HW revision.
 #
