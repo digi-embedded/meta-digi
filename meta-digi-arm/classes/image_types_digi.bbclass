@@ -46,7 +46,8 @@ IMAGE_CMD_jffs2() {
 
 	for i in $(seq 1 ${nimg}); do
 		eval peb_it="\${peb${i}}"
-		mkfs.jffs2 -r ${IMAGE_ROOTFS} -f -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2 -n -p -l -e ${peb_it}
+		# Do not use '-p (padding)' option. It breaks 'ccardxmx28js' flash images [JIRA:DEL-218]
+		mkfs.jffs2 -n -e ${peb_it} -d ${IMAGE_ROOTFS} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2
 	done
 }
 
@@ -56,8 +57,9 @@ IMAGE_CMD_sum.jffs2() {
 
 	for i in $(seq 1 ${nimg}); do
 		eval peb_it="\${peb${i}}"
-		mkfs.jffs2 -r ${IMAGE_ROOTFS} -f -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2 -n -p -l -e ${peb_it}
-		sumtool -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2 -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.sum.jffs2 -n -p -l -e ${peb_it}
+		# Do not use '-p (padding)' option. It breaks 'ccardxmx28js' flash images [JIRA:DEL-218]
+		mkfs.jffs2 -n -e ${peb_it} -d ${IMAGE_ROOTFS} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2
+		sumtool -e ${peb_it} -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2 -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.sum.jffs2
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2
 	done
 }
