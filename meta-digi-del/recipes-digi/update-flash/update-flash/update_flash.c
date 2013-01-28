@@ -29,6 +29,7 @@
 #include <stdlib.h>		/* EXIT_SUCCESS */
 #include <string.h>		/* memset */
 #include <unistd.h>		/* close */
+#include <sys/reboot.h>		/* reboot */
 
 #include <arpa/inet.h>		/* ntohl */
 #include <mntent.h>		/* setmntent */
@@ -383,10 +384,7 @@ int main(int argc, char *argv[])
 
 	if (cDoReboot) {
 		sync();
-
-		PRINTF("Rebooting System\n");
-		/* kills init */
-		kill(1, SIGTERM);
+		reboot(RB_AUTOBOOT);
 	}
 
 	/* may not be reached in case of kill */
