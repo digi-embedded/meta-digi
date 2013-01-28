@@ -54,14 +54,20 @@ char is_nand_oob_atomic(void)
 	    MACH_TYPE_CCMX51JS == platform_id ||
 	    MACH_TYPE_CCWMX51 == platform_id ||
 	    MACH_TYPE_CCWMX51JS == platform_id ||
+	    MACH_TYPE_CCXMX51 == platform_id ||
+	    MACH_TYPE_CCXMX51JS == platform_id ||
 	    MACH_TYPE_CCMX53 == platform_id ||
 	    MACH_TYPE_CCMX53JS == platform_id ||
 	    MACH_TYPE_CCWMX53 == platform_id ||
 	    MACH_TYPE_CCWMX53JS == platform_id ||
+	    MACH_TYPE_CCXMX53 == platform_id ||
+	    MACH_TYPE_CCXMX53JS == platform_id ||
 	    MACH_TYPE_CCARDMX28 == platform_id ||
 	    MACH_TYPE_CCARDMX28JS == platform_id ||
 	    MACH_TYPE_CCARDWMX28 == platform_id ||
-	    MACH_TYPE_CCARDWMX28JS == platform_id) {
+	    MACH_TYPE_CCARDWMX28JS == platform_id ||
+	    MACH_TYPE_CCARDXMX28 == platform_id ||
+	    MACH_TYPE_CCARDXMX28JS == platform_id) {
 		return 1;
 	}
 

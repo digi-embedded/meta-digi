@@ -97,6 +97,18 @@
 #define MACH_TYPE_CCARDWMX28JS_NAME	"ccardwmx28js"
 #define MACH_TYPE_CCARDMX28JS		3918
 #define MACH_TYPE_CCARDMX28JS_NAME	"ccardmx28js"
+#define MACH_TYPE_CCXMX53		9980
+#define MACH_TYPE_CCXMX53_NAME		"ccxmx53"
+#define MACH_TYPE_CCXMX53JS		9981
+#define MACH_TYPE_CCXMX53JS_NAME	"ccxmx53js"
+#define MACH_TYPE_CCXMX51		9982
+#define MACH_TYPE_CCXMX51_NAME		"ccxmx51"
+#define MACH_TYPE_CCXMX51JS		9983
+#define MACH_TYPE_CCXMX51JS_NAME	"ccxmx51js"
+#define MACH_TYPE_CCARDXMX28		9984
+#define MACH_TYPE_CCARDXMX28_NAME	"ccardxmx28"
+#define MACH_TYPE_CCARDXMX28JS		9985
+#define MACH_TYPE_CCARDXMX28JS_NAME	"ccardxmx28js"
 
 int get_platform_id(void);
 char is_nand_oob_atomic(void);
