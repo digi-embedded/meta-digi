@@ -1,5 +1,6 @@
-PACKAGECONFIG = "${@base_contains('DISTRO_FEATURES', 'x11', 'x11', '', d)}"
+PACKAGECONFIG = "${@base_contains('DISTRO_FEATURES', 'x11', 'x11 flac', '', d)}"
 PACKAGECONFIG[x11] = ",--disable-gconf --disable-x --disable-xshm --disable-xvideo,"
+PACKAGECONFIG[flac] = ",--disable-flac,"
 
 DEPENDS_no_X := "${@oe_filter_out('gconf', '${DEPENDS}', d)}"
 DEPENDS_del := "${@base_contains('DISTRO_FEATURES', 'x11', '${DEPENDS}', '${DEPENDS_no_X}', d)}"
@@ -16,7 +17,6 @@ EXTRA_OECONF_del += "\
 		 --disable-effectv \
 		 --disable-esdtest \
 		 --disable-examples \
-		 --disable-flac \
 		 --disable-goom \
 		 --disable-goom2k1 \
 		 --disable-gtk-doc \
