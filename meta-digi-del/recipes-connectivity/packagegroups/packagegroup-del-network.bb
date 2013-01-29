@@ -30,7 +30,6 @@ VIRTUAL-RUNTIME_snmp-manager ?= ""
 #VIRTUAL-RUNTIME_snmp-manager ?= "net-snmp-server"
 
 RDEPENDS_${PN} = "\
-	bridge-utils \
 	ppp \
 	iproute2 \
 	${VIRTUAL-RUNTIME_ftp-server} \
