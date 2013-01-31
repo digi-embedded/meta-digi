@@ -18,6 +18,7 @@ inherit del-image
 # Only common features to remain here.
 IMAGE_FEATURES += "ssh-server-dropbear"
 IMAGE_FEATURES += "del-network"
+IMAGE_FEATURES += "package-management"
 
 # Machine dependant features
 IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "alsa", "del-audio", "", d)}'
@@ -27,5 +28,4 @@ IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "bluetooth", "del-blueto
 
 IMAGE_ROOTFS_SIZE = "8192"
 
-# remove not needed ipkg informations
-ROOTFS_POSTPROCESS_COMMAND += "remove_packaging_data_files; del_rootfs_tuning;"
+ROOTFS_POSTPROCESS_COMMAND += "del_rootfs_tuning;"
