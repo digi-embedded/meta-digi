@@ -19,7 +19,7 @@ MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS ?= ""
 RDEPENDS_${PN} = "\
 	wpa-supplicant \
 	wireless-tools \
-        crda \
+	crda \
 	iw \
 	${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
