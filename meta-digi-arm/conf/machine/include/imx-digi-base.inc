@@ -23,5 +23,3 @@ UBOOT_SYMLINK = 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "
 
 # Flash image types
 IMAGE_FSTYPES += "sum.jffs2 ubifs"
-
-PREFERRED_VERSION_wpa-supplicant = "1.0"

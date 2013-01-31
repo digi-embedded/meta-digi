@@ -15,5 +15,3 @@ EXTRA_IMAGEDEPENDS = "u-boot"
 # At the moment it's failing due to wrong u-boot image
 IMAGE_FSTYPES ?= "tar.bz2"
 IMAGE_FSTYPES += "sum.jffs2 ubifs"
-
-PREFERRED_VERSION_wpa-supplicant = "6ffdc2f"

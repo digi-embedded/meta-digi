@@ -41,7 +41,7 @@
 
 
 # Driver interface for Host AP driver
-CONFIG_DRIVER_HOSTAP=y
+#CONFIG_DRIVER_HOSTAP=y
 
 # Driver interface for Agere driver
 #CONFIG_DRIVER_HERMES=y
@@ -60,7 +60,7 @@ CONFIG_DRIVER_HOSTAP=y
 #CONFIG_DRIVER_NDISWRAPPER=y
 
 # Driver interface for Atmel driver
-# CONFIG_DRIVER_ATMEL=y
+#CONFIG_DRIVER_ATMEL=y
 
 # Driver interface for old Broadcom driver
 # Please note that the newer Broadcom driver ("hybrid Linux driver") supports
@@ -78,10 +78,15 @@ CONFIG_DRIVER_HOSTAP=y
 #CONFIG_DRIVER_RALINK=y
 
 # Driver interface for generic Linux wireless extensions
+# Note: WEXT is deprecated in the current Linux kernel version and no new
+# functionality is added to it. nl80211-based interface is the new
+# replacement for WEXT and its use allows wpa_supplicant to properly control
+# the driver to improve existing functionality like roaming and to support new
+# functionality.
 CONFIG_DRIVER_WEXT=y
 
 # Driver interface for Linux drivers using the nl80211 kernel interface
-CONFIG_LIBNL20=y
+CONFIG_LIBNL32=y
 CONFIG_DRIVER_NL80211=y
 
 # Driver interface for FreeBSD net80211 layer (e.g., Atheros driver)
@@ -110,11 +115,6 @@ CONFIG_DRIVER_NL80211=y
 # Driver interface for development testing
 #CONFIG_DRIVER_TEST=y
 
-# Include client MLME (management frame processing) for test driver
-# This can be used to test MLME operations in hostapd with the test interface.
-# space.
-#CONFIG_CLIENT_MLME=y
-
 # Driver interface for wired Ethernet drivers
 CONFIG_DRIVER_WIRED=y
 
@@ -123,6 +123,10 @@ CONFIG_DRIVER_WIRED=y
 
 # Driver interface for no driver (e.g., WPS ER only)
 #CONFIG_DRIVER_NONE=y
+
+# Solaris libraries
+#LIBS += -lsocket -ldlpi -lnsl
+#LIBS_c += -lsocket
 
 # Enable IEEE 802.1X Supplicant (automatically included if any EAP method is
 # included)
@@ -148,7 +152,7 @@ CONFIG_EAP_TTLS=y
 # functionality needed for EAP-FAST. If EAP-FAST is enabled with OpenSSL,
 # the OpenSSL library must be patched (openssl-0.9.8d-tls-extensions.patch)
 # to add the needed functions.
-#CONFIG_EAP_FAST=y
+CONFIG_EAP_FAST=y
 
 # EAP-GTC
 CONFIG_EAP_GTC=y
@@ -157,19 +161,22 @@ CONFIG_EAP_GTC=y
 CONFIG_EAP_OTP=y
 
 # EAP-SIM (enable CONFIG_PCSC, if EAP-SIM is used)
-#CONFIG_EAP_SIM=y
+CONFIG_EAP_SIM=y
 
 # EAP-PSK (experimental; this is _not_ needed for WPA-PSK)
-#CONFIG_EAP_PSK=y
+CONFIG_EAP_PSK=y
+
+# EAP-pwd (secure authentication using only a password)
+#CONFIG_EAP_PWD=y
 
 # EAP-PAX
-#CONFIG_EAP_PAX=y
+CONFIG_EAP_PAX=y
 
 # LEAP
 CONFIG_EAP_LEAP=y
 
 # EAP-AKA (enable CONFIG_PCSC, if EAP-AKA is used)
-#CONFIG_EAP_AKA=y
+CONFIG_EAP_AKA=y
 
 # EAP-AKA' (enable CONFIG_PCSC, if EAP-AKA' is used).
 # This requires CONFIG_EAP_AKA to be enabled, too.
@@ -179,10 +186,10 @@ CONFIG_EAP_LEAP=y
 #CONFIG_USIM_SIMULATOR=y
 
 # EAP-SAKE
-#CONFIG_EAP_SAKE=y
+CONFIG_EAP_SAKE=y
 
 # EAP-GPSK
-#CONFIG_EAP_GPSK=y
+CONFIG_EAP_GPSK=y
 # Include support for optional SHA256 cipher suite in EAP-GPSK
 #CONFIG_EAP_GPSK_SHA256=y
 
@@ -190,10 +197,19 @@ CONFIG_EAP_LEAP=y
 #CONFIG_EAP_TNC=y
 
 # Wi-Fi Protected Setup (WPS)
-#CONFIG_WPS=y
+CONFIG_WPS=y
+# Enable WSC 2.0 support
+CONFIG_WPS2=y
+# Enable WPS external registrar functionality
+#CONFIG_WPS_ER=y
+# Disable credentials for an open network by default when acting as a WPS
+# registrar.
+#CONFIG_WPS_REG_DISABLE_OPEN=y
+# Enable WPS support with NFC config method
+#CONFIG_WPS_NFC=y
 
 # EAP-IKEv2
-#CONFIG_EAP_IKEV2=y
+CONFIG_EAP_IKEV2=y
 
 # PKCS#12 (PFX) support (used to read private key and certificate file from
 # a file that usually has extension .p12 or .pfx)
@@ -207,6 +223,9 @@ CONFIG_SMARTCARD=y
 # Enable this if EAP-SIM or EAP-AKA is included
 #CONFIG_PCSC=y
 
+# Support HT overrides (disable HT/HT40, mask MCS rates, etc.)
+CONFIG_HT_OVERRIDES=y
+
 # Development testing
 #CONFIG_EAPOL_TEST=y
 
@@ -214,16 +233,21 @@ CONFIG_SMARTCARD=y
 # unix = UNIX domain sockets (default for Linux/*BSD)
 # udp = UDP sockets using localhost (127.0.0.1)
 # named_pipe = Windows Named Pipe (default for Windows)
+# udp-remote = UDP sockets with remote access (only for tests systems/purpose)
 # y = use default (backwards compatibility)
 # If this option is commented out, control interface is not included in the
 # build.
-CONFIG_CTRL_IFACE=y
+CONFIG_CTRL_IFACE=unix
 
 # Include support for GNU Readline and History Libraries in wpa_cli.
 # When building a wpa_cli binary for distribution, please note that these
 # libraries are licensed under GPL and as such, BSD license may not apply for
 # the resulting binary.
 #CONFIG_READLINE=y
+
+# Include internal line edit mode in wpa_cli. This can be used as a replacement
+# for GNU Readline to provide limited command line editing and history support.
+CONFIG_WPA_CLI_EDIT=y
 
 # Remove debugging code that is printing out debug message to stdout.
 # This can be used to reduce the size of the wpa_supplicant considerably
@@ -286,6 +310,9 @@ CONFIG_BACKEND=file
 # eloop_none = Empty template
 #CONFIG_ELOOP=eloop
 
+# Should we use poll instead of select? Select is used by default.
+#CONFIG_ELOOP_POLL=y
+
 # Select layer 2 packet implementation
 # linux = Linux packet socket (default)
 # pcap = libpcap/libdnet/WinPcap
@@ -298,26 +325,30 @@ CONFIG_BACKEND=file
 # PeerKey handshake for Station to Station Link (IEEE 802.11e DLS)
 CONFIG_PEERKEY=y
 
-# IEEE 802.11w (management frame protection)
-# This version is an experimental implementation based on IEEE 802.11w/D1.0
-# draft and is subject to change since the standard has not yet been finalized.
+# IEEE 802.11w (management frame protection), also known as PMF
 # Driver support is also needed for IEEE 802.11w.
 #CONFIG_IEEE80211W=y
 
 # Select TLS implementation
 # openssl = OpenSSL (default)
-# gnutls = GnuTLS (needed for TLS/IA, see also CONFIG_GNUTLS_EXTRA)
+# gnutls = GnuTLS
 # internal = Internal TLSv1 implementation (experimental)
 # none = Empty template
 #CONFIG_TLS=openssl
 
-# Whether to enable TLS/IA support, which is required for EAP-TTLSv1.
-# You need CONFIG_TLS=gnutls for this to have any effect. Please note that
-# even though the core GnuTLS library is released under LGPL, this extra
-# library uses GPL and as such, the terms of GPL apply to the combination
-# of wpa_supplicant and GnuTLS if this option is enabled. BSD license may not
-# apply for distribution of the resulting binary.
-#CONFIG_GNUTLS_EXTRA=y
+# TLS-based EAP methods require at least TLS v1.0. Newer version of TLS (v1.1)
+# can be enabled to get a stronger construction of messages when block ciphers
+# are used. It should be noted that some existing TLS v1.0 -based
+# implementation may not be compatible with TLS v1.1 message (ClientHello is
+# sent prior to negotiating which version will be used)
+#CONFIG_TLSV11=y
+
+# TLS-based EAP methods require at least TLS v1.0. Newer version of TLS (v1.2)
+# can be enabled to enable use of stronger crypto algorithms. It should be
+# noted that some existing TLS v1.0 -based implementation may not be compatible
+# with TLS v1.2 message (ClientHello is sent prior to negotiating which version
+# will be used)
+#CONFIG_TLSV12=y
 
 # If CONFIG_TLS=internal is used, additional library and include paths are
 # needed for LibTomMath. Alternatively, an integrated, minimal version of
@@ -379,6 +410,17 @@ CONFIG_PEERKEY=y
 # Add support for writing debug log to a file (/tmp/wpa_supplicant-log-#.txt)
 #CONFIG_DEBUG_FILE=y
 
+# Send debug messages to syslog instead of stdout
+#CONFIG_DEBUG_SYSLOG=y
+# Set syslog facility for debug messages
+#CONFIG_DEBUG_SYSLOG_FACILITY=LOG_DAEMON
+
+# Add support for sending all debug messages (regardless of debug verbosity)
+# to the Linux kernel tracing facility. This helps debug the entire stack by
+# making it easy to record everything happening from the driver up into the
+# same file, e.g., using trace-cmd.
+#CONFIG_DEBUG_LINUX_TRACING=y
+
 # Enable privilege separation (see README 'Privilege separation' for details)
 #CONFIG_PRIVSEP=y
 
@@ -390,7 +432,7 @@ CONFIG_PEERKEY=y
 # This tracks use of memory allocations and other registrations and reports
 # incorrect use with a backtrace of call (or allocation) location.
 #CONFIG_WPA_TRACE=y
-# For BSD, comment out these.
+# For BSD, uncomment these.
 #LIBS += -lexecinfo
 #LIBS_p += -lexecinfo
 #LIBS_c += -lexecinfo
@@ -399,11 +441,84 @@ CONFIG_PEERKEY=y
 # This enables use of libbfd to get more detailed symbols for the backtraces
 # generated by CONFIG_WPA_TRACE=y.
 #CONFIG_WPA_TRACE_BFD=y
-# For BSD, comment out these.
+# For BSD, uncomment these.
 #LIBS += -lbfd -liberty -lz
 #LIBS_p += -lbfd -liberty -lz
 #LIBS_c += -lbfd -liberty -lz
-CONFIG_TLS = gnutls
-#CONFIG_GNUTLS_EXTRA=y
-CONFIG_CTRL_IFACE_DBUS=y
-CONFIG_CTRL_IFACE_DBUS_NEW=y
+
+# wpa_supplicant depends on strong random number generation being available
+# from the operating system. os_get_random() function is used to fetch random
+# data when needed, e.g., for key generation. On Linux and BSD systems, this
+# works by reading /dev/urandom. It should be noted that the OS entropy pool
+# needs to be properly initialized before wpa_supplicant is started. This is
+# important especially on embedded devices that do not have a hardware random
+# number generator and may by default start up with minimal entropy available
+# for random number generation.
+#
+# As a safety net, wpa_supplicant is by default trying to internally collect
+# additional entropy for generating random data to mix in with the data fetched
+# from the OS. This by itself is not considered to be very strong, but it may
+# help in cases where the system pool is not initialized properly. However, it
+# is very strongly recommended that the system pool is initialized with enough
+# entropy either by using hardware assisted random number generator or by
+# storing state over device reboots.
+#
+# wpa_supplicant can be configured to maintain its own entropy store over
+# restarts to enhance random number generation. This is not perfect, but it is
+# much more secure than using the same sequence of random numbers after every
+# reboot. This can be enabled with -e<entropy file> command line option. The
+# specified file needs to be readable and writable by wpa_supplicant.
+#
+# If the os_get_random() is known to provide strong random data (e.g., on
+# Linux/BSD, the board in question is known to have reliable source of random
+# data from /dev/urandom), the internal wpa_supplicant random pool can be
+# disabled. This will save some in binary size and CPU use. However, this
+# should only be considered for builds that are known to be used on devices
+# that meet the requirements described above.
+CONFIG_NO_RANDOM_POOL=y
+
+# IEEE 802.11n (High Throughput) support (mainly for AP mode)
+CONFIG_IEEE80211N=y
+
+# Wireless Network Management (IEEE Std 802.11v-2011)
+# Note: This is experimental and not complete implementation.
+#CONFIG_WNM=y
+
+# Interworking (IEEE 802.11u)
+# This can be used to enable functionality to improve interworking with
+# external networks (GAS/ANQP to learn more about the networks and network
+# selection based on available credentials).
+#CONFIG_INTERWORKING=y
+
+# Hotspot 2.0
+#CONFIG_HS20=y
+
+# AP mode operations with wpa_supplicant
+# This can be used for controlling AP mode operations with wpa_supplicant. It
+# should be noted that this is mainly aimed at simple cases like
+# WPA2-Personal while more complex configurations like WPA2-Enterprise with an
+# external RADIUS server can be supported with hostapd.
+CONFIG_AP=y
+
+# P2P (Wi-Fi Direct)
+# This can be used to enable P2P support in wpa_supplicant. See README-P2P for
+# more information on P2P operations.
+CONFIG_P2P=y
+
+# Autoscan
+# This can be used to enable automatic scan support in wpa_supplicant.
+# See wpa_supplicant.conf for more information on autoscan usage.
+#
+# Enabling directly a module will enable autoscan support.
+# For exponential module:
+#CONFIG_AUTOSCAN_EXPONENTIAL=y
+# For periodic module:
+#CONFIG_AUTOSCAN_PERIODIC=y
+
+# Password (and passphrase, etc.) backend for external storage
+# These optional mechanisms can be used to add support for storing passwords
+# and other secrets in external (to wpa_supplicant) location. This allows, for
+# example, operating system specific key storage to be used
+#
+# External password backend for testing purposes (developer use)
+#CONFIG_EXT_PASSWORD_TEST=y
