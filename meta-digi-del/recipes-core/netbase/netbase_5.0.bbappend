@@ -6,6 +6,8 @@ DEPENDS="virtual/kernel"
 
 SRC_URI += "file://ifup"
 
+WPA_DRIVER ?= "wext"
+
 do_install_append(){
 	install -m 0755 ${WORKDIR}/ifup ${D}${sysconfdir}/network/if-up.d
 }
@@ -69,7 +71,7 @@ iface wlan0 inet static
     network 192.168.43.0
     wireless_mode managed
     wireless_essid any
-    wpa-driver wext
+    wpa-driver ${WPA_DRIVER}
     wpa-conf /etc/wpa_supplicant.conf
 
 EOF
