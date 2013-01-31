@@ -9,6 +9,7 @@ PR = "r0"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 SRC_URI = "${DIGI_LOG_MIRROR}${PN}-${PV}.tar.bz2 \
+           file://0001-enable-libnl3.patch \
 	   file://S65bluez-bg.sh"
 
 S = "${WORKDIR}/${PN}-${PV}"
