@@ -3,7 +3,9 @@
 #
 DESCRIPTION = "DEL busybox based image (non graphical)."
 
-IMAGE_INSTALL = "packagegroup-del-core ${ROOTFS_PKGMANAGE_BOOTSTRAP} ${CORE_IMAGE_EXTRA_INSTALL}"
+VIRTUAL-RUNTIME_dev_manager ?= "busybox-mdev"
+
+IMAGE_INSTALL = "packagegroup-del-core ${VIRTUAL-RUNTIME_dev_manager} ${ROOTFS_PKGMANAGE_BOOTSTRAP} ${CORE_IMAGE_EXTRA_INSTALL}"
 
 IMAGE_LINGUAS = " "
 

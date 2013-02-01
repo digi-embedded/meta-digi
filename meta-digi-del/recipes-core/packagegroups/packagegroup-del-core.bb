@@ -18,7 +18,6 @@ MACHINE_ESSENTIAL_EXTRA_RDEPENDS ?= ""
 MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS ?= ""
 
 # Distro can override the following VIRTUAL-RUNTIME providers:
-VIRTUAL-RUNTIME_dev_manager ?= "busybox-mdev"
 VIRTUAL-RUNTIME_login_manager ?= ""
 VIRTUAL-RUNTIME_passwd_manager ?= "shadow"
 VIRTUAL-RUNTIME_init_manager ?= "sysvinit"
@@ -39,7 +38,6 @@ RDEPENDS_${PN} = "\
     netbase \
     ${VIRTUAL-RUNTIME_login_manager} \
     ${VIRTUAL-RUNTIME_init_manager} \
-    ${VIRTUAL-RUNTIME_dev_manager} \
     ${VIRTUAL-RUNTIME_update-alternatives} \
     update-flash \
     usbutils \
