@@ -1,0 +1,9 @@
+#
+# GPIO device nodes (LED2 and BUTTON2)
+#
+/dev/gpio       d    755    0    0
+/dev/gpio/1     c    644    0    0    240   1
+/dev/gpio/73    c    644    0    0    240   73
+/dev/gpio/97    c    644    0    0    240   97
+/dev/gpio/100   c    644    0    0    240   100
+/dev/gpio/204   c    644    0    0    240   204

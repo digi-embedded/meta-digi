@@ -21,8 +21,8 @@ if [ "${1}" != "start" ]; then
 fi
 
 MDEV="/sbin/mdev"
-# MAKEDEVS="/sbin/makedevs"
-# CONFIG="/etc/makedevs.d/${DEL_PLATFORM}"
+MAKEDEVS="/sbin/makedevs"
+CONFIG="/etc/device_table"
 
 # Create shared memory mount point
 mkdir -p /dev/shm
@@ -37,11 +37,7 @@ fi
 ${MDEV} -s
 
 # Create rest device nodes via configuration file.
-# if [ -f "${CONFIG}" ]; then
-# 	[ -z "${quietboot}" ] && echo -n "Creating nodes via configuration file... "
-# 	${MAKEDEVS} -d "${CONFIG}" / >/dev/null 2>&1
-# 	[ -z "${quietboot}" ] && echo "done"
-# fi
+[ -f "${CONFIG}" ] && ${MAKEDEVS} -d "${CONFIG}" / >/dev/null 2>&1
 
 # mount storage devices
 usbmount
