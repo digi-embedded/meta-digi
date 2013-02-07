@@ -13,3 +13,5 @@ IMAGE_CLASSES += "image_types_digi"
 
 # Do not enable console on VT (see sysvinit-inittab recipe)
 USE_VT = "0"
+
+MACHINE_ESSENTIAL_EXTRA_RDEPENDS += "kernel-module-gpio"
