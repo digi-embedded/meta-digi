@@ -1,0 +1,2 @@
+xinput set-prop "da9052-tsi" "Evdev Axis Calibration" 34 975 98 930
+xinput set-prop "da9052-tsi" "Evdev Axes Swap" 1

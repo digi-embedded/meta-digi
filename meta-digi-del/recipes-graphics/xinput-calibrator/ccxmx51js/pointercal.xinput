@@ -1,0 +1,2 @@
+xinput set-prop "mxc_ts" "Evdev Axis Calibration" 985 42 935 58
+xinput set-prop "mxc_ts" "Evdev Axes Swap" 1
