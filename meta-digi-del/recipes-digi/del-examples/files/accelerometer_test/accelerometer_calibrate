@@ -1,0 +1,115 @@
+#!/bin/sh
+#===============================================================================
+#
+#  accelerometer_calibrate
+#
+#  Copyright (C) 2012-2013 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#  !Description: calibrate CCXMX5X accelerometer
+#
+#  The calibration details for this particular accelerometer (MMA7455L) are in
+#  Freescale's Application Note AN3745.
+#
+#===============================================================================
+
+DEL_PLATFORM="$(cat /sys/kernel/machine/name)"
+
+## Per-platform accelerometer data
+# <platform> <driver_name> <i2c_address> <invert X-Y axis>
+while read _pl _name _i2c _invertXY; do
+	eval "${_pl}_name=\"${_name}\""
+	eval "${_pl}_i2c=\"${_i2c}\""
+	eval "${_pl}_invertXY=\"${_invertXY}\""
+done<<-_EOF_
+        ccxmx51         mma7455l        1-001d  y
+        ccxmx53         mma7455l        2-001d
+_EOF_
+
+eval SYSFS_I2C_PATH="/sys/bus/i2c/drivers/\${${DEL_PLATFORM}_name}/\${${DEL_PLATFORM}_i2c}"
+eval INVERTXY="\${${DEL_PLATFORM}_invertXY}"
+
+SYS_ACCEL_MODE="${SYSFS_I2C_PATH}/mode"
+SYS_ACCEL_MEASURE="${SYSFS_I2C_PATH}/measure"
+SYS_ACCEL_GSELECT="${SYSFS_I2C_PATH}/gSelect"
+SYS_ACCEL_CALIBRATION="${SYSFS_I2C_PATH}/calibration"
+
+CALIBRATION_CFG="/etc/accel_calibration"
+
+get_average_samples() {
+	local NUM_SAMPLES="20"
+	local x_total="0"
+	local y_total="0"
+	local z_total="0"
+	local _x
+	local _y
+	local _z
+	read _x _y _z < "${SYS_ACCEL_MEASURE}"
+	for i in $(seq ${NUM_SAMPLES}); do
+		x_total="$(( x_total + _x ))"
+		y_total="$(( y_total + _y ))"
+		z_total="$(( z_total + _z ))"
+		read _x _y _z < "${SYS_ACCEL_MEASURE}"
+	done
+	X="$(( x_total / ${NUM_SAMPLES} ))"
+	Y="$(( y_total / ${NUM_SAMPLES} ))"
+	Z="$(( z_total / ${NUM_SAMPLES} ))"
+	if [ -n "${INVERTXY}" ]; then
+		X="$(( (-1) * X ))"
+		Y="$(( (-1) * Y ))"
+	fi
+}
+
+onexit() {
+	local exit_status=${1:-$?}
+	echo Exiting $0 with $exit_status
+	exit $exit_status
+}
+
+trap onexit SIGHUP SIGINT SIGQUIT SIGTERM
+
+
+if [ -f "${SYS_ACCEL_MODE}" -a -f "${SYS_ACCEL_MEASURE}" \
+	-a -f "${SYS_ACCEL_GSELECT}" -a -f "${SYS_ACCEL_CALIBRATION}" ]; then
+	: # Accelerometer exists: continue
+else
+	printf "\n[ERROR]Accelerometer not present\n"
+	exit 1
+fi
+
+cat <<_EOF_
+************************************
+*      MMA7455L Accelerometer      *
+*        Calibration Script        *
+************************************
+
+Please put the module in a flat surface before continuing...
+
+_EOF_
+
+while [ "${gSelect}" != "2" -a "${gSelect}" != "4" -a "${gSelect}" != "8" ]; do
+	read -p "Enter g sensitivity (2, 4 or 8): " gSelect
+done
+
+echo -n "Measurement" > "${SYS_ACCEL_MODE}"
+echo -n "${gSelect}" > "${SYS_ACCEL_GSELECT}"
+
+Z_CALIBRATED="-$((128 / gSelect))"
+
+get_average_samples
+read X_offset Y_offset Z_offset < "${SYS_ACCEL_CALIBRATION}"
+while [ "${X}" != "0" -o "${Y}" != "0" -o "${Z}" != "${Z_CALIBRATED}" ]; do
+	[ "${X}" != "0" ] && X_offset="$((X_offset + (0 - X) * 2))"
+	[ "${Y}" != "0" ] && Y_offset="$((Y_offset + (0 - Y) * 2))"
+	[ "${Z}" != "${Z_CALIBRATED}" ] && Z_offset="$((Z_offset + (Z_CALIBRATED - Z) * 2))"
+	echo -n ${X_offset} ${Y_offset} ${Z_offset} > "${SYS_ACCEL_CALIBRATION}"
+	get_average_samples
+done
+
+printf "\nDone!. Saving calibration config: ${CALIBRATION_CFG}\n\n"
+
+printf "%s %s %s %s\n" ${gSelect} ${X_offset} ${Y_offset} ${Z_offset} > ${CALIBRATION_CFG}
