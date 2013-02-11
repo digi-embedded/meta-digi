@@ -3,11 +3,11 @@ PR_append = "+del.r0"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}_${PV}"
 
-SRCREV_mxs = "agonzal/yocto"
-LOCALVERSION_mxs = "mxs+agonzal_yocto"
+SRCREV_mxs = "del-6.0.1-sprint4"
+LOCALVERSION_mxs = "mxs+del-6.0.1-sprint4"
 
-SRCREV_mx5 = "agonzal/yocto"
-LOCALVERSION_mx5 = "mx5+agonzal_yocto"
+SRCREV_mx5 = "del-6.0.1-sprint4"
+LOCALVERSION_mx5 = "mx5+del-6.0.1-sprint4"
 
 SRC_URI = "${DIGI_LOG_GIT}linux-2.6.git \
            file://defconfig \

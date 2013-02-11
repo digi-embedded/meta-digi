@@ -7,7 +7,7 @@ inherit module
 PR = "r0"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-SRCREV = "del-5.9.3.1"
+SRCREV = "del-6.0.1-sprint4"
 SRC_URI = "${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git \
 	   file://atheros \
 	  "
