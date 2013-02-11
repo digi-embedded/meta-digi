@@ -4,7 +4,7 @@ DESCRIPTION = "bootloader for Digi platforms"
 
 PR_append = "+del.r0"
 
-SRC_URI = "${DIGI_LOG_GIT}u-boot-denx.git;tag=del-6.0.1-sprint4"
+SRC_URI = "${DIGI_LOG_GIT}u-boot-denx.git;tag=hpalacio/del-6.x"
 
 DEPENDS_mxs_ccardxmx28js += "elftosb-native imx-bootlets-del"
 
