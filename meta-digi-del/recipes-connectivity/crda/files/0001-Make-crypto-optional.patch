@@ -1,4 +1,3 @@
-From 3c5e208ba7780e4c65dd94f2aca7ee95c164f9f3 Mon Sep 17 00:00:00 2001
 From: Alex Gonzalez <alex.gonzalez@digi.com>
 Date: Thu, 13 Dec 2012 11:34:01 +0100
 Subject: [PATCH] Make crypto optional.

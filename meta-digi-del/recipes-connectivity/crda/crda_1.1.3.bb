@@ -4,7 +4,8 @@ SECTION = "base"
 PRIORITY = "optional"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=07c4f6dea3845b02a18dc00c8c87699c"
 LICENSE = "ISC"
-PR = "+del.r0"
+
+PR = "${DISTRO}.r0"
 
 # Virtual runtime settings can be overriden by the distribution.
 VIRTUAL-RUNTIME_crda_use_gcrypt ?= "0"
@@ -27,8 +28,6 @@ SRC_URI = "${DIGI_LOG_MIRROR}${PN}-${PV}.tar.bz2;name=crda \
 
 SRC_URI += '${@base_conditional("VIRTUAL-RUNTIME_crda_use_gcrypt", "1" , "", "file://0001-Make-crypto-optional.patch", d)}'
 
-CFLAGS += " -DCONFIG_LIBNL20"
-
 EXTRA_OEMAKE = "MAKEFLAGS="
 do_compile() {
 	oe_runmake all_noverify
@@ -40,8 +39,8 @@ do_install() {
 	install -m 0644 ${WORKDIR}/2011.04.28-regulatory.bin ${D}/usr/lib/crda/regulatory.bin
 }
 
-SRC_URI[crda.md5sum] = "5226f65aebacf94baaf820f8b4e06df4"
-SRC_URI[crda.sha256sum] = "e469348a5d0bb933df31995869130f68901de9be02e666437f52125698851864"
+SRC_URI[crda.md5sum] = "29579185e06a75675507527243d28e5c"
+SRC_URI[crda.sha256sum] = "aa8a7fe92f0765986c421a5b6768a185375ac210393df0605ee132f6754825f0"
 SRC_URI[reg.md5sum] = "1535e98bcaba732e2f8e8f62dac6f369"
 SRC_URI[reg.sha256sum] = "bb6ba6f5dcdf7106a19c588b0e4d43ab7af26f6474fe01011a318b3dceaba33b"
 
