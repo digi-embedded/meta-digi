@@ -20,10 +20,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
-#include <linux/fb.h>
-#include <linux/ipu.h>
-#include <linux/mxcfb.h>
-#include <linux/videodev.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,6 +29,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include <linux/fb.h>
+#include <linux/ipu.h>
+#include <linux/mxcfb.h>
+#include <linux/videodev.h>
 
 #define fourcc(a,b,c,d)\
         (((__u32)(a)<<0)|((__u32)(b)<<8)|((__u32)(c)<<16)|((__u32)(d)<<24))
