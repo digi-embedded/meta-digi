@@ -50,4 +50,4 @@ FILES_${PN} += " /lib/firmware/redpine/tadm \
 		/lib/firmware/redpine/taim \
 		/lib/firmware/redpine/instructionSet "
 
-COMPATIBLE_MACHINE = "(ccxmx51js|ccxmx53js)"
+COMPATIBLE_MACHINE = "(ccimx51js|ccimx53js)"

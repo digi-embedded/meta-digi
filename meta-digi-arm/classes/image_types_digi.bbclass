@@ -25,9 +25,9 @@ load_platform_data() {
 		eval "${_pl}_mio=\"$(echo ${_mio} | tr ',' ' ')\""
 		eval "${_pl}_sub=\"$(echo ${_sub} | tr ',' ' ')\""
 	done<<-_EOF_
-		ccardxmx28js    2047         128        126976           2048         -
-		ccxmx51js       4095,1023    128,512    129024,520192    2048,4096    512,1024
-		ccxmx53js       4095,1023    128,512    129024,520192    2048,4096    512,1024
+		ccardimx28js    2047         128        126976           2048         -
+		ccimx51js       4095,1023    128,512    129024,520192    2048,4096    512,1024
+		ccimx53js       4095,1023    128,512    129024,520192    2048,4096    512,1024
 _EOF_
 	# Set generic variables for current MACHINE
 	nimg="$(eval echo \${${MACHINE}_peb} | wc -w)"
@@ -46,7 +46,7 @@ IMAGE_CMD_jffs2() {
 
 	for i in $(seq 1 ${nimg}); do
 		eval peb_it="\${peb${i}}"
-		# Do not use '-p (padding)' option. It breaks 'ccardxmx28js' flash images [JIRA:DEL-218]
+		# Do not use '-p (padding)' option. It breaks 'ccardimx28js' flash images [JIRA:DEL-218]
 		mkfs.jffs2 -n -e ${peb_it} -d ${IMAGE_ROOTFS} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2
 	done
 }
@@ -57,7 +57,7 @@ IMAGE_CMD_sum.jffs2() {
 
 	for i in $(seq 1 ${nimg}); do
 		eval peb_it="\${peb${i}}"
-		# Do not use '-p (padding)' option. It breaks 'ccardxmx28js' flash images [JIRA:DEL-218]
+		# Do not use '-p (padding)' option. It breaks 'ccardimx28js' flash images [JIRA:DEL-218]
 		mkfs.jffs2 -n -e ${peb_it} -d ${IMAGE_ROOTFS} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2
 		sumtool -e ${peb_it} -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2 -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.sum.jffs2
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2

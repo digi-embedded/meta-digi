@@ -1,4 +1,4 @@
-state.imxccxmx53 {
+state.ccardimx28 {
 	control.1 {
 		comment.access 'read write'
 		comment.type ENUMERATED
@@ -71,34 +71,34 @@ state.imxccxmx53 {
 		name 'ADC Mux'
 		value MIC_IN
 	}
-	control.8 {
-		comment.access 'read write'
-		comment.type ENUMERATED
-		comment.count 1
-		comment.item.0 off
-		comment.item.1 on
-		iface MIXER
-		name 'Jack Function'
-		value on
-	}
-	control.9 {
-		comment.access 'read write'
-		comment.type ENUMERATED
-		comment.count 1
-		comment.item.0 off
-		comment.item.1 on
-		iface MIXER
-		name 'Speaker Function'
-		value on
-	}
-	control.10 {
-		comment.access 'read write'
-		comment.type ENUMERATED
-		comment.count 1
-		comment.item.0 off
-		comment.item.1 on
-		iface MIXER
-		name 'Line In Function'
-		value off
-	}
+#	control.8 {
+#		comment.access 'read write'
+#		comment.type ENUMERATED
+#		comment.count 1
+#		comment.item.0 off
+#		comment.item.1 on
+#		iface MIXER
+#		name 'Jack Function'
+#		value on
+#	}
+#	control.9 {
+#		comment.access 'read write'
+#		comment.type ENUMERATED
+#		comment.count 1
+#		comment.item.0 off
+#		comment.item.1 on
+#		iface MIXER
+#		name 'Speaker Function'
+#		value on
+#	}
+#	control.10 {
+#		comment.access 'read write'
+#		comment.type ENUMERATED
+#		comment.count 1
+#		comment.item.0 off
+#		comment.item.1 on
+#		iface MIXER
+#		name 'Line In Function'
+#		value on
+#	}
 }

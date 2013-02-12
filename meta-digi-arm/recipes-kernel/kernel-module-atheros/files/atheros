@@ -61,7 +61,7 @@ rm -f ${RAM_DRIVE}/${MAC_FILENAME}
 # appropriate calibration file is loaded.
 #
 US_CODE="0x0"
-REGION_CODE="$(cat /sys/kernel/ccardxmx28/mod_cert)"
+REGION_CODE="$(cat /sys/kernel/ccardimx28/mod_cert)"
 if [ -z "${REGION_CODE}" -o "${US_CODE}" = "${REGION_CODE}" ]; then
 	BDATA_SOURCE=Digi_6203-6233-US.bin
 else

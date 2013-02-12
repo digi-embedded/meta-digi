@@ -1,4 +1,4 @@
-state.ccardxmx28 {
+state.ccardimx28 {
 	control.1 {
 		comment.access 'read write'
 		comment.type ENUMERATED
@@ -18,8 +18,8 @@ state.ccardxmx28 {
 		comment.range '0 - 15'
 		iface MIXER
 		name 'Capture Volume'
-		value.0 15
-		value.1 15
+		value.0 11
+		value.1 11
 	}
 	control.3 {
 		comment.access 'read write'
@@ -38,8 +38,8 @@ state.ccardxmx28 {
 		comment.range '0 - 192'
 		iface MIXER
 		name 'Playback Volume'
-		value.0 132
-		value.1 132
+		value.0 192
+		value.1 192
 	}
 	control.5 {
 		comment.access 'read write'
@@ -48,8 +48,8 @@ state.ccardxmx28 {
 		comment.range '0 - 127'
 		iface MIXER
 		name 'Headphone Volume'
-		value.0 103
-		value.1 103
+		value.0 76
+		value.1 70
 	}
 	control.6 {
 		comment.access 'read write'
@@ -59,7 +59,7 @@ state.ccardxmx28 {
 		comment.item.1 LINE_IN
 		iface MIXER
 		name 'DAC Mux'
-		value DAC
+		value LINE_IN
 	}
 	control.7 {
 		comment.access 'read write'
@@ -69,7 +69,7 @@ state.ccardxmx28 {
 		comment.item.1 LINE_IN
 		iface MIXER
 		name 'ADC Mux'
-		value MIC_IN
+		value LINE_IN
 	}
 #	control.8 {
 #		comment.access 'read write'

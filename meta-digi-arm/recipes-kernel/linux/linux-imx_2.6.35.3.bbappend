@@ -13,9 +13,9 @@ SRC_URI = "${DIGI_LOG_GIT}linux-2.6.git \
            file://defconfig \
 "
 
-# Override 'ccardxmx28js' SRC_URI so the 'SRC_URI_append_mxs' patches
+# Override 'ccardimx28js' SRC_URI so the 'SRC_URI_append_mxs' patches
 # from FSL layer are *not* applied
-SRC_URI_ccardxmx28js_mxs = "${DIGI_LOG_GIT}linux-2.6.git \
+SRC_URI_ccardimx28js_mxs = "${DIGI_LOG_GIT}linux-2.6.git \
            file://defconfig \
 "
 FILES_kernel-image += "/boot/config*"

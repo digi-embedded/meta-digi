@@ -10,7 +10,7 @@
 #  under the terms of the GNU General Public License version 2 as published by
 #  the Free Software Foundation.
 #
-#  !Description: calibrate CCXMX5X accelerometer
+#  !Description: calibrate CCIMX5X accelerometer
 #
 #  The calibration details for this particular accelerometer (MMA7455L) are in
 #  Freescale's Application Note AN3745.
@@ -26,8 +26,8 @@ while read _pl _name _i2c _invertXY; do
 	eval "${_pl}_i2c=\"${_i2c}\""
 	eval "${_pl}_invertXY=\"${_invertXY}\""
 done<<-_EOF_
-        ccxmx51         mma7455l        1-001d  y
-        ccxmx53         mma7455l        2-001d
+        ccimx51         mma7455l        1-001d  y
+        ccimx53         mma7455l        2-001d
 _EOF_
 
 eval SYSFS_I2C_PATH="/sys/bus/i2c/drivers/\${${DEL_PLATFORM}_name}/\${${DEL_PLATFORM}_i2c}"

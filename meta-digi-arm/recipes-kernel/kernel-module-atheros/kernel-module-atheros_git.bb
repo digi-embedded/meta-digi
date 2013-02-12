@@ -58,4 +58,4 @@ FILES_${PN} += " /lib/firmware/ath6k/AR6003/hw2.1.1/athtcmd_ram.bin \
 		/lib/firmware/ath6k/AR6003/hw2.1.1/Digi_6203-6233-US.bin \
 		/lib/firmware/ath6k/AR6003/hw2.1.1/Digi_6203-6233-World.bin "
 
-COMPATIBLE_MACHINE = "(ccardxmx28js)"
+COMPATIBLE_MACHINE = "(ccardimx28js)"

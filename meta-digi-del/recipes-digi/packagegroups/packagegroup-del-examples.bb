@@ -18,14 +18,14 @@ RDEPENDS_${PN} = "\
 	del-examples-watchdog \
 "
 
-RDEPENDS_${PN}_append_ccardxmx28js = "\
+RDEPENDS_${PN}_append_ccardimx28js = "\
 	del-examples-bt \
 	del-examples-btconfig \
 	del-examples-can \
 	del-examples-hdp \
 "
 
-RDEPENDS_${PN}_append_ccxmx51js = "\
+RDEPENDS_${PN}_append_ccimx51js = "\
 	del-examples-accelerometer \
 	del-examples-battery \
 	del-examples-opengles \
@@ -33,7 +33,7 @@ RDEPENDS_${PN}_append_ccxmx51js = "\
 	del-examples-v4l2 \
 "
 
-RDEPENDS_${PN}_append_ccxmx53js = "\
+RDEPENDS_${PN}_append_ccimx53js = "\
 	del-examples-accelerometer \
 	del-examples-can \
 	del-examples-opengles \

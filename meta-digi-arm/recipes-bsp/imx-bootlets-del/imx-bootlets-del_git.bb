@@ -32,4 +32,4 @@ do_install () {
 FILES_${PN} = "/boot"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccardxmx28js)"
+COMPATIBLE_MACHINE = "(ccardimx28js)"

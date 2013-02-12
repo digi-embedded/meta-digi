@@ -22,8 +22,8 @@ while read _pl _name _i2c; do
 	eval "${_pl}_name=\"${_name}\""
 	eval "${_pl}_i2c=\"${_i2c}\""
 done<<-_EOF_
-        ccxmx51         mma7455l        1-001d
-        ccxmx53         mma7455l        2-001d
+        ccimx51         mma7455l        1-001d
+        ccimx53         mma7455l        2-001d
 _EOF_
 
 eval SYSFS_I2C_PATH="/sys/bus/i2c/drivers/\${${DEL_PLATFORM}_name}/\${${DEL_PLATFORM}_i2c}"

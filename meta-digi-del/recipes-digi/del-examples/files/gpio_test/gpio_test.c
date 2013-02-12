@@ -28,9 +28,9 @@
 #define MX28_GPIO(port,pin)	(port * 32 + pin)
 
 typedef enum {
-	CCARDXMX28JS = 0,
-	CCXMX51JS,
-	CCXMX53JS,
+	CCARDIMX28JS = 0,
+	CCIMX51JS,
+	CCIMX53JS,
 	PLAT_NONE
 } platform_e;
 
@@ -51,9 +51,9 @@ static struct {
 	int pullup_in;
 	char pullup_descr[15];
 } plat_list[PLAT_NONE + 1] = {
-        MK(CCARDXMX28JS, "ccardxmx28", "BUTTON2", "LED2", MX28_GPIO(2,9), MX28_GPIO(3,4),  1, GPIO_UNDEFINED, ""),
-	MK(CCXMX51JS,    "ccxmx51",    "BUTTON2", "LED2", 1 /*GPIO1_1*/,  73 /*GPIO3_9*/,  1, GPIO_UNDEFINED, ""),
-        MK(CCXMX53JS,    "ccxmx53",    "BUTTON2", "LED2", MX5X_GPIO(4,1), MX5X_GPIO(7,12), 1, GPIO_UNDEFINED, ""),
+        MK(CCARDIMX28JS, "ccardimx28", "BUTTON2", "LED2", MX28_GPIO(2,9), MX28_GPIO(3,4),  1, GPIO_UNDEFINED, ""),
+	MK(CCIMX51JS,    "ccimx51",    "BUTTON2", "LED2", 1 /*GPIO1_1*/,  73 /*GPIO3_9*/,  1, GPIO_UNDEFINED, ""),
+        MK(CCIMX53JS,    "ccimx53",    "BUTTON2", "LED2", MX5X_GPIO(4,1), MX5X_GPIO(7,12), 1, GPIO_UNDEFINED, ""),
 	MK(PLAT_NONE,    "",            "",        "",    0,              0,               0, GPIO_UNDEFINED, "")  /* always last */
 };
 #undef MK

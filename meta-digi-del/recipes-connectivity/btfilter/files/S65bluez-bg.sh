@@ -24,7 +24,7 @@ ccardwmx28js_bt_init() {
 	# Exit if this hardware does not support Bluetooth
 	#
 	BLUE_TOOTH_VARIANTS="0x02 0x03 0x04"
-	MOD_VARIANT="$(cat /sys/kernel/ccardxmx28/mod_variant)"
+	MOD_VARIANT="$(cat /sys/kernel/ccardimx28/mod_variant)"
 	if ! echo ${BLUE_TOOTH_VARIANTS} | grep -qs ${MOD_VARIANT}; then
 		[ -z "${quietboot}" ] && echo "${SCRIPTNAME}: FAILED (variant ${MOD_VARIANT} does not support bluetooth)"
 		exit
@@ -93,7 +93,7 @@ ccardwmx28js_bt_init() {
 
 # Initialize driver for 'ccardwmx28js'
 read -r platform < /sys/kernel/machine/name
-[ "${platform}" = "ccardxmx28" ] && ccardwmx28js_bt_init
+[ "${platform}" = "ccardimx28" ] && ccardwmx28js_bt_init
 
 # Run bluetooth daemon
 if hciconfig hci0 up && bluetoothd; then

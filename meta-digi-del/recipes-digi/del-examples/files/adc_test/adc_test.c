@@ -19,10 +19,10 @@
 #include <string.h>
 #include <unistd.h>
 
-#if defined(CCXMX51JS) || defined(CCXMX53JS)
+#if defined(CCIMX51JS) || defined(CCIMX53JS)
 #include <linux/pmic_adc.h>
 #include <sys/ioctl.h>
-#elif defined(CCARDXMX28JS)
+#elif defined(CCARDIMX28JS)
 #include <linux/mxs-lradc.h>
 #include <sys/ioctl.h>
 #endif
@@ -30,16 +30,16 @@
 #define	PROGRAM			"adc_test"
 #define VERSION			"2.0"
 
-#if defined(CCXMX53JS)
+#if defined(CCIMX53JS)
 # define ADC_MAX_CHANNELS	10
-#elif defined(CCXMX51JS)
+#elif defined(CCIMX51JS)
 # define ADC_MAX_CHANNELS	8
 #endif
 
-#if defined(CCXMX51JS) || defined(CCXMX53JS)
+#if defined(CCIMX51JS) || defined(CCIMX53JS)
 # define ADC_CONVERT_IOCTL	PMIC_ADC_CONVERT
 # define ADC_CHARDEV		"/dev/pmic_adc"
-#elif defined(CCARDXMX28JS)
+#elif defined(CCARDIMX28JS)
 # define ADC_MAX_CHANNELS	7
 # define ADC_CONVERT_IOCTL	LRADC_CONVERT
 # define ADC_CHARDEV		"/dev/mxs_lradc"
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 		{0, 0, 0, 0},
 	};
 
-#if defined(CCXMX51JS) || defined(CCXMX53JS) || defined(CCARDXMX28JS)
+#if defined(CCIMX51JS) || defined(CCIMX53JS) || defined(CCARDIMX28JS)
     t_adc_convert_param adc_convert_param;
 #else
     unsigned short int adcval;
@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
 		char *end;
 		int chnr = strtol(var, &end, 10);
 		if ((chnr >= 0) && (chnr < ADC_MAX_CHANNELS) && (var != end)) {
-#if defined(CCXMX51JS) || defined(CCXMX53JS) || defined(CCARDXMX28JS)
+#if defined(CCIMX51JS) || defined(CCIMX53JS) || defined(CCARDIMX28JS)
 			sprintf(device_name, ADC_CHARDEV);
 #else
 			snprintf(device_name, 30, "%s%d", ADC_CHARDEV, chnr);
@@ -276,10 +276,10 @@ int main(int argc, char *argv[])
 		k = j % ADC_MAX_SAMPLE_BUFFER;
 		for (i = 0; i < ADC_MAX_CHANNELS; i++) {
 			if (channel[i].fd >= 0) {
-#if defined(CCXMX51JS) || defined(CCXMX53JS) || defined(CCARDXMX28JS)
+#if defined(CCIMX51JS) || defined(CCIMX53JS) || defined(CCARDIMX28JS)
 				memset(&adc_convert_param,0,sizeof(adc_convert_param));
 				adc_convert_param.channel = channel[i].channel;
-#if defined(CCXMX51JS)
+#if defined(CCIMX51JS)
 				/* The PMIC ADC driver maps GEN_PURPOSE_AD5,GEN_PURPOSE_AD6 and
 				* GEN_PURPOSE_AD7 to channels 10,11,12*/
 				if( adc_convert_param.channel > 4 )
