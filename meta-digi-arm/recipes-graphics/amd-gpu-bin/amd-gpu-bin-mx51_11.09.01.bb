@@ -10,9 +10,7 @@ PR = "r11"
 #todo: Replace for correct AMD license
 LIC_FILES_CHKSUM = "file://usr/include/VG/openvg.h;endline=30;md5=b0109611dd76961057d4c45ae6519802"
 
-DEPENDS = "libz160"
 PROVIDES = "virtual/egl virtual/libgles1 virtual/libgles2"
-RDEPENDS = "libz160"
 
 SRC_URI = "${DIGI_LOG_MIRROR}/amd-gpu-bin-mx51-${PV}.tar.gz"
 SRC_URI[md5sum] = "15ede91135590fc12cc29a2bba46c12c"
