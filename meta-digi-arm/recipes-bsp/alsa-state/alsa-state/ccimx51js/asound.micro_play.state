@@ -1,4 +1,4 @@
-state.ccwmx51js {
+state.ccimx51js {
 	control.1 {
 		comment.access 'read write'
 		comment.type INTEGER
