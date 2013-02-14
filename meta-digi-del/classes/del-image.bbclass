@@ -31,4 +31,25 @@ del_rootfs_tuning() {
 			mv ${IMAGE_ROOTFS}/etc/passwd.new ${IMAGE_ROOTFS}/etc/passwd
 		fi
 	fi
+	#######################################################################
+	## WARNING:
+	## enable passwordless 'root' autologin in serial console and telnetd
+	## for testing purposes (when IMAGE_FEATURES contains 'del-test')
+	#######################################################################
+	if echo "${IMAGE_FEATURES}" | grep -qs del-test; then
+		if [ -f "${IMAGE_ROOTFS}/etc/inittab" ]; then
+			cat >${IMAGE_ROOTFS}/sbin/rootlogin <<-_EOF_
+				#!/bin/sh
+				exec /bin/login -f root
+			_EOF_
+			chmod u+x ${IMAGE_ROOTFS}/sbin/rootlogin
+			sed -i -e '
+				/^S.*getty/{
+					i\## WARNING: passwordless 'root' autologin enabled
+					a\~~::sysinit:/usr/sbin/telnetd -l /sbin/rootlogin
+					s,getty,getty -n -l /sbin/rootlogin,g
+				}' ${IMAGE_ROOTFS}/etc/inittab
+			rm -f ${IMAGE_ROOTFS}/etc/securetty
+		fi
+	fi
 }
