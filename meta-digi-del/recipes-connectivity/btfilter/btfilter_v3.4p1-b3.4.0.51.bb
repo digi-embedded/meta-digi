@@ -17,16 +17,16 @@ S = "${WORKDIR}/${PN}-${PV}"
 EXTRA_OEMAKE += "V210_DIR=${STAGING_DIR_TARGET}"
 CFLAGS_prepend = "-I ${STAGING_DIR_TARGET}/usr/include -DCONFIG_LIBNL20 -DCONFIG_NO_HCILIBS"
 
-SRC_URI[md5sum] = "5218950e9351a05ff98246de5b0a9139"
-SRC_URI[sha256sum] = "2fa79c8c29f11ecae9303e93cbba8df6ee344df987672794e2939b72c171f5e8"
+SRC_URI[md5sum] = "149b025f7a43f1f3abfa12462c48559a"
+SRC_URI[sha256sum] = "bbb358ce25ec36b32f99e66036ff52f375f3c1272b1425fafbef2c240a55d1a4"
 
 do_install() {
         install -d ${D}/${bindir}
         install -m 0755 ${S}/abtfilt ${D}${bindir}/abtfilt
-	install -d ${D}${sysconfdir}/rcS.d
-        install -m 0755 ${WORKDIR}/S65bluez-bg.sh ${D}${sysconfdir}/rcS.d/
+	install -d ${D}${sysconfdir}/rc5.d
+        install -m 0755 ${WORKDIR}/S65bluez-bg.sh ${D}${sysconfdir}/rc5.d/
 }
 
 FILES_${PN} = "${bindir}/abtfilt"
-FILES_${PN} += "${sysconfdir}/rcS.d/S65bluez-bg.sh"
-CONFFILES_${PN} += "${sysconfdir}/rcS.d/S65bluez-bg.sh"
+FILES_${PN} += "${sysconfdir}/rc5.d/S65bluez-bg.sh"
+CONFFILES_${PN} += "${sysconfdir}/rc5.d/S65bluez-bg.sh"
