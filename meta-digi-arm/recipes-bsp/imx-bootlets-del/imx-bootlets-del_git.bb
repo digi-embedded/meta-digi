@@ -14,7 +14,7 @@ S = "${WORKDIR}/git"
 # Disable parallel building or it may fail to build.
 PARALLEL_MAKE = ""
 
-EXTRA_OEMAKE = "BOARD=CCARDWMX28JS CROSS_COMPILE=${TARGET_PREFIX}"
+EXTRA_OEMAKE = "BOARD=CCARDIMX28JS CROSS_COMPILE=${TARGET_PREFIX}"
 
 do_install () {
     install -d ${STAGING_DIR_TARGET}/boot/
