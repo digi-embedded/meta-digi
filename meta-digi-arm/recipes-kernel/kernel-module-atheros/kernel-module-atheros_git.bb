@@ -7,7 +7,7 @@ inherit module
 PR = "r0"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-SRCREV = "del-5.9.3.1"
+SRCREV = "master"
 SRC_URI = "${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git \
 	   file://atheros \
 	  "
@@ -41,18 +41,18 @@ do_install_append() {
         install -d ${D}${sysconfdir}/network/if-pre-up.d
 	install -m 0755 ${WORKDIR}/atheros  ${D}${sysconfdir}/network/if-pre-up.d/
 	install -d ${D}/lib/firmware/ath6k/AR6003/hw2.1.1
-	install -m 0755 ${FIRMWARE_S}/athtcmd_ram.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
-	install -m 0755 ${FIRMWARE_S}/athwlan.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
-	install -m 0755 ${FIRMWARE_S}/fw-3.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
-	install -m 0755 ${FIRMWARE_S}/nullTestFlow.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
-	install -m 0755 ${FIRMWARE_S}/utf.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
+	install -m 0755 ${FIRMWARE_S}/ath6kl_fw_concurrency/athtcmd_ram.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
+	install -m 0755 ${FIRMWARE_S}/ath6kl_fw_concurrency/athwlan.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
+	install -m 0755 ${FIRMWARE_S}/ath6kl_fw_concurrency/fw-4.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
+	install -m 0755 ${FIRMWARE_S}/ath6kl_fw_concurrency/nullTestFlow.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
+	install -m 0755 ${FIRMWARE_S}/ath6kl_fw_concurrency/utf.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
 	install -m 0755 ${FIRMWARE_S}/Digi_6203-6233-US.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
 	install -m 0755 ${FIRMWARE_S}/Digi_6203-6233-World.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
 }
 
 FILES_${PN} += " /lib/firmware/ath6k/AR6003/hw2.1.1/athtcmd_ram.bin \
 		/lib/firmware/ath6k/AR6003/hw2.1.1/athwlan.bin \
-		/lib/firmware/ath6k/AR6003/hw2.1.1/fw-3.bin \
+		/lib/firmware/ath6k/AR6003/hw2.1.1/fw-4.bin \
 		/lib/firmware/ath6k/AR6003/hw2.1.1/nullTestFlow.bin \
 		/lib/firmware/ath6k/AR6003/hw2.1.1/utf.bin \
 		/lib/firmware/ath6k/AR6003/hw2.1.1/Digi_6203-6233-US.bin \
