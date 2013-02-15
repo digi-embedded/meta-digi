@@ -6,9 +6,8 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/GPL-2.0;md5=80
 
 PR = "r0"
 
-
-SRCREV="master"
-SRC_URI = "${DIGI_MTK_GIT}del/imx-bootlets.git;"
+SRCREV="${AUTOREV}"
+SRC_URI = "${DIGI_MTK_GIT}del/imx-bootlets.git;branch=refs/heads/master;protocol=git"
 S = "${WORKDIR}/git"
 
 # Disable parallel building or it may fail to build.

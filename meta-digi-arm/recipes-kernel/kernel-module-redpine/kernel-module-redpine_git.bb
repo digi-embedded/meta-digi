@@ -7,8 +7,8 @@ inherit module
 PR = "r0"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-SRCREV = "master"
-SRC_URI = "${DIGI_LOG_GIT}linux-modules/redpine.git;protocol=git \
+SRCREV = "${AUTOREV}"
+SRC_URI = "${DIGI_LOG_GIT}linux-modules/redpine.git;protocol=git;branch=refs/heads/master \
 	  file://0001-redpine-allow-to-build-with-gcc-4.7.patch \
 	  file://redpine"
 

@@ -7,8 +7,8 @@ inherit module
 PR = "r0"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-SRCREV = "master"
-SRC_URI = "${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git \
+SRCREV = "${AUTOREV}"
+SRC_URI = "${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git;branch=refs/heads/master \
 	   file://atheros \
 	  "
 
