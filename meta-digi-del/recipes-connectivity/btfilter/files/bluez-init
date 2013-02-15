@@ -1,9 +1,9 @@
 #!/bin/sh
 #===============================================================================
 #
-#  S65bluez-bg.sh
+#  bluez
 #
-#  Copyright (C) 2012 by Digi International Inc.
+#  Copyright (C) 2012-2013 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -17,7 +17,11 @@
 
 set -e
 
-SCRIPTNAME="S65bluez-bg.sh"
+if [ "${1}" != "start" ]; then
+	exit 0
+fi
+
+SCRIPTNAME="${0}"
 
 ccardwmx28js_bt_init() {
 	#
@@ -26,16 +30,15 @@ ccardwmx28js_bt_init() {
 	BLUE_TOOTH_VARIANTS="0x02 0x03 0x04"
 	MOD_VARIANT="$(cat /sys/kernel/ccardimx28/mod_variant)"
 	if ! echo ${BLUE_TOOTH_VARIANTS} | grep -qs ${MOD_VARIANT}; then
-		[ -z "${quietboot}" ] && echo "${SCRIPTNAME}: FAILED (variant ${MOD_VARIANT} does not support bluetooth)"
+		echo "${SCRIPTNAME}: FAILED (variant ${MOD_VARIANT} does not support bluetooth)"
 		exit
 	fi
 
 	#
-	# Get the Bluetooth MAC address from NVRAM.  Use a default
-	# value if the address has not been set.
+	# Get the Bluetooth MAC address from NVRAM. Use a default value if the
+	# address has not been set.
 	#
-	
-	BTADDR=`cat /proc/cmdline | sed 's/\s/\n/g' | awk '/btaddr1/ {print}' | sed 's/btaddr1=//g'`
+	BTADDR="$(sed -e 's,^.*btaddr1=\([^[:blank:]]\+\),\1,g' /proc/cmdline)"
 	if [ -z "${BTADDR}" -o "${BTADDR}" = "00:00:00:00:00:00" ]; then
 		BTADDR="00:04:F3:FF:FF:BB"
 	fi
@@ -60,45 +63,40 @@ ccardwmx28js_bt_init() {
 	HCIATTACH_OPTIONS_115K="${BT_DEVICE} ${BT_DRIVER} 115200"
 	TRIES="1"
 	MAX_TRIES="11111"
-	while !	hciattach ${HCIATTACH_OPTIONS} 1>/dev/null && [	"${TRIES}" != "${MAX_TRIES}" ] ;
-	do
+	while ! hciattach ${HCIATTACH_OPTIONS} 1>/dev/null && [ "${TRIES}" != "${MAX_TRIES}" ]; do
 		echo "${SCRIPTNAME}: (hciattach), retrying..."
 		#
-		# If hciattach at 4Kbps doesn't work, then try it at 115K bps
+		# If hciattach at 4Mbps doesn't work, then try it at 115Kbps
 		# just to get the chip working.
 		#
-		if hciattach ${HCIATTACH_OPTIONS_115K} 1>/dev/null ; then
+		if hciattach ${HCIATTACH_OPTIONS_115K} 1>/dev/null; then
 			#
-			# It worked	at 115Kbps.	 The chip should be	recovered now.
-			# Kill the daemon so we	can	retry at 4Mbps.
+			# It worked at 115Kbps. The chip should be recovered now.
+			# Kill the daemon so we can retry at 4Mbps.
 			#
-			kill -s	9 `pidof hciattach`
+			kill -9 $(pidof hciattach)
 		fi
 		TRIES="${TRIES}1"
 	done
-	if [ "${TRIES}"	== "${MAX_TRIES}" ]	; then
-	[ -z "${quietboot}" ] && echo "${SCRIPTNAME}: FAILED (hciattach)"
-	exit
+	if [ "${TRIES}" = "${MAX_TRIES}" ]; then
+		echo "${SCRIPTNAME}: FAILED (hciattach)"
+		exit
 	fi
-	BT_FILTER_ARGS="-d -x -s -w wlan0"
+	BT_FILTER_ARGS="-b -x -s -w wlan0"
 	if ! abtfilt ${BT_FILTER_ARGS} 1>/dev/null; then
-		[ -z "${quietboot}" ] && echo "${SCRIPTNAME}: FAILED (abtfilt)"
+		echo "${SCRIPTNAME}: FAILED (abtfilt)"
 		exit
 	fi
 }
 
-
-
-[ -z "${quietboot}" ] && echo "Starting bluetooth services."
+echo "Starting bluetooth services."
 
 # Initialize driver for 'ccardwmx28js'
-read -r platform < /sys/kernel/machine/name
-[ "${platform}" = "ccardimx28" ] && ccardwmx28js_bt_init
+[ "$(cat /sys/kernel/machine/name)" = "ccardimx28" ] && ccardwmx28js_bt_init
 
 # Run bluetooth daemon
 if hciconfig hci0 up && bluetoothd; then
 	:	# No-op
 else
-	[ -z "${quietboot}" ] && echo "${SCRIPTNAME}: FAILED"
+	echo "${SCRIPTNAME}: FAILED"
 fi
-
