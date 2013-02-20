@@ -24,4 +24,4 @@ IMAGE_FSTYPES ?= "sum.jffs2 tar.bz2 ubifs"
 
 KERNEL_IMAGETYPE = "uImage"
 
-MACHINE_FEATURES = "apm usbgadget usbhost vfat alsa touchscreen bluetooth wifi"
+MACHINE_FEATURES = "apm usbgadget usbhost vfat bluetooth wifi"
