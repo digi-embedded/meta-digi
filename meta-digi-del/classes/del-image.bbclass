@@ -2,13 +2,15 @@
 #
 # Copyright (C) 2012 Digi International.
 
+# DEL image features (alphabetical order)
 PACKAGE_GROUP_del-audio = "packagegroup-del-audio"
+PACKAGE_GROUP_del-bluetooth = "packagegroup-del-bluetooth"
+PACKAGE_GROUP_del-debug = "packagegroup-del-debug"
+PACKAGE_GROUP_del-examples = "packagegroup-del-examples"
 PACKAGE_GROUP_del-gstreamer = "packagegroup-del-gstreamer"
 PACKAGE_GROUP_del-network = "packagegroup-del-network"
-PACKAGE_GROUP_del-wireless = "packagegroup-del-wireless"
-PACKAGE_GROUP_del-debug = "packagegroup-del-debug"
-PACKAGE_GROUP_del-bluetooth = "packagegroup-del-bluetooth"
 PACKAGE_GROUP_del-qt = "packagegroup-del-qt"
+PACKAGE_GROUP_del-wireless = "packagegroup-del-wireless"
 
 ## DEL rootfs final tuning
 del_rootfs_tuning() {
