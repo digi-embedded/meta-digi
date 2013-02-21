@@ -17,6 +17,7 @@ SRC_URI = "${DIGI_LOG_GIT}linux-2.6.git;protocol=git;branch=refs/heads/master \
 SRCREV_mxs = "${AUTOREV}"
 LOCALVERSION_mxs = "mxs+master"
 KERNEL_CFG_FRAGS_ccardimx28js_mxs = "${@base_contains('DISTRO_FEATURES', 'x11', 'file://config-fb.cfg file://config-touch.cfg', '', d)}"
+KERNEL_CFG_FRAGS_ccardimx28js_mxs += "${@base_contains('MACHINE_FEATURES', 'alsa', 'file://config-sound.cfg', '', d)}"
 SRC_URI_ccardimx28js_mxs = "${DIGI_LOG_GIT}linux-2.6.git;protocol=git;branch=refs/heads/master \
            file://defconfig \
 	   ${KERNEL_CFG_FRAGS} \
