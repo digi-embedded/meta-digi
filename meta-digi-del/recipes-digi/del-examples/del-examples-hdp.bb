@@ -14,6 +14,6 @@ do_install() {
 	install -m 0755 hdp-test.py ${D}${bindir}
 }
 
-RDEPENDS_${PN} = "python"
+RDEPENDS_${PN} = "python python-argparse python-crypt python-dbus python-pygobject"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
