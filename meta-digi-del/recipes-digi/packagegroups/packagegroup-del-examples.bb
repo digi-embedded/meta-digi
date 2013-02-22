@@ -9,36 +9,35 @@ inherit packagegroup
 
 RDEPENDS_${PN} = "\
 	del-examples-adc \
-	del-examples-alsa \
+	${@base_contains("MACHINE_FEATURES", "alsa", "del-examples-alsa", "", d)} \
 	del-examples-gpio \
 	del-examples-gpio-sysfs \
-	del-examples-rtc \
+	${@base_contains("MACHINE_FEATURES", "rtc", "del-examples-rtc", "", d)} \
 	del-examples-spidev \
-	del-examples-vplay \
+	${@base_contains("MACHINE_FEATURES", "alsa", "del-examples-vplay", "", d)} \
 	del-examples-watchdog \
 "
 
-RDEPENDS_${PN}_append_ccardimx28js = "\
-	del-examples-bt \
-	del-examples-btconfig \
+RDEPENDS_${PN}_append_mxs = "\
+	${@base_contains("MACHINE_FEATURES", "bluetooth", "del-examples-bt", "", d)} \
+	${@base_contains("MACHINE_FEATURES", "bluetooth", "del-examples-btconfig", "", d)} \
 	del-examples-can \
-	del-examples-hdp \
+	${@base_contains("MACHINE_FEATURES", "bluetooth", "del-examples-hdp", "", d)} \
 "
 
-RDEPENDS_${PN}_append_ccimx51js = "\
+RDEPENDS_${PN}_append_mx5 = "\
 	del-examples-accelerometer \
+	${@base_contains("MACHINE_FEATURES", "accel-graphics", "del-examples-opengles", "", d)} \
+	del-examples-sahara \
+	del-examples-v4l2 \
+"
+
+RDEPENDS_${PN}_append_ccimx51js_mx5 = "\
 	del-examples-battery \
-	del-examples-opengles \
-	del-examples-sahara \
-	del-examples-v4l2 \
 "
 
-RDEPENDS_${PN}_append_ccimx53js = "\
-	del-examples-accelerometer \
+RDEPENDS_${PN}_append_ccimx53js_mx5 = "\
 	del-examples-can \
-	del-examples-opengles \
-	del-examples-sahara \
-	del-examples-v4l2 \
 "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
