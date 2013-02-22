@@ -5,6 +5,8 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 DEPENDS = "imx-lib"
 
+RDEPENDS_${PN} = "kernel-module-scc2-driver kernel-module-sahara"
+
 PR = "r0"
 
 SRC_URI = "file://sahara_test"
