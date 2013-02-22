@@ -9,8 +9,10 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}_${PV}"
 SRCREV_mx5 = "${AUTOREV}"
 LOCALVERSION_mx5 = "mx5+master"
 
+KERNEL_CFG_FRAGS_mx5 = "file://config-accel-module.cfg"
 SRC_URI = "${DIGI_LOG_GIT}linux-2.6.git;protocol=git;branch=refs/heads/master \
            file://defconfig \
+	   ${KERNEL_CFG_FRAGS} \
 "
 # Override 'ccardimx28js' SRC_URI so the 'SRC_URI_append_mxs' patches
 # from FSL layer are *not* applied
