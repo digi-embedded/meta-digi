@@ -5,6 +5,8 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 PR = "r0"
 
+RDEPENDS_${PN} = "kernel-module-mt9v111-camera"
+
 SRC_URI = "file://v4l2_test"
 
 S = "${WORKDIR}/v4l2_test"

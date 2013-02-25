@@ -9,7 +9,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}_${PV}"
 SRCREV_mx5 = "${AUTOREV}"
 LOCALVERSION_mx5 = "mx5+master"
 
-KERNEL_CFG_FRAGS_mx5 = "file://config-accel-module.cfg file://config-sahara-module.cfg"
+KERNEL_CFG_FRAGS_mx5 = "file://config-accel-module.cfg file://config-sahara-module.cfg file://config-camera-module.cfg"
 SRC_URI = "${DIGI_LOG_GIT}linux-2.6.git;protocol=git;branch=refs/heads/master \
            file://defconfig \
 	   ${KERNEL_CFG_FRAGS} \
