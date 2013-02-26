@@ -19,7 +19,7 @@ MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS ?= ""
 # Distro can override the following VIRTUAL-RUNTIME providers:
 VIRTUAL-RUNTIME_ftp-server ?= "vsftpd"
 
-VIRTUAL-RUNTIME_http-server ?= ""
+VIRTUAL-RUNTIME_http-server ?= "busybox-httpd"
 #VIRTUAL-RUNTIME_http-server ?= "cherokee"
 
 # Choose between ethtool or mii-tool

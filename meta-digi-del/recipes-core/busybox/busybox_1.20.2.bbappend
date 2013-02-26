@@ -13,6 +13,8 @@ SRC_URI += "file://0001-del-baudrates.patch \
             file://ts \
             file://suspend \
             file://busybox-ntpd \
+            file://index.html \
+            file://digi.gif \
            "
 
 # Add device handlers to 'mdev' package
@@ -43,6 +45,10 @@ do_install_append() {
 	fi
 	if grep "CONFIG_NTPD=y" ${WORKDIR}/defconfig; then
 		install -m 0755 ${WORKDIR}/busybox-ntpd ${D}${sysconfdir}/init.d/
+	fi
+	if grep "CONFIG_HTTPD=y" ${WORKDIR}/defconfig; then
+		install -m 0644 ${WORKDIR}/index.html ${D}/srv/www/
+		install -m 0644 ${WORKDIR}/digi.gif ${D}/srv/www/
 	fi
 	# Install 'suspend' script
 	install -m 0755 ${WORKDIR}/suspend ${D}${base_bindir}
