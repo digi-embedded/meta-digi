@@ -23,7 +23,7 @@ fi
 
 SCRIPTNAME="${0}"
 
-ccardwmx28js_bt_init() {
+ccardimx28js_bt_init() {
 	#
 	# Exit if this hardware does not support Bluetooth
 	#
@@ -56,29 +56,22 @@ ccardwmx28js_bt_init() {
 	#
 	# Start the Bluetooth driver and daemon (D-BUS must already be running)
 	#
-	BT_DEVICE="/dev/ttyBt"
-	BT_DRIVER="ath3k"
-	BT_BAUD_RATE="4000000"
-	HCIATTACH_OPTIONS="${BT_DEVICE} ${BT_DRIVER} ${BT_BAUD_RATE}"
-	HCIATTACH_OPTIONS_115K="${BT_DEVICE} ${BT_DRIVER} 115200"
-	TRIES="1"
-	MAX_TRIES="11111"
-	while ! hciattach ${HCIATTACH_OPTIONS} 1>/dev/null && [ "${TRIES}" != "${MAX_TRIES}" ]; do
-		echo "${SCRIPTNAME}: (hciattach), retrying..."
+	HCIATTACH_ARGS="ttyBt ath3k 4000000"
+	RETRIES="5"
+	while [ "${RETRIES}" -gt "0" ]; do
+		hciattach ${HCIATTACH_ARGS} 1>/dev/null && break
 		#
-		# If hciattach at 4Mbps doesn't work, then try it at 115Kbps
-		# just to get the chip working.
+		# If hciattach fails try to recover it by toggling the GPIO
 		#
-		if hciattach ${HCIATTACH_OPTIONS_115K} 1>/dev/null; then
-			#
-			# It worked at 115Kbps. The chip should be recovered now.
-			# Kill the daemon so we can retry at 4Mbps.
-			#
-			kill -9 $(pidof hciattach)
-		fi
-		TRIES="${TRIES}1"
+		BT_PWR_L="/sys/class/gpio/gpio21"
+		[ -d "${BT_PWR_L}" ] || echo -n 21 > /sys/class/gpio/export
+		echo -n out > ${BT_PWR_L}/direction && sleep .2
+		echo -n 0 > ${BT_PWR_L}/value && sleep .2
+		echo -n 1 > ${BT_PWR_L}/value && sleep .2
+		[ -d "${BT_PWR_L}" ] && echo -n 21 > /sys/class/gpio/unexport
+		RETRIES="$((RETRIES - 1))"
 	done
-	if [ "${TRIES}" = "${MAX_TRIES}" ]; then
+	if [ "${RETRIES}" -eq "0" ]; then
 		echo "${SCRIPTNAME}: FAILED (hciattach)"
 		exit
 	fi
@@ -91,8 +84,8 @@ ccardwmx28js_bt_init() {
 
 echo "Starting bluetooth services."
 
-# Initialize driver for 'ccardwmx28js'
-[ "$(cat /sys/kernel/machine/name)" = "ccardimx28" ] && ccardwmx28js_bt_init
+# Initialize driver for 'ccardimx28js'
+[ "$(cat /sys/kernel/machine/name)" = "ccardimx28" ] && ccardimx28js_bt_init
 
 # Run bluetooth daemon
 if hciconfig hci0 up && bluetoothd; then
