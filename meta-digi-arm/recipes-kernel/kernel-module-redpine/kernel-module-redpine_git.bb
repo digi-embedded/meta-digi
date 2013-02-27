@@ -20,6 +20,11 @@ do_configure_prepend() {
 	cp ${WORKDIR}/Makefile ${S}/
 }
 
+do_install_append() {
+	install -d ${D}${sysconfdir}/network/if-pre-up.d
+	install -m 0755 ${WORKDIR}/redpine ${D}${sysconfdir}/network/if-pre-up.d/
+}
+
 FILES_${PN} += "/lib/firmware/redpine/tadm \
 		/lib/firmware/redpine/taim \
 		/lib/firmware/redpine/instructionSet"
