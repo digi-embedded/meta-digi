@@ -14,6 +14,8 @@ SRC_URI = "${DIGI_LOG_GIT}linux-modules/redpine.git;protocol=git;branch=refs/hea
 
 S = "${WORKDIR}/git"
 
+EXTRA_OEMAKE = "DEL_PLATFORM=${MACHINE}"
+
 do_configure_prepend() {
 	cp ${WORKDIR}/Makefile ${S}/
 }
@@ -22,4 +24,14 @@ FILES_${PN} += "/lib/firmware/redpine/tadm \
 		/lib/firmware/redpine/taim \
 		/lib/firmware/redpine/instructionSet"
 
+# Create objects tarball and copy to deploy directory
+do_deploy() {
+	oe_runmake tarball
+	install -d ${DEPLOY_DIR_IMAGE}
+	cp ${S}/redpine-${MACHINE}.tar.gz ${DEPLOY_DIR_IMAGE}/
+}
+
+addtask deploy before do_build after do_install
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx51js|ccimx53js)"
