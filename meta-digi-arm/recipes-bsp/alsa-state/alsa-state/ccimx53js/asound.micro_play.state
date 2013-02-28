@@ -1,4 +1,4 @@
-state.imxccximx53 {
+state.imx-ccximx53 {
 	control.1 {
 		comment.access 'read write'
 		comment.type ENUMERATED
