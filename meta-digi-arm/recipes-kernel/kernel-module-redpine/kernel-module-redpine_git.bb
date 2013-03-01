@@ -8,7 +8,6 @@ PR = "r0"
 
 SRCREV = "${AUTOREV}"
 SRC_URI = "${DIGI_LOG_GIT}linux-modules/redpine.git;protocol=git;branch=refs/heads/master \
-	  file://0001-redpine-allow-to-build-with-gcc-4.7.patch \
 	  file://Makefile \
 	  file://redpine"
 
