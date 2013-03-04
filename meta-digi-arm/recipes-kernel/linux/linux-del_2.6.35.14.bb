@@ -25,8 +25,8 @@ SRC_URI_ccardimx28js_mxs = "${DIGI_LOG_GIT}linux-2.6.git;protocol=git;branch=ref
            file://defconfig \
 	   ${KERNEL_CFG_FRAGS} \
 "
-SRCREV_mxs = "${AUTOREV}"
-LOCALVERSION_cpx2 = "mxs+gateways_master"
+SRCREV_cpx2_mxs = "${AUTOREV}"
+LOCALVERSION_cpx2_mxs = "mxs+gateways_master"
 SRC_URI_cpx2_mxs = "${DIGI_LOG_GIT}linux-2.6.git;protocol=git;branch=refs/heads/gateways/master \
            file://defconfig \
 "
