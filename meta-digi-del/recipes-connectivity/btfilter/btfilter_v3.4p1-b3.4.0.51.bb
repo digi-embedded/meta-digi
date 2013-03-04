@@ -7,7 +7,7 @@ DEPENDS = "bluez4 dbus libnl"
 
 PR = "r0"
 
-SRC_URI = "${DIGI_MIRROR}${PN}-${PV}.tar.bz2 \
+SRC_URI = "${DIGI_MIRROR}/${PN}-${PV}.tar.bz2 \
 	   file://0001-enable-libnl3.patch \
 	   file://0002-cross-compile.patch \
 	   file://bluez-init"
