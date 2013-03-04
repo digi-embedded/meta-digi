@@ -1,0 +1,151 @@
+#!/bin/sh
+#===============================================================================
+#
+#  bluez
+#
+#  Copyright (C) 2013 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Configure Bluetooth
+#
+#===============================================================================
+
+set -e
+
+BLUETOOTHDAEMON="/usr/sbin/bluetoothd"
+HCIATTACH="/usr/sbin/hciattach"
+HCICONFIG="/usr/sbin/hciconfig"
+ABTFILT="/usr/sbin/abtfilt"
+DBUSPIDFILE="/var/run/dbus-daemon.pid"
+
+BT_DEVICE="/dev/ttyBt"
+
+BLUETOOTHDAEMONPIDFILE="/var/run/bluetootd.pid"
+HCIATTACHPIDFILE="/var/run/hciattach.pid"
+
+[ -x "${BLUETOOTHDAEMON}" ] || exit 0
+[ -x "${HCIATTACH}" ] || exit 0
+[ -x "${HCICONFIG}" ] || exit 0
+[ -x "${ABTFILT}" ] || exit 0
+[ -e "${DBUSPIDFILE}" ] || exit 0
+[ -e "${BT_DEVICE}" ] || exit 0
+[ -e /var/run/product_info/bt ] || exit 0
+
+
+SCRIPTNAME="bluez"
+
+start_hciattach() {
+	if ! [ -f "${HCIATTACHPIDFILE}" ]; then
+		[ -z "${quietboot}" ] && echo -n "Starting hciattach: "
+		#
+		# Get the Bluetooth MAC address from NVRAM.  Terminate the script
+		# if no address has been set.
+		#
+		BTADDR="$(nvram print module btaddr1 | sed 's,btaddr1=,,g')"
+		if [ -z "${BTADDR}" -o "${BTADDR}" = "00:00:00:00:00:00" ]; then
+			[ -z "${quietboot}" ] && echo "FAILED because no Bluetooth MAC address has been set."
+			exit
+		fi
+
+		#
+		# We need to write the Bluetooth MAC address to ar3kbdaddr.pst in
+		# the AR3k firmware directory.  However, we don't want to rewrite the
+		# file if it already exists and the address is the same because we
+		# don't want to wear out NAND flash. So compare the two and only
+		# update the copy on NAND if the address has changed.
+		#
+		FW_MAC="/lib/firmware/ar3k/1020200/ar3kbdaddr.pst"
+		[ -f "${FW_MAC}" ] && [ "$(cat ${FW_MAC})" = "${BTADDR}" ] || echo ${BTADDR} > ${FW_MAC}
+		#
+		# Start the Bluetooth driver and daemon (D-BUS must already be running)
+		#
+		BT_DRIVER="ath3k"
+		BT_BAUD_RATE="4000000"
+		HCIATTACH_OPTIONS="${BT_DEVICE} ${BT_DRIVER} ${BT_BAUD_RATE}"
+		HCIATTACH_OPTIONS_115K="${BT_DEVICE} ${BT_DRIVER} 115200"
+		TRIES="1"
+		MAX_TRIES="11111"
+		while !	hciattach ${HCIATTACH_OPTIONS} 1>/dev/null && [	"${TRIES}" != "${MAX_TRIES}" ] ;
+		do
+			echo -n "retrying... "
+			#
+			# If hciattach at 4Kbps doesn't work, then try it at 115K bps
+			# just to get the chip working.
+			#
+			if hciattach ${HCIATTACH_OPTIONS_115K} 1>/dev/null ; then
+				#
+				# It worked	at 115Kbps.	 The chip should be okay now.
+				# Kill the daemon so we	can	retry at 4Mbps.
+				#
+				kill -s 9 `pidof hciattach`
+			fi
+			TRIES="${TRIES}1"
+		done
+		if [ "${TRIES}" == "${MAX_TRIES}" ]	; then
+			[ -z "${quietboot}" ] && echo "FAILED"
+			exit
+		fi
+		echo `pidof hciattach` > ${HCIATTACHPIDFILE}
+		[ -z "${quietboot}" ] && echo "Okay"
+	fi
+}
+
+start_abtfilt() {
+	[ -z "${quietboot}" ] && echo -n "Starting abtfilt: "
+	BT_FILTER_ARGS="-d -x -s -w wlan0"
+	if ! abtfilt ${BT_FILTER_ARGS} 1>/dev/null; then
+		[ -z "${quietboot}" ] && echo "FAILED"
+		exit
+	fi
+	[ -z "${quietboot}" ] && echo "Okay"
+}
+
+start_bluetoothd() {
+	[ -z "${quietboot}" ] && echo -n "Starting bluetoothd: "
+	if hciconfig hci0 up && bluetoothd; then
+		[ -z "${quietboot}" ] && echo "Okay"
+	else
+		[ -z "${quietboot}" ] && echo "FAILED"
+		exit
+	fi
+}
+
+stop() {
+	BLUETOOTHPID=$(pidof bluetoothd)
+	ABTFILTPID=$(pidof abtfilt)
+	if [ -f "${HCIATTACHPIDFILE}" ] && hciconfig hci0 down && hciconfig hci0 reset; then
+		kill -s 9 ${BLUETOOTHPID}
+		kill -s 9 ${ABTFILTPID}
+	fi
+}
+
+
+start() {
+	start_hciattach
+	start_abtfilt
+	start_bluetoothd
+}
+
+case "${1}" in
+start)
+	start
+	;;
+stop)
+	stop
+	;;
+restart|force-reload)
+	stop
+	sleep 1
+	start
+	;;
+*)
+	echo "Usage: $0 {start|stop|restart|force-reload}"
+	exit 1
+	;;
+esac
+exit $?
