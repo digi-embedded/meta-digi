@@ -23,6 +23,11 @@ MASTER_OBJS += RS.GENR.LNX.SD_GPL/OSD/LINUX/master/ganges_linux_ioctl.o
 MASTER_OBJS += RS.GENR.LNX.SD_GPL/HAL/SDIO/LINUX/master/ganges_linux_sdio.o
 MASTER_OBJS += RS.GENR.LNX.SD_GPL/OSD/LINUX/master/digi_hal.o
 
+## Firmware files
+FIRMWARE := RS.GENR.LNX.SD_GPL/OSD/LINUX/release/instructionSet
+FIRMWARE += RS.GENR.LNX.SD_GPL/OSD/LINUX/release/tadm
+FIRMWARE += RS.GENR.LNX.SD_GPL/OSD/LINUX/release/taim
+
 EXTRA_CFLAGS += -DLINUX -DUSE_SDIO_INTF
 
 obj-m := rsi_client.o rsi_master.o
@@ -30,9 +35,6 @@ rsi_client-y := $(CLIENT_OBJS)
 rsi_master-y := $(MASTER_OBJS)
 
 SRC := $(shell pwd)
-
-SHELL     = /bin/bash
-FIRMWARE := $(addprefix $(SRC)/RS.GENR.LNX.SD_GPL/OSD/LINUX/release/, instructionSet tadm taim)
 
 all:
 	$(MAKE) -C $(KERNEL_SRC) M=$(SRC)
@@ -45,14 +47,15 @@ modules_install:
 
 tarball: TAR_DIR = $(SRC)/_tarball
 tarball:
-	mkdir -p $(TAR_DIR)/{firmware,GPL/{HAL/SDIO/LINUX/master,OSD/LINUX/master},NON_GPL}
-	install -m 0644 $(MASTER_OBJS:.o=.c) $(TAR_DIR)/GPL/OSD/LINUX/master/
-	mv $(TAR_DIR)/GPL/OSD/LINUX/master/ganges_linux_sdio.c $(TAR_DIR)/GPL/HAL/SDIO/LINUX/master/
-	cp -r RS.GENR.LNX.SD_GPL/include $(TAR_DIR)/GPL/
 	for i in $(CLIENT_OBJS); do \
-		install -m 0644 $${i} $(TAR_DIR)/NON_GPL/$$(basename $${i})_shipped; \
+		mkdir -p $(TAR_DIR)/$$(dirname $${i}); \
+		install -m 0644 $${i} $(TAR_DIR)/$$(dirname $${i})/$$(basename $${i})_shipped; \
 	done
-	install -m 0644 $(FIRMWARE) $(TAR_DIR)/firmware/
+	for i in $(MASTER_OBJS:.o=.c) $(FIRMWARE); do \
+		mkdir -p $(TAR_DIR)/$$(dirname $${i}); \
+		install -m 0644 $${i} $(TAR_DIR)/$$(dirname $${i})/; \
+	done
+	cp -r RS.GENR.LNX.SD_GPL/include $(TAR_DIR)/RS.GENR.LNX.SD_GPL/
 	rm -f redpine-$(DEL_PLATFORM).tar.gz && tar cz --transform 's,\(^[^/]\+/\),\1$(DEL_PLATFORM)/,' \
 		--numeric-owner --owner 0 --group 0 -f redpine-$(DEL_PLATFORM).tar.gz -C $(TAR_DIR) .
 	-rm -rf $(TAR_DIR)
