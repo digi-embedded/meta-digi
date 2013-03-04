@@ -28,7 +28,6 @@ RDEPENDS_${PN} = "\
     base-files \
     base-passwd \
     busybox \
-    busybox-ntpd \
     ${VIRTUAL-RUNTIME_passwd_manager} \
     ${VIRTUAL-RUNTIME_initscripts} \
     ${@base_contains("MACHINE_FEATURES", "rtc", "busybox-hwclock", "", d)} \

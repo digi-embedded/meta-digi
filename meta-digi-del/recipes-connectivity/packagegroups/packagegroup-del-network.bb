@@ -29,6 +29,8 @@ VIRTUAL-RUNTIME_network-utils ?= "ethtool"
 VIRTUAL-RUNTIME_snmp-manager ?= ""
 #VIRTUAL-RUNTIME_snmp-manager ?= "net-snmp-server"
 
+VIRTUAL-RUNTIME_ntp ?= "busybox-ntpd"
+
 RDEPENDS_${PN} = "\
 	ppp \
 	iproute2 \
@@ -36,6 +38,7 @@ RDEPENDS_${PN} = "\
 	${VIRTUAL-RUNTIME_http-server} \
 	${VIRTUAL-RUNTIME_network-utils} \
 	${VIRTUAL-RUNTIME_snmp-manager} \
+	${VIRTUAL-RUNTIME_ntp} \
 	${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
 RRECOMMENDS_${PN} = "\
