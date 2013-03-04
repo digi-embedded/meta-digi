@@ -35,10 +35,9 @@ do_configure_prepend() {
 
 	sed -e "${CONF_SED_SCRIPT}" < '${WORKDIR}/defconfig' >> '${S}/.config'
 
-	shopt -s nullglob
-	for f in ${WORKDIR}/*.cfg;
-	do
-		cat $f >> '${S}/.config'
+	for i in $(echo ${WORKDIR}/*.cfg); do
+		[ "${i}" = "${WORKDIR}/*.cfg" ] && continue
+		cat ${i} >> '${S}/.config'
 	done
 
 	if [ "${SCMVERSION}" = "y" ]; then
