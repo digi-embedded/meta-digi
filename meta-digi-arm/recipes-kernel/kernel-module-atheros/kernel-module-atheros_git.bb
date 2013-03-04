@@ -9,6 +9,7 @@ PR = "r0"
 SRCREV = "${AUTOREV}"
 SRC_URI = "${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git;branch=refs/heads/master \
 	   file://atheros \
+	   file://atheros.conf \
 	  "
 
 S = "${WORKDIR}/git"
@@ -39,6 +40,8 @@ module_do_install() {
 do_install_append() {
         install -d ${D}${sysconfdir}/network/if-pre-up.d
 	install -m 0755 ${WORKDIR}/atheros  ${D}${sysconfdir}/network/if-pre-up.d/
+	install -d ${D}/etc/modprobe.d
+	install -m 0755 ${WORKDIR}/atheros.conf  ${D}${sysconfdir}/modprobe.d/
 	install -d ${D}/lib/firmware/ath6k/AR6003/hw2.1.1
 	install -m 0755 ${FIRMWARE_S}/ath6kl_fw_concurrency/athtcmd_ram.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
 	install -m 0755 ${FIRMWARE_S}/ath6kl_fw_concurrency/athwlan.bin ${D}/lib/firmware/ath6k/AR6003/hw2.1.1/

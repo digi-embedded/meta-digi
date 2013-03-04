@@ -79,7 +79,7 @@ fi
 ATH6KL_PARAMS=""
 [ -f "/root/wifi_test_mode" ] && { ATH6KL_PARAMS="${ATH6KL_PARAMS} testmode=1"; test_mode_str=" in test mode"; }
 grep -qs ath6kl_sdio /proc/modules || \
-	/sbin/modprobe -q ath6kl_sdio ${ATH6KL_PARAMS} || echo "Loading ath6kl_sdio module${test_mode_str}: [FAILED]"
+	/sbin/modprobe --ignore-install -q ath6kl_sdio ${ATH6KL_PARAMS} || echo "Loading ath6kl_sdio module${test_mode_str}: [FAILED]"
 
 # Delay required for the interface 'wlan0' to settle down before trying to configure it.
 sleep 0.5
