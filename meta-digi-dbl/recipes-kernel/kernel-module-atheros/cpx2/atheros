@@ -1,7 +1,7 @@
 #!/bin/sh -l
 #===============================================================================
 #
-#  10-atheros_pre-up
+#  atheros
 #
 #  Copyright (C) 2012 by Digi International Inc.
 #  All rights reserved.
@@ -20,7 +20,7 @@ set -e
 
 # Exit if not the wlan0 interface,
 # or we've already run once
-[ "${IFACE}" != "wlan0" -o -e /var/run/10-atheros_pre_up ] && exit 0
+[ "${IFACE}" != "wlan0" -o -e /var/run/atheros ] && exit 0
 
 # If not manufacturing mode, exit if product has no wifi
 if [ -z "$1" -a ! -e /var/run/product_info/wifi ]; then
@@ -32,12 +32,17 @@ FIRMWARE_DIR="/lib/firmware/ath6k/AR6003/hw2.1.1"
 RAM_DRIVE="/var/run"
 MAC_FILENAME="softmac"
 
+# 
+# Use $1 for the MAC address, or, if empty, get the wlan MAC address
+# from kernel command line.  Use a default # value if the address has not
+# been set.
 #
-# Use $1 for the MAC address, or, if empty, extract from ethaddr2 in NVRAM
-# and then strip 'ethaddr2='
-#
-MAC_ADDR=${1:-$(nvram print module ethaddr2)}
-MAC_ADDR=${MAC_ADDR#*=}
+
+MAC_ADDR_CMDLINE=`cat /proc/cmdline | sed 's/\s/\n/g' | awk '/ethaddr2/ {print}' | sed 's/ethaddr2=//g'`
+MAC_ADDR=${1:-$(MAC_ADDR_CMDLINE)}
+if [ -z "${MAC_ADDR}" -o "${MAC_ADDR}" = "00:00:00:00:00:00" ]; then
+        MAC_ADDR="00:04:F3:4C:B1:D3"
+fi
 
 mac1="$(echo ${MAC_ADDR} | cut -d':' -f1)"
 mac2="$(echo ${MAC_ADDR} | cut -d':' -f2)"
