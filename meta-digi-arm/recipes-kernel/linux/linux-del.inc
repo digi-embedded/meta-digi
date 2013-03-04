@@ -47,6 +47,10 @@ do_configure_prepend() {
 	fi
 }
 
+do_deploy_append() {
+	ln -sf ${KERNEL_IMAGE_BASE_NAME}.bin ${KERNEL_IMAGE_SYMLINK_NAME}
+}
+
 # install nedded headers for imx-test compilation
 do_install_append() {
 	# bounds.h may be used by a module and is currently missing
