@@ -12,7 +12,7 @@ LIC_FILES_CHKSUM = "file://usr/include/VG/openvg.h;endline=30;md5=b0109611dd7696
 
 PROVIDES = "virtual/egl virtual/libgles1 virtual/libgles2"
 
-SRC_URI = "${DIGI_LOG_MIRROR}/amd-gpu-bin-mx51-${PV}.tar.gz"
+SRC_URI = "${DIGI_MIRROR}/amd-gpu-bin-mx51-${PV}.tar.gz"
 SRC_URI[md5sum] = "15ede91135590fc12cc29a2bba46c12c"
 SRC_URI[sha256sum] = "c87ad4e0c721a10e9faed9e096e180b326162e342d41cdfc14c5119110bde0f4"
 

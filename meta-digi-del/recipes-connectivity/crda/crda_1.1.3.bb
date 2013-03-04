@@ -18,12 +18,8 @@ RDEPENDS_${PN} = '${VIRTUAL-RUNTIME_device_manager}'
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
-# Original SRC_URIs
-#	http://wireless.kernel.org/download/crda/${P}.tar.bz2;name=crda \
-#	http://wireless.kernel.org/download/wireless-regdb/regulatory.bins/2011.04.28-regulatory.bin;name=reg
-
-SRC_URI = "${DIGI_LOG_MIRROR}${PN}-${PV}.tar.bz2;name=crda \
-	   ${DIGI_LOG_MIRROR}2011.04.28-regulatory.bin;name=reg \
+SRC_URI = "http://wireless.kernel.org/download/crda/${PN}-${PV}.tar.bz2;name=crda \
+	   http://wireless.kernel.org/download/wireless-regdb/regulatory.bins/2011.04.28-regulatory.bin;name=reg \
 	  "
 
 SRC_URI += '${@base_conditional("VIRTUAL-RUNTIME_crda_use_gcrypt", "1" , "", "file://0001-Make-crypto-optional.patch", d)}'
