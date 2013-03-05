@@ -1,0 +1,79 @@
+ATH_DRV_BASEDIR := Ath6kl_LinuxRelease/Generic_Packages/compat-wireless
+ATH_FIR_BASEDIR := Ath6kl_LinuxRelease/Firmware_Package/target/AR6003/hw2.1.1
+
+ifneq ($(KERNELRELEASE),)
+
+ATH_DEFINES += \
+	-DCOMPAT_BASE_TREE="\"$(shell cat $(src)/$(ATH_DRV_BASEDIR)/compat_base_tree)\"" \
+	-DCOMPAT_BASE_TREE_VERSION="\"$(shell cat $(src)/$(ATH_DRV_BASEDIR)/compat_base_tree_version)\"" \
+	-DCOMPAT_PROJECT="\"Compat-wireless\"" \
+	-DCOMPAT_VERSION="\"$(shell cat $(src)/$(ATH_DRV_BASEDIR)/compat_version)\""
+
+NOSTDINC_FLAGS := -I$(M)/$(ATH_DRV_BASEDIR)/include/ \
+	-include $(M)/$(ATH_DRV_BASEDIR)/include/linux/compat-2.6.h \
+	$(ATH_DEFINES)
+
+include $(src)/$(ATH_DRV_BASEDIR)/config.mk
+
+SHELL_EXPORT := PATH=$(src)/$(ATH_DRV_BASEDIR)/scripts:$${PATH} \
+		COMPAT_CONFIG=$(src)/$(ATH_DRV_BASEDIR)/config.mk \
+		CONFIG_CHECK=.$(COMPAT_CONFIG)_md5sum.txt \
+		COMPAT_AUTOCONF=$(src)/$(ATH_DRV_BASEDIR)/include/linux/compat_autoconf.h
+
+dummy := $(shell $(SHELL_EXPORT) bash -c "cd $(src)/$(ATH_DRV_BASEDIR) && ./scripts/check_config.sh || true")
+
+obj-y := $(ATH_DRV_BASEDIR)/compat/
+obj-y += $(ATH_DRV_BASEDIR)/net/wireless/
+obj-y += $(ATH_DRV_BASEDIR)/drivers/net/wireless/ath/ath6kl/
+
+else #ifneq ($(KERNELRELEASE),)
+
+## Firmware files
+FIRMWARE := $(ATH_FIR_BASEDIR)/ath6kl_fw_concurrency/athtcmd_ram.bin
+FIRMWARE += $(ATH_FIR_BASEDIR)/ath6kl_fw_concurrency/athwlan.bin
+FIRMWARE += $(ATH_FIR_BASEDIR)/Digi_6203-6233-US.bin
+FIRMWARE += $(ATH_FIR_BASEDIR)/Digi_6203-6233-World.bin
+FIRMWARE += $(ATH_FIR_BASEDIR)/ath6kl_fw_concurrency/fw-4.bin
+FIRMWARE += $(ATH_FIR_BASEDIR)/ath6kl_fw_concurrency/nullTestFlow.bin
+FIRMWARE += $(ATH_FIR_BASEDIR)/ath6kl_fw_concurrency/utf.bin
+ifeq ("$(DEL_PLATFORM)","cpx2")
+FIRMWARE += $(ATH_FIR_BASEDIR)/calData_AR6103_Digi_X2e_B.bin
+FIRMWARE += $(ATH_FIR_BASEDIR)/calData_AR6103_Digi_X2e_B_world.bin
+endif
+
+COPYRIGHT := $(ATH_DRV_BASEDIR)/COPYRIGHT
+
+COMPAT_OBJS = $(filter-out $(addprefix $(ATH_DRV_BASEDIR)/compat/,built-in.o compat.mod.o compat.o), $(wildcard $(ATH_DRV_BASEDIR)/compat/*.o))
+CFG802_OBJS = $(filter-out $(addprefix $(ATH_DRV_BASEDIR)/net/wireless/,built-in.o cfg80211.mod.o cfg80211.o), $(wildcard $(ATH_DRV_BASEDIR)/net/wireless/*.o))
+ATH6KL_OBJS = $(filter-out $(addprefix $(ATH_DRV_BASEDIR)/drivers/net/wireless/ath/ath6kl/,built-in.o ath6kl_sdio.mod.o ath6kl_sdio.o), $(wildcard $(ATH_DRV_BASEDIR)/drivers/net/wireless/ath/ath6kl/*.o))
+
+SRC := $(shell pwd)
+
+all:
+	$(MAKE) -C $(KERNEL_SRC) M=$(SRC)
+
+modules_install:
+	$(MAKE) -C $(KERNEL_SRC) M=$(SRC) modules_install
+	# Fix installation directory of the modules.
+	find $(INSTALL_MOD_PATH)/lib/modules/$(KERNEL_VERSION)/extra/Ath6kl_LinuxRelease -type f -name '*.ko' | \
+		xargs -I modfile mv -f modfile $(INSTALL_MOD_PATH)/lib/modules/$(KERNEL_VERSION)/extra/
+	rm -rf $(INSTALL_MOD_PATH)/lib/modules/*/extra/Ath6kl_LinuxRelease
+	# Install firmware
+	mkdir -p $(INSTALL_MOD_PATH)/lib/firmware/ath6k/AR6003/hw2.1.1/
+	install -m 0644 $(FIRMWARE) $(INSTALL_MOD_PATH)/lib/firmware/ath6k/AR6003/hw2.1.1/
+
+tarball: TAR_DIR = $(SRC)/_tarball
+tarball:
+	for i in $(COMPAT_OBJS) $(CFG802_OBJS) $(ATH6KL_OBJS); do \
+		mkdir -p $(TAR_DIR)/$$(dirname $${i}); \
+		install -m 0644 $${i} $(TAR_DIR)/$$(dirname $${i})/$$(basename $${i})_shipped; \
+	done
+	for i in $(FIRMWARE) $(COPYRIGHT); do \
+		mkdir -p $(TAR_DIR)/$$(dirname $${i}); \
+		install -m 0644 $${i} $(TAR_DIR)/$$(dirname $${i})/; \
+	done
+	rm -f atheros-$(DEL_PLATFORM).tar.gz && tar cz --transform 's,\(^[^/]\+/\),\1$(DEL_PLATFORM)/,' \
+		--numeric-owner --owner 0 --group 0 -f atheros-$(DEL_PLATFORM).tar.gz -C $(TAR_DIR) .
+	-rm -rf $(TAR_DIR)
+
+endif #ifneq ($(KERNELRELEASE),)
