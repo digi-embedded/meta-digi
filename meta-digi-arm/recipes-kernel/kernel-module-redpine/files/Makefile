@@ -28,11 +28,15 @@ FIRMWARE := RS.GENR.LNX.SD_GPL/OSD/LINUX/release/instructionSet
 FIRMWARE += RS.GENR.LNX.SD_GPL/OSD/LINUX/release/tadm
 FIRMWARE += RS.GENR.LNX.SD_GPL/OSD/LINUX/release/taim
 
+ifneq ($(KERNELRELEASE),)
+
 EXTRA_CFLAGS += -DLINUX -DUSE_SDIO_INTF
 
 obj-m := rsi_client.o rsi_master.o
 rsi_client-y := $(CLIENT_OBJS)
 rsi_master-y := $(MASTER_OBJS)
+
+else #ifneq ($(KERNELRELEASE),)
 
 SRC := $(shell pwd)
 
@@ -59,3 +63,5 @@ tarball:
 	rm -f redpine-$(DEL_PLATFORM).tar.gz && tar cz --transform 's,\(^[^/]\+/\),\1$(DEL_PLATFORM)/,' \
 		--numeric-owner --owner 0 --group 0 -f redpine-$(DEL_PLATFORM).tar.gz -C $(TAR_DIR) .
 	-rm -rf $(TAR_DIR)
+
+endif #ifneq ($(KERNELRELEASE),)
