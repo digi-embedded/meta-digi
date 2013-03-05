@@ -5,7 +5,7 @@ PR_append = "+${DISTRO}.r0"
 # gobject-introspection
 SRC_URI += "file://simple-agent"
 
-EXTRA_OECONF_append_del = " --enable-health"
+EXTRA_OECONF_append = " --enable-health"
 
 do_install_append() {
 	install -m 0755 ${WORKDIR}/simple-agent ${D}${bindir}

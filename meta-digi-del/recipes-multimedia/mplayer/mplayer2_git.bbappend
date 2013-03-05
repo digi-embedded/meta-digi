@@ -1,6 +1,6 @@
 # Copyright (C) 2012 Digi International.
 
-PR_append_del = "+${DISTRO}.0"
+PR_append = "+${DISTRO}.0"
 
 # live555 does not currently compile, this allows to remove it as a dependency.
 VIRTUAL-RUNTIME_streaming_framework = ""
@@ -10,17 +10,17 @@ VIRTUAL-RUNTIME_streaming_framework = ""
 VIRTUAL-RUNTIME_fonts_management = ""
 #VIRTUAL-RUNTIME_fonts_management = "fontconfig"
 
-DEPENDS_del = "libdvdread libtheora ffmpeg zlib libpng jpeg liba52 freetype alsa-lib lzo ncurses lame libass \
+DEPENDS = "libdvdread libtheora ffmpeg zlib libpng jpeg liba52 freetype alsa-lib lzo ncurses lame libass \
            ${@base_conditional('ENTERPRISE_DISTRO', '1', '', 'libmad liba52 lame', d)}"
-DEPENDS_del += "${VIRTUAL-RUNTIME_streaming_framework}"
-DEPENDS_del += "${VIRTUAL-RUNTIME_fonts_management}"
-DEPENDS_del += "${@base_contains('DISTRO_FEATURES', 'x11', 'libvpx virtual/libsdl xsp libxv virtual/libx11', '', d)}"
+DEPENDS += "${VIRTUAL-RUNTIME_streaming_framework}"
+DEPENDS += "${VIRTUAL-RUNTIME_fonts_management}"
+DEPENDS += "${@base_contains('DISTRO_FEATURES', 'x11', 'libvpx virtual/libsdl xsp libxv virtual/libx11', '', d)}"
 
 EXTRA_LIBS = " -lstdc++ -lvorbis"
 EXTRA_LIBS += "${@base_contains('DISTRO_FEATURES', 'x11', ' -lXext -lX11', '', d)}"
 EXTRA_LIBS += "${@base_conditional('VIRTUAL-RUNTIME_streaming_framework', 'live555', ' -lBasicUsageEnvironment -lUsageEnvironment -lgroupsock -lliveMedia', '', d)}"
 
-EXTRA_OECONF_del = " \
+EXTRA_OECONF = " \
 	--prefix=/usr \
 	--mandir=${mandir} \
 	--target=${SIMPLE_TARGET_SYS} \
@@ -112,7 +112,7 @@ EXTRA_OECONF_del = " \
         --extra-libs='${EXTRA_LIBS}' \
 "
 
-EXTRA_OECONF_del += " \
+EXTRA_OECONF += " \
      ${@base_conditional('VIRTUAL-RUNTIME_fonts_management', 'fontconfig', '', '--disable-fontconfig', d)} \
      ${@base_conditional('VIRTUAL-RUNTIME_streaming_framework', 'live555', '', '--disable-live', d)} \
 "

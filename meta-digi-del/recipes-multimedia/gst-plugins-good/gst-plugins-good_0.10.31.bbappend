@@ -3,9 +3,9 @@ PACKAGECONFIG[x11] = ",--disable-gconf --disable-x --disable-xshm --disable-xvid
 PACKAGECONFIG[flac] = ",--disable-flac,"
 
 DEPENDS_no_X := "${@oe_filter_out('gconf', '${DEPENDS}', d)}"
-DEPENDS_del := "${@base_contains('DISTRO_FEATURES', 'x11', '${DEPENDS}', '${DEPENDS_no_X}', d)}"
+DEPENDS := "${@base_contains('DISTRO_FEATURES', 'x11', '${DEPENDS}', '${DEPENDS_no_X}', d)}"
 
-EXTRA_OECONF_del += "\
+EXTRA_OECONF += "\
 		 --disable-aalibtest \
 		 --disable-audiofx \
 		 --disable-cairo \
