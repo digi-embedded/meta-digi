@@ -21,8 +21,6 @@ SRC_URI[sha256sum] = "ef25f5c9033500c236b1894436bddc4e20b90bc17585fbcdf9fe3bbbd9
 
 inherit autotools
 
-#FILES_${PN} += ""
-
 COMPATIBLE_MACHINE = "(ccardimx28js|cpx2)"
 
 BBCLASSEXTEND = "native"
