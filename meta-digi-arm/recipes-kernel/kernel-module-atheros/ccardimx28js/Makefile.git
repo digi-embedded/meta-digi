@@ -41,8 +41,6 @@ FIRMWARE += $(ATH_FIR_BASEDIR)/calData_AR6103_Digi_X2e_B.bin
 FIRMWARE += $(ATH_FIR_BASEDIR)/calData_AR6103_Digi_X2e_B_world.bin
 endif
 
-COPYRIGHT := $(ATH_DRV_BASEDIR)/COPYRIGHT
-
 COMPAT_OBJS = $(filter-out $(addprefix $(ATH_DRV_BASEDIR)/compat/,built-in.o compat.mod.o compat.o), $(wildcard $(ATH_DRV_BASEDIR)/compat/*.o))
 CFG802_OBJS = $(filter-out $(addprefix $(ATH_DRV_BASEDIR)/net/wireless/,built-in.o cfg80211.mod.o cfg80211.o), $(wildcard $(ATH_DRV_BASEDIR)/net/wireless/*.o))
 ATH6KL_OBJS = $(filter-out $(addprefix $(ATH_DRV_BASEDIR)/drivers/net/wireless/ath/ath6kl/,built-in.o ath6kl_sdio.mod.o ath6kl_sdio.o), $(wildcard $(ATH_DRV_BASEDIR)/drivers/net/wireless/ath/ath6kl/*.o))
@@ -68,7 +66,7 @@ tarball:
 		mkdir -p $(TAR_DIR)/$$(dirname $${i}); \
 		install -m 0644 $${i} $(TAR_DIR)/$$(dirname $${i})/$$(basename $${i})_shipped; \
 	done
-	for i in $(FIRMWARE) $(COPYRIGHT); do \
+	for i in $(FIRMWARE); do \
 		mkdir -p $(TAR_DIR)/$$(dirname $${i}); \
 		install -m 0644 $${i} $(TAR_DIR)/$$(dirname $${i})/; \
 	done

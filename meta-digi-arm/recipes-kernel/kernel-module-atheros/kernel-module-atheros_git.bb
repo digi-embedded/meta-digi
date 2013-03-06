@@ -1,6 +1,6 @@
 DESCRIPTION = "Atheros's wireless driver"
-LICENSE = "GPLv2"
-LIC_FILES_CHKSUM = "file://Ath6kl_LinuxRelease/Generic_Packages/compat-wireless/COPYRIGHT;md5=d7810fab7487fb0aad327b76f1be7cd7"
+LICENSE = "BSD"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/BSD;md5=3775480a712fc46a69647678acb234cb"
 
 inherit module
 
