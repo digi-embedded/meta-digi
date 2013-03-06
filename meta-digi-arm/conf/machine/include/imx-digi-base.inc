@@ -44,8 +44,10 @@ PREFERRED_PROVIDER_virtual/libgles2_mx5 ?= "${@base_contains('DISTRO_FEATURES', 
 EXTRA_IMAGEDEPENDS = "u-boot"
 
 # Flash image types
-SDCARD_ROOTFS ?= "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.ext3"
-IMAGE_FSTYPES ?= "ext3 sdcard sum.jffs2 tar.bz2 ubifs"
+# Do not build ext3/sdcard until they are tested.
+#SDCARD_ROOTFS ?= "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.ext3"
+#IMAGE_FSTYPES ?= "ext3 sdcard sum.jffs2 tar.bz2 ubifs"
+IMAGE_FSTYPES ?= "sum.jffs2 tar.bz2 ubifs"
 
 KERNEL_IMAGETYPE = "uImage"
 
