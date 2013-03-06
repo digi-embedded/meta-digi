@@ -22,6 +22,8 @@ SRC_URI  = "${@base_conditional('ATHEROS_BUILD_SRC', '1' , '${SRC_URI_git}', '${
 SRC_URI += " \
 	file://atheros \
 	file://atheros.conf \
+	file://50-firmware.rules \
+	file://firmware.sh \
 	"
 
 S = "${@base_conditional('ATHEROS_BUILD_SRC', '1' , '${WORKDIR}/git', '${WORKDIR}/${MACHINE}', d)}"
@@ -38,6 +40,10 @@ do_install_append() {
 	install -m 0755 ${WORKDIR}/atheros ${D}${sysconfdir}/network/if-pre-up.d/
 	install -d ${D}${sysconfdir}/modprobe.d
 	install -m 0644 ${WORKDIR}/atheros.conf ${D}${sysconfdir}/modprobe.d/
+	install -d ${D}${sysconfdir}/udev/rules.d
+	install -m 0644 ${WORKDIR}/50-firmware.rules ${D}${sysconfdir}/udev/rules.d/
+	install -d ${D}/lib/udev
+	install -m 0755 ${WORKDIR}/firmware.sh ${D}/lib/udev/
 }
 
 FILES_${PN} += " \
@@ -48,6 +54,7 @@ FILES_${PN} += " \
 	/lib/firmware/ath6k/AR6003/hw2.1.1/fw-4.bin \
 	/lib/firmware/ath6k/AR6003/hw2.1.1/nullTestFlow.bin \
 	/lib/firmware/ath6k/AR6003/hw2.1.1/utf.bin \
+	/lib/udev/firmware.sh \
 	"
 
 # Deploy objects tarball if building from sources
