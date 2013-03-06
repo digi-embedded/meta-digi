@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 PR = "r0"
 
 DEPENDS += "libdigi"
-RDEPENDS += "kobs-ng"
+RDEPENDS_${PN}_append_mxs = " kobs-ng"
 
 SRC_URI = "file://update_flash.c \
            file://jffs2-user.h \
