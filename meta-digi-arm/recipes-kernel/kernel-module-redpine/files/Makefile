@@ -60,8 +60,10 @@ tarball:
 		install -m 0644 $${i} $(TAR_DIR)/$$(dirname $${i})/; \
 	done
 	cp -r RS.GENR.LNX.SD_GPL/include $(TAR_DIR)/RS.GENR.LNX.SD_GPL/
-	rm -f redpine-$(DEL_PLATFORM).tar.gz && tar cz --transform 's,\(^[^/]\+/\),\1$(DEL_PLATFORM)/,' \
-		--numeric-owner --owner 0 --group 0 -f redpine-$(DEL_PLATFORM).tar.gz -C $(TAR_DIR) .
+	REV="$$(git rev-parse --short --verify HEAD)"; \
+		rm -f redpine-$(DEL_PLATFORM)-$${REV}.tar.gz && \
+		tar cz --transform 's,\(^[^/]\+/\),\1$(DEL_PLATFORM)/,' \
+			--numeric-owner --owner 0 --group 0 -f redpine-$(DEL_PLATFORM)-$${REV}.tar.gz -C $(TAR_DIR) .
 	-rm -rf $(TAR_DIR)
 
 endif #ifneq ($(KERNELRELEASE),)
