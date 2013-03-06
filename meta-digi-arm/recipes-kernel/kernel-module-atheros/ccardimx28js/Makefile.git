@@ -70,8 +70,10 @@ tarball:
 		mkdir -p $(TAR_DIR)/$$(dirname $${i}); \
 		install -m 0644 $${i} $(TAR_DIR)/$$(dirname $${i})/; \
 	done
-	rm -f atheros-$(DEL_PLATFORM).tar.gz && tar cz --transform 's,\(^[^/]\+/\),\1$(DEL_PLATFORM)/,' \
-		--numeric-owner --owner 0 --group 0 -f atheros-$(DEL_PLATFORM).tar.gz -C $(TAR_DIR) .
+	REV="$$(git rev-parse --short --verify HEAD)"; \
+		rm -f atheros-$(DEL_PLATFORM)-$${REV}.tar.gz && \
+		tar cz --transform 's,\(^[^/]\+/\),\1$(DEL_PLATFORM)/,' \
+			--numeric-owner --owner 0 --group 0 -f atheros-$(DEL_PLATFORM)-$${REV}.tar.gz -C $(TAR_DIR) .
 	-rm -rf $(TAR_DIR)
 
 endif #ifneq ($(KERNELRELEASE),)

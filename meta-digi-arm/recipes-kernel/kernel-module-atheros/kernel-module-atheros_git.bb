@@ -6,15 +6,22 @@ inherit module
 
 PR = "r0"
 
-ATHEROS_BUILD_SRC ?= "1"
+# Uncomment to build the driver from sources (internal use only)
+# ATHEROS_BUILD_SRC ?= "1"
 
-SRCREV = "${AUTOREV}"
+SRCREV = "e135bedca602cdcf25f4f48a6aafeb7311f7c700"
+
+# Checksums for 'atheros-${MACHINE}-${SRCREV_SHORT}.tar.gz' tarballs
+TARBALL_MD5_ccardimx28js    = "75d1ee875ca686927f62cb004a26911b"
+TARBALL_SHA256_ccardimx28js = "b975ede2f28e5a54433e25fd9ea35556d7ddc1382d26805f33af068110a18395"
+
 SRC_URI_git = " \
-	${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git;branch=refs/heads/master \
+	${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git \
 	file://Makefile.git \
 	"
+SRCREV_SHORT = "${@'${SRCREV}'[:7]}"
 SRC_URI_obj = " \
-	file://atheros-${MACHINE}.tar.gz \
+	${DIGI_MIRROR}/atheros-${MACHINE}-${SRCREV_SHORT}.tar.gz;md5sum=${TARBALL_MD5};sha256sum=${TARBALL_SHA256} \
 	file://Makefile.obj \
 	"
 
@@ -62,7 +69,12 @@ do_deploy() {
 	if [ "${ATHEROS_BUILD_SRC}" = "1" ]; then
 		oe_runmake tarball
 		install -d ${DEPLOY_DIR_IMAGE}
-		cp ${S}/atheros-${MACHINE}.tar.gz ${DEPLOY_DIR_IMAGE}/
+		if [ -f "${S}/atheros-${MACHINE}-${SRCREV_SHORT}.tar.gz" ]; then
+			cp ${S}/atheros-${MACHINE}-${SRCREV_SHORT}.tar.gz ${DEPLOY_DIR_IMAGE}/
+		else
+			bberror "Objects tarball not found: ${S}/atheros-${MACHINE}-${SRCREV_SHORT}.tar.gz"
+			exit 1
+		fi
 	fi
 }
 
