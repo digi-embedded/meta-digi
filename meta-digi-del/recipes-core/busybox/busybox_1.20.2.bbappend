@@ -1,5 +1,5 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
-PR_append = "+del.r0"
+PR_append = "+${DISTRO}.r0"
 
 DEPENDS += "libdigi"
 

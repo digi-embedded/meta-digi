@@ -2,7 +2,7 @@
 
 DESCRIPTION = "bootloader for Digi platforms"
 
-PR_append = "+del.r0"
+PR_append = "+${DISTRO}.r0"
 
 SRCREV_mxs = "${AUTOREV}"
 SRCREV_mx5 = "${AUTOREV}"

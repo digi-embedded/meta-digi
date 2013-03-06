@@ -1,5 +1,5 @@
 # Copyright (C) 2012 Digi International
-PR_append = "+del.r0"
+PR_append = "+${DISTRO}.r0"
 
 SRCREV_mxs = "${AUTOREV}"
 KBRANCH_mxs = "refs/heads/master"
