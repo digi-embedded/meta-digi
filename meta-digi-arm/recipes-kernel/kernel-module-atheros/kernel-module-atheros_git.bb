@@ -14,6 +14,8 @@ SRCREV = "e135bedca602cdcf25f4f48a6aafeb7311f7c700"
 # Checksums for 'atheros-${MACHINE}-${SRCREV_SHORT}.tar.gz' tarballs
 TARBALL_MD5_ccardimx28js    = "75d1ee875ca686927f62cb004a26911b"
 TARBALL_SHA256_ccardimx28js = "b975ede2f28e5a54433e25fd9ea35556d7ddc1382d26805f33af068110a18395"
+TARBALL_MD5_cpx2            = ""
+TARBALL_SHA256_cpx2         = ""
 
 SRC_URI_git = " \
 	${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git \
@@ -49,8 +51,8 @@ do_install_append() {
 	install -m 0644 ${WORKDIR}/atheros.conf ${D}${sysconfdir}/modprobe.d/
 	install -d ${D}${sysconfdir}/udev/rules.d
 	install -m 0644 ${WORKDIR}/50-firmware.rules ${D}${sysconfdir}/udev/rules.d/
-	install -d ${D}/lib/udev
-	install -m 0755 ${WORKDIR}/firmware.sh ${D}/lib/udev/
+	install -d ${D}${base_libdir}/udev
+	install -m 0755 ${WORKDIR}/firmware.sh ${D}${base_libdir}/udev/
 }
 
 FILES_${PN} += " \
@@ -62,6 +64,10 @@ FILES_${PN} += " \
 	/lib/firmware/ath6k/AR6003/hw2.1.1/nullTestFlow.bin \
 	/lib/firmware/ath6k/AR6003/hw2.1.1/utf.bin \
 	/lib/udev/firmware.sh \
+	"
+FILES_${PN}_append_cpx2 = " \
+	/lib/firmware/ath6k/AR6003/hw2.1.1/calData_AR6103_Digi_X2e_B.bin \
+	/lib/firmware/ath6k/AR6003/hw2.1.1/calData_AR6103_Digi_X2e_B_world.bin \
 	"
 
 # Deploy objects tarball if building from sources
