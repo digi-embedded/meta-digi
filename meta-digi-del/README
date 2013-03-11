@@ -3,6 +3,11 @@ OpenEmbedded/Yocto Digi Embedded Linux layer
 
 This layer provides the Digi Embedded Linux distribution images.
 
+This layer is based on the following Yocto layers (Danny):
+
+git://git.yoctoproject.org/poky 		 27af23e65f63b41962a7cfddba9e9372d5212396
+git://github.com/openembedded/meta-oe.git        c02834a7cc5fda525c7ebeec545625233bab4cb5
+
 Digi's license agreements
 -------------------------
 
