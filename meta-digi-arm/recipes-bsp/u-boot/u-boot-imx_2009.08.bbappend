@@ -4,8 +4,8 @@ DESCRIPTION = "bootloader for Digi platforms"
 
 PR_append = "+${DISTRO}.r0"
 
-SRCREV_mxs = "${AUTOREV}"
-SRCREV_mx5 = "${AUTOREV}"
+SRCREV_mxs = "57dc7fb843484ff0099f6e5f5a2528a7a2dd1766"
+SRCREV_mx5 = "57dc7fb843484ff0099f6e5f5a2528a7a2dd1766"
 SRC_URI = "${DIGI_LOG_GIT}u-boot-denx.git;protocol=git;branch=refs/heads/master"
 
 DEPENDS_mxs_ccardimx28js += "elftosb-native imx-bootlets-del"
