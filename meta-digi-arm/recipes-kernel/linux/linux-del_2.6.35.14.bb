@@ -4,7 +4,7 @@ include linux-del.inc
 
 PR = "${INC_PR}.0"
 
-SRCREV = "710c80d243367dea31c5236abab3ddae8e93f490"
+SRCREV = "${AUTOREV}"
 
 LOCALVERSION_mx5 = "mx5+master"
 LOCALVERSION_mxs = "mxs+master"

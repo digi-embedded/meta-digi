@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/GPL-2.0;md5=80
 
 PR = "r0"
 
-SRCREV="cc3b1eb94dda62aa737f2289b7a2d3936492a53b"
+SRCREV="${AUTOREV}"
 SRC_URI = "${DIGI_MTK_GIT}del/imx-bootlets.git;branch=refs/heads/master;protocol=git"
 S = "${WORKDIR}/git"
 
