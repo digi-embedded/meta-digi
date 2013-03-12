@@ -35,6 +35,7 @@ RDEPENDS_${PN} = "\
     ${@base_contains("MACHINE_FEATURES", "touchscreen", "tslib tslib-calibrate tslib-tests", "",d)} \
     modutils-initscripts \
     netbase \
+    nvram \
     ${VIRTUAL-RUNTIME_login_manager} \
     ${VIRTUAL-RUNTIME_init_manager} \
     ${VIRTUAL-RUNTIME_update-alternatives} \
