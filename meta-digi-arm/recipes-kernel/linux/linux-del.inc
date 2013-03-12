@@ -12,9 +12,6 @@ inherit kernel
 
 # Put a local version until we have a true SRCREV to point to
 LOCALVERSION ?= "+del"
-SCMVERSION ?= "y"
-
-S = "${WORKDIR}/git"
 
 kernel_conf_variable() {
 	CONF_SED_SCRIPT="$CONF_SED_SCRIPT /CONFIG_$1[ =]/d;"
