@@ -6,9 +6,22 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/GPL-2.0;md5=80
 
 PR = "r0"
 
-SRCREV="${AUTOREV}"
-SRC_URI = "${DIGI_MTK_GIT}del/imx-bootlets.git;branch=refs/heads/master;protocol=git"
-S = "${WORKDIR}/git"
+# Uncomment to build the from sources (internal use only)
+# IMX_BOOTLETS_BUILD_SRC ?= "1"
+
+# Checksums for 'imx-bootlets-${SRCREV_SHORT}.tar.gz' tarballs
+TARBALL_MD5    = "457c5925dbc5d3ee0839f1dfdb0b7d37"
+TARBALL_SHA256 = "eae8c6d7b872a7bb1c689010a11890918f4187a87e1c521f3b2bd80f63a8dd77"
+
+SRCREV="cc3b1eb94dda62aa737f2289b7a2d3936492a53b"
+SRCREV_SHORT = "${@'${SRCREV}'[:7]}"
+SRC_URI_git = "${DIGI_MTK_GIT}del/imx-bootlets.git;branch=refs/heads/master;protocol=git"
+SRC_URI_tarball = " \
+        ${DIGI_MIRROR}/imx-bootlets-${SRCREV_SHORT}.tar.gz;md5sum=${TARBALL_MD5};sha256sum=${TARBALL_SHA256} \
+        "
+
+SRC_URI  = "${@base_conditional('IMX_BOOTLETS_BUILD_SRC', '1' , '${SRC_URI_git}', '${SRC_URI_tarball}', d)}"
+S  = "${@base_conditional('IMX_BOOTLETS_BUILD_SRC', '1' , '${WORKDIR}/git', '${WORKDIR}/imx-bootlets-${SRCREV_SHORT}', d)}"
 
 # Disable parallel building or it may fail to build.
 PARALLEL_MAKE = ""
