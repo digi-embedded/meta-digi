@@ -16,11 +16,6 @@ All software is covered by Digi's general EULA and Digi's Open Source
 EULA. To have the right to use the software in your images you need to
 read and accept both EULAs at the DIGI_EULA and DIGI_OPEN_EULA files.
 
-In order to accept them, you should add, in your local.conf file:
-
-ACCEPT_DIGI_EULA = "1"
-ACCEPT_DIGI_OPEN_EULA = "1"
-
 Support
 -------
 
