@@ -1,5 +1,7 @@
 require microwindows.inc
 
+PR = "${DISTRO}.${INC_PR}.0"
+
 SRC_URI = " \
   ftp://ftp.microwindows.org/pub/microwindows/microwindows-src-${PV}.tar.gz \
   file://defconfig \

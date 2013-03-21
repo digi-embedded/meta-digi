@@ -2,7 +2,7 @@
 
 include linux-del.inc
 
-PR = "${INC_PR}.0"
+PR = "${DISTRO}.${INC_PR}.0"
 
 # Uncomment to build the from sources (internal use only)
 # KERNEL_BUILD_SRC ?= "1"

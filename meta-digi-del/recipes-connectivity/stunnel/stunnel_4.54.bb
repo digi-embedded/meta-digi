@@ -1,5 +1,7 @@
 require stunnel.inc
 
+PR = "${DISTRO}.${INC_PR}.0"
+
 SRC_URI = "http://www.stunnel.org/downloads/stunnel-${PV}.tar.gz \
 	   file://automake.patch \
 	   file://init \

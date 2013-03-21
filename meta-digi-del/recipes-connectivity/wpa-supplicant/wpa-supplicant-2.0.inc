@@ -9,6 +9,8 @@ LIC_FILES_CHKSUM = "file://../COPYING;md5=ab87f20cd7e8c0d0a6539b34d3791d0e \
 
 DEPENDS = "libnl openssl"
 
+INC_PR = "r0"
+
 SRC_URI = "http://hostap.epitest.fi/releases/wpa_supplicant-${PV}.tar.gz \
            file://defconfig \
            file://wpa_supplicant.conf \
