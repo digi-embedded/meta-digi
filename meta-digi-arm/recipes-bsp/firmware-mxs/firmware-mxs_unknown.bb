@@ -4,7 +4,7 @@ SECTION = "base"
 LICENSE = "Proprietary"
 LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=3f40d7994397109285ec7b81fdeb3b58"
 
-INC_PR = "r0"
+PR = "r0"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/firmware-${PV}:"
 SRC_URI = "file://PS_ASIC.pst \
