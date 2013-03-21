@@ -25,11 +25,7 @@ SRC_URI  = "${@base_conditional('UBOOT_BUILD_SRC', '1' , '${SRC_URI_git}', '${SR
 
 S  = "${@base_conditional('UBOOT_BUILD_SRC', '1' , '${WORKDIR}/git', '${WORKDIR}/u-boot-denx-${SRCREV_SHORT}', d)}"
 
-DEPENDS_mxs_ccardimx28js += "elftosb-native imx-bootlets-del"
-DEPENDS_mxs_cpx2 += "elftosb-native imx-bootlets-del"
-
-UBOOT_MAKE_TARGET_ccardimx28js = "u-boot-ivt.sb"
-UBOOT_MAKE_TARGET_cpx2 = "u-boot-ivt.sb"
+DEPENDS_mxs += "elftosb-native imx-bootlets-del"
 
 BOOTLETSDIR_mxs = "BOOTLETS_DIR=${STAGING_DIR_TARGET}/boot/"
 EXTRA_OEMAKE += '${BOOTLETSDIR}'
