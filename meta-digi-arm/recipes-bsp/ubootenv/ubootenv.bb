@@ -1,3 +1,5 @@
+# Copyright (C) 2013 Digi International.
+
 DESCRIPTION = "Digi's ubootenv tool"
 SECTION = "base"
 LICENSE = "GPL-2.0"

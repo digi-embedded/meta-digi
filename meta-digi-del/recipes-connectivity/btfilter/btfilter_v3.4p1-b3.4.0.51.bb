@@ -1,3 +1,5 @@
+# Copyright (C) 2013 Digi International.
+
 DESCRIPTION = "Atheros BT/wlan coexistance daemon"
 SECTION = "network"
 LICENSE = "ISC"

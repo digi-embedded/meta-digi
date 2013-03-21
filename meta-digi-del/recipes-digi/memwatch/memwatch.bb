@@ -1,3 +1,5 @@
+# Copyright (C) 2013 Digi International.
+
 DESCRIPTION = "Digi's memory access utility"
 SECTION = "base"
 LICENSE = "GPL-2.0"

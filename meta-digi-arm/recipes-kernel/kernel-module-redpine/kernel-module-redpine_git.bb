@@ -1,3 +1,5 @@
+# Copyright (C) 2013 Digi International.
+
 DESCRIPTION = "Redpine's wireless driver"
 LICENSE = "Proprietary"
 LIC_FILES_CHKSUM = "file://RS.GENR.LNX.SD_GPL/include/ganges_faf.h;endline=6;md5=2b5a9aab5291bd86a1103ca1165f9afa"

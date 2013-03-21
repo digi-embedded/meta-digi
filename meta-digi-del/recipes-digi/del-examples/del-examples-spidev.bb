@@ -1,3 +1,5 @@
+# Copyright (C) 2013 Digi International.
+
 DESCRIPTION = "DEL examples: SPI device driver test application"
 SECTION = "examples"
 LICENSE = "GPL-2.0"

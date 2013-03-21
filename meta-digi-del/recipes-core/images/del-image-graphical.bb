@@ -3,6 +3,8 @@
 #
 DESCRIPTION = "Graphical image based on SATO, a gnome mobile environment visual style."
 
+PR = "${INC_PR}.0"
+
 IMAGE_FEATURES += "splash package-management x11-base x11-sato"
 
 LICENSE = "MIT"

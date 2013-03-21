@@ -1,3 +1,5 @@
+# Copyright (C) 2013 Digi International.
+
 DESCRIPTION = "DEL examples: OpenGL-ES test application (based on Freescale GPU SDK)"
 SECTION = "examples"
 LICENSE = "GPL-2.0"

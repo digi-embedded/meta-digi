@@ -1,13 +1,13 @@
 # Copyright (C) 2013 Digi International.
 
+DESCRIPTION = "Stunnel is a program that allows you to encrypt \
+arbitrary TCP connections inside SSL"
 SECTION = "console/network"
 DEPENDS = "openssl"
 HOMEPAGE = "http://www.stunnel.org"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=06715c92fdfd7a3dcf901b26b162b64c"
 
-DESCRIPTION = "Stunnel is a program that allows you to encrypt \
-arbitrary TCP connections inside SSL"
 INC_PR = "r0"
 
 S = "${WORKDIR}/stunnel-${PV}"

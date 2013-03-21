@@ -1,3 +1,5 @@
+# Copyright (C) 2013 Digi International.
+
 DESCRIPTION = "DEL examples: CAN bus test application"
 SECTION = "examples"
 LICENSE = "GPL-2.0"

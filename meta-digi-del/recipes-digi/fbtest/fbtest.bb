@@ -1,3 +1,5 @@
+# Copyright (C) 2013 Digi International.
+
 DESCRIPTION = "Digi's framebuffer test utility"
 SECTION = "base"
 LICENSE = "GPL-2.0"

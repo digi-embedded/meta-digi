@@ -1,3 +1,5 @@
+# Copyright (C) 2013 Digi International.
+
 DESCRIPTION = "Digi's utilities library"
 SECTION = "libs"
 LICENSE = "GPL-2.0"

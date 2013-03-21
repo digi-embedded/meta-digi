@@ -1,3 +1,5 @@
+# Copyright (C) 2013 Digi International.
+
 DESCRIPTION = "Firmware files for Digi's MXS based platforms, such as Atheros bluetooth."
 SECTION = "base"
 LICENSE = "Proprietary"

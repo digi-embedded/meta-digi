@@ -14,6 +14,9 @@ LICENSE = "MIT"
 inherit core-image
 inherit del-image
 
+INC_PR = "r0"
+PR = "${INC_PR}"
+
 # These features will move to the project's local.conf
 # where they can be customized by platform.
 

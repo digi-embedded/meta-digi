@@ -1,3 +1,5 @@
+# Copyright (C) 2013 Digi International.
+
 DESCRIPTION = "DEL examples: application to perform low level bluetooth"
 SECTION = "examples"
 LICENSE = "GPL-2.0"

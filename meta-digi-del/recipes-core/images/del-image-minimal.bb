@@ -3,6 +3,9 @@
 #
 DESCRIPTION = "DEL busybox based image (non graphical)."
 
+INC_PR = "r0"
+PR = "${INC_PR}"
+
 VIRTUAL-RUNTIME_dev_manager ?= "busybox-mdev"
 
 IMAGE_INSTALL = "packagegroup-del-core ${VIRTUAL-RUNTIME_dev_manager} ${ROOTFS_PKGMANAGE_BOOTSTRAP} ${CORE_IMAGE_EXTRA_INSTALL}"
