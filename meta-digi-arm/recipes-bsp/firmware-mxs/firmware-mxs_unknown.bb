@@ -3,7 +3,7 @@
 DESCRIPTION = "Firmware files for Digi's MXS based platforms, such as Atheros bluetooth."
 SECTION = "base"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=3f40d7994397109285ec7b81fdeb3b58"
+LIC_FILES_CHKSUM = "file://${LAYERDIR}/DIGI_EULA;md5=ef5b088ca04b6f10b1764aa182f4f51d"
 
 PR = "r0"
 
@@ -16,10 +16,10 @@ SRC_URI = "file://PS_ASIC.pst \
 	  "
 
 do_install() {
-    install -d ${D}/lib/firmware/ar3k/1020200/
-    cp -rfv ${WORKDIR}/PS_ASIC.pst ${D}/lib/firmware/ar3k/1020200/
-    cp -rfv ${WORKDIR}/RamPatch.txt ${D}/lib/firmware/ar3k/1020200/
-    find ${D}/lib/firmware/ar3k/1020200/ -type f -exec chmod 644 '{}' ';'
+	install -d ${D}/lib/firmware/ar3k/1020200/
+	cp -rfv ${WORKDIR}/PS_ASIC.pst ${D}/lib/firmware/ar3k/1020200/
+	cp -rfv ${WORKDIR}/RamPatch.txt ${D}/lib/firmware/ar3k/1020200/
+	find ${D}/lib/firmware/ar3k/1020200/ -type f -exec chmod 644 '{}' ';'
 }
 
 PACKAGES += "${PN}-ar3k"
