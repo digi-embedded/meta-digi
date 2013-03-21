@@ -1,5 +1,9 @@
+# Copyright (C) 2013 Digi International.
+
+PRINC := "${@int(PRINC) + 1}"
+PR_append = "+${DISTRO}"
+
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-PR_append = "+${DISTRO}.r0"
 
 SRC_URI += " \
 	file://cherokee.conf \

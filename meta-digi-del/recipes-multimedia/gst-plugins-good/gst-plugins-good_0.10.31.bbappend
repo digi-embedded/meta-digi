@@ -1,3 +1,8 @@
+# Copyright (C) 2013 Digi International.
+
+PRINC := "${@int(PRINC) + 1}"
+PR_append = "+${DISTRO}"
+
 PACKAGECONFIG = "${@base_contains('DISTRO_FEATURES', 'x11', 'x11 flac', '', d)}"
 PACKAGECONFIG[x11] = ",--disable-gconf --disable-x --disable-xshm --disable-xvideo,"
 PACKAGECONFIG[flac] = ",--disable-flac,"

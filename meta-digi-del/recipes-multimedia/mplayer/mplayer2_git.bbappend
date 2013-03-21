@@ -1,6 +1,7 @@
 # Copyright (C) 2012 Digi International.
 
-PR_append = "+${DISTRO}.0"
+PRINC := "${@int(PRINC) + 1}"
+PR_append = "+${DISTRO}"
 
 # live555 does not currently compile, this allows to remove it as a dependency.
 VIRTUAL-RUNTIME_streaming_framework = ""

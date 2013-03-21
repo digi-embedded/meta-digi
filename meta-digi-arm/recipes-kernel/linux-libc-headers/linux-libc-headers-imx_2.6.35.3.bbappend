@@ -1,5 +1,7 @@
 # Copyright (C) 2012 Digi International
-PR_append = "+${DISTRO}.r0"
+
+PRINC := "${@int(PRINC) + 1}"
+PR_append = "+${DISTRO}"
 
 SRCREV_mxs = "${AUTOREV}"
 KBRANCH_mxs = "refs/heads/master"

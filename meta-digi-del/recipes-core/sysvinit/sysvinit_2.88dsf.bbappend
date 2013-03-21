@@ -1,4 +1,7 @@
-PR_append = "+${DISTRO}.r0"
+# Copyright (C) 2013 Digi International.
+
+PRINC := "${@int(PRINC) + 1}"
+PR_append = "+${DISTRO}"
 
 # Remove 'bootlogd' bootscript and symlinks
 # (synchronize with poky's sysvinit_2.88dsf.bb)

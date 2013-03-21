@@ -2,7 +2,8 @@
 
 DESCRIPTION = "bootloader for Digi platforms"
 
-PR_append = "+${DISTRO}.r0"
+PRINC := "${@int(PRINC) + 1}"
+PR_append = "+${DISTRO}"
 
 # Uncomment to build the from sources (internal use only)
 # UBOOT_BUILD_SRC ?= "1"

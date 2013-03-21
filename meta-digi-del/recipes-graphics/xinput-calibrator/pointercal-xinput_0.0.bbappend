@@ -1,3 +1,6 @@
+# Copyright (C) 2013 Digi International.
+
 FILESEXTRAPATHS_prepend := "${THISDIR}/${MACHINE}"
 
-PR_append = "+${DISTRO}.r0"
+PRINC := "${@int(PRINC) + 1}"
+PR_append = "+${DISTRO}"

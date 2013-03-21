@@ -1,3 +1,8 @@
+# Copyright (C) 2013 Digi International.
+
+PRINC := "${@int(PRINC) + 1}"
+PR_append = "+${DISTRO}"
+
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 SRC_URI_append += "file://gst-fsl-plugin-2.0.3-0001-ltmain.patch"
 SRC_URI_append += "file://gst-fsl-plugin-2.0.3-0002-gplay_fullscreen.patch"
@@ -13,4 +18,3 @@ SRC_URI_append += "file://gst-fsl-plugin-2.0.3-0011-gplay_next_file.patch"
 SRC_URI_append += "file://gst-fsl-plugin-2.0.3-0012-gplay_repeat.patch"
 SRC_URI_append += "file://gst-fsl-plugin-2.0.3-0013-Only-call-MXCFB_SET_OVERLAY_POS-with-overlay-framebuffer.patch"
 SRC_URI_append += "file://gst-fsl-plugin-2.0.3-0014-Do-not-blank-the-display-on-device-close.patch"
-PR_append = "+${DISTRO}.0"

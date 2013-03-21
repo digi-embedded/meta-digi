@@ -1,6 +1,10 @@
+# Copyright (C) 2013 Digi International.
+
+PRINC := "${@int(PRINC) + 1}"
+PR_append = "+${DISTRO}"
+
 FILESEXTRAPATHS_prepend := "${THISDIR}/files"
 
-PR_append = "+${DISTRO}.r0"
 DEPENDS += "openssl"
 
 # Inhibit warning about files already stripped

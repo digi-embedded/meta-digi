@@ -1,3 +1,8 @@
+# Copyright (C) 2013 Digi International.
+
+PRINC := "${@int(PRINC) + 1}"
+PR_append = "+${DISTRO}"
+
 # Overwrite DEPENDS to avoid livrsvg dependency
 # which brings in gtk+
 DEPENDS = "gst-plugins-base libmusicbrainz tremor curl"

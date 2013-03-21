@@ -1,6 +1,9 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+# Copyright (C) 2013 Digi International.
 
-PR_append = "+${DISTRO}.r0"
+PRINC := "${@int(PRINC) + 1}"
+PR_append = "+${DISTRO}"
+
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 SRC_URI += "file://os-release"
 
