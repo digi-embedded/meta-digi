@@ -1,4 +1,3 @@
-SUMMARY = "Firmware files for Digi's MXS based platforms"
 DESCRIPTION = "Firmware files for Digi's MXS based platforms, such as Atheros bluetooth."
 SECTION = "base"
 LICENSE = "Proprietary"

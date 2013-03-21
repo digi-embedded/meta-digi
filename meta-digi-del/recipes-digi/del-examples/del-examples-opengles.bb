@@ -1,4 +1,4 @@
-SUMMARY = "DEL examples: OpenGL-ES test application (based on Freescale GPU SDK)"
+DESCRIPTION = "DEL examples: OpenGL-ES test application (based on Freescale GPU SDK)"
 SECTION = "examples"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"

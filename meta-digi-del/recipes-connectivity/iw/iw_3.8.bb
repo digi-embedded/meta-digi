@@ -1,4 +1,4 @@
-SUMMARY = "nl80211 based CLI configuration utility for wireless devices"
+DESCRIPTION = "nl80211 based CLI configuration utility for wireless devices"
 DESCRIPTION = "iw is a new nl80211 based CLI configuration utility for \
 wireless devices. It supports almost all new drivers that have been added \
 to the kernel recently. "
