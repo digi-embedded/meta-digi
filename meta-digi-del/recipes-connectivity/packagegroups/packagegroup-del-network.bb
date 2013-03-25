@@ -41,5 +41,7 @@ RDEPENDS_${PN} = "\
 	${VIRTUAL-RUNTIME_ntp-client} \
 	${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
+RDEPENDS_${PN}_append_mx5 = " ${@base_contains('MACHINE_FEATURES', 'ext-eth', 'kernel-module-smsc911x', '', d)}"
+
 RRECOMMENDS_${PN} = "\
     ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS}"

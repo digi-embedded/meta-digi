@@ -28,7 +28,7 @@ RDEPENDS_${PN}_append_mxs = "\
 "
 
 RDEPENDS_${PN}_append_mx5 = "\
-	del-examples-accelerometer \
+	${@base_contains("MACHINE_FEATURES", "accelerometer", "del-examples-accelerometer", "", d)} \
 	${@base_contains("MACHINE_FEATURES", "accel-graphics", "del-examples-opengles", "", d)} \
 	del-examples-sahara \
 	del-examples-v4l2 \

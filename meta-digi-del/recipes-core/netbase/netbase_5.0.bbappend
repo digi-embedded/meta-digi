@@ -20,7 +20,7 @@ pkg_postinst_${PN} () {
 cat << EOF > $D${sysconfdir}/network/interfaces
 EOF
 
-cat $D/boot/config* | /bin/grep CONFIG_BLK_DEV_LOOP=y
+cat $D/boot/config* | /bin/grep CONFIG_BLK_DEV_LOOP=
 if [ $? -eq 0 ]; then
 cat << EOF >> $D${sysconfdir}/network/interfaces
 # The loopback interface
@@ -29,7 +29,7 @@ iface lo inet loopback
 EOF
 fi
 
-cat $D/boot/config* | /bin/grep CONFIG_FEC=y
+cat $D/boot/config* | /bin/grep CONFIG_FEC=
 if [ $? -eq 0 ]; then
 # Primary wired interface
 cat << EOF >> $D${sysconfdir}/network/interfaces
@@ -45,8 +45,24 @@ iface eth0 inet static
 EOF
 fi
 
-# Secondary wired interface
-cat $D/boot/config* | /bin/grep CONFIG_SMSC911X=y
+# Secondary wired interface on MXC platforms
+cat $D/boot/config* | /bin/grep CONFIG_SMSC911X=
+if [ $? -eq 0 ]; then
+cat << EOF >> $D${sysconfdir}/network/interfaces
+auto eth1
+# Use for dhcp
+# iface eth1 inet dhcp
+iface eth1 inet static
+    address 192.168.44.30
+    netmask 255.255.255.0
+    network 192.168.44.0
+    gateway 192.168.44.1
+
+EOF
+fi
+
+# Secondary wired interface on MXS platforms
+cat $D/boot/config* | /bin/grep CONFIG_CCARDIMX28_ENET1=
 if [ $? -eq 0 ]; then
 cat << EOF >> $D${sysconfdir}/network/interfaces
 auto eth1
@@ -62,7 +78,7 @@ EOF
 fi
 
 # Wireless interface
-cat $D/boot/config* | /bin/grep CONFIG_WIRELESS=y
+cat $D/boot/config* | /bin/grep CONFIG_WIRELESS=
 if [ $? -eq 0 ]; then
 cat << EOF >> $D${sysconfdir}/network/interfaces
 auto wlan0

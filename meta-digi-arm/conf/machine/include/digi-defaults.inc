@@ -14,3 +14,7 @@ IMAGE_CLASSES = "image_types_digi"
 
 # Do not enable console on VT (see sysvinit-inittab recipe)
 USE_VT = "0"
+
+# Add the machine variant to the valid machine override
+MACHINEOVERRIDES =. "${@['', '${MACHINE_VARIANT}:']['${MACHINE_VARIANT}' != '']}"
+MACHINE_VARIANT ?= ""

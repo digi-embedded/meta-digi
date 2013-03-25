@@ -16,11 +16,16 @@ inherit packagegroup
 MACHINE_ESSENTIAL_EXTRA_RDEPENDS ?= ""
 MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS ?= ""
 
+WIRELESS_MODULE ?= ""
+WIRELESS_MODULE_append_mx5 = "${@base_contains('MACHINE_FEATURES', 'wifi', 'kernel-module-redpine', '', d)}"
+WIRELESS_MODULE_append_mxs = "${@base_contains('MACHINE_FEATURES', 'wifi', 'kernel-module-atheros', '', d)}"
+
 RDEPENDS_${PN} = "\
 	wpa-supplicant \
 	wireless-tools \
 	crda \
 	iw \
+	${WIRELESS_MODULE} \
 	${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
 RDEPENDS_${PN}_append_ccimx51js = "kernel-module-redpine"
