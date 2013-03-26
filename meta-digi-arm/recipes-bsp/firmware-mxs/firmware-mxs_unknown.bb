@@ -3,7 +3,7 @@
 DESCRIPTION = "Firmware files for Digi's MXS based platforms, such as Atheros bluetooth."
 SECTION = "base"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://${LAYERDIR}/DIGI_EULA;md5=ef5b088ca04b6f10b1764aa182f4f51d"
+LIC_FILES_CHKSUM = "file://${DIGI_EULA_FILE};md5=ef5b088ca04b6f10b1764aa182f4f51d"
 
 PR = "r0"
 
