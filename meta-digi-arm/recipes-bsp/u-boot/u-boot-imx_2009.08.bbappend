@@ -30,4 +30,8 @@ DEPENDS_mxs += "elftosb-native imx-bootlets-del"
 BOOTLETSDIR_mxs = "BOOTLETS_DIR=${STAGING_DIR_TARGET}/boot/"
 EXTRA_OEMAKE += '${BOOTLETSDIR}'
 
+# The meta-fsl-arm recipe overrides this so it needs to be done here again.
+UBOOT_MAKE_TARGET_ccardimx28js = "u-boot-ivt.sb"
+UBOOT_MAKE_TARGET_cpx2 = "u-boot-ivt.sb"
+
 COMPATIBLE_MACHINE = "(ccardimx28js|ccimx51js|ccimx53js|cpx2)"
