@@ -13,9 +13,11 @@ SRCREV = "9fd8c01cf3453b8e9dd668ecfd0a26a3253c33a1"
 TARBALL_MD5    = "b18c09c4c5624d5d4f2644412810e61b"
 TARBALL_SHA256 = "0e14d1c27799ade5f404a101c9906dde35ecd405b6ec09a876255f9ca5609eb5"
 
-LOCALVERSION_mx5 = "mx5"
-LOCALVERSION_mxs = "mxs"
-LOCALVERSION_cpx2_mxs = "mxs+gateways"
+SRCREV_SHORT = "${@'${SRCREV}'[:7]}"
+
+LOCALVERSION_mx5 = "mx5+${SRCREV_SHORT}"
+LOCALVERSION_mxs = "mxs+${SRCREV_SHORT}"
+LOCALVERSION_cpx2_mxs = "mxs+gateways+${SRCREV_SHORT}"
 
 KERNEL_CFG_FRAGS ?= ""
 KERNEL_CFG_FRAGS_append_mx5 = " file://config-accel-module.cfg file://config-sahara-module.cfg file://config-camera-module.cfg"
@@ -23,7 +25,6 @@ KERNEL_CFG_FRAGS_append_ccimx51js = " file://config-battery-module.cfg"
 KERNEL_CFG_FRAGS_append_ccardimx28js = " ${@base_contains('DISTRO_FEATURES', 'x11', 'file://config-fb.cfg file://config-touch.cfg', '', d)}"
 KERNEL_CFG_FRAGS_append_ccardimx28js = " ${@base_contains('MACHINE_FEATURES', 'alsa', 'file://config-sound.cfg', '', d)}"
 
-SRCREV_SHORT = "${@'${SRCREV}'[:7]}"
 SRC_URI_tarball = " \
         ${DIGI_MIRROR}/linux-2.6-${SRCREV_SHORT}.tar.gz;md5sum=${TARBALL_MD5};sha256sum=${TARBALL_SHA256} \
         "
