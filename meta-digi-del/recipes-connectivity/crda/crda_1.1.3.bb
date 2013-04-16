@@ -13,10 +13,10 @@ PR = "${DISTRO}.r0"
 VIRTUAL-RUNTIME_crda_use_gcrypt ?= "0"
 
 # The distribution could set this to its device manger, for example udev.
-VIRTUAL-RUNTIME_device_manager ?= "busybox-mdev"
+VIRTUAL-RUNTIME_dev_manager ?= "busybox-mdev"
 
 DEPENDS = "libnl ${@base_conditional('VIRTUAL-RUNTIME_crda_use_gcrypt', '1' , 'libgcrypt python-m2crypto-native python-native', '', d)}"
-RDEPENDS_${PN} = '${VIRTUAL-RUNTIME_device_manager}'
+RDEPENDS_${PN} = '${VIRTUAL-RUNTIME_dev_manager}'
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
