@@ -5,7 +5,8 @@
 DESCRIPTION = "GPU driver and apps on mx5x"
 LICENSE = "Proprietary"
 SECTION = "libs"
-PR = "r0"
+
+PR = "${DISTRO}.r0"
 
 #todo: Replace for correct AMD license
 LIC_FILES_CHKSUM = "file://usr/include/VG/openvg.h;endline=30;md5=b0109611dd76961057d4c45ae6519802"

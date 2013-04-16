@@ -5,7 +5,7 @@ SECTION = "base"
 LICENSE = "Proprietary"
 LIC_FILES_CHKSUM = "file://${DIGI_EULA_FILE};md5=ef5b088ca04b6f10b1764aa182f4f51d"
 
-PR = "r0"
+PR = "${DISTRO}.r0"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/firmware-${PV}:"
 SRC_URI = "file://PS_ASIC.pst \

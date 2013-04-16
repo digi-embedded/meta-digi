@@ -7,7 +7,7 @@ DEPENDS = "libpng jpeg zlib"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://src/LICENSE;md5=537b9004889eb701c48fc1fe78d9c30e"
 
-INC_PR="r2"
+INC_PR="r0"
 
 PARALLEL_MAKE = ""
 

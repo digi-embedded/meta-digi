@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://RS.GENR.LNX.SD_GPL/include/ganges_faf.h;endline=6;md5
 
 inherit module
 
-PR = "r0"
+PR = "${DISTRO}.r0"
 
 # Uncomment to build the driver from sources (internal use only)
 # REDPINE_BUILD_SRC ?= "1"
