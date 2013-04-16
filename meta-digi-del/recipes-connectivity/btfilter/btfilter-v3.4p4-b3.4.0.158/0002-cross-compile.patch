@@ -1,5 +1,5 @@
 From: Javier Viguera <javier.viguera@digi.com>
-Date: Tue, 7 Aug 2012 14:00:03 +0200
+Date: Tue, 16 Apr 2013 18:46:31 +0200
 Subject: [PATCH] cross-compile
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
@@ -8,10 +8,10 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 27 insertions(+), 16 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 66f469e..f485b01 100644
+index 3170f65..22137d7 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -24,13 +24,13 @@ SBINDIR ?= $(PREFIX)/sbin
+@@ -25,13 +25,13 @@ SBINDIR ?= $(PREFIX)/sbin
  MANDIR ?= $(PREFIX)/share/man
  
  PKG_CONFIG ?= pkg-config
@@ -32,7 +32,7 @@ index 66f469e..f485b01 100644
  SOURCES=abtfilt_main.c \
  		abtfilt_wlan.c \
  		abtfilt_core.c \
-@@ -39,19 +39,19 @@ SOURCES=abtfilt_main.c \
+@@ -40,19 +40,19 @@ SOURCES=abtfilt_main.c \
  		nl80211_utils.c\
  		btfilter_core.c
  
@@ -61,7 +61,7 @@ index 66f469e..f485b01 100644
  
  NL1FOUND := $(shell $(PKG_CONFIG) --atleast-version=1 libnl-1 && echo Y)
  NL2FOUND := $(shell $(PKG_CONFIG) --atleast-version=2 libnl-2.0 && echo Y)
-@@ -79,6 +79,13 @@ endif
+@@ -80,6 +80,13 @@ endif
  LIBS += $(shell $(PKG_CONFIG) --libs $(NLLIBNAME))
  CFLAGS += $(shell $(PKG_CONFIG) --cflags $(NLLIBNAME))
  
@@ -73,9 +73,9 @@ index 66f469e..f485b01 100644
 +LIBS += $(shell $(PKG_CONFIG) --libs bluez)
 +CFLAGS += $(shell $(PKG_CONFIG) --cflags bluez)
  
- ifdef USE_HCIUTILS
- SOURCES += abtfilt_bluez_hciutils.c
-@@ -120,3 +127,7 @@ all: $(OBJECTS)
+ ifdef BOARD_HAS_ATH_WLAN_AR6004
+ CFLAGS += -DMULTI_WLAN_CHAN_SUPPORT
+@@ -125,3 +132,7 @@ all: $(OBJECTS)
  
  clean:
  	rm -f $(FILTERAPP) $(OBJECTS)

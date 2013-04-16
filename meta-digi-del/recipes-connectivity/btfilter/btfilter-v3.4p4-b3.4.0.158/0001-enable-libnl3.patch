@@ -10,10 +10,10 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  3 files changed, 10 insertions(+), 4 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 797dc51..66f469e 100644
+index 115ad33..3170f65 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -55,17 +55,23 @@ LIBS=		-ldbus-1 -lpthread -lrt -lbluetooth
+@@ -56,17 +56,23 @@ LIBS=		-ldbus-1 -lpthread -lrt -lbluetooth
  
  NL1FOUND := $(shell $(PKG_CONFIG) --atleast-version=1 libnl-1 && echo Y)
  NL2FOUND := $(shell $(PKG_CONFIG) --atleast-version=2 libnl-2.0 && echo Y)
@@ -61,7 +61,7 @@ index 4689044..2957f2e 100644
  int iw_debug = 0;
  
 diff --git a/nl80211_utils.h b/nl80211_utils.h
-index e58767a..e8c482a 100644
+index 6a0dbd7..6bbeb2c 100644
 --- a/nl80211_utils.h
 +++ b/nl80211_utils.h
 @@ -11,7 +11,7 @@

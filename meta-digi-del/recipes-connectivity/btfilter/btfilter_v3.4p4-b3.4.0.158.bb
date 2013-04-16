@@ -14,8 +14,8 @@ SRC_URI = "${DIGI_MIRROR}/${PN}-${PV}.tar.bz2 \
 	   file://0002-cross-compile.patch \
 	   file://bluez-init"
 
-SRC_URI[md5sum] = "149b025f7a43f1f3abfa12462c48559a"
-SRC_URI[sha256sum] = "bbb358ce25ec36b32f99e66036ff52f375f3c1272b1425fafbef2c240a55d1a4"
+SRC_URI[md5sum] = "06a26d3a368c33b508d660ea84d476ee"
+SRC_URI[sha256sum] = "b1af73003b622189b66d51911d429d6d205ac9227ec8278c8572ca0c68c7d5f3"
 
 inherit update-rc.d
 
