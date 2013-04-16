@@ -1,4 +1,4 @@
-#!/bin/sh -l
+#!/bin/sh
 #===============================================================================
 #
 #  10-atheros_pre-up
@@ -27,8 +27,7 @@ MAC_FILENAME="softmac"
 # Get the wlan MAC address from kernel command line.  Use a default
 # value if the address has not been set.
 #
-
-MAC_ADDR=`cat /proc/cmdline | sed 's/\s/\n/g' | awk '/ethaddr2/ {print}' | sed 's/ethaddr2=//g'`
+MAC_ADDR="$(sed -e 's,.\+ethaddr2=\([^[:blank:]]\+\)[[:blank:]].*,\1,g' /proc/cmdline)"
 if [ -z "${MAC_ADDR}" -o "${MAC_ADDR}" = "00:00:00:00:00:00" ]; then
 	MAC_ADDR="00:04:F3:4C:B1:D3"
 fi
@@ -76,10 +75,10 @@ if [ ! -e "${BDATA_LINK}" ] || ! cmp -s "${BDATA_LINK}" "${FIRMWARE_DIR}/${BDATA
 fi
 
 # ath6kl_sdio.ko
-ATH6KL_PARAMS=""
+ATH6KL_PARAMS="ath6kl_p2p=1 softmac_enable=1"
 [ -f "/root/wifi_test_mode" ] && { ATH6KL_PARAMS="${ATH6KL_PARAMS} testmode=1"; test_mode_str=" in test mode"; }
 grep -qs ath6kl_sdio /proc/modules || \
-	/sbin/modprobe --ignore-install -q ath6kl_sdio ${ATH6KL_PARAMS} || echo "Loading ath6kl_sdio module${test_mode_str}: [FAILED]"
+	modprobe --ignore-install -q ath6kl_sdio ${ATH6KL_PARAMS} || echo "Loading ath6kl_sdio module${test_mode_str}: [FAILED]"
 
 # Delay required for the interface 'wlan0' to settle down before trying to configure it.
 sleep 0.5
