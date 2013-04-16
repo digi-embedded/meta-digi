@@ -23,5 +23,10 @@ RDEPENDS_${PN} = "\
 	iw \
 	${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
+RDEPENDS_${PN}_append_ccimx51js = "kernel-module-redpine"
+RDEPENDS_${PN}_append_ccimx53js = "kernel-module-redpine"
+RDEPENDS_${PN}_append_ccardimx28js = "kernel-module-atheros"
+RDEPENDS_${PN}_append_cpx2 = "kernel-module-atheros"
+
 RRECOMMENDS_${PN} = "\
     ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS}"
