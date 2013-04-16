@@ -1,5 +1,5 @@
-ATH_DRV_BASEDIR := Ath6kl_LinuxRelease/Generic_Packages/compat-wireless
-ATH_FIR_BASEDIR := Ath6kl_LinuxRelease/Firmware_Package/target/AR6003/hw2.1.1
+ATH_DRV_BASEDIR := compat-wireless
+ATH_FIR_BASEDIR := Firmware_Package/target/AR6003/hw2.1.1
 
 ifneq ($(KERNELRELEASE),)
 
@@ -29,21 +29,17 @@ obj-y += $(ATH_DRV_BASEDIR)/drivers/net/wireless/ath/ath6kl/
 else #ifneq ($(KERNELRELEASE),)
 
 ## Firmware files
-FIRMWARE := $(ATH_FIR_BASEDIR)/ath6kl_fw_concurrency/athtcmd_ram.bin
-FIRMWARE += $(ATH_FIR_BASEDIR)/ath6kl_fw_concurrency/athwlan.bin
+FIRMWARE := $(ATH_FIR_BASEDIR)/fw_tablet_dongle/athtcmd_ram.bin
+FIRMWARE += $(ATH_FIR_BASEDIR)/fw_tablet_dongle/athwlan.bin
+FIRMWARE += $(ATH_FIR_BASEDIR)/fw_tablet_dongle/fw-4.bin
+FIRMWARE += $(ATH_FIR_BASEDIR)/fw_tablet_dongle/nullTestFlow.bin
+FIRMWARE += $(ATH_FIR_BASEDIR)/fw_tablet_dongle/utf.bin
 FIRMWARE += $(ATH_FIR_BASEDIR)/Digi_6203-6233-US.bin
 FIRMWARE += $(ATH_FIR_BASEDIR)/Digi_6203-6233-World.bin
-FIRMWARE += $(ATH_FIR_BASEDIR)/ath6kl_fw_concurrency/fw-4.bin
-FIRMWARE += $(ATH_FIR_BASEDIR)/ath6kl_fw_concurrency/nullTestFlow.bin
-FIRMWARE += $(ATH_FIR_BASEDIR)/ath6kl_fw_concurrency/utf.bin
 ifeq ("$(DEL_PLATFORM)","cpx2")
 FIRMWARE += $(ATH_FIR_BASEDIR)/calData_AR6103_Digi_X2e_B.bin
 FIRMWARE += $(ATH_FIR_BASEDIR)/calData_AR6103_Digi_X2e_B_world.bin
 endif
-
-COMPAT_OBJS = $(filter-out $(addprefix $(ATH_DRV_BASEDIR)/compat/,built-in.o compat.mod.o compat.o), $(wildcard $(ATH_DRV_BASEDIR)/compat/*.o))
-CFG802_OBJS = $(filter-out $(addprefix $(ATH_DRV_BASEDIR)/net/wireless/,built-in.o cfg80211.mod.o cfg80211.o), $(wildcard $(ATH_DRV_BASEDIR)/net/wireless/*.o))
-ATH6KL_OBJS = $(filter-out $(addprefix $(ATH_DRV_BASEDIR)/drivers/net/wireless/ath/ath6kl/,built-in.o ath6kl_sdio.mod.o ath6kl_sdio.o), $(wildcard $(ATH_DRV_BASEDIR)/drivers/net/wireless/ath/ath6kl/*.o))
 
 SRC := $(shell pwd)
 
@@ -53,27 +49,11 @@ all:
 modules_install:
 	$(MAKE) -C $(KERNEL_SRC) M=$(SRC) modules_install
 	# Fix installation directory of the modules.
-	find $(INSTALL_MOD_PATH)/lib/modules/$(KERNEL_VERSION)/extra/Ath6kl_LinuxRelease -type f -name '*.ko' | \
+	find $(INSTALL_MOD_PATH)/lib/modules/$(KERNEL_VERSION)/extra/$(ATH_DRV_BASEDIR) -type f -name '*.ko' | \
 		xargs -I modfile mv -f modfile $(INSTALL_MOD_PATH)/lib/modules/$(KERNEL_VERSION)/extra/
-	rm -rf $(INSTALL_MOD_PATH)/lib/modules/*/extra/Ath6kl_LinuxRelease
+	rm -rf $(INSTALL_MOD_PATH)/lib/modules/*/extra/$(ATH_DRV_BASEDIR)
 	# Install firmware
 	mkdir -p $(INSTALL_MOD_PATH)/lib/firmware/ath6k/AR6003/hw2.1.1/
 	install -m 0644 $(FIRMWARE) $(INSTALL_MOD_PATH)/lib/firmware/ath6k/AR6003/hw2.1.1/
-
-tarball: TAR_DIR = $(SRC)/_tarball
-tarball:
-	for i in $(COMPAT_OBJS) $(CFG802_OBJS) $(ATH6KL_OBJS); do \
-		mkdir -p $(TAR_DIR)/$$(dirname $${i}); \
-		install -m 0644 $${i} $(TAR_DIR)/$$(dirname $${i})/$$(basename $${i})_shipped; \
-	done
-	for i in $(FIRMWARE); do \
-		mkdir -p $(TAR_DIR)/$$(dirname $${i}); \
-		install -m 0644 $${i} $(TAR_DIR)/$$(dirname $${i})/; \
-	done
-	REV="$$(git rev-parse --short --verify HEAD)"; \
-		rm -f atheros-$(DEL_PLATFORM)-$${REV}.tar.gz && \
-		tar cz --transform 's,\(^[^/]\+/\),\1$(DEL_PLATFORM)/,' \
-			--numeric-owner --owner 0 --group 0 -f atheros-$(DEL_PLATFORM)-$${REV}.tar.gz -C $(TAR_DIR) .
-	-rm -rf $(TAR_DIR)
 
 endif #ifneq ($(KERNELRELEASE),)
