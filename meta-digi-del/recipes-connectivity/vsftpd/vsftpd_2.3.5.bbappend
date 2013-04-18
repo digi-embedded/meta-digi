@@ -3,7 +3,7 @@
 PRINC := "${@int(PRINC) + 1}"
 PR_append = "+${DISTRO}"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/files"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 DEPENDS += "openssl"
 

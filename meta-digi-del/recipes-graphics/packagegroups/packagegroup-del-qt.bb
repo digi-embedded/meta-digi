@@ -10,12 +10,6 @@ PR = "r0"
 
 inherit packagegroup
 
-# TODO: test the following
-# packagegroup-fsl-tools-testapps \
-# packagegroup-fsl-tools-benchmark \
-# packagegroup-qt-in-use-demos \
-
-
 RDEPENDS_${PN} = "\
 	packagegroup-core-qt-demoapps \
 	qt4-plugin-phonon-backend-gstreamer \

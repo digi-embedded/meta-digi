@@ -29,3 +29,5 @@ FILES_${PN} += "/usr/share/wallpapers/texture.bmp"
 RDEPENDS_${PN} = "lib2dz160-mx51 lib2dz430-mx51"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
+
+COMPATIBLE_MACHINE = "(ccimx51js|ccimx53js)"
