@@ -9,14 +9,12 @@ PR = "${DISTRO}.r0"
 
 DEPENDS = "microwindows"
 
-FILESEXTRAPATHS_append := "${THISDIR}/files:"
-SRC_URI = "file://fbtest.c \
-           "
+SRC_URI = "file://fbtest.c"
 
 S = "${WORKDIR}"
 
 do_compile() {
-	${CC} -O2 -Wall -I usr/include/ -L usr/lib fbtest.c -lnano-X -o fbtest
+	${CC} -O2 -Wall fbtest.c -o fbtest -lnano-X
 }
 
 do_install() {
