@@ -18,8 +18,6 @@ VIRTUAL-RUNTIME_dev_manager ?= "busybox-mdev"
 DEPENDS = "libnl ${@base_conditional('VIRTUAL-RUNTIME_crda_use_gcrypt', '1' , 'libgcrypt python-m2crypto-native python-native', '', d)}"
 RDEPENDS_${PN} = '${VIRTUAL-RUNTIME_dev_manager}'
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-
 REG_RELEASE_DATE = "2013.01.11"
 SRC_URI = "http://wireless.kernel.org/download/crda/${PN}-${PV}.tar.bz2;name=crda \
 	   http://wireless.kernel.org/download/wireless-regdb/regulatory.bins/${REG_RELEASE_DATE}-regulatory.bin;name=reg \
