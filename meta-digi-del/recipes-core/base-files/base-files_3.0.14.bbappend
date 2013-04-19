@@ -8,7 +8,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 SRC_URI += "file://os-release"
 
 TIMESTAMP  = "${@time.strftime('%Y%m%d%H%M')}"
-LAYERS_REV = "${@"Layers revisions:\n%s\n" % '\n'.join(get_layers_branch_rev(d))}"
+LAYERS_REV = "${@"\nLayers revisions:\n%s\n" % '\n'.join(get_layers_branch_rev(d))}"
 DEL_TAG    = "${@del_tag(d).strip()}"
 
 def del_tag(d):
@@ -23,5 +23,7 @@ do_install_append() {
 	install -m 0644 ${WORKDIR}/os-release ${D}${sysconfdir}/
 	sed -i -e 's,##DEL_TAG##,${DEL_TAG},g' ${D}${sysconfdir}/os-release
 	sed -i -e 's,##BUILD_TIMESTAMP##,${TIMESTAMP},g' ${D}${sysconfdir}/os-release
-	printf "\n%s\n" "${LAYERS_REV}" >> ${D}${sysconfdir}/os-release
+	cat >> ${D}${sysconfdir}/os-release <<-EOF
+		${LAYERS_REV}
+	EOF
 }
