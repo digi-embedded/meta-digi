@@ -16,7 +16,7 @@ def del_tag(d):
     for layer in d.getVar('BBLAYERS', True).split():
         if 'meta-digi-del' in layer:
             cmd = 'git describe --tags --exact-match 2>/dev/null || true'
-            return subprocess.check_output(cmd, cwd=layer, shell=True)
+            return subprocess.Popen(cmd, cwd=layer, shell=True, stdout=subprocess.PIPE).stdout.read()
     return ""
 
 do_install_append() {
