@@ -20,7 +20,7 @@ pkg_postinst_${PN} () {
 cat << EOF > $D${sysconfdir}/network/interfaces
 EOF
 
-cat $D/boot/config* | /bin/grep CONFIG_BLK_DEV_LOOP=
+/bin/grep -q "CONFIG_BLK_DEV_LOOP=" ${STAGING_KERNEL_DIR}/.config
 if [ $? -eq 0 ]; then
 cat << EOF >> $D${sysconfdir}/network/interfaces
 # The loopback interface
@@ -29,7 +29,7 @@ iface lo inet loopback
 EOF
 fi
 
-cat $D/boot/config* | /bin/grep CONFIG_FEC=
+/bin/grep -q  "CONFIG_FEC=" ${STAGING_KERNEL_DIR}/.config
 if [ $? -eq 0 ]; then
 # Primary wired interface
 cat << EOF >> $D${sysconfdir}/network/interfaces
@@ -46,7 +46,7 @@ EOF
 fi
 
 # Secondary wired interface on MXC platforms
-cat $D/boot/config* | /bin/grep CONFIG_SMSC911X=
+/bin/grep -q "CONFIG_SMSC911X=" ${STAGING_KERNEL_DIR}/.config
 if [ $? -eq 0 ]; then
 cat << EOF >> $D${sysconfdir}/network/interfaces
 auto eth1
@@ -62,7 +62,7 @@ EOF
 fi
 
 # Secondary wired interface on MXS platforms
-cat $D/boot/config* | /bin/grep CONFIG_CCARDIMX28_ENET1=
+/bin/grep -q  "CONFIG_CCARDIMX28_ENET1=" ${STAGING_KERNEL_DIR}/.config
 if [ $? -eq 0 ]; then
 cat << EOF >> $D${sysconfdir}/network/interfaces
 auto eth1
@@ -78,7 +78,7 @@ EOF
 fi
 
 # Wireless interface
-cat $D/boot/config* | /bin/grep CONFIG_WIRELESS=
+/bin/grep -q  "CONFIG_WIRELESS=" ${STAGING_KERNEL_DIR}/.config
 if [ $? -eq 0 ]; then
 cat << EOF >> $D${sysconfdir}/network/interfaces
 auto wlan0
