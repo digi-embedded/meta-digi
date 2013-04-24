@@ -21,10 +21,10 @@ SCRIPTNAME=/etc/init.d/$NAME
 
 do_start() {
 	# Enable the Headset (Audio Out)
-	$AMIXER sset "Headphone Volume" 120 > /dev/null
+	$AMIXER sset "Headphone" 120 > /dev/null
 	$AMIXER sset "Speaker Function" on > /dev/null
-	$AMIXER sset "Playback Volume" 160 > /dev/null
-	$AMIXER sset "Capture Volume" 15 > /dev/null
+	$AMIXER sset "Playback" 160 > /dev/null
+	$AMIXER sset "Capture" 15 > /dev/null
 	$AMIXER sset "Jack Function" on > /dev/null
 }
 
