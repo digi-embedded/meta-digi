@@ -40,11 +40,11 @@ MACHINE_FEATURES += "alsa touchscreen"
 
 # Variant configuration
 
-MACHINE_FEATURES_web1 += "wifi ext-eth bluetooth 1-wire"
-MACHINE_FEATURES_web += "wifi ext-eth bluetooth"
-MACHINE_FEATURES_wb += "wifi bluetooth"
-MACHINE_FEATURES_w += "wifi"
-MACHINE_FEATURES_e += "ext-eth"
+MACHINE_FEATURES_append_web1 = " wifi ext-eth bluetooth 1-wire"
+MACHINE_FEATURES_append_web = " wifi ext-eth bluetooth"
+MACHINE_FEATURES_append_wb = " wifi bluetooth"
+MACHINE_FEATURES_append_w = " wifi"
+MACHINE_FEATURES_append_e = " ext-eth"
 
 # Variants for different CPU speed
 #UBOOT_CONFIG_VARIANT = "261MHz"
