@@ -42,6 +42,7 @@ RDEPENDS_${PN} = "\
     ubootenv \
     update-flash \
     usbutils \
+    ${@base_contains("MACHINE_FEATURES", "usbgadget", "kernel-module-g-ether kernel-module-g-file-storage kernel-module-g-serial", "",d)} \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
 RRECOMMENDS_${PN} = "\
