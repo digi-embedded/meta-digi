@@ -1,6 +1,6 @@
 # Copyright (C) 2013 Digi International.
 
-DESCRIPTION = "DEL examples: bluetooth health profile test application"
+SUMMARY = "DEL examples: bluetooth health profile test application"
 SECTION = "examples"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"

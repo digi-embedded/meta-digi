@@ -2,7 +2,7 @@
 # Copyright (C) 2012 Digi International
 # Released under the MIT license (see COPYING.MIT for the terms)
 
-DESCRIPTION = "GPU driver and apps on mx5x"
+SUMMARY = "GPU driver and apps on mx5x"
 LICENSE = "Proprietary"
 SECTION = "libs"
 
