@@ -5,7 +5,10 @@ PR_append = "+${DISTRO}"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-SRC_URI += "file://os-release"
+SRC_URI += " \
+	file://os-release \
+	file://sysctl.conf \
+"
 
 TIMESTAMP  = "${@time.strftime('%Y%m%d%H%M')}"
 LAYERS_REV = "${@"\nLayers revisions:\n%s\n" % '\n'.join(get_layers_branch_rev(d))}"
@@ -25,5 +28,13 @@ do_install_append() {
 	sed -i -e 's,##BUILD_TIMESTAMP##,${TIMESTAMP},g' ${D}${sysconfdir}/os-release
 	cat >> ${D}${sysconfdir}/os-release <<-EOF
 		${LAYERS_REV}
+	EOF
+	install -m 0644 ${WORKDIR}/sysctl.conf ${D}${sysconfdir}/
+}
+
+do_install_append_mx5() {
+	cat >> ${D}${sysconfdir}/sysctl.conf <<-EOF
+		# Protect the DMA zone and avoid memory allocation error
+		vm.lowmem_reserve_ratio = 1 1
 	EOF
 }
