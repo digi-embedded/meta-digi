@@ -4,3 +4,5 @@ PRINC := "${@int(PRINC) + 1}"
 PR_append = "+${DISTRO}"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
+
+RRECOMMENDS_${PN} += "udev-extraconf"
