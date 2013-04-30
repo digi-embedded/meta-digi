@@ -24,20 +24,24 @@ VIRTUAL-RUNTIME_init_manager ?= "sysvinit"
 VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 VIRTUAL-RUNTIME_keymaps ?= "keymaps"
 
+# Set device manager depending on X11 feature
+VIRTUAL-RUNTIME_dev_manager ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'udev', 'busybox-mdev', d)}"
+
 RDEPENDS_${PN} = "\
     base-files \
     base-passwd \
     busybox \
-    ${VIRTUAL-RUNTIME_passwd_manager} \
-    ${VIRTUAL-RUNTIME_initscripts} \
     ${@base_contains("MACHINE_FEATURES", "rtc", "busybox-hwclock", "", d)} \
     ${@base_contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
     ${@base_contains("MACHINE_FEATURES", "touchscreen", "tslib tslib-calibrate tslib-tests", "",d)} \
     modutils-initscripts \
     netbase \
     nvram \
-    ${VIRTUAL-RUNTIME_login_manager} \
+    ${VIRTUAL-RUNTIME_dev_manager} \
     ${VIRTUAL-RUNTIME_init_manager} \
+    ${VIRTUAL-RUNTIME_initscripts} \
+    ${VIRTUAL-RUNTIME_login_manager} \
+    ${VIRTUAL-RUNTIME_passwd_manager} \
     ${VIRTUAL-RUNTIME_update-alternatives} \
     ubootenv \
     update-flash \

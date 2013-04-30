@@ -9,8 +9,6 @@ IMAGE_FEATURES += "splash package-management x11-base x11-sato"
 
 LICENSE = "MIT"
 
-VIRTUAL-RUNTIME_dev_manager = "udev"
-
 include del-image-minimal.bb
 
 DISTRO_FEATURES += "pulseaudio"

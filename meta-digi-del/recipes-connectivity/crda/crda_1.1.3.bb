@@ -9,11 +9,7 @@ LICENSE = "ISC"
 
 PR = "${DISTRO}.r0"
 
-# The distribution could set this to its device manger, for example udev.
-VIRTUAL-RUNTIME_dev_manager ?= "busybox-mdev"
-
 DEPENDS = "libnl"
-RDEPENDS_${PN} = '${VIRTUAL-RUNTIME_dev_manager}'
 
 REG_RELEASE_DATE = "2013.01.11"
 SRC_URI = " \

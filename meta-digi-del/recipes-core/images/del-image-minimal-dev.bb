@@ -6,9 +6,7 @@ DESCRIPTION = "DEL busybox based image (non graphical) suitable for development 
 INC_PR = "r0"
 PR = "${INC_PR}"
 
-VIRTUAL-RUNTIME_dev_manager ?= "busybox-mdev"
-
-IMAGE_INSTALL = "packagegroup-del-core ${VIRTUAL-RUNTIME_dev_manager} ${ROOTFS_PKGMANAGE_BOOTSTRAP} ${CORE_IMAGE_EXTRA_INSTALL}"
+IMAGE_INSTALL = "packagegroup-del-core ${ROOTFS_PKGMANAGE_BOOTSTRAP} ${CORE_IMAGE_EXTRA_INSTALL}"
 
 VIRTUAL-RUNTIME_accel-graphics = '${@base_contains("DISTRO_FEATURES", "x11", "", "amd-gpu-bin-mx51", d)}'
 IMAGE_INSTALL_append_mx5 = " ${@base_contains('MACHINE_FEATURES', 'accel-graphics', '${VIRTUAL-RUNTIME_accel-graphics}', '', d)}"

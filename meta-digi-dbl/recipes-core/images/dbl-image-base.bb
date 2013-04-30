@@ -3,9 +3,7 @@
 #
 DESCRIPTION = "DBL busybox based image."
 
-VIRTUAL-RUNTIME_dev_manager ?= "busybox-mdev"
-
-IMAGE_INSTALL = "packagegroup-dbl-core ${VIRTUAL-RUNTIME_dev_manager} ${ROOTFS_PKGMANAGE_BOOTSTRAP} ${CORE_IMAGE_EXTRA_INSTALL}"
+IMAGE_INSTALL = "packagegroup-dbl-core ${ROOTFS_PKGMANAGE_BOOTSTRAP} ${CORE_IMAGE_EXTRA_INSTALL}"
 
 IMAGE_LINGUAS = " "
 
