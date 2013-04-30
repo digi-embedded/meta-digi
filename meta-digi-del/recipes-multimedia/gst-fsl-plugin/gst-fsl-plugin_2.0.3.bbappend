@@ -5,6 +5,9 @@ PR_append = "+${DISTRO}"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
+DEPENDS += "fsl-mm-flv-codeclib fsl-mm-mp3enc-codeclib"
+RDEPENDS_${PN} += "fsl-mm-flv-codeclib fsl-mm-mp3enc-codeclib"
+
 SRC_URI += " \
     file://gst-fsl-plugin-2.0.3-0001-ltmain.patch \
     file://gst-fsl-plugin-2.0.3-0002-gplay_fullscreen.patch \
