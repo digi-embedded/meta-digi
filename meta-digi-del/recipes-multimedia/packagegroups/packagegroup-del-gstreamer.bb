@@ -196,9 +196,6 @@ VIRTUAL_RUNTIME_gst-plugins-ugly = "\
 	"
 
 RDEPENDS_${PN} = "\
-    fsl-mm-codeclib \
-    fsl-mm-flv-codeclib \
-    fsl-mm-mp3enc-codeclib \
     ${VIRTUAL_RUNTIME_gst-fsl-plugin} \
     imx-lib \
     ${MACHINE_FIRMWARE} \
