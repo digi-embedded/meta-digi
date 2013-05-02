@@ -8,13 +8,13 @@ PR_append = "+${DISTRO}"
 # Uncomment to build the from sources (internal use only)
 # UBOOT_BUILD_SRC ?= "1"
 
-SRCREV_mxs = "57dc7fb843484ff0099f6e5f5a2528a7a2dd1766"
-SRCREV_mx5 = "57dc7fb843484ff0099f6e5f5a2528a7a2dd1766"
+SRCREV_mxs = "af1375fd2b7273ab6e7c8a2506a58605264b6585"
+SRCREV_mx5 = "af1375fd2b7273ab6e7c8a2506a58605264b6585"
 SRCREV_SHORT = "${@'${SRCREV}'[:7]}"
 
 # Checksums for 'u-boot-denx-${SRCREV_SHORT}.tar.gz' tarballs
-TARBALL_MD5    = "a6d29ccd750719b82c366b5cbc890212"
-TARBALL_SHA256 = "7b387f1e246e8c44cd561b68ba9c7182915e13b460b6f16b6b2013a6d6aaa302"
+TARBALL_MD5    = "820bafe66d61b3b511c34683e9be7442"
+TARBALL_SHA256 = "4dcbe44e5b664f8742d546bb107dc96708bb43c5f058cf8d5198bbd100f206bb"
 
 SRC_URI_git = "${DIGI_LOG_GIT}u-boot-denx.git;protocol=git;branch=refs/heads/master"
 SRC_URI_tarball = " \

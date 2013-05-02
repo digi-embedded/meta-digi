@@ -11,13 +11,13 @@ PR = "${DISTRO}.r0"
 # Uncomment to build the driver from sources (internal use only)
 # REDPINE_BUILD_SRC ?= "1"
 
-SRCREV = "e43f35983fbcc4d2c537cfb5c0133c7d3cf4fc61"
+SRCREV = "576a38c9ffca144f4d21bb25f0487045682c956c"
 
 # Checksums for 'redpine-${MACHINE}-${SRCREV_SHORT}.tar.gz' tarballs
-TARBALL_MD5_ccimx51js    = "8ffb32adef6374b535941e31217876ab"
-TARBALL_SHA256_ccimx51js = "ba507b694f4dbc98c8ac5dd7b4fd47de6c8f122cd6c4fd3a5cba24ace2c8c7a0"
-TARBALL_MD5_ccimx53js    = "c65caf5097892b77024116b76e0c7e16"
-TARBALL_SHA256_ccimx53js = "618889737ce0a06aa9bcd8e9c3e1588a2ba4eea8be9d5952d97948dfe2d39c6c"
+TARBALL_MD5_ccimx51js    = "2b0c63a70ba2726baf7408040f0dbc17"
+TARBALL_SHA256_ccimx51js = "b689a9c7fba88db06709a84d5232e65234f53f7b43c036cec823d05aa14554e6"
+TARBALL_MD5_ccimx53js    = "b124056990c471961ebfeb2cc7c63f87"
+TARBALL_SHA256_ccimx53js = "13a2350d9866d1c26aaea9a36da80231602cc49e176baf2191408a685436ad60"
 
 SRC_URI_git = " \
 	${DIGI_LOG_GIT}linux-modules/redpine.git;protocol=git \
