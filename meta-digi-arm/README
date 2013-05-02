@@ -6,9 +6,9 @@ with OpenEmbedded and/or Yocto.
 
 This layer is based on the following Yocto layers (Danny):
 
-git://git.yoctoproject.org/poky 		 e89f812a0af56beda951c1dce6113a61d6db8cda
-git://git.yoctoproject.org/meta-fsl-arm          869452daf4fe085d5013905f6a5a6584a0e3a56e
-git://github.com/openembedded/meta-oe.git        c02834a7cc5fda525c7ebeec545625233bab4cb5
+git://git.yoctoproject.org/poky 		 2806646a263527ec0487ea160afd4bdc0a3c1703
+git://git.yoctoproject.org/meta-fsl-arm          a0e486a76af5819ee76ac34e966feb72bd3c48bd
+git://github.com/openembedded/meta-oe.git        34e5537e67b655b8d2effbbecc207d88eea52b87
 
 
 Digi's license agreements
