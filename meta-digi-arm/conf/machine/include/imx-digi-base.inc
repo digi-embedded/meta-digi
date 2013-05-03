@@ -18,8 +18,8 @@ UBOOT_PADDING = "2"
 UBOOT_CONFIG_VARIANT ?= ""
 
 UBOOT_MACHINE = '${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "_", "_${UBOOT_CONFIG_VARIANT}_", d )}config'
-UBOOT_IMAGE = 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "-", "-${UBOOT_CONFIG_VARIANT}-", d )}${PV}-${PR}.${UBOOT_SUFFIX}'
-UBOOT_SYMLINK = 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "", "-${UBOOT_CONFIG_VARIANT}", d )}.${UBOOT_SUFFIX}'
+UBOOT_IMAGE = 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "-", "_${UBOOT_CONFIG_VARIANT}-", d )}${PV}-${PR}.${UBOOT_SUFFIX}'
+UBOOT_SYMLINK = 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "", "_${UBOOT_CONFIG_VARIANT}", d )}.${UBOOT_SUFFIX}'
 
 XSERVER = "xserver-xorg \
            xf86-input-evdev \
