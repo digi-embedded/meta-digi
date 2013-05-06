@@ -7,11 +7,11 @@ PR = "${DISTRO}.${INC_PR}.0"
 # Uncomment to build the from sources (internal use only)
 # KERNEL_BUILD_SRC ?= "1"
 
-SRCREV = "9fd8c01cf3453b8e9dd668ecfd0a26a3253c33a1"
+SRCREV = "d615e9350f4d14e8a0177ff4a3da8639046657eb"
 
 # Checksums for 'linux-2.6-${SRCREV_SHORT}.tar.gz' tarballs
-TARBALL_MD5    = "b18c09c4c5624d5d4f2644412810e61b"
-TARBALL_SHA256 = "0e14d1c27799ade5f404a101c9906dde35ecd405b6ec09a876255f9ca5609eb5"
+TARBALL_MD5    = "7cdc5187de9b416cfd4a619cd4c83742"
+TARBALL_SHA256 = "5071dfc96c7340ca4e4b3f9c54771e146f3a4b46cb30c3c92c33c7a4d8ead7de"
 
 SRCREV_SHORT = "${@'${SRCREV}'[:7]}"
 
