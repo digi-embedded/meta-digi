@@ -66,6 +66,9 @@ do_mkproject() {
 	source ${SCRIPTPATH}/sources/poky/oe-init-build-env .
 	unset TEMPLATECONF
 
+	# Remove possible duplicated entries in PATH (due to re-sourcing the script)
+	export PATH=$(printf ${PATH} | awk -v RS=: '{if (!arr[$0]++) {printf("%s%s", !ln++ ? "" : ":", $0) }}')
+
 	# Customize project if just created
 	if [ -z "${OLD_PROJECT}" ]; then
 		NCPU="$(grep -c processor /proc/cpuinfo)"
