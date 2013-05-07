@@ -66,18 +66,23 @@ do_mkproject() {
 	source ${SCRIPTPATH}/sources/poky/oe-init-build-env .
 	unset TEMPLATECONF
 
-	# Customize project
-	NCPU="$(grep -c processor /proc/cpuinfo)"
-	chmod 644 ${PROJECTPATH}/conf/bblayers.conf ${PROJECTPATH}/conf/local.conf
-	sed -i  -e"s,##DIGIBASE##,${SCRIPTPATH}/sources,g" ${PROJECTPATH}/conf/bblayers.conf
-	sed -i  -e "/^#BB_NUMBER_THREADS =/cBB_NUMBER_THREADS = \"${NCPU}\"" \
-		-e "/^#PARALLEL_MAKE =/cPARALLEL_MAKE = \"-j ${NCPU}\"" \
-		${PROJECTPATH}/conf/local.conf
-	unset NCPU
+	# Customize project if just created
+	if [ -z "${OLD_PROJECT}" ]; then
+		NCPU="$(grep -c processor /proc/cpuinfo)"
+		chmod 644 ${PROJECTPATH}/conf/bblayers.conf ${PROJECTPATH}/conf/local.conf
+		sed -i  -e"s,##DIGIBASE##,${SCRIPTPATH}/sources,g" ${PROJECTPATH}/conf/bblayers.conf
+		sed -i  -e "/^#BB_NUMBER_THREADS =/cBB_NUMBER_THREADS = \"${NCPU}\"" \
+			-e "/^#PARALLEL_MAKE =/cPARALLEL_MAKE = \"-j ${NCPU}\"" \
+			${PROJECTPATH}/conf/local.conf
+		unset NCPU
+	fi
 }
 
 ## Get available platforms
 AVAILABLE_PLATFORMS="$(echo $(ls -1 ${CONFIGPATH}/*/local.conf.sample | sed -e 's,^.*config/\([^/]\+\)/local\.conf\.sample,\1,g'))"
+
+# Verify if this is a new project (so we do NOT customize it)
+[ -r "${PROJECTPATH}/conf/bblayers.conf" -a -r "${PROJECTPATH}/conf/local.conf" ] && OLD_PROJECT="1"
 
 # The script needs to be sourced (not executed) so make sure to
 # initialize OPTIND variable for getopts.
@@ -105,4 +110,5 @@ else
 fi
 
 # clean-up all variables (so the script can be re-sourced)
-unset AVAILABLE_PLATFORMS GREEN NONE PROJECTPATH RED SCRIPTNAME SCRIPTPATH list_platforms platform
+unset AVAILABLE_PLATFORMS GREEN NONE OLD_PROJECT PROJECTPATH RED SCRIPTNAME SCRIPTPATH
+unset list_platforms platform
