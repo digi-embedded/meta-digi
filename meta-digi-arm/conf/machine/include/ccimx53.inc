@@ -45,7 +45,7 @@ MACHINE_FEATURES += "accelerometer"
 # Variant configuration
 
 MACHINE_FEATURES_append_we = " wifi ext-eth"
-UBOOT_CONFIG_VARIANT_append_we = " ext_eth"
+UBOOT_CONFIG_VARIANT_we = "ext_eth"
 MACHINE_FEATURES_append_w = " wifi"
 MACHINE_FEATURES_append_w128 = " wifi"
 UBOOT_CONFIG_VARIANT_w128 = "128sdram"
