@@ -48,7 +48,10 @@
 #MACHINE ?= "routerstationpro"
 #
 # This sets the default machine to be qemux86 if no other machine is selected:
-MACHINE ??= "ccardimx28js"
+#MACHINE ??= "qemux86"
+
+MACHINE = "ccardimx28js"
+MACHINE_VARIANT = "wb"
 
 #
 # Where to place downloads

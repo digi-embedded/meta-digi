@@ -48,7 +48,10 @@
 #MACHINE ?= "routerstationpro"
 #
 # This sets the default machine to be qemux86 if no other machine is selected:
-MACHINE ??= "ccimx53js"
+#MACHINE ??= "qemux86"
+
+MACHINE = "ccimx53js"
+MACHINE_VARIANT = "w"
 
 #
 # Where to place downloads
