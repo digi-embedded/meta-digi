@@ -19,15 +19,6 @@ SCRIPTNAME="$(basename ${BASH_SOURCE})"
 SCRIPTPATH="$(cd $(dirname ${BASH_SOURCE}) && pwd)"
 PROJECTPATH="$(pwd)"
 
-# if [ "${#}" -gt "0" ]; then
-# 	echo $1
-# 	shift
-# 	exec ${SCRIPTPATH}/${SCRIPTNAME} $@
-# fi
-# Compare the script with the one in 'meta-digi'. If it differs, then
-# copy-overwrite the one here and re-exec it after warning the user that the
-# script was updated.
-
 ## Color codes
 RED="\033[1;31m"
 GREEN="\033[1;32m"
@@ -80,6 +71,15 @@ do_mkproject() {
 		unset NCPU
 	fi
 }
+
+# Keep the running script in sync with the one in the layer. If it differs,
+# update it (copy/overwrite) and warn the user.
+if ! cmp -s ${SCRIPTPATH}/${SCRIPTNAME} ${SCRIPTPATH}/sources/meta-digi/sdk/${SCRIPTNAME}; then
+	install -m 0555 ${SCRIPTPATH}/sources/meta-digi/sdk/${SCRIPTNAME} ${SCRIPTPATH}/${SCRIPTNAME}
+	printf "\n${GREEN}[INFO]:${NONE} %s\n" "the '${SCRIPTNAME}' script has been updated."
+	printf "\nPlease run '. ${BASH_SOURCE}' again.\n\n"
+	return
+fi
 
 ## Get available platforms
 AVAILABLE_PLATFORMS="$(echo $(ls -1 ${CONFIGPATH}/*/local.conf.sample | sed -e 's,^.*config/\([^/]\+\)/local\.conf\.sample,\1,g'))"
