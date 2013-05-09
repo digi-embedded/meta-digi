@@ -35,8 +35,13 @@ Usage: source ${SCRIPTNAME} [OPTIONS]
 
     -l               list available platforms
     -p <platform>    select platform for the project
+    -v <variant>     select platform variant
 
 Available platforms: ${AVAILABLE_PLATFORMS}
+
+See platform include files for supported variant names:
+
+${SCRIPTPATH}/sources/meta-digi/meta-digi-arm/conf/machine/include/<platform>.inc
 
 EOF
 }
@@ -72,6 +77,10 @@ do_mkproject() {
 		sed -i  -e "/^#BB_NUMBER_THREADS =/cBB_NUMBER_THREADS = \"${NCPU}\"" \
 			-e "/^#PARALLEL_MAKE =/cPARALLEL_MAKE = \"-j ${NCPU}\"" \
 			${PROJECTPATH}/conf/local.conf
+		if [ -n "${variant}" ]; then
+			sed -i -e "/^MACHINE_VARIANT =/cMACHINE_VARIANT = \"${variant}\"" \
+				${PROJECTPATH}/conf/local.conf
+		fi
 		unset NCPU
 	fi
 }
@@ -94,10 +103,11 @@ AVAILABLE_PLATFORMS="$(echo $(ls -1 ${CONFIGPATH}/*/local.conf.sample | sed -e '
 # The script needs to be sourced (not executed) so make sure to
 # initialize OPTIND variable for getopts.
 OPTIND=1
-while getopts "lp:" c; do
+while getopts "lp:v:" c; do
 	case "${c}" in
 		l) list_platforms="y";;
 		p) platform="${OPTARG}";;
+		v) variant="${OPTARG}";;
 	esac
 done
 
@@ -107,15 +117,15 @@ if [ "${BASH_SOURCE}" = "${0}" ]; then
 elif [ ${#} -eq 0 ] ; then
 	usage
 elif [ -n "${list_platforms}" ]; then
-        echo ${AVAILABLE_PLATFORMS}
+	echo ${AVAILABLE_PLATFORMS}
 elif [ -z "${platform}" ]; then
-        error "-p option is required"
+	error "-p option is required"
 elif ! check_selected_platform; then
-        error "the selected platform \"${platform}\" is not available"
+	error "the selected platform \"${platform}\" is not available"
 else
 	do_mkproject
 fi
 
 # clean-up all variables (so the script can be re-sourced)
 unset AVAILABLE_PLATFORMS GREEN NONE OLD_PROJECT PROJECTPATH RED SCRIPTNAME SCRIPTPATH
-unset list_platforms platform
+unset list_platforms platform variant
