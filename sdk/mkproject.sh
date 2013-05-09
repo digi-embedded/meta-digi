@@ -29,12 +29,16 @@ CONFIGPATH="${SCRIPTPATH}/sources/meta-digi/sdk/config"
 
 ## Local functions
 usage() {
-	printf "\nUsage: source ${SCRIPTNAME} [OPTIONS]\n
-	-l               list available platforms
-	-p <platform>    select platform for the project
-	\n"
+	cat <<EOF
 
-	printf "Available platforms: ${AVAILABLE_PLATFORMS}\n\n"
+Usage: source ${SCRIPTNAME} [OPTIONS]
+
+    -l               list available platforms
+    -p <platform>    select platform for the project
+
+Available platforms: ${AVAILABLE_PLATFORMS}
+
+EOF
 }
 
 error() {
