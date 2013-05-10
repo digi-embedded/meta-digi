@@ -23,10 +23,8 @@ SRC_URI_tar = "${DIGI_MIRROR}/atheros-${SRCREV_SHORT}.tar.gz;md5sum=${TARBALL_MD
 
 SRC_URI  = "${@base_conditional('ATHEROS_BUILD_FROM_GIT', '1' , '${SRC_URI_git}', '${SRC_URI_tar}', d)}"
 SRC_URI += " \
-	file://50-firmware.rules \
 	file://atheros \
 	file://atheros.conf \
-	file://firmware.sh \
 	file://Makefile \
 	"
 
@@ -43,10 +41,6 @@ do_install_append() {
 	install -m 0755 ${WORKDIR}/atheros ${D}${sysconfdir}/network/if-pre-up.d/
 	install -d ${D}${sysconfdir}/modprobe.d
 	install -m 0644 ${WORKDIR}/atheros.conf ${D}${sysconfdir}/modprobe.d/
-	install -d ${D}${sysconfdir}/udev/rules.d
-	install -m 0644 ${WORKDIR}/50-firmware.rules ${D}${sysconfdir}/udev/rules.d/
-	install -d ${D}${base_libdir}/udev
-	install -m 0755 ${WORKDIR}/firmware.sh ${D}${base_libdir}/udev/
 }
 
 FILES_${PN} += " \
@@ -57,7 +51,6 @@ FILES_${PN} += " \
 	/lib/firmware/ath6k/AR6003/hw2.1.1/fw-4.bin \
 	/lib/firmware/ath6k/AR6003/hw2.1.1/nullTestFlow.bin \
 	/lib/firmware/ath6k/AR6003/hw2.1.1/utf.bin \
-	/lib/udev/firmware.sh \
 	"
 FILES_${PN}_append_cpx2 = " \
 	/lib/firmware/ath6k/AR6003/hw2.1.1/calData_AR6103_Digi_X2e_B.bin \
