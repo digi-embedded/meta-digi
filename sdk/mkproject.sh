@@ -15,71 +15,71 @@
 #
 #===============================================================================
 
-SCRIPTNAME="$(basename ${BASH_SOURCE})"
-SCRIPTPATH="$(cd $(dirname ${BASH_SOURCE}) && pwd)"
-PROJECTPATH="$(pwd)"
+MKP_SCRIPTNAME="$(basename ${BASH_SOURCE})"
+MKP_SCRIPTPATH="$(cd $(dirname ${BASH_SOURCE}) && pwd)"
+MKP_PROJECTPATH="$(pwd)"
 
 ## Color codes
-RED="\033[1;31m"
-GREEN="\033[1;32m"
-NONE="\033[0m"
+MKP_RED="\033[1;31m"
+MKP_GREEN="\033[1;32m"
+MKP_NONE="\033[0m"
 
 # Path to platform config files
-CONFIGPATH="${SCRIPTPATH}/sources/meta-digi/sdk/config"
+MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/meta-digi/sdk/config"
 
 ## Local functions
 usage() {
 	cat <<EOF
 
-Usage: source ${SCRIPTNAME} [OPTIONS]
+Usage: source ${MKP_SCRIPTNAME} [OPTIONS]
 
     -l               list available platforms
     -p <platform>    select platform for the project
     -v <variant>     select platform variant
 
-Available platforms: ${AVAILABLE_PLATFORMS}
+Available platforms: ${MKP_AVAILABLE_PLATFORMS}
 
 See platform include files for supported variant names:
 
-${SCRIPTPATH}/sources/meta-digi/meta-digi-arm/conf/machine/include/<platform>.inc
+${MKP_SCRIPTPATH}/sources/meta-digi/meta-digi-arm/conf/machine/include/<platform>.inc
 
 EOF
 }
 
 error() {
 	if [ ${#} -ne 0 ] ; then
-		printf "\n${RED}[ERROR]:${NONE} %s\n" "${1}"
+		printf "\n${MKP_RED}[ERROR]:${MKP_NONE} %s\n" "${1}"
 	fi
 	usage
 }
 
 check_selected_platform() {
-	for i in : ${AVAILABLE_PLATFORMS}; do
+	for i in : ${MKP_AVAILABLE_PLATFORMS}; do
 		[ "${i}" = ":" ] && continue
-		[ "${i}" = "${platform}" ] && return 0
+		[ "${i}" = "${MKP_PLATFORM}" ] && return 0
 	done
 	return 1
 }
 
 do_mkproject() {
-	export TEMPLATECONF="${CONFIGPATH}/${platform}"
-	source ${SCRIPTPATH}/sources/poky/oe-init-build-env .
+	export TEMPLATECONF="${MKP_CONFIGPATH}/${MKP_PLATFORM}"
+	source ${MKP_SCRIPTPATH}/sources/poky/oe-init-build-env .
 	unset TEMPLATECONF
 
 	# Remove possible duplicated entries in PATH (due to re-sourcing the script)
 	export PATH=$(printf ${PATH} | awk -v RS=: '{if (!arr[$0]++) {printf("%s%s", !ln++ ? "" : ":", $0) }}')
 
 	# Customize project if just created
-	if [ -z "${OLD_PROJECT}" ]; then
+	if [ -z "${MKP_OLD_PROJECT}" ]; then
 		NCPU="$(grep -c processor /proc/cpuinfo)"
-		chmod 644 ${PROJECTPATH}/conf/bblayers.conf ${PROJECTPATH}/conf/local.conf
-		sed -i  -e"s,##DIGIBASE##,${SCRIPTPATH}/sources,g" ${PROJECTPATH}/conf/bblayers.conf
+		chmod 644 ${MKP_PROJECTPATH}/conf/bblayers.conf ${MKP_PROJECTPATH}/conf/local.conf
+		sed -i  -e"s,##DIGIBASE##,${MKP_SCRIPTPATH}/sources,g" ${MKP_PROJECTPATH}/conf/bblayers.conf
 		sed -i  -e "/^#BB_NUMBER_THREADS =/cBB_NUMBER_THREADS = \"${NCPU}\"" \
 			-e "/^#PARALLEL_MAKE =/cPARALLEL_MAKE = \"-j ${NCPU}\"" \
-			${PROJECTPATH}/conf/local.conf
-		if [ -n "${variant}" ]; then
-			sed -i -e "/^MACHINE_VARIANT =/cMACHINE_VARIANT = \"${variant}\"" \
-				${PROJECTPATH}/conf/local.conf
+			${MKP_PROJECTPATH}/conf/local.conf
+		if [ -n "${MKP_VARIANT}" ]; then
+			sed -i -e "/^MACHINE_VARIANT =/cMACHINE_VARIANT = \"${MKP_VARIANT}\"" \
+				${MKP_PROJECTPATH}/conf/local.conf
 		fi
 		unset NCPU
 	fi
@@ -87,27 +87,27 @@ do_mkproject() {
 
 # Keep the running script in sync with the one in the layer. If it differs,
 # update it (copy/overwrite) and warn the user.
-if ! cmp -s ${SCRIPTPATH}/${SCRIPTNAME} ${SCRIPTPATH}/sources/meta-digi/sdk/${SCRIPTNAME}; then
-	install -m 0555 ${SCRIPTPATH}/sources/meta-digi/sdk/${SCRIPTNAME} ${SCRIPTPATH}/${SCRIPTNAME}
-	printf "\n${GREEN}[INFO]:${NONE} %s\n" "the '${SCRIPTNAME}' script has been updated."
+if ! cmp -s ${MKP_SCRIPTPATH}/${MKP_SCRIPTNAME} ${MKP_SCRIPTPATH}/sources/meta-digi/sdk/${MKP_SCRIPTNAME}; then
+	install -m 0555 ${MKP_SCRIPTPATH}/sources/meta-digi/sdk/${MKP_SCRIPTNAME} ${MKP_SCRIPTPATH}/${MKP_SCRIPTNAME}
+	printf "\n${MKP_GREEN}[INFO]:${MKP_NONE} %s\n" "the '${MKP_SCRIPTNAME}' script has been updated."
 	printf "\nPlease run '. ${BASH_SOURCE}' again.\n\n"
 	return
 fi
 
 ## Get available platforms
-AVAILABLE_PLATFORMS="$(echo $(ls -1 ${CONFIGPATH}/*/local.conf.sample | sed -e 's,^.*config/\([^/]\+\)/local\.conf\.sample,\1,g'))"
+MKP_AVAILABLE_PLATFORMS="$(echo $(ls -1 ${MKP_CONFIGPATH}/*/local.conf.sample | sed -e 's,^.*config/\([^/]\+\)/local\.conf\.sample,\1,g'))"
 
 # Verify if this is a new project (so we do NOT customize it)
-[ -r "${PROJECTPATH}/conf/bblayers.conf" -a -r "${PROJECTPATH}/conf/local.conf" ] && OLD_PROJECT="1"
+[ -r "${MKP_PROJECTPATH}/conf/bblayers.conf" -a -r "${MKP_PROJECTPATH}/conf/local.conf" ] && MKP_OLD_PROJECT="1"
 
 # The script needs to be sourced (not executed) so make sure to
 # initialize OPTIND variable for getopts.
 OPTIND=1
 while getopts "lp:v:" c; do
 	case "${c}" in
-		l) list_platforms="y";;
-		p) platform="${OPTARG}";;
-		v) variant="${OPTARG}";;
+		l) MKP_LIST_PLATFORMS="y";;
+		p) MKP_PLATFORM="${OPTARG}";;
+		v) MKP_VARIANT="${OPTARG}";;
 	esac
 done
 
@@ -116,16 +116,17 @@ if [ "${BASH_SOURCE}" = "${0}" ]; then
 	error "This script needs to be sourced"
 elif [ ${#} -eq 0 ] ; then
 	usage
-elif [ -n "${list_platforms}" ]; then
-	echo ${AVAILABLE_PLATFORMS}
-elif [ -z "${platform}" ]; then
+elif [ -n "${MKP_LIST_PLATFORMS}" ]; then
+	echo ${MKP_AVAILABLE_PLATFORMS}
+elif [ -z "${MKP_PLATFORM}" ]; then
 	error "-p option is required"
 elif ! check_selected_platform; then
-	error "the selected platform \"${platform}\" is not available"
+	error "the selected platform \"${MKP_PLATFORM}\" is not available"
 else
 	do_mkproject
 fi
 
 # clean-up all variables (so the script can be re-sourced)
-unset AVAILABLE_PLATFORMS GREEN NONE OLD_PROJECT PROJECTPATH RED SCRIPTNAME SCRIPTPATH
-unset list_platforms platform variant
+unset MKP_AVAILABLE_PLATFORMS MKP_GREEN MKP_LIST_PLATFORMS MKP_NONE \
+      MKP_OLD_PROJECT MKP_PLATFORM MKP_PROJECTPATH MKP_RED MKP_SCRIPTNAME \
+      MKP_SCRIPTPATH MKP_VARIANT
