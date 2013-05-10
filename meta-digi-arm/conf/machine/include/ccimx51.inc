@@ -34,11 +34,11 @@ module_autoload_pmic_battery = "pmic_battery"
 # wagv		Y	N	256	Y	Y	Y
 # weagv		Y	Y	512	Y	Y	Y
 # w128agv	Y	N	128	Y	Y	Y
-# eavg		N	Y	512	Y	Y	Y
+# eagv		N	Y	512	Y	Y	Y
 # agv		N	N	256	Y	Y	Y
 # w		Y	N	512	N	N	N
 # 128		N	N	128	N	N	N
-# 128avg	N	N	128	Y	Y	Y
+# 128agv	N	N	128	Y	Y	Y
 # 128a		N	N	128	Y	N	N
 # w128a		Y	N	128	Y	N	N
 
