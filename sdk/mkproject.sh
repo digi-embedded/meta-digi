@@ -77,7 +77,7 @@ do_mkproject() {
 		sed -i  -e "/^#BB_NUMBER_THREADS =/cBB_NUMBER_THREADS = \"${NCPU}\"" \
 			-e "/^#PARALLEL_MAKE =/cPARALLEL_MAKE = \"-j ${NCPU}\"" \
 			${MKP_PROJECTPATH}/conf/local.conf
-		if [ -n "${MKP_VARIANT}" ]; then
+		if [ -n "${MKP_VARIANT+x}" ]; then
 			sed -i -e "/^MACHINE_VARIANT =/cMACHINE_VARIANT = \"${MKP_VARIANT}\"" \
 				${MKP_PROJECTPATH}/conf/local.conf
 		fi
