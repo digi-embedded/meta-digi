@@ -11,6 +11,7 @@ BBLAYERS ?= " \
   ##COREBASE##/meta-yocto-bsp \
   ##DIGIBASE##/meta-openembedded/meta-oe \
   ##DIGIBASE##/meta-fsl-arm \
+  ##DIGIBASE##/meta-fsl-demos \
   ##DIGIBASE##/meta-digi/meta-digi-arm \
   ##DIGIBASE##/meta-digi/meta-digi-del \
   "
