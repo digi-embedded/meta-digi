@@ -27,35 +27,40 @@ module_autoload_sahara = "sahara"
 module_autoload_mt9v111_camera = "mt9v111_camera"
 module_autoload_pmic_battery = "pmic_battery"
 
+#
 # Supported variants
+#
+# To build any of these variants configure MACHINE_VARIANT on the project's
+# local.conf to the variant name.
+#
+# Name          WiFi    Eth2    RAM     Accel   GPU     VPU
+# ---------------------------------------------------------
+# 128           N       N       128     N       N       N
+# 128a          N       N       128     Y       N       N
+# 128agv        N       N       128     Y       Y       Y
+# agv           N       N       256     Y       Y       Y
+# eagv          N       Y       512     Y       Y       Y
+# w             Y       N       512     N       N       N
+# w128a         Y       N       128     Y       N       N
+# w128agv       Y       N       128     Y       Y       Y
+# wagv          Y       N       256     Y       Y       Y
+# weagv         Y       Y       512     Y       Y       Y
 
-# Name		WiFi	Eth2	RAM	Accel	GPU	VPU
-# ----		---	---	---	----	---	---
-# wagv		Y	N	256	Y	Y	Y
-# weagv		Y	Y	512	Y	Y	Y
-# w128agv	Y	N	128	Y	Y	Y
-# eagv		N	Y	512	Y	Y	Y
-# agv		N	N	256	Y	Y	Y
-# w		Y	N	512	N	N	N
-# 128		N	N	128	N	N	N
-# 128agv	N	N	128	Y	Y	Y
-# 128a		N	N	128	Y	N	N
-# w128a		Y	N	128	Y	N	N
-
-
+# Per-variant machine features
+MACHINE_FEATURES_append_128a = " accelerometer"
+MACHINE_FEATURES_append_128agv = " accelerometer accel-video accel-graphics"
+MACHINE_FEATURES_append_agv = " accelerometer accel-video accel-graphics"
+MACHINE_FEATURES_append_eagv = " ext-eth accelerometer accel-video accel-graphics"
+MACHINE_FEATURES_append_w = " wifi"
+MACHINE_FEATURES_append_w128a = " wifi accelerometer"
+MACHINE_FEATURES_append_w128agv = " wifi accelerometer accel-video accel-graphics"
 MACHINE_FEATURES_append_wagv = " wifi accelerometer accel-video accel-graphics"
 MACHINE_FEATURES_append_weagv = " wifi ext-eth accelerometer accel-video accel-graphics"
-UBOOT_CONFIG_VARIANT_weagv = "ext_eth"
-MACHINE_FEATURES_append_w128agv = " wifi accelerometer accel-video accel-graphics"
-UBOOT_CONFIG_VARIANT_w128agv = "128sdram"
-MACHINE_FEATURES_append_eagv = " ext-eth accelerometer accel-video accel-graphics"
-MACHINE_FEATURES_append_agv = " accelerometer accel-video accel-graphics"
-MACHINE_FEATURES_append_w = " wifi"
-UBOOT_CONFIG_VARIANT_128 = "128sdram"
-MACHINE_FEATURES_append_128agv = " accelerometer accel-video accel-graphics"
-UBOOT_CONFIG_VARIANT_128agv = "128sdram"
-MACHINE_FEATURES_append_128a = " accelerometer"
-UBOOT_CONFIG_VARIANT_128a = "128sdram"
-MACHINE_FEATURES_append_w128a = " wifi accelerometer"
-UBOOT_CONFIG_VARIANT_w128a = "128sdram"
 
+# Per-variant u-boot configuration
+UBOOT_CONFIG_VARIANT_128 = "128sdram"
+UBOOT_CONFIG_VARIANT_128a = "128sdram"
+UBOOT_CONFIG_VARIANT_128agv = "128sdram"
+UBOOT_CONFIG_VARIANT_w128a = "128sdram"
+UBOOT_CONFIG_VARIANT_w128agv = "128sdram"
+UBOOT_CONFIG_VARIANT_weagv = "ext_eth"

@@ -27,24 +27,27 @@ MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE}"
 
 MACHINE_FEATURES += "alsa touchscreen"
 
+#
 # Supported variants
+#
+# To build any of these variants configure MACHINE_VARIANT on the project's
+# local.conf to the variant name.
+#
+# Name          WiFi    Eth2    BT      1wire
+# -------------------------------------------
+# -             N       N       N       N       (empty MACHINE_VARIANT="")
+# e             N       Y       N       N
+# w             Y       N       N       N
+# wb            Y       N       Y       N
+# web           Y       Y       Y       N
+# web1          Y       Y       Y       Y
 
-# Name		WiFi	Eth2	BT	1wire
-# ----		---	---	---	-----
-# web1		Y	Y	Y	Y
-# web		Y	Y	Y	N
-# wb		Y	N	Y	N
-# w		Y	N	N	N
-# -		N	N	N	N
-# e		N	Y	N	N
-
-# Variant configuration
-
-MACHINE_FEATURES_append_web1 = " wifi ext-eth bluetooth 1-wire"
-MACHINE_FEATURES_append_web = " wifi ext-eth bluetooth"
-MACHINE_FEATURES_append_wb = " wifi bluetooth"
-MACHINE_FEATURES_append_w = " wifi"
+# Per-variant machine features
 MACHINE_FEATURES_append_e = " ext-eth"
+MACHINE_FEATURES_append_w = " wifi"
+MACHINE_FEATURES_append_wb = " wifi bluetooth"
+MACHINE_FEATURES_append_web = " wifi ext-eth bluetooth"
+MACHINE_FEATURES_append_web1 = " wifi ext-eth bluetooth 1-wire"
 
 # Variants for different CPU speed
 #UBOOT_CONFIG_VARIANT = "261MHz"
