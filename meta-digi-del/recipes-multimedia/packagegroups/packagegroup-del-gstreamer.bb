@@ -10,7 +10,8 @@ PR = "r0"
 
 inherit packagegroup
 
-VIRTUAL_RUNTIME_gst-fsl-plugin = "\
+VIRTUAL_RUNTIME_gst-fsl-plugin ?= ""
+VIRTUAL_RUNTIME_gst-fsl-plugin_append_mx5 = " \
 	gst-fsl-plugin \
 	gst-fsl-plugin-gplay \
 	"
@@ -195,9 +196,12 @@ VIRTUAL_RUNTIME_gst-plugins-ugly = "\
 	${PACKAGE_gst-plugins-ugly-video} \
 	"
 
+VIRTUAL_RUNTIME_gst-plugins-ugly_append_ccardimx28js = " \
+	${@base_contains('DISTRO_FEATURES', 'del-audio', '${PACKAGE_gst-plugins-ugly-audio}', '', d)} \
+	"
+
 RDEPENDS_${PN} = "\
     ${VIRTUAL_RUNTIME_gst-fsl-plugin} \
-    imx-lib \
     ${MACHINE_FIRMWARE} \
     gstreamer \
     ${VIRTUAL_RUNTIME_gst-plugins-base} \
@@ -206,6 +210,8 @@ RDEPENDS_${PN} = "\
     ${VIRTUAL_RUNTIME_gst-plugins-ugly} \
     gst-ffmpeg \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
+
+RDEPENDS_${PN}_append_mx5 = " imx-lib"
 
 RRECOMMENDS_${PN} = "\
     ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS}"
