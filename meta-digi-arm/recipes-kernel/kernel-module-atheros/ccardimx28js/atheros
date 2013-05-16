@@ -53,18 +53,22 @@ if ! cmp -s ${RAM_DRIVE}/${MAC_FILENAME} ${FIRMWARE_DIR}/${MAC_FILENAME}; then
 fi
 rm -f ${RAM_DRIVE}/${MAC_FILENAME}
 
-# Figure out which wireless region we are in.  The US has rules for
-# what channels can be used and at what power level.  We use a different set of
-# rules for the other regions in the world that we sell into.  The mod_cert field
-# in OTP will be set to 0x0 for the US.  Once we know the region, make sure the
-# appropriate calibration file is loaded.
-#
-US_CODE="0x0"
-REGION_CODE="$(cat /sys/kernel/ccardimx28/mod_cert)"
-if [ -z "${REGION_CODE}" -o "${US_CODE}" = "${REGION_CODE}" ]; then
-	BDATA_SOURCE=Digi_6203-6233-US.bin
+BDATA_SOURCE=Digi_6203-6233-World.bin
+if [ -e "/sys/kernel/machine/name" ]; then
+	# Figure out which wireless region we are in.  The US has rules for
+	# what channels can be used and at what power level.  We use a different set of
+	# rules for the other regions in the world that we sell into.  The mod_cert field
+	# in OTP will be set to 0x0 for the US.  Once we know the region, make sure the
+	# appropriate calibration file is loaded.
+	#
+	US_CODE="0x0"
+	MACHINE="$(cat /sys/kernel/machine/name)"
+	REGION_CODE="$(cat /sys/kernel/${MACHINE}/mod_cert)"
+	if [ -z "${REGION_CODE}" -o "${US_CODE}" = "${REGION_CODE}" ]; then
+		BDATA_SOURCE=Digi_6203-6233-US.bin
+	fi
 else
-	BDATA_SOURCE=Digi_6203-6233-World.bin
+	logger -t atheros "Undefined machine, defaulting to world region."
 fi
 
 # We don't want to rewrite NAND every time we boot so only
