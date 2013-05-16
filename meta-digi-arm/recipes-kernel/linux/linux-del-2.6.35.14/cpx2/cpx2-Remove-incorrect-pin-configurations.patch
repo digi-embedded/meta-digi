@@ -1,0 +1,37 @@
+From a4ad7a68fa1d203314b71436b5911f2189aafb91 Mon Sep 17 00:00:00 2001
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Thu, 16 May 2013 10:30:20 +0200
+Subject: [PATCH 1/2] cpx2: Remove incorrect pin configurations.
+
+The CPX2e does not use the PINID_SAIF0_LRCLK pin to power up the wifi.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ arch/arm/mach-mx28/mx28_cpx2_pins.c |   14 --------------
+ 1 file changed, 14 deletions(-)
+
+diff --git a/arch/arm/mach-mx28/mx28_cpx2_pins.c b/arch/arm/mach-mx28/mx28_cpx2_pins.c
+index e7d6507..07c65bf 100755
+--- a/arch/arm/mach-mx28/mx28_cpx2_pins.c
++++ b/arch/arm/mach-mx28/mx28_cpx2_pins.c
+@@ -51,20 +51,6 @@ static struct pin_desc mx28_cpx2_fixed_pins[] = {
+ 	 .id = PINID_PWM1,
+ 	 .fun = PIN_GPIO,
+ 	 },
+-#ifdef CONFIG_WLAN
+-	{
+-	 .name = "ATHEROS_PWR",
+-	 .id = PINID_SAIF0_LRCLK,
+-	 .fun           = PIN_GPIO,
+-	 .strength      = PAD_4MA,
+-	 .voltage       = PAD_3_3V,
+-	 .pullup        = 0,
+-	 .drive         = 1,
+-	 .pull          = 0,
+-	 .output	= 1,
+-	 .data		= 1,
+-	 },
+-#endif
+ #ifdef CONFIG_MXS_AUART0_DEVICE_ENABLE
+ 	{
+ 	 .name  = "AUART0.RX",

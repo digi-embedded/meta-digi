@@ -46,6 +46,11 @@ SRC_URI += " \
         ${KERNEL_CFG_FRAGS} \
 	"
 
+SRC_URI_append_cpx2 = " \
+			file://cpx2-Remove-incorrect-pin-configurations.patch \
+			file://cpx2e-Setup-mmc0-for-the-wireless-interface.patch \
+		"
+
 S  = "${@base_conditional('KERNEL_BUILD_SRC', '1' , '${WORKDIR}/git', '${WORKDIR}/linux-2.6-${SRCREV_SHORT}', d)}"
 SCMVERSION = "${@base_conditional('KERNEL_BUILD_SRC', '1' , '1', '0', d)}"
 

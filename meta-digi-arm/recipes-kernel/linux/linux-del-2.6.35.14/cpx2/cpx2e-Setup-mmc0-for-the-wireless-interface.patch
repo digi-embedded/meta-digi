@@ -1,0 +1,133 @@
+From 4b17f5ce43df8b18c977386081d57929470e6bba Mon Sep 17 00:00:00 2001
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Thu, 16 May 2013 10:31:24 +0200
+Subject: [PATCH 2/2] cpx2e: Setup mmc0 for the wireless interface.
+
+The Atheros wireless chip is connected via SDIO to mmc0. This commits
+sets up the interface ready to be used.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ arch/arm/mach-mx28/device.c |  102 ++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 101 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-mx28/device.c b/arch/arm/mach-mx28/device.c
+index ca0739c..1475b28 100755
+--- a/arch/arm/mach-mx28/device.c
++++ b/arch/arm/mach-mx28/device.c
+@@ -398,7 +398,7 @@ static void mx28_init_gpmi_nfc(void)
+ #endif
+ 
+ #if defined(CONFIG_MMC_MXS) || defined(CONFIG_MMC_MXS_MODULE)
+-#if defined(CONFIG_MACH_MX28EVK) || defined (CONFIG_MACH_CPX2) || defined (CONFIG_MACH_WR21)
++#if defined(CONFIG_MACH_MX28EVK) || defined (CONFIG_MACH_WR21)
+ #define MMC0_POWER	MXS_PIN_TO_GPIO(PINID_PWM3)
+ #define MMC1_POWER	MXS_PIN_TO_GPIO(PINID_PWM4)
+ #define MMC0_WP		MXS_PIN_TO_GPIO(PINID_SSP1_SCK)
+@@ -629,6 +629,106 @@ static void __init mx28_init_mmc(void)
+ 		mxs_add_device(pdev, 2);
+ 	}
+ }
++#elif defined (CONFIG_MACH_CPX2)
++#define MMC0_POWER	MXS_PIN_TO_GPIO(PINID_AUART1_TX)
++
++static int mxs_mmc_hw_init_ssp0(void)
++{
++	int ret = 0;
++
++	/* Configure POWER pin as gpio to drive power to MMC slot */
++	ret = gpio_request(MMC0_POWER, "mmc0_power");
++	if (ret)
++		goto out_power;
++
++	gpio_direction_output(MMC0_POWER, 1);
++	mdelay(100);
++
++	return 0;
++
++out_power:
++	return ret;
++}
++
++static void mxs_mmc_hw_release_ssp0(void)
++{
++	gpio_free(MMC0_POWER);
++}
++
++static void mxs_mmc_cmd_pullup_ssp0(int enable)
++{
++	mxs_set_pullup(PINID_SSP0_CMD, enable, 0 /* sysfs */, "mmc0_cmd");
++}
++
++static unsigned long mxs_mmc_setclock_ssp0(unsigned long hz)
++{
++	struct clk *ssp = clk_get(NULL, "ssp.0"), *parent;
++	if (hz > 1000000)
++		parent = clk_get(NULL, "ref_io.0");
++	else
++		parent = clk_get(NULL, "xtal.0");
++
++	clk_set_parent(ssp, parent);
++	clk_set_rate(ssp, 2 * hz);
++	clk_put(parent);
++	clk_put(ssp);
++
++	return hz;
++}
++
++static struct mxs_mmc_platform_data mmc0_data = {
++	.hw_init	= mxs_mmc_hw_init_ssp0,
++	.hw_release	= mxs_mmc_hw_release_ssp0,
++	.get_wp		= NULL,
++	.cmd_pullup	= mxs_mmc_cmd_pullup_ssp0,
++	.setclock	= mxs_mmc_setclock_ssp0,
++	.caps 		= MMC_CAP_4_BIT_DATA
++				| MMC_CAP_DATA_DDR,
++	.min_clk	= 400000,
++	.max_clk	= 48000000,
++	.read_uA        = 50000,
++	.write_uA       = 70000,
++	.clock_mmc = "ssp.0",
++	.power_mmc = NULL,
++};
++
++static struct resource mmc0_resource[] = {
++	{
++		.flags	= IORESOURCE_MEM,
++		.start	= SSP0_PHYS_ADDR,
++		.end	= SSP0_PHYS_ADDR + 0x2000 - 1,
++	},
++	{
++		.flags	= IORESOURCE_DMA,
++		.start	= MXS_DMA_CHANNEL_AHB_APBH_SSP0,
++		.end	= MXS_DMA_CHANNEL_AHB_APBH_SSP0,
++	},
++	{
++		.flags	= IORESOURCE_IRQ,
++		.start	= IRQ_SSP0_DMA,
++		.end	= IRQ_SSP0_DMA,
++	},
++	{
++		.flags	= IORESOURCE_IRQ,
++		.start	= IRQ_SSP0,
++		.end	= IRQ_SSP0,
++	},
++};
++
++static void __init mx28_init_mmc(void)
++{
++	struct platform_device *pdev;
++
++	if (mxs_get_type(PINID_SSP0_CMD) == PIN_FUN1) {
++		pdev = mxs_get_device("mxs-mmc", 0);
++		if (pdev == NULL || IS_ERR(pdev))
++			return;
++		pdev->resource = mmc0_resource;
++		pdev->num_resources = ARRAY_SIZE(mmc0_resource);
++		pdev->dev.platform_data = &mmc0_data;
++		mxs_add_device(pdev, 0);
++	}
++}
+ #elif defined(CONFIG_MACH_CCARDIMX28JS)
+ #define MMC2_POWER	MXS_PIN_TO_GPIO(PINID_SSP2_MISO)
+ #define MMC2_WP		/* This is the Wi-Fi interface so there is no write protect*/

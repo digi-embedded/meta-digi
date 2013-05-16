@@ -21,6 +21,7 @@ TARBALL_SHA256 = "66396f801b6d4254370d81ebaa34f963207dfcf2f9ce4ec72a86f11906ec9b
 SRC_URI_git = "${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git"
 SRC_URI_tar = "${DIGI_MIRROR}/atheros-${SRCREV_SHORT}.tar.gz;md5sum=${TARBALL_MD5};sha256sum=${TARBALL_SHA256}"
 
+FILESEXTRAPATHS_prepend := "${THISDIR}/${MACHINE}:"
 SRC_URI  = "${@base_conditional('ATHEROS_BUILD_FROM_GIT', '1' , '${SRC_URI_git}', '${SRC_URI_tar}', d)}"
 SRC_URI += " \
 	file://atheros \
