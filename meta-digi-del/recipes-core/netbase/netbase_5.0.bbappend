@@ -17,22 +17,28 @@ do_install_append(){
 
 pkg_postinst_${PN} () {
 #!/bin/sh
-cat << EOF > $D${sysconfdir}/network/interfaces
-EOF
+INTERFACES_PATH=$D/etc/network/interfaces
+if test "x$D" != "x"; then
+	KERNEL_CONFIG_PATH=${STAGING_KERNEL_DIR}/.config
+else
+	KERNEL_CONFIG_PATH=/boot/config*
+fi
 
-/bin/grep -q "CONFIG_BLK_DEV_LOOP=" ${STAGING_KERNEL_DIR}/.config
+> ${INTERFACES_PATH}
+
+/bin/grep -q "CONFIG_BLK_DEV_LOOP=" ${KERNEL_CONFIG_PATH}
 if [ $? -eq 0 ]; then
-cat << EOF >> $D${sysconfdir}/network/interfaces
+cat << EOF >> ${INTERFACES_PATH}
 # The loopback interface
 auto lo
 iface lo inet loopback
 EOF
 fi
 
-/bin/grep -q  "CONFIG_FEC=" ${STAGING_KERNEL_DIR}/.config
+/bin/grep -q  "CONFIG_FEC=" ${KERNEL_CONFIG_PATH}
 if [ $? -eq 0 ]; then
 # Primary wired interface
-cat << EOF >> $D${sysconfdir}/network/interfaces
+cat << EOF >> ${INTERFACES_PATH}
 auto eth0
 # Use for dhcp
 # iface eth0 inet dhcp
@@ -46,9 +52,9 @@ EOF
 fi
 
 # Secondary wired interface on MXC platforms
-/bin/grep -q "CONFIG_SMSC911X=" ${STAGING_KERNEL_DIR}/.config
+/bin/grep -q "CONFIG_SMSC911X=" ${KERNEL_CONFIG_PATH}
 if [ $? -eq 0 ]; then
-cat << EOF >> $D${sysconfdir}/network/interfaces
+cat << EOF >> ${INTERFACES_PATH}
 auto eth1
 # Use for dhcp
 # iface eth1 inet dhcp
@@ -62,9 +68,9 @@ EOF
 fi
 
 # Secondary wired interface on MXS platforms
-/bin/grep -q  "CONFIG_CCARDIMX28_ENET1=" ${STAGING_KERNEL_DIR}/.config
+/bin/grep -q  "CONFIG_CCARDIMX28_ENET1=" ${KERNEL_CONFIG_PATH}
 if [ $? -eq 0 ]; then
-cat << EOF >> $D${sysconfdir}/network/interfaces
+cat << EOF >> ${INTERFACES_PATH}
 auto eth1
 # Use for dhcp
 # iface eth1 inet dhcp
@@ -78,9 +84,9 @@ EOF
 fi
 
 # Wireless interface
-/bin/grep -q  "CONFIG_WIRELESS=" ${STAGING_KERNEL_DIR}/.config
+/bin/grep -q  "CONFIG_WIRELESS=" ${KERNEL_CONFIG_PATH}
 if [ $? -eq 0 ]; then
-cat << EOF >> $D${sysconfdir}/network/interfaces
+cat << EOF >> ${INTERFACES_PATH}
 auto wlan0
 # Use for dhcp
 # iface wlan0 inet dhcp
