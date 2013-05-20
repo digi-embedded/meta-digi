@@ -11,5 +11,6 @@ EXTRA_OECONF += "\
 		--disable-cdparanoia \
 		--disable-examples \
 		--disable-gtk-doc \
+		--disable-ivorbis \
 		--disable-rpath \
 		"

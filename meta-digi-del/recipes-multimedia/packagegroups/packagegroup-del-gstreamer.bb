@@ -42,7 +42,6 @@ PACKAGE_gst-plugins-base-ogg-framework = "\
 	gst-plugins-base-ogg \
 	gst-plugins-base-theora \
 	gst-plugins-base-vorbis \
-	gst-plugins-base-ivorbisdec \
 	"
 PACKAGE_gst-plugins-base-conversion = "\
 	gst-plugins-base-ffmpegcolorspace \
