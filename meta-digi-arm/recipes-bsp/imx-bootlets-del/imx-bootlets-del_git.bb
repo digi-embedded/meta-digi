@@ -30,6 +30,7 @@ PARALLEL_MAKE = ""
 EXTRA_OEMAKE = "CROSS_COMPILE=${TARGET_PREFIX}"
 EXTRA_OEMAKE_append_ccardimx28js = " BOARD=CCARDIMX28JS"
 EXTRA_OEMAKE_append_cpx2 = " BOARD=CPX2"
+EXTRA_OEMAKE_append_wr21 = " BOARD=WR21"
 
 do_install () {
     install -d ${STAGING_DIR_TARGET}/boot/
@@ -47,4 +48,4 @@ do_install () {
 FILES_${PN} = "/boot"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccardimx28js|cpx2)"
+COMPATIBLE_MACHINE = "(ccardimx28js|cpx2|wr21)"

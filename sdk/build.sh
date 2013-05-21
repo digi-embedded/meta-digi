@@ -77,6 +77,7 @@ done<<-_EOF_
 	ccimx51js       128 128a 128agv agv eagv w w128a w128agv wagv weagv
 	ccimx53js       - 128 4k e e4k w w128 we
 	cpx2            -
+	wr21            -
 _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
