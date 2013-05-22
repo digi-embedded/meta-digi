@@ -66,9 +66,11 @@ copy_images() {
 [ -z "${DY_BUILD_VARIANTS}" ] && error "DY_BUILD_VARIANTS not specified"
 [ -z "${DY_PLATFORMS}" ]      && error "DY_PLATFORMS not specified"
 [ -z "${DY_REVISION}" ]       && error "DY_REVISION not specified"
-[ -z "${DY_TARGET}" ]         && DY_TARGET="del-image-minimal"
 [ -z "${DY_USE_MIRROR}" ]     && error "DY_USE_MIRROR not specified"
 [ -z "${WORKSPACE}" ]         && error "WORKSPACE not specified"
+
+# Set default build target if Jenkins does not set it
+[ -z "${DY_TARGET}" ] && DY_TARGET="del-image-minimal"
 
 # Per-platform variants
 while read _pl _var; do
