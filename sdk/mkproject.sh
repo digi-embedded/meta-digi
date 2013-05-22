@@ -62,7 +62,7 @@ check_selected_platform() {
 }
 
 do_mkproject() {
-	export TEMPLATECONF="${MKP_CONFIGPATH}/${MKP_PLATFORM}"
+	export TEMPLATECONF="${TEMPLATECONF:-${MKP_CONFIGPATH}/${MKP_PLATFORM}}"
 	source ${MKP_SCRIPTPATH}/sources/poky/oe-init-build-env .
 	unset TEMPLATECONF
 
