@@ -20,4 +20,11 @@ SRC_URI += " \
     file://gst-fsl-plugin-2.0.3-0012-gplay_repeat.patch \
     file://gst-fsl-plugin-2.0.3-0013-Only-call-MXCFB_SET_OVERLAY_POS-with-overlay-framebuffer.patch \
     file://gst-fsl-plugin-2.0.3-0014-Do-not-blank-the-display-on-device-close.patch \
+    file://gst-fsl-plugin-2.0.3-0015-Use-library-s-SONAME-in-dlopen.patch \
 "
+
+do_install_append() {
+    # Remove 'vssconfig' config files as we have a patch that configures
+    # the displays on the fly.
+    rm -f ${D}${datadir}/vssconfig*
+}
