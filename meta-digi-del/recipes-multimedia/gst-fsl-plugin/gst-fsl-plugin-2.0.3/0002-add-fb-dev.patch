@@ -1,4 +1,3 @@
-From 1767c2d99895b682a79a0b874379811e83f6f147 Mon Sep 17 00:00:00 2001
 From: Alejandro Gonzalez <alex.gonzalez@digi.com>
 Date: Tue, 13 Mar 2012 19:20:02 +0100
 Subject: [PATCH] add-fb-dev
@@ -11,18 +10,18 @@ device to use as output.
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
- src/misc/v4l_sink/src/mfw_gst_fb.c      |   15 +++++++++------
- src/misc/v4l_sink/src/mfw_gst_fb.h      |    1 -
- src/misc/v4l_sink/src/mfw_gst_v4l.c     |    4 ++++
- src/misc/v4l_sink/src/mfw_gst_v4lsink.c |   27 +++++++++++++++++++++++++--
- src/misc/v4l_sink/src/mfw_gst_v4lsink.h |    3 ++-
+ src/misc/v4l_sink/src/mfw_gst_fb.c      | 15 +++++++++------
+ src/misc/v4l_sink/src/mfw_gst_fb.h      |  1 -
+ src/misc/v4l_sink/src/mfw_gst_v4l.c     |  4 ++++
+ src/misc/v4l_sink/src/mfw_gst_v4lsink.c | 27 +++++++++++++++++++++++++--
+ src/misc/v4l_sink/src/mfw_gst_v4lsink.h |  3 ++-
  5 files changed, 40 insertions(+), 10 deletions(-)
 
 diff --git a/src/misc/v4l_sink/src/mfw_gst_fb.c b/src/misc/v4l_sink/src/mfw_gst_fb.c
-index 8c251da..fb13489 100755
+index 18d4f7f..991bf24 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_fb.c
 +++ b/src/misc/v4l_sink/src/mfw_gst_fb.c
-@@ -199,16 +199,19 @@ POST-CONDITIONS:    None
+@@ -200,16 +200,19 @@ POST-CONDITIONS:    None
  IMPORTANT NOTES:    None
  =============================================================================*/
  
@@ -76,7 +75,7 @@ index b85879a..d773f6a 100755
  
      v4l_info->tv_mode = NV_MODE;
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
-index b2c7b3d..d7943c1 100755
+index a3ba4a6..526699e 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
 @@ -137,6 +137,7 @@ enum
@@ -110,7 +109,7 @@ index b2c7b3d..d7943c1 100755
      case SETPARA:
          g_value_set_int (value, v4l_info->setpara);
          break;
-@@ -1497,6 +1507,12 @@ mfw_gst_v4lsink_finalize (GObject * object)
+@@ -1493,6 +1503,12 @@ mfw_gst_v4lsink_finalize (GObject * object)
  
  }
  
@@ -123,7 +122,7 @@ index b2c7b3d..d7943c1 100755
  /*=============================================================================
  FUNCTION:           mfw_gst_v4lsink_init
  
-@@ -1541,6 +1557,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
+@@ -1537,6 +1553,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
      v4l_info->dump_location = NULL;
      v4l_info->dumpfile = NULL;
      v4l_info->dump_length = 0;
@@ -131,7 +130,7 @@ index b2c7b3d..d7943c1 100755
      v4l_info->cr_left_bypixel_orig = 0;
      v4l_info->cr_right_bypixel_orig = 0;
      v4l_info->cr_top_bypixel_orig = 0;
-@@ -1573,8 +1590,6 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
+@@ -1569,8 +1586,6 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
      memset (&v4l_info->crop, 0, sizeof (struct v4l2_crop));
      memset (&v4l_info->prevCrop, 0, sizeof (struct v4l2_crop));
  
@@ -140,7 +139,7 @@ index b2c7b3d..d7943c1 100755
      v4l_info->chipcode = getChipCode();
      v4l_info->v4l_id = -1;
  
-@@ -1626,6 +1641,7 @@ mfw_gst_v4lsink_class_init (MFW_GST_V4LSINK_INFO_CLASS_T * klass)
+@@ -1622,6 +1637,7 @@ mfw_gst_v4lsink_class_init (MFW_GST_V4LSINK_INFO_CLASS_T * klass)
      
      parent_class = g_type_class_peek_parent (klass);
  
@@ -148,7 +147,7 @@ index b2c7b3d..d7943c1 100755
      gobject_class->set_property = mfw_gst_v4lsink_set_property;
      gobject_class->get_property = mfw_gst_v4lsink_get_property;
      gobject_class->finalize = mfw_gst_v4lsink_finalize;
-@@ -1730,6 +1746,13 @@ mfw_gst_v4lsink_class_init (MFW_GST_V4LSINK_INFO_CLASS_T * klass)
+@@ -1726,6 +1742,13 @@ mfw_gst_v4lsink_class_init (MFW_GST_V4LSINK_INFO_CLASS_T * klass)
                                                            NULL,
                                                            G_PARAM_READWRITE));
  

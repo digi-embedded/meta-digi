@@ -6,7 +6,7 @@ Change the default dimensions to the ones supported by the mt9v111 driver.
 
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 ---
- src/misc/v4l_source/src/mfw_gst_v4lsrc.c |   24 ++++++++++++------------
+ src/misc/v4l_source/src/mfw_gst_v4lsrc.c | 24 ++++++++++++------------
  1 file changed, 12 insertions(+), 12 deletions(-)
 
 diff --git a/src/misc/v4l_source/src/mfw_gst_v4lsrc.c b/src/misc/v4l_source/src/mfw_gst_v4lsrc.c

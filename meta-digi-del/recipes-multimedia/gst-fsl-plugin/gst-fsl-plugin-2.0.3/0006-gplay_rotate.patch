@@ -6,9 +6,9 @@ Subject: [PATCH] gplay_rotate
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
- src/misc/v4l_sink/src/mfw_gst_v4l.c     |    5 ++++-
- src/misc/v4l_sink/src/mfw_gst_v4lsink.c |    1 +
- src/misc/v4l_sink/src/mfw_gst_v4lsink.h |    1 +
+ src/misc/v4l_sink/src/mfw_gst_v4l.c     | 5 ++++-
+ src/misc/v4l_sink/src/mfw_gst_v4lsink.c | 1 +
+ src/misc/v4l_sink/src/mfw_gst_v4lsink.h | 1 +
  3 files changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4l.c b/src/misc/v4l_sink/src/mfw_gst_v4l.c
@@ -42,10 +42,10 @@ index d773f6a..cb999d2 100755
      if (ioctl (v4l_info->v4l_id, VIDIOC_S_CROP, crop) < 0) {
          GST_ERROR ("set crop failed");
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
-index d7943c1..e4f6aa0 100755
+index 526699e..2227c3d 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
-@@ -1540,6 +1540,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
+@@ -1536,6 +1536,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
      v4l_info->axis_left = 0;
      v4l_info->rotate = 0;
      v4l_info->prevRotate = 0;
@@ -54,7 +54,7 @@ index d7943c1..e4f6aa0 100755
      v4l_info->crop_top = 0;
  
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.h b/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
-index 28cd6b7..159d3e7 100755
+index 4764868..4c9465d 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
 @@ -255,6 +255,7 @@ typedef struct MFW_GST_V4LSINK_INFO_S

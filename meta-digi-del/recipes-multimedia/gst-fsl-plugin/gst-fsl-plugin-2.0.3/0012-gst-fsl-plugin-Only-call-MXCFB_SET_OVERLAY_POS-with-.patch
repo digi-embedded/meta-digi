@@ -1,16 +1,17 @@
 From: Alex Gonzalez <alex.gonzalez@digi.com>
 Date: Thu, 17 May 2012 10:46:39 +0200
-Subject: [PATCH] gst-fsl-plugin: Only call MXCFB_SET_OVERLAY_POS with overlay framebuffer.
+Subject: [PATCH] gst-fsl-plugin: Only call MXCFB_SET_OVERLAY_POS with overlay
+ framebuffer.
 
 This is just to avoid the ioctl to return an error.
 
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 ---
- libs/vss/vss_common.c |   22 ++++++++++++++--------
- 1 files changed, 14 insertions(+), 8 deletions(-)
+ libs/vss/vss_common.c | 22 ++++++++++++++--------
+ 1 file changed, 14 insertions(+), 8 deletions(-)
 
 diff --git a/libs/vss/vss_common.c b/libs/vss/vss_common.c
-index fb80f42..114b45b 100755
+index ee74046..7452274 100755
 --- a/libs/vss/vss_common.c
 +++ b/libs/vss/vss_common.c
 @@ -686,10 +686,14 @@ _setDeviceConfig(VideoDevice * vd)
@@ -49,4 +50,3 @@ index fb80f42..114b45b 100755
  here2:
  
      VS_IOCTL(fd, FBIOBLANK, done, FB_BLANK_UNBLANK);
-

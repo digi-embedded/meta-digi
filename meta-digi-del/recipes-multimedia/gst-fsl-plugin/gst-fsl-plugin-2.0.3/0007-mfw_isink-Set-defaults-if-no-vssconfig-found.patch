@@ -4,11 +4,11 @@ Subject: [PATCH] mfw_isink: Set defaults if no vssconfig found.
 
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 ---
- libs/vss/vss_common.c |   16 ++++++++++++++++
- 1 files changed, 16 insertions(+), 0 deletions(-)
+ libs/vss/vss_common.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
 
 diff --git a/libs/vss/vss_common.c b/libs/vss/vss_common.c
-index 757c2fc..c6ac428 100755
+index 2044051..52aa508 100755
 --- a/libs/vss/vss_common.c
 +++ b/libs/vss/vss_common.c
 @@ -390,6 +390,22 @@ next:
@@ -34,4 +34,3 @@ index 757c2fc..c6ac428 100755
      sconf_free_cs(css);
  
  }
-

@@ -13,14 +13,14 @@ that it won't perform a crop if the dimensions have not changed.
 
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 ---
- src/misc/v4l_sink/src/mfw_gst_v4lsink.c |    8 +++++---
- 1 files changed, 5 insertions(+), 3 deletions(-)
+ src/misc/v4l_sink/src/mfw_gst_v4lsink.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
-index e4f6aa0..b30f390 100755
+index 2227c3d..3ba9c78 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
-@@ -1852,6 +1852,7 @@ mfw_gst_v4lsink_buffer_alloc (GstBaseSink * bsink, guint64 offset,
+@@ -1848,6 +1848,7 @@ mfw_gst_v4lsink_buffer_alloc (GstBaseSink * bsink, guint64 offset,
      gint frame_buffer_size;
      gint max_frames;
      gint hwbuffernumforcodec;
@@ -28,7 +28,7 @@ index e4f6aa0..b30f390 100755
  
      gboolean result = FALSE;
  
-@@ -1990,7 +1991,6 @@ mfw_gst_v4lsink_buffer_alloc (GstBaseSink * bsink, guint64 offset,
+@@ -1985,7 +1986,6 @@ mfw_gst_v4lsink_buffer_alloc (GstBaseSink * bsink, guint64 offset,
              return GST_FLOW_ERROR;
          }
  
@@ -36,7 +36,7 @@ index e4f6aa0..b30f390 100755
          /* Two cases:
           * 1. VPU will request buffer first, when pipeline enter running state,
           *    every parameter is ready.
-@@ -1999,13 +1999,15 @@ mfw_gst_v4lsink_buffer_alloc (GstBaseSink * bsink, guint64 offset,
+@@ -1994,13 +1994,15 @@ mfw_gst_v4lsink_buffer_alloc (GstBaseSink * bsink, guint64 offset,
           */
  
          if (element->current_state == GST_STATE_PLAYING) {
@@ -54,4 +54,3 @@ index e4f6aa0..b30f390 100755
  
          /*
           *   The software H264 decoder need check the "num-buffers-required"
-

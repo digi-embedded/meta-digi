@@ -8,9 +8,9 @@ Subject: [PATCH] gplay_fullscreen
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
- src/misc/v4l_sink/src/mfw_gst_v4l.c     |    4 ++--
- src/misc/v4l_sink/src/mfw_gst_v4lsink.c |    2 +-
- tools/gplay/mfw_gplay_core.c            |   16 ++++++++++++++++
+ src/misc/v4l_sink/src/mfw_gst_v4l.c     |  4 ++--
+ src/misc/v4l_sink/src/mfw_gst_v4lsink.c |  2 +-
+ tools/gplay/mfw_gplay_core.c            | 16 ++++++++++++++++
  3 files changed, 19 insertions(+), 3 deletions(-)
 
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4l.c b/src/misc/v4l_sink/src/mfw_gst_v4l.c
@@ -32,7 +32,7 @@ index 8c2ed72..b85879a 100755
  
      return ( mfw_gst_v4l2_set_crop(v4l_info, width, height) );
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
-index c6a6b6c..b2c7b3d 100755
+index 20bf126..a3ba4a6 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
 @@ -976,7 +976,7 @@ mfw_gst_v4lsink_show_frame (GstBaseSink * basesink, GstBuffer * buf)
@@ -45,7 +45,7 @@ index c6a6b6c..b2c7b3d 100755
                  return GST_FLOW_OK;
              }
 diff --git a/tools/gplay/mfw_gplay_core.c b/tools/gplay/mfw_gplay_core.c
-index 4705cac..e5569fc 100755
+index 8361499..04be21b 100755
 --- a/tools/gplay/mfw_gplay_core.c
 +++ b/tools/gplay/mfw_gplay_core.c
 @@ -1583,6 +1583,9 @@ fsl_player_ret_val fsl_player_resize(fsl_player_handle handle, fsl_player_displa

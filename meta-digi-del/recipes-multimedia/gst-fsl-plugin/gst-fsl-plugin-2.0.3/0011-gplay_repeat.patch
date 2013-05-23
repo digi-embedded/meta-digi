@@ -14,11 +14,11 @@ CCORE_MX53_EXTENSIONS-140
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
- tools/gplay/mfw_gplay.c |    3 +++
+ tools/gplay/mfw_gplay.c | 3 +++
  1 file changed, 3 insertions(+)
 
 diff --git a/tools/gplay/mfw_gplay.c b/tools/gplay/mfw_gplay.c
-index de11e68..5e5a6f1 100755
+index 45b49da..bc0bd7a 100755
 --- a/tools/gplay/mfw_gplay.c
 +++ b/tools/gplay/mfw_gplay.c
 @@ -151,6 +151,7 @@ PlayItem * playlist_next(fsl_player_handle handle, options* opt)

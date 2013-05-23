@@ -7,7 +7,7 @@ but the returned buffer is NULL.
 
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 ---
- src/misc/v4l_source/src/mfw_gst_v4lsrc.c |    2 ++
+ src/misc/v4l_source/src/mfw_gst_v4lsrc.c | 2 ++
  1 file changed, 2 insertions(+)
 
 diff --git a/src/misc/v4l_source/src/mfw_gst_v4lsrc.c b/src/misc/v4l_source/src/mfw_gst_v4lsrc.c

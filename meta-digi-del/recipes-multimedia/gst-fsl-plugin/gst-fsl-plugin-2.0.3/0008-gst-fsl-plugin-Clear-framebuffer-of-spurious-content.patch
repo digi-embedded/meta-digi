@@ -7,11 +7,11 @@ framebuffer which remains. The blank/unblank operation gets rid of it.
 
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 ---
- libs/vss/vss_common.c |    5 +++++
- 1 files changed, 5 insertions(+), 0 deletions(-)
+ libs/vss/vss_common.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
 diff --git a/libs/vss/vss_common.c b/libs/vss/vss_common.c
-index c6ac428..fb80f42 100755
+index 52aa508..ee74046 100755
 --- a/libs/vss/vss_common.c
 +++ b/libs/vss/vss_common.c
 @@ -486,6 +486,11 @@ int _initVideoDevice(VideoDevice * vd, int mode_idx)
@@ -26,4 +26,3 @@ index c6ac428..fb80f42 100755
      if ((vd->resX==0) || (vd->resY==0))
          goto error;
  
-
