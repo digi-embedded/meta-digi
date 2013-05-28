@@ -18,11 +18,9 @@ LICENSE = "MIT"
 inherit core-image
 inherit del-image
 
-# These features will move to the project's local.conf
-# where they can be customized by platform.
-
 # Only common features to remain here.
-IMAGE_FEATURES += "ssh-server-dropbear"
+VIRTUAL_RUNTIME_ssh_server ?= "ssh-server-dropbear"
+IMAGE_FEATURES += "${VIRTUAL_RUNTIME_ssh_server}"
 IMAGE_FEATURES += "del-network"
 IMAGE_FEATURES += "package-management"
 
