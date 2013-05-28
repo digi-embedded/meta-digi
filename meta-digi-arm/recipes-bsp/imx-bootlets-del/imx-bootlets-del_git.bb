@@ -14,7 +14,7 @@ PR = "${DISTRO}.r0"
 TARBALL_MD5    = "457c5925dbc5d3ee0839f1dfdb0b7d37"
 TARBALL_SHA256 = "eae8c6d7b872a7bb1c689010a11890918f4187a87e1c521f3b2bd80f63a8dd77"
 
-SRCREV="cc3b1eb94dda62aa737f2289b7a2d3936492a53b"
+SRCREV = "cc3b1eb94dda62aa737f2289b7a2d3936492a53b"
 SRCREV_SHORT = "${@'${SRCREV}'[:7]}"
 SRC_URI_git = "${DIGI_MTK_GIT}del/imx-bootlets.git;branch=refs/heads/master;protocol=git"
 SRC_URI_tarball = " \

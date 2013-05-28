@@ -5,7 +5,7 @@ PR_append = "+${DISTRO}"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
 
-DEPENDS="virtual/kernel"
+DEPENDS = "virtual/kernel"
 
 SRC_URI += "file://ifup"
 
