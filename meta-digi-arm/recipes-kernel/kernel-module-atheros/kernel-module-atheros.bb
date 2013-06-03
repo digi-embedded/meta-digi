@@ -8,28 +8,23 @@ inherit module
 
 PR = "r0"
 
-# Uncomment to build the driver from GIT repository (internal use only)
-# ATHEROS_BUILD_FROM_GIT ?= "1"
+# Uncomment to build the driver from internal GIT repository
+# ATHEROS_USE_INTERNAL_REPO ?= "1"
 
-SRCREV = "15bae2c4e330ea6d9289217d3c38ebf63aa8ff15"
-SRCREV_SHORT = "${@'${SRCREV}'[:7]}"
+SRCREV_external = "9b21b4508d08a2fb3bf3c55aaac182bb9c1210f2"
+SRCREV_internal = "15bae2c4e330ea6d9289217d3c38ebf63aa8ff15"
+SRCREV = "${@base_conditional('ATHEROS_USE_INTERNAL_REPO', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
-# Checksums for 'atheros-${SRCREV_SHORT}.tar.gz' tarball
-TARBALL_MD5    = "bd6b75eac4b5041f1a9272527ee6e2ee"
-TARBALL_SHA256 = "66396f801b6d4254370d81ebaa34f963207dfcf2f9ce4ec72a86f11906ec9b0e"
-
-SRC_URI_git = "${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git"
-SRC_URI_tar = "${DIGI_MIRROR}/atheros-${SRCREV_SHORT}.tar.gz;md5sum=${TARBALL_MD5};sha256sum=${TARBALL_SHA256}"
-
-FILESEXTRAPATHS_prepend := "${THISDIR}/${MACHINE}:"
-SRC_URI  = "${@base_conditional('ATHEROS_BUILD_FROM_GIT', '1' , '${SRC_URI_git}', '${SRC_URI_tar}', d)}"
+SRC_URI_external = "git://github.com/dgii/atheros.git;protocol=git"
+SRC_URI_internal = "${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git"
+SRC_URI = "${@base_conditional('ATHEROS_USE_INTERNAL_REPO', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 SRC_URI += " \
 	file://atheros \
 	file://atheros.conf \
 	file://Makefile \
 	"
 
-S = "${@base_conditional('ATHEROS_BUILD_FROM_GIT', '1' , '${WORKDIR}/git', '${WORKDIR}/atheros-${SRCREV_SHORT}', d)}"
+S = "${WORKDIR}/git"
 
 EXTRA_OEMAKE = "DEL_PLATFORM=${MACHINE} KLIB_BUILD=${STAGING_KERNEL_DIR}"
 
