@@ -12,6 +12,7 @@ inherit kernel
 
 # Put a local version until we have a true SRCREV to point to
 LOCALVERSION ?= "+del"
+SCMVERSION ?= "y"
 
 kernel_conf_variable() {
 	CONF_SED_SCRIPT="$CONF_SED_SCRIPT /CONFIG_$1[ =]/d;"
@@ -45,7 +46,9 @@ do_configure_prepend() {
 }
 
 do_deploy_append() {
+	cd ${DEPLOYDIR}
 	ln -sf ${KERNEL_IMAGE_BASE_NAME}.bin ${KERNEL_IMAGE_SYMLINK_NAME}
+	cd -
 }
 
 # install nedded headers for imx-test compilation
