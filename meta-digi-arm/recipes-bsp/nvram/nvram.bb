@@ -9,12 +9,20 @@ PR = "${DISTRO}.r0"
 
 DEPENDS = "libdigi"
 
-SRCREV  = "${AUTOREV}"
-SRC_URI = " \
-	${DIGI_LOG_GIT}u-boot-denx.git;protocol=git;branch=refs/heads/master \
-	file://main.c \
-	file://nvram_priv_linux.c \
-	"
+# Uncomment to build the from sources (internal use only)
+# UBOOT_USE_INTERNAL_REPO ?= "1"
+
+SRCREV_external = "107e05c6fff8ccae6d5eeb6a39d7efd57694e544"
+SRCREV_internal = "4af0b5f73215c6f075e17f866d831a948d777a2a"
+SRCREV = "${@base_conditional('UBOOT_USE_INTERNAL_REPO', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
+
+SRC_URI_external = "git://github.com/dgii/yocto-uboot.git;protocol=git"
+SRC_URI_internal = "${DIGI_LOG_GIT}u-boot-denx.git;protocol=git"
+SRC_URI = "${@base_conditional('UBOOT_USE_INTERNAL_REPO', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
+SRC_URI += " \
+    file://main.c \
+    file://nvram_priv_linux.c \
+"
 
 S = "${WORKDIR}"
 
