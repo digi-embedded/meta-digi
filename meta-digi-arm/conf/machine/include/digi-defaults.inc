@@ -1,6 +1,6 @@
 # Digi BSP default providers
 PREFERRED_PROVIDER_linux-libc-headers ?= "linux-libc-headers-imx"
-PREFERRED_PROVIDER_u-boot ?= "u-boot-imx"
+PREFERRED_PROVIDER_u-boot ?= "u-boot-del"
 PREFERRED_PROVIDER_virtual/kernel ?= "linux-del"
 PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 
