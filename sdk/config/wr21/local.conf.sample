@@ -54,6 +54,11 @@ MACHINE = "wr21"
 MACHINE_VARIANT = ""
 
 #
+# Use Digi's internal git repositories
+#
+#DIGI_INTERNAL_GIT ?= "1"
+
+#
 # Where to place downloads
 #
 # During a first build the system will download many different source code tarballs

@@ -7,16 +7,13 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 PR = "${DISTRO}.r0"
 
-# Uncomment to build from internal GIT repository
-# IMX_BOOTLETS_USE_INTERNAL_REPO ?= "1"
-
 SRCREV_external = "9ffdf8cc253ba8d46fc4d8286ea054fa4c28c9af"
 SRCREV_internal = "cc3b1eb94dda62aa737f2289b7a2d3936492a53b"
-SRCREV = "${@base_conditional('IMX_BOOTLETS_USE_INTERNAL_REPO', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
+SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "git://github.com/dgii/imx-bootlets.git;protocol=git"
 SRC_URI_internal = "${DIGI_MTK_GIT}del/imx-bootlets.git;protocol=git"
-SRC_URI = "${@base_conditional('IMX_BOOTLETS_USE_INTERNAL_REPO', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
+SRC_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 
 S = "${WORKDIR}/git"
 

@@ -54,6 +54,11 @@ MACHINE = "ccimx51js"
 MACHINE_VARIANT = "wagv"
 
 #
+# Use Digi's internal git repositories
+#
+#DIGI_INTERNAL_GIT ?= "1"
+
+#
 # Where to place downloads
 #
 # During a first build the system will download many different source code tarballs

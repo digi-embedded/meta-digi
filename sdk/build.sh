@@ -138,9 +138,12 @@ for platform in ${DY_PLATFORMS}; do
 				sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_PROJ_DIR}/downloads\"" \
 					-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
 					conf/local.conf
-				# Set the specified distro if different from del.
+				# Set the specified distro if different from del
 				[ "${DY_DISTRO}" != "del" ] && sed -i -e "/^DISTRO ?=/cDISTRO ?= \"${DY_DISTRO}\"" conf/local.conf
-				[ "${DY_USE_MIRROR}" = "true" ] && printf "${DIGI_PREMIRROR_CFG}" >> conf/local.conf
+				if [ "${DY_USE_MIRROR}" = "true" ]; then
+					sed -i -e "s,^#DIGI_INTERNAL_GIT,DIGI_INTERNAL_GIT,g" conf/local.conf
+					printf "${DIGI_PREMIRROR_CFG}" >> conf/local.conf
+				fi
 				[ "${DY_BUILD_VARIANTS}" = "true" ] && printf "\nINHERIT += \"rm_work\"\n" >> conf/local.conf
 				time bitbake ${DY_TARGET}
 			)

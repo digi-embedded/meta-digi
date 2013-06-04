@@ -4,12 +4,9 @@ include linux-del.inc
 
 PR = "${DISTRO}.${INC_PR}.0"
 
-# Uncomment to build from internal GIT repository
-# KERNEL_USE_INTERNAL_REPO ?= "1"
-
 SRCREV_external = "c3f3fa8f819f83e77fc0e0c339f12a6fe2a52fef"
 SRCREV_internal = "d615e9350f4d14e8a0177ff4a3da8639046657eb"
-SRCREV = "${@base_conditional('KERNEL_USE_INTERNAL_REPO', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
+SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 LOCALVERSION_mx5 = "mx5"
 LOCALVERSION_mxs = "mxs"
@@ -17,7 +14,7 @@ LOCALVERSION_cpx2_mxs = "mxs+gateways"
 
 SRC_URI_external = "git://github.com/dgii/yocto-linux.git;protocol=git"
 SRC_URI_internal = "${DIGI_LOG_GIT}linux-2.6.git;protocol=git"
-SRC_URI = "${@base_conditional('KERNEL_USE_INTERNAL_REPO', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
+SRC_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 SRC_URI += " \
     file://defconfig \
     ${KERNEL_CFG_FRAGS} \

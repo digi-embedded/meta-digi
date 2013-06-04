@@ -8,16 +8,13 @@ inherit module
 
 PR = "r0"
 
-# Uncomment to build the driver from internal GIT repository
-# ATHEROS_USE_INTERNAL_REPO ?= "1"
-
 SRCREV_external = "9b21b4508d08a2fb3bf3c55aaac182bb9c1210f2"
 SRCREV_internal = "15bae2c4e330ea6d9289217d3c38ebf63aa8ff15"
-SRCREV = "${@base_conditional('ATHEROS_USE_INTERNAL_REPO', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
+SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "git://github.com/dgii/atheros.git;protocol=git"
 SRC_URI_internal = "${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git"
-SRC_URI = "${@base_conditional('ATHEROS_USE_INTERNAL_REPO', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
+SRC_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 SRC_URI += " \
 	file://atheros \
 	file://atheros.conf \
