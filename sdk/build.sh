@@ -15,10 +15,10 @@
 #
 #  Parameters set by Jenkins:
 #     DY_BUILD_VARIANTS: Build all platform variants
-#     DY_DISTRO:         Distribution name (the default is 'del')
+#     DY_DISTRO:         Distribution name (the default is 'dey')
 #     DY_PLATFORMS:      Platforms to build
 #     DY_REVISION:       Revision of the manifest repository (for 'repo init')
-#     DY_TARGET:         Target image (the default is 'del-image-minimal')
+#     DY_TARGET:         Target image (the default is 'dey-image-minimal')
 #     DY_USE_MIRROR:     Use internal Digi mirror to download packages
 #
 #===============================================================================
@@ -71,8 +71,8 @@ copy_images() {
 [ -z "${WORKSPACE}" ]         && error "WORKSPACE not specified"
 
 # Set default settings if Jenkins does not do it
-[ -z "${DY_TARGET}" ] && DY_TARGET="del-image-minimal"
-[ -z "${DY_DISTRO}" ] && DY_DISTRO="del"
+[ -z "${DY_TARGET}" ] && DY_TARGET="dey-image-minimal"
+[ -z "${DY_DISTRO}" ] && DY_DISTRO="dey"
 
 # Per-platform variants
 while read _pl _var; do
@@ -139,8 +139,8 @@ for platform in ${DY_PLATFORMS}; do
 				sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_PROJ_DIR}/downloads\"" \
 					-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
 					conf/local.conf
-				# Set the specified distro if different from del
-				[ "${DY_DISTRO}" != "del" ] && sed -i -e "/^DISTRO ?=/cDISTRO ?= \"${DY_DISTRO}\"" conf/local.conf
+				# Set the specified distro if different from dey
+				[ "${DY_DISTRO}" != "dey" ] && sed -i -e "/^DISTRO ?=/cDISTRO ?= \"${DY_DISTRO}\"" conf/local.conf
 				if [ "${DY_USE_MIRROR}" = "true" ]; then
 					sed -i -e "s,^#DIGI_INTERNAL_GIT,DIGI_INTERNAL_GIT,g" conf/local.conf
 					printf "${DIGI_PREMIRROR_CFG}" >> conf/local.conf

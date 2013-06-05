@@ -12,5 +12,5 @@ BBLAYERS ?= " \
   ##DIGIBASE##/meta-openembedded/meta-oe \
   ##DIGIBASE##/meta-fsl-arm \
   ##DIGIBASE##/meta-digi/meta-digi-arm \
-  ##DIGIBASE##/meta-digi/meta-digi-del \
+  ##DIGIBASE##/meta-digi/meta-digi-dey \
   "
