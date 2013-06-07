@@ -13,9 +13,11 @@ LIC_FILES_CHKSUM = "file://usr/include/VG/openvg.h;endline=30;md5=b0109611dd7696
 
 PROVIDES = "virtual/egl virtual/libgles1 virtual/libgles2"
 
-SRC_URI = "${DIGI_MIRROR}/amd-gpu-bin-mx51-${PV}.tar.gz"
-SRC_URI[md5sum] = "15ede91135590fc12cc29a2bba46c12c"
-SRC_URI[sha256sum] = "c87ad4e0c721a10e9faed9e096e180b326162e342d41cdfc14c5119110bde0f4"
+SRC_URI = "${FSL_MIRROR}/${PN}-${PV}.bin;fsl-eula=true"
+SRC_URI[md5sum] = "9f9b5f67b595721a08793aae8bd8fc46"
+SRC_URI[sha256sum] = "f0db68a764b5fb199729e7435f606b8d12b61ca97990336c647b7e81f4a584d9"
+
+inherit fsl-eula-unpack
 
 # FIXME: All binaries lack GNU_HASH in elf binary but as we don't have
 # the source we cannot fix it. Disable the insane check for now.
