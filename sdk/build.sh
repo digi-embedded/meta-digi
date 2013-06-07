@@ -133,6 +133,7 @@ for platform in ${DY_PLATFORMS}; do
 			# Configure and build the project in a sub-shell to avoid
 			# mixing environments between different platform's projects
 			(
+				export TEMPLATECONF="${TEMPLATECONF:+${TEMPLATECONF}/${platform}}"
 				. ${YOCTO_INST_DIR}/mkproject.sh -p ${platform} ${_this_var_arg}
 				# Set a common DL_DIR and SSTATE_DIR for all platforms
 				sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_PROJ_DIR}/downloads\"" \
