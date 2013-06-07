@@ -11,7 +11,7 @@ SRCREV_external = "9ffdf8cc253ba8d46fc4d8286ea054fa4c28c9af"
 SRCREV_internal = "cc3b1eb94dda62aa737f2289b7a2d3936492a53b"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
-SRC_URI_external = "git://github.com/dgii/imx-bootlets.git;protocol=git"
+SRC_URI_external = "${DIGI_GITHUB_GIT}/imx-bootlets.git;protocol=git"
 SRC_URI_internal = "${DIGI_MTK_GIT}del/imx-bootlets.git;protocol=git"
 SRC_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 

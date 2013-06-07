@@ -12,7 +12,7 @@ LOCALVERSION_mx5 = "mx5"
 LOCALVERSION_mxs = "mxs"
 LOCALVERSION_cpx2_mxs = "mxs+gateways"
 
-SRC_URI_external = "git://github.com/dgii/yocto-linux.git;protocol=git"
+SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-linux.git;protocol=git"
 SRC_URI_internal = "${DIGI_LOG_GIT}linux-2.6.git;protocol=git"
 SRC_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 SRC_URI += " \
