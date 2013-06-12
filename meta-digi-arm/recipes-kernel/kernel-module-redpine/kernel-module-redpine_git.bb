@@ -8,9 +8,6 @@ inherit module
 
 PR = "${DISTRO}.r0"
 
-# Uncomment to build the driver from sources (internal use only)
-# REDPINE_BUILD_SRC ?= "1"
-
 SRCREV = "b43b8f5e2d51b24bcc0bc167380cfd07baac81f0"
 
 # Checksums for 'redpine-${MACHINE}-${SRCREV_SHORT}.tar.gz' tarballs
@@ -27,13 +24,13 @@ SRC_URI_obj = " \
 	${DIGI_MIRROR}/redpine-${MACHINE}-${SRCREV_SHORT}.tar.gz;md5sum=${TARBALL_MD5};sha256sum=${TARBALL_SHA256} \
 	"
 
-SRC_URI  = "${@base_conditional('REDPINE_BUILD_SRC', '1' , '${SRC_URI_git}', '${SRC_URI_obj}', d)}"
+SRC_URI  = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_git}', '${SRC_URI_obj}', d)}"
 SRC_URI += " \
 	file://Makefile \
 	file://redpine \
 	"
 
-S = "${@base_conditional('REDPINE_BUILD_SRC', '1' , '${WORKDIR}/git', '${WORKDIR}/${MACHINE}', d)}"
+S = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${WORKDIR}/git', '${WORKDIR}/${MACHINE}', d)}"
 
 EXTRA_OEMAKE = "DEL_PLATFORM=${MACHINE}"
 
@@ -52,7 +49,7 @@ FILES_${PN} += "/lib/firmware/redpine/tadm \
 
 # Deploy objects tarball if building from sources
 do_deploy() {
-	if [ "${REDPINE_BUILD_SRC}" = "1" ]; then
+	if [ "${DIGI_INTERNAL_GIT}" = "1" ]; then
 		oe_runmake tarball
 		install -d ${DEPLOY_DIR_IMAGE}
 		if [ -f "${S}/redpine-${MACHINE}-${SRCREV_SHORT}.tar.gz" ]; then
