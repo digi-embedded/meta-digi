@@ -8,6 +8,7 @@ This layer is based on the following Yocto layers (Danny):
 git://git.yoctoproject.org/poky
 git://git.yoctoproject.org/meta-fsl-arm
 git://github.com/openembedded/meta-oe.git
+git://github.com/Freescale/meta-fsl-demos.git
 
 Digi's license agreements
 -------------------------
