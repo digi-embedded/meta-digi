@@ -10,8 +10,8 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=4c6cde5df68eff615d36789dc18edd3b"
 
 PR = "r0"
 
-SRCREV_external = "107e05c6fff8ccae6d5eeb6a39d7efd57694e544"
-SRCREV_internal = "4af0b5f73215c6f075e17f866d831a948d777a2a"
+SRCREV_external = "e5b7006e93f5d8bb75b89c56d50f5e839bc65224"
+SRCREV_internal = "2cc5fa912f12c6ffce0aa4fedb6720f4a1f11d43"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-uboot.git;protocol=git"
