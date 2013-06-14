@@ -148,7 +148,10 @@ for platform in ${DY_PLATFORMS}; do
 					printf "${DIGI_PREMIRROR_CFG}" >> conf/local.conf
 				fi
 				[ "${DY_BUILD_VARIANTS}" = "true" ] && printf "\nINHERIT += \"rm_work\"\n" >> conf/local.conf
-				time bitbake ${DY_TARGET}
+				for target in ${DY_TARGET}; do
+					printf "\n[INFO] Building the $target target.\n"
+					time bitbake ${target}
+				done
 			)
 			copy_images ${_this_img_dir}
 			popd
