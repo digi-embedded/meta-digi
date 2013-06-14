@@ -60,7 +60,9 @@ copy_images() {
 	# Jenkins artifact archiver does not copy symlinks, so remove them
 	# beforehand to avoid ending up with several duplicates of the same
 	# files.
-	find ${1}/images -type l -delete
+	if [ -d "${1}/images" ]; then
+		find ${1}/images -type l -delete
+	fi
 }
 
 # Sanity check (Jenkins environment)
