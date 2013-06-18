@@ -34,14 +34,18 @@ if [ -h /sys/class/net/eth0 ]; then
             ;;
     esac
     if [ "${macaddr}" ]; then
-    /sbin/ifconfig eth0 hw ether ${macaddr}
+        if /sbin/ifconfig eth0 | grep -qs UP; then
+            /sbin/ifconfig eth0 hw ether ${macaddr}
+        fi
     fi
 fi
 
 if [ -h /sys/class/net/eth1 ]; then
     macaddr=`cat /proc/cmdline | sed 's,\s,\n,g' | awk '/ethaddr3/ {print}' | sed 's,ethaddr3=,,g'`
     if [ "${macaddr}" ]; then
-    /sbin/ifconfig eth1 hw ether ${macaddr}
+        if /sbin/ifconfig eth1 | grep -qs UP; then
+            /sbin/ifconfig eth1 hw ether ${macaddr}
+        fi
     fi
 fi
 
