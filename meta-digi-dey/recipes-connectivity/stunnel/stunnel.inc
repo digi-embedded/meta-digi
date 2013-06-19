@@ -6,7 +6,7 @@ SECTION = "console/network"
 DEPENDS = "openssl"
 HOMEPAGE = "http://www.stunnel.org"
 LICENSE = "GPLv2"
-LIC_FILES_CHKSUM = "file://COPYING;md5=06715c92fdfd7a3dcf901b26b162b64c"
+LIC_FILES_CHKSUM = "file://COPYING;md5=f41ebed8571077706fee0b860c4d6666"
 
 INC_PR = "r0"
 

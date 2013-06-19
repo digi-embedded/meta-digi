@@ -7,5 +7,5 @@ SRC_URI = "http://www.stunnel.org/downloads/stunnel-${PV}.tar.gz \
 	   file://init \
 	   file://stunnel.conf"
 
-SRC_URI[md5sum] = "c2b1db99e3ed547214568959a8ed18ac"
-SRC_URI[sha256sum] = "b7e1b9e63569574dbdabee8af90b8ab88db3fe13dcb1268d59a1408c56e6de7b"
+SRC_URI[md5sum] = "ac4c4a30bd7a55b6687cbd62d864054c"
+SRC_URI[sha256sum] = "9cae2cfbe26d87443398ce50d7d5db54e5ea363889d5d2ec8d2778a01c871293"
