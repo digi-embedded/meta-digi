@@ -18,6 +18,7 @@
 #     DY_DISTRO:         Distribution name (the default is 'dey')
 #     DY_PLATFORMS:      Platforms to build
 #     DY_REVISION:       Revision of the manifest repository (for 'repo init')
+#     DY_RM_WORK:        Remove the package working folders to save disk space.
 #     DY_TARGET:         Target image (the default is 'dey-image-minimal')
 #     DY_USE_MIRROR:     Use internal Digi mirror to download packages
 #
@@ -69,6 +70,7 @@ copy_images() {
 [ -z "${DY_BUILD_VARIANTS}" ] && error "DY_BUILD_VARIANTS not specified"
 [ -z "${DY_PLATFORMS}" ]      && error "DY_PLATFORMS not specified"
 [ -z "${DY_REVISION}" ]       && error "DY_REVISION not specified"
+[ -z "${DY_RM_WORK}" ]        && error "DY_RM_WORK not specified"
 [ -z "${DY_USE_MIRROR}" ]     && error "DY_USE_MIRROR not specified"
 [ -z "${WORKSPACE}" ]         && error "WORKSPACE not specified"
 
@@ -147,7 +149,7 @@ for platform in ${DY_PLATFORMS}; do
 					sed -i -e "s,^#DIGI_INTERNAL_GIT,DIGI_INTERNAL_GIT,g" conf/local.conf
 					printf "${DIGI_PREMIRROR_CFG}" >> conf/local.conf
 				fi
-				[ "${DY_BUILD_VARIANTS}" = "true" ] && printf "\nINHERIT += \"rm_work\"\n" >> conf/local.conf
+				[ "${DY_RM_WORK}" = "true" ] && printf "\nINHERIT += \"rm_work\"\n" >> conf/local.conf
 				for target in ${DY_TARGET}; do
 					printf "\n[INFO] Building the $target target.\n"
 					time bitbake ${target}
