@@ -43,3 +43,4 @@ RDEPENDS_${PN}_append_ccimx53js_mx5 = "\
 "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
+COMPATIBLE_MACHINE = "(ccardimx28js|ccimx51js|ccimx53js)"
