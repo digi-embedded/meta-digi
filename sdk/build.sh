@@ -143,8 +143,11 @@ for platform in ${DY_PLATFORMS}; do
 				sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_PROJ_DIR}/downloads\"" \
 					-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
 					conf/local.conf
-				# Set the specified distro if different from dey
-				[ "${DY_DISTRO}" != "dey" ] && sed -i -e "/^DISTRO ?=/cDISTRO ?= \"${DY_DISTRO}\"" conf/local.conf
+				# Set the DISTRO and remove 'meta-digi-dey' layer if distro is not DEY based
+				sed -i -e "/^DISTRO ?=/cDISTRO ?= \"${DY_DISTRO}\"" conf/local.conf
+				if ! echo "${DY_DISTRO}" | grep -qs "dey"; then
+					sed -i -e '/meta-digi-dey/d' conf/bblayers.conf
+				fi
 				if [ "${DY_USE_MIRROR}" = "true" ]; then
 					sed -i -e "s,^#DIGI_INTERNAL_GIT,DIGI_INTERNAL_GIT,g" conf/local.conf
 					printf "${DIGI_PREMIRROR_CFG}" >> conf/local.conf
