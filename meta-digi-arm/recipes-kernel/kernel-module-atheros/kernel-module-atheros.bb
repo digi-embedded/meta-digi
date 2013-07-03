@@ -1,7 +1,7 @@
 # Copyright (C) 2013 Digi International.
 
 SUMMARY = "Atheros's wireless driver"
-LICENSE = "BSD"
+LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
 
 inherit module
