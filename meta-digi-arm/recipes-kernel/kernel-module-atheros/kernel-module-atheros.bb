@@ -8,7 +8,7 @@ inherit module
 
 PR = "r0"
 
-SRCREV_external = "9b21b4508d08a2fb3bf3c55aaac182bb9c1210f2"
+SRCREV_external = "c5ee2d328d03c9a30d67a75b286d7c3b3b06aed2"
 SRCREV_internal = "15bae2c4e330ea6d9289217d3c38ebf63aa8ff15"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 

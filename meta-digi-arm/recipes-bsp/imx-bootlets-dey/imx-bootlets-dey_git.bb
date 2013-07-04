@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 PR = "${DISTRO}.r0"
 
-SRCREV_external = "b5996d719a5a8f9f7bc7361e37d5a1bff20bc83d"
+SRCREV_external = "7370b2ef39d0d7cb3abb360f844506808aa247fb"
 SRCREV_internal = "de3a716c28e72c192963e9e561f77a1a41b25acf"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
