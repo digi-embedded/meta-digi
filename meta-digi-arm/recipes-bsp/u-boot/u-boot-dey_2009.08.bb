@@ -10,7 +10,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=4c6cde5df68eff615d36789dc18edd3b"
 
 PR = "r0"
 
-SRCREV_external = ""
+SRCREV_external = "288a38c4d40105547069785fe0f848c7e1e95cd6"
 SRCREV_internal = "61ac25cbf81c10bda9e3a74005734f5e419aee5c"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
