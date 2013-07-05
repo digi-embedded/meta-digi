@@ -4,7 +4,7 @@ include linux-dey.inc
 
 PR = "${DISTRO}.${INC_PR}.0"
 
-SRCREV_external = "aeca956315a7b2e6e4cc94f11fc799fcfa791353"
+SRCREV_external = "a138d8f6602b33ae6021df890ba2f292a405e09a"
 SRCREV_internal = "feec20411f1ee6c507bf50d12268cd8c05fe6820"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
