@@ -1,20 +1,14 @@
 # Copyright (C) 2012 Digi International
 
 include linux-dey.inc
+include linux-dey-rev.inc
 
 PR = "${DISTRO}.${INC_PR}.0"
-
-SRCREV_external = "a138d8f6602b33ae6021df890ba2f292a405e09a"
-SRCREV_internal = "feec20411f1ee6c507bf50d12268cd8c05fe6820"
-SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 LOCALVERSION_mx5 = "mx5"
 LOCALVERSION_mxs = "mxs"
 LOCALVERSION_cpx2_mxs = "mxs+gateways"
 
-SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-linux.git;protocol=git"
-SRC_URI_internal = "${DIGI_LOG_GIT}linux-2.6.git;protocol=git"
-SRC_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 SRC_URI += " \
     file://defconfig \
     ${KERNEL_CFG_FRAGS} \
