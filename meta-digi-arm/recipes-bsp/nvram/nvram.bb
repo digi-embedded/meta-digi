@@ -5,17 +5,12 @@ SECTION = "base"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
 
+require recipes-bsp/u-boot/u-boot-dey-rev.inc
+
 PR = "${DISTRO}.r0"
 
 DEPENDS = "libdigi"
 
-SRCREV_external = "107e05c6fff8ccae6d5eeb6a39d7efd57694e544"
-SRCREV_internal = "4af0b5f73215c6f075e17f866d831a948d777a2a"
-SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
-
-SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-uboot.git;protocol=git"
-SRC_URI_internal = "${DIGI_LOG_GIT}u-boot-denx.git;protocol=git"
-SRC_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 SRC_URI += " \
     file://main.c \
     file://nvram_priv_linux.c \
