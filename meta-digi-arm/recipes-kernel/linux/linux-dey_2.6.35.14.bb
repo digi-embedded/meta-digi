@@ -1,7 +1,7 @@
 # Copyright (C) 2012 Digi International
 
 include linux-dey.inc
-include linux-dey-rev.inc
+include linux-dey-rev_${PV}.inc
 
 PR = "${DISTRO}.${INC_PR}.0"
 
