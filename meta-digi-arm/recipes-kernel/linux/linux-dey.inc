@@ -55,7 +55,7 @@ do_deploy_append() {
 do_install_append() {
 	# bounds.h may be used by a module and is currently missing
 	if [ -d include/generated ]; then
-		cp include/generated/* $kerneldir/include/generated/
+		cp -a include/generated/* $kerneldir/include/generated/
 	fi
 
 	# Host architecture object file
