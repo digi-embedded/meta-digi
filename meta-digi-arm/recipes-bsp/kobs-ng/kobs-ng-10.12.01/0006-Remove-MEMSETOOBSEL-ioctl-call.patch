@@ -1,0 +1,68 @@
+From b8b59262cfddf3ddc68708ce0b242781df4377ae Mon Sep 17 00:00:00 2001
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Thu, 11 Jul 2013 17:56:40 +0200
+Subject: [PATCH] Remove MEMSETOOBSEL ioctl call.
+
+It has been removed a long time ago, it does nothing on 2.6.35, and it
+was finally removed from the ABI later on so it's not available on 3.10
+header.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ src/mtd.c |   23 -----------------------
+ 1 file changed, 23 deletions(-)
+
+diff --git a/src/mtd.c b/src/mtd.c
+index 4dbb878..0ae1ece 100644
+--- a/src/mtd.c
++++ b/src/mtd.c
+@@ -426,8 +426,6 @@ void mtd_dump(struct mtd_data *md)
+ 
+ }
+ 
+-static struct nand_oobinfo none_oobinfo = { .useecc = MTD_NANDECC_OFF };
+-
+ int parse_nfc_geometry(struct mtd_data *md)
+ {
+ 	FILE               *node;
+@@ -766,8 +764,6 @@ void mtd_close(struct mtd_data *md)
+ 		mp = &md->part[i];
+ 
+ 		if (mp->fd != -1) {
+-			(void)ioctl(mp->fd, MEMSETOOBSEL,
+-					&mp->old_oobinfo);
+ 			close(mp->fd);
+ 		}
+ 
+@@ -809,31 +805,12 @@ int mtd_set_ecc_mode(struct mtd_data *md, int ecc)
+ 				fprintf(stderr, "mtd: device %s can't switch to normal\n", mp->name);
+ 				continue;
+ 			}
+-
+-			if (r == -ENOTTY) {
+-				r = ioctl(mp->fd, MEMSETOOBSEL, &mp->old_oobinfo);
+-				if (r != 0) {
+-					fprintf(stderr, "mtd: device %s can't ioctl MEMSETOOBSEL\n", mp->name);
+-					continue;
+-				}
+-				mp->oobinfochanged = 0;
+-			}
+ 		} else {
+ 			r = ioctl(mp->fd, MTDFILEMODE, (void *)MTD_MODE_RAW);
+ 			if (r != 0 && r != -ENOTTY) {
+ 				fprintf(stderr, "mtd: device %s can't switch to RAW\n", mp->name);
+ 				continue;
+ 			}
+-
+-			if (r == -ENOTTY) {
+-				r = ioctl(mp->fd, MEMSETOOBSEL, &none_oobinfo);
+-				if (r != 0) {
+-					fprintf(stderr, "mtd: device %s can't ioctl MEMSETOOBSEL\n", mp->name);
+-					continue;
+-				}
+-				mp->oobinfochanged = 1;
+-			} else
+-				mp->oobinfochanged = 2;
+ 		}
+ 
+ 		mp->ecc = ecc;
