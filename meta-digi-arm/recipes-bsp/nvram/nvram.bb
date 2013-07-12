@@ -5,7 +5,7 @@ SECTION = "base"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
 
-require recipes-bsp/u-boot/u-boot-dey-rev.inc
+require recipes-bsp/u-boot/u-boot-dey-rev_${PREFERRED_VERSION_u-boot-dey}.inc
 
 PR = "${DISTRO}.r0"
 
@@ -24,7 +24,7 @@ LIB_GIT_SHA1 = "$(cd ${WORKDIR}/git && git rev-parse --short HEAD)"
 CFLAGS += "-Wall -DLINUX -DCMD_GIT_SHA1=\"${CMD_GIT_SHA1}\" -DLIB_GIT_SHA1=\"${LIB_GIT_SHA1}\" -Ilib/include -I${STAGING_INCDIR}/libdigi"
 
 do_configure() {
-	rm -f lib && ln -s git/common/digi/cmd_nvram/lib
+	rm -f lib && ln -s ${UBOOT_NVRAM_LIBPATH}
 }
 
 do_compile() {

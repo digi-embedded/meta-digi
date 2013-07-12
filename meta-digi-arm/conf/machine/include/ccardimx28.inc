@@ -12,11 +12,6 @@ UBOOT_LOADADDRESS = "0x41008000"
 # Set UBOOT_CONFIG_VARIANT in local.conf accordingly, default is empty: 261MHz,360MHz,test,dbg
 UBOOT_CONFIG_VARIANT ?= ""
 UBOOT_MACHINE = '${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "_", "_${UBOOT_CONFIG_VARIANT}_", d )}config'
-UBOOT_MAKE_TARGET = "u-boot-ivt.sb"
-UBOOT_SUFFIX = "sb"
-UBOOT_IMAGE = 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "-", "-${UBOOT_CONFIG_VARIANT}-", d )}ivt-${PV}-${PR}.${UBOOT_SUFFIX}'
-UBOOT_BINARY = "u-boot-ivt.${UBOOT_SUFFIX}"
-UBOOT_SYMLINK = 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "-", "-${UBOOT_CONFIG_VARIANT}-", d )}ivt.${UBOOT_SUFFIX}'
 
 # wpa_supplicant driver to use in '/etc/network/interfaces'
 WPA_DRIVER = "nl80211"

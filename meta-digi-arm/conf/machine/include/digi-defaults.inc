@@ -1,6 +1,7 @@
 # Digi BSP default providers
 PREFERRED_PROVIDER_linux-libc-headers ?= "linux-libc-headers-dey"
 PREFERRED_PROVIDER_u-boot ?= "u-boot-dey"
+PREFERRED_VERSION_u-boot-dey ?= "2009.08"
 PREFERRED_PROVIDER_virtual/kernel ?= "linux-dey"
 PREFERRED_VERSION_linux-dey = "2.6.35.14"
 PREFERRED_VERSION_linux-libc-headers-dey ?= "${PREFERRED_VERSION_linux-dey}"
