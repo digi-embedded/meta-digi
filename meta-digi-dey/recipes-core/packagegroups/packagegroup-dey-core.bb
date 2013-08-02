@@ -39,6 +39,7 @@ RDEPENDS_${PN} = "\
     modutils-initscripts \
     netbase \
     nvram \
+    init-ifupdown \
     ${VIRTUAL-RUNTIME_dev_manager} \
     ${VIRTUAL-RUNTIME_init_manager} \
     ${VIRTUAL-RUNTIME_initscripts} \

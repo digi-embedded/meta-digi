@@ -102,5 +102,3 @@ iface wlan0 inet static
 EOF
 fi
 }
-
-CONFFILES_${PN} = "${sysconfdir}/hosts"
