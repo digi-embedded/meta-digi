@@ -10,7 +10,13 @@ BBLAYERS ?= " \
   ##COREBASE##/meta-yocto \
   ##COREBASE##/meta-yocto-bsp \
   ##DIGIBASE##/meta-openembedded/meta-oe \
+  ##DIGIBASE##/meta-openembedded/meta-networking \
+  ##DIGIBASE##/meta-openembedded/meta-webserver \
   ##DIGIBASE##/meta-fsl-arm \
   ##DIGIBASE##/meta-digi/meta-digi-arm \
   ##DIGIBASE##/meta-digi/meta-digi-dey \
+  "
+BBLAYERS_NON_REMOVABLE ?= " \
+  ##COREBASE##/meta \
+  ##COREBASE##/meta-yocto \
   "
