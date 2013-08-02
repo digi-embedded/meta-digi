@@ -14,19 +14,19 @@ SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/atheros.git;protocol=git"
 SRC_URI_internal = "${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git"
-SRC_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
+SRC_URI  = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 SRC_URI += " \
-	file://atheros \
-	file://atheros.conf \
-	file://Makefile \
-	"
+    file://atheros \
+    file://atheros.conf \
+    file://Makefile \
+"
 
 S = "${WORKDIR}/git"
 
 EXTRA_OEMAKE = "DEL_PLATFORM=${MACHINE} KLIB_BUILD=${STAGING_KERNEL_DIR}"
 
 do_configure_prepend() {
-	cp ${WORKDIR}/Makefile ${S}/Makefile
+	cp ${WORKDIR}/Makefile ${S}/
 }
 
 do_install_append() {
@@ -37,18 +37,10 @@ do_install_append() {
 }
 
 FILES_${PN} += " \
-	/lib/firmware/ath6k/AR6003/hw2.1.1/athtcmd_ram.bin \
-	/lib/firmware/ath6k/AR6003/hw2.1.1/athwlan.bin \
-	/lib/firmware/ath6k/AR6003/hw2.1.1/Digi_6203-6233-US.bin \
-	/lib/firmware/ath6k/AR6003/hw2.1.1/Digi_6203-6233-World.bin \
-	/lib/firmware/ath6k/AR6003/hw2.1.1/fw-4.bin \
-	/lib/firmware/ath6k/AR6003/hw2.1.1/nullTestFlow.bin \
-	/lib/firmware/ath6k/AR6003/hw2.1.1/utf.bin \
-	"
-FILES_${PN}_append_cpx2 = " \
-	/lib/firmware/ath6k/AR6003/hw2.1.1/calData_AR6103_Digi_X2e_B.bin \
-	/lib/firmware/ath6k/AR6003/hw2.1.1/calData_AR6103_Digi_X2e_B_world.bin \
-	"
+    ${base_libdir}/firmware/ \
+    ${sysconfdir}/modprobe.d/ \
+    ${sysconfdir}/network/ \
+"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccardimx28js|cpx2)"
