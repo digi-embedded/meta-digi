@@ -4,7 +4,7 @@ SUMMARY = "Firmware files for Digi's MXS based platforms, such as Atheros blueto
 SECTION = "base"
 LICENSE = "Proprietary"
 LIC_FILES_CHKSUM = "file://${DIGI_EULA_FILE};md5=ef5b088ca04b6f10b1764aa182f4f51d"
-ALLOW_EMPTY = "1"
+ALLOW_EMPTY_${PN} = "1"
 
 PR = "${DISTRO}.r0"
 

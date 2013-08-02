@@ -23,4 +23,4 @@ INSANE_SKIP_${PN} = "${ERROR_QA} ${WARN_QA}"
 
 FILES_${PN} = "/usr/"
 
-RPROVIDES += "java2-runtime"
+RPROVIDES_${PN} += "java2-runtime"
