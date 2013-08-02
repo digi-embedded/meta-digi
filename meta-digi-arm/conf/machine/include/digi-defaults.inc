@@ -19,3 +19,12 @@ USE_VT = "0"
 # Add the machine variant to the valid machine override
 MACHINEOVERRIDES =. "${@['', '${MACHINE_VARIANT}:']['${MACHINE_VARIANT}' != '']}"
 MACHINE_VARIANT ?= ""
+
+# U-Boot settings
+UBOOT_BSTR           ??= ""
+UBOOT_CONFIG_VARIANT ??= ""
+UBOOT_BINARY          ?= "u-boot${UBOOT_BSTR}.${UBOOT_SUFFIX}"
+UBOOT_IMAGE           ?= 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "", "_${UBOOT_CONFIG_VARIANT}", d )}${UBOOT_BSTR}-${PV}-${PR}.${UBOOT_SUFFIX}'
+UBOOT_MACHINE         ?= '${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "", "_${UBOOT_CONFIG_VARIANT}", d )}_config'
+UBOOT_MAKE_TARGET     ?= "${UBOOT_BINARY}"
+UBOOT_SYMLINK         ?= 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "", "_${UBOOT_CONFIG_VARIANT}", d )}${UBOOT_BSTR}.${UBOOT_SUFFIX}'

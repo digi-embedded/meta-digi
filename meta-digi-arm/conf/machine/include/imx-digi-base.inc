@@ -6,21 +6,6 @@ include conf/machine/include/tune-cortexa8.inc
 # Disable perf features as 2.6.35.3 fail to build otherwise
 PERF_FEATURES_ENABLE = ""
 
-UBOOT_MAKE_TARGET = "u-boot.bin"
-UBOOT_SUFFIX = "bin"
-UBOOT_PADDING = "2"
-
-# Set UBOOT_CONFIG_VARIANT in local.conf accordingly, default is empty:
-# MX5X: 128sdram,ext_eth,128sdram_test,128sdram_dbg,test,dbg,test_dbg,db_pp,db_pa,db_rp,db_ra
-# MX51: EAK
-# MX53: 4Kpage
-
-UBOOT_CONFIG_VARIANT ?= ""
-
-UBOOT_MACHINE = '${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "_", "_${UBOOT_CONFIG_VARIANT}_", d )}config'
-UBOOT_IMAGE = 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "-", "_${UBOOT_CONFIG_VARIANT}-", d )}${PV}-${PR}.${UBOOT_SUFFIX}'
-UBOOT_SYMLINK = 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "", "_${UBOOT_CONFIG_VARIANT}", d )}.${UBOOT_SUFFIX}'
-
 XSERVER = "xserver-xorg \
            xf86-input-evdev \
            xf86-video-imxfb"

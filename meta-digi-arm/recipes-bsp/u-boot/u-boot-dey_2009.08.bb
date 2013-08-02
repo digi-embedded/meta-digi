@@ -13,11 +13,8 @@ PR = "r0"
 
 S = "${WORKDIR}/git"
 
-UBOOT_MAKE_TARGET = "u-boot-ivt.sb"
-UBOOT_SUFFIX = "sb"
-UBOOT_IMAGE = 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "-", "-${UBOOT_CONFIG_VARIANT}-", d )}ivt-${PV}-${PR}.${UBOOT_SUFFIX}'
-UBOOT_BINARY = "u-boot-ivt.${UBOOT_SUFFIX}"
-UBOOT_SYMLINK = 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "-", "-${UBOOT_CONFIG_VARIANT}-", d )}ivt.${UBOOT_SUFFIX}'
+UBOOT_BSTR_mxs   = "-ivt"
+UBOOT_SUFFIX_mxs = "sb"
 
 DEPENDS_mxs += "elftosb-native imx-bootlets-dey"
 

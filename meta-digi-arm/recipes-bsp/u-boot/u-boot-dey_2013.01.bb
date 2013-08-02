@@ -13,11 +13,7 @@ PR = "r0"
 
 S = "${WORKDIR}/git"
 
-UBOOT_MAKE_TARGET = "u-boot.sb"
-UBOOT_SUFFIX = "sb"
-UBOOT_IMAGE = 'u-boot-${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "-", "-${UBOOT_CONFIG_VARIANT}-", d )}${PV}-${PR}.${UBOOT_SUFFIX}'
-UBOOT_BINARY = "u-boot.${UBOOT_SUFFIX}"
-UBOOT_SYMLINK = 'u-boot-${MACHINE}.${UBOOT_SUFFIX}'
+UBOOT_SUFFIX_mxs = "sb"
 
 DEPENDS_mxs += "elftosb-native"
 

@@ -9,10 +9,6 @@ SOC_FAMILY = "mxs"
 UBOOT_ENTRYPOINT  = "0x41008000"
 UBOOT_LOADADDRESS = "0x41008000"
 
-# Set UBOOT_CONFIG_VARIANT in local.conf accordingly, default is empty: 261MHz,360MHz,test,dbg
-UBOOT_CONFIG_VARIANT ?= ""
-UBOOT_MACHINE = '${MACHINE}${@base_conditional( "UBOOT_CONFIG_VARIANT", "", "_", "_${UBOOT_CONFIG_VARIANT}_", d )}config'
-
 # wpa_supplicant driver to use in '/etc/network/interfaces'
 WPA_DRIVER = "nl80211"
 
@@ -44,6 +40,6 @@ MACHINE_FEATURES_append_wb = " wifi bluetooth"
 MACHINE_FEATURES_append_web = " wifi ext-eth bluetooth"
 MACHINE_FEATURES_append_web1 = " wifi ext-eth bluetooth 1-wire"
 
-# Variants for different CPU speed
-#UBOOT_CONFIG_VARIANT = "261MHz"
-#UBOOT_CONFIG_VARIANT = "360MHz"
+# UBOOT_CONFIG_VARIANT for different CPU speed (default is empty)
+#UBOOT_CONFIG_VARIANT ?= "261MHz"
+#UBOOT_CONFIG_VARIANT ?= "360MHz"
