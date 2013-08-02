@@ -4,16 +4,16 @@ Subject: [PATCH] enable-libnl3
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
- Makefile        | 8 +++++++-
+ Makefile        | 7 ++++++-
  nl80211_utils.c | 4 ++--
  nl80211_utils.h | 2 +-
- 3 files changed, 10 insertions(+), 4 deletions(-)
+ 3 files changed, 9 insertions(+), 4 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 115ad33..3170f65 100644
+index 115ad33..6c21413 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -56,17 +56,23 @@ LIBS=		-ldbus-1 -lpthread -lrt -lbluetooth
+@@ -56,17 +56,22 @@ LIBS=		-ldbus-1 -lpthread -lrt -lbluetooth
  
  NL1FOUND := $(shell $(PKG_CONFIG) --atleast-version=1 libnl-1 && echo Y)
  NL2FOUND := $(shell $(PKG_CONFIG) --atleast-version=2 libnl-2.0 && echo Y)
@@ -31,7 +31,6 @@ index 115ad33..3170f65 100644
  endif
  
 +ifeq ($(NL3FOUND),Y)
-+LIBS += -lnl-genl
 +NLLIBNAME = libnl-3.0
 +endif
 +

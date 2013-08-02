@@ -8,7 +8,7 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 27 insertions(+), 16 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 3170f65..22137d7 100644
+index 6c21413..91659dd 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -25,13 +25,13 @@ SBINDIR ?= $(PREFIX)/sbin
@@ -61,7 +61,7 @@ index 3170f65..22137d7 100644
  
  NL1FOUND := $(shell $(PKG_CONFIG) --atleast-version=1 libnl-1 && echo Y)
  NL2FOUND := $(shell $(PKG_CONFIG) --atleast-version=2 libnl-2.0 && echo Y)
-@@ -80,6 +80,13 @@ endif
+@@ -79,6 +79,13 @@ endif
  LIBS += $(shell $(PKG_CONFIG) --libs $(NLLIBNAME))
  CFLAGS += $(shell $(PKG_CONFIG) --cflags $(NLLIBNAME))
  
@@ -75,7 +75,7 @@ index 3170f65..22137d7 100644
  
  ifdef BOARD_HAS_ATH_WLAN_AR6004
  CFLAGS += -DMULTI_WLAN_CHAN_SUPPORT
-@@ -125,3 +132,7 @@ all: $(OBJECTS)
+@@ -124,3 +131,7 @@ all: $(OBJECTS)
  
  clean:
  	rm -f $(FILTERAPP) $(OBJECTS)
