@@ -1,5 +1,7 @@
 # Copyright (C) 2012 Digi International
 
+UBOOT_ENTRYPOINT  = "0x41008000"
+
 include linux-dey.inc
 include linux-dey-rev_${PV}.inc
 

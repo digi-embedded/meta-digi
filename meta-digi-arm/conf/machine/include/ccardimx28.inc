@@ -6,9 +6,6 @@ include conf/machine/include/mxs-digi-base.inc
 
 SOC_FAMILY = "mxs"
 
-UBOOT_ENTRYPOINT  = "0x41008000"
-UBOOT_LOADADDRESS = "0x41008000"
-
 # wpa_supplicant driver to use in '/etc/network/interfaces'
 WPA_DRIVER = "nl80211"
 
