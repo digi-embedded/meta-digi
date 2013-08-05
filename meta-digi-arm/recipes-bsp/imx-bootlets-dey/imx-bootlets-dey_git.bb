@@ -7,8 +7,8 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 PR = "${DISTRO}.r0"
 
-SRCREV_external = "9ff35cbe9d7046ac6aa5fd2a8b641fcbb8166b1e"
-SRCREV_internal = "de3a716c28e72c192963e9e561f77a1a41b25acf"
+SRCREV_external = ""
+SRCREV_internal = "d7573ef42237c078c7e7d646fced6243b53aee77"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/imx-bootlets.git;protocol=git"
