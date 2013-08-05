@@ -6,10 +6,10 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 
 inherit module
 
-PR = "r0"
+PR = "r1"
 
-SRCREV_external = "9d595329e4e22c8f175fee1df908bbd4697483e4"
-SRCREV_internal = "15bae2c4e330ea6d9289217d3c38ebf63aa8ff15"
+SRCREV_external = ""
+SRCREV_internal = "ac3a910ebc66d0eca8f4de78b513fa3636ed9e6b"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/atheros.git;protocol=git"
