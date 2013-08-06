@@ -27,8 +27,6 @@ VIRTUAL-RUNTIME_keymaps ?= "keymaps"
 # Set device manager depending on X11 feature
 VIRTUAL-RUNTIME_dev_manager ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'udev', 'busybox-mdev', d)}"
 
-USB_GADGET_MODULES = '${@base_version_less_or_equal("PREFERRED_VERSION_linux-dey", "2.6.35.14", "kernel-module-g-ether kernel-module-g-file-storage kernel-module-g-serial", "kernel-module-g-ether kernel-module-g-mass-storage kernel-module-g-serial", d)}'
-
 RDEPENDS_${PN} = "\
     base-files \
     base-passwd \
@@ -49,8 +47,9 @@ RDEPENDS_${PN} = "\
     ubootenv \
     update-flash \
     usbutils \
-    ${@base_contains("MACHINE_FEATURES", "usbgadget", "${USB_GADGET_MODULES}", "",d)} \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
 RRECOMMENDS_${PN} = "\
-    ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS}"
+    ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS} \
+    ${MACHINE_EXTRA_RRECOMMENDS} \
+"
