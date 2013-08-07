@@ -8,6 +8,10 @@ inherit module
 
 PR = "r1"
 
+# 'modprobe' from kmod package is needed to load atheros driver. The one
+# from busybox does not support '--ignore-install' option.
+RDEPENDS_${PN} = "kmod"
+
 SRCREV_external = ""
 SRCREV_internal = "ac3a910ebc66d0eca8f4de78b513fa3636ed9e6b"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
