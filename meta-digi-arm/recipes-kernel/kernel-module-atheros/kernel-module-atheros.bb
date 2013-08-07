@@ -27,7 +27,9 @@ SRC_URI += " \
 
 S = "${WORKDIR}/git"
 
-EXTRA_OEMAKE = "DEL_PLATFORM=${MACHINE} KLIB_BUILD=${STAGING_KERNEL_DIR}"
+ATH_ONLY_INSTALL_FW = "${@base_version_less_or_equal('PREFERRED_VERSION_linux-dey', '2.6.35.14', '', '1', d)}"
+
+EXTRA_OEMAKE = "DEL_PLATFORM=${MACHINE} KLIB_BUILD=${STAGING_KERNEL_DIR} ATH_ONLY_INSTALL_FW=${ATH_ONLY_INSTALL_FW}"
 
 do_configure_prepend() {
 	cp ${WORKDIR}/Makefile ${S}/

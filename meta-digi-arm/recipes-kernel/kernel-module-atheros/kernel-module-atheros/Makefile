@@ -44,14 +44,18 @@ endif
 SRC := $(shell pwd)
 
 all:
+ifeq ($(ATH_ONLY_INSTALL_FW),)
 	$(MAKE) -C $(KERNEL_SRC) M=$(SRC)
+endif
 
 modules_install:
+ifeq ($(ATH_ONLY_INSTALL_FW),)
 	$(MAKE) -C $(KERNEL_SRC) M=$(SRC) modules_install
 	# Fix installation directory of the modules.
 	find $(INSTALL_MOD_PATH)/lib/modules/$(KERNEL_VERSION)/extra/$(ATH_DRV_BASEDIR) -type f -name '*.ko' | \
 		xargs -I modfile mv -f modfile $(INSTALL_MOD_PATH)/lib/modules/$(KERNEL_VERSION)/extra/
 	rm -rf $(INSTALL_MOD_PATH)/lib/modules/*/extra/$(ATH_DRV_BASEDIR)
+endif
 	# Install firmware
 	mkdir -p $(INSTALL_MOD_PATH)/lib/firmware/ath6k/AR6003/hw2.1.1/
 	install -m 0644 $(FIRMWARE) $(INSTALL_MOD_PATH)/lib/firmware/ath6k/AR6003/hw2.1.1/
