@@ -16,7 +16,4 @@ RDEPENDS_${PN} = "\
 	qt4-demos \
 	qt4-examples \
 	fsl-gui-extrafiles \
-    ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
-
-RRECOMMENDS_${PN} = "\
-    ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS}"
+"

@@ -15,10 +15,6 @@ RDEPENDS_${PN} = "\
     alsa-utils \
     alsa-state \
     alsa-states \
-    ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
-
+"
 
 RDEPENDS_${PN}_append_mx5 = " imx-audio"
-
-RRECOMMENDS_${PN} = "\
-    ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS}"

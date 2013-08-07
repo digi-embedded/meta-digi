@@ -14,7 +14,6 @@ MACHINE_GSTREAMER_PLUGIN ?= ""
 RDEPENDS_${PN} = " \
     gst-meta-audio \
     gst-meta-video \
-    ${MACHINE_FIRMWARE} \
     ${MACHINE_GSTREAMER_PLUGIN} \
     gst-fsl-plugin-gplay \
 "
