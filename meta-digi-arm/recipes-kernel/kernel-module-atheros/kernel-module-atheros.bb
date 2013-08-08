@@ -28,6 +28,7 @@ SRC_URI += " \
 S = "${WORKDIR}/git"
 
 ATH_ONLY_INSTALL_FW = "${@base_version_less_or_equal('PREFERRED_VERSION_linux-dey', '2.6.35.14', '', '1', d)}"
+ATH6KL_MOD = "${@base_conditional('ATH_ONLY_INSTALL_FW', '1' , 'ath6kl_core', 'ath6kl_sdio', d)}"
 
 EXTRA_OEMAKE = "DEL_PLATFORM=${MACHINE} KLIB_BUILD=${STAGING_KERNEL_DIR} ATH_ONLY_INSTALL_FW=${ATH_ONLY_INSTALL_FW}"
 
@@ -40,6 +41,7 @@ do_install_append() {
 	install -m 0755 ${WORKDIR}/atheros ${D}${sysconfdir}/network/if-pre-up.d/
 	install -d ${D}${sysconfdir}/modprobe.d
 	install -m 0644 ${WORKDIR}/atheros.conf ${D}${sysconfdir}/modprobe.d/
+	echo "options ${ATH6KL_MOD} ath6kl_p2p=1 softmac_enable=1" >> ${D}${sysconfdir}/modprobe.d/atheros.conf
 }
 
 FILES_${PN} += " \
