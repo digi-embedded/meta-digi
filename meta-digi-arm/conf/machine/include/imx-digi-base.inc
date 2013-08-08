@@ -20,7 +20,7 @@ MACHINE_EXTRA_RRECOMMENDS += "imx-audio"
 MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
 
 # Gstreamer plugin
-MACHINE_GSTREAMER_PLUGIN ?= "gst-fsl-plugin"
+MACHINE_GSTREAMER_PLUGIN ?= "gst-fsl-plugin gst-fsl-plugin-gplay"
 
 PREFERRED_PROVIDER_virtual/egl_mx5      ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'amd-gpu-x11-bin-mx51', 'amd-gpu-bin-mx51', d)}"
 PREFERRED_PROVIDER_virtual/libgles1_mx5 ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'amd-gpu-x11-bin-mx51', 'amd-gpu-bin-mx51', d)}"

@@ -15,7 +15,6 @@ RDEPENDS_${PN} = " \
     gst-meta-audio \
     gst-meta-video \
     ${MACHINE_GSTREAMER_PLUGIN} \
-    gst-fsl-plugin-gplay \
 "
 
 ALLOW_EMPTY_${PN} = "1"
