@@ -3,6 +3,12 @@
 PRINC := "${@int(PRINC) + 1}"
 PR_append = "+${DISTRO}"
 
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+
+SRC_URI += " \
+    file://0001-v4l2-fix-compilation-against-newer-kernel-headers-as.patch \
+"
+
 PACKAGECONFIG = "${@base_contains('DISTRO_FEATURES', 'x11', 'x11', '', d)}"
 PACKAGECONFIG[x11] = ",--disable-gconf --disable-x --disable-xshm --disable-xvideo,"
 
