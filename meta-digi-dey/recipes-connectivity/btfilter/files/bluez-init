@@ -27,7 +27,7 @@ ccardimx28js_bt_init() {
 	#
 	# Exit if this hardware does not support Bluetooth
 	#
-	BLUE_TOOTH_VARIANTS="0x02 0x03 0x04"
+	BLUE_TOOTH_VARIANTS="0x02 0x03 0x10 0x11"
 	MOD_VARIANT="$(cat /sys/kernel/ccardimx28/mod_variant)"
 	if ! echo ${BLUE_TOOTH_VARIANTS} | grep -qs ${MOD_VARIANT}; then
 		echo "${SCRIPTNAME}: FAILED (variant ${MOD_VARIANT} does not support bluetooth)"
@@ -38,7 +38,7 @@ ccardimx28js_bt_init() {
 	# Get the Bluetooth MAC address from NVRAM. Use a default value if the
 	# address has not been set.
 	#
-	BTADDR="$(sed -e 's,^.*btaddr1=\([^[:blank:]]\+\),\1,g' /proc/cmdline)"
+	BTADDR="$(sed -ne 's,^.*btaddr1=\([^[:blank:]]\+\)[:blank:]*.*,\1,g;T;p' /proc/cmdline)"
 	if [ -z "${BTADDR}" -o "${BTADDR}" = "00:00:00:00:00:00" ]; then
 		BTADDR="00:04:F3:FF:FF:BB"
 	fi
@@ -52,6 +52,44 @@ ccardimx28js_bt_init() {
 	#
 	FW_MAC="/lib/firmware/ar3k/1020200/ar3kbdaddr.pst"
 	[ -f "${FW_MAC}" ] && [ "$(cat ${FW_MAC})" = "${BTADDR}" ] || echo ${BTADDR} > ${FW_MAC}
+
+	BT_CONFIG_FILE="/lib/firmware/ar3k/1020200/PS_ASIC.pst"
+	BT_CLASS_1_FILE="/lib/firmware/ar3k/1020200/PS_ASIC_class_1.pst"
+	BT_CLASS_2_FILE="/lib/firmware/ar3k/1020200/PS_ASIC_class_2.pst"
+	BT_READ_ME="/lib/firmware/ar3k/1020200/readme.txt"
+	#
+	# It is illegal to operate a class 1 Bluetooth device in Japan.  So see
+	# if this is a Japanese unit, and, if so, make sure it is configured
+	# for class 2 Bluetooth.
+	#
+	JAPANESE_REGION_CODE="0x2"
+	REGION_CODE="$(cat /sys/kernel/ccardimx28/mod_cert)"
+	if [ -n "${REGION_CODE}" -a "${JAPANESE_REGION_CODE}" = "${REGION_CODE}" ]; then
+		#
+		# We don't want to wear out flash rewriting the configuration file,
+		# so only replace the configuration file if it is not the class 2
+		# version.
+		#
+		if ! cmp -s ${BT_CLASS_2_FILE} ${BT_CONFIG_FILE}; then
+			ln -sf $(basename ${BT_CLASS_2_FILE}) ${BT_CONFIG_FILE}
+		fi
+		#
+		# We don't want the Bluetooth police to drag away our Japanese
+		# users, so delete the class 1 configuration file and the readme
+		# file that refers to it.
+		#
+		if [ -e ${BT_CLASS_1_FILE} ]; then
+			rm ${BT_CLASS_1_FILE}
+		fi
+		if [ -e ${BT_READ_ME} ]; then
+			rm ${BT_READ_ME}
+		fi
+	elif [ ! -e ${BT_CONFIG_FILE} ]; then
+		#
+		# Default to class 1 Bluetooth for non-japanese users.
+		#
+		ln -sf $(basename ${BT_CLASS_1_FILE}) ${BT_CONFIG_FILE}
+	fi
 
 	#
 	# Start the Bluetooth driver and daemon (D-BUS must already be running)
