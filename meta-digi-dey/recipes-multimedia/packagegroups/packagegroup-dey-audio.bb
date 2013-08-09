@@ -10,11 +10,19 @@ PR = "r0"
 
 inherit packagegroup
 
+ALSA_UTILS_PKGS = " \
+    alsa-utils-alsactl \
+    alsa-utils-alsamixer \
+    alsa-utils-amixer \
+    alsa-utils-aplay \
+    alsa-utils-speakertest \
+"
+
 RDEPENDS_${PN} = "\
     alsa-lib \
-    alsa-utils \
     alsa-state \
     alsa-states \
+    ${ALSA_UTILS_PKGS} \
 "
 
 RDEPENDS_${PN}_append_mx5 = " imx-audio"
