@@ -47,6 +47,7 @@ RDEPENDS_${PN} = "\
     ubootenv \
     update-flash \
     usbutils \
+    busybox-acpid \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
 
 RRECOMMENDS_${PN} = "\

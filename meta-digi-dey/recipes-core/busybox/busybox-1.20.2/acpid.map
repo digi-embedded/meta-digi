@@ -1,0 +1,2 @@
+EV_KEY  0x01    KEY_POWER       116     1       pswitch-press
+EV_KEY  0x01    KEY_POWER       116     0       pswitch-release

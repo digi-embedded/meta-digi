@@ -19,6 +19,10 @@ SRC_URI += "file://0001-del-baudrates.patch \
             file://busybox-ntpd \
             file://index.html \
             file://digi.gif \
+            file://busybox-acpid \
+            file://acpid.map \
+            file://pswitch-press \
+            file://pswitch-release \
            "
 
 # Add device handlers to 'mdev' package
@@ -41,6 +45,16 @@ PACKAGES =+ "${PN}-ntpd"
 FILES_${PN}-ntpd = "${sysconfdir}/init.d/busybox-ntpd"
 INITSCRIPT_PACKAGES =+ "${PN}-ntpd"
 INITSCRIPT_NAME_${PN}-ntpd = "busybox-ntpd"
+
+# ACPID package
+PACKAGES =+ "${PN}-acpid"
+FILES_${PN}-acpid = " ${sysconfdir}/init.d/busybox-acpid \
+                       ${sysconfdir}/acpi/acpid.map \
+                       ${sysconfdir}/acpi/pswitch-press \
+                       ${sysconfdir}/acpi/pswitch-release \
+"
+INITSCRIPT_PACKAGES =+ "${PN}-acpid"
+INITSCRIPT_NAME_${PN}-acpid = "busybox-acpid"
 
 do_install_append() {
 	if grep "CONFIG_MDEV=y" ${WORKDIR}/defconfig; then
@@ -65,4 +79,11 @@ do_install_append() {
 	fi
 	# Install 'suspend' script
 	install -m 0755 ${WORKDIR}/suspend ${D}${base_bindir}
+	if grep "CONFIG_ACPID=y" ${WORKDIR}/defconfig; then
+		install -m 0755 ${WORKDIR}/busybox-acpid ${D}${sysconfdir}/init.d/
+		install -d ${D}${sysconfdir}/acpi/
+		install -m 0755 ${WORKDIR}/acpid.map ${D}${sysconfdir}/acpi/
+		install -m 0755 ${WORKDIR}/pswitch-press ${D}${sysconfdir}/acpi/
+		install -m 0755 ${WORKDIR}/pswitch-release ${D}${sysconfdir}/acpi/
+	fi
 }

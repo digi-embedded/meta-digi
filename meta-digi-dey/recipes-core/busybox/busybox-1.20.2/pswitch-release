@@ -1,0 +1,26 @@
+#!/bin/sh
+
+POWEROFF_DELAY=2
+
+if [ ! -f  /tmp/pswitch_press ]; then
+    logger -t acpid  "No press event."
+    exit -1
+fi
+
+while read line
+do
+    TSTAMP=$line
+done < /tmp/pswitch_press
+
+rm -f /tmp/pswitch_press
+
+TDIFF=$((`date +%s`- $TSTAMP))
+if [ $TDIFF -lt $POWEROFF_DELAY  ]; then
+    logger -t acpid  "Power key suspend request."
+    exec /bin/suspend
+else
+    logger -t acpid  "Power key poweroff request."
+    exec /sbin/poweroff
+fi
+
+exit 0
