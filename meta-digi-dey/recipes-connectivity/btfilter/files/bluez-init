@@ -28,7 +28,11 @@ ccardimx28js_bt_init() {
 	# Exit if this hardware does not support Bluetooth
 	#
 	BLUE_TOOTH_VARIANTS="0x02 0x03 0x10 0x11"
-	MOD_VARIANT="$(cat /sys/kernel/ccardimx28/mod_variant)"
+        if [ -e "/proc/device-tree/digi,hwid,variant" ]; then
+                MOD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant)"
+        elif [ -e "/sys/kernel/ccardimx28/mod_variant" ]; then
+                MOD_VARIANT="$(cat /sys/kernel/ccardimx28/mod_variant)"
+        fi
 	if ! echo ${BLUE_TOOTH_VARIANTS} | grep -qs ${MOD_VARIANT}; then
 		echo "${SCRIPTNAME}: FAILED (variant ${MOD_VARIANT} does not support bluetooth)"
 		exit
@@ -63,7 +67,11 @@ ccardimx28js_bt_init() {
 	# for class 2 Bluetooth.
 	#
 	JAPANESE_REGION_CODE="0x2"
-	REGION_CODE="$(cat /sys/kernel/ccardimx28/mod_cert)"
+        if [ -e "/proc/device-tree/digi,hwid,cert" ]; then
+                REGION_CODE="$(cat /proc/device-tree/digi,hwid,cert)"
+        elif [ -e "/sys/kernel/ccardimx28/mod_cert" ]; then
+                REGION_CODE="$(cat /sys/kernel/ccardimx28/mod_cert)"
+        fi
 	if [ -n "${REGION_CODE}" -a "${JAPANESE_REGION_CODE}" = "${REGION_CODE}" ]; then
 		#
 		# We don't want to wear out flash rewriting the configuration file,
@@ -123,7 +131,13 @@ ccardimx28js_bt_init() {
 echo "Starting bluetooth services."
 
 # Initialize driver for 'ccardimx28js'
-[ "$(cat /sys/kernel/machine/name)" = "ccardimx28" ] && ccardimx28js_bt_init
+if [ -e "/proc/device-tree/digi,machine,name" ]; then
+        MACHINENAME="$(cat /proc/device-tree/digi,machine,name)"
+elif [ -e "/sys/kernel/machine/name" ]; then
+        MACHINENAME="$(cat /sys/kernel/machine/name)"
+fi
+
+[ "${MACHINENAME}" = "ccardimx28" ] && ccardimx28js_bt_init
 
 # Run bluetooth daemon
 if hciconfig hci0 up && bluetoothd; then
