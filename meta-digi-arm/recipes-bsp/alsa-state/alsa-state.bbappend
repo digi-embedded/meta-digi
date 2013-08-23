@@ -3,7 +3,7 @@
 PRINC := "${@int(PRINC) + 1}"
 PR_append = "+${DISTRO}"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}/${MACHINE}:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}/${MACHINE}/${PREFERRED_VERSION_linux-dey}:"
 
 SRC_URI_append_ccardimx28js = " \
 	file://asound.inline_play.state \
