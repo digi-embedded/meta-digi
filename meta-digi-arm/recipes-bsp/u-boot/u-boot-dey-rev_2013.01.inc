@@ -1,7 +1,7 @@
 # Copyright (C) 2013 Digi International
 
 SRCREV_external = ""
-SRCREV_internal = "7398757e2a3598df3d5f62ac09b5aec9d41e23fa"
+SRCREV_internal = "f206b8f5deb74a689a1d99e50bb377da77b28ddd"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-uboot.git;protocol=git"
