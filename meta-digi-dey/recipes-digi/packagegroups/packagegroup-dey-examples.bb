@@ -10,9 +10,9 @@ PR = "r0"
 inherit packagegroup
 
 RDEPENDS_${PN} = "\
-	dey-examples-adc \
+	${@base_version_less_or_equal("PREFERRED_VERSION_linux-dey", "2.6.35.14", "dey-examples-adc", "", d)} \
 	${@base_contains("MACHINE_FEATURES", "alsa", "dey-examples-alsa", "", d)} \
-	dey-examples-gpio \
+	${@base_version_less_or_equal("PREFERRED_VERSION_linux-dey", "2.6.35.14", "dey-examples-gpio", "", d)} \
 	dey-examples-gpio-sysfs \
 	${@base_contains("MACHINE_FEATURES", "rtc", "dey-examples-rtc", "", d)} \
 	dey-examples-spidev \
