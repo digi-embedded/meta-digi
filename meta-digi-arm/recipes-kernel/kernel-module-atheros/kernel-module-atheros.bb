@@ -51,4 +51,4 @@ FILES_${PN} += " \
 "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccardimx28js|cpx2)"
+COMPATIBLE_MACHINE = "(mxs)"

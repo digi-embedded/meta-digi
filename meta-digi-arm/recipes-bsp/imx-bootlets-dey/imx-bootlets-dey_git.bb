@@ -41,4 +41,4 @@ do_install () {
 FILES_${PN} = "/boot"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccardimx28js|cpx2|wr21)"
+COMPATIBLE_MACHINE = "(mxs)"

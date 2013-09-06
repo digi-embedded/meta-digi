@@ -22,4 +22,4 @@ EXTRA_OEMAKE += 'HOSTSTRIP=true'
 EXTRA_OEMAKE_append_mxs = ' BOOTLETS_DIR=${STAGING_DIR_TARGET}/boot'
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccardimx28js|ccimx51js|ccimx53js|cpx2|wr21)"
+COMPATIBLE_MACHINE = "(mxs|mx5)"

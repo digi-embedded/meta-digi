@@ -60,4 +60,4 @@ FILES_${PN} += " \
 "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx51js|ccimx53js)"
+COMPATIBLE_MACHINE = "(mx5)"

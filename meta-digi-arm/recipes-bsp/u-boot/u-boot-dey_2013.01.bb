@@ -18,4 +18,4 @@ UBOOT_SUFFIX_mxs = "sb"
 DEPENDS_mxs += "elftosb-native"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccardimx28js|cpx2|wr21)"
+COMPATIBLE_MACHINE = "(mxs)"
