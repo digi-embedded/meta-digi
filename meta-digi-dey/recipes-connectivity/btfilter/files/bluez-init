@@ -28,11 +28,8 @@ ccardimx28js_bt_init() {
 	# Exit if this hardware does not support Bluetooth
 	#
 	BLUE_TOOTH_VARIANTS="0x02 0x03 0x10 0x11"
-        if [ -e "/proc/device-tree/digi,hwid,variant" ]; then
-                MOD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant)"
-        elif [ -e "/sys/kernel/ccardimx28/mod_variant" ]; then
-                MOD_VARIANT="$(cat /sys/kernel/ccardimx28/mod_variant)"
-        fi
+	MOD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant 2>/dev/null || \
+		       cat /sys/kernel/ccardimx28/mod_variant)"
 	if ! echo ${BLUE_TOOTH_VARIANTS} | grep -qs ${MOD_VARIANT}; then
 		echo "${SCRIPTNAME}: FAILED (variant ${MOD_VARIANT} does not support bluetooth)"
 		exit
@@ -42,7 +39,11 @@ ccardimx28js_bt_init() {
 	# Get the Bluetooth MAC address from NVRAM. Use a default value if the
 	# address has not been set.
 	#
-	BTADDR="$(sed -ne 's,^.*btaddr1=\([^[:blank:]]\+\)[:blank:]*.*,\1,g;T;p' /proc/cmdline)"
+	if [ -f "/proc/device-tree/bluetooth/mac-address" ]; then
+		BTADDR="$(hexdump -ve '1/1 "%02X" ":"' /proc/device-tree/bluetooth/mac-address | sed 's/:$//g')"
+	else
+		BTADDR="$(sed -ne 's,^.*btaddr1=\([^[:blank:]]\+\)[:blank:]*.*,\1,g;T;p' /proc/cmdline)"
+	fi
 	if [ -z "${BTADDR}" -o "${BTADDR}" = "00:00:00:00:00:00" ]; then
 		BTADDR="00:04:F3:FF:FF:BB"
 	fi
@@ -67,11 +68,8 @@ ccardimx28js_bt_init() {
 	# for class 2 Bluetooth.
 	#
 	JAPANESE_REGION_CODE="0x2"
-        if [ -e "/proc/device-tree/digi,hwid,cert" ]; then
-                REGION_CODE="$(cat /proc/device-tree/digi,hwid,cert)"
-        elif [ -e "/sys/kernel/ccardimx28/mod_cert" ]; then
-                REGION_CODE="$(cat /sys/kernel/ccardimx28/mod_cert)"
-        fi
+	REGION_CODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null || \
+		       cat /sys/kernel/ccardimx28/mod_cert)"
 	if [ -n "${REGION_CODE}" -a "${JAPANESE_REGION_CODE}" = "${REGION_CODE}" ]; then
 		#
 		# We don't want to wear out flash rewriting the configuration file,
@@ -86,12 +84,7 @@ ccardimx28js_bt_init() {
 		# users, so delete the class 1 configuration file and the readme
 		# file that refers to it.
 		#
-		if [ -e ${BT_CLASS_1_FILE} ]; then
-			rm ${BT_CLASS_1_FILE}
-		fi
-		if [ -e ${BT_READ_ME} ]; then
-			rm ${BT_READ_ME}
-		fi
+		rm -f ${BT_CLASS_1_FILE} ${BT_READ_ME}
 	elif [ ! -e ${BT_CONFIG_FILE} ]; then
 		#
 		# Default to class 1 Bluetooth for non-japanese users.
@@ -131,12 +124,7 @@ ccardimx28js_bt_init() {
 echo "Starting bluetooth services."
 
 # Initialize driver for 'ccardimx28js'
-if [ -e "/proc/device-tree/digi,machine,name" ]; then
-        MACHINENAME="$(cat /proc/device-tree/digi,machine,name)"
-elif [ -e "/sys/kernel/machine/name" ]; then
-        MACHINENAME="$(cat /sys/kernel/machine/name)"
-fi
-
+MACHINENAME="$(cat /proc/device-tree/digi,machine,name 2>/dev/null || cat /sys/kernel/machine/name)"
 [ "${MACHINENAME}" = "ccardimx28" ] && ccardimx28js_bt_init
 
 # Run bluetooth daemon
