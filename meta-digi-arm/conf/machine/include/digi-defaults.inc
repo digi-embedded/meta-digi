@@ -18,7 +18,7 @@ IMAGE_CLASSES = "image_types_digi"
 USE_VT = "0"
 
 # Add the machine variant to the valid machine override
-MACHINEOVERRIDES =. "${@['', '${MACHINE_VARIANT}:']['${MACHINE_VARIANT}' != '']}"
+MACHINEOVERRIDES .= "${@['', ':${MACHINE_VARIANT}']['${MACHINE_VARIANT}' != '']}"
 MACHINE_VARIANT ?= ""
 
 # U-Boot settings
