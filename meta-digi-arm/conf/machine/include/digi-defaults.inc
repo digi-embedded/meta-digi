@@ -9,6 +9,8 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 PREFERRED_PROVIDER_virtual/libx11 ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'libx11', '', d)}"
 PREFERRED_PROVIDER_jpeg-native ?= "jpeg-native"
 
+IS_KERNEL_2X ?= "${@base_version_less_or_equal('PREFERRED_VERSION_linux-dey', '2.6.35.14', '1', '', d)}"
+
 # Digi BSP default settings
 IMAGE_CLASSES = "image_types_digi"
 
