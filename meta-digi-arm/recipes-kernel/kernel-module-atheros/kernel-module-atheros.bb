@@ -13,7 +13,7 @@ PR = "r1"
 RDEPENDS_${PN} = "kmod"
 
 SRCREV_external = ""
-SRCREV_internal = "ac3a910ebc66d0eca8f4de78b513fa3636ed9e6b"
+SRCREV_internal = "b17616e7d69cfc6f838daa5477403d9e9c4bc997"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/atheros.git;protocol=git"
@@ -21,16 +21,12 @@ SRC_URI_internal = "${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git"
 SRC_URI  = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 SRC_URI += " \
     file://atheros \
-    file://atheros.conf \
     file://Makefile \
 "
 
 S = "${WORKDIR}/git"
 
-ATH_ONLY_INSTALL_FW = "${@base_version_less_or_equal('PREFERRED_VERSION_linux-dey', '2.6.35.14', '', '1', d)}"
-ATH6KL_MOD = "${@base_conditional('ATH_ONLY_INSTALL_FW', '1' , 'ath6kl_core', 'ath6kl_sdio', d)}"
-
-EXTRA_OEMAKE = "DEL_PLATFORM=${MACHINE} KLIB_BUILD=${STAGING_KERNEL_DIR} ATH_ONLY_INSTALL_FW=${ATH_ONLY_INSTALL_FW}"
+EXTRA_OEMAKE = "DEL_PLATFORM=${MACHINE} KLIB_BUILD=${STAGING_KERNEL_DIR}"
 
 do_configure_prepend() {
 	cp ${WORKDIR}/Makefile ${S}/
@@ -40,8 +36,10 @@ do_install_append() {
 	install -d ${D}${sysconfdir}/network/if-pre-up.d
 	install -m 0755 ${WORKDIR}/atheros ${D}${sysconfdir}/network/if-pre-up.d/
 	install -d ${D}${sysconfdir}/modprobe.d
-	install -m 0644 ${WORKDIR}/atheros.conf ${D}${sysconfdir}/modprobe.d/
-	echo "options ${ATH6KL_MOD} ath6kl_p2p=1 softmac_enable=1" >> ${D}${sysconfdir}/modprobe.d/atheros.conf
+	cat >> ${D}${sysconfdir}/modprobe.d/atheros.conf <<-_EOF_
+		install ath6kl_sdio true
+		options ath6kl_sdio ath6kl_p2p=1 softmac_enable=1
+	_EOF_
 }
 
 FILES_${PN} += " \
