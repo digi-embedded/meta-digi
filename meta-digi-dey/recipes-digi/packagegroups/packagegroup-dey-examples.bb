@@ -34,11 +34,11 @@ RDEPENDS_${PN}_append_mx5 = "\
 	dey-examples-v4l2 \
 "
 
-RDEPENDS_${PN}_append_ccimx51js_mx5 = "\
+RDEPENDS_${PN}_append_ccimx51js = "\
 	dey-examples-battery \
 "
 
-RDEPENDS_${PN}_append_ccimx53js_mx5 = "\
+RDEPENDS_${PN}_append_ccimx53js = "\
 	dey-examples-can \
 "
 
