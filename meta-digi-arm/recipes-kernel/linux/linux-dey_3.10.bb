@@ -18,9 +18,11 @@ HAVE_EXT_ETH = "${@base_contains('MACHINE_FEATURES', 'ext-eth', '1', '', d)}"
 HAVE_BT      = "${@base_contains('MACHINE_FEATURES', 'bluetooth', '1', '', d)}"
 HAVE_1WIRE   = "${@base_contains('MACHINE_FEATURES', '1-wire', '1', '', d)}"
 HAVE_GUI     = "${@base_contains('DISTRO_FEATURES', 'x11', '1', '', d)}"
+HAVE_EXAMPLE = "${@base_contains('IMAGE_FEATURES', 'dey-examples', '1', '', d)}"
 
-# Preferably configure kernel through device tree.
+# Kernel configuration fragments
 KERNEL_CFG_FRAGS ?= ""
+KERNEL_CFG_FRAGS_append = " ${@base_conditional('HAVE_EXAMPLE', '1' , 'file://config-spidev.cfg', '', d)}"
 
 SRC_URI += " \
     file://defconfig \
@@ -63,6 +65,10 @@ do_update_dts() {
 		config_dts disable '_ssp1_'
 		config_dts disable '_auart1_4wires'
 		config_dts disable '_ethernet0_leds'
+	fi
+	if [ -n "${HAVE_EXAMPLE}" ]; then
+		config_dts enable  'ssp1_spi_gpio.dtsi'
+		config_dts enable  'ssp1_spi_gpio_spidev.dtsi'
 	fi
 }
 addtask update_dts before do_install after do_sizecheck
