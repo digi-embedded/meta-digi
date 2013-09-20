@@ -9,6 +9,9 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 # gobject-introspection
 SRC_URI += "file://simple-agent"
 
+# 'simple-agent' needs some python packages
+RDEPENDS_${PN} = "python-dbus python-pygobject"
+
 EXTRA_OECONF_append = " --enable-health"
 
 do_install_append() {
