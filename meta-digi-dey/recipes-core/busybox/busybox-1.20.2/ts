@@ -3,21 +3,19 @@
 #
 #  ts
 #
-#  Copyright (C) 2010 by Digi International Inc.
+#  Copyright (C) 2013 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License version 2 as published by
 #  the Free Software Foundation.
 #
+#  !Description: symlink known touchscreen devices
 #
-#  !Description: symlink touchscreen devices
+#   Values of '/sys/class/input/eventX/device/name':
 #
-#       i.MX5X:
-#           ts0 -> mxc_ts         (i.MX51)
-#           ts0 -> da9052-tsi     (i.MX53)
-#           ts1 -> ADS784x	  (Fusion and ADS cannot be enabled simultaneously)
-#           ts1 -> Fusion touch
+#       i.MX5X: mxc_ts, da9052-tsi, ADS784x, fusion touch
+#       i.MX28: mxs-lradc
 #
 #===============================================================================
 
@@ -26,16 +24,7 @@
 
 mdev=$(basename ${MDEV})
 
-if echo "${DEL_PLATFORM}" | grep -qs 'mx5'; then
-	if grep -qs 'mxc_ts' /sys/class/input/${mdev}/device/name; then
-		ln -sf ${mdev} /dev/input/ts0
-	elif grep -qs 'tsi' /sys/class/input/${mdev}/device/name; then
-		ln -sf ${mdev} /dev/input/ts0
-	elif grep -qs 'ADS784x' /sys/class/input/${mdev}/device/name; then
-		ln -sf ${mdev} /dev/input/ts1
-	elif grep -qs 'fusion' /sys/class/input/${mdev}/device/name; then
-		ln -sf ${mdev} /dev/input/ts1
-	fi
-else
-	grep -qs '[Tt]ouch' /sys/class/input/${mdev}/device/name && ln -sf ${mdev} /dev/input/ts0
+if grep -qs '\(mxc_ts\|da9052-tsi\|ADS784x\|fusion\|mxs-lradc\|[Tt]ouch\)' \
+   /sys/class/input/${mdev}/device/name; then
+	ln -sf ${mdev} /dev/input/touchscreen0
 fi
