@@ -24,8 +24,9 @@ VIRTUAL-RUNTIME_init_manager ?= "sysvinit"
 VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 VIRTUAL-RUNTIME_keymaps ?= "keymaps"
 
-# Set device manager depending on X11 feature
+# Set virtual runtimes depending on X11 feature
 VIRTUAL-RUNTIME_dev_manager ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'udev', 'busybox-mdev', d)}"
+VIRTUAL-RUNTIME_touchscreen ?= "${@base_contains('DISTRO_FEATURES', 'x11', '', 'tslib-calibrate tslib-tests', d)}"
 
 RDEPENDS_${PN} = "\
     base-files \
@@ -33,7 +34,7 @@ RDEPENDS_${PN} = "\
     busybox \
     ${@base_contains("MACHINE_FEATURES", "rtc", "busybox-hwclock", "", d)} \
     ${@base_contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
-    ${@base_contains("MACHINE_FEATURES", "touchscreen", "tslib tslib-calibrate tslib-tests", "",d)} \
+    ${@base_contains("MACHINE_FEATURES", "touchscreen", "${VIRTUAL-RUNTIME_touchscreen}", "",d)} \
     modutils-initscripts \
     netbase \
     nvram \
