@@ -5,7 +5,7 @@ SECTION = "examples"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
 
-DEPENDS = "imx-lib"
+DEPENDS = "imx-lib virtual/kernel"
 
 RDEPENDS_${PN} = "kernel-module-scc2-driver kernel-module-sahara"
 
@@ -37,6 +37,7 @@ S = "${WORKDIR}/sahara_test"
 
 do_compile() {
 	${CC} -O2 -Wall -DCONFIG_ARCH_MX5 -DSAHARA2 -DSAHARA \
+		-I${STAGING_KERNEL_DIR}/include \
 		-I${STAGING_KERNEL_DIR}/drivers/mxc/security/sahara2/include \
 		${SAHARA_TEST_SRC} -lsahara -o sahara_test
 }
