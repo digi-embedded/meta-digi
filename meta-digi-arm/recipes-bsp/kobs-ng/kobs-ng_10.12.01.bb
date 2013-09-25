@@ -18,8 +18,8 @@ SRC_URI_append_ccardimx28js = " \
     file://0005-version-parse-MX-arch-to-select-rom-version.patch \
 "
 SRC_URI_append = " \
-    ${@base_conditional('IS_KERNEL_2X', '1' , '', 'file://0006-Remove-MEMSETOOBSEL-ioctl-call.patch', d)} \
-    ${@base_conditional('IS_KERNEL_2X', '1' , '', 'file://0007-Rename-MTD_MODE_-to-MTD_FILE_MODE_.patch', d)} \
+    file://0006-Remove-MEMSETOOBSEL-ioctl-call.patch \
+    file://0007-Rename-MTD_MODE_-to-MTD_FILE_MODE_.patch \
 "
 
 SRC_URI[md5sum] = "9fce401b6c90e851f0335b9ca3a649a9"
