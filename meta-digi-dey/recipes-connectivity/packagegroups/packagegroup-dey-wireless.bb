@@ -21,4 +21,4 @@ RDEPENDS_${PN} = "\
     ${WIRELESS_MODULE} \
 "
 
-RDEPENDS_${PN}_append_mxs = " iw"
+RDEPENDS_${PN}_append_mxs = " iw wmiconfig"

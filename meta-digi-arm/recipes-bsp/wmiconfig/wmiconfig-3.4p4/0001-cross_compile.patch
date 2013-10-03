@@ -1,0 +1,56 @@
+diff --git a/ath6kl-wmiconfig/Makefile b/ath6kl-wmiconfig/Makefile
+index b9787a4..b074b6f 100644
+--- a/ath6kl-wmiconfig/Makefile
++++ b/ath6kl-wmiconfig/Makefile
+@@ -5,12 +5,12 @@
+ #------------------------------------------------
+ -include .config
+ 
+-LDFLAGS +=  $(shell pkg-config --cflags --libs glib-2.0)
++# LDFLAGS +=  $(shell pkg-config --cflags --libs glib-2.0)
+ 
+-CC :=$(ATH_CROSS_COMPILE_TYPE)gcc
++# CC :=$(ATH_CROSS_COMPILE_TYPE)gcc
+ APP=wmiconfig
+ 
+-NLLIBNAME = libnl-1
++NLLIBNAME = libnl-3.0
+ LIBTCMD_DIR := ../libtcmd
+ 
+ LDFLAGS += -ltcmd $(shell pkg-config --libs $(NLLIBNAME)) -lrt
+diff --git a/libtcmd/Makefile b/libtcmd/Makefile
+index 22f17db..1048758 100644
+--- a/libtcmd/Makefile
++++ b/libtcmd/Makefile
+@@ -1,7 +1,7 @@
+-CC = gcc
++# CC = gcc
+ CFLAGS = -Wall -g
+ 
+-NLLIBNAME = libnl-1
++NLLIBNAME = libnl-3.0
+ WLAN_API = WLAN_API_NL80211
+ WLAN_API_SRCS = nl80211.c
+ 
+@@ -9,7 +9,7 @@ SRCS = os.c $(WLAN_API_SRCS) libtcmd.c
+ OBJS = $(SRCS:.c=.o)
+ 
+ LDLIBS += $(shell pkg-config --libs $(NLLIBNAME)) -lrt
+-CFLAGS += $(shell pkg-config --cflags $(NLLIBNAME)) -D$(WLAN_API)
++CFLAGS += $(shell pkg-config --cflags $(NLLIBNAME)) -D$(WLAN_API) -DLIBNL_3
+ 
+ libtcmd.a: $(SRCS) $(OBJS)
+ 	$(AR) rcs $@ $(OBJS)
+diff --git a/libtcmd/nl80211.c b/libtcmd/nl80211.c
+index ec44a68..783d172 100644
+--- a/libtcmd/nl80211.c
++++ b/libtcmd/nl80211.c
+@@ -8,7 +8,7 @@
+ 
+ int cb_ret;
+ 
+-#ifdef LIBNL_2
++#if defined(LIBNL_2) || defined(LIBNL_3)
+ static inline struct nl_sock *nl_handle_alloc(void)
+ {
+ 	return nl_socket_alloc();
