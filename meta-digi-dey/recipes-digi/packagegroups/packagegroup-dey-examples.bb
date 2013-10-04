@@ -7,6 +7,8 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=3f40d7994397109285ec7b81fdeb3
 
 PR = "r0"
 
+DEPENDS = "virtual/kernel"
+
 inherit packagegroup
 
 RDEPENDS_${PN} = "\
