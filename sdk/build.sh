@@ -29,7 +29,7 @@ set -e
 SCRIPTNAME="$(basename ${0})"
 SCRIPTPATH="$(cd $(dirname ${0}) && pwd)"
 
-MANIFEST_URL="git://git.digi.com/linux/yocto/digi-yocto-sdk-manifest.git"
+MANIFEST_URL="ssh://git@stash.digi.com/dey/digi-yocto-sdk-manifest.git"
 
 DIGI_PREMIRROR_CFG="
 # Use internal mirror
