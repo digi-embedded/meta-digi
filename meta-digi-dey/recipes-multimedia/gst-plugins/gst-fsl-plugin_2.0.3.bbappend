@@ -19,6 +19,7 @@ SRC_URI += " \
     file://0011-gplay_repeat.patch \
     file://0012-gst-fsl-plugin-Only-call-MXCFB_SET_OVERLAY_POS-with-.patch \
     file://0013-gst-fsl-plugin-Do-not-blank-the-display-on-device-cl.patch \
+    file://0014-undefined-shm_open.patch \
 "
 
 do_install_append() {
