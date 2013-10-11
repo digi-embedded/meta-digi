@@ -1,0 +1,29 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Fri, 11 Oct 2013 18:56:04 +0200
+Subject: [PATCH] makefile.am
+
+Yocto build system does not use the makefile.in directly. Instead it
+uses autotools to regenerate it using the source makefile.am.
+
+But the makefile.in distributed in the package has some rules changed
+that are not generated from the makefile.am, so adapt the makefile.am to
+generate an equivalent makefile.in.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ include/Makefile.am | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/include/Makefile.am b/include/Makefile.am
+index 17d4d2c..dc3a466 100644
+--- a/include/Makefile.am
++++ b/include/Makefile.am
+@@ -1,5 +1,8 @@
+ noinst_HEADERS=version.h
+ 
++all-local:
++	echo "const char *git_sha = \""`git rev-parse HEAD`"\";" > ../include/autoversion.h
++
+ version.h: stamp-vh
+ 	@:
+ 
