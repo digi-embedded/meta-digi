@@ -20,6 +20,7 @@ SRC_URI_append_ccardimx28js = " \
 SRC_URI_append = " \
     file://0006-Remove-MEMSETOOBSEL-ioctl-call.patch \
     file://0007-Rename-MTD_MODE_-to-MTD_FILE_MODE_.patch \
+    file://0008-version-parse-ROM-version-from-FDT-if-available.patch \
 "
 
 SRC_URI[md5sum] = "9fce401b6c90e851f0335b9ca3a649a9"
