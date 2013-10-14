@@ -5,5 +5,5 @@ SRCREV_internal = "eadb42b86adce380ff2a706ab1c34458eee4bd38"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-linux.git;protocol=git"
-SRC_URI_internal = "${DIGI_LOG_GIT}linux-2.6.git;protocol=git"
+SRC_URI_internal = "${DIGI_GIT}linux-2.6.git;protocol=git"
 SRC_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"

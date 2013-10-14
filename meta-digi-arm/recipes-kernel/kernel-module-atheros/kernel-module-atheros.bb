@@ -17,7 +17,7 @@ SRCREV_internal = "${@base_conditional('IS_KERNEL_2X', '1' , 'f18d0de2ee85b6e768
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/atheros.git;protocol=git"
-SRC_URI_internal = "${DIGI_LOG_GIT}linux-modules/atheros.git;protocol=git"
+SRC_URI_internal = "${DIGI_GIT}linux-modules/atheros.git;protocol=git"
 SRC_URI  = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 SRC_URI += " \
     file://atheros \
