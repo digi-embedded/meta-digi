@@ -16,9 +16,6 @@ MACHINE_EXTRA_RRECOMMENDS = "kernel-modules"
 # Extra audio support
 MACHINE_EXTRA_RRECOMMENDS += "imx-audio"
 
-# Extra udev rules
-MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
-
 # Gstreamer plugin
 MACHINE_GSTREAMER_PLUGIN ?= "gst-fsl-plugin gst-fsl-plugin-gplay"
 
