@@ -20,7 +20,9 @@ EXTRA_IMAGEDEPENDS = "u-boot"
 # At the moment it's failing due to wrong u-boot image
 # SDCARD_ROOTFS ?= "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.ext3"
 # IMAGE_FSTYPES ?= "ext3 sdcard sum.jffs2 tar.bz2 ubifs"
-IMAGE_FSTYPES ?= "sum.jffs2 tar.bz2 ubifs"
+#
+# JFFS2 is not supported by kernel 3.10, so add it only for 2.6.35
+IMAGE_FSTYPES ?= "${@base_conditional('IS_KERNEL_2X', '1' , 'sum.jffs2', '', d)} tar.bz2 ubifs"
 
 KERNEL_IMAGETYPE = "uImage"
 
