@@ -51,7 +51,7 @@
 #MACHINE ??= "qemux86"
 
 MACHINE = "ccardimx28js"
-MACHINE_VARIANT = "wb"
+MACHINE_VARIANT = "web1"
 
 #
 # Use Digi's internal git repositories

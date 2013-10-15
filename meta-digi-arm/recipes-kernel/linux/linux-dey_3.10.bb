@@ -44,17 +44,25 @@ config_dts() {
 
 do_update_dts() {
 	if [ -n "${HAVE_WIFI}" ]; then
-		config_dts enable '_ssp2_mmc_wifi'
+		config_dts enable  '_ssp2_mmc_wifi.dtsi'
+	else
+		config_dts disable '_ssp2_mmc_wifi.dtsi'
 	fi
 	if [ -n "${HAVE_EXT_ETH}" ]; then
-		config_dts enable '_ethernet1[^_]'
+		config_dts enable  '_ethernet1.dtsi'
+	else
+		config_dts disable '_ethernet1.dtsi'
 	fi
 	if [ -n "${HAVE_BT}" ]; then
-		config_dts enable '_auart0_bluetooth'
+		config_dts enable  '_auart0_bluetooth.dtsi'
+	else
+		config_dts disable '_auart0_bluetooth.dtsi'
 	fi
 	if [ -n "${HAVE_1WIRE}" ]; then
-		config_dts enable  '_onewire_i2c1'
-		config_dts disable '_auart2_4wires'
+		config_dts enable  '_onewire_i2c1.dtsi'
+		config_dts disable '_auart2_4wires.dtsi'
+	else
+		config_dts disable '_onewire_i2c1.dtsi'
 	fi
 	if [ -n "${HAVE_GUI}" ]; then
 		# Enable LCD
