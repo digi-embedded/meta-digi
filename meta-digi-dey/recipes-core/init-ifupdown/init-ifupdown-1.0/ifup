@@ -1,4 +1,4 @@
-#!/bin/sh -l
+#!/bin/sh
 #===============================================================================
 #
 #  ifup
@@ -11,7 +11,7 @@
 #  the Free Software Foundation.
 #
 #
-#  !Description: Set network interfaces MAC addresses.
+#  !Description: Set network interfaces MAC addresses on i.MX5X
 #
 #===============================================================================
 
@@ -21,32 +21,13 @@ set -e
 [ "${METHOD}" = "loopback" ] && exit 0
 
 # Do nothing if interface does not exist
-[ !  -h /sys/class/net/${IFACE} ] && exit 0
+[ -d "/sys/class/net/${IFACE}" ] || exit 0
 
-if [ -h /sys/class/net/eth0 ]; then
-    driver="$(readlink -f -n /sys/class/net/eth0 | sed 's,\/,\n,g' | awk '/fec/ {print}')"
-    case ${driver} in
-        fec.*)
-           macaddr=`cat /proc/cmdline | sed 's,\s,\n,g' | awk '/ethaddr1/ {print}' | sed 's,ethaddr1=,,g'`
-            ;;
-        sms.*)
-            macaddr=`cat /proc/cmdline | sed 's,\s,\n,g' | awk '/ethaddr3/ {print}' | sed 's,ethaddr3=,,g'`
-            ;;
-    esac
-    if [ "${macaddr}" ]; then
-        if /sbin/ifconfig eth0 | grep -qs UP; then
-            /sbin/ifconfig eth0 hw ether ${macaddr}
-        fi
-    fi
-fi
+driver="$(readlink -f -n /sys/class/net/${IFACE} | sed 's,/sys/devices/platform/\(.\{3\}\).*,\1,g')"
 
-if [ -h /sys/class/net/eth1 ]; then
-    macaddr=`cat /proc/cmdline | sed 's,\s,\n,g' | awk '/ethaddr3/ {print}' | sed 's,ethaddr3=,,g'`
-    if [ "${macaddr}" ]; then
-        if /sbin/ifconfig eth1 | grep -qs UP; then
-            /sbin/ifconfig eth1 hw ether ${macaddr}
-        fi
-    fi
-fi
+case "${IFACE}:${driver}" in
+eth1: | *:sms)
+	macaddr="$(sed -ne 's,^.*ethaddr3=\([^[:blank:]]\+\)[:blank:]*.*,\1,g;T;p' /proc/cmdline)"
+esac
 
-exit 0
+[ -n "${macaddr}" ] && ifconfig ${IFACE} hw ether ${macaddr} up
