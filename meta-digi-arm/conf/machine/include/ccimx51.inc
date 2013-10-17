@@ -4,7 +4,7 @@
 
 include conf/machine/include/imx-digi-base.inc
 
-SOC_FAMILY = "mx51:mx5"
+SOC_FAMILY = "mx5:mx51"
 
 UBOOT_ENTRYPOINT  = "0x94000000"
 UBOOT_LOADADDRESS = "0x94000000"
