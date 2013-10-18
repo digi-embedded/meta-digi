@@ -19,9 +19,11 @@ MACHINE_EXTRA_RRECOMMENDS += "imx-audio"
 # Gstreamer plugin
 MACHINE_GSTREAMER_PLUGIN ?= "gst-fsl-plugin gst-fsl-plugin-gplay"
 
-PREFERRED_PROVIDER_virtual/egl_mx5      ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'amd-gpu-x11-bin-mx51', 'amd-gpu-bin-mx51', d)}"
-PREFERRED_PROVIDER_virtual/libgles1_mx5 ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'amd-gpu-x11-bin-mx51', 'amd-gpu-bin-mx51', d)}"
-PREFERRED_PROVIDER_virtual/libgles2_mx5 ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'amd-gpu-x11-bin-mx51', 'amd-gpu-bin-mx51', d)}"
+# MX5 GPU libraries
+GPU_FLAVOUR = "${@base_contains('DISTRO_FEATURES', 'x11', 'x11-', '', d)}"
+PREFERRED_PROVIDER_virtual/egl_mx5      ?= "amd-gpu-${GPU_FLAVOUR}bin-mx51"
+PREFERRED_PROVIDER_virtual/libgles1_mx5 ?= "amd-gpu-${GPU_FLAVOUR}bin-mx51"
+PREFERRED_PROVIDER_virtual/libgles2_mx5 ?= "amd-gpu-${GPU_FLAVOUR}bin-mx51"
 
 EXTRA_IMAGEDEPENDS = "u-boot"
 
