@@ -1,0 +1,128 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Fri, 18 Oct 2013 10:11:29 +0200
+Subject: discover boot ROM version from FDT if available
+
+New kernels don't get CPU information from U-Boot ATAGS and
+so the /proc/cpuinfo file does not have the Hardware/Revision
+lines filled in.
+This patch gets the CPU model from the device tree information
+at /proc/device-tree/compatible.
+For backwards compatibility, if the CPU model cannot be retrieved
+from this file, we try to get it from /proc/cpuinfo.
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+Reviewed-by: Robert Hodaszi <robert.hodaszi@digi.com>
+---
+ src/plat_boot_config.c | 95 +++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 94 insertions(+), 1 deletion(-)
+
+diff --git a/src/plat_boot_config.c b/src/plat_boot_config.c
+index e3bf242..af7e03a 100644
+--- a/src/plat_boot_config.c
++++ b/src/plat_boot_config.c
+@@ -105,7 +105,91 @@ static platform_config mx6q_boot_config = {
+ 	.rom_mtd_commit_structures = v4_rom_mtd_commit_structures,
+ };
+ 
+-int discover_boot_rom_version(void)
++#define MAX_STRLEN	256
++int get_rom_version_from_fdt(void)
++{
++	FILE *fd;
++	char line_buffer[MAX_STRLEN];
++	char *p;
++	static char *compatible = "fsl,imx";
++	char *rev;
++	int system_rev;
++
++	fd = fopen("/proc/device-tree/compatible", "r");
++	if (!fd)
++		return -1;
++
++	p = &line_buffer[0];
++	if (fgets(p, MAX_STRLEN, fd)) {
++		/*
++		 * The compatible string can contain more than one string.
++		 * Each string value is separated from the next one by a
++		 * NULL char. We must check all values one by one until
++		 * we find two consecutive NULL chars.
++		 */
++		while (p[0] != 0) {
++			if (!strncmp(p, compatible, strlen(compatible))) {
++				rev = p + strlen(compatible);
++				/*
++				 * check if it's an imx6 CPU series, or
++				 * a parsable number.
++				 */
++				if (!strncmp(rev, "6q", 2))
++					system_rev = MX6Q;
++				else if (!strncmp(rev, "6d", 2))
++					system_rev = MX6DL;
++				else if (!strncmp(rev, "6s", 2))
++					system_rev = MX6;
++				else
++					system_rev = strtoul(rev, NULL, 16);
++
++				switch (system_rev) {
++				case  MX23:
++					plat_config_data = &mx23_boot_config;
++					break;
++
++				case  MX28:
++					plat_config_data = &mx28_boot_config;
++					break;
++
++				case  MX53:
++					/*
++					 * TODO: check CPU revision
++					 * Consider it is a TO2 for the
++					 * moment
++					 */
++					plat_config_data = &mx53to2_boot_config;
++					break;
++
++				case  MX50:
++					plat_config_data = &mx50_boot_config;
++					break;
++
++				case MX6:
++				case MX6Q:
++				case MX6DL:
++					plat_config_data = &mx6q_boot_config;
++					break;
++
++				default:
++					break;
++				}
++
++				if (plat_config_data) {
++					plat_config_data->m_u32Arm_type = system_rev;
++					return 0;
++				}
++			}
++			/* Move string pointer to next possible value */
++			p += strlen(p) + 1;
++		}
++	}
++
++	fclose(fd);
++	return -1;
++}
++
++int get_rom_version_from_cpuinfo(void)
+ {
+ 	FILE         *cpuinfo;
+ 	char         line_buffer[100];
+@@ -203,3 +287,12 @@ int discover_boot_rom_version(void)
+ 	}
+ 	return -1;
+ }
++
++int discover_boot_rom_version(void)
++{
++	/* First, try to get ROM version from FDT */
++	if (get_rom_version_from_fdt())
++		return (get_rom_version_from_cpuinfo());
++
++	return 0;
++}

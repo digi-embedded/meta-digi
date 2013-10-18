@@ -1,0 +1,170 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Fri, 18 Oct 2013 10:10:37 +0200
+Subject: cleanup ROM version detection code and add cpx2 support
+
+The original code flow was difficult to understand.
+Now there is a main if-elseif to check for 'Hardware' or 'Revision'
+strings from cpuinfo.
+On the 'Hardware' section we first check if it is a CPX2, or else we
+will parse the MX-- number to get the CPU model.
+On the 'Revision' section we base on the revision number to get the
+CPU model or, if unset (like when Linux is booted directly), we'll
+rely on the previous hw_system_rev calculated before.
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+Reviewed-by: Robert Hodaszi <robert.hodaszi@digi.com>
+---
+ src/plat_boot_config.c | 119 ++++++++++++++++++++++++++-----------------------
+ 1 file changed, 63 insertions(+), 56 deletions(-)
+
+diff --git a/src/plat_boot_config.c b/src/plat_boot_config.c
+index 76e65c8..e3bf242 100644
+--- a/src/plat_boot_config.c
++++ b/src/plat_boot_config.c
+@@ -109,10 +109,11 @@ int discover_boot_rom_version(void)
+ {
+ 	FILE         *cpuinfo;
+ 	char         line_buffer[100];
+-	static char  *banner = "Revision";
++	static char  *banner_rev = "Revision";
+ 	static char  *banner_hw = "Hardware";
++	static char  *banner_digi_x2 = "Hardware\t: Digi ConnectPort X2";
+ 	char *rev;
+-	int system_rev, hw_system_rev = 0;
++	int system_rev = 0, hw_system_rev = 0;
+ 
+ 	cpuinfo = fopen("/proc/cpuinfo", "r");
+ 	if (!cpuinfo) {
+@@ -125,15 +126,20 @@ int discover_boot_rom_version(void)
+ 		if (!fgets(line_buffer, sizeof(line_buffer), cpuinfo))
+ 			break;
+ 
+-		/* Check if it's revision line */
+-		if (strncmp(line_buffer, banner, strlen(banner))) {
+-			/*
+-			 * Why use the `Hardware` to parse the system type ?
+-			 * [1] If boot linux kernel directly from SD card not by uboot,
+-			 *     the `Revision` will be zero.
+-			 * [2] The code does not change the old logic.
+-			 */
+-			if (!strncmp(line_buffer, banner_hw, strlen(banner))) {
++		/* Check if it's hardware line... */
++		/*
++		 * Why use the `Hardware` to parse the system type ?
++		 * [1] If boot linux kernel directly from SD card not by uboot,
++		 *     the `Revision` will be zero.
++		 * [2] The code does not change the old logic.
++		 */
++		if (!strncmp(line_buffer, banner_hw, strlen(banner_hw))) {
++			if (!strncmp(line_buffer, banner_digi_x2,
++				     strlen(banner_digi_x2))) {
++				/* The cpx2 is an i.MX28 */
++				hw_system_rev = MX28;
++			}
++			else {
+ 				rev = strstr(line_buffer, "MX");
+ 				if (rev) {
+ 					char tmp[3] = {};
+@@ -143,56 +149,57 @@ int discover_boot_rom_version(void)
+ 					hw_system_rev = strtoul(tmp, NULL, 16);
+ 				}
+ 			}
+-			continue;
+ 		}
++		/* ... or Revision line */
++		else if (!strncmp(line_buffer, banner_rev, strlen(banner_rev))) {
++			rev = index(line_buffer, ':');
++			if (rev != NULL) {
++				rev++;
++				system_rev = strtoul(rev, NULL, 16);
++				system_rev = mxc_cpu(system_rev);
++				if (!system_rev)
++					system_rev = hw_system_rev;
++
++				switch (system_rev) {
++				case  MX23:
++					plat_config_data = &mx23_boot_config;
++					break;
++
++				case  MX28:
++					plat_config_data = &mx28_boot_config;
++					break;
++
++				case  MX53:
++					if (mxc_cpu_is_rev(system_rev, CHIP_REV_2_0) < 0)
++						plat_config_data = &mx53to1_boot_config;
++					else
++						plat_config_data = &mx53to2_boot_config;
++					break;
++
++				case  MX50:
++					plat_config_data = &mx50_boot_config;
++					break;
++
++				case MX6:
++				case MX6Q:
++				case MX6DL:
++					plat_config_data = &mx6q_boot_config;
++					break;
++
++				default:
++					fprintf(stderr, "Couldn't find Boot ROM version\n");
++					break;
++				}
+ 
+-		rev = index(line_buffer, ':');
+-		if (rev != NULL) {
+-			rev++;
+-			system_rev = strtoul(rev, NULL, 16);
+-			system_rev = mxc_cpu(system_rev);
+-			if (!system_rev)
+-				system_rev = hw_system_rev;
+-
+-			switch (system_rev) {
+-			case  MX23:
+-				plat_config_data = &mx23_boot_config;
+-				break;
+-
+-			case  MX28:
+-				plat_config_data = &mx28_boot_config;
+-				break;
+-
+-			case  MX53:
+-				if (mxc_cpu_is_rev(system_rev, CHIP_REV_2_0) < 0)
+-					plat_config_data = &mx53to1_boot_config;
+-				else
+-					plat_config_data = &mx53to2_boot_config;
+-				break;
+-
+-			case  MX50:
+-				plat_config_data = &mx50_boot_config;
+-				break;
+-
+-			case MX6:
+-			case MX6Q:
+-			case MX6DL:
+-				plat_config_data = &mx6q_boot_config;
+-				break;
+-
+-			default:
+-				fprintf(stderr, "Couldn't find Boot ROM version\n");
+-				break;
+-			}
+-
+-			fclose(cpuinfo);
+-			if (plat_config_data) {
+-				plat_config_data->m_u32Arm_type = system_rev;
+-				return 0;
++				break;	/* quit for loop */
+ 			}
+-			return -1;
+ 		}
+ 	}
++
+ 	fclose(cpuinfo);
++	if (plat_config_data) {
++		plat_config_data->m_u32Arm_type = system_rev;
++		return 0;
++	}
+ 	return -1;
+ }
