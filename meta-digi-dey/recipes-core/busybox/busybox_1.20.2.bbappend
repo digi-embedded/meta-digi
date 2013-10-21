@@ -23,6 +23,7 @@ SRC_URI += "file://0001-del-baudrates.patch \
             file://acpid.map \
             file://pswitch-press \
             file://pswitch-release \
+            file://busybox-static-nodes \
            "
 
 # Add device handlers to 'mdev' package
@@ -56,6 +57,13 @@ FILES_${PN}-acpid = " ${sysconfdir}/init.d/busybox-acpid \
 INITSCRIPT_PACKAGES =+ "${PN}-acpid"
 INITSCRIPT_NAME_${PN}-acpid = "busybox-acpid"
 
+# static-nodes package (create static nodes from /etc/device_table)
+PACKAGES =+ "${PN}-static-nodes"
+FILES_${PN}-static-nodes = "${sysconfdir}/init.d/busybox-static-nodes"
+INITSCRIPT_PACKAGES =+ "${PN}-static-nodes"
+INITSCRIPT_NAME_${PN}-static-nodes = "busybox-static-nodes"
+INITSCRIPT_PARAMS_${PN}-static-nodes = "start 07 S ."
+
 do_install_append() {
 	if grep "CONFIG_MDEV=y" ${WORKDIR}/defconfig; then
 		if grep "CONFIG_FEATURE_MDEV_CONF=y" ${WORKDIR}/defconfig; then
@@ -85,5 +93,8 @@ do_install_append() {
 		install -m 0755 ${WORKDIR}/acpid.map ${D}${sysconfdir}/acpi/
 		install -m 0755 ${WORKDIR}/pswitch-press ${D}${sysconfdir}/acpi/
 		install -m 0755 ${WORKDIR}/pswitch-release ${D}${sysconfdir}/acpi/
+	fi
+	if grep "CONFIG_MAKEDEVS=y" ${WORKDIR}/defconfig; then
+		install -m 0755 ${WORKDIR}/busybox-static-nodes ${D}${sysconfdir}/init.d/
 	fi
 }

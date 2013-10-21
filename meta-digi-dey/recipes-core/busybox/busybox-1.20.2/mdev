@@ -21,8 +21,6 @@ if [ "${1}" != "start" ]; then
 fi
 
 MDEV="/sbin/mdev"
-MAKEDEVS="/sbin/makedevs"
-CONFIG="/etc/device_table"
 
 # Create shared memory mount point
 mkdir -p /dev/shm
@@ -35,9 +33,6 @@ fi
 
 # Create all device nodes scanning /sys.
 ${MDEV} -s
-
-# Create rest device nodes via configuration file.
-[ -f "${CONFIG}" ] && ${MAKEDEVS} -d "${CONFIG}" / >/dev/null 2>&1
 
 # mount storage devices
 usbmount

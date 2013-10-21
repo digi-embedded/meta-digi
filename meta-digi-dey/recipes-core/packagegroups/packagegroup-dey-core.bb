@@ -32,6 +32,7 @@ RDEPENDS_${PN} = "\
     base-files \
     base-passwd \
     busybox \
+    busybox-static-nodes \
     ${@base_contains("MACHINE_FEATURES", "rtc", "busybox-hwclock", "", d)} \
     ${@base_contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
     ${@base_contains("MACHINE_FEATURES", "touchscreen", "${VIRTUAL-RUNTIME_touchscreen}", "",d)} \
