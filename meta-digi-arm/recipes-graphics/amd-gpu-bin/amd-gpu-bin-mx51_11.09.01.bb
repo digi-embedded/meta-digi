@@ -13,7 +13,10 @@ LIC_FILES_CHKSUM = "file://usr/include/VG/openvg.h;endline=30;md5=b0109611dd7696
 
 PROVIDES = "virtual/egl virtual/libgles1 virtual/libgles2"
 
-SRC_URI = "${FSL_MIRROR}/${PN}-${PV}.bin;fsl-eula=true"
+SRC_URI = " \
+    ${FSL_MIRROR}/${PN}-${PV}.bin;fsl-eula=true \
+    file://0001-fix-linux-build-check.patch \
+"
 SRC_URI[md5sum] = "9f9b5f67b595721a08793aae8bd8fc46"
 SRC_URI[sha256sum] = "f0db68a764b5fb199729e7435f606b8d12b61ca97990336c647b7e81f4a584d9"
 
@@ -83,6 +86,8 @@ FILES_lib2dz160-mx51-dbg = "${libdir}/.debug/lib2dz160${SOLIBS}"
 
 FILES_lib2dz430-mx51 = "${libdir}/lib2dz430${SOLIBS}"
 FILES_lib2dz430-mx51-dbg = "${libdir}/.debug/lib2dz430${SOLIBS}"
+
+RCONFLICTS_${PN} = "amd-gpu-x11-bin-mx51"
 
 COMPATIBLE_MACHINE = "(mx5)"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
