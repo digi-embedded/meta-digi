@@ -1,7 +1,7 @@
 # Copyright (C) 2012 Digi International
 
 SRCREV_external = ""
-SRCREV_internal = "26cd72478512fb11f306698a06ecef420d912f8b"
+SRCREV_internal = "c2334ce9dde8e7313dc762d021200496a7fa3cf5"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-linux.git;protocol=git"
