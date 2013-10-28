@@ -2,16 +2,6 @@
 #
 # Copyright (C) 2012 Digi International.
 
-# DEY image features (alphabetical order)
-PACKAGE_GROUP_dey-audio = "packagegroup-dey-audio"
-PACKAGE_GROUP_dey-bluetooth = "packagegroup-dey-bluetooth"
-PACKAGE_GROUP_dey-debug = "packagegroup-dey-debug"
-PACKAGE_GROUP_dey-examples = "packagegroup-dey-examples"
-PACKAGE_GROUP_dey-gstreamer = "packagegroup-dey-gstreamer"
-PACKAGE_GROUP_dey-network = "packagegroup-dey-network"
-PACKAGE_GROUP_dey-qt = "packagegroup-dey-qt"
-PACKAGE_GROUP_dey-wireless = "packagegroup-dey-wireless"
-
 ## Auxiliar variables and functions (used in dey_rootfs_tuning)
 LAYERS_REV = "${@'\n'.join(get_layers_branch_rev(d))}"
 DEY_TAG    = "${@dey_tag(d).strip()}"
