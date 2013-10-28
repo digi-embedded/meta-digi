@@ -21,5 +21,3 @@ IMAGE_INSTALL += " \
 	${SOC_IMAGE_INSTALL} \
 	pointercal-xinput \
     "
-
-export IMAGE_BASENAME = "dey-image-graphical"
