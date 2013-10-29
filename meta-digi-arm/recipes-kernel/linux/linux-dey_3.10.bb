@@ -65,10 +65,13 @@ do_update_dts() {
 		config_dts disable '_ssp1_'
 		config_dts disable '_auart1_4wires'
 		config_dts disable '_ethernet0_leds'
-	fi
-	if [ -n "${HAVE_EXAMPLE}" ]; then
-		config_dts enable  'ssp1_spi_gpio.dtsi'
-		config_dts enable  'ssp1_spi_gpio_spidev.dtsi'
+	else
+		# spidev conflicts with touchscreen, thus enable it only
+		# when touch is disabled
+		if [ -n "${HAVE_EXAMPLE}" ]; then
+			config_dts enable 'ssp1_spi_gpio.dtsi'
+			config_dts enable 'ssp1_spi_gpio_spidev.dtsi'
+		fi
 	fi
 }
 addtask update_dts before do_install after do_sizecheck
