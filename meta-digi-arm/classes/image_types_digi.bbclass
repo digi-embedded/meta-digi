@@ -7,8 +7,15 @@ def max_leb_count(d):
     _flash_peb = d.getVar('FLASH_PEB', True)
     _flash_psz = d.getVar('FLASH_PSZ', True)
     for i in _flash_peb.split(','):
-        _mlc.append(str(2 ** (int(_flash_psz)/int(i) - 1).bit_length() - 1))
+        _mlc.append(str(next_power_of_2(int(_flash_psz)/int(i)) - 1))
     return ','.join(_mlc)
+
+# Return next power_of_2 bigger than passed argument
+def next_power_of_2(n):
+    i = 1
+    while (n > i):
+        i <<= 1
+    return i
 
 IMAGE_CMD_jffs2() {
 	nimg="$(echo ${FLASH_PEB} | awk -F, '{print NF}')"
