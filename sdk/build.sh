@@ -56,13 +56,13 @@ error() {
 #  $1: destination directoy
 #
 copy_images() {
-	# Do not copy all the individual packages when building all the variants
-	# The buildserver cannot afford such amount of disk space. In this case
-	# just copy the firmware images.
-	if [ "${DY_BUILD_VARIANTS}" = "true" ]; then
-		cp -r tmp/deploy/images ${1}/
-	else
+	# Copy individual packages only for 'release' builds, not for 'daily'.
+	# For 'daily' builds just copy the firmware images (the buildserver
+	# cannot afford such amount of disk space)
+	if echo ${JOB_NAME} | grep -qs 'dey.*release'; then
 		cp -r tmp/deploy/* ${1}/
+	else
+		cp -r tmp/deploy/images ${1}/
 	fi
 	# Jenkins artifact archiver does not copy symlinks, so remove them
 	# beforehand to avoid ending up with several duplicates of the same
