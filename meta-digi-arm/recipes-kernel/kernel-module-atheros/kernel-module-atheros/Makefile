@@ -36,10 +36,6 @@ FIRMWARE += $(ATH_FIR_BASEDIR)/fw_tablet_dongle/nullTestFlow.bin
 FIRMWARE += $(ATH_FIR_BASEDIR)/fw_tablet_dongle/utf.bin
 FIRMWARE += $(ATH_FIR_BASEDIR)/Digi_6203-6233-US.bin
 FIRMWARE += $(ATH_FIR_BASEDIR)/Digi_6203-6233-World.bin
-ifeq ("$(DEL_PLATFORM)","cpx2")
-FIRMWARE += $(ATH_FIR_BASEDIR)/calData_AR6103_Digi_X2e_B.bin
-FIRMWARE += $(ATH_FIR_BASEDIR)/calData_AR6103_Digi_X2e_B_world.bin
-endif
 
 SRC := $(shell pwd)
 

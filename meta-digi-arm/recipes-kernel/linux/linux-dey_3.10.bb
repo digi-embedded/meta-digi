@@ -10,7 +10,6 @@ include linux-dey-rev_${PV}.inc
 PR = "${DISTRO}.${INC_PR}.0"
 
 LOCALVERSION_mxs = "mxs"
-LOCALVERSION_cpx2_mxs = "mxs+gateways"
 
 # Kernel configuration fragments
 KERNEL_CFG_FRAGS ?= ""

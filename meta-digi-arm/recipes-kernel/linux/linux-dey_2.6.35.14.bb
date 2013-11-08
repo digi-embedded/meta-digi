@@ -7,15 +7,10 @@ PR = "${DISTRO}.${INC_PR}.0"
 
 LOCALVERSION_mx5 = "mx5"
 LOCALVERSION_mxs = "mxs"
-LOCALVERSION_cpx2_mxs = "mxs+gateways"
 
 SRC_URI += " \
     file://defconfig \
     ${KERNEL_CFG_FRAGS} \
-"
-SRC_URI_append_cpx2 = " \
-    file://cpx2-Remove-incorrect-pin-configurations.patch \
-    file://cpx2e-Setup-mmc0-for-the-wireless-interface.patch \
 "
 S = "${WORKDIR}/git"
 
