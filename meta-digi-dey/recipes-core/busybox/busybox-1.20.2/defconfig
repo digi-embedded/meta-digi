@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Busybox version: 1.20.2
-# Wed Jun 19 16:40:00 2013
+# Fri Nov  8 18:05:56 2013
 #
 CONFIG_HAVE_DOT_CONFIG=y
 
@@ -713,7 +713,7 @@ CONFIG_TIMEOUT=y
 CONFIG_TTYSIZE=y
 # CONFIG_VOLNAME is not set
 # CONFIG_WALL is not set
-# CONFIG_WATCHDOG is not set
+CONFIG_WATCHDOG=y
 
 #
 # Networking Utilities
