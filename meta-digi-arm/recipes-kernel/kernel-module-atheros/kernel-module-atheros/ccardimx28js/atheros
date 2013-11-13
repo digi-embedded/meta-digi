@@ -82,8 +82,18 @@ if [ ! -e "${BDATA_LINK}" ] || ! cmp -s "${BDATA_LINK}" "${FIRMWARE_DIR}/${BDATA
 fi
 
 # ath6kl_sdio.ko
-grep -qs ath6kl_sdio /proc/modules || \
-	modprobe --ignore-install -q ath6kl_sdio || echo "Loading ath6kl_sdio module: [FAILED]"
+if ! grep -qs ath6kl_sdio /proc/modules; then
+	RETRIES="5"
+	while [ "${RETRIES}" -gt "0" ]; do
+		modprobe --ignore-install -q ath6kl_sdio || true
+		[ -d "/sys/class/net/wlan0" ] && break
+		RETRIES="$((RETRIES - 1))"
+		rmmod ath6kl_sdio > /dev/null
+		echo "Retrying to load wireless"
+		sleep 2
+	done
+	[ "${RETRIES}" -eq "0" ] && echo "Loading ath6kl_sdio module: [FAILED]"
+fi
 
 # Delay required for the interface 'wlan0' to settle down before trying to configure it.
 sleep 0.5
