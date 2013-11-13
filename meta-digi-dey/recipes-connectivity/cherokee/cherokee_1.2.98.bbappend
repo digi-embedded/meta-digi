@@ -6,7 +6,7 @@ PR_append = "+${DISTRO}"
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 MIRRORS =+ " \
-http://www.cherokee-project.com/download/  ftp://ftp.yellowdoglinux.com/.1/cherokee/ \n \
+ftp://ftp.osuosl.org/.1/    http://www.cherokee-project.de/mirrors/ \n \
 "
 
 SRC_URI += " \
