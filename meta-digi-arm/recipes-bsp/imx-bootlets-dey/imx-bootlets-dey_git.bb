@@ -20,9 +20,17 @@ S = "${WORKDIR}/git"
 # Disable parallel building or it may fail to build.
 PARALLEL_MAKE = ""
 
-EXTRA_OEMAKE = "CROSS_COMPILE=${TARGET_PREFIX}"
-EXTRA_OEMAKE_append_ccardimx28js = " BOARD=CCARDIMX28JS"
-EXTRA_OEMAKE_append_wr21 = " BOARD=WR21"
+EXTRA_OEMAKE = "CROSS_COMPILE=${TARGET_PREFIX} BOARD=${IMXBOOTLETS_MACHINE}"
+
+# Ensure machine defines the IMXBOOTLETS_MACHINE
+python () {
+    if not d.getVar("IMXBOOTLETS_MACHINE", True):
+        PN = d.getVar("PN", True)
+        FILE = os.path.basename(d.getVar("FILE", True))
+        bb.debug(1, "To build %s, see %s for instructions on \
+                     setting up your machine config" % (PN, FILE))
+        raise bb.parse.SkipPackage("because IMXBOOTLETS_MACHINE is not set")
+}
 
 do_install () {
 	install -d ${STAGING_DIR_TARGET}/boot
