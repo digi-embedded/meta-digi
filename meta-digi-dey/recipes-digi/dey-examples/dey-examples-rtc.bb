@@ -9,10 +9,12 @@ PR = "${DISTRO}.r0"
 
 SRC_URI = "file://rtc_test"
 
+UPPER_PLAT = "${@'${MACHINE}'.upper()}"
+
 S = "${WORKDIR}/rtc_test"
 
 do_compile() {
-	${CC} -O2 -Wall rtc_test.c -o rtc_test
+	${CC} -O2 -Wall -D${UPPER_PLAT} rtc_test.c -o rtc_test
 }
 
 do_install() {

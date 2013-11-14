@@ -37,7 +37,7 @@
 
 #define	RTC_DEFAULT_TEST_OPS	0	/* None, pass it through the command line */
 
-#if defined (DEL_CCWMX53JS) || defined (DEL_CCMX53JS)
+#if defined(CCIMX53JS)
 #define RTC_ALARM_SECS 60
 #define RTC_ALARM_SECS_STR "60"
 #else
