@@ -5,9 +5,12 @@ UBOOT_ENTRYPOINT  = "0x40008000"
 require recipes-kernel/linux/linux-dtb.inc
 
 include linux-dey.inc
-include linux-dey-rev_${PV}.inc
 
 PR = "${DISTRO}.${INC_PR}.0"
+
+SRCREV_external = ""
+SRCREV_internal = "c2334ce9dde8e7313dc762d021200496a7fa3cf5"
+SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 LOCALVERSION_mxs = "mxs"
 
@@ -15,7 +18,10 @@ LOCALVERSION_mxs = "mxs"
 KERNEL_CFG_FRAGS ?= ""
 KERNEL_CFG_FRAGS_append = " ${@base_conditional('HAVE_EXAMPLE', '1' , 'file://config-spidev.cfg', '', d)}"
 
-SRC_URI += " \
+SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-linux.git;protocol=git"
+SRC_URI_internal = "${DIGI_GIT}linux-2.6.git;protocol=git"
+SRC_URI = " \
+    ${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)} \
     file://defconfig \
     ${KERNEL_CFG_FRAGS} \
 "
