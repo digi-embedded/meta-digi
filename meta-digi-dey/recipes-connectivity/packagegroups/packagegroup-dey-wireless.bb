@@ -18,6 +18,8 @@ RDEPENDS_${PN} = "\
     crda \
     wireless-tools \
     wpa-supplicant \
+    wpa-supplicant-cli \
+    wpa-supplicant-passphrase \
     ${WIRELESS_MODULE} \
 "
 
