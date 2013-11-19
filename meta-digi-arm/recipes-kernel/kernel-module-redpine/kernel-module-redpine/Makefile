@@ -60,7 +60,8 @@ tarball:
 		install -m 0644 $${i} $(TAR_DIR)/$$(dirname $${i})/; \
 	done
 	cp -r RS.GENR.LNX.SD_GPL/include $(TAR_DIR)/RS.GENR.LNX.SD_GPL/
-	REV="$$(git rev-parse --short --verify HEAD)"; \
+	# The SHA1 length must match SRCREV_SHORT in bitbake recipe
+	REV="$$(git rev-parse --short=7 --verify HEAD)"; \
 		rm -f redpine-$(DEL_PLATFORM)-$${REV}.tar.gz && \
 		tar cz --transform 's,\(^[^/]\+/\),\1$(DEL_PLATFORM)/,' \
 			--numeric-owner --owner 0 --group 0 -f redpine-$(DEL_PLATFORM)-$${REV}.tar.gz -C $(TAR_DIR) .
