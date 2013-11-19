@@ -14,6 +14,10 @@ MACHINE_GSTREAMER_PLUGIN ?= ""
 RDEPENDS_${PN} = " \
     gst-meta-audio \
     gst-meta-video \
+    gst-plugins-base-meta \
+    gst-plugins-good-meta \
+    gst-plugins-ugly-meta \
+    gst-plugins-bad-meta \
     ${MACHINE_GSTREAMER_PLUGIN} \
 "
 
