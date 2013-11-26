@@ -10,57 +10,48 @@ device to use as output.
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
- src/misc/v4l_sink/src/mfw_gst_fb.c      | 15 +++++++++------
- src/misc/v4l_sink/src/mfw_gst_fb.h      |  1 -
+ src/misc/v4l_sink/src/mfw_gst_fb.c      |  5 ++++-
+ src/misc/v4l_sink/src/mfw_gst_fb.h      |  2 +-
  src/misc/v4l_sink/src/mfw_gst_v4l.c     |  4 ++++
- src/misc/v4l_sink/src/mfw_gst_v4lsink.c | 27 +++++++++++++++++++++++++--
- src/misc/v4l_sink/src/mfw_gst_v4lsink.h |  3 ++-
- 5 files changed, 40 insertions(+), 10 deletions(-)
+ src/misc/v4l_sink/src/mfw_gst_v4lsink.c | 20 +++++++++++++++++++-
+ src/misc/v4l_sink/src/mfw_gst_v4lsink.h |  1 +
+ 5 files changed, 29 insertions(+), 3 deletions(-)
 
 diff --git a/src/misc/v4l_sink/src/mfw_gst_fb.c b/src/misc/v4l_sink/src/mfw_gst_fb.c
-index 18d4f7f..991bf24 100755
+index 8c251daa5df4..a0df95f09494 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_fb.c
 +++ b/src/misc/v4l_sink/src/mfw_gst_fb.c
-@@ -200,16 +200,19 @@ POST-CONDITIONS:    None
+@@ -199,11 +199,14 @@ POST-CONDITIONS:    None
  IMPORTANT NOTES:    None
  =============================================================================*/
  
 -gboolean mfw_gst_fb0_open(gint *fb)
-+gboolean mfw_gst_fb0_open(MFW_GST_V4LSINK_INFO_T * v4l_info)
++gboolean mfw_gst_fb0_open(gint *fb, gchar *device)
  {
      gboolean retval = TRUE;
      gchar fb_device[100] = FB_DEIVCE;
  
--	if ((*fb =
--	     open(fb_device, O_RDWR, 0)) < 0) {
--	    g_print("Unable to open %s %d\n", fb_device, *fb);
--        *fb = 0;
--	    retval = FALSE;
-+    if (v4l_info->device != NULL && v4l_info->device[0] != '\0')
-+        strcpy(fb_device , v4l_info->device);
++    if (device != NULL && device[0] != '\0')
++        strcpy(fb_device, device);
 +
-+    GST_DEBUG_OBJECT (v4l_info, "opened framebuffer %s", v4l_info->device);
-+    if ((v4l_info->fd_fb = open(fb_device, O_RDWR, 0)) < 0) {
-+        g_print("Unable to open %s %d\n", fb_device, v4l_info->fd_fb);
-+        v4l_info->fd_fb = 0;
-+        retval = FALSE;
-     }
-     return retval;
- 
+ 	if ((*fb =
+ 	     open(fb_device, O_RDWR, 0)) < 0) {
+ 	    g_print("Unable to open %s %d\n", fb_device, *fb);
 diff --git a/src/misc/v4l_sink/src/mfw_gst_fb.h b/src/misc/v4l_sink/src/mfw_gst_fb.h
-index 01321d6..4876b73 100755
+index 01321d65488d..da11ca1cffd0 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_fb.h
 +++ b/src/misc/v4l_sink/src/mfw_gst_fb.h
-@@ -50,7 +50,6 @@
+@@ -50,7 +50,7 @@
  
  gboolean mfw_gst_set_gbl_alpha(gint fb, gint alphaVal);
  gboolean mfw_gst_fb0_set_colorkey(gint fb,gulong *colorSrc);
 -gboolean mfw_gst_fb0_open(gint *fb);
++gboolean mfw_gst_fb0_open(gint *fb, gchar *device);
  gboolean mfw_gst_fb0_close(gint *fb);
  
  #if ((defined (_MX37) || defined (_MX51)) && defined (LOC_ALPHA_SUPPORT))
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4l.c b/src/misc/v4l_sink/src/mfw_gst_v4l.c
-index b85879a..d773f6a 100755
+index b85879a057dd..d773f6aa5192 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4l.c
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4l.c
 @@ -540,6 +540,10 @@ mfw_gst_v4l2_mx37_mx51_tv_close (MFW_GST_V4LSINK_INFO_T * v4l_info)
@@ -75,7 +66,7 @@ index b85879a..d773f6a 100755
  
      v4l_info->tv_mode = NV_MODE;
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
-index a3ba4a6..526699e 100755
+index 238d91956543..3a50bffedfe4 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
 @@ -137,6 +137,7 @@ enum
@@ -109,20 +100,7 @@ index a3ba4a6..526699e 100755
      case SETPARA:
          g_value_set_int (value, v4l_info->setpara);
          break;
-@@ -1493,6 +1503,12 @@ mfw_gst_v4lsink_finalize (GObject * object)
- 
- }
- 
-+static void mfw_gst_v4lsink_start(GstBaseSink * bsink)
-+{
-+    MFW_GST_V4LSINK_INFO_T *v4l_info = MFW_GST_V4LSINK(bsink);
-+    mfw_gst_fb0_open(v4l_info);
-+}
-+
- /*=============================================================================
- FUNCTION:           mfw_gst_v4lsink_init
- 
-@@ -1537,6 +1553,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
+@@ -1537,6 +1547,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
      v4l_info->dump_location = NULL;
      v4l_info->dumpfile = NULL;
      v4l_info->dump_length = 0;
@@ -130,24 +108,16 @@ index a3ba4a6..526699e 100755
      v4l_info->cr_left_bypixel_orig = 0;
      v4l_info->cr_right_bypixel_orig = 0;
      v4l_info->cr_top_bypixel_orig = 0;
-@@ -1569,8 +1586,6 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
+@@ -1569,7 +1580,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
      memset (&v4l_info->crop, 0, sizeof (struct v4l2_crop));
      memset (&v4l_info->prevCrop, 0, sizeof (struct v4l2_crop));
  
 -    mfw_gst_fb0_open (&v4l_info->fd_fb);
--
++    mfw_gst_fb0_open (&v4l_info->fd_fb, v4l_info->device);
+ 
      v4l_info->chipcode = getChipCode();
      v4l_info->v4l_id = -1;
- 
-@@ -1622,6 +1637,7 @@ mfw_gst_v4lsink_class_init (MFW_GST_V4LSINK_INFO_CLASS_T * klass)
-     
-     parent_class = g_type_class_peek_parent (klass);
- 
-+    gstvs_class->start = GST_DEBUG_FUNCPTR (mfw_gst_v4lsink_start);
-     gobject_class->set_property = mfw_gst_v4lsink_set_property;
-     gobject_class->get_property = mfw_gst_v4lsink_get_property;
-     gobject_class->finalize = mfw_gst_v4lsink_finalize;
-@@ -1726,6 +1742,13 @@ mfw_gst_v4lsink_class_init (MFW_GST_V4LSINK_INFO_CLASS_T * klass)
+@@ -1726,6 +1737,13 @@ mfw_gst_v4lsink_class_init (MFW_GST_V4LSINK_INFO_CLASS_T * klass)
                                                            NULL,
                                                            G_PARAM_READWRITE));
  
@@ -162,7 +132,7 @@ index a3ba4a6..526699e 100755
      g_object_class_install_property (gobject_class, PROP_FORCE_ASPECT_RATIO,
                                       g_param_spec_boolean
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.h b/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
-index 504e06f..4764868 100755
+index 504e06fb4ef0..28cd6b767ccf 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
 @@ -279,6 +279,7 @@ typedef struct MFW_GST_V4LSINK_INFO_S
@@ -172,13 +142,4 @@ index 504e06f..4764868 100755
 +    gchar *device;
  
      gint qbuff_count;           /* buffer counter, increase when frame queued to v4l device */
- 
-@@ -367,7 +368,7 @@ typedef struct MFW_GST_V4LSINK_INFO_CLASS_S
- =============================================================================*/
- 
- extern GType mfw_gst_v4lsink_get_type (void);
--
-+gboolean mfw_gst_fb0_open(MFW_GST_V4LSINK_INFO_T * v4l_info);
- 
- 
  
