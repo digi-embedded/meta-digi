@@ -17,10 +17,10 @@ Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
  1 file changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
-index 2227c3d..3ba9c78 100755
+index de55b9d..ce03ee4 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
-@@ -1848,6 +1848,7 @@ mfw_gst_v4lsink_buffer_alloc (GstBaseSink * bsink, guint64 offset,
+@@ -1847,6 +1847,7 @@ mfw_gst_v4lsink_buffer_alloc (GstBaseSink * bsink, guint64 offset,
      gint frame_buffer_size;
      gint max_frames;
      gint hwbuffernumforcodec;

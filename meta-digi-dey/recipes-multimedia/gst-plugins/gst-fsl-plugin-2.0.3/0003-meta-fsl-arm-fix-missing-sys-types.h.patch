@@ -1,0 +1,26 @@
+From: Otavio Salvador <otavio@ossystems.com.br>
+Date: Fri, 22 Nov 2013 17:54:22 +0100
+Subject: [PATCH] meta-fsl-arm: fix missing sys/types.h
+
+Fix a build failure due to missing uint definition
+
+Upstream-Status: Pending
+
+Signed-off-by: Otavio Salvador <otavio@ossystems.com.br>
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ src/misc/v4l_sink/src/mfw_gst_fb.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/misc/v4l_sink/src/mfw_gst_fb.c b/src/misc/v4l_sink/src/mfw_gst_fb.c
+index 291c2a1..18d4f7f 100755
+--- a/src/misc/v4l_sink/src/mfw_gst_fb.c
++++ b/src/misc/v4l_sink/src/mfw_gst_fb.c
+@@ -39,6 +39,7 @@
+ 
+ #include <fcntl.h>
+ #include <sys/ioctl.h>
++#include <sys/types.h>
+ //#if ((!defined (_MX233)) && (!defined (_MX28)) && (!defined (_MX50)))
+ //#include <linux/mxcfb.h>
+ //#else

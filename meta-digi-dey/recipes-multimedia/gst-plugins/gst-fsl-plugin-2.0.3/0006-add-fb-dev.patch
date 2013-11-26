@@ -18,10 +18,10 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  5 files changed, 29 insertions(+), 3 deletions(-)
 
 diff --git a/src/misc/v4l_sink/src/mfw_gst_fb.c b/src/misc/v4l_sink/src/mfw_gst_fb.c
-index 8c251daa5df4..a0df95f09494 100755
+index 18d4f7f..d03a874 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_fb.c
 +++ b/src/misc/v4l_sink/src/mfw_gst_fb.c
-@@ -199,11 +199,14 @@ POST-CONDITIONS:    None
+@@ -200,11 +200,14 @@ POST-CONDITIONS:    None
  IMPORTANT NOTES:    None
  =============================================================================*/
  
@@ -38,7 +38,7 @@ index 8c251daa5df4..a0df95f09494 100755
  	     open(fb_device, O_RDWR, 0)) < 0) {
  	    g_print("Unable to open %s %d\n", fb_device, *fb);
 diff --git a/src/misc/v4l_sink/src/mfw_gst_fb.h b/src/misc/v4l_sink/src/mfw_gst_fb.h
-index 01321d65488d..da11ca1cffd0 100755
+index 01321d6..da11ca1 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_fb.h
 +++ b/src/misc/v4l_sink/src/mfw_gst_fb.h
 @@ -50,7 +50,7 @@
@@ -51,7 +51,7 @@ index 01321d65488d..da11ca1cffd0 100755
  
  #if ((defined (_MX37) || defined (_MX51)) && defined (LOC_ALPHA_SUPPORT))
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4l.c b/src/misc/v4l_sink/src/mfw_gst_v4l.c
-index b85879a057dd..d773f6aa5192 100755
+index b85879a..d773f6a 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4l.c
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4l.c
 @@ -540,6 +540,10 @@ mfw_gst_v4l2_mx37_mx51_tv_close (MFW_GST_V4LSINK_INFO_T * v4l_info)
@@ -66,7 +66,7 @@ index b85879a057dd..d773f6aa5192 100755
  
      v4l_info->tv_mode = NV_MODE;
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
-index 238d91956543..3a50bffedfe4 100755
+index 3598fdb..4a6c642 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
 @@ -137,6 +137,7 @@ enum
@@ -100,7 +100,7 @@ index 238d91956543..3a50bffedfe4 100755
      case SETPARA:
          g_value_set_int (value, v4l_info->setpara);
          break;
-@@ -1537,6 +1547,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
+@@ -1541,6 +1551,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
      v4l_info->dump_location = NULL;
      v4l_info->dumpfile = NULL;
      v4l_info->dump_length = 0;
@@ -108,7 +108,7 @@ index 238d91956543..3a50bffedfe4 100755
      v4l_info->cr_left_bypixel_orig = 0;
      v4l_info->cr_right_bypixel_orig = 0;
      v4l_info->cr_top_bypixel_orig = 0;
-@@ -1569,7 +1580,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
+@@ -1573,7 +1584,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
      memset (&v4l_info->crop, 0, sizeof (struct v4l2_crop));
      memset (&v4l_info->prevCrop, 0, sizeof (struct v4l2_crop));
  
@@ -117,7 +117,7 @@ index 238d91956543..3a50bffedfe4 100755
  
      v4l_info->chipcode = getChipCode();
      v4l_info->v4l_id = -1;
-@@ -1726,6 +1737,13 @@ mfw_gst_v4lsink_class_init (MFW_GST_V4LSINK_INFO_CLASS_T * klass)
+@@ -1730,6 +1741,13 @@ mfw_gst_v4lsink_class_init (MFW_GST_V4LSINK_INFO_CLASS_T * klass)
                                                            NULL,
                                                            G_PARAM_READWRITE));
  
@@ -132,7 +132,7 @@ index 238d91956543..3a50bffedfe4 100755
      g_object_class_install_property (gobject_class, PROP_FORCE_ASPECT_RATIO,
                                       g_param_spec_boolean
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.h b/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
-index 504e06fb4ef0..28cd6b767ccf 100755
+index 504e06f..28cd6b7 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
 @@ -279,6 +279,7 @@ typedef struct MFW_GST_V4LSINK_INFO_S

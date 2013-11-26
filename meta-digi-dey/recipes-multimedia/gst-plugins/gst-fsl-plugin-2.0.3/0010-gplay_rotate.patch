@@ -42,10 +42,10 @@ index d773f6a..cb999d2 100755
      if (ioctl (v4l_info->v4l_id, VIDIOC_S_CROP, crop) < 0) {
          GST_ERROR ("set crop failed");
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
-index 526699e..2227c3d 100755
+index 4a6c642..de55b9d 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.c
-@@ -1536,6 +1536,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
+@@ -1534,6 +1534,7 @@ mfw_gst_v4lsink_init (MFW_GST_V4LSINK_INFO_T * v4l_info,
      v4l_info->axis_left = 0;
      v4l_info->rotate = 0;
      v4l_info->prevRotate = 0;
@@ -54,7 +54,7 @@ index 526699e..2227c3d 100755
      v4l_info->crop_top = 0;
  
 diff --git a/src/misc/v4l_sink/src/mfw_gst_v4lsink.h b/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
-index 4764868..4c9465d 100755
+index 28cd6b7..159d3e7 100755
 --- a/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
 +++ b/src/misc/v4l_sink/src/mfw_gst_v4lsink.h
 @@ -255,6 +255,7 @@ typedef struct MFW_GST_V4LSINK_INFO_S

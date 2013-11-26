@@ -15,10 +15,10 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/tools/gplay/mfw_gplay.c b/tools/gplay/mfw_gplay.c
-index 0bcd78c..45b49da 100755
+index ee65100..de11e68 100755
 --- a/tools/gplay/mfw_gplay.c
 +++ b/tools/gplay/mfw_gplay.c
-@@ -881,6 +881,7 @@ int main(int argc,char *argv[])
+@@ -876,6 +876,7 @@ int main(int argc,char *argv[])
              case '>': // Play next file
                  printf("next\n");
                  if (playlist_next(pplayer, opt)==NULL){
