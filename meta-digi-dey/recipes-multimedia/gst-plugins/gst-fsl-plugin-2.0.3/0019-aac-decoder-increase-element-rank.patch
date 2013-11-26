@@ -1,0 +1,27 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Mon, 25 Nov 2013 13:59:00 +0100
+Subject: [PATCH] aac decoder: increase element rank
+
+Give priority to FSL AAC decoder over others from the community when
+using gstreamer's playbin2 or gplay
+
+This allows to play some videos that fail otherwise.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ src/audio/aac_dec/src/mfw_gst_aacdec.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/audio/aac_dec/src/mfw_gst_aacdec.c b/src/audio/aac_dec/src/mfw_gst_aacdec.c
+index 6e8a37b..6103070 100755
+--- a/src/audio/aac_dec/src/mfw_gst_aacdec.c
++++ b/src/audio/aac_dec/src/mfw_gst_aacdec.c
+@@ -3659,7 +3659,7 @@ IMPORTANT NOTES:
+      static gboolean plugin_init (GstPlugin * plugin)
+ {
+   return gst_element_register (plugin, "mfw_aacdecoder",
+-      GST_RANK_PRIMARY, MFW_GST_TYPE_AACDEC);
++      GST_RANK_PRIMARY+1, MFW_GST_TYPE_AACDEC);
+ }
+ 
+ /*=============================================================================

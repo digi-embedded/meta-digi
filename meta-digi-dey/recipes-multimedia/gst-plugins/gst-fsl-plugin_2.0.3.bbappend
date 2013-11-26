@@ -25,6 +25,7 @@ SRC_URI = " \
     file://0016-gst-fsl-plugin-Only-call-MXCFB_SET_OVERLAY_POS-with-.patch \
     file://0017-gst-fsl-plugin-Do-not-blank-the-display-on-device-cl.patch \
     file://0018-undefined-shm_open.patch \
+    file://0019-aac-decoder-increase-element-rank.patch \
 "
 
 do_install_append() {
