@@ -19,6 +19,7 @@ RDEPENDS_${PN} = " \
     gst-plugins-ugly-meta \
     gst-plugins-bad-meta \
     ${MACHINE_GSTREAMER_PLUGIN} \
+    ${@base_conditional('HAVE_GUI', '1' , '', 'gst-fsl-plugin-gplay', d)} \
 "
 
 ALLOW_EMPTY_${PN} = "1"

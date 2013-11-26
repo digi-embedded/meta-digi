@@ -17,7 +17,7 @@ MACHINE_EXTRA_RRECOMMENDS = "kernel-modules"
 MACHINE_EXTRA_RRECOMMENDS += "imx-audio"
 
 # Gstreamer plugin
-MACHINE_GSTREAMER_PLUGIN ?= "gst-fsl-plugin gst-fsl-plugin-gplay"
+MACHINE_GSTREAMER_PLUGIN ?= "gst-fsl-plugin"
 
 # MX5 GPU libraries
 GPU_FLAVOUR = "${@base_contains('DISTRO_FEATURES', 'x11', 'x11-', '', d)}"

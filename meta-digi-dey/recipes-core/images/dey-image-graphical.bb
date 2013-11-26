@@ -18,6 +18,7 @@ SOC_IMAGE_INSTALL = ""
 SOC_IMAGE_INSTALL_mx5 = "amd-gpu-x11-bin-mx51"
 
 IMAGE_INSTALL += " \
-	${SOC_IMAGE_INSTALL} \
-	pointercal-xinput \
-    "
+    ${SOC_IMAGE_INSTALL} \
+    owl-video \
+    pointercal-xinput \
+"
