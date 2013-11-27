@@ -81,6 +81,10 @@ if [ ! -e "${BDATA_LINK}" ] || ! cmp -s "${BDATA_LINK}" "${FIRMWARE_DIR}/${BDATA
 	ln -sf "${BDATA_SOURCE}" "${BDATA_LINK}"
 fi
 
+
+# Load 'cfg80211' and let it settle down (needed by 'ath6kl_sdio')
+modprobe -q cfg80211 && sleep 0.1
+
 # ath6kl_sdio.ko
 if ! grep -qs ath6kl_sdio /proc/modules; then
 	RETRIES="5"
