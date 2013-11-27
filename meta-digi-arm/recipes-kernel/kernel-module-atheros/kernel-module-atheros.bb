@@ -32,6 +32,10 @@ do_configure_prepend() {
 	cp ${WORKDIR}/Makefile ${S}/
 }
 
+do_configure_prepend_ccardimx28js() {
+	sed -i '/^CONFIG_SUPPORT_11W=y/s,^,# ,g' ${S}/compat-wireless/config.mk
+}
+
 do_install_append() {
 	install -d ${D}${sysconfdir}/network/if-pre-up.d
 	install -m 0755 ${WORKDIR}/atheros ${D}${sysconfdir}/network/if-pre-up.d/
