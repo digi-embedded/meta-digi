@@ -11,7 +11,6 @@ LICENSE = "MIT"
 
 include dey-image-minimal.bb
 
-DISTRO_FEATURES += "pulseaudio"
 WEB = "web-webkit"
 
 SOC_IMAGE_INSTALL = ""
