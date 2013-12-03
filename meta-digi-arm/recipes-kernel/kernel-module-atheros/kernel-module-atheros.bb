@@ -13,7 +13,7 @@ PR = "r1"
 RDEPENDS_${PN} = "kmod"
 
 SRCREV_external = ""
-SRCREV_internal = "${@base_conditional('IS_KERNEL_2X', '1' , 'f18d0de2ee85b6e768bd7c9b4685efdc0240fd4b', 'b17616e7d69cfc6f838daa5477403d9e9c4bc997', d)}"
+SRCREV_internal = "15bae2c4e330ea6d9289217d3c38ebf63aa8ff15"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/atheros.git;protocol=git"
@@ -22,6 +22,8 @@ SRC_URI  = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}'
 SRC_URI += " \
     file://atheros \
     file://Makefile \
+    ${@base_conditional('IS_KERNEL_2X', '1' , '', 'file://0001-atheros-convert-NLA_PUT-macros.patch', d)} \
+    ${@base_conditional('IS_KERNEL_2X', '1' , '', 'file://0002-atheros-update-renamed-struct-members.patch', d)} \
 "
 
 S = "${WORKDIR}/git"
@@ -30,10 +32,6 @@ EXTRA_OEMAKE = "DEL_PLATFORM=${MACHINE} KLIB_BUILD=${STAGING_KERNEL_DIR}"
 
 do_configure_prepend() {
 	cp ${WORKDIR}/Makefile ${S}/
-}
-
-do_configure_prepend_ccardimx28js() {
-	sed -i '/^CONFIG_SUPPORT_11W=y/s,^,# ,g' ${S}/compat-wireless/config.mk
 }
 
 do_install_append() {
