@@ -9,7 +9,7 @@ include linux-dey.inc
 PR = "${DISTRO}.${INC_PR}.0"
 
 SRCREV_external = ""
-SRCREV_internal = "1ce7c6e71421ac99b79eaf960784a9ee43d0ed05"
+SRCREV_internal = "43ee95fb0a87645076f789f3c20dfe6bace89d2f"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 LOCALVERSION_mxs = "mxs"
