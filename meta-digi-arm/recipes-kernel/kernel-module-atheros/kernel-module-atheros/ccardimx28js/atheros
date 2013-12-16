@@ -83,7 +83,7 @@ fi
 
 
 # Load 'cfg80211' and let it settle down (needed by 'ath6kl_sdio')
-modprobe -q cfg80211 && sleep 0.1
+modprobe -q cfg80211 && sleep 0.2
 
 # ath6kl_sdio.ko
 if ! grep -qs ath6kl_sdio /proc/modules; then
