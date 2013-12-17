@@ -12,8 +12,8 @@ ATH_PROP_PN = "atheros-proprietary-v3.4p4-b3.4.0.158"
 
 SRC_MD5    = "5693e26e904ee7b829bc09a202b5fdcb"
 SRC_SHA256 = "9d29113a9832ee4960d75c42e0ba229c71ebfe1f1f6f7738b213329c6214e708"
-BIN_MD5    = "4f5536dddd6b69235b957a1261ddbb93"
-BIN_SHA256 = "4e86a8fd345e00e785e16e71ed8517b53d0e5ac75f52b318e89136b8ad0652e8"
+BIN_MD5    = "f502062cdecae89cd68562e476a896c9"
+BIN_SHA256 = "687b7139904b1de7424abfdf7968d30fe2cef3c9bae95638e05d9532aa2bca2b"
 
 SRC_URI_src = " \
     http://build-linux.digi.com/yocto/downloads/${ATH_PROP_PN}.tar.gz;md5sum=${SRC_MD5};sha256sum=${SRC_SHA256} \
