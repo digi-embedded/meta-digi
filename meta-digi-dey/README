@@ -3,11 +3,11 @@ OpenEmbedded/Yocto Digi Embedded Linux layer
 
 This layer provides the Digi Embedded Linux distribution images.
 
-This layer is based on the following Yocto layers (Danny):
+This layer depends on:
 
-git://git.yoctoproject.org/poky
-git://git.yoctoproject.org/meta-fsl-arm
-git://github.com/openembedded/meta-oe.git
+git://git.yoctoproject.org/poky.git
+git://git.openembedded.org/meta-openembedded.git
+git://git.yoctoproject.org/meta-fsl-arm.git
 git://github.com/Freescale/meta-fsl-demos.git
 
 Digi's license agreements
@@ -22,4 +22,3 @@ Support
 
 This layer is provided 'as is' with no guarantee. However, some support
 may be available from support@digi.com
-
