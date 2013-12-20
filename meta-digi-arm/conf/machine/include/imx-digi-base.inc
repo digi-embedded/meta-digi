@@ -13,6 +13,17 @@ XSERVER = "xserver-xorg \
 # Ship kernel modules
 MACHINE_EXTRA_RRECOMMENDS = "kernel-modules"
 
+# Sub-architecture support
+MACHINE_SOCARCH ?= ""
+MACHINE_SOCARCH_mx5 = "${TUNE_PKGARCH}-mx5"
+PACKAGE_EXTRA_ARCHS_append = " ${MACHINE_SOCARCH}"
+
+MACHINE_ARCH_FILTER = "virtual/kernel"
+MACHINE_SOCARCH_FILTER_mx5 = "virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl"
+MACHINE_SOCARCH_FILTER_mx6 = "virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl"
+
+INHERIT += "fsl-dynamic-packagearch"
+
 # Gstreamer plugin
 MACHINE_GSTREAMER_PLUGIN ?= "gst-fsl-plugin"
 

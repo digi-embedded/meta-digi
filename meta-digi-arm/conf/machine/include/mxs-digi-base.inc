@@ -10,6 +10,15 @@ XSERVER = "xserver-xorg \
            xf86-input-evdev \
            xf86-video-fbdev"
 
+# Sub-architecture support
+MACHINE_SOCARCH ?= ""
+MACHINE_SOCARCH_mx28 = "${TUNE_PKGARCH}-mx28"
+PACKAGE_EXTRA_ARCHS_append = " ${MACHINE_SOCARCH}"
+
+MACHINE_ARCH_FILTER = "virtual/kernel"
+
+INHERIT += "fsl-dynamic-packagearch"
+
 # Ship kernel modules
 MACHINE_EXTRA_RRECOMMENDS = "kernel-modules"
 
