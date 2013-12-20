@@ -24,5 +24,3 @@ RDEPENDS_${PN} = "\
     alsa-states \
     ${ALSA_UTILS_PKGS} \
 "
-
-RDEPENDS_${PN}_append_mx5 = " imx-audio"

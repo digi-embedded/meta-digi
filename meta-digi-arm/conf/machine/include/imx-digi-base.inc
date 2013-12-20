@@ -13,9 +13,6 @@ XSERVER = "xserver-xorg \
 # Ship kernel modules
 MACHINE_EXTRA_RRECOMMENDS = "kernel-modules"
 
-# Extra audio support
-MACHINE_EXTRA_RRECOMMENDS += "imx-audio"
-
 # Gstreamer plugin
 MACHINE_GSTREAMER_PLUGIN ?= "gst-fsl-plugin"
 
