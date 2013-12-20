@@ -17,12 +17,12 @@
 # These two options control how much parallelism BitBake should use. The first
 # option determines how many tasks bitbake should run in parallel:
 #
-#BB_NUMBER_THREADS = "4"
+#BB_NUMBER_THREADS ?= "4"
 #
 # The second option controls how many processes make should run in parallel when
 # running compile tasks:
 #
-#PARALLEL_MAKE = "-j 4"
+#PARALLEL_MAKE ?= "-j 4"
 #
 # For a quad-core machine, BB_NUMBER_THREADS = "4", PARALLEL_MAKE = "-j 4" would
 # be appropriate for example.
@@ -42,8 +42,9 @@
 # There are also the following hardware board target machines included for
 # demonstration purposes:
 #
-#MACHINE ?= "atom-pc"
 #MACHINE ?= "beagleboard"
+#MACHINE ?= "genericx86"
+#MACHINE ?= "genericx86-64"
 #MACHINE ?= "mpc8315e-rdb"
 #MACHINE ?= "routerstationpro"
 #
@@ -180,23 +181,9 @@ USER_CLASSES ?= "buildstats image-mklibs image-prelink"
 #
 # The build system can test booting virtual machine images under qemu (an emulator)
 # after any root filesystems are created and run tests against those images. To
-# enable this uncomment this line
-#IMAGETEST = "qemu"
-#
-# This variable controls which tests are run against virtual images if enabled
-# above. The following would enable bat, boot the test case under the sanity suite
-# and perform toolchain tests
-#TEST_SCEN = "sanity bat sanity:boot toolchain"
-#
-# Because of the QEMU booting slowness issue (see bug #646 and #618), the
-# autobuilder may suffer a timeout issue when running sanity tests. We introduce
-# the variable TEST_SERIALIZE here to reduce the time taken by the sanity tests.
-# It is set to 1 by default, which will boot the image and run cases in the same
-# image without rebooting or killing the machine instance. If it is set to 0, the
-# image will be copied and tested for each case, which will take longer but be
-# more precise.
-#TEST_SERIALIZE = "1"
-
+# enable this uncomment this line. See classes/testimage(-auto).bbclass for
+# further details.
+#TEST_IMAGE = "1"
 #
 # Interactive shell configuration
 #

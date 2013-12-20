@@ -6,9 +6,9 @@ BBPATH = "${TOPDIR}"
 BBFILES ?= ""
 
 BBLAYERS ?= " \
-  ##COREBASE##/meta \
-  ##COREBASE##/meta-yocto \
-  ##COREBASE##/meta-yocto-bsp \
+  ##OEROOT##/meta \
+  ##OEROOT##/meta-yocto \
+  ##OEROOT##/meta-yocto-bsp \
   ##DIGIBASE##/meta-openembedded/meta-oe \
   ##DIGIBASE##/meta-openembedded/meta-networking \
   ##DIGIBASE##/meta-openembedded/meta-webserver \
@@ -18,6 +18,6 @@ BBLAYERS ?= " \
   ##DIGIBASE##/meta-digi/meta-digi-dey \
   "
 BBLAYERS_NON_REMOVABLE ?= " \
-  ##COREBASE##/meta \
-  ##COREBASE##/meta-yocto \
+  ##OEROOT##/meta \
+  ##OEROOT##/meta-yocto \
   "
