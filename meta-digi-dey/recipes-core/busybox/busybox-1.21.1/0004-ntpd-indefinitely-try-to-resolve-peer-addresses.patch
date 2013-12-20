@@ -14,7 +14,7 @@ Conflicts:
  1 file changed, 23 insertions(+), 2 deletions(-)
 
 diff --git a/networking/ntpd.c b/networking/ntpd.c
-index 34b649f..49fb58b 100644
+index 79b7c37..01cd44b 100644
 --- a/networking/ntpd.c
 +++ b/networking/ntpd.c
 @@ -221,6 +221,7 @@ typedef struct {
@@ -22,9 +22,9 @@ index 34b649f..49fb58b 100644
  	len_and_sockaddr *p_lsa;
  	char             *p_dotted;
 +	char             *p_hostname;
- 	/* when to send new query (if p_fd == -1)
- 	 * or when receive times out (if p_fd >= 0): */
  	int              p_fd;
+ 	int              datapoint_idx;
+ 	uint32_t         lastpkt_refid;
 @@ -708,8 +709,9 @@ add_peers(char *s)
  	peer_t *p;
  
