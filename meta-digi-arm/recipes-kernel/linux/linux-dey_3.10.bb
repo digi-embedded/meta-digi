@@ -9,7 +9,7 @@ include linux-dey.inc
 PR = "${DISTRO}.${INC_PR}.0"
 
 SRCREV_external = ""
-SRCREV_internal = "43ee95fb0a87645076f789f3c20dfe6bace89d2f"
+SRCREV_internal = "${AUTOREV}"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 LOCALVERSION_mxs = "mxs"
@@ -19,7 +19,7 @@ KERNEL_CFG_FRAGS ?= ""
 KERNEL_CFG_FRAGS_append = " ${@base_conditional('HAVE_EXAMPLE', '1' , 'file://config-spidev.cfg', '', d)}"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-linux.git;protocol=git"
-SRC_URI_internal = "${DIGI_GIT}linux-2.6.git;protocol=git"
+SRC_URI_internal = "${DIGI_GIT}linux-2.6.git;protocol=git;branch=v3.10.y/maint"
 SRC_URI = " \
     ${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)} \
     file://defconfig \
