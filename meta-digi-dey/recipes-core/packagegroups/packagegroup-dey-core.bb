@@ -18,6 +18,7 @@ MACHINE_ESSENTIAL_EXTRA_RDEPENDS ?= ""
 MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS ?= ""
 
 # Distro can override the following VIRTUAL-RUNTIME providers:
+VIRTUAL-RUNTIME_dev_manager ?= "udev"
 VIRTUAL-RUNTIME_login_manager ?= ""
 VIRTUAL-RUNTIME_passwd_manager ?= "shadow"
 VIRTUAL-RUNTIME_init_manager ?= "sysvinit"
@@ -25,7 +26,6 @@ VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 VIRTUAL-RUNTIME_keymaps ?= "keymaps"
 
 # Set virtual runtimes depending on X11 feature
-VIRTUAL-RUNTIME_dev_manager ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'udev', 'busybox-mdev', d)}"
 VIRTUAL-RUNTIME_touchscreen ?= "${@base_contains('DISTRO_FEATURES', 'x11', '', 'tslib-calibrate tslib-tests', d)}"
 
 RDEPENDS_${PN} = "\

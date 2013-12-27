@@ -32,4 +32,7 @@ IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-blueto
 
 IMAGE_ROOTFS_SIZE = "8192"
 
+# Do not install udev-cache
+BAD_RECOMMENDATIONS += "udev-cache"
+
 ROOTFS_POSTPROCESS_COMMAND += "dey_rootfs_tuning;"
