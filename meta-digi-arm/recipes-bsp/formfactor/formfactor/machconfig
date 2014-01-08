@@ -1,3 +1,4 @@
 # Display options
 HAVE_TOUCHSCREEN=1
 HAVE_KEYBOARD=0
+SHOWCURSOR="yes"
