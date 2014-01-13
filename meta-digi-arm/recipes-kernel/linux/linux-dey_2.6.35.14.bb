@@ -4,6 +4,9 @@ include linux-dey.inc
 
 PR = "${DISTRO}.${INC_PR}.0"
 
+KBRANCH_DEFAULT = "del-5.9/meta-digi"
+KBRANCH = "${KBRANCH_DEFAULT}"
+
 SRCREV_external = ""
 SRCREV_internal = "${AUTOREV}"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
@@ -12,7 +15,7 @@ LOCALVERSION_mx5 = "mx5"
 LOCALVERSION_mxs = "mxs"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-linux.git;protocol=git"
-SRC_URI_internal = "${DIGI_GIT}linux-2.6.git;protocol=git;branch=del-5.9/meta-digi"
+SRC_URI_internal = "${DIGI_GIT}linux-2.6.git;protocol=git;branch=${KBRANCH}"
 SRC_URI = " \
     ${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)} \
     file://defconfig \
