@@ -1,11 +1,13 @@
 # Digi BSP default providers
-PREFERRED_PROVIDER_u-boot ?= "u-boot-dey"
-PREFERRED_VERSION_u-boot-dey ?= "2009.08"
-PREFERRED_PROVIDER_virtual/kernel ?= "linux-dey"
-PREFERRED_VERSION_linux-dey ?= "2.6.35.14"
-PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
-PREFERRED_PROVIDER_virtual/libx11 ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'libx11', '', d)}"
 PREFERRED_PROVIDER_jpeg-native ?= "jpeg-native"
+PREFERRED_PROVIDER_u-boot ?= "u-boot-dey"
+PREFERRED_PROVIDER_virtual/kernel ?= "linux-dey"
+PREFERRED_PROVIDER_virtual/libx11 ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'libx11', '', d)}"
+PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
+
+# Digi BSP default versions
+PREFERRED_VERSION_linux-dey ?= "2.6.35.14"
+PREFERRED_VERSION_u-boot-dey ?= "2009.08"
 
 # Help variables used in recipes
 HAVE_WIFI    = "${@base_contains('MACHINE_FEATURES', 'wifi', '1', '', d)}"
