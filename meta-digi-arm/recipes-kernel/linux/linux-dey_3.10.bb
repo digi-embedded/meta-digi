@@ -32,18 +32,23 @@ SRC_URI = " \
 
 S = "${WORKDIR}/git"
 
-KERNEL_DEVICETREE = "${S}/arch/arm/boot/dts/${DTSNAME}.dts"
 KERNEL_EXTRA_ARGS = "LOADADDR=${UBOOT_LOADADDRESS}"
 
 config_dts() {
-	if [ "${1}" = "enable" ]; then
-		sed  -i -e "/${2}/{s,^///include,/include,g}" ${KERNEL_DEVICETREE}
-	elif [ "${1}" = "disable" ]; then
-		sed  -i -e "/${2}/{s,^/include,///include,g}" ${KERNEL_DEVICETREE}
-	fi
+	for DTB in ${KERNEL_DEVICETREE}; do
+		if [ "${1}" = "enable" ]; then
+			sed  -i -e "/${2}/{s,^///include,/include,g}" ${S}/arch/arm/boot/dts/${DTB%b}s
+		elif [ "${1}" = "disable" ]; then
+			sed  -i -e "/${2}/{s,^/include,///include,g}" ${S}/arch/arm/boot/dts/${DTB%b}s
+		fi
+	done
 }
 
 do_update_dts() {
+	:
+}
+
+do_update_dts_mxs() {
 	if [ -n "${HAVE_WIFI}" ]; then
 		config_dts enable  '_ssp2_mmc_wifi.dtsi'
 	else
