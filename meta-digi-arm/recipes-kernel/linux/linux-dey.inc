@@ -14,6 +14,25 @@ inherit kernel
 LOCALVERSION ?= "+dey"
 SCMVERSION ?= "y"
 
+# Add imx-test support hacks
+IMX_TEST_SUPPORT ?= "y"
+
+SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-linux.git;protocol=git"
+SRC_URI_internal = "${DIGI_GIT}linux-2.6.git;protocol=git;branch=${KBRANCH}"
+SRC_URI = " \
+    ${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)} \
+    file://defconfig \
+    ${KERNEL_CFG_FRAGS} \
+"
+
+S = "${WORKDIR}/git"
+
+# We need to pass it as param since kernel might support more then one
+# machine, with different entry points
+KERNEL_EXTRA_ARGS += "LOADADDR=${UBOOT_ENTRYPOINT}"
+
+FILES_kernel-image += "/boot/config*"
+
 kernel_conf_variable() {
 	CONF_SED_SCRIPT="$CONF_SED_SCRIPT /CONFIG_$1[ =]/d;"
 	if test "$2" = "n"
@@ -53,13 +72,15 @@ do_deploy_append() {
 
 # install nedded headers for imx-test compilation
 do_install_append() {
-	# bounds.h may be used by a module and is currently missing
-	if [ -d include/generated ]; then
-		cp -a include/generated/* $kerneldir/include/generated/
-	fi
+	if [ "${IMX_TEST_SUPPORT}" = "y" ]; then
+		# bounds.h may be used by a module and is currently missing
+		if [ -d include/generated ]; then
+			cp -r include/generated/* $kerneldir/include/generated/
+		fi
 
-	# Host architecture object file
-	rm -f $kerneldir/scripts/kconfig/kxgettext.o
+		# Host architecture object file
+		rm -f $kerneldir/scripts/kconfig/kxgettext.o
+	fi
 }
 
 sysroot_stage_all_append() {

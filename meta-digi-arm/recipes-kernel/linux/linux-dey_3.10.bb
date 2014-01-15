@@ -2,11 +2,12 @@
 
 UBOOT_ENTRYPOINT  = "0x40008000"
 
+require recipes-kernel/linux/linux-dey.inc
 require recipes-kernel/linux/linux-dtb.inc
 
-include linux-dey.inc
-
 PR = "${DISTRO}.${INC_PR}.0"
+
+DEPENDS += "lzop-native bc-native"
 
 KBRANCH_DEFAULT = "v3.10/master"
 KBRANCH = "${KBRANCH_DEFAULT}"
@@ -21,18 +22,6 @@ LOCALVERSION_mxs = "mxs"
 # Kernel configuration fragments
 KERNEL_CFG_FRAGS ?= ""
 KERNEL_CFG_FRAGS_append = " ${@base_conditional('HAVE_EXAMPLE', '1' , 'file://config-spidev.cfg', '', d)}"
-
-SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-linux.git;protocol=git"
-SRC_URI_internal = "${DIGI_GIT}linux-2.6.git;protocol=git;branch=${KBRANCH}"
-SRC_URI = " \
-    ${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)} \
-    file://defconfig \
-    ${KERNEL_CFG_FRAGS} \
-"
-
-S = "${WORKDIR}/git"
-
-KERNEL_EXTRA_ARGS = "LOADADDR=${UBOOT_LOADADDRESS}"
 
 config_dts() {
 	for DTB in ${KERNEL_DEVICETREE}; do
@@ -89,7 +78,5 @@ do_update_dts_mxs() {
 	fi
 }
 addtask update_dts before do_install after do_sizecheck
-
-FILES_kernel-image += "/boot/config*"
 
 COMPATIBLE_MACHINE = "(mxs)"
