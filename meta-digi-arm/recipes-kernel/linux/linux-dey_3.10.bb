@@ -1,7 +1,5 @@
 # Copyright (C) 2012 Digi International
 
-UBOOT_ENTRYPOINT  = "0x40008000"
-
 require recipes-kernel/linux/linux-dey.inc
 require recipes-kernel/linux/linux-dtb.inc
 

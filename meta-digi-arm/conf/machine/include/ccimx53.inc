@@ -6,8 +6,7 @@ include conf/machine/include/imx-digi-base.inc
 
 SOC_FAMILY = "mx5:mx53"
 
-UBOOT_ENTRYPOINT  = "0x70800000"
-UBOOT_LOADADDRESS = "0x70800000"
+UBOOT_ENTRYPOINT = "0x70008000"
 
 # Firmware
 MACHINE_FIRMWARE = "firmware-imx-vpu-imx53 firmware-imx-sdma-imx53"
