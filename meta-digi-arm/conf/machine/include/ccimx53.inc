@@ -10,6 +10,8 @@ UBOOT_ENTRYPOINT = "0x70008000"
 
 # Firmware
 MACHINE_FIRMWARE = "firmware-imx-vpu-imx53 firmware-imx-sdma-imx53"
+
+MACHINE_EXTRA_RDEPENDS    += "nvram ubootenv update-flash"
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE}"
 MACHINE_EXTRA_RRECOMMENDS += "kernel-module-mma7455l"
 MACHINE_EXTRA_RRECOMMENDS += "kernel-module-smsc911x"

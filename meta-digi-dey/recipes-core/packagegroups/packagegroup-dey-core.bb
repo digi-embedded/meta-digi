@@ -39,7 +39,6 @@ RDEPENDS_${PN} = "\
     modutils-initscripts \
     mtd-utils-ubifs \
     netbase \
-    nvram \
     init-ifupdown \
     ${VIRTUAL-RUNTIME_dev_manager} \
     ${VIRTUAL-RUNTIME_init_manager} \
@@ -47,11 +46,11 @@ RDEPENDS_${PN} = "\
     ${VIRTUAL-RUNTIME_login_manager} \
     ${VIRTUAL-RUNTIME_passwd_manager} \
     ${VIRTUAL-RUNTIME_update-alternatives} \
-    ubootenv \
-    update-flash \
     usbutils \
     busybox-acpid \
-    ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS}"
+    ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS} \
+    ${MACHINE_EXTRA_RDEPENDS} \
+"
 
 RRECOMMENDS_${PN} = "\
     ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS} \
