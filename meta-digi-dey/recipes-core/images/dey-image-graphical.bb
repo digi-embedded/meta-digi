@@ -11,6 +11,8 @@ LICENSE = "MIT"
 
 include dey-image-minimal.bb
 
+REQUIRED_DISTRO_FEATURES = "x11"
+
 WEB = "web-webkit"
 
 SOC_IMAGE_INSTALL = ""

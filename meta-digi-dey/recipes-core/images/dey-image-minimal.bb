@@ -17,6 +17,9 @@ LICENSE = "MIT"
 
 inherit core-image
 inherit dey-image
+inherit distro_features_check
+
+CONFLICT_DISTRO_FEATURES = "directfb wayland"
 
 # Only common features to remain here.
 VIRTUAL_RUNTIME_ssh_server ?= "ssh-server-dropbear"
