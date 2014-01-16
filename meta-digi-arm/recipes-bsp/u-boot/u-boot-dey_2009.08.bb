@@ -14,7 +14,6 @@ PR = "r0"
 S = "${WORKDIR}/git"
 
 UBOOT_BSTR_mxs   = "-ivt"
-UBOOT_SUFFIX_mxs = "sb"
 
 DEPENDS_mxs += "elftosb-native imx-bootlets-dey"
 

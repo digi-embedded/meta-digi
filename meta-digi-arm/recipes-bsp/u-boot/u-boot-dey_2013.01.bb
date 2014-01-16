@@ -13,8 +13,6 @@ PR = "r0"
 
 S = "${WORKDIR}/git"
 
-UBOOT_SUFFIX_mxs = "sb"
-
 DEPENDS_mxs += "elftosb-native"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
