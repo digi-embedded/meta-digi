@@ -11,7 +11,10 @@ PR = "r0"
 inherit packagegroup
 
 RDEPENDS_${PN} = "\
-    packagegroup-core-tools-debug \
-    memwatch \
+    evtest \
     fbtest \
+    i2c-tools \
+    memwatch \
+    packagegroup-core-tools-debug \
+    tcpdump \
 "
