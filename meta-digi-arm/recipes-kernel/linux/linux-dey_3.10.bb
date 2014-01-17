@@ -77,4 +77,4 @@ do_update_dts_mxs() {
 }
 addtask update_dts before do_install after do_sizecheck
 
-COMPATIBLE_MACHINE = "(mxs)"
+COMPATIBLE_MACHINE = "(mxs|mx6)"
