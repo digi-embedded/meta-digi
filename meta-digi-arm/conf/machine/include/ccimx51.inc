@@ -3,6 +3,7 @@
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore for MX51 module.
 
 include conf/machine/include/imx-digi-base.inc
+include conf/machine/include/tune-cortexa8.inc
 
 SOC_FAMILY = "mx5:mx51"
 

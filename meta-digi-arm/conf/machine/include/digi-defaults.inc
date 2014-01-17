@@ -7,7 +7,9 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 
 # Digi BSP default versions
 PREFERRED_VERSION_linux-dey ?= "2.6.35.14"
+PREFERRED_VERSION_linux-dey_mx6 ?= "3.10"
 PREFERRED_VERSION_u-boot-dey ?= "2009.08"
+PREFERRED_VERSION_u-boot-dey_mx6 ?= "2013.04"
 
 # Help variables used in recipes
 HAVE_WIFI    = "${@base_contains('MACHINE_FEATURES', 'wifi', '1', '', d)}"
