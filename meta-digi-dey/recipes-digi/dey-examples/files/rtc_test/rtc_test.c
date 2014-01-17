@@ -24,7 +24,7 @@
 #include <string.h>
 
 #define	PROGRAM			"rtc_test"
-#define VERSION			"2.0"
+#define VERSION			"3.0"
 
 #define	RTC_DEVICE_FILE		"/dev/rtc"
 
@@ -46,7 +46,7 @@
 #endif
 
 #define rtc_test_usage \
-	"[-abcdeh]\n"
+	"[-abcdehms]\n"
 #define rtc_test_full_usage \
 	"rtc_test [options]\n\n" \
         "Tests the real time clock driver\n" \
@@ -54,9 +54,14 @@
         "  -a : Read the current time\n" \
         "  -b : Set the current time\n" \
         "  -c : Read the alarm programed value\n" \
-        "  -d : Set the alarm to trigger in " RTC_ALARM_SECS_STR " seconds\n" \
-        "  -e : Test the alarm interrupt\n" \
-        "  -h : Help\n\n"
+        "  -d : Set the alarm to trigger in the specified seconds\n" \
+        "  -e : Test the alarm interrupt with the specified seconds\n" \
+        "  -h : Help\n" \
+	"  -m : Alarm has minutes resolution. (seconds by default)." \
+	" In this mode the alarm triggers on the minutes register and the" \
+	" seconds are ignored.\n" \
+        "  -s : Seconds to trigger alarm (default 5)." \
+	" With minutes resolution this must be a multiple of 60\n\n" \
 
 /* Function prototypes */
 static void rtc_test_banner(void);
@@ -68,6 +73,9 @@ static int rtc_test_alarm_read(int fd);
 static int rtc_test_alarm_set(int fd, struct rtc_time *tm);
 static int rtc_test_alarm_irq(int fd, struct rtc_wkalrm *wkalrm);
 static void rtc_test_display_test_results(unsigned int test_ops, unsigned int test_results);
+
+static int seconds = 5;
+static int minutes_res = 0;
 
 /*
  * Function:    rtc_test_banner
@@ -123,7 +131,7 @@ int main(int argc, char *argv[])
 	memset(&wkalrm, 0, sizeof(struct rtc_wkalrm));
 
 	if (argc > 1) {
-		while ((opt = getopt(argc, argv, "abcdeh")) > 0) {
+		while ((opt = getopt(argc, argv, "abcdehms:")) > 0) {
 			switch (opt) {
 			case 'a':
 				test_ops |= RTC_TEST_RD_TIME;
@@ -140,9 +148,22 @@ int main(int argc, char *argv[])
 			case 'e':
 				test_ops |= RTC_TEST_ALARM_IRQ;
 				break;
+			case 'm':
+				minutes_res = 1;
+				break;
+			case 's':
+				seconds = atoi(optarg);
+				if(minutes_res && (seconds%60 != 0)){
+					exit_error(
+					"Seconds should be divisible by 60"
+					" as you specified minutes resolution."
+					"\n\n",EXIT_FAILURE);
+				}
+				break;
 			case 'h':
 			default:
-				show_usage_exit((opt == 'h') ? EXIT_SUCCESS : EXIT_FAILURE, 1);
+				show_usage_exit((opt == 'h') ?
+					 EXIT_SUCCESS : EXIT_FAILURE, 1);
 			}
 		}
 	}
@@ -156,7 +177,8 @@ int main(int argc, char *argv[])
 	}
 
 	if (test_ops &
-	    (RTC_TEST_RD_TIME | RTC_TEST_SET_ALARM | RTC_TEST_ALARM_IRQ | RTC_TEST_SET_TIME)) {
+	    (RTC_TEST_RD_TIME | RTC_TEST_SET_ALARM | RTC_TEST_ALARM_IRQ |
+		RTC_TEST_SET_TIME)) {
 		retval = rtc_test_time_read(rtc_fd, &rtc_tm);
 		if (retval == 1)
 			test_results |= RTC_TEST_RD_TIME;
@@ -202,28 +224,35 @@ int main(int argc, char *argv[])
  * Function:    rtc_test_display_test_results
  * Description: display test's results
  */
-static void rtc_test_display_test_results(unsigned int test_ops, unsigned int test_results)
+static void rtc_test_display_test_results(unsigned int test_ops,
+		unsigned int test_results)
 {
 	if (test_ops) {
 		printf("\nTest results:\n");
-		printf("-----------------------------------------------------------\n");
+		printf("-------------------------------------------------"
+			"----------\n");
 	}
 
 	if (test_ops & RTC_TEST_RD_TIME)
 		printf("ioctl cmd RTC_RD_TIME:         %s\n",
-		       test_results & RTC_TEST_RD_TIME ? "OK" : "Failure or not supported");
+		       test_results & RTC_TEST_RD_TIME ? "OK" :
+				"Failure or not supported");
 	if (test_ops & RTC_TEST_SET_TIME)
 		printf("ioctl cmd RTC_SET_TIME:        %s\n",
-		       test_results & RTC_TEST_SET_TIME ? "OK" : "Failure or not supported");
+		       test_results & RTC_TEST_SET_TIME ? "OK" :
+				"Failure or not supported");
 	if (test_ops & RTC_TEST_RD_ALARM)
 		printf("ioctl cmd RTC_ALM_READ:        %s\n",
-		       test_results & RTC_TEST_RD_ALARM ? "OK" : "Failure or not supported");
+		       test_results & RTC_TEST_RD_ALARM ? "OK" :
+				"Failure or not supported");
 	if (test_ops & RTC_TEST_SET_ALARM)
 		printf("ioctl cmd RTC_ALM_SET:         %s\n",
-		       test_results & RTC_TEST_SET_ALARM ? "OK" : "Failure or not supported");
+		       test_results & RTC_TEST_SET_ALARM ? "OK" :
+				"Failure or not supported");
 	if (test_ops & RTC_TEST_ALARM_IRQ)
 		printf("Alarm interrupt test:          %s\n",
-		       test_results & RTC_TEST_ALARM_IRQ ? "OK" : "Failure or not supported");
+		       test_results & RTC_TEST_ALARM_IRQ ? "OK" :
+				"Failure or not supported");
 }
 
 /*
@@ -288,7 +317,8 @@ static int rtc_test_alarm_read(int fd)
 	retval = ioctl(fd, RTC_ALM_READ, &alarm_tm);
 	if (retval >= 0) {
 		printf("Alarm was programmed to %02d:%02d:%02d.\n",
-		       alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_sec);
+				alarm_tm.tm_hour, alarm_tm.tm_min,
+					alarm_tm.tm_sec);
 		return 1;
 	}
 
@@ -303,7 +333,14 @@ static int rtc_test_alarm_set(int fd, struct rtc_time *tm)
 {
 	int retval;
 	struct rtc_time alarm_tm;
-	tm->tm_sec += RTC_ALARM_SECS;
+	struct rtc_time tm_now;
+
+	if(minutes_res){
+		tm->tm_sec = 0;
+		tm->tm_min += seconds/60;
+	}
+	else
+		tm->tm_sec += seconds;
 	if (tm->tm_sec >= 60) {
 		tm->tm_sec %= 60;
 		tm->tm_min++;
@@ -322,10 +359,13 @@ static int rtc_test_alarm_set(int fd, struct rtc_time *tm)
 		if (retval >= 0 ) {
 			retval = ioctl(fd, RTC_ALM_READ, &alarm_tm);
 			if (retval >= 0) {
-				printf("Alarm re-programmed to %02d:%02d:%02d.\n",
-				       alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_sec);
-				return 1;
+				printf("Alarm re-programmed to "
+					"%02d:%02d:%02d.\n",
+					alarm_tm.tm_hour,
+					alarm_tm.tm_min,
+					alarm_tm.tm_sec);
 			}
+			return 1;
 		}
 	}
 
@@ -340,13 +380,25 @@ static int rtc_test_alarm_irq(int fd, struct rtc_wkalrm *wkalrm)
 {
 	int retval, result = 0;
 	unsigned long data;
-	struct timeval tv = { RTC_ALARM_SECS + 2, 0 };	/* RTC_ALARM_SECS + 2 second timeout on select */
+	struct timeval tv = {0, 0};
 	fd_set readfds;
+	struct rtc_time tm_now;
+
+	if (!minutes_res){
+		/* seconds+2 second timeout on select  */
+		tv.tv_sec += seconds +2;
+	}
+	else {
+		retval = ioctl(fd, RTC_RD_TIME, &tm_now);
+		/* Round up to the next minute and add 2 seconds
+			to the timeout on select  */
+		tv.tv_sec += seconds - tm_now.tm_sec + 2;
+	}
 
 	/* Enable the alarm irq */
 	retval = ioctl(fd, RTC_WKALM_SET, wkalrm);
 	if (retval >= 0) {
-		printf("Waiting %d seconds for alarm... ",RTC_ALARM_SECS);
+		printf("Waiting %d seconds for alarm... ",tv.tv_sec);
 		fflush(stdout);
 
 		FD_ZERO(&readfds);
