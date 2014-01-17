@@ -51,4 +51,4 @@ FILES_${PN} += " \
 "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(mxs)"
+COMPATIBLE_MACHINE = "(mxs|mx6)"
