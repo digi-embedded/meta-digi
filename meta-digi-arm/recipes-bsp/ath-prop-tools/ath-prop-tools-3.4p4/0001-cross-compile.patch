@@ -1,3 +1,30 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Thu, 23 Jan 2014 14:01:05 +0100
+Subject: [PATCH] cross compile
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ ath6kl-tcmd/Makefile      | 6 +++---
+ ath6kl-wmiconfig/Makefile | 6 +++---
+ libtcmd/Makefile          | 8 ++++----
+ libtcmd/nl80211.c         | 2 +-
+ 4 files changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/ath6kl-tcmd/Makefile b/ath6kl-tcmd/Makefile
+index 733ac0f..44d06cf 100644
+--- a/ath6kl-tcmd/Makefile
++++ b/ath6kl-tcmd/Makefile
+@@ -1,7 +1,7 @@
+-CC = gcc
+-CFLAGS = -Wall -g
++# CC = gcc
++# CFLAGS = -Wall -g
+ 
+-NLLIBNAME = libnl-1
++NLLIBNAME = libnl-3.0
+ LIBTCMD_DIR := ../libtcmd
+ 
+ LDLIBS += $(shell pkg-config --libs $(NLLIBNAME)) -lrt -ltcmd -lm
 diff --git a/ath6kl-wmiconfig/Makefile b/ath6kl-wmiconfig/Makefile
 index b9787a4..b074b6f 100644
 --- a/ath6kl-wmiconfig/Makefile
@@ -19,13 +46,14 @@ index b9787a4..b074b6f 100644
  
  LDFLAGS += -ltcmd $(shell pkg-config --libs $(NLLIBNAME)) -lrt
 diff --git a/libtcmd/Makefile b/libtcmd/Makefile
-index 22f17db..1048758 100644
+index 22f17db..3e25c21 100644
 --- a/libtcmd/Makefile
 +++ b/libtcmd/Makefile
 @@ -1,7 +1,7 @@
 -CC = gcc
+-CFLAGS = -Wall -g
 +# CC = gcc
- CFLAGS = -Wall -g
++# CFLAGS = -Wall -g
  
 -NLLIBNAME = libnl-1
 +NLLIBNAME = libnl-3.0
