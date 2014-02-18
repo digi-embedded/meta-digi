@@ -14,3 +14,10 @@ do_install_append() {
 	rm -f ${D}${sysconfdir}/rc5.d/S99stop-bootlogd
 	rm -f ${D}${sysconfdir}/rcS.d/S07bootlogd
 }
+
+do_install_append_ccimx6adpt() {
+	cat >> ${D}${sysconfdir}/default/rcS <<-EOF
+		# Resize EXT4 filesystems to the size of the partition on boot
+		RESIZE_EXT4FS=yes
+	EOF
+}
