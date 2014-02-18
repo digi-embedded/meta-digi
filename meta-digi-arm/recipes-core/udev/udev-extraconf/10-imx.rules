@@ -28,3 +28,6 @@ KERNEL=="ttyAM0",   MODE="0660", SYMLINK+="ttyS0"
 KERNEL=="ttyAMA0",  MODE="0660", SYMLINK+="ttyS0"
 KERNEL=="ttySP0",   MODE="0660", SYMLINK+="ttyBt"
 KERNEL=="ttyAPP0",  MODE="0660", SYMLINK+="ttyBt"
+
+# i.MX6 serial port rules
+KERNEL=="ttymxc1",  MODE="0660", SYMLINK+="ttyBt"

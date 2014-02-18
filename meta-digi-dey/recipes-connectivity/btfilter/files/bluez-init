@@ -23,16 +23,21 @@ fi
 
 SCRIPTNAME="${0}"
 
-ccardimx28js_bt_init() {
+bt_init() {
 	#
 	# Exit if this hardware does not support Bluetooth
 	#
-	BLUE_TOOTH_VARIANTS="0x02 0x03 0x10 0x11"
-	MOD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant 2>/dev/null || \
-		       cat /sys/kernel/ccardimx28/mod_variant)"
-	if ! echo ${BLUE_TOOTH_VARIANTS} | grep -qs ${MOD_VARIANT}; then
-		echo "${SCRIPTNAME}: FAILED (variant ${MOD_VARIANT} does not support bluetooth)"
-		exit
+	if [ "${MACHINENAME}" = "ccardimx28" ]; then
+		BLUE_TOOTH_VARIANTS="0x02 0x03 0x10 0x11"
+		MOD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant 2>/dev/null || \
+			       cat /sys/kernel/${MACHINENAME}/mod_variant)"
+		if ! echo ${BLUE_TOOTH_VARIANTS} | grep -qs ${MOD_VARIANT}; then
+			echo "${SCRIPTNAME}: FAILED (variant ${MOD_VARIANT} does not support bluetooth)"
+			exit
+		fi
+		BT_PWR_GPIO_NR="21"
+	elif [ "${MACHINENAME}" = "ccimx6adpt" ]; then
+		BT_PWR_GPIO_NR="244"
 	fi
 
 	#
@@ -69,7 +74,7 @@ ccardimx28js_bt_init() {
 	#
 	JAPANESE_REGION_CODE="0x2"
 	REGION_CODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null || \
-		       cat /sys/kernel/ccardimx28/mod_cert)"
+		       cat /sys/kernel/${MACHINENAME}/mod_cert)"
 	if [ -n "${REGION_CODE}" -a "${JAPANESE_REGION_CODE}" = "${REGION_CODE}" ]; then
 		#
 		# We don't want to wear out flash rewriting the configuration file,
@@ -102,12 +107,12 @@ ccardimx28js_bt_init() {
 		#
 		# If hciattach fails try to recover it by toggling the GPIO
 		#
-		BT_PWR_L="/sys/class/gpio/gpio21"
-		[ -d "${BT_PWR_L}" ] || echo -n 21 > /sys/class/gpio/export
+		BT_PWR_L="/sys/class/gpio/gpio${BT_PWR_GPIO_NR}"
+		[ -d "${BT_PWR_L}" ] || echo -n ${BT_PWR_GPIO_NR} > /sys/class/gpio/export
 		echo -n out > ${BT_PWR_L}/direction && sleep .2
 		echo -n 0 > ${BT_PWR_L}/value && sleep .2
 		echo -n 1 > ${BT_PWR_L}/value && sleep .2
-		[ -d "${BT_PWR_L}" ] && echo -n 21 > /sys/class/gpio/unexport
+		[ -d "${BT_PWR_L}" ] && echo -n ${BT_PWR_GPIO_NR} > /sys/class/gpio/unexport
 		RETRIES="$((RETRIES - 1))"
 	done
 	if [ "${RETRIES}" -eq "0" ]; then
@@ -125,7 +130,7 @@ echo "Starting bluetooth services."
 
 # Initialize driver for 'ccardimx28js'
 MACHINENAME="$(cat /proc/device-tree/digi,machine,name 2>/dev/null || cat /sys/kernel/machine/name)"
-[ "${MACHINENAME}" = "ccardimx28" ] && ccardimx28js_bt_init
+[ "${MACHINENAME}" = "ccardimx28" -o "${MACHINENAME}" = "ccimx6adpt" ] && bt_init
 
 # Run bluetooth daemon
 if hciconfig hci0 up && bluetoothd; then
