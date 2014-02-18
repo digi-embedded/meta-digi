@@ -1,6 +1,6 @@
 # Copyright (C) 2013 Digi International.
 
-SUMMARY = "Firmware files for Digi's MXS based platforms, such as Atheros bluetooth."
+SUMMARY = "Firmware files for Digi's platforms, such as Atheros bluetooth."
 SECTION = "base"
 LICENSE = "Proprietary"
 LIC_FILES_CHKSUM = "file://${DIGI_EULA_FILE};md5=ef5b088ca04b6f10b1764aa182f4f51d"
@@ -29,4 +29,4 @@ PACKAGES += "${PN}-ar3k"
 
 FILES_${PN}-ar3k  = "/lib/firmware/ar3k/*"
 
-COMPATIBLE_MACHINE = "(mxs)"
+COMPATIBLE_MACHINE = "(mxs|mx6)"

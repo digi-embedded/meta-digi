@@ -14,6 +14,7 @@ UBOOT_SUFFIX = "imx"
 # Firmware
 MACHINE_FIRMWARE ?= ""
 MACHINE_FIRMWARE_append = " firmware-imx-vpu-imx6q"
+MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_BT', '1' , 'firmware-atheros-ar3k', '', d)}"
 
 MACHINE_EXTRA_RDEPENDS    += "e2fsprogs e2fsprogs-mke2fs parted"
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE}"
