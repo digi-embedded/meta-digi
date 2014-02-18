@@ -25,13 +25,15 @@ MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins"
 # To build any of these variants configure MACHINE_VARIANT on the project's
 # local.conf to the variant name.
 #
-# Name          WiFi
-# ------------------
-# -             N       (empty MACHINE_VARIANT="")
-# w             Y
+# Name          WiFi    BT
+# ------------------------
+# -             N       N    (empty MACHINE_VARIANT="")
+# w             Y       N
+# wb            Y       Y
 
 # All variants support
 MACHINE_FEATURES += "accel-graphics accel-video"
 
 # Per-variant machine features
 MACHINE_FEATURES_append_w = " wifi"
+MACHINE_FEATURES_append_wb = " wifi bluetooth"
