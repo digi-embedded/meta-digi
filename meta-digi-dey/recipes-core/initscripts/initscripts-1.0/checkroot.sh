@@ -22,7 +22,7 @@ test "$SULOGIN" = yes && sulogin -t 30 $CONSOLE
 exec 9< /etc/fstab
 rootmode=rw
 rootopts=rw
-rootcheck=no
+rootcheck=$ENABLE_ROOTFS_FSCK
 swap_on_md=no
 devfs=
 while read fs mnt type opts dump pass junk <&9
@@ -53,6 +53,16 @@ do
 	esac
 done
 exec 0>&9 9>&-
+
+# Check for conflicting configurations
+if [ "$rootmode" = "ro" -a "$ROOTFS_READ_ONLY" = "no" ] || \
+	[ "$rootmode" = "rw" -a "$ROOTFS_READ_ONLY" = "yes" ]; then
+	echo ""
+	echo "WARN: conflicting configurations in /etc/fstab and /etc/default/rcS"
+	echo "      regarding the writability of rootfs. Please fix one of them."
+	echo ""
+fi
+
 
 #
 # Activate the swap device(s) in /etc/fstab. This needs to be done
