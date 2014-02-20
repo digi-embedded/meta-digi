@@ -52,7 +52,7 @@ IMAGE_FSTYPES ?= "sum.jffs2 tar.bz2 ubifs"
 
 # MX6 does not have flash memory so build sdcard images
 SDCARD_ROOTFS_mx6 ?= "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.ext4"
-IMAGE_FSTYPES_mx6 ?= "ext4 sdcard tar.bz2"
+IMAGE_FSTYPES_mx6 ?= "boot.vfat ext4 sdcard tar.bz2"
 
 KERNEL_IMAGETYPE = "uImage"
 
