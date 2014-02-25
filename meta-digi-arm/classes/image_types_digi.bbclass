@@ -1,5 +1,8 @@
 inherit image_types_fsl
 
+# Do not create static nodes in image files
+USE_DEVFS = "1"
+
 # Dynamically calculate max LEB count for UBIFS images
 FLASH_MLC = "${@max_leb_count(d)}"
 def max_leb_count(d):
