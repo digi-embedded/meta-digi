@@ -13,7 +13,7 @@ PR = "r1"
 RDEPENDS_${PN} = "kmod"
 
 SRCREV_external = ""
-SRCREV_internal = "28ced2338be0d9e11a711b5063f2cca39713cbeb"
+SRCREV_internal = "15bae2c4e330ea6d9289217d3c38ebf63aa8ff15"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/atheros.git;protocol=git"
