@@ -22,6 +22,4 @@ RDEPENDS_${PN} = " \
     ${@base_conditional('HAVE_GUI', '1' , '', 'gst-fsl-plugin-gplay', d)} \
 "
 
-ALLOW_EMPTY_${PN} = "1"
-
 PACKAGE_ARCH = "${MACHINE_ARCH}"
