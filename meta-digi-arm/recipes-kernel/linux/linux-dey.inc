@@ -65,9 +65,7 @@ do_configure_prepend() {
 }
 
 do_deploy_append() {
-	cd ${DEPLOYDIR}
-	ln -sf ${KERNEL_IMAGE_BASE_NAME}.bin ${KERNEL_IMAGE_SYMLINK_NAME}
-	cd -
+	(cd ${DEPLOYDIR} && ln -sf ${KERNEL_IMAGE_BASE_NAME}.bin ${KERNEL_IMAGE_SYMLINK_NAME})
 }
 
 # install nedded headers for imx-test compilation
