@@ -10,7 +10,7 @@ KBRANCH_DEFAULT = "del-5.9/meta-digi"
 KBRANCH = "${KBRANCH_DEFAULT}"
 
 SRCREV_external = ""
-SRCREV_internal = "721c759663351636c2cbc8a6d2fb02fcf193c927"
+SRCREV_internal = "${AUTOREV}"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 LOCALVERSION_mx5 = "mx5"
