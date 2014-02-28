@@ -92,6 +92,7 @@ done<<-_EOF_
 	ccardimx28js    - e w wb web web1
 	ccimx51js       128 128a 128agv agv eagv w w128a w128agv wagv weagv
 	ccimx53js       - 128 4k e e4k w w128 we
+	ccimx6adpt      - w wb
 _EOF_
 
 # Support Linux-3.x and U-Boot 2013.x
@@ -101,6 +102,7 @@ done<<-_EOF_
 	ccardimx28js    y
 	ccimx51js       n
 	ccimx53js       n
+	ccimx6adpt      n
 _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
