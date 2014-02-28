@@ -12,7 +12,7 @@ KBRANCH = "${KBRANCH_DEFAULT}"
 KBRANCH_mxs = "v3.10.y/maint"
 
 SRCREV_external = ""
-SRCREV_internal = "${AUTOREV}"
+SRCREV_internal = "0bbd76bc2d20c577f78e368cea0accfe9b4e9e35"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 LOCALVERSION_mxs = "mxs"
