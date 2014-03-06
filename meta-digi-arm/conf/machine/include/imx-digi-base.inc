@@ -15,6 +15,9 @@ XSERVER = "xserver-xorg \
 # Ship kernel modules
 MACHINE_EXTRA_RRECOMMENDS = "kernel-modules"
 
+# Extra udev rules
+MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
+
 # Float-Point setting
 DEFAULTTUNE_mx6 ?= "cortexa9hf-neon"
 

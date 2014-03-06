@@ -22,6 +22,9 @@ INHERIT += "fsl-dynamic-packagearch"
 # Ship kernel modules
 MACHINE_EXTRA_RRECOMMENDS = "kernel-modules"
 
+# Extra udev rules
+MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
+
 EXTRA_IMAGEDEPENDS = "u-boot"
 
 # Flash image types
