@@ -11,6 +11,9 @@ SOC_FAMILY = "mx6:mx6q"
 UBOOT_ENTRYPOINT = "0x10800000"
 UBOOT_SUFFIX = "imx"
 
+# wpa_supplicant driver to use in '/etc/network/interfaces'
+WPA_DRIVER = "nl80211"
+
 # Firmware
 MACHINE_FIRMWARE ?= ""
 MACHINE_FIRMWARE_append = " firmware-imx-vpu-imx6q"
