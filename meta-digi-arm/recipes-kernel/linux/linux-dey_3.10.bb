@@ -3,8 +3,6 @@
 require recipes-kernel/linux/linux-dey.inc
 require recipes-kernel/linux/linux-dtb.inc
 
-PR = "${DISTRO}.${INC_PR}.0"
-
 DEPENDS += "lzop-native bc-native"
 
 KBRANCH_DEFAULT = "refs/heads/v3.10/master"

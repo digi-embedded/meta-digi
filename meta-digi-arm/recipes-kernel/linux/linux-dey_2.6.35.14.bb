@@ -1,7 +1,5 @@
 # Copyright (C) 2012 Digi International
 
-PR = "${DISTRO}.${INC_PR}.0"
-
 require recipes-kernel/linux/linux-dey.inc
 
 COMPATIBLE_MACHINE = "(mxs|mx5)"
