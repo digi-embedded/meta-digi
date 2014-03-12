@@ -4,3 +4,5 @@ PRINC := "${@int(PRINC) + 1}"
 PR_append = "+${DISTRO}"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+
+INSANE_SKIP_${PN} = "installed-vs-shipped"
