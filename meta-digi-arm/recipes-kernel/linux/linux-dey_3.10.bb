@@ -5,7 +5,7 @@ require recipes-kernel/linux/linux-dtb.inc
 
 DEPENDS += "lzop-native bc-native"
 
-KBRANCH_DEFAULT = "refs/heads/v3.10/master"
+KBRANCH_DEFAULT = "v3.10/master"
 KBRANCH = "${KBRANCH_DEFAULT}"
 KBRANCH_mxs = "v3.10.y/maint"
 
