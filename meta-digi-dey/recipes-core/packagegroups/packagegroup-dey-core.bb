@@ -37,7 +37,6 @@ RDEPENDS_${PN} = "\
     ${@base_contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
     ${@base_contains("MACHINE_FEATURES", "touchscreen", "${VIRTUAL-RUNTIME_touchscreen}", "",d)} \
     modutils-initscripts \
-    mtd-utils-ubifs \
     netbase \
     init-ifupdown \
     ${VIRTUAL-RUNTIME_dev_manager} \

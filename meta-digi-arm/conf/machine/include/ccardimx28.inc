@@ -16,7 +16,7 @@ WPA_DRIVER = "nl80211"
 # Firmware
 MACHINE_FIRMWARE = "firmware-atheros-ar3k"
 
-MACHINE_EXTRA_RDEPENDS    += "nvram ubootenv update-flash"
+MACHINE_EXTRA_RDEPENDS    += "mtd-utils-ubifs nvram ubootenv update-flash"
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE}"
 
 MACHINE_FEATURES += "alsa touchscreen"
