@@ -77,7 +77,7 @@ runimagecmd_jffs2() {
 runimagecmd_sum.jffs2 = "${runimagecmd_jffs2}"
 runimagecmd_ubifs = "${runimagecmd_jffs2}"
 
-runimagecmd_boot.vfat() {
+IMAGE_CMD_boot.vfat() {
 	#
 	# Image generation code for image type 'boot.vfat'
 	#
