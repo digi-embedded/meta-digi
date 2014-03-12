@@ -14,10 +14,10 @@ Conflicts:
  1 file changed, 23 insertions(+), 2 deletions(-)
 
 diff --git a/networking/ntpd.c b/networking/ntpd.c
-index 79b7c37..01cd44b 100644
+index c4b0187..f93bf04 100644
 --- a/networking/ntpd.c
 +++ b/networking/ntpd.c
-@@ -221,6 +221,7 @@ typedef struct {
+@@ -238,6 +238,7 @@ typedef struct {
  typedef struct {
  	len_and_sockaddr *p_lsa;
  	char             *p_dotted;
@@ -25,7 +25,7 @@ index 79b7c37..01cd44b 100644
  	int              p_fd;
  	int              datapoint_idx;
  	uint32_t         lastpkt_refid;
-@@ -708,8 +709,9 @@ add_peers(char *s)
+@@ -738,8 +739,9 @@ add_peers(char *s)
  	peer_t *p;
  
  	p = xzalloc(sizeof(*p));
@@ -37,7 +37,7 @@ index 79b7c37..01cd44b 100644
  	p->p_fd = -1;
  	p->p_xmt_msg.m_status = MODE_CLIENT | (NTP_VERSION << 3);
  	p->next_action_time = G.cur_time; /* = set_next(p, 0); */
-@@ -758,6 +760,25 @@ send_query_to_peer(peer_t *p)
+@@ -788,6 +790,25 @@ send_query_to_peer(peer_t *p)
  	 *
  	 * Uncomment this and use strace to see it in action:
  	 */

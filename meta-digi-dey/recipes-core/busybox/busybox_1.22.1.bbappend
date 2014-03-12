@@ -3,7 +3,7 @@
 PRINC := "${@int(PRINC) + 1}"
 PR_append = "+${DISTRO}"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 DEPENDS += "libdigi"
 

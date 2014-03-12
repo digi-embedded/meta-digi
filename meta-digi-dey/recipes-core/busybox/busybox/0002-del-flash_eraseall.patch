@@ -33,19 +33,19 @@ index 307afa7..feeeb7d 100644
  # env var should be set for make invocation.
  # Here we check whether CFLAGS_busybox indeed contains that flag.
 diff --git a/miscutils/flash_eraseall.c b/miscutils/flash_eraseall.c
-index 0598371..ea5b969 100644
+index bf9b739..f202392 100644
 --- a/miscutils/flash_eraseall.c
 +++ b/miscutils/flash_eraseall.c
-@@ -21,6 +21,8 @@
+@@ -22,6 +22,8 @@
  #include <mtd/mtd-user.h>
  #include <linux/jffs2.h>
  
 +#include "libdigi/digi-platforms.h"     // is_nand_oob_atomic
 +
  #define OPTION_J  (1 << 0)
- #define OPTION_Q  (1 << 1)
- #define IS_NAND   (1 << 2)
-@@ -84,6 +86,17 @@ int flash_eraseall_main(int argc UNUSED_PARAM, char **argv)
+ #define OPTION_N  (1 << 1)
+ #define OPTION_Q  (1 << 2)
+@@ -85,6 +87,17 @@ int flash_eraseall_main(int argc UNUSED_PARAM, char **argv)
  	if (meminfo.type == MTD_NANDFLASH)
  		flags |= IS_NAND;
  
