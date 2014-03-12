@@ -1,6 +1,6 @@
 # Copyright (C) 2014 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 SRC_URI += "file://resize-ext4fs.sh"
 
