@@ -31,14 +31,12 @@ case "$1" in
 		;;
 	stop)
 		echo -n "Stopping $DESC: "
-		start-stop-daemon -K -n $NAME
+		start-stop-daemon -K -q -n $NAME
 		echo "done"
 		;;
 	restart)
-		echo -n "Restarting $DESC: "
 		$0 stop
 		$0 start
-		echo "done"
 		;;
 	reload)
 		echo -n "Reloading $DESC: "
@@ -50,5 +48,3 @@ case "$1" in
 		exit 1
 		;;
 esac
-
-exit 0
