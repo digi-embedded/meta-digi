@@ -71,17 +71,12 @@ do_mkproject() {
 
 	# Customize project if just created
 	if [ -z "${MKP_OLD_PROJECT}" ]; then
-		NCPU="$(grep -c processor /proc/cpuinfo)"
 		chmod 644 ${MKP_PROJECTPATH}/conf/bblayers.conf ${MKP_PROJECTPATH}/conf/local.conf
 		sed -i  -e "s,##DIGIBASE##,${MKP_SCRIPTPATH}/sources,g" ${MKP_PROJECTPATH}/conf/bblayers.conf
-		sed -i  -e "/^#BB_NUMBER_THREADS ?=/cBB_NUMBER_THREADS ?= \"${NCPU}\"" \
-			-e "/^#PARALLEL_MAKE ?=/cPARALLEL_MAKE ?= \"-j ${NCPU}\"" \
-			${MKP_PROJECTPATH}/conf/local.conf
 		if [ -n "${MKP_VARIANT+x}" ]; then
 			sed -i -e "/^MACHINE_VARIANT =/cMACHINE_VARIANT = \"${MKP_VARIANT}\"" \
 				${MKP_PROJECTPATH}/conf/local.conf
 		fi
-		unset NCPU
 	fi
 }
 

@@ -19,10 +19,16 @@
 #
 #BB_NUMBER_THREADS ?= "4"
 #
+# Default to setting automatically based on cpu count
+BB_NUMBER_THREADS ?= "${@oe.utils.cpu_count()}"
+#
 # The second option controls how many processes make should run in parallel when
 # running compile tasks:
 #
 #PARALLEL_MAKE ?= "-j 4"
+#
+# Default to setting automatically based on cpu count
+PARALLEL_MAKE ?= "-j ${@oe.utils.cpu_count()}"
 #
 # For a quad-core machine, BB_NUMBER_THREADS = "4", PARALLEL_MAKE = "-j 4" would
 # be appropriate for example.
@@ -132,9 +138,9 @@ PACKAGE_CLASSES ?= "package_ipk"
 #
 # SDK/ADT target architecture
 #
-# This variable specified the architecture to build SDK/ADT items for and means
+# This variable specifies the architecture to build SDK/ADT items for and means
 # you can build the SDK packages for architectures other than the machine you are
-# running the build on (i.e. building i686 packages on an x86_64 host._
+# running the build on (i.e. building i686 packages on an x86_64 host).
 # Supported values are i686 and x86_64
 #SDKMACHINE ?= "i686"
 
@@ -236,6 +242,17 @@ BB_DISKMON_DIRS = "\
 #SSTATE_MIRRORS ?= "\
 #file://.* http://someserver.tld/share/sstate/PATH;downloadfilename=PATH \n \
 #file://.* file:///some/local/dir/sstate/PATH"
+
+
+#
+# Qemu configuration
+#
+# By default qemu will build with a builtin VNC server where graphical output can be
+# seen. The two lines below enable the SDL backend too. This assumes there is a
+# libsdl library available on your build system.
+PACKAGECONFIG_pn-qemu-native = "sdl"
+ASSUME_PROVIDED += "libsdl-native"
+
 
 # CONF_VERSION is increased each time build/conf/ changes incompatibly and is used to
 # track the version of this file when it was generated. This can safely be ignored if
