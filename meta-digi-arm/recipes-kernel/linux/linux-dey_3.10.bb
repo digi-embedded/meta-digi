@@ -13,8 +13,6 @@ SRCREV_external = ""
 SRCREV_internal = "${AUTOREV}"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
-LOCALVERSION_mxs = "mxs"
-
 # Kernel configuration fragments
 KERNEL_CFG_FRAGS ?= ""
 KERNEL_CFG_FRAGS_append = " ${@base_conditional('HAVE_EXAMPLE', '1' , 'file://config-spidev.cfg', '', d)}"

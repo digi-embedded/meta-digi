@@ -2,7 +2,7 @@
 
 require recipes-kernel/linux/linux-imx.inc
 
-LOCALVERSION ?= "+dey"
+LOCALVERSION = "-dey"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-linux.git;protocol=git"
 SRC_URI_internal = "${DIGI_GIT}linux-2.6.git;protocol=git;branch=${KBRANCH}"

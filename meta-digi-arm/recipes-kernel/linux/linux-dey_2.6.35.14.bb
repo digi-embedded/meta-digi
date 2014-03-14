@@ -11,9 +11,6 @@ SRCREV_external = ""
 SRCREV_internal = "${AUTOREV}"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
-LOCALVERSION_mx5 = "mx5"
-LOCALVERSION_mxs = "mxs"
-
 KERNEL_CFG_FRAGS ?= ""
 KERNEL_CFG_FRAGS_append_mx5 = "file://config-sahara-module.cfg file://config-camera-module.cfg"
 KERNEL_CFG_FRAGS_append_mx5 = " ${@base_contains('MACHINE_FEATURES', 'accelerometer', 'file://config-accel-module.cfg', '', d)}"
