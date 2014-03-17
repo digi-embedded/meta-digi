@@ -8,6 +8,7 @@ DEPENDS += "lzop-native bc-native"
 KBRANCH_DEFAULT = "v3.10/master"
 KBRANCH = "${KBRANCH_DEFAULT}"
 KBRANCH_mxs = "v3.10.y/maint"
+KBRANCH_mx6 = "v3.10/dey-1.6/maint"
 
 SRCREV_external = ""
 SRCREV_internal = "${AUTOREV}"
