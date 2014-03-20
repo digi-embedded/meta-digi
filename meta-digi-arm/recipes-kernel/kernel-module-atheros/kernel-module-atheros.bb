@@ -12,12 +12,15 @@ PR = "r1"
 # from busybox does not support '--ignore-install' option.
 RDEPENDS_${PN} = "kmod"
 
+SRCBRANCH = "master"
+SRCBRANCH_mx6 = "dey-1.6/maint"
+
 SRCREV_external = ""
-SRCREV_internal = "15bae2c4e330ea6d9289217d3c38ebf63aa8ff15"
+SRCREV_internal = "fdb797adf47514f5c94921fb20e64b4ecadb7a52"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/atheros.git;protocol=git"
-SRC_URI_internal = "${DIGI_GIT}linux-modules/atheros.git;protocol=git"
+SRC_URI_internal = "${DIGI_GIT}linux-modules/atheros.git;protocol=git;branch=${SRCBRANCH}"
 SRC_URI  = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 SRC_URI += " \
     file://atheros \
