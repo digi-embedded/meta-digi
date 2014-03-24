@@ -11,7 +11,7 @@ KBRANCH_mxs = "v3.10.y/maint"
 KBRANCH_mx6 = "v3.10/dey-1.6/maint"
 
 SRCREV_external = ""
-SRCREV_internal = "${AUTOREV}"
+SRCREV_internal = "e0cfbf28180e7bff38e26dfca0240ec21796f3d7"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 # Kernel configuration fragments
