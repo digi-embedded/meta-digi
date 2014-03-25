@@ -15,5 +15,9 @@ S = "${WORKDIR}/git"
 
 DEPENDS_mxs += "elftosb-native"
 
+do_compile_prepend() {
+	${S}/tools/setlocalversion --save-scmversion ${S}
+}
+
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(mxs)"

@@ -20,5 +20,9 @@ DEPENDS_mxs += "elftosb-native imx-bootlets-dey"
 EXTRA_OEMAKE += 'HOSTSTRIP=true'
 EXTRA_OEMAKE_append_mxs = ' BOOTLETS_DIR=${STAGING_DIR_TARGET}/boot'
 
+do_compile_prepend() {
+	${S}/tools/setlocalversion --save-scmversion ${S}
+}
+
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(mxs|mx5)"
