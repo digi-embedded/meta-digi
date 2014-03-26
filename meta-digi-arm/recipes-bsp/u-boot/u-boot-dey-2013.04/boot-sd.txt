@@ -1,0 +1,15 @@
+#
+# U-Boot bootscript for SD images created by Yocto.
+#
+# Layout:
+#   * U-Boot (raw copied)
+#   * Boot partion (FAT) with kernel images and DTB
+#   * Rootfs partion (EXT4)
+#
+# +--------------+----------------------+-------------------------+
+# | U-BOOT (RAW) | BOOT_PARTITION (FAT) | ROOTFS_PARTITION (EXT4) |
+# +--------------+----------------------+-------------------------+
+#
+setenv mmcroot /dev/mmcblk${mmcdev}p2
+setenv uimage uImage
+dboot linux mmc ${mmcdev}:${mmcpart}
