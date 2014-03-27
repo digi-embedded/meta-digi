@@ -14,7 +14,7 @@
 #
 
 # Boot partitions
-SUBSYSTEM=="block", ENV{ID_PART_ENTRY_NAME}=="kernels?", ACTION=="add", RUN+="/etc/udev/scripts/mount_bootparts.sh", GOTO="automount_rules_end"
+SUBSYSTEM=="block", ENV{ID_PART_ENTRY_NAME}=="linux*", ACTION=="add", RUN+="/etc/udev/scripts/mount_bootparts.sh", GOTO="automount_rules_end"
 
 # Media automounting
 SUBSYSTEM=="block", ACTION=="add"    RUN+="/etc/udev/scripts/mount.sh"
