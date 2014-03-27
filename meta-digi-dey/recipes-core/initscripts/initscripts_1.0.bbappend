@@ -1,8 +1,5 @@
 # Copyright (C) 2013 Digi International.
 
-PRINC := "${@int(PRINC) + 1}"
-PR_append = "+${DISTRO}"
-
 # The initscripts package includes a '/etc/init.d/umountfs' script used for
 # reboot/poweroff purposes. That script calls the 'umount' command but seems
 # that the combination of busybox' umount + linux 3.x fails in this script (it

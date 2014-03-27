@@ -1,8 +1,5 @@
 # Copyright (C) 2013 Digi International.
 
-PRINC := "${@int(PRINC) + 1}"
-PR_append = "+${DISTRO}"
-
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 # Use 'simple-agent' from bluez-4.98 to avoid a dependence in

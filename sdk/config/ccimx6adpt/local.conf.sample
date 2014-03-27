@@ -258,3 +258,8 @@ ASSUME_PROVIDED += "libsdl-native"
 # track the version of this file when it was generated. This can safely be ignored if
 # this doesn't mean anything to you.
 CONF_VERSION = "1"
+
+#
+# Enable local PR server
+#
+PRSERV_HOST = "localhost:0"
