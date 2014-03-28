@@ -44,5 +44,9 @@ RDEPENDS_${PN}_append_ccimx53js = "\
 	dey-examples-can \
 "
 
+RDEPENDS_${PN}_append_ccimx6adpt = "\
+	dey-examples-can \
+"
+
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccardimx28js|ccimx51js|ccimx53js|ccimx6adpt)"
