@@ -12,8 +12,7 @@ PR = "r1"
 # from busybox does not support '--ignore-install' option.
 RDEPENDS_${PN} = "kmod"
 
-SRCBRANCH = "master"
-SRCBRANCH_mx6 = "dey-1.6/maint"
+SRCBRANCH = "dey-1.6/maint"
 
 SRCREV_external = ""
 SRCREV_internal = "fdb797adf47514f5c94921fb20e64b4ecadb7a52"
