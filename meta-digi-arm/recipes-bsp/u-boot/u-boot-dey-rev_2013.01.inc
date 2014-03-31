@@ -3,7 +3,7 @@
 SRCBRANCH = "v2013.01/master"
 
 SRCREV_external = ""
-SRCREV_internal = "958e055c9e4c0b3092097a865335bc743c2abce1"
+SRCREV_internal = "181c8eddf0cee183d317ad400b5d01dce3c2dbe6"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-uboot.git;protocol=git"
