@@ -5,7 +5,10 @@ SECTION = "bootloader"
 
 include u-boot-dey-rev_${PV}.inc
 
-SRC_URI += "file://fw_env.config"
+SRC_URI += " \
+    file://0001-fw_env-add-support-to-unlock-emmc-boot-partition.patch \
+    file://fw_env.config \
+"
 
 S = "${WORKDIR}/git"
 
