@@ -28,7 +28,7 @@ MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
 EXTRA_IMAGEDEPENDS = "u-boot"
 
 # Flash image types
-IMAGE_FSTYPES ?= "sum.jffs2 tar.bz2 ubifs"
+IMAGE_FSTYPES ?= "jffs2.sum tar.bz2 ubifs"
 
 KERNEL_IMAGETYPE = "uImage"
 

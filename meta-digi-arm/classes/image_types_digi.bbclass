@@ -20,24 +20,39 @@ def next_power_of_2(n):
         i <<= 1
     return i
 
+# Return TRUE if jffs2 is not in IMAGE_FSTYPES
+JFFS2_NOT_IN_FSTYPES = "${@jffs2_not_in_fstypes(d)}"
+def jffs2_not_in_fstypes(d):
+    return str('jffs2' not in d.getVar('IMAGE_FSTYPES', True).split()).lower()
+
 IMAGE_CMD_jffs2() {
 	nimg="$(echo ${FLASH_PEB} | awk -F, '{print NF}')"
 	for i in $(seq 1 ${nimg}); do
 		peb_it="$(echo ${FLASH_PEB} | cut -d',' -f${i})"
 		# Do not use '-p (padding)' option. It breaks 'ccardimx28js' flash images [JIRA:DEL-218]
 		mkfs.jffs2 -n -e ${peb_it} -d ${IMAGE_ROOTFS} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2
+		ln -sf ${IMAGE_NAME}.${peb_it}.rootfs.jffs2 ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.${peb_it}.jffs2
 	done
 }
 
-IMAGE_CMD_sum.jffs2() {
-	nimg="$(echo ${FLASH_PEB} | awk -F, '{print NF}')"
+# The CWD for this set of commads is DEPLOY_DIR_IMAGE so the paths are relative to it.
+COMPRESS_CMD_sum() {
+	# 'nimg' is set in IMAGE_CMD_jffs2 (which is executed just before)
 	for i in $(seq 1 ${nimg}); do
 		peb_it="$(echo ${FLASH_PEB} | cut -d',' -f${i})"
-		# Do not use '-p (padding)' option. It breaks 'ccardimx28js' flash images [JIRA:DEL-218]
-		mkfs.jffs2 -n -e ${peb_it} -d ${IMAGE_ROOTFS} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2
-		sumtool -e ${peb_it} -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2 -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.sum.jffs2
-		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.jffs2
+		sumtool -e ${peb_it} -i ${IMAGE_NAME}.${peb_it}.rootfs.jffs2 -o ${IMAGE_NAME}.${peb_it}.rootfs.jffs2.sum
+		ln -sf ${IMAGE_NAME}.${peb_it}.rootfs.jffs2.sum ${IMAGE_LINK_NAME}.${peb_it}.jffs2.sum
+
+		# If 'jffs2' is not in IMAGE_FSTYPES remove the images and symlinks
+		if ${JFFS2_NOT_IN_FSTYPES}; then
+			rm -f ${IMAGE_NAME}.${peb_it}.rootfs.jffs2 ${IMAGE_LINK_NAME}.${peb_it}.jffs2
+		fi
 	done
+
+	# Create dummy file so the final script can remove it and not fail
+	if ${JFFS2_NOT_IN_FSTYPES}; then
+		touch ${IMAGE_NAME}.rootfs.jffs2
+	fi
 }
 
 IMAGE_CMD_ubifs() {
@@ -48,34 +63,9 @@ IMAGE_CMD_ubifs() {
 		leb_it="$(echo ${FLASH_LEB} | cut -d',' -f${i})"
 		mio_it="$(echo ${FLASH_MIO} | cut -d',' -f${i})"
 		mkfs.ubifs -r ${IMAGE_ROOTFS} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.ubifs -m ${mio_it} -e ${leb_it} -c ${mlc_it}
+		ln -sf ${IMAGE_NAME}.${peb_it}.rootfs.ubifs ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.${peb_it}.ubifs
 	done
 }
-
-#
-# A copy of the original function in 'image_types.bbclass', just overriding the
-# part of the symlinks generation so we can create more than one symlink (one per
-# JFFS2 image)
-#
-runimagecmd_jffs2() {
-	ROOTFS_SIZE=`du -ks ${IMAGE_ROOTFS} | awk '{base_size = $1 * ${IMAGE_OVERHEAD_FACTOR}; base_size = ((base_size > ${IMAGE_ROOTFS_SIZE} ? base_size : ${IMAGE_ROOTFS_SIZE}) + ${IMAGE_ROOTFS_EXTRA_SPACE}); if (base_size != int(base_size)) base_size = int(base_size + 1); base_size = base_size + ${IMAGE_ROOTFS_ALIGNMENT} - 1; base_size -= base_size % ${IMAGE_ROOTFS_ALIGNMENT}; print base_size }'`
-	${cmd}
-
-	# And create the symlinks
-	#
-	# The previous $\{cmd} expands to IMAGE_CMD_jffs2 so we have all the
-	# needed variables available (nimg, pebX, etc)
-	if [ -n "${IMAGE_LINK_NAME}" ]; then
-		for type in ${subimages}; do
-			for i in $(seq 1 ${nimg}); do
-				peb_it="$(echo ${FLASH_PEB} | cut -d',' -f${i})"
-				ln -sf ${IMAGE_NAME}.${peb_it}.rootfs.$type ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.${peb_it}.$type
-			done
-		done
-	fi
-}
-
-runimagecmd_sum.jffs2 = "${runimagecmd_jffs2}"
-runimagecmd_ubifs = "${runimagecmd_jffs2}"
 
 IMAGE_CMD_boot.vfat() {
 	#

@@ -54,7 +54,7 @@ PREFERRED_PROVIDER_virtual/libgles2_mx6 ?= "gpu-viv-bin-mx6q"
 EXTRA_IMAGEDEPENDS = "u-boot"
 
 # Flash image types
-IMAGE_FSTYPES ?= "sum.jffs2 tar.bz2 ubifs"
+IMAGE_FSTYPES ?= "jffs2.sum tar.bz2 ubifs"
 
 # MX6 does not have flash memory so build sdcard images
 SDCARD_ROOTFS_mx6 ?= "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.ext4"
