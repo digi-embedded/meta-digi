@@ -72,6 +72,18 @@ copy_images() {
 	fi
 }
 
+#
+# In the buildserver we share the state-cache for all the different platforms
+# we build in a jenkins job. This may cause problems with some packages that
+# have different runtime dependences depending on the platform.
+#
+# Purge then the state cache of those problematic packages between platform
+# builds.
+#
+purge_sstate() {
+	bitbake -c cleansstate packagegroup-dey-examples
+}
+
 # Sanity check (Jenkins environment)
 [ -z "${DY_BUILD_VARIANTS}" ] && error "DY_BUILD_VARIANTS not specified"
 [ -z "${DY_PLATFORMS}" ]      && error "DY_PLATFORMS not specified"
@@ -177,6 +189,7 @@ for platform in ${DY_PLATFORMS}; do
 						printf "\n[INFO] Building the $target target.\n"
 						time bitbake ${target}
 					done
+					purge_sstate
 				)
 				copy_images ${_this_img_dir}
 				popd
