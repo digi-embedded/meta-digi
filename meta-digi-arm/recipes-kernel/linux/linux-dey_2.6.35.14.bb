@@ -4,8 +4,9 @@ require recipes-kernel/linux/linux-dey.inc
 
 COMPATIBLE_MACHINE = "(mxs|mx5)"
 
-KBRANCH_DEFAULT = "del-5.9/meta-digi"
-KBRANCH = "${KBRANCH_DEFAULT}"
+SRCBRANCH_external = ""
+SRCBRANCH_internal = "del-5.9/meta-digi"
+SRCBRANCH = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCBRANCH_internal}', '${SRCBRANCH_external}', d)}"
 
 SRCREV_external = ""
 SRCREV_internal = "${AUTOREV}"

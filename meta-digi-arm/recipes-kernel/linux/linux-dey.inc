@@ -4,8 +4,8 @@ require recipes-kernel/linux/linux-imx.inc
 
 LOCALVERSION = "-dey"
 
-SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-linux.git;protocol=git"
-SRC_URI_internal = "${DIGI_GIT}linux-2.6.git;protocol=git;branch=${KBRANCH}"
+SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-linux.git;protocol=git;branch=${SRCBRANCH}"
+SRC_URI_internal = "${DIGI_GIT}linux-2.6.git;protocol=git;branch=${SRCBRANCH}"
 SRC_URI = " \
     ${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)} \
     file://defconfig \

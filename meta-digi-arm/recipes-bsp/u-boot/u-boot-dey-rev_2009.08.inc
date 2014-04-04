@@ -1,12 +1,14 @@
 # Copyright (C) 2013 Digi International
 
-SRCBRANCH = "master"
+SRCBRANCH_external = ""
+SRCBRANCH_internal = "master"
+SRCBRANCH = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCBRANCH_internal}', '${SRCBRANCH_external}', d)}"
 
 SRCREV_external = ""
 SRCREV_internal = "b23ff7f11a0577037becc20bbcfe61640fe87fb4"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
-SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-uboot.git;protocol=git"
+SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-uboot.git;protocol=git;branch=${SRCBRANCH}"
 SRC_URI_internal = "${DIGI_GIT}u-boot-denx.git;protocol=git;branch=${SRCBRANCH}"
 SRC_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 

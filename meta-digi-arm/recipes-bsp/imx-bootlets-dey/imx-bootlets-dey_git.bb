@@ -7,12 +7,16 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 PR = "${DISTRO}.r0"
 
+SRCBRANCH_external = ""
+SRCBRANCH_internal = "master"
+SRCBRANCH = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCBRANCH_internal}', '${SRCBRANCH_external}', d)}"
+
 SRCREV_external = ""
 SRCREV_internal = "967bc502cdb5073ca05fa13dfe588a5509066735"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
-SRC_URI_external = "${DIGI_GITHUB_GIT}/imx-bootlets.git;protocol=git"
-SRC_URI_internal = "${DIGI_MTK_GIT}linux/imx-bootlets.git;protocol=ssh"
+SRC_URI_external = "${DIGI_GITHUB_GIT}/imx-bootlets.git;protocol=git;branch=${SRCBRANCH}"
+SRC_URI_internal = "${DIGI_MTK_GIT}linux/imx-bootlets.git;protocol=ssh;branch=${SRCBRANCH}"
 SRC_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 
 S = "${WORKDIR}/git"
