@@ -30,4 +30,6 @@ eth1: | *:sms)
 	macaddr="$(sed -ne 's,^.*ethaddr3=\([^[:blank:]]\+\)[:blank:]*.*,\1,g;T;p' /proc/cmdline)"
 esac
 
-[ -n "${macaddr}" ] && ifconfig ${IFACE} hw ether ${macaddr} up
+if [ -n "${macaddr}" ]; then
+	ifconfig ${IFACE} hw ether ${macaddr} up
+fi
