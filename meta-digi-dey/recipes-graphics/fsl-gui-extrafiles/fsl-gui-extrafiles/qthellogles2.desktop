@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=QT OpenGL ES2 Hello World
+Exec=/usr/bin/qt4/examples/opengl/hellogl_es2/hellogl_es2
+Icon=hellogl_es2
+Terminal=false
+Type=Application
+X-MB-SingleInstance=true
+Comment=QT OpenGL ES2 Hello World
+StartupNotify=false

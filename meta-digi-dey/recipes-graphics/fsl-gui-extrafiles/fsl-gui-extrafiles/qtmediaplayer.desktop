@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=QT Media Player
+Exec=/usr/bin/qt4/demos/qmediaplayer/qmediaplayer
+Icon=qtmediaplayer
+Terminal=false
+Type=Application
+X-MB-SingleInstance=true
+Comment=Qt Media Player
+StartupNotify=false
