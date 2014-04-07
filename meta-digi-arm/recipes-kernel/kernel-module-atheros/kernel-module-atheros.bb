@@ -12,11 +12,11 @@ PR = "r1"
 # from busybox does not support '--ignore-install' option.
 RDEPENDS_${PN} = "kmod"
 
-SRCBRANCH_external = ""
+SRCBRANCH_external = "master"
 SRCBRANCH_internal = "dey-1.6/maint"
 SRCBRANCH = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCBRANCH_internal}', '${SRCBRANCH_external}', d)}"
 
-SRCREV_external = ""
+SRCREV_external = "621b43aef3f4611500c461ef8940fa7990d55d9e"
 SRCREV_internal = "fdb797adf47514f5c94921fb20e64b4ecadb7a52"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 

@@ -4,12 +4,12 @@ require recipes-kernel/linux/linux-dey.inc
 
 COMPATIBLE_MACHINE = "(mxs|mx5)"
 
-SRCBRANCH_external = ""
+SRCBRANCH_external = "v2.6.35.y/master"
 SRCBRANCH_internal = "del-5.9/meta-digi"
 SRCBRANCH = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCBRANCH_internal}', '${SRCBRANCH_external}', d)}"
 
-SRCREV_external = ""
-SRCREV_internal = "${AUTOREV}"
+SRCREV_external = "56508bdaa51cf5a7fec6192b50e37327511befae"
+SRCREV_internal = "721c759663351636c2cbc8a6d2fb02fcf193c927"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 KERNEL_CFG_FRAGS ?= ""
