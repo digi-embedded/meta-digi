@@ -10,7 +10,7 @@ SRCBRANCH_external_mxs = ""
 SRCBRANCH_external_mx6 = ""
 
 SRCBRANCH_internal = "v3.10/master"
-SRCBRANCH_internal_mxs = "v3.10.y/maint"
+SRCBRANCH_internal_mxs = "v3.10/dey-1.4/maint"
 SRCBRANCH_internal_mx6 = "v3.10/dey-1.6/maint"
 SRCBRANCH = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCBRANCH_internal}', '${SRCBRANCH_external}', d)}"
 
