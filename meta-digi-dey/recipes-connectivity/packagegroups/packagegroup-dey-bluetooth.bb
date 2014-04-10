@@ -13,4 +13,5 @@ inherit packagegroup
 RDEPENDS_${PN} = "\
 	btfilter \
 	bluez4 \
+	bluez4-testtools \
 "
