@@ -5,7 +5,7 @@ require recipes-kernel/linux/linux-dey.inc
 COMPATIBLE_MACHINE = "(mxs|mx5)"
 
 SRCBRANCH_external = "v2.6.35.y/master"
-SRCBRANCH_internal = "del-5.9/meta-digi"
+SRCBRANCH_internal = "v2.6.35/dey-1.4/maint"
 SRCBRANCH = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCBRANCH_internal}', '${SRCBRANCH_external}', d)}"
 
 SRCREV_external = "56508bdaa51cf5a7fec6192b50e37327511befae"
