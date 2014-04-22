@@ -17,8 +17,8 @@ SRCREV_external = ""
 SRCREV_external_mxs = "bccdf5cb75ba94d642c7893ba166dd1cb7d38985"
 SRCREV_external_mx6 = "c297650949c74e7010705a131f9a175609c19835"
 SRCREV_internal = ""
-SRCREV_internal_mxs = "8d68ea3c74b27e94d964dc035ba6324da4badd02"
-SRCREV_internal_mx6 = "17301d3677c99be1376c0c72c3e9b3e55fbb49e4"
+SRCREV_internal_mxs = "${AUTOREV}"
+SRCREV_internal_mx6 = "${AUTOREV}"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 # Kernel configuration fragments
