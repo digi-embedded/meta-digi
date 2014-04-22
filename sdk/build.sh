@@ -81,7 +81,7 @@ copy_images() {
 # builds.
 #
 purge_sstate() {
-	bitbake -c cleansstate packagegroup-dey-examples
+	bitbake -c cleansstate packagegroup-dey-examples || true
 }
 
 # Sanity check (Jenkins environment)
