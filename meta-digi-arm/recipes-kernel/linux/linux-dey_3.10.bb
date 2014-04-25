@@ -5,13 +5,10 @@ require recipes-kernel/linux/linux-dtb.inc
 
 DEPENDS += "lzop-native bc-native"
 
-SRCBRANCH_external = ""
-SRCBRANCH_external_mxs = "v3.10/dey-1.4/maint"
-SRCBRANCH_external_mx6 = "v3.10/dey-1.6/maint"
-SRCBRANCH_internal = ""
-SRCBRANCH_internal_mxs = "v3.10/dey-1.4/maint"
-SRCBRANCH_internal_mx6 = "v3.10/dey-1.6/maint"
-SRCBRANCH = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCBRANCH_internal}', '${SRCBRANCH_external}', d)}"
+# Internal repo branch
+SRCBRANCH = ""
+SRCBRANCH_mxs = "v3.10/dey-1.4/maint"
+SRCBRANCH_mx6 = "v3.10/dey-1.6/maint"
 
 SRCREV_external = ""
 SRCREV_external_mxs = "bccdf5cb75ba94d642c7893ba166dd1cb7d38985"
