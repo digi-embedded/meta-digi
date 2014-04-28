@@ -8,7 +8,7 @@ DEPENDS += "lzop-native bc-native"
 # Internal repo branch
 SRCBRANCH = "v3.10/master"
 SRCBRANCH_mxs = "v3.10/dey-1.4/maint"
-SRCBRANCH_mx6 = "v3.10/master"
+SRCBRANCH_mx6 = "v3.10/dey-1.6/maint"
 
 SRCREV_external = ""
 SRCREV_external_mxs = "bccdf5cb75ba94d642c7893ba166dd1cb7d38985"
