@@ -18,3 +18,10 @@ do_install_append_ccimx6adpt() {
 		RESIZE_EXT4FS=yes
 	EOF
 }
+
+do_install_append_ccimx6sbc() {
+	cat >> ${D}${sysconfdir}/default/rcS <<-EOF
+		# Resize EXT4 filesystems to the size of the partition on boot
+		RESIZE_EXT4FS=yes
+	EOF
+}
