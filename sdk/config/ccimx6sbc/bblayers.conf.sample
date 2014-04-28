@@ -1,0 +1,23 @@
+# LAYER_CONF_VERSION is increased each time build/conf/bblayers.conf
+# changes incompatibly
+LCONF_VERSION = "6"
+
+BBPATH = "${TOPDIR}"
+BBFILES ?= ""
+
+BBLAYERS ?= " \
+  ##OEROOT##/meta \
+  ##OEROOT##/meta-yocto \
+  ##OEROOT##/meta-yocto-bsp \
+  ##DIGIBASE##/meta-openembedded/meta-oe \
+  ##DIGIBASE##/meta-openembedded/meta-networking \
+  ##DIGIBASE##/meta-openembedded/meta-webserver \
+  ##DIGIBASE##/meta-fsl-arm \
+  ##DIGIBASE##/meta-fsl-demos \
+  ##DIGIBASE##/meta-digi/meta-digi-arm \
+  ##DIGIBASE##/meta-digi/meta-digi-dey \
+  "
+BBLAYERS_NON_REMOVABLE ?= " \
+  ##OEROOT##/meta \
+  ##OEROOT##/meta-yocto \
+  "
