@@ -12,4 +12,5 @@
 #
 setenv mmcroot /dev/mmcblk${mmcdev}p2
 setenv uimage uImage
+setenv fdt_file imx6-ccimx6adpt-ldo.dtb
 dboot linux mmc ${mmcdev}:${mmcpart}

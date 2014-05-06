@@ -72,7 +72,7 @@ IMAGE_CMD_boot.vfat() {
 	# Image generation code for image type 'boot.vfat'
 	#
 	BOOTIMG_FILES="$(readlink -e ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE})"
-	BOOTIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}"
+	BOOTIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
 	if [ -n "${KERNEL_DEVICETREE}" ]; then
 		for DTB in ${KERNEL_DEVICETREE}; do
 			if [ -e "${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}" ]; then
@@ -97,12 +97,9 @@ IMAGE_CMD_boot.vfat() {
 	# the use of 16 instead of 32.
 	BOOTIMG_BLOCKS="$(expr \( \( ${BOOTIMG_BLOCKS} + 15 \) / 16 \) \* 16)"
 
-	# Build VFAT boot image in copy the contents
+	# Build VFAT boot image and copy files into it
 	mkfs.vfat -n "Boot ${MACHINE}" -S 512 -C ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat ${BOOTIMG_BLOCKS}
-	# Copy files into the FAT image (renaming DTB's on the fly)
-	for i in ${BOOTIMG_FILES_SYMLINK}; do
-		mcopy -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat ${i} ::/$(basename ${i} | sed -e '/dtb$/s,^${KERNEL_IMAGETYPE}-,,g')
-	done
+	mcopy -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat ${BOOTIMG_FILES_SYMLINK} ::/
 
 	# Truncate the image to speed up the downloading/writing to the EMMC
 	if [ -n "${BOARD_BOOTIMAGE_PARTITION_SIZE}" ]; then
