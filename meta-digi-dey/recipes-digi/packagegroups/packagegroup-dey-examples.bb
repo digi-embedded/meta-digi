@@ -44,12 +44,9 @@ RDEPENDS_${PN}_append_ccimx53js = "\
 	dey-examples-can \
 "
 
-RDEPENDS_${PN}_append_ccimx6adpt = "\
+RDEPENDS_${PN}_append_mx6 = "\
 	dey-examples-can \
-"
-
-RDEPENDS_${PN}_append_ccimx6sbc = "\
-	dey-examples-can \
+	dey-examples-v4l2 \
 "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

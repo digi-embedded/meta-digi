@@ -9,15 +9,17 @@ DEPENDS = "virtual/kernel"
 
 PR = "${DISTRO}.r0"
 
-RDEPENDS_${PN} = "kernel-module-mt9v111-camera"
+RDEPENDS_${PN}_mx5 = "kernel-module-mt9v111-camera"
 
 SRC_URI = "file://v4l2_test"
+INCLUDE_PATH = "-I${STAGING_KERNEL_DIR}/include"
+INCLUDE_PATH_mx6 = "-I${STAGING_KERNEL_DIR}/arch/arm/include -I${STAGING_KERNEL_DIR}/include/uapi -I${STAGING_KERNEL_DIR}/include"
 
 S = "${WORKDIR}/v4l2_test"
 
 do_compile() {
-	${CC} -O2 -Wall -I${STAGING_KERNEL_DIR}/include v4l2_still.c -o v4l2_still -lpthread
-	${CC} -O2 -Wall -I${STAGING_KERNEL_DIR}/include v4l2_common.c v4l2_preview_test.c -o v4l2_preview_test -lpthread
+	${CC} -O2 -Wall ${INCLUDE_PATH} v4l2_still.c -o v4l2_still -lpthread
+	${CC} -O2 -Wall ${INCLUDE_PATH} v4l2_common.c v4l2_preview_test.c -o v4l2_preview_test -lpthread
 }
 
 do_install() {
