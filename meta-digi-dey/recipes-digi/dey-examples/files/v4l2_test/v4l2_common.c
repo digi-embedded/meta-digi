@@ -16,6 +16,68 @@
 
 #include "v4l2_defs.h"
 
+#define _MAKE_CHAN(num, v_in, g_in, a_in, out) \
+        ((num << 24) | (v_in << 18) | (g_in << 12) | (a_in << 6) | out)
+#define IPU_MAX_CH      32
+#define _MAKE_ALT_CHAN(ch)              (ch | (IPU_MAX_CH << 24))
+#define NO_DMA 0x3F
+/*!
+ * Enumeration of IPU logical channels. An IPU logical channel is defined as a
+ * combination of an input (memory to IPU), output (IPU to memory), and/or
+ * secondary input IDMA channels and in some cases an Image Converter task.
+ * Some channels consist of only an input or output.
+ */
+typedef enum {
+        CHAN_NONE = -1,
+        MEM_ROT_ENC_MEM = _MAKE_CHAN(1, 45, NO_DMA, NO_DMA, 48),
+        MEM_ROT_VF_MEM = _MAKE_CHAN(2, 46, NO_DMA, NO_DMA, 49),
+        MEM_ROT_PP_MEM = _MAKE_CHAN(3, 47, NO_DMA, NO_DMA, 50),
+
+        MEM_PRP_ENC_MEM = _MAKE_CHAN(4, 12, 14, 17, 20),
+        MEM_PRP_VF_MEM = _MAKE_CHAN(5, 12, 14, 17, 21),
+        MEM_PP_MEM = _MAKE_CHAN(6, 11, 15, 18, 22),
+
+        MEM_DC_SYNC = _MAKE_CHAN(7, 28, NO_DMA, NO_DMA, NO_DMA),
+        MEM_DC_ASYNC = _MAKE_CHAN(8, 41, NO_DMA, NO_DMA, NO_DMA),
+        MEM_BG_SYNC = _MAKE_CHAN(9, 23, NO_DMA, 51, NO_DMA),
+        MEM_FG_SYNC = _MAKE_CHAN(10, 27, NO_DMA, 31, NO_DMA),
+
+        MEM_BG_ASYNC0 = _MAKE_CHAN(11, 24, NO_DMA, 52, NO_DMA),
+        MEM_FG_ASYNC0 = _MAKE_CHAN(12, 29, NO_DMA, 33, NO_DMA),
+        MEM_BG_ASYNC1 = _MAKE_ALT_CHAN(MEM_BG_ASYNC0),
+        MEM_FG_ASYNC1 = _MAKE_ALT_CHAN(MEM_FG_ASYNC0),
+
+        DIRECT_ASYNC0 = _MAKE_CHAN(13, NO_DMA, NO_DMA, NO_DMA, NO_DMA),
+        DIRECT_ASYNC1 = _MAKE_CHAN(14, NO_DMA, NO_DMA, NO_DMA, NO_DMA),
+
+        CSI_MEM0 = _MAKE_CHAN(15, NO_DMA, NO_DMA, NO_DMA, 0),
+        CSI_MEM1 = _MAKE_CHAN(16, NO_DMA, NO_DMA, NO_DMA, 1),
+        CSI_MEM2 = _MAKE_CHAN(17, NO_DMA, NO_DMA, NO_DMA, 2),
+        CSI_MEM3 = _MAKE_CHAN(18, NO_DMA, NO_DMA, NO_DMA, 3),
+
+        CSI_MEM = CSI_MEM0,
+
+        CSI_PRP_ENC_MEM = _MAKE_CHAN(19, NO_DMA, NO_DMA, NO_DMA, 20),
+        CSI_PRP_VF_MEM = _MAKE_CHAN(20, NO_DMA, NO_DMA, NO_DMA, 21),
+
+        /* for vdi mem->vdi->ic->mem , add graphics plane and alpha*/
+        MEM_VDI_PRP_VF_MEM_P = _MAKE_CHAN(21, 8, 14, 17, 21),
+        MEM_VDI_PRP_VF_MEM = _MAKE_CHAN(22, 9, 14, 17, 21),
+        MEM_VDI_PRP_VF_MEM_N = _MAKE_CHAN(23, 10, 14, 17, 21),
+
+        /* for vdi mem->vdi->mem */
+        MEM_VDI_MEM_P = _MAKE_CHAN(24, 8, NO_DMA, NO_DMA, 5),
+        MEM_VDI_MEM = _MAKE_CHAN(25, 9, NO_DMA, NO_DMA, 5),
+        MEM_VDI_MEM_N = _MAKE_CHAN(26, 10, NO_DMA, NO_DMA, 5),
+
+        /* fake channel for vdoa to link with IPU */
+        MEM_VDOA_MEM =  _MAKE_CHAN(27, NO_DMA, NO_DMA, NO_DMA, NO_DMA),
+
+        MEM_PP_ADC = CHAN_NONE,
+        ADC_SYS2 = CHAN_NONE,
+
+} ipu_channel_t;
+
 #define BRIGHTNESS_MAX_VALUE	0xFF
 #define BRIGTHNESS_MIN_VALUE	0
 #define SATURATION_MAX_VALUE	0xFF

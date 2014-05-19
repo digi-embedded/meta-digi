@@ -31,7 +31,6 @@
 #include <unistd.h>
 
 #include <linux/fb.h>
-#include <linux/ipu.h>
 #include <linux/mxcfb.h>
 #include <linux/videodev.h>
 
