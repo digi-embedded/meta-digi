@@ -61,6 +61,7 @@ static void printUsage(FILE * fd)
 		"        Setting '-x' discards the output device option '-o' and\n"
 		"        uses the overlay background framebuffer.\n"
 		"     -r RGB565 (default is UYVY)\n"
+		"     -u YUYV (default is UYVY)\n"
 		"     -v Verbose mode\n"
 		"     -? This help\n\n");
 }
@@ -365,7 +366,7 @@ int main(int argc, char **argv)
 	strcpy(args.v4l2_device, "/dev/video0");
 
 	/* Input processing */
-	while ((opt = getopt(argc, argv, "w:d:h:l:t:o:xvr?")) != -1) {
+	while ((opt = getopt(argc, argv, "w:d:h:l:t:o:xvru?")) != -1) {
 		switch (opt) {
 			case '?':
 				printUsage(stderr);
@@ -393,6 +394,9 @@ int main(int argc, char **argv)
 				break;
 			case 'r':
 				args.options.format = V4L2_PIX_FMT_RGB565;
+				break;
+			case 'u':
+				args.options.format = V4L2_PIX_FMT_YUYV;
 				break;
 			case 'x':
 				args.options.non_destructive = 1;
