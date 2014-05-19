@@ -381,6 +381,7 @@ int v4l2_set_format_overlay(int fd, int top, int left, int height, int width)
 	int ret = 0;
 
 	/* Get the data format */
+	format.type = V4L2_BUF_TYPE_VIDEO_OVERLAY;
 	if ((ret = ioctl(fd, VIDIOC_G_FMT, &format)) < 0) {
 		log("Get format failed with %d\n", ret);
 		return ret;
