@@ -133,7 +133,7 @@ DISTRO ?= "dey"
 #  - 'package_rpm' for rpm style packages
 # E.g.: PACKAGE_CLASSES ?= "package_rpm package_deb package_ipk"
 # We default to rpm:
-PACKAGE_CLASSES ?= "package_ipk"
+PACKAGE_CLASSES ?= "package_rpm"
 
 #
 # SDK/ADT target architecture
