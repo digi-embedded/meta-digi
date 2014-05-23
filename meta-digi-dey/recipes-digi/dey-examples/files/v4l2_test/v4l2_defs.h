@@ -32,7 +32,12 @@
 
 #include <linux/fb.h>
 #include <linux/mxcfb.h>
+#include <linux/version.h>
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,37)
+#include <linux/videodev2.h>
+#else
 #include <linux/videodev.h>
+#endif
 
 #define fourcc(a,b,c,d)\
         (((__u32)(a)<<0)|((__u32)(b)<<8)|((__u32)(c)<<16)|((__u32)(d)<<24))

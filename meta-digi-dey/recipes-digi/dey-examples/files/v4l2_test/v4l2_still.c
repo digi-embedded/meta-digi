@@ -36,10 +36,10 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <asm/types.h>
-#include <linux/videodev.h>
 #include <sys/mman.h>
 #include <string.h>
 #include <malloc.h>
+#include "v4l2_defs.h"
 
 #define ipu_fourcc(a,b,c,d)\
         (((__u32)(a)<<0)|((__u32)(b)<<8)|((__u32)(c)<<16)|((__u32)(d)<<24))
