@@ -37,6 +37,6 @@ do_install() {
 	install -m 0644 cmdopt.h crc32.h digi-platforms.h log.h mem.h misc_helper.h ${D}/usr/include/libdigi
 }
 
-ALLOW_EMPTY_${PN} = "1"
+RDEPENDS_${PN}-dev = ""
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

@@ -29,4 +29,4 @@ do_install() {
 	oe_runmake install
 }
 
-ALLOW_EMPTY_${PN} = "1"
+RDEPENDS_${PN}-dev = ""
