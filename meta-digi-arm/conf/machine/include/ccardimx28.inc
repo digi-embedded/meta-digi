@@ -14,7 +14,8 @@ UBOOT_SUFFIX = "sb"
 WPA_DRIVER = "nl80211"
 
 # Firmware
-MACHINE_FIRMWARE = "firmware-atheros-ar3k"
+MACHINE_FIRMWARE ?= ""
+MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_BT', '1' , 'firmware-atheros-ar3k', '', d)}"
 
 MACHINE_EXTRA_RDEPENDS    += "mtd-utils-ubifs nvram ubootenv update-flash"
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE}"
