@@ -7,21 +7,22 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 PR = "${DISTRO}.r0"
 
-SRC_URI = "file://cmdopt.c \
-           file://cmdopt.h \
-           file://crc32.c \
-           file://crc32.h \
-           file://digi-platforms.h \
-           file://log.c \
-           file://log.h \
-           file://mem.c \
-           file://mem.h \
-           file://misc_helper.h \
-           file://platform.c \
-           "
+SRC_URI = " \
+    file://cmdopt.c \
+    file://cmdopt.h \
+    file://crc32.c \
+    file://crc32.h \
+    file://digi-platforms.h \
+    file://log.c \
+    file://log.h \
+    file://mem.c \
+    file://mem.h \
+    file://misc_helper.h \
+    file://platform.c \
+"
 
 S = "${WORKDIR}"
-           
+
 do_compile() {
 	${CC} -O2 -Wall -c -o log.o log.c
 	${CC} -O2 -Wall -c -o cmdopt.o cmdopt.c
