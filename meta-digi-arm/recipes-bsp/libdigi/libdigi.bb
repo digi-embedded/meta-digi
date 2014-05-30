@@ -32,9 +32,9 @@ do_compile() {
 }
 
 do_install() {
-	mkdir -p ${D}/usr/include/libdigi ${D}/usr/lib
-	install -m 0644 libdigi.a ${D}/usr/lib
-	install -m 0644 cmdopt.h crc32.h digi-platforms.h log.h mem.h misc_helper.h ${D}/usr/include/libdigi
+	mkdir -p ${D}${includedir}/libdigi ${D}${libdir}
+	install -m 0644 libdigi.a ${D}${libdir}
+	install -m 0644 cmdopt.h crc32.h digi-platforms.h log.h mem.h misc_helper.h ${D}${includedir}/libdigi
 }
 
 RDEPENDS_${PN}-dev = ""
