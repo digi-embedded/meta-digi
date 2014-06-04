@@ -46,6 +46,7 @@ RDEPENDS_${PN}_append_ccimx53js = "\
 
 RDEPENDS_${PN}_append_mx6 = "\
 	dey-examples-can \
+	${@base_contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \
 	dey-examples-v4l2 \
 "
 

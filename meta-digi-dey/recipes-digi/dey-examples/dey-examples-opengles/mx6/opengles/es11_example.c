@@ -4,8 +4,6 @@
  * This code was created by Jeff Molofee '99
  * (ported to Linux by Ti Leggett '01)
  * (ported to i.mx51, i.mx31 and x11 by Freescale '10)
- * (ported to ConnectCore Wi-i.MX51 by Digi International Inc '10)
- *
  * If you've found this code useful, please let him know.
  *
  * Visit Jeff at http://nehe.gamedev.net/
@@ -19,18 +17,23 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <math.h>
-#include <GLU3/glu3.h>
-#include <FSL/fslutil.h>
+#include <signal.h>
 
+#include "GLU3/glu3.h"
 #include "GLES/gl.h"
-#include "GLES/glext.h"
+
 #include "EGL/egl.h"
+
+#include "FSL/fsl_egl.h"
+#include "FSL/fslutil.h"
 
 EGLDisplay egldisplay;
 EGLConfig eglconfig;
 EGLSurface eglsurface;
 EGLContext eglcontext;
-int currentFrame = 0;
+EGLNativeWindowType eglNativeWindow;
+EGLNativeDisplayType eglNativeDisplayType;
+volatile sig_atomic_t quit = 0;
 
 GLfloat xrot; /* X Rotation ( NEW ) */
 GLfloat yrot; /* Y Rotation ( NEW ) */
@@ -46,12 +49,12 @@ int LoadGLTextures()
 	// allocate space for texture we will use
 	image1 = (Image *) malloc(sizeof(Image));
 	if (image1 == NULL) {
-		printf("Error allocating space for image");
+		printf("Error allocating space for image\n");
 		return 0;
 	}
 
 	/* Load The Bitmap, Check For Errors, If Bitmap's Not Found Quit */
-	if (ImageLoad("/usr/share/wallpapers/texture.bmp", image1)) {
+	if (LoadBMP("texture.bmp", image1)) {
 		/* Create The Texture */
 		glGenTextures(1, texture);
 		/* Typical Texture Generation Using Data From The Bitmap */
@@ -70,109 +73,6 @@ int LoadGLTextures()
 	if (image1 != NULL) {
 		free(image1);
 	}
-
-	return 1;
-}
-
-/* function to release/destroy our resources and restoring the old desktop */
-void Cleanup()
-{
-}
-
-/* general OpenGL initialization function */
-int init(void)
-{
-	static const EGLint s_configAttribs[] = {
-		EGL_RED_SIZE, 8,
-		EGL_GREEN_SIZE, 8,
-		EGL_BLUE_SIZE, 8,
-		EGL_ALPHA_SIZE, 0,
-		EGL_SAMPLES, 0,
-		EGL_NONE
-	};
-
-	EGLint numconfigs;
-
-	//get egl display
-	egldisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-	//Initialize egl
-	eglInitialize(egldisplay, NULL, NULL);
-	assert(eglGetError() == EGL_SUCCESS);
-	//tell the driver we are using OpenGL ES
-	eglBindAPI(EGL_OPENGL_ES_API);
-
-	//pass our egl configuration to egl
-	eglChooseConfig(egldisplay, s_configAttribs, &eglconfig, 1, &numconfigs);
-	printf("chooseconfig, \n");
-	assert(eglGetError() == EGL_SUCCESS);
-	assert(numconfigs == 1);
-
-	//You must pass in the file system handle to the linux framebuffer when creating a window
-	eglsurface =
-	    eglCreateWindowSurface(egldisplay, eglconfig, open("/dev/fb0", O_RDWR), NULL);
-	assert(eglGetError() == EGL_SUCCESS);
-
-	//create the egl graphics context
-	eglcontext = eglCreateContext(egldisplay, eglconfig, NULL, NULL);
-	printf("creatcontext, \n");
-	assert(eglGetError() == EGL_SUCCESS);
-
-	//make the context current
-	eglMakeCurrent(egldisplay, eglsurface, eglsurface, eglcontext);
-	printf("makecurrent, \n");
-	assert(eglGetError() == EGL_SUCCESS);
-
-	/* Load in the texture */
-	if (LoadGLTextures() == 0) {
-		return 0;
-	}
-
-	/* Enable Texture Mapping ( NEW ) */
-	glEnable(GL_TEXTURE_2D);
-
-	/* Enable smooth shading */
-	glShadeModel(GL_SMOOTH);
-
-	/* Set the background black */
-	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
-
-	/* Depth buffer setup */
-	glClearDepthf(1.0f);
-
-	/* Enables Depth Testing */
-	glEnable(GL_DEPTH_TEST);
-
-	/* The Type Of Depth Test To Do */
-	glDepthFunc(GL_LEQUAL);
-
-	/*enable cullface */
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-
-	/* Really Nice Perspective Calculations */
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
-	/*get width and height from egl */
-	EGLint h, w;
-	eglQuerySurface(egldisplay, eglsurface, EGL_WIDTH, &w);
-	eglQuerySurface(egldisplay, eglsurface, EGL_HEIGHT, &h);
-
-	/*change to projection matrix */
-	glMatrixMode(GL_PROJECTION);
-	/*reset the projection matrix */
-	glLoadIdentity();
-	/*set the viewport */
-	glViewport(0, 0, w, h);
-
-	GLUmat4 perspective;
-	/*use glu to set perspective */
-	gluPerspective4f(&perspective, 45.0f, ((GLfloat) w / (GLfloat) h), 1.0f, 100.0f);
-	glMultMatrixf(&perspective.col[0].values[0]);
-
-	/*get back to model view matrix */
-	glMatrixMode(GL_MODELVIEW);
-	/*reset modevl view matrix */
-	glLoadIdentity();
 
 	return 1;
 }
@@ -391,34 +291,129 @@ void resize(int w, int h)
 	glLoadIdentity();
 }
 
+int init(void)
+{
+	int w = 640;
+	int h = 480;
+
+	static const EGLint s_configAttribs[] = {
+		EGL_RED_SIZE, 5,
+		EGL_GREEN_SIZE, 6,
+		EGL_BLUE_SIZE, 5,
+		EGL_ALPHA_SIZE, 0,
+		EGL_SAMPLES, 0,
+		EGL_NONE
+	};
+
+	EGLint numconfigs;
+
+	//get egl display
+	eglNativeDisplayType = fsl_getNativeDisplay();
+	egldisplay = eglGetDisplay(eglNativeDisplayType);
+	//Initialize egl
+	eglInitialize(egldisplay, NULL, NULL);
+	assert(eglGetError() == EGL_SUCCESS);
+	//tell the driver we are using OpenGL ES
+	eglBindAPI(EGL_OPENGL_ES_API);
+
+	//pass our egl configuration to egl
+	eglChooseConfig(egldisplay, s_configAttribs, &eglconfig, 1, &numconfigs);
+	printf("chooseconfig, \n");
+	assert(eglGetError() == EGL_SUCCESS);
+	assert(numconfigs == 1);
+	/* Enable smooth shading */
+	glShadeModel(GL_SMOOTH);
+
+	eglNativeWindow = fsl_createwindow(egldisplay, eglNativeDisplayType);
+	assert(eglNativeWindow);
+
+	eglsurface =
+	    eglCreateWindowSurface(egldisplay, eglconfig, (EGLNativeWindowType) eglNativeWindow,
+				   NULL);
+
+	printf("createwindow, \n");
+	assert(eglGetError() == EGL_SUCCESS);
+
+	//create the egl graphics context
+	eglcontext = eglCreateContext(egldisplay, eglconfig, NULL, NULL);
+	printf("creatcontext, \n");
+	assert(eglGetError() == EGL_SUCCESS);
+
+	//make the context current
+	eglMakeCurrent(egldisplay, eglsurface, eglsurface, eglcontext);
+	printf("makecurrent, \n");
+	assert(eglGetError() == EGL_SUCCESS);
+
+	/* Load in the texture */
+	if (LoadGLTextures() == 0) {
+		return 0;
+	}
+
+	/* Enable Texture Mapping ( NEW ) */
+	glEnable(GL_TEXTURE_2D);
+
+	/* Enable smooth shading */
+	glShadeModel(GL_SMOOTH);
+
+	/* Set the background black */
+	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
+
+	/* Depth buffer setup */
+	glClearDepthf(1.0f);
+
+	/* Enables Depth Testing */
+	glEnable(GL_DEPTH_TEST);
+
+	/* The Type Of Depth Test To Do */
+	glDepthFunc(GL_LEQUAL);
+
+	/*enable cullface */
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+	/* Really Nice Perspective Calculations */
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+	/*get width and height from egl */
+	eglQuerySurface(egldisplay, eglsurface, EGL_WIDTH, &w);
+	eglQuerySurface(egldisplay, eglsurface, EGL_HEIGHT, &h);
+
+	/* Scale the content to the window */
+	resize(w, h);
+
+	return 1;
+}
+
 void deinit(void)
 {
-	//call clean up to release any memory allocated
-	Cleanup();
-	//Make a empty surface current
+	printf("Cleaning up...\n");
 	eglMakeCurrent(egldisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 	assert(eglGetError() == EGL_SUCCESS);
-	//destroy egl desplay
+	eglDestroyContext(egldisplay, eglcontext);
+	eglDestroySurface(egldisplay, eglsurface);
+	fsl_destroywindow(eglNativeWindow, eglNativeDisplayType);
 	eglTerminate(egldisplay);
 	assert(eglGetError() == EGL_SUCCESS);
-	//end egl thread
 	eglReleaseThread();
 }
 
-int main(int argc, char **argv)
+void sighandler(int signal)
 {
-	assert(init());
+	printf("Caught signal %d, setting flaq to quit.\n", signal);
+	quit = 1;
+}
 
-	while (currentFrame < 1000) {
-		EGLint width = 0;
-		EGLint height = 0;
-		eglQuerySurface(egldisplay, eglsurface, EGL_WIDTH, &width);
-		eglQuerySurface(egldisplay, eglsurface, EGL_HEIGHT, &height);
+int main(void)
+{
+	signal(SIGINT, sighandler);
+	signal(SIGTERM, sighandler);
+
+	assert(init());
+	while (!quit) {
 		render();
-		currentFrame++;
 		eglSwapBuffers(egldisplay, eglsurface);
 	}
-
 	deinit();
+
 	return 1;
 }

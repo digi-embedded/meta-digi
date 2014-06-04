@@ -231,7 +231,7 @@ int LoadGLTextures()
 	}
 
 	/* Load The Bitmap, Check For Errors, If Bitmap's Not Found Quit */
-	if (ImageLoad("/usr/share/wallpapers/texture.bmp", image1)) {
+	if (ImageLoad("texture.bmp", image1)) {
 		/* Create The Texture */
 		glGenTextures(1, texture);
 		/* Typical Texture Generation Using Data From The Bitmap */
