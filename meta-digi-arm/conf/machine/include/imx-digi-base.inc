@@ -12,14 +12,13 @@ XSERVER = "xserver-xorg \
            xf86-input-evdev \
            ${XSERVER_DRIVER}"
 
-# Use an older Xorg version until Vivante provides a valid GL API
+# FIXME: Use older versions until Vivante GPU is made compatible
 PREFERRED_VERSION_xserver-xorg_mx6 = "2:1.14.4"
+PREFERRED_VERSION_directfb_mx6 = "1.6.3"
+PREFERRED_VERSION_directfb-examples_mx6 = "1.6.0"
 
 # Ship kernel modules
 MACHINE_EXTRA_RRECOMMENDS = "kernel-modules"
-
-# Extra udev rules
-MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
 
 # Float-Point setting
 DEFAULTTUNE_mx6 ?= "cortexa9hf-neon"
@@ -31,17 +30,25 @@ MACHINE_SOCARCH_mx6 = "${TUNE_PKGARCH}-mx6"
 PACKAGE_EXTRA_ARCHS_append = " ${MACHINE_SOCARCH}"
 
 MACHINE_ARCH_FILTER = "virtual/kernel"
-MACHINE_SOCARCH_FILTER_mx5 = "virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl"
-MACHINE_SOCARCH_FILTER_mx6 = "virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl"
+MACHINE_SOCARCH_FILTER = "libfslcodec libfslvpuwrap libfslparser gst-fsl-plugins"
+MACHINE_SOCARCH_FILTER_append_mx5 = " virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl"
+MACHINE_SOCARCH_FILTER_append_mx6 = " virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl"
 
 INHERIT += "fsl-dynamic-packagearch"
 
-# Gstreamer plugin
+# Extra udev rules
+MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
+
+# GStreamer 0.10 plugins
 MACHINE_GSTREAMER_PLUGIN ?= "gst-fsl-plugin"
+
+# GStreamer 1.0 plugins
+MACHINE_GSTREAMER_1_0_PLUGIN ?= ""
+MACHINE_GSTREAMER_1_0_PLUGIN_mx6 ?= "gstreamer1.0-plugins-imx-meta"
 
 # mx5 GPU libraries
 GPU_FLAVOUR = "${@base_contains('DISTRO_FEATURES', 'x11', 'x11-', '', d)}"
-PREFERRED_PROVIDER_virtual/egl_mx5      ?= "amd-gpu-${GPU_FLAVOUR}bin-mx51"
+PREFERRED_PROVIDER_virtual/egl_mx5 ?= "amd-gpu-${GPU_FLAVOUR}bin-mx51"
 PREFERRED_PROVIDER_virtual/libgles1_mx5 ?= "amd-gpu-${GPU_FLAVOUR}bin-mx51"
 PREFERRED_PROVIDER_virtual/libgles2_mx5 ?= "amd-gpu-${GPU_FLAVOUR}bin-mx51"
 

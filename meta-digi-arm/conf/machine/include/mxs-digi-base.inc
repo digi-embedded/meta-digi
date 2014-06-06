@@ -4,11 +4,15 @@ include conf/machine/include/soc-family.inc
 include conf/machine/include/tune-arm926ejs.inc
 
 # Disable perf features as 2.6.35.3 fail to build otherwise
-PERF_FEATURES_ENABLE = ""
+PERF_FEATURES_ENABLE_mx28 = ""
 
 XSERVER = "xserver-xorg \
            xf86-input-evdev \
            xf86-video-fbdev"
+
+# Gstreamer plugin
+MACHINE_GSTREAMER_PLUGIN ?= ""
+MACHINE_GSTREAMER_PLUGIN_mx28 ?= "gst-fsl-plugin"
 
 # Sub-architecture support
 MACHINE_SOCARCH ?= ""
@@ -16,6 +20,7 @@ MACHINE_SOCARCH_mx28 = "${TUNE_PKGARCH}-mx28"
 PACKAGE_EXTRA_ARCHS_append = " ${MACHINE_SOCARCH}"
 
 MACHINE_ARCH_FILTER = "virtual/kernel"
+MACHINE_SOCARCH_FILTER = "libfslcodec libfslvpuwrap libfslparser gst-fsl-plugins"
 
 INHERIT += "fsl-dynamic-packagearch"
 
