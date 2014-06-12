@@ -26,12 +26,19 @@ SRC_URI += " \
     ${@base_conditional('IS_KERNEL_2X', '1' , '', 'file://0002-atheros-update-renamed-struct-members.patch', d)} \
 "
 
+# MX6 wireless calibration file
+SRC_URI_append_mx6 = " file://Digi_6203-6233-US.bin"
+
 S = "${WORKDIR}/git"
 
 EXTRA_OEMAKE = "DEL_PLATFORM=${MACHINE} KLIB_BUILD=${STAGING_KERNEL_DIR}"
 
 do_configure_prepend() {
 	cp ${WORKDIR}/Makefile ${S}/
+}
+
+do_configure_prepend_mx6() {
+	cp ${WORKDIR}/Digi_6203-6233-US.bin ${S}/Firmware_Package/target/AR6003/hw2.1.1/
 }
 
 do_install_append() {
