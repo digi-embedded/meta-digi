@@ -81,7 +81,18 @@ copy_images() {
 # builds.
 #
 purge_sstate() {
-	bitbake -c cleansstate packagegroup-dey-examples || true
+	local PURGE_PKGS=" \
+		packagegroup-dey-audio \
+		packagegroup-dey-bluetooth \
+		packagegroup-dey-core \
+		packagegroup-dey-debug \
+		packagegroup-dey-examples \
+		packagegroup-dey-gstreamer \
+		packagegroup-dey-network \
+		packagegroup-dey-qt \
+		packagegroup-dey-wireless \
+	"
+	bitbake -k -c cleansstate ${PURGE_PKGS} >/dev/null 2>&1 || true
 }
 
 # Sanity check (Jenkins environment)
