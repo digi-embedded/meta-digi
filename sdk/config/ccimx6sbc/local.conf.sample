@@ -58,7 +58,7 @@ PARALLEL_MAKE ?= "-j ${@oe.utils.cpu_count()}"
 #MACHINE ??= "qemux86"
 
 MACHINE = "ccimx6sbc"
-MACHINE_VARIANT = "w"
+MACHINE_VARIANT = "wb"
 
 #
 # Use Digi's internal git repositories
