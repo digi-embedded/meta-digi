@@ -27,17 +27,20 @@ MKP_NONE="\033[0m"
 # Path to platform config files
 MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/meta-digi/sdk/config"
 
+# Blacklist platforms (not officially supported in a DEY release)
+MKP_BLACKLIST_PLATFORMS=""
+
 ## Local functions
 usage() {
 	cat <<EOF
 
 Usage: source ${MKP_SCRIPTNAME} [OPTIONS]
 
-    -l               list available platforms
+    -l               list supported platforms
     -p <platform>    select platform for the project
     -v <variant>     select platform variant
 
-Available platforms: ${MKP_AVAILABLE_PLATFORMS}
+Supported platforms: $(display_supported_platforms)
 
 See platform include files for supported variant names:
 
@@ -59,6 +62,18 @@ check_selected_platform() {
 		[ "${i}" = "${MKP_PLATFORM}" ] && return 0
 	done
 	return 1
+}
+
+# Filter available platforms through the blacklist
+display_supported_platforms() {
+	local MKP_SUPPORTED_PLATFORMS=""
+	for i in ${MKP_AVAILABLE_PLATFORMS}; do
+		if echo "${MKP_BLACKLIST_PLATFORMS}" | grep -qsv "${i}"; then
+			MKP_SUPPORTED_PLATFORMS="${MKP_SUPPORTED_PLATFORMS:+${MKP_SUPPORTED_PLATFORMS} }${i}"
+		fi
+	done
+	echo "${MKP_SUPPORTED_PLATFORMS}"
+	unset MKP_SUPPORTED_PLATFORMS
 }
 
 do_mkproject() {
@@ -112,7 +127,7 @@ if [ "${BASH_SOURCE}" = "${0}" ]; then
 elif [ ${#} -eq 0 ] ; then
 	usage
 elif [ -n "${MKP_LIST_PLATFORMS}" ]; then
-	echo ${MKP_AVAILABLE_PLATFORMS}
+	display_supported_platforms
 elif [ -z "${MKP_PLATFORM}" ]; then
 	error "-p option is required"
 elif ! check_selected_platform; then
@@ -122,6 +137,6 @@ else
 fi
 
 # clean-up all variables (so the script can be re-sourced)
-unset MKP_AVAILABLE_PLATFORMS MKP_GREEN MKP_LIST_PLATFORMS MKP_NONE \
-      MKP_OLD_PROJECT MKP_PLATFORM MKP_PROJECTPATH MKP_RED MKP_SCRIPTNAME \
+unset MKP_AVAILABLE_PLATFORMS MKP_BLACKLIST_PLATFORMS MKP_GREEN MKP_LIST_PLATFORMS \
+      MKP_NONE MKP_OLD_PROJECT MKP_PLATFORM MKP_PROJECTPATH MKP_RED MKP_SCRIPTNAME \
       MKP_SCRIPTPATH MKP_VARIANT
