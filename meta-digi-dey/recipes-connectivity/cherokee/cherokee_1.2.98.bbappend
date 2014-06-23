@@ -2,10 +2,6 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
-MIRRORS =+ " \
-http://www.cherokee-project.de/mirrors/cherokee/    http://ftp.nluug.nl/internet/cherokee/ \n \
-"
-
 SRC_URI += " \
 	file://cherokee.conf \
 	file://digi.gif \
