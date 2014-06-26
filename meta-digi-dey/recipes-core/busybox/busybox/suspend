@@ -3,7 +3,7 @@
 #
 #  suspend
 #
-#  Copyright (C) 2009-2013 by Digi International Inc.
+#  Copyright (C) 2009-2014 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -43,32 +43,6 @@ suspend_interfaces() {
 	fi
 }
 
-resume_storage_devices() {
-	# remove disk devices and run coldplug mdev to scan for nodes in
-	# case any device was plugged while the system was suspended
-	rm -f /dev/sd[a-z] /dev/mmcblk[0-9] && mdev -s
-
-	# for partition nodes fire hotplug ADD event or umount file system
-	# in case the real hardware is not present
-	for i in /dev/sd[a-z][0-9]* /dev/mmcblk[0-9]p[0-9]*; do
-		[ "${i}" = "/dev/sd[a-z][0-9]*" ] && continue
-		[ "${i}" = "/dev/mmcblk[0-9]p[0-9]*" ] && continue
-
-		dev_path=$(ls -d /sys/block/*/${i#/dev/} 2>/dev/null)
-		if [ -f "${dev_path}/uevent" ]; then
-			printf "add" > ${dev_path}/uevent
-		else
-			if grep -q "${i}[[:blank:]]" /proc/mounts; then
-				mdir=$(sed -ne "s,${i}[[:blank:]]\+\([^[:blank:]]\+\)[[:blank:]].*,\1,g;T;p" /proc/mounts)
-				umount "${mdir}"
-				rmdir -- "${mdir}" 2>/dev/null
-				rm -f "${i}"
-			fi
-		fi
-
-	done
-}
-
 resume_interfaces() {
 	# 'wlan0' interface on some platforms (ccwmx5xjs, cwme9210, ccardwmx28js)
 	# has problems on suspend-resume, so we workaround it by bringing the
@@ -103,7 +77,6 @@ if [ -f "${syspower}" ]; then
 	sleep .5
 
 	# Post-resume actions
-	resume_storage_devices
 	resume_interfaces
 	resume_system_time
 else
