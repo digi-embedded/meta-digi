@@ -1,15 +1,9 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013-2014 Digi International.
 
-# Remove 'bootlogd' bootscript and symlinks
-# (synchronize with poky's sysvinit_2.88dsf.bb)
 do_install_append() {
-	rm -f ${D}${sysconfdir}/init.d/stop-bootlogd
-	rm -f ${D}${sysconfdir}/init.d/bootlogd
-	rm -f ${D}${sysconfdir}/rc2.d/S99stop-bootlogd
-	rm -f ${D}${sysconfdir}/rc3.d/S99stop-bootlogd
-	rm -f ${D}${sysconfdir}/rc4.d/S99stop-bootlogd
-	rm -f ${D}${sysconfdir}/rc5.d/S99stop-bootlogd
-	rm -f ${D}${sysconfdir}/rcS.d/S07bootlogd
+	# Remove 'bootlogd' bootscript symlinks
+	update-rc.d -f -r ${D} stop-bootlogd remove
+	update-rc.d -f -r ${D} bootlogd remove
 }
 
 do_install_append_ccimx6adpt() {
