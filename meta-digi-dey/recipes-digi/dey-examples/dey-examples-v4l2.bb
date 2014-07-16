@@ -9,11 +9,11 @@ DEPENDS = "virtual/kernel"
 
 PR = "${DISTRO}.r0"
 
-RDEPENDS_${PN}_mx5 = "kernel-module-mt9v111-camera"
+RDEPENDS_${PN}_ccimx5 = "kernel-module-mt9v111-camera"
 
 SRC_URI = "file://v4l2_test"
 INCLUDE_PATH = "-I${STAGING_KERNEL_DIR}/include"
-INCLUDE_PATH_mx6 = "-I${STAGING_KERNEL_DIR}/arch/arm/include -I${STAGING_KERNEL_DIR}/include/uapi -I${STAGING_KERNEL_DIR}/include"
+INCLUDE_PATH_ccimx6 = "-I${STAGING_KERNEL_DIR}/arch/arm/include -I${STAGING_KERNEL_DIR}/include/uapi -I${STAGING_KERNEL_DIR}/include"
 
 S = "${WORKDIR}/v4l2_test"
 

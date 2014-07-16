@@ -16,7 +16,7 @@ python do_warning_spidev() {
 }
 
 # Warn the user in case we cannot enable spidev in the device tree
-python do_warning_spidev_mxs() {
+python do_warning_spidev_ccardimx28() {
     if d.getVar('HAVE_GUI', True) and not d.getVar('IS_KERNEL_2X', True):
         bb.warn("SPIDEV conflicts with touchscreen so it was not enabled in the device tree")
 }

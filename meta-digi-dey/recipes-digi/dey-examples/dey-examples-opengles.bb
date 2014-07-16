@@ -14,7 +14,7 @@ SRC_URI = "file://opengles"
 S = "${WORKDIR}/opengles"
 
 EXTRA_OEMAKE = ""
-EXTRA_OEMAKE_mx6 = "EGL_FLAVOUR=${@base_conditional('HAVE_GUI', '1' , 'x11', 'fb', d)}"
+EXTRA_OEMAKE_ccimx6 = "EGL_FLAVOUR=${@base_conditional('HAVE_GUI', '1' , 'x11', 'fb', d)}"
 
 do_install () {
 	oe_runmake DEST_DIR="${D}" install
@@ -23,9 +23,9 @@ do_install () {
 FILES_${PN} = "/opt/${PN}"
 FILES_${PN}-dbg += "/opt/${PN}/.debug"
 
-RDEPENDS_${PN}_mx5 = "lib2dz160-mx51 lib2dz430-mx51"
-RDEPENDS_${PN}_mx6 = "libopenvg-mx6"
+RDEPENDS_${PN}_ccimx5 = "lib2dz160-mx51 lib2dz430-mx51"
+RDEPENDS_${PN}_ccimx6 = "libopenvg-mx6"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-COMPATIBLE_MACHINE = "(ccimx51js|ccimx53js|ccimx6adpt|ccimx6sbc)"
+COMPATIBLE_MACHINE = "(ccimx5|ccimx6)"

@@ -26,4 +26,4 @@ do_install() {
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-COMPATIBLE_MACHINE = "(ccardimx28js|ccimx51js|ccimx53js)"
+COMPATIBLE_MACHINE = "(ccardimx28|ccimx5)"
