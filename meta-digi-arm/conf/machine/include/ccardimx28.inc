@@ -4,7 +4,8 @@
 
 include conf/machine/include/mxs-digi-base.inc
 
-SOC_FAMILY = "mxs:mx28"
+DIGI_FAMILY = "ccardimx28"
+SOC_FAMILY  = "mxs:mx28:${DIGI_FAMILY}"
 
 # Platform u-boot settings
 UBOOT_ENTRYPOINT = "0x40008000"

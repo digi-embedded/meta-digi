@@ -5,7 +5,8 @@
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/tune-cortexa8.inc
 
-SOC_FAMILY = "mx5:mx53"
+DIGI_FAMILY = "ccimx5:ccimx53"
+SOC_FAMILY  = "mx5:mx53:${DIGI_FAMILY}"
 
 # Platform u-boot settings
 UBOOT_ENTRYPOINT = "0x70008000"

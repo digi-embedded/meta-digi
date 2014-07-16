@@ -5,7 +5,8 @@
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/tune-cortexa9.inc
 
-SOC_FAMILY = "mx6:mx6q"
+DIGI_FAMILY = "ccimx6"
+SOC_FAMILY  = "mx6:mx6q:${DIGI_FAMILY}"
 
 # Platform u-boot settings
 UBOOT_ENTRYPOINT = "0x10800000"
