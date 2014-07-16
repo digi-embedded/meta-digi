@@ -27,7 +27,7 @@ SRC_URI += " \
 "
 
 # MX6 wireless calibration file
-SRC_URI_append_mx6 = " file://Digi_6203-6233-US.bin"
+SRC_URI_append_ccimx6 = " file://Digi_6203-6233-US.bin"
 
 S = "${WORKDIR}/git"
 
@@ -37,7 +37,7 @@ do_configure_prepend() {
 	cp ${WORKDIR}/Makefile ${S}/
 }
 
-do_configure_prepend_mx6() {
+do_configure_prepend_ccimx6() {
 	cp ${WORKDIR}/Digi_6203-6233-US.bin ${S}/Firmware_Package/target/AR6003/hw2.1.1/
 }
 
@@ -58,4 +58,4 @@ FILES_${PN} += " \
 "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(mxs|mx6)"
+COMPATIBLE_MACHINE = "(ccardimx28|ccimx6)"
