@@ -30,4 +30,4 @@ do_install() {
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-COMPATIBLE_MACHINE = "(mx6)"
+COMPATIBLE_MACHINE = "(ccimx6)"

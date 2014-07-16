@@ -12,5 +12,5 @@
 #
 setenv mmcroot /dev/mmcblk${mmcdev}p2
 setenv uimage uImage
-setenv fdt_file imx6q-ccimx6sbc.dtb
+setenv fdt_file imx6q-${board}.dtb
 dboot linux mmc ${mmcdev}:${mmcpart}

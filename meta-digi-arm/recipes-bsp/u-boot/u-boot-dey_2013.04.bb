@@ -22,4 +22,4 @@ do_deploy_append() {
 }
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(mx6)"
+COMPATIBLE_MACHINE = "(ccimx6)"
