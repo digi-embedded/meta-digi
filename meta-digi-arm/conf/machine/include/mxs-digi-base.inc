@@ -12,7 +12,6 @@ XSERVER = "xserver-xorg \
 
 # Gstreamer plugin
 MACHINE_GSTREAMER_PLUGIN ?= ""
-MACHINE_GSTREAMER_PLUGIN_mx28 ?= "gst-fsl-plugin"
 
 # Sub-architecture support
 MACHINE_SOCARCH ?= ""
