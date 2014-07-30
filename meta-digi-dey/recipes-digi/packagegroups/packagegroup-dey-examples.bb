@@ -45,7 +45,10 @@ RDEPENDS_${PN}_append_ccimx53 = "\
 "
 
 RDEPENDS_${PN}_append_ccimx6 = "\
+	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
+	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
 	dey-examples-can \
+	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 	${@base_contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \
 	dey-examples-v4l2 \
 "
