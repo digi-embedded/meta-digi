@@ -1,7 +1,7 @@
 # Copyright (C) 2013 Digi International
 
 # Internal repo branch
-SRCBRANCH = "master"
+SRCBRANCH = "v2009.08/dub-1.6/maint"
 
 SRCREV_external = "8b22aa710c72a5daeb6f79852f1a4fb08abf37d4"
 SRCREV_internal = "${AUTOREV}"
