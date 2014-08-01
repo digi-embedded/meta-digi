@@ -5,11 +5,21 @@ PREFERRED_PROVIDER_virtual/kernel ?= "linux-dey"
 PREFERRED_PROVIDER_virtual/libx11 ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'libx11', '', d)}"
 PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 
+#
+# Linux and U-Boot supported versions:
+#
+# Platform      Linux              U-Boot
+# -------------------------------------------------
+# ccimx5        2.6.35.14          2009.08
+# ccardimx28    2.6.35.14, 3.10    2009.08, 2013.01
+# ccimx6        3.10               2013.04
+#
 # Digi BSP default versions
-PREFERRED_VERSION_linux-dey ?= "2.6.35.14"
-PREFERRED_VERSION_linux-dey_mx6 ?= "3.10"
-PREFERRED_VERSION_u-boot-dey ?= "2009.08"
-PREFERRED_VERSION_u-boot-dey_mx6 ?= "2013.04"
+PREFERRED_VERSION_linux-dey ?= "3.10"
+PREFERRED_VERSION_linux-dey_ccimx5 ?= "2.6.35.14"
+PREFERRED_VERSION_u-boot-dey ?= "2013.04"
+PREFERRED_VERSION_u-boot-dey_ccimx5 ?= "2009.08"
+PREFERRED_VERSION_u-boot-dey_ccardimx28 ?= "2013.01"
 
 # Help variables used in recipes
 HAVE_WIFI    = "${@base_contains('MACHINE_FEATURES', 'wifi', '1', '', d)}"
