@@ -37,10 +37,11 @@ SOURCE_MIRROR_URL ?= \"http://build-linux.digi.com/yocto/downloads/\"
 INHERIT += \"own-mirrors\"
 "
 
-KERNEL_3X_CFG="
-# Build Linux 3.10 and U-Boot 2013.01
-PREFERRED_VERSION_linux-dey = \"3.10\"
-PREFERRED_VERSION_u-boot-dey = \"2013.01\"
+# Alternative config for ccardimx28js
+KERNEL_2X_CFG="
+# Build Linux 2.6.35.14 and U-Boot 2009.08
+PREFERRED_VERSION_linux-dey = \"2.6.35.14\"
+PREFERRED_VERSION_u-boot-dey = \"2009.08\"
 "
 
 REPO="$(which repo)"
@@ -119,7 +120,7 @@ done<<-_EOF_
 	ccimx6sbc       - w wb
 _EOF_
 
-# Support Linux-3.x and U-Boot 2013.x
+# Build alternative linux and u-boot
 while read _pl _ker; do
 	eval "${_pl}_ker=\"${_ker}\""
 done<<-_EOF_
@@ -163,8 +164,8 @@ fi
 rm -rf ${YOCTO_IMGS_DIR} ${YOCTO_PROJ_DIR}
 for platform in ${DY_PLATFORMS}; do
 	eval platform_variants="\${${platform}_var}"
-	eval platform_kernel3x="\${${platform}_ker%n}"
-	for kernel_ver in "" ${platform_kernel3x:+-3x}; do
+	eval platform_kernel2x="\${${platform}_ker%n}"
+	for kernel_ver in "" ${platform_kernel2x:+-2x}; do
 		for variant in ${platform_variants}; do
 			_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}${kernel_ver}"
 			_this_img_dir="${YOCTO_IMGS_DIR}/${platform}${kernel_ver}"
@@ -195,7 +196,7 @@ for platform in ${DY_PLATFORMS}; do
 						printf "${DIGI_PREMIRROR_CFG}" >> conf/local.conf
 					fi
 					if [ -n "${kernel_ver}" ]; then
-						printf "${KERNEL_3X_CFG}" >> conf/local.conf
+						printf "${KERNEL_2X_CFG}" >> conf/local.conf
 					fi
 					[ "${DY_RM_WORK}" = "true" ] && printf "\nINHERIT += \"rm_work\"\n" >> conf/local.conf
 					for target in ${DY_TARGET}; do
