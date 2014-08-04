@@ -20,7 +20,8 @@ SRC_URI_external = "${DIGI_GITHUB_GIT}/atheros.git;protocol=git;nobranch=1"
 SRC_URI_internal = "${DIGI_GIT}linux-modules/atheros.git;protocol=git;nobranch=1"
 SRC_URI  = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
 SRC_URI += " \
-    file://atheros \
+    file://atheros-pre-up \
+    file://atheros-post-down \
     file://Makefile \
     ${@base_conditional('IS_KERNEL_2X', '1' , '', 'file://0001-atheros-convert-NLA_PUT-macros.patch', d)} \
     ${@base_conditional('IS_KERNEL_2X', '1' , '', 'file://0002-atheros-update-renamed-struct-members.patch', d)} \
@@ -42,8 +43,9 @@ do_configure_prepend_ccimx6() {
 }
 
 do_install_append() {
-	install -d ${D}${sysconfdir}/network/if-pre-up.d
-	install -m 0755 ${WORKDIR}/atheros ${D}${sysconfdir}/network/if-pre-up.d/
+	install -d ${D}${sysconfdir}/network/if-pre-up.d ${D}${sysconfdir}/network/if-post-down.d
+	install -m 0755 ${WORKDIR}/atheros-pre-up ${D}${sysconfdir}/network/if-pre-up.d/atheros
+	install -m 0755 ${WORKDIR}/atheros-post-down ${D}${sysconfdir}/network/if-post-down.d/atheros
 	install -d ${D}${sysconfdir}/modprobe.d
 	cat >> ${D}${sysconfdir}/modprobe.d/atheros.conf <<-_EOF_
 		install ath6kl_sdio true

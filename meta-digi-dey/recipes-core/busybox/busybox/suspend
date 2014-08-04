@@ -36,10 +36,8 @@ suspend_interfaces() {
 	# has problems on suspend-resume, so we workaround it by bringing the
 	# interface down before suspend and bring it up again after resume.
 	# (#35777, #40082)
-	if grep -qs 'wlan0' /proc/net/dev; then
-		if grep -qs '^wlan0' /var/run/ifstate; then
-			ifdown wlan0 && up_wlan_on_resume="1"
-		fi
+	if grep -qs '^wlan0' /var/run/ifstate; then
+		ifdown wlan0 && up_wlan_on_resume="1"
 	fi
 }
 
@@ -48,10 +46,8 @@ resume_interfaces() {
 	# has problems on suspend-resume, so we workaround it by bringing the
 	# interface down before suspend and bring it up again after resume.
 	# (#35777, #40082)
-	if grep -qs 'wlan0' /proc/net/dev; then
-		if ! grep -qs '^wlan0' /var/run/ifstate; then
-			[ -n "${up_wlan_on_resume}" ] && ifup wlan0
-		fi
+	if ! grep -qs '^wlan0' /var/run/ifstate; then
+		[ -n "${up_wlan_on_resume}" ] && ifup wlan0
 	fi
 }
 
