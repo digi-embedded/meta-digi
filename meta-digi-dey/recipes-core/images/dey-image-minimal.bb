@@ -27,7 +27,7 @@ IMAGE_FEATURES += "${VIRTUAL_RUNTIME_ssh_server}"
 IMAGE_FEATURES += "dey-network"
 IMAGE_FEATURES += "package-management"
 
-# Machine dependant features
+# Machine dependent features
 IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "alsa", "dey-audio", "", d)}'
 IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "accel-video", "dey-gstreamer", "", d)}'
 IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "wifi", "dey-wireless", "", d)}'

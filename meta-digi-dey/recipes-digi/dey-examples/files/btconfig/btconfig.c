@@ -3135,7 +3135,7 @@ static void cmd_wotp(int dev_id, int argc, char **argv)
 	}
 	ReverseHexString(argv[2]);
 	if (!write_otpRaw(dev_id, address, length, (UCHAR *)argv[2]))
-		printf("Write to OTP sucessful!\n");
+		printf("Write to OTP successful!\n");
 }
 
 static int write_otpRaw(int dev_id, int address, int length, UCHAR *data)
@@ -4463,7 +4463,7 @@ int SetMasterBlasterTestMode(tBRM_Control_packet *MasterBlaster, tMasterBlasterO
 			  sizeof(TestModeOption)/sizeof(tMasterBlasterOption), TM,1))
 	{
 		MasterBlaster->testCtrl.Mode = (UCHAR)Value;
-		// Enable continous Tx should disable continous Rx
+		// Enable continuous Tx should disable continuous Rx
 		MasterBlaster->ContRxMode = DISABLE;
 		MasterBlaster->ContTxMode = DISABLE;
 		return TRUE;
@@ -4639,7 +4639,7 @@ int SetMasterBlasterContTxMode (tBRM_Control_packet *MasterBlaster, tMasterBlast
       MasterBlaster->ContTxMode = (UCHAR)Value;
       if (MasterBlaster->ContTxMode == ENABLE)
       {
-         // Enable continous Tx should disable continous Rx
+         // Enable continuous Tx should disable continuous Rx
          MasterBlaster->ContRxMode = DISABLE;
 	 MasterBlaster->LERxMode = DISABLE;
 	 MasterBlaster->LETxMode = DISABLE;
@@ -4677,7 +4677,7 @@ int SetMasterBlasterLERxMode (tBRM_Control_packet *MasterBlaster, tMasterBlaster
       MasterBlaster->LERxMode = (UCHAR)Value;
       if (MasterBlaster->LERxMode == ENABLE)
       {
-         /* Enable continous Tx should disable other modes */
+         /* Enable continuous Tx should disable other modes */
          MasterBlaster->LETxMode = DISABLE;
          MasterBlaster->ContTxMode = DISABLE;
          MasterBlaster->ContRxMode = DISABLE;
@@ -4708,7 +4708,7 @@ int SetMasterBlasterLETxMode (tBRM_Control_packet *MasterBlaster, tMasterBlaster
       MasterBlaster->LETxMode = (UCHAR)Value;
       if (MasterBlaster->LETxMode == ENABLE)
       {
-         /* Enable continous Tx should disable other modes */
+         /* Enable continuous Tx should disable other modes */
          MasterBlaster->LERxMode = DISABLE;
          MasterBlaster->ContTxMode = DISABLE;
          MasterBlaster->ContRxMode = DISABLE;
@@ -4754,7 +4754,7 @@ int SetMasterBlasterContRxMode (tBRM_Control_packet *MasterBlaster, tMasterBlast
       MasterBlaster->ContRxMode = (UCHAR)Value;
       if (MasterBlaster->ContRxMode == ENABLE)
       {
-         // Enable continous Tx should disable continous Rx
+         // Enable continuous Tx should disable continuous Rx
          MasterBlaster->ContTxMode = DISABLE;
 	 MasterBlaster->LERxMode = DISABLE;
 	 MasterBlaster->LETxMode = DISABLE;

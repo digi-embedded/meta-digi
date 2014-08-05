@@ -230,7 +230,7 @@ static int run_test1(fsl_shw_uco_t* my_ctx, volatile struct rand_test tests[])
     while (++loop_count < 400000) {
         uint32_t callbacks_received = 0;
 
-        /* check that every request was serviced succesfully */
+        /* check that every request was serviced successfully */
         for (loop = 0; loop < RESULTS_SIZE; loop++) {
             if (tests[loop].result_received) {
                 callbacks_received++;
@@ -242,7 +242,7 @@ static int run_test1(fsl_shw_uco_t* my_ctx, volatile struct rand_test tests[])
         usleep(5);
     }
 
-    /* check that every request was serviced succesfully */
+    /* check that every request was serviced successfully */
     for (loop = 0; loop < RESULTS_SIZE; loop++) {
         if (tests[loop].initiated) {
             if (!tests[loop].result_received) {
@@ -301,7 +301,7 @@ static int run_test2(fsl_shw_uco_t* my_ctx, volatile struct rand_test tests[])
     while (++loop_count < 8000000) {
         uint32_t callbacks_received = 0;
 
-        /* check that every request was serviced succesfully */
+        /* check that every request was serviced successfully */
         for (loop = 0; loop < RESULTS_SIZE; loop++) {
             if (tests[loop].result_received) {
                 callbacks_received++;
@@ -319,7 +319,7 @@ static int run_test2(fsl_shw_uco_t* my_ctx, volatile struct rand_test tests[])
         passed = 0;
     }
 
-    /* check that every request was serviced succesfully */
+    /* check that every request was serviced successfully */
     for (loop = 0; loop < RESULTS_SIZE; loop++) {
         if (tests[loop].initiated) {
             if (!tests[loop].result_received) {

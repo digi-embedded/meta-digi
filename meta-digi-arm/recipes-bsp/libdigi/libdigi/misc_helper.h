@@ -8,7 +8,7 @@
  * under the terms of the GNU General Public License version 2 as published by
  * the Free Software Foundation.
  *
- * Description: miscellanous definitions that simplifies developing
+ * Description: miscellaneous definitions that simplifies developing
  *              May require 'string.h' or 'log.h'
  *
  */

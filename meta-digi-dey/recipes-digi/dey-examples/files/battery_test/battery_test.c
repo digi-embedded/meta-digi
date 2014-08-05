@@ -108,7 +108,7 @@ static void daemonize( const char *lockfile )
         }
     }
 
-    /* Trap signals that we expect to recieve */
+    /* Trap signals that we expect to receive */
     signal(SIGCHLD,signal_handler);
     signal(SIGUSR1,signal_handler);
     signal(SIGALRM,signal_handler);

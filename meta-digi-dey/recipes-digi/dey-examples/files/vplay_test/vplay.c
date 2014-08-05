@@ -344,7 +344,7 @@ void set_dsp_speed(int *dsp_speed)
  *
  * if to_mono:
  *    compress 8 bit stereo data 2:1, needed if we want play 'one track';
- *    this is usefull, if you habe SB 1.0 - 2.0 (I have 1.0) and want
+ *    this is useful, if you habe SB 1.0 - 2.0 (I have 1.0) and want
  *    hear the sample (in Mono)
  *
  * if to_8:

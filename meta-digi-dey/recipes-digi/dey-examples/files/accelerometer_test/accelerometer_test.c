@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 					break;
 				}
 			} else if (inp_event.type == EV_SYN && valid_x && valid_y && valid_z) {
-				/* Only need to validate data the 1st time, so it's not necesary to reset flags */
+				/* Only need to validate data the 1st time, so it's not necessary to reset flags */
 				printf("X = %d	Y = %d	Z = %d\n", abs_x, abs_y, abs_z);
 			}
 		} while (bytes_read);

@@ -303,7 +303,7 @@ static int gpio_init(void)
 	}
 
 	if (ret < 0){
-		pr_err(DRIVER_NAME ": major %d allready in use \n", gpio_major);
+		pr_err(DRIVER_NAME ": major %d already in use \n", gpio_major);
 		return ret;
 	}
 
