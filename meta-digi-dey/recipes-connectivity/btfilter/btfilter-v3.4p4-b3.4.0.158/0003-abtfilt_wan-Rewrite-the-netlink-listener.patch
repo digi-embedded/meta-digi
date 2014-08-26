@@ -1,0 +1,127 @@
+From 641f02fe3638d291a0ef53c076bda7e68e2f7d28 Mon Sep 17 00:00:00 2001
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Tue, 26 Aug 2014 16:57:14 +0200
+Subject: [PATCH] abtfilt_wan: Rewrite the netlink listener.
+
+Not sure how old this code is but it is not working properly any more.
+
+Not only it incorrectly detects the netlink messages as corrupted, but it
+also assumes an RTM_DELLINK will be issued for the link down event which
+is not correct.
+
+I have updated the code trying to touch as little things as possible.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ abtfilt_wlan.c | 87 +++++++++++++++++++++++++++++++++++++---------------------
+ 1 file changed, 56 insertions(+), 31 deletions(-)
+
+diff --git a/abtfilt_wlan.c b/abtfilt_wlan.c
+index b1966cef7ef2..64dffde37f19 100644
+--- a/abtfilt_wlan.c
++++ b/abtfilt_wlan.c
+@@ -232,6 +232,59 @@ Abf_WlanDispatchIO(ATHBT_FILTER_INFO *pInfo, unsigned long int req,
+     return A_OK;
+ }
+
++static void
++print_link(struct ifinfomsg *ifi, int len, int up)
++{
++        struct rtattr *attrib;
++
++        for(attrib = IFLA_RTA(ifi); RTA_OK(attrib, len);
++	     attrib = RTA_NEXT(attrib, len)) {
++                switch(attrib->rta_type) {
++                case IFLA_IFNAME:
++                        A_DEBUG("[%d:%s] Link %s\n", ifi->ifi_index,
++				(char *)RTA_DATA(attrib), up ? "UP" : "DOWN");
++                        break;
++                default:
++                        break;
++                }
++        }
++}
++
++static void
++parse_message(ATH_BT_FILTER_INSTANCE *pInstance, int len, char *buf)
++{
++	struct nlmsghdr *msg_ptr;
++	struct ifinfomsg *ifi;
++	int len1;
++
++	for(msg_ptr = (struct nlmsghdr *)buf; NLMSG_OK(msg_ptr, len);
++			msg_ptr = NLMSG_NEXT(msg_ptr, len)) {
++		/* Finish reading */
++		if(msg_ptr->nlmsg_type == NLMSG_DONE)
++			break;
++
++		/* Message is some kind of error */
++		if(msg_ptr->nlmsg_type == NLMSG_ERROR) {
++			A_ERR("Message is an error.\n");
++			break;
++		}
++
++		if(msg_ptr->nlmsg_type == RTM_NEWLINK) {
++			ifi = NLMSG_DATA(msg_ptr);
++			len1 = msg_ptr->nlmsg_len - NLMSG_LENGTH(sizeof(*ifi));
++			if(ifi->ifi_flags & IFF_RUNNING){
++				print_link(ifi, len1, 1);
++				NewLinkEvent(pInstance, msg_ptr, len1);
++			}
++			else {
++				print_link(ifi, len1, 0);
++				DelLinkEvent(pInstance, msg_ptr, len1);
++			}
++			break;
++		}
++	}
++}
++
+ /* Internal functions */
+ static void *
+ WlanEventThread(void *arg)
+@@ -322,41 +375,13 @@ WlanEventThread(void *arg)
+                 } while (left == -1 && errno == EINTR);
+
+                 if (left < 0) {
+-                    A_ERR("[%s] recvfrom(netlink)\n", __FUNCTION__);
++                    A_ERR("[%s] recvfrom(netlink) error %d\n", __FUNCTION__,
++				    left);
+                     continue;
+                  //   break;
+                 }
+
+-                h = (struct nlmsghdr *) buf;
+-                while (left >= (int)sizeof(*h)) {
+-                    int len, plen;
+-
+-                    len = h->nlmsg_len;
+-                    plen = len - sizeof(*h);
+-                    if (len > left || plen < 0) {
+-                        A_ERR("[%s] malformed netlink message\n", __FUNCTION__);
+-                        continue;
+-                    }
+-
+-                    //A_DEBUG("RTM Message Type: %s\n",
+-                    //        ((h->nlmsg_type == RTM_NEWLINK) ?
+-                    //         "RTM_NEWLINK" : ((h->nlmsg_type == RTM_DELLINK) ?
+-                    //         "RTM_DELLINK" : "RTM_OTHER")));
+-                    switch (h->nlmsg_type) {
+-                    case RTM_NEWLINK:
+-                        NewLinkEvent(pInstance, h, plen);
+-                        break;
+-                    case RTM_DELLINK:
+-                        DelLinkEvent(pInstance, h, plen);
+-                        break;
+-                    default:
+-                        break;
+-                    }
+-
+-                    len = NLMSG_ALIGN(len);
+-                    left -= len;
+-                    h = (struct nlmsghdr *) ((char *) h + len);
+-                }
++                parse_message(pInstance, left, buf);
+             }
+         }
+
