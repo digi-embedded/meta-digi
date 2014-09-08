@@ -21,6 +21,31 @@ set -e
 
 FIRMWARE_DIR="/lib/firmware/ath6k/AR6003/hw2.1.1"
 
+ATH6KL_DBG_NONE=0x0
+ATH6KL_DBG_CREDIT=0x00000001
+ATH6KL_DBG_WLAN_TX=0x00000004
+ATH6KL_DBG_WLAN_RX=0x00000008
+ATH6KL_DBG_BMI=0x00000010
+ATH6KL_DBG_HTC=0x00000020
+ATH6KL_DBG_HIF=0x00000040
+ATH6KL_DBG_IRQ=0x00000080
+ATH6KL_DBG_WMI=0x00000400
+ATH6KL_DBG_TRC=0x00000800
+ATH6KL_DBG_SCATTER=0x00001000
+ATH6KL_DBG_WLAN_CFG=0x00002000
+ATH6KL_DBG_RAW_BYTES=0x00004000
+ATH6KL_DBG_AGGR=0x00008000
+ATH6KL_DBG_SDIO=0x00010000
+ATH6KL_DBG_SDIO_DUMP=0x00020000
+ATH6KL_DBG_BOOT=0x00040000
+ATH6KL_DBG_WMI_DUMP=0x00080000
+ATH6KL_DBG_SUSPEND=0x00100000
+ATH6KL_DBG_USB=0x00200000
+ATH6KL_DBG_RECOVERY=0x00400000
+ATH6KL_DBG_ANY=0xffffffff
+
+ATH6KL_DEBUG_MASK="${ATH6KL_DBG_NONE}"
+
 #
 # Get the wlan MAC address from kernel command line.  Use a default
 # value if the address has not been set.
@@ -88,7 +113,7 @@ modprobe -q cfg80211 && sleep 0.2
 if ! grep -qs ath6kl_sdio /proc/modules; then
 	RETRIES="5"
 	while [ "${RETRIES}" -gt "0" ]; do
-		modprobe --ignore-install -q ath6kl_sdio || true
+		modprobe --ignore-install -q ath6kl_sdio debug_mask="${ATH6KL_DEBUG_MASK}" || true
 		[ -d "/sys/class/net/wlan0" ] && break
 		RETRIES="$((RETRIES - 1))"
 		rmmod ath6kl_sdio > /dev/null
