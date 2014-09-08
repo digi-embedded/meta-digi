@@ -44,6 +44,12 @@ PREFERRED_VERSION_linux-dey = \"2.6.35.14\"
 PREFERRED_VERSION_u-boot-dey = \"2009.08\"
 "
 
+RM_WORK_CFG="
+INHERIT += \"rm_work\"
+# Exclude rm_work for some key packages (for debugging purposes)
+RM_WORK_EXCLUDE += \"dey-image-graphical dey-image-minimal linux-dey u-boot-dey\"
+"
+
 REPO="$(which repo)"
 
 error() {
@@ -198,7 +204,9 @@ for platform in ${DY_PLATFORMS}; do
 					if [ -n "${kernel_ver}" ]; then
 						printf "${KERNEL_2X_CFG}" >> conf/local.conf
 					fi
-					[ "${DY_RM_WORK}" = "true" ] && printf "\nINHERIT += \"rm_work\"\n" >> conf/local.conf
+					if [ "${DY_RM_WORK}" = "true" ]; then
+						printf "${RM_WORK_CFG}" >> conf/local.conf
+					fi
 					for target in ${DY_TARGET}; do
 						printf "\n[INFO] Building the $target target.\n"
 						time bitbake ${target}
