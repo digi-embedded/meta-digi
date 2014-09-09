@@ -11,15 +11,6 @@ network={
 	key_mgmt=NONE
 }
 
-## -- Example AD-HOC network
-# ap_scan=1	# AD-HOC mode (Atheros driver)
-# network={
-# 	mode=1
-# 	frequency=2412
-# 	ssid="adhoc_network"
-# 	key_mgmt=NONE
-# }
-
 # -- SoftAP mode
 # ap_scan=2
 # network={
