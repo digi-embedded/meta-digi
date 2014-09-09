@@ -1,0 +1,5 @@
+
+auto eth1
+iface eth1 inet static
+        address ##ETH1_STATIC_IP##
+        netmask ##ETH1_STATIC_NETMASK##

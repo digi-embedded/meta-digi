@@ -1,0 +1,6 @@
+
+auto wlan0
+iface wlan0 inet dhcp
+       udhcpc_opts -b
+       wpa-driver ##WPA_DRIVER##
+       wpa-conf /etc/wpa_supplicant.conf

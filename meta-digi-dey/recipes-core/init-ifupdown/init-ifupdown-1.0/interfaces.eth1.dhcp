@@ -1,0 +1,4 @@
+
+auto eth1
+iface eth1 inet dhcp
+       udhcpc_opts -b

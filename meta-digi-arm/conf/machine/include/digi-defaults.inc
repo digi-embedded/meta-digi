@@ -30,6 +30,22 @@ HAVE_GUI     = "${@base_contains('DISTRO_FEATURES', 'x11', '1', '', d)}"
 HAVE_EXAMPLE = "${@base_contains('IMAGE_FEATURES', 'dey-examples', '1', '', d)}"
 IS_KERNEL_2X = "${@base_version_less_or_equal('PREFERRED_VERSION_linux-dey', '2.6.35.14', '1', '', d)}"
 
+#
+# Ethernet configuration used in recipes
+#
+# ETHx_MODE, WLANx_MODE accepted values: 'dhcp' or 'static'
+#
+ETH0_MODE            ?= "static"
+ETH0_STATIC_IP       ?= "192.168.42.30"
+ETH0_STATIC_NETMASK  ?= "255.255.255.0"
+ETH0_STATIC_GATEWAY  ?= "192.168.42.1"
+ETH1_MODE            ?= "static"
+ETH1_STATIC_IP       ?= "192.168.44.30"
+ETH1_STATIC_NETMASK  ?= "255.255.255.0"
+WLAN0_MODE           ?= "static"
+WLAN0_STATIC_IP      ?= "192.168.43.30"
+WLAN0_STATIC_NETMASK ?= "255.255.255.0"
+
 # Digi BSP default settings
 IMAGE_CLASSES = "image_types_digi"
 

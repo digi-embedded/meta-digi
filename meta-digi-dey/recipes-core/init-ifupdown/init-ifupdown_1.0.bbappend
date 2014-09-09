@@ -2,24 +2,34 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
 
+SRC_URI_append = " \
+	file://interfaces.eth0.static \
+	file://interfaces.eth0.dhcp \
+	file://interfaces.eth1.static \
+	file://interfaces.eth1.dhcp \
+	file://interfaces.wlan0.static \
+	file://interfaces.wlan0.dhcp"
+
 SRC_URI_append_mx5 = " file://ifup"
 
 WPA_DRIVER ?= "wext"
 
 do_install_append() {
-	# Enable or disable second ethernet interface
-	if [ -n "${HAVE_EXT_ETH}" ]; then
-		sed -i -e '/^.*auto eth1.*/cauto eth1' ${D}${sysconfdir}/network/interfaces
-	else
-		sed -i -e '/^.*auto eth1.*/c#auto eth1' ${D}${sysconfdir}/network/interfaces
-	fi
-	# Enable or disable wifi interface
-	if [ -n "${HAVE_WIFI}" ]; then
-		sed -i -e '/^.*auto wlan0.*/cauto wlan0' ${D}${sysconfdir}/network/interfaces
-	else
-		sed -i -e '/^.*auto wlan0.*/c#auto wlan0' ${D}${sysconfdir}/network/interfaces
-	fi
-	# Configure wpa_supplicant driver
+	# Create 'interfaces' file dynamically
+	cat ${WORKDIR}/interfaces.eth0.${ETH0_MODE} >> ${D}${sysconfdir}/network/interfaces
+	[ -n "${HAVE_EXT_ETH}" ] && cat ${WORKDIR}/interfaces.eth1.${ETH1_MODE} >> ${D}${sysconfdir}/network/interfaces
+	[ -n "${HAVE_WIFI}" ] && cat ${WORKDIR}/interfaces.wlan0.${WLAN0_MODE} >> ${D}${sysconfdir}/network/interfaces
+
+	# Replace interface parameters
+	sed -i -e 's,##ETH0_STATIC_IP##,${ETH0_STATIC_IP},g' ${D}${sysconfdir}/network/interfaces
+	sed -i -e 's,##ETH0_STATIC_NETMASK##,${ETH0_STATIC_NETMASK},g' ${D}${sysconfdir}/network/interfaces
+	sed -i -e 's,##ETH0_STATIC_GATEWAY##,${ETH0_STATIC_GATEWAY},g' ${D}${sysconfdir}/network/interfaces
+	sed -i -e 's,##ETH1_STATIC_IP##,${ETH1_STATIC_IP},g' ${D}${sysconfdir}/network/interfaces
+	sed -i -e 's,##ETH1_STATIC_NETMASK##,${ETH1_STATIC_NETMASK},g' ${D}${sysconfdir}/network/interfaces
+	sed -i -e 's,##ETH1_STATIC_GATEWAY##,${ETH1_STATIC_GATEWAY},g' ${D}${sysconfdir}/network/interfaces
+	sed -i -e 's,##WLAN0_STATIC_IP##,${WLAN0_STATIC_IP},g' ${D}${sysconfdir}/network/interfaces
+	sed -i -e 's,##WLAN0_STATIC_NETMASK##,${WLAN0_STATIC_NETMASK},g' ${D}${sysconfdir}/network/interfaces
+	sed -i -e 's,##WLAN0_STATIC_GATEWAY##,${WLAN0_STATIC_GATEWAY},g' ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WPA_DRIVER##,${WPA_DRIVER},g" ${D}${sysconfdir}/network/interfaces
 }
 
