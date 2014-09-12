@@ -5,7 +5,13 @@ DESCRIPTION = "Graphical image based on SATO, a gnome mobile environment visual 
 
 PR = "${INC_PR}.0"
 
-IMAGE_FEATURES += "package-management dey-gstreamer x11-base x11-sato"
+IMAGE_FEATURES += " \
+    dey-gstreamer \
+    dey-qt \
+    package-management \
+    x11-base \
+    x11-sato \
+"
 
 LICENSE = "MIT"
 
