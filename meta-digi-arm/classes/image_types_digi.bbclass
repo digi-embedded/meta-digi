@@ -62,7 +62,7 @@ IMAGE_CMD_ubifs() {
 		peb_it="$(echo ${FLASH_PEB} | cut -d',' -f${i})"
 		leb_it="$(echo ${FLASH_LEB} | cut -d',' -f${i})"
 		mio_it="$(echo ${FLASH_MIO} | cut -d',' -f${i})"
-		mkfs.ubifs -r ${IMAGE_ROOTFS} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.ubifs -m ${mio_it} -e ${leb_it} -c ${mlc_it}
+		mkfs.ubifs -r ${IMAGE_ROOTFS} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${peb_it}.rootfs.ubifs -m ${mio_it} -e ${leb_it} -c ${mlc_it} ${MKUBIFS_ARGS}
 		ln -sf ${IMAGE_NAME}.${peb_it}.rootfs.ubifs ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.${peb_it}.ubifs
 	done
 }
