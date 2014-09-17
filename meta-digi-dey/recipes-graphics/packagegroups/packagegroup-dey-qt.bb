@@ -11,8 +11,7 @@ PR = "r0"
 inherit packagegroup
 
 RDEPENDS_${PN} = "\
-	packagegroup-core-qt-demoapps \
-	qt4-plugin-phonon-backend-gstreamer \
-	qt4-demos \
-	qt4-examples \
+    packagegroup-core-qt-demoapps \
+    qt4-plugin-phonon-backend-gstreamer \
+    qt4-demos \
 "

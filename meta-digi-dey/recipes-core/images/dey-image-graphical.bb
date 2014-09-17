@@ -6,7 +6,6 @@ DESCRIPTION = "Graphical image based on SATO, a gnome mobile environment visual 
 PR = "${INC_PR}.0"
 
 IMAGE_FEATURES += " \
-    dey-gstreamer \
     dey-qt \
     package-management \
     x11-base \
@@ -27,6 +26,11 @@ SOC_IMAGE_INSTALL_mx6 = "gpu-viv-bin-mx6q gpu-viv-g2d"
 
 IMAGE_INSTALL += " \
     ${SOC_IMAGE_INSTALL} \
-    owl-video \
+    ${@base_contains("MACHINE_FEATURES", "accel-video", "owl-video", "", d)} \
     pointercal-xinput \
 "
+
+# Do not install some of the 'RRECOMMENDS_qt4-demos' to save space:
+# 'qt4-demos-doc' for all platforms and 'qt4-examples' for ccardimx28
+BAD_RECOMMENDATIONS += "qt4-demos-doc"
+BAD_RECOMMENDATIONS_append_ccardimx28 = " qt4-examples"
