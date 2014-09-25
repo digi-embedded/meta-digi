@@ -18,8 +18,6 @@ include dey-image-minimal.bb
 
 REQUIRED_DISTRO_FEATURES = "x11"
 
-WEB = "web-webkit"
-
 SOC_IMAGE_INSTALL = ""
 SOC_IMAGE_INSTALL_mx5 = "amd-gpu-x11-bin-mx51"
 SOC_IMAGE_INSTALL_mx6 = "gpu-viv-bin-mx6q gpu-viv-g2d"
