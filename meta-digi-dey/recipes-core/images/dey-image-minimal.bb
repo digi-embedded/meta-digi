@@ -21,6 +21,10 @@ inherit distro_features_check
 
 CONFLICT_DISTRO_FEATURES = "directfb wayland"
 
+# Add 'x11' to CONFLICT_DISTRO_FEATURES for 'dey-image-minimal' family of recipes but
+# not for 'dey-image-graphical' (NOTICE: dey-image-graphical recipe includes this one)
+CONFLICT_DISTRO_FEATURES += "${@base_ifelse(d.getVar('PN', True).startswith('dey-image-minimal'), "x11", "")}"
+
 # Only common features to remain here.
 VIRTUAL_RUNTIME_ssh_server ?= "ssh-server-dropbear"
 IMAGE_FEATURES += "${VIRTUAL_RUNTIME_ssh_server}"
