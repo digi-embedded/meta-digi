@@ -50,6 +50,10 @@ INHERIT += \"rm_work\"
 RM_WORK_EXCLUDE += \"dey-image-graphical dey-image-minimal linux-dey u-boot-dey\"
 "
 
+X11_REMOVAL_CFG="
+DISTRO_FEATURES_remove = \"x11\"
+"
+
 REPO="$(which repo)"
 
 error() {
@@ -206,6 +210,10 @@ for platform in ${DY_PLATFORMS}; do
 					fi
 					if [ "${DY_RM_WORK}" = "true" ]; then
 						printf "${RM_WORK_CFG}" >> conf/local.conf
+					fi
+					# Remove 'x11' distro feature if building minimal images
+					if echo "${DY_TARGET}" | grep -qs "dey-image-minimal"; then
+						printf "${X11_REMOVAL_CFG}" >> conf/local.conf
 					fi
 					for target in ${DY_TARGET}; do
 						printf "\n[INFO] Building the $target target.\n"
