@@ -30,6 +30,16 @@ MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/meta-digi/sdk/config"
 # Blacklist platforms (not officially supported in a DEY release)
 MKP_BLACKLIST_PLATFORMS=""
 
+MKP_SETUP_ENVIRONMENT='#!/bin/bash
+
+if [ "${BASH_SOURCE}" = "${0}" ]; then
+	printf "\\n[ERROR]: This script needs to be sourced\\n\\n"
+else
+	cd $(dirname ${BASH_SOURCE})
+	. %s/sources/poky/oe-init-build-env .
+fi
+'
+
 ## Local functions
 usage() {
 	cat <<EOF
@@ -81,17 +91,18 @@ do_mkproject() {
 	source ${MKP_SCRIPTPATH}/sources/poky/oe-init-build-env .
 	unset TEMPLATECONF
 
-	# Remove possible duplicated entries in PATH (due to re-sourcing the script)
-	export PATH=$(printf ${PATH} | awk -v RS=: '{if (!arr[$0]++) {printf("%s%s", !ln++ ? "" : ":", $0) }}')
-
-	# Customize project if just created
+	# New project
 	if [ -z "${MKP_OLD_PROJECT}" ]; then
+		# Customize project
 		chmod 644 ${MKP_PROJECTPATH}/conf/bblayers.conf ${MKP_PROJECTPATH}/conf/local.conf
 		sed -i  -e "s,##DIGIBASE##,${MKP_SCRIPTPATH}/sources,g" ${MKP_PROJECTPATH}/conf/bblayers.conf
 		if [ -n "${MKP_VARIANT+x}" ]; then
 			sed -i -e "/^MACHINE_VARIANT =/cMACHINE_VARIANT = \"${MKP_VARIANT}\"" \
 				${MKP_PROJECTPATH}/conf/local.conf
 		fi
+		# Create dey-setup-environment script
+		printf "${MKP_SETUP_ENVIRONMENT}" "${MKP_SCRIPTPATH}" > ${MKP_PROJECTPATH}/dey-setup-environment
+		chmod +x ${MKP_PROJECTPATH}/dey-setup-environment
 	fi
 }
 
@@ -137,6 +148,16 @@ else
 fi
 
 # clean-up all variables (so the script can be re-sourced)
-unset MKP_AVAILABLE_PLATFORMS MKP_BLACKLIST_PLATFORMS MKP_GREEN MKP_LIST_PLATFORMS \
-      MKP_NONE MKP_OLD_PROJECT MKP_PLATFORM MKP_PROJECTPATH MKP_RED MKP_SCRIPTNAME \
-      MKP_SCRIPTPATH MKP_VARIANT
+unset MKP_AVAILABLE_PLATFORMS \
+      MKP_BLACKLIST_PLATFORMS \
+      MKP_GREEN \
+      MKP_LIST_PLATFORMS \
+      MKP_NONE \
+      MKP_OLD_PROJECT \
+      MKP_PLATFORM \
+      MKP_PROJECTPATH \
+      MKP_RED \
+      MKP_SCRIPTNAME \
+      MKP_SCRIPTPATH \
+      MKP_SETUP_ENVIRONMENT \
+      MKP_VARIANT
