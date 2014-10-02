@@ -14,6 +14,7 @@
 #  !Description: Yocto autobuild script from Jenkins.
 #
 #  Parameters set by Jenkins:
+#     DY_BUILD_TCHAIN:   Build toolchains for DEY images
 #     DY_BUILD_VARIANTS: Build all platform variants
 #     DY_DISTRO:         Distribution name (the default is 'dey')
 #     DY_PLATFORMS:      Platforms to build
@@ -73,7 +74,7 @@ copy_images() {
 	if echo ${JOB_NAME} | grep -qs 'dey.*release'; then
 		cp -r tmp/deploy/* ${1}/
 	else
-		cp -r tmp/deploy/images ${1}/
+		cp -r tmp/deploy/{images,sdk} ${1}/
 	fi
 	# Jenkins artifact archiver does not copy symlinks, so remove them
 	# beforehand to avoid ending up with several duplicates of the same
@@ -117,6 +118,9 @@ purge_sstate() {
 # Set default settings if Jenkins does not do it
 [ -z "${DY_TARGET}" ] && DY_TARGET="dey-image-minimal"
 [ -z "${DY_DISTRO}" ] && DY_DISTRO="dey"
+
+# If DY_BUILD_TCHAIN is unset, set it for release jobs
+[ -z "${DY_BUILD_TCHAIN}" ] && [[ "${JOB_NAME}" =~ dey-.*-release ]] && DY_BUILD_TCHAIN="true"
 
 # Per-platform variants
 while read _pl _var; do
@@ -216,8 +220,13 @@ for platform in ${DY_PLATFORMS}; do
 						printf "${X11_REMOVAL_CFG}" >> conf/local.conf
 					fi
 					for target in ${DY_TARGET}; do
-						printf "\n[INFO] Building the $target target.\n"
+						printf "\n[INFO] Building the ${target} target.\n"
 						time bitbake ${target}
+						# Build the toolchain for DEY images
+						if [ "${DY_BUILD_TCHAIN}" = "true" ] && echo "${target}" | grep -qs '^dey-image-[^-]\+$'; then
+							printf "\n[INFO] Building the toolchain for ${target}.\n"
+							time bitbake -c populate_sdk ${target}
+						fi
 					done
 					purge_sstate
 				)
