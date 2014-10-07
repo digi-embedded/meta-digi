@@ -74,7 +74,10 @@ copy_images() {
 	if echo ${JOB_NAME} | grep -qs 'dey.*release'; then
 		cp -r tmp/deploy/* ${1}/
 	else
-		cp -r tmp/deploy/{images,sdk} ${1}/
+		cp -r tmp/deploy/images ${1}/
+		if [ "${DY_BUILD_TCHAIN}" = "true" ]; then
+			cp -r tmp/deploy/sdk ${1}/
+		fi
 	fi
 	# Jenkins artifact archiver does not copy symlinks, so remove them
 	# beforehand to avoid ending up with several duplicates of the same
