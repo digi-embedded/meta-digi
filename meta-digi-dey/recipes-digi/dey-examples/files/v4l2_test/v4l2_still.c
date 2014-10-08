@@ -69,6 +69,7 @@ extern "C" {
     static int g_bpp = 16;
     static int g_camera_framerate = 30;
     static int g_capture_mode = 0;
+    static char g_v4l_device[100] = "/dev/video0";
 
     void usage(void)
     {
@@ -81,6 +82,7 @@ extern "C" {
                "-c    Convert to YUV420P. This option is valid for interleaved pixel\n"
                "      formats only - YUYV, UYVY, YUV444\n"
                "-m    Capture mode, 0-low resolution(default), 1-high resolution \n"
+               "-d    Camera select, /dev/video0, /dev/video1 \n"
                "-fr   Capture frame rate, 30fps by default\n"
                "The output is saved in ./still.uyvy\n"
               );
@@ -162,15 +164,14 @@ extern "C" {
 
     int v4l_capture_setup(int * fd_v4l)
     {
-        char v4l_device[100] = "/dev/video0";
         struct v4l2_streamparm parm;
         struct v4l2_format fmt;
         struct v4l2_crop crop;
         int ret = 0;
 
-        if ((*fd_v4l = open(v4l_device, O_RDWR, 0)) < 0)
+        if ((*fd_v4l = open(g_v4l_device, O_RDWR, 0)) < 0)
         {
-            printf("Unable to open %s\n", v4l_device);
+            printf("Unable to open %s\n", g_v4l_device);
             return -1;
         }
 
@@ -325,6 +326,9 @@ exit1:
                     usage();
                     return -1;
                 }
+            }
+            else if (strcmp(argv[i], "-d") == 0) {
+                strcpy(g_v4l_device, argv[++i]);
             }
             else if (strcmp(argv[i], "-fr") == 0) {
                 if (argv[++i])
