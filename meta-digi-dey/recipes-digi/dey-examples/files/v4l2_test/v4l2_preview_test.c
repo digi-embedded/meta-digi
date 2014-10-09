@@ -230,7 +230,7 @@ static int cmd_area_zoom(int fd)
 	struct v4l2_rect zoom_rectangle;
 	int ret = -1;
 
-	printf("Enter rectangle's values (top, left, width, height): ");
+	printf("Enter rectangle's values (top, left, width [>=8], height [>=8]): ");
 	if ((scanf("%d,%d,%d,%d", &zoom_rectangle.top, &zoom_rectangle.left,
 		   &zoom_rectangle.width, &zoom_rectangle.height)) != 4 || should_stop) {
 		printf("Enter four parameters\n");
