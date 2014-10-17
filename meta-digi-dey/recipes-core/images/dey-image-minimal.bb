@@ -37,6 +37,9 @@ IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "accel-video", "dey-gstr
 IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "wifi", "dey-wireless", "", d)}'
 IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-bluetooth", "", d)}'
 
+# SDK features (for toolchains generated from an image with populate_sdk)
+SDKIMAGE_FEATURES ?= "dev-pkgs dbg-pkgs staticdev-pkgs"
+
 IMAGE_ROOTFS_SIZE = "8192"
 
 # Do not install udev-cache
