@@ -714,9 +714,14 @@ int v4l2_get_control(int fd, int id, int *value)
 	return retval;
 }
 
-int v4l2_rotate(int fd, int rotate)
+int v4l2_set_rotate(int fd, int rotate)
 {
 	/* This is not supported by V4L2, it's done by the IPUv3 driver */
+	return v4l2_set_control(fd, V4L2_CID_MXC_VF_ROT, rotate);
+}
+
+int v4l2_rotate(int fd, int rotate)
+{
 	int retval;
 
 	/* Stop overlay */
@@ -725,15 +730,12 @@ int v4l2_rotate(int fd, int rotate)
 		return retval;
 
 	/* Set new rotation value */
-	retval = v4l2_set_control(fd, V4L2_CID_MXC_VF_ROT, rotate);
-	if (retval < 0)
-		return retval;
-	/* Start overlay */
-	retval = v4l2_overlay_control(fd, 1);
-	if (retval < 1)
+	retval = v4l2_set_rotate(fd, rotate);
+	if (retval < 0 && errno != EINVAL)
 		return retval;
 
-	return retval;
+	/* Start overlay */
+	return v4l2_overlay_control(fd, 1);
 }
 
 int v4l2_set_brightness(int fd, int percentage)

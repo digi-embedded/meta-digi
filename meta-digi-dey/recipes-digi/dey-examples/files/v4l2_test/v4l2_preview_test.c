@@ -99,6 +99,9 @@ static void *v4l2_camera_thread(void *pargs)
 	/* Restore default cropping - no zoom */
 	v4l2_reset_cropping_rectangle(args->fd_in);
 
+	/* Reset rotation to ROTATE_NONE */
+	v4l2_set_rotate(args->fd_in, 0);
+
 	/* Set size in overlay */
 	v4l2_set_format_overlay(args->fd_in,
 				args->options.top, args->options.left,

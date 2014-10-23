@@ -159,6 +159,7 @@ int v4l2_reset_cropping_rectangle(int fd);
 int v4l2_fb_blank(int fd);
 int v4l2_fb_unblank(int fd);
 int v4l2_zoom(int fd, int zoom);
+int v4l2_set_rotate(int fd, int rotate);
 int v4l2_rotate(int fd, int rotate);
 int v4l2_crop_input(int fd, struct v4l2_rect *crop_rectangle);
 int v4l2_get_cropping_limits(int fd, struct v4l2_rect *limits);
