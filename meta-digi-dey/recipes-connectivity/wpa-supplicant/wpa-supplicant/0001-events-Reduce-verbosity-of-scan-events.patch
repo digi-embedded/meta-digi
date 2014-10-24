@@ -1,0 +1,37 @@
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Wed, 8 Oct 2014 15:50:34 +0200
+Subject: [PATCH] events: Reduce verbosity of scan events.
+
+Use wpa_msg_ctrl instead of wpa_msg to avoid cluttering the UI with log
+messages.
+
+https://jira.digi.com/browse/DEL-1024
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ wpa_supplicant/events.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/wpa_supplicant/events.c b/wpa_supplicant/events.c
+index a72f2fae7e1a..2ed2ab9254be 100644
+--- a/wpa_supplicant/events.c
++++ b/wpa_supplicant/events.c
+@@ -2892,15 +2892,15 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
+ 			wpa_s->own_scan_running = 1;
+ 			if (wpa_s->last_scan_req == MANUAL_SCAN_REQ &&
+ 			    wpa_s->manual_scan_use_id) {
+-				wpa_msg(wpa_s, MSG_INFO, WPA_EVENT_SCAN_STARTED "id=%u",
++				wpa_msg_ctrl(wpa_s, MSG_INFO, WPA_EVENT_SCAN_STARTED "id=%u",
+ 					wpa_s->manual_scan_id);
+ 			} else {
+-				wpa_msg(wpa_s, MSG_INFO, WPA_EVENT_SCAN_STARTED);
++				wpa_msg_ctrl(wpa_s, MSG_INFO, WPA_EVENT_SCAN_STARTED);
+ 			}
+ 		} else {
+ 			wpa_dbg(wpa_s, MSG_DEBUG, "External program started a scan");
+ 			wpa_s->external_scan_running = 1;
+-			wpa_msg(wpa_s, MSG_INFO, WPA_EVENT_SCAN_STARTED);
++			wpa_msg_ctrl(wpa_s, MSG_INFO, WPA_EVENT_SCAN_STARTED);
+ 		}
+ 		break;
+ 	case EVENT_SCAN_RESULTS:
