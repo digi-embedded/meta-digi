@@ -26,13 +26,15 @@ DEFAULTTUNE_mx6 ?= "cortexa9hf-neon"
 # Sub-architecture support
 MACHINE_SOCARCH ?= ""
 MACHINE_SOCARCH_mx5 = "${TUNE_PKGARCH}-mx5"
-MACHINE_SOCARCH_mx6 = "${TUNE_PKGARCH}-mx6"
+MACHINE_SOCARCH_mx6q = "${TUNE_PKGARCH}-mx6qdl"
+MACHINE_SOCARCH_mx6dl = "${TUNE_PKGARCH}-mx6qdl"
+MACHINE_SOCARCH_mx6sl = "${TUNE_PKGARCH}-mx6sl"
 PACKAGE_EXTRA_ARCHS_append = " ${MACHINE_SOCARCH}"
 
 MACHINE_ARCH_FILTER = "virtual/kernel"
 MACHINE_SOCARCH_FILTER = "libfslcodec libfslvpuwrap libfslparser gst-fsl-plugins"
 MACHINE_SOCARCH_FILTER_append_mx5 = " virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl"
-MACHINE_SOCARCH_FILTER_append_mx6 = " virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl"
+MACHINE_SOCARCH_FILTER_append_mx6 = " virtual/libopenvg virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl"
 
 INHERIT += "fsl-dynamic-packagearch"
 
@@ -54,9 +56,15 @@ PREFERRED_PROVIDER_virtual/libgles2_mx5 ?= "amd-gpu-${GPU_FLAVOUR}bin-mx51"
 
 # mx6 GPU libraries
 PREFERRED_PROVIDER_virtual/egl_mx6 ?= "gpu-viv-bin-mx6q"
-PREFERRED_PROVIDER_virtual/libgl_mx6 ?= "gpu-viv-bin-mx6q"
-PREFERRED_PROVIDER_virtual/libgles1_mx6 ?= "gpu-viv-bin-mx6q"
-PREFERRED_PROVIDER_virtual/libgles2_mx6 ?= "gpu-viv-bin-mx6q"
+PREFERRED_PROVIDER_virtual/libgles1_mx6q ?= "gpu-viv-bin-mx6q"
+PREFERRED_PROVIDER_virtual/libgles1_mx6dl ?= "gpu-viv-bin-mx6q"
+PREFERRED_PROVIDER_virtual/libgles1_mx6sl ?= "mesa"
+PREFERRED_PROVIDER_virtual/libgles2_mx6q ?= "gpu-viv-bin-mx6q"
+PREFERRED_PROVIDER_virtual/libgles2_mx6dl ?= "gpu-viv-bin-mx6q"
+PREFERRED_PROVIDER_virtual/libgles2_mx6sl ?= "mesa"
+PREFERRED_PROVIDER_virtual/libgl_mx6q ?= "gpu-viv-bin-mx6q"
+PREFERRED_PROVIDER_virtual/libgl_mx6dl ?= "gpu-viv-bin-mx6q"
+PREFERRED_PROVIDER_virtual/libgl_mx6sl ?= "mesa"
 
 EXTRA_IMAGEDEPENDS = "u-boot"
 

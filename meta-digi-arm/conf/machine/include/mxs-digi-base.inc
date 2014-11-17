@@ -1,4 +1,4 @@
-# Digi's i.MX platforms common settings
+# Digi's MXS platforms common settings
 include conf/machine/include/digi-defaults.inc
 include conf/machine/include/soc-family.inc
 include conf/machine/include/tune-arm926ejs.inc
