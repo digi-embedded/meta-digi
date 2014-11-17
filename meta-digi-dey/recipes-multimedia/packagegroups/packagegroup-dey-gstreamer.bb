@@ -7,6 +7,7 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=3f40d7994397109285ec7b81fdeb3
 
 PR = "r0"
 
+PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
 MACHINE_GSTREAMER_PLUGIN ?= ""
@@ -21,5 +22,3 @@ RDEPENDS_${PN} = " \
     ${MACHINE_GSTREAMER_PLUGIN} \
     ${@base_conditional('HAVE_GUI', '1' , '', 'gst-fsl-plugin-gplay', d)} \
 "
-
-PACKAGE_ARCH = "${MACHINE_ARCH}"

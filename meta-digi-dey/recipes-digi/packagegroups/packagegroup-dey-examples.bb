@@ -9,6 +9,7 @@ PR = "r0"
 
 DEPENDS = "virtual/kernel"
 
+PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
 RDEPENDS_${PN} = "\
@@ -53,5 +54,4 @@ RDEPENDS_${PN}_append_ccimx6 = "\
 	dey-examples-v4l2 \
 "
 
-PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccardimx28|ccimx5|ccimx6)"
