@@ -152,8 +152,6 @@ CONFIG_EAP_LEAP=y
 
 # Wi-Fi Protected Setup (WPS)
 CONFIG_WPS=y
-# Enable WSC 2.0 support
-CONFIG_WPS2=y
 # Enable WPS external registrar functionality
 #CONFIG_WPS_ER=y
 # Disable credentials for an open network by default when acting as a WPS
@@ -192,8 +190,10 @@ CONFIG_SMARTCARD=y
 # Select control interface backend for external programs, e.g, wpa_cli:
 # unix = UNIX domain sockets (default for Linux/*BSD)
 # udp = UDP sockets using localhost (127.0.0.1)
+# udp6 = UDP IPv6 sockets using localhost (::1)
 # named_pipe = Windows Named Pipe (default for Windows)
 # udp-remote = UDP sockets with remote access (only for tests systems/purpose)
+# udp6-remote = UDP IPv6 sockets with remote access (only for tests purpose)
 # y = use default (backwards compatibility)
 # If this option is commented out, control interface is not included in the
 # build.
@@ -253,7 +253,7 @@ CONFIG_BACKEND=file
 # main_none = Very basic example (development use only)
 #CONFIG_MAIN=main
 
-# Select wrapper for operatins system and C library specific functions
+# Select wrapper for operating system and C library specific functions
 # unix = UNIX/POSIX like systems (default)
 # win32 = Windows systems
 # none = Empty template
@@ -266,6 +266,9 @@ CONFIG_BACKEND=file
 
 # Should we use poll instead of select? Select is used by default.
 #CONFIG_ELOOP_POLL=y
+
+# Should we use epoll instead of select? Select is used by default.
+#CONFIG_ELOOP_EPOLL=y
 
 # Select layer 2 packet implementation
 # linux = Linux packet socket (default)
