@@ -19,6 +19,9 @@ SRC_URI[sha256sum] = "c0a8473842fc757ff4c225f82b83d98bba5da0dca0cf843cfc7792064a
 S = "${WORKDIR}/${PN}-${PV}/src"
 
 EXTRA_OEMAKE = " \
+    CC='${CC}' \
+    CXX='${CXX}' \
+    LD='${LD}' \
     ARMTOOLSPREFIX=${TARGET_PREFIX} \
     INSTALL_OWNER1= \
     INSTALL_OWNER2= \
