@@ -25,11 +25,12 @@ get_emmc_block_device() {
 	fi
 }
 
+RESIZE2FS="$(which resize2fs)"
 EMMC_BLOCK_DEVICE="$(get_emmc_block_device)"
-if [ "${RESIZE_EXT4FS}" = "yes" -a -n "${EMMC_BLOCK_DEVICE}" ]; then
+if [ -x "${RESIZE2FS}" -a -n "${EMMC_BLOCK_DEVICE}" ]; then
 	PARTITIONS="$(blkid | sed -ne "{s,\(^${EMMC_BLOCK_DEVICE}[^:]\+\):.*TYPE=\"ext4\".*,\1,g;T;p}" | sort -u)"
 	for i in ${PARTITIONS}; do
-		if ! resize2fs ${i} 2>/dev/null; then
+		if ! ${RESIZE2FS} ${i} 2>/dev/null; then
 			echo "ERROR: resize2fs ${i}"
 		fi
 	done
