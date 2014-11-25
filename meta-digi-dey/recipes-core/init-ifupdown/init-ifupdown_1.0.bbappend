@@ -17,16 +17,27 @@ SRC_URI_append_mx5 = " file://ifup"
 WPA_DRIVER ?= "wext"
 
 do_install_append() {
+	# Install DNS servers handler
+	install -m 0755 ${WORKDIR}/resolv ${D}${sysconfdir}/network/if-up.d/resolv
+
 	# Create 'interfaces' file dynamically
 	cat ${WORKDIR}/interfaces.eth0.${ETH0_MODE} >> ${D}${sysconfdir}/network/interfaces
 	[ -n "${HAVE_EXT_ETH}" ] && cat ${WORKDIR}/interfaces.eth1.${ETH1_MODE} >> ${D}${sysconfdir}/network/interfaces
 	[ -n "${HAVE_WIFI}" ] && cat ${WORKDIR}/interfaces.wlan0.${WLAN0_MODE} >> ${D}${sysconfdir}/network/interfaces
 
-	# Install DNS servers handler but remove DNS config lines if no DNS specified
-	install -m 0755 ${WORKDIR}/resolv ${D}${sysconfdir}/network/if-up.d/resolv
+	# Remove config entries if corresponding variable is not defined
 	[ -z "${ETH0_STATIC_DNS}" ] && sed -i -e "/##ETH0_STATIC_DNS##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${ETH0_STATIC_GATEWAY}" ] && sed -i -e "/##ETH0_STATIC_GATEWAY##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${ETH0_STATIC_IP}" ] && sed -i -e "/##ETH0_STATIC_IP##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${ETH0_STATIC_NETMASK}" ] && sed -i -e "/##ETH0_STATIC_NETMASK##/d" ${D}${sysconfdir}/network/interfaces
 	[ -z "${ETH1_STATIC_DNS}" ] && sed -i -e "/##ETH1_STATIC_DNS##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${ETH1_STATIC_GATEWAY}" ] && sed -i -e "/##ETH1_STATIC_GATEWAY##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${ETH1_STATIC_IP}" ] && sed -i -e "/##ETH1_STATIC_IP##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${ETH1_STATIC_NETMASK}" ] && sed -i -e "/##ETH1_STATIC_NETMASK##/d" ${D}${sysconfdir}/network/interfaces
 	[ -z "${WLAN0_STATIC_DNS}" ] && sed -i -e "/##WLAN0_STATIC_DNS##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${WLAN0_STATIC_GATEWAY}" ] && sed -i -e "/##WLAN0_STATIC_GATEWAY##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${WLAN0_STATIC_IP}" ] && sed -i -e "/##WLAN0_STATIC_IP##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${WLAN0_STATIC_NETMASK}" ] && sed -i -e "/##WLAN0_STATIC_NETMASK##/d" ${D}${sysconfdir}/network/interfaces
 
 	# Replace interface parameters
 	sed -i -e "s,##ETH0_STATIC_IP##,${ETH0_STATIC_IP},g" ${D}${sysconfdir}/network/interfaces
