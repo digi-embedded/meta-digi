@@ -1,0 +1,30 @@
+#!/bin/sh
+#===============================================================================
+#
+#  resolv
+#
+#  Copyright (C) 2014 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Configure static DNS servers with ifup
+#
+#===============================================================================
+
+# Only for static method
+[ "${METHOD}" != "static" ] && exit 0
+
+RESOLVCONF="$(readlink /etc/resolv.conf)"
+
+NAMESERVERS=""
+for NS in ${IF_DNS_NAMESERVER} ${IF_DNS_NAMESERVERS}; do
+        NAMESERVERS="${NAMESERVERS:+${NAMESERVERS}\n}nameserver ${NS}"
+done
+
+if [ -n "${RESOLVCONF}" -a -n "${NAMESERVERS}" ]; then
+	printf "${NAMESERVERS}\n" > "${RESOLVCONF}"
+fi
