@@ -10,11 +10,11 @@ PR = "${DISTRO}.r0"
 DEPENDS = "libdigi nvram"
 
 SRC_URI = " \
-	file://env_funcs.c \
-	file://env_funcs.h \
-	file://environment.h \
-	file://main_env.c \
-	"
+    file://env_funcs.c \
+    file://env_funcs.h \
+    file://environment.h \
+    file://main_env.c \
+"
 
 S = "${WORKDIR}"
 

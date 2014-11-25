@@ -9,11 +9,13 @@ DEPENDS = "bluez4 dbus libnl"
 
 PR = "${DISTRO}.r0"
 
-SRC_URI = "${DIGI_MIRROR}/${PN}-${PV}.tar.bz2 \
-	   file://0001-enable-libnl3.patch \
-	   file://0002-cross-compile.patch \
-	   file://0003-abtfilt_wan-Rewrite-the-netlink-listener.patch \
-	   file://bluez-init"
+SRC_URI = " \
+    ${DIGI_MIRROR}/${PN}-${PV}.tar.bz2 \
+    file://0001-enable-libnl3.patch \
+    file://0002-cross-compile.patch \
+    file://0003-abtfilt_wan-Rewrite-the-netlink-listener.patch \
+    file://bluez-init \
+"
 
 SRC_URI[md5sum] = "06a26d3a368c33b508d660ea84d476ee"
 SRC_URI[sha256sum] = "b1af73003b622189b66d51911d429d6d205ac9227ec8278c8572ca0c68c7d5f3"

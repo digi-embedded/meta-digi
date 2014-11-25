@@ -3,11 +3,11 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 SRC_URI += " \
-	file://cherokee.conf \
-	file://cherokee.pem \
-	file://digi.gif \
-	file://index.html \
-	"
+    file://cherokee.conf \
+    file://cherokee.pem \
+    file://digi.gif \
+    file://index.html \
+"
 
 do_install_append() {
 	install -d ${D}${sysconfdir}/cherokee/ssl ${D}/srv/www

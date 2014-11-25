@@ -3,13 +3,13 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
 
 SRC_URI_append = " \
-	file://interfaces.eth0.static \
-	file://interfaces.eth0.dhcp \
-	file://interfaces.eth1.static \
-	file://interfaces.eth1.dhcp \
-	file://interfaces.wlan0.static \
-	file://interfaces.wlan0.dhcp \
-	file://resolv \
+    file://interfaces.eth0.static \
+    file://interfaces.eth0.dhcp \
+    file://interfaces.eth1.static \
+    file://interfaces.eth1.dhcp \
+    file://interfaces.wlan0.static \
+    file://interfaces.wlan0.dhcp \
+    file://resolv \
 "
 
 SRC_URI_append_mx5 = " file://ifup"

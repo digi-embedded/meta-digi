@@ -10,10 +10,10 @@ PR = "${DISTRO}.r0"
 PV = "2.1"
 
 SRC_URI = "\
-	file://Makefile \
-	file://gpio.c \
-	file://gpio.h \
-	file://COPYING \
-	"
+    file://COPYING \
+    file://gpio.c \
+    file://gpio.h \
+    file://Makefile \
+"
 
 S = "${WORKDIR}"
