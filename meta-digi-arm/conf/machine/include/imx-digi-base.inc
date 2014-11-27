@@ -69,11 +69,10 @@ PREFERRED_PROVIDER_virtual/libgl_mx6sl ?= "mesa"
 EXTRA_IMAGEDEPENDS = "u-boot"
 
 # Flash image types
-IMAGE_FSTYPES ?= "jffs2.sum tar.bz2 ubifs"
+IMAGE_FSTYPES ??= "jffs2.sum tar.bz2 ubifs"
 
 # MX6 does not have flash memory so build sdcard images
 SDCARD_ROOTFS_mx6 ?= "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.ext4"
-IMAGE_FSTYPES_mx6 ?= "boot.vfat ext4 sdcard tar.bz2"
 
 KERNEL_IMAGETYPE = "uImage"
 
