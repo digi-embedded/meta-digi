@@ -36,7 +36,7 @@ bt_init() {
 			exit
 		fi
 		BT_PWR_GPIO_NR="21"
-	elif [ "${MACHINENAME}" = "ccimx6adpt" -o "${MACHINENAME}" = "ccimx6sbc" ]; then
+	elif [ "${MACHINENAME}" = "ccimx6sbc" ]; then
 		BLUE_TOOTH_VARIANTS="0x02 0x03 0x04 0x06"
 		MOD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant)"
 		if ! echo ${BLUE_TOOTH_VARIANTS} | grep -qs ${MOD_VARIANT}; then
@@ -136,7 +136,7 @@ echo "Starting bluetooth services."
 
 # Initialize driver for 'ccardimx28js'
 MACHINENAME="$(cat /proc/device-tree/digi,machine,name 2>/dev/null || cat /sys/kernel/machine/name)"
-[ "${MACHINENAME}" = "ccardimx28" -o "${MACHINENAME}" = "ccimx6adpt" -o "${MACHINENAME}" = "ccimx6sbc" ] && bt_init
+[ "${MACHINENAME}" = "ccardimx28" -o "${MACHINENAME}" = "ccimx6sbc" ] && bt_init
 
 # Run bluetooth daemon
 if hciconfig hci0 up && bluetoothd; then
