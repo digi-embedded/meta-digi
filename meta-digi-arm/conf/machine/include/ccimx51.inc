@@ -37,24 +37,28 @@ module_autoload_pmic_battery = "pmic_battery"
 # To build any of these variants configure MACHINE_VARIANT on the project's
 # local.conf to the variant name.
 #
-# Name          WiFi    Eth2    RAM     Accel   GPU     VPU
-# ---------------------------------------------------------
-# 128           N       N       128     N       N       N
-# 128a          N       N       128     Y       N       N
-# 128agv        N       N       128     Y       Y       Y
-# agv           N       N       256     Y       Y       Y
-# eagv          N       Y       512     Y       Y       Y
-# w             Y       N       512     N       N       N
-# w128a         Y       N       128     Y       N       N
-# w128agv       Y       N       128     Y       Y       Y
-# wagv          Y       N       256     Y       Y       Y
-# weagv         Y       Y       512     Y       Y       Y
+# Name          WiFi    Eth2    RAM=128MB    NAND=2GB     Accel   GPU     VPU
+# ---------------------------------------------------------------------------
+# 128           N       N           Y           N         N       N       N
+# 128a          N       N           Y           N         Y       N       N
+# 128agv        N       N           Y           N         Y       Y       Y
+# agv           N       N           N           N         Y       Y       Y
+# agv4k         N       N           N           Y         Y       Y       Y
+# eagv          N       Y           N           N         Y       Y       Y
+# eagv4k        N       Y           N           Y         Y       Y       Y
+# w             Y       N           N           N         N       N       N
+# w128a         Y       N           Y           N         Y       N       N
+# w128agv       Y       N           Y           N         Y       Y       Y
+# wagv          Y       N           N           N         Y       Y       Y
+# weagv         Y       Y           N           N         Y       Y       Y
 
 # Per-variant machine features
 MACHINE_FEATURES_append_128a = " accelerometer"
 MACHINE_FEATURES_append_128agv = " accelerometer accel-video accel-graphics"
 MACHINE_FEATURES_append_agv = " accelerometer accel-video accel-graphics"
+MACHINE_FEATURES_append_agv4k = " accelerometer accel-video accel-graphics"
 MACHINE_FEATURES_append_eagv = " ext-eth accelerometer accel-video accel-graphics"
+MACHINE_FEATURES_append_eagv4k = " ext-eth accelerometer accel-video accel-graphics"
 MACHINE_FEATURES_append_w = " wifi"
 MACHINE_FEATURES_append_w128a = " wifi accelerometer"
 MACHINE_FEATURES_append_w128agv = " wifi accelerometer accel-video accel-graphics"
