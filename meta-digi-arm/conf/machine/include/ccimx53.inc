@@ -23,11 +23,11 @@ MACHINE_EXTRA_RRECOMMENDS += "kernel-module-scc2-driver"
 MACHINE_EXTRA_RRECOMMENDS += "kernel-module-sahara"
 MACHINE_EXTRA_RRECOMMENDS += "kernel-module-mt9v111-camera"
 
-module_autoload_mma7455l = "mma7455l"
-module_autoload_smsc911x = "smsc911x"
-module_autoload_scc2_driver = "scc2_driver"
-module_autoload_sahara = "sahara"
-module_autoload_mt9v111_camera = "mt9v111_camera"
+KERNEL_MODULE_AUTOLOAD += "mma7455l"
+KERNEL_MODULE_AUTOLOAD += "smsc911x"
+KERNEL_MODULE_AUTOLOAD += "scc2_driver"
+KERNEL_MODULE_AUTOLOAD += "sahara"
+KERNEL_MODULE_AUTOLOAD += "mt9v111_camera"
 
 #
 # Supported variants
