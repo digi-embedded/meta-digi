@@ -39,7 +39,7 @@ MACHINE_SOCARCH_FILTER_append_mx6 = " virtual/libopenvg virtual/libgles1 virtual
 INHERIT += "fsl-dynamic-packagearch"
 
 # Extra udev rules
-MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
+MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf udev-rules-imx"
 
 # GStreamer 0.10 plugins
 MACHINE_GSTREAMER_PLUGIN ?= "gst-fsl-plugin"
