@@ -9,15 +9,19 @@ PROVIDES += "u-boot"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=1707d6db1d42237583f50183a5651ecb"
 
-PR = "r0"
+SRC_URI += "file://boot-sd.txt"
 
 S = "${WORKDIR}/git"
 
-DEPENDS_mxs += "elftosb-native"
+DEPENDS_ccardimx28 += "elftosb-native"
 
 do_compile_prepend() {
 	${S}/tools/setlocalversion --save-scmversion ${S}
 }
 
+do_deploy_append() {
+	mkimage -T script -n bootscript -C none -d ${WORKDIR}/boot-sd.txt ${DEPLOYDIR}/boot-sd.scr
+}
+
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(mxs)"
+COMPATIBLE_MACHINE = "(ccardimx28)"
