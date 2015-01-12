@@ -9,16 +9,18 @@ PROVIDES += "u-boot"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=4c6cde5df68eff615d36789dc18edd3b"
 
-PR = "r0"
+SRC_URI_append_mxs = " file://boot-sd.txt"
 
 S = "${WORKDIR}/git"
-
-UBOOT_BSTR_mxs   = "-ivt"
 
 DEPENDS_mxs += "elftosb-native imx-bootlets-dey"
 
 EXTRA_OEMAKE += 'HOSTSTRIP=true'
 EXTRA_OEMAKE_append_mxs = ' BOOTLETS_DIR=${STAGING_DIR_TARGET}/boot'
+
+do_deploy_append() {
+	mkimage -T script -n bootscript -C none -d ${WORKDIR}/boot-sd.txt ${DEPLOYDIR}/boot-sd.scr
+}
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(mxs|mx5)"

@@ -109,7 +109,7 @@ generate_ccardimx28js_sdcard() {
 	echo -n S | dd of=${SDCARD} bs=1 count=1 seek=450 conv=notrunc
 
 	${PRINTF} "${BS_HDR}" | dd of=${SDCARD} bs=512 seek=$(expr 1024 \* 2) conv=notrunc,sync
-	dd if=${DEPLOY_DIR_IMAGE}/u-boot-${MACHINE}.${UBOOT_SUFFIX} of=${SDCARD} bs=512 seek=$(expr 1024 \* 2 \+ 1) conv=notrunc,sync
+	dd if=${DEPLOY_DIR_IMAGE}/${UBOOT_SYMLINK} of=${SDCARD} bs=512 seek=$(expr 1024 \* 2 \+ 1) conv=notrunc,sync
 
 	BOOT_BLOCKS=$(LC_ALL=C parted -s ${SDCARD} unit b print \
 			| awk '/ 2 / { print substr($4, 1, length($4 -1)) / 1024 }')

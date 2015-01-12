@@ -1,0 +1,3 @@
+setenv kimg uimage
+setenv mmc_rpart /dev/mmcblk0p3
+dboot linux mmc 0:2 fat
