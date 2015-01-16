@@ -3,18 +3,12 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 SRC_URI += " \
-    file://os-release \
     file://sysctl.conf \
 "
 
 SRC_URI_append_ccimx6 = " file://resize-ext4fs.sh"
 
 do_install_append() {
-	install -m 0644 ${WORKDIR}/os-release ${D}${sysconfdir}/
-	sed -i  -e 's,##DISTRO##,${DISTRO},g' \
-		-e 's,##DISTRO_NAME##,${DISTRO_NAME},g' \
-		-e 's,##DISTRO_VERSION##,${DISTRO_VERSION},g' \
-		${D}${sysconfdir}/os-release
 	install -m 0644 ${WORKDIR}/sysctl.conf ${D}${sysconfdir}/
 }
 

@@ -40,6 +40,7 @@ RDEPENDS_${PN} = "\
     init-ifupdown \
     modutils-initscripts \
     netbase \
+    os-release \
     usbutils \
     ${VIRTUAL-RUNTIME_dev_manager} \
     ${VIRTUAL-RUNTIME_init_manager} \
