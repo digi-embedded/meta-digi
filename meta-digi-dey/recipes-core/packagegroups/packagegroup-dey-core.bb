@@ -19,11 +19,11 @@ MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS ?= ""
 
 # Distro can override the following VIRTUAL-RUNTIME providers:
 VIRTUAL-RUNTIME_dev_manager ?= "udev"
-VIRTUAL-RUNTIME_login_manager ?= ""
-VIRTUAL-RUNTIME_passwd_manager ?= "shadow"
 VIRTUAL-RUNTIME_init_manager ?= "sysvinit"
 VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 VIRTUAL-RUNTIME_keymaps ?= "keymaps"
+VIRTUAL-RUNTIME_login_manager ?= ""
+VIRTUAL-RUNTIME_passwd_manager ?= "shadow"
 
 # Set virtual runtimes depending on X11 feature
 VIRTUAL-RUNTIME_touchscreen ?= "${@base_contains('DISTRO_FEATURES', 'x11', '', 'tslib-calibrate tslib-tests', d)}"
@@ -32,21 +32,21 @@ RDEPENDS_${PN} = "\
     base-files \
     base-passwd \
     busybox \
+    busybox-acpid \
     busybox-static-nodes \
-    ${@base_contains("MACHINE_FEATURES", "rtc", "busybox-hwclock", "", d)} \
     ${@base_contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
+    ${@base_contains("MACHINE_FEATURES", "rtc", "busybox-hwclock", "", d)} \
     ${@base_contains("MACHINE_FEATURES", "touchscreen", "${VIRTUAL-RUNTIME_touchscreen}", "",d)} \
+    init-ifupdown \
     modutils-initscripts \
     netbase \
-    init-ifupdown \
+    usbutils \
     ${VIRTUAL-RUNTIME_dev_manager} \
     ${VIRTUAL-RUNTIME_init_manager} \
     ${VIRTUAL-RUNTIME_initscripts} \
     ${VIRTUAL-RUNTIME_login_manager} \
     ${VIRTUAL-RUNTIME_passwd_manager} \
     ${VIRTUAL-RUNTIME_update-alternatives} \
-    usbutils \
-    busybox-acpid \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS} \
     ${MACHINE_EXTRA_RDEPENDS} \
 "
