@@ -7,6 +7,12 @@ include conf/machine/include/mxs-digi-base.inc
 DIGI_FAMILY = "ccardimx28"
 SOC_FAMILY  = "mxs:mx28:${DIGI_FAMILY}"
 
+# Disable perf features when using kernel 2.6.35 as perf fails to build otherwise
+python __anonymous() {
+    if d.getVar('IS_KERNEL_2X', True) == '1':
+        d.setVar('PERF_FEATURES_ENABLE', '')
+}
+
 # Platform u-boot settings (IS_KERNEL_2X implies also u-boot v2009.08)
 UBOOT_BSTR = "${@base_conditional('IS_KERNEL_2X', '1' , '-ivt', '', d)}"
 UBOOT_ENTRYPOINT = "0x40008000"

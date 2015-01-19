@@ -2,9 +2,6 @@
 include conf/machine/include/digi-defaults.inc
 include conf/machine/include/soc-family.inc
 
-# Disable perf features as 2.6.35.3 fail to build otherwise
-PERF_FEATURES_ENABLE = ""
-
 XSERVER_DRIVER = "xf86-video-fbdev"
 XSERVER_DRIVER_mx5 = "xf86-video-imxfb"
 XSERVER_DRIVER_mx6 = "xf86-video-imxfb-vivante"

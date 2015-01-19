@@ -3,9 +3,6 @@ include conf/machine/include/digi-defaults.inc
 include conf/machine/include/soc-family.inc
 include conf/machine/include/tune-arm926ejs.inc
 
-# Disable perf features as 2.6.35.3 fail to build otherwise
-PERF_FEATURES_ENABLE_mx28 = ""
-
 XSERVER = "xserver-xorg \
            xf86-input-evdev \
            xf86-video-fbdev"

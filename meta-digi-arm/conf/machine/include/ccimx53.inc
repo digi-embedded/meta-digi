@@ -8,6 +8,9 @@ include conf/machine/include/tune-cortexa8.inc
 DIGI_FAMILY = "ccimx5:ccimx53"
 SOC_FAMILY  = "mx5:mx53:${DIGI_FAMILY}"
 
+# Disable perf features when using kernel 2.6.35 as perf fails to build otherwise
+PERF_FEATURES_ENABLE = ""
+
 # Platform u-boot settings
 UBOOT_ENTRYPOINT = "0x70008000"
 UBOOT_SUFFIX = "bin"
