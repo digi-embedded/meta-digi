@@ -36,7 +36,7 @@
 #MACHINE ??= "qemux86"
 
 MACHINE = "ccimx6sbc"
-MACHINE_VARIANT = "wb"
+MACHINE_VARIANT = "wbq1024"
 
 #
 # Use Digi's internal git repositories
