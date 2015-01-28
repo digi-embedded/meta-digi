@@ -36,6 +36,22 @@
 #MACHINE ??= "qemux86"
 
 MACHINE = "ccimx53js"
+
+#
+# Supported variants
+#
+# Maintain in sync with the same table in platform machine config file.
+#
+# Name          WiFi    Eth2    RAM     NAND
+# ------------------------------------------
+# -             N       N       512     512     (empty MACHINE_VARIANT="")
+# 128           N       N       128     128
+# 4k            N       N       512     1024
+# e             N       Y       1024    512
+# e4k           N       Y       512     1024
+# w             Y       N       512     512
+# w128          Y       N       128     128
+# we            Y       Y       512     512
 MACHINE_VARIANT = "w"
 
 #

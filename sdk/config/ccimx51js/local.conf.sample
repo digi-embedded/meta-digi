@@ -36,6 +36,24 @@
 #MACHINE ??= "qemux86"
 
 MACHINE = "ccimx51js"
+
+#
+# Supported variants
+#
+# Maintain in sync with the same table in platform machine config file.
+#
+# Name          WiFi    Eth2    RAM     Accel   GPU     VPU
+# ---------------------------------------------------------
+# 128           N       N       128     N       N       N
+# 128a          N       N       128     Y       N       N
+# 128agv        N       N       128     Y       Y       Y
+# agv           N       N       256     Y       Y       Y
+# eagv          N       Y       512     Y       Y       Y
+# w             Y       N       512     N       N       N
+# w128a         Y       N       128     Y       N       N
+# w128agv       Y       N       128     Y       Y       Y
+# wagv          Y       N       256     Y       Y       Y
+# weagv         Y       Y       512     Y       Y       Y
 MACHINE_VARIANT = "wagv"
 
 #

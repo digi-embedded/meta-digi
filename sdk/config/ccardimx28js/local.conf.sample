@@ -36,6 +36,20 @@
 #MACHINE ??= "qemux86"
 
 MACHINE = "ccardimx28js"
+
+#
+# Supported variants
+#
+# Maintain in sync with the same table in platform machine config file.
+#
+# Name          WiFi    Eth2    BT      1wire
+# -------------------------------------------
+# -             N       N       N       N       (empty MACHINE_VARIANT="")
+# e             N       Y       N       N
+# w             Y       N       N       N
+# wb            Y       N       Y       N
+# web           Y       Y       Y       N
+# web1          Y       Y       Y       Y
 MACHINE_VARIANT = "web1"
 
 #

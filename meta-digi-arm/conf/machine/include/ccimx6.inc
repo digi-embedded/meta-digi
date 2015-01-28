@@ -33,8 +33,7 @@ MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins"
 #
 # Supported variants
 #
-# To build any of these variants configure MACHINE_VARIANT on the project's
-# local.conf to the variant name.
+# Maintain in sync with the same table in platform local.conf template.
 #
 # Name        WiFi[w]    BT[b]    Proc[q|dl]      DDR[1024|512|256]
 # -----------------------------------------------------------------
