@@ -111,7 +111,6 @@ purge_sstate() {
 }
 
 # Sanity check (Jenkins environment)
-[ -z "${DY_BUILD_VARIANTS}" ] && error "DY_BUILD_VARIANTS not specified"
 [ -z "${DY_PLATFORMS}" ]      && error "DY_PLATFORMS not specified"
 [ -z "${DY_REVISION}" ]       && error "DY_REVISION not specified"
 [ -z "${DY_RM_WORK}" ]        && error "DY_RM_WORK not specified"
@@ -127,13 +126,23 @@ purge_sstate() {
 
 # Per-platform variants
 while read _pl _var; do
-	[ "${DY_BUILD_VARIANTS}" = "false" ] && _var="DONTBUILDVARIANTS"
+	# DY_BUILD_VARIANTS comes from Jenkins environment:
+	#   'false':     don't build variants (only the default)
+	#   <empty>:     build all the variants supported by the platform
+	#   'var1 var2': build the ones specified in the variable
+	if [ -n "${DY_BUILD_VARIANTS}" ]; then
+		if echo "${DY_BUILD_VARIANTS}" | grep -qs "false"; then
+			_var="DONTBUILDVARIANTS"
+		else
+			_var="${DY_BUILD_VARIANTS}"
+		fi
+	fi
 	eval "${_pl}_var=\"${_var}\""
 done<<-_EOF_
 	ccardimx28js    - e w wb web web1
 	ccimx51js       128 128a 128agv agv eagv w w128a w128agv wagv weagv
 	ccimx53js       - 128 4k e e4k w w128 we
-	ccimx6sbc       - w wb
+	ccimx6sbc       wbq1024 wbq512 wq1024 wdl256 q512 dl256 wdl512 wbdl1024
 _EOF_
 
 # Build alternative linux and u-boot
