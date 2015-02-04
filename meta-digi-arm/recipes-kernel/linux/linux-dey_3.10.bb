@@ -36,6 +36,18 @@ do_update_dts() {
 	:
 }
 
+do_update_dts_ccimx6() {
+	# Rename variant device tree to the standard name (used in u-boot)
+	for DTB in ${KERNEL_DEVICETREE}; do
+		DTS="${DTB%b}s"
+		DTS_VARIANT="$(echo ${DTS} | sed "s/${MACHINE}/${MACHINE}${DTB_VARIANT_STR}/g")"
+		[ "${DTS_VARIANT}" = "${DTS}" ] && continue
+		if [ -e "${S}/arch/arm/boot/dts/${DTS_VARIANT}" ]; then
+			cp -f "${S}/arch/arm/boot/dts/${DTS_VARIANT}" "${S}/arch/arm/boot/dts/${DTS}"
+		fi
+	done
+}
+
 do_update_dts_mxs() {
 	if [ -n "${HAVE_WIFI}" ]; then
 		config_dts enable  '_ssp2_mmc_wifi.dtsi'

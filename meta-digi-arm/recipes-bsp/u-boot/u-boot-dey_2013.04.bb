@@ -18,6 +18,7 @@ do_compile_prepend() {
 }
 
 do_deploy_append() {
+	sed -i -e 's,##CPU_FAMILY##,${CPU_FAMILY},g' ${WORKDIR}/boot-sd.txt
 	mkimage -T script -n bootscript -C none -d ${WORKDIR}/boot-sd.txt ${DEPLOYDIR}/boot-sd.scr
 }
 
