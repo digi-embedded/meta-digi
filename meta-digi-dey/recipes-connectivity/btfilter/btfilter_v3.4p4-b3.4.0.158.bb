@@ -10,7 +10,7 @@ DEPENDS = "bluez4 dbus libnl"
 PR = "${DISTRO}.r0"
 
 SRC_URI = " \
-    ${DIGI_MIRROR}/${PN}-${PV}.tar.bz2 \
+    ${DIGI_PKG_SRC}/${PN}-${PV}.tar.bz2 \
     file://0001-enable-libnl3.patch \
     file://0002-cross-compile.patch \
     file://0003-abtfilt_wan-Rewrite-the-netlink-listener.patch \

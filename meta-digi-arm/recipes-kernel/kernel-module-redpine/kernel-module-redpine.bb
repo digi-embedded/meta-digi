@@ -18,7 +18,7 @@ TARBALL_MD5_ccimx53js    = "4a84d4da7479a20db5ee76f81c33f7b1"
 TARBALL_SHA256_ccimx53js = "6e8d35f735172621b5b6c40aafd754aecd8371c6cc1589f9502c8f3098b3a90a"
 
 SRC_URI_git = "${DIGI_GIT}linux-modules/redpine.git;protocol=git"
-SRC_URI_obj = "${DIGI_MIRROR}/redpine-${MACHINE}-${SRCREV_SHORT}.tar.gz;md5sum=${TARBALL_MD5};sha256sum=${TARBALL_SHA256}"
+SRC_URI_obj = "${DIGI_PKG_SRC}/redpine-${MACHINE}-${SRCREV_SHORT}.tar.gz;md5sum=${TARBALL_MD5};sha256sum=${TARBALL_SHA256}"
 SRC_URI  = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_git}', '${SRC_URI_obj}', d)}"
 SRC_URI += " \
     file://Makefile \

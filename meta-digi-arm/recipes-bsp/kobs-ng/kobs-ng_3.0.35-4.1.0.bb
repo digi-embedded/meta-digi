@@ -10,7 +10,7 @@ PR = "${DISTRO}.r0"
 inherit autotools
 
 SRC_URI = " \
-    ${DIGI_MIRROR}/${PN}-${PV}.tar.gz \
+    ${DIGI_PKG_SRC}/${PN}-${PV}.tar.gz \
     file://0001-makefile.am.patch \
     file://0002-fix-mtd-defines.patch \
     file://0003-cleanup-ROM-version-detection-code-and-add-cpx2-supp.patch \
