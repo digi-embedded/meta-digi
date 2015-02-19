@@ -53,7 +53,7 @@ MACHINE = "ccimx6sbc"
 # dl256          N         N        N       duallite/solo       256MiB       (0x09)
 # wdl512         Y         N        N       duallite/solo       512MiB       (0x0A)
 # wbdl1024       Y         Y        N       duallite/solo      1024MiB       (0x0B)
-MACHINE_VARIANT = "wbq1024"
+MACHINE_VARIANT = "wbkq1024"
 
 #
 # Use Digi's internal git repositories
