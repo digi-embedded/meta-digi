@@ -79,12 +79,16 @@ copy_images() {
 			cp -r tmp/deploy/sdk ${1}/
 		fi
 	fi
-	# Jenkins artifact archiver does not copy symlinks, so remove them
-	# beforehand to avoid ending up with several duplicates of the same
-	# files.
-	if [ -d "${1}/images" ]; then
-		find ${1}/images -type l -delete
-	fi
+
+	# Images directory post-processing
+	#  - Jenkins artifact archiver does not copy symlinks, so remove them
+	#    beforehand to avoid ending up with several duplicates of the same
+	#    files.
+	#  - Remove 'README_-_DO_NOT_DELETE_FILES_IN_THIS_DIRECTORY.txt' files
+	#  - Create MD5SUMS file
+	find ${1} -type l -delete
+	find ${1} -type f -name 'README_-_DO_NOT_DELETE*' -delete
+	find ${1} -type f -not -name MD5SUMS -print0 | xargs -r -0 md5sum | sed -e "s,${1}/,,g" | sort -k2,2 > ${1}/MD5SUMS
 }
 
 #
