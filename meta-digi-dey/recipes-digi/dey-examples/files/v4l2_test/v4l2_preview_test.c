@@ -62,6 +62,7 @@ static void printUsage(FILE * fd)
 		"        uses the overlay background framebuffer.\n"
 		"     -r RGB565 (default is UYVY)\n"
 		"     -u YUYV (default is UYVY)\n"
+		"     -c capture mode (default is 0)\n"
 		"     -v Verbose mode\n"
 		"     -? This help\n\n");
 }
@@ -101,6 +102,9 @@ static void *v4l2_camera_thread(void *pargs)
 
 	/* Reset rotation to ROTATE_NONE */
 	v4l2_set_rotate(args->fd_in, 0);
+
+	/* Set capture mode */
+	v4l2_set_capture_mode(args->fd_in, args->options.capturemode);
 
 	/* Set size in overlay */
 	v4l2_set_format_overlay(args->fd_in,
@@ -365,11 +369,12 @@ int main(int argc, char **argv)
 	args.options.width = 640;
 	args.options.height = 480;
 	args.options.format = V4L2_PIX_FMT_UYVY;
+	args.options.capturemode = 0;
 	strcpy(args.fb_device, "/dev/fb0");
 	strcpy(args.v4l2_device, "/dev/video0");
 
 	/* Input processing */
-	while ((opt = getopt(argc, argv, "w:d:h:l:t:o:xvru?")) != -1) {
+	while ((opt = getopt(argc, argv, "w:d:h:l:t:o:xc:vru?")) != -1) {
 		switch (opt) {
 			case '?':
 				printUsage(stderr);
@@ -403,6 +408,9 @@ int main(int argc, char **argv)
 				break;
 			case 'x':
 				args.options.non_destructive = 1;
+				break;
+			case 'c':
+				args.options.capturemode = atoi(optarg);
 				break;
 			case 'v':
 				verbose = 1;

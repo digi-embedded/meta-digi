@@ -123,6 +123,7 @@ typedef struct {
 	int left;
 	int height;
 	int width;
+	int capturemode;
 	int non_destructive;
 	int camera_framerate;
 } OPTIONS;

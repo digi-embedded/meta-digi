@@ -303,6 +303,24 @@ int v4l2_set_frame_rate(int fd, int framerate)
 	return ioctl(fd, VIDIOC_S_PARM, &streamparm);
 }
 
+/* Set the specified capture mode on the V4L2 device */
+int v4l2_set_capture_mode(int fd, int capturemode)
+{
+	struct v4l2_streamparm streamparm;
+
+	memset(&streamparm, 0, sizeof(streamparm));
+	streamparm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	if (ioctl(fd, VIDIOC_G_PARM, &streamparm) < 0) {
+		log("get frame rate failed\n");
+		return FALSE;
+	}
+
+	/* Set capture mode */
+	streamparm.parm.capture.capturemode = capturemode;
+
+	return ioctl(fd, VIDIOC_S_PARM, &streamparm);
+}
+
 /* Return true if the output specified by name is supported by the device,
  * false or error otherwise */
 int v4l2_check_output(int fd, char *name)
