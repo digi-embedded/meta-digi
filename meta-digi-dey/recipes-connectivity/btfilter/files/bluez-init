@@ -26,7 +26,7 @@ SCRIPTNAME="$(basename "${0}")"
 bt_init() {
 	# Exit if this hardware does not support Bluetooth
 	if [ "${MACHINENAME}" = "ccardimx28" ]; then
-		BLUETOOTH_VARIANTS="0x02 0x03 0x10 0x11"
+		BLUETOOTH_VARIANTS="0x02 0x03 0x10 0x11 0x12"
 		MOD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant 2>/dev/null || \
 			       cat "/sys/kernel/${MACHINENAME}/mod_variant")"
 		if ! echo "${BLUETOOTH_VARIANTS}" | grep -qs "${MOD_VARIANT}"; then
