@@ -15,7 +15,7 @@ SRC_URI = " \
 do_configure() {
 	for i in $(echo ${WORKDIR}/*.cfg); do
 		[ "${i}" = "${WORKDIR}/*.cfg" ] && continue
-		cat ${i} >> '${S}/.config'
+		cat ${i} >> ${B}/.config
 	done
 	kernel_do_configure
 }
