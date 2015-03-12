@@ -31,4 +31,3 @@ IMAGE_FSTYPES_remove = "ext4"
 IMAGE_FSTYPES_append = " ext2"
 
 BAD_RECOMMENDATIONS += "busybox-syslog"
-ROOTFS_POSTPROCESS_COMMAND += "dey_rootfs_tuning;"
