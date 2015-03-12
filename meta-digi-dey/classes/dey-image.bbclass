@@ -2,30 +2,13 @@
 #
 # Copyright (C) 2012 Digi International.
 
-## Auxiliar variables and functions (used in dey_rootfs_tuning)
-LAYERS_REV = "${@'\n'.join(get_layers_branch_rev(d))}"
-DEY_TAG    = "${@dey_tag(d).strip()}"
-def dey_tag(d):
-    import subprocess
-    for layer in d.getVar('BBLAYERS', True).split():
-        if 'meta-digi-dey' in layer:
-            cmd = 'git describe --tags --exact-match 2>/dev/null || true'
-            return subprocess.Popen(cmd, cwd=layer, shell=True, stdout=subprocess.PIPE).stdout.read()
-    return ""
+#
+# Add build info to rootfs images (/etc/build)
+#
+inherit image-buildinfo
 
 ## DEY rootfs final tuning
 dey_rootfs_tuning() {
-	#######################################################################
-	## Create '/etc/build' with build statistics
-	#######################################################################
-	cat >${IMAGE_ROOTFS}/etc/build <<-_EOF_
-		TIMESTAMP=${DATETIME}
-		DEY_TAG=${DEY_TAG}
-
-		Layers revisions:
-		=================
-		${LAYERS_REV}
-	_EOF_
 	#######################################################################
 	## Set root password to 'root' if 'debug-tweaks' is NOT enabled.
 	## command: echo -n 'root' | mkpasswd -5 -s
