@@ -27,7 +27,7 @@ SRC_URI += " \
 
 S = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${WORKDIR}/git', '${WORKDIR}/${MACHINE}', d)}"
 
-EXTRA_OEMAKE = "DEL_PLATFORM=${MACHINE}"
+EXTRA_OEMAKE += "DEL_PLATFORM=${MACHINE}"
 
 do_configure_prepend() {
 	cp ${WORKDIR}/Makefile ${S}/
@@ -59,5 +59,4 @@ FILES_${PN} += " \
     ${sysconfdir}/network/ \
 "
 
-PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(mx5)"

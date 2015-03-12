@@ -34,7 +34,7 @@ SRC_URI_append_ccimx6 = " \
 
 S = "${WORKDIR}/git"
 
-EXTRA_OEMAKE = "DEL_PLATFORM=${MACHINE} KLIB_BUILD=${STAGING_KERNEL_DIR}"
+EXTRA_OEMAKE += "DEL_PLATFORM=${MACHINE} KLIB_BUILD=${STAGING_KERNEL_DIR}"
 
 do_configure_prepend() {
 	cp ${WORKDIR}/Makefile ${S}/
@@ -65,5 +65,4 @@ FILES_${PN} += " \
     ${sysconfdir}/network/ \
 "
 
-PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccardimx28|ccimx6)"
