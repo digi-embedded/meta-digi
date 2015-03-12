@@ -1,6 +1,6 @@
 # Copyright (C) 2013 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
     file://cherokee.conf \

@@ -4,7 +4,7 @@
 #
 # Origin: fsl-gui-extrafiles package (which was removed from meta-fsl-demos)
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
     file://qtbrowser.desktop \

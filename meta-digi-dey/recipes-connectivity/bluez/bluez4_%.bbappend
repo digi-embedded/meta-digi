@@ -1,6 +1,6 @@
 # Copyright (C) 2013 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 EXTRA_OECONF_append = " --enable-health --enable-static"
 

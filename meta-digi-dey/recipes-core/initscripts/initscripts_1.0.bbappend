@@ -1,6 +1,6 @@
 # Copyright (C) 2013 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
 SRC_URI += "file://device_table.txt \
 	    file://devtmpfs.sh"
