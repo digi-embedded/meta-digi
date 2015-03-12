@@ -10,10 +10,10 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 54 insertions(+), 13 deletions(-)
 
 diff --git a/libbb/speed_table.c b/libbb/speed_table.c
-index 45159f1..9806a60 100644
+index 174d531..0e57de4 100644
 --- a/libbb/speed_table.c
 +++ b/libbb/speed_table.c
-@@ -29,30 +29,68 @@ static const struct speed_map speeds[] = {
+@@ -34,30 +34,68 @@ static const struct speed_map speeds[] = {
  	{B2400, 2400},
  	{B4800, 4800},
  	{B9600, 9600},
@@ -93,7 +93,7 @@ index 45159f1..9806a60 100644
  #endif
  };
  
-@@ -64,8 +102,11 @@ unsigned FAST_FUNC tty_baud_to_value(speed_t speed)
+@@ -69,8 +107,11 @@ unsigned FAST_FUNC tty_baud_to_value(speed_t speed)
  
  	do {
  		if (speed == speeds[i].speed) {
