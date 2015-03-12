@@ -18,12 +18,14 @@ SRC_URI = " \
 
 S = "${WORKDIR}"
 
-GIT_SHA1 = "$(cd ${THISDIR} && git rev-parse --short HEAD)"
+GIT_SHA1 = "$(cd ${THISDIR} && git rev-parse --short=7 HEAD)"
 
-CFLAGS += "-Wall -DLINUX -DGIT_SHA1=\"${GIT_SHA1}\" -I${STAGING_INCDIR}/libdigi"
+EXTRA_CFLAGS = "-Wall -DLINUX -DGIT_SHA1=\"${GIT_SHA1}\" -I${STAGING_INCDIR}/libdigi"
 
 do_compile() {
-	${CC} ${CFLAGS} -o ubootenv main_env.c env_funcs.c -lnvram -ldigi
+	${CC} ${CFLAGS} ${EXTRA_CFLAGS} -c -o main_env.o main_env.c
+	${CC} ${CFLAGS} ${EXTRA_CFLAGS} -c -o env_funcs.o env_funcs.c
+	${CC} ${LDFLAGS} -o ubootenv main_env.o env_funcs.o -lnvram -ldigi
 }
 
 do_install() {

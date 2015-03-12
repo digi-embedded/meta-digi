@@ -18,10 +18,10 @@ SRC_URI += " \
 
 S = "${WORKDIR}"
 
-CMD_GIT_SHA1 = "$(cd ${THISDIR} && git rev-parse --short HEAD)"
-LIB_GIT_SHA1 = "$(cd ${WORKDIR}/git && git rev-parse --short HEAD)"
+CMD_GIT_SHA1 = "$(cd ${THISDIR} && git rev-parse --short=7 HEAD)"
+LIB_GIT_SHA1 = "$(cd ${WORKDIR}/git && git rev-parse --short=7 HEAD)"
 
-CFLAGS += "-Wall -DLINUX -DCMD_GIT_SHA1=\"${CMD_GIT_SHA1}\" -DLIB_GIT_SHA1=\"${LIB_GIT_SHA1}\" -Ilib/include -I${STAGING_INCDIR}/libdigi"
+EXTRA_CFLAGS = "-Wall -DLINUX -DCMD_GIT_SHA1=\"${CMD_GIT_SHA1}\" -DLIB_GIT_SHA1=\"${LIB_GIT_SHA1}\" -Ilib/include -I${STAGING_INCDIR}/libdigi"
 
 do_configure() {
 	rm -f lib && ln -s ${UBOOT_NVRAM_LIBPATH}
@@ -29,12 +29,13 @@ do_configure() {
 
 do_compile() {
 	# 'libnvram.a' static library
-	${CC} ${CFLAGS} -c -o nvram.o lib/src/nvram.c
-	${CC} ${CFLAGS} -c -o nvram_cmdline.o lib/src/nvram_cmdline.c
-	${CC} ${CFLAGS} -c -o nvram_priv_linux.o nvram_priv_linux.c
+	${CC} ${CFLAGS} ${EXTRA_CFLAGS} -c -o nvram.o lib/src/nvram.c
+	${CC} ${CFLAGS} ${EXTRA_CFLAGS} -c -o nvram_cmdline.o lib/src/nvram_cmdline.c
+	${CC} ${CFLAGS} ${EXTRA_CFLAGS} -c -o nvram_priv_linux.o nvram_priv_linux.c
 	${AR} -rcs libnvram.a nvram.o nvram_cmdline.o nvram_priv_linux.o
 	# 'nvram' command-line tool
-	${CC} ${CFLAGS} -o nvram main.c libnvram.a -ldigi
+	${CC} ${CFLAGS} ${EXTRA_CFLAGS} -c -o main.o main.c
+	${CC} ${LDFLAGS} -o nvram main.o libnvram.a -ldigi
 }
 
 do_install() {
