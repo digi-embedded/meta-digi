@@ -1,8 +1,8 @@
 # Digi BSP default providers
 PREFERRED_PROVIDER_jpeg-native ?= "jpeg-native"
-PREFERRED_PROVIDER_u-boot ?= "u-boot-dey"
-PREFERRED_PROVIDER_virtual/kernel ?= "linux-dey"
-PREFERRED_PROVIDER_virtual/libx11 ?= "${@base_contains('DISTRO_FEATURES', 'x11', 'libx11', '', d)}"
+PREFERRED_PROVIDER_u-boot ??= "u-boot-dey"
+PREFERRED_PROVIDER_virtual/bootloader ??= "u-boot-dey"
+PREFERRED_PROVIDER_virtual/kernel ??= "linux-dey"
 PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 
 #
