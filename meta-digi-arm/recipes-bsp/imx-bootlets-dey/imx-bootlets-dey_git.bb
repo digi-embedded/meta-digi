@@ -20,7 +20,12 @@ S = "${WORKDIR}/git"
 # Disable parallel building or it may fail to build.
 PARALLEL_MAKE = ""
 
-EXTRA_OEMAKE = "CROSS_COMPILE=${TARGET_PREFIX} BOARD=${IMXBOOTLETS_MACHINE}"
+EXTRA_OEMAKE = "\
+    BOARD='${IMXBOOTLETS_MACHINE}' \
+    CROSS_COMPILE='${TARGET_PREFIX}' \
+    CC='${CC}' \
+    LD='${LD}' \
+"
 
 # Ensure machine defines the IMXBOOTLETS_MACHINE
 python () {
