@@ -6,8 +6,6 @@ LICENSE = "GPLv2"
 # License path relative to S = "${WORKDIR}/${PN}-${PV}/src"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=537b9004889eb701c48fc1fe78d9c30e"
 
-PR = "${DISTRO}.r0"
-
 SRC_URI = " \
     ftp://ftp.microwindows.org/pub/microwindows/microwindows-src-${PV}.tar.gz \
     file://0001-defconfig.patch;striplevel=2 \

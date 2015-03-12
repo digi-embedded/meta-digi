@@ -7,8 +7,6 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 DEPENDS = "bluez4"
 
-PR = "${DISTRO}.r0"
-
 SRC_URI = "file://bt_test"
 
 S = "${WORKDIR}/bt_test"

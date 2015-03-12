@@ -3,9 +3,6 @@
 #
 DESCRIPTION = "DEY busybox based image (non graphical)."
 
-INC_PR = "r0"
-PR = "${INC_PR}"
-
 IMAGE_INSTALL = "packagegroup-dey-core ${ROOTFS_PKGMANAGE_BOOTSTRAP} ${CORE_IMAGE_EXTRA_INSTALL}"
 
 VIRTUAL-RUNTIME_accel-graphics = '${@base_contains("DISTRO_FEATURES", "x11", "", "amd-gpu-bin-mx51", d)}'

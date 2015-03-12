@@ -5,8 +5,6 @@ SECTION = "base"
 LICENSE = "Proprietary"
 LIC_FILES_CHKSUM = "file://${DIGI_EULA_FILE};md5=ef5b088ca04b6f10b1764aa182f4f51d"
 
-PR = "${DISTRO}.r0"
-
 SRC_URI = " \
     file://PS_ASIC_class_1.pst \
     file://PS_ASIC_class_2.pst \

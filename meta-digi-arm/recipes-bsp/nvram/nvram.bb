@@ -7,8 +7,6 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 require recipes-bsp/u-boot/u-boot-dey-rev_${PREFERRED_VERSION_u-boot-dey}.inc
 
-PR = "${DISTRO}.r0"
-
 DEPENDS = "libdigi"
 
 SRC_URI += " \

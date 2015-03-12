@@ -6,8 +6,6 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 
 inherit module
 
-PR = "r1"
-
 # 'modprobe' from kmod package is needed to load atheros driver. The one
 # from busybox does not support '--ignore-install' option.
 RDEPENDS_${PN} = "kmod"

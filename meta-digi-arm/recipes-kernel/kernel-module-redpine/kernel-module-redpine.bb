@@ -6,8 +6,6 @@ LIC_FILES_CHKSUM = "file://RS.GENR.LNX.SD_GPL/include/ganges_faf.h;endline=6;md5
 
 inherit module
 
-PR = "${DISTRO}.r0"
-
 SRCREV = "b43b8f5e2d51b24bcc0bc167380cfd07baac81f0"
 SRCREV_SHORT = "${@'${SRCREV}'[:7]}"
 

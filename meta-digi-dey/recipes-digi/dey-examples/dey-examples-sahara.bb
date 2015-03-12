@@ -9,8 +9,6 @@ DEPENDS = "imx-lib virtual/kernel"
 
 RDEPENDS_${PN} = "kernel-module-scc2-driver kernel-module-sahara"
 
-PR = "${DISTRO}.r0"
-
 SRC_URI = "file://sahara_test"
 
 SAHARA_TEST_SRC = "\

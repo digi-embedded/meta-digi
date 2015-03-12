@@ -3,8 +3,6 @@
 #
 DESCRIPTION = "Graphical image based on SATO, a gnome mobile environment visual style."
 
-PR = "${INC_PR}.0"
-
 IMAGE_FEATURES += " \
     dey-qt \
     package-management \

@@ -7,8 +7,6 @@ LIC_FILES_CHKSUM = "file://Makefile;beginline=1;endline=14;md5=8f6614b37751445a5
 
 DEPENDS = "bluez4 dbus libnl"
 
-PR = "${DISTRO}.r0"
-
 SRC_URI = " \
     ${DIGI_PKG_SRC}/${PN}-${PV}.tar.bz2 \
     file://0001-enable-libnl3.patch \
