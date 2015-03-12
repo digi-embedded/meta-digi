@@ -20,11 +20,10 @@ REQUIRED_DISTRO_FEATURES = "x11"
 
 SOC_IMAGE_INSTALL = ""
 SOC_IMAGE_INSTALL_mx5 = "amd-gpu-x11-bin-mx51"
-SOC_IMAGE_INSTALL_mx6 = "gpu-viv-bin-mx6q gpu-viv-g2d"
+SOC_IMAGE_INSTALL_mx6 = "imx-gpu-viv-demos imx-gpu-viv-tools"
 
 IMAGE_INSTALL += " \
     ${SOC_IMAGE_INSTALL} \
-    ${@base_contains("MACHINE_FEATURES", "accel-video", "owl-video", "", d)} \
     pointercal-xinput \
 "
 
