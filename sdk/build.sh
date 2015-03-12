@@ -20,6 +20,7 @@
 #     DY_PLATFORMS:      Platforms to build
 #     DY_REVISION:       Revision of the manifest repository (for 'repo init')
 #     DY_RM_WORK:        Remove the package working folders to save disk space.
+#     DY_SARES:          Build SARES test image
 #     DY_TARGET:         Target image (the default is 'dey-image-minimal')
 #     DY_USE_MIRROR:     Use internal Digi mirror to download packages
 #
@@ -49,6 +50,10 @@ RM_WORK_CFG="
 INHERIT += \"rm_work\"
 # Exclude rm_work for some key packages (for debugging purposes)
 RM_WORK_EXCLUDE += \"dey-image-graphical dey-image-minimal linux-dey u-boot-dey\"
+"
+
+SARES_CFG="
+INHERIT += \"sares-image\"
 "
 
 X11_REMOVAL_CFG="
@@ -228,6 +233,9 @@ for platform in ${DY_PLATFORMS}; do
 					fi
 					if [ "${DY_RM_WORK}" = "true" ]; then
 						printf "${RM_WORK_CFG}" >> conf/local.conf
+					fi
+					if [ "${DY_SARES}" = "true" ]; then
+						printf "${SARES_CFG}" >> conf/local.conf
 					fi
 					# Remove 'x11' distro feature if building minimal images
 					if echo "${DY_TARGET}" | grep -qs "dey-image-minimal"; then
