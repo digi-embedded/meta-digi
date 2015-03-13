@@ -68,7 +68,7 @@ SDCARD_GENERATION_COMMAND_ccardimx28js = "generate_ccardimx28js_sdcard"
 # The disk layout used is:
 #
 #    1M                     -> IMAGE_ROOTFS_ALIGNMENT         - u-boot bootstream
-#    IMAGE_ROOTFS_ALIGNMENT -> BOOT_SPACE                     - kernel + devide tree blob (VFAT partition)
+#    IMAGE_ROOTFS_ALIGNMENT -> BOOT_SPACE                     - kernel + device tree blob (VFAT partition)
 #    BOOT_SPACE             -> SDIMG_SIZE                     - rootfs (EXT4 partition)
 #
 #                                                        Default Free space = 1.3x
