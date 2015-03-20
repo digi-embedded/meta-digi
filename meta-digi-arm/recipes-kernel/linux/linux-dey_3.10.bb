@@ -8,7 +8,6 @@ DEPENDS += "lzop-native bc-native"
 # Internal repo branch
 SRCBRANCH = "v3.10/master"
 SRCBRANCH_mxs = "v3.10/dey-1.4/maint"
-SRCBRANCH_mx6 = "v3.10/dey-1.7/maint"
 
 SRCREV_external = ""
 SRCREV_external_mxs = ""
@@ -34,18 +33,6 @@ config_dts() {
 
 do_update_dts() {
 	:
-}
-
-do_update_dts_ccimx6() {
-	# Rename variant device tree to the standard name (used in u-boot)
-	for DTB in ${KERNEL_DEVICETREE}; do
-		DTS="${DTB%b}s"
-		DTS_VARIANT="$(echo ${DTS} | sed "s/${MACHINE}/${MACHINE}${DTB_VARIANT_STR}/g")"
-		[ "${DTS_VARIANT}" = "${DTS}" ] && continue
-		if [ -e "${S}/arch/arm/boot/dts/${DTS_VARIANT}" ]; then
-			cp -f "${S}/arch/arm/boot/dts/${DTS_VARIANT}" "${S}/arch/arm/boot/dts/${DTS}"
-		fi
-	done
 }
 
 do_update_dts_mxs() {
