@@ -13,7 +13,7 @@ SRC_URI += "file://boot-sd.txt"
 
 S = "${WORKDIR}/git"
 
-DEPENDS_ccardimx28 += "elftosb-native"
+DEPENDS += "elftosb-native u-boot-mkimage-native"
 
 do_compile_prepend() {
 	${S}/tools/setlocalversion --save-scmversion ${S}
