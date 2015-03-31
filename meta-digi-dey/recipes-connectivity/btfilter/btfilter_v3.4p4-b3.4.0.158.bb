@@ -5,7 +5,9 @@ SECTION = "network"
 LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://Makefile;beginline=1;endline=14;md5=8f6614b37751445a5f6a9bdc69be26b3"
 
-DEPENDS = "bluez4 dbus libnl"
+inherit bluetooth
+
+DEPENDS = "${BLUEZ} dbus libnl"
 
 SRC_URI = " \
     ${DIGI_PKG_SRC}/${PN}-${PV}.tar.bz2 \
