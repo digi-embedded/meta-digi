@@ -21,11 +21,10 @@ MACHINE_EXTRA_RRECOMMENDS = "kernel-modules"
 DEFAULTTUNE_mx6 ?= "cortexa9hf-neon"
 
 # Sub-architecture support
-MACHINE_SOCARCH ?= ""
-MACHINE_SOCARCH_mx5 = "${TUNE_PKGARCH}-mx5"
-MACHINE_SOCARCH_mx6q = "${TUNE_PKGARCH}-mx6qdl"
-MACHINE_SOCARCH_mx6dl = "${TUNE_PKGARCH}-mx6qdl"
-PACKAGE_EXTRA_ARCHS_append = " ${MACHINE_SOCARCH}"
+MACHINE_SOCARCH_SUFFIX ?= ""
+MACHINE_SOCARCH_SUFFIX_mx5 = "-mx5"
+MACHINE_SOCARCH_SUFFIX_mx6q = "-mx6qdl"
+MACHINE_SOCARCH_SUFFIX_mx6dl = "-mx6qdl"
 
 MACHINE_ARCH_FILTER = "virtual/kernel"
 MACHINE_SOCARCH_FILTER = "libfslcodec libfslvpuwrap libfslparser gst-fsl-plugins"

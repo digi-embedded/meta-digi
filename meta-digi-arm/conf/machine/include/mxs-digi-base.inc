@@ -11,9 +11,8 @@ XSERVER = "xserver-xorg \
 MACHINE_GSTREAMER_PLUGIN ?= ""
 
 # Sub-architecture support
-MACHINE_SOCARCH ?= ""
-MACHINE_SOCARCH_mx28 = "${TUNE_PKGARCH}-mx28"
-PACKAGE_EXTRA_ARCHS_append = " ${MACHINE_SOCARCH}"
+MACHINE_SOCARCH_SUFFIX ?= ""
+MACHINE_SOCARCH_SUFFIX_mx28 = "-mx28"
 
 MACHINE_ARCH_FILTER = "virtual/kernel"
 MACHINE_SOCARCH_FILTER = "libfslcodec libfslvpuwrap libfslparser gst-fsl-plugins"
