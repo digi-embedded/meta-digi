@@ -37,5 +37,3 @@ do_install() {
 }
 
 RDEPENDS_${PN}-dev = ""
-
-PACKAGE_ARCH = "${MACHINE_ARCH}"

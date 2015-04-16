@@ -19,5 +19,3 @@ do_install() {
 	install -d ${D}${bindir}
 	install -m 0755 alsa_test ${D}${bindir}
 }
-
-PACKAGE_ARCH = "${MACHINE_ARCH}"

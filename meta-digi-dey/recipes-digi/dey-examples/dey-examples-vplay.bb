@@ -17,5 +17,3 @@ do_install() {
 	install -d ${D}${bindir}
 	install -m 0755 vplay ${D}${bindir}
 }
-
-PACKAGE_ARCH = "${MACHINE_ARCH}"

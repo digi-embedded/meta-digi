@@ -37,14 +37,6 @@
 
 #define	RTC_DEFAULT_TEST_OPS	0	/* None, pass it through the command line */
 
-#if defined(CCIMX53JS)
-#define RTC_ALARM_SECS 60
-#define RTC_ALARM_SECS_STR "60"
-#else
-#define RTC_ALARM_SECS 5
-#define RTC_ALARM_SECS_STR "5"
-#endif
-
 #define rtc_test_usage \
 	"[-abcdehms]\n"
 #define rtc_test_full_usage \
