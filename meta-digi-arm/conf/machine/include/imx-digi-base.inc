@@ -62,12 +62,6 @@ PREFERRED_PROVIDER_virtual/libg2d_mx6 ?= "imx-gpu-viv"
 
 EXTRA_IMAGEDEPENDS = "u-boot"
 
-# Flash image types
-IMAGE_FSTYPES ??= "jffs2.sum tar.bz2 ubifs"
-
-# MX6 does not have flash memory so build sdcard images
-SDCARD_ROOTFS_mx6 ?= "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.ext4"
-
 KERNEL_IMAGETYPE = "uImage"
 
 MACHINE_FEATURES = "apm usbgadget usbhost vfat alsa touchscreen"
