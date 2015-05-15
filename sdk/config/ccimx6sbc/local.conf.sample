@@ -39,24 +39,6 @@
 MACHINE = "ccimx6sbc"
 
 #
-# Supported variants
-#
-# Maintain in sync with the same table in platform machine config file.
-#
-# Name        WiFi[w]    BT[b]  Kinetis[k]  Proc[q|dl]      DDR[1024|512|256]
-# ---------------------------------------------------------------------------
-# wbkq1024       Y         Y        Y       quad/dual          1024MiB       (0x01,0x02)
-# wbq512         Y         Y        N       quad/dual           512MiB       (0x03,0x06)
-# wbq1024        Y         Y        N       quad/dual          1024MiB       (0x04)
-# wq1024         Y         N        N       quad/dual          1024MiB       (0x05)
-# wdl256         Y         N        N       duallite/solo       256MiB       (0x07)
-# q512           N         N        N       quad/dual           512MiB       (0x08)
-# dl256          N         N        N       duallite/solo       256MiB       (0x09)
-# wdl512         Y         N        N       duallite/solo       512MiB       (0x0A)
-# wbdl1024       Y         Y        N       duallite/solo      1024MiB       (0x0B)
-MACHINE_VARIANT = "wbkq1024"
-
-#
 # Use Digi's internal git repositories
 #
 #DIGI_INTERNAL_GIT ?= "1"

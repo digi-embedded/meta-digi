@@ -151,7 +151,7 @@ done<<-_EOF_
 	ccardimx28js    - e w wb web web1
 	ccimx51js       128 128a 128agv agv eagv w w128a w128agv wagv weagv
 	ccimx53js       - 128 4k e e4k w w128 we
-	ccimx6sbc       wbkq1024 wbq512 wbq1024 wq1024 wdl256 q512 dl256 wdl512 wbdl1024
+	ccimx6sbc       DONTBUILDVARIANTS
 _EOF_
 
 # Build alternative linux and u-boot
