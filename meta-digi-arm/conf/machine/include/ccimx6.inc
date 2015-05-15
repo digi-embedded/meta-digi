@@ -31,5 +31,3 @@ MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE}"
 MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins"
 
 MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth"
-
-UBOOT_MACHINE = "ccimx6qsbc_config"

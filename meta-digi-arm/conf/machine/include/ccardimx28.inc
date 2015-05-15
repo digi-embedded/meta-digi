@@ -14,9 +14,13 @@ python __anonymous() {
 }
 
 # Platform u-boot settings (IS_KERNEL_2X implies also u-boot v2009.08)
-UBOOT_BSTR = "${@base_conditional('IS_KERNEL_2X', '1' , '-ivt', '', d)}"
 UBOOT_ENTRYPOINT = "0x40008000"
 UBOOT_SUFFIX = "sb"
+
+# Add '-ivt' to binary and symlink for old u-boot (v2009.08)
+UBOOT_BSTR    = "${@base_conditional('IS_KERNEL_2X', '1' , '-ivt', '', d)}"
+UBOOT_BINARY  = "u-boot${UBOOT_BSTR}.${UBOOT_SUFFIX}"
+UBOOT_SYMLINK = "u-boot-${MACHINE}${UBOOT_BSTR}.${UBOOT_SUFFIX}"
 
 # wpa_supplicant driver to use in '/etc/network/interfaces'
 WPA_DRIVER = "nl80211"
@@ -50,7 +54,3 @@ MACHINE_FEATURES_append_w = " wifi"
 MACHINE_FEATURES_append_wb = " wifi bluetooth"
 MACHINE_FEATURES_append_web = " wifi ext-eth bluetooth"
 MACHINE_FEATURES_append_web1 = " wifi ext-eth bluetooth 1-wire"
-
-# UBOOT_CONFIG_VARIANT for different CPU speed (default is empty)
-#UBOOT_CONFIG_VARIANT ?= "261MHz"
-#UBOOT_CONFIG_VARIANT ?= "360MHz"
