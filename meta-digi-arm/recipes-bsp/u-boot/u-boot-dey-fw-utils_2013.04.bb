@@ -12,6 +12,17 @@ SRC_URI += " \
 
 S = "${WORKDIR}/git"
 
+#
+# In a u-boot multiconfig case, UBOOT_MACHINE has multiple values. Using
+# parallel build leads to build failures:
+#
+#   ln: failed to create symbolic link 'asm/arch/arch-mx6': File exists
+#   ln: failed to create symbolic link 'asm/arch': No such file or directory
+#
+# Without parallel make, UBOOT_MACHINE's last entry is used to configure uboot
+#
+PARALLEL_MAKE = ""
+
 EXTRA_OEMAKE = 'HOSTCC="${CC}" HOSTSTRIP="true"'
 
 inherit uboot-config
