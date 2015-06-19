@@ -12,4 +12,5 @@ RDEPENDS_${PN} = "\
 	btfilter \
 	bluez4 \
 	bluez4-testtools \
+        ${@base_contains("MACHINE_FEATURES", "bluetooth", "libasound-module-bluez", "", d)} \
 "
