@@ -19,4 +19,5 @@ RDEPENDS_${PN} = " \
     gst-plugins-bad-meta \
     ${MACHINE_GSTREAMER_PLUGIN} \
     ${@base_conditional('HAVE_GUI', '1' , '', 'gst-fsl-plugin-gplay', d)} \
+    ${@base_conditional('HAVE_BT', '1' , 'gst-plugin-bluetooth', '', d)} \
 "
