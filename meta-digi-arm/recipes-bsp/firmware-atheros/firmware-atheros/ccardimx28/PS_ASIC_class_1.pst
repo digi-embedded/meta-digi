@@ -111,35 +111,11 @@
      00 01 00 00 01 01 01 01 01 00 00 00 01 00 01 01
      01 01 01 00 D2 D2
 
-//Bdaddr
-//#
-//[H:S]0001
-//[H:S]0006
-//[H:A]77 55 42 7f 03 00
-
-//Audio -Master 16bits PCM short frame
+//Audio - Audio main config
 #
-[H:S]0042
+[H:S]0041
 [H:S]0004
-[H:A]63 00 01 3d
-
-//Audio - Winbond codec (For TB409)
-//#
-//[H:S]0042
-//[H:S]0004
-//[H:A]23 08 01 33
-
-//Audio
-#
-[H:S]0044
-[H:S]0004
-[H:A]dd e5 2e 00
-
-//Audio
-#
-[H:S]0045
-[H:S]0004
-[H:A]00 00 a7 02
+[H:A]01 00 00 00
 
 //TLPM
 //HOST TLPM 6W (GPIO14) Enable Active low No ack, Target TLPM 4W Enable Active low, No ack
