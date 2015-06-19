@@ -11,3 +11,9 @@ EXTRA_OECONF_append = " --enable-health --enable-static"
 # We do not really need those static libs so just disable the QA test
 #
 INSANE_SKIP_${PN} = "installed-vs-shipped"
+
+SRC_URI += "file://audio.conf"
+
+do_install_append() {
+    install -m 0644 ${WORKDIR}/audio.conf ${D}/${sysconfdir}/bluetooth/
+}
