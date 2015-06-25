@@ -88,16 +88,27 @@ rm -f ${TMP_MACFILE}
 #
 MACHINE="$(cat /proc/device-tree/digi,machine,name 2>/dev/null || \
 	   cat /sys/kernel/machine/name)"
+MOD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant 2>/dev/null)"
 REGION_CODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null || \
 	       cat /sys/kernel/${MACHINE}/mod_cert)"
+
+# 'ccimx6sbc' variants 0x05, 0x07 and 0x0a do not have bluetooth
+# and use a different calibration file
 US_CODE="0x0"
-BDATA_SOURCE="Digi_6203-6233-World.bin"
-if [ -n "${REGION_CODE}" -a "${US_CODE}" = "${REGION_CODE}" ]; then
-	BDATA_SOURCE="Digi_6203-6233-US.bin"
-	logger -t atheros "Setting US wireless region."
-else
-	logger -t atheros "Setting non-US (world) wireless region."
-fi
+case "${MACHINE}:${MOD_VARIANT}:${REGION_CODE}" in
+	ccimx6sbc:0x05:${US_CODE}|ccimx6sbc:0x07:${US_CODE}|ccimx6sbc:0x0a:${US_CODE})
+		BDATA_SOURCE="Digi_6203_2_ANT-US.bin"
+		logger -t atheros "Setting US wireless region (no bluetooth)";;
+	ccimx6sbc:0x05:*|ccimx6sbc:0x07:*|ccimx6sbc:0x0a:*)
+		BDATA_SOURCE="Digi_6203_2_ANT-World.bin"
+		logger -t atheros "Setting non-US (world) wireless region (no bluetooth)";;
+	*:*:${US_CODE})
+		BDATA_SOURCE="Digi_6203-6233-US.bin"
+		logger -t atheros "Setting US wireless region";;
+	*:*:*)
+		BDATA_SOURCE="Digi_6203-6233-World.bin"
+		logger -t atheros "Setting non-US (world) wireless region";;
+esac
 
 # We don't want to rewrite NAND every time we boot so only
 # change the link if it is wrong.

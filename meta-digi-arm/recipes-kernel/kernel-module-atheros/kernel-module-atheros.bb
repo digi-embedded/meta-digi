@@ -26,6 +26,8 @@ SRC_URI += " \
 
 # MX6 wireless calibration file and post-down script
 SRC_URI_append_ccimx6 = " \
+    file://Digi_6203_2_ANT-US.bin \
+    file://Digi_6203_2_ANT-World.bin \
     file://Digi_6203-6233-US.bin \
     file://atheros-post-down \
 "
@@ -36,10 +38,6 @@ EXTRA_OEMAKE += "DEL_PLATFORM=${MACHINE} KLIB_BUILD=${STAGING_KERNEL_DIR}"
 
 do_configure_prepend() {
 	cp ${WORKDIR}/Makefile ${S}/
-}
-
-do_configure_prepend_ccimx6() {
-	cp ${WORKDIR}/Digi_6203-6233-US.bin ${S}/Firmware_Package/target/AR6003/hw2.1.1/
 }
 
 do_install_append() {
@@ -55,6 +53,11 @@ do_install_append() {
 do_install_append_ccimx6() {
 	install -d ${D}${sysconfdir}/network/if-post-down.d
 	install -m 0755 ${WORKDIR}/atheros-post-down ${D}${sysconfdir}/network/if-post-down.d/atheros
+	install -m 0644 \
+		${WORKDIR}/Digi_6203_2_ANT-US.bin \
+		${WORKDIR}/Digi_6203_2_ANT-World.bin \
+		${WORKDIR}/Digi_6203-6233-US.bin \
+		${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
 }
 
 FILES_${PN} += " \
