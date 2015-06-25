@@ -14,6 +14,7 @@ PERF_FEATURES_ENABLE = ""
 # Platform u-boot settings
 UBOOT_ENTRYPOINT = "0x90008000"
 UBOOT_SUFFIX = "bin"
+UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
 # Firmware
 MACHINE_FIRMWARE = "firmware-imx-vpu-imx51 firmware-imx-sdma-imx51"
