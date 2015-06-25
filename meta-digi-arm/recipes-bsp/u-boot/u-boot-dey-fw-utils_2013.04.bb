@@ -39,6 +39,17 @@ do_install() {
 	install -m 0644 ${WORKDIR}/fw_env.config ${D}${sysconfdir}/
 }
 
+pkg_postinst_${PN}() {
+	# run the postinst script on first boot
+	if [ x"$D" != "x" ]; then
+		exit 1
+	fi
+	MMCDEV="$(sed -ne 's,.*root=/dev/mmcblk\([0-9]\)p.*,\1,g;T;p' /proc/cmdline)"
+	if [ -n "${MMCDEV}" ]; then
+		sed -i -e "s,^/dev/mmcblk[^[:blank:]]\+,/dev/mmcblk${MMCDEV},g" /etc/fw_env.config
+	fi
+}
+
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 COMPATIBLE_MACHINE = "(ccimx6)"
