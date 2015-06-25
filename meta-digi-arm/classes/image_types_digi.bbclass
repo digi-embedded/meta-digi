@@ -21,7 +21,7 @@ IMAGE_CMD_boot.vfat() {
 	# 1KB blocks for mkfs.vfat
 	BOOTIMG_BLOCKS="$(expr ${BOOTIMG_FILES_SIZE} / 1024)"
 	if [ -n "${BOARD_BOOTIMAGE_PARTITION_SIZE}" ]; then
-		BOOTIMG_BLOCKS="$(expr ${BOARD_BOOTIMAGE_PARTITION_SIZE} / 1024)"
+		BOOTIMG_BLOCKS="${BOARD_BOOTIMAGE_PARTITION_SIZE}"
 	fi
 
 	# POKY: Ensure total sectors is a multiple of sectors per track or mcopy will
