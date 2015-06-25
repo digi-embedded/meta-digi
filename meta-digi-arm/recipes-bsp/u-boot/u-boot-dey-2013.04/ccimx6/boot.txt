@@ -1,0 +1,11 @@
+#
+# U-Boot bootscript for EMMC/SD images created by Yocto.
+#
+
+# To detect if we are booting from SD card we get the UUID of the
+# boot partition and compare with the default one for the EMMC
+part uuid mmc ${mmcdev}:${mmcpart} bootpart
+if test "${bootpart}" != "${part1_uuid}"; then
+	setenv mmcroot /dev/mmcblk${mmcdev}p2
+fi
+dboot linux mmc ${mmcdev}:${mmcpart}

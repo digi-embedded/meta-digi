@@ -9,7 +9,7 @@ PROVIDES += "u-boot"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=1707d6db1d42237583f50183a5651ecb"
 
-SRC_URI += "file://boot-sd.txt"
+SRC_URI += "file://boot.txt"
 
 S = "${WORKDIR}/git"
 
@@ -20,7 +20,7 @@ do_compile_prepend() {
 }
 
 do_deploy_append() {
-	mkimage -T script -n bootscript -C none -d ${WORKDIR}/boot-sd.txt ${DEPLOYDIR}/boot-sd.scr
+	mkimage -T script -n bootscript -C none -d ${WORKDIR}/boot.txt ${DEPLOYDIR}/boot.scr
 }
 
 COMPATIBLE_MACHINE = "(ccardimx28)"

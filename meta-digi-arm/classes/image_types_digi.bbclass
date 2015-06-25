@@ -1,4 +1,11 @@
-inherit image_types_fsl
+inherit image_types
+
+IMAGE_DEPENDS_boot.vfat = " \
+    dosfstools-native:do_populate_sysroot \
+    mtools-native:do_populate_sysroot \
+    u-boot:do_deploy \
+    virtual/kernel:do_deploy \
+"
 
 IMAGE_CMD_boot.vfat() {
 	#
@@ -34,6 +41,13 @@ IMAGE_CMD_boot.vfat() {
 	mkfs.vfat -n "Boot ${MACHINE}" -S 512 -C ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat ${BOOTIMG_BLOCKS}
 	mcopy -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat ${BOOTIMG_FILES_SYMLINK} ::/
 
+	# Copy boot scripts into the VFAT image
+	for item in ${BOOT_SCRIPTS}; do
+		src=`echo $item | awk -F':' '{ print $1 }'`
+		dst=`echo $item | awk -F':' '{ print $2 }'`
+		mcopy -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat -s ${DEPLOY_DIR_IMAGE}/$src ::/$dst
+	done
+
 	# Truncate the image to speed up the downloading/writing to the EMMC
 	if [ -n "${BOARD_BOOTIMAGE_PARTITION_SIZE}" ]; then
 		# U-Boot writes 512 bytes sectors so truncate the image at a sector boundary
@@ -58,32 +72,93 @@ IMAGE_CMD_rootfs.initramfs() {
 }
 IMAGE_TYPEDEP_rootfs.initramfs = "cpio.gz"
 
-SDCARD_GENERATION_COMMAND_ccardimx28js = "generate_ccardimx28js_sdcard"
+# Set alignment to 4MB [in KiB]
+IMAGE_ROOTFS_ALIGNMENT = "4096"
+
+# Boot partition size in KiB, (default 64MiB)
+BOARD_BOOTIMAGE_PARTITION_SIZE ??= "65536"
+
+# SD card image name
+SDIMG = "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.sdcard"
+
+SDIMG_BOOTFS_TYPE ?= "boot.vfat"
+SDIMG_BOOTFS = "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${SDIMG_BOOTFS_TYPE}"
+SDIMG_ROOTFS_TYPE ?= "ext4"
+SDIMG_ROOTFS = "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.${SDIMG_ROOTFS_TYPE}"
+
+IMAGE_DEPENDS_sdcard = " \
+    dosfstools-native:do_populate_sysroot \
+    mtools-native:do_populate_sysroot \
+    parted-native:do_populate_sysroot \
+    u-boot:do_deploy \
+    virtual/kernel:do_deploy \
+"
+
 #
-# Create an image that can by written onto a SD card using dd for use with ccardimx28js
-#
-# External variables needed:
-#   ${SDCARD_ROOTFS}    - the rootfs image to incorporate
+# Create an image that can by written onto a SD card using dd.
 #
 # The disk layout used is:
 #
-#    1M                     -> IMAGE_ROOTFS_ALIGNMENT         - u-boot bootstream
-#    IMAGE_ROOTFS_ALIGNMENT -> BOOT_SPACE                     - kernel + device tree blob (VFAT partition)
-#    BOOT_SPACE             -> SDIMG_SIZE                     - rootfs (EXT4 partition)
+#   1. Not partitioned  : reserved for bootloader (u-boot)
+#   2. BOOT PARTITION   : kernel and device tree blobs
+#   3. ROOTFS PARTITION : rootfs
 #
-#                                                        Default Free space = 1.3x
-#                                                        Use IMAGE_OVERHEAD_FACTOR to add more space
-#                                                        <--------->
-#            4MiB                8MiB             SDIMG_ROOTFS                    4MiB
-# <-----------------------> <-------------> <----------------------> <------------------------------>
-#  ---------------------------------------- ------------------------ -------------------------------
-# |      |                 | BOOT_SPACE    | ROOTFS_SIZE            | IMAGE_ROOTFS_ALIGNMENT        |
-#  ---------------------------------------- ------------------------ -------------------------------
-# ^      ^                 ^               ^                        ^                               ^
-# |      |                 |               |                        |                               |
-# 0     1M                4M        4MiB + BOOTSPACE   4MiB + BOOTSPACE + SDIMG_ROOTFS   4MiB + BOOTSPACE + SDIMG_ROOTFS + 4MiB
+#       4MiB            BOOT_SPACE                 ROOTFS_SIZE
+#  <------------> <--------------------> <------------------------------>
+# +--------------+----------------------+--------------------------------+
+# | U-BOOT (RAW) | BOOT PARTITION (FAT) | ROOTFS PARTITION (EXT4)        |
+# +--------------+----------------------+--------------------------------+
+# ^              ^                      ^                                ^
+# |              |                      |                                |
+# 0            4MiB             4MiB + BOOT_SPACE                   SDIMG_SIZE
 #
-generate_ccardimx28js_sdcard() {
+IMAGE_CMD_sdcard() {
+	# Align boot partition and calculate total sdcard image size
+	BOOT_SPACE_ALIGNED="$(expr \( \( ${BOARD_BOOTIMAGE_PARTITION_SIZE} + ${IMAGE_ROOTFS_ALIGNMENT} - 1 \) / ${IMAGE_ROOTFS_ALIGNMENT} \) \* ${IMAGE_ROOTFS_ALIGNMENT})"
+	SDIMG_SIZE="$(expr ${IMAGE_ROOTFS_ALIGNMENT} + ${BOOT_SPACE_ALIGNED} + $ROOTFS_SIZE)"
+
+	# Initialize sdcard image file
+	dd if=/dev/zero of=${SDIMG} bs=1024 count=0 seek=${SDIMG_SIZE}
+
+	# Create partition table, boot partition (with bootable flag) and rootfs partition (to the end of the disk)
+	parted -s ${SDIMG} mklabel msdos
+	parted -s ${SDIMG} unit KiB mkpart primary fat32 ${IMAGE_ROOTFS_ALIGNMENT} $(expr ${IMAGE_ROOTFS_ALIGNMENT} \+ ${BOOT_SPACE_ALIGNED})
+	parted -s ${SDIMG} set 1 boot on
+	parted -s ${SDIMG} -- unit KiB mkpart primary ext2 $(expr ${IMAGE_ROOTFS_ALIGNMENT} \+ ${BOOT_SPACE_ALIGNED}) -1s
+	parted -s ${SDIMG} unit KiB print
+
+	# Burn bootloader, boot and rootfs partitions
+	dd if=${DEPLOY_DIR_IMAGE}/${UBOOT_SYMLINK} of=${SDIMG} conv=notrunc,fsync seek=2 bs=512
+	dd if=${SDIMG_BOOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024)
+	dd if=${SDIMG_ROOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024 + ${BOOT_SPACE_ALIGNED} \* 1024)
+}
+
+#
+# Create an image that can by written onto a SD card using dd (for ccardimx28 family)
+#
+# The disk layout used is:
+#
+#   1. Not partitioned  : reserved for bootloader (u-boot at 1MiB offset)
+#   2. BOOT PARTITION   : kernel and device tree blobs
+#   3. ROOTFS PARTITION : rootfs
+#
+#         4MiB             BOOT_SPACE                 ROOTFS_SIZE
+#  <----------------> <--------------------> <------------------------------>
+# +---+--------------+----------------------+--------------------------------+
+# |   | U-BOOT (RAW) | BOOT PARTITION (FAT) | ROOTFS PARTITION (EXT4)        |
+# +---+--------------+----------------------+--------------------------------+
+# ^   ^              ^                      ^                                ^
+# |   |              |                      |                                |
+# 0 1MiB           4MiB             4MiB + BOOT_SPACE                   SDIMG_SIZE
+#
+IMAGE_CMD_sdcard_ccardimx28() {
+	# Align boot partition and calculate total sdcard image size
+	BOOT_SPACE_ALIGNED="$(expr \( \( ${BOARD_BOOTIMAGE_PARTITION_SIZE} + ${IMAGE_ROOTFS_ALIGNMENT} - 1 \) / ${IMAGE_ROOTFS_ALIGNMENT} \) \* ${IMAGE_ROOTFS_ALIGNMENT})"
+	SDIMG_SIZE="$(expr ${IMAGE_ROOTFS_ALIGNMENT} + ${BOOT_SPACE_ALIGNED} + $ROOTFS_SIZE)"
+
+	# Initialize sdcard image file
+	dd if=/dev/zero of=${SDIMG} bs=1024 count=0 seek=${SDIMG_SIZE}
+
 	#
 	# Bootstream header for u-boot at 1M offset
 	#
@@ -100,45 +175,23 @@ generate_ccardimx28js_sdcard() {
 	# format does not work well with 'dash' shell
 	PRINTF="$(which printf)"
 
-	parted -s ${SDCARD} mklabel msdos
-	parted -s ${SDCARD} unit KiB mkpart primary 1024 ${IMAGE_ROOTFS_ALIGNMENT}
-	parted -s ${SDCARD} unit KiB mkpart primary fat32 ${IMAGE_ROOTFS_ALIGNMENT} $(expr ${IMAGE_ROOTFS_ALIGNMENT} \+ ${BOOT_SPACE_ALIGNED})
-	parted -s ${SDCARD} unit KiB mkpart primary $(expr ${IMAGE_ROOTFS_ALIGNMENT} \+ ${BOOT_SPACE_ALIGNED}) $(expr ${IMAGE_ROOTFS_ALIGNMENT} \+ ${BOOT_SPACE_ALIGNED} \+ $ROOTFS_SIZE)
+	# Create partition table, boot partition (with bootable flag) and rootfs partition (to the end of the disk)
+	parted -s ${SDIMG} mklabel msdos
+	parted -s ${SDIMG} unit KiB mkpart primary 1024 ${IMAGE_ROOTFS_ALIGNMENT}
+	parted -s ${SDIMG} unit KiB mkpart primary fat32 ${IMAGE_ROOTFS_ALIGNMENT} $(expr ${IMAGE_ROOTFS_ALIGNMENT} \+ ${BOOT_SPACE_ALIGNED})
+	parted -s ${SDIMG} set 2 boot on
+	parted -s ${SDIMG} -- unit KiB mkpart primary ext2 $(expr ${IMAGE_ROOTFS_ALIGNMENT} \+ ${BOOT_SPACE_ALIGNED}) -1s
+	parted -s ${SDIMG} unit KiB print
 
-	# Change partition type to 0x53 for mxs processor family
-	echo -n S | dd of=${SDCARD} bs=1 count=1 seek=450 conv=notrunc
+	# Change partition type to 0x53 for mxs processor family and write bootstream header
+	echo -n S | dd of=${SDIMG} bs=1 count=1 seek=450 conv=notrunc
+	${PRINTF} "${BS_HDR}" | dd of=${SDIMG} bs=512 seek=$(expr 1024 \* 2) conv=notrunc,sync
 
-	${PRINTF} "${BS_HDR}" | dd of=${SDCARD} bs=512 seek=$(expr 1024 \* 2) conv=notrunc,sync
-	dd if=${DEPLOY_DIR_IMAGE}/${UBOOT_SYMLINK} of=${SDCARD} bs=512 seek=$(expr 1024 \* 2 \+ 1) conv=notrunc,sync
-
-	BOOT_BLOCKS=$(LC_ALL=C parted -s ${SDCARD} unit b print \
-			| awk '/ 2 / { print substr($4, 1, length($4 -1)) / 1024 }')
-
-	mkfs.vfat -n "${BOOTDD_VOLUME_ID}" -S 512 -C ${WORKDIR}/boot.img $BOOT_BLOCKS
-	mcopy -i ${WORKDIR}/boot.img -s ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin ::/${KERNEL_IMAGETYPE}
-
-	# Copy boot scripts
-	for item in ${BOOT_SCRIPTS}; do
-		src=`echo $item | awk -F':' '{ print $1 }'`
-		dst=`echo $item | awk -F':' '{ print $2 }'`
-		mcopy -i ${WORKDIR}/boot.img -s ${DEPLOY_DIR_IMAGE}/$src ::/$dst
-	done
-
-	# Copy kernel image and dtb's
-	if test -n "${KERNEL_DEVICETREE}"; then
-		for DTS_FILE in ${KERNEL_DEVICETREE}; do
-			DTS_BASE_NAME=`basename ${DTS_FILE} | awk -F "." '{print $1}'`
-			if [ -e "${KERNEL_IMAGETYPE}-${DTS_BASE_NAME}.dtb" ]; then
-				kernel_bin="`readlink ${KERNEL_IMAGETYPE}-${MACHINE}.bin`"
-				kernel_bin_for_dtb="`readlink ${KERNEL_IMAGETYPE}-${DTS_BASE_NAME}.dtb | sed "s,$DTS_BASE_NAME,${MACHINE},g;s,\.dtb$,.bin,g"`"
-				if [ $kernel_bin = $kernel_bin_for_dtb ]; then
-					mcopy -i ${WORKDIR}/boot.img -s ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTS_BASE_NAME}.dtb ::/${DTS_BASE_NAME}.dtb
-				fi
-			fi
-		done
-	fi
-
-	# Burn partitions
-	dd if=${WORKDIR}/boot.img of=${SDCARD} conv=notrunc seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
-	dd if=${SDCARD_ROOTFS} of=${SDCARD} conv=notrunc seek=1 bs=$(expr ${BOOT_SPACE_ALIGNED} \* 1024 + ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
+	# Burn bootloader, boot and rootfs partitions
+	dd if=${DEPLOY_DIR_IMAGE}/${UBOOT_SYMLINK} of=${SDIMG} conv=notrunc,fsync seek=$(expr 1024 \* 2 \+ 1) bs=512
+	dd if=${SDIMG_BOOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024)
+	dd if=${SDIMG_ROOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024 + ${BOOT_SPACE_ALIGNED} \* 1024)
 }
+
+# The sdcard image requires the boot and rootfs images to be built before
+IMAGE_TYPEDEP_sdcard = "${SDIMG_BOOTFS_TYPE} ${SDIMG_ROOTFS_TYPE}"

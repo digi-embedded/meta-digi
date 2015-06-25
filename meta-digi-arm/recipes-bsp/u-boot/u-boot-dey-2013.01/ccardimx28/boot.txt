@@ -10,7 +10,7 @@
 # | U-BOOT (RAW) | BOOT_PARTITION (FAT) | ROOTFS_PARTITION (EXT4) |
 # +--------------+----------------------+-------------------------+
 #
-setenv fdtimg imx28-ccardimx28js.dtb
-setenv kimg uimage
+setenv fdtimg uimage-imx28-ccardimx28js.dtb
+setenv kimg uimage-ccardimx28js.bin
 setenv mmc_rpart /dev/mmcblk0p3
 dboot linux mmc 0:2

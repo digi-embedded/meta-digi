@@ -9,7 +9,7 @@ PROVIDES += "u-boot"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=4c6cde5df68eff615d36789dc18edd3b"
 
-SRC_URI_append_mxs = " file://boot-sd.txt"
+SRC_URI_append_mxs = " file://boot.txt"
 
 S = "${WORKDIR}/git"
 
@@ -19,7 +19,7 @@ EXTRA_OEMAKE += 'HOSTSTRIP=true'
 EXTRA_OEMAKE_append_mxs = ' BOOTLETS_DIR=${STAGING_DIR_TARGET}/boot'
 
 do_deploy_append_mxs() {
-	mkimage -T script -n bootscript -C none -d ${WORKDIR}/boot-sd.txt ${DEPLOYDIR}/boot-sd.scr
+	mkimage -T script -n bootscript -C none -d ${WORKDIR}/boot.txt ${DEPLOYDIR}/boot.scr
 }
 
 COMPATIBLE_MACHINE = "(mxs|mx5)"
