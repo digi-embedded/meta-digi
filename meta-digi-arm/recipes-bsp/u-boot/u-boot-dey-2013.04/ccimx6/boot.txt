@@ -2,10 +2,45 @@
 # U-Boot bootscript for EMMC/SD images created by Yocto.
 #
 
+#
+# Set device tree filename depending on the hardware variant
+#
+if test "${module_variant}" = "0x02"; then
+	setenv fdt_file uImage-imx6q-ccimx6sbc-wb.dtb
+elif test "${module_variant}" = "0x03"; then
+	setenv fdt_file uImage-imx6q-ccimx6sbc-wb.dtb
+elif test "${module_variant}" = "0x04"; then
+	setenv fdt_file uImage-imx6q-ccimx6sbc-wb.dtb
+elif test "${module_variant}" = "0x05"; then
+	setenv fdt_file uImage-imx6q-ccimx6sbc-w.dtb
+elif test "${module_variant}" = "0x06"; then
+	setenv fdt_file uImage-imx6q-ccimx6sbc-wb.dtb
+elif test "${module_variant}" = "0x07"; then
+	setenv fdt_file uImage-imx6dl-ccimx6sbc-w.dtb
+elif test "${module_variant}" = "0x08"; then
+	setenv fdt_file uImage-imx6q-ccimx6sbc.dtb
+elif test "${module_variant}" = "0x09"; then
+	setenv fdt_file uImage-imx6dl-ccimx6sbc.dtb
+elif test "${module_variant}" = "0x0a"; then
+	setenv fdt_file uImage-imx6dl-ccimx6sbc-mw.dtb
+elif test "${module_variant}" = "0x0b"; then
+	setenv fdt_file uImage-imx6dl-ccimx6sbc-mwb.dtb
+elif test "${module_variant}" = "0x0c"; then
+	setenv fdt_file uImage-imx6dl-ccimx6sbc.dtb
+elif test "${module_variant}" = "0x0e"; then
+	setenv fdt_file uImage-imx6q-ccimx6sbc.dtb
+elif test "${module_variant}" = "0x0f"; then
+	setenv fdt_file uImage-imx6q-ccimx6sbc.dtb
+elif test "${module_variant}" = "0x11"; then
+	setenv fdt_file uImage-imx6q-ccimx6sbc-wb.dtb
+else
+	echo "------ Using default fdt_file"
+fi
+
 # To detect if we are booting from SD card we get the UUID of the
 # boot partition and compare with the default one for the EMMC
-part uuid mmc ${mmcdev}:${mmcpart} bootpart
+part uuid mmc ${mmcbootdev}:${mmcpart} bootpart
 if test "${bootpart}" != "${part1_uuid}"; then
-	setenv mmcroot /dev/mmcblk${mmcdev}p2
+	setenv mmcroot /dev/mmcblk${mmcbootdev}p2
 fi
-dboot linux mmc ${mmcdev}:${mmcpart}
+dboot linux mmc ${mmcbootdev}:${mmcpart}
