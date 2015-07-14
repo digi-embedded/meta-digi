@@ -35,7 +35,7 @@ bt_init() {
 		fi
 		BT_PWR_GPIO_NR="21"
 	elif [ "${MACHINENAME}" = "ccimx6sbc" ]; then
-		BLUETOOTH_VARIANTS="0x01 0x02 0x03 0x04 0x06 0x0b"
+		BLUETOOTH_VARIANTS="0x01 0x02 0x03 0x04 0x06 0x0b 0x11 0x12"
 		MOD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant)"
 		if ! echo "${BLUETOOTH_VARIANTS}" | grep -qs "${MOD_VARIANT}"; then
 			echo "${SCRIPTNAME}: variant ${MOD_VARIANT} does not support bluetooth"
