@@ -88,7 +88,8 @@ rm -f ${TMP_MACFILE}
 #
 MACHINE="$(cat /proc/device-tree/digi,machine,name 2>/dev/null || \
 	   cat /sys/kernel/machine/name)"
-MOD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant 2>/dev/null)"
+MOD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant 2>/dev/null || \
+	       cat /sys/kernel/${MACHINE}/mod_variant)"
 REGION_CODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null || \
 	       cat /sys/kernel/${MACHINE}/mod_cert)"
 
