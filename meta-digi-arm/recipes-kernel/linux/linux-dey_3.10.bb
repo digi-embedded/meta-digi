@@ -17,10 +17,6 @@ SRCREV_internal_mxs = "${AUTOREV}"
 SRCREV_internal_mx6 = "${AUTOREV}"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
-# Kernel configuration fragments
-KERNEL_CFG_FRAGS ?= ""
-KERNEL_CFG_FRAGS_append = " ${@base_conditional('HAVE_EXAMPLE', '1' , 'file://config-spidev.cfg', '', d)}"
-
 config_dts() {
 	for DTB in ${KERNEL_DEVICETREE}; do
 		if [ "${1}" = "enable" ]; then
