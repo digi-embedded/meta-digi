@@ -23,8 +23,8 @@ MACHINE_FIRMWARE_append_mx6dl = " firmware-imx-vpu-imx6d"
 MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_BT', '1' , 'firmware-atheros-ar3k', '', d)}"
 
 MACHINE_EXTRA_RDEPENDS += " \
-    e2fsprogs \
     e2fsprogs-mke2fs \
+    e2fsprogs-resize2fs \
     parted \
     u-boot-dey-fw-utils \
 "
