@@ -3,7 +3,7 @@
 SUMMARY = "Firmware files for Digi's platforms, such as Atheros bluetooth."
 SECTION = "base"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://${DIGI_EULA_FILE};md5=ef5b088ca04b6f10b1764aa182f4f51d"
+LIC_FILES_CHKSUM = "file://${DIGI_EULA_FILE};md5=4c0991cfde5c8a92338cbfe0f4f9a5c6"
 
 SRC_URI = " \
     file://PS_ASIC_class_1.pst \
