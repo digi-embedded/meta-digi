@@ -158,7 +158,7 @@ _EOF_
 while read _pl _ker; do
 	eval "${_pl}_ker=\"${_ker}\""
 done<<-_EOF_
-	ccardimx28js    y
+	ccardimx28js    n
 	ccimx51js       n
 	ccimx53js       n
 	ccimx6sbc       n

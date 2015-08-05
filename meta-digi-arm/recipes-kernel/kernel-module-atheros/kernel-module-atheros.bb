@@ -20,8 +20,8 @@ SRC_URI  = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}'
 SRC_URI += " \
     file://atheros-pre-up \
     file://Makefile \
-    ${@base_conditional('IS_KERNEL_2X', '1' , '', 'file://0001-atheros-convert-NLA_PUT-macros.patch', d)} \
-    ${@base_conditional('IS_KERNEL_2X', '1' , '', 'file://0002-atheros-update-renamed-struct-members.patch', d)} \
+    file://0001-atheros-convert-NLA_PUT-macros.patch \
+    file://0002-atheros-update-renamed-struct-members.patch \
 "
 
 # MX6 wireless calibration file and post-down script

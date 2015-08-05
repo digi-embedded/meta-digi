@@ -15,7 +15,7 @@ SRC_URI = " \
     file://0004-discover-boot-ROM-version-from-FDT-if-available.patch \
     file://0005-dump-v1-boot-structures.patch \
     file://0006-added-option-to-verify-data-written-to-flash.patch \
-    ${@base_conditional('IS_KERNEL_2X', '1' , '', 'file://0007-disable-use-of-nfc_geometry.patch', d)} \
+    file://0007-disable-use-of-nfc_geometry.patch \
 "
 
 SRC_URI[md5sum] = "2a0e55b5063605b2664fd67c95a6c686"
