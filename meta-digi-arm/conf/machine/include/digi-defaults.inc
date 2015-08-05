@@ -12,7 +12,7 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 # -------------------------------------------------
 # ccimx5        2.6.35.14          2009.08
 # ccardimx28    3.10               2013.01
-# ccimx6        3.10               2013.04
+# ccimx6        3.10,3.14          2013.04
 #
 # Digi BSP default versions
 PREFERRED_VERSION_linux-dey ?= "3.10"
