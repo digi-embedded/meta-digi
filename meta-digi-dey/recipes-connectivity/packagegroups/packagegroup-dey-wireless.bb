@@ -11,7 +11,7 @@ inherit packagegroup
 WIRELESS_MODULE ?= ""
 WIRELESS_MODULE_append_mx5 = "${@base_contains('MACHINE_FEATURES', 'wifi', 'kernel-module-redpine', '', d)}"
 WIRELESS_MODULE_append_mxs = "${@base_contains('MACHINE_FEATURES', 'wifi', 'kernel-module-atheros', '', d)}"
-WIRELESS_MODULE_append_mx6 = "${@base_contains('MACHINE_FEATURES', 'wifi', 'kernel-module-atheros', '', d)}"
+# WIRELESS_MODULE_append_mx6 = "${@base_contains('MACHINE_FEATURES', 'wifi', 'kernel-module-atheros', '', d)}"
 
 RDEPENDS_${PN} = "\
     crda \
