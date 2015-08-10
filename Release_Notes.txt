@@ -1,0 +1,93 @@
+
+                   Digi Embedded Yocto (DEY) 1.8
+                           Release Notes
+                           Build 1.6.8.1
+
+                    (c) 2015, Digi International
+                    http://www.digiembedded.com/
+                             November, 2015
+
+
+Introduction
+---------------------------------------------------------------------------
+  This document provides information about Digi Embedded Yocto 1.8 (DEY-1.8),
+  Digi International's professional embedded Yocto development environment.
+
+  Digi Embedded Yocto 1.8 is based on the 1.8 (Fido) Yocto release.
+
+  For setup instructions refer to the Quick Start Guide available to download
+  from Digi's support site.
+
+Contents
+-------------------------------------------------------------------------
+  This document contains the following sections:
+
+  1. Supported Platforms
+  2. Supported System-On-Module variants
+  3. Documentation
+  4. Support Contact Information
+
+
+1. Supported Platforms
+-------------------------------------------------------------------------
+
+  The current Digi Embedded Yocto 1.8 release supports the following hardware
+  platforms:
+
+    * ConnectCore 6 SBC                      (Digi P/N CC-SB-WMX-J97C)
+    * ConnectCard for i.MX28 JumpStart Kit   (Digi P/N CC-WMX28-LX)
+
+  Previous versions of Digi Embedded Yocto include support for additional Digi
+  hardware.
+
+  The additional hardware supported by DEY-1.4 is the following:
+
+    * ConnectCore for MX51                   (Digi P/N CC-(W)MX51-LX)
+    * ConnectCore for MX53                   (Digi P/N CC-(W)MX53-LX)
+
+
+2. Supported System-On-Module variants
+-------------------------------------------------------------------------
+
+  Digi's system-on-modules can be ordered in different hardware variants, for
+  example with different memory configurations. For a list of the available
+  module variants please refer to the Digi embedded products web page.
+
+  All module variants are fully supported on the current release, except for
+  the following which remain in beta software support:
+
+  CC-WMX-K77C-TE                             (Digi P/N 55001818-11)
+  CC-MX-PF58-ZK                              (Digi P/N 55001674-04)
+  CC-WMX-PF58-VM                             (Digi P/N 55001669-02)
+  CC-WMX-PF47-ALG1                           (Digi P/N 55001667-02)
+  CC-WMX-PE47-TM                             (Digi P/N 55001667-04)
+
+  If you are using any of the above variants please contact support for further
+  details.
+
+
+3. Documentation
+-------------------------------------------------------------------------
+
+  Digi Embedded Yocto documentation is available to download from the Digi
+  support page.
+
+   * Quick Start Guide
+   * Getting Started Guide
+   * First Steps Guide
+   * U-Boot customization guide
+   * Linux BSP user manual
+   * Hardware documentation
+
+4. Support Contact Information
+-------------------------------------------------------------------------
+  For support questions please contact the Digi technical support experts:
+
+    Digi Technical Support
+
+    Web based Support:   http://www.digi.com/support/eservice/login.jsp
+    Support Web site:    http://www.digi.com/support/index.jsp
+    Support forum:       http://www.digi.com/support/forum/
+
+
+Have fun!
