@@ -15,16 +15,12 @@ elif test "${module_variant}" = "0x05"; then
 	setenv fdt_file uImage-imx6q-ccimx6sbc-w.dtb
 elif test "${module_variant}" = "0x06"; then
 	setenv fdt_file uImage-imx6q-ccimx6sbc-wb.dtb
-elif test "${module_variant}" = "0x07"; then
-	setenv fdt_file uImage-imx6dl-ccimx6sbc-w.dtb
 elif test "${module_variant}" = "0x08"; then
 	setenv fdt_file uImage-imx6q-ccimx6sbc.dtb
-elif test "${module_variant}" = "0x09"; then
-	setenv fdt_file uImage-imx6dl-ccimx6sbc.dtb
 elif test "${module_variant}" = "0x0a"; then
-	setenv fdt_file uImage-imx6dl-ccimx6sbc-mw.dtb
+	setenv fdt_file uImage-imx6dl-ccimx6sbc-w.dtb
 elif test "${module_variant}" = "0x0b"; then
-	setenv fdt_file uImage-imx6dl-ccimx6sbc-mwb.dtb
+	setenv fdt_file uImage-imx6dl-ccimx6sbc-wb.dtb
 elif test "${module_variant}" = "0x0c"; then
 	setenv fdt_file uImage-imx6dl-ccimx6sbc.dtb
 elif test "${module_variant}" = "0x0e"; then
