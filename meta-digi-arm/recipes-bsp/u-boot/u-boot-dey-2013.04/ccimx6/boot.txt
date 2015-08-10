@@ -29,6 +29,8 @@ elif test "${module_variant}" = "0x0f"; then
 	setenv fdt_file uImage-imx6q-ccimx6sbc.dtb
 elif test "${module_variant}" = "0x11"; then
 	setenv fdt_file uImage-imx6q-ccimx6sbc-wb.dtb
+elif test "${module_variant}" = "0x12"; then
+	setenv fdt_file uImage-imx6q-ccimx6sbc-wb.dtb
 else
 	echo "------ Using default fdt_file"
 fi
