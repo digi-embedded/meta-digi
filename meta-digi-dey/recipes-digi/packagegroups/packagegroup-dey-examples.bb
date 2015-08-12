@@ -11,9 +11,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
 RDEPENDS_${PN} = "\
-	${@base_conditional('IS_KERNEL_2X', '1' , 'dey-examples-adc', '', d)} \
 	${@base_contains("MACHINE_FEATURES", "alsa", "dey-examples-alsa", "", d)} \
-	${@base_conditional('IS_KERNEL_2X', '1' , 'dey-examples-gpio', '', d)} \
 	dey-examples-gpio-sysfs \
 	${@base_contains("MACHINE_FEATURES", "rtc", "dey-examples-rtc", "", d)} \
 	dey-examples-spidev \
@@ -22,6 +20,8 @@ RDEPENDS_${PN} = "\
 "
 
 RDEPENDS_${PN}_append_ccardimx28 = "\
+	${@base_conditional('IS_KERNEL_2X', '1' , 'dey-examples-adc', '', d)} \
+	${@base_conditional('IS_KERNEL_2X', '1' , 'dey-examples-gpio', '', d)} \
 	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
 	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
 	dey-examples-can \
@@ -29,6 +29,8 @@ RDEPENDS_${PN}_append_ccardimx28 = "\
 "
 
 RDEPENDS_${PN}_append_ccimx5 = "\
+	${@base_conditional('IS_KERNEL_2X', '1' , 'dey-examples-adc', '', d)} \
+	${@base_conditional('IS_KERNEL_2X', '1' , 'dey-examples-gpio', '', d)} \
 	${@base_contains("MACHINE_FEATURES", "accelerometer", "dey-examples-accelerometer", "", d)} \
 	${@base_contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \
 	dey-examples-sahara \
