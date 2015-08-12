@@ -19,3 +19,5 @@ do_install() {
 	install -d ${D}${bindir}
 	install -m 0755 bt_test ${D}${bindir}
 }
+
+COMPATIBLE_MACHINE = "(ccardimx28|ccimx6)"

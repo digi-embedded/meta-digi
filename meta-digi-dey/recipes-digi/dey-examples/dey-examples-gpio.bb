@@ -21,3 +21,5 @@ do_install() {
 }
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
+
+COMPATIBLE_MACHINE = "(${@base_conditional("IS_KERNEL_2X", "1", "(ccardimx28|ccimx5)", "(^$)", d)})"

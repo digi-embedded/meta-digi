@@ -27,3 +27,5 @@ INITSCRIPT_NAME = "accelerometer"
 INITSCRIPT_PARAMS = "start 11 S ."
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
+
+COMPATIBLE_MACHINE = "(ccimx5)"

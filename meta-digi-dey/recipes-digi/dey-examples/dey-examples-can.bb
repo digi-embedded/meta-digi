@@ -17,3 +17,5 @@ do_install() {
 	install -d ${D}${bindir}
 	install -m 0755 can_test ${D}${bindir}
 }
+
+COMPATIBLE_MACHINE = "(ccardimx28|ccimx53|ccimx6)"
