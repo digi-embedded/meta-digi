@@ -13,8 +13,8 @@ SRCREV_external = ""
 SRCREV_external_mxs = ""
 SRCREV_external_mx6 = ""
 SRCREV_internal = ""
-SRCREV_internal_mxs = "313db2db8d566caad3c9c89145712ebee1a47340"
-SRCREV_internal_mx6 = "da7467d16cd3f8e4c72c2f5f7eec8d61dbc01520"
+SRCREV_internal_mxs = "${AUTOREV}"
+SRCREV_internal_mx6 = "${AUTOREV}"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 config_dts() {

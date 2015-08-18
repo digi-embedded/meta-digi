@@ -8,7 +8,7 @@ COMPATIBLE_MACHINE = "(mx5)"
 SRCBRANCH = "v2.6.35/dey-1.4/maint"
 
 SRCREV_external = ""
-SRCREV_internal = "4c04cc2a9bbcfd17e34cc3507b293907c83e8f0d"
+SRCREV_internal = "${AUTOREV}"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 KERNEL_CFG_FRAGS ?= ""
