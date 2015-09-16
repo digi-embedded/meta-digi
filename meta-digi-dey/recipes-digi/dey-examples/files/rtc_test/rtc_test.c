@@ -24,9 +24,9 @@
 #include <string.h>
 
 #define	PROGRAM			"rtc_test"
-#define VERSION			"3.0"
+#define VERSION			"3.1"
 
-#define	RTC_DEVICE_FILE		"/dev/rtc"
+#define	DEFAULT_RTC_DEVICE_FILE	"/dev/rtc"
 
 /* test options */
 #define	RTC_TEST_RD_TIME	(1<<0)
@@ -38,7 +38,7 @@
 #define	RTC_DEFAULT_TEST_OPS	0	/* None, pass it through the command line */
 
 #define rtc_test_usage \
-	"[-abcdehms]\n"
+	"[-abcdefhms]\n"
 #define rtc_test_full_usage \
 	"rtc_test [options]\n\n" \
         "Tests the real time clock driver\n" \
@@ -48,7 +48,8 @@
         "  -c : Read the alarm programed value\n" \
         "  -d : Set the alarm to trigger in the specified seconds\n" \
         "  -e : Test the alarm interrupt with the specified seconds\n" \
-        "  -h : Help\n" \
+        "  -f : Use specified device (default is /dev/rtc)\n" \
+	"  -h : Help\n" \
 	"  -m : Alarm has minutes resolution. (seconds by default)." \
 	" In this mode the alarm triggers on the minutes register and the" \
 	" seconds are ignored.\n" \
@@ -118,12 +119,13 @@ int main(int argc, char *argv[])
 	unsigned int test_results = 0;
 	struct rtc_time rtc_tm;
 	struct rtc_wkalrm wkalrm;
+	const char rtc_device_file[10] = DEFAULT_RTC_DEVICE_FILE;
 
 	memset(&rtc_tm, 0, sizeof(struct rtc_time));
 	memset(&wkalrm, 0, sizeof(struct rtc_wkalrm));
 
 	if (argc > 1) {
-		while ((opt = getopt(argc, argv, "abcdehms:")) > 0) {
+		while ((opt = getopt(argc, argv, "abcdef:hms:")) > 0) {
 			switch (opt) {
 			case 'a':
 				test_ops |= RTC_TEST_RD_TIME;
@@ -139,6 +141,9 @@ int main(int argc, char *argv[])
 				break;
 			case 'e':
 				test_ops |= RTC_TEST_ALARM_IRQ;
+				break;
+			case 'f':
+				strncpy(rtc_device_file,optarg,10);
 				break;
 			case 'm':
 				minutes_res = 1;
@@ -162,9 +167,9 @@ int main(int argc, char *argv[])
 
 	rtc_test_banner();
 
-	rtc_fd = open(RTC_DEVICE_FILE, O_RDONLY);
+	rtc_fd = open(rtc_device_file, O_RDONLY);
 	if (rtc_fd < 0) {
-		perror(RTC_DEVICE_FILE);
+		perror(rtc_device_file);
 		exit(EXIT_FAILURE);
 	}
 
