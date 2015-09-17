@@ -16,6 +16,7 @@ SRC_URI += "file://0001-del-baudrates.patch \
             file://pswitch-press \
             file://pswitch-release \
             file://busybox-static-nodes \
+            file://bridgeifupdown \
            "
 
 # hwclock bootscript init parameters
@@ -63,5 +64,13 @@ do_install_append() {
 	fi
 	if grep "CONFIG_MAKEDEVS=y" ${WORKDIR}/defconfig; then
 		install -m 0755 ${WORKDIR}/busybox-static-nodes ${D}${sysconfdir}/init.d/
+	fi
+
+	# Install bridgeifupdown script
+	if grep "CONFIG_BRCTL" ${WORKDIR}/defconfig; then
+		install -d ${D}${sysconfdir}/network/if-pre-up.d/
+		install -d ${D}${sysconfdir}/network/if-post-down.d/
+		install -m 0755 ${WORKDIR}/bridgeifupdown ${D}${sysconfdir}/network/if-pre-up.d/
+		ln -s ../if-pre-up.d/bridgeifupdown ${D}${sysconfdir}/network/if-post-down.d/bridgeifupdown
 	fi
 }

@@ -1,0 +1,52 @@
+#!/bin/sh
+# Execute only if the interface has a bridge_ports property (this characterizes bridge interfaces)
+case "$IF_BRIDGE_PORTS" in
+    "")
+        exit 0
+        ;;
+    none)
+        INTERFACES=""
+        ;;
+    *)
+        INTERFACES="$IF_BRIDGE_PORTS"
+        ;;
+esac
+
+if [ "$MODE" = "start" ] && [ ! -d /sys/class/net/$IFACE ]; then
+	# Create the bridge interface using brctl
+	brctl addbr $IFACE || exit 1
+
+	# Wait for wlan0 to be ready
+	sleep 0.5
+
+	# For all the interfaces in bridge ports, attach to the bridge and remove ip
+	for port in $INTERFACES; do
+		brctl addif $IFACE $port && ifconfig $port 0.0.0.0 up
+	done
+
+	# Setup the bridge (only options supported by busybox)
+	[ -n "$IF_BRIDEG_AGEING" ] && brctl setageing $IFACE $IF_BRIDGE_AGEING
+	[ -n "$IF_BRIDGE_BRIDGEPRIO" ] && brctl setbridgeprio $IFACE $IF_BRIDGE_BRIDGEPRIO
+	[ -n "$IF_BRIDGE_FD" ] && brctl setfd $IFACE $IF_BRIDGE_FD
+	[ -n "$IF_BRIDGE_HELLO" ] && brctl sethello $IFACE $IF_BRIDGE_HELLO
+	[ -n "$IF_BRIDGE_MAXAGE" ] && brctl setmaxage $IFACE $IF_BRIDGE_MAXAGE
+	[ -n "$IF_BRIDGE_PATHCOST" ] && brctl setpathcost $IFACE $IF_BRIDGE_PATHCOST
+	[ -n "$IF_BRIDGE_PORTPRIO" ] && brctl setportprio $IFACE $IF_BRIDGE_PORTPRIO
+	[ -n "$IF_BRIDGE_STP" ] && brctl stp $IFACE $IF_BRIDGE_STP
+
+	# Activate the bridge
+	ifconfig $IFACE 0.0.0.0 up
+
+elif [ "$MODE" = "stop" ];  then
+	# Bring down the interface
+	ifconfig $IFACE down || exit 1
+
+	# Remove port interfaces from the bridge
+	for port in $INTERFACES; do
+		ifconfig $port down && brctl delif $IFACE $port
+	done
+
+	# Destroy the interface
+	brctl delbr $IFACE
+fi
+

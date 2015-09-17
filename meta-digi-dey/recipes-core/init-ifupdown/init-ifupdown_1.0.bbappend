@@ -3,6 +3,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
 SRC_URI_append = " \
+    file://interfaces.br0.example \
     file://interfaces.eth0.static \
     file://interfaces.eth0.dhcp \
     file://interfaces.eth1.static \
@@ -24,6 +25,7 @@ do_install_append() {
 	cat ${WORKDIR}/interfaces.eth0.${ETH0_MODE} >> ${D}${sysconfdir}/network/interfaces
 	[ -n "${HAVE_EXT_ETH}" ] && cat ${WORKDIR}/interfaces.eth1.${ETH1_MODE} >> ${D}${sysconfdir}/network/interfaces
 	[ -n "${HAVE_WIFI}" ] && cat ${WORKDIR}/interfaces.wlan0.${WLAN0_MODE} >> ${D}${sysconfdir}/network/interfaces
+	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
 
 	# Remove config entries if corresponding variable is not defined
 	[ -z "${ETH0_STATIC_DNS}" ] && sed -i -e "/##ETH0_STATIC_DNS##/d" ${D}${sysconfdir}/network/interfaces
