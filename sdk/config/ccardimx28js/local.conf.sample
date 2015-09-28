@@ -257,3 +257,8 @@ CONF_VERSION = "1"
 # Enable local PR server
 #
 PRSERV_HOST = "localhost:0"
+
+#
+# Some libraries and packages are covered by Freescale EULA
+#
+#ACCEPT_FSL_EULA = "1"
