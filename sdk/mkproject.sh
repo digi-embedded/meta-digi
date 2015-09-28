@@ -114,7 +114,7 @@ do_mkproject() {
 	if [ -z "${MKP_OLD_PROJECT}" ]; then
 		# Customize project
 		chmod 644 ${MKP_PROJECTPATH}/conf/bblayers.conf ${MKP_PROJECTPATH}/conf/local.conf
-		sed -i  -e "s,##DIGIBASE##,${MKP_SCRIPTPATH}/sources,g" ${MKP_PROJECTPATH}/conf/bblayers.conf
+		sed -i -e "s,##DIGIBASE##,${MKP_SCRIPTPATH}/sources,g" ${MKP_PROJECTPATH}/conf/bblayers.conf
 		if [ -n "${MKP_VARIANT+x}" ]; then
 			sed -i -e "/^MACHINE_VARIANT =/cMACHINE_VARIANT = \"${MKP_VARIANT}\"" \
 				${MKP_PROJECTPATH}/conf/local.conf
