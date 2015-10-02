@@ -93,12 +93,29 @@ do_license() {
 		${MKP_SCRIPTPATH}/sources/meta-fsl-arm/EULA \
 	"
 	[ -z "${MKP_PAGER+x}" ] && MKP_PAGER="| more"
-	eval cat "${MKP_LICENSE_FILES}" ${MKP_PAGER}; printf "\n"
+	eval cat - "${MKP_LICENSE_FILES}" <<-_EOF_ ${MKP_PAGER}; printf "\n"
+		+-------------------------------------------------------------------------------+
+		|                                                                               |
+		|                                                                               |
+		|  This software depends on libraries and packages that are covered by the      |
+		|  following licenses:                                                          |
+		|                                                                               |
+		|      * Digi's end user license agreement                                      |
+		|      * Digi's third party and open source license notice                      |
+		|      * Freescale semiconductor software license agreement                     |
+		|                                                                               |
+		|  To have the right to use those binaries in your images you need to read and  |
+		|  accept the licenses.                                                         |
+		|                                                                               |
+		|                                                                               |
+		+-------------------------------------------------------------------------------+
+
+	_EOF_
 	unset MKP_LICENSE_FILES MKP_PAGER
 
 	ans=""
 	while [ -z "${ans}" ]; do
-		read -p "Do you accept the license agreement? [y/Y to accept]: " ans
+		read -p "Do you accept all three license agreements? [y/Y to accept]: " ans
 	done
 	printf "%80s\n\n" | tr ' ' '-'
 
