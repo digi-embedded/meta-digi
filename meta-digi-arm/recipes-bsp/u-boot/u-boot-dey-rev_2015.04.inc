@@ -1,7 +1,7 @@
-# Copyright (C) 2013 Digi International
+# Copyright (C) 2015 Digi International
 
 # Internal repo branch
-SRCBRANCH = "v2013.04/master"
+SRCBRANCH = "v2015.04/master"
 
 SRCREV_external = ""
 SRCREV_internal = "${AUTOREV}"
