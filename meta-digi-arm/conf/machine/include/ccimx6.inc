@@ -26,7 +26,7 @@ MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
     e2fsprogs-resize2fs \
     parted \
-    u-boot-dey-fw-utils \
+    u-boot-fw-utils \
 "
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE}"
 MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins"
