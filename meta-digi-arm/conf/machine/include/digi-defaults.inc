@@ -14,9 +14,6 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 # ccardimx28    3.10               2013.01
 # ccimx6        3.14               2015.04
 #
-# Digi BSP default versions
-PREFERRED_VERSION_u-boot-dey ?= "2013.01"
-PREFERRED_VERSION_u-boot-dey_ccimx5 ?= "2009.08"
 
 # Help variables used in recipes
 HAVE_WIFI    = "${@base_contains('MACHINE_FEATURES', 'wifi', '1', '', d)}"
