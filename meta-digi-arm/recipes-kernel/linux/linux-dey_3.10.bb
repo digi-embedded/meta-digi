@@ -3,8 +3,6 @@
 require recipes-kernel/linux/linux-dey.inc
 require recipes-kernel/linux/linux-dtb.inc
 
-DEPENDS += "lzop-native bc-native"
-
 # Internal repo branch
 SRCBRANCH = "v3.10/dey-1.4/maint"
 
