@@ -6,15 +6,10 @@ require recipes-kernel/linux/linux-dtb.inc
 DEPENDS += "lzop-native bc-native"
 
 # Internal repo branch
-SRCBRANCH = "v3.10/master"
-SRCBRANCH_mxs = "v3.10/dey-1.4/maint"
+SRCBRANCH = "v3.10/dey-1.4/maint"
 
 SRCREV_external = ""
-SRCREV_external_mxs = ""
-SRCREV_external_mx6 = ""
-SRCREV_internal = ""
-SRCREV_internal_mxs = "${AUTOREV}"
-SRCREV_internal_mx6 = "${AUTOREV}"
+SRCREV_internal = "${AUTOREV}"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 config_dts() {
@@ -28,10 +23,6 @@ config_dts() {
 }
 
 do_update_dts() {
-	:
-}
-
-do_update_dts_mxs() {
 	if [ -n "${HAVE_WIFI}" ]; then
 		config_dts enable  '_ssp2_mmc_wifi.dtsi'
 	else
@@ -73,4 +64,4 @@ do_update_dts_mxs() {
 }
 addtask update_dts before do_install after do_sizecheck
 
-COMPATIBLE_MACHINE = "(mxs|mx6)"
+COMPATIBLE_MACHINE = "(ccardimx28)"
