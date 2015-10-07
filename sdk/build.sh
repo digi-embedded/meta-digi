@@ -38,13 +38,6 @@ SOURCE_MIRROR_URL ?= \"http://build-linux.digi.com/yocto/downloads/\"
 INHERIT += \"own-mirrors\"
 "
 
-# Alternative config for ccardimx28js
-KERNEL_2X_CFG="
-# Build Linux 2.6.35.14 and U-Boot 2009.08
-PREFERRED_VERSION_linux-dey = \"2.6.35.14\"
-PREFERRED_VERSION_u-boot-dey = \"2009.08\"
-"
-
 RM_WORK_CFG="
 INHERIT += \"rm_work\"
 # Exclude rm_work for some key packages (for debugging purposes)
@@ -149,16 +142,6 @@ done<<-_EOF_
 	ccimx6sbc       DONTBUILDVARIANTS
 _EOF_
 
-# Build alternative linux and u-boot
-while read _pl _ker; do
-	eval "${_pl}_ker=\"${_ker}\""
-done<<-_EOF_
-	ccardimx28js    n
-	ccimx51js       n
-	ccimx53js       n
-	ccimx6sbc       n
-_EOF_
-
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
 YOCTO_INST_DIR="${WORKSPACE}/digi-yocto-sdk.$(echo ${DY_REVISION} | tr '/' '_')"
 YOCTO_PROJ_DIR="${WORKSPACE}/projects"
@@ -192,61 +175,55 @@ fi
 rm -rf ${YOCTO_IMGS_DIR} ${YOCTO_PROJ_DIR}
 for platform in ${DY_PLATFORMS}; do
 	eval platform_variants="\${${platform}_var}"
-	eval platform_kernel2x="\${${platform}_ker%n}"
-	for kernel_ver in "" ${platform_kernel2x:+-2x}; do
-		for variant in ${platform_variants}; do
-			_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}${kernel_ver}"
-			_this_img_dir="${YOCTO_IMGS_DIR}/${platform}${kernel_ver}"
-			if [ "${variant}" != "DONTBUILDVARIANTS" ]; then
-				_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}${kernel_ver}_${variant}"
-				_this_img_dir="${YOCTO_IMGS_DIR}/${platform}${kernel_ver}_${variant}"
-				_this_var_arg="-v ${variant}"
-				[ "${variant}" = "-" ] && _this_var_arg="-v \\"
-			fi
-			mkdir -p ${_this_img_dir} ${_this_prj_dir}
-			if pushd ${_this_prj_dir}; then
-				# Configure and build the project in a sub-shell to avoid
-				# mixing environments between different platform's projects
-				(
-					export TEMPLATECONF="${TEMPLATECONF:+${TEMPLATECONF}/${platform}}"
-					MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p ${platform} ${_this_var_arg} <<< "y"
-					# Set a common DL_DIR and SSTATE_DIR for all platforms
-					sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_PROJ_DIR}/downloads\"" \
-						-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
-						conf/local.conf
-					# Set the DISTRO and remove 'meta-digi-dey' layer if distro is not DEY based
-					sed -i -e "/^DISTRO ?=/cDISTRO ?= \"${DY_DISTRO}\"" conf/local.conf
-					if ! echo "${DY_DISTRO}" | grep -qs "dey"; then
-						sed -i -e '/meta-digi-dey/d' conf/bblayers.conf
+	for variant in ${platform_variants}; do
+		_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}"
+		_this_img_dir="${YOCTO_IMGS_DIR}/${platform}"
+		if [ "${variant}" != "DONTBUILDVARIANTS" ]; then
+			_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}_${variant}"
+			_this_img_dir="${YOCTO_IMGS_DIR}/${platform}_${variant}"
+			_this_var_arg="-v ${variant}"
+			[ "${variant}" = "-" ] && _this_var_arg="-v \\"
+		fi
+		mkdir -p ${_this_img_dir} ${_this_prj_dir}
+		if pushd ${_this_prj_dir}; then
+			# Configure and build the project in a sub-shell to avoid
+			# mixing environments between different platform's projects
+			(
+				export TEMPLATECONF="${TEMPLATECONF:+${TEMPLATECONF}/${platform}}"
+				MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p ${platform} ${_this_var_arg} <<< "y"
+				# Set a common DL_DIR and SSTATE_DIR for all platforms
+				sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_PROJ_DIR}/downloads\"" \
+					-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
+					conf/local.conf
+				# Set the DISTRO and remove 'meta-digi-dey' layer if distro is not DEY based
+				sed -i -e "/^DISTRO ?=/cDISTRO ?= \"${DY_DISTRO}\"" conf/local.conf
+				if ! echo "${DY_DISTRO}" | grep -qs "dey"; then
+					sed -i -e '/meta-digi-dey/d' conf/bblayers.conf
+				fi
+				if [ "${DY_USE_MIRROR}" = "true" ]; then
+					sed -i -e "s,^#DIGI_INTERNAL_GIT,DIGI_INTERNAL_GIT,g" conf/local.conf
+					printf "${DIGI_PREMIRROR_CFG}" >> conf/local.conf
+				fi
+				if [ "${DY_RM_WORK}" = "true" ]; then
+					printf "${RM_WORK_CFG}" >> conf/local.conf
+				fi
+				# Remove 'x11' distro feature if building minimal images
+				if echo "${DY_TARGET}" | grep -qs "dey-image-minimal"; then
+					printf "${X11_REMOVAL_CFG}" >> conf/local.conf
+				fi
+				for target in ${DY_TARGET}; do
+					printf "\n[INFO] Building the ${target} target.\n"
+					time bitbake ${target}
+					# Build the toolchain for DEY images
+					if [ "${DY_BUILD_TCHAIN}" = "true" ] && echo "${target}" | grep -qs '^dey-image-[^-]\+$'; then
+						printf "\n[INFO] Building the toolchain for ${target}.\n"
+						time bitbake -c populate_sdk ${target}
 					fi
-					if [ "${DY_USE_MIRROR}" = "true" ]; then
-						sed -i -e "s,^#DIGI_INTERNAL_GIT,DIGI_INTERNAL_GIT,g" conf/local.conf
-						printf "${DIGI_PREMIRROR_CFG}" >> conf/local.conf
-					fi
-					if [ -n "${kernel_ver}" ]; then
-						printf "${KERNEL_2X_CFG}" >> conf/local.conf
-					fi
-					if [ "${DY_RM_WORK}" = "true" ]; then
-						printf "${RM_WORK_CFG}" >> conf/local.conf
-					fi
-					# Remove 'x11' distro feature if building minimal images
-					if echo "${DY_TARGET}" | grep -qs "dey-image-minimal"; then
-						printf "${X11_REMOVAL_CFG}" >> conf/local.conf
-					fi
-					for target in ${DY_TARGET}; do
-						printf "\n[INFO] Building the ${target} target.\n"
-						time bitbake ${target}
-						# Build the toolchain for DEY images
-						if [ "${DY_BUILD_TCHAIN}" = "true" ] && echo "${target}" | grep -qs '^dey-image-[^-]\+$'; then
-							printf "\n[INFO] Building the toolchain for ${target}.\n"
-							time bitbake -c populate_sdk ${target}
-						fi
-					done
-					purge_sstate
-				)
-				copy_images ${_this_img_dir}
-				popd
-			fi
-		done
+				done
+				purge_sstate
+			)
+			copy_images ${_this_img_dir}
+			popd
+		fi
 	done
 done

@@ -7,7 +7,7 @@ include conf/machine/include/mxs-digi-base.inc
 DIGI_FAMILY = "ccardimx28"
 SOC_FAMILY  = "mxs:mx28:${DIGI_FAMILY}"
 
-# Platform u-boot settings (IS_KERNEL_2X implies also u-boot v2009.08)
+# Platform u-boot settings
 UBOOT_ENTRYPOINT = "0x40008000"
 UBOOT_SUFFIX = "sb"
 UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
