@@ -1,7 +1,6 @@
 # Digi's MXS platforms common settings
 include conf/machine/include/digi-defaults.inc
 include conf/machine/include/soc-family.inc
-include conf/machine/include/tune-arm926ejs.inc
 
 XSERVER = "xserver-xorg \
            xf86-input-evdev \
@@ -30,3 +29,6 @@ EXTRA_IMAGEDEPENDS = "u-boot"
 KERNEL_IMAGETYPE = "uImage"
 
 MACHINE_FEATURES = "apm usbgadget usbhost vfat"
+
+# Add the ability to specify _imx machines
+MACHINEOVERRIDES =. "imx:"

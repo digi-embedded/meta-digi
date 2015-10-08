@@ -3,6 +3,7 @@
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore for MX28 module.
 
 include conf/machine/include/mxs-digi-base.inc
+include conf/machine/include/tune-arm926ejs.inc
 
 DIGI_FAMILY = "ccardimx28"
 SOC_FAMILY  = "mxs:mx28:${DIGI_FAMILY}"
