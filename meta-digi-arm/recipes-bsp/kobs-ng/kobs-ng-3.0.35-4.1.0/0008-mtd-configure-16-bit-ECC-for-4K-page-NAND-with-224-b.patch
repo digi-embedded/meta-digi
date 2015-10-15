@@ -1,0 +1,23 @@
+From 62d43285dd08709c86b91ba0ae23c974e96c2905 Mon Sep 17 00:00:00 2001
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Thu, 15 Oct 2015 12:31:24 +0200
+Subject: [PATCH] mtd: configure 16-bit ECC for 4K page NAND with 224-byte OOB
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+---
+ src/mtd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/mtd.c b/src/mtd.c
+index 77ba3070de7a..4d04f4c2921d 100644
+--- a/src/mtd.c
++++ b/src/mtd.c
+@@ -2124,7 +2124,7 @@ int v1_rom_mtd_init(struct mtd_data *md, FILE *fp)
+ 	if (mtd_writesize(md) == 2048) {
+ 		geo->ecc_strength = ROM_BCH_Ecc_8bit << 1;
+ 	} else if (mtd_writesize(md) == 4096) {
+-		if (mtd_oobsize(md) == 218)
++		if (mtd_oobsize(md) == 218 || mtd_oobsize(md) == 224)
+ 			geo->ecc_strength = ROM_BCH_Ecc_16bit << 1;
+ 		else if ((mtd_oobsize(md) == 128))
+ 			geo->ecc_strength = ROM_BCH_Ecc_8bit << 1;
