@@ -23,6 +23,7 @@ WIRELESS_MODULE_append = "${@base_contains('MACHINE_FEATURES', 'wifi', 'kernel-m
 # Firmware
 MACHINE_FIRMWARE ?= ""
 MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_BT', '1' , 'firmware-atheros-ar3k', '', d)}"
+MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_WIFI', '1' , 'firmware-atheros-ath6kl', '', d)}"
 
 MACHINE_EXTRA_RDEPENDS    += "mtd-utils-ubifs nvram ubootenv update-flash"
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"

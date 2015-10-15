@@ -6,10 +6,6 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 
 inherit module
 
-# 'modprobe' from kmod package is needed to load atheros driver. The one
-# from busybox does not support '--ignore-install' option.
-RDEPENDS_${PN} = "kmod"
-
 SRCREV_external = ""
 SRCREV_internal = "50dafb5890180cf33fdb42919c3e6f591d0cd2ea"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
@@ -22,14 +18,6 @@ SRC_URI += " \
     file://Makefile \
     file://0001-atheros-convert-NLA_PUT-macros.patch \
     file://0002-atheros-update-renamed-struct-members.patch \
-"
-
-# MX6 wireless calibration file and post-down script
-SRC_URI_append_ccimx6 = " \
-    file://Digi_6203_2_ANT-US.bin \
-    file://Digi_6203_2_ANT-World.bin \
-    file://Digi_6203-6233-US.bin \
-    file://atheros-post-down \
 "
 
 S = "${WORKDIR}/git"
@@ -50,20 +38,13 @@ do_install_append() {
 	_EOF_
 }
 
-do_install_append_ccimx6() {
-	install -d ${D}${sysconfdir}/network/if-post-down.d
-	install -m 0755 ${WORKDIR}/atheros-post-down ${D}${sysconfdir}/network/if-post-down.d/atheros
-	install -m 0644 \
-		${WORKDIR}/Digi_6203_2_ANT-US.bin \
-		${WORKDIR}/Digi_6203_2_ANT-World.bin \
-		${WORKDIR}/Digi_6203-6233-US.bin \
-		${D}/lib/firmware/ath6k/AR6003/hw2.1.1/
-}
-
 FILES_${PN} += " \
-    ${base_libdir}/firmware/ \
     ${sysconfdir}/modprobe.d/ \
     ${sysconfdir}/network/ \
 "
 
-COMPATIBLE_MACHINE = "(ccardimx28|ccimx6)"
+# 'modprobe' from kmod package is needed to load atheros driver. The one
+# from busybox does not support '--ignore-install' option.
+RDEPENDS_${PN} = "kmod"
+
+COMPATIBLE_MACHINE = "(ccardimx28)"

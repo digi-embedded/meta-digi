@@ -1,5 +1,4 @@
 ATH_DRV_BASEDIR := compat-wireless
-ATH_FIR_BASEDIR := Firmware_Package/target/AR6003/hw2.1.1
 
 ifneq ($(KERNELRELEASE),)
 
@@ -28,15 +27,6 @@ obj-y += $(ATH_DRV_BASEDIR)/drivers/net/wireless/ath/ath6kl/
 
 else #ifneq ($(KERNELRELEASE),)
 
-## Firmware files
-FIRMWARE := $(ATH_FIR_BASEDIR)/fw_tablet_dongle/athtcmd_ram.bin
-FIRMWARE += $(ATH_FIR_BASEDIR)/fw_tablet_dongle/athwlan.bin
-FIRMWARE += $(ATH_FIR_BASEDIR)/fw_tablet_dongle/fw-4.bin
-FIRMWARE += $(ATH_FIR_BASEDIR)/fw_tablet_dongle/nullTestFlow.bin
-FIRMWARE += $(ATH_FIR_BASEDIR)/fw_tablet_dongle/utf.bin
-FIRMWARE += $(ATH_FIR_BASEDIR)/Digi_6203-6233-US.bin
-FIRMWARE += $(ATH_FIR_BASEDIR)/Digi_6203-6233-World.bin
-
 SRC := $(shell pwd)
 
 all:
@@ -48,8 +38,5 @@ modules_install:
 	find $(INSTALL_MOD_PATH)/lib/modules/$(KERNEL_VERSION)/extra/$(ATH_DRV_BASEDIR) -type f -name '*.ko' | \
 		xargs -I modfile mv -f modfile $(INSTALL_MOD_PATH)/lib/modules/$(KERNEL_VERSION)/extra/
 	rm -rf $(INSTALL_MOD_PATH)/lib/modules/*/extra/$(ATH_DRV_BASEDIR)
-	# Install firmware
-	mkdir -p $(INSTALL_MOD_PATH)/lib/firmware/ath6k/AR6003/hw2.1.1/
-	install -m 0644 $(FIRMWARE) $(INSTALL_MOD_PATH)/lib/firmware/ath6k/AR6003/hw2.1.1/
 
 endif #ifneq ($(KERNELRELEASE),)
