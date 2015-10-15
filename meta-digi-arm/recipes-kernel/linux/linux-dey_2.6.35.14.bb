@@ -6,7 +6,7 @@ require recipes-kernel/linux/linux-dey.inc
 SRCBRANCH = "v2.6.35/dey-1.4/maint"
 
 SRCREV_external = ""
-SRCREV_internal = "c4969c4a3e8d763f3f6bb0794a3d39602adc0b8b"
+SRCREV_internal = "${AUTOREV}"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 KERNEL_CFG_FRAGS = " \
