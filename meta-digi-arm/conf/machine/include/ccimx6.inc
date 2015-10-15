@@ -16,6 +16,9 @@ UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 # wpa_supplicant driver to use in '/etc/network/interfaces'
 WPA_DRIVER = "nl80211"
 
+# Wireless external module
+WIRELESS_MODULE ?= ""
+
 # Firmware
 MACHINE_FIRMWARE ?= ""
 MACHINE_FIRMWARE_append_mx6q = " firmware-imx-vpu-imx6q"
@@ -28,7 +31,7 @@ MACHINE_EXTRA_RDEPENDS += " \
     parted \
     u-boot-fw-utils \
 "
-MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE}"
+MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
 MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins"
 
 MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth"

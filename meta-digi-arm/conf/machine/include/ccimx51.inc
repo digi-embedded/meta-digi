@@ -16,11 +16,15 @@ UBOOT_ENTRYPOINT = "0x90008000"
 UBOOT_SUFFIX = "bin"
 UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
+# Wireless external module
+WIRELESS_MODULE ?= ""
+WIRELESS_MODULE_append = "${@base_contains('MACHINE_FEATURES', 'wifi', 'kernel-module-redpine', '', d)}"
+
 # Firmware
 MACHINE_FIRMWARE = "firmware-imx-vpu-imx51 firmware-imx-sdma-imx51"
 
 MACHINE_EXTRA_RDEPENDS    += "mtd-utils-ubifs nvram ubootenv update-flash"
-MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE}"
+MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
 MACHINE_EXTRA_RRECOMMENDS += "kernel-module-mma7455l"
 MACHINE_EXTRA_RRECOMMENDS += "kernel-module-smsc911x"
 MACHINE_EXTRA_RRECOMMENDS += "kernel-module-scc2-driver"

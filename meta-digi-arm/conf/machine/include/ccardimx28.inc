@@ -16,12 +16,16 @@ UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 # wpa_supplicant driver to use in '/etc/network/interfaces'
 WPA_DRIVER = "nl80211"
 
+# Wireless external module
+WIRELESS_MODULE ?= ""
+WIRELESS_MODULE_append = "${@base_contains('MACHINE_FEATURES', 'wifi', 'kernel-module-atheros', '', d)}"
+
 # Firmware
 MACHINE_FIRMWARE ?= ""
 MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_BT', '1' , 'firmware-atheros-ar3k', '', d)}"
 
 MACHINE_EXTRA_RDEPENDS    += "mtd-utils-ubifs nvram ubootenv update-flash"
-MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE}"
+MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
 
 MACHINE_FEATURES += "alsa touchscreen"
 

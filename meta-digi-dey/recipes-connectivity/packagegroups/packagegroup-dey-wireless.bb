@@ -8,18 +8,12 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 inherit packagegroup
 
-WIRELESS_MODULE ?= ""
-WIRELESS_MODULE_append_mx5 = "${@base_contains('MACHINE_FEATURES', 'wifi', 'kernel-module-redpine', '', d)}"
-WIRELESS_MODULE_append_mxs = "${@base_contains('MACHINE_FEATURES', 'wifi', 'kernel-module-atheros', '', d)}"
-# WIRELESS_MODULE_append_mx6 = "${@base_contains('MACHINE_FEATURES', 'wifi', 'kernel-module-atheros', '', d)}"
-
 RDEPENDS_${PN} = "\
     crda \
     wireless-tools \
     wpa-supplicant \
     wpa-supplicant-cli \
     wpa-supplicant-passphrase \
-    ${WIRELESS_MODULE} \
 "
 
 RDEPENDS_${PN}_append_mxs = " iw ath-prop-tools"
