@@ -16,5 +16,5 @@ RDEPENDS_${PN} = "\
     wpa-supplicant-passphrase \
 "
 
-RDEPENDS_${PN}_append_mxs = " iw ath-prop-tools"
-RDEPENDS_${PN}_append_mx6 = " iw ath-prop-tools"
+RDEPENDS_${PN}_append_mxs = " iw"
+RDEPENDS_${PN}_append_mx6 = " iw"
