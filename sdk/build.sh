@@ -167,7 +167,8 @@ if pushd ${YOCTO_INST_DIR}; then
 		fi
 	fi
 	yes "" 2>/dev/null | ${REPO} init --no-repo-verify -u ${MANIFEST_URL} ${repo_revision}
-	time ${REPO} sync ${MAKE_JOBS}
+	${REPO} forall -p -c 'git remote prune $(git remote)'
+	time ${REPO} sync -d ${MAKE_JOBS}
 	popd
 fi
 
