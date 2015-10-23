@@ -1,0 +1,43 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Thu, 22 Oct 2015 18:52:10 +0200
+Subject: [PATCH] gst1.0-fsl-plugin: fix mutex lock/unlock problem
+
+Otherwise a basic pipeline as:
+
+  gst-launch-1.0 playbin uri=file:///run/media/mmcblk0p5/big_buck_bunny_480p_h264.mov
+
+fails with:
+
+  Attempt to unlock mutex that was not locked
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ plugins/overlay_sink/compositor.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/overlay_sink/compositor.c b/plugins/overlay_sink/compositor.c
+index 47f8496d991a..8a04d37295c4 100755
+--- a/plugins/overlay_sink/compositor.c
++++ b/plugins/overlay_sink/compositor.c
+@@ -36,8 +36,19 @@ GST_DEBUG_CATEGORY_EXTERN (overlay_sink_debug);
+   (((a)->right <= (b)->left) || ((a)->left >= (b)->right) \
+    || ((a)->bottom <= (b)->top) || ((a)->top >= (b)->bottom))
+ 
+-#define COMPOSITOR_WAIT_SURFACE(h) (g_cond_wait (&((h)->cond), &((h)->lock)))
+-#define COMPOSITOR_POST_SURFACE(h) (g_cond_signal (&((h)->cond)))
++#define COMPOSITOR_WAIT_SURFACE(h) \
++  do { \
++    g_mutex_lock(&((h)->lock));  \
++    g_cond_wait (&((h)->cond), &((h)->lock)); \
++    g_mutex_unlock(&((h)->lock)); \
++  } while (0);
++
++#define COMPOSITOR_POST_SURFACE(h)  \
++  do { \
++    g_mutex_lock(&((h)->lock));  \
++    g_cond_signal (&((h)->cond)); \
++    g_mutex_unlock(&((h)->lock)); \
++  } while (0);
+ 
+ typedef struct _Surface Surface;
+ struct _Surface{
