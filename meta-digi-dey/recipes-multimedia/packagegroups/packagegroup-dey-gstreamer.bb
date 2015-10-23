@@ -10,7 +10,7 @@ inherit packagegroup
 
 MACHINE_GSTREAMER_PLUGIN ?= ""
 
-RDEPENDS_${PN} = " \
+GSTREAMER0_PKGS = " \
     gst-meta-audio \
     gst-meta-video \
     gst-plugins-base-meta \
@@ -20,4 +20,19 @@ RDEPENDS_${PN} = " \
     ${MACHINE_GSTREAMER_PLUGIN} \
     ${@base_conditional('HAVE_GUI', '1' , '', 'gst-fsl-plugin-gplay', d)} \
     ${@base_conditional('HAVE_BT', '1' , 'gst-plugin-bluetooth', '', d)} \
+"
+
+GSTREAMER1_PKGS = " \
+    gstreamer1.0-meta-audio \
+    gstreamer1.0-meta-video \
+    gstreamer1.0-plugins-base-meta \
+    gstreamer1.0-plugins-good-meta \
+    gstreamer1.0-plugins-ugly-meta \
+    gstreamer1.0-plugins-bad-meta \
+    ${MACHINE_GSTREAMER_1_0_PLUGIN} \
+"
+
+RDEPENDS_${PN} = " \
+    ${GSTREAMER0_PKGS} \
+    ${GSTREAMER1_PKGS} \
 "

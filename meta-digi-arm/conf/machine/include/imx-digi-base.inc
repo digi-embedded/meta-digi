@@ -30,7 +30,7 @@ MACHINE_SOCARCH_SUFFIX_mx6q = "-mx6qdl"
 MACHINE_SOCARCH_SUFFIX_mx6dl = "-mx6qdl"
 
 MACHINE_ARCH_FILTER = "virtual/kernel"
-MACHINE_SOCARCH_FILTER = "libfslcodec libfslvpuwrap libfslparser gst-fsl-plugins"
+MACHINE_SOCARCH_FILTER = "libfslcodec libfslvpuwrap libfslparser gst-fsl-plugin"
 MACHINE_SOCARCH_FILTER_append_mx5 = " virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl"
 MACHINE_SOCARCH_FILTER_append_mx6 = " virtual/libopenvg virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl virtual/libg2d"
 
@@ -44,8 +44,8 @@ MACHINE_GSTREAMER_PLUGIN ?= "gst-fsl-plugin"
 
 # GStreamer 1.0 plugins
 MACHINE_GSTREAMER_1_0_PLUGIN ?= ""
-MACHINE_GSTREAMER_1_0_PLUGIN_mx6q ?= "gstreamer1.0-plugins-imx-meta"
-MACHINE_GSTREAMER_1_0_PLUGIN_mx6dl ?= "gstreamer1.0-plugins-imx-meta"
+MACHINE_GSTREAMER_1_0_PLUGIN_mx6q ?= "gst1.0-fsl-plugin"
+MACHINE_GSTREAMER_1_0_PLUGIN_mx6dl ?= "gst1.0-fsl-plugin"
 
 # mx5 GPU libraries
 GPU_FLAVOUR = "${@base_contains('DISTRO_FEATURES', 'x11', 'x11-', '', d)}"
