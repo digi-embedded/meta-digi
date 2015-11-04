@@ -10,10 +10,8 @@ SRC_URI += " \
     file://qtbrowser.desktop \
     file://qtdemo.desktop \
     file://qthellogles2.desktop \
-    file://qtmediaplayer.desktop \
     file://hellogl_es2.png \
     file://qtdemo.png \
-    file://qtmediaplayer.png \
     file://webkit.png \
 "
 
@@ -24,9 +22,7 @@ do_install_append() {
     install -d ${D}${datadir}/applications ${D}${datadir}/pixmaps
     install -m 0644 ${WORKDIR}/qtbrowser.desktop ${D}${datadir}/applications
     install -m 0644 ${WORKDIR}/qtdemo.desktop ${D}${datadir}/applications
-    install -m 0644 ${WORKDIR}/qtmediaplayer.desktop ${D}${datadir}/applications
     install -m 0644 ${WORKDIR}/qtdemo.png ${D}${datadir}/pixmaps
-    install -m 0644 ${WORKDIR}/qtmediaplayer.png ${D}${datadir}/pixmaps
     install -m 0644 ${WORKDIR}/webkit.png ${D}${datadir}/pixmaps
 }
 
@@ -38,9 +34,7 @@ do_install_append_ccimx6() {
 FILES_${QT_BASE_NAME}-demos += " \
     ${datadir}/applications/qtbrowser.desktop \
     ${datadir}/applications/qtdemo.desktop \
-    ${datadir}/applications/qtmediaplayer.desktop \
     ${datadir}/pixmaps/qtdemo.png \
-    ${datadir}/pixmaps/qtmediaplayer.png \
     ${datadir}/pixmaps/webkit.png \
 "
 

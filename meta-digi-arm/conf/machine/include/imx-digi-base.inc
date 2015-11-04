@@ -26,18 +26,13 @@ MACHINE_SOCARCH_SUFFIX_mx6q = "-mx6qdl"
 MACHINE_SOCARCH_SUFFIX_mx6dl = "-mx6qdl"
 
 MACHINE_ARCH_FILTER = "virtual/kernel imx-vpu"
-MACHINE_SOCARCH_FILTER_append_mx6 = " libfslcodec libfslvpuwrap libfslparser gst-fsl-plugin"
+MACHINE_SOCARCH_FILTER_append_mx6 = " libfslcodec libfslvpuwrap libfslparser"
 MACHINE_SOCARCH_FILTER_append_mx6 = " virtual/libopenvg virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl virtual/libg2d"
 
 INHERIT += "fsl-dynamic-packagearch"
 
 # Extra udev rules
 MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf udev-rules-imx"
-
-# GStreamer 0.10 plugins
-MACHINE_GSTREAMER_PLUGIN ?= ""
-MACHINE_GSTREAMER_PLUGIN_mx6q ?= "gst-fsl-plugin"
-MACHINE_GSTREAMER_PLUGIN_mx6dl ?= "gst-fsl-plugin"
 
 # GStreamer 1.0 plugins
 MACHINE_GSTREAMER_1_0_PLUGIN ?= ""
