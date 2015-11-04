@@ -32,5 +32,3 @@ RDEPENDS_${PN} = "\
 	${VIRTUAL-RUNTIME_snmp-manager} \
 	${VIRTUAL-RUNTIME_ntp-client} \
 "
-
-RDEPENDS_${PN}_append_mx5 = " ${@base_contains('MACHINE_FEATURES', 'ext-eth', 'kernel-module-smsc911x', '', d)}"

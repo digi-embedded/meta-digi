@@ -7,8 +7,6 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 DEPENDS = "virtual/kernel"
 
-RDEPENDS_${PN}_ccimx5 = "kernel-module-mt9v111-camera"
-
 SRC_URI = "file://v4l2_test"
 INCLUDE_PATH = "-I${STAGING_KERNEL_DIR}/include"
 INCLUDE_PATH_ccimx6 = "-I${STAGING_KERNEL_DIR}/arch/arm/include -I${STAGING_KERNEL_DIR}/include/uapi -I${STAGING_KERNEL_DIR}/include"
@@ -27,4 +25,4 @@ do_install() {
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-COMPATIBLE_MACHINE = "(ccimx5|ccimx6)"
+COMPATIBLE_MACHINE = "(ccimx6)"

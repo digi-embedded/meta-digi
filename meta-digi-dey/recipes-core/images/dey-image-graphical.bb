@@ -17,7 +17,6 @@ include dey-image-minimal.bb
 REQUIRED_DISTRO_FEATURES = "x11"
 
 SOC_IMAGE_INSTALL = ""
-SOC_IMAGE_INSTALL_mx5 = "amd-gpu-x11-bin-mx51"
 SOC_IMAGE_INSTALL_mx6 = "imx-gpu-viv-demos imx-gpu-viv-tools"
 
 IMAGE_INSTALL += " \

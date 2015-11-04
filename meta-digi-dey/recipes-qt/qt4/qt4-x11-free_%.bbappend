@@ -30,11 +30,6 @@ do_install_append() {
     install -m 0644 ${WORKDIR}/webkit.png ${D}${datadir}/pixmaps
 }
 
-do_install_append_ccimx5() {
-    install -m 0644 ${WORKDIR}/qthellogles2.desktop ${D}${datadir}/applications
-    install -m 0644 ${WORKDIR}/hellogl_es2.png ${D}${datadir}/pixmaps
-}
-
 do_install_append_ccimx6() {
     install -m 0644 ${WORKDIR}/qthellogles2.desktop ${D}${datadir}/applications
     install -m 0644 ${WORKDIR}/hellogl_es2.png ${D}${datadir}/pixmaps
@@ -47,11 +42,6 @@ FILES_${QT_BASE_NAME}-demos += " \
     ${datadir}/pixmaps/qtdemo.png \
     ${datadir}/pixmaps/qtmediaplayer.png \
     ${datadir}/pixmaps/webkit.png \
-"
-
-FILES_${QT_BASE_NAME}-examples_append_ccimx5 = " \
-    ${datadir}/applications/qthellogles2.desktop \
-    ${datadir}/pixmaps/hellogl_es2.png \
 "
 
 FILES_${QT_BASE_NAME}-examples_append_ccimx6 = " \

@@ -13,8 +13,6 @@ SRC_URI_append = " \
     file://resolv \
 "
 
-SRC_URI_append_mx5 = " file://ifup"
-
 WPA_DRIVER ?= "wext"
 
 do_install_append() {
@@ -55,8 +53,4 @@ do_install_append() {
 	sed -i -e "s,##WLAN0_STATIC_GATEWAY##,${WLAN0_STATIC_GATEWAY},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WLAN0_STATIC_DNS##,${WLAN0_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WPA_DRIVER##,${WPA_DRIVER},g" ${D}${sysconfdir}/network/interfaces
-}
-
-do_install_append_mx5() {
-	install -m 0755 ${WORKDIR}/ifup ${D}${sysconfdir}/network/if-up.d
 }

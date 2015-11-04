@@ -137,8 +137,6 @@ while read _pl _var; do
 	eval "${_pl}_var=\"${_var}\""
 done<<-_EOF_
 	ccardimx28js    - e w wb web web1
-	ccimx51js       128 128a 128agv agv eagv w w128a w128agv wagv weagv
-	ccimx53js       - 128 4k e e4k w w128 we
 	ccimx6sbc       DONTBUILDVARIANTS
 _EOF_
 

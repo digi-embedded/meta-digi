@@ -26,23 +26,6 @@ RDEPENDS_${PN}_append_ccardimx28 = "\
 	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 "
 
-RDEPENDS_${PN}_append_ccimx5 = "\
-	dey-examples-adc \
-	dey-examples-gpio \
-	${@base_contains("MACHINE_FEATURES", "accelerometer", "dey-examples-accelerometer", "", d)} \
-	${@base_contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \
-	dey-examples-sahara \
-	dey-examples-v4l2 \
-"
-
-RDEPENDS_${PN}_append_ccimx51 = "\
-	dey-examples-battery \
-"
-
-RDEPENDS_${PN}_append_ccimx53 = "\
-	dey-examples-can \
-"
-
 RDEPENDS_${PN}_append_ccimx6 = "\
 	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
 	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
@@ -52,4 +35,4 @@ RDEPENDS_${PN}_append_ccimx6 = "\
 	dey-examples-v4l2 \
 "
 
-COMPATIBLE_MACHINE = "(ccardimx28|ccimx5|ccimx6)"
+COMPATIBLE_MACHINE = "(ccardimx28|ccimx6)"
