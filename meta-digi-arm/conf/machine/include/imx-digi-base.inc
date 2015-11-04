@@ -8,8 +8,6 @@ XSERVER = "xserver-xorg \
            xf86-input-evdev \
            ${XSERVER_DRIVER}"
 
-PREFERRED_VERSION_directfb_mx6 = "1.7.4"
-
 # Ship kernel modules
 MACHINE_EXTRA_RRECOMMENDS = "kernel-modules"
 
@@ -27,8 +25,8 @@ MACHINE_SOCARCH_SUFFIX ?= ""
 MACHINE_SOCARCH_SUFFIX_mx6q = "-mx6qdl"
 MACHINE_SOCARCH_SUFFIX_mx6dl = "-mx6qdl"
 
-MACHINE_ARCH_FILTER = "virtual/kernel"
-MACHINE_SOCARCH_FILTER = "libfslcodec libfslvpuwrap libfslparser gst-fsl-plugin"
+MACHINE_ARCH_FILTER = "virtual/kernel imx-vpu"
+MACHINE_SOCARCH_FILTER_append_mx6 = " libfslcodec libfslvpuwrap libfslparser gst-fsl-plugin"
 MACHINE_SOCARCH_FILTER_append_mx6 = " virtual/libopenvg virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl virtual/libg2d"
 
 INHERIT += "fsl-dynamic-packagearch"
@@ -37,21 +35,38 @@ INHERIT += "fsl-dynamic-packagearch"
 MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf udev-rules-imx"
 
 # GStreamer 0.10 plugins
-MACHINE_GSTREAMER_PLUGIN ?= "gst-fsl-plugin"
+MACHINE_GSTREAMER_PLUGIN ?= ""
+MACHINE_GSTREAMER_PLUGIN_mx6q ?= "gst-fsl-plugin"
+MACHINE_GSTREAMER_PLUGIN_mx6dl ?= "gst-fsl-plugin"
 
 # GStreamer 1.0 plugins
 MACHINE_GSTREAMER_1_0_PLUGIN ?= ""
 MACHINE_GSTREAMER_1_0_PLUGIN_mx6q ?= "gst1.0-fsl-plugin"
 MACHINE_GSTREAMER_1_0_PLUGIN_mx6dl ?= "gst1.0-fsl-plugin"
 
+# Determines if the SoC has support for Vivante kernel driver
+SOC_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT       = "0"
+SOC_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT_mx6q  = "1"
+SOC_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT_mx6dl = "1"
+
+# Handle Vivante kernel driver setting:
+#   0 - machine does not have Vivante GPU driver support
+#   1 - machine has Vivante GPU driver support
+MACHINE_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT ?= "${SOC_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT}"
+
 # mx6 GPU libraries
-PREFERRED_PROVIDER_virtual/egl_mx6 ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/egl_mx6q ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/egl_mx6dl ?= "imx-gpu-viv"
+
 PREFERRED_PROVIDER_virtual/libgles1_mx6q ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libgles1_mx6dl ?= "imx-gpu-viv"
+
 PREFERRED_PROVIDER_virtual/libgles2_mx6q ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libgles2_mx6dl ?= "imx-gpu-viv"
+
 PREFERRED_PROVIDER_virtual/libgl_mx6q ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libgl_mx6dl ?= "imx-gpu-viv"
+
 PREFERRED_PROVIDER_virtual/libg2d_mx6 ?= "imx-gpu-viv"
 
 EXTRA_IMAGEDEPENDS = "u-boot"

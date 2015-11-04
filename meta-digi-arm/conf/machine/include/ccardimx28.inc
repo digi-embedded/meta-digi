@@ -2,7 +2,7 @@
 #@NAME: ConnectCore for MX28 module.
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore for MX28 module.
 
-include conf/machine/include/mxs-digi-base.inc
+include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/tune-arm926ejs.inc
 
 DIGI_FAMILY = "ccardimx28"
@@ -27,8 +27,6 @@ MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_WIFI', '1' , 'firmware-ath
 
 MACHINE_EXTRA_RDEPENDS    += "mtd-utils-ubifs nvram ubootenv update-flash"
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
-
-MACHINE_FEATURES += "alsa touchscreen"
 
 #
 # Supported variants
