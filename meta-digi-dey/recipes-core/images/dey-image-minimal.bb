@@ -29,7 +29,10 @@ IMAGE_FEATURES += "package-management"
 IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "alsa", "dey-audio", "", d)}'
 IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "accel-video", "dey-gstreamer", "", d)}'
 IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "wifi", "dey-wireless", "", d)}'
-IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-bluetooth", "", d)}'
+
+# Yocto 2.0 migration: disable dey-bluetooth image feature temporarily
+# It has a hard-coded dependence in bluez4 and this has been removed from openembedded-core.
+# IMAGE_FEATURES += '${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-bluetooth", "", d)}'
 
 # SDK features (for toolchains generated from an image with populate_sdk)
 SDKIMAGE_FEATURES ?= "dev-pkgs dbg-pkgs staticdev-pkgs"
