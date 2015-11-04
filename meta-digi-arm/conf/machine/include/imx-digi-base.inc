@@ -36,8 +36,8 @@ MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf udev-rules-imx"
 
 # GStreamer 1.0 plugins
 MACHINE_GSTREAMER_1_0_PLUGIN ?= ""
-MACHINE_GSTREAMER_1_0_PLUGIN_mx6q ?= "gst1.0-fsl-plugin"
-MACHINE_GSTREAMER_1_0_PLUGIN_mx6dl ?= "gst1.0-fsl-plugin"
+MACHINE_GSTREAMER_1_0_PLUGIN_mx6q ?= "gst1.0-fsl-plugin gst1.0-fsl-plugin-gplay gst1.0-fsl-plugin-grecorder"
+MACHINE_GSTREAMER_1_0_PLUGIN_mx6dl ?= "gst1.0-fsl-plugin gst1.0-fsl-plugin-gplay gst1.0-fsl-plugin-grecorder"
 
 # Determines if the SoC has support for Vivante kernel driver
 SOC_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT       = "0"
