@@ -3,6 +3,8 @@
 require recipes-kernel/linux/linux-dey.inc
 require recipes-kernel/linux/linux-dtb.inc
 
+inherit fsl-vivante-kernel-driver-handler
+
 # Internal repo branch
 SRCBRANCH = "v3.14/master"
 
