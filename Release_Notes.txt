@@ -79,7 +79,12 @@ Contents
    * Linux BSP user manual
    * Hardware documentation
 
-4. Support Contact Information
+4. Known Issues
+-------------------------------------------------------------------------
+
+* wireless: WEP authentication is not supported when working in SoftAP mode.
+
+5. Support Contact Information
 -------------------------------------------------------------------------
   For support questions please contact the Digi technical support experts:
 
