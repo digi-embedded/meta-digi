@@ -10,7 +10,7 @@ SRC_URI += "file://0001-del-baudrates.patch \
             file://suspend \
             file://busybox-ntpd \
             file://index.html \
-            file://digi.gif \
+            file://digi-logo.png \
             file://busybox-acpid \
             file://acpid.map \
             file://pswitch-press \
@@ -51,7 +51,7 @@ do_install_append() {
 	fi
 	if grep "CONFIG_HTTPD=y" ${WORKDIR}/defconfig; then
 		install -m 0644 ${WORKDIR}/index.html ${D}/srv/www/
-		install -m 0644 ${WORKDIR}/digi.gif ${D}/srv/www/
+		install -m 0644 ${WORKDIR}/digi-logo.png ${D}/srv/www/
 	fi
 	# Install 'suspend' script
 	install -m 0755 ${WORKDIR}/suspend ${D}${base_bindir}

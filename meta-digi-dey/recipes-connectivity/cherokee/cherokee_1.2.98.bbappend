@@ -5,7 +5,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 SRC_URI += " \
     file://cherokee.conf \
     file://cherokee.pem \
-    file://digi.gif \
+    file://digi-logo.png \
     file://index.html \
 "
 
@@ -14,7 +14,7 @@ do_install_append() {
 	install -m 0644 ${WORKDIR}/cherokee.conf ${D}${sysconfdir}/cherokee/
 	install -m 0644 ${WORKDIR}/cherokee.pem ${D}${sysconfdir}/cherokee/ssl/
 	install -m 0644 ${WORKDIR}/index.html ${D}/srv/www/
-	install -m 0644 ${WORKDIR}/digi.gif ${D}/srv/www/
+	install -m 0644 ${WORKDIR}/digi-logo.png ${D}/srv/www/
 }
 
 FILES_${PN} += "/srv/www"
