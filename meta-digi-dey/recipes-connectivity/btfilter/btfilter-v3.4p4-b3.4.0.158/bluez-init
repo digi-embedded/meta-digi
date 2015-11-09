@@ -113,7 +113,7 @@ MACHINENAME="$(cat /proc/device-tree/digi,machine,name 2>/dev/null || cat /sys/k
 [ "${MACHINENAME}" = "ccardimx28" -o "${MACHINENAME}" = "ccimx6sbc" ] && bt_init
 
 # Run bluetooth daemon
-if hciconfig hci0 up && /usr/lib/bluez5/bluetooth/bluetoothd; then
+if hciconfig hci0 up && start-stop-daemon -S --background --exec /usr/lib/bluez5/bluetooth/bluetoothd; then
 	:	# No-op
 else
 	echo "${SCRIPTNAME}: FAILED"
