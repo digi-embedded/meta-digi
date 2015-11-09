@@ -13,7 +13,7 @@ SRC_URI_append = " \
     file://resolv \
 "
 
-WPA_DRIVER ?= "wext"
+WPA_DRIVER ?= "nl80211"
 
 do_install_append() {
 	# Install DNS servers handler

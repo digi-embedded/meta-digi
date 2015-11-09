@@ -13,9 +13,6 @@ UBOOT_ENTRYPOINT = "0x10800000"
 UBOOT_SUFFIX = "imx"
 UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
-# wpa_supplicant driver to use in '/etc/network/interfaces'
-WPA_DRIVER = "nl80211"
-
 # Wireless external module
 WIRELESS_MODULE ?= ""
 

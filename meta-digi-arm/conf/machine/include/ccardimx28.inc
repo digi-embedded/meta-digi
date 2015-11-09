@@ -13,9 +13,6 @@ UBOOT_ENTRYPOINT = "0x40008000"
 UBOOT_SUFFIX = "sb"
 UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
-# wpa_supplicant driver to use in '/etc/network/interfaces'
-WPA_DRIVER = "nl80211"
-
 # Wireless external module
 WIRELESS_MODULE ?= ""
 WIRELESS_MODULE_append = "${@base_contains('MACHINE_FEATURES', 'wifi', 'kernel-module-atheros', '', d)}"
