@@ -12,6 +12,7 @@ SRC_URI = " \
     file://0001-enable-libnl3.patch \
     file://0002-cross-compile.patch \
     file://0003-abtfilt_wan-Rewrite-the-netlink-listener.patch \
+    file://0004-add-fgnu89-flag-for-gcc5.patch \
     file://bluez-init \
 "
 

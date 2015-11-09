@@ -1,0 +1,29 @@
+From d631ddd830cfacf610a562b52fc953b14dff7962 Mon Sep 17 00:00:00 2001
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Fri, 6 Nov 2015 17:46:33 +0100
+Subject: [PATCH] add -fgnu89-inline flag for gcc5
+
+The problem is the change of the default C standard from gnu89 to gnu11
+    which changes the semantics of 'inline'. The issue is described in the
+    Porting guide at https://gcc.gnu.org/gcc-5/porting_to.html.
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 91659ddb788c..1e2e1d6b0584 100644
+--- a/Makefile
++++ b/Makefile
+@@ -50,7 +50,7 @@ override INCLUDES += -Iinclude \
+ # 		-I$(V210_DIR)/usr/include/bluetooth \
+ # 		-I$(V210_DIR)/usr/local/include/bluetooth \
+ 
+-CFLAGS=		-Wall -g -DABF_DEBUG
++CFLAGS=		-Wall -g -DABF_DEBUG -fgnu89-inline
+ #LIBS=		-ldbus-1 -lpthread -lbtfilt -lrt -lbluetooth
+ # LIBS=		-ldbus-1 -lpthread -lrt -lbluetooth
+ 
+-- 
+1.9.1
+
