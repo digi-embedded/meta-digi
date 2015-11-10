@@ -15,21 +15,14 @@ SRC_URI = " \
     file://0002-cross-compile.patch \
     file://0003-abtfilt_wan-Rewrite-the-netlink-listener.patch \
     file://0004-add-fgnu89-flag-for-gcc5.patch \
-    file://bluez-init \
 "
 
 SRC_URI[md5sum] = "06a26d3a368c33b508d660ea84d476ee"
 SRC_URI[sha256sum] = "b1af73003b622189b66d51911d429d6d205ac9227ec8278c8572ca0c68c7d5f3"
 
-inherit update-rc.d
-
 EXTRA_OEMAKE = "INCLUDES=-I${STAGING_INCDIR}/bluetooth"
 
 do_install() {
-	install -d ${D}${bindir} ${D}${sysconfdir}/init.d/
+	install -d ${D}${bindir}
 	install -m 0755 abtfilt ${D}${bindir}
-	install -m 0755 ${WORKDIR}/bluez-init ${D}${sysconfdir}/init.d/bluez
 }
-
-INITSCRIPT_NAME = "bluez"
-INITSCRIPT_PARAMS = "start 10 5 ."
