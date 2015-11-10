@@ -36,6 +36,7 @@ DIGI_PREMIRROR_CFG="
 # Use internal mirror
 SOURCE_MIRROR_URL ?= \"http://build-linux.digi.com/yocto/downloads/\"
 INHERIT += \"own-mirrors\"
+BB_GENERATE_MIRROR_TARBALLS = \"1\"
 "
 
 RM_WORK_CFG="
