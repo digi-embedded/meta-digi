@@ -86,10 +86,6 @@ bt_init() {
 		echo "${SCRIPTNAME}: FAILED (hciattach)"
 		exit
 	fi
-	if ! abtfilt -b -x -s -w wlan0 1>/dev/null; then
-		echo "${SCRIPTNAME}: FAILED (abtfilt)"
-		exit
-	fi
 	if hciconfig hci0 up; then
 		:	# No-op
 	else

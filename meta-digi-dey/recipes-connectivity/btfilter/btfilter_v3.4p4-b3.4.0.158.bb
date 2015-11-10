@@ -6,6 +6,7 @@ LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://Makefile;beginline=1;endline=14;md5=8f6614b37751445a5f6a9bdc69be26b3"
 
 inherit bluetooth
+inherit update-rc.d
 
 DEPENDS = "${BLUEZ} dbus libnl"
 
@@ -15,6 +16,7 @@ SRC_URI = " \
     file://0002-cross-compile.patch \
     file://0003-abtfilt_wan-Rewrite-the-netlink-listener.patch \
     file://0004-add-fgnu89-flag-for-gcc5.patch \
+    file://btfilter-init \
 "
 
 SRC_URI[md5sum] = "06a26d3a368c33b508d660ea84d476ee"
@@ -23,6 +25,10 @@ SRC_URI[sha256sum] = "b1af73003b622189b66d51911d429d6d205ac9227ec8278c8572ca0c68
 EXTRA_OEMAKE = "INCLUDES=-I${STAGING_INCDIR}/bluetooth"
 
 do_install() {
-	install -d ${D}${bindir}
+	install -d ${D}${bindir} ${D}${sysconfdir}/init.d/
 	install -m 0755 abtfilt ${D}${bindir}
+	install -m 0755 ${WORKDIR}/btfilter-init ${D}${sysconfdir}/init.d/btfilter
 }
+
+INITSCRIPT_NAME = "btfilter"
+INITSCRIPT_PARAMS = "start 11 5 ."
