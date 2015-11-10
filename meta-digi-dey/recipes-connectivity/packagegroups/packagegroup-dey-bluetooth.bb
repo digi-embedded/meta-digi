@@ -9,9 +9,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit bluetooth
 inherit packagegroup
 
-
 RDEPENDS_${PN} = " \
-	btfilter \
 	${BLUEZ} \
 	${BLUEZ}-testtools \
 	${@base_contains("MACHINE_FEATURES", "bluetooth", "libasound-module-bluez", "", d)} \
