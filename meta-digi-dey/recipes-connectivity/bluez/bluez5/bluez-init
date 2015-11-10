@@ -22,25 +22,12 @@ if [ "${1}" != "start" ]; then
 fi
 
 SCRIPTNAME="$(basename "${0}")"
+MACHINENAME="$(cat /proc/device-tree/digi,machine,name 2>/dev/null)"
 
 bt_init() {
-	# Exit if this hardware does not support Bluetooth
 	if [ "${MACHINENAME}" = "ccardimx28" ]; then
-		BLUETOOTH_VARIANTS="0x02 0x03 0x10 0x11 0x12"
-		MOD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant 2>/dev/null || \
-			       cat "/sys/kernel/${MACHINENAME}/mod_variant")"
-		if ! echo "${BLUETOOTH_VARIANTS}" | grep -qs "${MOD_VARIANT}"; then
-			echo "${SCRIPTNAME}: variant ${MOD_VARIANT} does not support bluetooth"
-			exit
-		fi
 		BT_PWR_GPIO_NR="21"
 	elif [ "${MACHINENAME}" = "ccimx6sbc" ]; then
-		BLUETOOTH_VARIANTS="0x01 0x02 0x03 0x04 0x06 0x0b 0x11 0x12"
-		MOD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant)"
-		if ! echo "${BLUETOOTH_VARIANTS}" | grep -qs "${MOD_VARIANT}"; then
-			echo "${SCRIPTNAME}: variant ${MOD_VARIANT} does not support bluetooth"
-			exit
-		fi
 		BT_PWR_GPIO_NR="244"
 	fi
 
@@ -63,8 +50,7 @@ bt_init() {
 		[ -f "${FW_MAC}" ] && [ "$(cat ${FW_MAC})" = "${BTADDR}" ] || echo ${BTADDR} > ${FW_MAC}
 
 		JPN_REGCODE="0x2"
-		REGCODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null || \
-			   cat "/sys/kernel/${MACHINENAME}/mod_cert")"
+		REGCODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null)"
 		BT_CLASS_LINK="PS_ASIC.pst"
 		BT_CLASS_FILE="PS_ASIC_class_1.pst"
 		if [ -n "${REGCODE}" ] && [ "${JPN_REGCODE}" = "${REGCODE}" ]; then
@@ -104,17 +90,16 @@ bt_init() {
 		echo "${SCRIPTNAME}: FAILED (abtfilt)"
 		exit
 	fi
+	if hciconfig hci0 up; then
+		:	# No-op
+	else
+		echo "${SCRIPTNAME}: FAILED"
+		exit
+	fi
 }
 
 echo "Starting bluetooth services."
+start-stop-daemon -S --background --exec /usr/lib/bluez5/bluetooth/bluetoothd
 
-# Initialize driver for 'ccardimx28js'
-MACHINENAME="$(cat /proc/device-tree/digi,machine,name 2>/dev/null || cat /sys/kernel/machine/name)"
-[ "${MACHINENAME}" = "ccardimx28" -o "${MACHINENAME}" = "ccimx6sbc" ] && bt_init
-
-# Run bluetooth daemon
-if hciconfig hci0 up && start-stop-daemon -S --background --exec /usr/lib/bluez5/bluetooth/bluetoothd; then
-	:	# No-op
-else
-	echo "${SCRIPTNAME}: FAILED"
-fi
+# Check if this hardware does support Bluetooth
+[ -d "/proc/device-tree/bluetooth" ] &&	bt_init
