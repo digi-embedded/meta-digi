@@ -12,8 +12,18 @@ EXTRA_OECONF_append = " --enable-health --enable-static"
 #
 INSANE_SKIP_${PN} = "installed-vs-shipped"
 
-SRC_URI += "file://audio.conf"
+inherit update-rc.d
+
+SRC_URI += " \
+    file://audio.conf \
+    file://bluez-init \
+"
 
 do_install_append() {
-    install -m 0644 ${WORKDIR}/audio.conf ${D}/${sysconfdir}/bluetooth/
+	install -m 0644 ${WORKDIR}/audio.conf ${D}/${sysconfdir}/bluetooth/
+	install -d  ${D}${sysconfdir}/init.d/
+	install -m 0755 ${WORKDIR}/bluez-init ${D}${sysconfdir}/init.d/bluez
 }
+
+INITSCRIPT_NAME = "bluez"
+INITSCRIPT_PARAMS = "start 10 5 ."
