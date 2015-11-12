@@ -23,9 +23,14 @@ VIRTUAL-RUNTIME_snmp-manager ?= ""
 
 VIRTUAL-RUNTIME_ntp-client ?= "busybox-ntpd"
 
+CELLULAR_PKGS = "\
+    modemmanager \
+    ppp \
+"
+
 RDEPENDS_${PN} = "\
-	ppp \
 	iproute2 \
+	${@base_contains('DISTRO_FEATURES', 'cellular', '${CELLULAR_PKGS}', '', d)} \
 	${VIRTUAL-RUNTIME_ftp-server} \
 	${VIRTUAL-RUNTIME_http-server} \
 	${VIRTUAL-RUNTIME_network-utils} \
