@@ -1,0 +1,58 @@
+#!/bin/sh
+
+RETRIES=12
+POLLING_WAIT=5
+
+# Run only for cellular network interfaces
+[ -z "${IF_APN}" ] && exit 0
+
+background_connect() {
+        # Ensure ModemManager is running
+        killall -0 ModemManager 2>/dev/null || ModemManager --log-file=/dev/null &
+
+        # Wait for modem detection
+        while [ "${RETRIES}" -gt "0" ]; do
+                mmcli -m 0 > /dev/null 2>&1 && break
+                sleep ${POLLING_WAIT}
+                RETRIES="$((RETRIES - 1))"
+        done
+
+        # Abort if no modem detected
+        if [ "$RETRIES" -eq "0" ]; then
+                logger -s -p error -t modemmanager "No modem detected";
+                exit
+        fi
+
+        ARGS="apn=${IF_APN}"
+        [ -n "${IF_PIN}" ] && ARGS="${ARGS},pin=${IF_PIN}"
+
+        [ -n "${IF_USER}" ] && ARGS="${ARGS},user=${IF_USER}"
+        [ -n "${IF_PASSWORD}" ] && ARGS="${ARGS},password=${IF_PASSWORD}"  
+        [ -n "${IF_PORT}" ] && ARGS="${ARGS},number=*99#"
+ 
+        # Enable the modem and connect to provider
+        mmcli -m 0 --simple-connect=${ARGS} > /dev/null 2>&1
+
+	# For serial modems, pppd creates the network interface
+	# Otherwise, get an IP with udhcpc
+	if [ -n "${IF_PORT}" ]; then
+		pppd ${IF_PORT} call mm_cellular > /dev/null 2>&1
+	else
+		udhcpc -q -i ${IFACE}
+	fi
+
+	ifconfig ${IFACE} up
+}
+
+
+if [ "$MODE" = "start" ]; then
+        background_connect &
+elif [ "$MODE" = "stop" ];  then
+	# If a call number was used, destroy the network interface
+	[ -n "${IF_PORT}" ] && poff mm_cellular
+
+	ifconfig ${IFACE} down
+
+        # Disconnect and disable the modem
+        mmcli -m 0 -d > /dev/null 2>&1
+fi
