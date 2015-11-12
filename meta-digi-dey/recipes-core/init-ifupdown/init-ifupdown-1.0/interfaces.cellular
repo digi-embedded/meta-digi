@@ -1,0 +1,9 @@
+
+# Cellular interface
+#auto ##CELLULAR_INTERFACE##
+iface ##CELLULAR_INTERFACE## inet manual
+	port
+	apn
+	pin
+	user
+	password

@@ -2,6 +2,9 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
+INITSCRIPT_NAME = "networking"
+INITSCRIPT_PARAMS = "start 03 2 3 4 5 . stop 80 0 6 1 ."
+
 SRC_URI_append = " \
     file://interfaces.br0.example \
     file://interfaces.eth0.static \
@@ -10,6 +13,7 @@ SRC_URI_append = " \
     file://interfaces.eth1.dhcp \
     file://interfaces.wlan0.static \
     file://interfaces.wlan0.dhcp \
+    file://interfaces.cellular \
     file://resolv \
 "
 
@@ -38,6 +42,43 @@ do_install_append() {
 	[ -z "${WLAN0_STATIC_GATEWAY}" ] && sed -i -e "/##WLAN0_STATIC_GATEWAY##/d" ${D}${sysconfdir}/network/interfaces
 	[ -z "${WLAN0_STATIC_IP}" ] && sed -i -e "/##WLAN0_STATIC_IP##/d" ${D}${sysconfdir}/network/interfaces
 	[ -z "${WLAN0_STATIC_NETMASK}" ] && sed -i -e "/##WLAN0_STATIC_NETMASK##/d" ${D}${sysconfdir}/network/interfaces
+
+	# Cellular interface
+	if [ -n "${@base_contains('DISTRO_FEATURES', 'cellular', '1', '', d)}" ] && [ -n "${CELLULAR_INTERFACE}" ]; then
+		cat ${WORKDIR}/interfaces.cellular >> ${D}${sysconfdir}/network/interfaces
+		sed -i -e 's,##CELLULAR_INTERFACE##,${CELLULAR_INTERFACE},g' ${D}${sysconfdir}/network/interfaces
+		[ -n "${CELLULAR_AUTO}" ] && sed -i -e 's/#auto/auto/g' ${D}${sysconfdir}/network/interfaces
+		if [ -n "${CELLULAR_APN}" ]; then
+			sed -i -e 's/apn/apn ${CELLULAR_APN}/g' ${D}${sysconfdir}/network/interfaces
+		else
+			sed -i -e '/apn/d' ${D}${sysconfdir}/network/interfaces
+		fi
+
+		if [ -n "${CELLULAR_PIN}" ]; then
+			sed -i -e 's/pin/pin ${CELLULAR_PIN}/g' ${D}${sysconfdir}/network/interfaces
+		else
+			sed -i -e '/pin/d' ${D}${sysconfdir}/network/interfaces
+		fi
+
+		if [ -n "${CELLULAR_PORT}" ]; then
+			sed -i -e 's/port/port ${CELLULAR_PORT}/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's,dhcp,manual,g' ${D}${sysconfdir}/network/interfaces
+		else
+			sed -i -e '/port/d' ${D}${sysconfdir}/network/interfaces
+		fi
+
+		if [ -n "${CELLULAR_USER}" ]; then
+			sed -i -e 's/user/user ${CELLULAR_PORT}/g' ${D}${sysconfdir}/network/interfaces
+		else
+			sed -i -e '/user/d' ${D}${sysconfdir}/network/interfaces
+		fi
+
+		if [ -n "${CELLULAR_PASSWORD}" ]; then
+			sed -i -e 's/password/password ${CELLULAR_PORT}/g' ${D}${sysconfdir}/network/interfaces
+		else
+			sed -i -e '/password/d' ${D}${sysconfdir}/network/interfaces
+		fi
+	fi
 
 	# Replace interface parameters
 	sed -i -e "s,##ETH0_STATIC_IP##,${ETH0_STATIC_IP},g" ${D}${sysconfdir}/network/interfaces
