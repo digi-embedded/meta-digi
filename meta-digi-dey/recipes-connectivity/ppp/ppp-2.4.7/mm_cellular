@@ -1,0 +1,26 @@
+# Assumes that your IP address is allocated dynamically by the ISP.
+noipdefault
+
+# Try to get the name server addresses from the ISP.
+usepeerdns
+
+# Use this connection as the default route.
+defaultroute
+
+# Replace default route if already exists.
+replacedefaultroute
+
+# Makes pppd "dial again" when the connection is lost.
+persist
+
+# Do not ask the remote to authenticate.
+noauth
+
+# Detach 'pppd' from its controlling terminal
+updetach
+
+# Don't use the modem control lines
+local
+
+# Lock the device to ensure exclusive access
+lock
