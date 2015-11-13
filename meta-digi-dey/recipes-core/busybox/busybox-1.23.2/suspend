@@ -31,26 +31,6 @@ suspend_system_time() {
 	fi
 }
 
-suspend_interfaces() {
-	# 'wlan0' interface on some platforms (ccwmx5xjs, cwme9210, ccardwmx28js)
-	# has problems on suspend-resume, so we workaround it by bringing the
-	# interface down before suspend and bring it up again after resume.
-	# (#35777, #40082)
-	if grep -qs '^wlan0' /var/run/ifstate; then
-		ifdown wlan0 && up_wlan_on_resume="1"
-	fi
-}
-
-resume_interfaces() {
-	# 'wlan0' interface on some platforms (ccwmx5xjs, cwme9210, ccardwmx28js)
-	# has problems on suspend-resume, so we workaround it by bringing the
-	# interface down before suspend and bring it up again after resume.
-	# (#35777, #40082)
-	if ! grep -qs '^wlan0' /var/run/ifstate; then
-		[ -n "${up_wlan_on_resume}" ] && ifup wlan0
-	fi
-}
-
 resume_system_time() {
 	if [ "$(echo /sys/class/rtc/rtc*)" != "/sys/class/rtc/rtc*" ]; then
 		hwclock -s
@@ -66,14 +46,12 @@ done
 if [ -f "${syspower}" ]; then
 	# Pre-suspend actions
 	suspend_system_time
-	suspend_interfaces
 
 	# Suspend the device
 	printf "mem" > ${syspower}
 	sleep .5
 
 	# Post-resume actions
-	resume_interfaces
 	resume_system_time
 else
 	printf "\n[ERROR] File ${syspower} not found\n\n"
