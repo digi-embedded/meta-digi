@@ -4,7 +4,7 @@ POWEROFF_DELAY=2
 
 if [ ! -f  /tmp/pswitch_press ]; then
     logger -t acpid  "No press event."
-    exit -1
+    exit 1
 fi
 
 while read line
