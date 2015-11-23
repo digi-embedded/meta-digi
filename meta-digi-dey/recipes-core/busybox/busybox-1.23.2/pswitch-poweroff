@@ -1,0 +1,4 @@
+#!/bin/sh
+
+logger -t acpid  "Power key poweroff request."
+exec /sbin/poweroff

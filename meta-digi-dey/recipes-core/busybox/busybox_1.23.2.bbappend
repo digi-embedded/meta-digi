@@ -13,8 +13,8 @@ SRC_URI += "file://0001-del-baudrates.patch \
             file://digi-logo.png \
             file://busybox-acpid \
             file://acpid.map \
-            file://pswitch-press \
-            file://pswitch-release \
+            file://pswitch-suspend \
+            file://pswitch-poweroff \
             file://busybox-static-nodes \
             file://bridgeifupdown \
            "
@@ -32,8 +32,8 @@ INITSCRIPT_NAME_${PN}-ntpd = "busybox-ntpd"
 PACKAGES =+ "${PN}-acpid"
 FILES_${PN}-acpid = " ${sysconfdir}/init.d/busybox-acpid \
                        ${sysconfdir}/acpi/acpid.map \
-                       ${sysconfdir}/acpi/pswitch-press \
-                       ${sysconfdir}/acpi/pswitch-release \
+                       ${sysconfdir}/acpi/pswitch-suspend \
+                       ${sysconfdir}/acpi/pswitch-poweroff \
 "
 INITSCRIPT_PACKAGES =+ "${PN}-acpid"
 INITSCRIPT_NAME_${PN}-acpid = "busybox-acpid"
@@ -59,8 +59,8 @@ do_install_append() {
 		install -m 0755 ${WORKDIR}/busybox-acpid ${D}${sysconfdir}/init.d/
 		install -d ${D}${sysconfdir}/acpi/
 		install -m 0755 ${WORKDIR}/acpid.map ${D}${sysconfdir}/acpi/
-		install -m 0755 ${WORKDIR}/pswitch-press ${D}${sysconfdir}/acpi/
-		install -m 0755 ${WORKDIR}/pswitch-release ${D}${sysconfdir}/acpi/
+		install -m 0755 ${WORKDIR}/pswitch-suspend ${D}${sysconfdir}/acpi/
+		install -m 0755 ${WORKDIR}/pswitch-poweroff ${D}${sysconfdir}/acpi/
 	fi
 	if grep "CONFIG_MAKEDEVS=y" ${WORKDIR}/defconfig; then
 		install -m 0755 ${WORKDIR}/busybox-static-nodes ${D}${sysconfdir}/init.d/

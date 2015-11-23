@@ -1,9 +1,0 @@
-#!/bin/sh
-
-if [ -f  /tmp/pswitch_press ]; then
-    logger -t acpid  "Bogus press event, removing."
-    rm -f /tmp/pswitch_press
-fi
-
-echo `date +%s` > /tmp/pswitch_press
-exit 0
