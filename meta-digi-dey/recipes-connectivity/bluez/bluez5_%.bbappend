@@ -5,6 +5,8 @@ SRC_URI += "file://bluez-init"
 
 inherit update-rc.d
 
+PACKAGECONFIG_append = " experimental"
+
 do_install_append() {
 	install -d ${D}${sbindir} ${D}${sysconfdir}/init.d/
 	install -m 0755 ${WORKDIR}/bluez-init ${D}${sysconfdir}/init.d/bluez
