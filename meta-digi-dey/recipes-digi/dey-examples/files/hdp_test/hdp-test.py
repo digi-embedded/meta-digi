@@ -20,6 +20,12 @@ import argparse
 # from hdp_utils import *
 from random import randint
 
+BUS_NAME = 'org.bluez'
+PATH = '/org/bluez'
+HEALTH_MANAGER_INTERFACE = 'org.bluez.HealthManager1'
+HEALTH_DEVICE_INTERFACE = 'org.bluez.HealthDevice1'
+HEALTH_CHANNEL_INTERFACE = 'org.bluez.HealthChannel1'
+
 class MessageType:
     (Association, Configuration, Release_Request,
      Release_Confirmation, Data, Unknown) = range(0, 6)
@@ -204,17 +210,17 @@ class SignalHandler(object):
 	def __init__(self):
 		bus.add_signal_receiver(self.ChannelConnected,
 			signal_name="ChannelConnected",
-			bus_name="org.bluez",
+			bus_name=BUS_NAME,
 			path_keyword="device",
 			interface_keyword="interface",
-			dbus_interface="org.bluez.HealthDevice")
+			dbus_interface=HEALTH_DEVICE_INTERFACE)
 
 		bus.add_signal_receiver(self.ChannelDeleted,
 			signal_name="ChannelDeleted",
-			bus_name="org.bluez",
+			bus_name=BUS_NAME,
 			path_keyword="device",
 			interface_keyword="interface",
-			dbus_interface="org.bluez.HealthDevice")
+			dbus_interface=HEALTH_DEVICE_INTERFACE)
 
 	def ChannelConnected(self, channel, interface, device):
 		print "%s has connected" % device
@@ -225,8 +231,8 @@ class SignalHandler(object):
 		# a socket for the connection.
 		#
 		try:
-			channel = bus.get_object("org.bluez", channel)
-			channel = dbus.Interface(channel, "org.bluez.HealthChannel")
+			channel = bus.get_object(BUS_NAME, channel)
+			channel = dbus.Interface(channel, HEALTH_CHANNEL_INTERFACE)
 			fd = channel.Acquire()
 			fd = fd.take()
 			sk = socket.fromfd(fd, socket.AF_UNIX, socket.SOCK_STREAM)
@@ -266,8 +272,8 @@ signal_handler = SignalHandler()
 config = dbus.Dictionary({"Role": "Sink", "DataType": dbus.types.UInt16(0x1004),
 		"Description": "Oximeter sink"}, signature='sv')
 
-manager = dbus.Interface(bus.get_object("org.bluez", "/org/bluez"),
-					"org.bluez.HealthManager")
+manager = dbus.Interface(bus.get_object(BUS_NAME, PATH),
+					HEALTH_MANAGER_INTERFACE)
 app = manager.CreateApplication(config)
 print "HDP application created, waiting for connection from"
 print "a pulse oximeter.  Press control-c to terminate."
