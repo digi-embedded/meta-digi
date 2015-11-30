@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=QT Browser
-Exec=/usr/bin/qt4/demos/browser/browser
-Icon=webkit
-Terminal=false
-Type=Application
-X-MB-SingleInstance=true
-Comment=Qt Browser
-StartupNotify=false
