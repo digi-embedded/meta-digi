@@ -94,8 +94,8 @@ bt_init() {
 	fi
 }
 
-echo "Starting bluetooth services."
-start-stop-daemon -S --background --exec /usr/lib/bluez5/bluetooth/bluetoothd
-
 # Check if this hardware does support Bluetooth
 [ -d "/proc/device-tree/bluetooth" ] &&	bt_init
+
+echo "Starting bluetooth services."
+start-stop-daemon -S --background --exec /usr/lib/bluez5/bluetooth/bluetoothd
