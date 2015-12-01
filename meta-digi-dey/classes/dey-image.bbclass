@@ -21,3 +21,8 @@ MD5_ROOT_PASSWD ?= "\$1\$SML0de4S\$lOWs3t82QAH0oEf8NyNKA0"
 EXTRA_USERS_PARAMS += "\
     usermod -p '${MD5_ROOT_PASSWD}' root; \
 "
+
+#
+# Create QT5 capable toolchain/SDK if 'dey-qt' image feature is enabled
+#
+inherit ${@bb.utils.contains("IMAGE_FEATURES", "dey-qt", "populate_sdk_qt5", "",d)}
