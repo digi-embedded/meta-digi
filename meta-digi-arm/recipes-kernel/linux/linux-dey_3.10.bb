@@ -7,7 +7,7 @@ require recipes-kernel/linux/linux-dtb.inc
 SRCBRANCH = "v3.10/dey-1.4/maint"
 
 SRCREV_external = ""
-SRCREV_internal = "aa1701793ab27ccfe4931bbc55b46f6b9cb442e7"
+SRCREV_internal = "${AUTOREV}"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
 config_dts() {
