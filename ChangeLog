@@ -1,4 +1,4 @@
-                   Digi Embedded Yocto (DEY) 1.8
+                   Digi Embedded Yocto (DEY) 2.0
                            Release Changelog
 
                     (c) 2015, Digi International
@@ -7,5 +7,6 @@
 
 Version  Release date  Changelog
 -------------------------------------------------------------------------------
-1.8.1    mm-dd-yyyy    TBC
+2.0.0.1  12-04-2015    DEY-2.0 ALPHA
 
+    - Engineering alpha release of DEY-2.0 for ConnectCore 6 SBC

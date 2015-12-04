@@ -1,19 +1,19 @@
 
-                   Digi Embedded Yocto (DEY) 1.8
+                   Digi Embedded Yocto (DEY) 2.0
                            Release Notes
-                           Build 1.6.8.1
+                           Build 2.0.0.1
 
                     (c) 2015, Digi International
                     http://www.digiembedded.com/
-                             November, 2015
+                           December, 2015
 
 
 Introduction
 ---------------------------------------------------------------------------
-  This document provides information about Digi Embedded Yocto 1.8 (DEY-1.8),
+  This document provides information about Digi Embedded Yocto 2.0 (DEY-2.0),
   Digi International's professional embedded Yocto development environment.
 
-  Digi Embedded Yocto 1.8 is based on the 1.8 (Fido) Yocto release.
+  Digi Embedded Yocto 2.0 is based on the 2.0 (Fido) Yocto release.
 
   For setup instructions refer to the Quick Start Guide available to download
   from Digi's support site.
@@ -31,7 +31,7 @@ Contents
 1. Supported Platforms
 -------------------------------------------------------------------------
 
-  The current Digi Embedded Yocto 1.8 release supports the following hardware
+  The current Digi Embedded Yocto 2.0 release supports the following hardware
   platforms:
 
     * ConnectCore 6 SBC                      (Digi P/N CC-SB-WMX-J97C)
