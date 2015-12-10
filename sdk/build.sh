@@ -207,8 +207,8 @@ for platform in ${DY_PLATFORMS}; do
 				if [ "${DY_RM_WORK}" = "true" ]; then
 					printf "${RM_WORK_CFG}" >> conf/local.conf
 				fi
-				# Remove 'x11' distro feature if building minimal images
-				if echo "${DY_TARGET}" | grep -qs "dey-image-minimal"; then
+				# Remove 'x11' distro feature if building minimal and tiny images
+				if echo "${DY_TARGET}" | grep -qs "^dey-image-\(minimal\|tiny\)"; then
 					printf "${X11_REMOVAL_CFG}" >> conf/local.conf
 				fi
 				for target in ${DY_TARGET}; do
