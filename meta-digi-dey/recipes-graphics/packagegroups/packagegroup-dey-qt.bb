@@ -24,7 +24,6 @@ QT5_EXAMPLES = " \
 
 QT5_DEMOS = " \
     cinematicexperience \
-    fslqtapplications \
     qt5-demo-extrafiles \
     qt5everywheredemo \
     qtsmarthome \
