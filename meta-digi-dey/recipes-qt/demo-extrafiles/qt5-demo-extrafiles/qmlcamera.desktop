@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Qt5 Camera
+Exec=/bin/sh -c "cd /usr/share/qt5/examples/multimedia/declarative-camera; ./declarative-camera"
+Icon=qmlcamera
+Terminal=false
+Type=Application
+X-MB-SingleInstance=true
+Comment=Qt5 Qml Camera demo application
+StartupNotify=false

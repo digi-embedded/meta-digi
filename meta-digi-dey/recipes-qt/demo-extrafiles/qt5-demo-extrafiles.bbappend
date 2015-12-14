@@ -3,6 +3,8 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
+    file://qmlcamera.desktop \
+    file://qmlcamera.png \
     file://qmlvideo.desktop \
     file://qmlvideo.png \
 "
@@ -10,6 +12,10 @@ SRC_URI += " \
 do_install_append () {
 	# Fix path for OpenGLES example
 	sed -i -e '/Exec/{s,hellogl_es2,hellogl2,g}' ${D}${datadir}/applications/hellogl_es2.desktop
+
+	# Add qmlcamera shortcut
+	install -m 0644 ${WORKDIR}/qmlcamera.desktop ${D}${datadir}/applications/
+	install -m 0644 ${WORKDIR}/qmlcamera.png ${D}${datadir}/pixmaps/
 
 	# Add qmlvideo shortcut
 	install -m 0644 ${WORKDIR}/qmlvideo.desktop ${D}${datadir}/applications/
