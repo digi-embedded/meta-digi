@@ -1,8 +1,19 @@
 # Copyright (C) 2015 Digi International.
 
+FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+
+SRC_URI += " \
+    file://qmlvideo.desktop \
+    file://qmlvideo.png \
+"
+
 do_install_append () {
 	# Fix path for OpenGLES example
 	sed -i -e '/Exec/{s,hellogl_es2,hellogl2,g}' ${D}${datadir}/applications/hellogl_es2.desktop
+
+	# Add qmlvideo shortcut
+	install -m 0644 ${WORKDIR}/qmlvideo.desktop ${D}${datadir}/applications/
+	install -m 0644 ${WORKDIR}/qmlvideo.png ${D}${datadir}/pixmaps/
 
 	# Remove the desktop launchers of the demo/example applications we do not provide.
 	rm -f ${D}${datadir}/applications/qt5basket.desktop ${D}${datadir}/pixmaps/qt5basket.png
