@@ -1,1 +1,0 @@
-export QT_GSTREAMER_CAMERABIN_VIDEOSRC="imxv4l2src"
