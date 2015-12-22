@@ -5,7 +5,6 @@ DESCRIPTION = "Graphical image based on SATO, a gnome mobile environment visual 
 
 IMAGE_FEATURES += " \
     dey-qt \
-    package-management \
     x11-base \
     x11-sato \
 "
@@ -21,5 +20,4 @@ SOC_IMAGE_INSTALL_mx6 = "imx-gpu-viv-demos imx-gpu-viv-tools"
 
 IMAGE_INSTALL += " \
     ${SOC_IMAGE_INSTALL} \
-    pointercal-xinput \
 "
