@@ -22,12 +22,11 @@ if [ "${1}" != "start" ]; then
 fi
 
 SCRIPTNAME="$(basename "${0}")"
-MACHINENAME="$(cat /proc/device-tree/digi,machine,name 2>/dev/null)"
 
 bt_init() {
-	if [ "${MACHINENAME}" = "ccardimx28" ]; then
+	if grep -qs '\<digi,ccardimx28\>' /proc/device-tree/compatible; then
 		BT_PWR_GPIO_NR="21"
-	elif [ "${MACHINENAME}" = "ccimx6sbc" ]; then
+	elif grep -qs '\<digi,ccimx6\>' /proc/device-tree/compatible; then
 		BT_PWR_GPIO_NR="244"
 	fi
 
