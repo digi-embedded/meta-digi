@@ -70,15 +70,19 @@ bt_init() {
 	RETRIES="5"
 	while [ "${RETRIES}" -gt "0" ]; do
 		hciattach ttyBt ath3k 4000000 1>/dev/null && break
-		#
-		# If hciattach fails try to recover it by toggling the GPIO
-		#
-		BT_PWR_L="/sys/class/gpio/gpio${BT_PWR_GPIO_NR}"
-		[ -d "${BT_PWR_L}" ] || printf "%s" ${BT_PWR_GPIO_NR} > /sys/class/gpio/export
-		printf out > ${BT_PWR_L}/direction && sleep .2
-		printf 0 > ${BT_PWR_L}/value && sleep .2
-		printf 1 > ${BT_PWR_L}/value && sleep .2
-		[ -d "${BT_PWR_L}" ] && printf "%s" ${BT_PWR_GPIO_NR} > /sys/class/gpio/unexport
+		if [ -n "${BT_PWR_GPIO_NR}" ]; then
+			#
+			# If hciattach fails try to recover it by toggling the BT power GPIO
+			#
+			BT_PWR_L="/sys/class/gpio/gpio${BT_PWR_GPIO_NR}"
+			[ -d "${BT_PWR_L}" ] || printf "%s" ${BT_PWR_GPIO_NR} > /sys/class/gpio/export
+			printf out > ${BT_PWR_L}/direction && sleep .2
+			printf 0 > ${BT_PWR_L}/value && sleep .2
+			printf 1 > ${BT_PWR_L}/value && sleep .2
+			[ -d "${BT_PWR_L}" ] && printf "%s" ${BT_PWR_GPIO_NR} > /sys/class/gpio/unexport
+		else
+			sleep .5
+		fi
 		RETRIES="$((RETRIES - 1))"
 	done
 	if [ "${RETRIES}" -eq "0" ]; then
