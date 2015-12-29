@@ -8,6 +8,9 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=3f40d7994397109285ec7b81fdeb3
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
+MACHINE_GSTREAMER_1_0_EXTRA_INSTALL ?= ""
+MACHINE_GSTREAMER_1_0_EXTRA_INSTALL_mx6 ?= "gstreamer1.0-rtsp-server-examples"
+
 RDEPENDS_${PN} = " \
     gstreamer1.0-meta-audio \
     gstreamer1.0-meta-video \
@@ -15,5 +18,6 @@ RDEPENDS_${PN} = " \
     gstreamer1.0-plugins-good-meta \
     gstreamer1.0-plugins-ugly-meta \
     gstreamer1.0-plugins-bad-meta \
+    ${MACHINE_GSTREAMER_1_0_EXTRA_INSTALL} \
     ${MACHINE_GSTREAMER_1_0_PLUGIN} \
 "
