@@ -1,0 +1,52 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Fri, 15 Jan 2016 17:21:01 +0100
+Subject: [PATCH] gstplayer: force use glimagesink
+
+Add support to set the video sink from an environment variable. For the
+X11 application (gtk-play) use the 'glimagesink' video sink if it has not
+been set in the environment.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ gtk/gtk-play.c             | 3 +++
+ lib/gst/player/gstplayer.c | 6 ++++++
+ 2 files changed, 9 insertions(+)
+
+diff --git a/gtk/gtk-play.c b/gtk/gtk-play.c
+index b92773b115b5..a364ffcb349d 100644
+--- a/gtk/gtk-play.c
++++ b/gtk/gtk-play.c
+@@ -403,6 +403,9 @@ main (gint argc, gchar ** argv)
+     file_names = NULL;
+   }
+ 
++  /* Use 'glimagesink' for gtk-play if not already configured in the environment */
++  g_setenv("VIDEOSINK", "glimagesink", FALSE);
++
+   play.player = gst_player_new ();
+   play.playing = TRUE;
+ 
+diff --git a/lib/gst/player/gstplayer.c b/lib/gst/player/gstplayer.c
+index bd682d97b4b8..0c4869a9aa53 100644
+--- a/lib/gst/player/gstplayer.c
++++ b/lib/gst/player/gstplayer.c
+@@ -1033,6 +1033,7 @@ request_state_cb (GstBus * bus, GstMessage * msg, gpointer user_data)
+ static gpointer
+ gst_player_main (gpointer data)
+ {
++  GstElement *videosink;
+   GstPlayer *self = GST_PLAYER (data);
+   GstBus *bus;
+   GSource *source;
+@@ -1053,6 +1054,11 @@ gst_player_main (gpointer data)
+ 
+   self->priv->playbin = gst_element_factory_make ("playbin", "playbin");
+ 
++  /* Use video sink from environment variable */
++  videosink = gst_element_factory_make(g_getenv("VIDEOSINK"), NULL);
++  if (videosink)
++      g_object_set(self->priv->playbin, "video-sink", videosink, NULL);
++
+   self->priv->bus = bus = gst_element_get_bus (self->priv->playbin);
+   bus_source = gst_bus_create_watch (bus);
+   g_source_set_callback (bus_source, (GSourceFunc) gst_bus_async_signal_func,
