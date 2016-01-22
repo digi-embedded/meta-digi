@@ -1,0 +1,215 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Wed, 29 Oct 2014 13:06:15 +0100
+Subject: [PATCH] sysvinit: disable all cpus but cpu0 for halt/reboot
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ src/Makefile    |  6 +++---
+ src/halt.c      | 20 +++++++++++-------
+ src/init.c      |  5 +++++
+ src/shutdown.c  |  3 +++
+ src/sysfs_cpu.c | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ src/sysfs_cpu.h | 24 ++++++++++++++++++++++
+ 6 files changed, 111 insertions(+), 10 deletions(-)
+ create mode 100644 src/sysfs_cpu.c
+ create mode 100644 src/sysfs_cpu.h
+
+diff --git a/src/Makefile b/src/Makefile
+index a6f9f4052926..d5bd705955c5 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -101,9 +101,9 @@ all:		$(BIN) $(SBIN) $(USRBIN)
+ #	$(CC) $(CFLAGS) $(CPPFLAGS) -c $^ -o $@
+ 
+ init:		LDLIBS += $(INITLIBS) $(STATIC)
+-init:		init.o init_utmp.o
++init:		init.o init_utmp.o sysfs_cpu.o
+ 
+-halt:		halt.o ifdown.o hddown.o utmp.o
++halt:		halt.o ifdown.o hddown.o utmp.o sysfs_cpu.o
+ 
+ last:		last.o
+ 
+@@ -120,7 +120,7 @@ sulogin:	sulogin.o
+ 
+ wall:		dowall.o wall.o
+ 
+-shutdown:	dowall.o shutdown.o utmp.o
++shutdown:	dowall.o shutdown.o utmp.o sysfs_cpu.o
+ 
+ bootlogd:	LDLIBS += -lutil
+ bootlogd:	bootlogd.o
+diff --git a/src/halt.c b/src/halt.c
+index 499e9734056c..7ded393caf46 100644
+--- a/src/halt.c
++++ b/src/halt.c
+@@ -57,6 +57,7 @@
+ #include <stdio.h>
+ #include <getopt.h>
+ #include "reboot.h"
++#include "sysfs_cpu.h"
+ 
+ char *Version = "@(#)halt  2.86  31-Jul-2004 miquels@cistron.nl";
+ char *progname;
+@@ -241,13 +242,18 @@ int main(int argc, char **argv)
+ 
+ 	(void)chdir("/");
+ 
+-	if (!do_hard && !do_nothing) {
+-		/*
+-		 *	See if we are in runlevel 0 or 6.
+-		 */
+-		c = get_runlevel();
+-		if (c != '0' && c != '6')
+-			do_shutdown(do_reboot ? "-r" : "-h", tm);
++	if (!do_nothing) {
++		if (!do_hard) {
++			/*
++			 *      See if we are in runlevel 0 or 6.
++			 */
++			c = get_runlevel();
++			if (c != '0' && c != '6')
++				do_shutdown(do_reboot ? "-r" : "-h", tm);
++		} else {
++			/* Disable cores for halt/reboot */
++			sysfs_disable_cpu_all();
++		}
+ 	}
+ 
+ 	/*
+diff --git a/src/init.c b/src/init.c
+index 27532aded622..84cb03523677 100644
+--- a/src/init.c
++++ b/src/init.c
+@@ -78,6 +78,7 @@
+ #include "paths.h"
+ #include "reboot.h"
+ #include "set.h"
++#include "sysfs_cpu.h"
+ 
+ #ifndef SIGPWR
+ #  define SIGPWR SIGUSR2
+@@ -2731,6 +2732,10 @@ int telinit(char *progname, int argc, char **argv)
+ 		request.cmd = INIT_CMD_RUNLVL;
+ 		request.runlevel  = env ? 0 : argv[optind][0];
+ 		request.sleeptime = sltime;
++
++		/* Disable cores for halt/reboot */
++		if (request.runlevel == '0' || request.runlevel == '6')
++			sysfs_disable_cpu_all();
+ 	}
+ 
+ 	/* Change to the root directory. */
+diff --git a/src/shutdown.c b/src/shutdown.c
+index 7e997da84e3a..f3b5aae2f07a 100644
+--- a/src/shutdown.c
++++ b/src/shutdown.c
+@@ -326,6 +326,9 @@ void fastdown()
+ 	}
+ #endif
+ 
++	/* Disable cores for halt/reboot */
++	sysfs_disable_cpu_all();
++
+ 	/* First close all files. */
+ 	for(i = 0; i < 3; i++)
+ 		if (!isatty(i)) {
+diff --git a/src/sysfs_cpu.c b/src/sysfs_cpu.c
+new file mode 100644
+index 000000000000..fe14ff71c382
+--- /dev/null
++++ b/src/sysfs_cpu.c
+@@ -0,0 +1,63 @@
++/*
++ * sysfs_cpu.c
++ *
++ * Copyright (C) 2014 by Digi International Inc.
++ * All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License version 2 as published by
++ * the Free Software Foundation.
++ *
++ * Description: CPU SYSFS API
++ *
++ */
++
++#include <fcntl.h>
++#include <stdio.h>
++#include <sys/sysinfo.h>
++#include <unistd.h>
++
++#include "sysfs_cpu.h"
++
++static int sysfs_cpu_set_value(int cpu, int value)
++{
++	int fd = -1, len;
++	char buf[64];
++
++	if (cpu < 0)
++		return 0;
++
++	snprintf(buf, sizeof(buf), CPUS_SYSDIR "/cpu%d/online", cpu);
++	fd = open(buf, O_WRONLY);
++	if (fd < 0) {
++		fprintf(stderr, "unable to open %s.\r\n", buf);
++		return fd;
++	}
++	snprintf(buf, sizeof(buf), "%s", value ? "1" : "0");
++	len = write(fd, buf, 1);
++	close(fd);
++
++	return (len < 1) ? -1 : 0;
++}
++
++int sysfs_disable_cpu(int cpu)
++{
++	return sysfs_cpu_set_value(cpu, 0);
++}
++
++/* Disable all CPUS but 'cpu0' */
++int sysfs_disable_cpu_all(void)
++{
++	int i, ncores;
++
++	ncores = get_nprocs_conf();
++	for (i = 1; i < ncores; i++)
++		sysfs_disable_cpu(i);
++
++	return 0;
++}
++
++int sysfs_enable_cpu(int cpu)
++{
++	return sysfs_cpu_set_value(cpu, 1);
++}
+diff --git a/src/sysfs_cpu.h b/src/sysfs_cpu.h
+new file mode 100644
+index 000000000000..7728d52fe4d9
+--- /dev/null
++++ b/src/sysfs_cpu.h
+@@ -0,0 +1,24 @@
++/*
++ * sysfs_cpu.h
++ *
++ * Copyright (C) 2014 by Digi International Inc.
++ * All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License version 2 as published by
++ * the Free Software Foundation.
++ *
++ * Description: CPU SYSFS API
++ *
++ */
++
++#ifndef SYSFS_CPU_H
++#define SYSFS_CPU_H
++
++#define CPUS_SYSDIR "/sys/devices/system/cpu"
++
++int sysfs_disable_cpu(int cpu);
++int sysfs_disable_cpu_all(void);
++int sysfs_enable_cpu(int cpu);
++
++#endif /* SYSFS_CPU_H */
