@@ -13,5 +13,5 @@ RDEPENDS_${PN} = " \
 	${BLUEZ} \
 	${BLUEZ}-testtools \
 	${@base_contains("MACHINE_FEATURES", "bluetooth", "libasound-module-bluez", "", d)} \
-	${@base_contains("BLUEZ", "bluez5", "bluez5-noinst-tools", "", d)} \
+	${@base_contains("BLUEZ", "bluez5", "bluez5-noinst-tools bluez5-obex", "", d)} \
 "
