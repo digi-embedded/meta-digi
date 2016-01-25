@@ -16,6 +16,7 @@ QT5_PKS = " \
 QT5_EXAMPLES = " \
     qt3d-examples \
     qtbase-examples \
+    qtconnectivity-examples \
     qtdeclarative-examples \
     qtmultimedia-examples \
     qtsvg-examples \
