@@ -3,12 +3,8 @@
 require recipes-kernel/linux/linux-dey.inc
 require recipes-kernel/linux/linux-dtb.inc
 
-# Internal repo branch
 SRCBRANCH = "v3.10/dey-1.4/maint"
-
-SRCREV_external = ""
-SRCREV_internal = "${AUTOREV}"
-SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
+SRCREV = "${AUTOREV}"
 
 config_dts() {
 	for DTB in ${KERNEL_DEVICETREE}; do

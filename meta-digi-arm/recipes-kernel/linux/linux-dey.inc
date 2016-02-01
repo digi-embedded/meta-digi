@@ -10,10 +10,11 @@ inherit kernel fsl-kernel-localversion
 
 LOCALVERSION = "-dey"
 
-SRC_URI_external = "${DIGI_GITHUB_GIT}/yocto-linux.git;protocol=git;nobranch=1"
-SRC_URI_internal = "${DIGI_GIT}linux-2.6.git;protocol=git;branch=${SRCBRANCH}"
+# Select internal or Github Linux repo
+LINUX_GIT_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}linux-2.6.git', '${DIGI_GITHUB_GIT}/linux.git', d)}"
+
 SRC_URI = " \
-    ${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)} \
+    ${LINUX_GIT_URI};branch=${SRCBRANCH} \
     file://defconfig \
 "
 
