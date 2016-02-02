@@ -1,11 +1,11 @@
 
                    Digi Embedded Yocto (DEY) 2.0
                            Release Notes
-                           Build 2.0.0.1
+                           Build 2.0-r1.1
 
-                    (c) 2015, Digi International
+                    (c) 2016, Digi International
                     http://www.digiembedded.com/
-                           December, 2015
+                           February, 2016
 
 
 Introduction
@@ -13,7 +13,7 @@ Introduction
   This document provides information about Digi Embedded Yocto 2.0 (DEY-2.0),
   Digi International's professional embedded Yocto development environment.
 
-  Digi Embedded Yocto 2.0 is based on the 2.0 (Fido) Yocto release.
+  Digi Embedded Yocto 2.0 is based on the 2.0 (Jethro) Yocto release.
 
   For setup instructions refer to the Quick Start Guide available to download
   from Digi's support site.
