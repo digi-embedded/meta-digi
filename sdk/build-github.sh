@@ -24,7 +24,7 @@ set -e
 
 AVAILABLE_PLATFORMS="ccardimx28js ccimx6sbc"
 
-MANIFEST_URL="https://github.com/digidotcom/dey-manifest.git"
+MANIFEST_URL="https://github.com/digi-embedded/dey-manifest.git"
 
 RM_WORK_CFG="
 INHERIT += \"rm_work\"
