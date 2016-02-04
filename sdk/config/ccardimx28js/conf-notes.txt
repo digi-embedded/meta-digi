@@ -1,11 +1,12 @@
-Digi Embedded Yocto provides two target images:
+Digi Embedded Yocto provides the following image recipes:
 
-  * dey-image-minimal: command line busybox-based image
+  * dey-image-qt: graphical QT image
 
-    This image does not support the X11 window system so in order to build
-    it you need to add the following line to the project's conf/local.conf:
+    By default the image is X11-based so it provides a full SATO theme
+    desktop environment.
+
+    To compile the image for the framebuffer (instead of X11) add the
+    following line to the project's conf/local.conf:
 
     DISTRO_FEATURES_remove = "x11"
-
-  * dey-image-graphical: graphical X11-based image with SATO theme
 
