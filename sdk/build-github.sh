@@ -16,7 +16,7 @@
 #  Parameters set by Jenkins:
 #     DY_PLATFORMS: Platforms to build
 #     DY_REVISION:  Revision of the manifest repository (for 'repo init')
-#     DY_TARGET:    Target image (the default is 'dey-image-minimal')
+#     DY_TARGET:    Target image (the default is 'dey-image-qt')
 #
 #===============================================================================
 
@@ -29,7 +29,7 @@ MANIFEST_URL="https://github.com/digi-embedded/dey-manifest.git"
 RM_WORK_CFG="
 INHERIT += \"rm_work\"
 # Exclude rm_work for some key packages (for debugging purposes)
-RM_WORK_EXCLUDE += \"dey-image-graphical dey-image-minimal linux-dey u-boot-dey\"
+RM_WORK_EXCLUDE += \"dey-image-qt linux-dey u-boot-dey\"
 "
 
 X11_REMOVAL_CFG="
@@ -98,7 +98,7 @@ purge_sstate() {
 
 # Set default values if not provided by Jenkins
 [ -z "${DY_PLATFORMS}" ] && DY_PLATFORMS="$(echo ${AVAILABLE_PLATFORMS})"
-[ -z "${DY_TARGET}" ] && DY_TARGET="dey-image-graphical"
+[ -z "${DY_TARGET}" ] && DY_TARGET="dey-image-qt"
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
 YOCTO_INST_DIR="${WORKSPACE}/dey.$(echo ${DY_REVISION} | tr '/' '_')"
@@ -147,8 +147,8 @@ for platform in ${DY_PLATFORMS}; do
 				-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
 				conf/local.conf
 			printf "${RM_WORK_CFG}" >> conf/local.conf
-			# Remove 'x11' distro feature if building minimal images
-			if echo "${DY_TARGET}" | grep -qs "dey-image-minimal"; then
+			# Remove 'x11' distro feature if building framebuffer images
+			if [ "${DY_FB_IMAGE}" = "true" ]; then
 				printf "${X11_REMOVAL_CFG}" >> conf/local.conf
 			fi
 			for target in ${DY_TARGET}; do

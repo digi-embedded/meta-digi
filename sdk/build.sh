@@ -20,7 +20,7 @@
 #     DY_PLATFORMS:      Platforms to build
 #     DY_REVISION:       Revision of the manifest repository (for 'repo init')
 #     DY_RM_WORK:        Remove the package working folders to save disk space.
-#     DY_TARGET:         Target image (the default is 'dey-image-minimal')
+#     DY_TARGET:         Target image (the default is 'dey-image-qt')
 #     DY_USE_MIRROR:     Use internal Digi mirror to download packages
 #
 #===============================================================================
@@ -42,7 +42,7 @@ BB_GENERATE_MIRROR_TARBALLS = \"1\"
 RM_WORK_CFG="
 INHERIT += \"rm_work\"
 # Exclude rm_work for some key packages (for debugging purposes)
-RM_WORK_EXCLUDE += \"dey-image-graphical dey-image-minimal linux-dey u-boot-dey\"
+RM_WORK_EXCLUDE += \"dey-image-qt linux-dey u-boot-dey\"
 "
 
 X11_REMOVAL_CFG="
@@ -116,11 +116,16 @@ purge_sstate() {
 [ -z "${WORKSPACE}" ]         && error "WORKSPACE not specified"
 
 # Set default settings if Jenkins does not do it
-[ -z "${DY_TARGET}" ] && DY_TARGET="dey-image-minimal"
+[ -z "${DY_TARGET}" ] && DY_TARGET="dey-image-qt"
 [ -z "${DY_DISTRO}" ] && DY_DISTRO="dey"
 
 # If DY_BUILD_TCHAIN is unset, set it for release jobs
 [ -z "${DY_BUILD_TCHAIN}" ] && [[ "${JOB_NAME}" =~ dey-.*-release ]] && DY_BUILD_TCHAIN="true"
+
+# If DY_FB_IMAGE is unset, set it depending on the job name
+if [ -z "${DY_FB_IMAGE}" ] && echo ${JOB_NAME} | grep -qs 'dey.*fb'; then
+	DY_FB_IMAGE="true"
+fi
 
 # Per-platform variants
 while read _pl _var; do
@@ -207,8 +212,8 @@ for platform in ${DY_PLATFORMS}; do
 				if [ "${DY_RM_WORK}" = "true" ]; then
 					printf "${RM_WORK_CFG}" >> conf/local.conf
 				fi
-				# Remove 'x11' distro feature if building minimal and tiny images
-				if echo "${DY_TARGET}" | grep -qs "^dey-image-\(minimal\|tiny\)"; then
+				# Remove 'x11' distro feature if building framebuffer images
+				if [ "${DY_FB_IMAGE}" = "true" ]; then
 					printf "${X11_REMOVAL_CFG}" >> conf/local.conf
 				fi
 				for target in ${DY_TARGET}; do
