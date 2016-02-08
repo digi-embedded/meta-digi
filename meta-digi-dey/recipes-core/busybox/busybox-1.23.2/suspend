@@ -25,6 +25,18 @@ usage() {
 	\n"
 }
 
+suspend_interfaces() {
+	if grep -qs '^wlan0' /var/run/ifstate; then
+		ifdown wlan0 && up_wlan_on_resume="1" && sleep 0.5 && rmmod ath6kl_sdio
+	fi
+}
+
+resume_interfaces() {
+	if ! grep -qs '^wlan0' /var/run/ifstate; then
+		[ -n "${up_wlan_on_resume}" ] && modprobe ath6kl_sdio && sleep 0.5 && ifup wlan0
+	fi
+}
+
 while getopts "h" c; do
 	case "${c}" in
 		h) usage; exit;;
@@ -33,12 +45,14 @@ done
 
 if [ -f "${syspower}" ]; then
 	# Pre-suspend actions
+	suspend_interfaces
 
 	# Suspend the device
 	printf "mem" > ${syspower}
 	sleep .5
 
 	# Post-resume actions
+	resume_interfaces
 else
 	printf "\n[ERROR] File ${syspower} not found\n\n"
 fi
