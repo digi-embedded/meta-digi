@@ -42,6 +42,4 @@ IMAGE_ROOTFS_SIZE = "8192"
 # Do not install udev-cache
 BAD_RECOMMENDATIONS += "udev-cache"
 
-GRAPHICAL_BACKEND = "${@base_contains('DISTRO_FEATURES', 'x11', 'x11', 'fb', d)}"
-
 export IMAGE_BASENAME = "dey-image-qt-${GRAPHICAL_BACKEND}"
