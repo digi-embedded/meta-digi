@@ -27,6 +27,27 @@ inherit fsl-u-boot-localversion
 EXTRA_OEMAKE_append = " KCFLAGS=-fgnu89-inline"
 
 do_deploy_append() {
+	# Remove canonical U-Boot symlinks for ${UBOOT_CONFIG} currently in the form:
+	#    u-boot-<platform>.imx-<type>
+	#    u-boot-<type>
+	# and add a more suitable symlink in the form:
+	#    u-boot-<platform>-<config>.imx
+	if [ "x${UBOOT_CONFIG}" != "x" ]; then
+		for config in ${UBOOT_MACHINE}; do
+			i=`expr $i + 1`
+			for type in ${UBOOT_CONFIG}; do
+				j=`expr $j + 1`
+				if [ $j -eq $i ]; then
+					cd ${DEPLOYDIR}
+					rm -r ${UBOOT_BINARY}-${type} ${UBOOT_SYMLINK}-${type}
+					ln -sf u-boot-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-${type}.${UBOOT_SUFFIX}
+				fi
+			done
+			unset  j
+		done
+		unset  i
+	fi
+
 	# Boot script for DEY images
 	mkimage -T script -n bootscript -C none -d ${WORKDIR}/boot.txt ${DEPLOYDIR}/boot.scr
 }
