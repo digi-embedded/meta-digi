@@ -27,6 +27,7 @@ inherit fsl-u-boot-localversion
 EXTRA_OEMAKE_append = " KCFLAGS=-fgnu89-inline"
 
 do_deploy_append() {
+	# Boot script for DEY images
 	mkimage -T script -n bootscript -C none -d ${WORKDIR}/boot.txt ${DEPLOYDIR}/boot.scr
 }
 
