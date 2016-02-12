@@ -19,6 +19,7 @@ UBOOT_GIT_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}u-bo
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
     file://boot.txt \
+    file://install_linux_fw_sd.txt \
 "
 
 LOCALVERSION ?= ""
@@ -47,6 +48,10 @@ do_deploy_append() {
 		done
 		unset  i
 	fi
+
+	# DEY firmware install script
+	sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_sd.txt
+	mkimage -T script -n "DEY firmware install script" -C none -d ${WORKDIR}/install_linux_fw_sd.txt ${DEPLOYDIR}/install_linux_fw_sd.scr
 
 	# Boot script for DEY images
 	mkimage -T script -n bootscript -C none -d ${WORKDIR}/boot.txt ${DEPLOYDIR}/boot.scr
