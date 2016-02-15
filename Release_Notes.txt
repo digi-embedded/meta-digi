@@ -22,10 +22,11 @@ Contents
 -------------------------------------------------------------------------
   This document contains the following sections:
 
-  1. Supported Platforms
-  2. Supported System-On-Module variants
-  3. Documentation
-  4. Support Contact Information
+    1. Supported Platforms
+    2. Supported System-On-Module variants
+    3. Documentation
+    4. Known Issues
+    5. Support Contact Information
 
 
 1. Supported Platforms
@@ -36,7 +37,7 @@ Contents
 
     * ConnectCore 6 SBC                      (Digi P/N CC-SB-WMX-J97C)
 
-  Following hardware platform remains in beta software support:
+  The following hardware platform remains in beta software support:
 
     * ConnectCore 6 SBC                      (Digi P/N CC-SB-WMX-J97C-1)
 
@@ -72,6 +73,7 @@ Contents
 -------------------------------------------------------------------------
 
   Refer to the Digi online documentation.
+
 
 5. Support Contact Information
 -------------------------------------------------------------------------
