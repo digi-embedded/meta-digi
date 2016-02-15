@@ -7,7 +7,7 @@
 
 Version     Release date (YYYY-MM-DD)
 -------------------------------------------------------------------------------
-2.0-r1      2016-02-02
+2.0-r1      2016-02-15
 
     * U-Boot 2015.04 for the ConnectCore 6 System-On-Module and SBC.
     * Linux kernel v3.14.57 for the ConnectCore 6 System-On-Module and SBC.
