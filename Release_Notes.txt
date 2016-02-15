@@ -15,8 +15,6 @@ Introduction
 
   Digi Embedded Yocto 2.0 is based on the 2.0 (Jethro) Yocto release.
 
-  For setup instructions refer to the Quick Start Guide available to download
-  from Digi's support site.
 
 Contents
 -------------------------------------------------------------------------
