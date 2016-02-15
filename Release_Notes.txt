@@ -31,14 +31,21 @@ Contents
 1. Supported Platforms
 -------------------------------------------------------------------------
 
-  The current Digi Embedded Yocto 2.0 release supports the following hardware
-  platforms:
+  The current Digi Embedded Yocto 2.0 release fully supports the following
+  hardware platforms:
 
     * ConnectCore 6 SBC                      (Digi P/N CC-SB-WMX-J97C)
-    * ConnectCard for i.MX28 JumpStart Kit   (Digi P/N CC-WMX28-LX)
+
+  Following hardware platform remains in beta software support:
+
+    * ConnectCore 6 SBC                      (Digi P/N CC-SB-WMX-J97C-1)
 
   Previous versions of Digi Embedded Yocto include support for additional Digi
   hardware.
+
+  The additional hardware supported by DEY-1.6 is the following:
+
+    * ConnectCard for i.MX28 JumpStart Kit   (Digi P/N CC-WMX28-LX)
 
   The additional hardware supported by DEY-1.4 is the following:
 
@@ -53,42 +60,24 @@ Contents
   example with different memory configurations. For a list of the available
   module variants please refer to the Digi embedded products web page.
 
-  All module variants are fully supported on the current release, except for
-  the following which remain in beta software support:
-
-  CC-WMX-K77C-TE                             (Digi P/N 55001818-11)
-  CC-MX-PF58-ZK                              (Digi P/N 55001674-04)
-  CC-WMX-PF58-VM                             (Digi P/N 55001669-02)
-  CC-WMX-PF47-ALG1                           (Digi P/N 55001667-02)
-  CC-WMX-PE47-TM                             (Digi P/N 55001667-04)
-
-  If you are using any of the above variants please contact support for further
-  details.
-
 
 3. Documentation
 -------------------------------------------------------------------------
 
-  Digi Embedded Yocto documentation is available to download from the Digi
-  support page.
+  Digi Embedded Yocto documentation is available from the Digi online
+  documentation system.
 
-   * Quick Start Guide
-   * Getting Started Guide
-   * First Steps Guide
-   * U-Boot customization guide
-   * Linux BSP user manual
-   * Hardware documentation
 
 4. Known Issues
 -------------------------------------------------------------------------
 
-* wireless: WEP authentication is not supported when working in SoftAP mode.
+  Refer to the Digi online documentation.
 
 5. Support Contact Information
 -------------------------------------------------------------------------
   For support questions please contact the Digi technical support experts:
 
-    Digi Technical Support
+  Digi Technical Support
 
     Web based Support:   http://www.digi.com/support/eservice/login.jsp
     Support Web site:    http://www.digi.com/support/index.jsp
