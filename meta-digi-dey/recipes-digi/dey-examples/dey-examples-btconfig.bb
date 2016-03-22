@@ -22,4 +22,4 @@ do_install() {
 	install -m 0755 btconfig ${D}${bindir}
 }
 
-COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$)"
+COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$|ccimx6ul)"

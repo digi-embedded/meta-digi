@@ -16,4 +16,4 @@ do_install() {
 
 RDEPENDS_${PN} = "python python-argparse python-crypt python-dbus python-pygobject"
 
-COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$)"
+COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$|ccimx6ul)"

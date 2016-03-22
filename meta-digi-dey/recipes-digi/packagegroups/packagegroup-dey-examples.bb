@@ -35,4 +35,11 @@ RDEPENDS_${PN}_append_ccimx6 = "\
 	dey-examples-v4l2 \
 "
 
-COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$)"
+RDEPENDS_${PN}_append_ccimx6ul = "\
+	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
+	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
+	dey-examples-can \
+	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
+"
+
+COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$|ccimx6ul)"
