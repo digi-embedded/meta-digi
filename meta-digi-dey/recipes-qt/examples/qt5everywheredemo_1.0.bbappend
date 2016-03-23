@@ -2,7 +2,7 @@
 
 LIC_FILES_CHKSUM = "file://main.cpp;md5=a3ecdc1d777da347f1bf35dd9966606f"
 
-DEPENDS += "qtmultimedia"
+DEPENDS += "qtmultimedia qtsvg"
 
 SRCREV = "35d72a2eba7456a2efc5eb8b77afbc00f69ba0ac"
 
