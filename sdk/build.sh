@@ -34,7 +34,7 @@ MANIFEST_URL="ssh://git@stash.digi.com/dey/digi-yocto-sdk-manifest.git"
 
 DIGI_PREMIRROR_CFG="
 # Use internal mirror
-SOURCE_MIRROR_URL ?= \"http://build-linux.digi.com/yocto/downloads/\"
+SOURCE_MIRROR_URL = \"http://log-sln-jenkins.digi.com/yocto/downloads/\"
 INHERIT += \"own-mirrors\"
 BB_GENERATE_MIRROR_TARBALLS = \"1\"
 "
