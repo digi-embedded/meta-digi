@@ -31,6 +31,54 @@ inherit fsl-u-boot-localversion
 
 EXTRA_OEMAKE_append = " KCFLAGS=-fgnu89-inline"
 
+UBOOT_EXTRA_CONF ?= ""
+
+do_compile () {
+	if [ "${@bb.utils.contains('DISTRO_FEATURES', 'ld-is-gold', 'ld-is-gold', '', d)}" = "ld-is-gold" ] ; then
+		sed -i 's/$(CROSS_COMPILE)ld$/$(CROSS_COMPILE)ld.bfd/g' config.mk
+	fi
+
+	unset LDFLAGS
+	unset CFLAGS
+	unset CPPFLAGS
+
+	if [ ! -e ${B}/.scmversion -a ! -e ${S}/.scmversion ]
+	then
+		echo ${UBOOT_LOCALVERSION} > ${B}/.scmversion
+		echo ${UBOOT_LOCALVERSION} > ${S}/.scmversion
+	fi
+
+    if [ "x${UBOOT_CONFIG}" != "x" ]
+    then
+        for config in ${UBOOT_MACHINE}; do
+            i=`expr $i + 1`;
+            for type in ${UBOOT_CONFIG}; do
+                j=`expr $j + 1`;
+                if [ $j -eq $i ]
+                then
+                    oe_runmake O=${config} ${config}
+                    for var in ${UBOOT_EXTRA_CONF}; do
+                        echo "${var}" >> ${config}/.config
+                    done
+                    oe_runmake O=${config} oldconfig
+                    oe_runmake O=${config} ${UBOOT_MAKE_TARGET}
+                    cp  ${S}/${config}/${UBOOT_BINARY}  ${S}/${config}/u-boot-${type}.${UBOOT_SUFFIX}
+                fi
+            done
+            unset  j
+        done
+        unset  i
+    else
+        oe_runmake ${UBOOT_MACHINE}
+        for var in ${UBOOT_EXTRA_CONF}; do
+            echo "${var}" >> .config
+        done
+        oe_runmake O=${config} oldconfig
+        oe_runmake ${UBOOT_MAKE_TARGET}
+    fi
+
+}
+
 do_deploy_append() {
 	# Remove canonical U-Boot symlinks for ${UBOOT_CONFIG} currently in the form:
 	#    u-boot-<platform>.imx-<type>
