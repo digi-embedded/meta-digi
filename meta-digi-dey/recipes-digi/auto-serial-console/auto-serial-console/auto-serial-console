@@ -1,0 +1,29 @@
+#!/bin/sh
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/auto-getty
+NAME="auto-getty"
+
+case "$1" in
+  start)
+        echo -n "Starting auto-serial-console: "
+        start-stop-daemon -S -b -n $NAME --exec $DAEMON
+        echo "done"
+        ;;
+  stop)
+        echo -n "Stopping auto-serial-console: "
+        start-stop-daemon -K -n $NAME
+        echo "done"
+        ;;
+  restart)
+        $0 stop
+        $0 start
+        ;;
+  *)
+        echo "Usage: auto-serial-console { start | stop | restart }" >&2
+        exit 1
+        ;;
+esac
+
+exit 0
+
