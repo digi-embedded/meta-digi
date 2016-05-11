@@ -11,6 +11,7 @@ DEPENDS += "dtc-native u-boot-mkimage-native"
 PROVIDES += "u-boot"
 
 SRCBRANCH = "v2015.04/maint"
+SRCBRANCH_ccimx6ul = "v2015.04/master"
 SRCREV = "${AUTOREV}"
 
 # Select internal or Github U-Boot repo
@@ -18,6 +19,9 @@ UBOOT_GIT_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}u-bo
 
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
+"
+
+SRC_URI_append_ccimx6 = " \
     file://boot.txt \
     file://install_linux_fw_sd.txt \
 "
@@ -48,7 +52,9 @@ do_deploy_append() {
 		done
 		unset  i
 	fi
+}
 
+do_deploy_append_ccimx6() {
 	# DEY firmware install script
 	sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_sd.txt
 	mkimage -T script -n "DEY firmware install script" -C none -d ${WORKDIR}/install_linux_fw_sd.txt ${DEPLOYDIR}/install_linux_fw_sd.scr
@@ -57,4 +63,4 @@ do_deploy_append() {
 	mkimage -T script -n bootscript -C none -d ${WORKDIR}/boot.txt ${DEPLOYDIR}/boot.scr
 }
 
-COMPATIBLE_MACHINE = "(ccimx6$)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"
