@@ -27,4 +27,4 @@ pkg_postinst_${PN}() {
 	fi
 }
 
-COMPATIBLE_MACHINE = "(ccimx6)"
+COMPATIBLE_MACHINE = "(ccimx6$)"

@@ -57,4 +57,4 @@ do_deploy_append() {
 	mkimage -T script -n bootscript -C none -d ${WORKDIR}/boot.txt ${DEPLOYDIR}/boot.scr
 }
 
-COMPATIBLE_MACHINE = "(ccimx6)"
+COMPATIBLE_MACHINE = "(ccimx6$)"

@@ -8,4 +8,4 @@ inherit fsl-vivante-kernel-driver-handler
 SRCBRANCH = "v3.14/dey-2.0/maint"
 SRCREV = "${AUTOREV}"
 
-COMPATIBLE_MACHINE = "(ccimx6)"
+COMPATIBLE_MACHINE = "(ccimx6$)"
