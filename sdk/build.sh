@@ -142,8 +142,9 @@ while read _pl _var; do
 	fi
 	eval "${_pl}_var=\"${_var}\""
 done<<-_EOF_
-	ccardimx28js    - e w wb web web1
-	ccimx6sbc       DONTBUILDVARIANTS
+	ccardimx28js      - e w wb web web1
+	ccimx6sbc         DONTBUILDVARIANTS
+	ccimx6ulstarter   DONTBUILDVARIANTS
 _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
