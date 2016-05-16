@@ -30,6 +30,6 @@ MACHINE_EXTRA_RDEPENDS += " \
     u-boot-fw-utils \
 "
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
-MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins cryptodev-module"
+MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins cryptodev-module rng-tools"
 
 MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth"
