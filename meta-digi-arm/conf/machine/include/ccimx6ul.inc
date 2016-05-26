@@ -26,6 +26,9 @@ MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins"
 
 MACHINE_FEATURES += "wifi bluetooth"
 
+MACHINE_FIRMWARE_append = " ${@base_contains('MACHINE_FEATURES', 'bluetooth', 'firmware-qualcomm-qca6564-bt', '', d)}"
+MACHINE_FIRMWARE_append = " ${@base_contains('MACHINE_FEATURES', 'wifi', 'firmware-qualcomm-qca6564-wifi', '', d)}"
+
 KERNEL_IMAGETYPE = "zImage"
 # FLASH parameters
 MKUBIFS_ARGS ?= "-m 2048 -e 126976 -c 2047"
