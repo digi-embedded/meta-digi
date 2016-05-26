@@ -1,0 +1,144 @@
+From: Kamal Negi <kamaln@codeaurora.org>
+Date: Tue, 30 Dec 2014 19:15:08 +0530
+Subject: [PATCH] Override PCM Settings by reading configuration file
+
+Configure the PCM role as master or slave depending upon
+the platform's support. This configuration is provided
+in the config file which is read during the firmware
+download process and the default PCM configuration is
+overwritten with this value.
+
+Change-Id: If0eae58b4cd32d75b3bcb669bc73dca67652473c
+Signed-off-by: Kamal Negi <kamaln@codeaurora.org>
+---
+ tools/hciattach_rome.c | 67 +++++++++++++++++++++++++++++++++++++++++++++++---
+ tools/hciattach_rome.h |  8 ++++++
+ 2 files changed, 71 insertions(+), 4 deletions(-)
+
+diff --git a/tools/hciattach_rome.c b/tools/hciattach_rome.c
+index 37974290ae0a..99866e23e99e 100644
+--- a/tools/hciattach_rome.c
++++ b/tools/hciattach_rome.c
+@@ -1,6 +1,6 @@
+ /*
+  *
+- *  Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
++ *  Copyright (c) 2013-2015, The Linux Foundation. All rights reserved.
+  *  Not a Contribution.
+  *
+  *  Copyright 2012 The Android Open Source Project
+@@ -873,6 +873,44 @@ error:
+     return err;
+ }
+ 
++int get_value_from_config(char *file_path,char *param)
++{
++    FILE *pfile = NULL;
++    char *line = NULL;
++    char *pch = NULL;
++    char param_str[20];
++    int bytes_read = 0, position;
++    int ret = -1;
++
++    if (!file_path || !param) {
++        fprintf(stderr,"Invalid arguments\n");
++        return -EINVAL;
++    }
++
++    pfile = fopen(file_path, "r" );
++    if (!pfile) {
++        fprintf(stderr, "Failed to open %s\n", file_path);
++        return ret;
++    }
++
++    while (getline(&line, &bytes_read, pfile) > 0 ) {
++        if (line[0] != '#'  && line[0] != '\n') {
++            pch = memchr(line, '=', strlen(line));
++            if (pch != NULL) {
++                position = pch - line;
++                strncpy(param_str, line, position);
++                if (strncmp(param_str, param, position) == 0) {
++                    ret = atoi(pch + 1);
++                    break;
++                }
++            }
++        }
++    }
++    free(line);
++    fclose(pfile);
++    return ret;
++}
++
+ int rome_get_tlv_file(char *file_path)
+ {
+     FILE * pFile;
+@@ -884,7 +922,7 @@ int rome_get_tlv_file(char *file_path)
+     unsigned char data_buf[PRINT_BUF_SIZE]={0,};
+     unsigned char *nvm_byte_ptr;
+     unsigned char bdaddr[6];
+-
++    unsigned short pcm_value;
+     fprintf(stderr, "File Open (%s)\n", file_path);
+     pFile = fopen ( file_path , "r" );
+     if (pFile==NULL) {;
+@@ -970,9 +1008,30 @@ int rome_get_tlv_file(char *file_path)
+                     *nvm_byte_ptr, *(nvm_byte_ptr+1), *(nvm_byte_ptr+2),
+                     *(nvm_byte_ptr+3), *(nvm_byte_ptr+4), *(nvm_byte_ptr+5));
+             }
++            /* Read from file and check what PCM Configuration is required:
++             * Master = 0 /Slave = 1 */
++            /* Override PCM configuration */
++            if (nvm_ptr->tag_id == TAG_NUM_44) {
++                if ((pcm_value =
++                    get_value_from_config(PCM_CONFIG_FILE_PATH, "PCM")) >= 0) {
++
++                    if (pcm_value == PCM_SLAVE) {
++                        nvm_byte_ptr[PCM_MS_OFFSET_1] |=
++                                                    (1 << PCM_ROLE_BIT_OFFSET);
++                        nvm_byte_ptr[PCM_MS_OFFSET_2] |=
++                                                    (1 << PCM_ROLE_BIT_OFFSET);
++                    } else if (pcm_value == PCM_MASTER) {
++                        nvm_byte_ptr[PCM_MS_OFFSET_1] &=
++                                                 (~(1 << PCM_ROLE_BIT_OFFSET));
++                        nvm_byte_ptr[PCM_MS_OFFSET_2] &=
++                                                 (~(1 << PCM_ROLE_BIT_OFFSET));
++                    }
++                }
++            }
+ 
+-            for(i =0;(i<nvm_ptr->tag_len && (i*3 + 2) <PRINT_BUF_SIZE);i++)
+-                snprintf((char *) data_buf, PRINT_BUF_SIZE, "%s%.02x ", (char *)data_buf, *(nvm_byte_ptr + i));
++            for(i =0;(i<nvm_ptr->tag_len && (i*3 + 2) < PRINT_BUF_SIZE);i++)
++                snprintf((char *) data_buf, PRINT_BUF_SIZE, "%s%.02x ",
++                    (char *)data_buf, *(nvm_byte_ptr + i));
+ 
+             fprintf(stderr, "TAG Data\t\t\t : %s\n", data_buf);
+ 
+diff --git a/tools/hciattach_rome.h b/tools/hciattach_rome.h
+index 1500ddd3a79f..f591c10e4f2b 100644
+--- a/tools/hciattach_rome.h
++++ b/tools/hciattach_rome.h
+@@ -202,8 +202,15 @@ typedef struct
+ #define NVM_ACCESS_SET            0x01
+ #define TAG_NUM_OFFSET             5
+ #define TAG_NUM_2                       2
++#define TAG_NUM_44                      44
+ #define TAG_BDADDR_OFFSET     7
+ 
++#define PCM_MS_OFFSET_1       9
++#define PCM_MS_OFFSET_2       33
++
++#define PCM_SLAVE            1
++#define PCM_MASTER           0
++#define PCM_ROLE_BIT_OFFSET  4
+ #define MAX_RETRY_CNT  1
+ #define SELECT_TIMEOUT 3
+ 
+@@ -240,6 +247,7 @@ typedef struct
+ #define ROME_SKIP_EVT_CC       0x02
+ #define ROME_SKIP_EVT_VSE_CC   0x03
+ 
++#define PCM_CONFIG_FILE_PATH        "/etc/bluetooth/pcm.conf"
+ /******************************************************************************
+ **  Local type definitions
+ ******************************************************************************/

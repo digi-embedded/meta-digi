@@ -1,0 +1,58 @@
+From: Dibyendu Roy <dibyen@codeaurora.org>
+Date: Mon, 6 Jul 2015 13:30:53 +0530
+Subject: [PATCH] Bluetooth: Fix static analysis issues
+
+Change-Id: Ida91f012544c39a8aaa6e7db23f1d5b68d3bec08
+---
+ tools/hciattach.c      |  9 ++++++++-
+ tools/hciattach_rome.c | 10 ++++++++--
+ 2 files changed, 16 insertions(+), 3 deletions(-)
+
+diff --git a/tools/hciattach.c b/tools/hciattach.c
+index 6de4129dfd8f..c9a5feffca2b 100644
+--- a/tools/hciattach.c
++++ b/tools/hciattach.c
+@@ -1395,7 +1395,14 @@ int main(int argc, char *argv[])
+ 			dev[0] = 0;
+ 			if (!strchr(opt, '/'))
+ 				strcpy(dev, "/dev/");
+-			strcat(dev, opt);
++
++			if (strlen(opt) + 1 > sizeof(dev) - strlen(dev)) {
++				fprintf(stderr, "error: string truncated\n");
++				exit(1);
++			}
++
++			strncat(dev, opt, sizeof(dev) - strlen(dev) - 1);
++
+ 			break;
+ 
+ 		case 1:
+diff --git a/tools/hciattach_rome.c b/tools/hciattach_rome.c
+index 1891de24e21a..59bdc16e4e8f 100644
+--- a/tools/hciattach_rome.c
++++ b/tools/hciattach_rome.c
+@@ -933,7 +933,13 @@ int rome_get_tlv_file(char *file_path)
+ 
+     /* Get File Size */
+     fseek (pFile , 0 , SEEK_END);
+-    fileSize = ftell (pFile);
++
++    if((fileSize = ftell(pFile)) < 0) {
++        fprintf(stderr, "%s: fail to get current file position\n", file_path);
++        fclose (pFile);
++        return -1;
++    }
++
+     rewind (pFile);
+ 
+     pdata_buffer = (unsigned char*) malloc (sizeof(char)*fileSize);
+@@ -1107,7 +1113,7 @@ int rome_tlv_dnld_segment(int fd, int index, int seg_size, unsigned char wait_cc
+ int rome_tlv_dnld_req(int fd, int tlv_size)
+ {
+     int  total_segment, remain_size, i, err = -1;
+-    unsigned char wait_cc_evt;
++    unsigned char wait_cc_evt = FALSE;
+     unsigned int rom = rome_ver >> 16;
+ 
+     total_segment = tlv_size/MAX_SIZE_PER_TLV_SEGMENT;

@@ -1,0 +1,52 @@
+From: Dibyendu Roy <dibyen@codeaurora.org>
+Date: Fri, 22 May 2015 18:57:05 +0530
+Subject: [PATCH] bluetooth: Fix flow control operation
+
+Flow off operation was not actually happening at the UART line level,
+since the argument passed was not being used correctly. As a result,
+sometimes command complete and VS event were sent by BT SOC even
+before the local UART Controller could change its baud rate to the
+newer one(3 Mbps). This led to VS event being processed
+incorrectly which in turn causes baud rate change to fail.
+
+CRs-Fixed: 844730
+Change-Id: I06d8c4ed7807aa47dd5498642c7a23c9189a1cff
+Signed-off-by: Dibyendu Roy <dibyen@codeaurora.org>
+---
+ tools/hciattach_rome.c | 6 +++---
+ tools/hciattach_rome.h | 4 ++--
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/tools/hciattach_rome.c b/tools/hciattach_rome.c
+index 6a3f33867c12..0d7014f1d2f6 100644
+--- a/tools/hciattach_rome.c
++++ b/tools/hciattach_rome.c
+@@ -1544,10 +1544,10 @@ static void flow_control(int fd, int opt)
+     c_opt.c_cc[VMIN] = 0; /* blocking read until 8 chars received */
+     c_opt.c_cflag &= ~CSIZE;
+     c_opt.c_cflag |= (CS8 | CLOCAL | CREAD);
+-    if (MSM_ENABLE_FLOW_CTRL)
++    if (opt == MSM_ENABLE_FLOW_CTRL)
+         c_opt.c_cflag |= CRTSCTS;
+-    else if (MSM_DISABLE_FLOW_CTRL)
+-        c_opt.c_cflag |= ~CRTSCTS;
++    else if (opt == MSM_DISABLE_FLOW_CTRL)
++        c_opt.c_cflag &= ~CRTSCTS;
+     else {
+         fprintf(stderr, "%s: Incorrect option passed for TIOCMSET\n", __func__);
+         return;
+diff --git a/tools/hciattach_rome.h b/tools/hciattach_rome.h
+index 8eaeeed8bc96..3fdaf208e522 100644
+--- a/tools/hciattach_rome.h
++++ b/tools/hciattach_rome.h
+@@ -40,8 +40,8 @@
+ #define NVITEM_SIZE         2
+ #define PERSIST_HEADER_LEN  3
+ #define BD_ADDR_LEN         6
+-#define MSM_ENABLE_FLOW_CTRL   16
+-#define MSM_DISABLE_FLOW_CTRL  17
++#define MSM_DISABLE_FLOW_CTRL  0
++#define MSM_ENABLE_FLOW_CTRL   1
+ #define USERIAL_OP_CLK_ON      0x5441
+ #define USERIAL_OP_CLK_OFF     0x5442
+ 

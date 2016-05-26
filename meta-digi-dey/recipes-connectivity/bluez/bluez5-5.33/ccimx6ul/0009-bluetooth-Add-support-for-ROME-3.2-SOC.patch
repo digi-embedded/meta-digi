@@ -1,0 +1,236 @@
+From: Anantha Krishnan <ananthk@codeaurora.org>
+Date: Mon, 8 Dec 2014 14:52:16 +0530
+Subject: [PATCH] bluetooth: Add support for ROME 3.2 SOC.
+
+Add firmware download support for ROME 3.2 version. As part
+of this, the Bluetooth on time is optimized based on event
+handling while downloading rampatch files.From ROME 3.2 onwards,
+the VS and command complete events will be sent depending the flag
+indication present in the header. HOST can wait for VS and command
+complete events only if specified in the header info. This greatly
+reduces the time spent by HOST in waiting for 2 events from the
+Controller before downloading each segment of the RAMPATCH file
+
+Change-Id: I9c4227a7a529455f4d120b2c9d065f3ec6b439e9
+---
+ tools/hciattach_rome.c | 104 ++++++++++++++++++++++++++++++++++++++++++-------
+ tools/hciattach_rome.h |  16 +++++++-
+ 2 files changed, 103 insertions(+), 17 deletions(-)
+
+diff --git a/tools/hciattach_rome.c b/tools/hciattach_rome.c
+index 84dfc97b5140..c6d528f118e1 100644
+--- a/tools/hciattach_rome.c
++++ b/tools/hciattach_rome.c
+@@ -62,9 +62,11 @@ unsigned char *pdata_buffer = NULL;
+ patch_info rampatch_patch_info;
+ int rome_ver = ROME_VER_UNKNOWN;
+ unsigned char gTlv_type;
++unsigned char gtlv_dwndcfg;
+ char *rampatch_file_path;
+ char *nvm_file_path;
+ vnd_userial_cb_t vnd_userial;
++unsigned char wait_vsc_evt = TRUE;
+ /******************************************************************************
+ **  Extern variables
+ ******************************************************************************/
+@@ -455,14 +457,16 @@ int hci_send_vs_cmd(int fd, unsigned char *cmd, unsigned char *rsp, int size)
+         goto failed;
+     }
+ 
+-    /* Check for response from the Controller */
+-    if (read_vs_hci_event(fd, rsp, HCI_MAX_EVENT_SIZE) < 0) {
+-        ret = -ETIMEDOUT;
+-        fprintf(stderr, "%s: Failed to get HCI-VS Event from SOC\n", __FUNCTION__);
+-        goto failed;
++    if (wait_vsc_evt) {
++        /* Check for response from the Controller */
++        if (read_vs_hci_event(fd, rsp, HCI_MAX_EVENT_SIZE) < 0) {
++            ret = -ETIMEDOUT;
++            fprintf(stderr, "%s: Failed to get HCI-VS Event from SOC\n", __FUNCTION__);
++            goto failed;
++        }
++        fprintf(stderr, "%s: Received HCI-Vendor Specific Event from SOC\n", __FUNCTION__);
+     }
+ 
+-    fprintf(stderr, "%s: Received HCI-Vendor Specific Event from SOC\n", __FUNCTION__);
+ failed:
+     return ret;
+ }
+@@ -903,6 +907,7 @@ int rome_get_tlv_file(char *file_path)
+ 
+     /* To handle different event between rampatch and NVM */
+     gTlv_type = ptlv_header->tlv_type;
++    gtlv_dwndcfg = ptlv_header->tlv.patch.dwnd_cfg;
+ 
+     if(ptlv_header->tlv_type == TLV_TYPE_PATCH){
+         fprintf(stderr, "====================================================\n");
+@@ -914,6 +919,7 @@ int rome_get_tlv_file(char *file_path)
+         fprintf(stderr, "Patch Data Length\t\t\t : %d bytes\n",ptlv_header->tlv.patch.tlv_patch_data_len);
+         fprintf(stderr, "Signing Format Version\t : 0x%x\n", ptlv_header->tlv.patch.sign_ver);
+         fprintf(stderr, "Signature Algorithm\t\t : 0x%x\n", ptlv_header->tlv.patch.sign_algorithm);
++        fprintf(stderr, "Event Handling\t\t\t : 0x%x", ptlv_header->tlv.patch.dwnd_cfg);
+         fprintf(stderr, "Reserved\t\t\t : 0x%x\n", ptlv_header->tlv.patch.reserved1);
+         fprintf(stderr, "Product ID\t\t\t : 0x%04x\n", ptlv_header->tlv.patch.prod_id);
+         fprintf(stderr, "Rom Build Version\t\t : 0x%04x\n", ptlv_header->tlv.patch.build_ver);
+@@ -1023,19 +1029,83 @@ int rome_tlv_dnld_req(int fd, int tlv_size)
+     fprintf(stderr, "%s: TLV size: %d, Total Seg num: %d, remain size: %d\n",
+         __FUNCTION__,tlv_size, total_segment, remain_size);
+ 
+-    for(i=0;i<total_segment ;i++){
+-        /* In case of ROME 1.1, last rampatch segment command will not wait for
+-            command complete event */
+-        wait_cc_evt = ((rome_ver >= ROME_VER_1_1) && (gTlv_type == TLV_TYPE_PATCH )
+-             && !remain_size && ((i+1) == total_segment))? FALSE: TRUE;
++    if (gTlv_type == TLV_TYPE_PATCH) {
++       /* Prior to Rome version 3.2(including inital few rampatch release of
++        * Rome 3.2), the event handling mechanism is ROME_SKIP_EVT_NONE. After
++        * few release of rampatch for Rome 3.2, the mechamism is changed to
++        * ROME_SKIP_EVT_VSE_CC. Rest of the mechanism is not used for now
++        */
++       switch(gtlv_dwndcfg)
++       {
++           case ROME_SKIP_EVT_NONE:
++              wait_vsc_evt = TRUE;
++              wait_cc_evt = TRUE;
++              fprintf(stderr, "%s: Event handling type: ROME_SKIP_EVT_NONE", __func__);
++              break;
++           case ROME_SKIP_EVT_VSE_CC:
++              wait_vsc_evt = FALSE;
++              wait_cc_evt = FALSE;
++              fprintf(stderr, "%s: Event handling type: ROME_SKIP_EVT_VSE_CC", __func__);
++              break;
++           /* Not handled for now */
++           case ROME_SKIP_EVT_VSE:
++           case ROME_SKIP_EVT_CC:
++           default:
++              fprintf(stderr, "%s: Unsupported Event handling: %d", __func__, gtlv_dwndcfg);
++              break;
++       }
++    } else {
++        wait_vsc_evt = TRUE;
++        wait_cc_evt = TRUE;
++    }
++
++    for(i = 0; i < total_segment; i++) {
++        if((i+1) == total_segment) {
++             if ((rome_ver >= ROME_VER_1_1) && (rome_ver < ROME_VER_3_2) &&
++                 (gTlv_type == TLV_TYPE_PATCH)) {
++               /* If the Rome version is from 1.1 to 3.1
++                * 1. No CCE for the last command segment but all other segment
++                * 2. All the command segments get VSE including the last one
++                */
++                wait_cc_evt = !remain_size ? FALSE: TRUE;
++             } else if ((rome_ver == ROME_VER_3_2) && (gTlv_type == TLV_TYPE_PATCH)) {
++                /* If the Rome version is 3.2
++                 * 1. None of the command segments receive CCE
++                 * 2. No command segments receive VSE except the last one
++                 * 3. If gtlv_dwndcfg is ROME_SKIP_EVT_NONE then the logic is
++                 *    same as Rome 2.1, 2.2, 3.0
++                 */
++                 if (gtlv_dwndcfg == ROME_SKIP_EVT_NONE) {
++                    wait_cc_evt = !remain_size ? FALSE: TRUE;
++                 } else if (gtlv_dwndcfg == ROME_SKIP_EVT_VSE_CC) {
++                    wait_vsc_evt = !remain_size ? TRUE: FALSE;
++                 }
++             }
++        }
++
+         if((err = rome_tlv_dnld_segment(fd, i, MAX_SIZE_PER_TLV_SEGMENT, wait_cc_evt )) < 0)
+             goto error;
+     }
+ 
+-    /* In case remain data still remain, last rampatch segment command will not wait
+-        for command complete event here */
+-    wait_cc_evt = ((rome_ver >= ROME_VER_1_1) && (gTlv_type == TLV_TYPE_PATCH )
+-         && remain_size )? FALSE:TRUE;
++    if ((rome_ver >= ROME_VER_1_1) && (rome_ver < ROME_VER_3_2) && (gTlv_type == TLV_TYPE_PATCH)) {
++       /* If the Rome version is from 1.1 to 3.1
++        * 1. No CCE for the last command segment but all other segment
++        * 2. All the command segments get VSE including the last one
++        */
++        wait_cc_evt = remain_size ? FALSE: TRUE;
++    } else if ((rome_ver == ROME_VER_3_2) && (gTlv_type == TLV_TYPE_PATCH)) {
++        /* If the Rome version is 3.2
++         * 1. None of the command segments receive CCE
++         * 2. No command segments receive VSE except the last one
++         * 3. If gtlv_dwndcfg is ROME_SKIP_EVT_NONE then the logic is
++         *    same as Rome 2.1, 2.2, 3.0
++         */
++        if (gtlv_dwndcfg == ROME_SKIP_EVT_NONE) {
++           wait_cc_evt = remain_size ? FALSE: TRUE;
++        } else if (gtlv_dwndcfg == ROME_SKIP_EVT_VSE_CC) {
++           wait_vsc_evt = remain_size ? TRUE: FALSE;
++        }
++    }
+ 
+     if(remain_size) err =rome_tlv_dnld_segment(fd, i, remain_size, wait_cc_evt);
+ 
+@@ -1619,6 +1689,10 @@ int qca_soc_init(int fd, char *bdaddr)
+             rampatch_file_path = ROME_RAMPATCH_TLV_3_0_0_PATH;
+             nvm_file_path = ROME_NVM_TLV_3_0_0_PATH;
+             goto download;
++        case ROME_VER_3_2:
++            rampatch_file_path = ROME_RAMPATCH_TLV_3_0_2_PATH;
++            nvm_file_path = ROME_NVM_TLV_3_0_2_PATH;
++            goto download;
+         case TUFELLO_VER_1_0:
+             rampatch_file_path = TF_RAMPATCH_TLV_1_0_0_PATH;
+             nvm_file_path = TF_NVM_TLV_1_0_0_PATH;
+diff --git a/tools/hciattach_rome.h b/tools/hciattach_rome.h
+index 9d18c576fcae..77e85e7e7b19 100644
+--- a/tools/hciattach_rome.h
++++ b/tools/hciattach_rome.h
+@@ -204,9 +204,17 @@ typedef struct
+ #define ROME_NVM_TLV_2_0_1_PATH         "/lib/firmware/nvm_tlv_2.1.bin"
+ #define ROME_RAMPATCH_TLV_3_0_0_PATH    "/lib/firmware/qca/rampatch_tlv_3.0.tlv"
+ #define ROME_NVM_TLV_3_0_0_PATH         "/lib/firmware/qca/nvm_tlv_3.0.bin"
++#define ROME_RAMPATCH_TLV_3_0_2_PATH    "/lib/firmware/qca/rampatch_tlv_3.2.tlv"
++#define ROME_NVM_TLV_3_0_2_PATH         "/lib/firmware/qca/nvm_tlv_3.2.bin"
+ #define TF_RAMPATCH_TLV_1_0_0_PATH    "/lib/firmware/rampatch_tlv_tf_1.0.tlv"
+ #define TF_NVM_TLV_1_0_0_PATH         "/lib/firmware/nvm_tlv_tf_1.0.bin"
+ 
++/* This header value in rampatch file decides event handling mechanism in the HOST */
++#define ROME_SKIP_EVT_NONE     0x00
++#define ROME_SKIP_EVT_VSE      0x01
++#define ROME_SKIP_EVT_CC       0x02
++#define ROME_SKIP_EVT_VSE_CC   0x03
++
+ /******************************************************************************
+ **  Local type definitions
+ ******************************************************************************/
+@@ -251,7 +259,8 @@ typedef struct {
+     unsigned int  tlv_patch_data_len;
+     unsigned char sign_ver;
+     unsigned char sign_algorithm;
+-    unsigned short reserved1;
++    unsigned char dwnd_cfg;
++    unsigned char reserved1;
+     unsigned short prod_id;
+     unsigned short build_ver;
+     unsigned short patch_ver;
+@@ -306,7 +315,8 @@ enum{
+     ROME_PATCH_VER_0100 = 0x0100,
+     ROME_PATCH_VER_0101 = 0x0101,
+     ROME_PATCH_VER_0200 = 0x0200,
+-    ROME_PATCH_VER_0300 = 0x0300
++    ROME_PATCH_VER_0300 = 0x0300,
++    ROME_PATCH_VER_0302 = 0x0302
+  };
+ 
+ enum{
+@@ -314,6 +324,7 @@ enum{
+     ROME_SOC_ID_11 = 0x00000011,
+     ROME_SOC_ID_13 = 0x00000013,
+     ROME_SOC_ID_22 = 0x00000022,
++    ROME_SOC_ID_44 = 0x00000044
+ };
+ 
+ enum{
+@@ -323,6 +334,7 @@ enum{
+     ROME_VER_1_3 = ((ROME_PATCH_VER_0200 << 16 ) | ROME_SOC_ID_00 ),
+     ROME_VER_2_1 = ((ROME_PATCH_VER_0200 << 16 ) | ROME_SOC_ID_11 ),
+     ROME_VER_3_0 = ((ROME_PATCH_VER_0300 << 16 ) | ROME_SOC_ID_22 ),
++    ROME_VER_3_2 = ((ROME_PATCH_VER_0302 << 16 ) | ROME_SOC_ID_44 ),
+     TUFELLO_VER_1_0 = ((ROME_PATCH_VER_0300 << 16 ) | ROME_SOC_ID_13 )
+ };
+ #endif /* HW_ROME_H */
