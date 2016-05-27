@@ -10,7 +10,7 @@ DEPENDS += "dtc-native u-boot-mkimage-native"
 
 PROVIDES += "u-boot"
 
-SRCBRANCH = "v2015.04/maint"
+SRCBRANCH = "v2015.04/master"
 SRCBRANCH_ccimx6ul = "v2015.04/master"
 SRCREV = "${AUTOREV}"
 
