@@ -63,6 +63,12 @@ do_compile () {
                     oe_runmake O=${config} oldconfig
                     oe_runmake O=${config} ${UBOOT_MAKE_TARGET}
                     cp  ${S}/${config}/${UBOOT_BINARY}  ${S}/${config}/u-boot-${type}.${UBOOT_SUFFIX}
+
+                    # Secure boot artifacts
+                    if [ -n "${TRUSTFENCE_UBOOT_SIGN}" ]; then
+                    then
+                        cp ${S}/${config}/u-boot-signed.imx ${S}/${config}/u-boot-signed-${type}.${UBOOT_SUFFIX}
+                    fi
                 fi
             done
             unset  j
@@ -94,6 +100,19 @@ do_deploy_append() {
 					cd ${DEPLOYDIR}
 					rm -r ${UBOOT_BINARY}-${type} ${UBOOT_SYMLINK}-${type}
 					ln -sf u-boot-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-${type}.${UBOOT_SUFFIX}
+					if [ -n "${TRUSTFENCE_UBOOT_SIGN}" ]
+					then
+						install ${S}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
+						install ${S}/${config}/u-boot-signed-${type}.${UBOOT_SUFFIX} u-boot-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+						ln -sf u-boot-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-signed-${type}.${UBOOT_SUFFIX}
+						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
+						if [ -n "${TRUSTFENCE_UBOOT_ENCRYPT}" ]
+						then
+							# Move the data encryption key in plain text directly to the deployment directory.
+							# Do not leave any other copies in the machine.
+							mv ${S}/${config}/dek.bin ${DEPLOYDIR}/dek-${type}.bin
+						fi
+					fi
 				fi
 			done
 			unset  j
