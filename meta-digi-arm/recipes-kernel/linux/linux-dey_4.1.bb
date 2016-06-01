@@ -3,7 +3,7 @@
 require recipes-kernel/linux/linux-dey.inc
 require recipes-kernel/linux/linux-dtb.inc
 
-SRCBRANCH_ccimx6ul = "v4.1/master"
+SRCBRANCH = "v4.1/maint"
 SRCREV = "${AUTOREV}"
 
 COMPATIBLE_MACHINE = "(ccimx6ul)"
