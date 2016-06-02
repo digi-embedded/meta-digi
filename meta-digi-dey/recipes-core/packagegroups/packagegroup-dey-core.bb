@@ -39,6 +39,7 @@ RDEPENDS_${PN} = "\
     modutils-initscripts \
     netbase \
     os-release \
+    sysinfo \
     usbutils \
     ${VIRTUAL-RUNTIME_dev_manager} \
     ${VIRTUAL-RUNTIME_init_manager} \

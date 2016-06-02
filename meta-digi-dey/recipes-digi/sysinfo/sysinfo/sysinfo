@@ -1,0 +1,215 @@
+#!/bin/sh
+#===============================================================================
+#
+#  sysinfo
+#
+#  Copyright (C) 2016 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: System information gather script
+#
+#===============================================================================
+
+FW_PRINTENV="$(which fw_printenv)"
+
+make_report(){
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-               Uptime               -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	uptime
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-          Kernel version            -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	uname -a
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-             OS release             -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	if [ -f "/etc/os-release" ]; then
+		cat /etc/os-release
+	else
+		echo "[NOT FOUND] /etc/os-release"
+	fi
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-         Build configurations       -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	if [ -f "/etc/build" ]; then
+		cat /etc/build
+	else
+		echo "[NOT FOUND] /etc/build"
+	fi
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-      U-boot saved environment      -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	if [ -x "${FW_PRINTENV}" ]; then
+		${FW_PRINTENV}
+	else
+		echo "[NOT FOUND] fw_printenv"
+	fi
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-          Linux boot log            -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	dmesg
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-       Log files from /var/log      -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	for f in $(find /var/log/ -name *.log); do
+		echo "${f} FILE";
+		echo "---------------------------------------";
+		cat ${f};
+		printf "\n\n"
+	done
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-         /var/log/messages          -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	if [ -f "/var/log/messages" ]; then
+		cat /var/log/messages
+	else
+		echo "[NOT FOUND] /var/log/messages"
+	fi
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-     Linux kernel configuration     -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	if [ -f "/proc/config.gz" ]; then
+		zcat /proc/config.gz
+	else
+		echo "[NOT FOUND] /proc/config.gz"
+	fi
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-         Memory consumption         -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	free
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-          Running processes         -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	ps -l
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-              Mounts                -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	mount
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-            Opened ports            -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	netstat -n -l
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-               Routes               -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	route -n
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-        Network configuration       -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	ifconfig -a
+	printf "\n"
+
+	echo "-------------End of report------------"
+}
+
+
+DEY_VERSION="$(sed -ne 's,DISTRO_VERSION = \(.*\)$,\1,g;T;p' /etc/build)"
+UBOOT_VERSION="$(strings /dev/mmcblk0boot0 | grep dub | cut -d' ' -f2)"
+BOARD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant)"
+BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn)"
+BOARD_VERSION="$(cat /proc/device-tree/digi,carrierboard,version)"
+BOARD_ID="$(cat /proc/device-tree/digi,carrierboard,id)"
+
+DATE="$(date "+%Y%m%d%H%M%S")"
+FILE="/tmp/sysinfo-${DEY_VERSION}-${BOARD_SN}-${DATE}.txt"
+printf "\n\n"
+
+(
+	echo "-------------------------------------"
+	echo "-                                   -"
+	echo "-         ENVIRONMENT TABLE         -"
+	echo "-                                   -"
+	echo "-------------------------------------"
+	echo ""
+
+	echo "||*Component*|*Version*"
+	echo "|| DUT | SN-${BOARD_SN}, CC6 ${BOARD_VARIANT} SBCv${BOARD_VERSION} board_ID=${BOARD_ID}."
+	echo "|| U-Boot | ${UBOOT_VERSION}"
+	echo "|| Firmware | ${DEY_VERSION}-$(cat /etc/version)"
+	echo "|| Kernel | $(uname -a)"
+	printf "\n\n"
+) | tee ${FILE}
+
+make_report >> ${FILE}
+gzip ${FILE}
+echo "Report generated in ${FILE}.gz"
+printf "\n\n"
