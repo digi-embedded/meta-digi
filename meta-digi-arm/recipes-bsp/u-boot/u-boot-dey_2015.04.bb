@@ -65,7 +65,7 @@ do_compile () {
                     cp  ${S}/${config}/${UBOOT_BINARY}  ${S}/${config}/u-boot-${type}.${UBOOT_SUFFIX}
 
                     # Secure boot artifacts
-                    if [ -n "${TRUSTFENCE_UBOOT_SIGN}" ]; then
+                    if [ -n "${TRUSTFENCE_UBOOT_SIGN}" ]
                     then
                         cp ${S}/${config}/u-boot-signed.imx ${S}/${config}/u-boot-signed-${type}.${UBOOT_SUFFIX}
                     fi
