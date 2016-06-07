@@ -26,7 +26,7 @@ python () {
     import hashlib
 
     # Secure console configuration
-    if d.getVar("TRUSTFENCE_CONSOLE_DISABLE", True):
+    if (d.getVar("TRUSTFENCE_CONSOLE_DISABLE", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_CONSOLE_DISABLE=y ")
         if d.getVar("TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE", True):
             passphrase_hash = hashlib.sha256(d.getVar("TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE")).hexdigest()
