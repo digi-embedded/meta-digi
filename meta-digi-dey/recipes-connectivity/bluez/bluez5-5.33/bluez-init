@@ -23,7 +23,22 @@ fi
 
 SCRIPTNAME="$(basename "${0}")"
 
-bt_init() {
+bt_init_qca6564() {
+	if hciattach -t120 ttyBt qca 3000000 flow 2>/dev/null; then
+		:	# No-op
+	else
+		echo "${SCRIPTNAME}: FAILED (hciattach)"
+		exit
+	fi
+	if hciconfig hci0 up; then
+		echo "${SCRIPTNAME}: OK"
+	else
+		echo "${SCRIPTNAME}: FAILED (hciconfig)"
+		exit
+	fi
+}
+
+bt_init_ar3k() {
 	if grep -qs '\<digi,ccardimx28\>' /proc/device-tree/compatible; then
 		BT_PWR_GPIO_NR="21"
 	elif grep -qs '\<digi,ccimx6\>' /proc/device-tree/compatible; then
@@ -98,7 +113,13 @@ bt_init() {
 }
 
 # Check if this hardware does support Bluetooth
-[ -d "/proc/device-tree/bluetooth" ] &&	bt_init
+if [ -d "/proc/device-tree/bluetooth" ]; then
+	if grep -qs '\<digi,ccimx6ul\>' /proc/device-tree/compatible; then
+		bt_init_qca6564
+	else
+		bt_init_ar3k
+	fi
+fi
 
 echo "Starting bluetooth services."
 start-stop-daemon -S --background --exec /usr/lib/bluez5/bluetooth/bluetoothd
