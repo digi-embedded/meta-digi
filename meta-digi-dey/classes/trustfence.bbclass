@@ -35,9 +35,9 @@ python () {
             d.appendVar("UBOOT_EXTRA_CONF", " CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CCIMX6SBC_CONSOLE_ENABLE_GPIO_NR=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"))
 
     # Secure boot configuration
-    if d.getVar("TRUSTFENCE_CHECK_KERNEL", True):
+    if (d.getVar("TRUSTFENCE_CHECK_KERNEL", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_SECURE_BOOT=y ")
-    if d.getVar("TRUSTFENCE_UBOOT_SIGN", True):
+    if (d.getVar("TRUSTFENCE_UBOOT_SIGN", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_SIGN_IMAGE=y ")
         if d.getVar("TRUSTFENCE_CST_PATH", True):
             d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_CST_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_CST_PATH"))
@@ -45,7 +45,7 @@ python () {
             d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_CSF_SIZE=%s " % d.getVar("TRUSTFENCE_CSF_SIZE"))
         if d.getVar("TRUSTFENCE_KEY_INDEX", True):
             d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_KEY_INDEX=%s " % d.getVar("TRUSTFENCE_KEY_INDEX"))
-        if d.getVar("TRUSTFENCE_UBOOT_ENCRYPT", True):
+        if (d.getVar("TRUSTFENCE_UBOOT_ENCRYPT", True) == "1"):
             d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_ENCRYPT_IMAGE=y ")
             if d.getVar("TRUSTFENCE_UBOOT_DEK_SIZE", True):
                 d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_DEK_SIZE=%s " % d.getVar("TRUSTFENCE_UBOOT_DEK_SIZE"))
