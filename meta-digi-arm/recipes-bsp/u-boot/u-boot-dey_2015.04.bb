@@ -33,6 +33,18 @@ EXTRA_OEMAKE_append = " KCFLAGS=-fgnu89-inline"
 
 UBOOT_EXTRA_CONF ?= ""
 
+python __anonymous() {
+    if (d.getVar("TRUSTFENCE_UBOOT_SIGN", True) == "1") and not d.getVar("TRUSTFENCE_CST_PATH", True):
+         bb.fatal("NXP's CST tool needs to be installed and a PKI tree generated. Please download it from the NXP website at http://www.nxp.com/pages/i.mx-design-tools:IMX_DESIGN?fsrch=1&sr=1&pageNum=1")
+    if (d.getVar("TRUSTFENCE_UBOOT_ENCRYPT", True) == "1") and (d.getVar("TRUSTFENCE_UBOOT_SIGN", True) != "1"):
+         bb.fatal("Only signed U-Boot images can be encrypted. Generate signed images (TRUSTFENCE_UBOOT_SIGN=1) or remove encryption (TRUSTFENCE_UBOOT_ENCRYPT=0)")
+    if (d.getVar("TRUSTFENCE_UBOOT_ENV_DEK", True) != "0"):
+        if (d.getVar("TRUSTFENCE_UBOOT_ENCRYPT", True) != "1"):
+            bb.warn("It is strongly recommended to encrypt the U-Boot image when using environment encrpytion. Consider defining TRUSTFENCE_UBOOT_ENCRYPT=1")
+        if (len(d.getVar("TRUSTFENCE_UBOOT_ENV_DEK", True)) != 32):
+            bb.fatal("Invalid TRUSTFENCE_UBOOT_ENV_DEK length. Define a string formed by 32 hexadecimal characters")
+}
+
 do_compile () {
 	if [ "${@bb.utils.contains('DISTRO_FEATURES', 'ld-is-gold', 'ld-is-gold', '', d)}" = "ld-is-gold" ] ; then
 		sed -i 's/$(CROSS_COMPILE)ld$/$(CROSS_COMPILE)ld.bfd/g' config.mk
