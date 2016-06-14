@@ -18,12 +18,20 @@ TRUSTFENCE_CONSOLE_DISABLE ?= "1"
 # Alternatively, uncommment to enable the console with the specified GPIO
 #TRUSTFENCE_CONSOLE_GPIO_ENABLE = "4"
 
+# Default secure boot configuration
+TRUSTFENCE_CHECK_KERNEL ?= "1"
+TRUSTFENCE_UBOOT_SIGN ?= "1"
+TRUSTFENCE_UBOOT_ENCRYPT ?= "1"
+TRUSTFENCE_UBOOT_ENV_DEK ?= "gen_random"
+
 IMAGE_FEATURES += "dey-trustfence"
 
 UBOOT_EXTRA_CONF = ""
 
 python () {
+    import binascii
     import hashlib
+    import os
 
     # Secure console configuration
     if (d.getVar("TRUSTFENCE_CONSOLE_DISABLE", True) == "1"):
@@ -35,6 +43,9 @@ python () {
             d.appendVar("UBOOT_EXTRA_CONF", " CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CCIMX6SBC_CONSOLE_ENABLE_GPIO_NR=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"))
 
     # Secure boot configuration
+    if (d.getVar("TRUSTFENCE_UBOOT_ENV_DEK") == "gen_random"):
+        d.setVar("TRUSTFENCE_UBOOT_ENV_DEK", str(binascii.hexlify(os.urandom(16)).decode()))
+
     if (d.getVar("TRUSTFENCE_CHECK_KERNEL", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_SECURE_BOOT=y ")
     if (d.getVar("TRUSTFENCE_UBOOT_SIGN", True) == "1"):
