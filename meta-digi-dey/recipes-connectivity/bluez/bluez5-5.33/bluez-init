@@ -24,17 +24,31 @@ fi
 SCRIPTNAME="$(basename "${0}")"
 
 bt_init_qca6564() {
-	if hciattach -t120 ttyBt qca 3000000 flow 2>/dev/null; then
+	MOD_VERSION="$(($(cat /proc/device-tree/digi,hwid,hv 2>/dev/null || true)))"
+
+	# Module version older than revision 4 has swapped TX and RX lines
+	if [ "${MOD_VERSION}" -lt "4" ]; then
+		# Workaround to ignore the CTS flow control line
+		BT_GPIO_CTS="18"
+		echo "${BT_GPIO_CTS}" > /sys/class/gpio/export
+		echo "out" > /sys/class/gpio/gpio${BT_GPIO_CTS}/direction
+		echo "0" > /sys/class/gpio/gpio${BT_GPIO_CTS}/value
+		# Reduce the rate to avoid the need for HW flow control
+		BT_RATE="115200"
+		BT_FLOW="noflow"
+	fi
+
+	if hciattach -t120 ttyBt qca ${BT_RATE:-3000000} ${BT_FLOW:-flow} 2>/dev/null; then
 		:	# No-op
 	else
 		echo "${SCRIPTNAME}: FAILED (hciattach)"
 		exit
 	fi
+
 	if hciconfig hci0 up; then
 		echo "${SCRIPTNAME}: OK"
 	else
-		echo "${SCRIPTNAME}: FAILED (hciconfig)"
-		exit
+		echo "${SCRIPTNAME}: FAILED"
 	fi
 }
 
@@ -114,6 +128,7 @@ bt_init_ar3k() {
 
 # Check if this hardware does support Bluetooth
 if [ -d "/proc/device-tree/bluetooth" ]; then
+	# Initialize for the specific bluetooth chip
 	if grep -qs '\<digi,ccimx6ul\>' /proc/device-tree/compatible; then
 		bt_init_qca6564
 	else
