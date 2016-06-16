@@ -45,11 +45,35 @@ bt_init_qca6564() {
 		exit
 	fi
 
-	if hciconfig hci0 up; then
-		echo "${SCRIPTNAME}: OK"
-	else
-		echo "${SCRIPTNAME}: FAILED"
+	# Convert the BT address to the hcitool command format.
+	#   Example:  "00:04:F3:11:22:33" coverted to "33 22 11 F3 04 00"
+	HCI_BTADDR="$(echo ${BTADDR} | tr ':' '\n' | tac | tr '\n' ' ' | sed -e 's/ $//g')"
+
+	# Up the interface to be able to send hci commands
+	if ! hciconfig hci0 up; then
+		echo "${SCRIPTNAME}: FAILED (hci0 up)"
+		exit
 	fi
+
+	# Set the MAC address
+	if ! hcitool -i hci0 cmd 3F 000B 01 02 06 ${HCI_BTADDR} > /dev/null; then
+		echo "${SCRIPTNAME}: FAILED (hci set MAC)"
+		exit
+	fi
+
+	# HCI Reset
+	if ! hcitool -i hci0 cmd 03 0003 00 > /dev/null; then
+		echo "${SCRIPTNAME}: FAILED (hci reset)"
+		exit
+	fi
+
+	# Down and up the interface to load the new MAC address
+	if ! hciconfig hci0 down; then
+		echo "${SCRIPTNAME}: FAILED (hci0 down)"
+		exit
+	fi
+
+	hciconfig hci0 up && echo "${SCRIPTNAME}: OK" || echo "${SCRIPTNAME}: FAILED"
 }
 
 bt_init_ar3k() {
@@ -62,16 +86,6 @@ bt_init_ar3k() {
 	# Use a sub-shell here to change to firmware directory
 	(
 		cd /lib/firmware/ar3k/1020200
-
-		# Get MAC address from device tree or NVRAM. Use a default value it it has not been set.
-		if [ -f "/proc/device-tree/bluetooth/mac-address" ]; then
-			BTADDR="$(hexdump -ve '1/1 "%02X" ":"' /proc/device-tree/bluetooth/mac-address | sed 's/:$//g')"
-		else
-			BTADDR="$(sed -ne 's,^.*btaddr1=\([^[:blank:]]\+\)[:blank:]*.*,\1,g;T;p' /proc/cmdline)"
-		fi
-		if [ -z "${BTADDR}" ] || [ "${BTADDR}" = "00:00:00:00:00:00" ]; then
-			BTADDR="00:04:F3:FF:FF:BB"
-		fi
 
 		# Update the MAC address file only if it has changed.
 		FW_MAC="ar3kbdaddr.pst"
@@ -128,6 +142,14 @@ bt_init_ar3k() {
 
 # Check if this hardware does support Bluetooth
 if [ -d "/proc/device-tree/bluetooth" ]; then
+	# Get MAC address from device tree. Use a default value if it has not been set.
+	if [ -f "/proc/device-tree/bluetooth/mac-address" ]; then
+		BTADDR="$(hexdump -ve '1/1 "%02X" ":"' /proc/device-tree/bluetooth/mac-address | sed 's/:$//g')"
+	fi
+	if [ -z "${BTADDR}" ] || [ "${BTADDR}" = "00:00:00:00:00:00" ]; then
+		BTADDR="00:04:F3:FF:FF:BB"
+	fi
+
 	# Initialize for the specific bluetooth chip
 	if grep -qs '\<digi,ccimx6ul\>' /proc/device-tree/compatible; then
 		bt_init_qca6564
