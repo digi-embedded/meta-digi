@@ -46,8 +46,8 @@ do_install_append() {
 	# Cellular interface
 	if [ -n "${@base_contains('DISTRO_FEATURES', 'cellular', '1', '', d)}" ] && [ -n "${CELLULAR_INTERFACE}" ]; then
 		cat ${WORKDIR}/interfaces.cellular >> ${D}${sysconfdir}/network/interfaces
+		[ -n "${CELLULAR_AUTO}" ] && sed -i -e 's/^#auto ##CELLULAR_INTERFACE##/auto ##CELLULAR_INTERFACE##/g' ${D}${sysconfdir}/network/interfaces
 		sed -i -e 's,##CELLULAR_INTERFACE##,${CELLULAR_INTERFACE},g' ${D}${sysconfdir}/network/interfaces
-		[ -n "${CELLULAR_AUTO}" ] && sed -i -e 's/^#auto/auto/g' ${D}${sysconfdir}/network/interfaces
 
 		if [ -n "${CELLULAR_APN}" ]; then
 			sed -i -e 's/^\(\s*\)apn/\1apn ${CELLULAR_APN}/g' ${D}${sysconfdir}/network/interfaces
