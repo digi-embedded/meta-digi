@@ -68,13 +68,13 @@ do_install_append() {
 		fi
 
 		if [ -n "${CELLULAR_USER}" ]; then
-			sed -i -e 's/user/user ${CELLULAR_PORT}/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's/user/user ${CELLULAR_USER}/g' ${D}${sysconfdir}/network/interfaces
 		else
 			sed -i -e '/user/d' ${D}${sysconfdir}/network/interfaces
 		fi
 
 		if [ -n "${CELLULAR_PASSWORD}" ]; then
-			sed -i -e 's/password/password ${CELLULAR_PORT}/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's/password/password ${CELLULAR_PASSWORD}/g' ${D}${sysconfdir}/network/interfaces
 		else
 			sed -i -e '/password/d' ${D}${sysconfdir}/network/interfaces
 		fi
