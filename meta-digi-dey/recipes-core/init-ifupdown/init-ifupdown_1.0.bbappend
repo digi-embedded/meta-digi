@@ -47,36 +47,37 @@ do_install_append() {
 	if [ -n "${@base_contains('DISTRO_FEATURES', 'cellular', '1', '', d)}" ] && [ -n "${CELLULAR_INTERFACE}" ]; then
 		cat ${WORKDIR}/interfaces.cellular >> ${D}${sysconfdir}/network/interfaces
 		sed -i -e 's,##CELLULAR_INTERFACE##,${CELLULAR_INTERFACE},g' ${D}${sysconfdir}/network/interfaces
-		[ -n "${CELLULAR_AUTO}" ] && sed -i -e 's/#auto/auto/g' ${D}${sysconfdir}/network/interfaces
+		[ -n "${CELLULAR_AUTO}" ] && sed -i -e 's/^#auto/auto/g' ${D}${sysconfdir}/network/interfaces
+
 		if [ -n "${CELLULAR_APN}" ]; then
-			sed -i -e 's/apn/apn ${CELLULAR_APN}/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's/^\(\s*\)apn/\1apn ${CELLULAR_APN}/g' ${D}${sysconfdir}/network/interfaces
 		else
-			sed -i -e '/apn/d' ${D}${sysconfdir}/network/interfaces
+			sed -i -e '/^\s*apn/d' ${D}${sysconfdir}/network/interfaces
 		fi
 
 		if [ -n "${CELLULAR_PIN}" ]; then
-			sed -i -e 's/pin/pin ${CELLULAR_PIN}/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's/^\(\s*\)pin/\1pin ${CELLULAR_PIN}/g' ${D}${sysconfdir}/network/interfaces
 		else
-			sed -i -e '/pin/d' ${D}${sysconfdir}/network/interfaces
+			sed -i -e '/^\s*pin/d' ${D}${sysconfdir}/network/interfaces
 		fi
 
 		if [ -n "${CELLULAR_PORT}" ]; then
-			sed -i -e 's/port/port ${CELLULAR_PORT}/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's/^\(\s*\)port/\1port ${CELLULAR_PORT}/g' ${D}${sysconfdir}/network/interfaces
 			sed -i -e 's,dhcp,manual,g' ${D}${sysconfdir}/network/interfaces
 		else
-			sed -i -e '/port/d' ${D}${sysconfdir}/network/interfaces
+			sed -i -e '/^\s*port/d' ${D}${sysconfdir}/network/interfaces
 		fi
 
 		if [ -n "${CELLULAR_USER}" ]; then
-			sed -i -e 's/user/user ${CELLULAR_USER}/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's/^\(\s*\)user/\1user ${CELLULAR_USER}/g' ${D}${sysconfdir}/network/interfaces
 		else
-			sed -i -e '/user/d' ${D}${sysconfdir}/network/interfaces
+			sed -i -e '/^\s*user/d' ${D}${sysconfdir}/network/interfaces
 		fi
 
 		if [ -n "${CELLULAR_PASSWORD}" ]; then
-			sed -i -e 's/password/password ${CELLULAR_PASSWORD}/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's/^\(\s*\)password/\1password ${CELLULAR_PASSWORD}/g' ${D}${sysconfdir}/network/interfaces
 		else
-			sed -i -e '/password/d' ${D}${sysconfdir}/network/interfaces
+			sed -i -e '/^\s*password/d' ${D}${sysconfdir}/network/interfaces
 		fi
 	fi
 
