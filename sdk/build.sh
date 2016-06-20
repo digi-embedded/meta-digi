@@ -70,7 +70,9 @@ copy_images() {
 	else
 		cp -r tmp/deploy/images ${1}/
 		if [ "${DY_BUILD_TCHAIN}" = "true" ]; then
-			cp -r tmp/deploy/sdk ${1}/
+			if [ -d tmp/deploy/sdk ]; then
+				cp -r tmp/deploy/sdk ${1}/
+			fi
 		fi
 	fi
 
@@ -116,7 +118,6 @@ purge_sstate() {
 [ -z "${WORKSPACE}" ]         && error "WORKSPACE not specified"
 
 # Set default settings if Jenkins does not do it
-[ -z "${DY_TARGET}" ] && DY_TARGET="dey-image-qt"
 [ -z "${DY_DISTRO}" ] && DY_DISTRO="dey"
 
 # If DY_BUILD_TCHAIN is unset, set it for release jobs
@@ -127,8 +128,8 @@ if [ -z "${DY_FB_IMAGE}" ] && echo ${JOB_NAME} | grep -qs 'dey.*fb'; then
 	DY_FB_IMAGE="true"
 fi
 
-# Per-platform variants
-while read _pl _var; do
+# Per-platform data
+while read _pl _var _tgt; do
 	# DY_BUILD_VARIANTS comes from Jenkins environment:
 	#   'false':     don't build variants (only the default)
 	#   <empty>:     build all the variants supported by the platform
@@ -140,11 +141,13 @@ while read _pl _var; do
 			_var="${DY_BUILD_VARIANTS}"
 		fi
 	fi
+	[ -n "${DY_TARGET}" ] && _tgt="${DY_TARGET}" || true
 	eval "${_pl}_var=\"${_var}\""
+	eval "${_pl}_tgt=\"${_tgt}\""
 done<<-_EOF_
-	ccardimx28js      - e w wb web web1
-	ccimx6sbc         DONTBUILDVARIANTS
-	ccimx6ulstarter   DONTBUILDVARIANTS
+	ccardimx28js      - e w wb web web1   dey-image-qt
+	ccimx6sbc         DONTBUILDVARIANTS   dey-image-qt
+	ccimx6ulstarter   DONTBUILDVARIANTS   core-image-base
 _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
@@ -181,6 +184,7 @@ fi
 rm -rf ${YOCTO_IMGS_DIR} ${YOCTO_PROJ_DIR}
 for platform in ${DY_PLATFORMS}; do
 	eval platform_variants="\${${platform}_var}"
+	eval platform_targets="\${${platform}_tgt}"
 	for variant in ${platform_variants}; do
 		_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}"
 		_this_img_dir="${YOCTO_IMGS_DIR}/${platform}"
@@ -217,7 +221,7 @@ for platform in ${DY_PLATFORMS}; do
 				if [ "${DY_FB_IMAGE}" = "true" ]; then
 					printf "${X11_REMOVAL_CFG}" >> conf/local.conf
 				fi
-				for target in ${DY_TARGET}; do
+				for target in ${platform_targets}; do
 					printf "\n[INFO] Building the ${target} target.\n"
 					time bitbake ${target}
 					# Build the toolchain for DEY images
