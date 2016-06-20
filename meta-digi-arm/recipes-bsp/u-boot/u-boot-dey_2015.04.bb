@@ -38,7 +38,7 @@ python __anonymous() {
          bb.fatal("NXP's CST tool needs to be installed and a PKI tree generated. Please download it from the NXP website at http://www.nxp.com/pages/i.mx-design-tools:IMX_DESIGN?fsrch=1&sr=1&pageNum=1")
     if (d.getVar("TRUSTFENCE_UBOOT_ENCRYPT", True) == "1") and (d.getVar("TRUSTFENCE_UBOOT_SIGN", True) != "1"):
          bb.fatal("Only signed U-Boot images can be encrypted. Generate signed images (TRUSTFENCE_UBOOT_SIGN=1) or remove encryption (TRUSTFENCE_UBOOT_ENCRYPT=0)")
-    if (d.getVar("TRUSTFENCE_UBOOT_ENV_DEK", True) != "0"):
+    if (d.getVar("TRUSTFENCE_UBOOT_ENV_DEK", True) not in [None, "0"]):
         if (d.getVar("TRUSTFENCE_UBOOT_ENCRYPT", True) != "1"):
             bb.warn("It is strongly recommended to encrypt the U-Boot image when using environment encrpytion. Consider defining TRUSTFENCE_UBOOT_ENCRYPT=1")
         if (len(d.getVar("TRUSTFENCE_UBOOT_ENV_DEK", True)) != 32):
