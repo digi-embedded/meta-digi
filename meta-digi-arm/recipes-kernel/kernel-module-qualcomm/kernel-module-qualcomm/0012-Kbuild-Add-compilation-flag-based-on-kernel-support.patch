@@ -1,0 +1,37 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Thu, 19 May 2016 12:28:39 +0200
+Subject: [PATCH 12/12] Kbuild: Add compilation flag based on kernel support
+
+The option WLAN_NL80211_TESTMODE was inconditionally added to the compilation
+but it does required the specific kernel support.
+
+https://jira.digi.com/browse/DEL-2567
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ Kbuild | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/Kbuild b/Kbuild
+index b248eee28bf0..339262874c94 100644
+--- a/Kbuild
++++ b/Kbuild
+@@ -908,7 +908,6 @@ CDEFINES :=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DWLAN_WAKEUP_EVENTS \
+ 		-DFEATURE_WLAN_RA_FILTERING\
+ 	        -DWLAN_KD_READY_NOTIFIER \
+-		-DWLAN_NL80211_TESTMODE \
+ 		-DFEATURE_WLAN_BATCH_SCAN \
+ 		-DFEATURE_WLAN_LPHB \
+ 		-DFEATURE_WLAN_PAL_TIMER_DISABLE \
+@@ -948,6 +947,10 @@ CDEFINES += -DDFS_MASTER_OFFLOAD_IND_SUPPORT
+ endif
+ endif
+
++ifeq ($(CONFIG_NL80211_TESTMODE), y)
++CDEFINES += -DWLAN_NL80211_TESTMODE
++endif
++
+ ifeq ($(CONFIG_ARCH_MSM), y)
+ CDEFINES += -DMSM_PLATFORM
+ endif

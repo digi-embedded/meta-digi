@@ -1,0 +1,57 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Mon, 18 Apr 2016 08:48:14 +0200
+Subject: [PATCH 02/12] Update cfg80211_vendor_event_alloc call for newer
+ kernel versions
+
+Current compilation fails with next error.
+
+> wlan_hdd_cfg80211.h:995:9: error: too few arguments to function 'cfg80211_vendor_event_alloc'
+
+This function has been updated starting with kernel 3.15
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ CORE/HDD/inc/wlan_hdd_cfg80211.h | 2 +-
+ CORE/HDD/src/wlan_hdd_assoc.c    | 8 ++++++++
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/CORE/HDD/inc/wlan_hdd_cfg80211.h b/CORE/HDD/inc/wlan_hdd_cfg80211.h
+index 7602f1d3874b..a40c55144bc5 100644
+--- a/CORE/HDD/inc/wlan_hdd_cfg80211.h
++++ b/CORE/HDD/inc/wlan_hdd_cfg80211.h
+@@ -992,7 +992,7 @@ backported_cfg80211_vendor_event_alloc(struct wiphy *wiphy,
+ 					int approxlen,
+ 					int event_idx, gfp_t gfp)
+ {
+-	return cfg80211_vendor_event_alloc(wiphy, approxlen, event_idx, gfp);
++	return cfg80211_vendor_event_alloc(wiphy, wdev, approxlen, event_idx, gfp);
+ }
+ #define cfg80211_vendor_event_alloc backported_cfg80211_vendor_event_alloc
+ #endif
+diff --git a/CORE/HDD/src/wlan_hdd_assoc.c b/CORE/HDD/src/wlan_hdd_assoc.c
+index bc3e15009d97..5dc882fa8f83 100644
+--- a/CORE/HDD/src/wlan_hdd_assoc.c
++++ b/CORE/HDD/src/wlan_hdd_assoc.c
+@@ -2027,6 +2027,8 @@ static void hdd_RoamIbssIndicationHandler( hdd_adapter_t *pAdapter,
+                                            eRoamCmdStatus roamStatus,
+                                            eCsrRoamResult roamResult )
+ {
++   struct ieee80211_channel *chann;
++
+    hddLog(VOS_TRACE_LEVEL_INFO, "%s: %s: id %d, status %d, result %d",
+           __func__, pAdapter->dev->name, roamId, roamStatus, roamResult);
+
+@@ -2082,7 +2084,13 @@ static void hdd_RoamIbssIndicationHandler( hdd_adapter_t *pAdapter,
+                return;
+             }
+
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 15, 0)
++            chann = ieee80211_get_channel(pAdapter->wdev.wiphy,
++                                          (int)pRoamInfo->pBssDesc->channelId);
++            cfg80211_ibss_joined(pAdapter->dev, bss->bssid, chann, GFP_KERNEL);
++#else
+             cfg80211_ibss_joined(pAdapter->dev, bss->bssid, GFP_KERNEL);
++#endif
+             cfg80211_put_bss(
+ #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0)) || defined(WITH_BACKPORTS)
+                              pHddCtx->wiphy,
