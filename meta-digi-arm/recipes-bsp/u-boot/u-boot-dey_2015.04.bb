@@ -1,6 +1,6 @@
 # Copyright (C) 2012-2015 Digi International
 
-require recipes-bsp/u-boot/u-boot.inc
+require u-boot.inc
 
 DESCRIPTION = "Bootloader for Digi platforms"
 LICENSE = "GPLv2+"
@@ -68,18 +68,18 @@ do_compile () {
                 j=`expr $j + 1`;
                 if [ $j -eq $i ]
                 then
-                    oe_runmake O=${config} ${config}
+                    oe_runmake O=build_${config} ${config}
                     for var in ${UBOOT_EXTRA_CONF}; do
-                        echo "${var}" >> ${config}/.config
+                        echo "${var}" >> build_${config}/.config
                     done
-                    oe_runmake O=${config} oldconfig
-                    oe_runmake O=${config} ${UBOOT_MAKE_TARGET}
-                    cp  ${S}/${config}/${UBOOT_BINARY}  ${S}/${config}/u-boot-${type}.${UBOOT_SUFFIX}
+                    oe_runmake O=build_${config} oldconfig
+                    oe_runmake O=build_${config} ${UBOOT_MAKE_TARGET}
+                    cp  ${S}/build_${config}/${UBOOT_BINARY}  ${S}/build_${config}/u-boot-${type}.${UBOOT_SUFFIX}
 
                     # Secure boot artifacts
                     if [ "${TRUSTFENCE_UBOOT_SIGN}" = "1" ]
                     then
-                        cp ${S}/${config}/u-boot-signed.imx ${S}/${config}/u-boot-signed-${type}.${UBOOT_SUFFIX}
+                        cp ${S}/build_${config}/u-boot-signed.imx ${S}/build_${config}/u-boot-signed-${type}.${UBOOT_SUFFIX}
                     fi
                 fi
             done
@@ -114,19 +114,19 @@ do_deploy_append() {
 					ln -sf u-boot-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-${type}.${UBOOT_SUFFIX}
 					if [ "${TRUSTFENCE_UBOOT_SIGN}" = "1" ]
 					then
-						install ${S}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
+						install ${S}/build_${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
 						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
 
 						if [ "${TRUSTFENCE_UBOOT_ENCRYPT}" = "1" ]
 						then
-							install ${S}/${config}/u-boot-signed-${type}.${UBOOT_SUFFIX} u-boot-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+							install ${S}/build_${config}/u-boot-signed-${type}.${UBOOT_SUFFIX} u-boot-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
 							ln -sf u-boot-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-encrypted-${type}.${UBOOT_SUFFIX}
 
 							# Move the data encryption key in plain text directly to the deployment directory.
 							# Do not leave any other copies in the machine.
-							mv ${S}/${config}/dek.bin ${DEPLOYDIR}/dek-${type}.bin
+							mv ${S}/build_${config}/dek.bin ${DEPLOYDIR}/dek-${type}.bin
 						else
-							install ${S}/${config}/u-boot-signed-${type}.${UBOOT_SUFFIX} u-boot-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+							install ${S}/build_${config}/u-boot-signed-${type}.${UBOOT_SUFFIX} u-boot-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
 							ln -sf u-boot-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-signed-${type}.${UBOOT_SUFFIX}
 						fi
 					fi
