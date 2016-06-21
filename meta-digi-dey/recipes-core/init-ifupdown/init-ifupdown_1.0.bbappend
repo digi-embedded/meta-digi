@@ -44,7 +44,7 @@ do_install_append() {
 	[ -z "${WLAN0_STATIC_NETMASK}" ] && sed -i -e "/##WLAN0_STATIC_NETMASK##/d" ${D}${sysconfdir}/network/interfaces
 
 	# Cellular interface
-	if [ -n "${@base_contains('DISTRO_FEATURES', 'cellular', '1', '', d)}" ] && [ -n "${CELLULAR_INTERFACE}" ]; then
+	if [ -n "${@bb.utils.contains('DISTRO_FEATURES', 'cellular', '1', '', d)}" ] && [ -n "${CELLULAR_INTERFACE}" ]; then
 		cat ${WORKDIR}/interfaces.cellular >> ${D}${sysconfdir}/network/interfaces
 		sed -i -e 's,##CELLULAR_INTERFACE##,${CELLULAR_INTERFACE},g' ${D}${sysconfdir}/network/interfaces
 		[ -n "${CELLULAR_AUTO}" ] && sed -i -e 's/#auto/auto/g' ${D}${sysconfdir}/network/interfaces

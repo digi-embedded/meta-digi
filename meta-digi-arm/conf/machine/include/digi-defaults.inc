@@ -16,12 +16,12 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 #
 
 # Help variables used in recipes
-HAVE_WIFI    = "${@base_contains('MACHINE_FEATURES', 'wifi', '1', '', d)}"
-HAVE_EXT_ETH = "${@base_contains('MACHINE_FEATURES', 'ext-eth', '1', '', d)}"
-HAVE_BT      = "${@base_contains('MACHINE_FEATURES', 'bluetooth', '1', '', d)}"
-HAVE_1WIRE   = "${@base_contains('MACHINE_FEATURES', '1-wire', '1', '', d)}"
-HAVE_GUI     = "${@base_contains('DISTRO_FEATURES', 'x11', '1', '', d)}"
-HAVE_EXAMPLE = "${@base_contains('IMAGE_FEATURES', 'dey-examples', '1', '', d)}"
+HAVE_WIFI    = "${@bb.utils.contains('MACHINE_FEATURES', 'wifi', '1', '', d)}"
+HAVE_EXT_ETH = "${@bb.utils.contains('MACHINE_FEATURES', 'ext-eth', '1', '', d)}"
+HAVE_BT      = "${@bb.utils.contains('MACHINE_FEATURES', 'bluetooth', '1', '', d)}"
+HAVE_1WIRE   = "${@bb.utils.contains('MACHINE_FEATURES', '1-wire', '1', '', d)}"
+HAVE_GUI     = "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '1', '', d)}"
+HAVE_EXAMPLE = "${@bb.utils.contains('IMAGE_FEATURES', 'dey-examples', '1', '', d)}"
 
 #
 # Ethernet configuration used in recipes

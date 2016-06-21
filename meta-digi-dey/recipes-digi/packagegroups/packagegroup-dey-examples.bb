@@ -11,35 +11,35 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
 RDEPENDS_${PN} = "\
-	${@base_contains("MACHINE_FEATURES", "alsa", "dey-examples-alsa", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "alsa", "dey-examples-alsa", "", d)} \
 	dey-examples-gpio-sysfs \
-	${@base_contains("MACHINE_FEATURES", "rtc", "dey-examples-rtc", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "rtc", "dey-examples-rtc", "", d)} \
 	dey-examples-spidev \
-	${@base_contains("MACHINE_FEATURES", "alsa", "dey-examples-vplay", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "alsa", "dey-examples-vplay", "", d)} \
 	dey-examples-watchdog \
 "
 
 RDEPENDS_${PN}_append_ccardimx28 = "\
-	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
-	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
 	dey-examples-can \
-	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 "
 
 RDEPENDS_${PN}_append_ccimx6 = "\
-	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
-	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
 	dey-examples-can \
-	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
-	${@base_contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \
 	dey-examples-v4l2 \
 "
 
 RDEPENDS_${PN}_append_ccimx6ul = "\
-	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
-	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
 	dey-examples-can \
-	${@base_contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 "
 
 COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$|ccimx6ul)"
