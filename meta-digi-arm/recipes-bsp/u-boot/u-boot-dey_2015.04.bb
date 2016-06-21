@@ -91,7 +91,7 @@ do_compile () {
         for var in ${UBOOT_EXTRA_CONF}; do
             echo "${var}" >> .config
         done
-        oe_runmake O=${config} oldconfig
+        oe_runmake oldconfig
         oe_runmake ${UBOOT_MAKE_TARGET}
     fi
 
