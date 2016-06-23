@@ -26,6 +26,15 @@ SCRIPTNAME="$(basename "${0}")"
 bt_init_qca6564() {
 	MOD_VERSION="$(($(cat /proc/device-tree/digi,hwid,hv 2>/dev/null || true)))"
 
+	# Reset the BT_EN line
+	BT_EN_QCA_GPIO_NR="137"
+	BT_EN_L="/sys/class/gpio/gpio${BT_EN_QCA_GPIO_NR}"
+	[ -d "${BT_EN_L}" ] || printf "%s" ${BT_EN_QCA_GPIO_NR} > /sys/class/gpio/export
+	printf out > ${BT_EN_L}/direction && sleep .1
+	printf 0 > ${BT_EN_L}/value && sleep .1
+	printf 1 > ${BT_EN_L}/value && sleep .1
+	[ -d "${BT_EN_L}" ] && printf "%s" ${BT_EN_QCA_GPIO_NR} > /sys/class/gpio/unexport
+
 	# Module version older than revision 4 has swapped TX and RX lines
 	if [ "${MOD_VERSION}" -lt "4" ]; then
 		# Workaround to ignore the CTS flow control line
