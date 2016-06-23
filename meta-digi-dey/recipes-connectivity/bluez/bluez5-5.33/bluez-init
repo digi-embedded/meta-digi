@@ -38,10 +38,12 @@ bt_init_qca6564() {
 	# Module version older than revision 4 has swapped TX and RX lines
 	if [ "${MOD_VERSION}" -lt "4" ]; then
 		# Workaround to ignore the CTS flow control line
-		BT_GPIO_CTS="18"
-		echo "${BT_GPIO_CTS}" > /sys/class/gpio/export
-		echo "out" > /sys/class/gpio/gpio${BT_GPIO_CTS}/direction
-		echo "0" > /sys/class/gpio/gpio${BT_GPIO_CTS}/value
+		BT_CTS_QCA_GPIO_NR="18"
+		BT_CTS_L="/sys/class/gpio/gpio${BT_CTS_QCA_GPIO_NR}"
+		[ -d "${BT_CTS_L}" ] || printf "%s" ${BT_CTS_QCA_GPIO_NR} > /sys/class/gpio/export
+		printf out > ${BT_CTS_L}/direction && sleep .1
+		printf 0 > ${BT_CTS_L}/value && sleep .1
+		[ -d "${BT_CTS_L}" ] && printf "%s" ${BT_CTS_QCA_GPIO_NR} > /sys/class/gpio/unexport
 		# Reduce the rate to avoid the need for HW flow control
 		BT_RATE="115200"
 		BT_FLOW="noflow"
