@@ -49,8 +49,12 @@ if ! cmp -s ${TMP_MACFILE} ${MACFILE}; then
 fi
 rm -f ${TMP_MACFILE}
 
+# Check the version of modprobe installed to compound the arguments.
+if readlink -f $(which modprobe) | grep -qs kmod; then
+	MODPROBE_ARGS="-i"
+fi
 # Load the wireless module with the params defined in modprobe.d/qualcomm.conf
-modprobe wlan
+modprobe ${MODPROBE_ARGS} wlan
 
 # Validate that firmware was loaded by checking if the interface is present.
 if [ -d "/sys/class/net/${IFACE}" ]; then
