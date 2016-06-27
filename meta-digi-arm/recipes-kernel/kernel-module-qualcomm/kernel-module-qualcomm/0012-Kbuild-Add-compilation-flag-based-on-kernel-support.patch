@@ -1,6 +1,6 @@
 From: Isaac Hermida <isaac.hermida@digi.com>
 Date: Thu, 19 May 2016 12:28:39 +0200
-Subject: [PATCH 12/12] Kbuild: Add compilation flag based on kernel support
+Subject: [PATCH] Kbuild: Add compilation flag based on kernel support
 
 The option WLAN_NL80211_TESTMODE was inconditionally added to the compilation
 but it does required the specific kernel support.

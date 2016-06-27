@@ -1,7 +1,7 @@
 From: Isaac Hermida <isaac.hermida@digi.com>
 Date: Thu, 21 Apr 2016 13:57:03 +0200
-Subject: [PATCH 08/12] wlan_hdd_p2p: Update call to "cfg80211_rx_mgmt" for
- different kernel versions
+Subject: [PATCH] wlan_hdd_p2p: Update call to "cfg80211_rx_mgmt" for different
+ kernel versions
 
 Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
 ---

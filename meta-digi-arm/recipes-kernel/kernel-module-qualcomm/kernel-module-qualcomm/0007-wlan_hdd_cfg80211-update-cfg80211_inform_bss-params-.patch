@@ -1,7 +1,7 @@
 From: Isaac Hermida <isaac.hermida@digi.com>
 Date: Thu, 21 Apr 2016 13:56:15 +0200
-Subject: [PATCH 07/12] wlan_hdd_cfg80211: update "cfg80211_inform_bss" params
- for kernel version
+Subject: [PATCH] wlan_hdd_cfg80211: update "cfg80211_inform_bss" params for
+ kernel version
 
 Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
 ---

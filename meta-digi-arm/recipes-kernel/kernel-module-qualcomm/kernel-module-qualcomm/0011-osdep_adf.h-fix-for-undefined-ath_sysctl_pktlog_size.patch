@@ -1,6 +1,6 @@
 From: Isaac Hermida <isaac.hermida@digi.com>
 Date: Thu, 21 Apr 2016 14:32:57 +0200
-Subject: [PATCH 11/12] osdep_adf.h: fix for undefined ath_sysctl_pktlog_size
+Subject: [PATCH] osdep_adf.h: fix for undefined ath_sysctl_pktlog_size
 
 Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
 ---

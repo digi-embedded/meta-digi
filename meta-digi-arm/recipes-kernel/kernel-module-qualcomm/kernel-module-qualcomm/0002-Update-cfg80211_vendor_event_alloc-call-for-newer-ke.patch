@@ -1,7 +1,7 @@
 From: Isaac Hermida <isaac.hermida@digi.com>
 Date: Mon, 18 Apr 2016 08:48:14 +0200
-Subject: [PATCH 02/12] Update cfg80211_vendor_event_alloc call for newer
- kernel versions
+Subject: [PATCH] Update cfg80211_vendor_event_alloc call for newer kernel
+ versions
 
 Current compilation fails with next error.
 

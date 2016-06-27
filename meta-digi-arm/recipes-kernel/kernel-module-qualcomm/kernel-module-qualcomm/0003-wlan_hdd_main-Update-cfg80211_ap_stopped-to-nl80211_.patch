@@ -1,6 +1,6 @@
 From: Isaac Hermida <isaac.hermida@digi.com>
 Date: Thu, 21 Apr 2016 10:30:51 +0200
-Subject: [PATCH 03/12] wlan_hdd_main: Update cfg80211_ap_stopped to
+Subject: [PATCH] wlan_hdd_main: Update cfg80211_ap_stopped to
  nl80211_send_ap_stopped
 
 Use nl80211_send_ap_stopped instead of cfg80211_ap_stopped for newer

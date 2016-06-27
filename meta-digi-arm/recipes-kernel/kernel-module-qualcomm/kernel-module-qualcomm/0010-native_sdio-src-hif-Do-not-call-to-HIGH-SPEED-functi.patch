@@ -1,7 +1,7 @@
 From: Isaac Hermida <isaac.hermida@digi.com>
 Date: Thu, 21 Apr 2016 14:00:59 +0200
-Subject: [PATCH 10/12] native_sdio/src/hif: Do not call to HIGH SPEED
- functions for newer kernels
+Subject: [PATCH] native_sdio/src/hif: Do not call to HIGH SPEED functions for
+ newer kernels
 
 Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
 ---

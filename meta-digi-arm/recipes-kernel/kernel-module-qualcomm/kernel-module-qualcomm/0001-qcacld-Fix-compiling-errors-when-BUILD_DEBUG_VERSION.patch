@@ -1,7 +1,6 @@
 From: Yi Chen <yichen@qti.qualcomm.com>
 Date: Fri, 28 Aug 2015 19:24:45 +0800
-Subject: [PATCH 01/12] qcacld: Fix compiling errors when BUILD_DEBUG_VERSION
- := 0.
+Subject: [PATCH] qcacld: Fix compiling errors when BUILD_DEBUG_VERSION := 0.
 
 This is a compiling issue when BUILD_DEBUG_VERSION := 0 is set in Kbuild.
 

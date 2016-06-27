@@ -1,6 +1,6 @@
 From: Karthick S <skarthic@qti.qualcomm.com>
 Date: Fri, 14 Aug 2015 14:52:23 +0530
-Subject: [PATCH 04/12] qcacld-2.0: remove unused code
+Subject: [PATCH] qcacld-2.0: remove unused code
 
 Removed unused code from ReinitSDIO. Also removed mmcbusmode and it's
 related references in the code.
