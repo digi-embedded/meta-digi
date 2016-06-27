@@ -29,6 +29,7 @@ SRC_URI = " \
     file://0010-native_sdio-src-hif-Do-not-call-to-HIGH-SPEED-functi.patch \
     file://0011-osdep_adf.h-fix-for-undefined-ath_sysctl_pktlog_size.patch \
     file://0012-Kbuild-Add-compilation-flag-based-on-kernel-support.patch \
+    file://0013-Kbuild-do-not-create-an-auxiliar-p2p-on-init.patch \
 "
 
 S = "${WORKDIR}/${PV}"
