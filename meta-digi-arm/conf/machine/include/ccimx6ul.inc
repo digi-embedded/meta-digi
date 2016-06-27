@@ -20,6 +20,7 @@ WIRELESS_MODULE_append = " ${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'ker
 MACHINE_FIRMWARE ?= ""
 
 MACHINE_EXTRA_RDEPENDS += " \
+    imx-kobs \
     mtd-utils-ubifs \
 "
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
