@@ -182,8 +182,10 @@ make_report(){
 }
 
 
+DISTRO="$(sed -ne 's,DISTRO = \(.*\)$,\1,g;T;p' /etc/build)"
 DEY_VERSION="$(sed -ne 's,DISTRO_VERSION = \(.*\)$,\1,g;T;p' /etc/build)"
 UBOOT_VERSION="$(strings /dev/mmcblk0boot0 | grep dub | cut -d' ' -f2)"
+MACHINE="$(cat /proc/device-tree/digi,machine,name)"
 BOARD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant)"
 BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn)"
 BOARD_VERSION="$(cat /proc/device-tree/digi,carrierboard,version)"
@@ -202,9 +204,9 @@ printf "\n\n"
 	echo ""
 
 	echo "||*Component*|*Version*"
-	echo "|| DUT | SN-${BOARD_SN}, CC6 ${BOARD_VARIANT} SBCv${BOARD_VERSION} board_ID=${BOARD_ID}."
+	echo "|| DUT | SN-${BOARD_SN}, ${MACHINE} ${BOARD_VARIANT} SBCv${BOARD_VERSION} board_ID=${BOARD_ID}."
 	echo "|| U-Boot | ${UBOOT_VERSION}"
-	echo "|| Firmware | ${DEY_VERSION}-$(cat /etc/version)"
+	echo "|| Firmware | ${DISTRO}-${DEY_VERSION}-$(cat /etc/version)"
 	echo "|| Kernel | $(uname -a)"
 	printf "\n\n"
 ) | tee ${FILE}
