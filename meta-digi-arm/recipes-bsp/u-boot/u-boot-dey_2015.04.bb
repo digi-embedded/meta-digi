@@ -115,14 +115,19 @@ do_deploy_append() {
 					if [ "${TRUSTFENCE_UBOOT_SIGN}" = "1" ]
 					then
 						install ${S}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
-						install ${S}/${config}/u-boot-signed-${type}.${UBOOT_SUFFIX} u-boot-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-						ln -sf u-boot-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-signed-${type}.${UBOOT_SUFFIX}
 						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
+
 						if [ "${TRUSTFENCE_UBOOT_ENCRYPT}" = "1" ]
 						then
+							install ${S}/${config}/u-boot-signed-${type}.${UBOOT_SUFFIX} u-boot-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+							ln -sf u-boot-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-encrypted-${type}.${UBOOT_SUFFIX}
+
 							# Move the data encryption key in plain text directly to the deployment directory.
 							# Do not leave any other copies in the machine.
 							mv ${S}/${config}/dek.bin ${DEPLOYDIR}/dek-${type}.bin
+						else
+							install ${S}/${config}/u-boot-signed-${type}.${UBOOT_SUFFIX} u-boot-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+							ln -sf u-boot-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-signed-${type}.${UBOOT_SUFFIX}
 						fi
 					fi
 				fi
