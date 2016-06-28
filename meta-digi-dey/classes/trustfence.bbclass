@@ -59,7 +59,7 @@ python () {
         if (d.getVar("TRUSTFENCE_UBOOT_ENCRYPT", True) == "1"):
             d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_ENCRYPT_IMAGE=y ")
             if d.getVar("TRUSTFENCE_UBOOT_DEK_SIZE", True):
-                d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_DEK_SIZE=%s " % d.getVar("TRUSTFENCE_UBOOT_DEK_SIZE"))
+                d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_DEK_SIZE=%s CONFIG_DEK_SIZE_%s=y" % (d.getVar("TRUSTFENCE_UBOOT_DEK_SIZE"),d.getVar("TRUSTFENCE_UBOOT_DEK_SIZE")))
     if (d.getVar("TRUSTFENCE_UBOOT_ENV_DEK", True) not in [None, "0"]):
         d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_ENV_AES=y CONFIG_ENV_AES_KEY=\\"%s\\"' % d.getVar("TRUSTFENCE_UBOOT_ENV_DEK"))
 }
