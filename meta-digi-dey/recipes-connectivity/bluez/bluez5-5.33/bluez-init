@@ -22,6 +22,7 @@ if [ "${1}" != "start" ]; then
 fi
 
 SCRIPTNAME="$(basename "${0}")"
+LOGFILE="/var/log/bluetoothd.log"
 
 bt_init_qca6564() {
 	MOD_VERSION="$(($(cat /proc/device-tree/digi,hwid,hv 2>/dev/null || true)))"
@@ -49,7 +50,7 @@ bt_init_qca6564() {
 		BT_FLOW="noflow"
 	fi
 
-	if hciattach -t120 ttyBt qca ${BT_RATE:-3000000} ${BT_FLOW:-flow} 2>/dev/null; then
+	if hciattach -t120 ttyBt qca ${BT_RATE:-3000000} ${BT_FLOW:-flow} 2>${LOGFILE}; then
 		:	# No-op
 	else
 		echo "${SCRIPTNAME}: FAILED (hciattach)"
@@ -123,7 +124,7 @@ bt_init_ar3k() {
 	# Start the Bluetooth driver and daemon (D-BUS must already be running)
 	RETRIES="5"
 	while [ "${RETRIES}" -gt "0" ]; do
-		hciattach ttyBt ath3k 4000000 1>/dev/null && break
+		hciattach ttyBt ath3k 4000000 1>${LOGFILE} && break
 		if [ -n "${BT_PWR_GPIO_NR}" ]; then
 			#
 			# If hciattach fails try to recover it by toggling the BT power GPIO
