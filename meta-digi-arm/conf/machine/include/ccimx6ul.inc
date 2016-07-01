@@ -24,7 +24,7 @@ MACHINE_EXTRA_RDEPENDS += " \
     mtd-utils-ubifs \
 "
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
-MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins"
+MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins cryptodev-module"
 
 MACHINE_FEATURES += "wifi bluetooth"
 
