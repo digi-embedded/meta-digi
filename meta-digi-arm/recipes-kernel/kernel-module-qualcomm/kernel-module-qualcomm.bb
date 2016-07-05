@@ -30,6 +30,8 @@ SRC_URI = " \
     file://0011-osdep_adf.h-fix-for-undefined-ath_sysctl_pktlog_size.patch \
     file://0012-Kbuild-Add-compilation-flag-based-on-kernel-support.patch \
     file://0013-Kbuild-do-not-create-an-auxiliar-p2p-on-init.patch \
+    file://0014-Kbuild-do-not-compile-the-DEBUG-version-inconditiona.patch \
+    file://0015-Kbuild-Group-most-of-the-relevant-DEBUG-options.patch \
 "
 
 S = "${WORKDIR}/${PV}"
@@ -39,6 +41,8 @@ EXTRA_OEMAKE += "CONFIG_CLD_HL_SDIO_CORE=y CONFIG_LINUX_QCMBR=y WLAN_OPEN_SOURCE
 # memory that is not allowed in ARMv6 (kernel commit
 # 309caa9cc6ff39d261264ec4ff10e29489afc8f8)
 EXTRA_OEMAKE += "CONFIG_NON_QC_PLATFORM=y"
+# Flag to compile the debug version (1 - enabled, rest of values - disabled)
+EXTRA_OEMAKE += "BUILD_DEBUG_VERSION=0"
 
 do_compile_prepend() {
      export BUILD_VER=${PV}
