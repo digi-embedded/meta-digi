@@ -60,6 +60,47 @@ IMAGE_CMD_boot.vfat() {
 	fi
 }
 
+IMAGE_CMD_boot.ubifs() {
+	#
+	# Image generation code for image type 'boot.ubifs'
+	#
+	BOOTIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
+	if [ -n "${KERNEL_DEVICETREE}" ]; then
+		for DTB in ${KERNEL_DEVICETREE}; do
+			if [ -e "${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}" ]; then
+				BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}"
+			fi
+		done
+	fi
+
+	# Create temporary folder
+	TMP_BOOTDIR="$(mktemp -d ${DEPLOY_DIR_IMAGE}/boot.XXXXXX)"
+
+	# Hard-link BOOTIMG_FILES into the temporary folder with the symlink filename
+	for item in ${BOOTIMG_FILES_SYMLINK}; do
+		orig="$(readlink -e ${item})"
+		ln ${orig} ${TMP_BOOTDIR}/$(basename ${item})
+	done
+
+	# Hard-link boot scripts into the temporary folder
+	for item in ${BOOT_SCRIPTS}; do
+		src="$(echo ${item} | awk -F':' '{ print $1 }')"
+		dst="$(echo ${item} | awk -F':' '{ print $2 }')"
+		ln ${DEPLOY_DIR_IMAGE}/${src} ${TMP_BOOTDIR}/${dst}
+	done
+
+	# Build UBIFS boot image out of temp folder
+	mkfs.ubifs -r ${TMP_BOOTDIR} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.ubifs ${MKUBIFS_BOOT_ARGS}
+
+	# Create the symlink
+	if [ -n "${IMAGE_LINK_NAME}" ] && [ -e ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.ubifs ]; then
+		ln -s ${IMAGE_NAME}.boot.ubifs ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.boot.ubifs
+	fi
+
+	# Remove the temporary folder
+	rm -rf ${TMP_BOOTDIR}
+}
+
 IMAGE_CMD_rootfs.initramfs() {
 	#
 	# Image generation code for image type 'rootfs.initramfs'
