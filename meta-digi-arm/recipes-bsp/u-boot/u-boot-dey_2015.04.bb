@@ -21,7 +21,7 @@ SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
 "
 
-SRC_URI_append_ccimx6 = " \
+SRC_URI_append = " \
     file://boot.txt \
     file://install_linux_fw_sd.txt \
 "
@@ -136,9 +136,7 @@ do_deploy_append() {
 		done
 		unset  i
 	fi
-}
 
-do_deploy_append_ccimx6() {
 	# DEY firmware install script
 	sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_sd.txt
 	mkimage -T script -n "DEY firmware install script" -C none -d ${WORKDIR}/install_linux_fw_sd.txt ${DEPLOYDIR}/install_linux_fw_sd.scr

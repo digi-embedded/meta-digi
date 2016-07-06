@@ -1,0 +1,23 @@
+#
+# U-Boot bootscript for NAND images created by Yocto.
+#
+
+#
+# Set device tree filename depending on the board ID (if defined)
+#
+if test -n "${board_id}"; then
+	setenv fdt_file zImage-imx6ul-ccimx6ulstarter-id${board_id}.dtb
+else
+	#
+	# Set device tree filename depending on the hardware variant
+	#
+	if test "${module_variant}" = "0x02"; then
+		setenv fdt_file zImage-imx6ul-ccimx6ulstarter-wb.dtb
+	elif test "${module_variant}" = "0x03"; then
+		setenv fdt_file zImage-imx6ul-ccimx6ulstarter.dtb
+	else
+		echo "------ Using default fdt_file: $fdt_file"
+	fi
+fi
+
+dboot linux nand
