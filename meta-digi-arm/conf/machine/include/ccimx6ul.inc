@@ -32,5 +32,9 @@ MACHINE_FIRMWARE_append = " ${@bb.utils.contains('MACHINE_FEATURES', 'bluetooth'
 MACHINE_FIRMWARE_append = " ${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'firmware-qualcomm-qca6564-wifi', '', d)}"
 
 KERNEL_IMAGETYPE = "zImage"
-# FLASH parameters
+
+# mkfs.ubifs parameters for boot partition (the one holding kernel and device tree files)
+MKUBIFS_BOOT_ARGS ?= "-m 2048 -e 126976 -c 127"
+
+# mkfs.ubifs parameters for rootfs partition
 MKUBIFS_ARGS ?= "-m 2048 -e 126976 -c 2047"
