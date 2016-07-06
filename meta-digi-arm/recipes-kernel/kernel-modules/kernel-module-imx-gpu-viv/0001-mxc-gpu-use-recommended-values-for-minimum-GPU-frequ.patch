@@ -56,10 +56,10 @@ index 4a29f0e776e2..69a2d483b2cd 100644
  
      if (!ret)
 diff --git a/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c b/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c
-index a12579d44723..c2a54b7d072d 100644
+index a5473bb926a2..d08479fa43b7 100644
 --- a/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c
 +++ b/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c
-@@ -103,7 +103,7 @@ extern int unregister_thermal_notifier(struct notifier_block *nb);
+@@ -108,7 +108,7 @@ extern int unregister_thermal_notifier(struct notifier_block *nb);
  #define UNREG_THERMAL_NOTIFIER(a) unregister_thermal_notifier(a);
  #endif
  
