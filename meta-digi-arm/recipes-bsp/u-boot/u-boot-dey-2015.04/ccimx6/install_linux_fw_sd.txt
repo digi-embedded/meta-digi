@@ -67,7 +67,7 @@ setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6sbc.ext4
 for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do
 	if test ! -e mmc 1:1 ${install_f}; then
 		echo "ERROR: Could not find file ${install_f}";
-		install_abort=1
+		install_abort=1;
 	fi;
 done
 if test -n "${install_abort}"; then
@@ -88,7 +88,7 @@ setenv mmcdev 0
 # Update U-Boot
 echo ""
 echo ""
-echo ">> Installing U-Boot boot loader (target will reset)";
+echo ">> Installing U-Boot boot loader (target will reset)"
 echo ""
 echo ""
 update uboot mmc 1 fat ${INSTALL_UBOOT_FILENAME}
@@ -110,8 +110,8 @@ setenv bootcmd '
 	env default -a;
 	saveenv;
 	setenv mmcdev 0;
-	setenv INSTALL_LINUX_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6sbc.boot.vfat
-	setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6sbc.ext4
+	setenv INSTALL_LINUX_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6sbc.boot.vfat;
+	setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6sbc.ext4;
 	echo "";
 	echo "";
 	echo ">> Creating Linux partition table on the eMMC";
