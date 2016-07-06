@@ -106,58 +106,55 @@ fi
 #  - Update the 'linux' partition
 #  - Update the 'rootfs' partition
 #  - Reset the system and let it boot
-setenv bootcmd '
+setenv bootcmd "
 	env default -a;
 	saveenv;
-	setenv mmcdev 0;
-	setenv INSTALL_LINUX_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6sbc.boot.vfat;
-	setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6sbc.ext4;
-	echo "";
-	echo "";
-	echo ">> Creating Linux partition table on the eMMC";
-	echo "";
-	echo "";
+	echo \"\";
+	echo \"\";
+	echo \">> Creating Linux partition table on the eMMC\";
+	echo \"\";
+	echo \"\";
 	run partition_mmc_linux;
-	if test $? -eq 1; then
-		echo "[ERROR] Failed to create Linux partition table!";
-		echo "";
-		echo "Aborted.";
+	if test \$? -eq 1; then
+		echo \"[ERROR] Failed to create Linux partition table!\";
+		echo \"\";
+		echo \"Aborted.\";
 		exit;
 	fi;
-	echo "";
-	echo "";
-	echo ">> Installing Linux kernel and device tree files";
-	echo "";
-	echo "";
+	echo \"\";
+	echo \"\";
+	echo \">> Installing Linux kernel and device tree files\";
+	echo \"\";
+	echo \"\";
 	update linux mmc 1 fat ${INSTALL_LINUX_FILENAME};
-	if test $? -eq 1; then
-		echo "[ERROR] Failed to update linux partition!";
-		echo "";
-		echo "Aborted.";
+	if test \$? -eq 1; then
+		echo \"[ERROR] Failed to update linux partition!\";
+		echo \"\";
+		echo \"Aborted.\";
 		exit;
 	fi;
-	echo "";
-	echo "";
-	echo ">> Installing Linux root file system";
-	echo "";
-	echo "";
+	echo \"\";
+	echo \"\";
+	echo \">> Installing Linux root file system\";
+	echo \"\";
+	echo \"\";
 	update rootfs mmc 1 fat ${INSTALL_ROOTFS_FILENAME};
-	if test $? -eq 1; then
-		echo "[ERROR] Failed to update rootfs partition!";
-		echo "";
-		echo "Aborted.";
+	if test \$? -eq 1; then
+		echo \"[ERROR] Failed to update rootfs partition!\";
+		echo \"\";
+		echo \"Aborted.\";
 		exit;
 	fi;
-	echo "";
-	echo "#######################";
-	echo "#  Install complete!  #";
-	echo "#######################";
-	echo "";
+	echo \"\";
+	echo \"#######################\";
+	echo \"#  Install complete!  #\";
+	echo \"#######################\";
+	echo \"\";
 	sleep 1;
-	echo ">> Restarting the system";
+	echo \">> Restarting the system\";
 	sleep 1;
 	reset;
-'
+"
 
 saveenv
 reset
