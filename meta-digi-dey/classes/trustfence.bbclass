@@ -19,9 +19,9 @@ TRUSTFENCE_CONSOLE_DISABLE ?= "1"
 #TRUSTFENCE_CONSOLE_GPIO_ENABLE = "4"
 
 # Default secure boot configuration
-TRUSTFENCE_CHECK_KERNEL ?= "1"
-TRUSTFENCE_UBOOT_SIGN ?= "1"
-TRUSTFENCE_UBOOT_ENCRYPT ?= "1"
+TRUSTFENCE_SIGN ?= "1"
+TRUSTFENCE_SIGN_KEYS_PATH ?= "default"
+TRUSTFENCE_DEK_PATH ?= "default"
 TRUSTFENCE_UBOOT_ENV_DEK ?= "gen_random"
 
 # Trustfence initramfs image recipe
@@ -49,20 +49,20 @@ python () {
     if (d.getVar("TRUSTFENCE_UBOOT_ENV_DEK") == "gen_random"):
         d.setVar("TRUSTFENCE_UBOOT_ENV_DEK", str(binascii.hexlify(os.urandom(16)).decode()))
 
-    if (d.getVar("TRUSTFENCE_CHECK_KERNEL", True) == "1"):
-        d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_SECURE_BOOT=y ")
-    if (d.getVar("TRUSTFENCE_UBOOT_SIGN", True) == "1"):
+    if (d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") == "default"):
+        d.setVar("TRUSTFENCE_SIGN_KEYS_PATH", d.getVar("TOPDIR") + "/trustfence");
+
+    if (d.getVar("TRUSTFENCE_DEK_PATH") == "default"):
+        d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/dek.bin");
+    
+    if (d.getVar("TRUSTFENCE_SIGN", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_SIGN_IMAGE=y ")
-        if d.getVar("TRUSTFENCE_CST_PATH", True):
-            d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_CST_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_CST_PATH"))
-        if d.getVar("TRUSTFENCE_CSF_SIZE", True):
-            d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_CSF_SIZE=%s " % d.getVar("TRUSTFENCE_CSF_SIZE"))
+        if d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True):
+            d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_SIGN_KEYS_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"))
         if d.getVar("TRUSTFENCE_KEY_INDEX", True):
             d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_KEY_INDEX=%s " % d.getVar("TRUSTFENCE_KEY_INDEX"))
-        if (d.getVar("TRUSTFENCE_UBOOT_ENCRYPT", True) == "1"):
-            d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_ENCRYPT_IMAGE=y ")
-            if d.getVar("TRUSTFENCE_UBOOT_DEK_SIZE", True):
-                d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_DEK_SIZE=%s CONFIG_DEK_SIZE_%s=y" % (d.getVar("TRUSTFENCE_UBOOT_DEK_SIZE"),d.getVar("TRUSTFENCE_UBOOT_DEK_SIZE")))
+        if (d.getVar("TRUSTFENCE_DEK_PATH", True) not in [None, "0"]):
+            d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_DEK_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_DEK_PATH"))
     if (d.getVar("TRUSTFENCE_UBOOT_ENV_DEK", True) not in [None, "0"]):
         d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_ENV_AES=y CONFIG_ENV_AES_KEY=\\"%s\\"' % d.getVar("TRUSTFENCE_UBOOT_ENV_DEK"))
 }
