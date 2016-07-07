@@ -141,8 +141,17 @@ do_deploy_append() {
 	sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_sd.txt
 	mkimage -T script -n "DEY firmware install script" -C none -d ${WORKDIR}/install_linux_fw_sd.txt ${DEPLOYDIR}/install_linux_fw_sd.scr
 
-	# Boot script for DEY images
-	mkimage -T script -n bootscript -C none -d ${WORKDIR}/boot.txt ${DEPLOYDIR}/boot.scr
+	# Boot script for DEY images (reconfigure on-the-fly if TRUSTFENCE is enabled)
+	TMP_BOOTSCR="$(mktemp ${WORKDIR}/bootscr.XXXXXX)"
+	cat ${WORKDIR}/boot.txt > ${TMP_BOOTSCR}
+	if [ -n "${TRUSTFENCE_INITRAMFS_IMAGE}" ]; then
+		sed -i -e '/^dboot linux/{
+				i\setenv boot_initrd true
+				i\setenv initrd_file ${TRUSTFENCE_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot
+			}' ${TMP_BOOTSCR}
+	fi
+	mkimage -T script -n bootscript -C none -d ${TMP_BOOTSCR} ${DEPLOYDIR}/boot.scr
+	rm -f ${TMP_BOOTSCR}
 }
 
 COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"

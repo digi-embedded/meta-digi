@@ -1,10 +1,15 @@
 inherit image_types
 
+def TRUSTFENCE_BOOTIMAGE_DEPENDS(d):
+    tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
+    return "%s:do_rootfs" % tf_initramfs if tf_initramfs else ""
+
 IMAGE_DEPENDS_boot.vfat = " \
     dosfstools-native:do_populate_sysroot \
     mtools-native:do_populate_sysroot \
     u-boot:do_deploy \
     virtual/kernel:do_deploy \
+    ${@TRUSTFENCE_BOOTIMAGE_DEPENDS(d)} \
 "
 
 IMAGE_CMD_boot.vfat() {
@@ -20,6 +25,12 @@ IMAGE_CMD_boot.vfat() {
 				BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}"
 			fi
 		done
+	fi
+
+	# Add Trustfence initramfs if enabled
+	if [ -n "${TRUSTFENCE_INITRAMFS_IMAGE}" ]; then
+		BOOTIMG_FILES="${BOOTIMG_FILES} $(readlink -e ${DEPLOY_DIR_IMAGE}/${TRUSTFENCE_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot)"
+		BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${TRUSTFENCE_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot"
 	fi
 
 	# Size of kernel and device tree + 10% extra space (in bytes)

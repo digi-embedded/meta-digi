@@ -24,6 +24,9 @@ TRUSTFENCE_UBOOT_SIGN ?= "1"
 TRUSTFENCE_UBOOT_ENCRYPT ?= "1"
 TRUSTFENCE_UBOOT_ENV_DEK ?= "gen_random"
 
+# Trustfence initramfs image recipe
+TRUSTFENCE_INITRAMFS_IMAGE ?= "dey-image-trustfence-initramfs"
+
 IMAGE_FEATURES += "dey-trustfence"
 
 UBOOT_EXTRA_CONF = ""
