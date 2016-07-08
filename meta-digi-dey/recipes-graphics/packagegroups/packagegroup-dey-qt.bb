@@ -8,6 +8,9 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 inherit packagegroup
 
+MACHINE_QT5_EXTRA_INSTALL ?= ""
+MACHINE_QT5_EXTRA_INSTALL_ccimx6 ?= "qtwebengine-examples"
+
 QT5_PKS = " \
     qtbase-fonts \
     qtdeclarative-tools \
@@ -20,7 +23,6 @@ QT5_EXAMPLES = " \
     qtdeclarative-examples \
     qtmultimedia-examples \
     qtsvg-examples \
-    qtwebengine-examples \
 "
 
 QT5_DEMOS = " \
@@ -34,4 +36,5 @@ RDEPENDS_${PN} += " \
     ${QT5_PKS} \
     ${QT5_DEMOS} \
     ${QT5_EXAMPLES} \
+    ${MACHINE_QT5_EXTRA_INSTALL} \
 "
