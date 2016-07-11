@@ -2,7 +2,11 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
-SRC_URI += "file://bluez-init"
+SRC_URI += " \
+    file://bluez-init \
+    file://0021-hcitool-do-not-show-unsupported-refresh-option.patch \
+    file://0022-hcitool-increase-the-shown-connection-limit-to-20.patch \
+"
 
 SRC_URI_append_ccimx6ul = " \
     file://0001-bluetooth-Add-bluetooth-support-for-QCA6174-chip.patch \
