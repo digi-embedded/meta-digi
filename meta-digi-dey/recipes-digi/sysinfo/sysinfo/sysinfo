@@ -131,6 +131,8 @@ make_report(){
 	echo "--------------------------------------"
 	echo ""
 	free
+	printf "\n"
+	cat /proc/meminfo
 	printf "\n\n"
 
 	echo "--------------------------------------"
@@ -157,7 +159,7 @@ make_report(){
 	echo "-                                    -"
 	echo "--------------------------------------"
 	echo ""
-	netstat -n -l
+	netstat -n -a -p
 	printf "\n\n"
 
 	echo "--------------------------------------"
@@ -176,6 +178,8 @@ make_report(){
 	echo "--------------------------------------"
 	echo ""
 	ifconfig -a
+	printf "\n"
+	ip link show
 	printf "\n"
 
 	echo "-------------End of report------------"
