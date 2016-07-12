@@ -58,7 +58,8 @@ wipe -cfs ${TMP_KEYFILE}
 
 # Mount mapped device
 mkdir -p /newroot
-mount ${root} /newroot
+FSTYPE="$(blkid ${root} | sed -e 's,.*TYPE="\([^"]\+\)".*,\1,g')"
+mount ${FSTYPE:+-t ${FSTYPE}} ${root} /newroot
 
 #
 # Clean-up and do the switch_root to the final rootfs
