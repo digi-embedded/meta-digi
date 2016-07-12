@@ -188,12 +188,20 @@ make_report(){
 
 DISTRO="$(sed -ne 's,DISTRO = \(.*\)$,\1,g;T;p' /etc/build)"
 DEY_VERSION="$(sed -ne 's,DISTRO_VERSION = \(.*\)$,\1,g;T;p' /etc/build)"
-UBOOT_VERSION="$(strings /dev/mmcblk0boot0 | grep dub | cut -d' ' -f2)"
+UBOOT_PARTITION="/dev/mmcblk0boot0"
+[ -c "/dev/mtd0" ] && UBOOT_PARTITION="/dev/mtd0"
+UBOOT_VERSION="$(strings ${UBOOT_PARTITION} | grep -m 1 dub | cut -d' ' -f2)"
 MACHINE="$(cat /proc/device-tree/digi,machine,name)"
 BOARD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant)"
 BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn)"
 BOARD_VERSION="$(cat /proc/device-tree/digi,carrierboard,version)"
 BOARD_ID="$(cat /proc/device-tree/digi,carrierboard,id)"
+if grep -qs '\<digi,ccimx6ul\>' /proc/device-tree/compatible; then
+	MCA_NODE="/sys/devices/platform/soc/2100000.aips-bus/21a0000.i2c/i2c-0/0-007e"
+	MCA_HW_VERSION=$(cat ${MCA_NODE}/hw_version) || MCA_HW_VERSION="??"
+	MCA_FW_VERSION=$(cat ${MCA_NODE}/fw_version) || MCA_FW_VERSION="??"
+	MCA_VERSION="HW_VERSION=${MCA_HW_VERSION}  FW_VERSION=${MCA_FW_VERSION}"
+fi
 
 DATE="$(date "+%Y%m%d%H%M%S")"
 FILE="/tmp/sysinfo-${DEY_VERSION}-${BOARD_SN}-${DATE}.txt"
@@ -212,6 +220,7 @@ printf "\n\n"
 	echo "|| U-Boot | ${UBOOT_VERSION}"
 	echo "|| Firmware | ${DISTRO}-${DEY_VERSION}-$(cat /etc/version)"
 	echo "|| Kernel | $(uname -a)"
+	[ -n "${MCA_VERSION}" ] && echo "|| Kinetis | ${MCA_VERSION}"
 	printf "\n\n"
 ) | tee ${FILE}
 
