@@ -11,6 +11,7 @@ SRC_URI = " \
 	${@base_conditional('TRUSTFENCE_SIGN', '1', 'file://cst-${PV}.tar.gz', '', d)} \
 	file://0001-gen_auth_encrypted_data-reuse-existing-DEK-file.patch \
 	file://0002-hab4_pki_tree.sh-automate-script.patch \
+	file://0003-openssl_helper-use-dev-urandom-as-seed-source.patch \
 	file://Makefile \
 "
 
