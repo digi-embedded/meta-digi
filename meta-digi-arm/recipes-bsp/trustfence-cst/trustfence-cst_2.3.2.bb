@@ -10,6 +10,7 @@ S= "${WORKDIR}/cst-${PV}"
 SRC_URI = " \
 	${@base_conditional('TRUSTFENCE_SIGN', '1', 'file://cst-${PV}.tar.gz', '', d)} \
 	file://0001-gen_auth_encrypted_data-reuse-existing-DEK-file.patch \
+	file://0002-hab4_pki_tree.sh-automate-script.patch \
 	file://Makefile \
 "
 
@@ -25,6 +26,7 @@ do_install () {
 	install -d ${D}${bindir}
 	install -m 0755 linux64/cst ${D}${bindir}/cst
 	install -m 0755 linux64/srktool ${D}${bindir}/srktool
+	install -m 0755 keys/hab4_pki_tree.sh ${D}${bindir}/trustfence-gen-pki.sh
 	install -m 0755 ca/openssl.cnf ${D}${bindir}/openssl.cnf
 	install -m 0755 ca/v3_ca.cnf ${D}${bindir}/v3_ca.cnf
 	install -m 0755 ca/v3_usr.cnf ${D}${bindir}/v3_usr.cnf
