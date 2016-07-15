@@ -7,6 +7,12 @@
 
 Version     Release date (YYYY-MM-DD)
 -------------------------------------------------------------------------------
+2.0-r2      2016-07-18
+
+    * Release based on Yocto 2.0 (Jethro) for ConnectCore 6 SBC including:
+        - Update support for new PMIC hardware revision
+        - minor bug fixes
+
 2.0-r1      2016-02-15
 
     * U-Boot 2015.04 for the ConnectCore 6 System-On-Module and SBC.
