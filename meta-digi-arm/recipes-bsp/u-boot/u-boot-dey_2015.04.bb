@@ -11,13 +11,13 @@ DEPENDS += "dtc-native u-boot-mkimage-native"
 PROVIDES += "u-boot"
 
 SRCBRANCH = "v2015.04/maint"
-SRCREV = "${AUTOREV}"
+SRCREV = "3f985499b4b8a5f402cc67ea44585015de3728a9"
 
 # Select internal or Github U-Boot repo
 UBOOT_GIT_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}u-boot-denx.git', '${DIGI_GITHUB_GIT}/u-boot.git', d)}"
 
 SRC_URI = " \
-    ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
+    ${UBOOT_GIT_URI};nobranch=1 \
     file://boot.txt \
     file://install_linux_fw_sd.txt \
 "
