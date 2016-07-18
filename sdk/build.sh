@@ -128,6 +128,11 @@ if [ -z "${DY_FB_IMAGE}" ] && echo ${JOB_NAME} | grep -qs 'dey.*fb'; then
 	DY_FB_IMAGE="true"
 fi
 
+# If DY_MFG_IMAGE is unset, set it depending on the job name
+if [ -z "${DY_MFG_IMAGE}" ] && echo ${JOB_NAME} | grep -qs 'dey.*mfg'; then
+	DY_MFG_IMAGE="true"
+fi
+
 # Per-platform data
 while read _pl _var _tgt; do
 	# DY_BUILD_VARIANTS comes from Jenkins environment:
@@ -174,7 +179,11 @@ if pushd ${YOCTO_INST_DIR}; then
 			error "Revision \"${DY_REVISION}\" not found"
 		fi
 	fi
-	yes "" 2>/dev/null | ${REPO} init --no-repo-verify -u ${MANIFEST_URL} ${repo_revision}
+	# If it is a manufacturing job, specify the manufacturing manifest name
+	if [ "${DY_MFG_IMAGE}" = "true" ]; then
+		mfg_xml="-m manufacturing.xml"
+	fi
+	yes "" 2>/dev/null | ${REPO} init --no-repo-verify -u ${MANIFEST_URL} ${repo_revision} ${mfg_xml}
 	${REPO} forall -p -c 'git remote prune $(git remote)'
 	time ${REPO} sync -d ${MAKE_JOBS}
 	popd
@@ -220,6 +229,10 @@ for platform in ${DY_PLATFORMS}; do
 				# Remove 'x11' distro feature if building framebuffer images
 				if [ "${DY_FB_IMAGE}" = "true" ]; then
 					printf "${X11_REMOVAL_CFG}" >> conf/local.conf
+				fi
+				# Add the manufacturing layer to bblayers.conf file if it is a manufacturing job
+				if [ "${DY_MFG_IMAGE}" = "true" ]; then
+					sed -i -e "/meta-digi-dey/a\  ${YOCTO_INST_DIR}/sources/meta-digi-mfg \\\\" conf/bblayers.conf
 				fi
 				for target in ${platform_targets}; do
 					printf "\n[INFO] Building the ${target} target.\n"
