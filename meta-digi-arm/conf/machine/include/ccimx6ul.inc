@@ -22,6 +22,7 @@ MACHINE_FIRMWARE ?= ""
 MACHINE_EXTRA_RDEPENDS += " \
     imx-kobs \
     mtd-utils-ubifs \
+    u-boot-fw-utils \
 "
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
 MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins cryptodev-module"
