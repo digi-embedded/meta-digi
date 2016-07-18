@@ -96,6 +96,13 @@ do_compile () {
 
 }
 
+TF_BOOTSCRIPT_SEDFILTER = ""
+TF_BOOTSCRIPT_SEDFILTER_ccimx6 = "${@tf_bootscript_sedfilter(d)}"
+
+def tf_bootscript_sedfilter(d):
+    tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
+    return "/^dboot linux/i\setenv boot_initrd true\\nsetenv initrd_file %s-${MACHINE}.cpio.gz.u-boot" % tf_initramfs if tf_initramfs else ""
+
 do_deploy_append() {
 	# Remove canonical U-Boot symlinks for ${UBOOT_CONFIG} currently in the form:
 	#    u-boot-<platform>.imx-<type>
@@ -142,13 +149,7 @@ do_deploy_append() {
 
 	# Boot script for DEY images (reconfigure on-the-fly if TRUSTFENCE is enabled)
 	TMP_BOOTSCR="$(mktemp ${WORKDIR}/bootscr.XXXXXX)"
-	cat ${WORKDIR}/boot.txt > ${TMP_BOOTSCR}
-	if [ -n "${TRUSTFENCE_INITRAMFS_IMAGE}" ]; then
-		sed -i -e '/^dboot linux/{
-				i\setenv boot_initrd true
-				i\setenv initrd_file ${TRUSTFENCE_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot
-			}' ${TMP_BOOTSCR}
-	fi
+	sed -e "${TF_BOOTSCRIPT_SEDFILTER}" ${WORKDIR}/boot.txt > ${TMP_BOOTSCR}
 	mkimage -T script -n bootscript -C none -d ${TMP_BOOTSCR} ${DEPLOYDIR}/boot.scr
 	rm -f ${TMP_BOOTSCR}
 }
