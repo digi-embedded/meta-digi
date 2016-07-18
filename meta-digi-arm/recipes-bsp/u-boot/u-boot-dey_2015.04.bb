@@ -78,6 +78,10 @@ do_compile () {
                     if [ "${TRUSTFENCE_SIGN}" = "1" ]
                     then
                         cp ${S}/build_${config}/u-boot-signed.imx ${S}/build_${config}/u-boot-signed-${type}.${UBOOT_SUFFIX}
+			if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]
+			then
+				cp ${S}/build_${config}/u-boot-encrypted.imx ${S}/build_${config}/u-boot-encrypted-${type}.${UBOOT_SUFFIX}
+			fi
                     fi
                 fi
             done
@@ -122,13 +126,13 @@ do_deploy_append() {
 						install ${S}/build_${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
 						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
 
+						install ${S}/build_${config}/u-boot-signed-${type}.${UBOOT_SUFFIX} u-boot-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+						ln -sf u-boot-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-signed-${type}.${UBOOT_SUFFIX}
+
 						if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]
 						then
-							install ${S}/build_${config}/u-boot-signed-${type}.${UBOOT_SUFFIX} u-boot-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+							install ${S}/build_${config}/u-boot-encrypted-${type}.${UBOOT_SUFFIX} u-boot-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
 							ln -sf u-boot-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-encrypted-${type}.${UBOOT_SUFFIX}
-						else
-							install ${S}/build_${config}/u-boot-signed-${type}.${UBOOT_SUFFIX} u-boot-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-							ln -sf u-boot-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-signed-${type}.${UBOOT_SUFFIX}
 						fi
 					fi
 				fi
