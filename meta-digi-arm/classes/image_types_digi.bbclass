@@ -71,6 +71,12 @@ IMAGE_CMD_boot.vfat() {
 	fi
 }
 
+IMAGE_DEPENDS_boot.ubifs = " \
+    mtd-utils-native:do_populate_sysroot \
+    u-boot:do_deploy \
+    virtual/kernel:do_deploy \
+"
+
 IMAGE_CMD_boot.ubifs() {
 	#
 	# Image generation code for image type 'boot.ubifs'
