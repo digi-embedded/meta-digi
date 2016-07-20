@@ -17,7 +17,8 @@
 
 [ "${IFACE}" != "wlan0" ] && exit 0
 
-MACFILE="/lib/firmware/wlan/wlan_mac.bin"
+FIRMWARE_DIR="/lib/firmware"
+MACFILE="${FIRMWARE_DIR}/wlan/wlan_mac.bin"
 TMP_MACFILE="$(mktemp -t wlan_mac.XXXXXX)"
 
 # Read the MACs from DeviceTree. We can have up to four wireless interfaces
@@ -48,6 +49,31 @@ if ! cmp -s ${TMP_MACFILE} ${MACFILE}; then
 	cp ${TMP_MACFILE} ${MACFILE}
 fi
 rm -f ${TMP_MACFILE}
+
+REGION_CODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null)"
+US_CODE="0x0"
+WW_CODE="0x1"
+JP_CODE="0x2"
+BDATA_LINK="${FIRMWARE_DIR}/bdwlan30.bin"
+# Create a symbolic link to the FW file for the specific country region.
+BDATA_SOURCE="${FIRMWARE_DIR}/bdwlan30_US.bin"
+case "${REGION_CODE}" in
+	${US_CODE})
+		logger -t qca6564 "Setting US wireless region";;
+	${WW_CODE}|${JP_CODE})
+		logger -t qca6564 "Setting WW (world wide) wireless region"
+		BDATA_SOURCE="${FIRMWARE_DIR}/bdwlan30_World.bin";;
+	"")
+		logger -t qca6564 "[WARN] region code not found, using US";;
+	*)
+		logger -t qca6564 "[WARN] Invalid region code, using US";;
+esac
+
+# We don't want to rewrite NAND every time we boot so only
+# change the link if it is wrong.
+if [ ! -e "${BDATA_LINK}" ] || ! cmp -s "${BDATA_LINK}" "${BDATA_SOURCE}"; then
+	ln -sf "${BDATA_SOURCE}" "${BDATA_LINK}"
+fi
 
 # Check the version of modprobe installed to compound the arguments.
 if readlink -f $(which modprobe) | grep -qs kmod; then
