@@ -50,14 +50,25 @@ if ! cmp -s ${TMP_MACFILE} ${MACFILE}; then
 fi
 rm -f ${TMP_MACFILE}
 
-REGION_CODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null)"
+OTP_REGION_CODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null)"
+DTB_REGION_CODE="$(cat /proc/device-tree/wireless/regulatory-domain 2>/dev/null)"
 US_CODE="0x0"
 WW_CODE="0x1"
 JP_CODE="0x2"
+# Check if the DTB_REGION_CODE is in the list of valid codes,
+# if not use the OTP programmed value.
+case "${DTB_REGION_CODE}" in
+    ${US_CODE}|${WW_CODE}|${JP_CODE})
+	REGULATORY_DOMAIN=${DTB_REGION_CODE};;
+    *)
+	logger -t qca6564 "[ERROR] Invalid region code in device tree, using OTP value"
+	REGULATORY_DOMAIN=${OTP_REGION_CODE};;
+esac
+
 BDATA_LINK="${FIRMWARE_DIR}/bdwlan30.bin"
 # Create a symbolic link to the FW file for the specific country region.
 BDATA_SOURCE="${FIRMWARE_DIR}/bdwlan30_US.bin"
-case "${REGION_CODE}" in
+case "${REGULATORY_DOMAIN}" in
 	${US_CODE})
 		logger -t qca6564 "Setting US wireless region";;
 	${WW_CODE}|${JP_CODE})
