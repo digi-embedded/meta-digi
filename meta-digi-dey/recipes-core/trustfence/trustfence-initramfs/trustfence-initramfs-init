@@ -48,13 +48,10 @@ fi
 root="$(findfs ${root})"
 
 # Open LUKS encrypted device
-TMP_KEYFILE="$(mktemp keyfile.XXXXXX)"
-trustfence-tool -f ${TMP_KEYFILE}
-if cryptsetup --key-file ${TMP_KEYFILE} open --type luks ${root} cryptroot; then
+if trustfence-tool ${root} cryptroot; then
 	# Reset root variable to the decrypted mapped device
 	root="/dev/mapper/cryptroot"
 fi
-wipe -cfs ${TMP_KEYFILE}
 
 # Mount mapped device
 mkdir -p /newroot
