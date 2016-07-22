@@ -7,6 +7,11 @@
 
 Version     Release date (YYYY-MM-DD)
 -------------------------------------------------------------------------------
+2.0-r3      2016-07-22
+
+    * Support for new platform CC6UL
+    * Support for Trustfence security enhancements
+
 2.0-r2      2016-07-19
 
     * Release based on Yocto 2.0 (Jethro) for ConnectCore 6 SBC including:
