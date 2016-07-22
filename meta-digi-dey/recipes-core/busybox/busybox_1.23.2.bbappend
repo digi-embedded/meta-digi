@@ -74,3 +74,5 @@ do_install_append() {
 		ln -s ../if-pre-up.d/bridgeifupdown ${D}${sysconfdir}/network/if-post-down.d/bridgeifupdown
 	fi
 }
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"

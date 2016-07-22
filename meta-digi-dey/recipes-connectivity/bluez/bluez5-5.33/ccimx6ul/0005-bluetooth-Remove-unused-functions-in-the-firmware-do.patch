@@ -1,0 +1,73 @@
+From: Anantha Krishnan <ananthk@codeaurora.org>
+Date: Mon, 8 Sep 2014 14:33:24 +0530
+Subject: [PATCH] bluetooth: Remove unused functions in the firmware download
+ process
+
+rome_disable_sleep() function is not used anywhere in the code and
+hence remove it.
+
+Change-Id: Iec1f9b1478850af3023ff297493693283a5338d7
+Signed-off-by: Rupesh Tatiya <rtatiya@codeaurora.org>
+---
+ tools/hciattach_rome.c | 48 ------------------------------------------------
+ 1 file changed, 48 deletions(-)
+
+diff --git a/tools/hciattach_rome.c b/tools/hciattach_rome.c
+index 947e1abb96c4..4fcbdf2ab82a 100644
+--- a/tools/hciattach_rome.c
++++ b/tools/hciattach_rome.c
+@@ -1317,54 +1317,6 @@ error:
+ 
+ }
+ 
+-int rome_disable_sleep(int fd)
+-{
+-   int size, err = 0;
+-    unsigned char cmd[HCI_MAX_CMD_SIZE];
+-    unsigned char rsp[HCI_MAX_EVENT_SIZE];
+-    hci_command_hdr *cmd_hdr;
+-    int flags;
+-
+-    memset(cmd, 0x0, HCI_MAX_CMD_SIZE);
+-
+-    cmd_hdr = (void *) (cmd + 1);
+-    cmd[0]  = HCI_COMMAND_PKT;
+-    cmd_hdr->opcode = cmd_opcode_pack(HCI_VENDOR_CMD_OGF, NVM_ACCESS_CODE);
+-    cmd_hdr->plen     = VSC_DISABLE_IBS_LEN;
+-    cmd[4] = 0x01;
+-    cmd[5] = 0x1B;
+-    cmd[6] = 0x01;
+-    cmd[7] = 0x00;
+-
+-    /* Total length of the packet to be sent to the Controller */
+-    size = (HCI_CMD_IND + HCI_COMMAND_HDR_SIZE + VSC_DISABLE_IBS_LEN);
+-    /* Send the HCI command packet to UART for transmission */
+-    fprintf(stderr, "%s: HCI CMD: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n", __FUNCTION__, cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5], cmd[6], cmd[7]) ;
+-    err = write(fd, cmd, size);
+-    if (err != size) {
+-        fprintf(stderr, "%s: Send failed with ret value: %d\n", __FUNCTION__, err);
+-        goto error;
+-    }
+-
+-    /* Check for response from the Controller */
+-    if ((err =read_vs_hci_event(fd, rsp, HCI_MAX_EVENT_SIZE)) < 0) {
+-            fprintf(stderr, "%s: Failed to get HCI-VS Event from SOC\n", __FUNCTION__);
+-            goto error;
+-    }
+-
+-    fprintf(stderr, "%s: Received HCI-Vendor Specific Event from SOC\n", __FUNCTION__);
+-
+-    /* Wait for command complete event */
+-    err = read_hci_event(fd, rsp, HCI_MAX_EVENT_SIZE);
+-    if ( err < 0) {
+-        fprintf(stderr, "%s: Failed to set patch info on Controller\n", __FUNCTION__);
+-        goto error;
+-    }
+-        fprintf(stderr, "%s\n", __FUNCTION__);
+-error:
+-    return err;
+-
+-}
+ 
+ int rome_set_baudrate_req(int fd)
+ {

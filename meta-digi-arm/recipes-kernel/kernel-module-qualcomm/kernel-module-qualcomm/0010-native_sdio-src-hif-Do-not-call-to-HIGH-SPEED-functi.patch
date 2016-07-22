@@ -1,0 +1,70 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Thu, 21 Apr 2016 14:00:59 +0200
+Subject: [PATCH] native_sdio/src/hif: Do not call to HIGH SPEED functions for
+ newer kernels
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ CORE/SERVICES/HIF/sdio/linux/native_sdio/src/hif.c | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/CORE/SERVICES/HIF/sdio/linux/native_sdio/src/hif.c b/CORE/SERVICES/HIF/sdio/linux/native_sdio/src/hif.c
+index b3afed2a8d7c..1a1e51eff8c7 100644
+--- a/CORE/SERVICES/HIF/sdio/linux/native_sdio/src/hif.c
++++ b/CORE/SERVICES/HIF/sdio/linux/native_sdio/src/hif.c
+@@ -690,7 +690,9 @@ A_STATUS ReinitSDIO(HIF_DEVICE *device)
+             err = Func0_CMD52ReadByte(card, SDIO_CCCR_SPEED, &cmd52_resp);
+             if (err) {
+                 AR_DEBUG_PRINTF(ATH_DEBUG_ERR, ("ReinitSDIO: CMD52 read to CCCR speed register failed  : %d \n",err));
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
+                 card->state &= ~MMC_STATE_HIGHSPEED;
++#endif
+                 /* no need to break */
+             } else {
+                 err = Func0_CMD52WriteByte(card, SDIO_CCCR_SPEED, (cmd52_resp | SDIO_SPEED_EHS));
+@@ -698,14 +700,20 @@ A_STATUS ReinitSDIO(HIF_DEVICE *device)
+                     AR_DEBUG_PRINTF(ATH_DEBUG_ERR, ("ReinitSDIO: CMD52 write to CCCR speed register failed  : %d \n",err));
+                     break;
+                 }
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
+                 mmc_card_set_highspeed(card);
++#endif
+                 host->ios.timing = MMC_TIMING_SD_HS;
+                 host->ops->set_ios(host, &host->ios);
+             }
+         }
+
+         /* Set clock */
+-        if (mmc_card_highspeed(card)) {
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
++	if (mmc_card_highspeed(card)) {
++#else
++        if (mmc_card_hs(card)) {
++#endif
+             clock = 50000000;
+         } else {
+             clock = card->cis.max_dtr;
+@@ -1181,7 +1189,11 @@ TODO: MMC SDIO3.0 Setting should also be modified in ReInit() function when Powe
+             if (mmcclock > 0){
+                 clock_set = mmcclock;
+             }
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
+             if (mmc_card_highspeed(func->card)){
++#else
++            if (mmc_card_hs(func->card)){
++#endif
+                 clock = 50000000;
+             } else {
+                 clock = func->card->cis.max_dtr;
+@@ -2000,7 +2012,11 @@ addHifDevice(struct sdio_func *func)
+     hifdevice->func = func;
+     hifdevice->powerConfig = HIF_DEVICE_POWER_UP;
+     hifdevice->DeviceState = HIF_DEVICE_STATE_ON;
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
+     ret = sdio_set_drvdata(func, hifdevice);
++#else
++    sdio_set_drvdata(func, hifdevice);
++#endif
+
+     EXIT("status %d", ret);
+     return hifdevice;

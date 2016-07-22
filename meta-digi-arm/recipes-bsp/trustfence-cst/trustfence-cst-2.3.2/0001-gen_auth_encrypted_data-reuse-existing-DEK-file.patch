@@ -1,0 +1,29 @@
+From: "Diaz de Grenu, Jose" <Jose.DiazdeGrenu@digi.com>
+Date: Thu, 30 Jun 2016 16:42:42 +0200
+Subject: [PATCH] gen_auth_encrypted_data: reuse existing DEK file
+
+In order to be able to encrypt several artifacts with the same DEK, it is
+needed to allow the CST to reuse an existing DEK file.
+
+Previous to this patch, the DEK is generated on the fly and placed on the
+specified path. After this patch, the DEK is taken from the specified path.
+
+https://jira.digi.com/browse/DUB-608
+
+Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
+---
+ code/back_end/src/adapt_layer_openssl.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/code/back_end/src/adapt_layer_openssl.c b/code/back_end/src/adapt_layer_openssl.c
+index 8513046269ea..ce6e370f2c6a 100644
+--- a/code/back_end/src/adapt_layer_openssl.c
++++ b/code/back_end/src/adapt_layer_openssl.c
+@@ -945,6 +945,7 @@ int32_t gen_auth_encrypted_data(const char* in_file,
+         }
+         printf("\n");
+ #endif
++        reuse_dek = 1;
+         if (reuse_dek) {
+             fh = fopen(key_file, "rb");
+             if (fh == NULL) {

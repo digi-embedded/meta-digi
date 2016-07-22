@@ -30,7 +30,7 @@ CELLULAR_PKGS = "\
 
 RDEPENDS_${PN} = "\
 	iproute2 \
-	${@base_contains('DISTRO_FEATURES', 'cellular', '${CELLULAR_PKGS}', '', d)} \
+	${@bb.utils.contains('DISTRO_FEATURES', 'cellular', '${CELLULAR_PKGS}', '', d)} \
 	${VIRTUAL-RUNTIME_ftp-server} \
 	${VIRTUAL-RUNTIME_http-server} \
 	${VIRTUAL-RUNTIME_network-utils} \

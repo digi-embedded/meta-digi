@@ -1,0 +1,58 @@
+#!/bin/sh
+#===============================================================================
+#
+#  suspend
+#
+#  Copyright (C) 2016 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: suspend system to RAM
+#
+#===============================================================================
+
+scriptname="$(basename ${0})"
+syspower="/sys/power/state"
+
+usage() {
+	printf "\nSuspend system to RAM memory\n"
+	printf "\nUsage: ${scriptname} [OPTIONS]\n
+	-h      Show this help
+	\n"
+}
+
+suspend_interfaces() {
+	if grep -qs '^wlan0' /var/run/ifstate; then
+		ifdown wlan0 && up_wlan_on_resume="1" && sleep 0.5 && rmmod wlan
+	fi
+}
+
+resume_interfaces() {
+	if ! grep -qs '^wlan0' /var/run/ifstate; then
+		[ -n "${up_wlan_on_resume}" ] && modprobe wlan && sleep 0.5 && ifup wlan0
+	fi
+}
+
+while getopts "h" c; do
+	case "${c}" in
+		h) usage; exit;;
+	esac
+done
+
+if [ -f "${syspower}" ]; then
+	# Pre-suspend actions
+	suspend_interfaces
+
+	# Suspend the device
+	printf "mem" > ${syspower}
+	sleep .5
+
+	# Post-resume actions
+	resume_interfaces
+else
+	printf "\n[ERROR] File ${syspower} not found\n\n"
+fi

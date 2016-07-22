@@ -1,0 +1,31 @@
+# The syntax for this file is documented in the HAB Code Signing Tool
+# User's Guid which is included in the CST package distributed by NXP
+[Header]
+    Version = 4.0
+    Hash Algorithm = sha256
+    Engine Configuration = 0
+    Certificate Format = X509
+    Signature Format = CMS
+
+[Install SRK]
+    File = "%srk_table%"
+    Source index = %key_index%
+
+ 
+[Install CSFK]
+    File = "%cert_csf%"
+
+[Authenticate CSF]
+
+[Unlock]
+    Engine = CAAM
+    Features = RNG
+
+[Install Key]
+    Verification index = 0
+    Target index = 2
+    File = "%cert_img%"
+
+[Authenticate Data]
+    Verification index = 2
+    Blocks = %ram_start% %image_offset% %auth_len% "%uimage_path%"

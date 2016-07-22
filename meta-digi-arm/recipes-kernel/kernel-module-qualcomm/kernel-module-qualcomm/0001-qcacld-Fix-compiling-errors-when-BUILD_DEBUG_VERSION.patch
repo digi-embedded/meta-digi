@@ -1,0 +1,64 @@
+From: Yi Chen <yichen@qti.qualcomm.com>
+Date: Fri, 28 Aug 2015 19:24:45 +0800
+Subject: [PATCH] qcacld: Fix compiling errors when BUILD_DEBUG_VERSION := 0.
+
+This is a compiling issue when BUILD_DEBUG_VERSION := 0 is set in Kbuild.
+
+Change-Id: Iaee98eb91d66990dfa4989a7c07cb5592f8a6079
+CRs-Fixed: 898366
+(cherry picked from commit d0258ff1dcf19236e4cfa69e45f75b72a1334609)
+---
+ CORE/UTILS/FWLOG/dbglog_host.c | 4 ++--
+ Kbuild                         | 8 ++++----
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/CORE/UTILS/FWLOG/dbglog_host.c b/CORE/UTILS/FWLOG/dbglog_host.c
+index 2dfa45983a87..63fc742259fc 100644
+--- a/CORE/UTILS/FWLOG/dbglog_host.c
++++ b/CORE/UTILS/FWLOG/dbglog_host.c
+@@ -55,8 +55,6 @@
+ #include <a_debug.h>
+ #define FWLOG_DEBUG   ATH_DEBUG_MAKE_MODULE_MASK(0)
+
+-#if defined(DEBUG)
+-
+ static bool appstarted = FALSE;
+ static bool senddriverstatus = FALSE;
+ static bool kd_nl_init = FALSE;
+@@ -64,6 +62,8 @@ static int cnss_diag_pid = INVALID_PID;
+ static int get_version = 0;
+ static int gprint_limiter = 0;
+
++#if defined(DEBUG)
++
+ static ATH_DEBUG_MASK_DESCRIPTION g_fwlogDebugDescription[] = {
+     {FWLOG_DEBUG,"fwlog"},
+ };
+diff --git a/Kbuild b/Kbuild
+index 04461cfb7945..b248eee28bf0 100644
+--- a/Kbuild
++++ b/Kbuild
+@@ -882,7 +882,6 @@ CDEFINES :=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DWLAN_PERF \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__ \
+ 		-DHAL_SELF_STA_PER_BSS=1 \
+ 		-DWLAN_FEATURE_VOWIFI_11R \
+@@ -966,11 +965,12 @@ CDEFINES += -DWCN_PRONTO
+ CDEFINES += -DWCN_PRONTO_V1
+ endif
+
++CDEFINES += 	-DTRACE_RECORD \
++		-DLIM_TRACE_RECORD \
++		-DSME_TRACE_RECORD
++
+ ifeq ($(BUILD_DEBUG_VERSION),1)
+ CDEFINES +=	-DWLAN_DEBUG \
+-		-DTRACE_RECORD \
+-		-DLIM_TRACE_RECORD \
+-		-DSME_TRACE_RECORD \
+ 		-DPE_DEBUG_LOGW \
+ 		-DPE_DEBUG_LOGE \
+ 		-DDEBUG

@@ -1,0 +1,75 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Thu, 21 Apr 2016 13:52:18 +0200
+Subject: [PATCH] Updating calls to "alloc_netdev_mq"
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ CORE/EPPING/src/epping_txrx.c   |  6 ++++++
+ CORE/HDD/src/wlan_hdd_hostapd.c |  4 ++++
+ CORE/HDD/src/wlan_hdd_main.c    | 10 +++++++---
+ 3 files changed, 17 insertions(+), 3 deletions(-)
+
+diff --git a/CORE/EPPING/src/epping_txrx.c b/CORE/EPPING/src/epping_txrx.c
+index 678d58e0cfae..0985e362f94a 100644
+--- a/CORE/EPPING/src/epping_txrx.c
++++ b/CORE/EPPING/src/epping_txrx.c
+@@ -355,7 +355,13 @@ epping_adapter_t *epping_add_adapter(epping_context_t *pEpping_ctx,
+    struct net_device *dev;
+    epping_adapter_t *pAdapter;
+
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
++   dev = alloc_netdev(sizeof(epping_adapter_t), "wifi%d", NET_NAME_UNKNOWN, ether_setup);
++#else
+    dev = alloc_netdev(sizeof(epping_adapter_t), "wifi%d", ether_setup);
++#endif
++
++
+    if (dev == NULL) {
+       EPPING_LOG(VOS_TRACE_LEVEL_FATAL,
+          "%s: Cannot allocate epping_adapter_t\n", __func__);
+diff --git a/CORE/HDD/src/wlan_hdd_hostapd.c b/CORE/HDD/src/wlan_hdd_hostapd.c
+index 6251224c11df..8a80d26f355a 100644
+--- a/CORE/HDD/src/wlan_hdd_hostapd.c
++++ b/CORE/HDD/src/wlan_hdd_hostapd.c
+@@ -5447,7 +5447,11 @@ hdd_adapter_t* hdd_wlan_create_ap_dev( hdd_context_t *pHddCtx, tSirMacAddr macAd
+
+    hddLog(VOS_TRACE_LEVEL_DEBUG, "%s: iface_name = %s", __func__, iface_name);
+
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
++   pWlanHostapdDev = alloc_netdev_mq(sizeof(hdd_adapter_t), iface_name, NET_NAME_UNKNOWN, ether_setup, NUM_TX_QUEUES);
++#else
+    pWlanHostapdDev = alloc_netdev_mq(sizeof(hdd_adapter_t), iface_name, ether_setup, NUM_TX_QUEUES);
++#endif
+
+     if (pWlanHostapdDev != NULL)
+     {
+diff --git a/CORE/HDD/src/wlan_hdd_main.c b/CORE/HDD/src/wlan_hdd_main.c
+index 0ff3f31b9863..a10da2a9b164 100755
+--- a/CORE/HDD/src/wlan_hdd_main.c
++++ b/CORE/HDD/src/wlan_hdd_main.c
+@@ -8226,7 +8226,11 @@ static hdd_adapter_t* hdd_alloc_station_adapter( hdd_context_t *pHddCtx, tSirMac
+    /*
+     * cfg80211 initialization and registration....
+     */
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
++   pWlanDev = alloc_netdev_mq(sizeof( hdd_adapter_t ), name, NET_NAME_UNKNOWN, ether_setup, NUM_TX_QUEUES);
++#else
+    pWlanDev = alloc_netdev_mq(sizeof( hdd_adapter_t ), name, ether_setup, NUM_TX_QUEUES);
++#endif
+
+    if(pWlanDev != NULL)
+    {
+@@ -9929,10 +9933,10 @@ VOS_STATUS hdd_start_all_adapters( hdd_context_t *pHddCtx )
+ #if defined(MSM_PLATFORM) && !defined(WITH_BACKPORTS)
+             hddLog(VOS_TRACE_LEVEL_ERROR, "%s [SSR] send stop ap to supplicant",
+                                                        __func__);
+-#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
+-            cfg80211_ap_stopped(pAdapter->dev, GFP_KERNEL);
+-#else
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0))
+             nl80211_send_ap_stopped(pAdapter->dev->ieee80211_ptr);
++#else
++            cfg80211_ap_stopped(pAdapter->dev, GFP_KERNEL);
+ #endif
+ #else
+             hddLog(VOS_TRACE_LEVEL_ERROR, "%s [SSR] send restart supplicant",

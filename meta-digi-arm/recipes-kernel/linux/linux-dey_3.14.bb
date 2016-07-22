@@ -5,7 +5,7 @@ require recipes-kernel/linux/linux-dtb.inc
 
 inherit fsl-vivante-kernel-driver-handler
 
-SRCBRANCH = "v3.14/dey-2.0/maint"
+SRCBRANCH = "v3.14/master"
 SRCREV = "${AUTOREV}"
 
-COMPATIBLE_MACHINE = "(ccimx6)"
+COMPATIBLE_MACHINE = "(ccimx6$)"

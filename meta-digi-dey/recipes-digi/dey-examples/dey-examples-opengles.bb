@@ -24,4 +24,4 @@ RDEPENDS_${PN}_ccimx6 = "libopenvg-mx6"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-COMPATIBLE_MACHINE = "(ccimx6)"
+COMPATIBLE_MACHINE = "(ccimx6$)"

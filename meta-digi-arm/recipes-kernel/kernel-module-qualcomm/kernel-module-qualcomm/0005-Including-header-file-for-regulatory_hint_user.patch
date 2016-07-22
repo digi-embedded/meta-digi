@@ -1,0 +1,28 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Thu, 21 Apr 2016 13:19:10 +0200
+Subject: [PATCH] Including header file for "regulatory_hint_user"
+
+The function "regulatory_hint_user" has been moved from
+include/net/cfg80211.h to net/wireless/reg.h.
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+(cherry picked from commit db944bc907127c191b1bbdcc58d3aecedcf44a8c)
+---
+ CORE/VOSS/src/vos_nvitem.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/CORE/VOSS/src/vos_nvitem.c b/CORE/VOSS/src/vos_nvitem.c
+index d79ae2871e4b..47290c9d1744 100644
+--- a/CORE/VOSS/src/vos_nvitem.c
++++ b/CORE/VOSS/src/vos_nvitem.c
+@@ -53,6 +53,10 @@
+ #include "regdomain.h"
+ #include "regdomain_common.h"
+
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0))
++#include <../net/wireless/reg.h>
++#endif
++
+ #if (LINUX_VERSION_CODE < KERNEL_VERSION(3,9,0)) && !defined(WITH_BACKPORTS)
+ #define IEEE80211_CHAN_NO_80MHZ		1<<7
+ #endif

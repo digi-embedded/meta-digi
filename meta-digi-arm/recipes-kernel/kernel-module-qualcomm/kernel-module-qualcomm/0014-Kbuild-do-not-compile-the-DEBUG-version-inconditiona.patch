@@ -1,0 +1,25 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Tue, 5 Jul 2016 17:57:07 +0200
+Subject: [PATCH] Kbuild: do not compile the DEBUG version inconditionally
+
+Do not compile the DEBUG version inconditionally by adding the posibility to
+define the DEBUG version as a flag parameter.
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ Kbuild | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Kbuild b/Kbuild
+index b14417a558cd..a0e203ce5493 100644
+--- a/Kbuild
++++ b/Kbuild
+@@ -121,7 +121,7 @@ endif
+ # Feature flags which are not (currently) configurable via Kconfig
+
+ #Whether to build debug version
+-BUILD_DEBUG_VERSION := 1
++BUILD_DEBUG_VERSION ?= 1
+
+ #Enable this flag to build driver in diag version
+ BUILD_DIAG_VERSION := 1

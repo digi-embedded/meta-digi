@@ -10,11 +10,9 @@ inherit packagegroup
 
 RDEPENDS_${PN} = "\
     crda \
+    iw \
     wireless-tools \
     wpa-supplicant \
     wpa-supplicant-cli \
     wpa-supplicant-passphrase \
 "
-
-RDEPENDS_${PN}_append_mxs = " iw"
-RDEPENDS_${PN}_append_mx6 = " iw"

@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -e
+
+[ -f "/etc/default/autogetty" ] && . /etc/default/autogetty
+
+[ "${ENABLED}" != "1" ] && exit
+
+for arg in $(cat /proc/cmdline); do
+	case "${arg}" in
+		console=*)
+			eval ${arg}
+			TTY="${console%,*}"
+			SPEED="${console#*,}"
+
+			# If no speed is given default to 115200 and fall-back
+			[ "${SPEED}" = "${TTY}" ] && SPEED="115200,57600,38400,19200,9600"
+
+			if [ -n "${TTY}" ] && grep -qs "${TTY}" /etc/securetty; then
+				/sbin/getty -L "${SPEED}" "${TTY}" &
+			fi
+			;;
+	esac
+done

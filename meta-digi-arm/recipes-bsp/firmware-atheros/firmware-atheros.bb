@@ -82,4 +82,4 @@ FILES_${PN}-ar3k = "/lib/firmware/ar3k"
 FILES_${PN}-ath6kl = "/lib/firmware/ath6k"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccardimx28|ccimx6)"
+COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$)"

@@ -12,6 +12,6 @@ inherit packagegroup
 RDEPENDS_${PN} = " \
 	${BLUEZ} \
 	${BLUEZ}-testtools \
-	${@base_contains("MACHINE_FEATURES", "bluetooth", "libasound-module-bluez", "", d)} \
-	${@base_contains("BLUEZ", "bluez5", "bluez5-noinst-tools bluez5-obex", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "libasound-module-bluez", "", d)} \
+	${@bb.utils.contains("BLUEZ", "bluez5", "bluez5-noinst-tools bluez5-obex", "", d)} \
 "

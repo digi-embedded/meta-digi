@@ -1,0 +1,30 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Thu, 21 Apr 2016 10:30:51 +0200
+Subject: [PATCH] wlan_hdd_main: Update cfg80211_ap_stopped to
+ nl80211_send_ap_stopped
+
+Use nl80211_send_ap_stopped instead of cfg80211_ap_stopped for newer
+kernel versions
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ CORE/HDD/src/wlan_hdd_main.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/CORE/HDD/src/wlan_hdd_main.c b/CORE/HDD/src/wlan_hdd_main.c
+index 5e4e95aaaee4..0ff3f31b9863 100755
+--- a/CORE/HDD/src/wlan_hdd_main.c
++++ b/CORE/HDD/src/wlan_hdd_main.c
+@@ -9929,8 +9929,12 @@ VOS_STATUS hdd_start_all_adapters( hdd_context_t *pHddCtx )
+ #if defined(MSM_PLATFORM) && !defined(WITH_BACKPORTS)
+             hddLog(VOS_TRACE_LEVEL_ERROR, "%s [SSR] send stop ap to supplicant",
+                                                        __func__);
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
+             cfg80211_ap_stopped(pAdapter->dev, GFP_KERNEL);
+ #else
++            nl80211_send_ap_stopped(pAdapter->dev->ieee80211_ptr);
++#endif
++#else
+             hddLog(VOS_TRACE_LEVEL_ERROR, "%s [SSR] send restart supplicant",
+                                                        __func__);
+             /* event supplicant to restart */

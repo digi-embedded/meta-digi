@@ -1,10 +1,15 @@
 inherit image_types
 
+def TRUSTFENCE_BOOTIMAGE_DEPENDS(d):
+    tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
+    return "%s:do_rootfs" % tf_initramfs if tf_initramfs else ""
+
 IMAGE_DEPENDS_boot.vfat = " \
     dosfstools-native:do_populate_sysroot \
     mtools-native:do_populate_sysroot \
     u-boot:do_deploy \
     virtual/kernel:do_deploy \
+    ${@TRUSTFENCE_BOOTIMAGE_DEPENDS(d)} \
 "
 
 IMAGE_CMD_boot.vfat() {
@@ -20,6 +25,12 @@ IMAGE_CMD_boot.vfat() {
 				BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}"
 			fi
 		done
+	fi
+
+	# Add Trustfence initramfs if enabled
+	if [ -n "${TRUSTFENCE_INITRAMFS_IMAGE}" ]; then
+		BOOTIMG_FILES="${BOOTIMG_FILES} $(readlink -e ${DEPLOY_DIR_IMAGE}/${TRUSTFENCE_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot)"
+		BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${TRUSTFENCE_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot"
 	fi
 
 	# Size of kernel and device tree + 10% extra space (in bytes)
@@ -58,6 +69,53 @@ IMAGE_CMD_boot.vfat() {
 	if [ -n "${IMAGE_LINK_NAME}" ] && [ -e ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat ]; then
 		ln -s ${IMAGE_NAME}.boot.vfat ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.boot.vfat
 	fi
+}
+
+IMAGE_DEPENDS_boot.ubifs = " \
+    mtd-utils-native:do_populate_sysroot \
+    u-boot:do_deploy \
+    virtual/kernel:do_deploy \
+"
+
+IMAGE_CMD_boot.ubifs() {
+	#
+	# Image generation code for image type 'boot.ubifs'
+	#
+	BOOTIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
+	if [ -n "${KERNEL_DEVICETREE}" ]; then
+		for DTB in ${KERNEL_DEVICETREE}; do
+			if [ -e "${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}" ]; then
+				BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}"
+			fi
+		done
+	fi
+
+	# Create temporary folder
+	TMP_BOOTDIR="$(mktemp -d ${DEPLOY_DIR_IMAGE}/boot.XXXXXX)"
+
+	# Hard-link BOOTIMG_FILES into the temporary folder with the symlink filename
+	for item in ${BOOTIMG_FILES_SYMLINK}; do
+		orig="$(readlink -e ${item})"
+		ln ${orig} ${TMP_BOOTDIR}/$(basename ${item})
+	done
+
+	# Hard-link boot scripts into the temporary folder
+	for item in ${BOOT_SCRIPTS}; do
+		src="$(echo ${item} | awk -F':' '{ print $1 }')"
+		dst="$(echo ${item} | awk -F':' '{ print $2 }')"
+		ln ${DEPLOY_DIR_IMAGE}/${src} ${TMP_BOOTDIR}/${dst}
+	done
+
+	# Build UBIFS boot image out of temp folder
+	mkfs.ubifs -r ${TMP_BOOTDIR} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.ubifs ${MKUBIFS_BOOT_ARGS}
+
+	# Create the symlink
+	if [ -n "${IMAGE_LINK_NAME}" ] && [ -e ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.ubifs ]; then
+		ln -s ${IMAGE_NAME}.boot.ubifs ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.boot.ubifs
+	fi
+
+	# Remove the temporary folder
+	rm -rf ${TMP_BOOTDIR}
 }
 
 IMAGE_CMD_rootfs.initramfs() {

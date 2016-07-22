@@ -1,0 +1,6 @@
+Digi Embedded Yocto provides the following image recipes:
+
+  * core-image-base: A console-only image.
+
+    Expansion of native core-image-base by including all the support for the
+    target device hardware like firmware files, rootfs customizations, etc.

@@ -19,11 +19,11 @@ IMAGE_FEATURES += " \
     dey-qt \
     package-management \
     ssh-server-dropbear \
-    ${@base_contains('DISTRO_FEATURES', 'x11', 'x11-base x11-sato', '', d)} \
-    ${@base_contains('MACHINE_FEATURES', 'accel-video', 'dey-gstreamer', '', d)} \
-    ${@base_contains('MACHINE_FEATURES', 'alsa', 'dey-audio', '', d)} \
-    ${@base_contains('MACHINE_FEATURES', 'bluetooth', 'dey-bluetooth', '', d)} \
-    ${@base_contains('MACHINE_FEATURES', 'wifi', 'dey-wireless', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'x11-base x11-sato', '', d)} \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'accel-video', 'dey-gstreamer', '', d)} \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'alsa', 'dey-audio', '', d)} \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'bluetooth', 'dey-bluetooth', '', d)} \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'dey-wireless', '', d)} \
 "
 
 # SDK features (for toolchains generated from an image with populate_sdk)

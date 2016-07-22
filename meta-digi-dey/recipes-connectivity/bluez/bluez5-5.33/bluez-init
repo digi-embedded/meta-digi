@@ -1,0 +1,174 @@
+#!/bin/sh
+#===============================================================================
+#
+#  bluez
+#
+#  Copyright (C) 2012-2014 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Configure Bluetooth
+#
+#===============================================================================
+
+set -e
+
+if [ "${1}" != "start" ]; then
+	exit 0
+fi
+
+SCRIPTNAME="$(basename "${0}")"
+LOGFILE="/var/log/bluetoothd.log"
+
+bt_init_qca6564() {
+	MOD_VERSION="$(($(cat /proc/device-tree/digi,hwid,hv 2>/dev/null || true)))"
+
+	# Reset the BT_EN line
+	BT_EN_QCA_GPIO_NR="137"
+	BT_EN_L="/sys/class/gpio/gpio${BT_EN_QCA_GPIO_NR}"
+	[ -d "${BT_EN_L}" ] || printf "%s" ${BT_EN_QCA_GPIO_NR} > /sys/class/gpio/export
+	printf out > ${BT_EN_L}/direction && sleep .1
+	printf 0 > ${BT_EN_L}/value && sleep .1
+	printf 1 > ${BT_EN_L}/value && sleep .1
+	[ -d "${BT_EN_L}" ] && printf "%s" ${BT_EN_QCA_GPIO_NR} > /sys/class/gpio/unexport
+
+	# Module version older than revision 4 has swapped TX and RX lines
+	if [ "${MOD_VERSION}" -lt "4" ]; then
+		# Workaround to ignore the CTS flow control line
+		BT_CTS_QCA_GPIO_NR="18"
+		BT_CTS_L="/sys/class/gpio/gpio${BT_CTS_QCA_GPIO_NR}"
+		[ -d "${BT_CTS_L}" ] || printf "%s" ${BT_CTS_QCA_GPIO_NR} > /sys/class/gpio/export
+		printf out > ${BT_CTS_L}/direction && sleep .1
+		printf 0 > ${BT_CTS_L}/value && sleep .1
+		[ -d "${BT_CTS_L}" ] && printf "%s" ${BT_CTS_QCA_GPIO_NR} > /sys/class/gpio/unexport
+		# Reduce the rate to avoid the need for HW flow control
+		BT_RATE="115200"
+		BT_FLOW="noflow"
+	fi
+
+	if hciattach -t120 ttyBt qca ${BT_RATE:-3000000} ${BT_FLOW:-flow} 2>${LOGFILE}; then
+		:	# No-op
+	else
+		echo "${SCRIPTNAME}: FAILED (hciattach)"
+		exit
+	fi
+
+	# Convert the BT address to the hcitool command format.
+	#   Example:  "00:04:F3:11:22:33" coverted to "33 22 11 F3 04 00"
+	HCI_BTADDR="$(echo ${BTADDR} | tr ':' '\n' | tac | tr '\n' ' ' | sed -e 's/ $//g')"
+
+	# Up the interface to be able to send hci commands
+	if ! hciconfig hci0 up; then
+		echo "${SCRIPTNAME}: FAILED (hci0 up)"
+		exit
+	fi
+
+	# Set the MAC address
+	if ! hcitool -i hci0 cmd 3F 000B 01 02 06 ${HCI_BTADDR} > /dev/null; then
+		echo "${SCRIPTNAME}: FAILED (hci set MAC)"
+		exit
+	fi
+
+	# HCI Reset
+	if ! hcitool -i hci0 cmd 03 0003 00 > /dev/null; then
+		echo "${SCRIPTNAME}: FAILED (hci reset)"
+		exit
+	fi
+
+	# Down and up the interface to load the new MAC address
+	if ! hciconfig hci0 down; then
+		echo "${SCRIPTNAME}: FAILED (hci0 down)"
+		exit
+	fi
+
+	hciconfig hci0 up && echo "${SCRIPTNAME}: OK" || echo "${SCRIPTNAME}: FAILED"
+}
+
+bt_init_ar3k() {
+	if grep -qs '\<digi,ccardimx28\>' /proc/device-tree/compatible; then
+		BT_PWR_GPIO_NR="21"
+	elif grep -qs '\<digi,ccimx6\>' /proc/device-tree/compatible; then
+		BT_PWR_GPIO_NR="244"
+	fi
+
+	# Use a sub-shell here to change to firmware directory
+	(
+		cd /lib/firmware/ar3k/1020200
+
+		# Update the MAC address file only if it has changed.
+		FW_MAC="ar3kbdaddr.pst"
+		[ -f "${FW_MAC}" ] && [ "$(cat ${FW_MAC})" = "${BTADDR}" ] || echo ${BTADDR} > ${FW_MAC}
+
+		JPN_REGCODE="0x2"
+		REGCODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null)"
+		BT_CLASS_LINK="PS_ASIC.pst"
+		BT_CLASS_FILE="PS_ASIC_class_1.pst"
+		if [ -n "${REGCODE}" ] && [ "${JPN_REGCODE}" = "${REGCODE}" ]; then
+			BT_CLASS_FILE="PS_ASIC_class_2.pst"
+		fi
+
+		# Replace the configuration file if different
+		if ! cmp -s ${BT_CLASS_FILE} ${BT_CLASS_LINK}; then
+			ln -sf ${BT_CLASS_FILE} ${BT_CLASS_LINK}
+		fi
+		# Remove not used configuration and readme files
+		# -- Do not quote the subcommand to avoid leading/trailing whitespace
+		# -- being part of the file name.
+		rm -f $(echo PS_ASIC_class_?.pst | sed -e "s,${BT_CLASS_FILE},,g") readme.txt
+	)
+
+	# Start the Bluetooth driver and daemon (D-BUS must already be running)
+	RETRIES="5"
+	while [ "${RETRIES}" -gt "0" ]; do
+		hciattach ttyBt ath3k 4000000 1>${LOGFILE} && break
+		if [ -n "${BT_PWR_GPIO_NR}" ]; then
+			#
+			# If hciattach fails try to recover it by toggling the BT power GPIO
+			#
+			BT_PWR_L="/sys/class/gpio/gpio${BT_PWR_GPIO_NR}"
+			[ -d "${BT_PWR_L}" ] || printf "%s" ${BT_PWR_GPIO_NR} > /sys/class/gpio/export
+			printf out > ${BT_PWR_L}/direction && sleep .2
+			printf 0 > ${BT_PWR_L}/value && sleep .2
+			printf 1 > ${BT_PWR_L}/value && sleep .2
+			[ -d "${BT_PWR_L}" ] && printf "%s" ${BT_PWR_GPIO_NR} > /sys/class/gpio/unexport
+		else
+			sleep .5
+		fi
+		RETRIES="$((RETRIES - 1))"
+	done
+	if [ "${RETRIES}" -eq "0" ]; then
+		echo "${SCRIPTNAME}: FAILED (hciattach)"
+		exit
+	fi
+	if hciconfig hci0 up; then
+		:	# No-op
+	else
+		echo "${SCRIPTNAME}: FAILED"
+		exit
+	fi
+}
+
+# Check if this hardware does support Bluetooth
+if [ -d "/proc/device-tree/bluetooth" ]; then
+	# Get MAC address from device tree. Use a default value if it has not been set.
+	if [ -f "/proc/device-tree/bluetooth/mac-address" ]; then
+		BTADDR="$(hexdump -ve '1/1 "%02X" ":"' /proc/device-tree/bluetooth/mac-address | sed 's/:$//g')"
+	fi
+	if [ -z "${BTADDR}" ] || [ "${BTADDR}" = "00:00:00:00:00:00" ]; then
+		BTADDR="00:04:F3:FF:FF:BB"
+	fi
+
+	# Initialize for the specific bluetooth chip
+	if grep -qs '\<digi,ccimx6ul\>' /proc/device-tree/compatible; then
+		bt_init_qca6564
+	else
+		bt_init_ar3k
+	fi
+fi
+
+echo "Starting bluetooth services."
+start-stop-daemon -S --background --exec /usr/lib/bluez5/bluetooth/bluetoothd
