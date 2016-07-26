@@ -238,7 +238,7 @@ for platform in ${DY_PLATFORMS}; do
 					printf "\n[INFO] Building the ${target} target.\n"
 					time bitbake ${target}
 					# Build the toolchain for DEY images
-					if [ "${DY_BUILD_TCHAIN}" = "true" ] && echo "${target}" | grep -qs '^dey-image-[^-]\+$'; then
+					if [ "${DY_BUILD_TCHAIN}" = "true" ] && echo "${target}" | grep -qs '^\(core\|dey\)-image-[^-]\+$'; then
 						printf "\n[INFO] Building the toolchain for ${target}.\n"
 						time bitbake -c populate_sdk ${target}
 					fi
