@@ -37,11 +37,6 @@ UBOOT_EXTRA_CONF ?= ""
 python __anonymous() {
     if (d.getVar("TRUSTFENCE_DEK_PATH", True) not in ["0", None]) and (d.getVar("TRUSTFENCE_SIGN", True) != "1"):
          bb.fatal("Only signed U-Boot images can be encrypted. Generate signed images (TRUSTFENCE_SIGN=1) or remove encryption (TRUSTFENCE_DEK_PATH = 0)")
-    if (d.getVar("TRUSTFENCE_UBOOT_ENV_DEK", True) not in [None, "0"]):
-        if (d.getVar("TRUSTFENCE_DEK_PATH", True) in [None, "0"]):
-            bb.warn("It is strongly recommended to encrypt the U-Boot image when using environment encryption. Consider removing TRUSTFENCE_DEK_PATH = 0")
-        if (len(d.getVar("TRUSTFENCE_UBOOT_ENV_DEK", True)) != 32):
-            bb.fatal("Invalid TRUSTFENCE_UBOOT_ENV_DEK length. Define a string formed by 32 hexadecimal characters")
 }
 
 do_compile () {

@@ -22,7 +22,7 @@ TRUSTFENCE_CONSOLE_DISABLE ?= "1"
 TRUSTFENCE_SIGN ?= "1"
 TRUSTFENCE_SIGN_KEYS_PATH ?= "default"
 TRUSTFENCE_DEK_PATH ?= "default"
-TRUSTFENCE_UBOOT_ENV_DEK ?= "gen_random"
+TRUSTFENCE_ENCRYPT_ENVIRONMENT ?= "1"
 
 # Trustfence initramfs image recipe
 TRUSTFENCE_INITRAMFS_IMAGE ?= "dey-image-trustfence-initramfs"
@@ -46,9 +46,6 @@ python () {
             d.appendVar("UBOOT_EXTRA_CONF", " CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NR=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"))
 
     # Secure boot configuration
-    if (d.getVar("TRUSTFENCE_UBOOT_ENV_DEK") == "gen_random"):
-        d.setVar("TRUSTFENCE_UBOOT_ENV_DEK", str(binascii.hexlify(os.urandom(16)).decode()))
-
     if (d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") == "default"):
         d.setVar("TRUSTFENCE_SIGN_KEYS_PATH", d.getVar("TOPDIR") + "/trustfence");
 
@@ -63,6 +60,6 @@ python () {
             d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_KEY_INDEX=%s " % d.getVar("TRUSTFENCE_KEY_INDEX"))
         if (d.getVar("TRUSTFENCE_DEK_PATH", True) not in [None, "0"]):
             d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_DEK_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_DEK_PATH"))
-    if (d.getVar("TRUSTFENCE_UBOOT_ENV_DEK", True) not in [None, "0"]):
-        d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_ENV_AES=y CONFIG_ENV_AES_KEY=\\"%s\\"' % d.getVar("TRUSTFENCE_UBOOT_ENV_DEK"))
+    if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT", True) == "1"):
+        d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y')
 }
