@@ -15,7 +15,7 @@ LOCALVERSION = "-dey"
 LINUX_GIT_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}linux-2.6.git', '${DIGI_GITHUB_GIT}/linux.git', d)}"
 
 SRC_URI = " \
-    ${LINUX_GIT_URI};nobranch=1 \
+    ${LINUX_GIT_URI};branch=${SRCBRANCH} \
     file://defconfig \
 "
 
