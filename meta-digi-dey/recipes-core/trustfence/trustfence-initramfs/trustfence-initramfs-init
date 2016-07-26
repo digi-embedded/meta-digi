@@ -31,9 +31,12 @@ mkdir -p /var/run && rngd
 
 for arg in $(cat /proc/cmdline); do
 	case "${arg}" in
-		init=*|rescue=1|root=*) eval ${arg};;
+		init=*|rescue=1|root=*|trustfence_install=*) eval ${arg};;
 	esac
 done
+
+# Translate "PARTUUID=..." to real device
+root="$(findfs ${root})"
 
 # Jump to a rescue shell if requested
 if [ -n "${rescue}" ]; then
@@ -44,8 +47,14 @@ if [ -n "${rescue}" ]; then
 	done
 fi
 
-# Translate "PARTUUID=..." to real device
-root="$(findfs ${root})"
+# Run install script if "trustfence_install" kernel parameter exists
+if [ -n "${trustfence_install}" ]; then
+	trustfence-install.sh ${trustfence_install} ${root}
+	sleep 1
+	echo ">> Rebooting the system"
+	sleep 1
+	sync && reboot -f
+fi
 
 # Open LUKS encrypted device
 if trustfence-tool ${root} cryptroot; then
