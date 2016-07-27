@@ -58,11 +58,13 @@ JP_CODE="0x2"
 # Check if the DTB_REGION_CODE is in the list of valid codes,
 # if not use the OTP programmed value.
 case "${DTB_REGION_CODE}" in
-    ${US_CODE}|${WW_CODE}|${JP_CODE})
-	REGULATORY_DOMAIN=${DTB_REGION_CODE};;
-    *)
-	logger -t qca6564 "[ERROR] Invalid region code in device tree, using OTP value"
-	REGULATORY_DOMAIN=${OTP_REGION_CODE};;
+	${US_CODE}|${WW_CODE}|${JP_CODE})
+		REGULATORY_DOMAIN=${DTB_REGION_CODE};;
+	*)
+		if [ -n "${DTB_REGION_CODE}" ]; then
+			logger -t qca6564 "[ERROR] Invalid region code in device tree, using OTP value"
+		fi
+		REGULATORY_DOMAIN=${OTP_REGION_CODE};;
 esac
 
 BDATA_LINK="${FIRMWARE_DIR}/bdwlan30.bin"
