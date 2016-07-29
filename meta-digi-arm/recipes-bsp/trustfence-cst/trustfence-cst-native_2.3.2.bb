@@ -14,6 +14,7 @@ SRC_URI = " \
 	file://0001-gen_auth_encrypted_data-reuse-existing-DEK-file.patch \
 	file://0002-hab4_pki_tree.sh-automate-script.patch \
 	file://0003-openssl_helper-use-dev-urandom-as-seed-source.patch \
+	file://0004-hab4_pki_tree.sh-usa-a-random-password-for-the-defau.patch \
 	file://Makefile \
 "
 
