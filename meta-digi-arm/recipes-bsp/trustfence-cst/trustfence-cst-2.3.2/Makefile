@@ -1,7 +1,6 @@
 TARGET = linux64/cst
 LIBS = -lfrontend -lcrypto
-CC = gcc
-CFLAGS = -g -Wall
+CFLAGS += -g -Wall
 
 .PHONY: default all clean
 
@@ -18,7 +17,7 @@ LIBS_PATH = linux64/lib
 .PRECIOUS: $(TARGET) $(OBJECTS)
 
 $(TARGET): $(OBJECTS)
-	$(CC) $(OBJECTS) $(CFLAGS) -L $(LIBS_PATH) $(LIBS) -I $(HEADERS) -o $@
+	$(CC) $(OBJECTS) $(CFLAGS) $(LDFLAGS) -L $(LIBS_PATH) $(LIBS) -I $(HEADERS) -o $@
 
 clean:
 	-rm -f *.o $(TARGET)
