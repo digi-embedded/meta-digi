@@ -42,7 +42,7 @@ BB_GENERATE_MIRROR_TARBALLS = \"1\"
 RM_WORK_CFG="
 INHERIT += \"rm_work\"
 # Exclude rm_work for some key packages (for debugging purposes)
-RM_WORK_EXCLUDE += \"dey-image-qt linux-dey u-boot-dey\"
+RM_WORK_EXCLUDE += \"dey-image-qt linux-dey qtbase u-boot-dey\"
 "
 
 X11_REMOVAL_CFG="
