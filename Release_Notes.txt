@@ -1,11 +1,11 @@
 
                    Digi Embedded Yocto (DEY) 2.0
                            Release Notes
-                           Build 2.0-r1.2
+                           Build 2.0-r2.1
 
                     (c) 2016, Digi International
                     http://www.digiembedded.com/
-                           February, 2016
+                           July, 2016
 
 
 Introduction

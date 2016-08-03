@@ -20,10 +20,6 @@ LICENSE = "MIT"
 
 inherit core-image
 inherit dey-image
-inherit distro_features_check
-
-# Add 'x11' to CONFLICT_DISTRO_FEATURES for 'dey-image-tiny' family of recipes
-CONFLICT_DISTRO_FEATURES += "x11"
 
 IMAGE_ROOTFS_SIZE ?= "8192"
 
