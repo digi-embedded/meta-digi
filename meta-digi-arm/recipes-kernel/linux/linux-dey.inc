@@ -44,6 +44,8 @@ do_deploy_append() {
 	(cd ${DEPLOYDIR} && ln -sf ${KERNEL_IMAGE_BASE_NAME}.bin ${KERNEL_IMAGE_SYMLINK_NAME})
 }
 
+do_deploy[vardeps] += "TRUSTFENCE_SIGN_KEYS_PATH TRUSTFENCE_KEY_INDEX TRUSTFENCE_DEK_PATH"
+
 FILES_kernel-image += "/boot/config-${KERNEL_VERSION}"
 
 # Don't include kernels in standard images
