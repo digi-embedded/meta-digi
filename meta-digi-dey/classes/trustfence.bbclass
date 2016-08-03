@@ -10,7 +10,7 @@
 #
 
 # Default secure console configuration
-TRUSTFENCE_CONSOLE_DISABLE ?= "1"
+TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 
 # Uncomment to enable the console with the specified passphrase
 #TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE = "my_secure_passphrase"
