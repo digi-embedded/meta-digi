@@ -3,15 +3,18 @@ DESCRIPTION = "Provides software code signing support designed for use with i.MX
 HOMEPAGE = "https://www.nxp.com/webapp/Download?colCode=IMX_CST_TOOL"
 LICENSE = "CLOSED"
 
-DEPENDS = "openssl"
+DEPENDS = "openssl-native"
 
-S= "${WORKDIR}/cst-${PV}"
+S = "${WORKDIR}/cst-${PV}"
+
+inherit native
 
 SRC_URI = " \
 	${@base_conditional('TRUSTFENCE_SIGN', '1', 'file://cst-${PV}.tar.gz', '', d)} \
 	file://0001-gen_auth_encrypted_data-reuse-existing-DEK-file.patch \
 	file://0002-hab4_pki_tree.sh-automate-script.patch \
 	file://0003-openssl_helper-use-dev-urandom-as-seed-source.patch \
+	file://0004-hab4_pki_tree.sh-usa-a-random-password-for-the-defau.patch \
 	file://Makefile \
 "
 
@@ -32,5 +35,3 @@ do_install () {
 	install -m 0755 ca/v3_ca.cnf ${D}${bindir}/v3_ca.cnf
 	install -m 0755 ca/v3_usr.cnf ${D}${bindir}/v3_usr.cnf
 }
-
-BBCLASSEXTEND = "native"
