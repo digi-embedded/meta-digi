@@ -56,6 +56,8 @@ python () {
         d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_SIGN_IMAGE=y ")
         if d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True):
             d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_SIGN_KEYS_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"))
+        if (d.getVar("TRUSTFENCE_UNLOCK_KEY_REVOCATION", True) == "1"):
+            d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_UNLOCK_SRK_REVOKE=y ")
         if d.getVar("TRUSTFENCE_KEY_INDEX", True):
             d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_KEY_INDEX=%s " % d.getVar("TRUSTFENCE_KEY_INDEX"))
         if (d.getVar("TRUSTFENCE_DEK_PATH", True) not in [None, "0"]):

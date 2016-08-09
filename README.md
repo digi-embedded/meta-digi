@@ -112,6 +112,10 @@ Bluetooth Low Energy mode
 hang the processor when trying to authenticate an encrypted kernel image after
 a failed attempt. Hence the target needs to be reset after an authentication
 failure.
+* NXP i.MX6 processor does not set the sticky bit which write protects the
+SRK_REVOKE eFuse on closed devices. This means that in the ConnectCore 6,
+key revocation is always possible, no matter the value of the Yocto macro
+TRUSTFENCE_UNLOCK_KEY_REVOCATION.
 
 ## Digi ConnectCore 6 SBC
 
