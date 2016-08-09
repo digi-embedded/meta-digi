@@ -28,7 +28,6 @@ Software for the following hardware platforms is in beta support:
 
 * Digi ConnectCore 6UL
   * [Digi P/N CC-WMX-JN58-NE](http://www.digi.com/products/models/cc-wmx-jn58-ne)
-  * [Digi P/N CC-MX-JN58-Z1](http://www.digi.com/products/models/cc-mx-jn58-z1)
 * Digi ConnectCore 6UL Starter Kit
   * [Digi P/N CC-WMX6UL-START](http://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001514/default.htm#concept/yocto/c_get_started_with_yocto.htm))
 
@@ -88,6 +87,9 @@ Documentation is available online on the Digi documentation site:
 
 # Known Issues and Limitations
 
+This is a list of known issues and limitations at the time of release. An
+updated list can be found on the online documentation.
+
 * When using the TrustFence (TM) U-Boot environment encryption, access to the
 U-Boot environment from the Linux OS is not supported.
 
@@ -109,14 +111,14 @@ modes:
 softAP mode
 * A maximum of ten connected devices are supported when using Qualcomm's AR6233
 Bluetooth Low Energy mode
-* When using TrustFence encrypted images secure boot support, the CAAM will
-hang the processor when trying to authenticate an encrypted kernel image after
-a failed attempt. Hence the target needs to be reset after an authentication
-failure.
 * NXP i.MX6 processor does not set the sticky bit which write protects the
 SRK_REVOKE eFuse on closed devices. This means that in the ConnectCore 6,
 key revocation is always possible, no matter the value of the Yocto macro
 TRUSTFENCE_UNLOCK_KEY_REVOCATION.
+* When using TrustFence (TM)  encrypted images secure boot support, the CAAM
+will hang the processor when trying to authenticate an encrypted kernel image
+after a failed attempt. Hence the target needs to be reset after an
+authentication failure.
 
 ## Digi ConnectCore 6 SBC
 
