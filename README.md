@@ -88,6 +88,9 @@ Documentation is available online on the Digi documentation site:
 
 # Known Issues and Limitations
 
+* When using the TrustFence (TM) U-Boot environment encryption, access to the
+U-Boot environment from the Linux OS is not supported.
+
 ## Digi ConnectCore 6UL
 
 ## Digi ConnectCore 6UL Starter Kit
