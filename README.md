@@ -6,6 +6,9 @@ Digi International's professional embedded Yocto development environment.
 
 Digi Embedded Yocto 2.0 is based on the 2.0 (Jethro) Yocto release.
 
+For a full list of supported features and interfaces please refer to the
+online documentation.
+
 # Supported Platforms
 
 The current release supports the following hardware platforms:
@@ -95,7 +98,10 @@ U-Boot environment from the Linux OS is not supported.
 
 ## Digi ConnectCore 6UL
 
-## Digi ConnectCore 6UL Starter Kit
+* In the Bluetooth interface, the UART hardware flow control doesn’t work
+properly. To work around this problem the UART is configured without hardware
+flow control at 115200 bps, reducing the maximum throughput of this interface.
+This problem will be corrected in newer revisions of the hardware.
 
 ## Digi ConnectCore 6
 
@@ -124,6 +130,8 @@ authentication failure.
 
 * The Micrel PHY KSZ9031 may take between five and six seconds to
 auto-negotiate with Gigabit switches
+* Secure uSD booting only supports booting signed images. A uSD image is not
+generated if TrustFence (TM) image encryption support is enabled.
 
 # Support Contact Information
 
