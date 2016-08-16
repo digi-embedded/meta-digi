@@ -185,8 +185,14 @@ IMAGE_CMD_sdcard() {
 	parted -s ${SDIMG} -- unit KiB mkpart primary ext2 $(expr ${IMAGE_ROOTFS_ALIGNMENT} \+ ${BOOT_SPACE_ALIGNED}) -1s
 	parted -s ${SDIMG} unit KiB print
 
+	# Set u-boot image to flash depending on whether TRUSTFENCE_SIGN is enabled
+	SDIMG_UBOOT="${DEPLOY_DIR_IMAGE}/${UBOOT_SYMLINK}"
+	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+		SDIMG_UBOOT="$(readlink -e ${SDIMG_UBOOT} | sed -e 's,u-boot-,u-boot-signed-,g')"
+	fi
+
 	# Burn bootloader, boot and rootfs partitions
-	dd if=${DEPLOY_DIR_IMAGE}/${UBOOT_SYMLINK} of=${SDIMG} conv=notrunc,fsync seek=2 bs=512
+	dd if=${SDIMG_UBOOT} of=${SDIMG} conv=notrunc,fsync seek=2 bs=512
 	dd if=${SDIMG_BOOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024)
 	dd if=${SDIMG_ROOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024 + ${BOOT_SPACE_ALIGNED} \* 1024)
 }

@@ -38,6 +38,9 @@ FILES_${PN}-acpid = " ${sysconfdir}/init.d/busybox-acpid \
 INITSCRIPT_PACKAGES =+ "${PN}-acpid"
 INITSCRIPT_NAME_${PN}-acpid = "busybox-acpid"
 
+# Start busybox-syslog at a very early state
+INITSCRIPT_PARAMS_${PN}-syslog = "defaults 02"
+
 # static-nodes package (create static nodes from /etc/device_table)
 PACKAGES =+ "${PN}-static-nodes"
 FILES_${PN}-static-nodes = "${sysconfdir}/init.d/busybox-static-nodes"

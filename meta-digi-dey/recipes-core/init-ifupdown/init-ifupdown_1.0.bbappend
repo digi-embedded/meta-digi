@@ -46,37 +46,38 @@ do_install_append() {
 	# Cellular interface
 	if [ -n "${@bb.utils.contains('DISTRO_FEATURES', 'cellular', '1', '', d)}" ] && [ -n "${CELLULAR_INTERFACE}" ]; then
 		cat ${WORKDIR}/interfaces.cellular >> ${D}${sysconfdir}/network/interfaces
+		[ -n "${CELLULAR_AUTO}" ] && sed -i -e 's/^#auto ##CELLULAR_INTERFACE##/auto ##CELLULAR_INTERFACE##/g' ${D}${sysconfdir}/network/interfaces
 		sed -i -e 's,##CELLULAR_INTERFACE##,${CELLULAR_INTERFACE},g' ${D}${sysconfdir}/network/interfaces
-		[ -n "${CELLULAR_AUTO}" ] && sed -i -e 's/#auto/auto/g' ${D}${sysconfdir}/network/interfaces
+
 		if [ -n "${CELLULAR_APN}" ]; then
-			sed -i -e 's/apn/apn ${CELLULAR_APN}/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's/^\([[:blank:]]*\)apn/\1apn ${CELLULAR_APN}/g' ${D}${sysconfdir}/network/interfaces
 		else
-			sed -i -e '/apn/d' ${D}${sysconfdir}/network/interfaces
+			sed -i -e '/^[[:blank:]]*apn/d' ${D}${sysconfdir}/network/interfaces
 		fi
 
 		if [ -n "${CELLULAR_PIN}" ]; then
-			sed -i -e 's/pin/pin ${CELLULAR_PIN}/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's/^\([[:blank:]]*\)pin/\1pin ${CELLULAR_PIN}/g' ${D}${sysconfdir}/network/interfaces
 		else
-			sed -i -e '/pin/d' ${D}${sysconfdir}/network/interfaces
+			sed -i -e '/^[[:blank:]]*pin/d' ${D}${sysconfdir}/network/interfaces
 		fi
 
 		if [ -n "${CELLULAR_PORT}" ]; then
-			sed -i -e 's/port/port ${CELLULAR_PORT}/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's/^\([[:blank:]]*\)port/\1port ${CELLULAR_PORT}/g' ${D}${sysconfdir}/network/interfaces
 			sed -i -e 's,dhcp,manual,g' ${D}${sysconfdir}/network/interfaces
 		else
-			sed -i -e '/port/d' ${D}${sysconfdir}/network/interfaces
+			sed -i -e '/^[[:blank:]]*port/d' ${D}${sysconfdir}/network/interfaces
 		fi
 
 		if [ -n "${CELLULAR_USER}" ]; then
-			sed -i -e 's/user/user ${CELLULAR_PORT}/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's/^\([[:blank:]]*\)user/\1user ${CELLULAR_USER}/g' ${D}${sysconfdir}/network/interfaces
 		else
-			sed -i -e '/user/d' ${D}${sysconfdir}/network/interfaces
+			sed -i -e '/^[[:blank:]]*user/d' ${D}${sysconfdir}/network/interfaces
 		fi
 
 		if [ -n "${CELLULAR_PASSWORD}" ]; then
-			sed -i -e 's/password/password ${CELLULAR_PORT}/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's/^\([[:blank:]]*\)password/\1password ${CELLULAR_PASSWORD}/g' ${D}${sysconfdir}/network/interfaces
 		else
-			sed -i -e '/password/d' ${D}${sysconfdir}/network/interfaces
+			sed -i -e '/^[[:blank:]]*password/d' ${D}${sysconfdir}/network/interfaces
 		fi
 	fi
 

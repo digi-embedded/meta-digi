@@ -36,7 +36,7 @@ UBOOT_EXTRA_CONF ?= ""
 
 python __anonymous() {
     if (d.getVar("TRUSTFENCE_DEK_PATH", True) not in ["0", None]) and (d.getVar("TRUSTFENCE_SIGN", True) != "1"):
-         bb.fatal("Only signed U-Boot images can be encrypted. Generate signed images (TRUSTFENCE_SIGN=1) or remove encryption (TRUSTFENCE_DEK_PATH = 0)")
+         bb.fatal("Only signed U-Boot images can be encrypted. Generate signed images (TRUSTFENCE_SIGN = \"1\") or remove encryption (TRUSTFENCE_DEK_PATH = \"0\")")
 }
 
 do_compile () {

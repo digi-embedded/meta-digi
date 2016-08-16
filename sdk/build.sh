@@ -42,7 +42,7 @@ BB_GENERATE_MIRROR_TARBALLS = \"1\"
 RM_WORK_CFG="
 INHERIT += \"rm_work\"
 # Exclude rm_work for some key packages (for debugging purposes)
-RM_WORK_EXCLUDE += \"dey-image-qt linux-dey u-boot-dey\"
+RM_WORK_EXCLUDE += \"dey-image-qt linux-dey qtbase u-boot-dey\"
 "
 
 X11_REMOVAL_CFG="
@@ -238,7 +238,7 @@ for platform in ${DY_PLATFORMS}; do
 					printf "\n[INFO] Building the ${target} target.\n"
 					time bitbake ${target}
 					# Build the toolchain for DEY images
-					if [ "${DY_BUILD_TCHAIN}" = "true" ] && echo "${target}" | grep -qs '^dey-image-[^-]\+$'; then
+					if [ "${DY_BUILD_TCHAIN}" = "true" ] && echo "${target}" | grep -qs '^\(core\|dey\)-image-[^-]\+$'; then
 						printf "\n[INFO] Building the toolchain for ${target}.\n"
 						time bitbake -c populate_sdk ${target}
 					fi
