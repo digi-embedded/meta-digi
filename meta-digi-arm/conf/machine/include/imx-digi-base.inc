@@ -68,7 +68,7 @@ EXTRA_IMAGEDEPENDS = "u-boot"
 
 KERNEL_IMAGETYPE = "uImage"
 
-MACHINE_FEATURES = "apm usbgadget usbhost vfat alsa touchscreen"
+MACHINE_FEATURES = "usbgadget usbhost vfat alsa touchscreen"
 
 # Add the ability to specify _imx machines
 MACHINEOVERRIDES =. "imx:"
