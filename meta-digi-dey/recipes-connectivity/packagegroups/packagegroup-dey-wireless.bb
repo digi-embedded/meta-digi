@@ -16,3 +16,5 @@ RDEPENDS_${PN} = "\
     wpa-supplicant-cli \
     wpa-supplicant-passphrase \
 "
+
+RDEPENDS_${PN}_append_ccimx6ul = " hostapd"
