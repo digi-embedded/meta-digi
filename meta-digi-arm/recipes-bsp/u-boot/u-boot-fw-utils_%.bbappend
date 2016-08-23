@@ -2,7 +2,10 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
-SRC_URI += "file://fw_env.config"
+SRC_URI += " \
+	file://fw_env.config \
+	file://0001-tools-env-implement-support-for-environment-encrypti.patch \	
+"
 SRC_URI_append_ccimx6 = " file://0002-fw_env-add-support-to-unlock-emmc-boot-partition.patch"
 
 # We do not have a platform defconfig in this version of u-boot, so just use the generic
