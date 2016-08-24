@@ -93,9 +93,6 @@ Documentation is available online on the Digi documentation site:
 This is a list of known issues and limitations at the time of release. An
 updated list can be found on the online documentation.
 
-* When using the TrustFence (TM) U-Boot environment encryption, access to the
-U-Boot environment from the Linux OS is not supported.
-
 ## Digi ConnectCore 6UL
 
 * In the Bluetooth interface, the UART hardware flow control doesn’t work
