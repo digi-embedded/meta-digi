@@ -51,7 +51,7 @@ python () {
 
     if (d.getVar("TRUSTFENCE_DEK_PATH") == "default"):
         d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/dek.bin");
-    
+
     if (d.getVar("TRUSTFENCE_SIGN", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_SIGN_IMAGE=y ")
         if d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True):

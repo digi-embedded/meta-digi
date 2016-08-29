@@ -18,7 +18,7 @@
 #      CONFIG_SIGN_KEYS_PATH: (mandatory) path to the CST folder by NXP with keys generated.
 #      CONFIG_UIMAGE_LOADADDR: (mandatory) memory address in which U-Boot loads the uImage
 #      CONFIG_KEY_INDEX: (optional) key index to use for signing. Default is 0.
-#      CONFIG_DEK_PATH: (optional) Path to keyfile. Define it to generate 
+#      CONFIG_DEK_PATH: (optional) Path to keyfile. Define it to generate
 #			encrypted images
 #
 #===============================================================================
@@ -44,7 +44,7 @@ if [ -n "${CONFIG_DEK_PATH}" ]; then
 		echo "DEK not found. Generating random 256 bit DEK."
 		[ -d $(dirname ${CONFIG_DEK_PATH}) ] || mkdir -p $(dirname ${CONFIG_DEK_PATH})
 		dd if=/dev/urandom of="${CONFIG_DEK_PATH}" bs=32 count=1
-	fi 
+	fi
 	dek_size="$((8 * $(stat -L -c %s ${CONFIG_DEK_PATH})))"
 	if [ "${dek_size}" != "128" ] && [ "${dek_size}" != "192" ] && [ "${dek_size}" != "256" ]; then
 		echo "Invalid DEK size: ${dek_size} bits. Valid sizes are 128, 192 and 256 bits"

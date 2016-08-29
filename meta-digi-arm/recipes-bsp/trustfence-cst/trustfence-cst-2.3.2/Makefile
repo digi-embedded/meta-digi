@@ -11,7 +11,7 @@ OBJECTS = code/back_end/src/*.c
 HEADERS = code/back_end/hdr
 LIBS_PATH = linux64/lib
 
-%.o: %.c 
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .PRECIOUS: $(TARGET) $(OBJECTS)

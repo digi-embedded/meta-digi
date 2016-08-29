@@ -11,7 +11,7 @@
     File = "%srk_table%"
     Source index = %key_index%
 
- 
+
 [Install CSFK]
     File = "%cert_csf%"
 
