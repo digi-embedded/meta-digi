@@ -22,7 +22,7 @@
 
 set -e
 
-AVAILABLE_PLATFORMS="ccardimx28js ccimx6sbc ccimx6ulstarter"
+AVAILABLE_PLATFORMS="ccardimx28js ccimx6sbc ccimx6ulsbc ccimx6ulstarter"
 
 MANIFEST_URL="https://github.com/digi-embedded/dey-manifest.git"
 
@@ -106,6 +106,7 @@ while read _pl _tgt; do
 done<<-_EOF_
 	ccardimx28js      dey-image-qt
 	ccimx6sbc         dey-image-qt
+	ccimx6ulsbc       core-image-base
 	ccimx6ulstarter   core-image-base
 _EOF_
 
