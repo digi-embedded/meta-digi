@@ -4,8 +4,10 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
 # The recipe uses a different "$S" directory so point the patch to the hostapd
 # tarball directory.
-SRC_URI_append_ccimx6ul = " file://fix_num_probereq_cb_clearing.patch;patchdir=.."
-SRC_URI += "file://hostapd.conf"
+SRC_URI += " \
+	file://fix_num_probereq_cb_clearing.patch;patchdir=.. \
+	file://hostapd.conf \
+"
 
 do_install_append() {
 	# Overwrite the default hostapd.conf with our custom file
@@ -14,5 +16,3 @@ do_install_append() {
 
 # Do not autostart hostapd daemon, it will conflict with wpa-supplicant.
 INITSCRIPT_PARAMS = "remove"
-
-PACKAGE_ARCH = "${MACHINE_ARCH}"
