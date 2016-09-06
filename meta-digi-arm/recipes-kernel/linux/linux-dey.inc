@@ -6,6 +6,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
 DEPENDS += "lzop-native bc-native"
 DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-cst-native', '', d)}"
+DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 inherit kernel fsl-kernel-localversion
 
@@ -38,7 +39,7 @@ do_deploy_append() {
 		export CONFIG_UIMAGE_LOADADDR="${UBOOT_CONFIG_LOADADDR}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
-		"${THISDIR}/../../scripts/trustfence-sign-uimage.sh" "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}.bin" "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}-signed.bin"
+		"${STAGING_BINDIR_NATIVE}/trustfence-sign-kernel.sh" "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}.bin" "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}-signed.bin"
 		mv "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}-signed.bin" "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}.bin"
 	fi
 	(cd ${DEPLOYDIR} && ln -sf ${KERNEL_IMAGE_BASE_NAME}.bin ${KERNEL_IMAGE_SYMLINK_NAME})

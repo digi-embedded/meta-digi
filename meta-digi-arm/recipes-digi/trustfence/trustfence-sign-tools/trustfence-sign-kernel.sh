@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #===============================================================================
 #
 #  trustfence_sign_uimage.sh
@@ -144,7 +144,7 @@ if [ "${ENCRYPT}" = "true" ]; then
 	    -e "s,%r2_uimage_offset%,${r2_uimage_offset},g"		    \
 	    -e "s,%r2_ram_start%,${r2_ram_start},g"			    \
 	    -e "s,%r2_size%,${r2_size},g"				    \
-	"${SCRIPT_BASEDIR}/templates/encrypt_uimage" > csf_descriptor
+	"${SCRIPT_BASEDIR}/csf_templates/encrypt_uimage" > csf_descriptor
 else
 	sed -e "s,%ram_start%,${CONFIG_UIMAGE_LOADADDR},g" \
 	    -e "s,%srk_table%,${SRK_TABLE},g"		   \
@@ -154,7 +154,7 @@ else
 	    -e "s,%cert_img%,${CERT_IMG},g"		   \
 	    -e "s,%uimage_path%,${TARGET},g"		   \
 	    -e "s,%key_index%,${CONFIG_KEY_INDEX},g"	   \
-	"${SCRIPT_BASEDIR}/templates/sign_uimage" > csf_descriptor
+	"${SCRIPT_BASEDIR}/csf_templates/sign_uimage" > csf_descriptor
 fi
 
 # Generate SRK tables
