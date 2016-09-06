@@ -23,6 +23,14 @@
 #
 #===============================================================================
 
+SCRIPT_NAME="$(basename ${0})"
+SCRIPT_PATH="$(cd $(dirname ${0}) && pwd)"
+
+if [ "${#}" != "2" ]; then
+	echo "Usage: ${SCRIPT_NAME} input-unsigned-image output-signed-image"
+	exit 1
+fi
+
 # Negative offset with respect to CONFIG_UIMAGE_LOADADDR in which U-Boot
 # copies the DEK blob.
 DEK_BLOB_OFFSET="0x100"
@@ -30,9 +38,10 @@ CONFIG_CSF_SIZE="0x4000"
 
 UIMAGE_PATH="$(readlink -e ${1})"
 TARGET="$(readlink -m ${2})"
-SCRIPT_BASEDIR="$(cd $(dirname ${0}) && pwd)"
 
-# Check arguments
+# Read user configuration file (if used)
+[ -f .config ] && . ./.config
+
 if [ -z "${CONFIG_SIGN_KEYS_PATH}" ]; then
 	echo "Undefined CONFIG_SIGN_KEYS_PATH";
 	exit 1
@@ -43,7 +52,7 @@ if [ -n "${CONFIG_DEK_PATH}" ]; then
 	if [ ! -f "${CONFIG_DEK_PATH}" ]; then
 		echo "DEK not found. Generating random 256 bit DEK."
 		[ -d $(dirname ${CONFIG_DEK_PATH}) ] || mkdir -p $(dirname ${CONFIG_DEK_PATH})
-		dd if=/dev/urandom of="${CONFIG_DEK_PATH}" bs=32 count=1
+		dd if=/dev/urandom of="${CONFIG_DEK_PATH}" bs=32 count=1 >/dev/null 2>&1
 	fi
 	dek_size="$((8 * $(stat -L -c %s ${CONFIG_DEK_PATH})))"
 	if [ "${dek_size}" != "128" ] && [ "${dek_size}" != "192" ] && [ "${dek_size}" != "256" ]; then
@@ -52,15 +61,19 @@ if [ -n "${CONFIG_DEK_PATH}" ]; then
 	fi
 	ENCRYPT="true"
 fi
+
+[ "${CONFIG_PLATFORM}" = "ccimx6" ] && CONFIG_UIMAGE_LOADADDR="0x12000000"
+[ "${CONFIG_PLATFORM}" = "ccimx6ul" ] && CONFIG_UIMAGE_LOADADDR="0x80800000"
+
 if [ -z "${CONFIG_UIMAGE_LOADADDR}" ]; then
 	echo "Undefined CONFIG_UIMAGE_LOADADDR"
+	echo "As an alternative, define CONFIG_PLATFORM. Supported platforms: ccimx6, ccimx6ul"	
 	exit 1
 fi
 
 # Default values
 [ -z "${CONFIG_KEY_INDEX}" ] && CONFIG_KEY_INDEX="0"
 CONFIG_KEY_INDEX_1="$((CONFIG_KEY_INDEX + 1))"
-[ -z "${CONFIG_DEK_SIZE}" ] && CONFIG_DEK_SIZE="128"
 
 SRK_KEYS="$(echo ${CONFIG_SIGN_KEYS_PATH}/crts/SRK*crt.pem | sed s/\ /\,/g)"
 CERT_CSF="$(echo ${CONFIG_SIGN_KEYS_PATH}/crts/CSF${CONFIG_KEY_INDEX_1}*crt.pem)"
@@ -88,9 +101,7 @@ SRK_TABLE="$(pwd)/SRK_table.bin"
 # Other constants
 GAP_FILLER="0x00"
 
-# Compute dek blob size in bytes:
-# header (8) + 256-bit AES key (32) + MAC (16) + custom key size in bytes
-dek_blob_size="$((8 + 32 + 16 + CONFIG_DEK_SIZE/8))"
+# The DEK blob is placed by U-Boot just before the kernel image
 dek_blob_offset="$((CONFIG_UIMAGE_LOADADDR - DEK_BLOB_OFFSET))"
 
 # Compute the layout: sizes and offsets.
@@ -144,7 +155,7 @@ if [ "${ENCRYPT}" = "true" ]; then
 	    -e "s,%r2_uimage_offset%,${r2_uimage_offset},g"		    \
 	    -e "s,%r2_ram_start%,${r2_ram_start},g"			    \
 	    -e "s,%r2_size%,${r2_size},g"				    \
-	"${SCRIPT_BASEDIR}/csf_templates/encrypt_uimage" > csf_descriptor
+	"${SCRIPT_PATH}/csf_templates/encrypt_uimage" > csf_descriptor
 else
 	sed -e "s,%ram_start%,${CONFIG_UIMAGE_LOADADDR},g" \
 	    -e "s,%srk_table%,${SRK_TABLE},g"		   \
@@ -154,7 +165,7 @@ else
 	    -e "s,%cert_img%,${CERT_IMG},g"		   \
 	    -e "s,%uimage_path%,${TARGET},g"		   \
 	    -e "s,%key_index%,${CONFIG_KEY_INDEX},g"	   \
-	"${SCRIPT_BASEDIR}/csf_templates/sign_uimage" > csf_descriptor
+	"${SCRIPT_PATH}/csf_templates/sign_uimage" > csf_descriptor
 fi
 
 # Generate SRK tables
@@ -184,7 +195,7 @@ IVT_HEADER="0x402000D1"
 } >> "${TARGET}"
 
 CURRENT_PATH="$(pwd)"
-cst -o "${CURRENT_PATH}/csf.bin" -i "${CURRENT_PATH}/csf_descriptor"
+cst -o "${CURRENT_PATH}/csf.bin" -i "${CURRENT_PATH}/csf_descriptor" >/dev/null
 if [ $? -ne 0 ]; then
 	echo "[ERROR] Could not generate CSF"
 	exit 1
@@ -193,5 +204,7 @@ fi
 cat csf.bin >> "${TARGET}"
 
 objcopy -I binary -O binary --pad-to "${sig_len}" --gap-fill="${GAP_FILLER}" "${TARGET}"
-echo "Signed uImage at ${TARGET}"
+
+[ "${ENCRYPT}" = "true" ] && ENCRYPTED_MSG="and encrypted "
+echo "Signed ${ENCRYPTED_MSG}image ready: ${TARGET}"
 rm -f "${SRK_TABLE}" csf_descriptor csf.bin 2> /dev/null
