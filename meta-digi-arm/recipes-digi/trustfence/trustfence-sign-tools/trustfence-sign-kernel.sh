@@ -170,16 +170,18 @@ objcopy -I binary -O binary --pad-to "${pad_len}" --gap-fill="${GAP_FILLER}" "${
 # Generate and attach IVT
 # Fields: header, jump location, reserved (0), DCD pointer (null)
 #	  boot data (null), self pointer, CSF pointer, reserved (0)
+PRINTF="$(which printf)"
 IVT_HEADER="0x402000D1"
-printf "0: %.8x" ${IVT_HEADER} | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 > ivt
-printf "0: %.8x" "${entrypoint_ram_start}" | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 >> ivt
-printf "0: %.8x" 0 | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 >> ivt
-printf "0: %.8x" 0 | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 >> ivt
-printf "0: %.8x" 0 | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 >> ivt
-printf "0: %.8x" "${ivt_ram_start}" | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 >> ivt
-printf "0: %.8x" "${csf_ram_start}" | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 >> ivt
-printf "0: %.8x" 0 | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 >> ivt
-cat ivt >> "${TARGET}"
+{
+	${PRINTF} $(${PRINTF} "%08x" ${IVT_HEADER} | sed 's/.\{2\}/&\n/g' | tac | sed 's,^,\\x,g' | tr -d '\n')
+	${PRINTF} $(${PRINTF} "%08x" ${entrypoint_ram_start} | sed 's/.\{2\}/&\n/g' | tac | sed 's,^,\\x,g' | tr -d '\n')
+	${PRINTF} $(${PRINTF} "%08x" 0 | sed 's/.\{2\}/&\n/g' | tac | sed 's,^,\\x,g' | tr -d '\n')
+	${PRINTF} $(${PRINTF} "%08x" 0 | sed 's/.\{2\}/&\n/g' | tac | sed 's,^,\\x,g' | tr -d '\n')
+	${PRINTF} $(${PRINTF} "%08x" 0 | sed 's/.\{2\}/&\n/g' | tac | sed 's,^,\\x,g' | tr -d '\n')
+	${PRINTF} $(${PRINTF} "%08x" ${ivt_ram_start} | sed 's/.\{2\}/&\n/g' | tac | sed 's,^,\\x,g' | tr -d '\n')
+	${PRINTF} $(${PRINTF} "%08x" ${csf_ram_start} | sed 's/.\{2\}/&\n/g' | tac | sed 's,^,\\x,g' | tr -d '\n')
+	${PRINTF} $(${PRINTF} "%08x" 0 | sed 's/.\{2\}/&\n/g' | tac | sed 's,^,\\x,g' | tr -d '\n')
+} >> "${TARGET}"
 
 CURRENT_PATH="$(pwd)"
 cst -o "${CURRENT_PATH}/csf.bin" -i "${CURRENT_PATH}/csf_descriptor"
@@ -192,4 +194,4 @@ cat csf.bin >> "${TARGET}"
 
 objcopy -I binary -O binary --pad-to "${sig_len}" --gap-fill="${GAP_FILLER}" "${TARGET}"
 echo "Signed uImage at ${TARGET}"
-rm -f "${SRK_TABLE}" csf_descriptor csf.bin ivt 2> /dev/null
+rm -f "${SRK_TABLE}" csf_descriptor csf.bin 2> /dev/null
