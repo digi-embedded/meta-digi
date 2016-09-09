@@ -22,7 +22,7 @@ do_update_dts() {
 	else
 		config_dts disable '_ssp2_mmc_wifi.dtsi'
 	fi
-	if [ -n "${HAVE_EXT_ETH}" ]; then
+	if [ -n "${HAVE_SECOND_ETH}" ]; then
 		config_dts enable  '_ethernet1.dtsi'
 	else
 		config_dts disable '_ethernet1.dtsi'
