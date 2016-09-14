@@ -103,6 +103,10 @@ properly. To work around this problem the UART is configured without hardware
 flow control at 115200 bps, reducing the maximum throughput of this interface.
 This problem will be corrected in newer revisions of the hardware.
 
+* U-Boot version dub-2015.04-r4.5 may report running on Starter Board version 1
+even when your Starter Board is version 2. In that case Ethernet does not work
+in U-Boot. More recent versions of U-Boot fix this issue.
+
 ## Digi ConnectCore 6
 
 * NXP i.MX6 processor has a documented errata (ERR004512) whereby the maximum
