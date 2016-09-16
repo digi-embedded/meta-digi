@@ -16,7 +16,6 @@
 #
 #    The following environment variables define the script behaviour:
 #      CONFIG_SIGN_KEYS_PATH: (mandatory) path to the CST folder by NXP with keys generated.
-#      CONFIG_UIMAGE_LOADADDR: (mandatory) memory address in which U-Boot loads the uImage
 #      CONFIG_KEY_INDEX: (optional) key index to use for signing. Default is 0.
 #      CONFIG_DEK_PATH: (optional) Path to keyfile. Define it to generate
 #			encrypted images
@@ -26,12 +25,37 @@
 SCRIPT_NAME="$(basename ${0})"
 SCRIPT_PATH="$(cd $(dirname ${0}) && pwd)"
 
+while getopts "dilp:" c; do
+	case "${c}" in
+		d) ARTIFACT_DTB="y";;
+		i) ARTIFACT_INITRAMFS="y";;
+		l) ARTIFACT_KERNEL="y";;
+		p) PLATFORM="${OPTARG}";;
+	esac
+done
+shift "$((OPTIND - 1))"
+
+usage() {
+        cat <<EOF
+
+Usage: ${SCRIPT_NAME} [OPTIONS] input-unsigned-image output-signed-image
+
+    -p <platform>    select platform for the project
+    -d               sign/encrypt initramfs
+    -i               sign/encrypt DTB
+    -l               sign/encrypt Linux image
+
+Supported platforms: ccimx6, ccimx6ul
+
+EOF
+}
+
 if [ "${#}" != "2" ]; then
-	echo "Usage: ${SCRIPT_NAME} input-unsigned-image output-signed-image"
+	usage
 	exit 1
 fi
 
-# Negative offset with respect to CONFIG_UIMAGE_LOADADDR in which U-Boot
+# Negative offset with respect to CONFIG_RAM_START in which U-Boot
 # copies the DEK blob.
 DEK_BLOB_OFFSET="0x100"
 CONFIG_CSF_SIZE="0x4000"
@@ -62,13 +86,27 @@ if [ -n "${CONFIG_DEK_PATH}" ]; then
 	ENCRYPT="true"
 fi
 
-[ "${CONFIG_PLATFORM}" = "ccimx6" ] && CONFIG_UIMAGE_LOADADDR="0x12000000"
-[ "${CONFIG_PLATFORM}" = "ccimx6ul" ] && CONFIG_UIMAGE_LOADADDR="0x80800000"
-
-if [ -z "${CONFIG_UIMAGE_LOADADDR}" ]; then
-	echo "Undefined CONFIG_UIMAGE_LOADADDR"
-	echo "As an alternative, define CONFIG_PLATFORM. Supported platforms: ccimx6, ccimx6ul"	
+if [ "${PLATFORM}" = "ccimx6" ]; then
+	CONFIG_FDT_LOADADDR="0x18000000"
+	CONFIG_RAMDISK_LOADADDR="0x19000000"
+	CONFIG_KERNEL_LOADADDR="0x12000000"
+elif [ "${PLATFORM}" = "ccimx6ul" ]; then
+	CONFIG_FDT_LOADADDR="0x83000000"
+	CONFIG_RAMDISK_LOADADDR="0x83800000"
+	CONFIG_KERNEL_LOADADDR="0x80800000"
+else
+	echo "Invalid platform: ${PLATFORM}"
+	echo "Supported platforms: ccimx6, ccimx6ul"
 	exit 1
+fi
+
+[ "${ARTIFACT_DTB}" = "y" ] && CONFIG_RAM_START="${CONFIG_FDT_LOADADDR}"
+[ "${ARTIFACT_INITRAMFS}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
+[ "${ARTIFACT_KERNEL}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
+
+if [ -z "${CONFIG_RAM_START}" ]; then
+        echo "Specify the type of image to process (-i, -d, or -l)"
+        exit 1
 fi
 
 # Default values
@@ -102,7 +140,7 @@ SRK_TABLE="$(pwd)/SRK_table.bin"
 GAP_FILLER="0x00"
 
 # The DEK blob is placed by U-Boot just before the kernel image
-dek_blob_offset="$((CONFIG_UIMAGE_LOADADDR - DEK_BLOB_OFFSET))"
+dek_blob_offset="$((CONFIG_KERNEL_LOADADDR - DEK_BLOB_OFFSET))"
 
 # Compute the layout: sizes and offsets.
 uimage_size="$(stat -L -c %s ${UIMAGE_PATH})"
@@ -112,26 +150,26 @@ auth_len="$((pad_len + 0x20))"
 sig_len="$((auth_len + CONFIG_CSF_SIZE))"
 
 ivt_uimage_start="$((auth_len - 0x20))"
-ivt_ram_start="$((CONFIG_UIMAGE_LOADADDR + ivt_uimage_start))"
+ivt_ram_start="$((CONFIG_RAM_START + ivt_uimage_start))"
 ivt_size="0x20"
 csf_ram_start="$((ivt_ram_start + ivt_size))"
 entrypoint_uimage_offset="0x1000"
-entrypoint_ram_start="$((CONFIG_UIMAGE_LOADADDR + entrypoint_uimage_offset))"
+entrypoint_ram_start="$((CONFIG_RAM_START + entrypoint_uimage_offset))"
 entrypoint_size="0x20"
 header_uimage_offset="0x0"
-header_ram_start="${CONFIG_UIMAGE_LOADADDR}"
+header_ram_start="${CONFIG_RAM_START}"
 header_size="0x40"
 
 r1_uimage_offset="${header_size}"
-r1_ram_start="$((CONFIG_UIMAGE_LOADADDR + r1_uimage_offset))"
+r1_ram_start="$((CONFIG_RAM_START + r1_uimage_offset))"
 r1_size="$((entrypoint_uimage_offset - header_size ))"
 r2_uimage_offset="$((entrypoint_uimage_offset + entrypoint_size))"
-r2_ram_start="$((CONFIG_UIMAGE_LOADADDR + r2_uimage_offset))"
+r2_ram_start="$((CONFIG_RAM_START + r2_uimage_offset))"
 r2_size="$((ivt_uimage_start - (entrypoint_uimage_offset + entrypoint_size)))"
 
 # Generate actual CSF descriptor file from template
 if [ "${ENCRYPT}" = "true" ]; then
-	sed -e "s,%ram_start%,${CONFIG_UIMAGE_LOADADDR},g"		    \
+	sed -e "s,%ram_start%,${CONFIG_RAM_START},g"		    \
 	    -e "s,%srk_table%,${SRK_TABLE},g "				    \
 	    -e "s,%cert_csf%,${CERT_CSF},g"				    \
 	    -e "s,%cert_img%,${CERT_IMG},g"				    \
@@ -157,7 +195,7 @@ if [ "${ENCRYPT}" = "true" ]; then
 	    -e "s,%r2_size%,${r2_size},g"				    \
 	"${SCRIPT_PATH}/csf_templates/encrypt_uimage" > csf_descriptor
 else
-	sed -e "s,%ram_start%,${CONFIG_UIMAGE_LOADADDR},g" \
+	sed -e "s,%ram_start%,${CONFIG_RAM_START},g" \
 	    -e "s,%srk_table%,${SRK_TABLE},g"		   \
 	    -e "s,%image_offset%,${uimage_offset},g"	   \
 	    -e "s,%auth_len%,${auth_len},g"		   \

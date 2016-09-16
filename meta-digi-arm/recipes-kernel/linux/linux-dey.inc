@@ -28,11 +28,13 @@ KERNEL_EXTRA_ARGS += "LOADADDR=${UBOOT_ENTRYPOINT}"
 
 do_deploy_append() {
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+		# Set environment variables for trustfence configuration
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
-		export CONFIG_PLATFORM="${DIGI_FAMILY}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
-		"${STAGING_BINDIR_NATIVE}/trustfence-sign-kernel.sh" "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}.bin" "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}-signed.bin"
+
+		# Sign/encrypt the kernel image
+		"${STAGING_BINDIR_NATIVE}/trustfence-sign-kernel.sh" -p "${DIGI_FAMILY}" -l "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}.bin" "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}-signed.bin"
 		mv "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}-signed.bin" "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}.bin"
 	fi
 	(cd ${DEPLOYDIR} && ln -sf ${KERNEL_IMAGE_BASE_NAME}.bin ${KERNEL_IMAGE_SYMLINK_NAME})
