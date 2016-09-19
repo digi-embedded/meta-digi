@@ -101,7 +101,7 @@ TF_BOOTSCRIPT_SEDFILTER_ccimx6 = "${@tf_bootscript_sedfilter(d)}"
 
 def tf_bootscript_sedfilter(d):
     tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
-    return "/^dboot linux/i\setenv boot_initrd true\\nsetenv initrd_file %s-${MACHINE}.cpio.gz.u-boot" % tf_initramfs if tf_initramfs else ""
+    return "/^dboot linux/i\setenv boot_initrd true\\nsetenv initrd_file %s-${MACHINE}.cpio.gz.u-boot.tf" % tf_initramfs if tf_initramfs else ""
 
 do_deploy_append() {
 	# Remove canonical U-Boot symlinks for ${UBOOT_CONFIG} currently in the form:
