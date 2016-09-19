@@ -36,6 +36,15 @@ do_deploy_append() {
 		# Sign/encrypt the kernel image
 		"${STAGING_BINDIR_NATIVE}/trustfence-sign-kernel.sh" -p "${DIGI_FAMILY}" -l "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}.bin" "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}-signed.bin"
 		mv "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}-signed.bin" "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}.bin"
+
+		# Sign/encrypt the device tree blobs
+		if [ -n "${KERNEL_DEVICETREE}" ]; then
+			for DTB_NAME in ${KERNEL_DEVICETREE}; do
+				DTB="${B}/arch/${ARCH}/boot/dts/${DTB_NAME}"
+				"${STAGING_BINDIR_NATIVE}/trustfence-sign-kernel.sh" -p "${DIGI_FAMILY}" -d "${DTB}" "${DTB}-signed"
+				mv "${DTB}-signed" "${DTB}"
+			done
+		fi
 	fi
 	(cd ${DEPLOYDIR} && ln -sf ${KERNEL_IMAGE_BASE_NAME}.bin ${KERNEL_IMAGE_SYMLINK_NAME})
 }
