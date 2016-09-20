@@ -4,6 +4,9 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI_append = " file://qt5.sh"
 
+PACKAGECONFIG_GL_mx6ul = "gles2"
+QT_CONFIG_FLAGS_append_mx6ul = "${@base_contains('DISTRO_FEATURES', 'x11', ' -no-eglfs', ' -eglfs', d)}"
+
 PACKAGECONFIG_append = " accessibility examples icu sql-sqlite"
 
 do_install_append() {
