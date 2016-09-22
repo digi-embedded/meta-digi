@@ -25,8 +25,9 @@
 SCRIPT_NAME="$(basename ${0})"
 SCRIPT_PATH="$(cd $(dirname ${0}) && pwd)"
 
-while getopts "dilp:" c; do
+while getopts "bdilp:" c; do
 	case "${c}" in
+		b) ARTIFACT_BOOTSCRIPT="y";;
 		d) ARTIFACT_DTB="y";;
 		i) ARTIFACT_INITRAMFS="y";;
 		l) ARTIFACT_KERNEL="y";;
@@ -41,6 +42,7 @@ usage() {
 Usage: ${SCRIPT_NAME} [OPTIONS] input-unsigned-image output-signed-image
 
     -p <platform>    select platform for the project
+    -b               sign/encrypt bootscript
     -d               sign/encrypt initramfs
     -i               sign/encrypt DTB
     -l               sign/encrypt Linux image
@@ -103,9 +105,11 @@ fi
 [ "${ARTIFACT_DTB}" = "y" ] && CONFIG_RAM_START="${CONFIG_FDT_LOADADDR}"
 [ "${ARTIFACT_INITRAMFS}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
 [ "${ARTIFACT_KERNEL}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
+# bootscripts are loaded to $loadaddr, just like the kernel
+[ "${ARTIFACT_BOOTSCRIPT}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
 
 if [ -z "${CONFIG_RAM_START}" ]; then
-        echo "Specify the type of image to process (-i, -d, or -l)"
+        echo "Specify the type of image to process (-b, -i, -d, or -l)"
         exit 1
 fi
 
