@@ -2,4 +2,6 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
-SRC_URI_append = " file://0001-gstplayer-force-use-glimagesink.patch"
+SRC_URI_append_ccimx6 = " file://0001-gstplayer-force-use-glimagesink.patch"
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"
