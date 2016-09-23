@@ -4,6 +4,7 @@
 SUMMARY = "QT packagegroup for DEY image"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=3f40d7994397109285ec7b81fdeb3b58"
+
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 inherit packagegroup
@@ -11,21 +12,20 @@ inherit packagegroup
 MACHINE_QT5_EXTRA_INSTALL ?= ""
 MACHINE_QT5_EXTRA_INSTALL_ccimx6 ?= "qtwebengine-examples"
 
-QT5_PKS = " \
-    qtbase-fonts \
-    qtdeclarative-tools \
-"
+QT5_PKS = "qtbase-fonts qtserialport"
+QT5_PKS_append_ccimx6 = " qtdeclarative-tools"
 
-QT5_EXAMPLES = " \
+QT5_EXAMPLES = "qtbase-examples"
+QT5_EXAMPLES_append_ccimx6 = " \
     qt3d-examples \
-    qtbase-examples \
     qtconnectivity-examples \
     qtdeclarative-examples \
     qtmultimedia-examples \
     qtsvg-examples \
 "
 
-QT5_DEMOS = " \
+QT5_DEMOS = ""
+QT5_DEMOS_append_ccimx6 = " \
     cinematicexperience \
     qt5-demo-extrafiles \
     qt5everywheredemo \
