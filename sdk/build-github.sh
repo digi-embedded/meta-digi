@@ -106,7 +106,7 @@ while read _pl _tgt; do
 done<<-_EOF_
 	ccardimx28js      dey-image-qt
 	ccimx6sbc         dey-image-qt
-	ccimx6ulsbc       core-image-base
+	ccimx6ulsbc       dey-image-qt
 	ccimx6ulstarter   core-image-base
 _EOF_
 
