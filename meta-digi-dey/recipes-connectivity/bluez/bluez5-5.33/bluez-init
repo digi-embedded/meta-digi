@@ -23,6 +23,7 @@ fi
 
 SCRIPTNAME="$(basename "${0}")"
 LOGFILE="/var/log/bluetoothd.log"
+FIRMWARE_FILE="/lib/firmware/qca/nvm_tlv_3.2.bin"
 
 bt_init_qca6564() {
 	MOD_VERSION="$(($(cat /proc/device-tree/digi,hwid,hv 2>/dev/null || true)))"
@@ -32,8 +33,8 @@ bt_init_qca6564() {
 	BT_EN_L="/sys/class/gpio/gpio${BT_EN_QCA_GPIO_NR}"
 	[ -d "${BT_EN_L}" ] || printf "%s" ${BT_EN_QCA_GPIO_NR} > /sys/class/gpio/export
 	printf out > ${BT_EN_L}/direction && sleep .1
-	printf 0 > ${BT_EN_L}/value && sleep .1
-	printf 1 > ${BT_EN_L}/value && sleep .1
+	printf 0 > ${BT_EN_L}/value && sleep .2
+	printf 1 > ${BT_EN_L}/value && sleep .2
 	[ -d "${BT_EN_L}" ] && printf "%s" ${BT_EN_QCA_GPIO_NR} > /sys/class/gpio/unexport
 
 	# Module version older than revision 4 has swapped TX and RX lines
@@ -47,7 +48,13 @@ bt_init_qca6564() {
 		[ -d "${BT_CTS_L}" ] && printf "%s" ${BT_CTS_QCA_GPIO_NR} > /sys/class/gpio/unexport
 		# Reduce the rate to avoid the need for HW flow control
 		BT_RATE="115200"
+		BT_RATE_CODE="00" # 115200 bps
 		BT_FLOW="noflow"
+		# Check the current FW file rate
+		if [ "$(hexdump -s 56 -n 1 -ve '1/1 "%.2x"' ${FIRMWARE_FILE})" != "${BT_RATE_CODE}" ]; then
+			# Modify the BT FW file rate
+			printf "\x${BT_RATE_CODE}" | dd of="${FIRMWARE_FILE}" bs=1 seek=56 count=1 conv=notrunc,fsync 2>/dev/null
+		fi
 	fi
 
 	if hciattach -t120 ttyBt qca ${BT_RATE:-3000000} ${BT_FLOW:-flow} 2>${LOGFILE}; then
