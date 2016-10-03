@@ -21,8 +21,8 @@ fi
 
 setenv INSTALL_MMCDEV 0
 setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulsbc.imx
-setenv INSTALL_LINUX_FILENAME core-image-base-ccimx6ulsbc.boot.ubifs
-setenv INSTALL_ROOTFS_FILENAME core-image-base-ccimx6ulsbc.ubifs
+setenv INSTALL_LINUX_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6ulsbc.boot.ubifs
+setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6ulsbc.ubifs
 
 # Check for presence of firmware files on the SD card
 for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do
