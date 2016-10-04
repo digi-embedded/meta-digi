@@ -3,4 +3,4 @@
 # Disable network manager
 NETWORK_MANAGER = ""
 
-RDEPENDS_${PN}-apps_remove_ccimx6ul = "gst-player-bin x11vnc"
+RDEPENDS_${PN}-apps_remove_ccimx6ul = "gst-player-bin"
