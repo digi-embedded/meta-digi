@@ -90,6 +90,7 @@ setenv bootcmd "
 		echo \"Aborted.\";
 		exit;
 	fi;
+	saveenv;
 	echo \"\";
 	echo \"#######################\";
 	echo \"#  Install complete!  #\";
