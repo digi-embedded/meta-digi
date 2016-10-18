@@ -1,0 +1,28 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Fri, 14 Oct 2016 10:28:29 +0200
+Subject: [PATCH] wlan_hdd_cfg80211: fix missing ifdef clause
+
+Fix the compilation for old kernels by defining a missing "ifdef" clause.
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ CORE/HDD/inc/wlan_hdd_cfg80211.h | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/CORE/HDD/inc/wlan_hdd_cfg80211.h b/CORE/HDD/inc/wlan_hdd_cfg80211.h
+index a40c55144bc5..95c1ddce7de4 100644
+--- a/CORE/HDD/inc/wlan_hdd_cfg80211.h
++++ b/CORE/HDD/inc/wlan_hdd_cfg80211.h
+@@ -992,7 +992,12 @@ backported_cfg80211_vendor_event_alloc(struct wiphy *wiphy,
+ 					int approxlen,
+ 					int event_idx, gfp_t gfp)
+ {
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 15, 0)
+ 	return cfg80211_vendor_event_alloc(wiphy, wdev, approxlen, event_idx, gfp);
++#else
++	return cfg80211_vendor_event_alloc(wiphy, approxlen, event_idx, gfp);
++#endif
++
+ }
+ #define cfg80211_vendor_event_alloc backported_cfg80211_vendor_event_alloc
+ #endif

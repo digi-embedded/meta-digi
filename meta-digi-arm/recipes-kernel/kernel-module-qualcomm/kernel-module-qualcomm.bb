@@ -32,6 +32,9 @@ SRC_URI = " \
     file://0013-Kbuild-do-not-create-an-auxiliar-p2p-on-init.patch \
     file://0014-Kbuild-do-not-compile-the-DEBUG-version-inconditiona.patch \
     file://0015-Kbuild-Group-most-of-the-relevant-DEBUG-options.patch \
+    file://0016-wlan_hdd_cfg80211-fix-missing-ifdef-clause.patch \
+    file://0017-Add-.gitignore-rules.patch \
+    file://0018-wlan_hdd_main-initialize-all-adapter-completion-vari.patch \
 "
 
 S = "${WORKDIR}/${PV}"
