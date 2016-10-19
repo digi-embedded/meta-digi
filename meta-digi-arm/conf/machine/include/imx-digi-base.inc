@@ -19,11 +19,13 @@ MACHINE_EXTRA_RRECOMMENDS = "kernel-modules"
 # DEFAULTTUNE_mx6 ?= "cortexa9t-neon"
 # handled by hardware
 DEFAULTTUNE_mx6 ?= "cortexa9thf-neon"
+DEFAULTTUNE_mx6ul ?= "cortexa7thf-neon"
 
 # Sub-architecture support
 MACHINE_SOCARCH_SUFFIX ?= ""
 MACHINE_SOCARCH_SUFFIX_mx6q = "-mx6qdl"
 MACHINE_SOCARCH_SUFFIX_mx6dl = "-mx6qdl"
+MACHINE_SOCARCH_SUFFIX_mx6ul = "-mx6ul"
 
 MACHINE_ARCH_FILTER = "virtual/kernel imx-vpu"
 MACHINE_SOCARCH_FILTER_append_mx6 = " libfslcodec libfslvpuwrap libfslparser"
@@ -52,17 +54,22 @@ MACHINE_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT ?= "${SOC_HAS_VIVANTE_KERNEL_DRIVER_SU
 # mx6 GPU libraries
 PREFERRED_PROVIDER_virtual/egl_mx6q ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/egl_mx6dl ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/egl_mx6ul ?= "mesa"
 
 PREFERRED_PROVIDER_virtual/libgles1_mx6q ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libgles1_mx6dl ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/libgles1_mx6ul ?= "mesa"
 
 PREFERRED_PROVIDER_virtual/libgles2_mx6q ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libgles2_mx6dl ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/libgles2_mx6ul ?= "mesa"
 
 PREFERRED_PROVIDER_virtual/libgl_mx6q ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libgl_mx6dl ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/libgl_mx6ul ?= "mesa"
 
 PREFERRED_PROVIDER_virtual/libg2d_mx6 ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/libg2d_mx6ul = ""
 
 EXTRA_IMAGEDEPENDS = "u-boot"
 
