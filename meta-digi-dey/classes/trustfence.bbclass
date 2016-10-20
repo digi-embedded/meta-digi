@@ -65,6 +65,3 @@ python () {
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y')
 }
-
-# SDCARD image is not supported when encryption is enabled, so disable it in such cases
-IMAGE_FSTYPES_remove = "${@'' if d.getVar('TRUSTFENCE_DEK_PATH', True) == '0' else 'sdcard'}"

@@ -131,8 +131,8 @@ authentication failure.
 
 * The Micrel PHY KSZ9031 may take between five and six seconds to
 auto-negotiate with Gigabit switches
-* Secure uSD booting only supports booting signed images. A uSD image is not
-generated if TrustFence (TM) image encryption support is enabled.
+* If TrustFence (TM) image encryption support is enabled, the uSD image will
+boot a signed U-Boot only.
 
 # Support Contact Information
 
