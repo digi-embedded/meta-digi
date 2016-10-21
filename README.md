@@ -97,6 +97,13 @@ Documentation is available online on the Digi documentation site:
 This is a list of known issues and limitations at the time of release. An
 updated list can be found on the online documentation.
 
+* When using TrustFence (TM)  encrypted images secure boot support, the CAAM
+will hang the processor when trying to authenticate an encrypted firmware image
+after a failed attempt. Hence the target needs to be reset after an
+authentication failure.
+* If TrustFence (TM) image encryption support is enabled, the uSD image will
+boot a signed U-Boot only.
+
 ## Digi ConnectCore 6UL
 
 * In the Bluetooth interface, the UART hardware flow control doesn’t work
@@ -118,21 +125,11 @@ modes:
 softAP mode
 * A maximum of ten connected devices are supported when using Qualcomm's AR6233
 Bluetooth Low Energy mode
-* NXP i.MX6 processor does not set the sticky bit which write protects the
-SRK_REVOKE eFuse on closed devices. This means that in the ConnectCore 6,
-key revocation is always possible, no matter the value of the Yocto macro
-TRUSTFENCE_UNLOCK_KEY_REVOCATION.
-* When using TrustFence (TM)  encrypted images secure boot support, the CAAM
-will hang the processor when trying to authenticate an encrypted kernel image
-after a failed attempt. Hence the target needs to be reset after an
-authentication failure.
 
 ## Digi ConnectCore 6 SBC
 
 * The Micrel PHY KSZ9031 may take between five and six seconds to
 auto-negotiate with Gigabit switches
-* If TrustFence (TM) image encryption support is enabled, the uSD image will
-boot a signed U-Boot only.
 
 # Support Contact Information
 
