@@ -143,6 +143,9 @@ IMAGE_CMD_cpio.gz.u-boot.tf() {
 
 		# Sign/encrypt the ramdisk
 		"${STAGING_BINDIR_NATIVE}/trustfence-sign-kernel.sh" -p "${DIGI_FAMILY}" -i "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz.u-boot" "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz.u-boot.tf"
+	else
+		# Rename image
+		mv "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz.u-boot" "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz.u-boot.tf"
 	fi
 }
 
