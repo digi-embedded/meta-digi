@@ -182,6 +182,25 @@ make_report(){
 	ip link show
 	printf "\n"
 
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-             TrustFence             -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+
+	if [ "$(($(cat /sys/fsl_otp/HW_OCOTP_LOCK) & 2))" != "0" ]; then
+		echo "Device status: [CLOSED]"
+	else
+		echo "Device status: [OPEN]"
+	fi
+
+	if [ -f "/proc/device-tree/digi,uboot-env,encrypted" ]; then
+		echo "U-Boot environment is encrypted"
+	else
+		echo "U-Boot environment is NOT encrypted"
+	fi
+
 	echo "-------------End of report------------"
 }
 
