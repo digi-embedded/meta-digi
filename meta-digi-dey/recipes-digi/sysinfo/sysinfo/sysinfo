@@ -188,9 +188,12 @@ make_report(){
 
 DISTRO="$(sed -ne 's,DISTRO = \(.*\)$,\1,g;T;p' /etc/build)"
 DEY_VERSION="$(sed -ne 's,DISTRO_VERSION = \(.*\)$,\1,g;T;p' /etc/build)"
-UBOOT_PARTITION="/dev/mmcblk0boot0"
-[ -c "/dev/mtd0" ] && UBOOT_PARTITION="/dev/mtd0"
-UBOOT_VERSION="$(strings ${UBOOT_PARTITION} | grep -m 1 dub | cut -d' ' -f2)"
+UBOOT_VERSION="$(cat /proc/device-tree/digi,uboot,version 2>/dev/null)"
+if [ -z "${UBOOT_VERSION}" ]; then
+	UBOOT_PARTITION="/dev/mmcblk0boot0"
+	[ -c "/dev/mtd0" ] && UBOOT_PARTITION="/dev/mtd0"
+	UBOOT_VERSION="$(strings ${UBOOT_PARTITION} | grep -m 1 dub | cut -d' ' -f2)"
+fi
 MACHINE="$(cat /proc/device-tree/digi,machine,name)"
 BOARD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant)"
 BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn)"
