@@ -184,6 +184,32 @@ make_report(){
 
 	echo "--------------------------------------"
 	echo "-                                    -"
+	echo "-       Wireless configuration       -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	wpa_supplicant -v 2>/dev/null
+	echo ""
+	if [ -f "/etc/wpa_supplicant.conf" ]; then
+		echo "wpa_supplicant.conf:"
+		cat "/etc/wpa_supplicant.conf"
+	else
+		echo "[NOT FOUND] /etc/wpa_supplicant.conf"
+	fi
+
+	echo ""
+	hostapd -v 2>&1
+	echo ""
+	if [ -f "/etc/hostapd.conf" ]; then
+		echo "hostapd.conf:"
+		cat "/etc/hostapd.conf"
+	else
+		echo "[NOT FOUND] hostapd.conf"
+	fi
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
 	echo "-             TrustFence             -"
 	echo "-                                    -"
 	echo "--------------------------------------"
