@@ -6,7 +6,7 @@ LICENSE = "CLOSED"
 
 SRC_URI = "${DIGI_PKG_SRC}/${BP}.tar.gz"
 
-SRC_URI[md5sum] = "eea4efe8b8e7527a0ffeea16fd238ba3"
-SRC_URI[sha256sum] = "aefeb08f2db59c891cf1162488499448bf9d80d64b2778d4fda11343793373e7"
+SRC_URI[md5sum] = "413084cc2045d345883189cd0d68ca76"
+SRC_URI[sha256sum] = "dff702f2838a7802103469c1ba07daead206652774e02a0a855b08d94aafe5fe"
 
 inherit bin_package

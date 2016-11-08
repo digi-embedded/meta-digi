@@ -75,6 +75,7 @@ IMAGE_DEPENDS_boot.ubifs = " \
     mtd-utils-native:do_populate_sysroot \
     u-boot:do_deploy \
     virtual/kernel:do_deploy \
+    ${@TRUSTFENCE_BOOTIMAGE_DEPENDS(d)} \
 "
 
 IMAGE_CMD_boot.ubifs() {
@@ -88,6 +89,11 @@ IMAGE_CMD_boot.ubifs() {
 				BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}"
 			fi
 		done
+	fi
+
+	# Add Trustfence initramfs if enabled
+	if [ -n "${TRUSTFENCE_INITRAMFS_IMAGE}" ]; then
+		BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${TRUSTFENCE_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf"
 	fi
 
 	# Create temporary folder

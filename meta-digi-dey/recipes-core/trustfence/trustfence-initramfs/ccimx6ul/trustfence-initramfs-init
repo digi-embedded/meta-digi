@@ -1,0 +1,98 @@
+#!/bin/sh
+#===============================================================================
+#
+#  trustfence-initramfs-init
+#
+#  Copyright (C) 2016 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Init script for Trustfence initramfs
+#
+#===============================================================================
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+mkdir -p /proc /sys /dev
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+
+# Set kernel console loglevel
+LOGLEVEL="$(sysctl -n kernel.printk)"
+sysctl -q -w kernel.printk=4
+
+for arg in $(cat /proc/cmdline); do
+	case "${arg}" in
+		init=*|rescue=1|root=*|trustfence_install=*) eval ${arg};;
+		trustfence_fskey*)
+			tf_fskey_bool=true;
+			eval ${arg};;
+	esac
+done
+
+# Translate "PARTUUID=..." to real device
+root="/dev/$(findfs ${root})"
+
+rescue_shell () {
+	# Expand console and respawn if exited
+	while true; do
+		setsid cttyhack sh -l
+		sleep 1
+	done
+}
+
+# Jump to a rescue shell if requested
+if [ -n "${rescue}" ]; then
+	rescue_shell
+fi
+
+if [ -n "${tf_fskey_bool}" ]; then
+	# Program key if trustfence_fskey kernel parameter exists
+	if [ -n "${trustfence_fskey}" ]; then
+		# trustfence_fskey not empty - use provided key
+		printf "\nUsing provided key\n"
+		trustfence-tool --newkey=${trustfence_fskey}
+		if [ "${?}" != "0" ]; then
+			error "trustfence-tool: key generation"
+		fi
+	else
+		# trustfence_fskey empty - use random key
+		printf "\nGenerating new random key\n"
+		trustfence-tool --newkey
+		if [ "${?}" != "0" ]; then
+			error "trustfence-tool: key generation"
+		fi
+	fi
+	echo "\nFile system encryption key changed.\n"
+	echo "A system reboot is needed for the kernel to use it.\n"
+	rescue_shell
+fi
+
+# Run install script if "trustfence_install" kernel parameter exists
+if [ -n "${trustfence_install}" ]; then
+	trustfence-install.sh ${trustfence_install}
+	sleep 1
+	echo ">> Rebooting the system"
+	sleep 1
+	sync && reboot -f
+fi
+
+# Mount device
+mkdir -p /newroot
+mount -t "ubifs" ${root} /newroot
+
+#
+# Clean-up and do the switch_root to the final rootfs
+#
+# - restore previous kernel console loglevel
+# - umount virtual filesystems
+#
+[ -n "${LOGLEVEL}" ] && sysctl -q -w kernel.printk="${LOGLEVEL}"
+mount --move /dev /newroot/dev
+umount /sys /proc
+exec switch_root /newroot ${init:-/sbin/init}
