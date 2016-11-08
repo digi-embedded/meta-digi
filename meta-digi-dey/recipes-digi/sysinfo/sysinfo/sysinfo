@@ -215,7 +215,7 @@ make_report(){
 	echo "--------------------------------------"
 	echo ""
 
-	if [ "$(($(cat /sys/fsl_otp/HW_OCOTP_LOCK) & 2))" != "0" ]; then
+	if [ "$(($(cat /sys/fsl_otp/HW_OCOTP_CFG5) & 2))" != "0" ]; then
 		echo "Device status: [CLOSED]"
 	else
 		echo "Device status: [OPEN]"
