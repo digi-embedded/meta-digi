@@ -22,6 +22,13 @@
 #
 #===============================================================================
 
+# Avoid parallel execution of this script
+SINGLE_PROCESS_LOCK="/tmp/sign_script.lock.d"
+trap 'rm -rf "${SINGLE_PROCESS_LOCK}"' INT TERM EXIT
+while ! mkdir "${SINGLE_PROCESS_LOCK}" > /dev/null 2>&1; do
+        sleep 1
+done
+
 SCRIPT_NAME="$(basename ${0})"
 SCRIPT_PATH="$(cd $(dirname ${0}) && pwd)"
 
