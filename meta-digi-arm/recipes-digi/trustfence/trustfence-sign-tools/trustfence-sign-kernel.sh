@@ -50,8 +50,8 @@ Usage: ${SCRIPT_NAME} [OPTIONS] input-unsigned-image output-signed-image
 
     -p <platform>    select platform for the project
     -b               sign/encrypt bootscript
-    -d               sign/encrypt initramfs
-    -i               sign/encrypt DTB
+    -d               sign/encrypt DTB
+    -i               sign/encrypt initramfs
     -l               sign/encrypt Linux image
 
 Supported platforms: ccimx6, ccimx6ul
