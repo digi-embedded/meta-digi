@@ -125,6 +125,7 @@ modes:
 softAP mode
 * A maximum of ten connected devices are supported when using Qualcomm's AR6233
 Bluetooth Low Energy mode
+* The MIPI and CSI1 camera connectors cannot be used simultaneously.
 
 ## Digi ConnectCore 6 SBC
 
