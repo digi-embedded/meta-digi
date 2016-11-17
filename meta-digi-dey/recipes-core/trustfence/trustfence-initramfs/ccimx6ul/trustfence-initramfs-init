@@ -68,8 +68,8 @@ if [ -n "${tf_fskey_bool}" ]; then
 			error "trustfence-tool: key generation"
 		fi
 	fi
-	echo "\nFile system encryption key changed.\n"
-	echo "A system reboot is needed for the kernel to use it.\n"
+	printf "\nFile system encryption key changed.\n"
+	printf "A system reboot is needed for the kernel to use it.\n"
 	rescue_shell
 fi
 
