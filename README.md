@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 2.0
-## Release 2.0-r3
+## Release 2.0-r4
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -59,6 +59,10 @@ Documentation is available online on the Digi documentation site:
 
 # Release Changelog
 
+## 2.0-r4
+
+* TBC
+
 ## 2.0-r3
 
 * Support for the new Digi ConnectCore 6UL System-On-Module and Starter Kit
@@ -93,8 +97,12 @@ Documentation is available online on the Digi documentation site:
 This is a list of known issues and limitations at the time of release. An
 updated list can be found on the online documentation.
 
-* When using the TrustFence (TM) U-Boot environment encryption, access to the
-U-Boot environment from the Linux OS is not supported.
+* When using TrustFence (TM)  encrypted images secure boot support, the CAAM
+will hang the processor when trying to authenticate an encrypted firmware image
+after a failed attempt. Hence the target needs to be reset after an
+authentication failure.
+* If TrustFence (TM) image encryption support is enabled, the uSD image will
+boot a signed U-Boot only.
 
 ## Digi ConnectCore 6UL
 
@@ -121,21 +129,12 @@ modes:
 softAP mode
 * A maximum of ten connected devices are supported when using Qualcomm's AR6233
 Bluetooth Low Energy mode
-* NXP i.MX6 processor does not set the sticky bit which write protects the
-SRK_REVOKE eFuse on closed devices. This means that in the ConnectCore 6,
-key revocation is always possible, no matter the value of the Yocto macro
-TRUSTFENCE_UNLOCK_KEY_REVOCATION.
-* When using TrustFence (TM)  encrypted images secure boot support, the CAAM
-will hang the processor when trying to authenticate an encrypted kernel image
-after a failed attempt. Hence the target needs to be reset after an
-authentication failure.
+* The MIPI and CSI1 camera connectors cannot be used simultaneously.
 
 ## Digi ConnectCore 6 SBC
 
 * The Micrel PHY KSZ9031 may take between five and six seconds to
 auto-negotiate with Gigabit switches
-* Secure uSD booting only supports booting signed images. A uSD image is not
-generated if TrustFence (TM) image encryption support is enabled.
 
 # Support Contact Information
 

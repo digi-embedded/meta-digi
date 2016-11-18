@@ -24,9 +24,17 @@ FILES_${PN} = "/"
 
 # Runtime packages used in 'trustfence-initramfs-init'
 RDEPENDS_${PN} = " \
-    cryptsetup \
-    rng-tools \
     trustfence-tool \
     util-linux-findfs \
     wipe \
+    u-boot-fw-utils \
+"
+
+RDEPENDS_${PN}_append_ccimx6sbc = " \
+    cryptsetup \
+    rng-tools \
+"
+
+RDEPENDS_${PN}_append_ccimx6ul = " \
+    mtd-utils-ubifs \
 "

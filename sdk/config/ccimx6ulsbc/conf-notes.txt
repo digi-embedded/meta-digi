@@ -1,0 +1,17 @@
+Digi Embedded Yocto provides the following image recipes:
+
+  * dey-image-qt: graphical QT image
+
+    By default the image is X11-based so it provides a full SATO theme
+    desktop environment.
+
+    To compile the image for the framebuffer (instead of X11) add the
+    following line to the project's conf/local.conf:
+
+    DISTRO_FEATURES_remove = "x11"
+
+  * core-image-base: a console-only image
+
+    Expansion of native core-image-base by including all the support for the
+    target device hardware like firmware files, rootfs customizations, etc.
+

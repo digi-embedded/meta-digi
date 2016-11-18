@@ -1,0 +1,301 @@
+From: "Diaz de Grenu, Jose" <Jose.DiazdeGrenu@digi.com>
+Date: Tue, 23 Aug 2016 13:05:05 +0200
+Subject: [PATCH] tools: env: implement support for environment encryption by
+ CAAM
+
+https://jira.digi.com/browse/DEL-2836
+
+Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
+---
+ configs/sandbox_defconfig |   1 +
+ tools/env/Makefile        |   2 +-
+ tools/env/caam_keyblob.h  |  45 +++++++++++++++
+ tools/env/fw_env.c        | 140 ++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 187 insertions(+), 1 deletion(-)
+ create mode 100644 tools/env/caam_keyblob.h
+
+diff --git a/configs/sandbox_defconfig b/configs/sandbox_defconfig
+index 598519dbb2fc..81dd4d445c0e 100644
+--- a/configs/sandbox_defconfig
++++ b/configs/sandbox_defconfig
+@@ -44,3 +44,4 @@ CONFIG_UNIT_TEST=y
+ CONFIG_UT_TIME=y
+ CONFIG_UT_DM=y
+ CONFIG_UT_ENV=y
++CONFIG_MD5=y
+diff --git a/tools/env/Makefile b/tools/env/Makefile
+index 40164f7a35fa..de4766ddf8dd 100644
+--- a/tools/env/Makefile
++++ b/tools/env/Makefile
+@@ -25,7 +25,7 @@ hostprogs-y := fw_printenv
+ 
+ fw_printenv-objs := fw_env.o fw_env_main.o \
+ 	crc32.o ctype.o linux_string.o \
+-	env_attr.o env_flags.o aes.o
++	env_attr.o env_flags.o aes.o ../../lib/md5.o
+ 
+ quiet_cmd_crosstools_strip = STRIP   $^
+       cmd_crosstools_strip = $(STRIP) $^; touch $@
+diff --git a/tools/env/caam_keyblob.h b/tools/env/caam_keyblob.h
+new file mode 100644
+index 000000000000..1e33b3f01a05
+--- /dev/null
++++ b/tools/env/caam_keyblob.h
+@@ -0,0 +1,45 @@
++/*
++ * CAAM public-level include definitions for the key blob
++ *
++ * Copyright (C) 2015 Freescale Semiconductor, Inc.
++ */
++
++#ifndef CAAM_KEYBLOB_H
++#define CAAM_KEYBLOB_H
++
++
++#include <linux/ioctl.h>
++#include <linux/types.h>
++
++struct caam_kb_data {
++	char *rawkey;
++	size_t rawkey_len;
++	char *keyblob;
++	size_t keyblob_len;
++	char *keymod;
++	size_t keymod_len;
++};
++
++
++#define CAAM_KB_MAGIC		'I'
++
++/**
++ * DOC: CAAM_KB_ENCRYPT - generate a key blob from raw key
++ *
++ * Takes an caam_kb_data struct and returns it with the key blob
++ */
++#define CAAM_KB_ENCRYPT		_IOWR(CAAM_KB_MAGIC, 0, \
++				      struct caam_kb_data)
++
++/**
++ * DOC: CAAM_KB_DECRYPT - get keys from a key blob
++ *
++ * Takes an caam_kb_data struct and returns it with the raw key.
++ */
++#define CAAM_KB_DECRYPT		_IOWR(CAAM_KB_MAGIC, 1, struct caam_kb_data)
++
++#ifndef GENMEM_KEYMOD_LEN
++#define GENMEM_KEYMOD_LEN 16
++#endif
++
++#endif /* CAAM_KEYBLOB_H */
+\ No newline at end of file
+diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
+index daa02a760e37..09f06c874b17 100644
+--- a/tools/env/fw_env.c
++++ b/tools/env/fw_env.c
+@@ -21,6 +21,7 @@
+ #include <sys/types.h>
+ #include <sys/ioctl.h>
+ #include <sys/stat.h>
++#include <u-boot/md5.h>
+ #include <unistd.h>
+ 
+ #ifdef MTD_OLD
+@@ -31,10 +32,19 @@
+ # include <mtd/mtd-user.h>
+ #endif
+ 
++#include "caam_keyblob.h"
+ #include "fw_env.h"
+ 
+ #include <aes.h>
+ 
++/*
++ * The BLOB includes a random AES-256 key (32 bytes) and a
++ * Message Authentication Code (MAC) (16 bytes)
++ */
++#define BLOB_OVERHEAD	48
++#define CAAM_KEY_DEV	"/dev/caam_kb"
++
++#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+ #define DIV_ROUND_UP(n, d)	(((n) + (d) - 1) / (d))
+ 
+ #define WHITESPACE(c) ((c == '\t') || (c == ' '))
+@@ -109,6 +119,8 @@ static int aes_flag;
+ static uint8_t aes_key[AES_KEY_LENGTH] = { 0 };
+ static int env_aes_cbc_crypt(char *data, const int enc);
+ 
++static int caam_encryption_flag;
++
+ static int HaveRedundEnv = 0;
+ 
+ static unsigned char active_flag = 1;
+@@ -236,6 +248,103 @@ static int parse_aes_key(char *key)
+ 	return 0;
+ }
+ 
++static void check_caam_encryption(void)
++{
++	const char *dt_prop = "/proc/device-tree/digi,uboot-env,encrypted";
++
++	if (access(dt_prop, F_OK) != -1)
++		caam_encryption_flag = 1;
++}
++
++static int env_caam_get_keymod(unsigned char output[16])
++{
++	int i;
++	int len;
++	int fd;
++	char buff[32];
++	uint32_t ocotp_hwid[2];
++	const char *ocotp_hwid_file[2] = {
++		"/sys/fsl_otp/HW_OCOTP_MAC0",
++		"/sys/fsl_otp/HW_OCOTP_MAC1"
++	};
++
++	for (i = 0; i < ARRAY_SIZE(ocotp_hwid); i++) {
++		fd = open(ocotp_hwid_file[i], O_RDONLY);
++		if (fd < 0)
++			return fd;
++		len = read(fd, buff, sizeof(buff));
++		if (len < 0) {
++			close(fd);
++			return -1;
++		}
++		/* drop last character (new line) */
++		buff[len - 1] = '\0';
++		ocotp_hwid[i] = strtoul(buff, NULL, 0);
++		close(fd);
++	}
++
++	md5((unsigned char *)(&ocotp_hwid), sizeof(ocotp_hwid), output);
++
++	return 0;
++}
++
++static int env_caam_crypt(char *data, const int enc)
++{
++	struct caam_kb_data enc_data;
++	int fd;
++	int ret = 0;
++	const int len = getenvsize();
++	int ioctl_mode;
++	char *buffer;
++	unsigned char key_modifier[16];
++
++	ret = env_caam_get_keymod(key_modifier);
++	if (ret)
++		return ret;
++
++	enc_data.keymod = (char *)key_modifier;
++	enc_data.keymod_len = sizeof(key_modifier);
++
++	enc_data.keyblob_len = len;
++	enc_data.rawkey_len = len - BLOB_OVERHEAD;
++
++	buffer = malloc(len);
++	if (!buffer) {
++		printf("Could not allocate memory\n");
++		return -1;
++	}
++
++	if (enc) {
++		enc_data.rawkey = data;
++		ioctl_mode = CAAM_KB_ENCRYPT;
++		enc_data.keyblob = buffer;
++	} else {
++		enc_data.keyblob = data;
++		ioctl_mode = CAAM_KB_DECRYPT;
++		enc_data.rawkey = buffer;
++	}
++
++	if ((fd = open(CAAM_KEY_DEV, O_RDWR)) < 0) {
++		ret = fd;
++		goto free;
++	}
++
++	ret = ioctl(fd, ioctl_mode, &enc_data);
++	if (ret) {
++		printf("CAAM_KEY_DEV ioctl failed: %d\n", ret);
++		goto out;
++	}
++
++	memcpy(data, buffer, len);
++
++out:
++	close(fd);
++free:
++	free(buffer);
++
++	return ret;
++}
++
+ /*
+  * Print the current definition of one, or more, or all
+  * environment variables
+@@ -259,6 +368,8 @@ int fw_printenv (int argc, char *argv[])
+ 		argc -= 2;
+ 	}
+ 
++	check_caam_encryption();
++
+ 	if (fw_env_open())
+ 		return -1;
+ 
+@@ -334,6 +445,15 @@ int fw_env_close(void)
+ 		}
+ 	}
+ 
++	if (caam_encryption_flag) {
++		ret = env_caam_crypt(environment.data, 1);
++		if (ret) {
++			fprintf(stderr,
++				"Error: can't encrypt env for flash\n");
++			return ret;
++		}
++	}
++
+ 	/*
+ 	 * Update CRC
+ 	 */
+@@ -504,6 +624,8 @@ int fw_setenv(int argc, char *argv[])
+ 		argc -= 2;
+ 	}
+ 
++	check_caam_encryption();
++
+ 	if (argc < 2) {
+ 		errno = EINVAL;
+ 		return -1;
+@@ -1229,6 +1351,15 @@ int fw_env_open(void)
+ 			return ret;
+ 	}
+ 
++	if (caam_encryption_flag) {
++		ret = env_caam_crypt(environment.data, 0);
++		if (ret) {
++			fprintf(stderr,
++				"Error: can't decrypt environment\n");
++			return ret;
++		}
++	}
++
+ 	crc0_ok = (crc0 == *environment.crc);
+ 	if (!HaveRedundEnv) {
+ 		if (!crc0_ok) {
+@@ -1286,6 +1417,15 @@ int fw_env_open(void)
+ 				return ret;
+ 		}
+ 
++		if (caam_encryption_flag) {
++			ret = env_caam_crypt(redundant->data, 0);
++			if (ret) {
++				fprintf(stderr,
++					"Error: can't decrypt environment\n");
++				return ret;
++			}
++		}
++
+ 		crc1_ok = (crc1 == redundant->crc);
+ 		flag1 = redundant->flags;
+ 

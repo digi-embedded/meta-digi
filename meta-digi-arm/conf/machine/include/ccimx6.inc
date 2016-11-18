@@ -27,7 +27,7 @@ MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
     e2fsprogs-resize2fs \
     parted \
-    ${@base_conditional('TRUSTFENCE_ENCRYPT_ENVIRONMENT', '1', '', 'u-boot-fw-utils', d)} \
+    u-boot-fw-utils \
 "
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
 MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins cryptodev-module rng-tools"

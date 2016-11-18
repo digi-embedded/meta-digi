@@ -25,7 +25,7 @@ do_install_append() {
 
 	# Create 'interfaces' file dynamically
 	cat ${WORKDIR}/interfaces.eth0.${ETH0_MODE} >> ${D}${sysconfdir}/network/interfaces
-	[ -n "${HAVE_EXT_ETH}" ] && cat ${WORKDIR}/interfaces.eth1.${ETH1_MODE} >> ${D}${sysconfdir}/network/interfaces
+	[ -n "${HAVE_SECOND_ETH}" ] && cat ${WORKDIR}/interfaces.eth1.${ETH1_MODE} >> ${D}${sysconfdir}/network/interfaces
 	[ -n "${HAVE_WIFI}" ] && cat ${WORKDIR}/interfaces.wlan0.${WLAN0_MODE} >> ${D}${sysconfdir}/network/interfaces
 	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
 

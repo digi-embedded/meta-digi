@@ -26,6 +26,9 @@ IMAGE_FEATURES += " \
     ${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'dey-wireless', '', d)} \
 "
 
+# Remove some features to reduce the rootfs size to fit in the internal storage.
+IMAGE_FEATURES_remove_ccimx6ul = "package-management"
+
 # SDK features (for toolchains generated from an image with populate_sdk)
 SDKIMAGE_FEATURES ?= "dev-pkgs dbg-pkgs staticdev-pkgs"
 

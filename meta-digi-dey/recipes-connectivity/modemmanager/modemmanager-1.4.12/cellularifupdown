@@ -27,9 +27,9 @@ background_connect() {
         [ -n "${IF_PIN}" ] && ARGS="${ARGS},pin=${IF_PIN}"
 
         [ -n "${IF_USER}" ] && ARGS="${ARGS},user=${IF_USER}"
-        [ -n "${IF_PASSWORD}" ] && ARGS="${ARGS},password=${IF_PASSWORD}"  
+        [ -n "${IF_PASSWORD}" ] && ARGS="${ARGS},password=${IF_PASSWORD}"
         [ -n "${IF_PORT}" ] && ARGS="${ARGS},number=*99#"
- 
+
         # Enable the modem and connect to provider
         mmcli -m 0 --simple-connect=${ARGS} > /dev/null 2>&1
 

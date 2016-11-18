@@ -182,15 +182,63 @@ make_report(){
 	ip link show
 	printf "\n"
 
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-       Wireless configuration       -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	wpa_supplicant -v 2>/dev/null
+	echo ""
+	if [ -f "/etc/wpa_supplicant.conf" ]; then
+		echo "wpa_supplicant.conf:"
+		cat "/etc/wpa_supplicant.conf"
+	else
+		echo "[NOT FOUND] /etc/wpa_supplicant.conf"
+	fi
+
+	echo ""
+	hostapd -v 2>&1
+	echo ""
+	if [ -f "/etc/hostapd.conf" ]; then
+		echo "hostapd.conf:"
+		cat "/etc/hostapd.conf"
+	else
+		echo "[NOT FOUND] hostapd.conf"
+	fi
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-             TrustFence             -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+
+	if [ "$(($(cat /sys/fsl_otp/HW_OCOTP_CFG5) & 2))" != "0" ]; then
+		echo "Device status: [CLOSED]"
+	else
+		echo "Device status: [OPEN]"
+	fi
+
+	if [ -f "/proc/device-tree/digi,uboot-env,encrypted" ]; then
+		echo "U-Boot environment is encrypted"
+	else
+		echo "U-Boot environment is NOT encrypted"
+	fi
+
 	echo "-------------End of report------------"
 }
 
 
 DISTRO="$(sed -ne 's,DISTRO = \(.*\)$,\1,g;T;p' /etc/build)"
 DEY_VERSION="$(sed -ne 's,DISTRO_VERSION = \(.*\)$,\1,g;T;p' /etc/build)"
-UBOOT_PARTITION="/dev/mmcblk0boot0"
-[ -c "/dev/mtd0" ] && UBOOT_PARTITION="/dev/mtd0"
-UBOOT_VERSION="$(strings ${UBOOT_PARTITION} | grep -m 1 dub | cut -d' ' -f2)"
+UBOOT_VERSION="$(cat /proc/device-tree/digi,uboot,version 2>/dev/null)"
+if [ -z "${UBOOT_VERSION}" ]; then
+	UBOOT_PARTITION="/dev/mmcblk0boot0"
+	[ -c "/dev/mtd0" ] && UBOOT_PARTITION="/dev/mtd0"
+	UBOOT_VERSION="$(strings ${UBOOT_PARTITION} | grep -m 1 dub | cut -d' ' -f2)"
+fi
 MACHINE="$(cat /proc/device-tree/digi,machine,name)"
 BOARD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant)"
 BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn)"

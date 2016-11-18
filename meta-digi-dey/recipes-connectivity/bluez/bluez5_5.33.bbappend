@@ -28,6 +28,7 @@ SRC_URI_append_ccimx6ul = " \
     file://0017-bluetooth-Fix-flow-control-operation.patch \
     file://0018-Adding-MDM-specific-code-under-_PLATFORM_MDM_.patch \
     file://0019-Bluetooth-Fix-static-analysis-issues.patch \
+    file://0023-hciattach_rome-do-not-override-the-baudrate-in-the-N.patch \
 "
 
 inherit update-rc.d

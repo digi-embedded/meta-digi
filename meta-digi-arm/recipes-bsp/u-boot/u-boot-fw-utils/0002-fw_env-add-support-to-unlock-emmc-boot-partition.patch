@@ -8,10 +8,10 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 33 insertions(+)
 
 diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
-index 698fe5181bc0..d7e61a467e73 100644
+index 09f06c874b17..ae6c69eca0ad 100644
 --- a/tools/env/fw_env.c
 +++ b/tools/env/fw_env.c
-@@ -1097,6 +1097,27 @@ static int flash_read (int fd)
+@@ -1218,6 +1218,27 @@ static int flash_read (int fd)
  	return 0;
  }
  
@@ -39,7 +39,7 @@ index 698fe5181bc0..d7e61a467e73 100644
  static int flash_io (int mode)
  {
  	int fd_current, fd_target, rc, dev_target;
-@@ -1129,8 +1150,20 @@ static int flash_io (int mode)
+@@ -1250,8 +1271,20 @@ static int flash_io (int mode)
  			fd_target = fd_current;
  		}
  

@@ -11,7 +11,7 @@ PACKAGE_INSTALL = " \
 IMAGE_FEATURES = ""
 IMAGE_LINGUAS = ""
 
-IMAGE_FSTYPES = "cpio.gz.u-boot"
+IMAGE_FSTYPES = "cpio.gz.u-boot.tf"
 inherit core-image image_types_uboot
 
 IMAGE_ROOTFS_SIZE = "8192"

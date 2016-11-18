@@ -29,8 +29,8 @@ IMAGE_CMD_boot.vfat() {
 
 	# Add Trustfence initramfs if enabled
 	if [ -n "${TRUSTFENCE_INITRAMFS_IMAGE}" ]; then
-		BOOTIMG_FILES="${BOOTIMG_FILES} $(readlink -e ${DEPLOY_DIR_IMAGE}/${TRUSTFENCE_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot)"
-		BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${TRUSTFENCE_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot"
+		BOOTIMG_FILES="${BOOTIMG_FILES} $(readlink -e ${DEPLOY_DIR_IMAGE}/${TRUSTFENCE_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf)"
+		BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${TRUSTFENCE_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf"
 	fi
 
 	# Size of kernel and device tree + 10% extra space (in bytes)
@@ -75,6 +75,7 @@ IMAGE_DEPENDS_boot.ubifs = " \
     mtd-utils-native:do_populate_sysroot \
     u-boot:do_deploy \
     virtual/kernel:do_deploy \
+    ${@TRUSTFENCE_BOOTIMAGE_DEPENDS(d)} \
 "
 
 IMAGE_CMD_boot.ubifs() {
@@ -88,6 +89,11 @@ IMAGE_CMD_boot.ubifs() {
 				BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}"
 			fi
 		done
+	fi
+
+	# Add Trustfence initramfs if enabled
+	if [ -n "${TRUSTFENCE_INITRAMFS_IMAGE}" ]; then
+		BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${TRUSTFENCE_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf"
 	fi
 
 	# Create temporary folder
@@ -129,6 +135,27 @@ IMAGE_CMD_rootfs.initramfs() {
 	fi
 }
 IMAGE_TYPEDEP_rootfs.initramfs = "cpio.gz"
+
+IMAGE_CMD_cpio.gz.u-boot.tf() {
+	#
+	# Image generation code for image type 'cpio.gz.u-boot.tf'
+	# (signed/encrypted ramdisk)
+	#
+	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+		# Set environment variables for trustfence configuration
+		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
+		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
+
+		# Sign/encrypt the ramdisk
+		"${STAGING_BINDIR_NATIVE}/trustfence-sign-kernel.sh" -p "${DIGI_FAMILY}" -i "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz.u-boot" "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz.u-boot.tf"
+	else
+		# Rename image
+		mv "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz.u-boot" "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz.u-boot.tf"
+	fi
+}
+
+IMAGE_TYPEDEP_cpio.gz.u-boot.tf = "cpio.gz.u-boot"
 
 # Set alignment to 4MB [in KiB]
 IMAGE_ROOTFS_ALIGNMENT = "4096"

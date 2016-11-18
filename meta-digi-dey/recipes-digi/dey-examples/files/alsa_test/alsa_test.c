@@ -57,7 +57,7 @@ int main(void)
                 printf("Could't open PCM '%s': %s\n", device, snd_strerror(err));
                 return EXIT_FAILURE;
         }
-	
+
         if ((err = snd_pcm_set_params(handle,
                                       PCM_TEST_FORMAT,
                                       SND_PCM_ACCESS_RW_INTERLEAVED,
@@ -81,16 +81,16 @@ int main(void)
                         err = EXIT_FAILURE;
 			goto exit_close_pcm;
                 }
-		
+
                 if (frames > 0 && frames < total_frames)
                         printf("Short write (expected %li, wrote %li)\n",
 			       total_frames, frames);
         }
 
 	err = EXIT_SUCCESS;
-	
+
  exit_close_pcm:
         snd_pcm_close(handle);
-	
+
         return err;
 }

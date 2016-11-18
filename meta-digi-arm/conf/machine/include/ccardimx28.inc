@@ -40,8 +40,8 @@ MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
 # web1          Y       Y       Y       Y
 
 # Per-variant machine features
-MACHINE_FEATURES_append_e = " ext-eth"
+MACHINE_FEATURES_append_e = " second-eth"
 MACHINE_FEATURES_append_w = " wifi"
 MACHINE_FEATURES_append_wb = " wifi bluetooth"
-MACHINE_FEATURES_append_web = " wifi ext-eth bluetooth"
-MACHINE_FEATURES_append_web1 = " wifi ext-eth bluetooth 1-wire"
+MACHINE_FEATURES_append_web = " wifi second-eth bluetooth"
+MACHINE_FEATURES_append_web1 = " wifi second-eth bluetooth 1-wire"

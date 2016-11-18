@@ -16,13 +16,13 @@
 #  Parameters set by Jenkins:
 #     DY_PLATFORMS: Platforms to build
 #     DY_REVISION:  Revision of the manifest repository (for 'repo init')
-#     DY_TARGET:    Target image (the default is 'dey-image-qt')
+#     DY_TARGET:    Target image (the default is platform dependent)
 #
 #===============================================================================
 
 set -e
 
-AVAILABLE_PLATFORMS="ccardimx28js ccimx6sbc"
+AVAILABLE_PLATFORMS="ccardimx28js ccimx6sbc ccimx6ulsbc ccimx6ulstarter"
 
 MANIFEST_URL="https://github.com/digi-embedded/dey-manifest.git"
 
@@ -98,7 +98,17 @@ purge_sstate() {
 
 # Set default values if not provided by Jenkins
 [ -z "${DY_PLATFORMS}" ] && DY_PLATFORMS="$(echo ${AVAILABLE_PLATFORMS})"
-[ -z "${DY_TARGET}" ] && DY_TARGET="dey-image-qt"
+
+# Per-platform data
+while read _pl _tgt; do
+	[ -n "${DY_TARGET}" ] && _tgt="${DY_TARGET}" || true
+	eval "${_pl}_tgt=\"${_tgt}\""
+done<<-_EOF_
+	ccardimx28js      dey-image-qt
+	ccimx6sbc         dey-image-qt
+	ccimx6ulsbc       dey-image-qt
+	ccimx6ulstarter   core-image-base
+_EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
 YOCTO_INST_DIR="${WORKSPACE}/dey.$(echo ${DY_REVISION} | tr '/' '_')"
@@ -133,6 +143,7 @@ fi
 # Create projects and build
 rm -rf ${YOCTO_IMGS_DIR} ${YOCTO_PROJ_DIR}
 for platform in ${DY_PLATFORMS}; do
+	eval platform_targets="\${${platform}_tgt}"
 	_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}"
 	_this_img_dir="${YOCTO_IMGS_DIR}/${platform}"
 	mkdir -p ${_this_img_dir} ${_this_prj_dir}
@@ -151,8 +162,8 @@ for platform in ${DY_PLATFORMS}; do
 			if [ "${DY_FB_IMAGE}" = "true" ]; then
 				printf "${X11_REMOVAL_CFG}" >> conf/local.conf
 			fi
-			for target in ${DY_TARGET}; do
-				printf "\n[INFO] Building the $target target.\n"
+			for target in ${platform_targets}; do
+				printf "\n[INFO] Building the ${target} target.\n"
 				time bitbake ${target}
 			done
 			purge_sstate

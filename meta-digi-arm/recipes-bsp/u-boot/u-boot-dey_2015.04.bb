@@ -97,10 +97,11 @@ do_compile () {
 
 TF_BOOTSCRIPT_SEDFILTER = ""
 TF_BOOTSCRIPT_SEDFILTER_ccimx6 = "${@tf_bootscript_sedfilter(d)}"
+TF_BOOTSCRIPT_SEDFILTER_ccimx6ul = "${@tf_bootscript_sedfilter(d)}"
 
 def tf_bootscript_sedfilter(d):
     tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
-    return "/^dboot linux/i\setenv boot_initrd true\\nsetenv initrd_file %s-${MACHINE}.cpio.gz.u-boot" % tf_initramfs if tf_initramfs else ""
+    return "/^dboot linux/i\setenv boot_initrd true\\nsetenv initrd_file %s-${MACHINE}.cpio.gz.u-boot.tf" % tf_initramfs if tf_initramfs else ""
 
 do_deploy_append() {
 	# Remove canonical U-Boot symlinks for ${UBOOT_CONFIG} currently in the form:
@@ -149,6 +150,13 @@ do_deploy_append() {
 	TMP_BOOTSCR="$(mktemp ${WORKDIR}/bootscr.XXXXXX)"
 	sed -e "${TF_BOOTSCRIPT_SEDFILTER}" ${WORKDIR}/boot.txt > ${TMP_BOOTSCR}
 	mkimage -T script -n bootscript -C none -d ${TMP_BOOTSCR} ${DEPLOYDIR}/boot.scr
+	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
+		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
+		"${STAGING_BINDIR_NATIVE}/trustfence-sign-kernel.sh" -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${DEPLOYDIR}/boot-signed.scr"
+		mv ${DEPLOYDIR}/boot-signed.scr ${DEPLOYDIR}/boot.scr
+	fi
 	rm -f ${TMP_BOOTSCR}
 }
 

@@ -2,12 +2,14 @@
 
 . /etc/formfactor/config
 
-## Use SHOWCURSOR from formfactor config files instaed of hardcoding it
-# if [ "$HAVE_TOUCHSCREEN" = "1" ]; then
-#     SHOWCURSOR="no"
-# else
-#     SHOWCURSOR="yes"
-# fi
+## Use first SHOWCURSOR from formfactor config files (fallback to set it depending on HAVE_TOUCHSCREEN)
+if [ -z "${SHOWCURSOR}" ]; then
+    if [ "$HAVE_TOUCHSCREEN" = "1" ]; then
+        SHOWCURSOR="no"
+    else
+        SHOWCURSOR="yes"
+    fi
+fi
 
 if [ "$HAVE_KEYBOARD" = "1" ]; then
     KEYBOARD_APPLET=""
@@ -15,6 +17,10 @@ else
     KEYBOARD_APPLET="keyboard"
 fi
 
+# Tell GTK+3 we really want server side decorations, even with
+# GtkHeaderBar using applications: Without that mb-panel will render
+# on top of the client side decorations.
+export GTK_CSD=0
 
 matchbox-desktop &
 

@@ -4,3 +4,5 @@ iface wlan0 inet dhcp
        udhcpc_opts -b
        wpa-driver ##WPA_DRIVER##
        wpa-conf /etc/wpa_supplicant.conf
+       # post-up /etc/init.d/hostapd start
+       # pre-down /etc/init.d/hostapd stop
