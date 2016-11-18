@@ -54,14 +54,25 @@ Documentation is available online on the Digi documentation site:
 
 # Downloads
 
-* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r3/images/
-* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r3/sdk/
+* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r4/images/
+* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r4/sdk/
 
 # Release Changelog
 
 ## 2.0-r4
 
-* TBC
+* Digi ConnectCore 6UL
+        * Support for Digi ConnectCore 6UL SBC
+                * Linux kernel v4.1.35
+                * Support for Fusion touch displays
+        * Authenticated and encrypted initramfs, bootscripts and DTBs
+        * Encrypted root filesystem
+        * MCA tampering
+        * Power management optimizations
+* Digi ConnectCore 6
+  * Support for Quectel EC-20 LTE modem
+  * Authenticated and encrypted initramfs, bootscripts and DTBs
+  * Minor bug fixes
 
 ## 2.0-r3
 
