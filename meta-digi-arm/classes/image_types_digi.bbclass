@@ -124,18 +124,6 @@ IMAGE_CMD_boot.ubifs() {
 	rm -rf ${TMP_BOOTDIR}
 }
 
-IMAGE_CMD_rootfs.initramfs() {
-	#
-	# Image generation code for image type 'rootfs.initramfs'
-	#
-	mkimage -A ${TARGET_ARCH} -O linux -T ramdisk -C none -n ${IMAGE_NAME} -d ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.initramfs
-	# Create the symlink
-	if [ -n "${IMAGE_LINK_NAME}" ] && [ -e ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.initramfs ]; then
-		ln -s ${IMAGE_NAME}.rootfs.initramfs ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.initramfs
-	fi
-}
-IMAGE_TYPEDEP_rootfs.initramfs = "cpio.gz"
-
 IMAGE_CMD_cpio.gz.u-boot.tf() {
 	#
 	# Image generation code for image type 'cpio.gz.u-boot.tf'
