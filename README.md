@@ -13,6 +13,17 @@ online documentation.
 
 The current release supports the following hardware platforms:
 
+Software for the following hardware platforms is in beta support:
+
+* Digi ConnectCore 6UL
+  * [Digi P/N CC-WMX-JN58-NE](http://www.digi.com/products/models/cc-wmx-jn58-ne)
+* Digi ConnectCore 6UL Starter Kit
+  * [Digi P/N CC-WMX6UL-START](http://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001514/default.htm#concept/yocto/c_get_started_with_yocto.htm))
+* Digi ConnectCore 6UL Development Kit
+  * [Digi P/N CC-WMX6UL-KIT](https://www.digi.com/products/models/cc-wmx6ul-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001515/default.htm#concept/yocto/c_get_started_with_yocto.htm))
+
+Software for the following hardware platforms is in production support:
+
 * Digi ConnectCore 6
   * [Digi P/N CC-WMX-J97C-TN](http://www.digi.com/products/models/cc-wmx-j97c-tn)
   * [Digi P/N CC-WMX-L96C-TE](http://www.digi.com/products/models/cc-wmx-l96c-te)
@@ -27,20 +38,13 @@ The current release supports the following hardware platforms:
   * Digi P/N CC-WMX-J98C-FJA
   * Digi P/N CC-WMX-J98C-FJA-1
 
-Software for the following hardware platforms is in beta support:
-
-* Digi ConnectCore 6UL
-  * [Digi P/N CC-WMX-JN58-NE](http://www.digi.com/products/models/cc-wmx-jn58-ne)
-* Digi ConnectCore 6UL Starter Kit
-  * [Digi P/N CC-WMX6UL-START](http://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001514/default.htm#concept/yocto/c_get_started_with_yocto.htm))
-
 * Digi ConnectCore 6 Development Kit
   * [Digi P/N CC-WMX6-KIT](http://www.digi.com/products/models/cc-wmx6-kit) ([Get Started](http://www.digi.com/resources/documentation/digidocs/90001945-13/default.htm#concept/yocto/c_get_started_with_yocto.htm%3FTocPath%3DDigi%2520Embedded%2520Yocto%7CGet%2520started%7C_____0))
 
 * Digi ConnectCore 6 SBC
   * [Digi P/N CC-SB-WMX-J97C-1](http://www.digi.com/products/models/cc-sb-wmx-j97c-1)
-  * Digi P/N CC-SB-WMX-L87C-1
-  * Digi P/N CC-SB-WMX-L76C-1
+  * [Digi P/N CC-SB-WMX-L87C-1](https://www.digi.com/products/models/cc-sb-wmx-l87c-1)
+  * [Digi P/N CC-SB-WMX-L76C-1](https://www.digi.com/products/models/cc-sb-wmx-l76c-1)
 
 Previous versions of Digi Embedded Yocto include support for additional Digi
 hardware.
@@ -49,8 +53,9 @@ hardware.
 
 Documentation is available online on the Digi documentation site:
 
-* [Digi ConnectCore 6UL](http://www.digi.com/resources/documentation/Digidocs/90001514/default.htm)
-* [Digi ConnectCore 6](http://www.digi.com/resources/documentation/Digidocs/90001945-13/default.htm)
+* [Digi ConnectCore 6UL Starter Kit](http://www.digi.com/resources/documentation/Digidocs/90001514/default.htm)
+* [Digi ConnectCore 6UL Development Kit](http://www.digi.com/resources/documentation/Digidocs/90001515/default.htm)
+* [Digi ConnectCore 6 Jumpstart Development Kit](http://www.digi.com/resources/documentation/Digidocs/90001945-13/default.htm)
 
 # Downloads
 
@@ -62,13 +67,13 @@ Documentation is available online on the Digi documentation site:
 ## 2.0-r4
 
 * Digi ConnectCore 6UL
-        * Support for Digi ConnectCore 6UL SBC
-                * Linux kernel v4.1.35
-                * Support for Fusion touch displays
-        * Authenticated and encrypted initramfs, bootscripts and DTBs
-        * Encrypted root filesystem
-        * MCA tampering
-        * Power management optimizations
+  * Support for Digi ConnectCore 6UL SBC
+    * Linux kernel v4.1.35
+    * Support for Fusion touch displays
+  * Authenticated and encrypted initramfs, bootscripts and DTBs
+  * Encrypted root filesystem
+  * MCA tampering
+  * Power management optimizations
 * Digi ConnectCore 6
   * Support for Quectel EC-20 LTE modem
   * Authenticated and encrypted initramfs, bootscripts and DTBs
