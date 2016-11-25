@@ -2,8 +2,7 @@ SUMMARY = "TrustFence signing and encryption scripts"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
 
-SRCBRANCH = "v2015.04/master"
-SRCBRANCH_ccimx6ul = "v2015.04/master"
+SRCBRANCH = "v2015.04/maint"
 SRCREV = "${AUTOREV}"
 
 S = "${WORKDIR}"
