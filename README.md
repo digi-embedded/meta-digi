@@ -72,11 +72,13 @@ Documentation is available online on the Digi documentation site:
     * Support for Fusion touch displays
   * Authenticated and encrypted initramfs, bootscripts and DTBs
   * Encrypted root filesystem
+  * MCA firmware update
   * MCA tampering
   * Power management optimizations
 * Digi ConnectCore 6
   * Support for Quectel EC-20 LTE modem
   * Authenticated and encrypted initramfs, bootscripts and DTBs
+  * Linux kernel v3.14.79
   * Minor bug fixes
 
 ## 2.0-r3
