@@ -21,6 +21,7 @@ MACHINE_FIRMWARE ?= ""
 
 MACHINE_EXTRA_RDEPENDS += " \
     imx-kobs \
+    mca-tool \
     mtd-utils-ubifs \
     u-boot-fw-utils \
 "

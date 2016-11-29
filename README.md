@@ -13,6 +13,17 @@ online documentation.
 
 The current release supports the following hardware platforms:
 
+Software for the following hardware platforms is in beta support:
+
+* Digi ConnectCore 6UL
+  * [Digi P/N CC-WMX-JN58-NE](http://www.digi.com/products/models/cc-wmx-jn58-ne)
+* Digi ConnectCore 6UL Starter Kit
+  * [Digi P/N CC-WMX6UL-START](http://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001514/default.htm#concept/yocto/c_get_started_with_yocto.htm))
+* Digi ConnectCore 6UL Development Kit
+  * [Digi P/N CC-WMX6UL-KIT](https://www.digi.com/products/models/cc-wmx6ul-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001515/default.htm#concept/yocto/c_get_started_with_yocto.htm))
+
+Software for the following hardware platforms is in production support:
+
 * Digi ConnectCore 6
   * [Digi P/N CC-WMX-J97C-TN](http://www.digi.com/products/models/cc-wmx-j97c-tn)
   * [Digi P/N CC-WMX-L96C-TE](http://www.digi.com/products/models/cc-wmx-l96c-te)
@@ -27,20 +38,13 @@ The current release supports the following hardware platforms:
   * Digi P/N CC-WMX-J98C-FJA
   * Digi P/N CC-WMX-J98C-FJA-1
 
-Software for the following hardware platforms is in beta support:
-
-* Digi ConnectCore 6UL
-  * [Digi P/N CC-WMX-JN58-NE](http://www.digi.com/products/models/cc-wmx-jn58-ne)
-* Digi ConnectCore 6UL Starter Kit
-  * [Digi P/N CC-WMX6UL-START](http://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001514/default.htm#concept/yocto/c_get_started_with_yocto.htm))
-
 * Digi ConnectCore 6 Development Kit
   * [Digi P/N CC-WMX6-KIT](http://www.digi.com/products/models/cc-wmx6-kit) ([Get Started](http://www.digi.com/resources/documentation/digidocs/90001945-13/default.htm#concept/yocto/c_get_started_with_yocto.htm%3FTocPath%3DDigi%2520Embedded%2520Yocto%7CGet%2520started%7C_____0))
 
 * Digi ConnectCore 6 SBC
   * [Digi P/N CC-SB-WMX-J97C-1](http://www.digi.com/products/models/cc-sb-wmx-j97c-1)
-  * Digi P/N CC-SB-WMX-L87C-1
-  * Digi P/N CC-SB-WMX-L76C-1
+  * [Digi P/N CC-SB-WMX-L87C-1](https://www.digi.com/products/models/cc-sb-wmx-l87c-1)
+  * [Digi P/N CC-SB-WMX-L76C-1](https://www.digi.com/products/models/cc-sb-wmx-l76c-1)
 
 Previous versions of Digi Embedded Yocto include support for additional Digi
 hardware.
@@ -49,19 +53,33 @@ hardware.
 
 Documentation is available online on the Digi documentation site:
 
-* [Digi ConnectCore 6UL](http://www.digi.com/resources/documentation/Digidocs/90001514/default.htm)
-* [Digi ConnectCore 6](http://www.digi.com/resources/documentation/Digidocs/90001945-13/default.htm)
+* [Digi ConnectCore 6UL Starter Kit](http://www.digi.com/resources/documentation/Digidocs/90001514/default.htm)
+* [Digi ConnectCore 6UL Development Kit](http://www.digi.com/resources/documentation/Digidocs/90001515/default.htm)
+* [Digi ConnectCore 6 Jumpstart Development Kit](http://www.digi.com/resources/documentation/Digidocs/90001945-13/default.htm)
 
 # Downloads
 
-* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r3/images/
-* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r3/sdk/
+* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r4/images/
+* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r4/sdk/
 
 # Release Changelog
 
 ## 2.0-r4
 
-* TBC
+* Digi ConnectCore 6UL
+  * Support for Digi ConnectCore 6UL SBC
+    * Linux kernel v4.1.35
+    * Support for Fusion touch displays
+  * Authenticated and encrypted initramfs, bootscripts and DTBs
+  * Encrypted root filesystem
+  * MCA firmware update
+  * MCA tampering
+  * Power management optimizations
+* Digi ConnectCore 6
+  * Support for Quectel EC-20 LTE modem
+  * Authenticated and encrypted initramfs, bootscripts and DTBs
+  * Linux kernel v3.14.79
+  * Minor bug fixes
 
 ## 2.0-r3
 
@@ -111,6 +129,10 @@ properly. To work around this problem the UART is configured without hardware
 flow control at 115200 bps, reducing the maximum throughput of this interface.
 This problem will be corrected in newer revisions of the hardware.
 
+* U-Boot version dub-2015.04-r4.5 may report running on Starter Board version 1
+even when your Starter Board is version 2. In that case Ethernet does not work
+in U-Boot. More recent versions of U-Boot fix this issue.
+
 ## Digi ConnectCore 6
 
 * NXP i.MX6 processor has a documented errata (ERR004512) whereby the maximum
@@ -125,7 +147,6 @@ modes:
 softAP mode
 * A maximum of ten connected devices are supported when using Qualcomm's AR6233
 Bluetooth Low Energy mode
-* The MIPI and CSI1 camera connectors cannot be used simultaneously.
 
 ## Digi ConnectCore 6 SBC
 
