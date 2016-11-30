@@ -27,10 +27,10 @@ usage() {
 
 suspend_interfaces() {
 	if hcitool -i hci0 dev >/dev/null 2>&1; then
-		hciconfig hci0 down && up_hci0_on_resume="1" && sleep 0.5
+		hciconfig hci0 down && up_hci0_on_resume="1"
 	fi
 	if grep -qs '^wlan0' /var/run/ifstate; then
-		ifdown wlan0 && up_wlan_on_resume="1" && sleep 0.5
+		ifdown wlan0 && up_wlan_on_resume="1"
 	fi
 	if grep -qs '^wlan' /proc/modules; then
 		rmmod wlan
