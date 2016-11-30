@@ -39,7 +39,7 @@ suspend_interfaces() {
 
 resume_interfaces() {
 	if ! grep -qs '^wlan0' /var/run/ifstate; then
-		[ -n "${up_wlan_on_resume}" ] && modprobe wlan && sleep 0.5 && ifup wlan0
+		[ -n "${up_wlan_on_resume}" ] && ifup wlan0
 	fi
 	[ -n "${up_hci0_on_resume}" ] && hciconfig hci0 up
 }
