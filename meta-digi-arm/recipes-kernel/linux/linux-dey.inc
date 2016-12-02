@@ -27,26 +27,32 @@ S = "${WORKDIR}/git"
 KERNEL_EXTRA_ARGS += "LOADADDR=${UBOOT_ENTRYPOINT}"
 
 do_deploy_append() {
-	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
-		# Set environment variables for trustfence configuration
-		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
-		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
-		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
-
-		# Sign/encrypt the kernel image
-		"${STAGING_BINDIR_NATIVE}/trustfence-sign-kernel.sh" -p "${DIGI_FAMILY}" -l "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}.bin" "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}-signed.bin"
-		mv "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}-signed.bin" "${DEPLOYDIR}/${KERNEL_IMAGE_BASE_NAME}.bin"
-
-		# Sign/encrypt the device tree blobs
-		if [ -n "${KERNEL_DEVICETREE}" ]; then
-			for DTB_NAME in ${KERNEL_DEVICETREE}; do
-				DTB="${B}/arch/${ARCH}/boot/dts/${DTB_NAME}"
-				"${STAGING_BINDIR_NATIVE}/trustfence-sign-kernel.sh" -p "${DIGI_FAMILY}" -d "${DTB}" "${DTB}-signed"
-				mv "${DTB}-signed" "${DTB}"
-			done
-		fi
-	fi
 	(cd ${DEPLOYDIR} && ln -sf ${KERNEL_IMAGE_BASE_NAME}.bin ${KERNEL_IMAGE_SYMLINK_NAME})
+}
+
+do_deploy[postfuncs] += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence_sign', '', d)}"
+
+trustfence_sign() {
+	# Set environment variables for trustfence configuration
+	export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+	[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
+	[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
+
+	# Sign/encrypt the kernel image
+	KERNEL_IMAGE="$(readlink -e ${DEPLOYDIR}/${KERNEL_IMAGE_SYMLINK_NAME})"
+	TMP_KERNEL_IMAGE_SIGNED="$(mktemp ${DEPLOYDIR}/${KERNEL_IMAGE_SYMLINK_NAME}-signed.XXXXXX)"
+	trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -l "${KERNEL_IMAGE}" "${TMP_KERNEL_IMAGE_SIGNED}"
+	mv "${TMP_KERNEL_IMAGE_SIGNED}" "${KERNEL_IMAGE}"
+
+	# Sign/encrypt the device tree blobs
+	if [ -n "${KERNEL_DEVICETREE}" ]; then
+		for DTB_NAME in ${KERNEL_DEVICETREE}; do
+			DTB=$(readlink -e ${DEPLOYDIR}/${KERNEL_IMAGETYPE}-${DTB_NAME})
+			TMP_DTB_SIGNED="$(mktemp ${DEPLOYDIR}/${KERNEL_IMAGETYPE}-${DTB_NAME}-signed.XXXXXX)"
+			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -d "${DTB}" "${TMP_DTB_SIGNED}"
+			mv "${TMP_DTB_SIGNED}" "${DTB}"
+		done
+	fi
 }
 
 do_deploy[vardeps] += "TRUSTFENCE_SIGN_KEYS_PATH TRUSTFENCE_KEY_INDEX TRUSTFENCE_DEK_PATH"
