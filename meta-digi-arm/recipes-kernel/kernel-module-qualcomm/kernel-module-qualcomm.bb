@@ -9,9 +9,9 @@ DEPENDS = "virtual/kernel"
 inherit module
 
 CAF_MIRROR = "git://codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/qcacld-2.0"
-PV = "v4.2.74.63"
+PV = "v4.2.79.63"
 SRCBRANCH = "caf-wlan/QCA6564_LE_1.0.3_LA.4.2.2.3"
-SRCREV = "38f01638d75bdf3eb83ac428a4b6ec528b26f541"
+SRCREV = "b0ae2aa45bbba54600b537e90cb1aca34f2d1a13"
 
 SRC_URI = " \
     ${CAF_MIRROR};destsuffix=${PV};branch=${SRCBRANCH} \
