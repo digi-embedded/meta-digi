@@ -35,6 +35,7 @@ SRC_URI = " \
     file://0016-wlan_hdd_cfg80211-fix-missing-ifdef-clause.patch \
     file://0017-Add-.gitignore-rules.patch \
     file://0018-wlan_hdd_main-initialize-all-adapter-completion-vari.patch \
+    file://0019-qcacld-Indicate-disconnect-event-to-upper-layers.patch \
 "
 
 S = "${WORKDIR}/${PV}"
