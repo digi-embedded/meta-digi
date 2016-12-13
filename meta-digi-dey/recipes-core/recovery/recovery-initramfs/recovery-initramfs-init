@@ -1,0 +1,394 @@
+#!/bin/sh
+#===============================================================================
+#
+#  recovery-initramfs-init
+#
+#  Copyright (C) 2016 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Init script for recovery initramfs
+#
+#===============================================================================
+
+# Variables.
+#------------------------------------------------------------------------------
+ENV_BOOT_RECOVERY="boot_recovery"
+ENV_RECOVERY_COMMAND="recovery_command"
+
+SW_CONFIG="/etc/swupdate.cfg"
+
+USB_MOUNT_DIR="/run/media/"
+UPDATE_MOUNT_DIR="/update"
+
+REBOOT_TIME=10
+
+# Functions.
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+# Function - log
+#
+# Prints the given text in the console.
+#
+# @param ${1}  - Text to print.
+#------------------------------------------------------------------------------
+log() {
+	echo "[RECOVERY] ${1}"
+}
+
+#------------------------------------------------------------------------------
+# Function - log_warning
+#
+# Prints the given text in the console as a warning.
+#
+# @param ${1}  - Warning text to print.
+#------------------------------------------------------------------------------
+log_warning() {
+	log "[WARNING] ${1}"
+}
+
+#------------------------------------------------------------------------------
+# Function - log_error
+#
+# Prints the given text in the console as an error.
+#
+# @param ${1}  - Error text to print.
+#------------------------------------------------------------------------------
+log_error() {
+	log "[ERROR] ${1}"
+}
+
+#------------------------------------------------------------------------------
+# Function - clear_uboot_vars
+#
+# Clears recovery U-Boot variables.
+#------------------------------------------------------------------------------
+clear_uboot_vars() {
+	fw_setenv "${ENV_BOOT_RECOVERY}"
+	fw_setenv "${ENV_RECOVERY_COMMAND}"
+}
+
+#------------------------------------------------------------------------------
+# Function - read_uboot_var
+#
+# Reads the given U-Boot variable.
+#
+# @param ${1}  - U-Boot variable to read.
+# @param ${2}  - Where to store the value of the read variable.
+#------------------------------------------------------------------------------
+read_uboot_var() {
+	eval "${2}=\"$(fw_printenv -n ${1} 2>/dev/null)\""
+}
+
+#------------------------------------------------------------------------------
+# Function - show_error
+#
+# Shows the given error message in the display.
+#
+# @param ${1}  - Error message to show.
+#------------------------------------------------------------------------------
+show_error() {
+	# DEL-3273 - https://jira.digi.com/browse/DEL-3273
+	# Show error in the display
+	echo "DEL-3273 - Show error in the display"
+}
+
+#------------------------------------------------------------------------------
+# Function - reboot_system
+#
+# Reboots the system.
+#------------------------------------------------------------------------------
+reboot_system() {
+	sync && reboot -f
+}
+
+#------------------------------------------------------------------------------
+# Function - quit_with_error
+#
+# Ends the recovery process with the given error message.
+#
+# @param ${1}  - Error message.
+#------------------------------------------------------------------------------
+quit_with_error() {
+	clear_uboot_vars
+	log_error "${1}"
+	show_error "${1}"
+	log "The system will now reboot in ${REBOOT_TIME} seconds"
+	sleep "${REBOOT_TIME}"
+	reboot_system
+}
+
+#------------------------------------------------------------------------------
+# Function - is_nand
+#
+# Verifies if the system is running in a NAND flash.
+#
+# @return  - "yes" if the system is running in NAND, "no" otherwise
+#------------------------------------------------------------------------------
+is_nand() {
+	if [ -f /proc/mtd ] && grep -qs mtd /proc/mtd; then
+		echo "yes"
+	else
+		echo "no"
+	fi
+}
+
+#------------------------------------------------------------------------------
+# Function - mount_external_disks
+#
+# Mounts all available external disks.
+#------------------------------------------------------------------------------
+mount_external_disks() {
+	local devices=$(ls -1 /dev/sd? 2>/dev/null)
+	for device in ${devices}; do
+		for i in ${device}?; do
+			local dev_name=$(basename "${device}${i}")
+			local mount_dir="${USB_MOUNT_DIR}${dev_name}"
+			mkdir -p "${mount_dir}"
+			mount "/dev/${dev_name}" "${mount_dir}" 2>/dev/null
+		done
+	done
+}
+
+#------------------------------------------------------------------------------
+# Function - mount_partition
+#
+# Mounts the given partition.
+#
+# @param ${1}  - Partition name to mount.
+# @param ${2}  - Mount point.
+#------------------------------------------------------------------------------
+mount_partition() {
+	if [ "$(is_nand)" = "yes" ]; then
+		mount_ubi_volume "${1}" "${2}"
+	else
+		mount_emmc_block "${1}" "${2}"
+	fi
+}
+
+#------------------------------------------------------------------------------
+# Function - mount_ubi_volume
+#
+# Mounts the given UBI volume.
+#
+# @param ${1}  - UBI Volume name to mount.
+# @param ${2}  - Mount point.
+#------------------------------------------------------------------------------
+mount_ubi_volume() {
+	# Find the MTD partition.
+	local mtd_num="$(sed -ne "s/mtd\([0-9]\+\):.*\<${1}\>.*/\1/g;T;p" /proc/mtd 2>/dev/null)"
+	if [ -z "${mtd_num}" ]; then
+		log_warning "Could not find MTD partition for volume '${1}'"
+	else
+		# Attach and get UBI device number
+		local dev_number="$(ubiattach -p /dev/mtd${mtd_num} 2>/dev/null | sed -ne 's,.*device number \([0-9]\).*,\1,g;T;p' 2>/dev/null)"
+		# Check if volume exists.
+		ubinfo "/dev/ubi${dev_number}" -N "${1}" >/dev/null 2>&1
+		if [ "$?" = "0" ]; then
+			# Mount the volume.
+			mkdir -p "${2}"
+			mount -t ubifs "ubi${dev_number}:${1}" "${2}" >/dev/null 2>&1
+			if [ "$?" != "0" ]; then
+				log_warning "Could not mount '${1}' partition"
+			fi
+		else
+			log_warning "Could not mount '${1}' partition, volume not found"
+		fi
+	fi
+}
+
+#------------------------------------------------------------------------------
+# Function - mount_emmc_block
+#
+# Mounts the given emmc partition block name.
+#
+# @param ${1}  - Partition name to mount.
+# @param ${2}  - Mount point.
+#------------------------------------------------------------------------------
+mount_emmc_block() {
+	# Find partition block number.
+	local partition_block="/dev/mmcblk0p$(parted -s /dev/mmcblk0 print | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<${1}\>.*,\1,g;T;p")"
+	# Mount the volume.
+	mkdir -p "${2}"
+	mount -t auto "${partition_block}" "${2}" >/dev/null 2>&1
+	if [ "$?" != "0" ]; then
+		log_warning "Could not mount '${1}' partition (${partition_block})"
+	fi
+}
+
+#------------------------------------------------------------------------------
+# Function - format_partition
+#
+# Formats the given partition.
+#
+# @param ${1}  - Partition name to format.
+#------------------------------------------------------------------------------
+format_partition() {
+	if [ "$(is_nand)" = "yes" ]; then
+		format_ubi_volume "${1}"
+	else
+		format_emmc_block "${1}"
+	fi
+}
+
+#------------------------------------------------------------------------------
+# Function - format_ubi_volume
+#
+# Formats and re-creates the given UBI volume.
+#
+# @param ${1}  - UBI Volume name to format.
+#------------------------------------------------------------------------------
+format_ubi_volume() {
+	# Find the MTD partition.
+	local mtd_num="$(sed -ne "s/mtd\([0-9]\+\):.*\<${1}\>.*/\1/g;T;p" /proc/mtd 2>/dev/null)"
+	if [ -z "${mtd_num}" ]; then
+		quit_with_error "Could not find MTD partition for volume '${1}'"
+	else
+		# Format MTD partition.
+		ubiformat "/dev/mtd${mtd_num}" >/dev/null 2>&1
+		if [ "$?" != "0" ]; then
+			quit_with_error "Error erasing '/dev/mtd${mtd_num}' block"
+		fi
+		# Attach and get UBI device number
+		local dev_number="$(ubiattach -p /dev/mtd${mtd_num} 2>/dev/null | sed -ne 's,.*device number \([0-9]\).*,\1,g;T;p' 2>/dev/null)"
+		# Create UBI Vol.
+		ubimkvol "/dev/ubi${dev_number}" -m -N "${1}" >/dev/null 2>&1
+		if [ "$?" = "0" ]; then
+			log "Partition '${1}' successfully erased!"
+			# Detach MTD partition.
+			ubidetach -p "/dev/mtd${mtd_num}" >/dev/null 2>&1
+		else
+			quit_with_error "Error creating '${1}' UBI volume"
+		fi
+	fi
+}
+
+#------------------------------------------------------------------------------
+# Function - format_emmc_block
+#
+# Formats the given emmc partition block name.
+#
+# @param ${1}  - Partition name to format.
+#------------------------------------------------------------------------------
+format_emmc_block() {
+	# Find partition block number.
+	local partition_block="/dev/mmcblk0p$(parted -s /dev/mmcblk0 print | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<${1}\>.*,\1,g;T;p")"
+	# Umount in case partition is mounted, ignore errors.
+	if grep -qs "${partition_block}" /proc/mounts; then
+		umount "${partition_block}" >/dev/null 2>&1
+	fi
+	# Format emmc block.
+	mkfs.ext4 "${partition_block}" >/dev/null 2>&1
+	if [ "$?" = "0" ]; then
+		log "Partition '${1}' successfully erased!"
+	else
+		quit_with_error "Error erasing '${1}' partition"
+	fi
+}
+
+# Main
+#------------------------------------------------------------------------------
+# Setup the environment.
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+# Mount virtual file system.
+mkdir -p /proc /sys /dev /tmp
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+mount -t tmpfs tmpfs /tmp
+
+# Setup fw_printenv.
+mkdir -p /var/lock
+
+# Set kernel console loglevel.
+sysctl -q -w kernel.printk=4
+
+# Parse the kernel command line.
+for arg in $(cat /proc/cmdline); do
+	case "${arg}" in
+		rescue=1) eval "${arg}";;
+	esac
+done
+
+# Jump to a rescue shell if requested.
+if [ -n "${rescue}" ]; then
+	# Expand console and respawn if exited
+	while true; do
+		setsid cttyhack sh -l
+		sleep 1
+	done
+fi
+
+log "Starting recovery..."
+
+# Read the recovery command.
+read_uboot_var "${ENV_RECOVERY_COMMAND}" COMMAND
+
+# Check if there is any command.
+if [ -z "${COMMAND}" ]; then
+	quit_with_error "No command found"
+fi
+
+# Parse the recovery command.
+for arg in ${COMMAND}; do
+	case "${arg}" in
+		wipe_update)
+			wipe_update_bool=true;;
+		encryption_key=*)
+			encryption_key_bool=true;
+			eval "${arg}";;
+		update_package=*)
+			update_package_bool=true;
+			eval "${arg}";;
+		*)
+			# Not supported command
+			quit_with_error "Unknown recovery command '${arg}'";;
+	esac
+done
+
+# Check if wipe update patition command is configured.
+if [ -n "${wipe_update_bool}" ]; then
+	log "Wipe 'update' partition requested"
+	format_partition update
+fi
+
+# Check if encryption key command is configured.
+if [ -n "${encryption_key_bool}" ]; then
+	log "Trustfence encryption key setup requested (new key: ${encryption_key:-random})"
+	trustfence-tool "--newkey${encryption_key:+=${encryption_key}}"
+	if [ "$?" = "0" ]; then
+		log "Trustfence encryption key setup succeed!"
+	else
+		quit_with_error "Error configuring trustfence encryption key"
+	fi
+fi
+
+# Check if update package command is configured.
+if [ -n "${update_package_bool}" ]; then
+	log "Firmware update requested"
+	if [ -z "${update_package}" ]; then
+		quit_with_error "Firmware update package not specified"
+	else
+		log "Update package location: ${update_package}"
+		# Mount external disks.
+		mount_external_disks
+		# Mount update partition.
+		mount_partition update "${UPDATE_MOUNT_DIR}"
+		# Execute the software update.
+		swupdate -f "${SW_CONFIG}" -i "${update_package}"
+		if [ "$?" = "0" ]; then
+			log "Firmware update process succeed!"
+		else
+			quit_with_error "Error executing the firmware update"
+		fi
+	fi
+fi
+
+# End the recovery process.
+clear_uboot_vars
+reboot_system
