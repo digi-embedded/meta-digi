@@ -1,0 +1,26 @@
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Thu, 15 Dec 2016 13:31:12 +0100
+Subject: [PATCH] wdd_hdd_main: Print con_mode to clearly see if in FTM mode.
+
+We use FTM mode for RF testing.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ CORE/HDD/src/wlan_hdd_main.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/CORE/HDD/src/wlan_hdd_main.c b/CORE/HDD/src/wlan_hdd_main.c
+index f057f8c177b1..d83602740b94 100755
+--- a/CORE/HDD/src/wlan_hdd_main.c
++++ b/CORE/HDD/src/wlan_hdd_main.c
+@@ -12607,8 +12607,8 @@ static int hdd_driver_init( void)
+ #ifdef HDD_TRACE_RECORD
+    MTRACE(hddTraceInit());
+ #endif
+-   pr_info("%s: loading driver v%s\n", WLAN_MODULE_NAME,
+-           QWLAN_VERSIONSTR TIMER_MANAGER_STR MEMORY_DEBUG_STR);
++   pr_info("%s: loading driver v%s in mode %d\n", WLAN_MODULE_NAME,
++           QWLAN_VERSIONSTR TIMER_MANAGER_STR MEMORY_DEBUG_STR, con_mode);
+ 
+    do {
+ 
