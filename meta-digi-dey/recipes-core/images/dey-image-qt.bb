@@ -26,6 +26,11 @@ IMAGE_FEATURES += " \
     ${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'dey-wireless', '', d)} \
 "
 
+# Separately add 'dey-gstreamer' to ccimx6ulsbc platform.
+# This platform does not have 'accel-video' but we want gstreamer for using
+# it with video/camera
+IMAGE_FEATURES_append_ccimx6ulsbc = " dey-gstreamer"
+
 # Remove some features to reduce the rootfs size to fit in the internal storage.
 IMAGE_FEATURES_remove_ccimx6ul = "package-management"
 
