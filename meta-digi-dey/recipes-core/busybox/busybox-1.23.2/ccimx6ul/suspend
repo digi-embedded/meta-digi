@@ -26,9 +26,6 @@ usage() {
 }
 
 suspend_interfaces() {
-	if hcitool -i hci0 dev >/dev/null 2>&1; then
-		hciconfig hci0 down && up_hci0_on_resume="1"
-	fi
 	if grep -qs '^wlan0' /var/run/ifstate; then
 		ifdown wlan0 && up_wlan_on_resume="1"
 	fi
@@ -41,7 +38,6 @@ resume_interfaces() {
 	if ! grep -qs '^wlan0' /var/run/ifstate; then
 		[ -n "${up_wlan_on_resume}" ] && ifup wlan0
 	fi
-	[ -n "${up_hci0_on_resume}" ] && hciconfig hci0 up
 }
 
 while getopts "h" c; do
