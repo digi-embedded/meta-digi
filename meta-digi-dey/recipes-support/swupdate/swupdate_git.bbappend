@@ -6,6 +6,8 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 SRCREV = "edd6559728d2e234ebdc03ba1d5444449ae2b92b"
 PV = "2016.10+git${SRCPV}"
 
+SRC_URI += "file://0001-progress_client-add-command-line-parameter.patch"
+
 do_install_append() {
 	# The 'progress' command is new starting in version '2016.10', but we
 	# don't need to do a version check here because the bbappend is version
