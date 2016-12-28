@@ -248,6 +248,12 @@ format_ubi_volume() {
 	if [ -z "${mtd_num}" ]; then
 		quit_with_error "Could not find MTD partition for volume '${1}'"
 	else
+		# Umount in case partition is mounted, ignore errors.
+		if grep -qs "${1}" /proc/mounts; then
+			local path="$(sed -ne "s/.*:${1} \(.*\) ubifs.*/\1/g;T;p" /proc/mounts 2>/dev/null)"
+			umount "${path}" >/dev/null 2>&1
+			ubidetach -p "/dev/mtd${mtd_num}" >/dev/null 2>&1
+		fi
 		# Format MTD partition.
 		ubiformat "/dev/mtd${mtd_num}" >/dev/null 2>&1
 		if [ "$?" != "0" ]; then
@@ -277,16 +283,20 @@ format_ubi_volume() {
 format_emmc_block() {
 	# Find partition block number.
 	local partition_block="/dev/mmcblk0p$(parted -s /dev/mmcblk0 print | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<${1}\>.*,\1,g;T;p")"
-	# Umount in case partition is mounted, ignore errors.
-	if grep -qs "${partition_block}" /proc/mounts; then
-		umount "${partition_block}" >/dev/null 2>&1
-	fi
-	# Format emmc block.
-	mkfs.ext4 "${partition_block}" >/dev/null 2>&1
-	if [ "$?" = "0" ]; then
-		log "Partition '${1}' successfully erased!"
+	if [ -b "${partition_block}" ]; then
+		# Umount in case partition is mounted, ignore errors.
+		if grep -qs "${partition_block}" /proc/mounts; then
+			umount "${partition_block}" >/dev/null 2>&1
+		fi
+		# Format emmc block.
+		mkfs.ext4 "${partition_block}" >/dev/null 2>&1
+		if [ "$?" = "0" ]; then
+			log "Partition '${1}' successfully erased!"
+		else
+			quit_with_error "Error erasing '${1}' partition"
+		fi
 	else
-		quit_with_error "Error erasing '${1}' partition"
+		quit_with_error "Could not find partition block for '${1}'"
 	fi
 }
 
@@ -376,6 +386,7 @@ if [ -n "${update_package_bool}" ]; then
 	else
 		log "Update package location: ${update_package}"
 		# Mount external disks.
+		sleep 5
 		mount_external_disks
 		# Mount update partition.
 		mount_partition update "${UPDATE_MOUNT_DIR}"
