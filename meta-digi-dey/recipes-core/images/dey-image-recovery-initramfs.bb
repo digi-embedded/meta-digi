@@ -5,6 +5,7 @@ LICENSE = "MIT"
 
 PACKAGE_INSTALL = " \
     busybox \
+    psplash \
     recovery-initramfs \
     swupdate \
     trustfence-tool \

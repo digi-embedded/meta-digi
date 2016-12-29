@@ -60,6 +60,8 @@ log_warning() {
 #------------------------------------------------------------------------------
 log_error() {
 	log "[ERROR] ${1}"
+	psplash_message "ERROR: ${1}"
+	psplash_progress "0"
 }
 
 #------------------------------------------------------------------------------
@@ -85,16 +87,27 @@ read_uboot_var() {
 }
 
 #------------------------------------------------------------------------------
-# Function - show_error
+# Function - psplash_message
 #
-# Shows the given error message in the display.
+# Shows the given message in the psplash screen.
 #
-# @param ${1}  - Error message to show.
+# @param ${1}  - Message to show.
 #------------------------------------------------------------------------------
-show_error() {
-	# DEL-3273 - https://jira.digi.com/browse/DEL-3273
-	# Show error in the display
-	echo "DEL-3273 - Show error in the display"
+psplash_message() {
+	echo "MSG ${1}" > /tmp/psplash_fifo
+	sleep 0.2
+}
+
+#------------------------------------------------------------------------------
+# Function - psplash_progress
+#
+# Sets the psplash progress bar percentage to the given one.
+#
+# @param ${1}  - Progress percentage.
+#------------------------------------------------------------------------------
+psplash_progress() {
+	echo "PROGRESS ${1}" > /tmp/psplash_fifo
+	sleep 0.2
 }
 
 #------------------------------------------------------------------------------
@@ -116,7 +129,6 @@ reboot_system() {
 quit_with_error() {
 	clear_uboot_vars
 	log_error "${1}"
-	show_error "${1}"
 	log "The system will now reboot in ${REBOOT_TIME} seconds"
 	sleep "${REBOOT_TIME}"
 	reboot_system
@@ -259,11 +271,13 @@ format_ubi_volume() {
 		if [ "$?" != "0" ]; then
 			quit_with_error "Error erasing '/dev/mtd${mtd_num}' block"
 		fi
+		psplash_progress "50"
 		# Attach and get UBI device number
 		local dev_number="$(ubiattach -p /dev/mtd${mtd_num} 2>/dev/null | sed -ne 's,.*device number \([0-9]\).*,\1,g;T;p' 2>/dev/null)"
 		# Create UBI Vol.
 		ubimkvol "/dev/ubi${dev_number}" -m -N "${1}" >/dev/null 2>&1
 		if [ "$?" = "0" ]; then
+			psplash_progress "100"
 			log "Partition '${1}' successfully erased!"
 			# Detach MTD partition.
 			ubidetach -p "/dev/mtd${mtd_num}" >/dev/null 2>&1
@@ -291,6 +305,7 @@ format_emmc_block() {
 		# Format emmc block.
 		mkfs.ext4 "${partition_block}" >/dev/null 2>&1
 		if [ "$?" = "0" ]; then
+			psplash_progress "100"
 			log "Partition '${1}' successfully erased!"
 		else
 			quit_with_error "Error erasing '${1}' partition"
@@ -318,6 +333,9 @@ mkdir -p /var/lock
 # Set kernel console loglevel.
 sysctl -q -w kernel.printk=4
 
+# Start psplash.
+psplash &
+
 # Parse the kernel command line.
 for arg in $(cat /proc/cmdline); do
 	case "${arg}" in
@@ -335,6 +353,7 @@ if [ -n "${rescue}" ]; then
 fi
 
 log "Starting recovery..."
+psplash_message "Starting recovery..."
 
 # Read the recovery command.
 read_uboot_var "${ENV_RECOVERY_COMMAND}" COMMAND
@@ -364,14 +383,17 @@ done
 # Check if wipe update patition command is configured.
 if [ -n "${wipe_update_bool}" ]; then
 	log "Wipe 'update' partition requested"
+	psplash_message "Erasing update partition..."
 	format_partition update
 fi
 
 # Check if encryption key command is configured.
 if [ -n "${encryption_key_bool}" ]; then
 	log "Trustfence encryption key setup requested (new key: ${encryption_key:-random})"
+	psplash_message "Configuring new encryption key..."
 	trustfence-tool "--newkey${encryption_key:+=${encryption_key}}"
 	if [ "$?" = "0" ]; then
+		psplash_progress "100"
 		log "Trustfence encryption key setup succeed!"
 	else
 		quit_with_error "Error configuring trustfence encryption key"
@@ -381,6 +403,7 @@ fi
 # Check if update package command is configured.
 if [ -n "${update_package_bool}" ]; then
 	log "Firmware update requested"
+	psplash_message "Updating firmware..."
 	if [ -z "${update_package}" ]; then
 		quit_with_error "Firmware update package not specified"
 	else
@@ -390,6 +413,8 @@ if [ -n "${update_package_bool}" ]; then
 		mount_external_disks
 		# Mount update partition.
 		mount_partition update "${UPDATE_MOUNT_DIR}"
+		# Execute the progress binary.
+		progress -wp &
 		# Execute the software update.
 		swupdate -f "${SW_CONFIG}" -i "${update_package}"
 		if [ "$?" = "0" ]; then
