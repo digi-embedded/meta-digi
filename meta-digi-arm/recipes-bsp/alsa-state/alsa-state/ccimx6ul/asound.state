@@ -758,7 +758,7 @@ state.imxmax98088 {
 	control.69 {
 		iface MIXER
 		name 'Right SPK Mixer Right DAC1 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -778,7 +778,7 @@ state.imxmax98088 {
 	control.71 {
 		iface MIXER
 		name 'Right SPK Mixer Right DAC2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
