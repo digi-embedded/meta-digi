@@ -1,0 +1,41 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Mon, 2 Jan 2017 13:11:02 +0100
+Subject: [PATCH] pulseaudio: keep headphones volume in platforms without jack
+ detection
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+---
+ src/modules/alsa/mixer/paths/analog-output-headphones.conf | 4 ++--
+ src/modules/alsa/mixer/paths/analog-output-speaker.conf    | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/modules/alsa/mixer/paths/analog-output-headphones.conf b/src/modules/alsa/mixer/paths/analog-output-headphones.conf
+index b6ee70ba84c5..ddc0918d3a12 100644
+--- a/src/modules/alsa/mixer/paths/analog-output-headphones.conf
++++ b/src/modules/alsa/mixer/paths/analog-output-headphones.conf
+@@ -81,8 +81,8 @@ override-map.2 = all-left,all-right
+
+ [Element Headphone]
+ required-any = any
+-switch = mute
+-volume = merge
++switch = on
++volume = ignore
+ override-map.1 = all
+ override-map.2 = all-left,all-right
+
+diff --git a/src/modules/alsa/mixer/paths/analog-output-speaker.conf b/src/modules/alsa/mixer/paths/analog-output-speaker.conf
+index 39193dd8851e..5183be2bbe4f 100644
+--- a/src/modules/alsa/mixer/paths/analog-output-speaker.conf
++++ b/src/modules/alsa/mixer/paths/analog-output-speaker.conf
+@@ -73,8 +73,8 @@ volume = off
+ ; This profile path is intended to control the speaker, let's mute headphones
+ ; else there will be a spike when plugging in headphones
+ [Element Headphone]
+-switch = off
+-volume = off
++switch = on
++volume = ignore
+
+ [Element Headphone2]
+ switch = off
