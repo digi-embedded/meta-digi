@@ -19,7 +19,6 @@ FW_QCA6564-WIFI = " \
     file://otp30.bin \
     file://qwlan30.bin \
     file://utf30.bin \
-    file://utfbd30.bin \
     file://wlan/cfg.dat \
     file://wlan/qcom_cfg.ini \
 "
@@ -50,7 +49,6 @@ do_install() {
 		otp30.bin \
 		qwlan30.bin \
 		utf30.bin \
-		utfbd30.bin \
 		${D}${base_libdir}/firmware
 	install -m 0644 \
 		wlan/cfg.dat \

@@ -68,7 +68,8 @@ case "${DTB_REGION_CODE}" in
 esac
 
 BDATA_LINK="${FIRMWARE_DIR}/bdwlan30.bin"
-# Create a symbolic link to the FW file for the specific country region.
+UTFBDATA_LINK="${FIRMWARE_DIR}/utfbd30.bin"
+# Create a symbolic links to the FW files for the specific country region.
 BDATA_SOURCE="${FIRMWARE_DIR}/bdwlan30_US.bin"
 case "${REGULATORY_DOMAIN}" in
 	${US_CODE})
@@ -83,9 +84,10 @@ case "${REGULATORY_DOMAIN}" in
 esac
 
 # We don't want to rewrite NAND every time we boot so only
-# change the link if it is wrong.
+# change the links if they are wrong.
 if [ ! -e "${BDATA_LINK}" ] || ! cmp -s "${BDATA_LINK}" "${BDATA_SOURCE}"; then
 	ln -sf "${BDATA_SOURCE}" "${BDATA_LINK}"
+	ln -sf "${BDATA_SOURCE}" "${UTFBDATA_LINK}"
 fi
 
 # Check the version of modprobe installed to compound the arguments.
