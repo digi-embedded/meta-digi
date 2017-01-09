@@ -37,6 +37,7 @@ SRC_URI = " \
     file://0018-wlan_hdd_main-initialize-all-adapter-completion-vari.patch \
     file://0019-qcacld-Indicate-disconnect-event-to-upper-layers.patch \
     file://0020-wdd_hdd_main-Print-con_mode-to-clearly-see-if-in-FTM.patch \
+    file://0021-Makefile-Pass-BUILD_DEBUG_VERSION-to-kbuild-system.patch \
 "
 
 S = "${WORKDIR}/${PV}"
