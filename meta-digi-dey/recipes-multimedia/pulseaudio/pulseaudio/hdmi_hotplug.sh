@@ -27,15 +27,7 @@ done
 # HDMI audio sink from ALSA
 if [ "${EVENT}" = "plugin" ]; then
 	if ! pactl list sinks | grep -qs "imx-hdmi-soc"; then
-		if which aplay; then
-			# Run a command that always fails but loads
-			# pulseaudio HDMI sink/card as a side effect
-			aplay / -D "hw:${HDMI_CARD}"
- 		else
-			# Unload and reload the detection module
-			pactl unload-module module-udev-detect
-			pactl load-module module-udev-detect tsched=0
-		fi
+		card-detect "${HDMI_CARD}"
 
 		# Set HDMI as default sink
 		pactl set-default-sink "$(pactl list sinks | grep -i 'Name:.*hdmi' | cut -d ' ' -f2)"

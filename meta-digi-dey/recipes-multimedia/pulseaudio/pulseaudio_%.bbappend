@@ -16,3 +16,6 @@ do_install_append_ccimx6sbc() {
 }
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
+
+# The card-detect binary is only necessary for the HDMI hotplug to work on the ccimx6sbc
+RDEPENDS_${PN}_append_ccimx6sbc = " card-detect"
