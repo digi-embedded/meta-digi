@@ -4,7 +4,6 @@ SUMMARY = "Qualcomm's wireless driver for qca6564"
 DESCRIPTION = "qcacld-2.0 module.bbclass mechanism."
 LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
-DEPENDS = "virtual/kernel"
 
 inherit module
 
