@@ -6,12 +6,12 @@ software =
         {
             filename = "##BOOTIMG_NAME##";
             device = "/dev/mmcblk0p1";
-            types = "raw";
+            type = "raw";
         },
         {
             filename = "##ROOTIMG_NAME##";
             device = "/dev/mmcblk0p3";
-            types = "raw";
+            type = "raw";
         }
     );
 }
