@@ -15,7 +15,7 @@ UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
 # Wireless external module
 WIRELESS_MODULE ?= ""
-WIRELESS_MODULE_append = "${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'kernel-module-atheros', '', d)}"
+WIRELESS_MODULE_append = " ${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'kernel-module-atheros', '', d)}"
 
 # Firmware
 MACHINE_FIRMWARE ?= ""
