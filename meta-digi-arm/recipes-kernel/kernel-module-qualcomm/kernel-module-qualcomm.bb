@@ -5,8 +5,6 @@ DESCRIPTION = "qcacld-2.0 module.bbclass mechanism."
 LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
 
-inherit module
-
 CAF_MIRROR = "git://codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/qcacld-2.0"
 PV = "v4.2.79.63"
 SRCBRANCH = "caf-wlan/QCA6564_LE_1.0.3_LA.4.2.2.3"
@@ -41,6 +39,8 @@ SRC_URI = " \
 
 S = "${WORKDIR}/${PV}"
 
+inherit module
+
 EXTRA_OEMAKE += "CONFIG_CLD_HL_SDIO_CORE=y CONFIG_LINUX_QCMBR=y WLAN_OPEN_SOURCE=1"
 # Explicity state it is not a QC platform, if not the driver will try to remap
 # memory that is not allowed in ARMv6 (kernel commit
@@ -50,7 +50,7 @@ EXTRA_OEMAKE += "CONFIG_NON_QC_PLATFORM=y"
 EXTRA_OEMAKE += "BUILD_DEBUG_VERSION=0"
 
 do_compile_prepend() {
-     export BUILD_VER=${PV}
+	export BUILD_VER=${PV}
 }
 
 do_install_append() {
