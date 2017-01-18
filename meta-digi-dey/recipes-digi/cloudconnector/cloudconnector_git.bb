@@ -25,6 +25,7 @@ FILES_${PN}-cert = "${sysconfdir}/ssl/certs/Digi_Int-ca-cert-public.crt"
 CONFFILES_${PN}-bin += "${sysconfdir}/cc.conf"
 
 DEBIAN_NOAUTONAME_${PN}-bin = "1"
+DEBIAN_NOAUTONAME_${PN}-cert = "1"
 
 RDEPENDS_${PN} = "${PN}-cert"
 RDEPENDS_${PN}-bin = "${PN}-cert"
