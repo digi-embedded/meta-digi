@@ -17,6 +17,8 @@ do_install_append_ccimx6sbc() {
 	install -m 0644 ${WORKDIR}/dey-audio-hdmi.conf ${D}${datadir}/pulseaudio/alsa-mixer/profile-sets
 	install -m 0644 ${WORKDIR}/dey-audio-sgtl5000.conf ${D}${datadir}/pulseaudio/alsa-mixer/profile-sets
 
+	sed -i -e '/load-module module-suspend-on-idle/{s,$, timeout=0,g}' ${D}${sysconfdir}/pulse/default.pa
+
 	cat >> ${D}${base_libdir}/udev/rules.d/90-pulseaudio.rules <<-_EOL_
 
 		# Digi ConnectCore 6 SBC HDMI
