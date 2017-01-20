@@ -32,7 +32,7 @@ RDEPENDS_${PN} = "\
     busybox \
     busybox-acpid \
     busybox-static-nodes \
-    cloudconnector-bin \
+    cloudconnector \
     ${@bb.utils.contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "rtc", "busybox-hwclock", "", d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "touchscreen", "${VIRTUAL-RUNTIME_touchscreen}", "",d)} \

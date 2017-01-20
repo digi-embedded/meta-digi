@@ -14,19 +14,16 @@ SRC_URI = "gitsm://git@stash.digi.com/cc/cc_dey.git;protocol=ssh;branch=${SRCBRA
 
 S = "${WORKDIR}/git"
 
+inherit pkgconfig
+
 do_install() {
 	oe_runmake DESTDIR=${D} install
 }
 
-PACKAGES =+ "${PN}-bin ${PN}-cert"
+PACKAGES =+ "${PN}-cert"
 
-FILES_${PN}-bin += "${sysconfdir}/cc.conf"
 FILES_${PN}-cert = "${sysconfdir}/ssl/certs/Digi_Int-ca-cert-public.crt"
 
-CONFFILES_${PN}-bin += "${sysconfdir}/cc.conf"
-
-DEBIAN_NOAUTONAME_${PN}-bin = "1"
-DEBIAN_NOAUTONAME_${PN}-cert = "1"
+CONFFILES_${PN} += "${sysconfdir}/cc.conf"
 
 RDEPENDS_${PN} = "${PN}-cert"
-RDEPENDS_${PN}-bin = "${PN}-cert"
