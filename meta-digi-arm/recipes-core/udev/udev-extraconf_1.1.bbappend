@@ -2,10 +2,14 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
-SRC_URI += "file://mount_bootparts.sh"
+SRC_URI += " \
+    file://mount_bootparts.sh \
+    file://mount_partition.sh \
+"
 
 do_install_append() {
 	install -m 0755 ${WORKDIR}/mount_bootparts.sh ${D}${sysconfdir}/udev/scripts/
+	install -m 0755 ${WORKDIR}/mount_partition.sh ${D}${sysconfdir}/udev/scripts/
 
 	# Bluetooth tty symlink
 	if [ -n "${BT_TTY}" ]; then
