@@ -19,7 +19,7 @@ PROGRAM := upload_file
 CFLAGS += -Wall
 
 CFLAGS += $(shell pkg-config --cflags cloudconnector)
-LDLIBS += $(shell pkg-config --libs cloudconnector)
+LDLIBS += $(shell pkg-config --libs --static cloudconnector)
 
 all: $(PROGRAM)
 

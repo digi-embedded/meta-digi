@@ -9,6 +9,8 @@ SRC_URI = "file://cloudconnector_test"
 
 S = "${WORKDIR}/cloudconnector_test"
 
+inherit pkgconfig
+
 do_install() {
 	oe_runmake DESTDIR=${D} install
 }
