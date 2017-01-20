@@ -7,9 +7,10 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 DEPENDS = "confuse openssl zlib"
 
+SRCBRANCH = "master"
 SRCREV = "${AUTOREV}"
 
-SRC_URI = "gitsm://git@stash.digi.com/cc/cc_dey.git;protocol=ssh"
+SRC_URI = "gitsm://git@stash.digi.com/cc/cc_dey.git;protocol=ssh;branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git"
 
