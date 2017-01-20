@@ -317,6 +317,29 @@ format_emmc_block() {
 	fi
 }
 
+#------------------------------------------------------------------------------
+# Function - swu_package_path
+#
+# Get absolute path of update package searching in local media
+#
+# @param ${1}  - SWU package name
+#------------------------------------------------------------------------------
+swu_package_path() {
+	for i in ${UPDATE_MOUNT_DIR} $(echo ${USB_MOUNT_DIR}/*); do
+		echo $i | grep -qs "${USB_MOUNT_DIR}/\*" && continue
+		if [ -f "${i}/${1}" ]; then
+			swu_abspath="${i}/${1}"
+			break
+		fi
+	done
+
+	if [ -n "${swu_abspath}" ]; then
+		echo "${swu_abspath}"
+	else
+		quit_with_error "Unable to find update package '${1}'"
+	fi
+}
+
 # Main
 #------------------------------------------------------------------------------
 # Setup the environment.
@@ -409,12 +432,17 @@ if [ -n "${update_package_bool}" ]; then
 	if [ -z "${update_package}" ]; then
 		quit_with_error "Firmware update package not specified"
 	else
-		log "Update package location: ${update_package}"
-		# Mount external disks.
+		# Give some time for the devices to settle down
 		sleep 5
 		mount_external_disks
-		# Mount update partition.
 		mount_partition update "${UPDATE_MOUNT_DIR}"
+
+		# Check whether the package is local and get the absolute path
+		if echo "${update_package}" | grep -qs '^file://'; then
+			update_package="$(swu_package_path $(basename ${update_package}))"
+		fi
+
+		log "Update package location: ${update_package}"
 		# Execute the progress binary.
 		progress -wp &
 		# Execute the software update.
