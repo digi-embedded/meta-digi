@@ -17,6 +17,8 @@
  *
  */
 
+#define _GNU_SOURCE	/* For GNU version of basename */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,6 +26,8 @@
 #include <unistd.h>
 
 #include <libubootenv/ubootenv.h>
+
+#define FILE_PREFIX	"file://"
 
 /*
  * Function:    append_recovery_command
@@ -78,6 +82,7 @@ err:
 int update_firmware(const char *swu_path)
 {
 	char *fwupdate_cmd;
+	int file_prefix_len = 0;
 	int ret = -1;
 
 	/* Verify input parameter */
@@ -86,14 +91,23 @@ int update_firmware(const char *swu_path)
 		goto err;
 	}
 
+	/* If file is local reset the path */
+	if (!access(swu_path, F_OK)) {
+		file_prefix_len = strlen(FILE_PREFIX);
+		swu_path = basename(swu_path);
+	}
+
 	fwupdate_cmd =
-	    calloc(1, strlen("update_package=") + strlen(swu_path) + 1);
+	    calloc(1,
+		   strlen("update_package=") + file_prefix_len +
+		   strlen(swu_path) + 1);
 	if (!fwupdate_cmd) {
 		fprintf(stderr, "Error: calloc 'fwupdate_cmd'\n");
 		goto err;
 	}
 
-	sprintf(fwupdate_cmd, "update_package=%s", swu_path);
+	sprintf(fwupdate_cmd, "update_package=%s%s",
+		file_prefix_len ? FILE_PREFIX : "", swu_path);
 
 	ret = append_recovery_command(fwupdate_cmd);
 
