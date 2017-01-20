@@ -161,7 +161,8 @@ mount_external_disks() {
 			local dev_name=$(basename "${i}")
 			local mount_dir="${USB_MOUNT_DIR}/${dev_name}"
 			mkdir -p "${mount_dir}"
-			mount "/dev/${dev_name}" "${mount_dir}" 2>/dev/null
+			FSTYPE="$(blkid /dev/${dev_name} | sed -e 's,.*TYPE="\([^"]\+\)".*,\1,g')"
+			mount -r ${FSTYPE:+-t ${FSTYPE}} "/dev/${dev_name}" "${mount_dir}"
 		done
 	done
 }
@@ -226,7 +227,8 @@ mount_emmc_block() {
 	local partition_block="/dev/mmcblk0p$(parted -s /dev/mmcblk0 print | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<${1}\>.*,\1,g;T;p")"
 	# Mount the volume.
 	mkdir -p "${2}"
-	mount -t auto "${partition_block}" "${2}" >/dev/null 2>&1
+	FSTYPE="$(blkid ${partition_block} | sed -e 's,.*TYPE="\([^"]\+\)".*,\1,g')"
+	mount -r ${FSTYPE:+-t ${FSTYPE}} "${partition_block}" "${2}"
 	if [ "$?" != "0" ]; then
 		log_warning "Could not mount '${1}' partition (${partition_block})"
 	fi
