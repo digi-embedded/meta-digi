@@ -22,7 +22,7 @@ ENV_RECOVERY_COMMAND="recovery_command"
 
 SW_CONFIG="/etc/swupdate.cfg"
 
-USB_MOUNT_DIR="/run/media/"
+USB_MOUNT_DIR="/run/media"
 UPDATE_MOUNT_DIR="/update"
 
 REBOOT_TIME=10
@@ -159,7 +159,7 @@ mount_external_disks() {
 	for device in ${devices}; do
 		for i in ${device}?; do
 			local dev_name=$(basename "${i}")
-			local mount_dir="${USB_MOUNT_DIR}${dev_name}"
+			local mount_dir="${USB_MOUNT_DIR}/${dev_name}"
 			mkdir -p "${mount_dir}"
 			mount "/dev/${dev_name}" "${mount_dir}" 2>/dev/null
 		done
