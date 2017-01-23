@@ -24,6 +24,7 @@
 #define UNUSED_ARGUMENT(a)	(void)(a)
 
 #define STREAM_NAME		"examples/uploaded_file"
+#define UPLOAD_FILE		"/etc/build"
 
 static void sigint_handler(int signum)
 {
@@ -76,7 +77,7 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	send_error = ccapi_dp_binary_send_file(CCAPI_TRANSPORT_TCP, argv[0], STREAM_NAME);
+	send_error = ccapi_dp_binary_send_file(CCAPI_TRANSPORT_TCP, UPLOAD_FILE, STREAM_NAME);
 	if (send_error != CCAPI_DP_B_ERROR_NONE) {
 		log_error("ccapi_dp_binary_send_file() failed, error %d\n", send_error);
 		return EXIT_FAILURE;
