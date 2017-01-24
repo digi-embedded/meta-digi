@@ -23,7 +23,7 @@ ENV_RECOVERY_COMMAND="recovery_command"
 SW_CONFIG="/etc/swupdate.cfg"
 
 USB_MOUNT_DIR="/run/media"
-UPDATE_MOUNT_DIR="/update"
+UPDATE_MOUNT_DIR="/mnt/update"
 
 REBOOT_TIME=10
 
