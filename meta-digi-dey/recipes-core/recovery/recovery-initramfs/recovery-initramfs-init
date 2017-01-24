@@ -279,6 +279,9 @@ format_ubi_volume() {
 		# Create UBI Vol.
 		ubimkvol "/dev/ubi${dev_number}" -m -N "${1}" >/dev/null 2>&1
 		if [ "$?" = "0" ]; then
+			# Configure the empty UBIFS partition to use ZLIB
+			volid="$(ubinfo "/dev/ubi${dev_number}" -N "${1}" | sed -ne 's,Volume ID:[[:blank:]]\+\([0-9]\+\)[[:blank:]]\+.*,\1,g;T;p')"
+			mkfs.ubifs -x zlib -F /dev/ubi${dev_number}_${volid}
 			psplash_progress "100"
 			log "Partition '${1}' successfully erased!"
 			# Detach MTD partition.
