@@ -8,7 +8,7 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 33 insertions(+)
 
 diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
-index 09f06c874b17..ae6c69eca0ad 100644
+index 09f06c874b17..e4e242b35bd1 100644
 --- a/tools/env/fw_env.c
 +++ b/tools/env/fw_env.c
 @@ -1218,6 +1218,27 @@ static int flash_read (int fd)
@@ -18,7 +18,7 @@ index 09f06c874b17..ae6c69eca0ad 100644
 +/*
 + * Set mmcboot partition read-write protection
 + */
-+static int sysfs_mmcboot_set_protection(char *device, int value)
++static int sysfs_mmcboot_set_protection(const char *device, int value)
 +{
 +	int fd;
 +	char buf[64];
