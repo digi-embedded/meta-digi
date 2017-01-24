@@ -110,6 +110,17 @@ purge_sstate() {
 	bitbake -k -c cleansstate ${PURGE_PKGS} >/dev/null 2>&1 || true
 }
 
+#
+# For a given image recipe print the SWU recipe (if it exists)
+#
+#  $1: image recipe
+#
+swu_recipe_name() {
+	if [ -n "$(find ${YOCTO_INST_DIR}/sources/meta-digi -type f -name "${1}-swu.bb")" ]; then
+		printf "${1}-swu"
+	fi
+}
+
 # Sanity check (Jenkins environment)
 [ -z "${DY_PLATFORMS}" ]      && error "DY_PLATFORMS not specified"
 [ -z "${DY_REVISION}" ]       && error "DY_REVISION not specified"
@@ -237,7 +248,7 @@ for platform in ${DY_PLATFORMS}; do
 				fi
 				for target in ${platform_targets}; do
 					printf "\n[INFO] Building the ${target} target.\n"
-					time bitbake ${target}
+					time bitbake ${target} $(swu_recipe_name ${target})
 					# Build the toolchain for DEY images
 					if [ "${DY_BUILD_TCHAIN}" = "true" ] && echo "${target}" | grep -qs '^\(core\|dey\)-image-[^-]\+$'; then
 						printf "\n[INFO] Building the toolchain for ${target}.\n"
