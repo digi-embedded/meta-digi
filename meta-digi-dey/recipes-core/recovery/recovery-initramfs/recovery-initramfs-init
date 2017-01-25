@@ -269,8 +269,7 @@ format_ubi_volume() {
 			ubidetach -p "/dev/mtd${mtd_num}" >/dev/null 2>&1
 		fi
 		# Format MTD partition.
-		ubiformat "/dev/mtd${mtd_num}" >/dev/null 2>&1
-		if [ "$?" != "0" ]; then
+		if ! ubiformat "/dev/mtd${mtd_num}" -q -y; then
 			quit_with_error "Error erasing '/dev/mtd${mtd_num}' block"
 		fi
 		psplash_progress "50"
