@@ -7,12 +7,12 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 DEPENDS = "confuse openssl recovery-utils zlib"
 
-SRCBRANCH = "master"
-SRCREV = "${AUTOREV}"
+SRC_URI = "${DIGI_PKG_SRC}/${BP}.tar.gz"
 
-SRC_URI = "gitsm://git@stash.digi.com/cc/cc_dey.git;protocol=ssh;branch=${SRCBRANCH}"
+SRC_URI[md5sum] = "db366b0358c1b47f6380080ce75d91e4"
+SRC_URI[sha256sum] = "5ecd4b1830fea7746e005465b6eef30f118302147861eb4074cf717fffbdf9d5"
 
-S = "${WORKDIR}/git"
+S = "${WORKDIR}/${PN}-${PV}"
 
 inherit pkgconfig
 
@@ -27,5 +27,3 @@ FILES_${PN}-cert = "${sysconfdir}/ssl/certs/Digi_Int-ca-cert-public.crt"
 CONFFILES_${PN} += "${sysconfdir}/cc.conf"
 
 RDEPENDS_${PN} = "${PN}-cert"
-
-DEFAULT_PREFERENCE = "-1"
