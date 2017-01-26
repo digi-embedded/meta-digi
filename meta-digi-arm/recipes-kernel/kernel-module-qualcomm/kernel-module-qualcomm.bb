@@ -4,14 +4,11 @@ SUMMARY = "Qualcomm's wireless driver for qca6564"
 DESCRIPTION = "qcacld-2.0 module.bbclass mechanism."
 LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
-DEPENDS = "virtual/kernel"
-
-inherit module
 
 CAF_MIRROR = "git://codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/qcacld-2.0"
-PV = "v4.2.74.63"
+PV = "v4.2.79.63"
 SRCBRANCH = "caf-wlan/QCA6564_LE_1.0.3_LA.4.2.2.3"
-SRCREV = "38f01638d75bdf3eb83ac428a4b6ec528b26f541"
+SRCREV = "b0ae2aa45bbba54600b537e90cb1aca34f2d1a13"
 
 SRC_URI = " \
     ${CAF_MIRROR};destsuffix=${PV};branch=${SRCBRANCH} \
@@ -29,15 +26,19 @@ SRC_URI = " \
     file://0010-native_sdio-src-hif-Do-not-call-to-HIGH-SPEED-functi.patch \
     file://0011-osdep_adf.h-fix-for-undefined-ath_sysctl_pktlog_size.patch \
     file://0012-Kbuild-Add-compilation-flag-based-on-kernel-support.patch \
-    file://0013-Kbuild-do-not-create-an-auxiliar-p2p-on-init.patch \
-    file://0014-Kbuild-do-not-compile-the-DEBUG-version-inconditiona.patch \
-    file://0015-Kbuild-Group-most-of-the-relevant-DEBUG-options.patch \
-    file://0016-wlan_hdd_cfg80211-fix-missing-ifdef-clause.patch \
-    file://0017-Add-.gitignore-rules.patch \
-    file://0018-wlan_hdd_main-initialize-all-adapter-completion-vari.patch \
+    file://0013-Kbuild-do-not-compile-the-DEBUG-version-inconditiona.patch \
+    file://0014-Kbuild-Group-most-of-the-relevant-DEBUG-options.patch \
+    file://0015-wlan_hdd_cfg80211-fix-missing-ifdef-clause.patch \
+    file://0016-Add-.gitignore-rules.patch \
+    file://0017-wlan_hdd_main-initialize-all-adapter-completion-vari.patch \
+    file://0018-qcacld-Indicate-disconnect-event-to-upper-layers.patch \
+    file://0019-wdd_hdd_main-Print-con_mode-to-clearly-see-if-in-FTM.patch \
+    file://0020-Makefile-Pass-BUILD_DEBUG_VERSION-to-kbuild-system.patch \
 "
 
 S = "${WORKDIR}/${PV}"
+
+inherit module
 
 EXTRA_OEMAKE += "CONFIG_CLD_HL_SDIO_CORE=y CONFIG_LINUX_QCMBR=y WLAN_OPEN_SOURCE=1"
 # Explicity state it is not a QC platform, if not the driver will try to remap
@@ -48,7 +49,7 @@ EXTRA_OEMAKE += "CONFIG_NON_QC_PLATFORM=y"
 EXTRA_OEMAKE += "BUILD_DEBUG_VERSION=0"
 
 do_compile_prepend() {
-     export BUILD_VER=${PV}
+	export BUILD_VER=${PV}
 }
 
 do_install_append() {

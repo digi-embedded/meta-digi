@@ -13,6 +13,7 @@ SRC_URI_append = " \
     file://interfaces.eth1.dhcp \
     file://interfaces.wlan0.static \
     file://interfaces.wlan0.dhcp \
+    file://interfaces.p2p \
     file://interfaces.cellular \
     file://resolv \
 "
@@ -26,7 +27,15 @@ do_install_append() {
 	# Create 'interfaces' file dynamically
 	cat ${WORKDIR}/interfaces.eth0.${ETH0_MODE} >> ${D}${sysconfdir}/network/interfaces
 	[ -n "${HAVE_SECOND_ETH}" ] && cat ${WORKDIR}/interfaces.eth1.${ETH1_MODE} >> ${D}${sysconfdir}/network/interfaces
-	[ -n "${HAVE_WIFI}" ] && cat ${WORKDIR}/interfaces.wlan0.${WLAN0_MODE} >> ${D}${sysconfdir}/network/interfaces
+
+	if [ -n "${HAVE_WIFI}" ]; then
+		cat ${WORKDIR}/interfaces.wlan0.${WLAN0_MODE} >> ${D}${sysconfdir}/network/interfaces
+		if [ -n "${WLAN_P2P_INTERFACE}" ]; then
+			cat ${WORKDIR}/interfaces.p2p >> ${D}${sysconfdir}/network/interfaces
+			[ -n "${WLAN_P2P_AUTO}" ] && sed -i -e 's/^#auto ##WLAN_P2P_INTERFACE##/auto ##WLAN_P2P_INTERFACE##/g' ${D}${sysconfdir}/network/interfaces
+			sed -i -e 's,##WLAN_P2P_INTERFACE##,${WLAN_P2P_INTERFACE},g' ${D}${sysconfdir}/network/interfaces
+		fi
+	fi
 	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
 
 	# Remove config entries if corresponding variable is not defined
@@ -42,6 +51,10 @@ do_install_append() {
 	[ -z "${WLAN0_STATIC_GATEWAY}" ] && sed -i -e "/##WLAN0_STATIC_GATEWAY##/d" ${D}${sysconfdir}/network/interfaces
 	[ -z "${WLAN0_STATIC_IP}" ] && sed -i -e "/##WLAN0_STATIC_IP##/d" ${D}${sysconfdir}/network/interfaces
 	[ -z "${WLAN0_STATIC_NETMASK}" ] && sed -i -e "/##WLAN0_STATIC_NETMASK##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${P2P0_STATIC_DNS}" ] && sed -i -e "/##P2P0_STATIC_DNS##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${P2P0_STATIC_GATEWAY}" ] && sed -i -e "/##P2P0_STATIC_GATEWAY##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${P2P0_STATIC_IP}" ] && sed -i -e "/##P2P0_STATIC_IP##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${P2P0_STATIC_NETMASK}" ] && sed -i -e "/##P2P0_STATIC_NETMASK##/d" ${D}${sysconfdir}/network/interfaces
 
 	# Cellular interface
 	if [ -n "${@bb.utils.contains('DISTRO_FEATURES', 'cellular', '1', '', d)}" ] && [ -n "${CELLULAR_INTERFACE}" ]; then
@@ -94,5 +107,9 @@ do_install_append() {
 	sed -i -e "s,##WLAN0_STATIC_NETMASK##,${WLAN0_STATIC_NETMASK},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WLAN0_STATIC_GATEWAY##,${WLAN0_STATIC_GATEWAY},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WLAN0_STATIC_DNS##,${WLAN0_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
+	sed -i -e "s,##P2P0_STATIC_IP##,${P2P0_STATIC_IP},g" ${D}${sysconfdir}/network/interfaces
+	sed -i -e "s,##P2P0_STATIC_NETMASK##,${P2P0_STATIC_NETMASK},g" ${D}${sysconfdir}/network/interfaces
+	sed -i -e "s,##P2P0_STATIC_GATEWAY##,${P2P0_STATIC_GATEWAY},g" ${D}${sysconfdir}/network/interfaces
+	sed -i -e "s,##P2P0_STATIC_DNS##,${P2P0_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WPA_DRIVER##,${WPA_DRIVER},g" ${D}${sysconfdir}/network/interfaces
 }

@@ -30,6 +30,7 @@ RDEPENDS_${PN}_append_ccimx6 = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
 	dey-examples-can \
+	dey-examples-cloudconnector \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \
 	dey-examples-v4l2 \
@@ -38,7 +39,9 @@ RDEPENDS_${PN}_append_ccimx6 = "\
 RDEPENDS_${PN}_append_ccimx6ul = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
+	dey-examples-adc \
 	dey-examples-can \
+	dey-examples-cloudconnector \ 
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 	dey-examples-tamper \
 "

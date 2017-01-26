@@ -24,6 +24,7 @@ SRC_URI = " \
 SRC_URI_append = " \
     file://boot.txt \
     file://install_linux_fw_sd.txt \
+    file://recovery.txt \
 "
 
 LOCALVERSION ?= ""
@@ -150,12 +151,24 @@ do_deploy_append() {
 	TMP_BOOTSCR="$(mktemp ${WORKDIR}/bootscr.XXXXXX)"
 	sed -e "${TF_BOOTSCRIPT_SEDFILTER}" ${WORKDIR}/boot.txt > ${TMP_BOOTSCR}
 	mkimage -T script -n bootscript -C none -d ${TMP_BOOTSCR} ${DEPLOYDIR}/boot.scr
+
+	# Recovery boot script for DEY images
+	mkimage -T script -n bootscript -C none -d ${WORKDIR}/recovery.txt ${DEPLOYDIR}/recovery.scr
+
+	# Sign the scripts
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
-		"${STAGING_BINDIR_NATIVE}/trustfence-sign-kernel.sh" -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${DEPLOYDIR}/boot-signed.scr"
-		mv ${DEPLOYDIR}/boot-signed.scr ${DEPLOYDIR}/boot.scr
+
+		# Sign boot script
+		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
+		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
+		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
+
+		# Sign recovery script
+		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/recovery.scr" "${TMP_SIGNED_BOOTSCR}"
+		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/recovery.scr"
 	fi
 	rm -f ${TMP_BOOTSCR}
 }

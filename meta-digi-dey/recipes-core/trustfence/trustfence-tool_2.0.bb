@@ -4,19 +4,9 @@ SUMMARY = "Trustfence command line tool"
 SECTION = "console/tools"
 LICENSE = "CLOSED"
 
-SRC_URI = "file://trustfence-tool"
+SRC_URI = "${DIGI_PKG_SRC}/${BP}.tar.gz"
 
-S = "${WORKDIR}"
+SRC_URI[md5sum] = "dfbe0f7a5c2d16c5abafae14eb33d592"
+SRC_URI[sha256sum] = "e335fc7080fb35ad198319c06ec31c77d9d2fe63219b9adc1ffc1e686e1534ae"
 
-INSANE_SKIP_${PN} = "already-stripped"
-
-do_configure[noexec] = "1"
-do_compile[noexec] = "1"
-
-do_install() {
-	install -d ${D}${base_sbindir}
-	install -m 0755 trustfence-tool ${D}${base_sbindir}
-}
-
-PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6|ccimx6ul)"
+inherit bin_package

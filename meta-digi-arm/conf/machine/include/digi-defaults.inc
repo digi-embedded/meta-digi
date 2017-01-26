@@ -38,6 +38,8 @@ ETH1_STATIC_NETMASK  ?= "255.255.255.0"
 WLAN0_MODE           ?= "static"
 WLAN0_STATIC_IP      ?= "192.168.43.30"
 WLAN0_STATIC_NETMASK ?= "255.255.255.0"
+P2P0_STATIC_IP       ?= "192.168.45.30"
+P2P0_STATIC_NETMASK  ?= "255.255.255.0"
 
 # Digi BSP default settings
 IMAGE_CLASSES = "image_types_digi"

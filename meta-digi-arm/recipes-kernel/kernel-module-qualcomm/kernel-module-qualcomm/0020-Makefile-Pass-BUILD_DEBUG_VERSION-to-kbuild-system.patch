@@ -1,0 +1,23 @@
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Mon, 9 Jan 2017 16:51:17 +0100
+Subject: [PATCH] Makefile: Pass BUILD_DEBUG_VERSION to kbuild system.
+
+https://jira.digi.com/browse/DEL-3392
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Makefile b/Makefile
+index c05b00f26c57..25cec85a0c1e 100644
+--- a/Makefile
++++ b/Makefile
+@@ -16,6 +16,7 @@ KBUILD_OPTIONS += CONFIG_QCA_WIFI_ISOC=0
+ KBUILD_OPTIONS += CONFIG_QCA_WIFI_2_0=1
+ KBUILD_OPTIONS += $(WLAN_SELECT)
+ KBUILD_OPTIONS += WLAN_OPEN_SOURCE=$(WLAN_OPEN_SOURCE)
++KBUILD_OPTIONS += BUILD_DEBUG_VERSION=$(BUILD_DEBUG_VERSION)
+ KBUILD_OPTIONS += $(KBUILD_EXTRA) # Extra config if any
+ 
+ all:

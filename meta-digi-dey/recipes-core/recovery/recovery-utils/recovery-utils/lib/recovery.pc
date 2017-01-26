@@ -1,0 +1,13 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: recovery
+Description: recovery functionality library
+Version:1.0
+
+Requires:
+Libs: -L${libdir} -lrecovery
+Libs.private: -lubootenv
+Cflags: -I${includedir}/librecovery -I${includedir}

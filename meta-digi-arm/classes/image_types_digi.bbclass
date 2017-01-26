@@ -124,17 +124,76 @@ IMAGE_CMD_boot.ubifs() {
 	rm -rf ${TMP_BOOTDIR}
 }
 
-IMAGE_CMD_rootfs.initramfs() {
+IMAGE_DEPENDS_recovery.vfat = "${RECOVERY_INITRAMFS_IMAGE}:do_rootfs"
+
+# The recovery vfat image requires the boot image to be built before
+IMAGE_TYPEDEP_recovery.vfat = "${SDIMG_BOOTFS_TYPE}"
+
+IMAGE_CMD_recovery.vfat() {
 	#
-	# Image generation code for image type 'rootfs.initramfs'
+	# Image generation code for image type 'recovery.vfat'
 	#
-	mkimage -A ${TARGET_ARCH} -O linux -T ramdisk -C none -n ${IMAGE_NAME} -d ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.initramfs
+	# Copy the boot.vfat image
+	cp ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.recovery.vfat
+
+	# Copy the recovery init script into the VFAT image
+	mcopy -o -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.recovery.vfat -s ${DEPLOY_DIR_IMAGE}/recovery.scr ::/boot.scr
+
+	# Copy the recovery ramdisk into the VFAT image
+	mcopy -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.recovery.vfat -s ${DEPLOY_DIR_IMAGE}/${RECOVERY_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf ::/uramdisk-recovery.img
+
 	# Create the symlink
-	if [ -n "${IMAGE_LINK_NAME}" ] && [ -e ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.initramfs ]; then
-		ln -s ${IMAGE_NAME}.rootfs.initramfs ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.initramfs
+	if [ -n "${IMAGE_LINK_NAME}" ] && [ -e ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.recovery.vfat ]; then
+		ln -s ${IMAGE_NAME}.recovery.vfat ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.recovery.vfat
 	fi
 }
-IMAGE_TYPEDEP_rootfs.initramfs = "cpio.gz"
+
+IMAGE_DEPENDS_recovery.ubifs = " \
+    mtd-utils-native:do_populate_sysroot \
+    u-boot:do_deploy \
+    virtual/kernel:do_deploy \
+    ${RECOVERY_INITRAMFS_IMAGE}:do_rootfs \
+"
+
+IMAGE_CMD_recovery.ubifs() {
+    #
+    # Image generation code for image type 'recovery.ubifs'
+    #
+    RECOVERYIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
+    if [ -n "${KERNEL_DEVICETREE}" ]; then
+        for DTB in ${KERNEL_DEVICETREE}; do
+            if [ -e "${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}" ]; then
+                RECOVERYIMG_FILES_SYMLINK="${RECOVERYIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}"
+            fi
+        done
+    fi
+
+    # Create temporary folder
+    TMP_RECOVERYDIR="$(mktemp -d ${DEPLOY_DIR_IMAGE}/recovery.XXXXXX)"
+
+    # Hard-link RECOVERYIMG_FILES into the temporary folder with the symlink filename
+    for item in ${RECOVERYIMG_FILES_SYMLINK}; do
+        orig="$(readlink -e ${item})"
+        ln ${orig} ${TMP_RECOVERYDIR}/$(basename ${item})
+    done
+
+    # Copy the recovery init script.
+    cp ${DEPLOY_DIR_IMAGE}/recovery.scr ${TMP_RECOVERYDIR}/boot.scr
+
+    # Copy the recovery ramdisk image.
+    cp ${DEPLOY_DIR_IMAGE}/${RECOVERY_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf ${TMP_RECOVERYDIR}/uramdisk-recovery.img
+
+    # Build UBIFS boot image out of temp folder
+    mkfs.ubifs -r ${TMP_RECOVERYDIR} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.recovery.ubifs ${MKUBIFS_BOOT_ARGS}
+
+    # Create the symlink
+    if [ -n "${IMAGE_LINK_NAME}" ] && [ -e ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.recovery.ubifs ]; then
+        ln -s ${IMAGE_NAME}.recovery.ubifs ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.recovery.ubifs
+    fi
+
+    # Remove the temporary folder
+    rm -rf ${TMP_RECOVERYDIR}
+}
 
 IMAGE_CMD_cpio.gz.u-boot.tf() {
 	#

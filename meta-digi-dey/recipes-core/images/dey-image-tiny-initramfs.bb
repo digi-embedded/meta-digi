@@ -7,6 +7,5 @@ include dey-image-tiny.bb
 
 export IMAGE_BASENAME = "dey-image-tiny-initramfs"
 
-IMAGE_FSTYPES = "${INITRAMFS_FSTYPES}"
-IMAGE_FSTYPES_append = " rootfs.initramfs"
-
+IMAGE_FSTYPES = "cpio.gz.u-boot.tf"
+inherit image_types_uboot

@@ -1,0 +1,76 @@
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Mon, 12 Dec 2016 16:19:48 +0100
+Subject: [PATCH] qcacld: Indicate disconnect event to upper layers.
+
+This is to avoid the following warning:
+
+------------[ cut here ]------------
+WARNING: CPU: 0 PID: 1120 at net/wireless/core.c:1140 cfg80211_netdev_notifier_call+0x3a0/0x574()
+Modules linked in: wlan(O-) evbug [last unloaded: wlan]
+CPU: 0 PID: 1120 Comm: rmmod Tainted: G           O    4.1.15-95656-g4c5caa2cab98-dirty #11
+Hardware name: Freescale i.MX6 Ultralite (Device Tree)
+[<80015ae4>] (unwind_backtrace) from [<8001269c>] (show_stack+0x10/0x14)
+[<8001269c>] (show_stack) from [<80730464>] (dump_stack+0x84/0xc4)
+[<80730464>] (dump_stack) from [<8002d220>] (warn_slowpath_common+0x80/0xb0)
+[<8002d220>] (warn_slowpath_common) from [<8002d2ec>] (warn_slowpath_null+0x1c/0x24)
+[<8002d2ec>] (warn_slowpath_null) from [<806bdad8>] (cfg80211_netdev_notifier_call+0x3a0/0x574)
+[<806bdad8>] (cfg80211_netdev_notifier_call) from [<800462b8>] (notifier_call_chain+0x44/0x84)
+[<800462b8>] (notifier_call_chain) from [<8004642c>] (raw_notifier_call_chain+0x18/0x20)
+[<8004642c>] (raw_notifier_call_chain) from [<8057f8fc>] (rollback_registered_many+0x2a0/0x3a4)
+[<8057f8fc>] (rollback_registered_many) from [<8057fa24>] (rollback_registered+0x24/0x38)
+[<8057fa24>] (rollback_registered) from [<80581d24>] (unregister_netdevice_queue+0x54/0xb0)
+[<80581d24>] (unregister_netdevice_queue) from [<80581d98>] (unregister_netdev+0x18/0x20)
+[<80581d98>] (unregister_netdev) from [<7f02363c>] (hdd_close_all_adapters+0x7c/0xbc [wlan])
+[<7f02363c>] (hdd_close_all_adapters [wlan]) from [<7f025be4>] (hdd_wlan_exit+0x2e4/0x72c [wlan])
+[<7f025be4>] (hdd_wlan_exit [wlan]) from [<7f0260c8>] (__hdd_wlan_exit+0x9c/0xe4 [wlan])
+[<7f0260c8>] (__hdd_wlan_exit [wlan]) from [<7f1c3238>] (ath_hif_sdio_remove+0x54/0xfc [wlan])
+[<7f1c3238>] (ath_hif_sdio_remove [wlan]) from [<7f1c5de0>] (hifDeviceRemoved+0x7c/0x16c [wlan])
+[<7f1c5de0>] (hifDeviceRemoved [wlan]) from [<804e9c8c>] (sdio_bus_remove+0x30/0xf8)
+[<804e9c8c>] (sdio_bus_remove) from [<8036f598>] (__device_release_driver+0x70/0xe4)
+[<8036f598>] (__device_release_driver) from [<8036fd34>] (driver_detach+0xac/0xb0)
+[<8036fd34>] (driver_detach) from [<8036f2f8>] (bus_remove_driver+0x4c/0xa0)
+[<8036f2f8>] (bus_remove_driver) from [<7f1c53a8>] (HIFShutDownDevice+0xbc/0x17c [wlan])
+[<7f1c53a8>] (HIFShutDownDevice [wlan]) from [<7f1c36c4>] (hif_unregister_driver+0x28/0x48 [wlan])
+[<7f1c36c4>] (hif_unregister_driver [wlan]) from [<7f1d2fa8>] (hdd_module_exit+0x140/0x18c [wlan])
+[<7f1d2fa8>] (hdd_module_exit [wlan]) from [<8008ae18>] (SyS_delete_module+0x174/0x1b8)
+[<8008ae18>] (SyS_delete_module) from [<8000f400>] (ret_fast_syscall+0x0/0x3c)
+---[ end trace cb71790dd22e980e ]---
+
+https://jira.digi.com/browse/DEL-3365
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ CORE/HDD/src/wlan_hdd_cfg80211.c | 3 +++
+ CORE/HDD/src/wlan_hdd_main.c     | 5 +++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/CORE/HDD/src/wlan_hdd_cfg80211.c b/CORE/HDD/src/wlan_hdd_cfg80211.c
+index 43543a9a473d..ae86c88fcfa5 100644
+--- a/CORE/HDD/src/wlan_hdd_cfg80211.c
++++ b/CORE/HDD/src/wlan_hdd_cfg80211.c
+@@ -11038,6 +11038,9 @@ disconnected:
+              FL("Set HDD connState to eConnectionState_NotConnected"));
+     pHddStaCtx->conn_info.connState = eConnectionState_NotConnected;
+ 
++    /* indicate disconnected event to nl80211 */
++    cfg80211_disconnected(pAdapter->dev, WLAN_REASON_UNSPECIFIED, NULL, 0,
++             GFP_KERNEL);
+     return 0;
+ }
+ 
+diff --git a/CORE/HDD/src/wlan_hdd_main.c b/CORE/HDD/src/wlan_hdd_main.c
+index df5b1065d463..f057f8c177b1 100755
+--- a/CORE/HDD/src/wlan_hdd_main.c
++++ b/CORE/HDD/src/wlan_hdd_main.c
+@@ -9536,6 +9536,11 @@ VOS_STATUS hdd_stop_adapter( hdd_context_t *pHddCtx, hdd_adapter_t *pAdapter,
+                          "%s: wait on disconnect_comp_var failed",
+                          __func__);
+                }
++               else
++               {
++                 cfg80211_disconnected(pAdapter->dev, WLAN_REASON_UNSPECIFIED,
++                         NULL, 0, GFP_KERNEL);
++               }
+            }
+            else
+            {

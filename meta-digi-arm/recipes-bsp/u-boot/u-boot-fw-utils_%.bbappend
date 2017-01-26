@@ -6,6 +6,7 @@ SRC_URI += " \
 	file://fw_env.config \
 	file://0001-tools-env-implement-support-for-environment-encrypti.patch \
 "
+SRC_URI_append = " file://0004-Implement-U-Boot-environment-access-functions.patch"
 SRC_URI_append_ccimx6 = " file://0002-fw_env-add-support-to-unlock-emmc-boot-partition.patch"
 
 # We do not have a platform defconfig in this version of u-boot, so just use the generic
@@ -14,6 +15,8 @@ UBOOT_CONFIG = "sandbox"
 UBOOT_CONFIG[sandbox] = "sandbox_defconfig"
 
 do_install_append() {
+	install -d ${D}${includedir}/libubootenv
+	install -m 0644 ${S}/tools/env/ubootenv.h ${D}${includedir}/libubootenv/
 	install -m 0644 ${WORKDIR}/fw_env.config ${D}${sysconfdir}/
 }
 

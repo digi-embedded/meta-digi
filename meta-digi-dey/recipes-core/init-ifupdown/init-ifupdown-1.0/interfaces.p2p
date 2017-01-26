@@ -1,0 +1,10 @@
+
+# WiFi P2P interface
+#auto ##WLAN_P2P_INTERFACE##
+iface ##WLAN_P2P_INTERFACE## inet static
+        address ##P2P0_STATIC_IP##
+        netmask ##P2P0_STATIC_NETMASK##
+        gateway ##P2P0_STATIC_GATEWAY##
+        dns-nameservers ##P2P0_STATIC_DNS##
+        wpa-driver ##WPA_DRIVER##
+        wpa-conf /etc/wpa_supplicant_p2p.conf

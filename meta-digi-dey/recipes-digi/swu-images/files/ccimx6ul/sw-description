@@ -1,0 +1,17 @@
+software =
+{
+    version = "##SW_VERSION##";
+
+    images: (
+        {
+            filename = "##BOOTIMG_NAME##";
+            volume = "linux";
+            type = "ubivol"
+        },
+        {
+            filename = "##ROOTIMG_NAME##";
+            volume = "rootfs";
+            type = "ubivol"
+        }
+    );
+}

@@ -22,3 +22,5 @@ RDEPENDS_${PN} = "\
     alsa-states \
     ${ALSA_UTILS_PKGS} \
 "
+
+RDEPENDS_${PN}_append_ccimx6sbc = " card-detect"

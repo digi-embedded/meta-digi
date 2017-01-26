@@ -32,6 +32,7 @@ RDEPENDS_${PN} = "\
     busybox \
     busybox-acpid \
     busybox-static-nodes \
+    cloudconnector \
     ${@bb.utils.contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "rtc", "busybox-hwclock", "", d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "touchscreen", "${VIRTUAL-RUNTIME_touchscreen}", "",d)} \
@@ -39,6 +40,7 @@ RDEPENDS_${PN} = "\
     modutils-initscripts \
     netbase \
     os-release \
+    recovery-utils \
     sysinfo \
     usbutils \
     ${VIRTUAL-RUNTIME_dev_manager} \
