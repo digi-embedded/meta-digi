@@ -72,7 +72,6 @@ if [ -f "${syspower}" ]; then
 
 	# Suspend the device
 	printf "mem" > ${syspower}
-	sleep .5
 
 	# Post-resume actions
 	resume_interfaces
