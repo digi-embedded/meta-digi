@@ -162,8 +162,8 @@ setenv bootcmd "
 		exit;
 	fi;
 	echo \"\";
-	setenv boot_recovery yes
-	setenv recovery_command wipe_update
+	setenv boot_recovery yes;
+	setenv recovery_command wipe_update;
 	saveenv;
 	echo \">> Firmware installation complete. Booting into recovery for final deployment.\";
 	sleep 1;
