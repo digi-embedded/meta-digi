@@ -13,7 +13,7 @@ inherit kernel fsl-kernel-localversion
 LOCALVERSION = "-dey"
 
 # Select internal or Github Linux repo
-LINUX_GIT_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}linux-2.6.git', '${DIGI_GITHUB_GIT}/linux.git', d)}"
+LINUX_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}linux-2.6.git', '${DIGI_GITHUB_GIT}/linux.git', d)}"
 
 SRC_URI = " \
     ${LINUX_GIT_URI};branch=${SRCBRANCH} \
