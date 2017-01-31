@@ -48,13 +48,8 @@ Usage: source ${MKP_SCRIPTNAME} [OPTIONS]
 
     -l               list supported platforms
     -p <platform>    select platform for the project
-    -v <variant>     select platform variant
 
 Supported platforms: $(display_supported_platforms)
-
-See platform include files for supported variant names:
-
-${MKP_SCRIPTPATH}/sources/meta-digi/meta-digi-arm/conf/machine/include/<platform>.inc
 
 EOF
 }
