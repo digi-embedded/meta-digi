@@ -144,6 +144,10 @@ if [ -z "${DY_MFG_IMAGE}" ] && echo ${JOB_NAME} | grep -qs 'dey.*mfg'; then
 	DY_MFG_IMAGE="true"
 fi
 
+if [ -n "${DY_MACHINES_LAYER}" ]; then
+	MACHINES_LAYER="-m ${DY_MACHINES_LAYER}"
+fi
+
 # Per-platform data
 while read _pl _var _tgt; do
 	# DY_BUILD_VARIANTS comes from Jenkins environment:
@@ -221,7 +225,7 @@ for platform in ${DY_PLATFORMS}; do
 			# mixing environments between different platform's projects
 			(
 				export TEMPLATECONF="${TEMPLATECONF:+${TEMPLATECONF}/${platform}}"
-				MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p ${platform} ${_this_var_arg} <<< "y"
+				MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p ${platform} ${MACHINES_LAYER} ${_this_var_arg} <<< "y"
 				# Set a common DL_DIR and SSTATE_DIR for all platforms
 				sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_PROJ_DIR}/downloads\"" \
 					-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
