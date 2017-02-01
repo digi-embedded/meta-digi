@@ -1,7 +1,7 @@
 From: "Diaz de Grenu, Jose" <Jose.DiazdeGrenu@digi.com>
 Date: Tue, 23 Aug 2016 13:05:05 +0200
-Subject: [PATCH] tools: env: implement support for environment encryption by
- CAAM
+Subject: [PATCH] tools: env: implement support for environment encryption
+ by CAAM
 
 https://jira.digi.com/browse/DEL-2836
 
@@ -10,8 +10,8 @@ Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
  configs/sandbox_defconfig |   1 +
  tools/env/Makefile        |   2 +-
  tools/env/caam_keyblob.h  |  45 +++++++++++++++
- tools/env/fw_env.c        | 140 ++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 187 insertions(+), 1 deletion(-)
+ tools/env/fw_env.c        | 138 ++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 185 insertions(+), 1 deletion(-)
  create mode 100644 tools/env/caam_keyblob.h
 
 diff --git a/configs/sandbox_defconfig b/configs/sandbox_defconfig
@@ -89,7 +89,7 @@ index 000000000000..1e33b3f01a05
 +#endif /* CAAM_KEYBLOB_H */
 \ No newline at end of file
 diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
-index daa02a760e37..09f06c874b17 100644
+index daa02a760e37..806c2fb6d550 100644
 --- a/tools/env/fw_env.c
 +++ b/tools/env/fw_env.c
 @@ -21,6 +21,7 @@
@@ -233,16 +233,7 @@ index daa02a760e37..09f06c874b17 100644
  /*
   * Print the current definition of one, or more, or all
   * environment variables
-@@ -259,6 +368,8 @@ int fw_printenv (int argc, char *argv[])
- 		argc -= 2;
- 	}
- 
-+	check_caam_encryption();
-+
- 	if (fw_env_open())
- 		return -1;
- 
-@@ -334,6 +445,15 @@ int fw_env_close(void)
+@@ -334,6 +443,15 @@ int fw_env_close(void)
  		}
  	}
  
@@ -258,16 +249,16 @@ index daa02a760e37..09f06c874b17 100644
  	/*
  	 * Update CRC
  	 */
-@@ -504,6 +624,8 @@ int fw_setenv(int argc, char *argv[])
- 		argc -= 2;
- 	}
+@@ -1191,6 +1309,8 @@ int fw_env_open(void)
+ 	struct env_image_single *single;
+ 	struct env_image_redundant *redundant;
  
 +	check_caam_encryption();
 +
- 	if (argc < 2) {
- 		errno = EINVAL;
+ 	if (parse_config ())		/* should fill envdevices */
  		return -1;
-@@ -1229,6 +1351,15 @@ int fw_env_open(void)
+ 
+@@ -1229,6 +1349,15 @@ int fw_env_open(void)
  			return ret;
  	}
  
@@ -283,7 +274,7 @@ index daa02a760e37..09f06c874b17 100644
  	crc0_ok = (crc0 == *environment.crc);
  	if (!HaveRedundEnv) {
  		if (!crc0_ok) {
-@@ -1286,6 +1417,15 @@ int fw_env_open(void)
+@@ -1286,6 +1415,15 @@ int fw_env_open(void)
  				return ret;
  		}
  
