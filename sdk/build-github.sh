@@ -32,6 +32,10 @@ INHERIT += \"rm_work\"
 RM_WORK_EXCLUDE += \"dey-image-qt linux-dey qtbase u-boot-dey\"
 "
 
+ZIP_INSTALLER_CFG="
+DEY_IMAGE_INSTALLER = \"1\"
+"
+
 X11_REMOVAL_CFG="
 DISTRO_FEATURES_remove = \"x11\"
 "
@@ -169,6 +173,7 @@ for platform in ${DY_PLATFORMS}; do
 				-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
 				conf/local.conf
 			printf "${RM_WORK_CFG}" >> conf/local.conf
+			printf "${ZIP_INSTALLER_CFG}" >> conf/local.conf
 			# Remove 'x11' distro feature if building framebuffer images
 			if [ "${DY_FB_IMAGE}" = "true" ]; then
 				printf "${X11_REMOVAL_CFG}" >> conf/local.conf
