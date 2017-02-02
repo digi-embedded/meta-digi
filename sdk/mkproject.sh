@@ -48,13 +48,9 @@ Usage: source ${MKP_SCRIPTNAME} [OPTIONS]
 
     -l               list supported platforms
     -p <platform>    select platform for the project
-    -v <variant>     select platform variant
+    -m <layer>       Layer with the supported platforms (defaults to meta-digi)
 
 Supported platforms: $(display_supported_platforms)
-
-See platform include files for supported variant names:
-
-${MKP_SCRIPTPATH}/sources/meta-digi/meta-digi-arm/conf/machine/include/<platform>.inc
 
 EOF
 }
@@ -153,28 +149,31 @@ if ! cmp -s ${MKP_SCRIPTPATH}/${MKP_SCRIPTNAME} ${MKP_SCRIPTPATH}/sources/meta-d
 	return
 fi
 
-## Get available platforms
-MKP_AVAILABLE_PLATFORMS="$(echo $(ls -1 ${MKP_CONFIGPATH}/*/local.conf.sample | sed -e 's,^.*config/\([^/]\+\)/local\.conf\.sample,\1,g'))"
-
 # Verify if this is a new project (so we do NOT customize it)
 [ -r "${MKP_PROJECTPATH}/conf/bblayers.conf" -a -r "${MKP_PROJECTPATH}/conf/local.conf" ] && MKP_OLD_PROJECT="1"
 
 # The script needs to be sourced (not executed) so make sure to
 # initialize OPTIND variable for getopts.
 OPTIND=1
-while getopts "lp:v:" c; do
+while getopts "lp:v:m:" c; do
 	case "${c}" in
 		l) MKP_LIST_PLATFORMS="y";;
 		p) MKP_PLATFORM="${OPTARG}";;
 		v) MKP_VARIANT="${OPTARG}";;
+		m) MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/${OPTARG}/sdk/config";;
 	esac
 done
+
+## Get available platforms
+MKP_AVAILABLE_PLATFORMS="$(echo $(ls -1 ${MKP_CONFIGPATH}/*/local.conf.sample | sed -e 's,^.*config/\([^/]\+\)/local\.conf\.sample,\1,g'))"
 
 ## Sanity checks
 if [ "${BASH_SOURCE}" = "${0}" ]; then
 	error "This script needs to be sourced"
 elif [ ${#} -eq 0 ] ; then
 	usage
+elif [ ! -d "${MKP_CONFIGPATH}" ]; then
+	error "selected platform configuration directory \"${MKP_CONFIGPATH}\" does not exist"
 elif [ -n "${MKP_LIST_PLATFORMS}" ]; then
 	display_supported_platforms
 elif [ -z "${MKP_PLATFORM}" ]; then
