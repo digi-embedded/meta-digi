@@ -142,13 +142,24 @@ after a failed attempt. Hence the target needs to be reset after an
 authentication failure.
 * If TrustFence (TM) image encryption support is enabled, the uSD image will
 boot a signed U-Boot only.
+* Firmware update
+  * Updating from a microSD card is not supported, only from local partitions
+    (e.g. the 'update' partition) or from external USB memory devices.
+  * The software update package must be located in the root level of the
+    update media (subfolders are not yet supported).
+* Cloud Connector
+  * Remote file system management fails with long file names and paths
+    (over 255 characters).
+  * Data points are always sent to the server although data service is
+    disabled.
 
 ## Digi ConnectCore 6UL
 
-* In the Bluetooth interface, the UART hardware flow control doesn’t work
-properly. To work around this problem the UART is configured without hardware
-flow control at 115200 bps, reducing the maximum throughput of this interface.
-This problem will be corrected in newer revisions of the hardware.
+* The UART connected to the Bluetooth chip on early versions of the ConnectCore
+  6UL system-on-module (hardware version < 4) cannot properly execute flow
+  control. To work around this issue, UART1 of these SOM versions has been
+  configured to operate at 115200 bps and without hardware flow control,
+  reducing the maximum throughput of this interface.
 
 ## Digi ConnectCore 6
 
