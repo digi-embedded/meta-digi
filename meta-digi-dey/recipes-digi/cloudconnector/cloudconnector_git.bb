@@ -27,5 +27,3 @@ FILES_${PN}-cert = "${sysconfdir}/ssl/certs/Digi_Int-ca-cert-public.crt"
 CONFFILES_${PN} += "${sysconfdir}/cc.conf"
 
 RDEPENDS_${PN} = "${PN}-cert"
-
-DEFAULT_PREFERENCE = "-1"
