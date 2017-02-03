@@ -10,7 +10,12 @@ DEPENDS = "confuse openssl recovery-utils zlib"
 SRCBRANCH = "master"
 SRCREV = "${AUTOREV}"
 
-SRC_URI = "gitsm://git@stash.digi.com/cc/cc_dey.git;protocol=ssh;branch=${SRCBRANCH}"
+CC_STASH = "gitsm://git@stash.digi.com/cc/cc_dey.git;protocol=ssh"
+CC_GITHUB = "gitsm://github.com/digi-embedded/cc_dey.git;protocol=git"
+
+CC_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${CC_STASH}', '${CC_GITHUB}', d)}"
+
+SRC_URI = "${CC_GIT_URI};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git"
 
