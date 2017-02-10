@@ -68,7 +68,7 @@ Documentation is available online on the Digi documentation site:
 
 * Digi Embedded Yocto
   * Support firmware update through the new recovery mode
-  * Initial support to connect to Device Cloud with the CloudConnector
+  * Initial support to connect to Remote Manager with the CloudConnector
   * Updated U-Boot to version 'dub-2015.04-r7' for Digi ConnectCore 6 and 6UL
 * Digi ConnectCore 6UL
   * Added support to audio codec MAX98089
@@ -150,8 +150,6 @@ boot a signed U-Boot only.
 * Cloud Connector
   * Remote file system management fails with long file names and paths
     (over 255 characters).
-  * Data points are always sent to the server although data service is
-    disabled.
 
 ## Digi ConnectCore 6UL
 
