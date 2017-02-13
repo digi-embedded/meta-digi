@@ -34,6 +34,8 @@ SRC_URI = " \
     file://0018-qcacld-Indicate-disconnect-event-to-upper-layers.patch \
     file://0019-wdd_hdd_main-Print-con_mode-to-clearly-see-if-in-FTM.patch \
     file://0020-Makefile-Pass-BUILD_DEBUG_VERSION-to-kbuild-system.patch \
+    file://0021-cosmetic-change-log-level.patch \
+    file://0022-fix-issue-with-_scan_callback.patch \
 "
 
 S = "${WORKDIR}/${PV}"
