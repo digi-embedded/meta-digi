@@ -8,7 +8,7 @@ This layer depends on:
 
 git://git.yoctoproject.org/poky.git
 git://git.openembedded.org/meta-openembedded.git
-git://git.yoctoproject.org/meta-fsl-arm.git
+git://git.yoctoproject.org/meta-freescale.git
 
 Digi's license agreements
 -------------------------

@@ -14,7 +14,7 @@ BBLAYERS ?= " \
   ##DIGIBASE##/meta-openembedded/meta-networking \
   ##DIGIBASE##/meta-openembedded/meta-webserver \
   ##DIGIBASE##/meta-qt5 \
-  ##DIGIBASE##/meta-fsl-arm \
+  ##DIGIBASE##/meta-freescale \
   ##DIGIBASE##/meta-fsl-demos \
   ##DIGIBASE##/meta-digi/meta-digi-arm \
   ##DIGIBASE##/meta-digi/meta-digi-dey \

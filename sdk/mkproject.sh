@@ -86,7 +86,7 @@ do_license() {
 	local MKP_LICENSE_FILES=" \
 		${MKP_SCRIPTPATH}/sources/meta-digi/meta-digi-arm/DIGI_EULA \
 		${MKP_SCRIPTPATH}/sources/meta-digi/meta-digi-arm/DIGI_OPEN_EULA \
-		${MKP_SCRIPTPATH}/sources/meta-fsl-arm/EULA \
+		${MKP_SCRIPTPATH}/sources/meta-freescale/EULA \
 	"
 	[ -z "${MKP_PAGER+x}" ] && MKP_PAGER="| more"
 	eval cat - "${MKP_LICENSE_FILES}" <<-_EOF_ ${MKP_PAGER}; printf "\n"
