@@ -3,7 +3,7 @@
 #
 #  suspend
 #
-#  Copyright (C) 2016 by Digi International Inc.
+#  Copyright (C) 2016, 2017 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -17,6 +17,8 @@
 
 scriptname="$(basename ${0})"
 syspower="/sys/power/state"
+lockfile="/var/lock/${scriptname}.lock"
+lockfd="9"
 
 usage() {
 	printf "\nSuspend system to RAM memory\n"
@@ -40,6 +42,21 @@ resume_interfaces() {
 	fi
 }
 
+enter_critical_section() {
+	# Create lock file
+	eval "exec ${lockfd}>${lockfile}"
+
+	# Acquire the lock in non blocking mode. Otherwise, additional calls
+	# to the script will be queued and the system will endlessly go in
+	# and out of suspend to ram
+	flock -n "${lockfd}" || exit 0
+}
+
+exit_critical_section() {
+	# Release the lock
+	flock -u "${lockfd}"
+}
+
 while getopts "h" c; do
 	case "${c}" in
 		h) usage; exit;;
@@ -47,15 +64,19 @@ while getopts "h" c; do
 done
 
 if [ -f "${syspower}" ]; then
+	# Avoid running multiple instances of this script in parallel
+	enter_critical_section
+
 	# Pre-suspend actions
 	suspend_interfaces
 
 	# Suspend the device
 	printf "mem" > ${syspower}
-	sleep .5
 
 	# Post-resume actions
 	resume_interfaces
+
+	exit_critical_section
 else
 	printf "\n[ERROR] File ${syspower} not found\n\n"
 fi

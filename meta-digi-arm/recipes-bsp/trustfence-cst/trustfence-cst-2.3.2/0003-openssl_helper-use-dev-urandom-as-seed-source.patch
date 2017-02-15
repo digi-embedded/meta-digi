@@ -20,3 +20,5 @@ index 3c9c779092c5..f0cd4e06f0dd 100644
 -    return RAND_load_file("/dev/random", bytes);
 +    return RAND_load_file("/dev/urandom", bytes);
  }
+ 
+ 

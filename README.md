@@ -59,14 +59,31 @@ Documentation is available online on the Digi documentation site:
 
 # Downloads
 
-* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r4/images/
-* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r4/sdk/
+* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r5/images/
+* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r5/sdk/
 
 # Release Changelog
 
 ## 2.0-r5
 
-* TBC
+* Digi Embedded Yocto
+  * Support firmware update through the new recovery mode
+  * Initial support to connect to Remote Manager with the CloudConnector
+  * Updated U-Boot to version 'dub-2015.04-r7' for Digi ConnectCore 6 and 6UL
+* Digi ConnectCore 6UL
+  * Added support to audio codec MAX98089
+  * Added support to camera Omnivision OV5642
+  * Optimized kernel configuration (smaller kernel)
+  * Added support for EDO mode on NAND Flash
+  * Added PMIC NVRAM support through sysfs
+  * Added suspend support for PMIC regulators
+  * Added support for i.MX6UL ADC channels
+  * Added voltage scaling support for MCA ADC
+  * Added full-system reset support to MCA watchdog
+  * Added MCA 32KHz output control through sysfs
+  * Added VRef output control through sysfs
+  * Added support to PWM1 on Starter Board expansion header
+  * Kernel v4.1.38
 
 ## 2.0-r4
 
@@ -125,17 +142,22 @@ after a failed attempt. Hence the target needs to be reset after an
 authentication failure.
 * If TrustFence (TM) image encryption support is enabled, the uSD image will
 boot a signed U-Boot only.
+* Firmware update
+  * Updating from a microSD card is not supported, only from local partitions
+    (e.g. the 'update' partition) or from external USB memory devices.
+  * The software update package must be located in the root level of the
+    update media (subfolders are not yet supported).
+* Cloud Connector
+  * Remote file system management fails with long file names and paths
+    (over 255 characters).
 
 ## Digi ConnectCore 6UL
 
-* In the Bluetooth interface, the UART hardware flow control doesn’t work
-properly. To work around this problem the UART is configured without hardware
-flow control at 115200 bps, reducing the maximum throughput of this interface.
-This problem will be corrected in newer revisions of the hardware.
-
-* U-Boot version dub-2015.04-r4.5 may report running on Starter Board version 1
-even when your Starter Board is version 2. In that case Ethernet does not work
-in U-Boot. More recent versions of U-Boot fix this issue.
+* The UART connected to the Bluetooth chip on early versions of the ConnectCore
+  6UL system-on-module (hardware version < 4) cannot properly execute flow
+  control. To work around this issue, UART1 of these SOM versions has been
+  configured to operate at 115200 bps and without hardware flow control,
+  reducing the maximum throughput of this interface.
 
 ## Digi ConnectCore 6
 

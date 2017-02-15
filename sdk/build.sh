@@ -45,6 +45,10 @@ INHERIT += \"rm_work\"
 RM_WORK_EXCLUDE += \"dey-image-qt linux-dey qtbase u-boot-dey\"
 "
 
+ZIP_INSTALLER_CFG="
+DEY_IMAGE_INSTALLER = \"1\"
+"
+
 X11_REMOVAL_CFG="
 DISTRO_FEATURES_remove = \"x11\"
 "
@@ -170,6 +174,7 @@ done<<-_EOF_
 	ccimx6ulsbc       DONTBUILDVARIANTS   dey-image-qt
 	ccimx6ulstarter   DONTBUILDVARIANTS   core-image-base
 	ccimx6ulsom       DONTBUILDVARIANTS   dey-image-mft-module-min
+	ccimx6ulrftest    DONTBUILDVARIANTS   dey-image-mft-module-rf
 _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
@@ -243,6 +248,7 @@ for platform in ${DY_PLATFORMS}; do
 				if [ "${DY_RM_WORK}" = "true" ]; then
 					printf "${RM_WORK_CFG}" >> conf/local.conf
 				fi
+				printf "${ZIP_INSTALLER_CFG}" >> conf/local.conf
 				# Remove 'x11' distro feature if building framebuffer images
 				if [ "${DY_FB_IMAGE}" = "true" ]; then
 					printf "${X11_REMOVAL_CFG}" >> conf/local.conf
