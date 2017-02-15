@@ -2,11 +2,8 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
-DEPENDS += "libdigi"
-
 SRC_URI += "file://0001-del-baudrates.patch \
-            file://0002-del-flash_eraseall.patch \
-            file://0003-ntpd-indefinitely-try-to-resolve-peer-addresses.patch \
+            file://0002-ntpd-indefinitely-try-to-resolve-peer-addresses.patch \
             file://suspend \
             file://busybox-ntpd \
             file://index.html \
