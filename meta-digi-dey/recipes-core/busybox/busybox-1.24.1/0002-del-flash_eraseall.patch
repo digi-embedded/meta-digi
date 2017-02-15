@@ -18,10 +18,10 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  2 files changed, 17 insertions(+)
 
 diff --git a/Makefile.flags b/Makefile.flags
-index 307afa7..feeeb7d 100644
+index 9f77674..fdbaad8 100644
 --- a/Makefile.flags
 +++ b/Makefile.flags
-@@ -152,6 +152,10 @@ ifeq ($(CONFIG_DMALLOC),y)
+@@ -159,6 +159,10 @@ ifeq ($(CONFIG_DMALLOC),y)
  LDLIBS += dmalloc
  endif
  
