@@ -26,10 +26,6 @@ S = "${WORKDIR}/git"
 # machine, with different entry points
 KERNEL_EXTRA_ARGS += "LOADADDR=${UBOOT_ENTRYPOINT}"
 
-do_deploy_append() {
-	(cd ${DEPLOYDIR} && ln -sf ${KERNEL_IMAGE_BASE_NAME}.bin ${KERNEL_IMAGE_SYMLINK_NAME})
-}
-
 do_deploy[postfuncs] += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence_sign', '', d)}"
 
 trustfence_sign() {
