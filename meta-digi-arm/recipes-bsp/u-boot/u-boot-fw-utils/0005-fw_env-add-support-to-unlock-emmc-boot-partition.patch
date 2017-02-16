@@ -1,17 +1,17 @@
 From: Javier Viguera <javier.viguera@digi.com>
-Date: Tue, 1 Apr 2014 18:43:07 +0200
+Date: Thu, 16 Feb 2017 14:53:44 +0100
 Subject: [PATCH] fw_env: add support to unlock emmc boot partition
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
- tools/env/fw_env.c | 33 +++++++++++++++++++++++++++++++++
- 1 file changed, 33 insertions(+)
+ tools/env/fw_env.c | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
 
 diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
-index 09f06c874b17..e4e242b35bd1 100644
+index 46c619b211b5..1c337b4727a9 100644
 --- a/tools/env/fw_env.c
 +++ b/tools/env/fw_env.c
-@@ -1218,6 +1218,27 @@ static int flash_read (int fd)
+@@ -1177,9 +1177,31 @@ static int flash_read (int fd)
  	return 0;
  }
  
@@ -39,23 +39,24 @@ index 09f06c874b17..e4e242b35bd1 100644
  static int flash_io (int mode)
  {
  	int fd_current, fd_target, rc, dev_target;
-@@ -1250,8 +1271,20 @@ static int flash_io (int mode)
++	char *mmcblk = NULL;
+ 
+ 	/* dev_current: fd_current, erase_current */
+ 	fd_current = open (DEVNAME (dev_current), mode);
+@@ -1209,8 +1231,17 @@ static int flash_io (int mode)
  			fd_target = fd_current;
  		}
  
-+		/*
-+		 * Disable mmcboot protection (set read-write)
-+		 *
-+		 * In a CCIMX6 dev_current and dev_target is the same device so it's ok to
-+		 * just use dev_current here.
-+		 *
-+		 */
-+		sysfs_mmcboot_set_protection(DEVNAME(dev_current) + 5 /* /dev/ */ , 0);
++		/* Disable mmcboot protection if using EMMC (set read-write) */
++		mmcblk = strstr(DEVNAME(dev_target), "mmcblk");
++		if (mmcblk)
++			sysfs_mmcboot_set_protection(mmcblk, 0);
 +
  		rc = flash_write (fd_current, fd_target, dev_target);
  
 +		/* Re-enable mmcboot protection (set read-only) */
-+		sysfs_mmcboot_set_protection(DEVNAME(dev_current) + 5 /* /dev/ */ , 1);
++		if (mmcblk)
++			sysfs_mmcboot_set_protection(mmcblk, 1);
 +
  		if (HaveRedundEnv) {
  			if (close (fd_target)) {

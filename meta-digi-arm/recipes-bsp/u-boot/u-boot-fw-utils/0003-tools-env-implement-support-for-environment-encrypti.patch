@@ -1,7 +1,7 @@
 From: "Diaz de Grenu, Jose" <Jose.DiazdeGrenu@digi.com>
 Date: Tue, 23 Aug 2016 13:05:05 +0200
-Subject: [PATCH] tools: env: implement support for environment encryption
- by CAAM
+Subject: [PATCH] tools: env: implement support for environment encryption by
+ CAAM
 
 https://jira.digi.com/browse/DEL-2836
 
@@ -15,30 +15,30 @@ Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
  create mode 100644 tools/env/caam_keyblob.h
 
 diff --git a/configs/sandbox_defconfig b/configs/sandbox_defconfig
-index 598519dbb2fc..81dd4d445c0e 100644
+index 02534bfea761..5a690c1cc623 100644
 --- a/configs/sandbox_defconfig
 +++ b/configs/sandbox_defconfig
-@@ -44,3 +44,4 @@ CONFIG_UNIT_TEST=y
+@@ -90,3 +90,4 @@ CONFIG_UNIT_TEST=y
  CONFIG_UT_TIME=y
  CONFIG_UT_DM=y
  CONFIG_UT_ENV=y
 +CONFIG_MD5=y
 diff --git a/tools/env/Makefile b/tools/env/Makefile
-index 40164f7a35fa..de4766ddf8dd 100644
+index 38ad118d032f..fa2a564bb357 100644
 --- a/tools/env/Makefile
 +++ b/tools/env/Makefile
 @@ -25,7 +25,7 @@ hostprogs-y := fw_printenv
  
- fw_printenv-objs := fw_env.o fw_env_main.o \
+ lib-y += fw_env.o \
  	crc32.o ctype.o linux_string.o \
 -	env_attr.o env_flags.o aes.o
 +	env_attr.o env_flags.o aes.o ../../lib/md5.o
  
- quiet_cmd_crosstools_strip = STRIP   $^
-       cmd_crosstools_strip = $(STRIP) $^; touch $@
+ fw_printenv-objs := fw_env_main.o $(lib-y)
+ 
 diff --git a/tools/env/caam_keyblob.h b/tools/env/caam_keyblob.h
 new file mode 100644
-index 000000000000..1e33b3f01a05
+index 000000000000..1cdf3946c1ba
 --- /dev/null
 +++ b/tools/env/caam_keyblob.h
 @@ -0,0 +1,45 @@
@@ -87,12 +87,11 @@ index 000000000000..1e33b3f01a05
 +#endif
 +
 +#endif /* CAAM_KEYBLOB_H */
-\ No newline at end of file
 diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
-index daa02a760e37..806c2fb6d550 100644
+index b2f62827d918..46c619b211b5 100644
 --- a/tools/env/fw_env.c
 +++ b/tools/env/fw_env.c
-@@ -21,6 +21,7 @@
+@@ -22,6 +22,7 @@
  #include <sys/types.h>
  #include <sys/ioctl.h>
  #include <sys/stat.h>
@@ -100,14 +99,16 @@ index daa02a760e37..806c2fb6d550 100644
  #include <unistd.h>
  
  #ifdef MTD_OLD
-@@ -31,10 +32,19 @@
+@@ -32,12 +33,21 @@
  # include <mtd/mtd-user.h>
  #endif
  
 +#include "caam_keyblob.h"
  #include "fw_env.h"
  
- #include <aes.h>
+ struct common_args common_args;
+ struct printenv_args printenv_args;
+ struct setenv_args setenv_args;
  
 +/*
 + * The BLOB includes a random AES-256 key (32 bytes) and a
@@ -120,8 +121,8 @@ index daa02a760e37..806c2fb6d550 100644
  #define DIV_ROUND_UP(n, d)	(((n) + (d) - 1) / (d))
  
  #define WHITESPACE(c) ((c == '\t') || (c == ' '))
-@@ -109,6 +119,8 @@ static int aes_flag;
- static uint8_t aes_key[AES_KEY_LENGTH] = { 0 };
+@@ -109,6 +119,8 @@ static struct environment environment = {
+ 
  static int env_aes_cbc_crypt(char *data, const int enc);
  
 +static int caam_encryption_flag;
@@ -129,7 +130,7 @@ index daa02a760e37..806c2fb6d550 100644
  static int HaveRedundEnv = 0;
  
  static unsigned char active_flag = 1;
-@@ -236,6 +248,103 @@ static int parse_aes_key(char *key)
+@@ -234,6 +246,103 @@ int parse_aes_key(char *key, uint8_t *bin_key)
  	return 0;
  }
  
@@ -233,7 +234,7 @@ index daa02a760e37..806c2fb6d550 100644
  /*
   * Print the current definition of one, or more, or all
   * environment variables
-@@ -334,6 +443,15 @@ int fw_env_close(void)
+@@ -311,6 +420,15 @@ int fw_env_close(void)
  		}
  	}
  
@@ -249,7 +250,7 @@ index daa02a760e37..806c2fb6d550 100644
  	/*
  	 * Update CRC
  	 */
-@@ -1191,6 +1309,8 @@ int fw_env_open(void)
+@@ -1154,6 +1272,8 @@ int fw_env_open(void)
  	struct env_image_single *single;
  	struct env_image_redundant *redundant;
  
@@ -258,7 +259,7 @@ index daa02a760e37..806c2fb6d550 100644
  	if (parse_config ())		/* should fill envdevices */
  		return -1;
  
-@@ -1229,6 +1349,15 @@ int fw_env_open(void)
+@@ -1192,6 +1312,15 @@ int fw_env_open(void)
  			return ret;
  	}
  
@@ -274,7 +275,7 @@ index daa02a760e37..806c2fb6d550 100644
  	crc0_ok = (crc0 == *environment.crc);
  	if (!HaveRedundEnv) {
  		if (!crc0_ok) {
-@@ -1286,6 +1415,15 @@ int fw_env_open(void)
+@@ -1249,6 +1378,15 @@ int fw_env_open(void)
  				return ret;
  		}
  
