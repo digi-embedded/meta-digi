@@ -195,7 +195,7 @@ IMAGE_CMD_recovery.ubifs() {
     rm -rf ${TMP_RECOVERYDIR}
 }
 
-IMAGE_CMD_cpio.gz.u-boot.tf() {
+trustence_sign_cpio() {
 	#
 	# Image generation code for image type 'cpio.gz.u-boot.tf'
 	# (signed/encrypted ramdisk)
@@ -207,14 +207,15 @@ IMAGE_CMD_cpio.gz.u-boot.tf() {
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
 
 		# Sign/encrypt the ramdisk
-		"${STAGING_BINDIR_NATIVE}/trustfence-sign-kernel.sh" -p "${DIGI_FAMILY}" -i "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz.u-boot" "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz.u-boot.tf"
+		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -i "${1}" "${1}.tf"
 	else
 		# Rename image
-		mv "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz.u-boot" "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.cpio.gz.u-boot.tf"
+		mv "${1}" "${1}.tf"
 	fi
 }
-
-IMAGE_TYPEDEP_cpio.gz.u-boot.tf = "cpio.gz.u-boot"
+CONVERSIONTYPES += "gz.u-boot.tf"
+CONVERSION_CMD_gz.u-boot.tf = "${CONVERSION_CMD_gz.u-boot}; trustence_sign_cpio ${IMAGE_NAME}.rootfs.${type}.gz.u-boot"
+IMAGE_TYPES += "cpio.gz.u-boot.tf"
 
 # Set alignment to 4MB [in KiB]
 IMAGE_ROOTFS_ALIGNMENT = "4096"
