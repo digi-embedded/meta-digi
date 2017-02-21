@@ -14,10 +14,10 @@ Signed-off-by: Rupesh Tatiya <rtatiya@codeaurora.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/tools/hciattach.c b/tools/hciattach.c
-index d3917a0d503e..3041e28ff82a 100644
+index 73811d4c4c2a..e3a915061440 100644
 --- a/tools/hciattach.c
 +++ b/tools/hciattach.c
-@@ -1156,7 +1156,7 @@ struct uart_t uart[] = {
+@@ -1102,7 +1102,7 @@ struct uart_t uart[] = {
  			FLOW_CTL, DISABLE_PM, NULL, ath3k_ps, ath3k_pm  },
  
  	/* QCA ROME */

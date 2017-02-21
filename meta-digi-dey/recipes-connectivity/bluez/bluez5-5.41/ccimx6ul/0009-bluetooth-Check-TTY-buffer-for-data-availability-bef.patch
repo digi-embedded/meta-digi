@@ -26,10 +26,10 @@ Signed-off-by: Rupesh Tatiya <rtatiya@codeaurora.org>
  3 files changed, 83 insertions(+), 17 deletions(-)
 
 diff --git a/tools/hciattach.c b/tools/hciattach.c
-index 3041e28ff82a..13f073325c43 100644
+index e3a915061440..c3cf10843303 100644
 --- a/tools/hciattach.c
 +++ b/tools/hciattach.c
-@@ -163,16 +163,34 @@ int read_hci_event(int fd, unsigned char* buf, int size)
+@@ -109,16 +109,34 @@ int read_hci_event(int fd, unsigned char* buf, int size)
  {
  	int remain, r;
  	int count = 0;

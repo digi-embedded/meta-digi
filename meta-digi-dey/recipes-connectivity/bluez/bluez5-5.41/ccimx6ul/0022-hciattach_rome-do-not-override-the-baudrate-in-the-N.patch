@@ -19,7 +19,7 @@ index 59bdc16e4e8f..4f0f8c82fa8d 100644
 @@ -1903,15 +1903,8 @@ download:
              }
              fprintf(stderr, "%s: Download TLV file successfully \n", __FUNCTION__);
-
+ 
 -            /*
 -             * Overriding the baud rate value in NVM file with the user
 -             * requested baud rate, since default baud rate in NVM file is 3M.
@@ -31,6 +31,6 @@ index 59bdc16e4e8f..4f0f8c82fa8d 100644
 -            }
 +            /* Do not override the baudrate in the TLV file */
 +            fprintf(stderr, "%s: Skipping Override of baud rate!\n", __FUNCTION__);
-
+ 
              /* Perform HCI reset here*/
              err = rome_hci_reset_req(fd, local_baud_rate);

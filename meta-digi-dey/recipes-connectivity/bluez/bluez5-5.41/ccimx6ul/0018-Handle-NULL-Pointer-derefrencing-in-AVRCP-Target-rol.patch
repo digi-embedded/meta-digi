@@ -14,10 +14,10 @@ Signed-off-by: Kamal Negi <kamaln@codeaurora.org>
  1 file changed, 22 insertions(+), 5 deletions(-)
 
 diff --git a/profiles/audio/avrcp.c b/profiles/audio/avrcp.c
-index d66f67032624..9fa939d9548b 100644
+index c100149acf42..d8cb0ed96a1f 100644
 --- a/profiles/audio/avrcp.c
 +++ b/profiles/audio/avrcp.c
-@@ -1808,13 +1808,19 @@ static gboolean avrcp_get_play_status_rsp(struct avctp *conn,
+@@ -2082,13 +2082,19 @@ static gboolean avrcp_get_play_status_rsp(struct avctp *conn, uint8_t code,
  					void *user_data)
  {
  	struct avrcp *session = user_data;
@@ -39,7 +39,7 @@ index d66f67032624..9fa939d9548b 100644
  	if (pdu == NULL || code == AVC_CTYPE_REJECTED ||
  						ntohs(pdu->params_len) != 9)
  		return FALSE;
-@@ -1872,12 +1878,18 @@ static gboolean avrcp_player_value_rsp(struct avctp *conn,
+@@ -2146,12 +2152,18 @@ static gboolean avrcp_player_value_rsp(struct avctp *conn, uint8_t code,
  					void *user_data)
  {
  	struct avrcp *session = user_data;
@@ -60,7 +60,7 @@ index d66f67032624..9fa939d9548b 100644
  	if (pdu == NULL) {
  		media_player_set_setting(mp, "Error", "Timeout");
  		return FALSE;
-@@ -2028,10 +2040,15 @@ static gboolean avrcp_get_element_attributes_rsp(struct avctp *conn,
+@@ -2303,10 +2315,15 @@ static gboolean avrcp_get_element_attributes_rsp(struct avctp *conn,
  						void *user_data)
  {
  	struct avrcp *session = user_data;

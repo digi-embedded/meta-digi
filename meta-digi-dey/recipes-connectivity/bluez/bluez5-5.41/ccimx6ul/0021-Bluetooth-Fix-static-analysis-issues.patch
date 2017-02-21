@@ -4,30 +4,9 @@ Subject: [PATCH] Bluetooth: Fix static analysis issues
 
 Change-Id: Ida91f012544c39a8aaa6e7db23f1d5b68d3bec08
 ---
- tools/hciattach.c      |  9 ++++++++-
  tools/hciattach_rome.c | 10 ++++++++--
- 2 files changed, 16 insertions(+), 3 deletions(-)
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-diff --git a/tools/hciattach.c b/tools/hciattach.c
-index 6de4129dfd8f..c9a5feffca2b 100644
---- a/tools/hciattach.c
-+++ b/tools/hciattach.c
-@@ -1395,7 +1395,14 @@ int main(int argc, char *argv[])
- 			dev[0] = 0;
- 			if (!strchr(opt, '/'))
- 				strcpy(dev, "/dev/");
--			strcat(dev, opt);
-+
-+			if (strlen(opt) + 1 > sizeof(dev) - strlen(dev)) {
-+				fprintf(stderr, "error: string truncated\n");
-+				exit(1);
-+			}
-+
-+			strncat(dev, opt, sizeof(dev) - strlen(dev) - 1);
-+
- 			break;
- 
- 		case 1:
 diff --git a/tools/hciattach_rome.c b/tools/hciattach_rome.c
 index 1891de24e21a..59bdc16e4e8f 100644
 --- a/tools/hciattach_rome.c
