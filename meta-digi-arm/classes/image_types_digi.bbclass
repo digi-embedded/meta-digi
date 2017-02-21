@@ -1,8 +1,11 @@
 inherit image_types
 
+################################################################################
+#                                 BOOT IMAGES                                  #
+################################################################################
 def TRUSTFENCE_BOOTIMAGE_DEPENDS(d):
     tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
-    return "%s:do_rootfs" % tf_initramfs if tf_initramfs else ""
+    return "%s:do_image_complete" % tf_initramfs if tf_initramfs else ""
 
 IMAGE_DEPENDS_boot.vfat = " \
     dosfstools-native:do_populate_sysroot \
@@ -13,10 +16,7 @@ IMAGE_DEPENDS_boot.vfat = " \
 "
 
 IMAGE_CMD_boot.vfat() {
-	#
-	# Image generation code for image type 'boot.vfat'
-	#
-	BOOTIMG_FILES="$(readlink -e ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE})"
+	BOOTIMG_FILES="$(readlink -e ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin)"
 	BOOTIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
 	if [ -n "${KERNEL_DEVICETREE}" ]; then
 		for DTB in ${KERNEL_DEVICETREE}; do
@@ -49,27 +49,25 @@ IMAGE_CMD_boot.vfat() {
 	BOOTIMG_BLOCKS="$(expr \( \( ${BOOTIMG_BLOCKS} + 15 \) / 16 \) \* 16)"
 
 	# Build VFAT boot image and copy files into it
-	mkfs.vfat -n "Boot ${MACHINE}" -S 512 -C ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat ${BOOTIMG_BLOCKS}
-	mcopy -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat ${BOOTIMG_FILES_SYMLINK} ::/
+	mkfs.vfat -n "Boot ${MACHINE}" -S 512 -C ${IMGDEPLOYDIR}/${IMAGE_NAME}.boot.vfat ${BOOTIMG_BLOCKS}
+	mcopy -i ${IMGDEPLOYDIR}/${IMAGE_NAME}.boot.vfat ${BOOTIMG_FILES_SYMLINK} ::/
 
 	# Copy boot scripts into the VFAT image
 	for item in ${BOOT_SCRIPTS}; do
 		src=`echo $item | awk -F':' '{ print $1 }'`
 		dst=`echo $item | awk -F':' '{ print $2 }'`
-		mcopy -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat -s ${DEPLOY_DIR_IMAGE}/$src ::/$dst
+		mcopy -i ${IMGDEPLOYDIR}/${IMAGE_NAME}.boot.vfat -s ${DEPLOY_DIR_IMAGE}/$src ::/$dst
 	done
 
 	# Truncate the image to speed up the downloading/writing to the EMMC
 	if [ -n "${BOARD_BOOTIMAGE_PARTITION_SIZE}" ]; then
 		# U-Boot writes 512 bytes sectors so truncate the image at a sector boundary
-		truncate -s $(expr \( \( ${BOOTIMG_FILES_SIZE} + 511 \) / 512 \) \* 512) ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat
-	fi
-
-        # Create the symlink
-	if [ -n "${IMAGE_LINK_NAME}" ] && [ -e ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat ]; then
-		ln -s ${IMAGE_NAME}.boot.vfat ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.boot.vfat
+		truncate -s $(expr \( \( ${BOOTIMG_FILES_SIZE} + 511 \) / 512 \) \* 512) ${IMGDEPLOYDIR}/${IMAGE_NAME}.boot.vfat
 	fi
 }
+
+# Remove the default ".rootfs." suffix for 'boot.vfat' images
+do_image_boot_vfat[imgsuffix] = "."
 
 IMAGE_DEPENDS_boot.ubifs = " \
     mtd-utils-native:do_populate_sysroot \
@@ -79,9 +77,6 @@ IMAGE_DEPENDS_boot.ubifs = " \
 "
 
 IMAGE_CMD_boot.ubifs() {
-	#
-	# Image generation code for image type 'boot.ubifs'
-	#
 	BOOTIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
 	if [ -n "${KERNEL_DEVICETREE}" ]; then
 		for DTB in ${KERNEL_DEVICETREE}; do
@@ -97,7 +92,7 @@ IMAGE_CMD_boot.ubifs() {
 	fi
 
 	# Create temporary folder
-	TMP_BOOTDIR="$(mktemp -d ${DEPLOY_DIR_IMAGE}/boot.XXXXXX)"
+	TMP_BOOTDIR="$(mktemp -d ${IMGDEPLOYDIR}/boot.XXXXXX)"
 
 	# Hard-link BOOTIMG_FILES into the temporary folder with the symlink filename
 	for item in ${BOOTIMG_FILES_SYMLINK}; do
@@ -113,88 +108,99 @@ IMAGE_CMD_boot.ubifs() {
 	done
 
 	# Build UBIFS boot image out of temp folder
-	mkfs.ubifs -r ${TMP_BOOTDIR} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.ubifs ${MKUBIFS_BOOT_ARGS}
-
-	# Create the symlink
-	if [ -n "${IMAGE_LINK_NAME}" ] && [ -e ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.ubifs ]; then
-		ln -s ${IMAGE_NAME}.boot.ubifs ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.boot.ubifs
-	fi
+	mkfs.ubifs -r ${TMP_BOOTDIR} -o ${IMGDEPLOYDIR}/${IMAGE_NAME}.boot.ubifs ${MKUBIFS_BOOT_ARGS}
 
 	# Remove the temporary folder
 	rm -rf ${TMP_BOOTDIR}
 }
 
-IMAGE_DEPENDS_recovery.vfat = "${RECOVERY_INITRAMFS_IMAGE}:do_rootfs"
+# Remove the default ".rootfs." suffix for 'boot.ubifs' images
+do_image_boot_ubifs[imgsuffix] = "."
 
-# The recovery vfat image requires the boot image to be built before
-IMAGE_TYPEDEP_recovery.vfat = "${SDIMG_BOOTFS_TYPE}"
+#
+# Transfer the dependences from the basetype 'boot' to the actual image types
+#
+# This is needed because otherwise the IMAGE_DEPENDS_<actualtype> is not used and the build fails.
+#
+IMAGE_TYPEDEP_boot = " \
+    ${@bb.utils.contains('IMAGE_FSTYPES', 'boot.ubifs', 'boot.ubifs', '', d)} \
+    ${@bb.utils.contains('IMAGE_FSTYPES', 'boot.vfat', 'boot.vfat', '', d)} \
+"
+
+################################################################################
+#                               RECOVERY IMAGES                                #
+################################################################################
+IMAGE_DEPENDS_recovery.vfat = " \
+    ${RECOVERY_INITRAMFS_IMAGE}:do_image_complete \
+"
 
 IMAGE_CMD_recovery.vfat() {
-	#
-	# Image generation code for image type 'recovery.vfat'
-	#
-	# Copy the boot.vfat image
-	cp ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.boot.vfat ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.recovery.vfat
+	# Use 'boot.vfat' image as base
+	cp --remove-destination ${IMGDEPLOYDIR}/${IMAGE_NAME}.boot.vfat ${IMGDEPLOYDIR}/${IMAGE_NAME}.recovery.vfat
 
-	# Copy the recovery init script into the VFAT image
-	mcopy -o -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.recovery.vfat -s ${DEPLOY_DIR_IMAGE}/recovery.scr ::/boot.scr
-
-	# Copy the recovery ramdisk into the VFAT image
-	mcopy -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.recovery.vfat -s ${DEPLOY_DIR_IMAGE}/${RECOVERY_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf ::/uramdisk-recovery.img
-
-	# Create the symlink
-	if [ -n "${IMAGE_LINK_NAME}" ] && [ -e ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.recovery.vfat ]; then
-		ln -s ${IMAGE_NAME}.recovery.vfat ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.recovery.vfat
-	fi
+	# Copy the recovery U-Boot script and recovery initramfs into the VFAT image
+	mcopy -o -i ${IMGDEPLOYDIR}/${IMAGE_NAME}.recovery.vfat -s ${DEPLOY_DIR_IMAGE}/recovery.scr ::/boot.scr
+	mcopy -i ${IMGDEPLOYDIR}/${IMAGE_NAME}.recovery.vfat -s ${DEPLOY_DIR_IMAGE}/${RECOVERY_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf ::/uramdisk-recovery.img
 }
+
+# Remove the default ".rootfs." suffix for 'recovery.vfat' images
+do_image_recovery_vfat[imgsuffix] = "."
+
+IMAGE_TYPEDEP_recovery.vfat = "boot.vfat"
 
 IMAGE_DEPENDS_recovery.ubifs = " \
     mtd-utils-native:do_populate_sysroot \
     u-boot:do_deploy \
     virtual/kernel:do_deploy \
-    ${RECOVERY_INITRAMFS_IMAGE}:do_rootfs \
+    ${RECOVERY_INITRAMFS_IMAGE}:do_image_complete \
 "
 
 IMAGE_CMD_recovery.ubifs() {
-    #
-    # Image generation code for image type 'recovery.ubifs'
-    #
-    RECOVERYIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
-    if [ -n "${KERNEL_DEVICETREE}" ]; then
-        for DTB in ${KERNEL_DEVICETREE}; do
-            if [ -e "${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}" ]; then
-                RECOVERYIMG_FILES_SYMLINK="${RECOVERYIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}"
-            fi
-        done
-    fi
+	RECOVERYIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
+	if [ -n "${KERNEL_DEVICETREE}" ]; then
+		for DTB in ${KERNEL_DEVICETREE}; do
+			if [ -e "${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}" ]; then
+				RECOVERYIMG_FILES_SYMLINK="${RECOVERYIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}"
+			fi
+		done
+	fi
 
-    # Create temporary folder
-    TMP_RECOVERYDIR="$(mktemp -d ${DEPLOY_DIR_IMAGE}/recovery.XXXXXX)"
+	# Create temporary folder
+	TMP_RECOVERYDIR="$(mktemp -d ${IMGDEPLOYDIR}/recovery.XXXXXX)"
 
-    # Hard-link RECOVERYIMG_FILES into the temporary folder with the symlink filename
-    for item in ${RECOVERYIMG_FILES_SYMLINK}; do
-        orig="$(readlink -e ${item})"
-        ln ${orig} ${TMP_RECOVERYDIR}/$(basename ${item})
-    done
+	# Hard-link RECOVERYIMG_FILES into the temporary folder with the symlink filename
+	for item in ${RECOVERYIMG_FILES_SYMLINK}; do
+		orig="$(readlink -e ${item})"
+		ln ${orig} ${TMP_RECOVERYDIR}/$(basename ${item})
+	done
 
-    # Copy the recovery init script.
-    cp ${DEPLOY_DIR_IMAGE}/recovery.scr ${TMP_RECOVERYDIR}/boot.scr
+	# Copy the recovery U-Boot script and recovery initramfs into the temporary folder
+	cp ${DEPLOY_DIR_IMAGE}/recovery.scr ${TMP_RECOVERYDIR}/boot.scr
+	cp ${DEPLOY_DIR_IMAGE}/${RECOVERY_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf ${TMP_RECOVERYDIR}/uramdisk-recovery.img
 
-    # Copy the recovery ramdisk image.
-    cp ${DEPLOY_DIR_IMAGE}/${RECOVERY_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf ${TMP_RECOVERYDIR}/uramdisk-recovery.img
+	# Build UBIFS recovery image out of temp folder
+	mkfs.ubifs -r ${TMP_RECOVERYDIR} -o ${IMGDEPLOYDIR}/${IMAGE_NAME}.recovery.ubifs ${MKUBIFS_BOOT_ARGS}
 
-    # Build UBIFS boot image out of temp folder
-    mkfs.ubifs -r ${TMP_RECOVERYDIR} -o ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.recovery.ubifs ${MKUBIFS_BOOT_ARGS}
-
-    # Create the symlink
-    if [ -n "${IMAGE_LINK_NAME}" ] && [ -e ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.recovery.ubifs ]; then
-        ln -s ${IMAGE_NAME}.recovery.ubifs ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.recovery.ubifs
-    fi
-
-    # Remove the temporary folder
-    rm -rf ${TMP_RECOVERYDIR}
+	# Remove the temporary folder
+	rm -rf ${TMP_RECOVERYDIR}
 }
 
+# Remove the default ".rootfs." suffix for 'recovery.ubifs' images
+do_image_recovery_ubifs[imgsuffix] = "."
+
+#
+# Transfer the dependences from the basetype 'recovery' to the actual image types
+#
+# This is needed because otherwise the IMAGE_DEPENDS_<actualtype> is not used and the build fails.
+#
+IMAGE_TYPEDEP_recovery = " \
+    ${@bb.utils.contains('IMAGE_FSTYPES', 'recovery.ubifs', 'recovery.ubifs', '', d)} \
+    ${@bb.utils.contains('IMAGE_FSTYPES', 'recovery.vfat', 'recovery.vfat boot.vfat', '', d)} \
+"
+
+################################################################################
+#                               TRUSTFENCE SIGN                                #
+################################################################################
 trustence_sign_cpio() {
 	#
 	# Image generation code for image type 'cpio.gz.u-boot.tf'
@@ -217,6 +223,9 @@ CONVERSIONTYPES += "gz.u-boot.tf"
 CONVERSION_CMD_gz.u-boot.tf = "${CONVERSION_CMD_gz.u-boot}; trustence_sign_cpio ${IMAGE_NAME}.rootfs.${type}.gz.u-boot"
 IMAGE_TYPES += "cpio.gz.u-boot.tf"
 
+################################################################################
+#                                SDCARD IMAGES                                 #
+################################################################################
 # Set alignment to 4MB [in KiB]
 IMAGE_ROOTFS_ALIGNMENT = "4096"
 
@@ -224,12 +233,12 @@ IMAGE_ROOTFS_ALIGNMENT = "4096"
 BOARD_BOOTIMAGE_PARTITION_SIZE ??= "65536"
 
 # SD card image name
-SDIMG = "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.sdcard"
+SDIMG = "${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.sdcard"
 
 SDIMG_BOOTFS_TYPE ?= "boot.vfat"
-SDIMG_BOOTFS = "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.${SDIMG_BOOTFS_TYPE}"
+SDIMG_BOOTFS = "${IMGDEPLOYDIR}/${IMAGE_NAME}.${SDIMG_BOOTFS_TYPE}"
 SDIMG_ROOTFS_TYPE ?= "ext4"
-SDIMG_ROOTFS = "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.${SDIMG_ROOTFS_TYPE}"
+SDIMG_ROOTFS = "${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.${SDIMG_ROOTFS_TYPE}"
 
 IMAGE_DEPENDS_sdcard = " \
     dosfstools-native:do_populate_sysroot \
