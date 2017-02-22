@@ -11,8 +11,15 @@ SRC_URI = "file://card-detect.c"
 
 S = "${WORKDIR}"
 
+inherit pkgconfig
+
+export CFLAGS += "`pkg-config --cflags alsa`"
+export LDLIBS += "`pkg-config --libs alsa`"
+
+do_configure[noexec] = "1"
+
 do_compile() {
-	${CC} -O2 -Wall card-detect.c -o card-detect -lasound
+	oe_runmake card-detect
 }
 
 do_install() {
