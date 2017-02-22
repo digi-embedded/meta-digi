@@ -140,10 +140,6 @@ Documentation is available online on the Digi documentation site:
 This is a list of known issues and limitations at the time of release. An
 updated list can be found on the online documentation.
 
-* When using TrustFence (TM)  encrypted images secure boot support, the CAAM
-will hang the processor when trying to authenticate an encrypted firmware image
-after a failed attempt. Hence the target needs to be reset after an
-authentication failure.
 * If TrustFence (TM) image encryption support is enabled, the uSD image will
 boot a signed U-Boot only.
 * Firmware update
