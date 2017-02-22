@@ -2,11 +2,11 @@
 #@NAME: ConnectCore for i.MX6UL.
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore 6UL.
 
+DIGI_FAMILY = "ccimx6ul"
+MACHINEOVERRIDES =. "mx6:mx6ul:${DIGI_FAMILY}:"
+
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/tune-cortexa7.inc
-
-DIGI_FAMILY = "ccimx6ul"
-SOC_FAMILY  = "mx6ul:${DIGI_FAMILY}"
 
 # Platform u-boot settings
 UBOOT_SUFFIX = "imx"
@@ -26,7 +26,7 @@ MACHINE_EXTRA_RDEPENDS += " \
     u-boot-fw-utils \
 "
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
-MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins cryptodev-module"
+MACHINE_EXTRA_RRECOMMENDS += "imx-alsa-plugins cryptodev-module"
 
 MACHINE_FEATURES += "wifi bluetooth"
 

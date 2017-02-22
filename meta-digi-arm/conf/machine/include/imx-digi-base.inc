@@ -1,9 +1,8 @@
 # Digi's i.MX platforms common settings
 include conf/machine/include/digi-defaults.inc
-include conf/machine/include/soc-family.inc
 
 XSERVER_DRIVER = "xf86-video-fbdev"
-XSERVER_DRIVER_mx6 = "xf86-video-imxfb-vivante"
+XSERVER_DRIVER_imxgpu2d = "xf86-video-imxfb-vivante"
 XSERVER = "xserver-xorg \
            xf86-input-evdev \
            ${XSERVER_DRIVER}"
@@ -21,26 +20,41 @@ MACHINE_EXTRA_RRECOMMENDS = "kernel-modules"
 DEFAULTTUNE_mx6 ?= "cortexa9thf-neon"
 DEFAULTTUNE_mx6ul ?= "cortexa7thf-neon"
 
+INHERIT += "machine-overrides-extender"
+
+MACHINEOVERRIDES_EXTENDER_mx6q  = "imxipu:imxvpu:imxgpu2d:imxgpu3d"
+MACHINEOVERRIDES_EXTENDER_mx6dl = "imxpxp:imxipu:imxvpu:imxgpu2d:imxgpu3d:imxepdc"
+MACHINEOVERRIDES_EXTENDER_mx6ul = "imxpxp"
+
 # Sub-architecture support
 MACHINE_SOCARCH_SUFFIX ?= ""
 MACHINE_SOCARCH_SUFFIX_mx6q = "-mx6qdl"
 MACHINE_SOCARCH_SUFFIX_mx6dl = "-mx6qdl"
 MACHINE_SOCARCH_SUFFIX_mx6ul = "-mx6ul"
 
-MACHINE_ARCH_FILTER = "virtual/kernel imx-vpu"
-MACHINE_SOCARCH_FILTER_append_mx6 = " libfslcodec libfslvpuwrap libfslparser"
-MACHINE_SOCARCH_FILTER_append_mx6 = " virtual/libopenvg virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl virtual/libg2d"
+MACHINE_ARCH_FILTER = "virtual/kernel"
+MACHINE_SOCARCH_FILTER_append_imxvpu = " imx-vpu libimxvpuapi imx-codec imx-vpuwrap imx-parser"
+MACHINE_SOCARCH_FILTER_append_imxgpu2d = " virtual/libopenvg virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl virtual/libg2d cairo pango"
+MACHINE_SOCARCH_FILTER_append_imxpxp = " imx-codec imx-parser"
 
 INHERIT += "fsl-dynamic-packagearch"
+
+SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS_append = " \
+    imx-gpu-viv->kernel-module-imx-gpu-viv \
+    libimxvpuapi->imx-vpu \
+    imx-vpuwrap->imx-vpu \
+    imx-codec->imx-vpu \
+    imx-test->imx-vpu \
+"
 
 # Extra udev rules
 MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf udev-rules-imx"
 
 # GStreamer 1.0 plugins
 MACHINE_GSTREAMER_1_0_PLUGIN ?= ""
-MACHINE_GSTREAMER_1_0_PLUGIN_mx6q ?= "gst1.0-fsl-plugin gst1.0-fsl-plugin-gplay gst1.0-fsl-plugin-grecorder"
-MACHINE_GSTREAMER_1_0_PLUGIN_mx6dl ?= "gst1.0-fsl-plugin gst1.0-fsl-plugin-gplay gst1.0-fsl-plugin-grecorder"
-MACHINE_GSTREAMER_1_0_PLUGIN_mx6ul ?= "gst1.0-fsl-plugin gst1.0-fsl-plugin-gplay gst1.0-fsl-plugin-grecorder"
+MACHINE_GSTREAMER_1_0_PLUGIN_mx6q ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
+MACHINE_GSTREAMER_1_0_PLUGIN_mx6dl ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
+MACHINE_GSTREAMER_1_0_PLUGIN_mx6ul ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
 
 # Determines if the SoC has support for Vivante kernel driver
 SOC_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT       = "0"

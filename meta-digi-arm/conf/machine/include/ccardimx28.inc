@@ -2,11 +2,11 @@
 #@NAME: ConnectCore for MX28 module.
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore for MX28 module.
 
+DIGI_FAMILY = "ccardimx28"
+MACHINEOVERRIDES =. "mxs:mx28:${DIGI_FAMILY}:"
+
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/tune-arm926ejs.inc
-
-DIGI_FAMILY = "ccardimx28"
-SOC_FAMILY  = "mxs:mx28:${DIGI_FAMILY}"
 
 # Platform u-boot settings
 UBOOT_ENTRYPOINT = "0x40008000"

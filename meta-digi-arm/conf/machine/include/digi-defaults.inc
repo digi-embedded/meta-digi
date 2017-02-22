@@ -45,7 +45,7 @@ P2P0_STATIC_NETMASK  ?= "255.255.255.0"
 IMAGE_CLASSES = "image_types_digi"
 
 # Do not enable console on VT (see sysvinit-inittab recipe)
-USE_VT = "0"
+USE_VT ?= "0"
 
 # Add the machine variant to the valid machine override
 MACHINE_VARIANT ?= ""

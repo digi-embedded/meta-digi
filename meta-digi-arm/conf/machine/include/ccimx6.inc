@@ -2,11 +2,11 @@
 #@NAME: ConnectCore 6 module.
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore 6 module.
 
+DIGI_FAMILY = "ccimx6"
+MACHINEOVERRIDES =. "mx6:mx6dl:mx6q:${DIGI_FAMILY}:"
+
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/tune-cortexa9.inc
-
-DIGI_FAMILY = "ccimx6"
-SOC_FAMILY  = "mx6:mx6dl:mx6q:${DIGI_FAMILY}"
 
 # Platform u-boot settings
 UBOOT_ENTRYPOINT = "0x10800000"
@@ -30,6 +30,6 @@ MACHINE_EXTRA_RDEPENDS += " \
     u-boot-fw-utils \
 "
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
-MACHINE_EXTRA_RRECOMMENDS += "fsl-alsa-plugins cryptodev-module rng-tools"
+MACHINE_EXTRA_RRECOMMENDS += "imx-alsa-plugins cryptodev-module rng-tools"
 
 MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth"
