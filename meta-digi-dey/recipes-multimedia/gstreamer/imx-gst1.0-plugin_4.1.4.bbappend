@@ -1,4 +1,4 @@
-# Copyright (C) 2016 Digi International
+# Copyright (C) 2016, 2017 Digi International
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
