@@ -10,7 +10,7 @@ MACHINE_GSTREAMER_1_0_EXTRA_INSTALL ?= ""
 MACHINE_GSTREAMER_1_0_EXTRA_INSTALL_mx6 ?= " \
     gstreamer1.0-plugins-bad-meta \
     gstreamer1.0-plugins-ugly-meta \
-    gstreamer1.0-rtsp-server-examples \
+    gstreamer1.0-rtsp-server-meta \
 "
 
 RDEPENDS_${PN} = " \
