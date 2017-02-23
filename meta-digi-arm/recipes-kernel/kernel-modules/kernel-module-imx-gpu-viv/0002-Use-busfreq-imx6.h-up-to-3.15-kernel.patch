@@ -12,7 +12,7 @@ Signed-off-by: Hector Palacios <hector.palacios@digi.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c b/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c
-index d08479fa43b7..4a9b72ce2297 100644
+index 0eae8262c2ce..f166680affa2 100644
 --- a/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c
 +++ b/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c
 @@ -74,7 +74,7 @@

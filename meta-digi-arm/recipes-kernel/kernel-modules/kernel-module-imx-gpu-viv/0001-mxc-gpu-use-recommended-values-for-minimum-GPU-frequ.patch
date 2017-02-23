@@ -18,7 +18,7 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  2 files changed, 13 insertions(+), 2 deletions(-)
 
 diff --git a/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/gc_hal_kernel_probe.c b/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/gc_hal_kernel_probe.c
-index 4a29f0e776e2..69a2d483b2cd 100644
+index 93a19d51303c..71c4ea3a33bd 100644
 --- a/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/gc_hal_kernel_probe.c
 +++ b/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/gc_hal_kernel_probe.c
 @@ -54,6 +54,7 @@
@@ -56,11 +56,11 @@ index 4a29f0e776e2..69a2d483b2cd 100644
  
      if (!ret)
 diff --git a/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c b/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c
-index a5473bb926a2..d08479fa43b7 100644
+index dc7c9769ab75..0eae8262c2ce 100644
 --- a/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c
 +++ b/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c
-@@ -108,7 +108,7 @@ extern int unregister_thermal_notifier(struct notifier_block *nb);
- #define UNREG_THERMAL_NOTIFIER(a) unregister_thermal_notifier(a);
+@@ -109,7 +109,7 @@ extern int unregister_thermal_notifier(struct notifier_block *nb);
+ #define gcdFSL_CONTIGUOUS_SIZE (4 << 20)
  #endif
  
 -static int initgpu3DMinClock = 1;
