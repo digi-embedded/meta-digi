@@ -5,13 +5,13 @@ software =
     images: (
         {
             filename = "##BOOTIMG_NAME##";
-            volume = "linux";
+            volume = "##BOOT_DEV##";
             type = "ubivol"
             sha256 = "@##BOOTIMG_NAME##";
         },
         {
             filename = "##ROOTIMG_NAME##";
-            volume = "rootfs";
+            volume = "##ROOTFS_DEV##";
             type = "ubivol"
             sha256 = "@##ROOTIMG_NAME##";
         }
