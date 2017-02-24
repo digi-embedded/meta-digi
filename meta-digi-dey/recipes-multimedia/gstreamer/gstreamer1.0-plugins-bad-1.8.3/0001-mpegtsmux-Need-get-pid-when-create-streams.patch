@@ -1,4 +1,4 @@
-From 315a61197dafe6df4ee6e81b1fff46b3696cc9c6 Mon Sep 17 00:00:00 2001
+From a3118c47585d98891454731f66e62d79fff153d9 Mon Sep 17 00:00:00 2001
 From: Song Bing <b06498@freescale.com>
 Date: Wed, 22 Apr 2015 18:06:35 +0800
 Subject: [PATCH] mpegtsmux: Need get pid when create streams.
@@ -11,15 +11,16 @@ https://bugzilla.gnome.org/show_bug.cgi?id=748288
 
 UpStream Status: Pending
 
+Signed-off-by: Lyon Wang <lyon.wang@freescale.com>
 ---
- gst/mpegtsmux/mpegtsmux.c |   15 +++++++++++++++
+ gst/mpegtsmux/mpegtsmux.c | 15 +++++++++++++++
  1 file changed, 15 insertions(+)
 
 diff --git a/gst/mpegtsmux/mpegtsmux.c b/gst/mpegtsmux/mpegtsmux.c
-index af246a2..c9918a8 100644
+index 4c68e3e95f96..d93374520e36 100644
 --- a/gst/mpegtsmux/mpegtsmux.c
 +++ b/gst/mpegtsmux/mpegtsmux.c
-@@ -769,6 +769,21 @@ mpegtsmux_create_streams (MpegTsMux * mux)
+@@ -833,6 +833,21 @@ mpegtsmux_create_streams (MpegTsMux * mux)
        } else {
          ts_data->prog_id = DEFAULT_PROG_ID;
        }
@@ -40,7 +41,4 @@ index af246a2..c9918a8 100644
 +      }
      }
  
-     ts_data->prog = mux->programs[ts_data->prog_id];
--- 
-1.7.9.5
-
+     ts_data->prog =

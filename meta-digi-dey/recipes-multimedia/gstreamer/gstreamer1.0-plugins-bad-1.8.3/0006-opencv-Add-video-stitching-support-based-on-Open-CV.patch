@@ -1,35 +1,35 @@
-From aa485cfba8a06f767498bf707175134629fe2377 Mon Sep 17 00:00:00 2001
+From 348adcf57d05bf396b457be2af3496d416a7c20b Mon Sep 17 00:00:00 2001
 From: Song Bing <b06498@freescale.com>
 Date: Mon, 1 Jun 2015 13:30:11 +0800
-Subject: [PATCH 2/2] opencv: Add video stitching support.
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Subject: [PATCH] opencv: Add video stitching support based on Open CV
 
-Add video stitching element.
-
-Upstream Status: Waiting for review.
+Add video stitching element based on Open CV.
 
 https://bugzilla.gnome.org/show_bug.cgi?id=751203
+
+Conflicts:
+	ext/opencv/Makefile.am
+
+Signed-off-by: Lyon Wang <lyon.wang@freescale.com>
 ---
- docs/plugins/Makefile.am         |    1 +
- ext/opencv/Makefile.am           |   12 +-
- ext/opencv/gstcvstitching.cpp    |  834 ++++++++++++++++++++++++++++++++++++++
- ext/opencv/gstcvstitching.h      |  130 ++++++
- ext/opencv/gstopencv.cpp         |    4 +
- ext/opencv/gstopencvaggregator.c |  708 ++++++++++++++++++++++++++++++++
- ext/opencv/gstopencvaggregator.h |  118 ++++++
- 7 files changed, 1806 insertions(+), 1 deletion(-)
+ docs/plugins/Makefile.am         |   1 +
+ ext/opencv/Makefile.am           |  14 +-
+ ext/opencv/gstcvstitching.cpp    | 834 +++++++++++++++++++++++++++++++++++++++
+ ext/opencv/gstcvstitching.h      | 130 ++++++
+ ext/opencv/gstopencv.cpp         |   4 +
+ ext/opencv/gstopencvaggregator.c | 705 +++++++++++++++++++++++++++++++++
+ ext/opencv/gstopencvaggregator.h | 118 ++++++
+ 7 files changed, 1804 insertions(+), 2 deletions(-)
  create mode 100644 ext/opencv/gstcvstitching.cpp
  create mode 100644 ext/opencv/gstcvstitching.h
  create mode 100644 ext/opencv/gstopencvaggregator.c
  create mode 100644 ext/opencv/gstopencvaggregator.h
 
 diff --git a/docs/plugins/Makefile.am b/docs/plugins/Makefile.am
-index b093bcf..77593ed 100644
+index 7607b558fd42..95f2661d0a42 100644
 --- a/docs/plugins/Makefile.am
 +++ b/docs/plugins/Makefile.am
-@@ -98,6 +98,7 @@ EXTRA_HFILES = \
+@@ -97,6 +97,7 @@ EXTRA_HFILES = \
  	$(top_srcdir)/ext/opencv/gstpyramidsegment.h \
  	$(top_srcdir)/ext/opencv/gsttemplatematch.h \
  	$(top_srcdir)/ext/opencv/gsttextoverlay.h \
@@ -38,10 +38,10 @@ index b093bcf..77593ed 100644
  	$(top_srcdir)/ext/rsvg/gstrsvgdec.h \
  	$(top_srcdir)/ext/rsvg/gstrsvgoverlay.h \
 diff --git a/ext/opencv/Makefile.am b/ext/opencv/Makefile.am
-index 3c3418e..38f67fd 100644
+index 0eee38c450d5..8cea91fda70f 100644
 --- a/ext/opencv/Makefile.am
 +++ b/ext/opencv/Makefile.am
-@@ -24,10 +24,15 @@ libgstopencv_la_SOURCES = gstopencv.cpp \
+@@ -24,11 +24,15 @@ libgstopencv_la_SOURCES = gstopencv.cpp \
  			gstsegmentation.cpp \
  			gstgrabcut.cpp \
  			gstdisparity.cpp \
@@ -50,21 +50,22 @@ index 3c3418e..38f67fd 100644
  			motioncells_wrapper.cpp \
  			MotionCells.cpp
  
--libgstopencv_la_CXXFLAGS = $(GST_PLUGINS_BASE_CFLAGS) $(GST_BASE_CFLAGS) $(GST_CXXFLAGS) $(OPENCV_CFLAGS)
-+libgstopencv_la_CXXFLAGS = $(GST_PLUGINS_BASE_CFLAGS) $(GST_BASE_CFLAGS) \
-+	$(GST_CXXFLAGS) $(OPENCV_CFLAGS) \
+-libgstopencv_la_CXXFLAGS = $(GST_PLUGINS_BASE_CFLAGS) $(GST_BASE_CFLAGS) $(GST_CXXFLAGS) $(OPENCV_CFLAGS) \
+-	-DGST_HAAR_CASCADES_DIR=\"$(pkgdatadir)/@GST_API_VERSION@/opencv_haarcascades\"
++libgstopencv_la_CXXFLAGS = $(GST_PLUGINS_BASE_CFLAGS) $(GST_BASE_CFLAGS)	$(GST_CXXFLAGS) $(OPENCV_CFLAGS) \
++	-DGST_HAAR_CASCADES_DIR=\"$(pkgdatadir)/@GST_API_VERSION@/opencv_haarcascades\" \
 +	-I$(top_srcdir)/gst-libs \
 +	-I$(top_builddir)/gst-libs
  
  # flags used to compile this facedetect
  # add other _CFLAGS and _LIBS as needed
-@@ -36,11 +41,14 @@ libgstopencv_la_CXXFLAGS = $(GST_PLUGINS_BASE_CFLAGS) $(GST_BASE_CFLAGS) $(GST_C
+@@ -37,10 +41,14 @@ libgstopencv_la_CXXFLAGS = $(GST_PLUGINS_BASE_CFLAGS) $(GST_BASE_CFLAGS) $(GST_C
  # OpenCV's define isn't good enough to avoid 'unused' gcc warnings (at v2.1.0)
  libgstopencv_la_CFLAGS = $(GST_PLUGINS_BASE_CFLAGS) $(GST_BASE_CFLAGS) \
  	$(GST_CFLAGS) $(OPENCV_CFLAGS) \
 +	-I$(top_srcdir)/gst-libs \
 +	-I$(top_builddir)/gst-libs \
- 	-DGST_HAAR_CASCADES_DIR=\"$(pkgdatadir)/@GST_API_VERSION@/opencv_haarcascades\" \
++	-DGST_HAAR_CASCADES_DIR=\"$(pkgdatadir)/@GST_API_VERSION@/opencv_haarcascades\" \
  	-DCV_INLINE="static inline" \
  	-DCV_NO_BACKWARD_COMPATIBILITY
  
@@ -84,7 +85,7 @@ index 3c3418e..38f67fd 100644
  		MotionCells.h
 diff --git a/ext/opencv/gstcvstitching.cpp b/ext/opencv/gstcvstitching.cpp
 new file mode 100644
-index 0000000..47105f7
+index 000000000000..47105f723594
 --- /dev/null
 +++ b/ext/opencv/gstcvstitching.cpp
 @@ -0,0 +1,834 @@
@@ -924,7 +925,7 @@ index 0000000..47105f7
 +}
 diff --git a/ext/opencv/gstcvstitching.h b/ext/opencv/gstcvstitching.h
 new file mode 100644
-index 0000000..ec955d0
+index 000000000000..ec955d063611
 --- /dev/null
 +++ b/ext/opencv/gstcvstitching.h
 @@ -0,0 +1,130 @@
@@ -1059,7 +1060,7 @@ index 0000000..ec955d0
 +G_END_DECLS
 +#endif /* __GST_CV_STITCHING_H__ */
 diff --git a/ext/opencv/gstopencv.cpp b/ext/opencv/gstopencv.cpp
-index 3184518..f01aa1d 100644
+index 4077ba6e2ca8..6ae73c46ec00 100644
 --- a/ext/opencv/gstopencv.cpp
 +++ b/ext/opencv/gstopencv.cpp
 @@ -42,6 +42,7 @@
@@ -1082,10 +1083,10 @@ index 3184518..f01aa1d 100644
  
 diff --git a/ext/opencv/gstopencvaggregator.c b/ext/opencv/gstopencvaggregator.c
 new file mode 100644
-index 0000000..3c69edf
+index 000000000000..8a813fc2d9ca
 --- /dev/null
 +++ b/ext/opencv/gstopencvaggregator.c
-@@ -0,0 +1,708 @@
+@@ -0,0 +1,705 @@
 +/*
 + * GStreamer
 + * Copyright (C) 2015 Song Bing <b06498@freescale.com>
@@ -1265,7 +1266,6 @@ index 0000000..3c69edf
 +  agg_class->stop = gst_opencv_aggregator_stop;
 +  agg_class->start = gst_opencv_aggregator_start;
 +
-+  videoaggregator_class->disable_frame_conversion = TRUE;
 +  videoaggregator_class->aggregate_frames =
 +      gst_opencv_aggregator_aggregate_frames;
 +  videoaggregator_class->get_output_buffer =
@@ -1695,11 +1695,9 @@ index 0000000..3c69edf
 +
 +      walk = g_list_next (walk);
 +
-+      GST_WARNING_OBJECT (aggregator, "sink pad caps:  %"
-+          GST_PTR_FORMAT, caps);
++      GST_WARNING_OBJECT (aggregator, "sink pad caps:  %" GST_PTR_FORMAT, caps);
 +      if (!gst_opencv_parse_iplimage_params_from_caps (caps, &in_width,
-+            &in_height, &in_depth, &in_channels,
-+              &in_err)) {
++              &in_height, &in_depth, &in_channels, &in_err)) {
 +        GST_WARNING_OBJECT (aggregator, "Failed to parse input caps: %s",
 +            in_err->message);
 +        g_error_free (in_err);
@@ -1796,7 +1794,7 @@ index 0000000..3c69edf
 +}
 diff --git a/ext/opencv/gstopencvaggregator.h b/ext/opencv/gstopencvaggregator.h
 new file mode 100644
-index 0000000..1fc65a5
+index 000000000000..1fc65a5a1783
 --- /dev/null
 +++ b/ext/opencv/gstopencvaggregator.h
 @@ -0,0 +1,118 @@
@@ -1918,6 +1916,3 @@ index 0000000..1fc65a5
 +
 +G_END_DECLS
 +#endif /* __GST_OPENCV_AGGREGATOR_H__ */
--- 
-1.7.9.5
-

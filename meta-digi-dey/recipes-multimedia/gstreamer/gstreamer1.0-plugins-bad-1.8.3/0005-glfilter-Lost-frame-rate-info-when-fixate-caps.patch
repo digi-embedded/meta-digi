@@ -1,4 +1,4 @@
-From 901e9e6fa16ed9558022f64bdc3cc6b8ac761c71 Mon Sep 17 00:00:00 2001
+From a4f0b87d5c4bbe1de5e7cf223d107afbae126110 Mon Sep 17 00:00:00 2001
 From: Song Bing <b06498@freescale.com>
 Date: Mon, 8 Jun 2015 17:06:22 +0800
 Subject: [PATCH] glfilter: Lost frame rate info when fixate caps
@@ -12,15 +12,16 @@ down stream element fail, such avimux.
 Upstream Status: Waiting for review.
 
 https://bugzilla.gnome.org/show_bug.cgi?id=750545
+Signed-off-by: Lyon Wang <lyon.wang@freescale.com>
 ---
- gst-libs/gst/gl/gstglfilter.c |   13 ++++++++++++-
+ gst-libs/gst/gl/gstglfilter.c | 13 ++++++++++++-
  1 file changed, 12 insertions(+), 1 deletion(-)
 
 diff --git a/gst-libs/gst/gl/gstglfilter.c b/gst-libs/gst/gl/gstglfilter.c
-index feff9de..d46e272 100644
+index d25bb72988f1..6840f4ca97a7 100644
 --- a/gst-libs/gst/gl/gstglfilter.c
 +++ b/gst-libs/gst/gl/gstglfilter.c
-@@ -356,7 +356,8 @@ gst_gl_filter_fixate_caps (GstBaseTransform * bt,
+@@ -247,7 +247,8 @@ gst_gl_filter_fixate_caps (GstBaseTransform * bt,
      GstPadDirection direction, GstCaps * caps, GstCaps * othercaps)
  {
    GstStructure *ins, *outs;
@@ -30,7 +31,7 @@ index feff9de..d46e272 100644
    GValue fpar = { 0, }, tpar = {
    0,};
  
-@@ -369,6 +370,16 @@ gst_gl_filter_fixate_caps (GstBaseTransform * bt,
+@@ -260,6 +261,16 @@ gst_gl_filter_fixate_caps (GstBaseTransform * bt,
    ins = gst_caps_get_structure (caps, 0);
    outs = gst_caps_get_structure (othercaps, 0);
  
@@ -47,6 +48,3 @@ index feff9de..d46e272 100644
    from_par = gst_structure_get_value (ins, "pixel-aspect-ratio");
    to_par = gst_structure_get_value (outs, "pixel-aspect-ratio");
  
--- 
-1.7.9.5
-
