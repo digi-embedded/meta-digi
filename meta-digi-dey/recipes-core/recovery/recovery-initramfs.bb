@@ -1,4 +1,4 @@
-# Copyright (C) 2016 Digi International.
+# Copyright (C) 2016, 2017 Digi International Inc.
 
 SUMMARY = "Recovery initramfs files"
 LICENSE = "GPL-2.0"
@@ -56,3 +56,7 @@ do_install() {
 PACKAGES = "${PN}"
 
 FILES_${PN} = "/"
+
+RDEPENDS_${PN}_append_ccimx6 = " \
+    cryptsetup \
+"

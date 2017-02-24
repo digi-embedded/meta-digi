@@ -415,11 +415,19 @@ if [ -n "${encryption_key_bool}" ]; then
 	psplash_progress "0"
 	trustfence-tool "--newkey${encryption_key:+=${encryption_key}}"
 	if [ "$?" = "0" ]; then
-		psplash_progress "100"
+		psplash_progress "10"
 		log "Trustfence encryption key setup succeed!"
 	else
 		quit_with_error "Error configuring trustfence encryption key"
 	fi
+
+	# Format partition.
+	if [ "$(is_nand)" = "no" ]; then
+		psplash_message "Formatting rootfs partition..."
+		rootfs_block="/dev/mmcblk0p$(parted -s /dev/mmcblk0 print | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<rootfs\>.*,\1,g;T;p")"
+		trustfence-tool --format ${rootfs_block} cryptroot
+	fi
+	psplash_progress "100"
 fi
 
 # Check if update package command is configured.
@@ -432,6 +440,7 @@ if [ -n "${update_package_bool}" ]; then
 	else
 		# Give some time for the devices to settle down
 		sleep 5
+
 		mount_external_disks
 		mount_partition update "${UPDATE_MOUNT_DIR}"
 
