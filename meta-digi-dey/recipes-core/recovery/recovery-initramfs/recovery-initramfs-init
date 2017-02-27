@@ -3,7 +3,7 @@
 #
 #  recovery-initramfs-init
 #
-#  Copyright (C) 2016 by Digi International Inc.
+#  Copyright (C) 2016, 2017 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -408,17 +408,11 @@ for arg in ${COMMAND}; do
 	esac
 done
 
-# Check if wipe update patition command is configured.
-if [ -n "${wipe_update_bool}" ]; then
-	log "Wipe 'update' partition requested"
-	psplash_message "Erasing update partition..."
-	format_partition update
-fi
-
 # Check if encryption key command is configured.
 if [ -n "${encryption_key_bool}" ]; then
 	log "Trustfence encryption key setup requested (new key: ${encryption_key:-random})"
 	psplash_message "Configuring new encryption key..."
+	psplash_progress "0"
 	trustfence-tool "--newkey${encryption_key:+=${encryption_key}}"
 	if [ "$?" = "0" ]; then
 		psplash_progress "100"
@@ -432,6 +426,7 @@ fi
 if [ -n "${update_package_bool}" ]; then
 	log "Firmware update requested"
 	psplash_message "Updating firmware..."
+	psplash_progress "0"
 	if [ -z "${update_package}" ]; then
 		quit_with_error "Firmware update package not specified"
 	else
@@ -460,6 +455,14 @@ if [ -n "${update_package_bool}" ]; then
 			quit_with_error "Error executing the firmware update"
 		fi
 	fi
+fi
+
+# Check if wipe update patition command is configured.
+if [ -n "${wipe_update_bool}" ]; then
+	log "Wipe 'update' partition requested"
+	psplash_message "Erasing update partition..."
+	psplash_progress "0"
+	format_partition update
 fi
 
 # End the recovery process.
