@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013-2017, Digi International Inc.
 #
 SUMMARY = "QT packagegroup for DEY image"
 
@@ -9,7 +9,7 @@ inherit packagegroup
 MACHINE_QT5_EXTRA_INSTALL ?= ""
 MACHINE_QT5_EXTRA_INSTALL_ccimx6 ?= "qtwebengine-examples"
 
-QT5_PKS = "qtbase-fonts qtserialport"
+QT5_PKS = "qtserialport"
 QT5_PKS_append_ccimx6 = " qtdeclarative-tools"
 
 QT5_EXAMPLES = "qtbase-examples"
