@@ -253,6 +253,10 @@ for platform in ${DY_PLATFORMS}; do
 				if [ "${DY_FB_IMAGE}" = "true" ]; then
 					printf "${X11_REMOVAL_CFG}" >> conf/local.conf
 				fi
+				# Append extra configuration macros if provided from build environment
+				if [ -n "${DY_EXTRA_LOCAL_CONF}" ]; then
+					printf "%s\n" "${DY_EXTRA_LOCAL_CONF}" >> conf/local.conf
+				fi
 				# Add the manufacturing layer to bblayers.conf file if it is a manufacturing job
 				if [ "${DY_MFG_IMAGE}" = "true" ]; then
 					sed -i -e "/meta-digi-dey/a\  ${YOCTO_INST_DIR}/sources/meta-digi-mfg \\\\" conf/bblayers.conf
