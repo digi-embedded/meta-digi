@@ -88,6 +88,18 @@ read_uboot_var() {
 }
 
 #------------------------------------------------------------------------------
+# Function - set_uboot_var
+#
+# Sets the given U-Boot variable.
+#
+# @param ${1}  - U-Boot variable to set.
+# @param ${2}  - Value to set.
+#------------------------------------------------------------------------------
+set_uboot_var() {
+	fw_setenv ${1} ${2} 2>/dev/null
+}
+
+#------------------------------------------------------------------------------
 # Function - psplash_message
 #
 # Shows the given message in the psplash screen.
@@ -280,8 +292,10 @@ format_ubi_volume() {
 		ubimkvol "/dev/ubi${dev_number}" -m -N "${1}" >/dev/null 2>&1
 		if [ "$?" = "0" ]; then
 			# Configure the empty UBIFS partition to use ZLIB
+			[ "${1}" = "update" ] && UBIFS_COMPRESSION="-x zlib"
+
 			volid="$(ubinfo "/dev/ubi${dev_number}" -N "${1}" | sed -ne 's,Volume ID:[[:blank:]]\+\([0-9]\+\)[[:blank:]]\+.*,\1,g;T;p')"
-			mkfs.ubifs -x zlib -F /dev/ubi${dev_number}_${volid}
+			mkfs.ubifs ${UBIFS_COMPRESSION} -F /dev/ubi${dev_number}_${volid}
 			psplash_progress "100"
 			log "Partition '${1}' successfully erased!"
 			# Detach MTD partition.
@@ -340,6 +354,48 @@ swu_package_path() {
 		echo "${swu_abspath}"
 	else
 		quit_with_error "Unable to find update package '${1}'"
+	fi
+}
+
+#------------------------------------------------------------------------------
+# Function - set_encryption_flag
+#
+# Set the rootfs encryption flag to the mtdparts variable.
+#------------------------------------------------------------------------------
+set_encryption_flag() {
+	if [ "$(is_nand)" = "no" ]; then
+		return
+	fi
+
+	# Read the mtdparts variable.
+	read_uboot_var mtdparts mtdparts
+
+	# Check if there is any command.
+	if [ -z "${mtdparts}" ]; then
+		quit_with_error "No mtdparts found"
+	fi
+
+	# Parse the mtdparts value.
+	case "${mtdparts}" in
+		*\(rootfs\)enc*)
+			# Partition already flagged.
+			;;
+		*\(rootfs\)*)
+			# Add the flag to the rootfs.
+			local new_mtdparts=$(echo "${mtdparts}" | sed "s/(rootfs)/(rootfs)enc/g")
+			set_uboot_var mtdparts "${new_mtdparts}"
+			;;
+		*)
+			quit_with_error "Error flagging rootfs as encrypted"
+			;;
+	esac
+
+	if [ -n "${update_package_bool}" ]; then
+		# Modify the recovery command not to set again the key.
+		new_command=$(echo "${COMMAND}" | sed "s/encryption_key=[^ ]*//g")
+		set_uboot_var "${ENV_RECOVERY_COMMAND}" "${new_command}"
+		psplash_progress "100"
+		reboot_system
 	fi
 }
 
@@ -421,6 +477,9 @@ if [ -n "${encryption_key_bool}" ]; then
 		quit_with_error "Error configuring trustfence encryption key"
 	fi
 
+	# Set the encryption flag to the rootfs.
+	set_encryption_flag
+
 	# Format partition.
 	if [ "$(is_nand)" = "no" ]; then
 		psplash_message "Formatting rootfs partition..."
@@ -440,6 +499,13 @@ if [ -n "${update_package_bool}" ]; then
 	else
 		# Give some time for the devices to settle down
 		sleep 5
+
+		# Format the UBI volume before updating.
+		if [ "$(is_nand)" = "yes" ]; then
+			psplash_message "Formatting rootfs partition..."
+			format_ubi_volume rootfs
+			psplash_progress "0"
+		fi
 
 		mount_external_disks
 		mount_partition update "${UPDATE_MOUNT_DIR}"
