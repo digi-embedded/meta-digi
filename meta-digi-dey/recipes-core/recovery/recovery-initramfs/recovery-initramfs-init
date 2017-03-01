@@ -21,6 +21,7 @@ ENV_BOOT_RECOVERY="boot_recovery"
 ENV_RECOVERY_COMMAND="recovery_command"
 
 SW_CONFIG="/etc/swupdate.cfg"
+PUBLIC_KEY="/etc/ssl/certs/key.pub"
 
 USB_MOUNT_DIR="/run/media"
 UPDATE_MOUNT_DIR="/mnt/update"
@@ -448,7 +449,11 @@ if [ -n "${update_package_bool}" ]; then
 		# Execute the progress binary.
 		progress -wp &
 		# Execute the software update.
-		swupdate -f "${SW_CONFIG}" -i "${update_package}"
+		if [ -f "${PUBLIC_KEY}" ]; then
+			swupdate -f "${SW_CONFIG}" -i "${update_package}" -k "${PUBLIC_KEY}"
+		else
+			swupdate -f "${SW_CONFIG}" -i "${update_package}"
+		fi
 		if [ "$?" = "0" ]; then
 			log "Firmware update process succeed!"
 		else
