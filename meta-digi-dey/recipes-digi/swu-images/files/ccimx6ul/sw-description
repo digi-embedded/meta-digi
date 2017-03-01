@@ -16,4 +16,5 @@ software =
             sha256 = "@##ROOTIMG_NAME##";
         }
     );
+    ##PREINSTALL_SCRIPT##
 }
