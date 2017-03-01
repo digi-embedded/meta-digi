@@ -40,28 +40,28 @@ python () {
     if (d.getVar("TRUSTFENCE_CONSOLE_DISABLE", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_CONSOLE_DISABLE=y ")
         if d.getVar("TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE", True):
-            passphrase_hash = hashlib.sha256(d.getVar("TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE")).hexdigest()
+            passphrase_hash = hashlib.sha256(d.getVar("TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE", True)).hexdigest()
             d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_CONSOLE_ENABLE_PASSPHRASE=y CONFIG_CONSOLE_ENABLE_PASSPHRASE_KEY=\\"%s\\" ' % passphrase_hash)
         elif d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE", True):
-            d.appendVar("UBOOT_EXTRA_CONF", " CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NR=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"))
+            d.appendVar("UBOOT_EXTRA_CONF", " CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NR=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE", True))
 
     # Secure boot configuration
-    if (d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") == "default"):
-        d.setVar("TRUSTFENCE_SIGN_KEYS_PATH", d.getVar("TOPDIR") + "/trustfence");
+    if (d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True) == "default"):
+        d.setVar("TRUSTFENCE_SIGN_KEYS_PATH", d.getVar("TOPDIR", True) + "/trustfence");
 
-    if (d.getVar("TRUSTFENCE_DEK_PATH") == "default"):
-        d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/dek.bin");
+    if (d.getVar("TRUSTFENCE_DEK_PATH", True) == "default"):
+        d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True) + "/dek.bin");
 
     if (d.getVar("TRUSTFENCE_SIGN", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_SIGN_IMAGE=y ")
         if d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True):
-            d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_SIGN_KEYS_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"))
+            d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_SIGN_KEYS_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True))
         if (d.getVar("TRUSTFENCE_UNLOCK_KEY_REVOCATION", True) == "1"):
             d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_UNLOCK_SRK_REVOKE=y ")
         if d.getVar("TRUSTFENCE_KEY_INDEX", True):
-            d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_KEY_INDEX=%s " % d.getVar("TRUSTFENCE_KEY_INDEX"))
+            d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_KEY_INDEX=%s " % d.getVar("TRUSTFENCE_KEY_INDEX", True))
         if (d.getVar("TRUSTFENCE_DEK_PATH", True) not in [None, "0"]):
-            d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_DEK_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_DEK_PATH"))
+            d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_DEK_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_DEK_PATH", True))
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y')
 }
