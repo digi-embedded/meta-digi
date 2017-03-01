@@ -1,4 +1,4 @@
-# Copyright (C) 2016 Digi International.
+# Copyright (C) 2016-2017, Digi International Inc.
 
 DESCRIPTION = "Recovery initramfs image"
 LICENSE = "MIT"
@@ -20,7 +20,10 @@ PACKAGE_INSTALL_append_ccimx6ul = " mtd-utils-ubifs"
 IMAGE_FEATURES = ""
 IMAGE_LINGUAS = ""
 
-IMAGE_FSTYPES = "cpio.gz.u-boot.tf"
+python() {
+    d.setVar('IMAGE_FSTYPES', 'cpio.gz.u-boot.tf')
+}
+
 inherit core-image image_types_uboot
 
 IMAGE_ROOTFS_SIZE = "8192"
