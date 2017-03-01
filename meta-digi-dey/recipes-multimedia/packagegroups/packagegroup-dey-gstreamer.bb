@@ -7,7 +7,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
 MACHINE_GSTREAMER_1_0_EXTRA_INSTALL ?= ""
-MACHINE_GSTREAMER_1_0_EXTRA_INSTALL_mx6 ?= " \
+MACHINE_GSTREAMER_1_0_EXTRA_INSTALL_ccimx6 ?= " \
     gstreamer1.0-plugins-bad-meta \
     gstreamer1.0-plugins-ugly-meta \
     gstreamer1.0-rtsp-server-meta \
