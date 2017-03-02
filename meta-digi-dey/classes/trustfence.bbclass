@@ -35,6 +35,7 @@ python () {
     import binascii
     import hashlib
     import os
+    import glob
 
     # Secure console configuration
     if (d.getVar("TRUSTFENCE_CONSOLE_DISABLE", True) == "1"):
@@ -64,4 +65,24 @@ python () {
             d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_DEK_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_DEK_PATH", True))
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y')
+
+    # Provide sane default values for SWUPDATE class in case Trustfence is enabled
+    if (d.getVar("TRUSTFENCE_SIGN", True) == "1"):
+        # Enable package signing.
+        d.setVar("SWUPDATE_SIGNING", "1")
+
+        # Retrieve the keys path to use.
+        keys_path = d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True)
+
+        # Retrieve the key index to use.
+        key_index = 0
+        if (d.getVar("TRUSTFENCE_KEY_INDEX", True)):
+            key_index = int(d.getVar("TRUSTFENCE_KEY_INDEX", True))
+        key_index_1 = key_index + 1
+
+        # Set the private key.
+        d.setVar("SWUPDATE_PRIVATE_KEY", glob.glob(keys_path + "/keys/IMG" + str(key_index_1) + "*key.pem")[0])
+
+        # Set the key password.
+        d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
 }

@@ -7,11 +7,13 @@ software =
             filename = "##BOOTIMG_NAME##";
             volume = "linux";
             type = "ubivol"
+            sha256 = "@##BOOTIMG_NAME##";
         },
         {
             filename = "##ROOTIMG_NAME##";
             volume = "rootfs";
             type = "ubivol"
+            sha256 = "@##ROOTIMG_NAME##";
         }
     );
 }

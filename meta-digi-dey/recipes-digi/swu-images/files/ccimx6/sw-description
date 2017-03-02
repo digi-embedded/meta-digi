@@ -7,11 +7,13 @@ software =
             filename = "##BOOTIMG_NAME##";
             device = "/dev/mmcblk0p1";
             type = "raw";
+            sha256 = "@##BOOTIMG_NAME##";
         },
         {
             filename = "##ROOTIMG_NAME##";
             device = "/dev/mmcblk0p3";
             type = "raw";
+            sha256 = "@##ROOTIMG_NAME##";
         }
     );
 }
