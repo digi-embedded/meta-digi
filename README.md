@@ -186,3 +186,10 @@ For support questions please contact Digi Technical Support:
 * [Enterprise Support](https://mydigi.secure.force.com/customers/)
 * [Product Technical Support](http://www.digi.com/support/product-support)
 * [Support forum](http://www.digi.com/support/forum/)
+
+When you contact Digi Technical Support, include important system details and
+device information to help Digi resolve the issue more quickly.
+
+1. In the device, run the command 'sysinfo'. This generates the following file:
+   /tmp/<current timestamp>.txt.gz.
+2. Attach the <current timestamp>.txt.gz file to your support ticket.
