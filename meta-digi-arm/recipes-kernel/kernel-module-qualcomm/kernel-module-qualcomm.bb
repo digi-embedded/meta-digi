@@ -1,44 +1,26 @@
-# Copyright (C) 2016 Digi International.
+# Copyright (C) 2016,2017 Digi International.
 
 SUMMARY = "Qualcomm's wireless driver for qca6564"
-DESCRIPTION = "qcacld-2.0 module.bbclass mechanism."
+DESCRIPTION = "qcacld-2.0 module"
 LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
 
-CAF_MIRROR = "git://codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/qcacld-2.0"
-PV = "v4.2.79.63"
-SRCBRANCH = "caf-wlan/QCA6564_LE_1.0.3_LA.4.2.2.3"
-SRCREV = "b0ae2aa45bbba54600b537e90cb1aca34f2d1a13"
+PV = "v4.2.80.63"
+SRCBRANCH = "dey-2.2/master"
 
-SRC_URI = " \
-    ${CAF_MIRROR};destsuffix=${PV};branch=${SRCBRANCH} \
+SRCREV_external = ""
+SRCREV_internal = "${AUTOREV}"
+SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
+
+SRC_URI_external = "${DIGI_GITHUB_GIT}/qcacld-2.0.git;protocol=git;nobranch=1"
+SRC_URI_internal = "${DIGI_MTK_GIT}linux/qcacld-2.0.git;protocol=ssh;branch=${SRCBRANCH}"
+SRC_URI  = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
+SRC_URI += " \
     file://qualcomm-pre-up \
     file://modprobe-qualcomm.conf \
-    file://0001-qcacld-Fix-compiling-errors-when-BUILD_DEBUG_VERSION.patch \
-    file://0002-Update-cfg80211_vendor_event_alloc-call-for-newer-ke.patch \
-    file://0003-wlan_hdd_main-Update-cfg80211_ap_stopped-to-nl80211_.patch \
-    file://0004-qcacld-2.0-remove-unused-code.patch \
-    file://0005-Including-header-file-for-regulatory_hint_user.patch \
-    file://0006-Updating-calls-to-alloc_netdev_mq.patch \
-    file://0007-wlan_hdd_cfg80211-update-cfg80211_inform_bss-params-.patch \
-    file://0008-wlan_hdd_p2p-Update-call-to-cfg80211_rx_mgmt-for-dif.patch \
-    file://0009-linux_ac-Fix-for-f_dentry.patch \
-    file://0010-native_sdio-src-hif-Do-not-call-to-HIGH-SPEED-functi.patch \
-    file://0011-osdep_adf.h-fix-for-undefined-ath_sysctl_pktlog_size.patch \
-    file://0012-Kbuild-Add-compilation-flag-based-on-kernel-support.patch \
-    file://0013-Kbuild-do-not-compile-the-DEBUG-version-inconditiona.patch \
-    file://0014-Kbuild-Group-most-of-the-relevant-DEBUG-options.patch \
-    file://0015-wlan_hdd_cfg80211-fix-missing-ifdef-clause.patch \
-    file://0016-Add-.gitignore-rules.patch \
-    file://0017-wlan_hdd_main-initialize-all-adapter-completion-vari.patch \
-    file://0018-qcacld-Indicate-disconnect-event-to-upper-layers.patch \
-    file://0019-wdd_hdd_main-Print-con_mode-to-clearly-see-if-in-FTM.patch \
-    file://0020-Makefile-Pass-BUILD_DEBUG_VERSION-to-kbuild-system.patch \
-    file://0021-cosmetic-change-log-level.patch \
-    file://0022-fix-issue-with-_scan_callback.patch \
 "
 
-S = "${WORKDIR}/${PV}"
+S = "${WORKDIR}/git"
 
 inherit module
 
