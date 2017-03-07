@@ -16,6 +16,9 @@ UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 WIRELESS_MODULE ?= ""
 WIRELESS_MODULE_append = " ${@base_conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
 
+# Wireless p2p interface
+WLAN_P2P_INTERFACE ?= "p2p0"
+
 # Firmware
 MACHINE_FIRMWARE ?= ""
 
