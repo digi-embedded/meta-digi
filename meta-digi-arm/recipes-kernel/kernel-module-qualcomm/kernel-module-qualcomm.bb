@@ -36,6 +36,7 @@ SRC_URI = " \
     file://0020-Makefile-Pass-BUILD_DEBUG_VERSION-to-kbuild-system.patch \
     file://0021-cosmetic-change-log-level.patch \
     file://0022-fix-issue-with-_scan_callback.patch \
+    file://0023-on-stop-cancel-scan-requests.patch \
 "
 
 S = "${WORKDIR}/${PV}"

@@ -1,0 +1,62 @@
+From: Pedro Perez de Heredia <pedro.perez@digi.com>
+Date: Tue, 7 Mar 2017 22:15:02 +0100
+Subject: [PATCH 1/1] [PATCH] qcacld: when closing the adapter, cancel pending
+ scan requests
+
+Call cfg80211_scan_done() when closing the adapter to avoid kernel ops
+if the scan callback is called when part of the resources have been
+already freed.
+
+https://jira.digi.com/browse/DEL-3607
+https://jira.digi.com/browse/DEL-3393
+
+Signed-off-by: Pedro Perez de Heredia <pedro.perez@digi.com>
+---
+ CORE/HDD/src/wlan_hdd_main.c | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+
+diff --git a/CORE/HDD/src/wlan_hdd_main.c b/CORE/HDD/src/wlan_hdd_main.c
+index d836027..c0a3153 100755
+--- a/CORE/HDD/src/wlan_hdd_main.c
++++ b/CORE/HDD/src/wlan_hdd_main.c
+@@ -7820,6 +7820,29 @@ int hdd_mon_open (struct net_device *dev)
+
+    return 0;
+ }
++
++
++/**---------------------------------------------------------------------------
++
++  \brief hdd_cfg80211_cancel_scan() - HDD Cancel scan request in cfg80211
++
++  To be called when the interface is being closed.
++
++  \param  - pAdapter Pointer to hdd_adapter_t structure
++
++  --------------------------------------------------------------------------*/
++void hdd_cfg80211_cancel_scan (hdd_adapter_t *pAdapter)
++{
++   unsigned long flags;
++
++   spin_lock_irqsave(&hdd_context_lock, flags);
++   if (pAdapter->request) {
++      cfg80211_scan_done(pAdapter->request, true);
++      pAdapter->request = NULL;
++   }
++   spin_unlock_irqrestore(&hdd_context_lock, flags);
++}
++
+ /**---------------------------------------------------------------------------
+
+   \brief hdd_stop() - HDD stop function
+@@ -7862,6 +7885,10 @@ int hdd_stop (struct net_device *dev)
+
+    /* Make sure the interface is marked as closed */
+    clear_bit(DEVICE_IFACE_OPENED, &pAdapter->event_flags);
++
++   /* Cancel any pending scan request */
++   hdd_cfg80211_cancel_scan(pAdapter);
++
+    hddLog(VOS_TRACE_LEVEL_INFO, "%s: Disabling OS Tx queues", __func__);
+
+    /* Disable TX on the interface, after this hard_start_xmit() will not
