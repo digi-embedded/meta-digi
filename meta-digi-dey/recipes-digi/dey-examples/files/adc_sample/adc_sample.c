@@ -35,7 +35,7 @@
 	"Usage:\n"							\
 	"adc_sample -t ADC_type -c channel [options]\n\n"		\
 	"Options:\n"							\
-	"  -t : ADC_type ('MX6UL', 'MCA')\n"				\
+	"  -t : ADC_type ('MX6UL', 'MCA', 'IOEXP')\n"			\
 	"  -c : channel number to read from\n"				\
 	"  -n : Number of samples (default: 1)\n"			\
 	"  -d : Delay (in ms) between samples (default: 1000)\n"	\
@@ -45,7 +45,8 @@
 enum adc_type {
 	ADC_TYPE_UNKNOWN,
 	ADC_TYPE_MX6UL,
-	ADC_TYPE_MCA
+	ADC_TYPE_MCA,
+	ADC_TYPE_IOEXP,
 };
 
 struct adc_data {
@@ -61,12 +62,19 @@ struct adc_data adc_list[] = {
 		.name 		= "MX6UL",
 		.dev_name 	= "2198000.adc",
 		.nbits 		= 12,
-	}, {
+	},
+	{
 		.type 		= ADC_TYPE_MCA,
 		.name 		= "MCA",
 		.dev_name 	= "mca-cc6ul-adc",
 		.nbits 		= 12,
-	}
+	},
+	{
+		.type 		= ADC_TYPE_IOEXP,
+		.name 		= "IOEXP",
+		.dev_name 	= "mca-ioexp-adc",
+		.nbits 		= 12,
+	},
 };
 
 typedef struct adc {
