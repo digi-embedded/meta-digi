@@ -3,7 +3,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
 SRC_URI += " \
-    file://bluez-init \
+    file://bluetooth-init \
     file://0001-hcitool-do-not-show-unsupported-refresh-option.patch \
     file://0002-hcitool-increase-the-shown-connection-limit-to-20.patch \
 "
@@ -37,10 +37,14 @@ PACKAGECONFIG_append = " experimental"
 
 do_install_append() {
 	install -d ${D}${sysconfdir}/init.d/
-	install -m 0755 ${WORKDIR}/bluez-init ${D}${sysconfdir}/init.d/bluez
+	install -m 0755 ${WORKDIR}/bluetooth-init ${D}${sysconfdir}/init.d/bluetooth-init
 }
 
-INITSCRIPT_NAME = "bluez"
-INITSCRIPT_PARAMS = "start 10 5 ."
+PACKAGES =+ "${PN}-init"
+
+FILES_${PN}-init = "${sysconfdir}/init.d/bluetooth-init"
+
+INITSCRIPT_PACKAGES += "${PN}-init"
+INITSCRIPT_NAME_${PN}-init = "bluetooth-init"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

@@ -6,9 +6,12 @@ SUMMARY = "Bluetooth packagegroup for DEY image"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup bluetooth
 
+MACHINE_BLUETOOTH_EXTRA_INSTALL ?= "${@bb.utils.contains('BLUEZ', 'bluez5', 'bluez5-init', '', d)}"
+
 RDEPENDS_${PN} = " \
-	${BLUEZ} \
-	${BLUEZ}-testtools \
-	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "libasound-module-bluez", "", d)} \
-	${@bb.utils.contains("BLUEZ", "bluez5", "bluez5-noinst-tools bluez5-obex", "", d)} \
+    ${BLUEZ} \
+    ${BLUEZ}-testtools \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'bluetooth', 'libasound-module-bluez', '', d)} \
+    ${@bb.utils.contains('BLUEZ', 'bluez5', 'bluez5-noinst-tools bluez5-obex', '', d)} \
+    ${MACHINE_BLUETOOTH_EXTRA_INSTALL} \
 "
