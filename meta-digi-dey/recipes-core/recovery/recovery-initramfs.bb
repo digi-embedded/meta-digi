@@ -59,4 +59,5 @@ FILES_${PN} = "/"
 
 RDEPENDS_${PN}_append_ccimx6 = " \
     cryptsetup \
+    rng-tools \
 "
