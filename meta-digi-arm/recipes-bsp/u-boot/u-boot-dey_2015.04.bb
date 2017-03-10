@@ -24,7 +24,6 @@ SRC_URI = " \
 SRC_URI_append = " \
     file://boot.txt \
     file://install_linux_fw_sd.txt \
-    file://recovery.txt \
 "
 
 LOCALVERSION ?= ""
@@ -102,7 +101,7 @@ TF_BOOTSCRIPT_SEDFILTER_ccimx6ul = "${@tf_bootscript_sedfilter(d)}"
 
 def tf_bootscript_sedfilter(d):
     tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
-    return "/^dboot linux/i\setenv boot_initrd true\\nsetenv initrd_file %s-${MACHINE}.cpio.gz.u-boot.tf" % tf_initramfs if tf_initramfs else ""
+    return "s,\(^[[:blank:]]*\)true.*,\\1setenv boot_initrd true\\n\\1setenv initrd_file %s-${MACHINE}.cpio.gz.u-boot.tf,g" % tf_initramfs if tf_initramfs else ""
 
 do_deploy_append() {
 	# Remove canonical U-Boot symlinks for ${UBOOT_CONFIG} currently in the form:
@@ -152,9 +151,6 @@ do_deploy_append() {
 	sed -e "${TF_BOOTSCRIPT_SEDFILTER}" ${WORKDIR}/boot.txt > ${TMP_BOOTSCR}
 	mkimage -T script -n bootscript -C none -d ${TMP_BOOTSCR} ${DEPLOYDIR}/boot.scr
 
-	# Recovery boot script for DEY images
-	mkimage -T script -n bootscript -C none -d ${WORKDIR}/recovery.txt ${DEPLOYDIR}/recovery.scr
-
 	# Sign the scripts
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
@@ -165,10 +161,6 @@ do_deploy_append() {
 		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
 		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
 		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
-
-		# Sign recovery script
-		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/recovery.scr" "${TMP_SIGNED_BOOTSCR}"
-		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/recovery.scr"
 	fi
 	rm -f ${TMP_BOOTSCR}
 }

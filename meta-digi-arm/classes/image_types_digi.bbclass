@@ -138,8 +138,7 @@ IMAGE_CMD_recovery.vfat() {
 	# Use 'boot.vfat' image as base
 	cp --remove-destination ${IMGDEPLOYDIR}/${IMAGE_NAME}.boot.vfat ${IMGDEPLOYDIR}/${IMAGE_NAME}.recovery.vfat
 
-	# Copy the recovery U-Boot script and recovery initramfs into the VFAT image
-	mcopy -o -i ${IMGDEPLOYDIR}/${IMAGE_NAME}.recovery.vfat -s ${DEPLOY_DIR_IMAGE}/recovery.scr ::/boot.scr
+	# Copy the recovery initramfs into the VFAT image
 	mcopy -i ${IMGDEPLOYDIR}/${IMAGE_NAME}.recovery.vfat -s ${DEPLOY_DIR_IMAGE}/${RECOVERY_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf ::/uramdisk-recovery.img
 }
 
@@ -174,8 +173,14 @@ IMAGE_CMD_recovery.ubifs() {
 		ln ${orig} ${TMP_RECOVERYDIR}/$(basename ${item})
 	done
 
-	# Copy the recovery U-Boot script and recovery initramfs into the temporary folder
-	cp ${DEPLOY_DIR_IMAGE}/recovery.scr ${TMP_RECOVERYDIR}/boot.scr
+	# Hard-link boot scripts into the temporary folder
+	for item in ${BOOT_SCRIPTS}; do
+		src="$(echo ${item} | awk -F':' '{ print $1 }')"
+		dst="$(echo ${item} | awk -F':' '{ print $2 }')"
+		ln ${DEPLOY_DIR_IMAGE}/${src} ${TMP_RECOVERYDIR}/${dst}
+	done
+
+	# Copy the recovery initramfs into the temporary folder
 	cp ${DEPLOY_DIR_IMAGE}/${RECOVERY_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf ${TMP_RECOVERYDIR}/uramdisk-recovery.img
 
 	# Build UBIFS recovery image out of temp folder

@@ -20,4 +20,10 @@ else
 	fi
 fi
 
-dboot linux nand
+if test "${mtdbootpart}" = "recovery"; then
+	setenv boot_initrd true
+	setenv initrd_file uramdisk-recovery.img
+else
+	true
+fi
+dboot linux nand ${mtdbootpart}

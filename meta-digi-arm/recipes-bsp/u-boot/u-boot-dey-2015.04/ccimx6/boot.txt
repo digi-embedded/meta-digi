@@ -44,10 +44,18 @@ else
 	fi
 fi
 
-# To detect if we are booting from SD card we get the UUID of the
-# boot partition and compare with the default one for the EMMC
+# Get the UUID of the configured boot partition.
 part uuid mmc ${mmcbootdev}:${mmcpart} bootpart
-if test "${bootpart}" != "${part1_uuid}"; then
+# Check the boot source.
+if test "${bootpart}" = "${part1_uuid}"; then
+	# We are booting from the eMMC using 'linux'.
+	true
+elif test "${bootpart}" = "${part2_uuid}"; then
+	# We are booting from the eMMC using 'recovery'.
+	setenv boot_initrd true
+	setenv initrd_file uramdisk-recovery.img
+else
+	# We are booting from the SD card.
 	setenv mmcroot /dev/mmcblk${mmcbootdev}p2
 fi
 dboot linux mmc ${mmcbootdev}:${mmcpart}
