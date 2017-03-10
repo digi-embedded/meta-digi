@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "DEY examples: RTC test application"
 SECTION = "examples"
@@ -10,7 +10,7 @@ SRC_URI = "file://rtc_test"
 S = "${WORKDIR}/rtc_test"
 
 do_compile() {
-	${CC} -O2 -Wall rtc_test.c -o rtc_test
+	${CC} -O2 -Wall ${LDFLAGS} rtc_test.c -o rtc_test
 }
 
 do_install() {

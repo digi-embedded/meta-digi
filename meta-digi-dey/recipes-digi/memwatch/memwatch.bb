@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "Digi's memory access utility"
 SECTION = "base"
@@ -11,7 +11,7 @@ SRC_URI = "file://memwatch.c \
 S = "${WORKDIR}"
 
 do_compile() {
-	${CC} -O2 -Wall -o memwatch memwatch.c
+	${CC} -O2 -Wall ${LDFLAGS} -o memwatch memwatch.c
 }
 
 do_install() {

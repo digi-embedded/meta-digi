@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "DEY examples: CAN bus test application"
 SECTION = "examples"
@@ -10,7 +10,7 @@ SRC_URI = "file://can_test"
 S = "${WORKDIR}/can_test"
 
 do_compile() {
-	${CC} -O2 -Wall can_test.c -o can_test -pthread
+	${CC} -O2 -Wall ${LDFLAGS} can_test.c -o can_test -pthread
 }
 
 do_install() {

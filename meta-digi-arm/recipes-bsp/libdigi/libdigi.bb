@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "Digi's utilities library"
 SECTION = "libs"
@@ -22,11 +22,11 @@ SRC_URI = " \
 S = "${WORKDIR}"
 
 do_compile() {
-	${CC} -O2 -Wall -c -o log.o log.c
-	${CC} -O2 -Wall -c -o cmdopt.o cmdopt.c
-	${CC} -O2 -Wall -c -o mem.o mem.c
-	${CC} -O2 -Wall -c -o crc32.o crc32.c
-	${CC} -O2 -Wall -c -o platform.o platform.c
+	${CC} -O2 -Wall ${LDFLAGS} -c -o log.o log.c
+	${CC} -O2 -Wall ${LDFLAGS} -c -o cmdopt.o cmdopt.c
+	${CC} -O2 -Wall ${LDFLAGS} -c -o mem.o mem.c
+	${CC} -O2 -Wall ${LDFLAGS} -c -o crc32.o crc32.c
+	${CC} -O2 -Wall ${LDFLAGS} -c -o platform.o platform.c
 	${AR} -rcs libdigi.a log.o cmdopt.o mem.o crc32.o platform.o
 }
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "DEY examples: ALSA API test application"
 SECTION = "examples"
@@ -12,7 +12,7 @@ SRC_URI = "file://alsa_test"
 S = "${WORKDIR}/alsa_test"
 
 do_compile() {
-	${CC} -O2 -Wall alsa_test.c -o alsa_test -lasound
+	${CC} -O2 -Wall ${LDFLAGS} alsa_test.c -o alsa_test -lasound
 }
 
 do_install() {

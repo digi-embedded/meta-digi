@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "DEY examples: SPI device driver test application"
 SECTION = "examples"
@@ -21,7 +21,7 @@ python do_warning_spidev_ccardimx28() {
 addtask warning_spidev before do_compile
 
 do_compile() {
-	${CC} -O2 -Wall spidev_test.c -o spidev_test
+	${CC} -O2 -Wall ${LDFLAGS} spidev_test.c -o spidev_test
 }
 
 do_install() {

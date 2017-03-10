@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "DEY examples: application to transfer data over bluetooth"
 SECTION = "examples"
@@ -14,7 +14,7 @@ SRC_URI = "file://bt_test"
 S = "${WORKDIR}/bt_test"
 
 do_compile() {
-	${CC} -O2 -Wall bt_test.c -o bt_test -lbluetooth -pthread
+	${CC} -O2 -Wall ${LDFLAGS} bt_test.c -o bt_test -lbluetooth -pthread
 }
 
 do_install() {

@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "DEY examples: OSS (open sound system) test application"
 SECTION = "examples"
@@ -10,7 +10,7 @@ SRC_URI = "file://vplay_test"
 S = "${WORKDIR}/vplay_test"
 
 do_compile() {
-	${CC} -O2 -Wall vplay.c -o vplay
+	${CC} -O2 -Wall ${LDFLAGS} vplay.c -o vplay
 }
 
 do_install() {

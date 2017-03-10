@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "DEY examples: GPIO sysfs API test application"
 SECTION = "examples"
@@ -10,7 +10,7 @@ SRC_URI = "file://gpio_sysfs_test"
 S = "${WORKDIR}/gpio_sysfs_test"
 
 do_compile() {
-	${CC} -O2 -Wall gpio_sysfs_test.c sysfsgpio.c -o gpio_sysfs_test
+	${CC} -O2 -Wall ${LDFLAGS} gpio_sysfs_test.c sysfsgpio.c -o gpio_sysfs_test
 }
 
 do_install() {

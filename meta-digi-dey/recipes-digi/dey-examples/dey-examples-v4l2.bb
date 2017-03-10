@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "DEY examples: V4L2 test application"
 SECTION = "examples"
@@ -14,8 +14,8 @@ INCLUDE_PATH_ccimx6 = "-I${STAGING_KERNEL_DIR}/arch/arm/include -I${STAGING_KERN
 S = "${WORKDIR}/v4l2_test"
 
 do_compile() {
-	${CC} -O2 -Wall ${INCLUDE_PATH} v4l2_still.c -o v4l2_still -lpthread
-	${CC} -O2 -Wall ${INCLUDE_PATH} v4l2_common.c v4l2_preview_test.c -o v4l2_preview_test -lpthread
+	${CC} -O2 -Wall ${INCLUDE_PATH} ${LDFLAGS} v4l2_still.c -o v4l2_still -lpthread
+	${CC} -O2 -Wall ${INCLUDE_PATH} ${LDFLAGS} v4l2_common.c v4l2_preview_test.c -o v4l2_preview_test -lpthread
 }
 
 do_install() {

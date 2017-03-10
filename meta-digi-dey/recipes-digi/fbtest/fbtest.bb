@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "Digi's framebuffer test utility"
 SECTION = "base"
@@ -12,7 +12,7 @@ SRC_URI = "file://fbtest.c"
 S = "${WORKDIR}"
 
 do_compile() {
-	${CC} -O2 -Wall fbtest.c -o fbtest -lnano-X
+	${CC} -O2 -Wall ${LDFLAGS} fbtest.c -o fbtest -lnano-X
 }
 
 do_install() {

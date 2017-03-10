@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "DEY examples: application to perform low level bluetooth"
 SECTION = "examples"
@@ -14,7 +14,7 @@ SRC_URI = "file://btconfig"
 S = "${WORKDIR}/btconfig"
 
 do_compile() {
-	${CC} -O2 -Wall btconfig.c -o btconfig -lbluetooth
+	${CC} -O2 -Wall ${LDFLAGS} btconfig.c -o btconfig -lbluetooth
 }
 
 do_install() {

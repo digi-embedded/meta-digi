@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "DEY examples: watchdog test application"
 SECTION = "examples"
@@ -10,7 +10,7 @@ SRC_URI = "file://watchdog_test"
 S = "${WORKDIR}/watchdog_test"
 
 do_compile() {
-	${CC} -O2 -Wall watchdog_test.c -o watchdog_test
+	${CC} -O2 -Wall ${LDFLAGS} watchdog_test.c -o watchdog_test
 }
 
 do_install() {

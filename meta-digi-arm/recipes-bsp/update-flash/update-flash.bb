@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013,2017 Digi International.
 
 SUMMARY = "Digi's update test utility"
 SECTION = "base"
@@ -17,7 +17,7 @@ GIT_SHA1 = "$(cd ${THISDIR} && git rev-parse --short HEAD)"
 S = "${WORKDIR}"
 
 do_compile() {
-	${CC} -O2 -Wall -DGIT_SHA1=\"${GIT_SHA1}\" update_flash.c -o update_flash -ldigi
+	${CC} -O2 -Wall ${LDFLAGS} -DGIT_SHA1=\"${GIT_SHA1}\" update_flash.c -o update_flash -ldigi
 }
 
 do_install() {
