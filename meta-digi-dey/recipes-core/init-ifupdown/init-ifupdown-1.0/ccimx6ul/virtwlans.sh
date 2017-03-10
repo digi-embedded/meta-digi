@@ -19,8 +19,11 @@
 if [ -s "/proc/device-tree/wireless/mac-address1" ] &&
    [ -s "/proc/device-tree/wireless/mac-address2" ] &&
    [ -s "/proc/device-tree/wireless/mac-address3" ]; then
-	iw dev wlan0 interface add wlan1 type managed
+   :
 else
-	echo "ERROR: Missing virtual MAC addresses, please"
-	echo "program one referring to the Digi U-Boot Documentation"
+	echo "WARNING: Using default MAC addresses for virtual interfaces, please "
+	echo "program them referring to the Digi U-Boot Documentation"
 fi
+
+# This will create a second wireless network device
+iw dev wlan0 interface add wlan1 type managed
