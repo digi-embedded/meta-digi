@@ -98,7 +98,7 @@ int main(void)
 		return EXIT_FAILURE;
 	}
 
-	printf("Waiting for Device Cloud request...\n");
+	printf("Waiting for Remote Manager request...\n");
 	printf("Press a key to exit\n");
 	getchar();
 
