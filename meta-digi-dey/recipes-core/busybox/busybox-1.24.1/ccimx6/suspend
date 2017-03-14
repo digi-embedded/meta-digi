@@ -20,6 +20,8 @@ syspower="/sys/power/state"
 lockfile="/var/lock/${scriptname}.lock"
 lockfd="9"
 
+BT_INIT="/etc/init.d/bluetooth-init"
+
 usage() {
 	printf "\nSuspend system to RAM memory\n"
 	printf "\nUsage: ${scriptname} [OPTIONS]\n
@@ -28,15 +30,24 @@ usage() {
 }
 
 suspend_interfaces() {
+	# Suspend wireless interface
 	if grep -qs '^wlan0' /var/run/ifstate; then
 		ifdown wlan0 && up_wlan_on_resume="1" && sleep 0.5 && rmmod ath6kl_sdio
 	fi
+
+	# Suspend bluetooth interface
+	hciconfig hci0 2>&1 | grep -qs UP && up_bt_on_resume="1"
+	${BT_INIT} stop >/dev/null
 }
 
 resume_interfaces() {
+	# Resume wireless interface
 	if ! grep -qs '^wlan0' /var/run/ifstate; then
 		[ -n "${up_wlan_on_resume}" ] && modprobe ath6kl_sdio && sleep 0.5 && ifup wlan0
 	fi
+
+	# Resume bluetooth interface
+	[ -n "${up_bt_on_resume}" ] && ${BT_INIT} start >/dev/null
 }
 
 enter_critical_section() {
