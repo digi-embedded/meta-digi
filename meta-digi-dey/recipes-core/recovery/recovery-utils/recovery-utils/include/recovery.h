@@ -47,4 +47,14 @@ int reboot_recovery(unsigned int reboot_timeout);
  */
 int wipe_update_partition(void);
 
+/*
+ * Configure recovery commands to set a file system encryption key.
+ *
+ * Params:
+ *   'key' (input)  Encryption key to use, NULL or empty to generate a random one
+ *
+ * Return: 0 on sucess, -1 on failure
+ */
+int set_fs_encryption_key(char *key);
+
 #endif /* RECOVERY_H */

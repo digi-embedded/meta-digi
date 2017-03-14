@@ -26,7 +26,7 @@
 
 #include <recovery.h>
 
-#define VERSION		"0.1" GIT_REVISION
+#define VERSION		"0.2" GIT_REVISION
 
 #define REBOOT_TIMEOUT	10
 
@@ -40,10 +40,13 @@
 	"Version: %s\n" \
 	"\n" \
 	"Usage: %s [options] [<SWU-package-path>]\n\n" \
-	"  -u  --update-firmware          Perform firmware update\n" \
-	"  -w  --wipe-update-partition    Wipe 'update' partition\n" \
-	"  -T  --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
-	"      --help                     Print help and exit\n" \
+	"  -u         --update-firmware          Perform firmware update\n" \
+	"  -k[<key>]  --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
+	"                                        Empty to generate a random key.\n" \
+	"                                        Use this option along with update firmware option (-u).\n" \
+	"  -w         --wipe-update-partition    Wipe 'update' partition\n" \
+	"  -T<N>      --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
+	"             --help                     Print help and exit\n" \
 	"\n" \
 	"<SWU-package-path>    Absolute path to the firmware update package\n" \
 	"\n"
@@ -55,8 +58,10 @@
 	"Version: %s\n" \
 	"\n" \
 	"Usage: %s [options] <SWU-package-path>\n\n" \
-	"  -T  --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
-	"      --help                     Print help and exit\n" \
+	"  -k[<key>]  --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
+	"                                        Empty to generate a random key.\n" \
+	"  -T<N>      --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
+	"             --help                     Print help and exit\n" \
 	"\n" \
 	"<SWU-package-path>    Absolute path to the firmware update package\n" \
 	"\n"
@@ -69,8 +74,10 @@ static char *cmd_name;
 
 /* Command line options */
 static char *swu_package;
+static char *key = NULL;
 static int wipe_update;
 static int update_fw;
+static int set_key;
 static int reboot_timeout = REBOOT_TIMEOUT;
 
 /*
@@ -96,9 +103,10 @@ static void usage_and_exit(int exitval)
 static void parse_options(int argc, char *argv[])
 {
 	static int opt_index, opt;
-	static const char *short_options = "uwT:";
+	static const char *short_options = "uk::wT:";
 	static const struct option long_options[] = {
 		{"update-firmware", no_argument, NULL, 'u'},
+		{"encryption-key", optional_argument, NULL, 'k'},
 		{"wipe-update-partition", no_argument, NULL, 'w'},
 		{"reboot-timeout", required_argument, NULL, 'T'},
 		{"help", no_argument, NULL, 'h'},
@@ -122,6 +130,11 @@ static void parse_options(int argc, char *argv[])
 			break;
 		case 'w':
 			wipe_update = 1;
+			break;
+		case 'k':
+			set_key = 1;
+			if (optarg)
+				key = optarg;
 			break;
 		case 'T':
 			reboot_timeout = (int)strtol(optarg, &endptr, 10);
@@ -152,6 +165,10 @@ static void parse_options(int argc, char *argv[])
 			printf("Error: missing SWU package argument\n");
 			exit(EXIT_FAILURE);
 		}
+	} else if (set_key) {
+		/* Always need to update firmware when setting a new key */
+		printf("Error: encryption key can only be set while performing a firmware update\n");
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -167,6 +184,15 @@ int main(int argc, char *argv[])
 
 	/* Read and parse command line */
 	parse_options(argc, argv);
+
+	if (set_key) {
+		/* Configure recovery commands to set a fs encryption key */
+		ret = set_fs_encryption_key(key);
+		if (ret) {
+			printf("Error: set_fs_encryption_key\n");
+			goto out;
+		}
+	}
 
 	if (swu_package) {
 		/* Configure recovery commands to update the firmware */

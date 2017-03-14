@@ -19,6 +19,7 @@
 
 #define _GNU_SOURCE	/* For GNU version of basename */
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,6 +29,18 @@
 #include <libubootenv/ubootenv.h>
 
 #define FILE_PREFIX	"file://"
+
+#define OTP_CLOSED_BIT	2
+
+/* Plain key size */
+#define KEYSIZE_BYTES		32	/* 256 bits */
+
+/*
+ * Base64 encoded string size
+ *
+ * https://en.wikipedia.org/wiki/Base64#Padding
+ */
+#define BASE64_SIZE_BYTES(x)	(4 * ((x + (3 - 1)) / 3))
 
 /*
  * Function:    append_recovery_command
@@ -73,6 +86,41 @@ static int append_recovery_command(const char *value)
 
 err:
 	return ret ? -1 : 0;
+}
+
+/*
+ * Function:    is_device_closed
+ * Description: check if the device is closed
+ */
+static int is_device_closed(void)
+{
+	const char *path = "/sys/fsl_otp/HW_OCOTP_CFG5";
+	FILE *fd = NULL;
+	unsigned int value = 0;
+	long open = 0;
+
+	if ((fd = fopen(path, "r")) == NULL) {
+		fprintf(stderr, "Cannot check device status. Assuming closed...\n");
+		return 1;
+	}
+
+	open = (fscanf(fd, "%x", &value) == 1) && (value & OTP_CLOSED_BIT);
+
+	fclose(fd);
+
+	return open;
+}
+
+/*
+ * Function:    secure_memzero
+ * Description: secure memzero that is not optimized out by the compiler
+ */
+void secure_memzero(void *buf, size_t len)
+{
+	volatile uint8_t *p = (volatile uint8_t *)buf;
+
+	while (len--)
+		*p++ = 0;
 }
 
 /*
@@ -152,4 +200,53 @@ err:
 int wipe_update_partition(void)
 {
 	return append_recovery_command("wipe_update");
+}
+
+/*
+ * Function:    set_fs_encryption_key
+ * Description: configure recovery commands to set a file system encryption key
+ */
+int set_fs_encryption_key(char *key)
+{
+	char *key_cmd = NULL;
+	int generate_random_key = 0;
+	int ret = -1;
+
+	generate_random_key = (!key || strlen(key) == 0);
+
+	if (!generate_random_key &&
+	    BASE64_SIZE_BYTES(KEYSIZE_BYTES) != strlen(key)) {
+		fprintf(stderr, "Error: invalid key size\n");
+		goto err;
+	}
+
+	if (!is_device_closed()) {
+		printf("\n"
+		       "  *****************************************************************\n"
+		       "  * Warning: Use filesystem encryption only on CLOSED devices.    *\n"
+		       "  *          Filesystem encryption on open devices is not secure. *\n"
+		       "  *****************************************************************\n");
+	}
+
+	key_cmd =
+	    calloc(1,
+		   strlen("encryption_key=") +
+		   (generate_random_key ? 0 : strlen(key)) + 1);
+	if (!key_cmd) {
+		fprintf(stderr, "Error: calloc 'key_cmd'\n");
+		goto err;
+	}
+
+	sprintf(key_cmd, "encryption_key=%s", generate_random_key ? "" : key);
+
+	ret = append_recovery_command(key_cmd);
+
+	free(key_cmd);
+
+err:
+	/* Secure delete the key buffers */
+	if (!generate_random_key)
+		secure_memzero(key, strlen(key));
+
+	return ret ? -1 : 0;
 }
