@@ -38,6 +38,13 @@ python () {
     d.setVarFlag("SWUPDATE_IMAGES_FSTYPES", "core-image-base", img_fstypes)
 }
 
+python do_swuimage_prepend() {
+    import glob
+
+    if (d.getVar('TRUSTFENCE_SIGN', True) == "1"):
+        d.setVar('SWUPDATE_PRIVATE_KEY', glob.glob(d.getVar('SWUPDATE_PRIVATE_KEY_TEMPLATE', True))[0])
+}
+
 do_unpack[postfuncs] += "fill_description"
 
 fill_description() {

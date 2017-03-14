@@ -35,7 +35,6 @@ python () {
     import binascii
     import hashlib
     import os
-    import glob
 
     # Secure console configuration
     if (d.getVar("TRUSTFENCE_CONSOLE_DISABLE", True) == "1"):
@@ -80,8 +79,8 @@ python () {
             key_index = int(d.getVar("TRUSTFENCE_KEY_INDEX", True))
         key_index_1 = key_index + 1
 
-        # Set the private key.
-        d.setVar("SWUPDATE_PRIVATE_KEY", glob.glob(keys_path + "/keys/IMG" + str(key_index_1) + "*key.pem")[0])
+        # Set the private key template, it will be expanded later in 'swu' recipes once keys are generated.
+        d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", keys_path + "/keys/IMG" + str(key_index_1) + "*key.pem")
 
         # Set the key password.
         d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
