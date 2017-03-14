@@ -25,5 +25,7 @@ else
 	echo "program them referring to the Digi U-Boot Documentation"
 fi
 
-# This will create a second wireless network device
-iw dev wlan0 interface add wlan1 type managed
+if [ ! -d "/sys/class/net/wlan1" ]; then
+	# This will create a second wireless network device
+	iw dev wlan0 interface add wlan1 type managed
+fi
