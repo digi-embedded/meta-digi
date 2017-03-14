@@ -3,7 +3,7 @@
 #
 #  trustfence-initramfs-init
 #
-#  Copyright (C) 2016 by Digi International Inc.
+#  Copyright (C) 2016, 2017 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -31,7 +31,7 @@ mkdir -p /var/run && rngd
 
 for arg in $(cat /proc/cmdline); do
 	case "${arg}" in
-		init=*|rescue=1|root=*|trustfence_install=*) eval ${arg};;
+		init=*|rescue=1|root=*) eval ${arg};;
 	esac
 done
 
@@ -45,15 +45,6 @@ if [ -n "${rescue}" ]; then
 		setsid cttyhack sh -l
 		sleep 1
 	done
-fi
-
-# Run install script if "trustfence_install" kernel parameter exists
-if [ -n "${trustfence_install}" ]; then
-	trustfence-install.sh ${trustfence_install} ${root}
-	sleep 1
-	echo ">> Rebooting the system"
-	sleep 1
-	sync && reboot -f
 fi
 
 # Open LUKS encrypted device
