@@ -15,6 +15,15 @@
 #
 #===============================================================================
 
+POWEROFF_TIME="10"
+
+error() {
+	[ "${#}" != "0" ] && printf "\n[ERROR]: %s\n\n" "${1}"
+	echo "The system will poweroff in ${POWEROFF_TIME} seconds"
+	sleep "${POWEROFF_TIME}"
+	sync && poweroff -f
+}
+
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
 mkdir -p /proc /sys /dev
@@ -51,6 +60,8 @@ fi
 if trustfence-tool ${root} cryptroot; then
 	# Reset root variable to the decrypted mapped device
 	root="/dev/mapper/cryptroot"
+else
+	error "unable to open encrypted partition."
 fi
 
 # Mount mapped device
