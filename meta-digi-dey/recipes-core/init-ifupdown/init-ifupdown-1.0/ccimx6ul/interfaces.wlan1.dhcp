@@ -1,6 +1,6 @@
 
 auto wlan1
 iface wlan1 inet dhcp
-       udhcpc_opts -b
+       udhcpc_opts -S -b >/dev/null &
        post-up /etc/init.d/hostapd start
        pre-down /etc/init.d/hostapd stop
