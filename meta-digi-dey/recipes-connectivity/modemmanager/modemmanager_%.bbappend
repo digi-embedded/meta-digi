@@ -2,7 +2,10 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
-SRC_URI += "file://cellularifupdown"
+SRC_URI += " \
+	file://cellularifupdown \
+	file://0001-meta-digi-dey-Add-fix-to-return-correct-error-code.patch \
+"
 
 # 'polkit' depends on 'consolekit', and this requires 'x11' distro feature. So
 # remove 'polkit' support to be able to build ModemManager on a framebuffer
