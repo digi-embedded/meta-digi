@@ -38,7 +38,7 @@ background_connect() {
 	if [ -n "${IF_PORT}" ]; then
 		pppd ${IF_PORT} call mm_cellular > /dev/null 2>&1
 	else
-		udhcpc -q -i ${IFACE}
+		udhcpc -q -i ${IFACE} >/dev/null
 	fi
 
 	ifconfig ${IFACE} up
