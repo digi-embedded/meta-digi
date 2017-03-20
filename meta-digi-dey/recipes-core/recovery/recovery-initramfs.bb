@@ -13,6 +13,9 @@ DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'virtual/kernel openssl-
 SRC_URI = " \
     file://recovery-initramfs-init \
     file://swupdate.cfg \
+    file://automount_block.sh \
+    file://automount_mtd.sh \
+    file://mdev.conf \
 "
 
 S = "${WORKDIR}"
@@ -21,6 +24,10 @@ do_install() {
 	install -d ${D}${sysconfdir}
 	install -m 0755 ${WORKDIR}/recovery-initramfs-init ${D}/init
 	install -m 0644 ${WORKDIR}/swupdate.cfg ${D}${sysconfdir}
+	install -d ${D}${base_libdir}/mdev
+	install -m 0755 ${WORKDIR}/automount_block.sh ${D}${base_libdir}/mdev/automount_block.sh
+	install -m 0755 ${WORKDIR}/automount_mtd.sh ${D}${base_libdir}/mdev/automount_mtd.sh
+	install -m 0644 ${WORKDIR}/mdev.conf ${D}${sysconfdir}
 
 	# If Trustfence is enabled, copy the public key that is going to be used into the
 	# initramfs '/etc/ssl/certs' folder in order to verify swupdate packages.

@@ -5,6 +5,7 @@ LICENSE = "MIT"
 
 PACKAGE_INSTALL = " \
     busybox \
+    parted \
     psplash \
     recovery-initramfs \
     swupdate \
@@ -13,7 +14,7 @@ PACKAGE_INSTALL = " \
     wipe \
 "
 
-PACKAGE_INSTALL_append_ccimx6 = " e2fsprogs-mke2fs parted"
+PACKAGE_INSTALL_append_ccimx6 = " e2fsprogs-mke2fs"
 PACKAGE_INSTALL_append_ccimx6ul = " mtd-utils-ubifs"
 
 # Do not pollute the initrd image with rootfs features

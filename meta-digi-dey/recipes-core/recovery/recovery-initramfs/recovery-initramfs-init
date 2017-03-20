@@ -163,91 +163,6 @@ is_nand() {
 }
 
 #------------------------------------------------------------------------------
-# Function - mount_external_disks
-#
-# Mounts all available external disks.
-#------------------------------------------------------------------------------
-mount_external_disks() {
-	local devices=$(ls -1 /dev/sd? 2>/dev/null)
-	for device in ${devices}; do
-		for i in ${device}?; do
-			local dev_name=$(basename "${i}")
-			local mount_dir="${USB_MOUNT_DIR}/${dev_name}"
-			mkdir -p "${mount_dir}"
-			FSTYPE="$(blkid /dev/${dev_name} | sed -e 's,.*TYPE="\([^"]\+\)".*,\1,g')"
-			mount -r ${FSTYPE:+-t ${FSTYPE}} "/dev/${dev_name}" "${mount_dir}"
-		done
-	done
-}
-
-#------------------------------------------------------------------------------
-# Function - mount_partition
-#
-# Mounts the given partition.
-#
-# @param ${1}  - Partition name to mount.
-# @param ${2}  - Mount point.
-#------------------------------------------------------------------------------
-mount_partition() {
-	if [ "$(is_nand)" = "yes" ]; then
-		mount_ubi_volume "${1}" "${2}"
-	else
-		mount_emmc_block "${1}" "${2}"
-	fi
-}
-
-#------------------------------------------------------------------------------
-# Function - mount_ubi_volume
-#
-# Mounts the given UBI volume.
-#
-# @param ${1}  - UBI Volume name to mount.
-# @param ${2}  - Mount point.
-#------------------------------------------------------------------------------
-mount_ubi_volume() {
-	# Find the MTD partition.
-	local mtd_num="$(sed -ne "s/mtd\([0-9]\+\):.*\<${1}\>.*/\1/g;T;p" /proc/mtd 2>/dev/null)"
-	if [ -z "${mtd_num}" ]; then
-		log_warning "Could not find MTD partition for volume '${1}'"
-	else
-		# Attach and get UBI device number
-		local dev_number="$(ubiattach -p /dev/mtd${mtd_num} 2>/dev/null | sed -ne 's,.*device number \([0-9]\).*,\1,g;T;p' 2>/dev/null)"
-		# Check if volume exists.
-		ubinfo "/dev/ubi${dev_number}" -N "${1}" >/dev/null 2>&1
-		if [ "$?" = "0" ]; then
-			# Mount the volume.
-			mkdir -p "${2}"
-			mount -t ubifs "ubi${dev_number}:${1}" "${2}" >/dev/null 2>&1
-			if [ "$?" != "0" ]; then
-				log_warning "Could not mount '${1}' partition"
-			fi
-		else
-			log_warning "Could not mount '${1}' partition, volume not found"
-		fi
-	fi
-}
-
-#------------------------------------------------------------------------------
-# Function - mount_emmc_block
-#
-# Mounts the given emmc partition block name.
-#
-# @param ${1}  - Partition name to mount.
-# @param ${2}  - Mount point.
-#------------------------------------------------------------------------------
-mount_emmc_block() {
-	# Find partition block number.
-	local partition_block="/dev/mmcblk0p$(parted -s /dev/mmcblk0 print | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<${1}\>.*,\1,g;T;p")"
-	# Mount the volume.
-	mkdir -p "${2}"
-	FSTYPE="$(blkid ${partition_block} | sed -e 's,.*TYPE="\([^"]\+\)".*,\1,g')"
-	mount -r ${FSTYPE:+-t ${FSTYPE}} "${partition_block}" "${2}"
-	if [ "$?" != "0" ]; then
-		log_warning "Could not mount '${1}' partition (${partition_block})"
-	fi
-}
-
-#------------------------------------------------------------------------------
 # Function - format_partition
 #
 # Formats the given partition.
@@ -411,6 +326,17 @@ mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
 mount -t tmpfs tmpfs /tmp
 
+# Register mdev as device manager
+if [ -f /proc/sys/kernel/hotplug ]; then
+	echo > /dev/mdev.seq
+	echo > /dev/mdev.log
+	echo "/sbin/mdev" > /proc/sys/kernel/hotplug
+	mdev -s
+fi
+
+# Give some time for the devices to settle down
+sleep 2
+
 # Setup fw_printenv.
 mkdir -p /var/lock
 
@@ -502,18 +428,12 @@ if [ -n "${update_package_bool}" ]; then
 	if [ -z "${update_package}" ]; then
 		quit_with_error "Firmware update package not specified"
 	else
-		# Give some time for the devices to settle down
-		sleep 5
-
 		# Format the UBI volume before updating.
 		if [ "$(is_nand)" = "yes" ]; then
 			psplash_message "Formatting rootfs partition..."
 			format_ubi_volume rootfs
 			psplash_progress "0"
 		fi
-
-		mount_external_disks
-		mount_partition update "${UPDATE_MOUNT_DIR}"
 
 		# Check whether the package is local and get the absolute path
 		if echo "${update_package}" | grep -qs '^file://'; then
