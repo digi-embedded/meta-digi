@@ -194,8 +194,8 @@ format_ubi_volume() {
 		if grep -qs "${1}" /proc/mounts; then
 			local path="$(sed -ne "s/.*:${1} \(.*\) ubifs.*/\1/g;T;p" /proc/mounts 2>/dev/null)"
 			umount "${path}" >/dev/null 2>&1
-			ubidetach -p "/dev/mtd${mtd_num}" >/dev/null 2>&1
 		fi
+		ubidetach -p "/dev/mtd${mtd_num}" >/dev/null 2>&1
 		# Format MTD partition.
 		if ! ubiformat "/dev/mtd${mtd_num}" -q -y; then
 			quit_with_error "Error erasing '/dev/mtd${mtd_num}' block"

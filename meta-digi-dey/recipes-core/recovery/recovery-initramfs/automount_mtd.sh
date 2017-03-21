@@ -43,6 +43,7 @@ if is_update_device; then
 			fi
 		else
 			echo "ERROR: Could not mount '${PARTITION_NAME}' partition, volume not found"
+			ubidetach -p "/dev/${MDEV}" >/dev/null 2>&1
 			rmdir --ignore-fail-on-non-empty ${UPDATE_MOUNTPOINT}
 		fi
 	fi
