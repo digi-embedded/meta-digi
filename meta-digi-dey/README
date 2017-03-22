@@ -17,6 +17,14 @@ All software is covered by Digi's general EULA and Digi's Open Source
 EULA. To have the right to use the software in your images you need to
 read and accept both EULAs at the DIGI_EULA and DIGI_OPEN_EULA files.
 
+NXP Semiconductors' software license agreement
+----------------------------------------------
+
+Some platforms depends on libraries and packages that are covered by
+NXP Semiconductors' EULA. To have the right to use those binaries in
+your images you need to read and accept the EULA file in meta-freescale
+Yocto layer.
+
 Support
 -------
 

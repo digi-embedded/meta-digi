@@ -250,6 +250,6 @@ CONF_VERSION = "1"
 PRSERV_HOST = "localhost:0"
 
 #
-# Some libraries and packages are covered by Freescale EULA
+# Some libraries and packages are covered by NXP EULA
 #
 #ACCEPT_FSL_EULA = "1"

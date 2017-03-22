@@ -98,7 +98,7 @@ do_license() {
 		|                                                                               |
 		|      * Digi's end user license agreement                                      |
 		|      * Digi's third party and open source license notice                      |
-		|      * Freescale semiconductor software license agreement                     |
+		|      * NXP Semiconductors' software license agreement                         |
 		|                                                                               |
 		|  To have the right to use those binaries in your images you need to read and  |
 		|  accept the licenses.                                                         |

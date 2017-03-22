@@ -17,12 +17,13 @@ All software is covered by Digi's general EULA and Digi's Open Source
 EULA. To have the right to use the software in your images you need to
 read and accept both EULAs at the DIGI_EULA and DIGI_OPEN_EULA files.
 
-Freescale's license agreeements
--------------------------------
+NXP Semiconductors' software license agreement
+----------------------------------------------
 
 Some platforms depends on libraries and packages that are covered by
-Freescale's MMK EULA. To have the right to use those binaries in your
-images you need to read and accept the EULA at the FSL_MMK_EULA file.
+NXP Semiconductors' EULA. To have the right to use those binaries in
+your images you need to read and accept the EULA file in meta-freescale
+Yocto layer.
 
 Support
 -------
