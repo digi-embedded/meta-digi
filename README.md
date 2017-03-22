@@ -1,10 +1,10 @@
-# Digi Embedded Yocto (DEY) 2.0
-## Release 2.0-r6
+# Digi Embedded Yocto (DEY) 2.2
+## Release 2.2-r1
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
 
-Digi Embedded Yocto 2.0 is based on the 2.0 (Jethro) Yocto release.
+Digi Embedded Yocto 2.2 is based on the 2.2 (Morty) Yocto release.
 
 For a full list of supported features and interfaces please refer to the
 online documentation.
@@ -64,7 +64,7 @@ Documentation is available online on the Digi documentation site:
 
 # Release Changelog
 
-## 2.0-r6
+## 2.2-r1
 
 * TBC
 
