@@ -156,7 +156,7 @@ dek_blob_offset="$((CONFIG_KERNEL_LOADADDR - DEK_BLOB_OFFSET))"
 # Compute the layout: sizes and offsets.
 uimage_size="$(stat -L -c %s ${UIMAGE_PATH})"
 uimage_offset="0x0"
-pad_len="$((uimage_size - uimage_size % 0x1000 + 0x1000))"
+pad_len="$(((uimage_size + 0x1000 - 1) & ~(0x1000 - 1)))"
 auth_len="$((pad_len + 0x20))"
 sig_len="$((auth_len + CONFIG_CSF_SIZE))"
 
