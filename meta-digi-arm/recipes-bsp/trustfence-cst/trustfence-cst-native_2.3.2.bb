@@ -15,6 +15,17 @@ SRC_URI = " \
     file://Makefile \
 "
 
+# Usually local files (with file:// protocol) are not checked for
+# premirrors. But in this case we want to be able to download the 'cst'
+# package from a premirror in case it's not already in the DL_DIR, so prepend
+# a premirror for the 'file://' protocol.
+python() {
+    source_mirror_url = d.getVar('SOURCE_MIRROR_URL', True)
+    if source_mirror_url:
+        premirrors = d.getVar('PREMIRRORS', True)
+        d.setVar('PREMIRRORS', "file://cst.* %s \\n %s" % (source_mirror_url, premirrors))
+}
+
 S = "${WORKDIR}/cst-${PV}"
 
 inherit native
