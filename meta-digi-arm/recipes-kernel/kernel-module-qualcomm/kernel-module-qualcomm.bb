@@ -6,16 +6,17 @@ LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
 
 PV = "v4.2.80.63"
+
 SRCBRANCH = "dey-2.2/master"
+SRCREV = "${AUTOREV}"
 
-SRCREV_external = ""
-SRCREV_internal = "${AUTOREV}"
-SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
+QCOM_GIT_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git', d)}"
 
-SRC_URI_external = "${DIGI_GITHUB_GIT}/qcacld-2.0.git;protocol=git;nobranch=1"
-SRC_URI_internal = "${DIGI_MTK_GIT}linux/qcacld-2.0.git;protocol=ssh;branch=${SRCBRANCH}"
-SRC_URI  = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
-SRC_URI += " \
+SRC_URI = " \
+    ${QCOM_GIT_URI};branch=${SRCBRANCH} \
+"
+
+SRC_URI_append = " \
     file://qualcomm-pre-up \
     file://modprobe-qualcomm.conf \
 "
