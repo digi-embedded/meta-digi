@@ -17,9 +17,9 @@ Software for the following hardware platforms is in production support:
 
 * Digi ConnectCore 6UL
   * [Digi P/N CC-WMX-JN58-NE](http://www.digi.com/products/models/cc-wmx-jn58-ne)
-* Digi ConnectCore 6UL Starter Kit
+* Digi ConnectCore 6UL SBC Express
   * [Digi P/N CC-WMX6UL-START](http://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001514/default.htm#concept/yocto/c_get_started_with_yocto.htm))
-* Digi ConnectCore 6UL Development Kit
+* Digi ConnectCore 6UL SBC Pro
   * [Digi P/N CC-WMX6UL-KIT](https://www.digi.com/products/models/cc-wmx6ul-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001515/default.htm#concept/yocto/c_get_started_with_yocto.htm))
 
 * Digi ConnectCore 6
@@ -51,20 +51,16 @@ hardware.
 
 Documentation is available online on the Digi documentation site:
 
-* [Digi ConnectCore 6UL Starter Kit](http://www.digi.com/resources/documentation/Digidocs/90001514/default.htm)
-* [Digi ConnectCore 6UL Development Kit](http://www.digi.com/resources/documentation/Digidocs/90001515/default.htm)
+* [Digi ConnectCore 6UL SBC Express](http://www.digi.com/resources/documentation/Digidocs/90001514/default.htm)
+* [Digi ConnectCore 6UL SBC Pro](http://www.digi.com/resources/documentation/Digidocs/90001515/default.htm)
 * [Digi ConnectCore 6 Jumpstart Development Kit](http://www.digi.com/resources/documentation/Digidocs/90001945-13/default.htm)
 
 # Downloads
 
-* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r5/images/
-* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r5/sdk/
+* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.2/r1/images/
+* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.2/r1/sdk/
 
 # Release Changelog
-
-## 2.2-r2
-
-* TBC
 
 ## 2.2-r1
 
