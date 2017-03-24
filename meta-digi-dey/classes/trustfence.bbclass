@@ -40,7 +40,7 @@ python () {
     if (d.getVar("TRUSTFENCE_CONSOLE_DISABLE", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_CONSOLE_DISABLE=y ")
         if d.getVar("TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE", True):
-            passphrase_hash = hashlib.sha256(d.getVar("TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE", True)).hexdigest()
+            passphrase_hash = hashlib.sha256(d.getVar("TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE", True).encode()).hexdigest()
             d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_CONSOLE_ENABLE_PASSPHRASE=y CONFIG_CONSOLE_ENABLE_PASSPHRASE_KEY=\\"%s\\" ' % passphrase_hash)
         elif d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE", True):
             d.appendVar("UBOOT_EXTRA_CONF", " CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NR=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE", True))
