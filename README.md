@@ -13,7 +13,7 @@ online documentation.
 
 The current release supports the following hardware platforms:
 
-Software for the following hardware platforms is in beta support:
+Software for the following hardware platforms is in production support:
 
 * Digi ConnectCore 6UL
   * [Digi P/N CC-WMX-JN58-NE](http://www.digi.com/products/models/cc-wmx-jn58-ne)
@@ -21,8 +21,6 @@ Software for the following hardware platforms is in beta support:
   * [Digi P/N CC-WMX6UL-START](http://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001514/default.htm#concept/yocto/c_get_started_with_yocto.htm))
 * Digi ConnectCore 6UL Development Kit
   * [Digi P/N CC-WMX6UL-KIT](https://www.digi.com/products/models/cc-wmx6ul-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001515/default.htm#concept/yocto/c_get_started_with_yocto.htm))
-
-Software for the following hardware platforms is in production support:
 
 * Digi ConnectCore 6
   * [Digi P/N CC-WMX-J97C-TN](http://www.digi.com/products/models/cc-wmx-j97c-tn)
@@ -64,75 +62,19 @@ Documentation is available online on the Digi documentation site:
 
 # Release Changelog
 
-## 2.2-r1
+## 2.2-r2
 
 * TBC
 
-## 2.0-r5
+## 2.2-r1
 
-* Digi Embedded Yocto
-  * Support firmware update through the new recovery mode
-  * Initial support to connect to Remote Manager with the CloudConnector
-  * Updated U-Boot to version 'dub-2015.04-r7' for Digi ConnectCore 6 and 6UL
-* Digi ConnectCore 6UL
-  * Added support to audio codec MAX98089
-  * Added support to camera Omnivision OV5642
-  * Optimized kernel configuration (smaller kernel)
-  * Added support for EDO mode on NAND Flash
-  * Added PMIC NVRAM support through sysfs
-  * Added suspend support for PMIC regulators
-  * Added support for i.MX6UL ADC channels
-  * Added voltage scaling support for MCA ADC
-  * Added full-system reset support to MCA watchdog
-  * Added MCA 32KHz output control through sysfs
-  * Added VRef output control through sysfs
-  * Added support to PWM1 on Starter Board expansion header
-  * Kernel v4.1.38
-
-## 2.0-r4
-
-* Digi ConnectCore 6UL
-  * Support for Digi ConnectCore 6UL SBC
-    * Linux kernel v4.1.35
-    * Support for Fusion touch displays
-  * Authenticated and encrypted initramfs, bootscripts and DTBs
-  * Encrypted root filesystem
-  * MCA firmware update
-  * MCA tampering
-  * Power management optimizations
-* Digi ConnectCore 6
-  * Support for Quectel EC-20 LTE modem
-  * Authenticated and encrypted initramfs, bootscripts and DTBs
-  * Linux kernel v3.14.79
-  * Minor bug fixes
-
-## 2.0-r3
-
-* Support for the new Digi ConnectCore 6UL System-On-Module and Starter Kit
-  * U-Boot 2015.04
-  * Linux kernel v4.1.28
-* Support for TrustFence security enhancements
-  * Secure console
-  * Secure boot
-  * Secure JTAG
-  * Encrypted root filesystem
-  * True Random Number Generator
-
-## 2.0-r2
-
-* Release based on Yocto 2.0 (Jethro) for ConnectCore 6 SBC including:
-  * Update support for new PMIC hardware revision
-  * Minor bug fixes
-
-## 2.0-r1
-
-* U-Boot 2015.04 for the Digi ConnectCore 6 System-On-Module and SBC
-* Linux kernel v3.14.57 for the Digi ConnectCore 6 System-On-Module and SBC
-* Release based on Yocto 2.0 (Jethro) for Digi ConnectCore 6 SBC including:
-  * Bluez5
-  * QT5 (over X11 and Framebuffer graphical systems)
-  * New toolchain based on GCC-5.2 and GLIBC-2.22
-  * Cellular support
+* Release based on [Yocto 2.2 (Morty)](https://www.yoctoproject.org/downloads/core/morty22) including:
+  * New toolchain based on GCC-6.2.0 and GLIBC-2.24
+  * Updated Qt 5.7
+  * Cellular support, including the new Quectel EC21 cellular modem
+  * TrustFence enabled
+  * Remote manager
+  * Local and remote manager firmware update
   * Package upgrades and security fixes
 
 # Known Issues and Limitations
@@ -143,8 +85,6 @@ updated list can be found on the online documentation.
 * If TrustFence (TM) image encryption support is enabled, the uSD image will
 boot a signed U-Boot only.
 * Firmware update
-  * Updating from a microSD card is not supported, only from local partitions
-    (e.g. the 'update' partition) or from external USB memory devices.
   * The software update package must be located in the root level of the
     update media (subfolders are not yet supported).
 * Cloud Connector
