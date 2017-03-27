@@ -19,8 +19,36 @@ if test $? -eq 1; then
 	exit;
 fi
 
+# Determine U-Boot file to program basing on module variant
+if test -n "${module_variant}"; then
+	if test "${module_variant}" = "0x02" || test "${module_variant}" = "0x03"; then
+		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulsbc.imx;
+	elif test "${module_variant}" = "0x04"; then
+		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulsbc1GB.imx;
+	fi
+fi
+# Use 'test -n ...' because 'test -z ...' does not work well on old versions of
+# u-boot when the checked value is empty.
+if test -n "${INSTALL_UBOOT_FILENAME}"; then
+	true;
+else
+	echo "";
+	echo "[ERROR] Cannot determine U-Boot file for this module!";
+	echo "";
+	echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 6UL variant:";
+	echo "   - For a SOM with 1GB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulsbc1GB.imx";
+	echo "   - For a SOM with 256MB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulsbc.imx";
+	echo "";
+	echo "2. Run the install script again.";
+	echo "";
+	echo "Aborted";
+	echo "";
+	exit;
+fi;
+
 setenv INSTALL_MMCDEV 0
-setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulsbc.imx
 setenv INSTALL_LINUX_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6ulsbc.boot.ubifs
 setenv INSTALL_RECOVERY_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6ulsbc.recovery.ubifs
 setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6ulsbc.ubifs
