@@ -42,11 +42,16 @@ do_install_append() {
 	install -m 0755 ${WORKDIR}/qualcomm-pre-up ${D}${sysconfdir}/network/if-pre-up.d/qualcomm
 	install -d ${D}${sysconfdir}/modprobe.d
 	install -m 0644 ${WORKDIR}/modprobe-qualcomm.conf ${D}${sysconfdir}/modprobe.d/qualcomm.conf
+	install -d ${D}${base_libdir}/firmware/wlan/
+	install -m 0644 ${WORKDIR}/git/firmware_bin/WCNSS_cfg.dat ${D}${base_libdir}/firmware/wlan/cfg.dat
+	install -m 0644 ${WORKDIR}/git/firmware_bin/WCNSS_qcom_cfg.ini ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
 }
 
 FILES_${PN} += " \
     ${sysconfdir}/network/if-pre-up.d/qualcomm \
     ${sysconfdir}/modprobe.d/qualcomm.conf \
+    ${base_libdir}/firmware/wlan/cfg.dat \
+    ${base_libdir}/firmware/wlan/qcom_cfg.ini \
 "
 
 COMPATIBLE_MACHINE = "(ccimx6ul)"
