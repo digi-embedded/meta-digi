@@ -45,5 +45,6 @@ FILES_${PN}-init = "${sysconfdir}/init.d/bluetooth-init"
 
 INITSCRIPT_PACKAGES += "${PN}-init"
 INITSCRIPT_NAME_${PN}-init = "bluetooth-init"
+INITSCRIPT_PARAMS_${PN}-init = "start 19 2 3 4 5 . stop 21 0 1 6 ."
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
