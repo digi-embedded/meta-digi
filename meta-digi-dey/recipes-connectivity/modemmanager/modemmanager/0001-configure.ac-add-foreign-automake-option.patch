@@ -1,0 +1,25 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Thu, 6 Apr 2017 11:17:46 +0200
+Subject: [PATCH] configure.ac: add foreign automake option
+
+Needed to build the repository directly in Yocto, so the missing
+autotools files are generated.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index c8a35d1b1a3f..24ed761d8e42 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -26,7 +26,7 @@ dnl-----------------------------------------------------------------------------
+ dnl autoconf, automake, libtool initialization
+ dnl
+ AC_INIT([ModemManager],[mm_version],[modemmanager-devel@lists.freedesktop.org],[ModemManager])
+-AM_INIT_AUTOMAKE([1.11.2 subdir-objects tar-ustar no-dist-gzip dist-xz -Wno-portability])
++AM_INIT_AUTOMAKE([1.11.2 foreign subdir-objects tar-ustar no-dist-gzip dist-xz -Wno-portability])
+ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+ 
+ AM_MAINTAINER_MODE([enable])

@@ -4,7 +4,6 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
     file://cellularifupdown \
-    file://0001-telit-lock-unlock-CSIM-operations-by-default.patch \
 "
 
 # 'polkit' depends on 'consolekit', and this requires 'x11' distro feature. So
