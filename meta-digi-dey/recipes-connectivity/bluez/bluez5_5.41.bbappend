@@ -4,6 +4,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
 SRC_URI += " \
     file://bluetooth-init \
+    file://main.conf \
     file://0001-hcitool-do-not-show-unsupported-refresh-option.patch \
     file://0002-hcitool-increase-the-shown-connection-limit-to-20.patch \
 "
@@ -37,10 +38,12 @@ PACKAGECONFIG_append = " experimental"
 do_install_append() {
 	install -d ${D}${sysconfdir}/init.d/
 	install -m 0755 ${WORKDIR}/bluetooth-init ${D}${sysconfdir}/init.d/bluetooth-init
+	install -m 0644 ${WORKDIR}/main.conf ${D}${sysconfdir}/bluetooth/
 }
 
 PACKAGES =+ "${PN}-init"
 
+FILES_${PN} += " ${sysconfdir}/bluetooth/main.conf"
 FILES_${PN}-init = "${sysconfdir}/init.d/bluetooth-init"
 
 INITSCRIPT_PACKAGES += "${PN}-init"
