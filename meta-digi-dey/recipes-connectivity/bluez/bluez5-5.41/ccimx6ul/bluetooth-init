@@ -67,66 +67,13 @@ bluetooth_init() {
 
 	# Start the Bluetooth driver and bring up the interface
 	HCIATTACH_LOG="/var/log/hciattach.log"
-	BT_CMD="HCIATTACH"
-	RETRIES="5"
-	while [ "${RETRIES}" -gt "0" ]; do
-		case "${BT_CMD}" in
-		HCIATTACH)
-			# Reset BT
-			killproc hciattach
-			powercycle_gpio "${BT_EN_QCA_GPIO_NR}"
-			if hciattach ttyBt qca ${BT_RATE:-3000000} ${BT_FLOW:-flow} >${HCIATTACH_LOG} 2>&1; then
-				BT_CMD="HCICONFIG_UP"
-			else
-				BT_ERROR="FAILED (hciattach)"
-				BT_CMD="BT_INIT_FAIL"
-			fi
-			;;
-		HCICONFIG_UP)
-			if hciconfig hci0 up; then
-				BT_CMD="HCITOOL_SETMAC"
-			else
-				BT_ERROR="FAILED (hciconfig up)"
-				BT_CMD="BT_INIT_FAIL"
-			fi
-			;;
-		HCITOOL_SETMAC)
-			#
-			# Set the MAC address (the interface needs to be up to send HCI commands)
-			#
-			# Convert it to the format accepted by 'hcitool' ("00:04:F3:11:22:33" -> "33 22 11 F3 04 00")
-			#
-			HCI_MACADDR="$(echo ${BT_MACADDR} | tr ':' '\n' | tac | tr '\n' ' ' | sed -e 's/ $//g')"
-			if hcitool -i hci0 cmd 3F 000B 01 02 06 ${HCI_MACADDR} >/dev/null; then
-				BT_CMD="HCITOOL_RESET"
-			else
-				BT_ERROR="FAILED (hcitool set MAC)"
-				BT_CMD="BT_INIT_FAIL"
-			fi
-			;;
-		HCITOOL_RESET)
-			if hcitool -i hci0 cmd 03 0003 00 >/dev/null; then
-				BT_CMD="HCICONFIG_RESET"
-			else
-				BT_ERROR="FAILED (hcitool reset)"
-				BT_CMD="BT_INIT_FAIL"
-			fi
-			;;
-		HCICONFIG_RESET)
-			if hciconfig hci0 reset; then
-				break
-			else
-				BT_ERROR="FAILED (hciconfig reset)"
-				BT_CMD="BT_INIT_FAIL"
-			fi
-			;;
-		BT_INIT_FAIL)
-			RETRIES="$((RETRIES - 1))"
-			BT_CMD="HCIATTACH"
-			;;
-		esac
-	done
-	[ "${RETRIES}" = "0" ] && error "${BT_ERROR}"
+	killproc hciattach
+	powercycle_gpio "${BT_EN_QCA_GPIO_NR}"
+	if hciattach ttyBt qca ${BT_RATE:-3000000} -t30 ${BT_FLOW:-flow} unused ${BT_MACADDR} >${HCIATTACH_LOG} 2>&1; then
+		echo "[OK]"
+	else
+		echo "[FAIL]"
+	fi
 }
 
 # Source function library
@@ -137,17 +84,16 @@ case "$1" in
 		if [ -d "/proc/device-tree/bluetooth" ]; then
 			echo -n "Starting bluetooth hardware: "
 			bluetooth_init
-			echo "done."
+			echo "${BT_ERROR:-done.}"
 		fi
 		;;
 	stop)
 		if [ -d "/sys/class/bluetooth/hci0" ]; then
 			echo -n "Stopping bluetooth hardware: "
-			hciconfig hci0 down || BT_ERROR="FAILED (hciconfig down)"
 			killproc hciattach
 			# Power down bluetooth
 			set_gpio_value "${BT_EN_QCA_GPIO_NR}" 0
-			echo "${BT_ERROR:-done.}"
+			echo "done."
 		fi
 		;;
 	restart)
