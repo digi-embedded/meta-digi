@@ -29,6 +29,9 @@ SRC_URI_append_ccimx6ul = " \
     file://0019-bluetooth-Fix-flow-control-operation.patch \
     file://0020-Adding-MDM-specific-code-under-_PLATFORM_MDM_.patch \
     file://0021-Bluetooth-Fix-static-analysis-issues.patch \
+    file://0022-hciattach_rome-Respect-the-user-indication-for-noflo.patch \
+    file://0023-hciattach-If-the-user-supplies-a-bdaddr-use-it.patch \
+    file://0024-hciattach-Add-verbosity-option.patch \
 "
 
 inherit update-rc.d

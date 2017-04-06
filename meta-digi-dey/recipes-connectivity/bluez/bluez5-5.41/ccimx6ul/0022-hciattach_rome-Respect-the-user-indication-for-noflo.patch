@@ -1,0 +1,186 @@
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Thu, 6 Apr 2017 09:27:09 +0200
+Subject: [PATCH] hciattach_rome: Respect the user indication for noflow
+
+When hciattach is called with noflow, it should not assume the hardware
+supports hardware flow control.
+
+Basically, use 'flow' or 'noflow' on the hciattach command line arguments
+to indicate whether to use or not hardware flow control.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ tools/hciattach.c      |  2 +-
+ tools/hciattach.h      |  2 +-
+ tools/hciattach_rome.c | 50 +++++++++++++++++++++++++++++++++++---------------
+ tools/hciattach_rome.h |  1 +
+ 4 files changed, 38 insertions(+), 17 deletions(-)
+
+diff --git a/tools/hciattach.c b/tools/hciattach.c
+index dda639cabca3..81d78ab3f69a 100644
+--- a/tools/hciattach.c
++++ b/tools/hciattach.c
+@@ -286,7 +286,7 @@ static int ath3k_pm(int fd, struct uart_t *u, struct termios *ti)
+ static int qca(int fd, struct uart_t *u, struct termios *ti)
+ {
+         fprintf(stderr,"qca\n");
+-        return qca_soc_init(fd, u->speed, u->bdaddr);
++        return qca_soc_init(fd, u->speed, u->bdaddr, ti);
+ }
+ 
+ static int qualcomm(int fd, struct uart_t *u, struct termios *ti)
+diff --git a/tools/hciattach.h b/tools/hciattach.h
+index 49e59321fcac..3524e716c847 100644
+--- a/tools/hciattach.h
++++ b/tools/hciattach.h
+@@ -64,7 +64,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
+ 						struct termios *ti);
+ int ath3k_post(int fd, int pm);
+ int qualcomm_init(int fd, int speed, struct termios *ti, const char *bdaddr);
+-int qca_soc_init(int fd, int speed, char *bdaddr);
++int qca_soc_init(int fd, int speed, char *bdaddr , struct termios * ti);
+ int intel_init(int fd, int init_speed, int *speed, struct termios *ti);
+ int bcm43xx_init(int fd, int def_speed, int speed, struct termios *ti,
+ 		const char *bdaddr);
+diff --git a/tools/hciattach_rome.c b/tools/hciattach_rome.c
+index 59bdc16e4e8f..ee67bb068c09 100644
+--- a/tools/hciattach_rome.c
++++ b/tools/hciattach_rome.c
+@@ -1565,7 +1565,8 @@ static void flow_control(int fd, int opt)
+ }
+ 
+ 
+-int rome_set_baudrate_req(int fd, int local_baud_rate, int controller_baud_rate)
++int rome_set_baudrate_req(int fd, int local_baud_rate,
++		int controller_baud_rate, int hwfc)
+ {
+    int size, err = 0;
+     unsigned char cmd[HCI_MAX_CMD_SIZE];
+@@ -1575,6 +1576,12 @@ int rome_set_baudrate_req(int fd, int local_baud_rate, int controller_baud_rate)
+ 
+     memset(cmd, 0x0, HCI_MAX_CMD_SIZE);
+ 
++    /* If not using hardware flow control limit baud rate to 115200 */
++    if (!hwfc) {
++                local_baud_rate = USERIAL_BAUD_115200;
++                controller_baud_rate = BAUDRATE_115200;
++    }
++
+     cmd_hdr = (void *) (cmd + 1);
+     cmd[0]  = HCI_COMMAND_PKT;
+     cmd_hdr->opcode = cmd_opcode_pack(HCI_VENDOR_CMD_OGF, EDL_SET_BAUDRATE_CMD_OCF);
+@@ -1621,7 +1628,7 @@ error:
+ }
+ 
+ 
+-int rome_hci_reset_req(int fd, char baud)
++int rome_hci_reset_req(int fd, char baud, int hwfc)
+ {
+     int size, err = 0;
+     unsigned char cmd[HCI_MAX_CMD_SIZE];
+@@ -1641,8 +1648,9 @@ int rome_hci_reset_req(int fd, char baud)
+     /* Total length of the packet to be sent to the Controller */
+     size = (HCI_CMD_IND + HCI_COMMAND_HDR_SIZE);
+ 
+-    /* Flow off during baudrate change */
+-    flow_control(fd, MSM_DISABLE_FLOW_CTRL);
++    /* If using hardware flow control, turn off during baudrate change */
++    if (hwfc)
++        flow_control(fd, MSM_DISABLE_FLOW_CTRL);
+ 
+     /* Send the HCI command packet to UART for transmission */
+     fprintf(stderr, "%s: HCI CMD: 0x%x 0x%x 0x%x 0x%x\n", __FUNCTION__, cmd[0], cmd[1], cmd[2], cmd[3]);
+@@ -1655,8 +1663,9 @@ int rome_hci_reset_req(int fd, char baud)
+     /* Change Local UART baudrate to high speed UART */
+      userial_vendor_set_baud(baud);
+ 
+-    /* Flow on after changing local uart baudrate */
+-    flow_control(fd, MSM_ENABLE_FLOW_CTRL);
++    /* If using hardware flow control, turn on after changing local uart baudrate */
++    if (hwfc)
++        flow_control(fd, MSM_ENABLE_FLOW_CTRL);
+ 
+     /* Wait for command complete event */
+     err = read_hci_event(fd, rsp, HCI_MAX_EVENT_SIZE);
+@@ -1778,7 +1787,7 @@ int isSpeedValid(int speed, int *local_baud_rate, int *controller_baud_rate)
+     return -1;
+ }
+ 
+-int qca_soc_init(int fd, int speed, char *bdaddr)
++int qca_soc_init(int fd, int speed, char *bdaddr , struct termios * ti)
+ {
+     int err = -1;
+     int size, local_baud_rate = 0, controller_baud_rate = 0;
+@@ -1793,6 +1802,12 @@ int qca_soc_init(int fd, int speed, char *bdaddr)
+         return -1;
+     }
+ #endif
++
++    /* Assume we don't use hardware flow control unless user requested 'flow' */
++    vnd_userial.hwfc = 0;
++    if (ti->c_cflag & ~CRTSCTS)
++        vnd_userial.hwfc = 1;
++
+     /* Get Rome version information */
+     if((err = rome_patch_ver_req(fd)) <0){
+         fprintf(stderr, "%s: Fail to get Rome Version (0x%x)\n", __FUNCTION__, err);
+@@ -1838,11 +1853,14 @@ int qca_soc_init(int fd, int speed, char *bdaddr)
+                     goto error;
+                 }
+ 
+-                /* Change baud rate 115.2 kbps to 3Mbps*/
+-                err = rome_hci_reset_req(fd, local_baud_rate);
+-                if ( err <0 ) {
+-                    fprintf(stderr, "HCI Reset Failed !!\n");
+-                    goto error;
++                /* If using hw flow control, change baud rate 115.2 kbps to 3Mbps*/
++                if (vnd_userial.hwfc) {
++                    err = rome_hci_reset_req(fd, local_baud_rate,
++                    vnd_userial.hwfc);
++                    if ( err <0 ) {
++                        fprintf(stderr, "HCI Reset Failed !!\n");
++                        goto error;
++                    }
+                 }
+ 
+                 fprintf(stderr, "HCI Reset is done\n");
+@@ -1888,7 +1906,8 @@ download:
+                 if (local_baud_rate < 0 || controller_baud_rate < 0)
+                     goto error;
+ 
+-                err = rome_set_baudrate_req(fd, local_baud_rate, controller_baud_rate);
++                err = rome_set_baudrate_req(fd, local_baud_rate,
++				controller_baud_rate, vnd_userial.hwfc);
+                 if (err < 0) {
+                     fprintf(stderr, "%s: Baud rate change failed!\n", __FUNCTION__);
+                     goto error;
+@@ -1907,14 +1926,15 @@ download:
+              * Overriding the baud rate value in NVM file with the user
+              * requested baud rate, since default baud rate in NVM file is 3M.
+              */
+-            err = rome_set_baudrate_req(fd, local_baud_rate, controller_baud_rate);
++            err = rome_set_baudrate_req(fd, local_baud_rate,
++			    controller_baud_rate, vnd_userial.hwfc);
+             if (err < 0) {
+                 fprintf(stderr, "%s: Baud rate change failed!\n", __FUNCTION__);
+                 goto error;
+             }
+ 
+             /* Perform HCI reset here*/
+-            err = rome_hci_reset_req(fd, local_baud_rate);
++            err = rome_hci_reset_req(fd, local_baud_rate, vnd_userial.hwfc);
+             if ( err <0 ) {
+                 fprintf(stderr, "HCI Reset Failed !!!\n");
+                 goto error;
+diff --git a/tools/hciattach_rome.h b/tools/hciattach_rome.h
+index 89f7db3bef86..760685ad7915 100644
+--- a/tools/hciattach_rome.h
++++ b/tools/hciattach_rome.h
+@@ -62,6 +62,7 @@ typedef struct
+     int fd;                     /* fd to Bluetooth device */
+     struct termios termios;     /* serial terminal of BT port */
+     char port_name[256];
++    int hwfc;
+ } vnd_userial_cb_t;
+ 
+ /**** baud rates ****/
