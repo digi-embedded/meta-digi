@@ -3,7 +3,7 @@ DAEMON=/usr/sbin/hostapd
 NAME=hostapd
 DESC="HOSTAP Daemon"
 PIDFILE="/var/run/hostapd.${IFACE}.pid"
-ARGS="/etc/hostapd_${IFACE}.conf -B -P ${PIDFILE}"
+ARGS="/etc/hostapd_${IFACE}.conf"
 
 test -f $DAEMON || exit 0
 
@@ -29,7 +29,7 @@ delay_stop() {
 case "$1" in
     start)
 	echo -n "Starting $DESC: "
-	start-stop-daemon -S -x $DAEMON -- $ARGS
+	start-stop-daemon -S -x $DAEMON -m -p ${PIDFILE} -b -- $ARGS
 	echo "$NAME."
 	;;
     stop)
