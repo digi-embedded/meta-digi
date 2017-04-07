@@ -254,21 +254,56 @@ format_emmc_block() {
 #
 # Get absolute path of update package searching in local media
 #
-# @param ${1}  - SWU package name
+# @param ${1}  - SWU package
 #------------------------------------------------------------------------------
 swu_package_path() {
-	for i in ${UPDATE_MOUNT_DIR} $(echo ${USB_MOUNT_DIR}/*); do
-		echo $i | grep -qs "${USB_MOUNT_DIR}/\*" && continue
-		if [ -f "${i}/${1}" ]; then
-			swu_abspath="${i}/${1}"
-			break
-		fi
-	done
+	# Check whether the package is local and get the absolute path.
+	if echo "${1}" | grep -qs '^file://'; then
+		local pkg_name="$(basename ${1})"
 
-	if [ -n "${swu_abspath}" ]; then
-		echo "${swu_abspath}"
+		for i in ${UPDATE_MOUNT_DIR} $(echo ${USB_MOUNT_DIR}/*); do
+			echo $i | grep -qs "${USB_MOUNT_DIR}/\*" && continue
+			if [ -f "${i}/${pkg_name}" ]; then
+				swu_abspath="${i}/${pkg_name}"
+				break
+			fi
+		done
+
+		if [ -n "${swu_abspath}" ]; then
+			echo "${swu_abspath}"
+		else
+			quit_with_error "Unable to find update package '${pkg_name}'"
+		fi
 	else
-		quit_with_error "Unable to find update package '${1}'"
+		echo "${1}"
+	fi
+}
+
+#------------------------------------------------------------------------------
+# Function - check_swu_package
+#
+# Check if the update package is a valid one and get its absolute path
+#
+# @param ${1}  - SWU package
+#------------------------------------------------------------------------------
+check_swu_package() {
+	log "Checking update package '$(basename ${1})'"
+
+	if [ -z "${1}" ]; then
+		quit_with_error "Firmware update package not specified"
+	fi
+
+	update_package="$(swu_package_path ${1})"
+
+	# Check software update package.
+	if [ -f "${PUBLIC_KEY}" ]; then
+		swupdate -c -i "${update_package}" -k "${PUBLIC_KEY}"
+	else
+		swupdate -c -i "${update_package}"
+	fi
+
+	if [ "$?" != "0" ]; then
+		quit_with_error "Invalid update package '$(basename ${1})'"
 	fi
 }
 
@@ -395,11 +430,17 @@ for arg in ${COMMAND}; do
 	esac
 done
 
+# Sanity checks.
+if [ -n "${update_package_bool}" ]; then
+	check_swu_package "${update_package}"
+fi
+
 # Check if encryption key command is configured.
 if [ -n "${encryption_key_bool}" ]; then
 	log "Trustfence encryption key setup requested (new key: ${encryption_key:-random})"
 	psplash_message "Configuring new encryption key..."
 	psplash_progress "0"
+
 	trustfence-tool "--newkey${encryption_key:+=${encryption_key}}"
 	if [ "$?" = "0" ]; then
 		psplash_progress "10"
@@ -425,35 +466,27 @@ if [ -n "${update_package_bool}" ]; then
 	log "Firmware update requested"
 	psplash_message "Updating firmware..."
 	psplash_progress "0"
-	if [ -z "${update_package}" ]; then
-		quit_with_error "Firmware update package not specified"
+
+	# Format the UBI volume before updating.
+	if [ "$(is_nand)" = "yes" ]; then
+		psplash_message "Formatting rootfs partition..."
+		format_ubi_volume rootfs
+		psplash_progress "0"
+	fi
+
+	log "Update package location: ${update_package}"
+	# Execute the progress binary.
+	progress -wp &
+	# Execute the software update.
+	if [ -f "${PUBLIC_KEY}" ]; then
+		swupdate -f "${SW_CONFIG}" -i "${update_package}" -k "${PUBLIC_KEY}"
 	else
-		# Format the UBI volume before updating.
-		if [ "$(is_nand)" = "yes" ]; then
-			psplash_message "Formatting rootfs partition..."
-			format_ubi_volume rootfs
-			psplash_progress "0"
-		fi
-
-		# Check whether the package is local and get the absolute path
-		if echo "${update_package}" | grep -qs '^file://'; then
-			update_package="$(swu_package_path $(basename ${update_package}))"
-		fi
-
-		log "Update package location: ${update_package}"
-		# Execute the progress binary.
-		progress -wp &
-		# Execute the software update.
-		if [ -f "${PUBLIC_KEY}" ]; then
-			swupdate -f "${SW_CONFIG}" -i "${update_package}" -k "${PUBLIC_KEY}"
-		else
-			swupdate -f "${SW_CONFIG}" -i "${update_package}"
-		fi
-		if [ "$?" = "0" ]; then
-			log "Firmware update process succeed!"
-		else
-			quit_with_error "Error executing the firmware update"
-		fi
+		swupdate -f "${SW_CONFIG}" -i "${update_package}"
+	fi
+	if [ "$?" = "0" ]; then
+		log "Firmware update process succeed!"
+	else
+		quit_with_error "Error executing the firmware update"
 	fi
 fi
 
