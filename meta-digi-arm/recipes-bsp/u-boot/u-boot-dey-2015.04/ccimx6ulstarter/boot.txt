@@ -11,7 +11,7 @@ else
 	#
 	# Set device tree filename depending on the hardware variant
 	#
-	if test "${module_variant}" = "0x02"; then
+	if test "${module_variant}" = "0x02" || test "${module_variant}" = "0x04"; then
 		setenv fdt_file zImage-imx6ul-ccimx6ulstarter-wb.dtb
 	elif test "${module_variant}" = "0x03"; then
 		setenv fdt_file zImage-imx6ul-ccimx6ulstarter.dtb
