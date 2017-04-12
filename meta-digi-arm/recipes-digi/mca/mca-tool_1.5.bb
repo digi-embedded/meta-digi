@@ -1,4 +1,4 @@
-# Copyright (C) 2016 Digi International.
+# Copyright (C) 2016, 2017 Digi International.
 
 SUMMARY = "MCA firmware management tool"
 SECTION = "console/tools"
@@ -13,5 +13,7 @@ SRC_URI[sha256sum] = "79cf18bfec35fd9a779eff3ad119d03cc3ab96de8ada6ffcd63dac45a9
 S = "${WORKDIR}/${PKGNAME}-${PV}"
 
 inherit bin_package
+
+INSANE_SKIP_${PN} = "already-stripped"
 
 COMPATIBLE_MACHINE = "(ccimx6ul)"
