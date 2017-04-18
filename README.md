@@ -67,7 +67,14 @@ Documentation is available online on the Digi documentation site:
 * Release based on [Yocto 2.2 (Morty)](https://www.yoctoproject.org/downloads/core/morty22) including:
   * New toolchain based on GCC-6.2.0 and GLIBC-2.24
   * Updated Qt 5.7
-  * Cellular support, including the new Quectel EC21 cellular modem
+  * Cellular support:
+    * Digi's XBee Cellular LTE Cat 1 (USA/Verizon), with P/N XBC-V1-UT-001
+    * Telit's LE910 and HE910
+    * Huawei's ME909u
+    * Quectel's EC21
+  * Modified default networking settings:
+    * Defalt to dynamic IP addresses assignments
+    * Default station and softAP concurrent wireless mode
   * TrustFence enabled
   * Remote manager
   * Local and remote manager firmware update
@@ -97,6 +104,13 @@ boot a signed U-Boot only.
   control. To work around this issue, UART1 of these SOM versions has been
   configured to operate at 115200 bps and without hardware flow control,
   reducing the maximum throughput of this interface.
+* When using wireless concurrent mode as the wireless interface is shared
+  between several different functionalities performance is reduced.
+* When using wireless concurrent mode Digi recommends to keep the different
+  modes on the same frequency channels. For example, when configuring access
+  point mode on channel 36 on band A, the recommendation would be to connect
+  to the same channel both in station mode and WiFi direct so that the radio
+  performance is optimized
 
 ## Digi ConnectCore 6
 
