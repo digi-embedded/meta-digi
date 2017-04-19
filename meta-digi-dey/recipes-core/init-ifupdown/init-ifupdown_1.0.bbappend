@@ -82,7 +82,6 @@ do_install_append() {
 
 		if [ -n "${CELLULAR_PORT}" ]; then
 			sed -i -e 's/^\([[:blank:]]*\)port/\1port ${CELLULAR_PORT}/g' ${D}${sysconfdir}/network/interfaces
-			sed -i -e 's,dhcp,manual,g' ${D}${sysconfdir}/network/interfaces
 		else
 			sed -i -e '/^[[:blank:]]*port/d' ${D}${sysconfdir}/network/interfaces
 		fi
