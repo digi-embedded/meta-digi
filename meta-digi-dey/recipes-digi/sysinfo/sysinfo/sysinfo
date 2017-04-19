@@ -90,7 +90,7 @@ make_report(){
 	echo "-                                    -"
 	echo "--------------------------------------"
 	echo ""
-	for f in $(find /var/log/ -name *.log); do
+	for f in $(find /var/log/ -name "*.log"); do
 		echo "${f} FILE";
 		echo "---------------------------------------";
 		cat ${f};
