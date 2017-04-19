@@ -15,6 +15,7 @@ PV = "1.7.0+git${SRCPV}"
 SRC_URI = " \
     git://anongit.freedesktop.org/git/ModemManager/ModemManager.git;protocol=https \
     file://0001-configure.ac-add-foreign-automake-option.patch \
+    file://0002-port-probe-add-more-retries-for-port-AT-probing.patch \
 "
 SRCREV = "d09bc8baaa9fe93a72bb715530b1403a7a81c891"
 
