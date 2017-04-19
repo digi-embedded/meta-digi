@@ -8,7 +8,7 @@ POLLING_WAIT=5
 
 background_connect() {
         # Ensure ModemManager is running
-        killall -0 ModemManager 2>/dev/null || ModemManager --log-file=/dev/null &
+        killall -0 ModemManager 2>/dev/null || ModemManager --log-file=/var/log/modemmanager.log &
 
         # Wait for modem detection
         while [ "${RETRIES}" -gt "0" ]; do
