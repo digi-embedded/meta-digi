@@ -20,23 +20,23 @@ SRC_URI = " \
     file://0004-qcacld-2.0-remove-unused-code.patch \
     file://0005-Including-header-file-for-regulatory_hint_user.patch \
     file://0006-Updating-calls-to-alloc_netdev_mq.patch \
-    file://0007-wlan_hdd_cfg80211-update-cfg80211_inform_bss-params-.patch \
-    file://0008-wlan_hdd_p2p-Update-call-to-cfg80211_rx_mgmt-for-dif.patch \
-    file://0009-linux_ac-Fix-for-f_dentry.patch \
-    file://0010-native_sdio-src-hif-Do-not-call-to-HIGH-SPEED-functi.patch \
-    file://0011-osdep_adf.h-fix-for-undefined-ath_sysctl_pktlog_size.patch \
-    file://0012-Kbuild-Add-compilation-flag-based-on-kernel-support.patch \
-    file://0013-Kbuild-do-not-compile-the-DEBUG-version-inconditiona.patch \
-    file://0014-Kbuild-Group-most-of-the-relevant-DEBUG-options.patch \
-    file://0015-wlan_hdd_cfg80211-fix-missing-ifdef-clause.patch \
-    file://0016-Add-.gitignore-rules.patch \
-    file://0017-wlan_hdd_main-initialize-all-adapter-completion-vari.patch \
-    file://0018-qcacld-Indicate-disconnect-event-to-upper-layers.patch \
-    file://0019-wdd_hdd_main-Print-con_mode-to-clearly-see-if-in-FTM.patch \
-    file://0020-Makefile-Pass-BUILD_DEBUG_VERSION-to-kbuild-system.patch \
-    file://0021-cosmetic-change-log-level.patch \
-    file://0022-fix-issue-with-_scan_callback.patch \
-    file://0023-on-stop-cancel-scan-requests.patch \
+    file://0007-wlan_hdd_p2p-Update-call-to-cfg80211_rx_mgmt-for-dif.patch \
+    file://0008-linux_ac-Fix-for-f_dentry.patch \
+    file://0009-native_sdio-src-hif-Do-not-call-to-HIGH-SPEED-functi.patch \
+    file://0010-osdep_adf.h-fix-for-undefined-ath_sysctl_pktlog_size.patch \
+    file://0011-Kbuild-Add-compilation-flag-based-on-kernel-support.patch \
+    file://0012-Kbuild-do-not-compile-the-DEBUG-version-inconditiona.patch \
+    file://0013-Kbuild-Group-most-of-the-relevant-DEBUG-options.patch \
+    file://0014-wlan_hdd_cfg80211-fix-missing-ifdef-clause.patch \
+    file://0015-Add-.gitignore-rules.patch \
+    file://0016-wlan_hdd_main-initialize-all-adapter-completion-vari.patch \
+    file://0017-qcacld-Indicate-disconnect-event-to-upper-layers.patch \
+    file://0018-wdd_hdd_main-Print-con_mode-to-clearly-see-if-in-FTM.patch \
+    file://0019-Makefile-Pass-BUILD_DEBUG_VERSION-to-kbuild-system.patch \
+    file://0020-cosmetic-change-log-level.patch \
+    file://0021-fix-issue-with-_scan_callback.patch \
+    file://0022-on-stop-cancel-scan-requests.patch \
+    file://0023-qcacld-2.0-Use-wlan_hdd_cfg80211_inform_bss_frame-to.patch \
 "
 
 S = "${WORKDIR}/${PV}"
