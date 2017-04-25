@@ -93,9 +93,6 @@ boot a signed U-Boot only.
 * Cloud Connector
   * Remote file system management fails with long file names and paths
     (over 255 characters).
-* Cellular modem Telit LE910-EUG
-  * Firmware version 17.01.522 not supported. Digi Embedded Yocto 2.2 has been tested
-    with FW version 17.00.523.
 
 ## Digi ConnectCore 6UL
 
