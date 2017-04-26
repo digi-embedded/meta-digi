@@ -108,6 +108,8 @@ boot a signed U-Boot only.
   point mode on channel 36 on band A, the recommendation would be to connect
   to the same channel both in station mode and WiFi direct so that the radio
   performance is optimized
+* When working as an access point, DFS capable channels in band A are not
+  currently supported.
 
 ## Digi ConnectCore 6
 
