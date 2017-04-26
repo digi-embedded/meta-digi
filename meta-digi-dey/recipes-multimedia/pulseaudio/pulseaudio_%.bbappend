@@ -9,6 +9,8 @@ SRC_URI_append_ccimx6sbc = " \
     file://dey-audio-sgtl5000.conf \
 "
 
+EXTRA_OECONF_append_ccimx6sbc = " --disable-memfd"
+
 do_install_append_ccimx6sbc() {
 	install -d ${D}${sysconfdir}/udev/scripts
 	install -m 0755 ${WORKDIR}/hdmi_hotplug.sh ${D}${sysconfdir}/udev/scripts
