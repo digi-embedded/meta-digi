@@ -67,7 +67,7 @@ Documentation is available online on the Digi documentation site:
 * Release based on [Yocto 2.2 (Morty)](https://www.yoctoproject.org/downloads/core/morty22) including:
   * New toolchain based on GCC-6.2.0 and GLIBC-2.24
   * Updated Qt 5.7
-  * Cellular support:
+  * Updated ModemManager with validated support for:
     * Digi's XBee Cellular LTE Cat 1 (USA/Verizon), with P/N XBC-V1-UT-001
     * Telit's LE910 and HE910
     * Huawei's ME909u
@@ -79,6 +79,7 @@ Documentation is available online on the Digi documentation site:
   * Remote manager
   * Local and remote manager firmware update
   * Package upgrades and security fixes
+  * U-boot support for 1GB DDR3 RAM on CC6UL
 
 # Known Issues and Limitations
 
