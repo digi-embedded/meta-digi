@@ -1,0 +1,33 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Wed, 19 Apr 2017 14:13:56 +0200
+Subject: [PATCH] port-serial: add B230400 and B921600 missing baudrates
+
+So MM can use them when opening a specific serial port.
+
+Upstream-Status: Pending
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ src/mm-port-serial.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/mm-port-serial.c b/src/mm-port-serial.c
+index 04ab17fe1675..b6359d28acd3 100644
+--- a/src/mm-port-serial.c
++++ b/src/mm-port-serial.c
+@@ -260,9 +260,15 @@ parse_baudrate (guint  baudrate_num,
+     case 115200:
+         speed = B115200;
+         break;
++    case 230400:
++        speed = B230400;
++        break;
+     case 460800:
+         speed = B460800;
+         break;
++    case 921600:
++        speed = B921600;
++        break;
+     default:
+         return FALSE;
+     }

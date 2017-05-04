@@ -90,7 +90,7 @@ make_report(){
 	echo "-                                    -"
 	echo "--------------------------------------"
 	echo ""
-	for f in $(find /var/log/ -name *.log); do
+	for f in $(find /var/log/ -name "*.log"); do
 		echo "${f} FILE";
 		echo "---------------------------------------";
 		cat ${f};
@@ -196,8 +196,15 @@ make_report(){
 	else
 		echo "[NOT FOUND] /etc/wpa_supplicant.conf"
 	fi
-
 	echo ""
+	if [ -f "/etc/wpa_supplicant_p2p.conf" ]; then
+		echo "wpa_supplicant_p2p.conf:"
+		cat "/etc/wpa_supplicant_p2p.conf"
+	else
+		echo "[NOT FOUND] /etc/wpa_supplicant_p2p.conf"
+	fi
+	echo ""
+
 	hostapd -v 2>&1
 	echo ""
 	if [ -f "/etc/hostapd.conf" ]; then
@@ -205,6 +212,20 @@ make_report(){
 		cat "/etc/hostapd.conf"
 	else
 		echo "[NOT FOUND] hostapd.conf"
+	fi
+	echo ""
+	if [ -f "/etc/hostapd_wlan0.conf" ]; then
+		echo "hostapd_wlan0.conf:"
+		cat "/etc/hostapd_wlan0.conf"
+	else
+		echo "[NOT FOUND] /etc/hostapd_wlan0.conf"
+	fi
+	echo ""
+	if [ -f "/etc/hostapd_wlan1.conf" ]; then
+		echo "hostapd_wlan1.conf:"
+		cat "/etc/hostapd_wlan1.conf"
+	else
+		echo "[NOT FOUND] /etc/hostapd_wlan1.conf"
 	fi
 	printf "\n\n"
 

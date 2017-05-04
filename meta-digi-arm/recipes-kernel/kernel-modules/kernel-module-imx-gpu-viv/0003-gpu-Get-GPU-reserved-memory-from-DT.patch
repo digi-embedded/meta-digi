@@ -1,0 +1,38 @@
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Tue, 11 Apr 2017 11:13:23 +0200
+Subject: [PATCH] gpu: Get GPU reserved memory from DT.
+
+This commit adds support to specify the GPU reserved memory in
+the DT.
+
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
+
+https://jira.digi.com/browse/DEL-3868
+---
+ .../linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c  | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c b/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c
+index dc7c976..fd2dbd3 100644
+--- a/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c
++++ b/kernel-module-imx-gpu-viv-src/hal/os/linux/kernel/platform/freescale/gc_hal_kernel_platform_imx6q14.c
+@@ -444,7 +444,7 @@ gckPLATFORM_AdjustParam(
+         Args->registerMemSizeVG = res->end - res->start + 1;
+     }
+
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+     res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "contiguous_mem");
+     if (res)
+     {
+@@ -453,8 +453,6 @@ gckPLATFORM_AdjustParam(
+         if( Args->contiguousSize == ~0U )
+            Args->contiguousSize = res->end - res->start + 1;
+     }
+-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+-       Args->contiguousBase = 0;
+ #elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
+        prop = of_get_property(dn, "contiguousbase", NULL);
+        if(prop)
+
+

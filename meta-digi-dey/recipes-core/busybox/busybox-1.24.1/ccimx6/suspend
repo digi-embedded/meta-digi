@@ -21,6 +21,7 @@ lockfile="/var/lock/${scriptname}.lock"
 lockfd="9"
 
 BT_INIT="/etc/init.d/bluetooth-init"
+BT_DAEMON="/etc/init.d/bluetooth"
 
 usage() {
 	printf "\nSuspend system to RAM memory\n"
@@ -37,6 +38,7 @@ suspend_interfaces() {
 
 	# Suspend bluetooth interface
 	hciconfig hci0 2>&1 | grep -qs UP && up_bt_on_resume="1"
+	${BT_DAEMON} stop >/dev/null
 	${BT_INIT} stop >/dev/null
 }
 
@@ -47,7 +49,10 @@ resume_interfaces() {
 	fi
 
 	# Resume bluetooth interface
-	[ -n "${up_bt_on_resume}" ] && ${BT_INIT} start >/dev/null
+	if [ -n "${up_bt_on_resume}" ]; then
+		${BT_INIT} start >/dev/null
+		${BT_DAEMON} start >/dev/null
+	fi
 }
 
 enter_critical_section() {

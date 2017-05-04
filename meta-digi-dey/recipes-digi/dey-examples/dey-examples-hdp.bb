@@ -14,6 +14,6 @@ do_install() {
 	install -m 0755 hdp-test.py ${D}${bindir}
 }
 
-RDEPENDS_${PN} = "python python-argparse python-crypt python-dbus python-pygobject"
+RDEPENDS_${PN} = "python3 python3-argparse python3-crypt python3-dbus python3-pygobject"
 
 COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$|ccimx6ul)"

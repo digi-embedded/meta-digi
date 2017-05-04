@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013-2017 Digi International Inc.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
@@ -82,7 +82,6 @@ do_install_append() {
 
 		if [ -n "${CELLULAR_PORT}" ]; then
 			sed -i -e 's/^\([[:blank:]]*\)port/\1port ${CELLULAR_PORT}/g' ${D}${sysconfdir}/network/interfaces
-			sed -i -e 's,dhcp,manual,g' ${D}${sysconfdir}/network/interfaces
 		else
 			sed -i -e '/^[[:blank:]]*port/d' ${D}${sysconfdir}/network/interfaces
 		fi
@@ -138,4 +137,22 @@ do_install_append_ccimx6ul() {
 	sed -i -e "s,##WLAN1_STATIC_NETMASK##,${WLAN1_STATIC_NETMASK},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WLAN1_STATIC_GATEWAY##,${WLAN1_STATIC_GATEWAY},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WLAN1_STATIC_DNS##,${WLAN1_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
+}
+
+# Disable wireless interfaces on first boot for non-wireless variants
+pkg_postinst_${PN}() {
+	if [ -n "$D" ]; then
+		exit 1
+	fi
+
+	if [ ! -d "/proc/device-tree/wireless" ]; then
+		sed -i -e '/^auto wlan/{s,^,#,g};/^auto p2p/{s,^,#,g}' /etc/network/interfaces
+	fi
+
+	# Create the symlinks in the different runlevels
+	if type update-rc.d >/dev/null 2>/dev/null; then
+		update-rc.d ${INITSCRIPT_NAME} ${INITSCRIPT_PARAMS}
+	fi
+
+	exit 0
 }
