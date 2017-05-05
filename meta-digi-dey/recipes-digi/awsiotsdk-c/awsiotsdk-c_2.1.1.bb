@@ -10,6 +10,7 @@ DEPENDS = "mbedtls"
 
 SRC_URI = " \
     https://github.com/aws/aws-iot-device-sdk-embedded-C/archive/v${PV}.tar.gz \
+    file://0001-aws-iot-samples-modify-provided-samples-to-work-in-o.patch \
     file://aws_iot_config.h.template \
     file://awsiotsdk.pc \
     file://Makefile \
