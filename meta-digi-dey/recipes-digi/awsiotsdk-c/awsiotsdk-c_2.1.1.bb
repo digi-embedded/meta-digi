@@ -24,6 +24,8 @@ S = "${WORKDIR}/aws-iot-device-sdk-embedded-C-${PV}"
 
 inherit awsiotsdk-c pkgconfig
 
+EXTRA_OEMAKE += "'LOG_FLAGS=${@get_log_level(d)}'"
+
 do_configure() {
 	cp -f ${WORKDIR}/awsiotsdk.pc ${S}
 

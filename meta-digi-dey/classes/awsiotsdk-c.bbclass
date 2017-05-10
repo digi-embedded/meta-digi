@@ -63,3 +63,25 @@ AWS_IOT_MQTT_MIN_RECONNECT_WAIT_INTERVAL ?= "1000"
 # to reconnect (milliseconds)
 AWS_IOT_MQTT_MAX_RECONNECT_WAIT_INTERVAL ?= "128000"
 
+# Logging level control: error, warn, info, debug, trace.
+AWS_IOT_LOGGING_LEVEL ?= "debug"
+
+def get_log_level(d):
+    levels = ['error', 'warn', 'info', 'debug', 'trace']
+    log_flags = ""
+
+    log_level = d.getVar('AWS_IOT_LOGGING_LEVEL', True)
+    if log_level == 'none':
+        return ""
+    if log_level not in levels:
+        log_level = "debug"
+        d.setVar('AWS_IOT_LOGGING_LEVEL', log_level)
+
+    log_index = levels.index(log_level)
+    for i, val in enumerate(levels):
+        log_flags = log_flags + "-DENABLE_IOT_" + val.upper() + " "
+        if i == log_index:
+            break;
+
+    return log_flags
+
