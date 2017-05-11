@@ -65,6 +65,7 @@ Documentation is available online on the Digi documentation site:
 ## 2.2-r2
 
 * Digi Embedded Yocto
+  * Support to connect to AWS IoT with AWS IoT Device SDK for embedded C.
   * Added support for Digi XBee Cellular 3G Global, with P/N XBC-M5-UT-001
   * Added support for U-Blox TOBY L-200/L-210
   * Added support for Quectel EC-25
