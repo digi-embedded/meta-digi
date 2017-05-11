@@ -15,10 +15,8 @@ PV = "1.7.0+git${SRCPV}"
 SRC_URI = " \
     git://anongit.freedesktop.org/git/ModemManager/ModemManager.git;protocol=https \
     file://0001-configure.ac-add-foreign-automake-option.patch \
-    file://0002-ublox-support-modems-connected-to-serial-port.patch \
-    file://0003-port-serial-add-B230400-and-B921600-missing-baudrate.patch \
 "
-SRCREV = "d09bc8baaa9fe93a72bb715530b1403a7a81c891"
+SRCREV = "d41d717112e6a183a0df510c210e80a86fc11060"
 
 S = "${WORKDIR}/git"
 
