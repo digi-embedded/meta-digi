@@ -66,6 +66,8 @@ Documentation is available online on the Digi documentation site:
 
 * Digi Embedded Yocto
   * Added support for Digi XBee Cellular 3G Global, with P/N XBC-M5-UT-001
+  * Added support for U-Blox TOBY L-200/L-210
+  * Added support for Quectel EC-25
 
 ## 2.2-r1
 
