@@ -37,6 +37,7 @@ RDEPENDS_${PN}_append_ccimx6ul = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
 	dey-examples-adc \
+	dey-examples-adc-cmp \
 	dey-examples-can \
 	dey-examples-cloudconnector \ 
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
