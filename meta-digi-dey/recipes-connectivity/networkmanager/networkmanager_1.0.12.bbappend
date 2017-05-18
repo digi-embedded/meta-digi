@@ -9,6 +9,8 @@ SRC_URI += " \
     file://nm.eth0.static \
     file://nm.eth1.dhcp \
     file://nm.eth1.static \
+    file://nm.wlan0.dhcp \
+    file://nm.wlan0.static \
 "
 
 PACKAGECONFIG_remove = "dnsmasq netconfig"
@@ -27,6 +29,7 @@ def ipaddr_to_cidr(iface, d):
 
 ETH0_STATIC_CIDR = "${@ipaddr_to_cidr('eth0', d)}"
 ETH1_STATIC_CIDR = "${@ipaddr_to_cidr('eth1', d)}"
+WLAN0_STATIC_CIDR = "${@ipaddr_to_cidr('wlan0', d)}"
 
 inherit update-rc.d
 
@@ -53,6 +56,13 @@ do_install_append() {
 		-e "s,##ETH1_STATIC_GATEWAY##,${ETH1_STATIC_GATEWAY},g" \
 		-e "s,##ETH1_STATIC_DNS##,${ETH1_STATIC_DNS},g" \
 		${D}${sysconfdir}/NetworkManager/system-connections/nm.eth1
+
+	# Wireless (only IP settings; connection settings need to be provided at runtime)
+	install -m 0600 ${WORKDIR}/nm.wlan0.${WLAN0_MODE} ${D}${sysconfdir}/NetworkManager/system-connections/nm.wlan0
+	sed -i  -e "s,##WLAN0_STATIC_CIDR##,${WLAN0_STATIC_CIDR},g" \
+		-e "s,##WLAN0_STATIC_GATEWAY##,${WLAN0_STATIC_GATEWAY},g" \
+		-e "s,##WLAN0_STATIC_DNS##,${WLAN0_STATIC_DNS},g" \
+		${D}${sysconfdir}/NetworkManager/system-connections/nm.wlan0
 }
 
 # NetworkManager needs to be started after DBUS
