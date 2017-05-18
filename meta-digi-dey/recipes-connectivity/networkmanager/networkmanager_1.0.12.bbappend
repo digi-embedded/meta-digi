@@ -5,6 +5,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 SRC_URI += " \
     file://NetworkManager.conf \
     file://networkmanager-init \
+    file://nm.cellular \
     file://nm.eth0.dhcp \
     file://nm.eth0.static \
     file://nm.eth1.dhcp \
@@ -63,6 +64,20 @@ do_install_append() {
 		-e "s,##WLAN0_STATIC_GATEWAY##,${WLAN0_STATIC_GATEWAY},g" \
 		-e "s,##WLAN0_STATIC_DNS##,${WLAN0_STATIC_DNS},g" \
 		${D}${sysconfdir}/NetworkManager/system-connections/nm.wlan0
+
+	# Cellular
+	if [ -n "${@bb.utils.contains('DISTRO_FEATURES', 'cellular', '1', '', d)}" ]; then
+		install -m 0600 ${WORKDIR}/nm.cellular ${D}${sysconfdir}/NetworkManager/system-connections/nm.cellular
+		[ -z "${CELLULAR_APN}" ] && sed -i -e "/##CELLULAR_APN##/d" ${D}${sysconfdir}/NetworkManager/system-connections/nm.cellular
+		[ -z "${CELLULAR_PIN}" ] && sed -i -e "/##CELLULAR_PIN##/d" ${D}${sysconfdir}/NetworkManager/system-connections/nm.cellular
+		[ -z "${CELLULAR_USER}" ] && sed -i -e "/##CELLULAR_USER##/d" ${D}${sysconfdir}/NetworkManager/system-connections/nm.cellular
+		[ -z "${CELLULAR_PASSWORD}" ] && sed -i -e "/##CELLULAR_PASSWORD##/d" ${D}${sysconfdir}/NetworkManager/system-connections/nm.cellular
+		sed -i  -e "s,##CELLULAR_APN##,${CELLULAR_APN},g" \
+			-e "s,##CELLULAR_PIN##,${CELLULAR_PIN},g" \
+			-e "s,##CELLULAR_USER##,${CELLULAR_USER},g" \
+			-e "s,##CELLULAR_PASSWORD##,${CELLULAR_PASSWORD},g" \
+			${D}${sysconfdir}/NetworkManager/system-connections/nm.cellular
+	fi
 }
 
 # NetworkManager needs to be started after DBUS

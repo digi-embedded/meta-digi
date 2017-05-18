@@ -1,0 +1,10 @@
+[connection]
+id=cellular
+type=gsm
+
+[gsm]
+apn=##CELLULAR_APN##
+number=*99#
+password=##CELLULAR_PASSWORD##
+pin=##CELLULAR_PIN##
+username=##CELLULAR_USER##
