@@ -1,7 +1,7 @@
 /*
  * memwatch.c: Program to read/write from/to memory.
  *
- * Copyright (C) 2006 by Digi International Inc.
+ * Copyright (C) 2006-2017 by Digi International Inc.
  * All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -243,10 +243,10 @@ int main( int argc, char** argv )
 				}
 
 				if( ( verbose < VERB_PRNT_ADDR ) && ( j % 16 == 0 ) ) {
-					printf( "\n0x%08lx: ", address + j );
+					printf( "0x%08lx: ", address + j );
 				}
 				print_hex_formated( rd_val, access );
-
+				printf("\n");
 			} else {
 				if( filename != NULL ) {
 					if( ( ret = read( fd_file, &wr_val, access ) ) != access ) {
