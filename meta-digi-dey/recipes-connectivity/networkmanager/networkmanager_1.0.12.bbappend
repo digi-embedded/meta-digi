@@ -14,6 +14,11 @@ SRC_URI += " \
     file://nm.wlan0.static \
 "
 
+# 'polkit' and 'consolekit' require 'x11' distro feature, so disable them for non-X11 distros
+DEPENDS_remove = "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '', 'polkit', d)}"
+PACKAGECONFIG_remove = "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '', 'consolekit', d)}"
+EXTRA_OECONF += "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '', '--enable-polkit=disabled', d)}"
+
 PACKAGECONFIG_remove = "dnsmasq netconfig"
 PACKAGECONFIG_append = " concheck modemmanager ppp"
 
