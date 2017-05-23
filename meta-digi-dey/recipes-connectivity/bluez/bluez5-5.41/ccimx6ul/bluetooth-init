@@ -69,10 +69,8 @@ bluetooth_init() {
 	HCIATTACH_LOG="/var/log/hciattach.log"
 	killproc hciattach
 	powercycle_gpio "${BT_EN_QCA_GPIO_NR}"
-	if hciattach ttyBt qca ${BT_RATE:-3000000} -t30 ${BT_FLOW:-flow} unused ${BT_MACADDR} >${HCIATTACH_LOG} 2>&1; then
-		echo "[OK]"
-	else
-		echo "[FAIL]"
+	if ! hciattach ttyBt qca ${BT_RATE:-3000000} -t30 ${BT_FLOW:-flow} unused ${BT_MACADDR} >${HCIATTACH_LOG} 2>&1; then
+		BT_ERROR="FAIL (hciattach)"
 	fi
 }
 
