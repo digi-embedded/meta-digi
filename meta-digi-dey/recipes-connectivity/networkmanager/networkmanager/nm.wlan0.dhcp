@@ -8,3 +8,6 @@ ssid=""
 
 [ipv4]
 method=auto
+
+[ipv6]
+method=ignore

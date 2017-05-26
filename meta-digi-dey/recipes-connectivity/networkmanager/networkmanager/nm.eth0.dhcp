@@ -5,3 +5,6 @@ interface-name=eth0
 
 [ipv4]
 method=auto
+
+[ipv6]
+method=ignore

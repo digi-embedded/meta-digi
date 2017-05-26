@@ -10,3 +10,6 @@ ssid=""
 address1=##WLAN0_STATIC_CIDR##,##WLAN0_STATIC_GATEWAY##
 dns=##WLAN0_STATIC_DNS##;
 method=manual
+
+[ipv6]
+method=ignore

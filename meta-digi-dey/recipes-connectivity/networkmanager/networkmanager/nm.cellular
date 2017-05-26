@@ -8,3 +8,6 @@ number=*99#
 password=##CELLULAR_PASSWORD##
 pin=##CELLULAR_PIN##
 username=##CELLULAR_USER##
+
+[ipv6]
+method=ignore
