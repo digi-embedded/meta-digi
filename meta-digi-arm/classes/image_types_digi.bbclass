@@ -122,9 +122,9 @@ do_image_boot_ubifs[imgsuffix] = "."
 #
 # This is needed because otherwise the IMAGE_DEPENDS_<actualtype> is not used and the build fails.
 #
-IMAGE_TYPEDEP_boot = " \
-    ${@bb.utils.contains('IMAGE_FSTYPES', 'boot.ubifs', 'boot.ubifs', '', d)} \
-    ${@bb.utils.contains('IMAGE_FSTYPES', 'boot.vfat', 'boot.vfat', '', d)} \
+IMAGE_DEPENDS_boot = " \
+    ${@bb.utils.contains('IMAGE_FSTYPES', 'boot.ubifs', '${IMAGE_DEPENDS_boot.ubifs}', '', d)} \
+    ${@bb.utils.contains('IMAGE_FSTYPES', 'boot.vfat', '${IMAGE_DEPENDS_boot.vfat}', '', d)} \
 "
 
 ################################################################################
@@ -198,9 +198,9 @@ do_image_recovery_ubifs[imgsuffix] = "."
 #
 # This is needed because otherwise the IMAGE_DEPENDS_<actualtype> is not used and the build fails.
 #
-IMAGE_TYPEDEP_recovery = " \
-    ${@bb.utils.contains('IMAGE_FSTYPES', 'recovery.ubifs', 'recovery.ubifs', '', d)} \
-    ${@bb.utils.contains('IMAGE_FSTYPES', 'recovery.vfat', 'recovery.vfat boot.vfat', '', d)} \
+IMAGE_DEPENDS_recovery = " \
+    ${@bb.utils.contains('IMAGE_FSTYPES', 'recovery.ubifs', '${IMAGE_DEPENDS_recovery.ubifs}', '', d)} \
+    ${@bb.utils.contains('IMAGE_FSTYPES', 'recovery.vfat', '${IMAGE_DEPENDS_recovery.vfat}', '', d)} \
 "
 
 ################################################################################
