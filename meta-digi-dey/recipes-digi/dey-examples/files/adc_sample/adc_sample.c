@@ -196,7 +196,7 @@ int main(int argc, char **argv)
 	int ret, opt, i;
 
 	if (argc <= 2) {
-		show_usage(0);
+		show_usage(1);
 		return EXIT_FAILURE;
 	}
 
