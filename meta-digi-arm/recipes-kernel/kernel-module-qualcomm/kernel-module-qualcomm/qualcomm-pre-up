@@ -78,8 +78,13 @@ case "${REGULATORY_DOMAIN}" in
 	${US_CODE})
 		logger -t qca6564 "Setting US wireless region";;
 	${WW_CODE}|${JP_CODE})
-		logger -t qca6564 "Setting WW (world wide) wireless region"
-		BDATA_SOURCE="${FIRMWARE_DIR}/bdwlan30_World.bin";;
+		if [ -e "${FIRMWARE_DIR}/bdwlan30_World.bin" ]; then
+			logger -t qca6564 "Setting WW (world wide) wireless region"
+			BDATA_SOURCE="${FIRMWARE_DIR}/bdwlan30_World.bin"
+		else
+			logger -t qca6564 "[WARN] No WW (worldwide) board data file, using US"
+		fi
+		;;
 	"")
 		logger -t qca6564 "[WARN] region code not found, using US";;
 	*)
