@@ -39,6 +39,8 @@ else
 		setenv fdt_file uImage-imx6q-ccimx6sbc-wb.dtb
 	elif test "${module_variant}" = "0x13"; then
 		setenv fdt_file uImage-imx6dl-ccimx6sbc-wb.dtb
+	elif test "${module_variant}" = "0x14"; then
+		setenv fdt_file uImage-imx6q-ccimx6sbc.dtb
 	else
 		echo "------ Using default fdt_file"
 	fi
