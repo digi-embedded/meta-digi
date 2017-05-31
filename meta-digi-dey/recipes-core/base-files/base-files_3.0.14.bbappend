@@ -16,3 +16,5 @@ do_install_append_ccimx6() {
 	install -d ${D}${sysconfdir}/${IMAGE_PKGTYPE}-postinsts
 	install -m 0755 ${WORKDIR}/resize-ext4fs.sh ${D}${sysconfdir}/${IMAGE_PKGTYPE}-postinsts/
 }
+
+CONFFILES_${PN} += "${sysconfdir}/sysctl.conf"
