@@ -18,7 +18,10 @@
 # Only for static method
 [ "${METHOD}" != "static" ] && exit 0
 
-RESOLVCONF="$(readlink /etc/resolv.conf)"
+RESOLVCONF="/etc/resolv.conf"
+
+# For symlinks reset to the destination file
+[ -h "${RESOLVCONF}" ] && RESOLVCONF="$(readlink ${RESOLVCONF})"
 
 NAMESERVERS=""
 for NS in ${IF_DNS_NAMESERVER} ${IF_DNS_NAMESERVERS}; do
