@@ -65,6 +65,7 @@ LIC_FILES_CHKSUM = " \
 
 SRC_URI = " \
     http:///not/exist/greengrass-linux-armv6l-${PV}-release.tar.gz \
+    file://greengrass-init \
     file://0001-greengrassd-remove-bashisms-in-launcher-shell-script.patch \
     file://0002-greengrassd-wait-some-time-to-check-GG-daemon-status.patch \
 "
@@ -85,7 +86,7 @@ python() {
 
 S = "${WORKDIR}/${BPN}"
 
-inherit useradd
+inherit update-rc.d useradd
 
 GG_USESYSTEMD = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'yes', 'no', d)}"
 
@@ -97,6 +98,11 @@ do_install() {
 	install -d ${D}/${BPN}
 	tar --no-same-owner --exclude='./patches' --exclude='./.pc' -cpf - -C ${S} . \
 		| tar --no-same-owner -xpf - -C ${D}/${BPN}
+
+	# Install wrapper bootscript to launch Greengrass core on boot
+	install -d ${D}${sysconfdir}/init.d
+	install -m 0755 ${WORKDIR}/greengrass-init ${D}${sysconfdir}/init.d/greengrass
+	sed -i -e "s,##GG_INSTALL_DIR##,/${BPN},g" ${D}${sysconfdir}/init.d/greengrass
 
 	# Configure whether to use systemd or not
 	sed -i -e "/useSystemd/{s,\[yes|no],${GG_USESYSTEMD},g}" ${D}/${BPN}/configuration/config.json
@@ -136,7 +142,10 @@ pkg_postinst_${PN}() {
 	fi
 }
 
-FILES_${PN} = "/${BPN}"
+FILES_${PN} = "/${BPN} ${sysconfdir}"
+
+INITSCRIPT_NAME = "greengrass"
+INITSCRIPT_PARAMS = "defaults 80 20"
 
 USERADD_PACKAGES = "${PN}"
 GROUPADD_PARAM_${PN} = "-r ggc_group"
