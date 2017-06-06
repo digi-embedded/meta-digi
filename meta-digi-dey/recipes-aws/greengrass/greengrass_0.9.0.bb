@@ -93,12 +93,12 @@ do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 
 do_install() {
-	install -d ${D}/opt/${BPN}
+	install -d ${D}/${BPN}
 	tar --no-same-owner --exclude='./patches' --exclude='./.pc' -cpf - -C ${S} . \
-		| tar --no-same-owner -xpf - -C ${D}/opt/${BPN}
+		| tar --no-same-owner -xpf - -C ${D}/${BPN}
 
 	# Configure whether to use systemd or not
-	sed -i -e "/useSystemd/{s,\[yes|no],${GG_USESYSTEMD},g}" ${D}/opt/${BPN}/configuration/config.json
+	sed -i -e "/useSystemd/{s,\[yes|no],${GG_USESYSTEMD},g}" ${D}/${BPN}/configuration/config.json
 }
 
 pkg_postinst_${PN}() {
@@ -135,7 +135,7 @@ pkg_postinst_${PN}() {
 	fi
 }
 
-FILES_${PN} = "/opt/${BPN}"
+FILES_${PN} = "/${BPN}"
 
 USERADD_PACKAGES = "${PN}"
 GROUPADD_PARAM_${PN} = "-r ggc_group"
