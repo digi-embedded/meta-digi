@@ -1,0 +1,35 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Tue, 6 Jun 2017 18:34:10 +0200
+Subject: [PATCH] greengrassd: wait some time to check GG daemon status after
+ launch
+
+GG daemon may die due to misconfigurations, but this takes a bit of
+time, so wait a bit to check whether the daemon is still alive.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ greengrassd | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/greengrassd b/greengrassd
+index 1d4b3ad6dd22..50c922bca3ae 100755
+--- a/greengrassd
++++ b/greengrassd
+@@ -134,13 +134,16 @@ start() {
+     if nohup $COMMAND >/dev/null 2>$CRASH_LOG < /dev/null &
+     then
+         pid=$!
++        # Give GG daemon some time to initialize before checking
++        # whether it's still alive.
++        sleep .5
+         if [ -e "/proc/$pid" ]
+         then
+             echo "PID: $pid"
+             echo "$pid" > $PID_FILE
+             echo "Greengrass daemon started"
+         else
+-            echo "Greengrass daemon $pid crashed after start"
++            echo "Greengrass daemon $pid crashed after start: check ${CRASH_LOG}"
+             exit 1
+         fi
+     else

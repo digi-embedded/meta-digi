@@ -66,6 +66,7 @@ LIC_FILES_CHKSUM = " \
 SRC_URI = " \
     http:///not/exist/greengrass-linux-armv6l-${PV}-release.tar.gz \
     file://0001-greengrassd-remove-bashisms-in-launcher-shell-script.patch \
+    file://0002-greengrassd-wait-some-time-to-check-GG-daemon-status.patch \
 "
 SRC_URI[md5sum] = "eb7e6dbdfe00e51db8b7ffbd2284ae59"
 SRC_URI[sha256sum] = "24da4016345eeeb6a86067619d385015139437fbd16dba9a91461758692f933f"
