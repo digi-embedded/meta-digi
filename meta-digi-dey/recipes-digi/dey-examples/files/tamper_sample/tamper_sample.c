@@ -97,7 +97,7 @@ static void tamper_event_ack(mca_tamper_t *tdata)
 	}
 
 	/* Finally, acknowledge the event */
-	ret = write_sysfs_int("tamper_events", tamper_sysfs_dir, 2);
+	ret = write_sysfs_string("tamper_events", tamper_sysfs_dir, "ack");
 	if (ret < 0) {
 		fprintf(stdout, "Failed to acknowledge tamper%d event\n",
 			tdata->iface);
