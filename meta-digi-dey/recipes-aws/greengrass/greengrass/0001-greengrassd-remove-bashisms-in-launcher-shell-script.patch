@@ -1,16 +1,16 @@
 From: Javier Viguera <javier.viguera@digi.com>
-Date: Wed, 31 May 2017 13:52:30 +0200
+Date: Wed, 7 Jun 2017 20:44:56 +0200
 Subject: [PATCH] greengrassd: remove bashisms in launcher shell script
 
 So it runs properly in other Posix shells (like the one in Busybox)
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
- greengrassd | 20 ++++++++++----------
- 1 file changed, 10 insertions(+), 10 deletions(-)
+ greengrassd | 28 ++++++++++++++--------------
+ 1 file changed, 14 insertions(+), 14 deletions(-)
 
 diff --git a/greengrassd b/greengrassd
-index c312d23dda3c..1d4b3ad6dd22 100755
+index cadaa6b0101e..e24422af2f3d 100755
 --- a/greengrassd
 +++ b/greengrassd
 @@ -1,4 +1,4 @@
@@ -19,7 +19,7 @@ index c312d23dda3c..1d4b3ad6dd22 100755
  
  ##########Environment Requirement for Greengrass Daemon##########
  # by default, the daemon assumes it's going to be launched from a directory
-@@ -35,19 +35,19 @@ setup() {
+@@ -38,19 +38,19 @@ setup() {
      mkdir -p $GGC_ROOT_FS
  
      # Mask greengrass directory for containers
@@ -40,10 +40,10 @@ index c312d23dda3c..1d4b3ad6dd22 100755
  
 -    if [[ "$PROT_HARDLINK_VAL" -ne 1 || "$PROT_SOFTLINK_VAL" -ne 1 ]];  then
 +    if [ "$PROT_HARDLINK_VAL" -ne 1 ] || [ "$PROT_SOFTLINK_VAL" -ne 1 ];  then
-         echo "Insecure configuration detected: No hardlink/softlink protection" | tee -a $CRASH_LOG
+         echo "AWS Greengrass detected insecure OS configuration: No hardlink/softlink protection enabled." | tee -a $CRASH_LOG
          exit 1
      fi
-@@ -124,7 +124,7 @@ validateEnvironment() {
+@@ -127,7 +127,7 @@ validateEnvironment() {
  
  start() {
      setup
@@ -52,21 +52,52 @@ index c312d23dda3c..1d4b3ad6dd22 100755
          validatePlatformSecurity
      fi
  
-@@ -169,7 +169,7 @@ stop() {
-                         break
-                     fi
-                 done;
--                echo -e "\nStopped greengrass daemon"
-+                printf "\nStopped greengrass daemon\n"
-                 rm $PID_FILE
-             else
-                 echo "Unable to kill the process with pid: $PID"
-@@ -186,16 +186,16 @@ usage() {
+@@ -139,7 +139,7 @@ start() {
+     then
+         pid=$!
+         # sleep 5 seconds to wait for daemon to start or exit
+-        for i in {1..5}; do
++        for i in $(seq 1 5); do
+             echo -n "."
+             sleep 1
+         done
+@@ -147,10 +147,10 @@ start() {
+         if [ -e "/proc/$pid" ]
+         then
+             echo "$pid" > $PID_FILE
+-            echo -e "\e[0;32mGreengrass daemon started with PID: $pid\e[0m"
++            printf "\e[0;32mGreengrass daemon started with PID: $pid\e[0m\n"
+         else
+             echo "Greengrass daemon $pid failed to start"
+-            echo -e "\e[0;31m$(cat $CRASH_LOG)\e[0m"
++            printf "\e[0;31m$(cat $CRASH_LOG)\e[0m\n"
+             exit 1
+         fi
+     else
+@@ -179,7 +179,7 @@ stop() {
+              # If the pid no longer exists, we're done, remove the pid file and exit. Otherwise, just increment the loop counter
+              if [ ! -e "/proc/$PID" ]; then
+                  rm $PID_FILE
+-                 echo -e "\nStopped greengrass daemon, exiting with success"
++                 printf "\nStopped greengrass daemon, exiting with success\n"
+                  break
+              else
+                  total_sleep_seconds=$(($total_sleep_seconds+1))
+@@ -194,7 +194,7 @@ stop() {
+ 
+          if [ $total_sleep_seconds -ge $MAX_DAEMON_KILL_WAIT_SECONDS ]; then
+             # If we are here, we never exited in the previous loop and the pid still exists. Exit with failure.
+-            echo -e "\nProcess with pid $PID still alive after timeout of $MAX_DAEMON_KILL_WAIT_SECONDS seconds. Unable to kill process, exiting with failure."
++            printf "\nProcess with pid $PID still alive after timeout of $MAX_DAEMON_KILL_WAIT_SECONDS seconds. Unable to kill process, exiting with failure.\n"
+             exit 1
+          fi
+      fi
+@@ -204,16 +204,16 @@ usage() {
      echo ""
      echo "Usage: $0 [FLAGS] {start|stop|restart}"
      echo ""
--    echo -e "[FLAGS]: -i, --insecure \t Run GGC in insecure mode, (highly discouraged!)"
-+    printf "[FLAGS]: -i, --insecure \t Run GGC in insecure mode, (highly discouraged!)\n"
+-    echo -e "[FLAGS]: -i, --insecure \t Run GGC in insecure mode without hardlink/softlink protection, (highly discouraged for production use)"
++    printf "[FLAGS]: -i, --insecure \t Run GGC in insecure mode without hardlink/softlink protection, (highly discouraged for production use)\n"
      echo ""
      exit 1
  }
