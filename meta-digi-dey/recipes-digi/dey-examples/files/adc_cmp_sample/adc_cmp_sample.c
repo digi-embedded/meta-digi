@@ -27,10 +27,6 @@
 
 #define BUFFER_LEN		20
 
-#define USAGE								\
-	"Usage:\n"							\
-	"adc_cmp_sample -c channel -l THRESH_LOW [options]\n\n"
-
 #define FULL_USAGE							\
 	"Usage:\n"							\
 	"adc_cmp_sample -c channel [options]\n\n"			\
@@ -50,9 +46,9 @@ typedef struct cmp {
 	bool raw;
 } cmp_t;
 
-static void show_usage(int full)
+static void show_usage()
 {
-	fprintf(stdout, "%s", full ? FULL_USAGE : USAGE);
+	fprintf(stdout, "%s", FULL_USAGE);
 }
 
 static int read_adc_sample_sysfs(cmp_t *cmp, long int *val)
@@ -340,7 +336,7 @@ int main(int argc, char **argv)
 	struct iio_event_data event;
 
 	if (argc <= 3) {
-		show_usage(0);
+		show_usage();
 		return EXIT_FAILURE;
 	}
 
@@ -377,10 +373,10 @@ int main(int argc, char **argv)
 			cmp.raw = false;
 			break;
 		case '?':
-			show_usage(1);
+			show_usage();
 			return EXIT_SUCCESS;
 		default:
-			show_usage(0);
+			show_usage();
 			return EXIT_FAILURE;
 		}
 	}
