@@ -35,7 +35,6 @@
 	"  -h : Threshold_high higher limit of the comparator window\n"	\
 	"  -l : Threshold_low lower limit of the comparator window\n"	\
 	"  -e : edges enabled: 'rising', 'falling' or 'both'\n"	\
-	"  -s : sample_rate how often to sample the input, in 100 ms units.\n"\
 	"  -v : use V for output and thresholds instead of raw values.\n"\
 	"  -? : help\n\n"
 
@@ -264,7 +263,7 @@ exit:
 }
 
 static int configure_comparator(cmp_t *cmp, uint16_t th_l, uint16_t th_h,
-				uint16_t srate, char *edge)
+				char *edge)
 {
 	char *path;
 	char buffer[BUFFER_LEN];
@@ -296,11 +295,6 @@ static int configure_comparator(cmp_t *cmp, uint16_t th_l, uint16_t th_h,
 	if (ret < 0)
 		goto exit;
 
-	/* Configure Sample rate */
-	sprintf(path, "%s/in_voltage%u_cmp_rate",
-		cmp->sysfs_dir, cmp->channel);
-	sprintf(buffer, "%d", srate);
-
 	ret = write_in_path(path, buffer);
 	if (ret < 0)
 		goto exit;
@@ -326,7 +320,6 @@ int main(int argc, char **argv)
 	char *chrdev_path = NULL;
 	char *edge = NULL;
 	int dev_num;
-	unsigned int sample_rate = 1;
 	double threshold_low = 0;
 	double threshold_high = 0xFFFF;
 	cmp_t cmp = {
@@ -340,7 +333,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	while ((opt = getopt(argc, argv, "c:h:l:s:e:v?")) > 0) {
+	while ((opt = getopt(argc, argv, "c:h:l:e:v?")) > 0) {
 		switch (opt) {
 		case 'c':
 			cmp.channel = strtoul(optarg, NULL, 10);
@@ -350,9 +343,6 @@ int main(int argc, char **argv)
 			break;
 		case 'l':
 			threshold_low = atof(optarg);
-			break;
-		case 's':
-			sample_rate = strtoul(optarg, NULL, 10);
 			break;
 		case 'e':
 			if (!strcmp(optarg, "rising") &&
@@ -420,8 +410,7 @@ int main(int argc, char **argv)
 		threshold_low = threshold_low * 1000 / cmp.voltage_scale;
 	}
 
-	ret = configure_comparator(&cmp, threshold_low, threshold_high,
-				   sample_rate, edge);
+	ret = configure_comparator(&cmp, threshold_low, threshold_high, edge);
 	if (ret < 0)
 		goto exit;
 
