@@ -3,8 +3,8 @@
 SUMMARY = "AWS IoT device SDK Demo"
 DESCRIPTION = "Demo application for AWS IoT device SDK"
 SECTION = "base"
-LICENSE = "MPL-2.0"
-LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
+LICENSE = "ISC"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
 
 DEPENDS = "awsiotsdk-c confuse"
 
