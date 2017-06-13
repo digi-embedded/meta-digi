@@ -17,19 +17,9 @@
 #
 # ***************************************************************************
 
-SAMPLES_SUBDIR := samples/linux
-
-EXAMPLES := $(SAMPLES_SUBDIR)/shadow_sample \
-            $(SAMPLES_SUBDIR)/shadow_sample_console_echo \
-            $(SAMPLES_SUBDIR)/subscribe_publish_sample
-
-SUBDIRS := src $(EXAMPLES)
+SUBDIRS := src
 
 all: $(SUBDIRS)
-
-$(SAMPLES_SUBDIR)/shadow_sample: src
-$(SAMPLES_SUBDIR)/shadow_sample_console_echo: src
-$(SAMPLES_SUBDIR)/subscribe_publish_sample: src
 
 .PHONY: $(SUBDIRS)
 $(SUBDIRS):

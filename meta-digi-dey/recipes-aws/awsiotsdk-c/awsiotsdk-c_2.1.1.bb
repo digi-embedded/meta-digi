@@ -10,11 +10,9 @@ DEPENDS = "mbedtls"
 
 SRC_URI = " \
     https://github.com/aws/aws-iot-device-sdk-embedded-C/archive/v${PV}.tar.gz \
-    file://0001-aws-iot-samples-modify-provided-samples-to-work-in-o.patch \
     file://aws_iot_config.h.template \
     file://awsiotsdk.pc \
     file://Makefile \
-    file://Makefile.app \
     file://Makefile.lib \
 "
 
@@ -48,17 +46,9 @@ do_configure() {
 	sed -i -e "s,##AWS_IOT_MQTT_MIN_RECONNECT_WAIT_INTERVAL##,${AWS_IOT_MQTT_MIN_RECONNECT_WAIT_INTERVAL},g" "${S}/include/aws_iot_config.h"
 	sed -i -e "s,##AWS_IOT_MQTT_MAX_RECONNECT_WAIT_INTERVAL##,${AWS_IOT_MQTT_MAX_RECONNECT_WAIT_INTERVAL},g" "${S}/include/aws_iot_config.h"
 
-	# Remove the examples header files.
-	rm -f ${S}/samples/linux/shadow_sample/aws_iot_config.h
-	rm -f ${S}/samples/linux/shadow_sample_console_echo/aws_iot_config.h
-	rm -f ${S}/samples/linux/subscribe_publish_sample/aws_iot_config.h
-
 	# Copy the Makefiles.
 	cp -f ${WORKDIR}/Makefile ${S}
 	cp -f ${WORKDIR}/Makefile.lib ${S}/src/Makefile
-	cp -f ${WORKDIR}/Makefile.app ${S}/samples/linux/shadow_sample/Makefile
-	cp -f ${WORKDIR}/Makefile.app ${S}/samples/linux/shadow_sample_console_echo/Makefile
-	cp -f ${WORKDIR}/Makefile.app ${S}/samples/linux/subscribe_publish_sample/Makefile
 }
 
 do_install() {
@@ -89,13 +79,11 @@ do_install() {
 	install -m 0644 ${AWS_IOT_CERTS_DIR}/${AWS_IOT_PRIVATE_KEY_FILENAME} ${D}${sysconfdir}/ssl/certs/
 }
 
-PACKAGES =+ "${PN}-cert ${PN}-examples"
+PACKAGES =+ "${PN}-cert"
 
 FILES_${PN}-cert = "${sysconfdir}/ssl/certs/"
-FILES_${PN}-examples = "${bindir}"
 
 RDEPENDS_${PN} = "${PN}-cert"
-RDEPENDS_${PN}-examples = "${PN}-cert"
 
 ALLOW_EMPTY_${PN} = "1"
 
