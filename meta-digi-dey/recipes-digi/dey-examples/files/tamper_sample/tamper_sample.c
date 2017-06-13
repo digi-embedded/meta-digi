@@ -86,11 +86,10 @@ static void tamper_event_actions(mca_tamper_t *tdata)
 static void tamper_event_ack(mca_tamper_t *tdata)
 {
 	int ret;
-	char *tamper_sysfs_dir;
+	char tamper_sysfs_dir[sizeof("/sys/bus/iio/devices/iio:deviceX")];
 
-	ret = asprintf(&tamper_sysfs_dir,
-		       "/sys/bus/iio/devices/iio:device%d",
-		       tdata->dev_num);
+	ret = sprintf(tamper_sysfs_dir,
+		      "/sys/bus/iio/devices/iio:device%d", tdata->dev_num);
 	if (ret < 0) {
 		fprintf(stdout, "Failed to build event ack file name\n");
 		return;
@@ -98,15 +97,14 @@ static void tamper_event_ack(mca_tamper_t *tdata)
 
 	/* Finally, acknowledge the event */
 	ret = write_sysfs_string("tamper_events", tamper_sysfs_dir, "ack");
-	if (ret < 0) {
+	if (ret < 0)
 		fprintf(stdout, "Failed to acknowledge tamper%d event\n",
 			tdata->iface);
-	}
 }
 
-static void process_tamper_event(mca_tamper_t *tdata)
+static void process_tamper_event(mca_tamper_t *tdata, bool check_event)
 {
-	if (!event_is_tamper(&tdata->event)) {
+	if (check_event && !event_is_tamper(&tdata->event)) {
 		fprintf(stdout, "Unknown event: time: %lld, id: %llx\n",
 			tdata->event.timestamp, tdata->event.id);
 		return;
@@ -115,6 +113,48 @@ static void process_tamper_event(mca_tamper_t *tdata)
 	tamper_event_log(tdata);
 	tamper_event_actions(tdata);
 	tamper_event_ack(tdata);
+}
+
+static int check_tamper_event(mca_tamper_t *tdata)
+{
+	int ret;
+	char tamper_sysfs_dir[sizeof("/sys/bus/iio/devices/iio:deviceX")];
+	char str[50];
+
+	ret = sprintf(tamper_sysfs_dir,
+		      "/sys/bus/iio/devices/iio:device%d", tdata->dev_num);
+	if (ret < 0) {
+		fprintf(stdout, "Failed to build event file name\n");
+		return -1;
+	}
+
+	ret = read_sysfs_string("tamper_events", tamper_sysfs_dir, str);
+	if (ret < 0) {
+		fprintf(stdout, "Failed to read tamper%d event\n",
+			tdata->iface);
+		return -1;
+	}
+
+	if (!strncmp(str, "none", strlen("none"))) {
+		/* Continue to wait for tamper event to happen */
+		return 0;
+	} else if (!strncmp(str, "signaled+acked", strlen("signaled+acked"))) {
+		fprintf(stdout, "Tamper event already acknowledged, not taking actions\n");
+		return 1;
+	} else if (!strncmp(str, "signaled", strlen("signaled"))) {
+		tdata->event.timestamp = read_sysfs_posint("timestamp",
+							   tamper_sysfs_dir);
+		if (tdata->event.timestamp < 0)
+			fprintf(stdout, "Failed to read timestamp for tamper%d!\n",
+				tdata->iface);
+
+		fprintf(stdout, "Tamper event was already signaled.\n");
+		process_tamper_event(tdata, false);
+		return 1;
+	}
+
+	fprintf(stdout, "Unkown status for tamper%d: '%s'\n", tdata->iface, str);
+	return -1;
 }
 
 int main(int argc, char **argv)
@@ -169,6 +209,10 @@ int main(int argc, char **argv)
 		goto error_ret2;
 	}
 
+	ret = check_tamper_event(tdata);
+	if (ret)
+		goto error_ret3;
+
 	fd = open(tdata->chrdev_name, 0);
 	if (fd < 0) {
 		fprintf(stdout, "Failed to open %s\n", tdata->chrdev_name);
@@ -201,7 +245,7 @@ int main(int argc, char **argv)
 			}
 		}
 
-		process_tamper_event(tdata);
+		process_tamper_event(tdata, true);
 	}
 
 	close(tdata->event_fd);
