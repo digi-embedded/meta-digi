@@ -69,9 +69,11 @@ Documentation is available online on the Digi documentation site:
   * Updated Qt 5.7
   * Updated ModemManager with validated support for:
     * Digi's XBee Cellular LTE Cat 1 (USA/Verizon), with P/N XBC-V1-UT-001
+    * Digi's XBee Cellular 3G Global, with P/N XBC-M5-UT-001
+    * U-Blox's TOBY L-200/L-210
     * Telit's LE910 and HE910
     * Huawei's ME909u
-    * Quectel's EC21
+    * Quectel's EC21 and EC25
   * Modified default networking settings:
     * Defalt to dynamic IP addresses assignments
     * Default station and softAP concurrent wireless mode
