@@ -54,36 +54,15 @@ do_configure() {
 do_install() {
 	oe_runmake DESTDIR=${D} install
 
-	# Check if certificate variables are defined and files exist.
-	if [ -z "${AWS_IOT_CERTS_DIR}" ]; then
-		bberror "Undefined variable AWS_IOT_CERTS_DIR. Define it in your project 'local.conf'."
-		return -1
-	elif [ ! -d "${AWS_IOT_CERTS_DIR}" ]; then
-		bberror "Unable to find defined AWS_IOT_CERTS_DIR ('${AWS_IOT_CERTS_DIR}')."
-		return -1
-	elif [ ! -f "${AWS_IOT_CERTS_DIR}/${AWS_IOT_ROOT_CA_FILENAME}" ]; then
-		bberror "Unable to find defined AWS_IOT_ROOT_CA_FILENAME ('${AWS_IOT_ROOT_CA_FILENAME}') in '${AWS_IOT_CERTS_DIR}'."
-		return -1
-	elif [ ! -f "${AWS_IOT_CERTS_DIR}/${AWS_IOT_CERTIFICATE_FILENAME}" ]; then
-		bberror "Unable to find defined AWS_IOT_CERTIFICATE_FILENAME ('${AWS_IOT_CERTIFICATE_FILENAME}') in '${AWS_IOT_CERTS_DIR}'."
-		return -1
-	elif [ ! -f "${AWS_IOT_CERTS_DIR}/${AWS_IOT_PRIVATE_KEY_FILENAME}" ]; then
-		bberror "Unable to find defined AWS_IOT_PRIVATE_KEY_FILENAME ('${AWS_IOT_PRIVATE_KEY_FILENAME}') in '${AWS_IOT_CERTS_DIR}'."
-		return -1
+	# Install certificates only if they exist.
+	if [ -f "${AWS_IOT_CERTS_DIR}/${AWS_IOT_ROOT_CA_FILENAME}" ] && \
+	   [ -f "${AWS_IOT_CERTS_DIR}/${AWS_IOT_CERTIFICATE_FILENAME}" ] && \
+	   [ -f "${AWS_IOT_CERTS_DIR}/${AWS_IOT_PRIVATE_KEY_FILENAME}" ]; then
+		install -m 0644 "${AWS_IOT_CERTS_DIR}/${AWS_IOT_ROOT_CA_FILENAME}" ${D}${sysconfdir}/ssl/certs/
+		install -m 0644 "${AWS_IOT_CERTS_DIR}/${AWS_IOT_CERTIFICATE_FILENAME}" ${D}${sysconfdir}/ssl/certs/
+		install -m 0644 "${AWS_IOT_CERTS_DIR}/${AWS_IOT_PRIVATE_KEY_FILENAME}" ${D}${sysconfdir}/ssl/certs/
 	fi
-
-	# Install certificates.
-	install -d ${D}${sysconfdir}/ssl/certs
-	install -m 0644 ${AWS_IOT_CERTS_DIR}/${AWS_IOT_ROOT_CA_FILENAME} ${D}${sysconfdir}/ssl/certs/
-	install -m 0644 ${AWS_IOT_CERTS_DIR}/${AWS_IOT_CERTIFICATE_FILENAME} ${D}${sysconfdir}/ssl/certs/
-	install -m 0644 ${AWS_IOT_CERTS_DIR}/${AWS_IOT_PRIVATE_KEY_FILENAME} ${D}${sysconfdir}/ssl/certs/
 }
-
-PACKAGES =+ "${PN}-cert"
-
-FILES_${PN}-cert = "${sysconfdir}/ssl/certs/"
-
-RDEPENDS_${PN} = "${PN}-cert"
 
 ALLOW_EMPTY_${PN} = "1"
 
