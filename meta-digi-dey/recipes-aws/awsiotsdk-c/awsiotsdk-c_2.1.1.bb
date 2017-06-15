@@ -9,7 +9,7 @@ LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=acc7a1bf87c055789657b148939e4b40"
 DEPENDS = "mbedtls"
 
 SRC_URI = " \
-    https://github.com/aws/aws-iot-device-sdk-embedded-C/archive/v${PV}.tar.gz \
+    https://github.com/aws/aws-iot-device-sdk-embedded-C/archive/v${PV}.tar.gz;downloadfilename=${BP}.tar.gz \
     file://aws_iot_config.h.template \
     file://awsiotsdk.pc \
     file://Makefile \
@@ -58,11 +58,16 @@ do_install() {
 	if [ -f "${AWS_IOT_CERTS_DIR}/${AWS_IOT_ROOT_CA_FILENAME}" ] && \
 	   [ -f "${AWS_IOT_CERTS_DIR}/${AWS_IOT_CERTIFICATE_FILENAME}" ] && \
 	   [ -f "${AWS_IOT_CERTS_DIR}/${AWS_IOT_PRIVATE_KEY_FILENAME}" ]; then
+		install -d ${D}${sysconfdir}/ssl/certs
 		install -m 0644 "${AWS_IOT_CERTS_DIR}/${AWS_IOT_ROOT_CA_FILENAME}" ${D}${sysconfdir}/ssl/certs/
 		install -m 0644 "${AWS_IOT_CERTS_DIR}/${AWS_IOT_CERTIFICATE_FILENAME}" ${D}${sysconfdir}/ssl/certs/
 		install -m 0644 "${AWS_IOT_CERTS_DIR}/${AWS_IOT_PRIVATE_KEY_FILENAME}" ${D}${sysconfdir}/ssl/certs/
 	fi
 }
+
+PACKAGES =+ "${PN}-cert"
+
+FILES_${PN}-cert = "${sysconfdir}/ssl/certs/"
 
 ALLOW_EMPTY_${PN} = "1"
 

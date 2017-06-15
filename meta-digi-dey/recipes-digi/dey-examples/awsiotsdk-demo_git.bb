@@ -45,5 +45,7 @@ do_install() {
 	oe_runmake DESTDIR=${D} install
 }
 
+RRECOMMENDS_${PN} += "awsiotsdk-c-cert"
+
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
