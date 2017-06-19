@@ -243,10 +243,11 @@ int main( int argc, char** argv )
 				}
 
 				if( ( verbose < VERB_PRNT_ADDR ) && ( j % 16 == 0 ) ) {
+					if (j > 0)
+						printf("\n");
 					printf( "0x%08lx: ", address + j );
 				}
 				print_hex_formated( rd_val, access );
-				printf("\n");
 			} else {
 				if( filename != NULL ) {
 					if( ( ret = read( fd_file, &wr_val, access ) ) != access ) {
@@ -263,6 +264,7 @@ int main( int argc, char** argv )
 			}
 			virt_addr += access;
 		}
+		printf("\n");
 
 		if( munmap( map_base, MAP_SIZE ) == -1 ) {
 			fprintf( stderr, "Error unmapping memory\n" );
