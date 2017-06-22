@@ -25,7 +25,7 @@ SRC_URI = "${CC_GIT_URI};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git/awsiot-sample"
 
-inherit awsiotsdk-c pkgconfig
+inherit aws-iot pkgconfig
 
 EXTRA_OEMAKE += "'LOG_FLAGS=${@get_log_level(d)}'"
 

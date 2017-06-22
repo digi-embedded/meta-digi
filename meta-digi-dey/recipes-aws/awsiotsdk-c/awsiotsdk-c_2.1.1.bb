@@ -21,7 +21,7 @@ SRC_URI[sha256sum] = "74d434b3258654cea048b20eb52d4fc627f5c87e8727ce180a1d529e32
 
 S = "${WORKDIR}/aws-iot-device-sdk-embedded-C-${PV}"
 
-inherit awsiotsdk-c pkgconfig
+inherit aws-iot pkgconfig
 
 EXTRA_OEMAKE += "'LOG_FLAGS=${@get_log_level(d)}'"
 
