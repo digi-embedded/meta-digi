@@ -372,6 +372,9 @@ fi
 # Give some time for the devices to settle down
 sleep 2
 
+# Run all shell scripts in postinstall folder
+run-parts /etc/*-postinsts
+
 # Setup fw_printenv.
 mkdir -p /var/lock
 
