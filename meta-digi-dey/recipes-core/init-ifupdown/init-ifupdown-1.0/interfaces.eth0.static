@@ -1,7 +1,0 @@
-
-auto eth0
-iface eth0 inet static
-        address ##ETH0_STATIC_IP##
-        netmask ##ETH0_STATIC_NETMASK##
-        gateway ##ETH0_STATIC_GATEWAY##
-        dns-nameservers ##ETH0_STATIC_DNS##
