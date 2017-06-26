@@ -12,8 +12,9 @@ SRCREV = "b0ae2aa45bbba54600b537e90cb1aca34f2d1a13"
 
 SRC_URI = " \
     ${CAF_MIRROR};destsuffix=${PV};branch=${SRCBRANCH} \
-    file://qualcomm-pre-up \
+    file://80-sdio-qcom.rules \
     file://modprobe-qualcomm.conf \
+    file://qualcomm.sh \
     file://0001-qcacld-Fix-compiling-errors-when-BUILD_DEBUG_VERSION.patch \
     file://0002-Update-cfg80211_vendor_event_alloc-call-for-newer-ke.patch \
     file://0003-wlan_hdd_main-Update-cfg80211_ap_stopped-to-nl80211_.patch \
@@ -56,15 +57,16 @@ do_compile_prepend() {
 }
 
 do_install_append() {
-	install -d ${D}${sysconfdir}/network/if-pre-up.d
-	install -m 0755 ${WORKDIR}/qualcomm-pre-up ${D}${sysconfdir}/network/if-pre-up.d/qualcomm
 	install -d ${D}${sysconfdir}/modprobe.d
 	install -m 0644 ${WORKDIR}/modprobe-qualcomm.conf ${D}${sysconfdir}/modprobe.d/qualcomm.conf
+	install -d ${D}${sysconfdir}/udev/rules.d ${D}${sysconfdir}/udev/scripts
+	install -m 0644 ${WORKDIR}/80-sdio-qcom.rules ${D}${sysconfdir}/udev/rules.d/
+	install -m 0755 ${WORKDIR}/qualcomm.sh ${D}${sysconfdir}/udev/scripts/
 }
 
 FILES_${PN} += " \
-    ${sysconfdir}/network/if-pre-up.d/qualcomm \
     ${sysconfdir}/modprobe.d/qualcomm.conf \
+    ${sysconfdir}/udev/ \
 "
 
 COMPATIBLE_MACHINE = "(ccimx6ul)"
