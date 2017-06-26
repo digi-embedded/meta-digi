@@ -85,3 +85,26 @@ def get_log_level(d):
 
     return log_flags
 
+#######################
+# AWS Greengrass Core #
+#######################
+
+#
+# Verisign root CA server certificate used to authenticate the AWS IoT server.
+#
+# https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem
+#
+AWS_GGCORE_ROOT_CA ?= "aws-root-ca.pem"
+
+# Greengrass core device certificate
+AWS_GGCORE_CERTIFICATE ?= "gg-core.pem"
+
+# Greengrass core device private key
+AWS_GGCORE_PRIVATE_KEY ?= "gg-core.key"
+
+# Greengrass core Thing ARN
+AWS_GGCORE_THING_ARN ?= ""
+
+# AWS IoT endpoint (check your account)
+# CLI: aws iot describe-endpoint
+AWS_GGCORE_IOT_HOST ?= ""

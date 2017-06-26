@@ -93,7 +93,7 @@ python() {
 
 S = "${WORKDIR}/${BPN}"
 
-inherit update-rc.d useradd
+inherit aws-iot update-rc.d useradd
 
 GG_USESYSTEMD = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'yes', 'no', d)}"
 
@@ -117,6 +117,29 @@ do_install() {
 	install -d ${D}${sysconfdir}/init.d
 	install -m 0755 ${WORKDIR}/greengrass-init ${D}${sysconfdir}/init.d/greengrass
 	sed -i -e "s,##GG_INSTALL_DIR##,/${BPN},g" ${D}${sysconfdir}/init.d/greengrass
+
+	# If certificates do exist, install them and update the config file
+	if [ -f "${AWS_IOT_CERTS_DIR}/${AWS_GGCORE_ROOT_CA}" ] && \
+	   [ -f "${AWS_IOT_CERTS_DIR}/${AWS_GGCORE_CERTIFICATE}" ] && \
+	   [ -f "${AWS_IOT_CERTS_DIR}/${AWS_GGCORE_PRIVATE_KEY}" ]; then
+		install -m 0644 "${AWS_IOT_CERTS_DIR}/${AWS_GGCORE_ROOT_CA}" \
+			"${AWS_IOT_CERTS_DIR}/${AWS_GGCORE_CERTIFICATE}" \
+			"${AWS_IOT_CERTS_DIR}/${AWS_GGCORE_PRIVATE_KEY}" \
+			${D}/${BPN}/configuration/certs/
+		sed -i  -e "s,\[ROOT_CA_PEM_HERE],${AWS_GGCORE_ROOT_CA},g" \
+			-e "s,\[CLOUD_PEM_CRT_HERE],${AWS_GGCORE_CERTIFICATE},g" \
+			-e "s,\[CLOUD_PEM_KEY_HERE],${AWS_GGCORE_PRIVATE_KEY},g" \
+			${D}/${BPN}/configuration/config.json
+	fi
+
+	# Configure the rest of GG Core parameters
+	[ -n "${AWS_GGCORE_THING_ARN}" ] && sed -i -e "s,\[THING_ARN_HERE],${AWS_GGCORE_THING_ARN},g" ${D}/${BPN}/configuration/config.json
+	if [ -n "${AWS_GGCORE_IOT_HOST}" ]; then
+		AWS_GGCORE_HOST_PREFIX="$(echo ${AWS_GGCORE_IOT_HOST} | sed -e 's,\([^.]\+\)\.iot.*,\1,g')"
+		AWS_GGCORE_REGION="$(echo ${AWS_GGCORE_IOT_HOST} | sed -e 's,.*.iot\.\([^.]\+\)\..*,\1,g')"
+		[ -n "${AWS_GGCORE_HOST_PREFIX}" ] && sed -i -e "s,\[HOST_PREFIX_HERE],${AWS_GGCORE_HOST_PREFIX},g" ${D}/${BPN}/configuration/config.json
+		[ -n "${AWS_GGCORE_REGION}" ] && sed -i -e "s,\[AWS_REGION_HERE],${AWS_GGCORE_REGION},g" ${D}/${BPN}/configuration/config.json
+	fi
 
 	# Configure whether to use systemd or not
 	sed -i -e "/useSystemd/{s,\[yes|no],${GG_USESYSTEMD},g}" ${D}/${BPN}/configuration/config.json
@@ -157,6 +180,8 @@ pkg_postinst_${PN}() {
 }
 
 FILES_${PN} = "/${BPN} ${sysconfdir}"
+
+CONFFILES_${PN} += "/${BPN}/configuration/config.json"
 
 INITSCRIPT_NAME = "greengrass"
 INITSCRIPT_PARAMS = "defaults 80 20"
