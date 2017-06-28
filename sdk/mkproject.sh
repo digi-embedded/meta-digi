@@ -35,8 +35,15 @@ MKP_SETUP_ENVIRONMENT='#!/bin/bash
 if [ "${BASH_SOURCE}" = "${0}" ]; then
 	printf "\\n[ERROR]: This script needs to be sourced\\n\\n"
 else
+	DEY_INSTALLDIR="%s"
 	cd $(dirname ${BASH_SOURCE})
-	. %s/sources/poky/oe-init-build-env .
+	. ${DEY_INSTALLDIR}/sources/poky/oe-init-build-env .
+
+	# Add our own scripts directory to the PATH
+	PATH="$(echo $PATH | sed -e "s,:\?${DEY_INSTALLDIR}/sources/meta-digi/scripts,,g;s,^:,,g")"
+	export PATH="${DEY_INSTALLDIR}/sources/meta-digi/scripts:$PATH"
+
+	unset DEY_INSTALLDIR
 fi
 '
 
@@ -122,6 +129,10 @@ do_mkproject() {
 	export TEMPLATECONF="${TEMPLATECONF:-${MKP_CONFIGPATH}/${MKP_PLATFORM}}"
 	source ${MKP_SCRIPTPATH}/sources/poky/oe-init-build-env .
 	unset TEMPLATECONF
+
+	# Add our own scripts directory to the PATH
+	PATH="$(echo $PATH | sed -e "s,:\?${MKP_SCRIPTPATH}/sources/meta-digi/scripts,,g;s,^:,,g")"
+	export PATH="${MKP_SCRIPTPATH}/sources/meta-digi/scripts:$PATH"
 
 	# New project
 	if [ -z "${MKP_OLD_PROJECT}" ]; then
