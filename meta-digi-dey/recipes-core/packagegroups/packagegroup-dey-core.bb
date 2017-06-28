@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Digi International.
+# Copyright (C) 2012-2017 Digi International.
 #
 SUMMARY = "Core packagegroup for DEY image"
 
@@ -26,6 +26,7 @@ VIRTUAL-RUNTIME_passwd_manager ?= "shadow"
 VIRTUAL-RUNTIME_touchscreen ?= "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '', 'tslib-calibrate tslib-tests', d)}"
 
 RDEPENDS_${PN} = "\
+    awsiotsdk-c \
     base-files \
     base-passwd \
     busybox \
