@@ -15,13 +15,16 @@ endif
 
 all: $(BINARIES)
 
-es11_example: fsl_egl.o fslutil.o glu3.o
-	$(CC) $(CFLAGS) $^ -lm -lEGL -lGLESv1_CM $(X11LIBS) $@.c -o $@
+es11_example: es11_example.o fsl_egl.o fslutil.o glu3.o
+	$(CC) $(LDFLAGS) $^ -lm -lEGL -lGLESv1_CM $(X11LIBS) -o $@
 
-es20_example: fsl_egl.o fslutil.o
-	$(CC) $(CFLAGS) $^ -lm -lEGL -lGLESv2 $(X11LIBS) $@.c -o $@
+es20_example: es20_example.o fsl_egl.o fslutil.o
+	$(CC) $(LDFLAGS) $^ -lm -lEGL -lGLESv2 $(X11LIBS) -o $@
 
 install: $(BINARIES)
 	-mkdir -p $(DEST_DIR)/opt/dey-examples-opengles
 	install -m 0755 $^ $(DEST_DIR)/opt/dey-examples-opengles
 	install -m 0644 texture.bmp $(DEST_DIR)/opt/dey-examples-opengles
+
+clean:
+	-rm -f *.o $(BINARIES)
