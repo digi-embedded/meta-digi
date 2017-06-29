@@ -8,16 +8,13 @@ LIC_FILES_CHKSUM = "file://${DIGI_EULA_FILE};md5=4c0991cfde5c8a92338cbfe0f4f9a5c
 FW_ATH6KL = " \
     file://athtcmd_ram.bin \
     file://athwlan.bin \
+    file://Digi_6203_2_ANT-US.bin \
+    file://Digi_6203_2_ANT-World.bin \
     file://Digi_6203-6233-US.bin \
     file://Digi_6203-6233-World.bin \
     file://fw-4.bin \
     file://nullTestFlow.bin \
     file://utf.bin \
-"
-
-FW_ATH6KL_append_ccimx6 = " \
-    file://Digi_6203_2_ANT-US.bin \
-    file://Digi_6203_2_ANT-World.bin \
 "
 
 FW_AR3K = " \
@@ -49,6 +46,8 @@ do_install() {
 	install -m 0644 \
 		athtcmd_ram.bin \
 		athwlan.bin \
+		Digi_6203_2_ANT-US.bin \
+		Digi_6203_2_ANT-World.bin \
 		Digi_6203-6233-US.bin \
 		Digi_6203-6233-World.bin \
 		fw-4.bin \
@@ -63,13 +62,6 @@ do_install() {
 	ln -sf Digi_6203-6233-US.bin ${D}${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.0x0.bin
 	ln -sf Digi_6203-6233-World.bin ${D}${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.0x1.bin
 	ln -sf Digi_6203-6233-World.bin ${D}${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.0x2.bin
-}
-
-do_install_append_ccimx6() {
-	install -m 0644 \
-		Digi_6203_2_ANT-US.bin \
-		Digi_6203_2_ANT-World.bin \
-		${D}${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/
 	ln -sf Digi_6203_2_ANT-US.bin ${D}${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.ANT-0x0.bin
 	ln -sf Digi_6203_2_ANT-World.bin ${D}${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.ANT-0x1.bin
 	ln -sf Digi_6203_2_ANT-World.bin ${D}${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.ANT-0x2.bin
@@ -82,4 +74,4 @@ FILES_${PN}-ar3k = "/lib/firmware/ar3k"
 FILES_${PN}-ath6kl = "/lib/firmware/ath6k"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$)"
+COMPATIBLE_MACHINE = "(ccimx6$)"
