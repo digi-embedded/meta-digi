@@ -3,7 +3,7 @@
 #
 #  mkproject.sh
 #
-#  Copyright (C) 2013 by Digi International Inc.
+#  Copyright (C) 2013-2017 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -28,7 +28,7 @@ MKP_NONE="\033[0m"
 MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/meta-digi/sdk/config"
 
 # Blacklist platforms (not officially supported in a DEY release)
-MKP_BLACKLIST_PLATFORMS="ccardimx28js"
+MKP_BLACKLIST_PLATFORMS=""
 
 MKP_SETUP_ENVIRONMENT='#!/bin/bash
 

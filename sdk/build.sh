@@ -3,7 +3,7 @@
 #
 #  build.sh
 #
-#  Copyright (C) 2013 by Digi International Inc.
+#  Copyright (C) 2013-2017 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -169,7 +169,6 @@ while read _pl _var _tgt; do
 	eval "${_pl}_var=\"${_var//,/ }\""
 	eval "${_pl}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
-	ccardimx28js      -,e,w,wb,web,web1   dey-image-qt
 	ccimx6sbc         DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
 	ccimx6ulsbc       DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
 	ccimx6ulstarter   DONTBUILDVARIANTS   core-image-base,dey-image-aws
