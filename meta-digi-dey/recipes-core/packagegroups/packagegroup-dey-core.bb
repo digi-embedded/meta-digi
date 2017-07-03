@@ -39,6 +39,7 @@ RDEPENDS_${PN} = "\
     init-ifupdown \
     modutils-initscripts \
     netbase \
+    networkmanager \
     os-release \
     recovery-utils \
     sysinfo \
