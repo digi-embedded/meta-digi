@@ -17,7 +17,7 @@ SRC_URI = " \
 "
 
 SRC_URI_append = " \
-    file://80-sdio-qcom.rules \
+    file://81-sdio-qcom.rules \
     file://modprobe-qualcomm.conf \
     file://qualcomm.sh \
 "
@@ -45,7 +45,7 @@ do_install_append() {
 	install -m 0644 ${WORKDIR}/git/firmware_bin/WCNSS_cfg.dat ${D}${base_libdir}/firmware/wlan/cfg.dat
 	install -m 0644 ${WORKDIR}/git/firmware_bin/WCNSS_qcom_cfg.ini ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
 	install -d ${D}${sysconfdir}/udev/rules.d ${D}${sysconfdir}/udev/scripts
-	install -m 0644 ${WORKDIR}/80-sdio-qcom.rules ${D}${sysconfdir}/udev/rules.d/
+	install -m 0644 ${WORKDIR}/81-sdio-qcom.rules ${D}${sysconfdir}/udev/rules.d/
 	install -m 0755 ${WORKDIR}/qualcomm.sh ${D}${sysconfdir}/udev/scripts/
 }
 

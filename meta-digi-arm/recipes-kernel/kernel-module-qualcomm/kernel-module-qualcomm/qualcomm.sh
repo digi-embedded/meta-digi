@@ -93,13 +93,8 @@ esac
 	fi
 )
 
-# Check the version of modprobe installed to compound the arguments.
-if readlink -f $(which modprobe) | grep -qs kmod; then
-	MODPROBE_ARGS="-i"
-fi
-
 # Load the wireless module with the params defined in modprobe.d/qualcomm.conf
-modprobe ${MODPROBE_ARGS} wlan
+modprobe wlan
 
 # Verify the interface is present
 [ -d "/sys/class/net/wlan0" ] || logger -t qca6564 "[ERROR] Loading qca6564 module"
