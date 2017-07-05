@@ -97,4 +97,9 @@ esac
 modprobe wlan
 
 # Verify the interface is present
-[ -d "/sys/class/net/wlan0" ] || logger -t qca6564 "[ERROR] Loading qca6564 module"
+if [ -d "/sys/class/net/wlan0" ]; then
+	# Create 'wlan1' virtual interface
+	virtwlans.sh
+else
+	logger -t qca6564 "[ERROR] Loading qca6564 module"
+fi
