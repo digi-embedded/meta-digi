@@ -12,7 +12,7 @@ SRCREV = "b0ae2aa45bbba54600b537e90cb1aca34f2d1a13"
 
 SRC_URI = " \
     ${CAF_MIRROR};destsuffix=${PV};branch=${SRCBRANCH} \
-    file://80-sdio-qcom.rules \
+    file://81-sdio-qcom.rules \
     file://modprobe-qualcomm.conf \
     file://qualcomm.sh \
     file://0001-qcacld-Fix-compiling-errors-when-BUILD_DEBUG_VERSION.patch \
@@ -60,7 +60,7 @@ do_install_append() {
 	install -d ${D}${sysconfdir}/modprobe.d
 	install -m 0644 ${WORKDIR}/modprobe-qualcomm.conf ${D}${sysconfdir}/modprobe.d/qualcomm.conf
 	install -d ${D}${sysconfdir}/udev/rules.d ${D}${sysconfdir}/udev/scripts
-	install -m 0644 ${WORKDIR}/80-sdio-qcom.rules ${D}${sysconfdir}/udev/rules.d/
+	install -m 0644 ${WORKDIR}/81-sdio-qcom.rules ${D}${sysconfdir}/udev/rules.d/
 	install -m 0755 ${WORKDIR}/qualcomm.sh ${D}${sysconfdir}/udev/scripts/
 }
 
