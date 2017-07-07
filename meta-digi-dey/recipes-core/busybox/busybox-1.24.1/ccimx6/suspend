@@ -40,9 +40,11 @@ suspend_interfaces() {
 	fi
 
 	# Suspend bluetooth interface
-	hciconfig hci0 2>&1 | grep -qs UP && up_bt_on_resume="1"
-	${BT_DAEMON} stop >/dev/null
-	${BT_INIT} stop >/dev/null
+	if [ -d "/proc/device-tree/bluetooth" ]; then
+		hciconfig hci0 2>&1 | grep -qs UP && up_bt_on_resume="1"
+		${BT_DAEMON} stop >/dev/null
+		${BT_INIT} stop >/dev/null
+	fi
 }
 
 resume_interfaces() {
@@ -59,9 +61,11 @@ resume_interfaces() {
 	fi
 
 	# Resume bluetooth interface
-	if [ -n "${up_bt_on_resume}" ]; then
-		${BT_INIT} start >/dev/null
-		${BT_DAEMON} start >/dev/null
+	if [ -d "/proc/device-tree/bluetooth" ]; then
+		if [ -n "${up_bt_on_resume}" ]; then
+			${BT_INIT} start >/dev/null
+			${BT_DAEMON} start >/dev/null
+		fi
 	fi
 }
 
