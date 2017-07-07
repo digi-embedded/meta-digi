@@ -1,0 +1,68 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Mon, 29 May 2017 11:41:23 +0200
+Subject: [PATCH 1/2] tools: env: factorize function to get device type
+
+This function may be reused to determine the device type in other helper
+functions.
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+
+https://jira.digi.com/browse/DUB-741
+---
+ tools/env/fw_env.c | 20 +++++++++++++++-----
+ 1 file changed, 15 insertions(+), 5 deletions(-)
+
+diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
+index 1c337b4727a9..08ba0fd1111f 100644
+--- a/tools/env/fw_env.c
++++ b/tools/env/fw_env.c
+@@ -1134,7 +1134,7 @@ static int flash_write (int fd_current, int fd_target, int dev_target)
+ 	return 0;
+ }
+
+-static int flash_read (int fd)
++static int get_type(int dev, int fd)
+ {
+ 	struct mtd_info_user mtdinfo;
+ 	struct stat st;
+@@ -1151,7 +1151,7 @@ static int flash_read (int fd)
+ 		rc = ioctl(fd, MEMGETINFO, &mtdinfo);
+ 		if (rc < 0) {
+ 			fprintf(stderr, "Cannot get MTD information for %s\n",
+-				DEVNAME(dev_current));
++				DEVNAME(dev));
+ 			return -1;
+ 		}
+ 		if (mtdinfo.type != MTD_NORFLASH &&
+@@ -1159,7 +1159,7 @@ static int flash_read (int fd)
+ 		    mtdinfo.type != MTD_DATAFLASH &&
+ 		    mtdinfo.type != MTD_UBIVOLUME) {
+ 			fprintf (stderr, "Unsupported flash type %u on %s\n",
+-				 mtdinfo.type, DEVNAME(dev_current));
++				 mtdinfo.type, DEVNAME(dev));
+ 			return -1;
+ 		}
+ 	} else {
+@@ -1167,10 +1167,20 @@ static int flash_read (int fd)
+ 		mtdinfo.type = MTD_ABSENT;
+ 	}
+
+-	DEVTYPE(dev_current) = mtdinfo.type;
++	DEVTYPE(dev) = mtdinfo.type;
++	return 0;
++}
++
++static int flash_read (int fd)
++{
++	int rc;
++
++	rc = get_type(dev_current, fd);
++	if (rc < 0)
++		return -1;
+
+ 	rc = flash_read_buf(dev_current, fd, environment.image, CUR_ENVSIZE,
+-			     DEVOFFSET (dev_current), mtdinfo.type);
++			    DEVOFFSET(dev_current), DEVTYPE(dev_current));
+ 	if (rc != CUR_ENVSIZE)
+ 		return -1;
+

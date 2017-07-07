@@ -1,0 +1,12 @@
+[connection]
+id=eth1
+type=ethernet
+interface-name=eth1
+
+[ipv4]
+address1=##ETH1_STATIC_CIDR##,##ETH1_STATIC_GATEWAY##
+dns=##ETH1_STATIC_DNS##;
+method=manual
+
+[ipv6]
+method=ignore

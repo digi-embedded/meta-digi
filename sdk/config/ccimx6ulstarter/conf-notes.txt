@@ -5,3 +5,9 @@ Digi Embedded Yocto provides the following image recipes:
     Expansion of native core-image-base by including all the support for the
     target device hardware like firmware files, rootfs customizations, etc.
 
+  * dey-image-aws: console-only image supporting Amazon Web Services IoT
+
+    This image includes the AWS Greengrass Core and an AWS IoT platform
+    example application. For more information on AWS support in Digi
+    Embedded Yocto see the online documentation.
+

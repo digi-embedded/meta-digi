@@ -1,0 +1,41 @@
+From: Tatiana Leon <tatiana.leon@digi.com>
+Date: Fri, 28 Apr 2017 14:47:43 +0200
+Subject: [PATCH] mbedtls library: add pkg-config file
+
+Signed-off-by: Tatiana Leon <tatiana.leon@digi.com>
+---
+ CMakeLists.txt |  4 ++++
+ mbedtls.pc.in  | 12 ++++++++++++
+ 2 files changed, 16 insertions(+)
+ create mode 100644 mbedtls.pc.in
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 094d906..b662eee 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -124,3 +124,7 @@ if(ENABLE_TESTING)
+         )
+     endif(UNIX)
+ endif()
++
++SET(prefix ${CMAKE_INSTALL_PREFIX})
++CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/mbedtls.pc.in ${CMAKE_BINARY_DIR}/mbedtls.pc @ONLY)
++INSTALL(FILES ${CMAKE_BINARY_DIR}/mbedtls.pc DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
+diff --git a/mbedtls.pc.in b/mbedtls.pc.in
+new file mode 100644
+index 0000000..9eff4ac
+--- /dev/null
++++ b/mbedtls.pc.in
+@@ -0,0 +1,12 @@
++prefix=@prefix@
++exec_prefix=${prefix}
++libdir=${exec_prefix}/lib
++includedir=${prefix}/include
++
++Name: mbedtls
++Description: Light-weight open source cryptographic and SSL/TLS library
++Version: 2.1.1
++
++Libs: -L${libdir} -lmbedtls -lmbedcrypto -lmbedx509
++Cflags: -I${includedir}/mbedtls
++

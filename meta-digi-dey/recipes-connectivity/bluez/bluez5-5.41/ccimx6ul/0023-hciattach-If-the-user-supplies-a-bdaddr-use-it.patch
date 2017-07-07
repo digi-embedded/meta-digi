@@ -1,0 +1,177 @@
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Thu, 6 Apr 2017 14:37:57 +0200
+Subject: [PATCH] hciattach: If the user supplies a bdaddr, use it
+
+The QCA6564 has no non-volatile configuration file for the bluetooth
+MAC, so use the one supplied on the command line.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ tools/hciattach.c      |  4 +--
+ tools/hciattach_rome.c | 76 ++++++++++----------------------------------------
+ 2 files changed, 17 insertions(+), 63 deletions(-)
+
+diff --git a/tools/hciattach.c b/tools/hciattach.c
+index 81d78ab3f69a..022bbe5fa6d5 100644
+--- a/tools/hciattach.c
++++ b/tools/hciattach.c
+@@ -285,7 +285,7 @@ static int ath3k_pm(int fd, struct uart_t *u, struct termios *ti)
+ 
+ static int qca(int fd, struct uart_t *u, struct termios *ti)
+ {
+-        fprintf(stderr,"qca\n");
++        fprintf(stderr,"qca, bdaddr %s\n", u->bdaddr ? u->bdaddr : "Default");
+         return qca_soc_init(fd, u->speed, u->bdaddr, ti);
+ }
+ 
+@@ -1363,7 +1363,7 @@ int main(int argc, char *argv[])
+ 				fprintf(stderr, "Unknown device type or id\n");
+ 				exit(1);
+ 			}
+-
++			u->bdaddr = NULL;
+ 			break;
+ 
+ 		case 2:
+diff --git a/tools/hciattach_rome.c b/tools/hciattach_rome.c
+index ee67bb068c09..854cfff707aa 100644
+--- a/tools/hciattach_rome.c
++++ b/tools/hciattach_rome.c
+@@ -45,6 +45,7 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <termios.h>
++#include <endian.h>
+ #include <bluetooth/bluetooth.h>
+ #include "hciattach_rome.h"
+ #include "hciattach.h"
+@@ -911,7 +912,7 @@ int get_value_from_config(char *file_path,char *param)
+     return ret;
+ }
+ 
+-int rome_get_tlv_file(char *file_path)
++int rome_get_tlv_file(char *file_path, unsigned char * bdaddr)
+ {
+     FILE * pFile;
+     long fileSize;
+@@ -921,7 +922,6 @@ int rome_get_tlv_file(char *file_path)
+     tlv_nvm_hdr *nvm_ptr;
+     unsigned char data_buf[PRINT_BUF_SIZE]={0,};
+     unsigned char *nvm_byte_ptr;
+-    unsigned char bdaddr[6];
+     unsigned short pcm_value, ibs_value;
+ 
+     fprintf(stderr, "File Open (%s)\n", file_path);
+@@ -1008,12 +1008,15 @@ int rome_get_tlv_file(char *file_path)
+             nvm_byte_ptr+=sizeof(tlv_nvm_hdr);
+ 
+             /* Write BD Address */
+-            if(nvm_ptr->tag_id == TAG_NUM_2 && read_bd_address(&bdaddr) == 0) {
+-                memcpy(nvm_byte_ptr, bdaddr, 6);
+-                fprintf(stderr, "Overriding default BD ADDR with user"
+-                  " programmed BD Address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+-                    *nvm_byte_ptr, *(nvm_byte_ptr+1), *(nvm_byte_ptr+2),
+-                    *(nvm_byte_ptr+3), *(nvm_byte_ptr+4), *(nvm_byte_ptr+5));
++            if(nvm_ptr->tag_id == TAG_NUM_2 && bdaddr) {
++                bdaddr_t ba;
++                if (!str2ba(bdaddr, &ba)) {
++                    memcpy(nvm_byte_ptr, &ba, 6);
++                    fprintf(stderr, "Overriding default BD ADDR with user"
++                    " programmed BD Address: %02x:%02x:%02x:%02x:%02x:%02x\n",
++                        *(nvm_byte_ptr+5), *(nvm_byte_ptr+4), *(nvm_byte_ptr+3),
++                        *(nvm_byte_ptr+2), *(nvm_byte_ptr+1), *nvm_byte_ptr);
++                }
+             }
+ 
+ 	    if (nvm_ptr->tag_id == TAG_NUM_17) {
+@@ -1209,14 +1212,14 @@ error:
+     return err;
+ }
+ 
+-int rome_download_tlv_file(int fd)
++int rome_download_tlv_file(int fd, char * bdaddr)
+ {
+     int tlv_size, err = -1;
+ 
+     /* Rampatch TLV file Downloading */
+     pdata_buffer = NULL;
+ 
+-    if((tlv_size = rome_get_tlv_file(rampatch_file_path)) < 0)
++    if((tlv_size = rome_get_tlv_file(rampatch_file_path, bdaddr)) < 0)
+         goto error;
+ 
+     if((err =rome_tlv_dnld_req(fd, tlv_size)) <0 )
+@@ -1228,7 +1231,7 @@ int rome_download_tlv_file(int fd)
+     }
+ 
+     /* NVM TLV file Downloading */
+-    if((tlv_size = rome_get_tlv_file(nvm_file_path)) < 0)
++    if((tlv_size = rome_get_tlv_file(nvm_file_path, bdaddr)) < 0)
+         goto error;
+ 
+     if((err =rome_tlv_dnld_req(fd, tlv_size)) <0 )
+@@ -1679,55 +1682,6 @@ error:
+ 
+ }
+ 
+-int read_bd_address(unsigned char *bdaddr)
+-{
+-  int fd = -1;
+-  int readPtr = 0;
+-  unsigned char data[BD_ADDR_LEN];
+-
+-  /* Open the persist file for reading device address*/
+-  fd = open("/etc/bluetooth/.bt_nv.bin", O_RDONLY);
+-  if(fd < 0)
+-  {
+-    fprintf(stderr, "%s: Open failed: Programming default BD ADDR\n", __func__);
+-    return -1;
+-  }
+-
+-  /* Read the NVM Header : fp will be advanced by readPtr number of bytes */
+-  readPtr = read(fd, data, PERSIST_HEADER_LEN);
+-  if (readPtr > 0)
+-    fprintf(stderr, "%s: Persist header data: %02x \t %02x \t %02x\n", __func__,
+-      data[NVITEM], data[RDWR_PROT], data[NVITEM_SIZE]);
+-  else {
+-    fprintf(stderr, "%s: Read from persist memory failed : Programming default"
+-      " BD ADDR\n");
+-    close(fd);
+-    return -1;
+-  }
+-
+-  /* Check for BD ADDR length before programming */
+-  if(data[NVITEM_SIZE] != BD_ADDR_LEN) {
+-    fprintf(stderr, "Invalid BD ADDR: Programming default BD ADDR!\n");
+-    close(fd);
+-    return -1;
+-  }
+-
+-  /* Read the BD ADDR info */
+-  readPtr = read(fd, data, BD_ADDR_LEN);
+-  if (readPtr > 0)
+-    fprintf(stderr, "BD-ADDR: ==> %02x:%02x:%02x:%02x:%02x:%02x\n", data[0],
+-      data[1], data[2], data[3], data[4], data[5]);
+-  else {
+-    fprintf(stderr, "%s: Read from persist memory failed : Programming default"
+-      " BD ADDR\n");
+-    close(fd);
+-    return -1;
+-  }
+-  memcpy(bdaddr, data, BD_ADDR_LEN);
+-  close(fd);
+-  return 0;
+-}
+-
+ int isSpeedValid(int speed, int *local_baud_rate, int *controller_baud_rate)
+ {
+     switch(speed) {
+@@ -1915,7 +1869,7 @@ download:
+              }
+ 
+             /* Donwload TLV files (rampatch, NVM) */
+-            err = rome_download_tlv_file(fd);
++            err = rome_download_tlv_file(fd, bdaddr);
+             if (err < 0) {
+                 fprintf(stderr, "%s: Download TLV file failed!\n", __FUNCTION__);
+                 goto error;

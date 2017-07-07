@@ -14,7 +14,6 @@ FW_QCA6564-BT = " \
 
 FW_QCA6564-WIFI = " \
     file://bdwlan30_US.bin \
-    file://bdwlan30_World.bin \
     file://LICENCE.atheros_firmware \
     file://otp30.bin \
     file://qwlan30.bin \
@@ -42,7 +41,6 @@ do_install() {
 	install -d ${D}${base_libdir}/firmware
 	install -m 0644 \
 		bdwlan30_US.bin \
-		bdwlan30_World.bin \
 		LICENCE.atheros_firmware \
 		otp30.bin \
 		qwlan30.bin \

@@ -5,6 +5,7 @@ ACTION!="add|change|move", GOTO="mm_digi_xbee_cellular_modem_end"
 
 # ConnectCore 6 SBC
 DEVPATH=="/devices/soc0/soc.0/2100000.aips-bus/21f4000.serial/tty/ttymxc4", ENV{ID_MM_PLATFORM_DRIVER_PROBE}="1"
+DEVPATH=="/devices/soc0/soc/2100000.aips-bus/21f4000.serial/tty/ttymxc4", ENV{ID_MM_PLATFORM_DRIVER_PROBE}="1"
 
 # ConnectCore 6UL SBC Pro
 DEVPATH=="/devices/platform/soc/2100000.aips-bus/21e8000.serial/tty/ttymxc1", ENV{ID_MM_PLATFORM_DRIVER_PROBE}="1"

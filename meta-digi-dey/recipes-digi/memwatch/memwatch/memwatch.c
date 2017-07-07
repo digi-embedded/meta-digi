@@ -1,7 +1,7 @@
 /*
  * memwatch.c: Program to read/write from/to memory.
  *
- * Copyright (C) 2006 by Digi International Inc.
+ * Copyright (C) 2006-2017 by Digi International Inc.
  * All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -243,10 +243,11 @@ int main( int argc, char** argv )
 				}
 
 				if( ( verbose < VERB_PRNT_ADDR ) && ( j % 16 == 0 ) ) {
-					printf( "\n0x%08lx: ", address + j );
+					if (j > 0)
+						printf("\n");
+					printf( "0x%08lx: ", address + j );
 				}
 				print_hex_formated( rd_val, access );
-
 			} else {
 				if( filename != NULL ) {
 					if( ( ret = read( fd_file, &wr_val, access ) ) != access ) {
@@ -263,6 +264,7 @@ int main( int argc, char** argv )
 			}
 			virt_addr += access;
 		}
+		printf("\n");
 
 		if( munmap( map_base, MAP_SIZE ) == -1 ) {
 			fprintf( stderr, "Error unmapping memory\n" );

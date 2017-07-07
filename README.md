@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 2.2
-## Release 2.2-r1
+## Release 2.2-r2
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -61,6 +61,14 @@ Documentation is available online on the Digi documentation site:
 * Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.2/r1/sdk/
 
 # Release Changelog
+
+## 2.2-r2
+
+* Digi Embedded Yocto
+  * Support to connect to AWS IoT with AWS IoT Device SDK for embedded C.
+  * Added support for Digi XBee Cellular 3G Global, with P/N XBC-M5-UT-001
+  * Added support for U-Blox TOBY L-200/L-210
+  * Added support for Quectel EC-25
 
 ## 2.2-r1
 

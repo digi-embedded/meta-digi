@@ -1,0 +1,166 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Mon, 29 May 2017 12:10:10 +0200
+Subject: [PATCH 2/2] tools: env: add support to set dynamic location of
+ environment copies
+
+A mechanism was added in U-Boot to set the location of environment copies
+dynamically in an shared area. If the config file sets both copies to the
+same offset, a function will be called to set the offset of each copy to
+the first two good NAND sectors within the specified area.
+
+The config file should contain the sector size and the number of sectors
+of the area, like in this example:
+
+  # Device name    Offset   Size       Erase-size    No.Blocks
+  /dev/mtd1        0x0      0x20000    0x20000       8
+  /dev/mtd1        0x0      0x20000    0x20000       8
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+
+https://jira.digi.com/browse/DUB-741
+---
+ tools/env/fw_env.c | 103 +++++++++++++++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 96 insertions(+), 7 deletions(-)
+
+diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
+index 08ba0fd1111f..c1a4d89f62c0 100644
+--- a/tools/env/fw_env.c
++++ b/tools/env/fw_env.c
+@@ -122,6 +122,8 @@ static int env_aes_cbc_crypt(char *data, const int enc);
+ static int caam_encryption_flag;
+
+ static int HaveRedundEnv = 0;
++static int have_dynamic_env;
++static off_t top_of_range;	/* end of the last block we may use */
+
+ static unsigned char active_flag = 1;
+ /* obsolete_flag must be 0 to efficiently set it on NOR flash without erasing */
+@@ -790,7 +792,6 @@ static int flash_read_buf (int dev, int fd, void *buf, size_t count,
+ 				   0 on NOR */
+ 	size_t processed = 0;	/* progress counter */
+ 	size_t readlen = count;	/* current read length */
+-	off_t top_of_range;	/* end of the last block we may use */
+ 	off_t block_seek;	/* offset inside the current block to the start
+ 				   of the data */
+ 	loff_t blockstart;	/* running start of the current block -
+@@ -809,12 +810,22 @@ static int flash_read_buf (int dev, int fd, void *buf, size_t count,
+ 		 */
+ 		blocklen = DEVESIZE (dev);
+
+-		/*
+-		 * To calculate the top of the range, we have to use the
+-		 * global DEVOFFSET (dev), which can be different from offset
+-		 */
+-		top_of_range = ((DEVOFFSET(dev) / blocklen) +
+-				ENVSECTORS (dev)) * blocklen;
++		if (!have_dynamic_env) {
++			/*
++			 * To calculate the top of the range, we have to use the
++			 * global DEVOFFSET (dev), which can be different from
++			 * offset
++			 */
++			top_of_range = ((DEVOFFSET(dev) / blocklen) +
++					ENVSECTORS(dev)) * blocklen;
++		}
++
++		if (offset >= top_of_range) {
++			/* End of range is reached */
++			fprintf(stderr,
++				"Too few good blocks within range\n");
++			return -1;
++		}
+
+ 		/* Limit to one block for the first read */
+ 		if (readlen > blocklen - block_seek)
+@@ -1208,6 +1219,72 @@ static int sysfs_mmcboot_set_protection(const char *device, int value)
+ 	return 0;
+ }
+
++static int set_dynamic_location(void)
++{
++	int fd, i, nsectors, type;
++	loff_t offset, blocksize;
++	int dev = 0;
++	int copies = 1;
++	int rc = 0;
++
++	if (HaveRedundEnv)
++		copies++;
++
++	fd = open(DEVNAME(dev), O_RDONLY);
++	if (fd < 0) {
++		fprintf(stderr, "Can't open %s: %s\n", DEVNAME(dev),
++			strerror(errno));
++		rc = -1;
++		goto error;
++	}
++
++	rc = get_type(dev, fd);
++	if (rc < 0) {
++		fprintf(stderr, "could not get type\n", DEVNAME(dev),
++			strerror(errno));
++		rc = -1;
++		goto error;
++	}
++
++	/* Set initial block to start looking for environment */
++	offset = DEVOFFSET(dev);
++	/* Use variables for common values */
++	blocksize = DEVESIZE(dev);
++	type = DEVTYPE(dev);
++	/* Look for the number of sectors specified for the primary copy */
++	nsectors = ENVSECTORS(dev);
++
++	for (i = 0; i < nsectors && copies; i++) {
++		rc = flash_bad_block(fd, type, &offset);
++		if (rc < 0) {
++			rc = -1;
++			goto error;
++		} else if (!rc) {
++			/*
++			 * Set first good block as primary (no matter if it is
++			 * the other copy. After all, the 'current' copy is
++			 * determined by the active flag.
++			 */
++			DEVOFFSET(dev) = offset;
++			copies--;
++			dev++;
++		}
++		offset += blocksize;
++	}
++
++	while (copies) {
++		/* No good sectors available. Set offset out of bounds */
++		DEVOFFSET(dev) = offset;
++		copies--;
++		dev++;
++	}
++	rc = 0;
++
++error:
++	close(fd);
++	return rc;
++}
++
+ static int flash_io (int mode)
+ {
+ 	int fd_current, fd_target, rc, dev_target;
+@@ -1341,6 +1418,18 @@ int fw_env_open(void)
+ 		environment.data	= single->data;
+ 	}
+
++	/*
++	 * Trigger dynamic location of environment if redundant copy has the
++	 * same offset than primary copy.
++	 */
++	if (HaveRedundEnv && (DEVOFFSET(0) == DEVOFFSET(1))) {
++		have_dynamic_env = 1;
++		top_of_range = DEVOFFSET(0) + (ENVSECTORS(0) * DEVESIZE(0));
++
++		if (set_dynamic_location() < 0)
++			return -1;
++	}
++
+ 	dev_current = 0;
+ 	if (flash_io (O_RDONLY))
+ 		return -1;

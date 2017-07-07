@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013-2017 Digi International.
 
 SUMMARY = "DEY examples packagegroup"
 
@@ -24,6 +24,7 @@ RDEPENDS_${PN}_append_ccardimx28 = "\
 "
 
 RDEPENDS_${PN}_append_ccimx6 = "\
+	awsiotsdk-demo \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
 	dey-examples-can \
@@ -34,9 +35,11 @@ RDEPENDS_${PN}_append_ccimx6 = "\
 "
 
 RDEPENDS_${PN}_append_ccimx6ul = "\
+	awsiotsdk-demo \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
 	dey-examples-adc \
+	dey-examples-adc-cmp \
 	dey-examples-can \
 	dey-examples-cloudconnector \ 
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \

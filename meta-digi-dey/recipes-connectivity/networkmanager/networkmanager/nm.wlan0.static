@@ -1,0 +1,15 @@
+[connection]
+id=wlan0
+type=wifi
+interface-name=wlan0
+
+[wifi]
+ssid=""
+
+[ipv4]
+address1=##WLAN0_STATIC_CIDR##,##WLAN0_STATIC_GATEWAY##
+dns=##WLAN0_STATIC_DNS##;
+method=manual
+
+[ipv6]
+method=ignore

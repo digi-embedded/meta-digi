@@ -1,0 +1,12 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: awsiotsdk
+Description: SDK for connecting to AWS IoT from a device using embedded C
+Version: 2.1.1
+
+Requires.private: mbedtls
+Libs: -L${libdir} -lawsiotsdk
+Cflags: -I${includedir}/awsiotsdk -I${includedir}

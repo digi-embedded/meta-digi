@@ -1,0 +1,13 @@
+[connection]
+id=wlan0
+type=wifi
+interface-name=wlan0
+
+[wifi]
+ssid=""
+
+[ipv4]
+method=auto
+
+[ipv6]
+method=ignore

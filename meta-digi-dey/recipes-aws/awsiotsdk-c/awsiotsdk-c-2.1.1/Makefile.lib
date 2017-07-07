@@ -1,0 +1,79 @@
+# ***************************************************************************
+# Copyright (c) 2017 Digi International Inc.
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this file,
+# You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+# REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+# INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+# LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+# PERFORMANCE OF THIS SOFTWARE.
+#
+# Digi International Inc. 11001 Bren Road East, Minnetonka, MN 55343
+#
+# ***************************************************************************
+# Use GNU C Compiler.
+CC ?= gcc
+
+# Generated Library name.
+NAME := awsiotsdk
+
+# Location of Source Code.
+SRC = .
+
+#IoT client directory.
+IOT_CLIENT_DIR = $(SRC)/..
+
+PLATFORM_DIR = $(IOT_CLIENT_DIR)/platform/linux/mbedtls
+PLATFORM_COMMON_DIR = $(IOT_CLIENT_DIR)/platform/linux/common
+INSTALL_HEADERS_DIR = /usr/include/awsiotsdk
+
+CFLAGS += -I $(IOT_CLIENT_DIR)/include
+CFLAGS += -I $(IOT_CLIENT_DIR)/external_libs/jsmn
+CFLAGS += -I $(PLATFORM_COMMON_DIR)
+CFLAGS += -I $(PLATFORM_DIR)
+CFLAGS += -Wall -g
+CFLAGS += $(LOG_FLAGS)
+CFLAGS += $(shell pkg-config --cflags mbedtls)
+
+# Libraries to Link.
+LIBS += $(shell pkg-config --libs --static mbedtls)
+
+# Linking Flags.
+LDFLAGS += $(DFLAGS)
+
+# Target output to generate.
+SRCS += $(wildcard $(SRC)/*.c)
+SRCS += $(wildcard $(IOT_CLIENT_DIR)/external_libs/jsmn/*.c)
+SRCS += $(wildcard $(PLATFORM_DIR)/*.c)
+SRCS += $(wildcard $(PLATFORM_COMMON_DIR)/*.c)
+
+OBJS = $(SRCS:.c=.o)
+
+.PHONY: all
+all:  lib$(NAME).a
+
+lib$(NAME).a: $(OBJS)
+	$(AR) -rcs $@ $^
+
+.PHONY: install
+install: lib$(NAME).a
+	# Install library and pkg-config file.
+	install -d $(DESTDIR)/usr/lib/pkgconfig
+	install -m 0644 lib$(NAME).a $(DESTDIR)/usr/lib/
+	install -m 0644 ../awsiotsdk.pc $(DESTDIR)/usr/lib/pkgconfig/
+	# Install header files.
+	install -d $(DESTDIR)$(INSTALL_HEADERS_DIR)
+	install -m 0644 $(IOT_CLIENT_DIR)/include/*.h $(DESTDIR)$(INSTALL_HEADERS_DIR)/
+	install -m 0644 $(IOT_CLIENT_DIR)/external_libs/jsmn/*.h $(DESTDIR)$(INSTALL_HEADERS_DIR)/
+	install -m 0644 $(PLATFORM_COMMON_DIR)/*.h $(DESTDIR)$(INSTALL_HEADERS_DIR)/
+	install -m 0644 $(PLATFORM_DIR)/*.h $(DESTDIR)$(INSTALL_HEADERS_DIR)/
+
+.PHONY: clean
+clean:
+	-rm -f lib$(NAME).a $(OBJS)
+

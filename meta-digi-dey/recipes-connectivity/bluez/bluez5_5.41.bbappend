@@ -4,6 +4,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
 SRC_URI += " \
     file://bluetooth-init \
+    file://main.conf \
     file://0001-hcitool-do-not-show-unsupported-refresh-option.patch \
     file://0002-hcitool-increase-the-shown-connection-limit-to-20.patch \
 "
@@ -28,6 +29,9 @@ SRC_URI_append_ccimx6ul = " \
     file://0019-bluetooth-Fix-flow-control-operation.patch \
     file://0020-Adding-MDM-specific-code-under-_PLATFORM_MDM_.patch \
     file://0021-Bluetooth-Fix-static-analysis-issues.patch \
+    file://0022-hciattach_rome-Respect-the-user-indication-for-noflo.patch \
+    file://0023-hciattach-If-the-user-supplies-a-bdaddr-use-it.patch \
+    file://0024-hciattach-Add-verbosity-option.patch \
 "
 
 inherit update-rc.d
@@ -37,10 +41,12 @@ PACKAGECONFIG_append = " experimental"
 do_install_append() {
 	install -d ${D}${sysconfdir}/init.d/
 	install -m 0755 ${WORKDIR}/bluetooth-init ${D}${sysconfdir}/init.d/bluetooth-init
+	install -m 0644 ${WORKDIR}/main.conf ${D}${sysconfdir}/bluetooth/
 }
 
 PACKAGES =+ "${PN}-init"
 
+FILES_${PN} += " ${sysconfdir}/bluetooth/main.conf"
 FILES_${PN}-init = "${sysconfdir}/init.d/bluetooth-init"
 
 INITSCRIPT_PACKAGES += "${PN}-init"

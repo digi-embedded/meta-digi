@@ -1,0 +1,10 @@
+[connection]
+id=eth1
+type=ethernet
+interface-name=eth1
+
+[ipv4]
+method=auto
+
+[ipv6]
+method=ignore
