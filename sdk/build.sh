@@ -170,9 +170,9 @@ while read _pl _var _tgt; do
 	eval "${_pl}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
 	ccardimx28js      -,e,w,wb,web,web1   dey-image-qt
-	ccimx6sbc         DONTBUILDVARIANTS   dey-image-qt
-	ccimx6ulsbc       DONTBUILDVARIANTS   dey-image-qt
-	ccimx6ulstarter   DONTBUILDVARIANTS   core-image-base
+	ccimx6sbc         DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
+	ccimx6ulsbc       DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
+	ccimx6ulstarter   DONTBUILDVARIANTS   core-image-base,dey-image-aws
 	ccimx6ulsom       DONTBUILDVARIANTS   dey-image-mft-module-min
 	ccimx6ulrftest    DONTBUILDVARIANTS   dey-image-mft-module-rf
 _EOF_
