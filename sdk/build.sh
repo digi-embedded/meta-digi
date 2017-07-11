@@ -166,10 +166,10 @@ while read _pl _var _tgt; do
 		fi
 	fi
 	[ -n "${DY_TARGET}" ] && _tgt="${DY_TARGET}" || true
-	eval "${_pl}_var=\"${_var}\""
-	eval "${_pl}_tgt=\"${_tgt}\""
+	eval "${_pl}_var=\"${_var//,/ }\""
+	eval "${_pl}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
-	ccardimx28js      - e w wb web web1   dey-image-qt
+	ccardimx28js      -,e,w,wb,web,web1   dey-image-qt
 	ccimx6sbc         DONTBUILDVARIANTS   dey-image-qt
 	ccimx6ulsbc       DONTBUILDVARIANTS   dey-image-qt
 	ccimx6ulstarter   DONTBUILDVARIANTS   core-image-base
