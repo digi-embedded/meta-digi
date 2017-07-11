@@ -42,4 +42,4 @@ KERNEL_IMAGETYPE = "zImage"
 MKUBIFS_BOOT_ARGS ?= "-m 2048 -e 126976 -c 127"
 
 # mkfs.ubifs parameters for rootfs partition
-MKUBIFS_ARGS ?= "-m 2048 -e 126976 -c 2047"
+MKUBIFS_ARGS ?= "-m 2048 -e 126976 -c 8191"
