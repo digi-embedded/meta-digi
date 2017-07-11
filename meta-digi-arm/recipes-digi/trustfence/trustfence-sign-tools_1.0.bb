@@ -3,7 +3,7 @@ LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
 
 SRCBRANCH = "v2015.04/maint"
-SRCREV = "${AUTOREV}"
+SRCREV = "d14ae0b88580c50358df6266c71cea84fd7df7dd"
 
 S = "${WORKDIR}"
 
@@ -11,7 +11,7 @@ S = "${WORKDIR}"
 UBOOT_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}u-boot-denx.git', '${DIGI_GITHUB_GIT}/u-boot.git', d)}"
 
 SRC_URI = " \
-    ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
+    ${UBOOT_GIT_URI};nobranch=1 \
     file://trustfence-sign-kernel.sh;name=kernel-script \
     file://sign_uimage;name=kernel-sign \
     file://encrypt_uimage;name=kernel-encrypt \
