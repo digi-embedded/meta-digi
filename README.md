@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 2.2
-## Release 2.2-r2
+## Release 2.2-r3
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -61,6 +61,10 @@ Documentation is available online on the Digi documentation site:
 * Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.2/r1/sdk/
 
 # Release Changelog
+
+## 2.2-r3
+
+* TBC
 
 ## 2.2-r2
 
