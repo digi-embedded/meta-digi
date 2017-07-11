@@ -51,24 +51,26 @@ hardware.
 
 Documentation is available online on the Digi documentation site:
 
-* [Digi ConnectCore 6UL SBC Express](http://www.digi.com/resources/documentation/Digidocs/90001514/default.htm)
-* [Digi ConnectCore 6UL SBC Pro](http://www.digi.com/resources/documentation/Digidocs/90001515/default.htm)
-* [Digi ConnectCore 6 Jumpstart Development Kit](http://www.digi.com/resources/documentation/Digidocs/90001945-13/default.htm)
+* [Digi ConnectCore 6UL SBC Express](https://www.digi.com/resources/documentation/digidocs/90001548/default.htm)
+* [Digi ConnectCore 6UL SBC Pro](https://www.digi.com/resources/documentation/digidocs/90001547/default.htm)
+* [Digi ConnectCore 6 Jumpstart Development Kit](https://www.digi.com/resources/documentation/digidocs/90001546/default.htm)
 
 # Downloads
 
-* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.2/r1/images/
-* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.2/r1/sdk/
+* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.2/r2/images/
+* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.2/r2/sdk/
 
 # Release Changelog
 
 ## 2.2-r2
 
 * Digi Embedded Yocto
+  * Use NetworkManager for ethernet, wireless (station) and cellular network interfaces
+  * Updated kernel version to v4.1.41 for CC6 platform
+  * Added support for SPI Slave mode on CC6UL platform
+  * Added support for Atmel Cryptochip ATEC508A using Cryptoauthlib
+  * Added support for AWS Greengrass core software
   * Support to connect to AWS IoT with AWS IoT Device SDK for embedded C.
-  * Added support for Digi XBee Cellular 3G Global, with P/N XBC-M5-UT-001
-  * Added support for U-Blox TOBY L-200/L-210
-  * Added support for Quectel EC-25
 
 ## 2.2-r1
 
