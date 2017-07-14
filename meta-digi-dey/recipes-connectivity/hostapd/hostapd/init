@@ -34,7 +34,7 @@ case "$1" in
 	;;
     stop)
 	echo -n "Stopping $DESC: "
-	start-stop-daemon -K --oknodo -x $DAEMON -p ${PIDFILE}
+	start-stop-daemon -K --oknodo -q -x $DAEMON -p ${PIDFILE}
 	echo "$NAME."
 	;;
     restart)
