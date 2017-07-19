@@ -100,6 +100,9 @@ esac
 )
 
 # Load the wireless module with the params defined in modprobe.d/qualcomm.conf
+# and reduce the console log level to avoid debug messages at boot time
+LOGLEVEL="$(sed -ne 's,^kernel.printk[^=]*=[[:blank:]]*\(.*\)$,\1,g;T;p' /etc/sysctl.conf 2>/dev/null)"
+[ -n "${LOGLEVEL}" ] && sysctl -q -w kernel.printk="${LOGLEVEL}"
 modprobe wlan
 
 # Verify the interface is present
