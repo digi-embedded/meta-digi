@@ -9,5 +9,9 @@ password=##CELLULAR_PASSWORD##
 pin=##CELLULAR_PIN##
 username=##CELLULAR_USER##
 
+[ppp]
+lcp-echo-failure=3
+lcp-echo-interval=5
+
 [ipv6]
 method=ignore
