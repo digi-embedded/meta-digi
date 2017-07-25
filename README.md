@@ -17,6 +17,8 @@ Software for the following hardware platforms is in production support:
 
 * Digi ConnectCore 6UL
   * [Digi P/N CC-WMX-JN58-NE](http://www.digi.com/products/models/cc-wmx-jn58-ne)
+  * [Digi P/N CC-MX-JN58-Z1](https://www.digi.com/products/models/cc-mx-jn58-z1)
+  * Digi P/N CC-WMX-JN7A-NE
 * Digi ConnectCore 6UL SBC Express
   * [Digi P/N CC-WMX6UL-START](http://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001514/default.htm#concept/yocto/c_get_started_with_yocto.htm))
 * Digi ConnectCore 6UL SBC Pro
@@ -64,13 +66,28 @@ Documentation is available online on the Digi documentation site:
 
 ## 2.2-r2
 
-* Digi Embedded Yocto
-  * Use NetworkManager for ethernet, wireless (station) and cellular network interfaces
-  * Updated kernel version to v4.1.41 for CC6 platform
-  * Added support for SPI Slave mode on CC6UL platform
-  * Added support for Atmel Cryptochip ATEC508A using Cryptoauthlib
-  * Added support for AWS Greengrass core software
-  * Support to connect to AWS IoT with AWS IoT Device SDK for embedded C.
+* Use NetworkManager for ethernet, wireless (station) and cellular network interfaces
+* Updated kernel version to v4.1.41 for CC6 platform
+* Added support for SPI Slave mode on CC6UL platform
+* Added support for Atmel Cryptochip ATEC508A using Cryptoauthlib
+* Network failover mechanism
+* Powered by AWS certified on all supported hardware platforms including:
+  * AWS GreenGrass core software
+  * AWS IoT Device SDK for embedded C
+* Updated AR6233 firmware for Radio Equipment Directive module certification
+* QCA6564 WorldWide board data file available on request
+* Includes MCA firmware v1.0:
+  * MCA analog tamper detection
+  * MCA ADC-based analog comparators
+* Updated U-Boot to version 2015.04-r9
+  * Added support for CC6UL variant 0x4
+  * Added dynamic environment location and bad block handling for the environment
+  * TrustFence:
+    * Move RootFS encryption key to 'safe' partition
+    * Added support for four tamper interfaces
+    * Disable external memory boot in OTP for secure boot
+  * Skip initial scanning of bad blocks for faster boot on NAND
+  * Updated documentation
 
 ## 2.2-r1
 
@@ -123,6 +140,7 @@ boot a signed U-Boot only.
   performance is optimized
 * When working as an access point, DFS capable channels in band A are not
   currently supported.
+* The QCA6564 wireless chip does not support Wake On Wireless LAN
 
 ## Digi ConnectCore 6
 
