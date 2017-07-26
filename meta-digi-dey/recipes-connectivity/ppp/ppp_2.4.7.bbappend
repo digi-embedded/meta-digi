@@ -1,8 +1,8 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
+# Copyright (C) 2017 Digi International Inc.
 
-SRC_URI += "file://mm_cellular"
-
-do_install_append () {
-        mkdir -p ${D}${sysconfdir}/ppp/peers
-        install -m 0755 ${WORKDIR}/mm_cellular ${D}${sysconfdir}/ppp/peers/mm_cellular
+do_install_append() {
+	# NetworkManager manages the 'resolv.conf' file globally, so
+	# remove the 'pppd' specific scripts for DNS.
+	rm -f ${D}${sysconfdir}/ppp/ip-up.d/08setupdns
+	rm -f ${D}${sysconfdir}/ppp/ip-down.d/92removedns
 }
