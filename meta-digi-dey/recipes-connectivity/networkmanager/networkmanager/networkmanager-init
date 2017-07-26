@@ -8,7 +8,7 @@ case "${1}" in
 	start)
 		mkdir -p /var/run/NetworkManager
 		echo -n "Starting ${DESC}: "
-		${DAEMON}
+		${DAEMON} && (sleep 40 && mmcli --scan-modems 1>/dev/null 2>&1) &
 		echo "done"
 		;;
 	stop)
