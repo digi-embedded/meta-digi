@@ -18,7 +18,7 @@
 # At this point of the boot (udev script), the system log (syslog) is not
 # available yet, so use the kernel log buffer from userspace.
 log() {
-	printf "<5>qca6564: $1\n" >/dev/kmsg
+	printf "<$1>qca6564: $2\n" >/dev/kmsg
 }
 
 # Do nothing if the module is already loaded
@@ -60,7 +60,7 @@ case "${DTB_REGION_CODE}" in
 		REGULATORY_DOMAIN="${DTB_REGION_CODE}";;
 	*)
 		if [ -n "${DTB_REGION_CODE}" ]; then
-			log "[WARN] Invalid region code in device tree, using OTP value"
+			log "5" "[WARN] Invalid region code in device tree, using OTP value"
 		fi
 		REGULATORY_DOMAIN="${OTP_REGION_CODE}";;
 esac
@@ -74,19 +74,19 @@ esac
 	BDATA_SOURCE="bdwlan30_US.bin"
 	case "${REGULATORY_DOMAIN}" in
 		${US_CODE})
-			log "Setting US wireless region";;
+			log "5" "Setting US wireless region";;
 		${WW_CODE}|${JP_CODE})
 			if [ -f "bdwlan30_World.bin" ]; then
-				log "Setting WW (world wide) wireless region"
+				log "5" "Setting WW (world wide) wireless region"
 				BDATA_SOURCE="bdwlan30_World.bin"
 			else
-				log "[WARN] No WW (worldwide) board data file, using US"
+				log "5" "[WARN] No WW (worldwide) board data file, using US"
 			fi
 			;;
 		"")
-			log "[WARN] region code not found, using US";;
+			log "5" "[WARN] region code not found, using US";;
 		*)
-			log "[WARN] Invalid region code, using US";;
+			log "5" "[WARN] Invalid region code, using US";;
 	esac
 
 	# We don't want to rewrite NAND every time we boot so only
@@ -108,7 +108,8 @@ modprobe wlan
 # Verify the interface is present
 if [ -d "/sys/class/net/wlan0" ]; then
 	# Create 'wlan1' virtual interface
-	virtwlans.sh
+	VIRTWLANS_OUT="$(virtwlans.sh)"
+	[ -n "${VIRTWLANS_OUT}" ] && log "3" "${VIRTWLANS_OUT}"
 else
-	log "[ERROR] Loading qca6564 module"
+	log "3" "[ERROR] Loading qca6564 module"
 fi

@@ -21,8 +21,7 @@ if [ -s "/proc/device-tree/wireless/mac-address1" ] &&
    [ -s "/proc/device-tree/wireless/mac-address3" ]; then
    :
 else
-	echo "WARNING: Using default MAC addresses for virtual interfaces, please "
-	echo "program them referring to the Digi U-Boot Documentation"
+	echo "[WARN] Using default MAC addresses for virtual interfaces, please program them referring to the Digi U-Boot Documentation"
 fi
 
 if [ ! -d "/sys/class/net/wlan1" ]; then
