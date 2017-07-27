@@ -174,5 +174,5 @@ When you contact Digi Technical Support, include important system details and
 device information to help Digi resolve the issue more quickly.
 
 1. In the device, run the command 'sysinfo'. This generates the following file:
-   /tmp/<current timestamp>.txt.gz.
-2. Attach the <current timestamp>.txt.gz file to your support ticket.
+   /tmp/&lt;current timestamp>.txt.gz.
+2. Attach the &lt;current timestamp>.txt.gz file to your support ticket.
