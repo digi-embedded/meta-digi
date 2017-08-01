@@ -1,3 +1,3 @@
 # Copyright (C) 2017 Digi International Inc.
 
-RDEPENDS_${PN} += "glibc-gconv-utf-16"
+RDEPENDS_${PN}_append_libc-glibc = " glibc-gconv-utf-16"

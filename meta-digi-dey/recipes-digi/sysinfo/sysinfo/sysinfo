@@ -274,8 +274,8 @@ fi
 
 IOEXP_NODE="/sys/devices/platform/soc/2100000.aips-bus/21a0000.i2c/i2c-0/0-006e"
 if [ -d "$IOEXP_NODE" ]; then
-	IOEXP_HW_VERSION=$(cat ${IOEXP_NODE}/hw_version) || IOEXP_HW_VERSION="??"
-	IOEXP_FW_VERSION=$(cat ${IOEXP_NODE}/fw_version) || IOEXP_FW_VERSION="??"
+	IOEXP_HW_VERSION=$(cat ${IOEXP_NODE}/hw_version 2>/dev/null) || IOEXP_HW_VERSION="??"
+	IOEXP_FW_VERSION=$(cat ${IOEXP_NODE}/fw_version 2>/dev/null) || IOEXP_FW_VERSION="??"
 	IOEXP_VERSION="HW_VERSION=${IOEXP_HW_VERSION}  FW_VERSION=${IOEXP_FW_VERSION}"
 fi
 

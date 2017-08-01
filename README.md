@@ -17,10 +17,12 @@ Software for the following hardware platforms is in production support:
 
 * Digi ConnectCore 6UL
   * [Digi P/N CC-WMX-JN58-NE](http://www.digi.com/products/models/cc-wmx-jn58-ne)
+  * [Digi P/N CC-MX-JN58-Z1](https://www.digi.com/products/models/cc-mx-jn58-z1)
+  * Digi P/N CC-WMX-JN7A-NE
 * Digi ConnectCore 6UL SBC Express
-  * [Digi P/N CC-WMX6UL-START](http://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001514/default.htm#concept/yocto/c_get_started_with_yocto.htm))
+  * [Digi P/N CC-WMX6UL-START](http://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001548/default.htm#concept/yocto/c_get_started_with_yocto.htm))
 * Digi ConnectCore 6UL SBC Pro
-  * [Digi P/N CC-WMX6UL-KIT](https://www.digi.com/products/models/cc-wmx6ul-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001515/default.htm#concept/yocto/c_get_started_with_yocto.htm))
+  * [Digi P/N CC-WMX6UL-KIT](https://www.digi.com/products/models/cc-wmx6ul-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001547/default.htm#concept/yocto/c_get_started_with_yocto.htm))
 
 * Digi ConnectCore 6
   * [Digi P/N CC-WMX-J97C-TN](http://www.digi.com/products/models/cc-wmx-j97c-tn)
@@ -37,7 +39,7 @@ Software for the following hardware platforms is in production support:
   * Digi P/N CC-WMX-J98C-FJA-1
 
 * Digi ConnectCore 6 Development Kit
-  * [Digi P/N CC-WMX6-KIT](http://www.digi.com/products/models/cc-wmx6-kit) ([Get Started](http://www.digi.com/resources/documentation/digidocs/90001945-13/default.htm#concept/yocto/c_get_started_with_yocto.htm%3FTocPath%3DDigi%2520Embedded%2520Yocto%7CGet%2520started%7C_____0))
+  * [Digi P/N CC-WMX6-KIT](http://www.digi.com/products/models/cc-wmx6-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001546/default.htm#concept/yocto/c_get_started_with_yocto.htm))
 
 * Digi ConnectCore 6 SBC
   * [Digi P/N CC-SB-WMX-J97C-1](http://www.digi.com/products/models/cc-sb-wmx-j97c-1)
@@ -51,14 +53,14 @@ hardware.
 
 Documentation is available online on the Digi documentation site:
 
-* [Digi ConnectCore 6UL SBC Express](http://www.digi.com/resources/documentation/Digidocs/90001514/default.htm)
-* [Digi ConnectCore 6UL SBC Pro](http://www.digi.com/resources/documentation/Digidocs/90001515/default.htm)
-* [Digi ConnectCore 6 Jumpstart Development Kit](http://www.digi.com/resources/documentation/Digidocs/90001945-13/default.htm)
+* [Digi ConnectCore 6UL SBC Express](https://www.digi.com/resources/documentation/digidocs/90001548/default.htm)
+* [Digi ConnectCore 6UL SBC Pro](https://www.digi.com/resources/documentation/digidocs/90001547/default.htm)
+* [Digi ConnectCore 6 Jumpstart Development Kit](https://www.digi.com/resources/documentation/digidocs/90001546/default.htm)
 
 # Downloads
 
-* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.2/r1/images/
-* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.2/r1/sdk/
+* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.2/r2/images/
+* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.2/r2/sdk/
 
 # Release Changelog
 
@@ -68,11 +70,28 @@ Documentation is available online on the Digi documentation site:
 
 ## 2.2-r2
 
-* Digi Embedded Yocto
-  * Support to connect to AWS IoT with AWS IoT Device SDK for embedded C.
-  * Added support for Digi XBee Cellular 3G Global, with P/N XBC-M5-UT-001
-  * Added support for U-Blox TOBY L-200/L-210
-  * Added support for Quectel EC-25
+* Use NetworkManager for ethernet, wireless (station) and cellular network interfaces
+* Updated kernel version to v4.1.41 for CC6 platform
+* Added support for SPI Slave mode on CC6UL platform
+* Added support for Atmel Cryptochip ATEC508A using Cryptoauthlib
+* Network failover mechanism
+* Powered by AWS certified on all supported hardware platforms including:
+  * AWS GreenGrass core software
+  * AWS IoT Device SDK for embedded C
+* Updated AR6233 firmware for Radio Equipment Directive module certification
+* QCA6564 WorldWide board data file available on request
+* Includes MCA firmware v1.0:
+  * MCA analog tamper detection
+  * MCA ADC-based analog comparators
+* Updated U-Boot to version 2015.04-r9
+  * Added support for CC6UL variant 0x4
+  * Added dynamic environment location and bad block handling for the environment
+  * TrustFence:
+    * Move RootFS encryption key to 'safe' partition
+    * Added support for four tamper interfaces
+    * Disable external memory boot in OTP for secure boot
+  * Skip initial scanning of bad blocks for faster boot on NAND
+  * Updated documentation
 
 ## 2.2-r1
 
@@ -81,9 +100,11 @@ Documentation is available online on the Digi documentation site:
   * Updated Qt 5.7
   * Updated ModemManager with validated support for:
     * Digi's XBee Cellular LTE Cat 1 (USA/Verizon), with P/N XBC-V1-UT-001
+    * Digi's XBee Cellular 3G Global, with P/N XBC-M5-UT-001
+    * U-Blox's TOBY L-200/L-210
     * Telit's LE910 and HE910
     * Huawei's ME909u
-    * Quectel's EC21
+    * Quectel's EC21 and EC25
   * Modified default networking settings:
     * Defalt to dynamic IP addresses assignments
     * Default station and softAP concurrent wireless mode
@@ -123,6 +144,7 @@ boot a signed U-Boot only.
   performance is optimized
 * When working as an access point, DFS capable channels in band A are not
   currently supported.
+* The QCA6564 wireless chip does not support Wake On Wireless LAN
 
 ## Digi ConnectCore 6
 
@@ -156,5 +178,5 @@ When you contact Digi Technical Support, include important system details and
 device information to help Digi resolve the issue more quickly.
 
 1. In the device, run the command 'sysinfo'. This generates the following file:
-   /tmp/<current timestamp>.txt.gz.
-2. Attach the <current timestamp>.txt.gz file to your support ticket.
+   /tmp/&lt;current timestamp>.txt.gz.
+2. Attach the &lt;current timestamp>.txt.gz file to your support ticket.

@@ -14,13 +14,16 @@ SRC_URI += " \
     file://nm.wlan0.static \
 "
 
-# 'polkit' and 'consolekit' require 'x11' distro feature, so disable them for non-X11 distros
-DEPENDS_remove = "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '', 'polkit', d)}"
-PACKAGECONFIG_remove = "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '', 'consolekit', d)}"
-EXTRA_OECONF += "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '', '--enable-polkit=disabled', d)}"
+# 'polkit' depends on 'consolekit', and this requires 'x11' distro feature. So
+# disable those compile time options to be able to build for framebuffer
+# based images.
+DEPENDS_remove = "polkit"
+EXTRA_OECONF += "--enable-polkit=disabled"
+PACKAGECONFIG_remove = "consolekit"
 
-PACKAGECONFIG_remove = "dnsmasq netconfig"
-PACKAGECONFIG_append = " concheck modemmanager ppp"
+# Adjust other compile time options to save space
+PACKAGECONFIG_remove = "dnsmasq netconfig nss"
+PACKAGECONFIG_append = " concheck gnutls modemmanager ppp"
 
 #
 # NetworkManager only accepts IP addresses in CIDR format
