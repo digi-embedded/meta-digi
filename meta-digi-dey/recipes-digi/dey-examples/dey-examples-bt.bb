@@ -1,4 +1,4 @@
-# Copyright (C) 2013,2017 Digi International.
+# Copyright (C) 2013-2017, Digi International Inc.
 
 SUMMARY = "DEY examples: application to transfer data over bluetooth"
 SECTION = "examples"
@@ -22,4 +22,4 @@ do_install() {
 	install -m 0755 bt_test ${D}${bindir}
 }
 
-COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$|ccimx6ul)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"

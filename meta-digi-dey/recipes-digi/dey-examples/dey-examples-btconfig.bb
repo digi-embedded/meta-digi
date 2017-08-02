@@ -1,4 +1,4 @@
-# Copyright (C) 2013,2017 Digi International.
+# Copyright (C) 2013-2017, Digi International Inc.
 
 SUMMARY = "DEY examples: application to perform low level bluetooth"
 SECTION = "examples"
@@ -22,4 +22,4 @@ do_install() {
 	install -m 0755 btconfig ${D}${bindir}
 }
 
-COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$|ccimx6ul)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"
