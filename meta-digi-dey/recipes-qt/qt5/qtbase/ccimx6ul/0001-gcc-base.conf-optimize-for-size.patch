@@ -1,0 +1,24 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Thu, 3 Aug 2017 15:21:21 +0200
+Subject: [PATCH] gcc-base.conf: optimize for size
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ mkspecs/common/gcc-base.conf | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/mkspecs/common/gcc-base.conf b/mkspecs/common/gcc-base.conf
+index 6e043f558f1c..e77fb93326d4 100644
+--- a/mkspecs/common/gcc-base.conf
++++ b/mkspecs/common/gcc-base.conf
+@@ -31,8 +31,8 @@
+ # you can use the manual test in tests/manual/mkspecs.
+ #
+ 
+-QMAKE_CFLAGS_OPTIMIZE      = -O2
+-QMAKE_CFLAGS_OPTIMIZE_FULL = -O3
++QMAKE_CFLAGS_OPTIMIZE      = -Os
++QMAKE_CFLAGS_OPTIMIZE_FULL = -Os
+ 
+ QMAKE_CFLAGS               += -pipe
+ QMAKE_CFLAGS_DEPS          += -M

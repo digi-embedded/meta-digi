@@ -3,6 +3,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI_append = " file://qt5.sh"
+SRC_URI_append_ccimx6ul = " file://0001-gcc-base.conf-optimize-for-size.patch"
 
 PACKAGECONFIG_append = " accessibility examples fontconfig sql-sqlite"
 PACKAGECONFIG_append_ccimx6 = " icu"
