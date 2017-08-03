@@ -1,4 +1,43 @@
 #!/bin/sh
+
+VERBOSITY=0
+
+start_stop_wpa_supplicant() {
+	BRIDGE_WPA_IFACE="${1}"
+	WPA_SUP_BIN="/usr/sbin/wpa_supplicant"
+	WPA_SUP_PNAME="wpa_supplicant"
+	WPA_SUP_PIDFILE="/var/run/wpa_supplicant.${BRIDGE_WPA_IFACE}.pid"
+	WPA_SUP_OPTIONS="-B -P ${WPA_SUP_PIDFILE} -i ${BRIDGE_WPA_IFACE}"
+
+	if [ -z "${IF_BRIDGE_WPA_DRIVER}" ]; then
+		echo "${WPA_SUP_PNAME}: missing bridge_wpa_driver property for bridge interface ${IFACE}"
+		exit 1
+	fi
+
+	case "${MODE}" in
+	start)
+		if [ "${VERBOSITY}" = "1" ]; then
+			echo "${WPA_SUP_PNAME}: ${WPA_SUP_BIN} ${WPA_SUP_OPTIONS} -c ${IF_BRIDGE_WPA_CONF} -D ${IF_BRIDGE_WPA_DRIVER}"
+		fi
+
+		start-stop-daemon --start --quiet \
+			--name ${WPA_SUP_PNAME} --startas ${WPA_SUP_BIN} --pidfile ${WPA_SUP_PIDFILE} \
+			-- ${WPA_SUP_OPTIONS} -c ${IF_BRIDGE_WPA_CONF} -D ${IF_BRIDGE_WPA_DRIVER} -b ${IFACE}
+
+		# Wait for wireless to be ready
+		sleep 0.5
+		;;
+	stop)
+		if [ "${VERBOSITY}" = "1" ]; then
+			echo "${WPA_SUP_PNAME}: terminating ${WPA_SUP_PNAME} daemon"
+		fi
+
+		start-stop-daemon --stop --quiet \
+			--name ${WPA_SUP_PNAME} --pidfile ${WPA_SUP_PIDFILE}
+		;;
+	esac
+}
+
 # Execute only if the interface has a bridge_ports property (this characterizes bridge interfaces)
 case "$IF_BRIDGE_PORTS" in
     "")
@@ -16,16 +55,19 @@ if [ "$MODE" = "start" ] && [ ! -d /sys/class/net/$IFACE ]; then
 	# Create the bridge interface using brctl
 	brctl addbr $IFACE || exit 1
 
-	# Wait for wlan0 to be ready
-	sleep 0.5
-
 	# For all the interfaces in bridge ports, attach to the bridge and remove ip
 	for port in $INTERFACES; do
+		if [ -d "/sys/class/net/${port}/wireless" ] && [ -n "${IF_BRIDGE_WPA_CONF}" ]; then
+			# Launch wpa_supplicant with bridge support
+			start_stop_wpa_supplicant ${port}
+		fi
+
+		# Turn up the interface and include in the bridge
 		brctl addif $IFACE $port && ifconfig $port 0.0.0.0 up
 	done
 
 	# Setup the bridge (only options supported by busybox)
-	[ -n "$IF_BRIDEG_AGEING" ] && brctl setageing $IFACE $IF_BRIDGE_AGEING
+	[ -n "$IF_BRIDGE_AGEING" ] && brctl setageing $IFACE $IF_BRIDGE_AGEING
 	[ -n "$IF_BRIDGE_BRIDGEPRIO" ] && brctl setbridgeprio $IFACE $IF_BRIDGE_BRIDGEPRIO
 	[ -n "$IF_BRIDGE_FD" ] && brctl setfd $IFACE $IF_BRIDGE_FD
 	[ -n "$IF_BRIDGE_HELLO" ] && brctl sethello $IFACE $IF_BRIDGE_HELLO
@@ -43,10 +85,14 @@ elif [ "$MODE" = "stop" ];  then
 
 	# Remove port interfaces from the bridge
 	for port in $INTERFACES; do
+		if [ -d "/sys/class/net/${port}/wireless" ] && [ -n "${IF_BRIDGE_WPA_CONF}" ]; then
+			# Stop the wpa_supplicant instance for the bridge
+			start_stop_wpa_supplicant ${port}
+		fi
+
 		ifconfig $port down && brctl delif $IFACE $port
 	done
 
 	# Destroy the interface
 	brctl delbr $IFACE
 fi
-
