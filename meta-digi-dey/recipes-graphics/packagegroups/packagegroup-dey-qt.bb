@@ -30,6 +30,7 @@ QT5_DEMOS_append_ccimx6 = " \
 "
 
 RDEPENDS_${PN} += " \
+    liberation-fonts \
     ${QT5_PKS} \
     ${QT5_DEMOS} \
     ${QT5_EXAMPLES} \
