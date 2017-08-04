@@ -1,4 +1,4 @@
-# Copyright (C) 2015 Digi International.
+# Copyright (C) 2015-2017 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
@@ -7,6 +7,7 @@ SRC_URI += " \
     file://main.conf \
     file://0001-hcitool-do-not-show-unsupported-refresh-option.patch \
     file://0002-hcitool-increase-the-shown-connection-limit-to-20.patch \
+    file://0025-port-test-discovery-to-python3.patch \
 "
 
 SRC_URI_append_ccimx6ul = " \

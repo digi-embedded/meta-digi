@@ -1,0 +1,99 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Thu, 3 Aug 2017 14:10:43 +0200
+Subject: [PATCH] port test-discovery to python3
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ test/bluezutils.py  |  4 ++--
+ test/test-discovery | 16 +++++++++-------
+ 2 files changed, 11 insertions(+), 9 deletions(-)
+
+diff --git a/test/bluezutils.py b/test/bluezutils.py
+index de08cbdcb712..cd8964082450 100644
+--- a/test/bluezutils.py
++++ b/test/bluezutils.py
+@@ -15,7 +15,7 @@ def find_adapter(pattern=None):
+ 
+ def find_adapter_in_objects(objects, pattern=None):
+ 	bus = dbus.SystemBus()
+-	for path, ifaces in objects.iteritems():
++	for path, ifaces in objects.items():
+ 		adapter = ifaces.get(ADAPTER_INTERFACE)
+ 		if adapter is None:
+ 			continue
+@@ -35,7 +35,7 @@ def find_device_in_objects(objects, device_address, adapter_pattern=None):
+ 	if adapter_pattern:
+ 		adapter = find_adapter_in_objects(objects, adapter_pattern)
+ 		path_prefix = adapter.object_path
+-	for path, ifaces in objects.iteritems():
++	for path, ifaces in objects.items():
+ 		device = ifaces.get(DEVICE_INTERFACE)
+ 		if device is None:
+ 			continue
+diff --git a/test/test-discovery b/test/test-discovery
+index cea77683d726..852611c862ea 100755
+--- a/test/test-discovery
++++ b/test/test-discovery
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python3
+ 
+ from __future__ import absolute_import, print_function, unicode_literals
+ 
+@@ -18,9 +18,9 @@ def print_compact(address, properties):
+ 	name = ""
+ 	address = "<unknown>"
+ 
+-	for key, value in properties.iteritems():
++	for key, value in properties.items():
+ 		if type(value) is dbus.String:
+-			value = unicode(value).encode('ascii', 'replace')
++			value = str(value)
+ 		if (key == "Name"):
+ 			name = value
+ 		elif (key == "Address"):
+@@ -41,7 +41,7 @@ def print_normal(address, properties):
+ 	for key in properties.keys():
+ 		value = properties[key]
+ 		if type(value) is dbus.String:
+-			value = unicode(value).encode('ascii', 'replace')
++			value = str(value)
+ 		if (key == "Class"):
+ 			print("    %s = 0x%06x" % (key, value))
+ 		else:
+@@ -61,6 +61,8 @@ def skip_dev(old_dev, new_dev):
+ 	return False
+ 
+ def interfaces_added(path, interfaces):
++	if "org.bluez.Device1" not in interfaces.keys():
++		return
+ 	properties = interfaces["org.bluez.Device1"]
+ 	if not properties:
+ 		return
+@@ -70,7 +72,7 @@ def interfaces_added(path, interfaces):
+ 
+ 		if compact and skip_dev(dev, properties):
+ 			return
+-		devices[path] = dict(devices[path].items() + properties.items())
++		devices[path] = dict(list(devices[path].items()) + list(properties.items()))
+ 	else:
+ 		devices[path] = properties
+ 
+@@ -93,7 +95,7 @@ def properties_changed(interface, changed, invalidated, path):
+ 
+ 		if compact and skip_dev(dev, changed):
+ 			return
+-		devices[path] = dict(devices[path].items() + changed.items())
++		devices[path] = dict(list(devices[path].items()) + list(changed.items()))
+ 	else:
+ 		devices[path] = changed
+ 
+@@ -152,7 +154,7 @@ if __name__ == '__main__':
+ 	om = dbus.Interface(bus.get_object("org.bluez", "/"),
+ 				"org.freedesktop.DBus.ObjectManager")
+ 	objects = om.GetManagedObjects()
+-	for path, interfaces in objects.iteritems():
++	for path, interfaces in objects.items():
+ 		if "org.bluez.Device1" in interfaces:
+ 			devices[path] = interfaces["org.bluez.Device1"]
+ 
