@@ -7,8 +7,8 @@ LICENSE = "CLOSED"
 PKGNAME = "mca_tool"
 SRC_URI = "${DIGI_PKG_SRC}/${PKGNAME}-${PV}.tar.gz"
 
-SRC_URI[md5sum] = "3d954ceb361efa8325c9fae280c95775"
-SRC_URI[sha256sum] = "874f02bc1ad7d1768879cff563888666c70691b12404a986af2e5743b3e3e628"
+SRC_URI[md5sum] = "e739879489b2d0f0ab2fa61f60af80f6"
+SRC_URI[sha256sum] = "af2eb7abebfbabe228c574b887d166d2ef5ad5b3a9308ccd07778d0ccbed1e8b"
 
 S = "${WORKDIR}/${PKGNAME}-${PV}"
 
