@@ -1,0 +1,24 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Tue, 8 Aug 2017 18:17:46 +0200
+Subject: [PATCH] qtsmarthome: fix runtime warning
+
+Both point size and pixel size set. Using pixel size.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ components/qml/components/timepicker/PickerPathView.qml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/components/qml/components/timepicker/PickerPathView.qml b/components/qml/components/timepicker/PickerPathView.qml
+index 7038331e3aae..1987d72e32b9 100644
+--- a/components/qml/components/timepicker/PickerPathView.qml
++++ b/components/qml/components/timepicker/PickerPathView.qml
+@@ -74,7 +74,7 @@ PathView {
+         verticalAlignment: Text.AlignVCenter
+         text: modelData
+         Component.onCompleted: {
+-            font.pointSize = font.pointSize * 0.8
++            font.pixelSize = font.pixelSize * 0.8
+         }
+     }
+ 
