@@ -15,6 +15,9 @@ do_install_append () {
 	install -m 0644 ${WORKDIR}/qmlvideo.desktop ${D}${datadir}/applications/
 	install -m 0644 ${WORKDIR}/qmlvideo.png ${D}${datadir}/pixmaps/
 
+	# Remove the desktop launchers that have been moved along with its package
+	rm -f ${D}${datadir}/applications/qtsmarthome.desktop ${D}${datadir}/pixmaps/qtsmarthome.png
+
 	# Remove the desktop launchers of the demo/example applications we do not provide.
 	rm -f ${D}${datadir}/applications/hellogl_es2.desktop ${D}${datadir}/pixmaps/hellogl_es2.png
 	rm -f ${D}${datadir}/applications/qt5basket.desktop ${D}${datadir}/pixmaps/qt5basket.png
