@@ -13,21 +13,21 @@ QT5_PKS = "qtserialport"
 QT5_PKS_append_ccimx6 = " qtdeclarative-tools"
 QT5_PKS_append_ccimx6ul = " qtdeclarative-render2d-plugins"
 
-QT5_EXAMPLES = "qtbase-examples"
+QT5_EXAMPLES = ""
 QT5_EXAMPLES_append_ccimx6 = " \
     qt3d-examples \
+    qtbase-examples \
     qtconnectivity-examples \
     qtdeclarative-examples \
     qtmultimedia-examples \
     qtsvg-examples \
 "
 
-QT5_DEMOS = ""
+QT5_DEMOS = "qtsmarthome"
 QT5_DEMOS_append_ccimx6 = " \
     cinematicexperience \
     qt5-demo-extrafiles \
     qt5everywheredemo \
-    qtsmarthome \
 "
 
 RDEPENDS_${PN} += " \
