@@ -1,13 +1,12 @@
                     END-USER LICENSE AGREEMENT
-                       DIGI DEVELOPMENT KIT
-                           (PN 90002118)
 
 This end-user license agreement is a legal agreement between you
 (either an individual or a single entity) and Digi International, Inc.
 ("Digi") for use of Digi Technology. This license applies to the
-product with which it was shipped, which may be a Development Kit or a
-unit of Digi Hardware. By using Digi product, you are consenting to be
-bound by and are becoming a party to this end-user license agreement.
+product with which it was provided, which may be a Development Kit,
+Digi Software, or a unit of Digi Hardware. By using the product,
+you are consenting to be bound by and are becoming a party to this
+end-user license agreement.
 
 DEFINITIONS
 
@@ -41,6 +40,13 @@ and developing solutions that incorporate Digi Technology. Digi Software
 may only be used in conjunction with Digi Hardware. Copies of Digi Software
 may not be redistributed on a standalone basis or as part of any product
 not incorporating Digi Hardware.
+
+DEVELOPMENT KITS
+
+Development Kits may include Digi Hardware. ALL DIGI HARDWARE PROVIDED IN
+DEVELOPMENT KITS IS INTENDED FOR PRODUCT EVALUATION, DEVELOPMENT, AND
+PROTOTYPING PURPOSES ONLY, AND MAY NOT BE USED IN OR IS WARRANTED FOR
+PRODUCTION ENVIRONMENTS.
 
 THIRD-PARTY COMPONENTS
 
@@ -79,12 +85,3 @@ and regulations concerning export and re-export of products, technology
 and documentation, including without limitation, the laws and regulations
 administered by the United States Department of Commerce and the United
 States Department of State.
-
--------------------------------------------------------------------------
-                       U-BOOT LICENSE NOTICE
-
-THE U-BOOT SOFTWARE THAT IS PROVIDED WITH DIGI SOFTWARE AND DIGI HARDWARE
-IS COVERED BY THE GNU GENERAL PUBLIC LICENSE (VERSION 2 OR LATER) AS
-PUBLISHED BY THE FREE SOFTWARE FOUNDATION.
-
-Please visit http://www.denx.de for current U-Boot license information.
