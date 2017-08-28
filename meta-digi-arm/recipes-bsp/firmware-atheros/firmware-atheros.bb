@@ -3,7 +3,7 @@
 SUMMARY = "Firmware files for Digi's platforms, such as Atheros bluetooth."
 SECTION = "base"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://${DIGI_EULA_FILE};md5=4c0991cfde5c8a92338cbfe0f4f9a5c6"
+LIC_FILES_CHKSUM = "file://${DIGI_EULA_FILE};md5=8c0ad592dd48ace3d25eed5bbb26ba78"
 
 FW_ATH6KL = " \
     file://athtcmd_ram.bin \
