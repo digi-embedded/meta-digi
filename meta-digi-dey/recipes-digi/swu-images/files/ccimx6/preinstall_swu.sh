@@ -72,7 +72,7 @@ if [ -b /dev/mapper/cryptroot ]; then
 	exit 0
 fi
 
-rootfs_block="/dev/mmcblk0p$(parted -s /dev/mmcblk0 print | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<rootfs\>.*,\1,g;T;p")"
+rootfs_block="/dev/mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<rootfs\>.*,\1,g;T;p")"
 
 # Open LUKS encrypted device
 trustfence-tool ${rootfs_block} cryptroot

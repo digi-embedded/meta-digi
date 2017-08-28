@@ -5,7 +5,6 @@ LICENSE = "MIT"
 
 PACKAGE_INSTALL = " \
     busybox \
-    parted \
     psplash \
     recovery-initramfs \
     swupdate \

@@ -230,7 +230,7 @@ format_ubi_volume() {
 #------------------------------------------------------------------------------
 format_emmc_block() {
 	# Find partition block number.
-	local partition_block="/dev/mmcblk0p$(parted -s /dev/mmcblk0 print | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<${1}\>.*,\1,g;T;p")"
+	local partition_block="/dev/mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<${1}\>.*,\1,g;T;p")"
 	if [ -b "${partition_block}" ]; then
 		# Umount in case partition is mounted, ignore errors.
 		if grep -qs "${partition_block}" /proc/mounts; then
@@ -458,7 +458,7 @@ if [ -n "${encryption_key_bool}" ]; then
 	# Format partition.
 	if [ "$(is_nand)" = "no" ]; then
 		psplash_message "Formatting rootfs partition..."
-		rootfs_block="/dev/mmcblk0p$(parted -s /dev/mmcblk0 print | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<rootfs\>.*,\1,g;T;p")"
+		rootfs_block="/dev/mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<rootfs\>.*,\1,g;T;p")"
 		trustfence-tool --format ${rootfs_block} cryptroot
 	fi
 	psplash_progress "100"
