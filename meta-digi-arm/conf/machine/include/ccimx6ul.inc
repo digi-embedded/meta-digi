@@ -39,7 +39,9 @@ MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_WIFI', '1', 'firmware-qual
 KERNEL_IMAGETYPE = "zImage"
 
 # mkfs.ubifs parameters for boot partition (the one holding kernel and device tree files)
-MKUBIFS_BOOT_ARGS ?= "-m 2048 -e 126976 -c 127"
+# Max LEB count (-c 255) calculated for a partition of up to 32 MiB considering 128 KiB erase-block size.
+MKUBIFS_BOOT_ARGS ?= "-m 2048 -e 126976 -c 255"
 
 # mkfs.ubifs parameters for rootfs partition
+# Max LEB count (-c 8191) calculated for a partition of up to 1 GiB considering 128 KiB erase-block size.
 MKUBIFS_ARGS ?= "-m 2048 -e 126976 -c 8191"
