@@ -30,7 +30,6 @@ do_install_append() {
 			sed -i -e 's,##WLAN_P2P_INTERFACE##,${WLAN_P2P_INTERFACE},g' ${D}${sysconfdir}/network/interfaces
 		fi
 	fi
-	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
 
 	# Remove config entries if corresponding variable is not defined
 	[ -z "${P2P0_STATIC_DNS}" ] && sed -i -e "/##P2P0_STATIC_DNS##/d" ${D}${sysconfdir}/network/interfaces
@@ -44,6 +43,10 @@ do_install_append() {
 	sed -i -e "s,##P2P0_STATIC_GATEWAY##,${P2P0_STATIC_GATEWAY},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##P2P0_STATIC_DNS##,${P2P0_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WPA_DRIVER##,${WPA_DRIVER},g" ${D}${sysconfdir}/network/interfaces
+}
+
+do_install_append_ccimx6sbc() {
+	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
 }
 
 do_install_append_ccimx6ul() {
@@ -64,6 +67,8 @@ do_install_append_ccimx6ul() {
 	sed -i -e "s,##WLAN1_STATIC_NETMASK##,${WLAN1_STATIC_NETMASK},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WLAN1_STATIC_GATEWAY##,${WLAN1_STATIC_GATEWAY},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WLAN1_STATIC_DNS##,${WLAN1_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
+
+	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
 }
 
 # Disable wireless interfaces on first boot for non-wireless variants
