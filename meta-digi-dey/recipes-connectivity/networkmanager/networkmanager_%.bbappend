@@ -12,6 +12,7 @@ SRC_URI += " \
     file://nm.eth1.static \
     file://nm.wlan0.dhcp \
     file://nm.wlan0.static \
+    file://0001-connectivity-configure-network-interface-for-DNS-res.patch \
 "
 
 # 'polkit' depends on 'consolekit', and this requires 'x11' distro feature. So
