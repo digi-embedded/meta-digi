@@ -4,7 +4,7 @@
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
 
-Digi Embedded Yocto 2.2 is based on the 2.2 (Morty) Yocto release.
+Digi Embedded Yocto 2.2 is based on the Yocto Project(TM) 2.2 (Morty) release.
 
 For a full list of supported features and interfaces please refer to the
 online documentation.
@@ -48,6 +48,13 @@ Software for the following hardware platforms is in production support:
 
 Previous versions of Digi Embedded Yocto include support for additional Digi
 hardware.
+
+# Installation
+
+Digi Embedded Yocto is composed of a set of different Yocto layers that work in
+parallel. The layers are specified on a [manifest](https://github.com/digi-embedded/dey-manifest/blob/morty/default.xml) file.
+
+To install, please follow the instructions at the dey-manifest [README](https://github.com/digi-embedded/dey-manifest)
 
 # Documentation
 
