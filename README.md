@@ -73,7 +73,11 @@ Documentation is available online on the Digi documentation site:
 
 ## 2.2-r3
 
-* TBC
+* Added Digi APIX C library to access and manage ConnectCore platforms interfaces:
+  * GPIO
+  * SPI
+  * I2C
+  * PWM
 
 ## 2.2-r2
 
