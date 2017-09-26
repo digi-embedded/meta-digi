@@ -22,7 +22,7 @@ EXTRA_OECONF += "--enable-polkit=disabled"
 PACKAGECONFIG_remove = "consolekit"
 
 # Adjust other compile time options to save space
-PACKAGECONFIG_remove = "dnsmasq netconfig nss"
+PACKAGECONFIG_remove = "netconfig nss"
 PACKAGECONFIG_append = " concheck gnutls modemmanager ppp"
 
 #
