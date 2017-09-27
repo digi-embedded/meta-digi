@@ -43,6 +43,9 @@ do_install_append() {
 	install -d ${D}${sysconfdir}/init.d/
 	install -m 0755 ${WORKDIR}/bluetooth-init ${D}${sysconfdir}/init.d/bluetooth-init
 	install -m 0644 ${WORKDIR}/main.conf ${D}${sysconfdir}/bluetooth/
+	if [ -n "${@bb.utils.contains('PACKAGECONFIG', 'experimental', 'experimental', '', d)}" ]; then
+		sed -i '/^SSD_OPTIONS/a SSD_OPTIONS="${SSD_OPTIONS} --experimental"' ${D}${INIT_D_DIR}/bluetooth
+	fi
 }
 
 PACKAGES =+ "${PN}-init"
