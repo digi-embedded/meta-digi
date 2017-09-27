@@ -8,6 +8,7 @@ SRC_URI += " \
     file://0001-hcitool-do-not-show-unsupported-refresh-option.patch \
     file://0002-hcitool-increase-the-shown-connection-limit-to-20.patch \
     file://0025-port-test-discovery-to-python3.patch \
+    file://0027-example-gatt-server-update-example-to-master-version.patch \
 "
 
 SRC_URI_append_ccimx6ul = " \
