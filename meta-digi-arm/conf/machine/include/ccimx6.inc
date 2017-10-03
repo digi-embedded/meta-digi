@@ -20,8 +20,6 @@ WIRELESS_MODULE ?= ""
 MACHINE_FIRMWARE ?= ""
 MACHINE_FIRMWARE_append_mx6q = " firmware-imx-vpu-imx6q"
 MACHINE_FIRMWARE_append_mx6dl = " firmware-imx-vpu-imx6d"
-MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_BT', '1' , 'firmware-atheros-ar3k', '', d)}"
-MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_WIFI', '1' , 'firmware-atheros-ath6kl', '', d)}"
 
 MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
@@ -30,6 +28,6 @@ MACHINE_EXTRA_RDEPENDS += " \
     u-boot-fw-utils \
 "
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
-MACHINE_EXTRA_RRECOMMENDS += "imx-alsa-plugins cryptodev-module rng-tools"
+MACHINE_EXTRA_RRECOMMENDS += "imx-alsa-plugins cryptodev-module"
 
 MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth"

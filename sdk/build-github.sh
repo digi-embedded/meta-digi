@@ -22,7 +22,7 @@
 
 set -e
 
-AVAILABLE_PLATFORMS="ccimx6sbc ccimx6ulsbc ccimx6ulstarter"
+AVAILABLE_PLATFORMS="ccimx6qpsbc ccimx6sbc ccimx6ulsbc ccimx6ulstarter"
 
 MANIFEST_URL="https://github.com/digi-embedded/dey-manifest.git"
 
@@ -119,6 +119,7 @@ while read _pl _tgt; do
 	[ -n "${DY_TARGET}" ] && _tgt="${DY_TARGET}" || true
 	eval "${_pl}_tgt=\"${_tgt}\""
 done<<-_EOF_
+	ccimx6qpsbc       dey-image-qt
 	ccimx6sbc         dey-image-qt
 	ccimx6ulsbc       dey-image-qt
 	ccimx6ulstarter   core-image-base
