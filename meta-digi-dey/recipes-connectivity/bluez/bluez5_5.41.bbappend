@@ -11,7 +11,7 @@ SRC_URI += " \
     file://0027-example-gatt-server-update-example-to-master-version.patch \
 "
 
-SRC_URI_append_ccimx6ul = " \
+QCA6564_COMMON_PATCHES = " \
     file://0003-bluetooth-Add-bluetooth-support-for-QCA6174-chip.patch \
     file://0004-bluetooth-Enable-bluetooth-low-power-mode-functional.patch \
     file://0005-bluetooth-Fix-bug-in-firmware-parsing-mechanism.patch \
@@ -35,6 +35,9 @@ SRC_URI_append_ccimx6ul = " \
     file://0023-hciattach-If-the-user-supplies-a-bdaddr-use-it.patch \
     file://0024-hciattach-Add-verbosity-option.patch \
 "
+
+SRC_URI_append_ccimx6ul = " ${QCA6564_COMMON_PATCHES}"
+SRC_URI_append_ccimx6qpsbc = " ${QCA6564_COMMON_PATCHES}"
 
 inherit update-rc.d
 
