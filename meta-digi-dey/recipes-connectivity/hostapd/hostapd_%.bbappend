@@ -4,6 +4,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI_append = " file://hostapd_wlan0.conf"
 SRC_URI_append_ccimx6ul = " file://hostapd_wlan1.conf"
+SRC_URI_append_ccimx6qpsbc = " file://hostapd_wlan1.conf"
 
 do_install_append() {
 	# Remove the default hostapd.conf
@@ -13,6 +14,11 @@ do_install_append() {
 }
 
 do_install_append_ccimx6ul() {
+	# Install custom hostapd_IFACE.conf file
+	install -m 0644 ${WORKDIR}/hostapd_wlan1.conf ${D}${sysconfdir}
+}
+
+do_install_append_ccimx6qpsbc() {
 	# Install custom hostapd_IFACE.conf file
 	install -m 0644 ${WORKDIR}/hostapd_wlan1.conf ${D}${sysconfdir}
 }
