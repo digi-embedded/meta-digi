@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Digi International.
+# Copyright (C) 2012-2017 Digi International.
 #
 SUMMARY = "Audio packagegroup for DEY image"
 
@@ -21,4 +21,4 @@ RDEPENDS_${PN} = "\
     ${ALSA_UTILS_PKGS} \
 "
 
-RDEPENDS_${PN}_append_ccimx6sbc = " card-detect"
+RDEPENDS_${PN}_append_ccimx6 = " card-detect"

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Digi International.
+# Copyright (C) 2012-2017 Digi International.
 #
 SUMMARY = "Wireless packagegroup for DEY image"
 
@@ -16,3 +16,4 @@ RDEPENDS_${PN} = "\
 "
 
 RDEPENDS_${PN}_append_ccimx6ul = " hostapd"
+RDEPENDS_${PN}_append_ccimx6qpsbc = " hostapd"

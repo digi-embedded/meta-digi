@@ -32,7 +32,7 @@ ROOTFS_ENC_DEV_ccimx6ul = "${ROOTFS_DEV_NAME}"
 ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_INITRAMFS_IMAGE', True), '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
 PREINST_SCRIPT_TEMPLATE = "scripts: ( { filename = \\"preinstall_swu.sh\\"; type = \\"preinstall\\"; sha256 = \\"@preinstall_swu.sh\\"; \\x7D );"
 PREINST_SCRIPT_DESC = ""
-PREINST_SCRIPT_DESC_ccimx6sbc = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_INITRAMFS_IMAGE', True), '${PREINST_SCRIPT_TEMPLATE}', '')}"
+PREINST_SCRIPT_DESC_ccimx6 = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_INITRAMFS_IMAGE', True), '${PREINST_SCRIPT_TEMPLATE}', '')}"
 PREINST_SCRIPT_DESC_ccimx6ul = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_INITRAMFS_IMAGE', True), '', '${PREINST_SCRIPT_TEMPLATE}')}"
 
 python () {

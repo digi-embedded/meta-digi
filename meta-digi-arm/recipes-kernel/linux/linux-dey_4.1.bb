@@ -6,4 +6,4 @@ require recipes-kernel/linux/linux-dtb.inc
 SRCBRANCH = "v4.1.15/master"
 SRCREV = "${AUTOREV}"
 
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"
+COMPATIBLE_MACHINE = "(ccimx6sbc|ccimx6ul)"

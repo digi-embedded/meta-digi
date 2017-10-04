@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013-2017 Digi International.
 
 SUMMARY = "Firmware files for Digi's platforms, such as Atheros bluetooth."
 SECTION = "base"
@@ -74,4 +74,4 @@ FILES_${PN}-ar3k = "/lib/firmware/ar3k"
 FILES_${PN}-ath6kl = "/lib/firmware/ath6k"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6$)"
+COMPATIBLE_MACHINE = "(ccimx6sbc)"
