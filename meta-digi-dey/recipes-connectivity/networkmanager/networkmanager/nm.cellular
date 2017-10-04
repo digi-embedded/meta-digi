@@ -14,4 +14,4 @@ lcp-echo-failure=3
 lcp-echo-interval=5
 
 [ipv6]
-method=ignore
+method=auto
