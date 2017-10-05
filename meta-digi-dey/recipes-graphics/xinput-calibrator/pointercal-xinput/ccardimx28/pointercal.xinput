@@ -1,2 +1,0 @@
-xinput set-int-prop "mxs-lradc" "Evdev Axis Calibration" 32 4200 269 4020 250
-xinput set-int-prop "mxs-lradc" "Evdev Axes Swap" 8 1
