@@ -12,6 +12,7 @@ AWS_USER_LED ?= ""
 AWS_USER_LED_ccimx6ulstarter ?= "75"
 AWS_USER_LED_ccimx6ulsbc ?= "488"
 AWS_USER_LED_ccimx6sbc ?= "34"
+AWS_USER_LED_ccimx6qpsbc ?= "34"
 
 SRCBRANCH = "master"
 SRCREV = "${AUTOREV}"
