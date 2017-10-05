@@ -15,9 +15,11 @@ SRC_URI = "${GIT_URI};branch=${SRCBRANCH}"
 S = "${WORKDIR}/git/engine_atecc/cryptoauthlib"
 
 I2C_BUS = ""
+I2C_BUS_ccimx6qpsbc = "1"
 I2C_BUS_ccimx6ul = "0"
 
 I2C_SPEED = ""
+I2C_SPEED_ccimx6qpsbc = "100000"
 I2C_SPEED_ccimx6ul = "100000"
 
 CFLAGS += "-DATCA_HAL_I2C_BUS=${I2C_BUS} -DATCA_HAL_I2C_SPEED=${I2C_SPEED}"
@@ -27,4 +29,4 @@ do_install() {
 }
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6ul)"
+COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul)"
