@@ -16,7 +16,10 @@ LIBDIGIAPIX_URI_GITHUB = "git://github.com/digi-embedded/libdigiapix.git;protoco
 
 LIBDIGIAPIX_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${LIBDIGIAPIX_URI_STASH}', '${LIBDIGIAPIX_URI_GITHUB}', d)}"
 
-SRC_URI = "${LIBDIGIAPIX_GIT_URI};branch=${SRCBRANCH}"
+SRC_URI = " \
+    ${LIBDIGIAPIX_GIT_URI};branch=${SRCBRANCH} \
+    file://board.conf \
+"
 
 S = "${WORKDIR}/git"
 
@@ -25,8 +28,8 @@ inherit pkgconfig
 do_install() {
 	oe_runmake 'DESTDIR=${D}' install
 
-	# Create a link to 'libsoc.conf' file that is installed by libsoc recipe
 	install -d ${D}${sysconfdir}/
-	ln -sf libsoc.conf ${D}${sysconfdir}/${BPN}.conf
+	install -m 0644 ${WORKDIR}/board.conf ${D}${sysconfdir}/libdigiapix.conf
 }
 
+PACKAGE_ARCH = "${MACHINE_ARCH}"
