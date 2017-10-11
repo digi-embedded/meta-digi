@@ -78,6 +78,11 @@ Documentation is available online on the Digi documentation site:
 * Added support for SPI Slave mode on CC6UL platform
 * Added support for Atmel Cryptochip ATEC508A using Cryptoauthlib
 * Network failover mechanism
+* Raspberry Pi Sense hat Yocto support using meta-digi-maker layer for CC6UL SBC Express
+* QT fonts fix
+* QT software renderer for CC6UL
+* Fix for CVE-2017-1000251 vulnerability (https://nvd.nist.gov/vuln/detail/CVE-2017-1000251)
+* RS-485 kernel patches
 * Powered by AWS certified on all supported hardware platforms including:
   * AWS GreenGrass core software
   * AWS IoT Device SDK for embedded C
