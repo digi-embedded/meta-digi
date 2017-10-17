@@ -266,13 +266,13 @@ BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn)"
 BOARD_VERSION="$(cat /proc/device-tree/digi,carrierboard,version)"
 BOARD_ID="$(cat /proc/device-tree/digi,carrierboard,id)"
 if grep -qs '\<digi,ccimx6ul\>' /proc/device-tree/compatible; then
-	MCA_NODE="/sys/devices/platform/soc/2100000.aips-bus/21a0000.i2c/i2c-0/0-007e"
+	MCA_NODE="/sys/bus/i2c/devices/0-007e"
 	MCA_HW_VERSION=$(cat ${MCA_NODE}/hw_version) || MCA_HW_VERSION="??"
 	MCA_FW_VERSION=$(cat ${MCA_NODE}/fw_version) || MCA_FW_VERSION="??"
 	MCA_VERSION="HW_VERSION=${MCA_HW_VERSION}  FW_VERSION=${MCA_FW_VERSION}"
 fi
 
-IOEXP_NODE="/sys/devices/platform/soc/2100000.aips-bus/21a0000.i2c/i2c-0/0-006e"
+IOEXP_NODE="/sys/bus/i2c/devices/0-006e"
 if [ -d "$IOEXP_NODE" ]; then
 	IOEXP_HW_VERSION=$(cat ${IOEXP_NODE}/hw_version 2>/dev/null) || IOEXP_HW_VERSION="??"
 	IOEXP_FW_VERSION=$(cat ${IOEXP_NODE}/fw_version 2>/dev/null) || IOEXP_FW_VERSION="??"
@@ -297,7 +297,7 @@ printf "\n\n"
 	echo "|| Firmware | ${DISTRO}-${DEY_VERSION}-$(cat /etc/version)"
 	echo "|| Kernel | $(uname -a)"
 	echo "|| meta-digi | $(sed -ne '/^meta-digi-dey/s,.*= \(.*\)$,\1,g;T;p' /etc/build)"
-	[ -n "${MCA_VERSION}" ] && echo "|| Kinetis | ${MCA_VERSION}"
+	[ -n "${MCA_VERSION}" ] && echo "|| MCA | ${MCA_VERSION}"
 	[ -n "${IOEXP_VERSION}" ] && echo "|| I/O Expander | ${IOEXP_VERSION}"
 	printf "\n\n"
 ) | tee ${FILE}
