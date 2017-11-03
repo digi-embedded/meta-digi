@@ -7,15 +7,15 @@ SRC_URI += " \
     file://main.conf \
     file://0001-hcitool-do-not-show-unsupported-refresh-option.patch \
     file://0002-hcitool-increase-the-shown-connection-limit-to-20.patch \
-    file://0007-port-test-discovery-to-python3.patch \
-    file://0008-example-gatt-server-update-example-to-master-version.patch \
+    file://0003-port-test-discovery-to-python3.patch \
+    file://0004-example-gatt-server-update-example-to-master-version.patch \
 "
 
 QCA6564_COMMON_PATCHES = " \
-    file://0003-QCA_bluetooth_chip_support.patch \
-    file://0004-hciattach_rome-Respect-the-user-indication-for-noflo.patch \
-    file://0005-hciattach-If-the-user-supplies-a-bdaddr-use-it.patch \
-    file://0006-hciattach-Add-verbosity-option.patch \
+    file://0005-QCA_bluetooth_chip_support.patch \
+    file://0006-hciattach_rome-Respect-the-user-indication-for-noflo.patch \
+    file://0007-hciattach-If-the-user-supplies-a-bdaddr-use-it.patch \
+    file://0008-hciattach-Add-verbosity-option.patch \
 "
 
 SRC_URI_append_ccimx6ul = " ${QCA6564_COMMON_PATCHES}"
