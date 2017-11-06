@@ -18,4 +18,4 @@ PLATFORM_mx6sll = "IMX6Q"
 PROVIDES = "virtual/libvpu"
 RPROVIDES_${PN} = "virtual/libvpu"
 
-COMPATIBLE_MACHINE = "(ccimx6qpsbc)"
+COMPATIBLE_MACHINE = "(ccimx6)"
