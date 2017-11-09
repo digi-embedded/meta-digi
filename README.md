@@ -73,6 +73,17 @@ Documentation is available online on the Digi documentation site:
 
 ## 2.2-r2
 
+* Fix for KRACK Attack vulnerability:
+  * [CVE-2017-13077](https://nvd.nist.gov/vuln/detail/CVE-2017-13077)
+  * [CVE-2017-13078](https://nvd.nist.gov/vuln/detail/CVE-2017-13078)
+  * [CVE-2017-13079](https://nvd.nist.gov/vuln/detail/CVE-2017-13079)
+  * [CVE-2017-13080](https://nvd.nist.gov/vuln/detail/CVE-2017-13080)
+  * [CVE-2017-13081](https://nvd.nist.gov/vuln/detail/CVE-2017-13081)
+  * [CVE-2017-13082](https://nvd.nist.gov/vuln/detail/CVE-2017-13082)
+  * [CVE-2017-13086](https://nvd.nist.gov/vuln/detail/CVE-2017-13086)
+  * [CVE-2017-13087](https://nvd.nist.gov/vuln/detail/CVE-2017-13087)
+  * [CVE-2017-13088](https://nvd.nist.gov/vuln/detail/CVE-2017-13088)
+* Cloud Connector: fix connections through PPP
 * Use NetworkManager for ethernet, wireless (station) and cellular network interfaces
 * Updated kernel version to v4.1.41 for CC6 platform
 * Added support for SPI Slave mode on CC6UL platform
