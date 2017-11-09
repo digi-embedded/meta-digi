@@ -3,6 +3,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
+    file://0001-networkmanager-trigger-dispatcher-on-per-device-conn.patch \
     file://NetworkManager.conf \
     file://networkmanager-init \
     file://nm.cellular \
