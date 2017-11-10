@@ -66,6 +66,20 @@ Documentation is available online on the Digi documentation site:
 
 ## 2.0-r5
 
+* Fix for KRACK Attack vulnerability:
+  * [CVE-2017-13077](https://nvd.nist.gov/vuln/detail/CVE-2017-13077)
+  * [CVE-2017-13078](https://nvd.nist.gov/vuln/detail/CVE-2017-13078)
+  * [CVE-2017-13079](https://nvd.nist.gov/vuln/detail/CVE-2017-13079)
+  * [CVE-2017-13080](https://nvd.nist.gov/vuln/detail/CVE-2017-13080)
+  * [CVE-2017-13081](https://nvd.nist.gov/vuln/detail/CVE-2017-13081)
+  * [CVE-2017-13082](https://nvd.nist.gov/vuln/detail/CVE-2017-13082)
+  * [CVE-2017-13086](https://nvd.nist.gov/vuln/detail/CVE-2017-13086)
+  * [CVE-2017-13087](https://nvd.nist.gov/vuln/detail/CVE-2017-13087)
+  * [CVE-2017-13088](https://nvd.nist.gov/vuln/detail/CVE-2017-13088)
+* Fix for BlueBorne bluetooth vulnerability:
+  * [CVE-2017-1000250](https://nvd.nist.gov/vuln/detail/CVE-2017-1000250)
+  * [CVE-2017-1000251](https://nvd.nist.gov/vuln/detail/CVE-2017-1000251)
+
 * Digi Embedded Yocto
   * Support firmware update through the new recovery mode
   * Initial support to connect to Remote Manager with the CloudConnector
