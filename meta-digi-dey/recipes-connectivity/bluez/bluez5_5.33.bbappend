@@ -4,6 +4,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
 SRC_URI += " \
     file://bluez-init \
+    file://cve-2017-1000250.patch \
     file://0021-hcitool-do-not-show-unsupported-refresh-option.patch \
     file://0022-hcitool-increase-the-shown-connection-limit-to-20.patch \
 "
