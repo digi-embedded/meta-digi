@@ -17,6 +17,7 @@ IMAGE_INSTALL = " \
 IMAGE_FEATURES += " \
     dey-network \
     dey-qt \
+    eclipse-debug \
     package-management \
     ssh-server-dropbear \
     ${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'x11-base x11-sato', '', d)} \
