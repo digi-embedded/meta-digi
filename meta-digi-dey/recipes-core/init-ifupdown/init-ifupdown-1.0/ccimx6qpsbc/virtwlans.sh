@@ -26,5 +26,5 @@ fi
 
 if [ ! -d "/sys/class/net/wlan1" ]; then
 	# This will create a second wireless network device
-	iw dev wlan0 interface add wlan1 type managed
+	iw dev wlan0 interface add wlan1 type __ap
 fi
