@@ -23,7 +23,7 @@ SRC_URI = " \
 
 S = "${WORKDIR}/git"
 
-inherit pkgconfig
+inherit pkgconfig useradd
 
 do_install() {
 	oe_runmake 'DESTDIR=${D}' install
@@ -31,5 +31,8 @@ do_install() {
 	install -d ${D}${sysconfdir}/
 	install -m 0644 ${WORKDIR}/board.conf ${D}${sysconfdir}/libdigiapix.conf
 }
+
+USERADD_PACKAGES = "${PN}"
+GROUPADD_PARAM_${PN} = "-r digiapix"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
