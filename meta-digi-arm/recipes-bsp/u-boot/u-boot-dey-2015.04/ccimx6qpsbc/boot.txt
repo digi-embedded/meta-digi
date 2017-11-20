@@ -6,13 +6,13 @@
 # Set device tree filename depending on the board ID (if defined)
 #
 if test -n "${board_id}"; then
-	setenv fdt_file uImage-${soc_family}-ccimx6qpsbc-id${board_id}.dtb
+	setenv fdt_file zImage-${soc_family}-ccimx6qpsbc-id${board_id}.dtb
 else
 	#
 	# Set device tree filename depending on the hardware variant
 	#
 	if test "${module_variant}" = "0x01"; then
-		setenv fdt_file uImage-${soc_family}-ccimx6qpsbc-wb.dtb
+		setenv fdt_file zImage-${soc_family}-ccimx6qpsbc-wb.dtb
 	else
 		echo "------ Using default fdt_file"
 	fi
