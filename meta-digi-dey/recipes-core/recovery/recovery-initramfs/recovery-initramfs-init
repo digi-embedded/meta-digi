@@ -349,6 +349,19 @@ set_encryption_flag() {
 	fi
 }
 
+#------------------------------------------------------------------------------
+# Function - get_kernel_version
+#
+# Obtain the kernel version and return it in number format
+#
+# @return  - kernel version
+#------------------------------------------------------------------------------
+get_kernel_version() {
+	major="$(uname -r | cut -d'.' -f1)"
+	minor="$(uname -r | cut -d'.' -f2)"
+	echo $(((major << 8) + minor))
+}
+
 # Main
 #------------------------------------------------------------------------------
 # Setup the environment.
@@ -381,8 +394,9 @@ mkdir -p /var/lock
 # Set kernel console loglevel.
 sysctl -q -w kernel.printk=4
 
-if [ "$(is_nand)" = "no" ]; then
-	# Launch 'rngd' to feed random data to kernel entropy pool
+# Launch 'rngd' to feed random data to kernel entropy pool
+# for kernels previous to v3.17
+if [ "$(get_kernel_version)" -lt "$(((3 << 8) + 17))" ]; then
 	mkdir -p /var/run && rngd
 fi
 
