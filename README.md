@@ -148,6 +148,9 @@ boot a signed U-Boot only.
 * Cloud Connector
   * Remote file system management fails with long file names and paths
     (over 255 characters).
+* For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
+  devices (ConnectCore 6UL and ConnectCore 6 Plus) running a 4.9 kernel
+  version fail to join to autonomous groups.
 
 ## Digi ConnectCore 6UL
 
