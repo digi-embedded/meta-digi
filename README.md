@@ -9,6 +9,14 @@ Digi Embedded Yocto 2.2 is based on the Yocto Project(TM) 2.2 (Morty) release.
 For a full list of supported features and interfaces please refer to the
 online documentation.
 
+# Tested OS versions
+
+The current release has been verified and tested with the following
+OS versions:
+
+* Ubuntu 16.04
+* Ubuntu 14.04
+
 # Supported Platforms
 
 The current release supports the following hardware platforms:
