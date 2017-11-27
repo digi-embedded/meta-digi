@@ -82,12 +82,13 @@ Documentation is available online on the Digi documentation site:
 ## 2.2-r3
 
 * Added Digi APIX C library to access and manage ConnectCore platforms interfaces:
+  * ADC
   * GPIO
-  * SPI
   * I2C
   * PWM
+  * SPI
 * Updated AWS Greengrass Core software to v1.1.0
-
+=======
 ## 2.2-r2
 
 * Use NetworkManager for ethernet, wireless (station) and cellular network interfaces
