@@ -18,7 +18,9 @@ LIBDIGIAPIX_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${LIBDIG
 
 SRC_URI = " \
     ${LIBDIGIAPIX_GIT_URI};branch=${SRCBRANCH} \
+    file://99-digiapix.rules \
     file://board.conf \
+    file://digiapix.sh \
 "
 
 S = "${WORKDIR}/git"
@@ -28,7 +30,12 @@ inherit pkgconfig useradd
 do_install() {
 	oe_runmake 'DESTDIR=${D}' install
 
-	install -d ${D}${sysconfdir}/
+	# Install udev rules for digiapix
+	install -d ${D}${sysconfdir}/udev/rules.d ${D}${sysconfdir}/udev/scripts
+	install -m 0644 ${WORKDIR}/99-digiapix.rules ${D}${sysconfdir}/udev/rules.d/
+	install -m 0755 ${WORKDIR}/digiapix.sh ${D}${sysconfdir}/udev/scripts/
+
+	# Install board config file
 	install -m 0644 ${WORKDIR}/board.conf ${D}${sysconfdir}/libdigiapix.conf
 }
 
