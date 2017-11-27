@@ -86,6 +86,7 @@ Documentation is available online on the Digi documentation site:
   * SPI
   * I2C
   * PWM
+* Updated AWS Greengrass Core software to v1.1.0
 
 ## 2.2-r2
 
