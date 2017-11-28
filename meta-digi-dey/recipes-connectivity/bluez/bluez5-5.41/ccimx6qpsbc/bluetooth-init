@@ -48,11 +48,17 @@ bluetooth_init() {
 
 	# Start the Bluetooth driver and bring up the interface
 	HCIATTACH_LOG="/var/log/hciattach.log"
-	killproc hciattach
-	powercycle_gpio "${BT_EN_QCA_GPIO_NR}"
-	if ! hciattach ttyBt qca ${BT_RATE:-3000000} -t30 ${BT_FLOW:-flow} unused ${BT_MACADDR} >${HCIATTACH_LOG} 2>&1; then
-		BT_ERROR="FAIL (hciattach)"
-	fi
+
+	for RETRY in $(seq 1 5)
+	do
+		killproc hciattach
+		powercycle_gpio "${BT_EN_QCA_GPIO_NR}"
+		if hciattach ttyBt qca ${BT_RATE:-3000000} -t30 ${BT_FLOW:-flow} unused ${BT_MACADDR} >${HCIATTACH_LOG} 2>&1; then
+			return
+		fi
+		sleep 1
+	done
+	BT_ERROR="FAIL (hciattach)"
 }
 
 # Source function library
