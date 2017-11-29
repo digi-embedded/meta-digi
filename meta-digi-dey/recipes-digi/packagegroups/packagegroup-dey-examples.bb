@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2017 Digi International.
+# Copyright (C) 2013-2017, Digi International Inc.
 
 SUMMARY = "DEY examples packagegroup"
 
@@ -14,13 +14,6 @@ RDEPENDS_${PN} = "\
 	dey-examples-spidev \
 	${@bb.utils.contains("MACHINE_FEATURES", "alsa", "dey-examples-vplay", "", d)} \
 	dey-examples-watchdog \
-"
-
-RDEPENDS_${PN}_append_ccardimx28 = "\
-	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
-	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
-	dey-examples-can \
-	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 "
 
 RDEPENDS_${PN}_append_ccimx6 = "\
@@ -46,4 +39,4 @@ RDEPENDS_${PN}_append_ccimx6ul = "\
 	dey-examples-tamper \
 "
 
-COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$|ccimx6ul)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"

@@ -88,7 +88,7 @@ PREFERRED_PROVIDER_virtual/libg2d_mx6ul = ""
 
 EXTRA_IMAGEDEPENDS = "u-boot"
 
-KERNEL_IMAGETYPE = "uImage"
+KERNEL_IMAGETYPE = "zImage"
 
 MACHINE_FEATURES = "usbgadget usbhost vfat alsa touchscreen"
 

@@ -1,0 +1,18 @@
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=0
+fast_reauth=1
+update_config=1
+
+ap_scan=1
+
+# Static scheduled scan interval time in seconds
+#
+# The wpa-supplicant dynamically adjusts the scheduled scan time interval. On
+# occassions, fixing the interval time is helpful, for example on DFS channels.
+#sched_scan_interval=2
+
+network={
+	scan_ssid=1
+	ssid=""
+	key_mgmt=NONE
+}

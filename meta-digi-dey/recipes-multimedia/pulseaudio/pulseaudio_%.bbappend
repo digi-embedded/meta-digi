@@ -3,15 +3,15 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI_append_ccimx6ulsbc = " file://0001-pulseaudio-keep-headphones-volume-in-platforms-witho.patch"
-SRC_URI_append_ccimx6sbc = " \
+SRC_URI_append_ccimx6 = " \
     file://hdmi_hotplug.sh \
     file://dey-audio-hdmi.conf \
     file://dey-audio-sgtl5000.conf \
 "
 
-EXTRA_OECONF_append_ccimx6sbc = " --disable-memfd"
+EXTRA_OECONF_append_ccimx6 = " --disable-memfd"
 
-do_install_append_ccimx6sbc() {
+do_install_append_ccimx6() {
 	install -d ${D}${sysconfdir}/udev/scripts
 	install -m 0755 ${WORKDIR}/hdmi_hotplug.sh ${D}${sysconfdir}/udev/scripts
 
@@ -34,5 +34,5 @@ do_install_append_ccimx6sbc() {
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-# The card-detect binary is only necessary for the HDMI hotplug to work on the ccimx6sbc
-RDEPENDS_${PN}_append_ccimx6sbc = " card-detect"
+# The card-detect binary is only necessary for the HDMI hotplug to work on the ccimx6sbc/ccimx6qpsbc
+RDEPENDS_${PN}_append_ccimx6 = " card-detect"

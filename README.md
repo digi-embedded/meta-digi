@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 2.2
-## Release 2.2-r2
+## Release 2.2-r3
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -8,6 +8,14 @@ Digi Embedded Yocto 2.2 is based on the Yocto Project(TM) 2.2 (Morty) release.
 
 For a full list of supported features and interfaces please refer to the
 online documentation.
+
+# Tested OS versions
+
+The current release has been verified and tested with the following
+OS versions:
+
+* Ubuntu 16.04
+* Ubuntu 14.04
 
 # Supported Platforms
 
@@ -70,6 +78,16 @@ Documentation is available online on the Digi documentation site:
 * Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.2/r2/sdk/
 
 # Release Changelog
+
+## 2.2-r3
+
+* Added Digi APIX C library to access and manage ConnectCore platforms interfaces:
+  * ADC
+  * GPIO
+  * I2C
+  * PWM
+  * SPI
+* Updated AWS Greengrass Core software to v1.1.0
 
 ## 2.2-r2
 
@@ -146,6 +164,9 @@ boot a signed U-Boot only.
 * Cloud Connector
   * Remote file system management fails with long file names and paths
     (over 255 characters).
+* For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
+  devices (ConnectCore 6UL and ConnectCore 6 Plus) running a 4.9 kernel
+  version fail to join to autonomous groups.
 
 ## Digi ConnectCore 6UL
 

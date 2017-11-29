@@ -11,6 +11,12 @@ SRC_URI_append = " \
     file://resolv \
 "
 
+SRC_URI_append_ccimx6qpsbc = "\
+    file://interfaces.wlan1.static \
+    file://interfaces.wlan1.dhcp \
+    file://virtwlans.sh \
+"
+
 SRC_URI_append_ccimx6ul = "\
     file://interfaces.wlan1.static \
     file://interfaces.wlan1.dhcp \
@@ -46,6 +52,28 @@ do_install_append() {
 }
 
 do_install_append_ccimx6sbc() {
+	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
+}
+
+do_install_append_ccimx6qpsbc() {
+	install -d ${D}${base_bindir}
+	install -m 0755 ${WORKDIR}/virtwlans.sh ${D}${base_bindir}
+	if [ -n "${HAVE_WIFI}" ]; then
+		cat ${WORKDIR}/interfaces.wlan1.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
+	fi
+
+	# Remove config entries if corresponding variable is not defined
+	[ -z "${WLAN1_STATIC_DNS}" ] && sed -i -e "/##WLAN1_STATIC_DNS##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${WLAN1_STATIC_GATEWAY}" ] && sed -i -e "/##WLAN1_STATIC_GATEWAY##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${WLAN1_STATIC_IP}" ] && sed -i -e "/##WLAN1_STATIC_IP##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${WLAN1_STATIC_NETMASK}" ] && sed -i -e "/##WLAN1_STATIC_NETMASK##/d" ${D}${sysconfdir}/network/interfaces
+
+	# Replace interface parameters
+	sed -i -e "s,##WLAN1_STATIC_IP##,${WLAN1_STATIC_IP},g" ${D}${sysconfdir}/network/interfaces
+	sed -i -e "s,##WLAN1_STATIC_NETMASK##,${WLAN1_STATIC_NETMASK},g" ${D}${sysconfdir}/network/interfaces
+	sed -i -e "s,##WLAN1_STATIC_GATEWAY##,${WLAN1_STATIC_GATEWAY},g" ${D}${sysconfdir}/network/interfaces
+	sed -i -e "s,##WLAN1_STATIC_DNS##,${WLAN1_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
+
 	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
 }
 

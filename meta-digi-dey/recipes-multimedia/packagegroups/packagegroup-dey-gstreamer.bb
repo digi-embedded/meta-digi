@@ -1,10 +1,33 @@
 #
-# Copyright (C) 2012 Digi International.
+# Copyright (C) 2012-2017 Digi International Inc.
 #
 SUMMARY = "Gstreamer framework packagegroup for DEY image"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
+
+# Per machine gstreamer base packages
+MACHINE_GSTREAMER_1_0_PKGS = " \
+    gstreamer1.0-meta-audio \
+    gstreamer1.0-meta-video \
+    gstreamer1.0-plugins-base-meta \
+    gstreamer1.0-plugins-good-meta \
+"
+# Minimal set of gstreamer elements to play a local WEBM video
+MACHINE_GSTREAMER_1_0_PKGS_ccimx6ul = " \
+    gstreamer1.0-plugins-base-alsa \
+    gstreamer1.0-plugins-base-audioconvert \
+    gstreamer1.0-plugins-base-audioresample \
+    gstreamer1.0-plugins-base-playback \
+    gstreamer1.0-plugins-base-typefindfunctions \
+    gstreamer1.0-plugins-base-videoconvert \
+    gstreamer1.0-plugins-base-videoscale \
+    gstreamer1.0-plugins-base-volume \
+    gstreamer1.0-plugins-good-pulse \
+    gstreamer1.0-plugins-good-video4linux2 \
+    gstreamer1.0-plugins-good-videofilter \
+    gstreamer1.0-plugins-good-vpx \
+"
 
 MACHINE_GSTREAMER_1_0_EXTRA_INSTALL ?= ""
 MACHINE_GSTREAMER_1_0_EXTRA_INSTALL_ccimx6 ?= " \
@@ -14,10 +37,7 @@ MACHINE_GSTREAMER_1_0_EXTRA_INSTALL_ccimx6 ?= " \
 "
 
 RDEPENDS_${PN} = " \
-    gstreamer1.0-meta-audio \
-    gstreamer1.0-meta-video \
-    gstreamer1.0-plugins-base-meta \
-    gstreamer1.0-plugins-good-meta \
+    ${MACHINE_GSTREAMER_1_0_PKGS} \
     ${MACHINE_GSTREAMER_1_0_EXTRA_INSTALL} \
     ${MACHINE_GSTREAMER_1_0_PLUGIN} \
 "

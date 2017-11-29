@@ -53,7 +53,9 @@ PACKAGES = "${PN}"
 
 FILES_${PN} = "/"
 
-RDEPENDS_${PN}_append_ccimx6 = " \
+RDEPENDS_${PN}_append_ccimx6sbc = " \
     cryptsetup \
     rng-tools \
 "
+
+RDEPENDS_${PN}_append_ccimx6qpsbc = " cryptsetup"

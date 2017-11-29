@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013-2017, Digi International Inc.
 
 SUMMARY = "DEY examples: bluetooth health profile test application"
 SECTION = "examples"
@@ -16,4 +16,4 @@ do_install() {
 
 RDEPENDS_${PN} = "python3 python3-argparse python3-crypt python3-dbus python3-pygobject"
 
-COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$|ccimx6ul)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"

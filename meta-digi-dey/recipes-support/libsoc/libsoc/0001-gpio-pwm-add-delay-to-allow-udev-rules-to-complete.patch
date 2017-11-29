@@ -1,0 +1,46 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Tue, 28 Nov 2017 17:39:05 +0100
+Subject: [PATCH] gpio,pwm: add delay to allow udev rules to complete
+
+After exporting a GPIO or PWM, we need to give some time for udev rules
+to complete, before actually trying to access the newly created entries
+in the sysfs.
+
+This solves a problem, where udev was setting the mode and group of
+the newly created files, so they are accessible for users (not root)
+belonging to that group.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ lib/gpio.c | 3 +++
+ lib/pwm.c  | 3 +++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/lib/gpio.c b/lib/gpio.c
+index bc509f8f09d7..527f2be649a4 100644
+--- a/lib/gpio.c
++++ b/lib/gpio.c
+@@ -104,6 +104,9 @@ libsoc_gpio_request (unsigned int gpio_id, gpio_mode mode)
+       if (file_close (fd))
+ 	return NULL;
+ 
++      /* Give udev some time to execute the rules of the exported GPIO */
++      usleep(200000);
++
+       sprintf (tmp_str, "/sys/class/gpio/gpio%d", gpio_id);
+ 
+       if (!file_valid (tmp_str))
+diff --git a/lib/pwm.c b/lib/pwm.c
+index 94a20d9be281..ed6dec8ee2a9 100644
+--- a/lib/pwm.c
++++ b/lib/pwm.c
+@@ -88,6 +88,9 @@ pwm* libsoc_pwm_request (unsigned int chip, unsigned int pwm_num,
+       return NULL;
+     }
+ 
++    /* Give udev some time to execute the rules of the exported PWM */
++    usleep(200000);
++
+     sprintf(tmp_str, "/sys/class/pwm/pwmchip%d/pwm%d/enable", chip, pwm_num);
+ 
+     if (!file_valid(tmp_str))

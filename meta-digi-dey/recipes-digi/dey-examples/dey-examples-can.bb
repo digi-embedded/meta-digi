@@ -1,4 +1,4 @@
-# Copyright (C) 2013,2017 Digi International.
+# Copyright (C) 2013-2017, Digi International Inc.
 
 SUMMARY = "DEY examples: CAN bus test application"
 SECTION = "examples"
@@ -18,4 +18,4 @@ do_install() {
 	install -m 0755 can_test ${D}${bindir}
 }
 
-COMPATIBLE_MACHINE = "(ccardimx28|ccimx6$|ccimx6ul)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"

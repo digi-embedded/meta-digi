@@ -1,0 +1,99 @@
+From c0202538bc31e25f37fc45681d07873c8a127ecb Mon Sep 17 00:00:00 2001
+From: Jiangbo Wu <jiangbo.wu@intel.com>
+Date: Sun, 2 Oct 2016 20:38:31 +0800
+Subject: [PATCH 6/7] src/device: Free bonding while failed to pair device
+
+device unable pair since another pairng is in progress, and need to
+free bonding before it created for next pairing.
+---
+ src/device.c | 62 +++++++++++++++++++++++++++++++-----------------------------
+ 1 file changed, 32 insertions(+), 30 deletions(-)
+
+diff --git a/src/device.c b/src/device.c
+index 2a77a2e67232..97d7c4e899f6 100644
+--- a/src/device.c
++++ b/src/device.c
+@@ -2330,6 +2330,35 @@ static void create_bond_req_exit(DBusConnection *conn, void *user_data)
+ 	}
+ }
+ 
++static void bonding_request_free(struct bonding_req *bonding)
++{
++	if (!bonding)
++		return;
++
++	if (bonding->listener_id)
++		g_dbus_remove_watch(dbus_conn, bonding->listener_id);
++
++	if (bonding->msg)
++		dbus_message_unref(bonding->msg);
++
++	if (bonding->cb_iter)
++		g_free(bonding->cb_iter);
++
++	if (bonding->agent) {
++		agent_cancel(bonding->agent);
++		agent_unref(bonding->agent);
++		bonding->agent = NULL;
++	}
++
++	if (bonding->retry_timer)
++		g_source_remove(bonding->retry_timer);
++
++	if (bonding->device)
++		bonding->device->bonding = NULL;
++
++	g_free(bonding);
++}
++
+ static DBusMessage *pair_device(DBusConnection *conn, DBusMessage *msg,
+ 								void *data)
+ {
+@@ -2400,8 +2429,10 @@ static DBusMessage *pair_device(DBusConnection *conn, DBusMessage *msg,
+ 							BDADDR_BREDR, io_cap);
+ 	}
+ 
+-	if (err < 0)
++	if (err < 0) {
++		bonding_request_free(device->bonding);
+ 		return btd_error_failed(msg, strerror(-err));
++	}
+ 
+ 	return NULL;
+ }
+@@ -2442,35 +2473,6 @@ static DBusMessage *new_authentication_return(DBusMessage *msg, uint8_t status)
+ 	}
+ }
+ 
+-static void bonding_request_free(struct bonding_req *bonding)
+-{
+-	if (!bonding)
+-		return;
+-
+-	if (bonding->listener_id)
+-		g_dbus_remove_watch(dbus_conn, bonding->listener_id);
+-
+-	if (bonding->msg)
+-		dbus_message_unref(bonding->msg);
+-
+-	if (bonding->cb_iter)
+-		g_free(bonding->cb_iter);
+-
+-	if (bonding->agent) {
+-		agent_cancel(bonding->agent);
+-		agent_unref(bonding->agent);
+-		bonding->agent = NULL;
+-	}
+-
+-	if (bonding->retry_timer)
+-		g_source_remove(bonding->retry_timer);
+-
+-	if (bonding->device)
+-		bonding->device->bonding = NULL;
+-
+-	g_free(bonding);
+-}
+-
+ static void device_cancel_bonding(struct btd_device *device, uint8_t status)
+ {
+ 	struct bonding_req *bonding = device->bonding;

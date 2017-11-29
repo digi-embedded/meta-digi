@@ -10,18 +10,15 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 #
 # Platform      Linux              U-Boot
 # -------------------------------------------------
-# ccardimx28    3.10               2013.01
 # ccimx6        4.1, 3.14          2015.04
-# ccimx6ul      4.1                2015.04
+# ccimx6qp      4.9                2015.04
+# ccimx6ul      4.9, 4.1           2015.04
 #
 
 # Help variables used in recipes
 HAVE_WIFI       = "${@bb.utils.contains('MACHINE_FEATURES', 'wifi', '1', '', d)}"
-HAVE_SECOND_ETH = "${@bb.utils.contains('MACHINE_FEATURES', 'second-eth', '1', '', d)}"
 HAVE_BT         = "${@bb.utils.contains('MACHINE_FEATURES', 'bluetooth', '1', '', d)}"
-HAVE_1WIRE      = "${@bb.utils.contains('MACHINE_FEATURES', '1-wire', '1', '', d)}"
 HAVE_GUI        = "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '1', '', d)}"
-HAVE_EXAMPLE    = "${@bb.utils.contains('IMAGE_FEATURES', 'dey-examples', '1', '', d)}"
 
 #
 # Ethernet configuration used in recipes

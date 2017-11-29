@@ -37,6 +37,7 @@ RDEPENDS_${PN} = "\
     ${@bb.utils.contains("MACHINE_FEATURES", "rtc", "busybox-hwclock", "", d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "touchscreen", "${VIRTUAL-RUNTIME_touchscreen}", "",d)} \
     init-ifupdown \
+    libdigiapix \
     modutils-initscripts \
     netbase \
     networkmanager \

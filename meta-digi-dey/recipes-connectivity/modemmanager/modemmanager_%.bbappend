@@ -16,3 +16,5 @@ do_install_append() {
 	install -d ${D}${nonarch_base_libdir}/udev/rules.d
 	install -m 0644 ${WORKDIR}/78-mm-digi-xbee-cellular.rules ${D}${nonarch_base_libdir}/udev/rules.d/
 }
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"

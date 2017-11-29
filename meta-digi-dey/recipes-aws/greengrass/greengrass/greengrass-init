@@ -18,7 +18,7 @@
 #
 
 GG_INSTALL_DIR="##GG_INSTALL_DIR##"
-GG_LAUNCHER="${GG_INSTALL_DIR}/greengrassd"
+GG_LAUNCHER="$(find ${GG_INSTALL_DIR} -type f -name greengrassd)"
 
 case "${1}" in
 	start | stop | restart)

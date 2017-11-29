@@ -56,4 +56,4 @@ FILES_${PN} += " \
     ${base_libdir}/firmware/wlan/qcom_cfg.ini \
 "
 
-COMPATIBLE_MACHINE = "(ccimx6ul)"
+COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul)"

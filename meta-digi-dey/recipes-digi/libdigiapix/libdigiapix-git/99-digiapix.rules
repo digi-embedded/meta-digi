@@ -1,0 +1,22 @@
+# libdigiapix: configure interfaces so they can be used by group 'digiapix'
+
+SUBSYSTEM=="i2c-dev", GROUP="digiapix", MODE="0660"
+SUBSYSTEM=="spidev",  GROUP="digiapix", MODE="0660"
+
+#
+# Use two different rules for GPIO's.
+#
+#   1. The first rule (gpiochip0) allows to configure the GROUP and MODE of
+#      the 'export' and 'unexport' files. This is basically executed once on
+#      boot and it's needed so a normal user (with group 'digiapix')
+#      is able to export/unexport gpios.
+#
+#   2. The second rule configures the GROUP and MODE of the sysfs files that
+#      are created whenever a 'gpio' is exported.
+#
+# This way we filter out multiple gpiochipX events that we don't want to attend
+#
+SUBSYSTEM=="gpio", KERNEL=="gpiochip0", ACTION=="add", RUN="/etc/udev/scripts/digiapix.sh"
+SUBSYSTEM=="gpio", KERNEL!="gpiochip*", ACTION=="add", RUN="/etc/udev/scripts/digiapix.sh"
+
+SUBSYSTEM=="pwm", ACTION=="add", RUN="/etc/udev/scripts/digiapix.sh"

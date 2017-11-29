@@ -23,12 +23,12 @@ PARTITION="$(echo "${MDEV}" | sed -n -e '/^mmc/{s,^[^p]\+p\([0-9]\+\)$,\1,g;T;p}
 
 # This will detect if the block device has a update partition
 is_update_device() {
-	parted -s "/dev/${DEVICE}" print | grep -qs update
+	fdisk -l "/dev/${DEVICE}" | grep -qs update
 }
 
 # This will verify that the requested partition is the update partition
 is_update_partition() {
-	parted -s "/dev/${DEVICE}" print | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<update\>.*,\1,g;T;p" | grep -qs "${PARTITION}"
+	fdisk -l "/dev/${DEVICE}" | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<update\>.*,\1,g;T;p" | grep -qs "${PARTITION}"
 }
 
 if is_update_device; then

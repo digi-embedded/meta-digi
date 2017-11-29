@@ -3,6 +3,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
+    file://0001-networkmanager-trigger-dispatcher-on-per-device-conn.patch \
     file://NetworkManager.conf \
     file://networkmanager-init \
     file://nm.cellular \
@@ -22,7 +23,7 @@ EXTRA_OECONF += "--enable-polkit=disabled"
 PACKAGECONFIG_remove = "consolekit"
 
 # Adjust other compile time options to save space
-PACKAGECONFIG_remove = "dnsmasq netconfig nss"
+PACKAGECONFIG_remove = "netconfig nss"
 PACKAGECONFIG_append = " concheck gnutls modemmanager ppp"
 
 #

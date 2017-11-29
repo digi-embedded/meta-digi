@@ -36,8 +36,6 @@ MACHINE_FEATURES += "wifi bluetooth"
 MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6564-bt', '', d)}"
 MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6564-wifi', '', d)}"
 
-KERNEL_IMAGETYPE = "zImage"
-
 # mkfs.ubifs parameters for boot partition (the one holding kernel and device tree files)
 # Max LEB count (-c 255) calculated for a partition of up to 32 MiB considering 128 KiB erase-block size.
 MKUBIFS_BOOT_ARGS ?= "-m 2048 -e 126976 -c 255"

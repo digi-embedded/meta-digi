@@ -1,0 +1,129 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Thu, 9 Nov 2017 11:49:14 +0100
+Subject: [PATCH] networkmanager: trigger dispatcher on per-device connectivity
+ loss
+
+This creates a new dispatcher action DEVICE_CONNECTIVITY_CHANGE, that
+gets triggered whenever one interface fails in the upstream connectivity
+check, regardless of the system having connectivity through a different
+interface.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ shared/nm-dispatcher-api.h |  1 +
+ src/devices/nm-device.c    |  3 +++
+ src/nm-dispatcher.c        | 40 +++++++++++++++++++++++++++++++++++++++-
+ src/nm-dispatcher.h        |  9 ++++++++-
+ 4 files changed, 51 insertions(+), 2 deletions(-)
+
+diff --git a/shared/nm-dispatcher-api.h b/shared/nm-dispatcher-api.h
+index b1f28e71d4c3..e83835b03057 100644
+--- a/shared/nm-dispatcher-api.h
++++ b/shared/nm-dispatcher-api.h
+@@ -50,6 +50,7 @@
+ #define NMD_ACTION_DHCP4_CHANGE "dhcp4-change"
+ #define NMD_ACTION_DHCP6_CHANGE "dhcp6-change"
+ #define NMD_ACTION_CONNECTIVITY_CHANGE "connectivity-change"
++#define NMD_ACTION_DEVICE_CONNECTIVITY_CHANGE "device-connectivity-change"
+ 
+ typedef enum {
+ 	DISPATCH_RESULT_UNKNOWN = 0,
+diff --git a/src/devices/nm-device.c b/src/devices/nm-device.c
+index fbf315ed3bc8..503c4689b035 100644
+--- a/src/devices/nm-device.c
++++ b/src/devices/nm-device.c
+@@ -1824,6 +1824,9 @@ update_connectivity_state (NMDevice *self, NMConnectivityState state)
+ 		       nm_connectivity_state_to_string (priv->connectivity_state),
+ 		       nm_connectivity_state_to_string (state));
+ #endif
++		if (priv->connectivity_state == NM_CONNECTIVITY_FULL)
++			nm_dispatcher_call_device_connectivity(state, self, NULL, NULL, NULL);
++
+ 		priv->connectivity_state = state;
+ 		_notify (self, PROP_CONNECTIVITY);
+ 
+diff --git a/src/nm-dispatcher.c b/src/nm-dispatcher.c
+index 0d482e0cad9d..8e3f95c0b819 100644
+--- a/src/nm-dispatcher.c
++++ b/src/nm-dispatcher.c
+@@ -453,7 +453,8 @@ static const char *action_table[] = {
+ 	[NM_DISPATCHER_ACTION_VPN_DOWN]     = NMD_ACTION_VPN_DOWN,
+ 	[NM_DISPATCHER_ACTION_DHCP4_CHANGE] = NMD_ACTION_DHCP4_CHANGE,
+ 	[NM_DISPATCHER_ACTION_DHCP6_CHANGE] = NMD_ACTION_DHCP6_CHANGE,
+-	[NM_DISPATCHER_ACTION_CONNECTIVITY_CHANGE] = NMD_ACTION_CONNECTIVITY_CHANGE
++	[NM_DISPATCHER_ACTION_CONNECTIVITY_CHANGE] = NMD_ACTION_CONNECTIVITY_CHANGE,
++	[NM_DISPATCHER_ACTION_DEVICE_CONNECTIVITY_CHANGE] = NMD_ACTION_DEVICE_CONNECTIVITY_CHANGE
+ };
+ 
+ static const char *
+@@ -903,6 +904,43 @@ nm_dispatcher_call_connectivity (NMConnectivityState connectivity_state,
+ 	                         callback, user_data, out_call_id);
+ }
+ 
++/**
++ * nm_dispatcher_call_device_connectivity():
++ * @connectivity_state: the #NMConnectivityState value
++ * @device: the #NMDevice the action applies to
++ * @callback: a caller-supplied callback to execute when done
++ * @user_data: caller-supplied pointer passed to @callback
++ * @out_call_id: on success, a call identifier which can be passed to
++ * nm_dispatcher_call_cancel()
++ *
++ * This method does not block the caller.
++ *
++ * Returns: %TRUE if the action was dispatched, %FALSE on failure
++ */
++gboolean
++nm_dispatcher_call_device_connectivity(NMConnectivityState connectivity_state,
++				       NMDevice *device,
++				       NMDispatcherFunc callback,
++				       gpointer user_data, guint *out_call_id)
++{
++	NMActRequest *act_request;
++
++	nm_assert(NM_IS_DEVICE(device));
++
++	act_request = nm_device_get_act_request(device);
++	if (!act_request)
++		return FALSE;
++
++	nm_assert(NM_IN_SET(nm_active_connection_get_device(NM_ACTIVE_CONNECTION(act_request)), NULL, device));
++	return _dispatcher_call(NM_DISPATCHER_ACTION_DEVICE_CONNECTIVITY_CHANGE, FALSE, device,
++				nm_act_request_get_settings_connection(act_request),
++				nm_act_request_get_applied_connection(act_request),
++				nm_active_connection_get_activation_type(NM_ACTIVE_CONNECTION(act_request)) == NM_ACTIVATION_TYPE_EXTERNAL,
++				connectivity_state,
++				NULL, NULL, NULL, NULL,
++				callback, user_data, out_call_id);
++}
++
+ void
+ nm_dispatcher_call_cancel (guint call_id)
+ {
+diff --git a/src/nm-dispatcher.h b/src/nm-dispatcher.h
+index 4448e8173fa7..9902a77ba683 100644
+--- a/src/nm-dispatcher.h
++++ b/src/nm-dispatcher.h
+@@ -36,7 +36,8 @@ typedef enum {
+ 	NM_DISPATCHER_ACTION_VPN_DOWN,
+ 	NM_DISPATCHER_ACTION_DHCP4_CHANGE,
+ 	NM_DISPATCHER_ACTION_DHCP6_CHANGE,
+-	NM_DISPATCHER_ACTION_CONNECTIVITY_CHANGE
++	NM_DISPATCHER_ACTION_CONNECTIVITY_CHANGE,
++	NM_DISPATCHER_ACTION_DEVICE_CONNECTIVITY_CHANGE
+ } NMDispatcherAction;
+ 
+ typedef void (*NMDispatcherFunc) (guint call_id, gpointer user_data);
+@@ -82,6 +83,12 @@ gboolean nm_dispatcher_call_connectivity (NMConnectivityState state,
+                                           gpointer user_data,
+                                           guint *out_call_id);
+ 
++gboolean nm_dispatcher_call_device_connectivity(NMConnectivityState
++                                                connectivity_state,
++                                                NMDevice *device,
++                                                NMDispatcherFunc callback,
++                                                gpointer user_data,
++                                                guint *out_call_id);
+ 
+ void nm_dispatcher_call_cancel (guint call_id);
+ 
