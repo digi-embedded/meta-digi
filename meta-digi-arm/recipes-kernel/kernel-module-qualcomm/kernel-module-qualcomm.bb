@@ -8,12 +8,12 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 PV = "v4.2.80.63"
 
 SRCBRANCH = "dey-2.2/maint"
-SRCREV = "1754f440a9971ba99fa37d36c0b9b1d77f067207"
+SRCREV = "${AUTOREV}"
 
 QCOM_GIT_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git', d)}"
 
 SRC_URI = " \
-    ${QCOM_GIT_URI};nobranch=1 \
+    ${QCOM_GIT_URI};branch=${SRCBRANCH} \
 "
 
 SRC_URI_append = " \
