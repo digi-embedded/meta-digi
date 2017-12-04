@@ -36,13 +36,6 @@ suspend_interfaces() {
 		for i in $(sed -ne 's,^\(wlan[0-9]\)=.*,\1,g;T;p' /var/run/ifstate | sort -r); do
 			ifdown "${i}" && RESUME_IFACES="${RESUME_IFACES:+${RESUME_IFACES} }${i}"
 		done
-
-		# Get a list of the wireless interfaces managed by NetworkManager
-		# and set them to unmanaged before suspend.
-		for i in $(nmcli -t -f DEVICE,TYPE,STATE dev | grep :wifi: | grep -v unmanaged | cut -d':' -f1); do
-			nmcli dev set "${i}" managed no && NM_MANAGED_IFACES="${NM_MANAGED_IFACES:+${NM_MANAGED_IFACES} }${i}"
-		done
-
 		grep -qs '^ath6kl_sdio' /proc/modules && rmmod ath6kl_sdio ath6kl_core
 	fi
 
@@ -60,11 +53,6 @@ resume_interfaces() {
 		# Trigger wireless module loading event, and wait until the interface exists
 		udevadm trigger --action=add --attr-match="modalias=sdio:c00v0271d0301"
 		timeout -t 5 sh -c "while [ ! -d /sys/class/net/wlan0 ]; do sleep .2; done" 2>/dev/null
-
-		# Set interfaces managed by NetworkManager back as managed
-		for i in $(echo ${NM_MANAGED_IFACES} | tr ' ' '\n' | sort); do
-			nmcli dev set "${i}" managed yes
-		done
 
 		# Bring up the interfaces that were bring down on suspend
 		for i in $(echo ${RESUME_IFACES} | tr ' ' '\n' | sort); do
