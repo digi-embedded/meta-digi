@@ -22,6 +22,7 @@ lockfd="9"
 
 BT_INIT="/etc/init.d/bluetooth-init"
 BT_DAEMON="/etc/init.d/bluetooth"
+NM_DAEMON="/etc/init.d/networkmanager"
 
 usage() {
 	printf "\nSuspend system to RAM memory\n"
@@ -31,6 +32,9 @@ usage() {
 }
 
 suspend_interfaces() {
+	# Stop NetworkManager before suspend
+	${NM_DAEMON} stop
+
 	# Suspend wireless interfaces
 	if [ -d "/proc/device-tree/wireless" ]; then
 		for i in $(sed -ne 's,^\(wlan[0-9]\)=.*,\1,g;T;p' /var/run/ifstate | sort -r); do
@@ -59,6 +63,9 @@ resume_interfaces() {
 			grep -qs "^${i}" /var/run/ifstate || ifup "${i}"
 		done
 	fi
+
+	# Resume NetworkManager after suspend
+	${NM_DAEMON} start
 
 	# Resume bluetooth interface
 	if [ -d "/proc/device-tree/bluetooth" ]; then
