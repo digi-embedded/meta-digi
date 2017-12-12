@@ -54,6 +54,12 @@ Software for the following hardware platforms is in production support:
   * [CC-SB-WMX-L87C-1](https://www.digi.com/products/models/cc-sb-wmx-l87c-1)
   * [CC-SB-WMX-L76C-1](https://www.digi.com/products/models/cc-sb-wmx-l76c-1)
 
+## ConnectCore 6 Plus
+* ConnectCore 6 Plus System-on-Module (SOM)
+  * CC-WMX-KK8D-TN
+* ConnectCore 6 Plus SBC
+  * CC-SB-WMX-KK8D
+
 Previous versions of Digi Embedded Yocto include support for additional Digi
 hardware.
 
@@ -71,6 +77,7 @@ Documentation is available online on the Digi documentation site:
 * [ConnectCore 6UL SBC Express](https://www.digi.com/resources/documentation/digidocs/90001548/default.htm)
 * [ConnectCore 6UL SBC Pro](https://www.digi.com/resources/documentation/digidocs/90001547/default.htm)
 * [ConnectCore 6 Jumpstart Development Kit](https://www.digi.com/resources/documentation/digidocs/90001546/default.htm)
+* [ConnectCore 6 Plus Jumpstart Development Kit](https://www.digi.com/resources/documentation/digidocs/90002275/default.htm)
 
 # Downloads
 
@@ -81,6 +88,7 @@ Documentation is available online on the Digi documentation site:
 
 ## 2.2-r3
 
+* Added support for ConnectCore 6 Plus platform
 * Added Digi APIX C library to access and manage ConnectCore platforms interfaces:
   * ADC
   * GPIO
@@ -203,6 +211,15 @@ boot a signed U-Boot only.
   * A maximum of ten connected devices are supported when using Qualcomm's AR6233
     Bluetooth Low Energy mode.
 * ConnectCore 6 SBC
+  * The Micrel PHY KSZ9031 may take between five and six seconds to
+    auto-negotiate with Gigabit switches.
+
+## ConnectCore 6 Plus
+
+* ConnectCore 6 Plus System-on-Module (SOM)
+  * NXP i.MX6QP processor has a documented errata (ERR004512) whereby the maximum
+    performance of the Gigabit FEC is limited to 400Mbps (total for Tx and Rx).
+* ConnectCore 6 Plus SBC
   * The Micrel PHY KSZ9031 may take between five and six seconds to
     auto-negotiate with Gigabit switches.
 
