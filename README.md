@@ -23,36 +23,36 @@ The current release supports the following hardware platforms:
 
 Software for the following hardware platforms is in production support:
 
-* Digi ConnectCore 6UL
-  * [Digi P/N CC-WMX-JN58-NE](http://www.digi.com/products/models/cc-wmx-jn58-ne)
-  * [Digi P/N CC-MX-JN58-Z1](https://www.digi.com/products/models/cc-mx-jn58-z1)
-  * Digi P/N CC-WMX-JN7A-NE
-* Digi ConnectCore 6UL SBC Express
-  * [Digi P/N CC-WMX6UL-START](http://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001548/default.htm#concept/yocto/c_get_started_with_yocto.htm))
-* Digi ConnectCore 6UL SBC Pro
-  * [Digi P/N CC-WMX6UL-KIT](https://www.digi.com/products/models/cc-wmx6ul-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001547/default.htm#concept/yocto/c_get_started_with_yocto.htm))
+## ConnectCore 6UL
+* ConnectCore 6UL System-on-Module (SOM)
+  * [CC-WMX-JN58-NE](http://www.digi.com/products/models/cc-wmx-jn58-ne)
+  * [CC-MX-JN58-Z1](https://www.digi.com/products/models/cc-mx-jn58-z1)
+  * CC-WMX-JN7A-NE
+* ConnectCore 6UL SBC Express
+  * [CC-WMX6UL-START](http://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001548/default.htm#concept/yocto/c_get_started_with_yocto.htm))
+* ConnectCore 6UL SBC Pro
+  * [CC-WMX6UL-KIT](https://www.digi.com/products/models/cc-wmx6ul-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001547/default.htm#concept/yocto/c_get_started_with_yocto.htm))
 
-* Digi ConnectCore 6
-  * [Digi P/N CC-WMX-J97C-TN](http://www.digi.com/products/models/cc-wmx-j97c-tn)
-  * [Digi P/N CC-WMX-L96C-TE](http://www.digi.com/products/models/cc-wmx-l96c-te)
-  * [Digi P/N CC-WMX-L87C-TE](http://www.digi.com/products/models/cc-wmx-l87c-te)
-  * [Digi P/N CC-MX-L76C-Z1](http://www.digi.com/products/models/cc-mx-l76c-z1)
-  * [Digi P/N CC-MX-L86C-Z1](http://www.digi.com/products/models/cc-mx-l86c-z1)
-  * [Digi P/N CC-MX-L96C-Z1](http://www.digi.com/products/models/cc-mx-l96c-z1)
-  * [Digi P/N CC-WMX-L76C-TE](http://www.digi.com/products/models/cc-wmx-l76c-te)
-  * Digi P/N CC-WMX-K87C-FJA
-  * Digi P/N CC-WMX-K77C-TE
-  * Digi P/N CC-WMX-L97D-TN
-  * Digi P/N CC-WMX-J98C-FJA
-  * Digi P/N CC-WMX-J98C-FJA-1
-
-* Digi ConnectCore 6 Development Kit
-  * [Digi P/N CC-WMX6-KIT](http://www.digi.com/products/models/cc-wmx6-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001546/default.htm#concept/yocto/c_get_started_with_yocto.htm))
-
-* Digi ConnectCore 6 SBC
-  * [Digi P/N CC-SB-WMX-J97C-1](http://www.digi.com/products/models/cc-sb-wmx-j97c-1)
-  * [Digi P/N CC-SB-WMX-L87C-1](https://www.digi.com/products/models/cc-sb-wmx-l87c-1)
-  * [Digi P/N CC-SB-WMX-L76C-1](https://www.digi.com/products/models/cc-sb-wmx-l76c-1)
+## ConnectCore 6
+* ConnectCore 6 System-on-Module (SOM)
+  * [CC-WMX-J97C-TN](http://www.digi.com/products/models/cc-wmx-j97c-tn)
+  * [CC-WMX-L96C-TE](http://www.digi.com/products/models/cc-wmx-l96c-te)
+  * [CC-WMX-L87C-TE](http://www.digi.com/products/models/cc-wmx-l87c-te)
+  * [CC-MX-L76C-Z1](http://www.digi.com/products/models/cc-mx-l76c-z1)
+  * [CC-MX-L86C-Z1](http://www.digi.com/products/models/cc-mx-l86c-z1)
+  * [CC-MX-L96C-Z1](http://www.digi.com/products/models/cc-mx-l96c-z1)
+  * [CC-WMX-L76C-TE](http://www.digi.com/products/models/cc-wmx-l76c-te)
+  * CC-WMX-K87C-FJA
+  * CC-WMX-K77C-TE
+  * CC-WMX-L97D-TN
+  * CC-WMX-J98C-FJA
+  * CC-WMX-J98C-FJA-1
+* ConnectCore 6 Development Kit
+  * [CC-WMX6-KIT](http://www.digi.com/products/models/cc-wmx6-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001546/default.htm#concept/yocto/c_get_started_with_yocto.htm))
+* ConnectCore 6 SBC
+  * [CC-SB-WMX-J97C-1](http://www.digi.com/products/models/cc-sb-wmx-j97c-1)
+  * [CC-SB-WMX-L87C-1](https://www.digi.com/products/models/cc-sb-wmx-l87c-1)
+  * [CC-SB-WMX-L76C-1](https://www.digi.com/products/models/cc-sb-wmx-l76c-1)
 
 Previous versions of Digi Embedded Yocto include support for additional Digi
 hardware.
@@ -68,9 +68,9 @@ To install, please follow the instructions at the dey-manifest [README](https://
 
 Documentation is available online on the Digi documentation site:
 
-* [Digi ConnectCore 6UL SBC Express](https://www.digi.com/resources/documentation/digidocs/90001548/default.htm)
-* [Digi ConnectCore 6UL SBC Pro](https://www.digi.com/resources/documentation/digidocs/90001547/default.htm)
-* [Digi ConnectCore 6 Jumpstart Development Kit](https://www.digi.com/resources/documentation/digidocs/90001546/default.htm)
+* [ConnectCore 6UL SBC Express](https://www.digi.com/resources/documentation/digidocs/90001548/default.htm)
+* [ConnectCore 6UL SBC Pro](https://www.digi.com/resources/documentation/digidocs/90001547/default.htm)
+* [ConnectCore 6 Jumpstart Development Kit](https://www.digi.com/resources/documentation/digidocs/90001546/default.htm)
 
 # Downloads
 
@@ -168,43 +168,43 @@ boot a signed U-Boot only.
   devices (ConnectCore 6UL and ConnectCore 6 Plus) running a 4.9 kernel
   version fail to join to autonomous groups.
 
-## Digi ConnectCore 6UL
+## ConnectCore 6UL
 
-* The UART connected to the Bluetooth chip on early versions of the ConnectCore
-  6UL system-on-module (hardware version < 4) cannot properly execute flow
-  control. To work around this issue, UART1 of these SOM versions has been
-  configured to operate at 115200 bps and without hardware flow control,
-  reducing the maximum throughput of this interface.
-* When using wireless concurrent mode as the wireless interface is shared
-  between several different functionalities performance is reduced.
-* When using wireless concurrent mode Digi recommends to keep the different
-  modes on the same frequency channels. For example, when configuring access
-  point mode on channel 36 on band A, the recommendation would be to connect
-  to the same channel both in station mode and WiFi direct so that the radio
-  performance is optimized
-* When working as an access point, DFS capable channels in band A are not
-  currently supported.
-* The QCA6564 wireless chip does not support Wake On Wireless LAN
+* ConnectCore 6UL System-on-Module (SOM)
+  * The UART connected to the Bluetooth chip on early versions of the ConnectCore
+    6UL system-on-module (hardware version < 4) cannot properly execute flow
+    control. To work around this issue, UART1 of these SOM versions has been
+    configured to operate at 115200 bps and without hardware flow control,
+    reducing the maximum throughput of this interface.
+  * When using wireless concurrent mode as the wireless interface is shared
+    between several different functionalities performance is reduced.
+  * When using wireless concurrent mode Digi recommends to keep the different
+    modes on the same frequency channels. For example, when configuring access
+    point mode on channel 36 on band A, the recommendation would be to connect
+    to the same channel both in station mode and WiFi direct so that the radio
+    performance is optimized.
+  * When working as an access point, DFS capable channels in band A are not
+    currently supported.
+  * The QCA6564 wireless chip does not support Wake On Wireless LAN.
 
-## Digi ConnectCore 6
+## ConnectCore 6
 
-* NXP i.MX6 processor has a documented errata (ERR004512) whereby the maximum
-performance of the Gigabit FEC is limited to 400Mbps (total for Tx and Rx)
-* When using softAP mode on Band A on the Qualcomm AR6233, channels used for
-Dynamic Frequency Selection (DFS) are not supported
-* The Qualcomm AR6233 firmware does not support the following configuration
-modes:
-  * Concurrent modes involving P2P mode, such as P2P + softAP or P2P + STA
-  * Bluetooth + softAP + STA concurrent mode
-* A maximum of five clients are supported when using Qualcomm's AR6233 in
-softAP mode
-* A maximum of ten connected devices are supported when using Qualcomm's AR6233
-Bluetooth Low Energy mode
-
-## Digi ConnectCore 6 SBC
-
-* The Micrel PHY KSZ9031 may take between five and six seconds to
-auto-negotiate with Gigabit switches
+* ConnectCore 6 System-on-Module (SOM)
+  * NXP i.MX6 processor has a documented errata (ERR004512) whereby the maximum
+    performance of the Gigabit FEC is limited to 400Mbps (total for Tx and Rx).
+  * When using softAP mode on Band A on the Qualcomm AR6233, channels used for
+    Dynamic Frequency Selection (DFS) are not supported.
+  * The Qualcomm AR6233 firmware does not support the following configuration
+    modes:
+    * Concurrent modes involving P2P mode, such as P2P + softAP or P2P + STA.
+    * Bluetooth + softAP + STA concurrent mode.
+  * A maximum of five clients are supported when using Qualcomm's AR6233 in
+    softAP mode.
+  * A maximum of ten connected devices are supported when using Qualcomm's AR6233
+    Bluetooth Low Energy mode.
+* ConnectCore 6 SBC
+  * The Micrel PHY KSZ9031 may take between five and six seconds to
+    auto-negotiate with Gigabit switches.
 
 # Support Contact Information
 
