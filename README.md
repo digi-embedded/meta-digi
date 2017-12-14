@@ -19,38 +19,37 @@ OS versions:
 
 # Supported Platforms
 
-The current release supports the following hardware platforms:
-
 Software for the following hardware platforms is in production support:
 
 ## ConnectCore 6UL
 * ConnectCore 6UL System-on-Module (SOM)
-  * [CC-WMX-JN58-NE](http://www.digi.com/products/models/cc-wmx-jn58-ne)
+  * [CC-WMX-JN58-NE](https://www.digi.com/products/models/cc-wmx-jn58-ne)
   * [CC-MX-JN58-Z1](https://www.digi.com/products/models/cc-mx-jn58-z1)
   * CC-WMX-JN7A-NE
 * ConnectCore 6UL SBC Express
-  * [CC-WMX6UL-START](http://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001548/default.htm#concept/yocto/c_get_started_with_yocto.htm))
+  * [CC-WMX6UL-START](https://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001548/default.htm#concept/yocto/c_get_started_with_yocto.htm))
+  * [CC-SBE-WMX-JN58](https://www.digi.com/products/models/cc-sbe-wmx-jn58)
 * ConnectCore 6UL SBC Pro
   * [CC-WMX6UL-KIT](https://www.digi.com/products/models/cc-wmx6ul-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001547/default.htm#concept/yocto/c_get_started_with_yocto.htm))
+  * [CC-SBP-WMX-JN58](https://www.digi.com/products/models/cc-sbp-wmx-jn58)
 
 ## ConnectCore 6
 * ConnectCore 6 System-on-Module (SOM)
-  * [CC-WMX-J97C-TN](http://www.digi.com/products/models/cc-wmx-j97c-tn)
-  * [CC-WMX-L96C-TE](http://www.digi.com/products/models/cc-wmx-l96c-te)
-  * [CC-WMX-L87C-TE](http://www.digi.com/products/models/cc-wmx-l87c-te)
-  * [CC-MX-L76C-Z1](http://www.digi.com/products/models/cc-mx-l76c-z1)
-  * [CC-MX-L86C-Z1](http://www.digi.com/products/models/cc-mx-l86c-z1)
-  * [CC-MX-L96C-Z1](http://www.digi.com/products/models/cc-mx-l96c-z1)
-  * [CC-WMX-L76C-TE](http://www.digi.com/products/models/cc-wmx-l76c-te)
+  * [CC-WMX-J97C-TN](https://www.digi.com/products/models/cc-wmx-j97c-tn)
+  * [CC-WMX-L96C-TE](https://www.digi.com/products/models/cc-wmx-l96c-te)
+  * [CC-WMX-L87C-TE](https://www.digi.com/products/models/cc-wmx-l87c-te)
+  * [CC-MX-L76C-Z1](https://www.digi.com/products/models/cc-mx-l76c-z1)
+  * [CC-MX-L86C-Z1](https://www.digi.com/products/models/cc-mx-l86c-z1)
+  * [CC-MX-L96C-Z1](https://www.digi.com/products/models/cc-mx-l96c-z1)
+  * [CC-WMX-L76C-TE](https://www.digi.com/products/models/cc-wmx-l76c-te)
   * CC-WMX-K87C-FJA
   * CC-WMX-K77C-TE
   * CC-WMX-L97D-TN
   * CC-WMX-J98C-FJA
   * CC-WMX-J98C-FJA-1
-* ConnectCore 6 Development Kit
-  * [CC-WMX6-KIT](http://www.digi.com/products/models/cc-wmx6-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001546/default.htm#concept/yocto/c_get_started_with_yocto.htm))
 * ConnectCore 6 SBC
-  * [CC-SB-WMX-J97C-1](http://www.digi.com/products/models/cc-sb-wmx-j97c-1)
+  * [CC-WMX6-KIT](https://www.digi.com/products/models/cc-wmx6-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/90001546/default.htm#concept/yocto/c_get_started_with_yocto.htm))
+  * [CC-SB-WMX-J97C-1](https://www.digi.com/products/models/cc-sb-wmx-j97c-1)
   * [CC-SB-WMX-L87C-1](https://www.digi.com/products/models/cc-sb-wmx-l87c-1)
   * [CC-SB-WMX-L76C-1](https://www.digi.com/products/models/cc-sb-wmx-l76c-1)
 
@@ -76,8 +75,8 @@ Documentation is available online on the Digi documentation site:
 
 * [ConnectCore 6UL SBC Express](https://www.digi.com/resources/documentation/digidocs/90001548/default.htm)
 * [ConnectCore 6UL SBC Pro](https://www.digi.com/resources/documentation/digidocs/90001547/default.htm)
-* [ConnectCore 6 Jumpstart Development Kit](https://www.digi.com/resources/documentation/digidocs/90001546/default.htm)
-* [ConnectCore 6 Plus Jumpstart Development Kit](https://www.digi.com/resources/documentation/digidocs/90002275/default.htm)
+* [ConnectCore 6 SBC](https://www.digi.com/resources/documentation/digidocs/90001546/default.htm)
+* [ConnectCore 6 Plus SBC](https://www.digi.com/resources/documentation/digidocs/90002275/default.htm)
 
 # Downloads
 
@@ -89,6 +88,7 @@ Documentation is available online on the Digi documentation site:
 ## 2.2-r3
 
 * Added support for ConnectCore 6 Plus platform
+* Updated kernel version to v4.9 for ConnectCore 6UL platform
 * Added Digi APIX C library to access and manage ConnectCore platforms interfaces:
   * ADC
   * GPIO
@@ -96,6 +96,9 @@ Documentation is available online on the Digi documentation site:
   * PWM
   * SPI
 * Updated AWS Greengrass Core software to v1.1.0
+* Updated TrustFence Code Signing Tool to v2.3.3
+* Default rootfs images are now Eclipse debug ready
+* Updated documentation
 
 ## 2.2-r2
 
@@ -228,8 +231,8 @@ boot a signed U-Boot only.
 For support questions please contact Digi Technical Support:
 
 * [Enterprise Support](https://mydigi.secure.force.com/customers/)
-* [Product Technical Support](http://www.digi.com/support/product-support)
-* [Support forum](http://www.digi.com/support/forum/)
+* [Product Technical Support](https://www.digi.com/support#support-tools)
+* [Support forum](https://www.digi.com/support/forum/)
 
 When you contact Digi Technical Support, include important system details and
 device information to help Digi resolve the issue more quickly.
