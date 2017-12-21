@@ -22,6 +22,7 @@ lockfd="9"
 
 BT_INIT="/etc/init.d/bluetooth-init"
 BT_DAEMON="/etc/init.d/bluetooth"
+NM_DAEMON="/etc/init.d/networkmanager"
 
 usage() {
 	printf "\nSuspend system to RAM memory\n"
@@ -31,18 +32,14 @@ usage() {
 }
 
 suspend_interfaces() {
+	# Stop NetworkManager before suspend
+	${NM_DAEMON} stop
+
 	# Suspend wireless interfaces
 	if [ -d "/proc/device-tree/wireless" ]; then
 		for i in $(sed -ne 's,^\(wlan[0-9]\)=.*,\1,g;T;p' /var/run/ifstate | sort -r); do
 			ifdown "${i}" && RESUME_IFACES="${RESUME_IFACES:+${RESUME_IFACES} }${i}"
 		done
-
-		# Get a list of the wireless interfaces managed by NetworkManager
-		# and set them to unmanaged before suspend.
-		for i in $(nmcli -t -f DEVICE,TYPE,STATE dev | grep :wifi: | grep -v unmanaged | cut -d':' -f1); do
-			nmcli dev set "${i}" managed no && NM_MANAGED_IFACES="${NM_MANAGED_IFACES:+${NM_MANAGED_IFACES} }${i}"
-		done
-
 		grep -qs '^wlan' /proc/modules && rmmod wlan
 	fi
 
@@ -61,11 +58,6 @@ resume_interfaces() {
 		udevadm trigger --action=add --attr-match="modalias=sdio:c00v0271d050A"
 		timeout -t 5 sh -c "while [ ! -d /sys/class/net/wlan0 ]; do sleep .2; done" 2>/dev/null
 
-		# Set interfaces managed by NetworkManager back as managed
-		for i in $(echo ${NM_MANAGED_IFACES} | tr ' ' '\n' | sort); do
-			nmcli dev set "${i}" managed yes
-		done
-
 		# Bring up the interfaces that were bring down on suspend
 		for i in $(echo ${RESUME_IFACES} | tr ' ' '\n' | sort); do
 			grep -qs "^${i}" /var/run/ifstate || ifup "${i}"
@@ -79,6 +71,9 @@ resume_interfaces() {
 			${BT_DAEMON} start >/dev/null
 		fi
 	fi
+
+	# Resume NetworkManager after suspend
+	${NM_DAEMON} start
 }
 
 enter_critical_section() {
