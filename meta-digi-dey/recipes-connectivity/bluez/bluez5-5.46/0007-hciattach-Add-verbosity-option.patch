@@ -1,10 +1,11 @@
-From: Alex Gonzalez <alex.gonzalez@digi.com>
-Date: Mon, 10 Apr 2017 12:44:00 +0200
-Subject: [PATCH] hciattach: Add verbosity option
+From: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
+Date: Mon, 8 Jan 2018 10:30:49 +0100
+Subject: [PATCH 4/4] hciattach: Add verbosity option
 
 And reduce the verbosity of the hciattach_rome plugin.
 
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
 ---
  lib/bluetooth.h        |   3 +
  tools/hciattach.c      |  13 ++-

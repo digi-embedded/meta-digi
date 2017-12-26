@@ -1,6 +1,6 @@
-From: Alex Gonzalez <alex.gonzalez@digi.com>
-Date: Thu, 6 Apr 2017 09:27:09 +0200
-Subject: [PATCH] hciattach_rome: Respect the user indication for noflow
+From: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
+Date: Mon, 8 Jan 2018 10:30:18 +0100
+Subject: [PATCH 2/4] hciattach_rome: Respect the user indication for noflow
 
 When hciattach is called with noflow, it should not assume the hardware
 supports hardware flow control.
@@ -9,6 +9,7 @@ Basically, use 'flow' or 'noflow' on the hciattach command line arguments
 to indicate whether to use or not hardware flow control.
 
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
 ---
  tools/hciattach.c      |  2 +-
  tools/hciattach.h      |  2 +-
@@ -30,10 +31,10 @@ index dda639cabca3..81d78ab3f69a 100644
  
  static int qualcomm(int fd, struct uart_t *u, struct termios *ti)
 diff --git a/tools/hciattach.h b/tools/hciattach.h
-index 49e59321fcac..3524e716c847 100644
+index 481e3a65f685..5f2764cca0b0 100644
 --- a/tools/hciattach.h
 +++ b/tools/hciattach.h
-@@ -64,7 +64,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
+@@ -67,7 +67,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
  						struct termios *ti);
  int ath3k_post(int fd, int pm);
  int qualcomm_init(int fd, int speed, struct termios *ti, const char *bdaddr);
