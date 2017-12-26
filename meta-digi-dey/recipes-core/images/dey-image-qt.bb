@@ -9,7 +9,6 @@ SOC_PACKAGES_ccimx6 = "imx-gpu-viv-demos imx-gpu-viv-tools"
 
 IMAGE_INSTALL = " \
     packagegroup-dey-core \
-    ${ROOTFS_PKGMANAGE_BOOTSTRAP} \
     ${CORE_IMAGE_EXTRA_INSTALL} \
     ${SOC_PACKAGES} \
 "

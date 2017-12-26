@@ -12,7 +12,6 @@ IMAGE_INSTALL = " \
     packagegroup-dey-core \
     ${AWS_PACKAGES} \
     ${CORE_IMAGE_EXTRA_INSTALL} \
-    ${ROOTFS_PKGMANAGE_BOOTSTRAP} \
 "
 
 IMAGE_FEATURES += " \

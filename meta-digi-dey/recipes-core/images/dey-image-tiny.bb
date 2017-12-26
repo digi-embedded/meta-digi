@@ -10,7 +10,6 @@ IMAGE_INSTALL= "\
 	busybox-static-nodes \
 	sysvinit \
 	initscripts \
-	${ROOTFS_PKGMANAGE_BOOTSTRAP} \
 	${CORE_IMAGE_EXTRA_INSTALL} \
 "
 
