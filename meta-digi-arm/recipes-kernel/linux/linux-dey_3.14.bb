@@ -1,7 +1,6 @@
-# Copyright (C) 2015-2017 Digi International
+# Copyright (C) 2015-2018 Digi International
 
 require recipes-kernel/linux/linux-dey.inc
-require recipes-kernel/linux/linux-dtb.inc
 
 inherit fsl-vivante-kernel-driver-handler
 
