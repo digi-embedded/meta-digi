@@ -7,7 +7,7 @@ def TRUSTFENCE_BOOTIMAGE_DEPENDS(d):
     tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
     return "%s:do_image_complete" % tf_initramfs if tf_initramfs else ""
 
-IMAGE_DEPENDS_boot.vfat = " \
+do_image_boot_vfat[depends] += " \
     dosfstools-native:do_populate_sysroot \
     mtools-native:do_populate_sysroot \
     u-boot:do_deploy \
@@ -69,7 +69,7 @@ IMAGE_CMD_boot.vfat() {
 # Remove the default ".rootfs." suffix for 'boot.vfat' images
 do_image_boot_vfat[imgsuffix] = "."
 
-IMAGE_DEPENDS_boot.ubifs = " \
+do_image_boot_ubifs[depends] += " \
     mtd-utils-native:do_populate_sysroot \
     u-boot:do_deploy \
     virtual/kernel:do_deploy \
@@ -117,20 +117,10 @@ IMAGE_CMD_boot.ubifs() {
 # Remove the default ".rootfs." suffix for 'boot.ubifs' images
 do_image_boot_ubifs[imgsuffix] = "."
 
-#
-# Transfer the dependences from the basetype 'boot' to the actual image types
-#
-# This is needed because otherwise the IMAGE_DEPENDS_<actualtype> is not used and the build fails.
-#
-IMAGE_DEPENDS_boot = " \
-    ${@bb.utils.contains('IMAGE_FSTYPES', 'boot.ubifs', '${IMAGE_DEPENDS_boot.ubifs}', '', d)} \
-    ${@bb.utils.contains('IMAGE_FSTYPES', 'boot.vfat', '${IMAGE_DEPENDS_boot.vfat}', '', d)} \
-"
-
 ################################################################################
 #                               RECOVERY IMAGES                                #
 ################################################################################
-IMAGE_DEPENDS_recovery.vfat = " \
+do_image_recovery_vfat[depends] +=  " \
     ${RECOVERY_INITRAMFS_IMAGE}:do_image_complete \
 "
 
@@ -147,7 +137,7 @@ do_image_recovery_vfat[imgsuffix] = "."
 
 IMAGE_TYPEDEP_recovery.vfat = "boot.vfat"
 
-IMAGE_DEPENDS_recovery.ubifs = " \
+do_image_recovery_ubifs[depends] += " \
     mtd-utils-native:do_populate_sysroot \
     u-boot:do_deploy \
     virtual/kernel:do_deploy \
@@ -193,16 +183,6 @@ IMAGE_CMD_recovery.ubifs() {
 # Remove the default ".rootfs." suffix for 'recovery.ubifs' images
 do_image_recovery_ubifs[imgsuffix] = "."
 
-#
-# Transfer the dependences from the basetype 'recovery' to the actual image types
-#
-# This is needed because otherwise the IMAGE_DEPENDS_<actualtype> is not used and the build fails.
-#
-IMAGE_DEPENDS_recovery = " \
-    ${@bb.utils.contains('IMAGE_FSTYPES', 'recovery.ubifs', '${IMAGE_DEPENDS_recovery.ubifs}', '', d)} \
-    ${@bb.utils.contains('IMAGE_FSTYPES', 'recovery.vfat', '${IMAGE_DEPENDS_recovery.vfat}', '', d)} \
-"
-
 ################################################################################
 #                               TRUSTFENCE SIGN                                #
 ################################################################################
@@ -245,7 +225,7 @@ SDIMG_BOOTFS = "${IMGDEPLOYDIR}/${IMAGE_NAME}.${SDIMG_BOOTFS_TYPE}"
 SDIMG_ROOTFS_TYPE ?= "ext4"
 SDIMG_ROOTFS = "${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.${SDIMG_ROOTFS_TYPE}"
 
-IMAGE_DEPENDS_sdcard = " \
+do_image_sdcard[depends] = " \
     dosfstools-native:do_populate_sysroot \
     mtools-native:do_populate_sysroot \
     parted-native:do_populate_sysroot \
