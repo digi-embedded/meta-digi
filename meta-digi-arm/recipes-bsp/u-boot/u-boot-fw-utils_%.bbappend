@@ -10,8 +10,6 @@ UBOOT_FW_UTILS_PATCHES = " \
     file://0001-tools-env-implement-support-for-environment-encrypti.patch \
     file://0002-Implement-U-Boot-environment-access-functions.patch \
     file://0003-fw_env-add-support-to-unlock-emmc-boot-partition.patch \
-    file://0004-tools-env-factorize-function-to-get-device-type.patch \
-    file://0005-tools-env-add-support-to-set-dynamic-location-of-env.patch \
 "
 
 # Patches from 'meta-swupdate' touch the same files than ours, so we need to

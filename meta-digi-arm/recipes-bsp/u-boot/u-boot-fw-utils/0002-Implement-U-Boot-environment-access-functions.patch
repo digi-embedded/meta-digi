@@ -1,8 +1,9 @@
 From: Javier Viguera <javier.viguera@digi.com>
 Date: Tue, 10 Jan 2017 19:34:26 +0100
-Subject: [PATCH] Implement U-Boot environment access functions
+Subject: [PATCH 2/4] Implement U-Boot environment access functions
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
 ---
  tools/env/Makefile   |  2 +-
  tools/env/ubootenv.c | 62 ++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -12,7 +13,7 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  create mode 100644 tools/env/ubootenv.h
 
 diff --git a/tools/env/Makefile b/tools/env/Makefile
-index fa2a564bb357..b29dcea16fe8 100644
+index c10ff66c7772..1d99e3b65dc6 100644
 --- a/tools/env/Makefile
 +++ b/tools/env/Makefile
 @@ -25,7 +25,7 @@ hostprogs-y := fw_printenv
@@ -26,7 +27,7 @@ index fa2a564bb357..b29dcea16fe8 100644
  
 diff --git a/tools/env/ubootenv.c b/tools/env/ubootenv.c
 new file mode 100644
-index 000000000000..db789a55adaa
+index 000000000000..836fcd14a67f
 --- /dev/null
 +++ b/tools/env/ubootenv.c
 @@ -0,0 +1,62 @@
@@ -61,7 +62,7 @@ index 000000000000..db789a55adaa
 +{
 +	int ret = 0;
 +
-+	ret = fw_env_open();
++	ret = fw_env_open(NULL);
 +	if (ret)
 +		goto err;
 +
@@ -79,7 +80,7 @@ index 000000000000..db789a55adaa
 +{
 +	int ret = 0;
 +
-+	ret = fw_env_open();
++	ret = fw_env_open(NULL);
 +	if (ret)
 +		goto err;
 +
@@ -87,7 +88,7 @@ index 000000000000..db789a55adaa
 +	if (ret)
 +		goto err;
 +
-+	ret = fw_env_close();
++	ret = fw_env_close(NULL);
 +
 +err:
 +	return ret ? -1 : 0;

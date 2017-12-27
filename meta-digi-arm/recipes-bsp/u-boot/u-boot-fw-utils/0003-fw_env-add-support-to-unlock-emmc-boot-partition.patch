@@ -1,17 +1,17 @@
 From: Javier Viguera <javier.viguera@digi.com>
 Date: Thu, 16 Feb 2017 14:53:44 +0100
-Subject: [PATCH] fw_env: add support to unlock emmc boot partition
+Subject: [PATCH 3/4] fw_env: add support to unlock emmc boot partition
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
- tools/env/fw_env.c | 31 +++++++++++++++++++++++++++++++
- 1 file changed, 31 insertions(+)
+ tools/env/fw_env.c | 32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
 
 diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
-index 46c619b211b5..1c337b4727a9 100644
+index de2e693e9f93..db1182c7216e 100644
 --- a/tools/env/fw_env.c
 +++ b/tools/env/fw_env.c
-@@ -1177,9 +1177,31 @@ static int flash_read (int fd)
+@@ -1173,9 +1173,31 @@ static int flash_read (int fd)
  	return 0;
  }
  
@@ -43,10 +43,11 @@ index 46c619b211b5..1c337b4727a9 100644
  
  	/* dev_current: fd_current, erase_current */
  	fd_current = open (DEVNAME (dev_current), mode);
-@@ -1209,8 +1231,17 @@ static int flash_io (int mode)
+@@ -1205,8 +1227,18 @@ static int flash_io (int mode)
  			fd_target = fd_current;
  		}
  
++
 +		/* Disable mmcboot protection if using EMMC (set read-write) */
 +		mmcblk = strstr(DEVNAME(dev_target), "mmcblk");
 +		if (mmcblk)
@@ -58,6 +59,6 @@ index 46c619b211b5..1c337b4727a9 100644
 +		if (mmcblk)
 +			sysfs_mmcboot_set_protection(mmcblk, 1);
 +
- 		if (HaveRedundEnv) {
- 			if (close (fd_target)) {
- 				fprintf (stderr,
+ 		if (fsync(fd_current) &&
+ 		    !(errno == EINVAL || errno == EROFS)) {
+ 			fprintf (stderr,
