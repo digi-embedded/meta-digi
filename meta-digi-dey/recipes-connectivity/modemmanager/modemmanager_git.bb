@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = " \
     file://COPYING.LIB;md5=4fbd65380cdd255951079008b364516c \
 "
 
-DEPENDS = "glib-2.0 intltool-native libgudev"
+DEPENDS = "glib-2.0 intltool-native libgudev libxslt-native"
 
 PV = "1.7.0+git${SRCPV}"
 
