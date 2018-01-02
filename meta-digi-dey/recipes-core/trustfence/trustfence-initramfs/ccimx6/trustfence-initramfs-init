@@ -24,19 +24,6 @@ error() {
 	sync && poweroff -f
 }
 
-#------------------------------------------------------------------------------
-# Function - get_kernel_version
-#
-# Obtain the kernel version and return it in number format
-#
-# @return  - kernel version
-#------------------------------------------------------------------------------
-get_kernel_version() {
-	major="$(uname -r | cut -d'.' -f1)"
-	minor="$(uname -r | cut -d'.' -f2)"
-	echo $(((major << 8) + minor))
-}
-
 # Main
 #------------------------------------------------------------------------------
 # Setup the environment.
@@ -50,12 +37,6 @@ mount -t devtmpfs devtmpfs /dev
 # Set kernel console loglevel
 LOGLEVEL="$(sysctl -n kernel.printk)"
 sysctl -q -w kernel.printk=4
-
-# Launch 'rngd' to feed random data to kernel entropy pool
-# for kernels previous to v3.17
-if [ "$(get_kernel_version)" -lt "$(((3 << 8) + 17))" ]; then
-	mkdir -p /var/run && rngd
-fi
 
 for arg in $(cat /proc/cmdline); do
 	case "${arg}" in
@@ -91,13 +72,9 @@ mount ${FSTYPE:+-t ${FSTYPE}} ${root} /newroot
 #
 # Clean-up and do the switch_root to the final rootfs
 #
-# - explicit kill 'rngd' daemon so it doesn't leak to the final rootfs
 # - restore previous kernel console loglevel
 # - umount virtual filesystems
 #
-if [ "$(get_kernel_version)" -lt "$(((3 << 8) + 17))" ]; then
-    pkill -9 rngd
-fi
 [ -n "${LOGLEVEL}" ] && sysctl -q -w kernel.printk="${LOGLEVEL}"
 mount --move /dev /newroot/dev
 umount /sys /proc

@@ -27,12 +27,9 @@ RDEPENDS_${PN} = " \
     u-boot-fw-utils \
 "
 
-RDEPENDS_${PN}_append_ccimx6sbc = " \
+RDEPENDS_${PN}_append_ccimx6 = " \
     cryptsetup \
-    rng-tools \
 "
-
-RDEPENDS_${PN}_append_ccimx6qpsbc = " cryptsetup"
 
 RDEPENDS_${PN}_append_ccimx6ul = " \
     mtd-utils-ubifs \

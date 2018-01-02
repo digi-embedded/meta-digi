@@ -394,12 +394,6 @@ mkdir -p /var/lock
 # Set kernel console loglevel.
 sysctl -q -w kernel.printk=4
 
-# Launch 'rngd' to feed random data to kernel entropy pool
-# for kernels previous to v3.17
-if [ "$(get_kernel_version)" -lt "$(((3 << 8) + 17))" ]; then
-	mkdir -p /var/run && rngd
-fi
-
 # Start psplash.
 psplash &
 
