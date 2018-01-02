@@ -11,7 +11,6 @@ MACHINE_QT5_EXTRA_INSTALL_ccimx6 ?= "qtwebengine-examples"
 
 QT5_PKS = "qtserialport"
 QT5_PKS_append_ccimx6 = " qtdeclarative-tools"
-QT5_PKS_append_ccimx6ul = " qtdeclarative-render2d-plugins"
 
 QT5_EXAMPLES = ""
 QT5_EXAMPLES_append_ccimx6 = " \
