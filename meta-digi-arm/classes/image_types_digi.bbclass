@@ -201,12 +201,12 @@ trustence_sign_cpio() {
 		# Sign/encrypt the ramdisk
 		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -i "${1}" "${1}.tf"
 	else
-		# Rename image
-		mv "${1}" "${1}.tf"
+		# Copy the image with no changes
+		cp "${1}" "${1}.tf"
 	fi
 }
-CONVERSIONTYPES += "gz.u-boot.tf"
-CONVERSION_CMD_gz.u-boot.tf = "${CONVERSION_CMD_gz.u-boot}; trustence_sign_cpio ${IMAGE_NAME}.rootfs.${type}.gz.u-boot"
+CONVERSIONTYPES += "tf"
+CONVERSION_CMD_tf = "trustence_sign_cpio ${IMAGE_NAME}.rootfs.${type}"
 IMAGE_TYPES += "cpio.gz.u-boot.tf"
 
 ################################################################################
