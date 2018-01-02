@@ -26,6 +26,8 @@ PACKAGECONFIG_remove = "consolekit"
 PACKAGECONFIG_remove = "netconfig nss"
 PACKAGECONFIG_append = " concheck gnutls modemmanager ppp"
 
+EXTRA_OECONF_append = " --disable-introspection"
+
 #
 # NetworkManager only accepts IP addresses in CIDR format
 #
