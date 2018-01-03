@@ -8,6 +8,7 @@ def TRUSTFENCE_BOOTIMAGE_DEPENDS(d):
     return "%s:do_image_complete" % tf_initramfs if tf_initramfs else ""
 
 do_image_boot_vfat[depends] += " \
+    coreutils-native:do_populate_sysroot \
     dosfstools-native:do_populate_sysroot \
     mtools-native:do_populate_sysroot \
     u-boot:do_deploy \
