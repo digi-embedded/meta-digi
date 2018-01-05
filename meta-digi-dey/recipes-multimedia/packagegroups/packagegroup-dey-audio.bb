@@ -15,7 +15,7 @@ ALSA_UTILS_PKGS = " \
 "
 
 RDEPENDS_${PN} = "\
-    alsa-lib \
+    libasound \
     alsa-state \
     alsa-states \
     ${ALSA_UTILS_PKGS} \
