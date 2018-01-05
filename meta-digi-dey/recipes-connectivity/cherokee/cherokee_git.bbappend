@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013-2018 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
