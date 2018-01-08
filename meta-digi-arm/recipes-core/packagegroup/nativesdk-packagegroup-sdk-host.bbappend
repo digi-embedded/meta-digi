@@ -1,5 +1,5 @@
 # Copyright (C) 2016 Digi International.
 
 RDEPENDS_${PN} += " \
-    nativesdk-trustfence-sign-tools \
+    ${@base_conditional('TRUSTFENCE_SIGN', '1', 'nativesdk-trustfence-sign-tools', '', d)} \
 "
