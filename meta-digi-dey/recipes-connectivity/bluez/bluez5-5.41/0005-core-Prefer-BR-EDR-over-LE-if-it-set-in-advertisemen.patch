@@ -1,0 +1,47 @@
+From 2f78f64aee11dde478fd76f1e15bb1b977ba7099 Mon Sep 17 00:00:00 2001
+From: Luiz Augusto von Dentz <luiz.von.dentz@intel.com>
+Date: Wed, 10 Aug 2016 16:23:56 +0300
+Subject: [PATCH 1/7] core: Prefer BR/EDR over LE if it set in advertisement
+ flag
+
+This makes the code prefer BR/EDR if the last advertisement has it set
+in the flags.
+---
+ src/adapter.c | 5 ++++-
+ src/device.c  | 6 +++++-
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/src/adapter.c b/src/adapter.c
+index 37423985dfb4..ddabf2de5462 100644
+--- a/src/adapter.c
++++ b/src/adapter.c
+@@ -5488,8 +5488,11 @@ static void update_found_devices(struct btd_adapter *adapter,
+ 	 * supports this we can make the non-zero check conditional.
+ 	 */
+ 	if (bdaddr_type != BDADDR_BREDR && eir_data.flags &&
+-					!(eir_data.flags & EIR_BREDR_UNSUP))
++					!(eir_data.flags & EIR_BREDR_UNSUP)) {
+ 		device_set_bredr_support(dev);
++		/* Update last seen for BR/EDR in case its flag is set */
++		device_update_last_seen(dev, BDADDR_BREDR);
++	}
+ 
+ 	if (eir_data.name != NULL && eir_data.name_complete)
+ 		device_store_cached_name(dev, eir_data.name);
+diff --git a/src/device.c b/src/device.c
+index 82704f8bb343..7f40af44cd01 100644
+--- a/src/device.c
++++ b/src/device.c
+@@ -1763,7 +1763,11 @@ static uint8_t select_conn_bearer(struct btd_device *dev)
+ 	if (dev->le && (!dev->bredr || bredr_last == NVAL_TIME))
+ 		return dev->bdaddr_type;
+ 
+-	if (bredr_last < le_last)
++	/*
++	 * Prefer BR/EDR if time is the same since it might be from an
++	 * advertisement with BR/EDR flag set.
++	 */
++	if (bredr_last <= le_last)
+ 		return BDADDR_BREDR;
+ 
+ 	return dev->bdaddr_type;

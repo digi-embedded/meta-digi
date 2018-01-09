@@ -1,0 +1,22 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Fri, 8 Jul 2016 12:19:33 +0200
+Subject: [PATCH] hcitool: do not show unsupported refresh option
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ tools/hcitool.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/hcitool.c b/tools/hcitool.c
+index 02c4ebe1b71b..229c22c49909 100644
+--- a/tools/hcitool.c
++++ b/tools/hcitool.c
+@@ -568,7 +568,7 @@ static struct option scan_options[] = {
+ 
+ static const char *scan_help =
+ 	"Usage:\n"
+-	"\tscan [--length=N] [--numrsp=N] [--iac=lap] [--flush] [--class] [--info] [--oui] [--refresh]\n";
++	"\tscan [--length=N] [--numrsp=N] [--iac=lap] [--flush] [--class] [--info] [--oui]\n";
+ 
+ static void cmd_scan(int dev_id, int argc, char **argv)
+ {
