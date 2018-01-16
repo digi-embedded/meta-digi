@@ -1,0 +1,36 @@
+From bbce23ade0d17c7ef4dbd6042009e0f2419f9668 Mon Sep 17 00:00:00 2001
+From: Haihua Hu <jared.hu@nxp.com>
+Date: Mon, 6 Nov 2017 15:05:47 +0800
+Subject: [PATCH] fdmemory: need unmap if mapping flags are not subset of
+ previous
+
+Upstream-Status: Pending
+https://bugzilla.gnome.org/show_bug.cgi?id=789952
+
+---
+ gst-libs/gst/allocators/gstfdmemory.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/gst-libs/gst/allocators/gstfdmemory.c b/gst-libs/gst/allocators/gstfdmemory.c
+index ad428a7..1e6125a 100644
+--- a/gst-libs/gst/allocators/gstfdmemory.c
++++ b/gst-libs/gst/allocators/gstfdmemory.c
+@@ -97,9 +97,13 @@ gst_fd_mem_map (GstMemory * gmem, gsize maxsize, GstMapFlags flags)
+     if ((mem->mmapping_flags & prot) == prot) {
+       ret = mem->data;
+       mem->mmap_count++;
++      goto out;
++    } else {
++      /* if mapping flags is not a subset, need unmap first */
++      munmap ((void *) mem->data, gmem->maxsize);
++      mem->data = NULL;
++      mem->mmap_count = 0;;
+     }
+-
+-    goto out;
+   }
+ 
+   if (mem->fd != -1) {
+-- 
+1.9.1
+

@@ -1,0 +1,34 @@
+From f11ab0f14638d21b6e48bff3fd63aaaa0689f21d Mon Sep 17 00:00:00 2001
+From: Haihua Hu <jared.hu@nxp.com>
+Date: Thu, 30 Nov 2017 17:43:20 +0800
+Subject: [PATCH] [MMFMWK-7786] basetextoverlay: need avoid idx exceed memory
+ block number
+
+when check whether video buffer is read only, the gst_buffer_get_memory call
+should make sure idx don't exceed the total memory block number
+
+Upstream-Status: Inappropriate [i.MX specific]
+
+Signed-off-by: Haihua Hu <jared.hu@nxp.com>
+---
+ ext/pango/gstbasetextoverlay.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/ext/pango/gstbasetextoverlay.c b/ext/pango/gstbasetextoverlay.c
+index 7e32904..d2bbbee 100755
+--- a/ext/pango/gstbasetextoverlay.c
++++ b/ext/pango/gstbasetextoverlay.c
+@@ -2248,7 +2248,9 @@ gst_base_text_overlay_push_frame (GstBaseTextOverlay * overlay,
+   gboolean mem_rdonly = FALSE;
+   GstMemory *mem;
+ 
+-  while (mem = gst_buffer_get_memory(video_frame, idx++)) {
++  gint n_mem = gst_buffer_n_memory (video_frame);
++
++  while (idx < n_mem && (mem = gst_buffer_get_memory(video_frame, idx++))) {
+     if (GST_MEMORY_IS_READONLY(mem)) {
+       gst_memory_unref (mem);
+       mem_rdonly = TRUE;
+-- 
+1.9.1
+
