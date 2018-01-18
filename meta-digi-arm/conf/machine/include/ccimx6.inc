@@ -9,7 +9,6 @@ include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/tune-cortexa9.inc
 
 # Platform u-boot settings
-UBOOT_ENTRYPOINT = "0x10800000"
 UBOOT_SUFFIX = "imx"
 UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 

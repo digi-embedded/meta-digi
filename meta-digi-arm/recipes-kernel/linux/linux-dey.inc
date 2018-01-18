@@ -21,10 +21,6 @@ SRC_URI = " \
 
 S = "${WORKDIR}/git"
 
-# We need to pass it as param since kernel might support more than one
-# machine, with different entry points
-KERNEL_EXTRA_ARGS += "LOADADDR=${UBOOT_ENTRYPOINT}"
-
 do_deploy[postfuncs] += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence_sign', '', d)}"
 
 trustfence_sign() {
