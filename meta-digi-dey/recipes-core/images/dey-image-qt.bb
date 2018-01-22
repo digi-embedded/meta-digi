@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016 Digi International.
+# Copyright (C) 2016-2018 Digi International.
 #
 DESCRIPTION = "DEY image with QT graphical libraries"
 LICENSE = "MIT"
@@ -49,5 +49,6 @@ IMAGE_ROOTFS_SIZE = "8192"
 
 # Do not install udev-cache
 BAD_RECOMMENDATIONS += "udev-cache"
+BAD_RECOMMENDATIONS += "eudev-hwdb"
 
 export IMAGE_BASENAME = "dey-image-qt-${GRAPHICAL_BACKEND}"
