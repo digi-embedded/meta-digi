@@ -68,7 +68,7 @@ python () {
     # Provide sane default values for SWUPDATE class in case Trustfence is enabled
     if (d.getVar("TRUSTFENCE_SIGN", True) == "1"):
         # Enable package signing.
-        d.setVar("SWUPDATE_SIGNING", "1")
+        d.setVar("SWUPDATE_SIGNING", "RSA")
 
         # Retrieve the keys path to use.
         keys_path = d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True)
