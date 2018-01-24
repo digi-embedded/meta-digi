@@ -104,7 +104,7 @@ def get_noinst_tools_paths (d, bb, tools):
 
 FILES_${PN}-noinst-tools = "${@get_noinst_tools_paths(d, bb, d.getVar('NOINST_TOOLS', True))}"
 
-RDEPENDS_${PN}-testtools += "python3 python3-dbus python3-pygobject"
+RDEPENDS_${PN}-testtools += "python3-core python3-dbus python3-pygobject"
 
 SYSTEMD_SERVICE_${PN} = "bluetooth.service"
 INITSCRIPT_PACKAGES = "${PN}"
