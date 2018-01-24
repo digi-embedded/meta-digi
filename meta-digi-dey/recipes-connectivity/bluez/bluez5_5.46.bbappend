@@ -22,8 +22,6 @@ SRC_URI_append_ccimx6qpsbc = " ${QCA6564_COMMON_PATCHES}"
 
 inherit update-rc.d
 
-PACKAGECONFIG_append = " testing"
-
 do_install_append() {
 	install -d ${D}${sysconfdir}/init.d/
 	install -m 0755 ${WORKDIR}/bluetooth-init ${D}${sysconfdir}/init.d/bluetooth-init
