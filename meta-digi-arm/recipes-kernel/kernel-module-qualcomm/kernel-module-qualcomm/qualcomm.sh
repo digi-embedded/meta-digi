@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2017, Digi International Inc.
+# Copyright (c) 2017,2018 Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -48,8 +48,8 @@ if ! cmp -s ${TMP_MACFILE} ${MACFILE}; then
 fi
 rm -f "${TMP_MACFILE}"
 
-OTP_REGION_CODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null)"
-DTB_REGION_CODE="$(cat /proc/device-tree/wireless/regulatory-domain 2>/dev/null)"
+OTP_REGION_CODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null | tr -d '\0')"
+DTB_REGION_CODE="$(cat /proc/device-tree/wireless/regulatory-domain 2>/dev/null | tr -d '\0')"
 US_CODE="0x0"
 WW_CODE="0x1"
 JP_CODE="0x2"

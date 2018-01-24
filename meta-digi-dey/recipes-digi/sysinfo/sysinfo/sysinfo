@@ -3,7 +3,7 @@
 #
 #  sysinfo
 #
-#  Copyright (C) 2016,2017 by Digi International Inc.
+#  Copyright (C) 2016-2018 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -254,28 +254,28 @@ make_report(){
 
 DISTRO="$(sed -ne 's,DISTRO = \(.*\)$,\1,g;T;p' /etc/build)"
 DEY_VERSION="$(sed -ne 's,DISTRO_VERSION = \(.*\)$,\1,g;T;p' /etc/build)"
-UBOOT_VERSION="$(cat /proc/device-tree/digi,uboot,version 2>/dev/null)"
+UBOOT_VERSION="$(cat /proc/device-tree/digi,uboot,version 2>/dev/null | tr -d '\0')"
 if [ -z "${UBOOT_VERSION}" ]; then
 	UBOOT_PARTITION="/dev/mmcblk0boot0"
 	[ -c "/dev/mtd0" ] && UBOOT_PARTITION="/dev/mtd0"
 	UBOOT_VERSION="$(strings ${UBOOT_PARTITION} | grep -m 1 dub | cut -d' ' -f2)"
 fi
-MACHINE="$(cat /proc/device-tree/digi,machine,name)"
-BOARD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant)"
-BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn)"
-BOARD_VERSION="$(cat /proc/device-tree/digi,carrierboard,version)"
-BOARD_ID="$(cat /proc/device-tree/digi,carrierboard,id)"
+MACHINE="$(cat /proc/device-tree/digi,machine,name | tr -d '\0')"
+BOARD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant | tr -d '\0')"
+BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn | tr -d '\0')"
+BOARD_VERSION="$(cat /proc/device-tree/digi,carrierboard,version | tr -d '\0')"
+BOARD_ID="$(cat /proc/device-tree/digi,carrierboard,id | tr -d '\0')"
 if grep -qs '\<digi,ccimx6ul\>' /proc/device-tree/compatible; then
 	MCA_NODE="/sys/bus/i2c/devices/0-007e"
-	MCA_HW_VERSION=$(cat ${MCA_NODE}/hw_version) || MCA_HW_VERSION="??"
-	MCA_FW_VERSION=$(cat ${MCA_NODE}/fw_version) || MCA_FW_VERSION="??"
+	MCA_HW_VERSION=$(cat ${MCA_NODE}/hw_version 2>/dev/null | tr -d '\0') || MCA_HW_VERSION="??"
+	MCA_FW_VERSION=$(cat ${MCA_NODE}/fw_version 2>/dev/null | tr -d '\0') || MCA_FW_VERSION="??"
 	MCA_VERSION="HW_VERSION=${MCA_HW_VERSION}  FW_VERSION=${MCA_FW_VERSION}"
 fi
 
 IOEXP_NODE="/sys/bus/i2c/devices/0-006e"
 if [ -d "$IOEXP_NODE" ]; then
-	IOEXP_HW_VERSION=$(cat ${IOEXP_NODE}/hw_version 2>/dev/null) || IOEXP_HW_VERSION="??"
-	IOEXP_FW_VERSION=$(cat ${IOEXP_NODE}/fw_version 2>/dev/null) || IOEXP_FW_VERSION="??"
+	IOEXP_HW_VERSION=$(cat ${IOEXP_NODE}/hw_version 2>/dev/null | tr -d '\0') || IOEXP_HW_VERSION="??"
+	IOEXP_FW_VERSION=$(cat ${IOEXP_NODE}/fw_version 2>/dev/null | tr -d '\0') || IOEXP_FW_VERSION="??"
 	IOEXP_VERSION="HW_VERSION=${IOEXP_HW_VERSION}  FW_VERSION=${IOEXP_FW_VERSION}"
 fi
 
