@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Digi International.
+# Copyright (C) 2012-2018 Digi International.
 #
 SUMMARY = "Bluetooth packagegroup for DEY image"
 
@@ -10,7 +10,6 @@ MACHINE_BLUETOOTH_EXTRA_INSTALL ?= "${@bb.utils.contains('BLUEZ', 'bluez5', 'blu
 
 RDEPENDS_${PN} = " \
     ${BLUEZ} \
-    ${BLUEZ}-testtools \
     ${@bb.utils.contains('BLUEZ', 'bluez5', 'bluez5-noinst-tools bluez5-obex', '', d)} \
     ${MACHINE_BLUETOOTH_EXTRA_INSTALL} \
 "
