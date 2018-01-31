@@ -6,9 +6,9 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
 ---
  tools/env/Makefile   |  2 +-
- tools/env/ubootenv.c | 62 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tools/env/ubootenv.h | 46 ++++++++++++++++++++++++++++++++++++++
- 3 files changed, 109 insertions(+), 1 deletion(-)
+ tools/env/ubootenv.c | 66 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tools/env/ubootenv.h | 46 ++++++++++++++++++++++++++++++++++++
+ 3 files changed, 113 insertions(+), 1 deletion(-)
  create mode 100644 tools/env/ubootenv.c
  create mode 100644 tools/env/ubootenv.h
 
@@ -27,10 +27,10 @@ index c10ff66c7772..1d99e3b65dc6 100644
  
 diff --git a/tools/env/ubootenv.c b/tools/env/ubootenv.c
 new file mode 100644
-index 000000000000..836fcd14a67f
+index 000000000000..eb9ad5fce097
 --- /dev/null
 +++ b/tools/env/ubootenv.c
-@@ -0,0 +1,62 @@
+@@ -0,0 +1,66 @@
 +/*
 + * Copyright (c) 2017, Digi International Inc.
 + *
@@ -85,6 +85,10 @@ index 000000000000..836fcd14a67f
 +		goto err;
 +
 +	ret = fw_env_write(name, value);
++	if (ret)
++		goto err;
++
++	ret = fw_env_flush(NULL);
 +	if (ret)
 +		goto err;
 +
