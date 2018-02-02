@@ -1,16 +1,16 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013-2018 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
 SRC_URI += "file://0001-del-baudrates.patch \
             file://0002-ntpd-indefinitely-try-to-resolve-peer-addresses.patch \
-            file://suspend \
+            file://standby \
             file://busybox-ntpd \
             file://index.html \
             file://digi-logo.png \
             file://busybox-acpid \
             file://acpid.map \
-            file://pswitch-suspend \
+            file://pswitch-standby \
             file://pswitch-poweroff \
             file://busybox-static-nodes \
             file://bridgeifupdown \
@@ -29,7 +29,7 @@ INITSCRIPT_NAME_${PN}-ntpd = "busybox-ntpd"
 PACKAGES =+ "${PN}-acpid"
 FILES_${PN}-acpid = " ${sysconfdir}/init.d/busybox-acpid \
                        ${sysconfdir}/acpi/acpid.map \
-                       ${sysconfdir}/acpi/pswitch-suspend \
+                       ${sysconfdir}/acpi/pswitch-standby \
                        ${sysconfdir}/acpi/pswitch-poweroff \
 "
 INITSCRIPT_PACKAGES =+ "${PN}-acpid"
@@ -53,13 +53,15 @@ do_install_append() {
 		install -m 0644 ${WORKDIR}/index.html ${D}/srv/www/
 		install -m 0644 ${WORKDIR}/digi-logo.png ${D}/srv/www/
 	fi
-	# Install 'suspend' script
-	install -m 0755 ${WORKDIR}/suspend ${D}${base_bindir}
+	# Install 'standby' script
+	install -m 0755 ${WORKDIR}/standby ${D}${base_bindir}
+	# Create a symlink called suspend to maintain backward compatibility
+	ln -s standby ${D}${base_bindir}/suspend
 	if grep "CONFIG_ACPID=y" ${WORKDIR}/defconfig; then
 		install -m 0755 ${WORKDIR}/busybox-acpid ${D}${sysconfdir}/init.d/
 		install -d ${D}${sysconfdir}/acpi/
 		install -m 0755 ${WORKDIR}/acpid.map ${D}${sysconfdir}/acpi/
-		install -m 0755 ${WORKDIR}/pswitch-suspend ${D}${sysconfdir}/acpi/
+		install -m 0755 ${WORKDIR}/pswitch-standby ${D}${sysconfdir}/acpi/
 		install -m 0755 ${WORKDIR}/pswitch-poweroff ${D}${sysconfdir}/acpi/
 	fi
 	if grep "CONFIG_MAKEDEVS=y" ${WORKDIR}/defconfig; then

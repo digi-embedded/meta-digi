@@ -1,4 +1,0 @@
-#!/bin/sh
-
-logger -t acpid  "Power key suspend request."
-exec /bin/suspend

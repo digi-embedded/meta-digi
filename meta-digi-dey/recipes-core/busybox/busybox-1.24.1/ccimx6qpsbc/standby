@@ -1,9 +1,9 @@
 #!/bin/sh
 #===============================================================================
 #
-#  suspend
+#  standby
 #
-#  Copyright (C) 2009-2017 by Digi International Inc.
+#  Copyright (C) 2017,2018 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -15,7 +15,7 @@
 #
 #===============================================================================
 
-scriptname="$(basename ${0})"
+scriptname="$(basename $(readlink -f ${0}))"
 syspower="/sys/power/state"
 lockfile="/var/lock/${scriptname}.lock"
 lockfd="9"
@@ -40,7 +40,7 @@ suspend_interfaces() {
 		for i in $(sed -ne 's,^\(wlan[0-9]\)=.*,\1,g;T;p' /var/run/ifstate | sort -r); do
 			ifdown "${i}" && RESUME_IFACES="${RESUME_IFACES:+${RESUME_IFACES} }${i}"
 		done
-		grep -qs '^ath6kl_sdio' /proc/modules && rmmod ath6kl_sdio ath6kl_core
+		grep -qs '^wlan' /proc/modules && rmmod wlan
 	fi
 
 	# Suspend bluetooth interface
@@ -55,7 +55,7 @@ resume_interfaces() {
 	# Resume wireless interfaces
 	if [ -d "/proc/device-tree/wireless" ]; then
 		# Trigger wireless module loading event, and wait until the interface exists
-		udevadm trigger --action=add --attr-match="modalias=sdio:c00v0271d0301"
+		udevadm trigger --action=add --attr-match="modalias=sdio:c00v0271d050A"
 		timeout -t 5 sh -c "while [ ! -d /sys/class/net/wlan0 ]; do sleep .2; done" 2>/dev/null
 
 		# Bring up the interfaces that were bring down on suspend
@@ -64,6 +64,9 @@ resume_interfaces() {
 		done
 	fi
 
+	# Resume NetworkManager after suspend
+	${NM_DAEMON} start
+
 	# Resume bluetooth interface
 	if [ -d "/proc/device-tree/bluetooth" ]; then
 		if [ -n "${up_bt_on_resume}" ]; then
@@ -71,9 +74,6 @@ resume_interfaces() {
 			${BT_DAEMON} start >/dev/null
 		fi
 	fi
-
-	# Resume NetworkManager after suspend
-	${NM_DAEMON} start
 }
 
 enter_critical_section() {
@@ -106,7 +106,6 @@ if [ -f "${syspower}" ]; then
 
 	# Suspend the device
 	printf "mem" > ${syspower}
-	sleep .5
 
 	# Post-resume actions
 	resume_interfaces
