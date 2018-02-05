@@ -29,6 +29,7 @@ do_install_append() {
 }
 
 PACKAGES =+ "${PN}-init"
+PACKAGECONFIG_append = " health-profiles"
 
 FILES_${PN} += " ${sysconfdir}/bluetooth/main.conf"
 FILES_${PN}-init = "${sysconfdir}/init.d/bluetooth-init"
