@@ -26,7 +26,12 @@ MACHINE_EXTRA_RDEPENDS += " \
     parted \
     u-boot-fw-utils \
 "
-MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
-MACHINE_EXTRA_RRECOMMENDS += "imx-alsa-plugins cryptodev-module"
+
+MACHINE_EXTRA_RRECOMMENDS += " \
+    ${MACHINE_FIRMWARE} \
+    ${WIRELESS_MODULE} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
+    cryptodev-module \
+"
 
 MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth"

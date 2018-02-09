@@ -28,8 +28,14 @@ MACHINE_EXTRA_RDEPENDS += " \
     mtd-utils-ubifs \
     u-boot-fw-utils \
 "
-MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE} ${WIRELESS_MODULE}"
-MACHINE_EXTRA_RRECOMMENDS += "imx-alsa-plugins cryptodev-module cryptoauthlib"
+
+MACHINE_EXTRA_RRECOMMENDS += " \
+    ${MACHINE_FIRMWARE} \
+    ${WIRELESS_MODULE} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
+    cryptoauthlib \
+    cryptodev-module \
+"
 
 MACHINE_FEATURES += "wifi bluetooth"
 
