@@ -3,7 +3,7 @@ SUMMARY = "TrustFence signing and encryption scripts"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
 
-DEPENDS = "trustfence-cst-native coreutils-native"
+DEPENDS = "trustfence-cst coreutils util-linux"
 
 SRCBRANCH = "v2015.04/master"
 SRCREV = "${AUTOREV}"
