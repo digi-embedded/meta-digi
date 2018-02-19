@@ -1,0 +1,399 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Wed, 14 Feb 2018 17:30:49 +0100
+Subject: [PATCH 1/2] Port changes from the cryptoauth engine repo to the
+ library repo
+
+Incorporate makefiles to be able to build cryptoauthlib as well as the changes
+Digi has done in the atmel-cryptoauth-openssl-engine repo (except for
+our modifications in the HAL section, which are not needed anymore). Update
+package configuration version to 1.3, remove OpenSSL engine dependencies and
+fix an infinite recursion that happened when cleaning the project.
+
+https://jira.digi.com/browse/DEL-5591
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ Makefile                            | 32 +++++++++++++++++
+ Makefile.generic                    | 22 ++++++++++++
+ ecc-test-main.c                     | 71 +++++++++++++++++++++++++++++++++++++
+ lib/Makefile                        | 42 ++++++++++++++++++++++
+ lib/atca_cfgs.c                     | 16 +++++++--
+ lib/atcacert/Makefile               |  1 +
+ lib/basic/Makefile                  |  1 +
+ lib/crypto/Makefile                 |  1 +
+ lib/crypto/hashes/Makefile          |  1 +
+ lib/cryptoauthlib.pc                | 11 ++++++
+ lib/hal/Makefile                    |  1 +
+ lib/host/Makefile                   |  1 +
+ lib/jwt/Makefile                    |  1 +
+ lib/tls/Makefile                    |  1 +
+ test/Makefile                       | 15 ++++++++
+ test/atcacert/Makefile              |  1 +
+ test/jwt/Makefile                   |  1 +
+ test/sha-byte-test-vectors/Makefile |  1 +
+ test/tls/Makefile                   |  1 +
+ 19 files changed, 218 insertions(+), 3 deletions(-)
+ create mode 100644 Makefile
+ create mode 100644 Makefile.generic
+ create mode 100644 ecc-test-main.c
+ create mode 100644 lib/Makefile
+ create mode 100644 lib/atcacert/Makefile
+ create mode 100644 lib/basic/Makefile
+ create mode 100644 lib/crypto/Makefile
+ create mode 100644 lib/crypto/hashes/Makefile
+ create mode 100644 lib/cryptoauthlib.pc
+ create mode 100644 lib/hal/Makefile
+ create mode 100644 lib/host/Makefile
+ create mode 100644 lib/jwt/Makefile
+ create mode 100644 lib/tls/Makefile
+ create mode 100644 test/Makefile
+ create mode 100644 test/atcacert/Makefile
+ create mode 100644 test/jwt/Makefile
+ create mode 100644 test/sha-byte-test-vectors/Makefile
+ create mode 100644 test/tls/Makefile
+
+diff --git a/Makefile b/Makefile
+new file mode 100644
+index 0000000..a471428
+--- /dev/null
++++ b/Makefile
+@@ -0,0 +1,32 @@
++CWD:=	$(shell pwd)
++CFLAGS+= -I. -I../.. -fPIC -g -O0
++SRC:=	$(wildcard *.c)
++export CFLAGS
++
++SUBDIRS=	lib test
++
++.PHONY:	tgt_lib tgt_test clean
++
++all:	tgt_lib tgt_test ecc-test
++
++%.o: %.c
++	$(CC) $(CFLAGS) -o $@ -c $<
++
++tgt_lib:
++	make -w -C lib
++
++tgt_test:
++	make -w -C test
++
++ecc-test: tgt_lib tgt_test
++	$(CC) -c ecc-test-main.c $(CFLAGS) $(LDFLAGS) -I ./lib/ -I ./test/
++	$(CC) -o ecc-test-main ecc-test-main.o $(LDFLAGS) test/tls/atcatls_tests.o -L lib -L test -lm -lc -lrt -lcryptoauth -lunity
++
++install:
++	for a in $(SUBDIRS); do $(MAKE) -C $$a $@; done
++	install -d $(DESTDIR)/usr/bin
++	install -m 0755 ecc-test-main $(DESTDIR)/usr/bin/
++
++clean:
++	rm -f *.o *.a ecc-test-main
++	$(foreach subdir,$(basename $(SUBDIRS)),$(MAKE) -w -C $(subdir) clean;)
+diff --git a/Makefile.generic b/Makefile.generic
+new file mode 100644
+index 0000000..f6a0d67
+--- /dev/null
++++ b/Makefile.generic
+@@ -0,0 +1,22 @@
++CWD:=	$(shell pwd)
++CFLAGS+=	-I. -I.. -I../.. -I../../.. -I../../../.. -I../../lib -I../lib -fPIC -g -O0 -DATCA_HAL_I2C -DATCAPRINTF
++SRC:=	$(wildcard *.c)
++export CFLAGS
++
++DIRECTORIES=	$(shell find . -maxdepth 1 ! -path . -type d)
++SUBDIRS=	$(DIRECTORIES)
++
++.PHONY:	clean tgt_local
++
++MODULES=	$(patsubst %.c,%.o,$(SRC))
++
++all:	$(MODULES) tgt_local
++	$(foreach subdir,$(basename $(SUBDIRS)),$(MAKE) -w -C $(subdir);)
++
++%.o: %.c
++	$(CC) $(CFLAGS) -o $@ -c $<
++
++clean:
++	rm -f *.o *.a
++	$(foreach subdir,$(basename $(SUBDIRS)),$(MAKE) -w -C $(subdir) clean;)
++
+diff --git a/ecc-test-main.c b/ecc-test-main.c
+new file mode 100644
+index 0000000..032bc4b
+--- /dev/null
++++ b/ecc-test-main.c
+@@ -0,0 +1,71 @@
++/** \file ecc-test-main.c
++ * \brief Used to launch CryptoAuthLib tests for TLS
++ *
++ * Copyright (c) 2015 Atmel Corporation. All rights reserved.
++ *
++ * \atmel_crypto_device_library_license_start
++ *
++ * \page License
++ *  
++ * Redistribution and use in source and binary forms, with or without 
++ * modification, are permitted provided that the following conditions are met:
++ * 
++ * 1. Redistributions of source code must retain the above copyright notice, 
++ *    this list of conditions and the following disclaimer.
++ * 
++ * 2. Redistributions in binary form must reproduce the above copyright notice, 
++ *    this list of conditions and the following disclaimer in the documentation 
++ *    and/or other materials provided with the distribution.
++ * 
++ * 3. Neither the name of Atmel nor the names of its contributors may be used to endorse 
++ *    or promote products derived from this software without specific prior written permission.  
++ * 
++ * 4. This software may only be redistributed and used in connection with an 
++ *    Atmel integrated circuit.
++ * 
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE 
++ * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
++ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
++ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
++ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++*/
++
++//#include "ssl.h"
++#include <stdio.h>
++#include <string.h>
++#include <stdint.h>
++#include <cryptoauthlib.h>
++#include <tls/atcatls_tests.h>
++
++#define ATCA_HAL_I2C
++
++// Get a pointer to the default configuration based on the compiler switch
++#ifdef ATCA_HAL_KIT_CDC
++ATCAIfaceCfg* pCfg = &cfg_ecc508_kitcdc_default;
++#elif defined(ATCA_HAL_KIT_HID)
++ATCAIfaceCfg* pCfg = &cfg_ecc508_kithid_default;
++#elif defined(ATCA_HAL_I2C)
++ATCAIfaceCfg* pCfg = &cfg_ateccx08a_i2c_default;
++#endif
++
++
++/** \brief Main function for running ATECC508 tests.
++ * Use this test program to ensure that the Engine can communicate to your ATECC508 
++ *
++ * \return For success return 0
++ */
++int main()
++{
++	uint8_t		runTests = true;
++
++	if (runTests)
++	{
++		atcatls_test_runner(pCfg);
++	}
++	return 0;
++}
+diff --git a/lib/Makefile b/lib/Makefile
+new file mode 100644
+index 0000000..1e22faa
+--- /dev/null
++++ b/lib/Makefile
+@@ -0,0 +1,42 @@
++CWD:=$(shell pwd)
++SRC:=$(wildcard *.c)
++
++DIRECTORIES=$(shell find . -maxdepth 1 ! -path . -type d)
++SUBDIRS=$(DIRECTORIES)
++
++.PHONY:	clean
++
++MODULES=$(patsubst %.c,%.o,$(SRC))
++#O_FILES=$(shell find . -name \*.o)
++O_FILES=$(wildcard **/**/*.o)
++O_FILES+=$(wildcard **/*.o)
++LIBNAME=libcryptoauth
++
++INCLUDE_PATH = "$(DESTDIR)/usr/include/cryptoauthlib"
++
++all:	$(MODULES)
++	- $(foreach subdir,$(basename $(SUBDIRS)),$(shell make -w -C $(subdir)))
++	@echo "OFILES: $(O_FILES)"
++	$(AR) -r $(LIBNAME).a $(MODULES) $(O_FILES)
++	$(RANLIB) $(LIBNAME).a
++
++.PHONY: install
++install: $(LIBNAME).a
++	install -d $(DESTDIR)/usr/lib/pkgconfig
++	install -m 0644 $(LIBNAME).a $(DESTDIR)/usr/lib/
++	install -m 0644 cryptoauthlib.pc $(DESTDIR)/usr/lib/pkgconfig/	
++
++	install -d $(INCLUDE_PATH)/atcacert $(INCLUDE_PATH)/basic $(INCLUDE_PATH)/hal $(INCLUDE_PATH)/tls
++	install -m 0644 atcacert/*.h $(INCLUDE_PATH)/atcacert
++	install -m 0644 basic/*.h $(INCLUDE_PATH)/basic
++	install -m 0644 hal/*.h $(INCLUDE_PATH)/hal
++	install -m 0644 tls/*.h $(INCLUDE_PATH)/tls
++	install -m 0644 *.h $(INCLUDE_PATH)
++
++%.o: %.c
++	$(CC) $(CFLAGS) -o $@ -c $<
++
++clean:
++	rm -f *.o *.a
++	$(foreach subdir,$(basename $(SUBDIRS)),$(MAKE) -w -C $(subdir) clean;)
++
+diff --git a/lib/atca_cfgs.c b/lib/atca_cfgs.c
+index b8de8e8..4cbd305 100644
+--- a/lib/atca_cfgs.c
++++ b/lib/atca_cfgs.c
+@@ -40,14 +40,24 @@
+ 
+ /* if the number of these configurations grows large, we can #ifdef them based on required device support */
+ 
++/* Default I2C configuration */
++#ifndef ATCA_HAL_I2C_BUS
++#define ATCA_HAL_I2C_BUS 0
++#warning "Using default value for ATCA_HAL_I2C_BUS: 0"
++#endif
++
++#ifndef ATCA_HAL_I2C_SPEED
++#define ATCA_HAL_I2C_SPEED 400000
++#warning "Using default value for ATCA_HAL_I2C_SPEED: 400000"
++#endif
++
+ /** \brief default configuration for an ECCx08A device */
+ ATCAIfaceCfg cfg_ateccx08a_i2c_default = {
+     .iface_type             = ATCA_I2C_IFACE,
+     .devtype                = ATECC508A,
+     .atcai2c.slave_address  = 0xC0,
+-    .atcai2c.bus            = 2,
+-    .atcai2c.baud           = 400000,
+-    //.atcai2c.baud = 100000,
++    .atcai2c.bus            = ATCA_HAL_I2C_BUS,
++    .atcai2c.baud           = ATCA_HAL_I2C_SPEED,
+     .wake_delay             = 1500,
+     .rx_retries             = 20
+ };
+diff --git a/lib/atcacert/Makefile b/lib/atcacert/Makefile
+new file mode 100644
+index 0000000..aa3e016
+--- /dev/null
++++ b/lib/atcacert/Makefile
+@@ -0,0 +1 @@
++include ../../Makefile.generic
+diff --git a/lib/basic/Makefile b/lib/basic/Makefile
+new file mode 100644
+index 0000000..aa3e016
+--- /dev/null
++++ b/lib/basic/Makefile
+@@ -0,0 +1 @@
++include ../../Makefile.generic
+diff --git a/lib/crypto/Makefile b/lib/crypto/Makefile
+new file mode 100644
+index 0000000..aa3e016
+--- /dev/null
++++ b/lib/crypto/Makefile
+@@ -0,0 +1 @@
++include ../../Makefile.generic
+diff --git a/lib/crypto/hashes/Makefile b/lib/crypto/hashes/Makefile
+new file mode 100644
+index 0000000..0356cb8
+--- /dev/null
++++ b/lib/crypto/hashes/Makefile
+@@ -0,0 +1 @@
++include ../../../Makefile.generic
+diff --git a/lib/cryptoauthlib.pc b/lib/cryptoauthlib.pc
+new file mode 100644
+index 0000000..001a02c
+--- /dev/null
++++ b/lib/cryptoauthlib.pc
+@@ -0,0 +1,11 @@
++prefix=/usr
++exec_prefix=${prefix}
++libdir=${exec_prefix}/lib
++includedir=${prefix}/include
++
++Name: cryptoauthlib
++Description: Atmel Cryptochip library for ATECC508A
++Version:1.3
++
++Libs: -L${libdir} -lcryptoauth
++Cflags: -I${includedir} -I${includedir}/cryptoauthlib -I${includedir}/cryptoauthlib/tls
+diff --git a/lib/hal/Makefile b/lib/hal/Makefile
+new file mode 100644
+index 0000000..aa3e016
+--- /dev/null
++++ b/lib/hal/Makefile
+@@ -0,0 +1 @@
++include ../../Makefile.generic
+diff --git a/lib/host/Makefile b/lib/host/Makefile
+new file mode 100644
+index 0000000..aa3e016
+--- /dev/null
++++ b/lib/host/Makefile
+@@ -0,0 +1 @@
++include ../../Makefile.generic
+diff --git a/lib/jwt/Makefile b/lib/jwt/Makefile
+new file mode 100644
+index 0000000..aa3e016
+--- /dev/null
++++ b/lib/jwt/Makefile
+@@ -0,0 +1 @@
++include ../../Makefile.generic
+diff --git a/lib/tls/Makefile b/lib/tls/Makefile
+new file mode 100644
+index 0000000..aa3e016
+--- /dev/null
++++ b/lib/tls/Makefile
+@@ -0,0 +1 @@
++include ../../Makefile.generic
+diff --git a/test/Makefile b/test/Makefile
+new file mode 100644
+index 0000000..5de9ef4
+--- /dev/null
++++ b/test/Makefile
+@@ -0,0 +1,15 @@
++LIBNAME=        libunity
++LIB=            $(LIBNAME).a
++AR+=            r
++
++include ../Makefile.generic
++
++tgt_local:
++	$(CC) -o unity.o -c unity.c
++	$(AR) $(LIB) unity.o
++
++ecc-test: tgt_local
++	$(CC) -c ecc-test-main.c $(CFLAGS) -I. -I..
++	$(CC) -o ecc-test-main ecc-test-main.o ../test/tls/atcatls_tests.o -Lcryptoauthlib/lib -lcryptoauth  -Lcryptoauthlib/test -lunity -lm -lc -lrt
++
++install: ;
+diff --git a/test/atcacert/Makefile b/test/atcacert/Makefile
+new file mode 100644
+index 0000000..aa3e016
+--- /dev/null
++++ b/test/atcacert/Makefile
+@@ -0,0 +1 @@
++include ../../Makefile.generic
+diff --git a/test/jwt/Makefile b/test/jwt/Makefile
+new file mode 100644
+index 0000000..aa3e016
+--- /dev/null
++++ b/test/jwt/Makefile
+@@ -0,0 +1 @@
++include ../../Makefile.generic
+diff --git a/test/sha-byte-test-vectors/Makefile b/test/sha-byte-test-vectors/Makefile
+new file mode 100644
+index 0000000..78d2455
+--- /dev/null
++++ b/test/sha-byte-test-vectors/Makefile
+@@ -0,0 +1 @@
++empty_target: ;
+diff --git a/test/tls/Makefile b/test/tls/Makefile
+new file mode 100644
+index 0000000..aa3e016
+--- /dev/null
++++ b/test/tls/Makefile
+@@ -0,0 +1 @@
++include ../../Makefile.generic
