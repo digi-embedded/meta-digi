@@ -51,7 +51,7 @@ setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6qpsbc.ex
 
 # Check for presence of firmware files on the SD card
 for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do
-	if test ! -e mmc ${INSTALL_MMCDEV}:1 ${install_f}; then
+	if test ! -e mmc ${INSTALL_MMCDEV} ${install_f}; then
 		echo "ERROR: Could not find file ${install_f}";
 		install_abort=1;
 	fi;
