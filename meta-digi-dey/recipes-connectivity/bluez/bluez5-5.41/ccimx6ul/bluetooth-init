@@ -73,9 +73,17 @@ bluetooth_init() {
 		killproc hciattach
 		powercycle_gpio "${BT_EN_QCA_GPIO_NR}"
 		if hciattach ttyBt qca ${BT_RATE:-3000000} -t30 ${BT_FLOW:-flow} unused ${BT_MACADDR} >${HCIATTACH_LOG} 2>&1; then
-			return
+			# hciattach performs a reset to load the new firmware and needs some time to be ready
+			sleep 1
+			# Verify if firmware was loaded successfully
+			bdaddr >/dev/null 2>&1 && return
 		fi
 		sleep 1
+
+		if [ $RETRY -ge 3 ]; then
+			# Retry at default firmware baudrate
+			BT_RATE="115200"
+		fi
 	done
 	BT_ERROR="FAIL (hciattach)"
 }
