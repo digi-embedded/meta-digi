@@ -19,6 +19,8 @@ SRC_URI = "${CC_GIT_URI};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git/cryptochip-get-random"
 
+inherit pkgconfig
+
 do_install() {
 	oe_runmake DESTDIR=${D} install
 }
