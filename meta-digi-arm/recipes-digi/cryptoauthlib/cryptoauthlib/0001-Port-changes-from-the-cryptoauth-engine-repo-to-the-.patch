@@ -12,11 +12,12 @@ fix an infinite recursion that happened when cleaning the project.
 https://jira.digi.com/browse/DEL-5591
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
 ---
  Makefile                            | 32 +++++++++++++++++
  Makefile.generic                    | 22 ++++++++++++
  ecc-test-main.c                     | 71 +++++++++++++++++++++++++++++++++++++
- lib/Makefile                        | 42 ++++++++++++++++++++++
+ lib/Makefile                        | 46 ++++++++++++++++++++++++
  lib/atca_cfgs.c                     | 16 +++++++--
  lib/atcacert/Makefile               |  1 +
  lib/basic/Makefile                  |  1 +
@@ -32,7 +33,7 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  test/jwt/Makefile                   |  1 +
  test/sha-byte-test-vectors/Makefile |  1 +
  test/tls/Makefile                   |  1 +
- 19 files changed, 218 insertions(+), 3 deletions(-)
+ 19 files changed, 222 insertions(+), 3 deletions(-)
  create mode 100644 Makefile
  create mode 100644 Makefile.generic
  create mode 100644 ecc-test-main.c
@@ -54,7 +55,7 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 
 diff --git a/Makefile b/Makefile
 new file mode 100644
-index 0000000..a471428
+index 000000000000..a471428ad12c
 --- /dev/null
 +++ b/Makefile
 @@ -0,0 +1,32 @@
@@ -92,7 +93,7 @@ index 0000000..a471428
 +	$(foreach subdir,$(basename $(SUBDIRS)),$(MAKE) -w -C $(subdir) clean;)
 diff --git a/Makefile.generic b/Makefile.generic
 new file mode 100644
-index 0000000..f6a0d67
+index 000000000000..f6a0d67c708c
 --- /dev/null
 +++ b/Makefile.generic
 @@ -0,0 +1,22 @@
@@ -120,7 +121,7 @@ index 0000000..f6a0d67
 +
 diff --git a/ecc-test-main.c b/ecc-test-main.c
 new file mode 100644
-index 0000000..032bc4b
+index 000000000000..032bc4bc2b5a
 --- /dev/null
 +++ b/ecc-test-main.c
 @@ -0,0 +1,71 @@
@@ -197,10 +198,10 @@ index 0000000..032bc4b
 +}
 diff --git a/lib/Makefile b/lib/Makefile
 new file mode 100644
-index 0000000..1e22faa
+index 000000000000..e8c89380a43c
 --- /dev/null
 +++ b/lib/Makefile
-@@ -0,0 +1,42 @@
+@@ -0,0 +1,46 @@
 +CWD:=$(shell pwd)
 +SRC:=$(wildcard *.c)
 +
@@ -236,6 +237,10 @@ index 0000000..1e22faa
 +	install -m 0644 tls/*.h $(INCLUDE_PATH)/tls
 +	install -m 0644 *.h $(INCLUDE_PATH)
 +
++	install -d $(INCLUDE_PATH)/crypto/hashes
++	install -m 0644 crypto/*.h $(INCLUDE_PATH)/crypto
++	install -m 0644 crypto/hashes/*.h $(INCLUDE_PATH)/crypto/hashes
++
 +%.o: %.c
 +	$(CC) $(CFLAGS) -o $@ -c $<
 +
@@ -244,7 +249,7 @@ index 0000000..1e22faa
 +	$(foreach subdir,$(basename $(SUBDIRS)),$(MAKE) -w -C $(subdir) clean;)
 +
 diff --git a/lib/atca_cfgs.c b/lib/atca_cfgs.c
-index b8de8e8..4cbd305 100644
+index b8de8e8ede7f..4cbd305724d4 100644
 --- a/lib/atca_cfgs.c
 +++ b/lib/atca_cfgs.c
 @@ -40,14 +40,24 @@
@@ -277,35 +282,35 @@ index b8de8e8..4cbd305 100644
  };
 diff --git a/lib/atcacert/Makefile b/lib/atcacert/Makefile
 new file mode 100644
-index 0000000..aa3e016
+index 000000000000..aa3e01644e15
 --- /dev/null
 +++ b/lib/atcacert/Makefile
 @@ -0,0 +1 @@
 +include ../../Makefile.generic
 diff --git a/lib/basic/Makefile b/lib/basic/Makefile
 new file mode 100644
-index 0000000..aa3e016
+index 000000000000..aa3e01644e15
 --- /dev/null
 +++ b/lib/basic/Makefile
 @@ -0,0 +1 @@
 +include ../../Makefile.generic
 diff --git a/lib/crypto/Makefile b/lib/crypto/Makefile
 new file mode 100644
-index 0000000..aa3e016
+index 000000000000..aa3e01644e15
 --- /dev/null
 +++ b/lib/crypto/Makefile
 @@ -0,0 +1 @@
 +include ../../Makefile.generic
 diff --git a/lib/crypto/hashes/Makefile b/lib/crypto/hashes/Makefile
 new file mode 100644
-index 0000000..0356cb8
+index 000000000000..0356cb8c0cd5
 --- /dev/null
 +++ b/lib/crypto/hashes/Makefile
 @@ -0,0 +1 @@
 +include ../../../Makefile.generic
 diff --git a/lib/cryptoauthlib.pc b/lib/cryptoauthlib.pc
 new file mode 100644
-index 0000000..001a02c
+index 000000000000..001a02c1c341
 --- /dev/null
 +++ b/lib/cryptoauthlib.pc
 @@ -0,0 +1,11 @@
@@ -322,35 +327,35 @@ index 0000000..001a02c
 +Cflags: -I${includedir} -I${includedir}/cryptoauthlib -I${includedir}/cryptoauthlib/tls
 diff --git a/lib/hal/Makefile b/lib/hal/Makefile
 new file mode 100644
-index 0000000..aa3e016
+index 000000000000..aa3e01644e15
 --- /dev/null
 +++ b/lib/hal/Makefile
 @@ -0,0 +1 @@
 +include ../../Makefile.generic
 diff --git a/lib/host/Makefile b/lib/host/Makefile
 new file mode 100644
-index 0000000..aa3e016
+index 000000000000..aa3e01644e15
 --- /dev/null
 +++ b/lib/host/Makefile
 @@ -0,0 +1 @@
 +include ../../Makefile.generic
 diff --git a/lib/jwt/Makefile b/lib/jwt/Makefile
 new file mode 100644
-index 0000000..aa3e016
+index 000000000000..aa3e01644e15
 --- /dev/null
 +++ b/lib/jwt/Makefile
 @@ -0,0 +1 @@
 +include ../../Makefile.generic
 diff --git a/lib/tls/Makefile b/lib/tls/Makefile
 new file mode 100644
-index 0000000..aa3e016
+index 000000000000..aa3e01644e15
 --- /dev/null
 +++ b/lib/tls/Makefile
 @@ -0,0 +1 @@
 +include ../../Makefile.generic
 diff --git a/test/Makefile b/test/Makefile
 new file mode 100644
-index 0000000..5de9ef4
+index 000000000000..5de9ef42a46b
 --- /dev/null
 +++ b/test/Makefile
 @@ -0,0 +1,15 @@
@@ -371,28 +376,28 @@ index 0000000..5de9ef4
 +install: ;
 diff --git a/test/atcacert/Makefile b/test/atcacert/Makefile
 new file mode 100644
-index 0000000..aa3e016
+index 000000000000..aa3e01644e15
 --- /dev/null
 +++ b/test/atcacert/Makefile
 @@ -0,0 +1 @@
 +include ../../Makefile.generic
 diff --git a/test/jwt/Makefile b/test/jwt/Makefile
 new file mode 100644
-index 0000000..aa3e016
+index 000000000000..aa3e01644e15
 --- /dev/null
 +++ b/test/jwt/Makefile
 @@ -0,0 +1 @@
 +include ../../Makefile.generic
 diff --git a/test/sha-byte-test-vectors/Makefile b/test/sha-byte-test-vectors/Makefile
 new file mode 100644
-index 0000000..78d2455
+index 000000000000..78d24559879f
 --- /dev/null
 +++ b/test/sha-byte-test-vectors/Makefile
 @@ -0,0 +1 @@
 +empty_target: ;
 diff --git a/test/tls/Makefile b/test/tls/Makefile
 new file mode 100644
-index 0000000..aa3e016
+index 000000000000..aa3e01644e15
 --- /dev/null
 +++ b/test/tls/Makefile
 @@ -0,0 +1 @@

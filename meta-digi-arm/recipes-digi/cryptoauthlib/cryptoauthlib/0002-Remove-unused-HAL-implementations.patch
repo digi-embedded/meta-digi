@@ -129,7 +129,7 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 
 diff --git a/lib/hal/hal_at90usb1287_i2c_asf.c b/lib/hal/hal_at90usb1287_i2c_asf.c
 deleted file mode 100644
-index 878d82e..0000000
+index 878d82e48470..000000000000
 --- a/lib/hal/hal_at90usb1287_i2c_asf.c
 +++ /dev/null
 @@ -1,520 +0,0 @@
@@ -655,7 +655,7 @@ index 878d82e..0000000
 -/** @} */
 diff --git a/lib/hal/hal_at90usb1287_i2c_asf.h b/lib/hal/hal_at90usb1287_i2c_asf.h
 deleted file mode 100644
-index 82ef65e..0000000
+index 82ef65e314e7..000000000000
 --- a/lib/hal/hal_at90usb1287_i2c_asf.h
 +++ /dev/null
 @@ -1,64 +0,0 @@
@@ -726,7 +726,7 @@ index 82ef65e..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_at90usb1287_timer_asf.c b/lib/hal/hal_at90usb1287_timer_asf.c
 deleted file mode 100644
-index bd6260f..0000000
+index bd6260f5b11a..000000000000
 --- a/lib/hal/hal_at90usb1287_timer_asf.c
 +++ /dev/null
 @@ -1,79 +0,0 @@
@@ -811,7 +811,7 @@ index bd6260f..0000000
 -/** @} */
 diff --git a/lib/hal/hal_i2c_bitbang.c b/lib/hal/hal_i2c_bitbang.c
 deleted file mode 100644
-index d25cc98..0000000
+index d25cc9887e03..000000000000
 --- a/lib/hal/hal_i2c_bitbang.c
 +++ /dev/null
 @@ -1,518 +0,0 @@
@@ -1336,7 +1336,7 @@ index d25cc98..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_i2c_bitbang.h b/lib/hal/hal_i2c_bitbang.h
 deleted file mode 100644
-index 02b33f8..0000000
+index 02b33f83babf..000000000000
 --- a/lib/hal/hal_i2c_bitbang.h
 +++ /dev/null
 @@ -1,78 +0,0 @@
@@ -1421,7 +1421,7 @@ index 02b33f8..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_linux_kit_cdc.c b/lib/hal/hal_linux_kit_cdc.c
 deleted file mode 100644
-index 232cefc..0000000
+index 232cefc93b97..000000000000
 --- a/lib/hal/hal_linux_kit_cdc.c
 +++ /dev/null
 @@ -1,428 +0,0 @@
@@ -1855,7 +1855,7 @@ index 232cefc..0000000
 -/** @} */
 diff --git a/lib/hal/hal_linux_kit_cdc.h b/lib/hal/hal_linux_kit_cdc.h
 deleted file mode 100644
-index c0dcf4a..0000000
+index c0dcf4ab9801..000000000000
 --- a/lib/hal/hal_linux_kit_cdc.h
 +++ /dev/null
 @@ -1,67 +0,0 @@
@@ -1928,7 +1928,7 @@ index c0dcf4a..0000000
 -
 diff --git a/lib/hal/hal_linux_kit_hid.c b/lib/hal/hal_linux_kit_hid.c
 deleted file mode 100644
-index 960d18c..0000000
+index 960d18c7ddea..000000000000
 --- a/lib/hal/hal_linux_kit_hid.c
 +++ /dev/null
 @@ -1,429 +0,0 @@
@@ -2363,7 +2363,7 @@ index 960d18c..0000000
 -/** @} */
 diff --git a/lib/hal/hal_linux_kit_hid.h b/lib/hal/hal_linux_kit_hid.h
 deleted file mode 100644
-index 649aab5..0000000
+index 649aab556668..000000000000
 --- a/lib/hal/hal_linux_kit_hid.h
 +++ /dev/null
 @@ -1,62 +0,0 @@
@@ -2431,7 +2431,7 @@ index 649aab5..0000000
 -#endif /* HAL_LINUX_KIT_HID_H_ */
 diff --git a/lib/hal/hal_pic32mx695f512h_i2c.c b/lib/hal/hal_pic32mx695f512h_i2c.c
 deleted file mode 100644
-index 730d782..0000000
+index 730d782d7e51..000000000000
 --- a/lib/hal/hal_pic32mx695f512h_i2c.c
 +++ /dev/null
 @@ -1,510 +0,0 @@
@@ -2948,7 +2948,7 @@ index 730d782..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_pic32mx695f512h_i2c.h b/lib/hal/hal_pic32mx695f512h_i2c.h
 deleted file mode 100644
-index 1b24216..0000000
+index 1b242168b43d..000000000000
 --- a/lib/hal/hal_pic32mx695f512h_i2c.h
 +++ /dev/null
 @@ -1,74 +0,0 @@
@@ -3029,7 +3029,7 @@ index 1b24216..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_pic32mx695f512h_timer.c b/lib/hal/hal_pic32mx695f512h_timer.c
 deleted file mode 100644
-index b4963d2..0000000
+index b4963d2d31a8..000000000000
 --- a/lib/hal/hal_pic32mx695f512h_timer.c
 +++ /dev/null
 @@ -1,106 +0,0 @@
@@ -3142,7 +3142,7 @@ index b4963d2..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_sam4s_i2c_asf.c b/lib/hal/hal_sam4s_i2c_asf.c
 deleted file mode 100644
-index 619de4d..0000000
+index 619de4d1b6a4..000000000000
 --- a/lib/hal/hal_sam4s_i2c_asf.c
 +++ /dev/null
 @@ -1,667 +0,0 @@
@@ -3815,7 +3815,7 @@ index 619de4d..0000000
 -/** @} */
 diff --git a/lib/hal/hal_sam4s_i2c_asf.h b/lib/hal/hal_sam4s_i2c_asf.h
 deleted file mode 100644
-index dea016a..0000000
+index dea016a08be9..000000000000
 --- a/lib/hal/hal_sam4s_i2c_asf.h
 +++ /dev/null
 @@ -1,67 +0,0 @@
@@ -3889,7 +3889,7 @@ index dea016a..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_sam4s_timer_asf.c b/lib/hal/hal_sam4s_timer_asf.c
 deleted file mode 100644
-index c3c937c..0000000
+index c3c937c25252..000000000000
 --- a/lib/hal/hal_sam4s_timer_asf.c
 +++ /dev/null
 @@ -1,86 +0,0 @@
@@ -3981,7 +3981,7 @@ index c3c937c..0000000
 -/** @} */
 diff --git a/lib/hal/hal_samb11_i2c_asf.c b/lib/hal/hal_samb11_i2c_asf.c
 deleted file mode 100644
-index aa12364..0000000
+index aa12364e62c7..000000000000
 --- a/lib/hal/hal_samb11_i2c_asf.c
 +++ /dev/null
 @@ -1,485 +0,0 @@
@@ -4472,7 +4472,7 @@ index aa12364..0000000
 -/** @} */
 diff --git a/lib/hal/hal_samb11_i2c_asf.h b/lib/hal/hal_samb11_i2c_asf.h
 deleted file mode 100644
-index 0c2243a..0000000
+index 0c2243a3c703..000000000000
 --- a/lib/hal/hal_samb11_i2c_asf.h
 +++ /dev/null
 @@ -1,60 +0,0 @@
@@ -4539,7 +4539,7 @@ index 0c2243a..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_samb11_timer_asf.c b/lib/hal/hal_samb11_timer_asf.c
 deleted file mode 100644
-index dd0a21f..0000000
+index dd0a21fea7ee..000000000000
 --- a/lib/hal/hal_samb11_timer_asf.c
 +++ /dev/null
 @@ -1,78 +0,0 @@
@@ -4623,7 +4623,7 @@ index dd0a21f..0000000
 -/** @} */
 diff --git a/lib/hal/hal_samd21_i2c_asf.c b/lib/hal/hal_samd21_i2c_asf.c
 deleted file mode 100644
-index 841a1fb..0000000
+index 841a1fb9125e..000000000000
 --- a/lib/hal/hal_samd21_i2c_asf.c
 +++ /dev/null
 @@ -1,572 +0,0 @@
@@ -5201,7 +5201,7 @@ index 841a1fb..0000000
 -/** @} */
 diff --git a/lib/hal/hal_samd21_i2c_asf.h b/lib/hal/hal_samd21_i2c_asf.h
 deleted file mode 100644
-index b8ff14d..0000000
+index b8ff14d0123d..000000000000
 --- a/lib/hal/hal_samd21_i2c_asf.h
 +++ /dev/null
 @@ -1,63 +0,0 @@
@@ -5271,7 +5271,7 @@ index b8ff14d..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_samd21_i2c_start.c b/lib/hal/hal_samd21_i2c_start.c
 deleted file mode 100644
-index 5bade07..0000000
+index 5bade0768ef0..000000000000
 --- a/lib/hal/hal_samd21_i2c_start.c
 +++ /dev/null
 @@ -1,545 +0,0 @@
@@ -5822,7 +5822,7 @@ index 5bade07..0000000
 -/** @} */
 diff --git a/lib/hal/hal_samd21_i2c_start.h b/lib/hal/hal_samd21_i2c_start.h
 deleted file mode 100644
-index 08a5009..0000000
+index 08a50093dd9a..000000000000
 --- a/lib/hal/hal_samd21_i2c_start.h
 +++ /dev/null
 @@ -1,64 +0,0 @@
@@ -5892,7 +5892,7 @@ index 08a5009..0000000
 -#endif /* HAL_SAMD21_I2C_START_H_ */
 diff --git a/lib/hal/hal_samd21_timer_asf.c b/lib/hal/hal_samd21_timer_asf.c
 deleted file mode 100644
-index ba191e4..0000000
+index ba191e400f3c..000000000000
 --- a/lib/hal/hal_samd21_timer_asf.c
 +++ /dev/null
 @@ -1,79 +0,0 @@
@@ -5977,7 +5977,7 @@ index ba191e4..0000000
 -/** @} */
 diff --git a/lib/hal/hal_samd21_timer_start.c b/lib/hal/hal_samd21_timer_start.c
 deleted file mode 100644
-index 1204331..0000000
+index 1204331466ab..000000000000
 --- a/lib/hal/hal_samd21_timer_start.c
 +++ /dev/null
 @@ -1,80 +0,0 @@
@@ -6063,7 +6063,7 @@ index 1204331..0000000
 -/** @} */
 diff --git a/lib/hal/hal_samg55_i2c_asf.c b/lib/hal/hal_samg55_i2c_asf.c
 deleted file mode 100644
-index 37a7ddd..0000000
+index 37a7ddd9348d..000000000000
 --- a/lib/hal/hal_samg55_i2c_asf.c
 +++ /dev/null
 @@ -1,661 +0,0 @@
@@ -6730,7 +6730,7 @@ index 37a7ddd..0000000
 -/** @} */
 diff --git a/lib/hal/hal_samg55_i2c_asf.h b/lib/hal/hal_samg55_i2c_asf.h
 deleted file mode 100644
-index a3c545c..0000000
+index a3c545c72d43..000000000000
 --- a/lib/hal/hal_samg55_i2c_asf.h
 +++ /dev/null
 @@ -1,67 +0,0 @@
@@ -6804,7 +6804,7 @@ index a3c545c..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_samg55_timer_asf.c b/lib/hal/hal_samg55_timer_asf.c
 deleted file mode 100644
-index 6b5a27c..0000000
+index 6b5a27ce1dbf..000000000000
 --- a/lib/hal/hal_samg55_timer_asf.c
 +++ /dev/null
 @@ -1,86 +0,0 @@
@@ -6896,7 +6896,7 @@ index 6b5a27c..0000000
 -/** @} */
 diff --git a/lib/hal/hal_samv71_i2c_asf.c b/lib/hal/hal_samv71_i2c_asf.c
 deleted file mode 100644
-index 7da3880..0000000
+index 7da38807d998..000000000000
 --- a/lib/hal/hal_samv71_i2c_asf.c
 +++ /dev/null
 @@ -1,583 +0,0 @@
@@ -7485,7 +7485,7 @@ index 7da3880..0000000
 -/** @} */
 diff --git a/lib/hal/hal_samv71_i2c_asf.h b/lib/hal/hal_samv71_i2c_asf.h
 deleted file mode 100644
-index 7efcb52..0000000
+index 7efcb52b8b17..000000000000
 --- a/lib/hal/hal_samv71_i2c_asf.h
 +++ /dev/null
 @@ -1,63 +0,0 @@
@@ -7555,7 +7555,7 @@ index 7efcb52..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_samv71_timer_asf.c b/lib/hal/hal_samv71_timer_asf.c
 deleted file mode 100644
-index 1090a2d..0000000
+index 1090a2d26f70..000000000000
 --- a/lib/hal/hal_samv71_timer_asf.c
 +++ /dev/null
 @@ -1,79 +0,0 @@
@@ -7640,7 +7640,7 @@ index 1090a2d..0000000
 -/** @} */
 diff --git a/lib/hal/hal_swi_bitbang.c b/lib/hal/hal_swi_bitbang.c
 deleted file mode 100644
-index 412b393..0000000
+index 412b393d9bd0..000000000000
 --- a/lib/hal/hal_swi_bitbang.c
 +++ /dev/null
 @@ -1,347 +0,0 @@
@@ -7994,7 +7994,7 @@ index 412b393..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_swi_bitbang.h b/lib/hal/hal_swi_bitbang.h
 deleted file mode 100644
-index b981a6f..0000000
+index b981a6fc99ff..000000000000
 --- a/lib/hal/hal_swi_bitbang.h
 +++ /dev/null
 @@ -1,76 +0,0 @@
@@ -8077,7 +8077,7 @@ index b981a6f..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_swi_uart.c b/lib/hal/hal_swi_uart.c
 deleted file mode 100644
-index f379d9a..0000000
+index f379d9abcd5e..000000000000
 --- a/lib/hal/hal_swi_uart.c
 +++ /dev/null
 @@ -1,527 +0,0 @@
@@ -8610,7 +8610,7 @@ index f379d9a..0000000
 -/** @} */
 diff --git a/lib/hal/hal_swi_uart.h b/lib/hal/hal_swi_uart.h
 deleted file mode 100644
-index 75274a7..0000000
+index 75274a7d4f2e..000000000000
 --- a/lib/hal/hal_swi_uart.h
 +++ /dev/null
 @@ -1,62 +0,0 @@
@@ -8679,7 +8679,7 @@ index 75274a7..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_win_kit_cdc.c b/lib/hal/hal_win_kit_cdc.c
 deleted file mode 100644
-index be3664f..0000000
+index be3664f3df3b..000000000000
 --- a/lib/hal/hal_win_kit_cdc.c
 +++ /dev/null
 @@ -1,556 +0,0 @@
@@ -9242,7 +9242,7 @@ index be3664f..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_win_kit_cdc.h b/lib/hal/hal_win_kit_cdc.h
 deleted file mode 100644
-index 8970d54..0000000
+index 8970d54965e2..000000000000
 --- a/lib/hal/hal_win_kit_cdc.h
 +++ /dev/null
 @@ -1,58 +0,0 @@
@@ -9306,7 +9306,7 @@ index 8970d54..0000000
 -
 diff --git a/lib/hal/hal_win_kit_hid.c b/lib/hal/hal_win_kit_hid.c
 deleted file mode 100644
-index 44b5212..0000000
+index 44b52120bbee..000000000000
 --- a/lib/hal/hal_win_kit_hid.c
 +++ /dev/null
 @@ -1,469 +0,0 @@
@@ -9781,7 +9781,7 @@ index 44b5212..0000000
 -/** @} */
 diff --git a/lib/hal/hal_win_kit_hid.h b/lib/hal/hal_win_kit_hid.h
 deleted file mode 100644
-index e352327..0000000
+index e3523272d33a..000000000000
 --- a/lib/hal/hal_win_kit_hid.h
 +++ /dev/null
 @@ -1,64 +0,0 @@
@@ -9852,7 +9852,7 @@ index e352327..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_win_timer.c b/lib/hal/hal_win_timer.c
 deleted file mode 100644
-index 71c431b..0000000
+index 71c431b4354b..000000000000
 --- a/lib/hal/hal_win_timer.c
 +++ /dev/null
 @@ -1,86 +0,0 @@
@@ -9944,7 +9944,7 @@ index 71c431b..0000000
 -/** @} */
 diff --git a/lib/hal/hal_xmega_a3bu_i2c_asf.c b/lib/hal/hal_xmega_a3bu_i2c_asf.c
 deleted file mode 100644
-index 2d8fa71..0000000
+index 2d8fa71c9b21..000000000000
 --- a/lib/hal/hal_xmega_a3bu_i2c_asf.c
 +++ /dev/null
 @@ -1,520 +0,0 @@
@@ -10470,7 +10470,7 @@ index 2d8fa71..0000000
 -/** @} */
 diff --git a/lib/hal/hal_xmega_a3bu_i2c_asf.h b/lib/hal/hal_xmega_a3bu_i2c_asf.h
 deleted file mode 100644
-index 4617c73..0000000
+index 4617c739245d..000000000000
 --- a/lib/hal/hal_xmega_a3bu_i2c_asf.h
 +++ /dev/null
 @@ -1,64 +0,0 @@
@@ -10541,7 +10541,7 @@ index 4617c73..0000000
 \ No newline at end of file
 diff --git a/lib/hal/hal_xmega_a3bu_timer_asf.c b/lib/hal/hal_xmega_a3bu_timer_asf.c
 deleted file mode 100644
-index e2f4a43..0000000
+index e2f4a4337e03..000000000000
 --- a/lib/hal/hal_xmega_a3bu_timer_asf.c
 +++ /dev/null
 @@ -1,78 +0,0 @@
@@ -10625,7 +10625,7 @@ index e2f4a43..0000000
 -/** @} */
 diff --git a/lib/hal/i2c_bitbang_samd21.c b/lib/hal/i2c_bitbang_samd21.c
 deleted file mode 100644
-index 0cdac42..0000000
+index 0cdac42912b9..000000000000
 --- a/lib/hal/i2c_bitbang_samd21.c
 +++ /dev/null
 @@ -1,262 +0,0 @@
@@ -10894,7 +10894,7 @@ index 0cdac42..0000000
 \ No newline at end of file
 diff --git a/lib/hal/i2c_bitbang_samd21.h b/lib/hal/i2c_bitbang_samd21.h
 deleted file mode 100644
-index 00fc797..0000000
+index 00fc7977e305..000000000000
 --- a/lib/hal/i2c_bitbang_samd21.h
 +++ /dev/null
 @@ -1,195 +0,0 @@
@@ -11096,7 +11096,7 @@ index 00fc797..0000000
 \ No newline at end of file
 diff --git a/lib/hal/kit_phy.h b/lib/hal/kit_phy.h
 deleted file mode 100644
-index f0b6ecd..0000000
+index f0b6ecd35f90..000000000000
 --- a/lib/hal/kit_phy.h
 +++ /dev/null
 @@ -1,62 +0,0 @@
@@ -11164,7 +11164,7 @@ index f0b6ecd..0000000
 -#endif /* ATCA_HAL_PHY_H_ */
 diff --git a/lib/hal/kit_protocol.c b/lib/hal/kit_protocol.c
 deleted file mode 100644
-index 55f8708..0000000
+index 55f8708d1d94..000000000000
 --- a/lib/hal/kit_protocol.c
 +++ /dev/null
 @@ -1,430 +0,0 @@
@@ -11600,7 +11600,7 @@ index 55f8708..0000000
 -/** @} */
 diff --git a/lib/hal/kit_protocol.h b/lib/hal/kit_protocol.h
 deleted file mode 100644
-index 84f7fee..0000000
+index 84f7fee454cb..000000000000
 --- a/lib/hal/kit_protocol.h
 +++ /dev/null
 @@ -1,77 +0,0 @@
@@ -11683,7 +11683,7 @@ index 84f7fee..0000000
 -#endif // KIT_PROTOCOL_H
 diff --git a/lib/hal/swi_bitbang_samd21.c b/lib/hal/swi_bitbang_samd21.c
 deleted file mode 100644
-index 3c54010..0000000
+index 3c540109cb4c..000000000000
 --- a/lib/hal/swi_bitbang_samd21.c
 +++ /dev/null
 @@ -1,272 +0,0 @@
@@ -11962,7 +11962,7 @@ index 3c54010..0000000
 \ No newline at end of file
 diff --git a/lib/hal/swi_bitbang_samd21.h b/lib/hal/swi_bitbang_samd21.h
 deleted file mode 100644
-index b6d20f6..0000000
+index b6d20f6153ba..000000000000
 --- a/lib/hal/swi_bitbang_samd21.h
 +++ /dev/null
 @@ -1,148 +0,0 @@
@@ -12117,7 +12117,7 @@ index b6d20f6..0000000
 \ No newline at end of file
 diff --git a/lib/hal/swi_uart_at90usb1287_asf.c b/lib/hal/swi_uart_at90usb1287_asf.c
 deleted file mode 100644
-index 68efbf6..0000000
+index 68efbf61eec5..000000000000
 --- a/lib/hal/swi_uart_at90usb1287_asf.c
 +++ /dev/null
 @@ -1,260 +0,0 @@
@@ -12383,7 +12383,7 @@ index 68efbf6..0000000
 -/** @} */
 diff --git a/lib/hal/swi_uart_at90usb1287_asf.h b/lib/hal/swi_uart_at90usb1287_asf.h
 deleted file mode 100644
-index 2b11b24..0000000
+index 2b11b2467937..000000000000
 --- a/lib/hal/swi_uart_at90usb1287_asf.h
 +++ /dev/null
 @@ -1,83 +0,0 @@
@@ -12472,7 +12472,7 @@ index 2b11b24..0000000
 -#endif // SWI_UART_AT90USB1287_ASF_H
 diff --git a/lib/hal/swi_uart_samd21_asf.c b/lib/hal/swi_uart_samd21_asf.c
 deleted file mode 100644
-index 1a5b698..0000000
+index 1a5b698381e0..000000000000
 --- a/lib/hal/swi_uart_samd21_asf.c
 +++ /dev/null
 @@ -1,238 +0,0 @@
@@ -12716,7 +12716,7 @@ index 1a5b698..0000000
 -/** @} */
 diff --git a/lib/hal/swi_uart_samd21_asf.h b/lib/hal/swi_uart_samd21_asf.h
 deleted file mode 100644
-index eb518a3..0000000
+index eb518a3430fd..000000000000
 --- a/lib/hal/swi_uart_samd21_asf.h
 +++ /dev/null
 @@ -1,84 +0,0 @@
@@ -12806,7 +12806,7 @@ index eb518a3..0000000
 -#endif // SWI_UART_ASF_H
 diff --git a/lib/hal/swi_uart_samd21_start.c b/lib/hal/swi_uart_samd21_start.c
 deleted file mode 100644
-index 0bf4650..0000000
+index 0bf4650afaa0..000000000000
 --- a/lib/hal/swi_uart_samd21_start.c
 +++ /dev/null
 @@ -1,208 +0,0 @@
@@ -13020,7 +13020,7 @@ index 0bf4650..0000000
 -/** @} */
 diff --git a/lib/hal/swi_uart_samd21_start.h b/lib/hal/swi_uart_samd21_start.h
 deleted file mode 100644
-index e039228..0000000
+index e039228ef7c3..000000000000
 --- a/lib/hal/swi_uart_samd21_start.h
 +++ /dev/null
 @@ -1,80 +0,0 @@
@@ -13106,7 +13106,7 @@ index e039228..0000000
 -#endif // SWI_UART_ASF_H
 diff --git a/lib/hal/swi_uart_xmega_a3bu_asf.c b/lib/hal/swi_uart_xmega_a3bu_asf.c
 deleted file mode 100644
-index 26785cd..0000000
+index 26785cd795ee..000000000000
 --- a/lib/hal/swi_uart_xmega_a3bu_asf.c
 +++ /dev/null
 @@ -1,258 +0,0 @@
@@ -13370,7 +13370,7 @@ index 26785cd..0000000
 -/** @} */
 diff --git a/lib/hal/swi_uart_xmega_a3bu_asf.h b/lib/hal/swi_uart_xmega_a3bu_asf.h
 deleted file mode 100644
-index e9bfffc..0000000
+index e9bfffc58fc6..000000000000
 --- a/lib/hal/swi_uart_xmega_a3bu_asf.h
 +++ /dev/null
 @@ -1,83 +0,0 @@
