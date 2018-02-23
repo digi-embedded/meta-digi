@@ -14,6 +14,8 @@ SRC_URI = " \
     ${GIT_URI};nobranch=1 \
     file://0001-Port-changes-from-the-cryptoauth-engine-repo-to-the-.patch \
     file://0002-Remove-unused-HAL-implementations.patch \
+    file://0003-Build-cryptochip-cmd-processor-application-along-wit.patch \
+    file://0004-Remove-unnecessary-code-from-cryptochip-cmd-processo.patch \
 "
 
 S = "${WORKDIR}/git"

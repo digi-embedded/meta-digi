@@ -1,0 +1,50 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Mon, 26 Feb 2018 11:42:50 +0100
+Subject: [PATCH 1/2] Build cryptochip-cmd-processor application along with the
+ library
+
+This new test application is more complete than ecc-test-main. It includes a
+command line with different test runs for the chip's basic functionality,
+helper functions, certificate functions and allows the configuration to be
+read, among other things.
+
+Hardcode the app to use the ATECC508A and remove all code that is specific for
+other chips.
+
+https://jira.digi.com/browse/DEL-5763
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ Makefile | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index a471428..c57b1bf 100644
+--- a/Makefile
++++ b/Makefile
+@@ -7,7 +7,7 @@ SUBDIRS=	lib test
+ 
+ .PHONY:	tgt_lib tgt_test clean
+ 
+-all:	tgt_lib tgt_test ecc-test
++all:   tgt_lib tgt_test ecc-test cmd-processor
+ 
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -o $@ -c $<
+@@ -22,11 +22,15 @@ ecc-test: tgt_lib tgt_test
+ 	$(CC) -c ecc-test-main.c $(CFLAGS) $(LDFLAGS) -I ./lib/ -I ./test/
+ 	$(CC) -o ecc-test-main ecc-test-main.o $(LDFLAGS) test/tls/atcatls_tests.o -L lib -L test -lm -lc -lrt -lcryptoauth -lunity
+ 
++cmd-processor: tgt_lib tgt_test
++	$(CC) -o cryptochip-cmd-processor test/*.o $(LDFLAGS) test/*/*.o -L lib -L test -lcryptoauth
++
+ install:
+ 	for a in $(SUBDIRS); do $(MAKE) -C $$a $@; done
+ 	install -d $(DESTDIR)/usr/bin
+ 	install -m 0755 ecc-test-main $(DESTDIR)/usr/bin/
++	install -m 0755 cryptochip-cmd-processor $(DESTDIR)/usr/bin
+ 
+ clean:
+-	rm -f *.o *.a ecc-test-main
++	rm -f *.o *.a ecc-test-main cryptochip-cmd-processor
+ 	$(foreach subdir,$(basename $(SUBDIRS)),$(MAKE) -w -C $(subdir) clean;)
