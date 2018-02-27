@@ -8,14 +8,14 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 DEPENDS = "libdigiapix"
 
 SRCBRANCH = "dey-2.4/maint"
-SRCREV = "a2a5d119b94a6113655df026cfc4e4b41f29c008"
+SRCREV = "${AUTOREV}"
 
 LIBDIGIAPIX_STASH = "${DIGI_MTK_GIT}dey/dey-examples.git;protocol=ssh"
 LIBDIGIAPIX_GITHUB = "${DIGI_GITHUB_GIT}/dey-examples.git;protocol=git"
 
 LIBDIGIAPIX_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${LIBDIGIAPIX_STASH}', '${LIBDIGIAPIX_GITHUB}', d)}"
 
-SRC_URI = "${LIBDIGIAPIX_GIT_URI};nobranch=1"
+SRC_URI = "${LIBDIGIAPIX_GIT_URI};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git"
 
