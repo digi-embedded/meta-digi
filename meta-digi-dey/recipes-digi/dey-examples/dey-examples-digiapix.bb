@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 
 DEPENDS = "libdigiapix"
 
-SRCBRANCH = "master"
+SRCBRANCH = "dey-2.4/maint"
 SRCREV = "${AUTOREV}"
 
 LIBDIGIAPIX_STASH = "${DIGI_MTK_GIT}dey/dey-examples.git;protocol=ssh"

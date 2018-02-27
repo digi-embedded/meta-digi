@@ -14,7 +14,7 @@ AWS_USER_LED_ccimx6ulsbc ?= "488"
 AWS_USER_LED_ccimx6sbc ?= "34"
 AWS_USER_LED_ccimx6qpsbc ?= "34"
 
-SRCBRANCH = "master"
+SRCBRANCH = "dey-2.4/maint"
 SRCREV = "${AUTOREV}"
 
 CC_STASH = "${DIGI_MTK_GIT}dey/dey-examples.git;protocol=ssh"

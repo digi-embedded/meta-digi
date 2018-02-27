@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 DEPENDS = "cryptoauthlib"
 
-SRCBRANCH = "master"
+SRCBRANCH = "dey-2.4/maint"
 SRCREV = "${AUTOREV}"
 
 CC_STASH = "${DIGI_MTK_GIT}dey/dey-examples.git;protocol=ssh"

@@ -11,7 +11,7 @@ DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-n
 
 PROVIDES += "u-boot"
 
-SRCBRANCH = "v2015.04/master"
+SRCBRANCH = "v2015.04/maint"
 SRCREV = "${AUTOREV}"
 
 # Select internal or Github U-Boot repo
