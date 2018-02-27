@@ -205,11 +205,7 @@ if pushd ${YOCTO_INST_DIR}; then
 			error "Revision \"${DY_REVISION}\" not found"
 		fi
 	fi
-	# If it is a manufacturing job, specify the manufacturing manifest name
-	if [ "${DY_MFG_IMAGE}" = "true" ]; then
-		mfg_xml="-m manufacturing.xml"
-	fi
-	yes "" 2>/dev/null | ${REPO} init --no-repo-verify -u ${MANIFEST_URL} ${repo_revision} ${mfg_xml}
+	yes "" 2>/dev/null | ${REPO} init --no-repo-verify -u ${MANIFEST_URL} ${repo_revision}
 	${REPO} forall -p -c 'git remote prune $(git remote)'
 	time ${REPO} sync -d ${MAKE_JOBS}
 	popd
@@ -263,8 +259,8 @@ for platform in ${DY_PLATFORMS}; do
 				if [ -n "${DY_EXTRA_LOCAL_CONF}" ]; then
 					printf "%s\n" "${DY_EXTRA_LOCAL_CONF}" >> conf/local.conf
 				fi
-				# Add the manufacturing layer to bblayers.conf file if it is a manufacturing job
-				if [ "${DY_MFG_IMAGE}" = "true" ]; then
+				# Check if it is a manufacturing job and, if the mfg layer is not there, add it
+				if [ "${DY_MFG_IMAGE}" = "true" ] && ! grep -qs "meta-digi-mfg" conf/bblayers.conf; then
 					sed -i -e "/meta-digi-dey/a\  ${YOCTO_INST_DIR}/sources/meta-digi-mfg \\\\" conf/bblayers.conf
 				fi
 				for target in ${platform_targets}; do
