@@ -13,7 +13,7 @@ else
 	#
 	if test "${module_variant}" = "0x02" || test "${module_variant}" = "0x04"; then
 		setenv fdt_file zImage-imx6ul-ccimx6ulstarter-wb.dtb
-	elif test "${module_variant}" = "0x03"; then
+	elif test "${module_variant}" = "0x03" || test "${module_variant}" = "0x05"; then
 		setenv fdt_file zImage-imx6ul-ccimx6ulstarter.dtb
 	else
 		echo "------ Using default fdt_file: $fdt_file"
