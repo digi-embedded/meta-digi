@@ -20,7 +20,7 @@ do_install () {
 FILES_${PN} = "/opt/${PN}"
 FILES_${PN}-dbg += "/opt/${PN}/.debug"
 
-RDEPENDS_${PN}_ccimx6 = "libopenvg-mx6"
+RDEPENDS_${PN}_ccimx6 = "libopenvg-imx"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
