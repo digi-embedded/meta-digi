@@ -1,0 +1,40 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Wed, 2 May 2018 18:49:28 +0200
+Subject: [PATCH] Modify openssl.cnf to automatically load the cryptochip
+ engine
+
+https://jira.digi.com/browse/DEL-5592
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ apps/openssl.cnf | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/apps/openssl.cnf b/apps/openssl.cnf
+index 1eb86c4..49d9d83 100644
+--- a/apps/openssl.cnf
++++ b/apps/openssl.cnf
+@@ -3,6 +3,8 @@
+ # This is mostly being used for generation of certificate requests.
+ #
+ 
++openssl_conf = openssl_init
++
+ # This definition stops the following lines choking if HOME isn't
+ # defined.
+ HOME			= .
+@@ -348,3 +350,14 @@ tsa_name		= yes	# Must the TSA name be included in the reply?
+ 				# (optional, default: no)
+ ess_cert_id_chain	= no	# Must the ESS cert id chain be included?
+ 				# (optional, default: no)
++
++[ openssl_init ]
++engines = engine_section
++
++[ engine_section ]
++ateccx08 = ateccx08_config
++
++[ ateccx08_config ]
++engine_id = ateccx08
++dynamic_path = /usr/lib/ssl/engines/libateccssl.so
++init = 0
