@@ -37,6 +37,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     cryptodev-module \
     cryptoauth-openssl-engine \
 "
+MACHINE_EXTRA_RRECOMMENDS_remove_use-mainline-bsp = "${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)}"
 
 MACHINE_FEATURES += "wifi bluetooth cryptochip"
 
