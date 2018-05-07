@@ -35,6 +35,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
     cryptoauthlib \
     cryptodev-module \
+    cryptoauth-openssl-engine \
 "
 
 MACHINE_FEATURES += "wifi bluetooth"
