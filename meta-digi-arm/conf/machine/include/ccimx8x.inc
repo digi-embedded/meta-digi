@@ -1,0 +1,35 @@
+#@TYPE: Machine
+#@NAME: ConnectCore 8X module.
+#@DESCRIPTION: Machine configuration for Digi's ConnectCore 8X module.
+
+DIGI_FAMILY = "ccimx8x"
+MACHINEOVERRIDES =. "mx8:mx8x:mx8qxp:mx8dxp:mx8dx:${DIGI_FAMILY}:"
+
+include conf/machine/include/imx-digi-base.inc
+include conf/machine/include/arm/arch-arm64.inc
+
+# Platform u-boot settings
+UBOOT_SUFFIX = "bin"
+UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
+
+# Wireless external module
+WIRELESS_MODULE ?= ""
+
+# Firmware
+MACHINE_FIRMWARE ?= ""
+
+MACHINE_EXTRA_RDEPENDS += " \
+    e2fsprogs-mke2fs \
+    e2fsprogs-resize2fs \
+    parted \
+    u-boot-fw-utils \
+"
+
+MACHINE_EXTRA_RRECOMMENDS += " \
+    ${MACHINE_FIRMWARE} \
+    ${WIRELESS_MODULE} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
+    cryptodev-module \
+"
+
+MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth"

@@ -3,7 +3,7 @@
 #
 #  build-github.sh
 #
-#  Copyright (C) 2015-2017 by Digi International Inc.
+#  Copyright (C) 2015-2018 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -22,7 +22,7 @@
 
 set -e
 
-AVAILABLE_PLATFORMS="ccimx6qpsbc ccimx6sbc ccimx6ulsbc ccimx6ulstarter"
+AVAILABLE_PLATFORMS="ccimx8x-sbc-express ccimx6qpsbc ccimx6sbc ccimx6ulsbc ccimx6ulstarter"
 
 MANIFEST_URL="https://github.com/digi-embedded/dey-manifest.git"
 
@@ -119,10 +119,11 @@ while read _pl _tgt; do
 	[ -n "${DY_TARGET}" ] && _tgt="${DY_TARGET}" || true
 	eval "${_pl}_tgt=\"${_tgt}\""
 done<<-_EOF_
-	ccimx6qpsbc       dey-image-qt
-	ccimx6sbc         dey-image-qt
-	ccimx6ulsbc       dey-image-qt
-	ccimx6ulstarter   core-image-base
+	ccimx8x-sbc-express  dey-image-qt
+	ccimx6qpsbc          dey-image-qt
+	ccimx6sbc            dey-image-qt
+	ccimx6ulsbc          dey-image-qt
+	ccimx6ulstarter      core-image-base
 _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"

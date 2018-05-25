@@ -3,7 +3,7 @@
 #
 #  build.sh
 #
-#  Copyright (C) 2013-2017 by Digi International Inc.
+#  Copyright (C) 2013-2018 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -169,12 +169,13 @@ while read _pl _var _tgt; do
 	eval "${_pl}_var=\"${_var//,/ }\""
 	eval "${_pl}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
-	ccimx6qpsbc       DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
-	ccimx6sbc         DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
-	ccimx6ulsbc       DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
-	ccimx6ulstarter   DONTBUILDVARIANTS   core-image-base,dey-image-aws
-	ccimx6ulsom       DONTBUILDVARIANTS   dey-image-mft-module-min
-	ccimx6ulrftest    DONTBUILDVARIANTS   dey-image-mft-module-rf
+	ccimx8x-sbc-express  DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
+	ccimx6qpsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
+	ccimx6sbc            DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
+	ccimx6ulsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
+	ccimx6ulstarter      DONTBUILDVARIANTS   core-image-base,dey-image-aws
+	ccimx6ulsom          DONTBUILDVARIANTS   dey-image-mft-module-min
+	ccimx6ulrftest       DONTBUILDVARIANTS   dey-image-mft-module-rf
 _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
