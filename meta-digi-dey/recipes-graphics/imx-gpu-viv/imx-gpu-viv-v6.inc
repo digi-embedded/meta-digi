@@ -7,11 +7,13 @@ SECTION = "libs"
 LICENSE = "Proprietary"
 LIC_FILES_CHKSUM = "file://COPYING;md5=08fd295cce89b0a9c74b9b83ed74f671"
 
-DEPENDS += " \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'wayland', \
-       bb.utils.contains('DISTRO_FEATURES',     'x11', 'virtual/libx11 libxdamage libxext libxfixes', \
-                                                       '', d), d)} \
-"
+DEPENDS += \
+    "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'wayland', \
+        bb.utils.contains('DISTRO_FEATURES',     'x11', 'virtual/libx11 libxdamage libxext libxfixes', \
+                                                        '', d), d)}"
+DEPENDS += \
+    "${@bb.utils.contains('DISTRO_FEATURES',     'x11', 'libxcb libxshmfence libxxf86vm', \
+                                                        '', d)}"
 DEPENDS += "libdrm"
 
 # imx-gpu-viv does not provide everything it needs to for virtual/libgl
@@ -20,10 +22,28 @@ DEPENDS += "libdrm"
 DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'mesa', '', d)}"
 
 EXTRA_PROVIDES = ""
-EXTRA_PROVIDES_append_imxgpu3d = " virtual/libgl virtual/libgles1 virtual/libgles2"
-EXTRA_PROVIDES_append_mx6q     = " virtual/opencl-icd opencl-headers"
-EXTRA_PROVIDES_append_mx8      = " virtual/opencl-icd opencl-headers virtual/libopenvx"
-PROVIDES += "imx-gpu-viv virtual/wayland-egl virtual/libgal-x11 virtual/egl virtual/libopenvg ${EXTRA_PROVIDES}"
+EXTRA_PROVIDES_append_imxgpu3d = " \
+    virtual/libgl \
+    virtual/libgles1 \
+    virtual/libgles2 \
+"
+EXTRA_PROVIDES_append_mx6q = " \
+    virtual/opencl-icd \
+    opencl-headers \
+"
+EXTRA_PROVIDES_append_mx8 = " \
+    virtual/libopenvx \
+    virtual/opencl-icd \
+    opencl-headers \
+"
+PROVIDES += " \
+    imx-gpu-viv \
+    virtual/egl \
+    virtual/libgal-x11 \
+    virtual/libopenvg \
+    virtual/wayland-egl \
+    ${EXTRA_PROVIDES} \
+"
 
 RPROVIDES_${PN}_imxgpu3d += "imx-gpu-viv"
 
@@ -35,26 +55,26 @@ SRC_URI = "${FSL_MIRROR}/${PN}-${PV}.bin;fsl-eula=true"
 
 # Note : If you add a package here, to prevent a naming conflict see the python_anonymous() futher below
 PACKAGES =+ "libclc-imx libclc-imx-dev \
-    libgl-imx libgl-imx-dev \
-    libgles-imx libgles-imx-dev \
-    libgles2-imx libgles2-imx-dev \
-    libgles3-imx-dev \
-    libglslc-imx libglslc-imx-dev \
-    libopencl-imx libopencl-imx-dev \
-    libopenvg-imx libopenvg-imx-dev \
-    libvdk-imx libvdk-imx-dev \
-    libegl-imx libegl-imx-dev \
-    libgal-imx libgal-imx-dev \
-    libvivante-dri-imx \
-    libvsc-imx \
-    libgbm-imx libgbm-imx-dev \
-    libwayland-viv-imx libwayland-viv-imx-dev \
-    libgc-wayland-protocol-imx libgc-wayland-protocol-imx-dev \
-    libwayland-egl-imx-dev \
-    imx-gpu-viv-tools \
-    imx-gpu-viv-demos \
-    libvulkan-imx libvulkan-imx-dev \
-    libopenvx-imx libopenvx-imx-dev \
+	libgl-imx libgl-imx-dev \
+	libgles-imx libgles-imx-dev \
+	libgles2-imx libgles2-imx-dev \
+	libgles3-imx-dev \
+	libglslc-imx libglslc-imx-dev \
+	libopencl-imx libopencl-imx-dev \
+	libopenvg-imx libopenvg-imx-dev \
+	libvdk-imx libvdk-imx-dev \
+	libegl-imx libegl-imx-dev \
+	libgal-imx libgal-imx-dev \
+	libvivante-dri-imx \
+	libvsc-imx \
+	libgbm-imx libgbm-imx-dev \
+	libwayland-viv-imx libwayland-viv-imx-dev \
+	libgc-wayland-protocol-imx libgc-wayland-protocol-imx-dev \
+	libwayland-egl-imx-dev \
+	imx-gpu-viv-tools \
+	imx-gpu-viv-demos \
+	libvulkan-imx libvulkan-imx-dev \
+	libopenvx-imx libopenvx-imx-dev \
 "
 python __anonymous () {
         has_vivante_kernel_driver_support = (d.getVar('MACHINE_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT', True) or '0')
@@ -109,6 +129,11 @@ IS_MX6SL_mx6sl = "1"
 IS_MX8 = "0"
 IS_MX8_mx8 = "1"
 
+PACKAGE_FP_TYPE = "hardfp"
+
+HAS_GPU3D          = "false"
+HAS_GPU3D_imxgpu3d = "true"
+
 do_install () {
     install -d ${D}${libdir}
     install -d ${D}${includedir}
@@ -121,6 +146,9 @@ do_install () {
 
 
     install -d ${D}${libdir}/pkgconfig
+    if ${HAS_GPU3D}; then
+        install -m 0644 ${S}/gpu-core/usr/lib/pkgconfig/gbm.pc ${D}${libdir}/pkgconfig/gbm.pc
+    fi
 
     # The preference order, based in DISTRO_FEATURES, is Wayland (with or without X11), X11 and fb
     if [ "${USE_WL}" = "yes" ]; then
@@ -134,7 +162,6 @@ do_install () {
         install -m 0644 ${S}/gpu-core/usr/lib/pkgconfig/gc_wayland_protocol.pc ${D}${libdir}/pkgconfig/gc_wayland_protocol.pc
         install -m 0644 ${S}/gpu-core/usr/lib/pkgconfig/wayland-egl.pc ${D}${libdir}/pkgconfig/wayland-egl.pc
         install -m 0644 ${S}/gpu-core/usr/lib/pkgconfig/wayland-viv.pc ${D}${libdir}/pkgconfig/wayland-viv.pc
-        install -m 0644 ${S}/gpu-core/usr/lib/pkgconfig/gbm.pc ${D}${libdir}/pkgconfig/gbm.pc
 
        if [ "${USE_X11}" = "yes" ]; then
 
@@ -199,8 +226,8 @@ do_install () {
 
     # skip packaging wayland libraries if no support is requested
     if [ "${USE_WL}" = "no" ]; then
-        rm ${D}${libdir}/libgc_wayland_protocol.*
-        rm ${D}${libdir}/libwayland-viv.*
+        find ${D}${libdir} -name "libgc_wayland_protocol.*" -exec rm '{}' ';'
+        find ${D}${libdir} -name "libwayland-viv.*" -exec rm '{}' ';'
     fi
 
     for i in wl x11 fb dri; do
@@ -212,7 +239,7 @@ do_install () {
     if [ "${IS_MX6SL}" = "1" ]; then
         rm -rf ${D}${libdir}/libCLC* ${D}${includedir}/CL \
                \
-               ${D}${libdir}/libGL* ${D}${includedir}/GL* ${D}${libdir}/pkgconfig/gl.pc \ 
+               ${D}${libdir}/libGL* ${D}${includedir}/GL* ${D}${libdir}/pkgconfig/gl.pc \
                \
                ${D}${libdir}/libGLES* ${D}${libdir}/pkgconfig/gles*.pc \
                \
