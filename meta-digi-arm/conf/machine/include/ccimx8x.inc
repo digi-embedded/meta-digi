@@ -12,6 +12,9 @@ include conf/machine/include/arm/arch-arm64.inc
 UBOOT_SUFFIX = "bin"
 UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
+# Linux kernel configuration
+KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8x_defconfig"
+
 # Wireless external module
 WIRELESS_MODULE ?= ""
 
@@ -33,3 +36,6 @@ MACHINE_EXTRA_RRECOMMENDS += " \
 "
 
 MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth"
+
+# AARCH64 doesn't support compressed kernel images
+KERNEL_IMAGETYPE = "Image"
