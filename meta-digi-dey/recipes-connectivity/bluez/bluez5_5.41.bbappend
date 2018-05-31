@@ -18,15 +18,15 @@ SRC_URI += " \
     file://0011-core-Fix-BR-EDR-pairing-for-dual-mode-devices.patch \
 "
 
-QCA6564_COMMON_PATCHES = " \
+QCA65XX_COMMON_PATCHES = " \
     file://0012-QCA_bluetooth_chip_support.patch \
     file://0013-hciattach_rome-Respect-the-user-indication-for-noflo.patch \
     file://0014-hciattach-If-the-user-supplies-a-bdaddr-use-it.patch \
     file://0015-hciattach-Add-verbosity-option.patch \
 "
 
-SRC_URI_append_ccimx6ul = " ${QCA6564_COMMON_PATCHES}"
-SRC_URI_append_ccimx6qpsbc = " ${QCA6564_COMMON_PATCHES}"
+SRC_URI_append_ccimx6ul = " ${QCA65XX_COMMON_PATCHES}"
+SRC_URI_append_ccimx6qpsbc = " ${QCA65XX_COMMON_PATCHES}"
 
 inherit update-rc.d
 
