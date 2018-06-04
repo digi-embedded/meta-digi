@@ -1,4 +1,4 @@
-# Copyright (C) 2016,2017 Digi International.
+# Copyright (C) 2016-2018 Digi International.
 
 SUMMARY = "Qualcomm's wireless driver for qca6564"
 DESCRIPTION = "qcacld-2.0 module"
@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 
 PV = "v4.2.80.63"
 
-SRCBRANCH = "dey-2.2/master"
+SRCBRANCH = "dey-2.4/master"
 SRCREV = "${AUTOREV}"
 
 QCOM_GIT_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git', d)}"
