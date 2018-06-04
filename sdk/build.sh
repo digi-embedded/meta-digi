@@ -166,8 +166,10 @@ while read _pl _var _tgt; do
 		fi
 	fi
 	[ -n "${DY_TARGET}" ] && _tgt="${DY_TARGET}" || true
-	eval "${_pl}_var=\"${_var//,/ }\""
-	eval "${_pl}_tgt=\"${_tgt//,/ }\""
+	# Dashes are not allowed in variables so let's substitute them on
+	# the fly with underscores.
+	eval "${_pl//-/_}_var=\"${_var//,/ }\""
+	eval "${_pl//-/_}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
 	ccimx8x-sbc-express  DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
 	ccimx6qpsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
@@ -215,8 +217,10 @@ fi
 # Create projects and build
 rm -rf ${YOCTO_IMGS_DIR} ${YOCTO_PROJ_DIR}
 for platform in ${DY_PLATFORMS}; do
-	eval platform_variants="\${${platform}_var}"
-	eval platform_targets="\${${platform}_tgt}"
+	# The variables <platform>_var|tgt got their dashes converted to
+	# underscores, so we must convert also the ones in ${platform}.
+	eval platform_variants=\"\${${platform//-/_}_var}\"
+	eval platform_targets=\"\${${platform//-/_}_tgt}\"
 	for variant in ${platform_variants}; do
 		_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}"
 		_this_img_dir="${YOCTO_IMGS_DIR}/${platform}"
