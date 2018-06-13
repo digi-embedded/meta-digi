@@ -1,9 +1,0 @@
-
-auto wlan1
-iface wlan1 inet static
-        address ##WLAN1_STATIC_IP##
-        netmask ##WLAN1_STATIC_NETMASK##
-        gateway ##WLAN1_STATIC_GATEWAY##
-        dns-nameservers ##WLAN1_STATIC_DNS##
-        post-up /etc/init.d/hostapd start
-        pre-down /etc/init.d/hostapd stop
