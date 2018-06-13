@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2017 Digi International Inc.
+# Copyright (C) 2013-2018 Digi International Inc.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
@@ -18,6 +18,12 @@ SRC_URI_append_ccimx6qpsbc = "\
 "
 
 SRC_URI_append_ccimx6ul = "\
+    file://interfaces.wlan1.static \
+    file://interfaces.wlan1.dhcp \
+    file://virtwlans.sh \
+"
+
+SRC_URI_append_ccimx8x = "\
     file://interfaces.wlan1.static \
     file://interfaces.wlan1.dhcp \
     file://virtwlans.sh \
@@ -82,6 +88,11 @@ do_install_append_ccimx6qpsbc() {
 }
 
 do_install_append_ccimx6ul() {
+	install_virtwlans
+	install_wlan1
+}
+
+do_install_append_ccimx8x() {
 	install_virtwlans
 	install_wlan1
 }
