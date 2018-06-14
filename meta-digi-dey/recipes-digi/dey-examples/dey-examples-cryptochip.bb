@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Digi International.
+# Copyright (C) 2017, 2018 Digi International.
 
 SUMMARY = "DEY examples: Cryptochip example application"
 SECTION = "examples"
@@ -26,5 +26,4 @@ do_install() {
 }
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul)"
-
+COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul|ccimx8x)"

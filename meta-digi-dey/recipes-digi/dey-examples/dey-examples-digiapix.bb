@@ -1,4 +1,4 @@
-# Copyright (C) 2017, Digi International Inc.
+# Copyright (C) 2017, 2018, Digi International Inc.
 
 SUMMARY = "DEY Digi APIX examples"
 SECTION = "examples"
@@ -30,5 +30,3 @@ do_compile() {
 do_install() {
 	oe_runmake DESTDIR=${D} install
 }
-
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"

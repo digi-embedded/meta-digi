@@ -49,4 +49,3 @@ do_install() {
 RRECOMMENDS_${PN} += "awsiotsdk-c-cert"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-

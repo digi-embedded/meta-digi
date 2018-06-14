@@ -39,4 +39,12 @@ RDEPENDS_${PN}_append_ccimx6qpsbc = "\
 	dey-examples-cryptochip \
 "
 
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"
+RDEPENDS_${PN}_append_ccimx8x = "\
+	dey-examples-adc \
+	dey-examples-adc-cmp \
+	dey-examples-cryptochip \
+	dey-examples-tamper \
+	dey-examples-v4l2 \
+"
+
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x)"

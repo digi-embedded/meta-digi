@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Digi International Inc.
+# Copyright (C) 2017, 2018 Digi International Inc.
 
 SUMMARY = "DEY examples: Remote Manager test applications"
 SECTION = "examples"
@@ -18,5 +18,3 @@ do_install() {
 }
 
 RDEPENDS_${PN} = "cloudconnector-cert"
-
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"
