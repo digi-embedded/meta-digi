@@ -87,4 +87,4 @@ pkg_postinst_${PN}() {
 	fi
 }
 
-COMPATIBLE_MACHINE = "(ccimx6sbc|ccimx6qpsbc|ccimx6ul)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x)"
