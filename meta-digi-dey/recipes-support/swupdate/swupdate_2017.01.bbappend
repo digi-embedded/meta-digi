@@ -2,12 +2,6 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
-SRC_URI += "\
-     file://swupdate-usb.rules \
-     file://swupdate-usb@.service \
-     file://swupdate-progress.service \
-"
-
 do_configure_append() {
 	# If Trustfence is enabled, enable the signing support in the
 	# '.config' file.
@@ -27,6 +21,4 @@ do_install_append() {
 	# Copy the 'progress' binary.
 	install -d ${D}${bindir}/
 	install -m 0755 progress ${D}${bindir}/
-	# Rename 'swupdate' binary
-	mv ${D}${bindir}/swupdate_unstripped ${D}${bindir}/swupdate
 }
