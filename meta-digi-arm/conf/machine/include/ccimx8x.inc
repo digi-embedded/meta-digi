@@ -31,7 +31,6 @@ MACHINE_EXTRA_RDEPENDS += " \
 MACHINE_EXTRA_RRECOMMENDS += " \
     ${MACHINE_FIRMWARE} \
     ${WIRELESS_MODULE} \
-    ${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
     cryptodev-module \
 "
 
