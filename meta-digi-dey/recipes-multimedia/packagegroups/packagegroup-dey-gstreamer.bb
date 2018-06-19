@@ -23,7 +23,7 @@ MACHINE_GSTREAMER_1_0_PKGS_ccimx6ul = " \
     gstreamer1.0-plugins-base-videoconvert \
     gstreamer1.0-plugins-base-videoscale \
     gstreamer1.0-plugins-base-volume \
-    gstreamer1.0-plugins-good-pulse \
+    gstreamer1.0-plugins-good-pulseaudio \
     gstreamer1.0-plugins-good-video4linux2 \
     gstreamer1.0-plugins-good-videofilter \
     gstreamer1.0-plugins-good-vpx \
