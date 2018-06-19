@@ -13,5 +13,6 @@ SRC_URI_append_imx = " \
 SRCREV_imx = "b2c850f295a0fe49310fb60784ac6af4a29bceae"
 
 EXTRA_AUTORECONF = ""
+PACKAGECONFIG_append = " vpx"
 
 S_imx = "${WORKDIR}/git"
