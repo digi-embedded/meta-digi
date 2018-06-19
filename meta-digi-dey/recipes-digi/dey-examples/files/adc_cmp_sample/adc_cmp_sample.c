@@ -25,12 +25,14 @@
 
 #include "iio_utils.h"
 
+#define ARRAY_SIZE(v)		(sizeof(v) / sizeof((v)[0]))
 #define BUFFER_LEN		20
 
 #define FULL_USAGE							\
 	"Usage:\n"							\
 	"adc_cmp_sample -c channel [options]\n\n"			\
 	"Options:\n"							\
+	"  -t : ADC_type ('MCA-CC6UL', 'MCA-CC8X')\n"			\
 	"  -c : channel number to read from\n"				\
 	"  -h : Threshold_high higher limit of the comparator window\n"	\
 	"  -l : Threshold_low lower limit of the comparator window\n"	\
@@ -38,7 +40,36 @@
 	"  -v : use V for output and thresholds instead of raw values.\n"\
 	"  -? : help\n\n"
 
+enum adc_type {
+	ADC_TYPE_UNKNOWN,
+	ADC_TYPE_MCA_CC6UL,
+	ADC_TYPE_MCA_CC8X,
+};
+
+struct adc_data {
+	enum adc_type type;
+	const char *name;
+	const char *dev_name;
+	unsigned int nbits;
+};
+
+struct adc_data adc_list[] = {
+	{
+		.type 		= ADC_TYPE_MCA_CC6UL,
+		.name 		= "MCA-CC6UL",
+		.dev_name 	= "mca-cc6ul-adc",
+		.nbits 		= 12,
+	},
+	{
+		.type 		= ADC_TYPE_MCA_CC8X,
+		.name 		= "MCA-CC8X",
+		.dev_name 	= "mca-cc8x-adc",
+		.nbits 		= 12,
+	},
+};
+
 typedef struct cmp {
+	struct adc_data *data;
 	char *sysfs_dir;
 	unsigned int channel;
 	double voltage_scale;
@@ -48,6 +79,21 @@ typedef struct cmp {
 static void show_usage()
 {
 	fprintf(stdout, "%s", FULL_USAGE);
+}
+
+static struct adc_data *get_adc_data(const char *type_str)
+{
+	struct adc_data *data = NULL;
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(adc_list); i++) {
+		if (!strcmp(adc_list[i].name, type_str)) {
+			data = &adc_list[i];
+			break;
+		}
+	}
+
+	return data;
 }
 
 static int read_adc_sample_sysfs(cmp_t *cmp, long int *val)
@@ -328,13 +374,22 @@ int main(int argc, char **argv)
 	};
 	struct iio_event_data event;
 
-	if (argc <= 3) {
+	if (argc <= 4) {
 		show_usage();
 		return EXIT_FAILURE;
 	}
 
-	while ((opt = getopt(argc, argv, "c:h:l:e:v?")) > 0) {
+	while ((opt = getopt(argc, argv, "t:c:h:l:e:v?")) > 0) {
 		switch (opt) {
+		case 't':
+			cmp.data = get_adc_data(optarg);
+			if (!cmp.data) {
+				fprintf(stdout, "Unknown ADC type %s\n", optarg);
+				show_usage(0);
+				ret = EXIT_FAILURE;
+				goto exit;
+			}
+			break;
 		case 'c':
 			cmp.channel = strtoul(optarg, NULL, 10);
 			break;
@@ -371,6 +426,21 @@ int main(int argc, char **argv)
 		}
 	}
 
+	/* Check that the application params provide what we need */
+	if (!cmp.data || cmp.data->type == ADC_TYPE_UNKNOWN) {
+		fprintf(stdout, "ADC type must be provided\n");
+		show_usage(1);
+		ret = EXIT_FAILURE;
+		goto exit;
+	}
+
+	if (cmp.channel == ~0) {
+		fprintf(stdout, "ADC channel must be provided\n");
+		show_usage(1);
+		ret = EXIT_FAILURE;
+		goto exit;
+	}
+
 	if (!edge) {
 		edge = strdup("both");
 		if (!edge) {
@@ -379,10 +449,10 @@ int main(int argc, char **argv)
 		}
 	}
 
-	dev_num = find_type_by_name("mca-cc6ul-adc", "iio:device");
+	dev_num = find_type_by_name(cmp.data->dev_name, "iio:device");
 	if (dev_num < 0) {
-		fprintf(stdout,
-			"Failed to find iio:device for mca-cc6ul-adc\n");
+		fprintf(stdout, "Failed to find iio:device for %s\n",
+		        cmp.data->dev_name);
 		ret = -ENODEV;
 		goto exit;
 	}
@@ -408,6 +478,20 @@ int main(int argc, char **argv)
 			goto exit;
 		threshold_high = threshold_high * 1000 / cmp.voltage_scale;
 		threshold_low = threshold_low * 1000 / cmp.voltage_scale;
+	}
+
+	if (threshold_low > threshold_high) {
+		fprintf(stdout, "threshold_low bigger than threshold_high\n");
+		show_usage(1);
+		ret = EXIT_FAILURE;
+		goto exit;
+	}
+
+	if (threshold_high >= 1 << cmp.data->nbits) {
+		fprintf(stdout, "threshold_high out of range\n");
+		show_usage(1);
+		ret = EXIT_FAILURE;
+		goto exit;
 	}
 
 	ret = configure_comparator(&cmp, threshold_low, threshold_high, edge);
