@@ -1,0 +1,10 @@
+ACTION!="add|change|move", GOTO="mm_digi_xbee_cellular_modem_end"
+
+# By default, ModemManager expects a default baudrate of 57600bps. Different
+# baudrates may be used by setting the ID_MM_TTY_BAUDRATE udev tag.
+
+# ModemManager documentation states that the best practice is to use the DEVPATH
+# this way rather than other rules such as KERNEL, so be careful when modifying
+DEVPATH=="/devices/platform/5a060000.serial/tty/ttyLP0", ENV{ID_MM_PLATFORM_DRIVER_PROBE}="1", ENV{ID_MM_PHYSDEV_UID}="Digi XBee Cellular"
+
+LABEL="mm_digi_xbee_cellular_modem_end"
