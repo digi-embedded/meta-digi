@@ -31,6 +31,7 @@ FW_QCA6574_WIFI_PROPRIETARY = " \
     file://qca6574_proprietary/athwlan.bin \
     file://qca6574_proprietary/fakeboar.bin \
     file://qca6574_proprietary/otp.bin \
+    file://qca6574_proprietary/utf.bin \
 "
 
 # Firmware files for QCA6574 (Qualcomm community driver)
