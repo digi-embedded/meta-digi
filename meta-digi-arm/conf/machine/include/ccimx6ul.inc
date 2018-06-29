@@ -41,7 +41,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     cryptoauth-openssl-engine \
 "
 
-MACHINE_FEATURES += "wifi bluetooth"
+MACHINE_FEATURES += "wifi bluetooth cryptochip"
 
 MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6564-bt', '', d)}"
 MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6564-wifi', '', d)}"
