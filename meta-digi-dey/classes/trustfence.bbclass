@@ -36,6 +36,10 @@ python () {
     import hashlib
     import os
 
+    if ("ccimx8x" in d.getVar("MACHINE", True)):
+        bb.fatal("Trustfence is not currently supported on the ccimx8x SOM")
+        return
+
     # Secure console configuration
     if (d.getVar("TRUSTFENCE_CONSOLE_DISABLE", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_CONSOLE_DISABLE=y ")
