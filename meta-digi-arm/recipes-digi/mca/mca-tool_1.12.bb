@@ -13,8 +13,8 @@ SRC_URI[arm.sha256sum] = "e74682cb9b0f93b1e5f2e900c1a860df250bbf8733837506df3063
 
 # AARCH64 tarball
 SRC_URI_aarch64 = "${DIGI_PKG_SRC}/${PKGNAME}-${PV}-${TUNE_ARCH}.tar.gz;name=aarch64"
-SRC_URI[aarch64.md5sum] = "0041add9ccdb138e34d061cbbedf4077"
-SRC_URI[aarch64.sha256sum] = "0a35cf2ffb8e43ffb216e982abf52a4f51f15740c911fdbca54002d552852d6e"
+SRC_URI[aarch64.md5sum] = "bf14a7a431353c37523149af24fb44d0"
+SRC_URI[aarch64.sha256sum] = "8646837296b7d80de4ef3a5374d18aaf5a1d5b96345b6ce9e05ee982794ece24"
 
 S = "${WORKDIR}/${PKGNAME}-${PV}"
 
