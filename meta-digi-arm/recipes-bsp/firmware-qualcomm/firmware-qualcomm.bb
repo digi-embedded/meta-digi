@@ -7,7 +7,6 @@ LIC_FILES_CHKSUM = "file://${DIGI_EULA_FILE};md5=8c0ad592dd48ace3d25eed5bbb26ba7
 
 # Selects whether to use proprietary or community driver
 QUALCOMM_WIFI_DRIVER ?= "proprietary"
-QUALCOMM_WIFI_DRIVER_ccimx8x = "community"
 
 FW_QUALCOMM_BT = " \
     file://qca/nvm_tlv_3.0.bin \
@@ -28,7 +27,7 @@ FW_QCA6564_WIFI_PROPRIETARY = " \
 # Firmware files for QCA6574 (Qualcomm proprietary driver)
 FW_QCA6574_WIFI_PROPRIETARY = " \
     file://LICENCE.atheros_firmware \
-    file://qca6574_proprietary/athwlan.bin \
+    file://qca6574_proprietary/qwlan30.bin \
     file://qca6574_proprietary/fakeboar.bin \
     file://qca6574_proprietary/otp.bin \
     file://qca6574_proprietary/utf.bin \
@@ -79,7 +78,8 @@ do_install() {
 		ln -s fakeboar.bin board.bin
 	else
 		if [ "${FW_QUALCOMM_WIFI}" = "${FW_QCA6574_WIFI_PROPRIETARY}" ]; then
-			ln -s athwlan.bin qwlan30.bin
+			ln -s qwlan30.bin athwlan.bin
+			ln -s otp.bin athsetup.bin
 		fi
 	fi
 }
