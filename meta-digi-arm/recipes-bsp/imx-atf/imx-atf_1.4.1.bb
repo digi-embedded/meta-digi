@@ -1,19 +1,19 @@
-# Copyright 2017 NXP
+# Copyright 2017-2018 NXP
 
 DESCRIPTION = "i.MX ARM Trusted Firmware"
 SECTION = "BSP"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/BSD-3-Clause;md5=550794465ba0ec5312d6919e203a55f9"
 
-inherit fsl-eula-unpack pkgconfig deploy
+inherit pkgconfig deploy
 
 PV = "1.4.1+git${SRCPV}"
 
 ATF_SRC ?= "git://source.codeaurora.org/external/imx/imx-atf.git;protocol=https"
-ATF_BRANCH = "imx_4.9.51_imx8_beta1"
+SRCBRANCH = "imx_4.9.88_imx8qxp_beta2"
 
-SRC_URI = "${ATF_SRC};branch=${ATF_BRANCH}"
-SRCREV = "a4388010f06ceb8fa9a33391bff47dabd027dbb1"
+SRC_URI = "${ATF_SRC};branch=${SRCBRANCH}"
+SRCREV = "00b653ec4b51a211ae735ffe0d3c9de7a8979947"
 
 S = "${WORKDIR}/git"
 
@@ -25,6 +25,8 @@ SOC_ATF_mx8qxp = "imx8qxp"
 SOC_ATF_mx8mq = "imx8mq"
 
 SYSROOT_DIRS += "/boot"
+
+EXTRA_OEMAKE_append = " ${@bb.utils.contains('COMBINED_FEATURES', 'optee', 'SPD=opteed', '', d)}"
 
 do_compile () {
     export CROSS_COMPILE="${TARGET_PREFIX}"
