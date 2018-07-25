@@ -12,6 +12,9 @@ include conf/machine/include/arm/arch-arm64.inc
 UBOOT_SUFFIX = "bin"
 UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
+# The bootloader image that gets flashed consists of U-Boot and several fw binaries
+EXTRA_IMAGEDEPENDS = "imx-boot"
+
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8x_defconfig"
 
