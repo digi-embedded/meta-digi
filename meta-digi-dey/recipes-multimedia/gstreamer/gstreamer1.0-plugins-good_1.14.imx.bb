@@ -15,6 +15,7 @@ SRCREV = "037e2bf9a152de410623235974c68be21948985a"
 DEPENDS_append = " libdrm"
 
 EXTRA_AUTORECONF = ""
+PACKAGECONFIG_append = " vpx"
 
 # Fix: unrecognised options: --disable-sunaudio [unknown-configure-option]
 EXTRA_OECONF_remove = " --disable-sunaudio"
