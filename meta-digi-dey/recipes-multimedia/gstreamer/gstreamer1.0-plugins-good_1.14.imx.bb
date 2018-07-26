@@ -16,6 +16,7 @@ SRC_URI = " \
 SRCREV = "cec0ef39784a3acfd2b442d107f054c6ab10181e" 
 
 EXTRA_AUTORECONF = ""
+PACKAGECONFIG_append = " vpx"
 
 # Fix: unrecognised options: --disable-sunaudio [unknown-configure-option]
 EXTRA_OECONF_remove = " --disable-sunaudio"
