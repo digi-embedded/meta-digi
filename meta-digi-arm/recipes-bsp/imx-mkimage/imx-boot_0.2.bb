@@ -9,6 +9,11 @@ require imx-mkimage_git.inc
 
 inherit deploy
 
+SRC_URI_append = " \
+    file://0001-cc8x-configure-DDRC-for-Micron-MT53B256M32D1.patch \
+    file://0002-cc8x-add-second-DCD-for-the-2GB-variant-of-the-cc8x.patch \
+"
+
 # Add CFLAGS with native INCDIR & LIBDIR for imx-mkimage build
 CFLAGS = "-O2 -Wall -std=c99 -static -I ${STAGING_INCDIR_NATIVE} -L ${STAGING_LIBDIR_NATIVE}"
 
@@ -55,6 +60,8 @@ ATF_MACHINE_NAME_mx8mq = "bl31-imx8mq.bin"
 DCD_NAME ?= "imx8qm_dcd.cfg.tmp"
 DCD_NAME_mx8qm = "imx8qm_dcd.cfg.tmp"
 DCD_NAME_mx8qxp = "imx8qx_dcd.cfg.tmp"
+
+DCD_SRC_NAME = "imx8qx_dcd_1.2GHz.cfg"
 
 UBOOT_NAME = "u-boot-${MACHINE}.bin"
 BOOT_CONFIG_MACHINE = "${BOOT_NAME}"
@@ -126,9 +133,10 @@ do_compile () {
 
     # mkimage for i.MX8
     for type in ${UBOOT_CONFIG}; do
-    cd ${S}/${SOC_TARGET}
-    ln -sf u-boot.bin-${type} u-boot.bin
-    cd -
+        cd ${S}/${SOC_TARGET}
+        ln -sf u-boot.bin-${type} u-boot.bin
+        ln -sf ${DCD_SRC_NAME}-${type} ${DCD_SRC_NAME}
+        cd -
         for target in ${IMXBOOT_TARGETS}; do
             echo "building ${SOC_TARGET} - ${type} - ${target}"
             make SOC=${SOC_TARGET} ${target}
@@ -136,7 +144,9 @@ do_compile () {
                 cp ${S}/${SOC_TARGET}/flash.bin ${S}/${BOOT_CONFIG_MACHINE}-${type}.bin-${target}
             fi
         done
-    rm ${S}/${SOC_TARGET}/u-boot.bin
+        cp ${S}/${SOC_TARGET}/${DCD_NAME} ${S}/${SOC_TARGET}/${DCD_NAME}-${type}
+        rm ${S}/${SOC_TARGET}/${DCD_SRC_NAME}
+        rm ${S}/${SOC_TARGET}/u-boot.bin
     done
 }
 
@@ -175,7 +185,9 @@ do_deploy () {
         install -m 0755 ${S}/${TOOLS_NAME} ${DEPLOYDIR}/${BOOT_TOOLS}
     else
         # the DCD only needs to get copied when using an A0 CPU
-        install -m 0644 ${S}/${SOC_TARGET}/${DCD_NAME} ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
+        for type in ${UBOOT_CONFIG}; do
+            install -m 0644 ${S}/${SOC_TARGET}/${DCD_NAME}-${type} ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
+        done
         install -m 0644 ${S}/${SOC_TARGET}/ahab-container.img ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
         install -m 0644 ${S}/${SOC_TARGET}/m40_tcm.bin ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
         install -m 0644 ${S}/${SOC_TARGET}/CM4.bin ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
@@ -193,7 +205,7 @@ do_deploy () {
 
     # copy the generated boot image to deploy path
     for type in ${UBOOT_CONFIG}; do
-    IMAGE_IMXBOOT_TARGET=""
+        IMAGE_IMXBOOT_TARGET=""
         for target in ${IMXBOOT_TARGETS}; do
             # Use first "target" as IMAGE_IMXBOOT_TARGET
             if [ "$IMAGE_IMXBOOT_TARGET" = "" ]; then
