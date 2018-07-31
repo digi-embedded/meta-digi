@@ -27,6 +27,7 @@ MACHINE_FIRMWARE ?= ""
 MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
     e2fsprogs-resize2fs \
+    mca-tool \
     parted \
     u-boot-fw-utils \
 "
