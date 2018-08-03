@@ -1,24 +1,22 @@
 # Copyright (C) 2016 Freescale Semiconductor
 # Copyright 2017-2018 NXP
+# Copyright (C) 2018 Digi International.
 
 DESCRIPTION = "i.MX System Controller Firmware"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=ab61cab9599935bfe9f700405ef00f28"
 SECTION = "BSP"
 
-inherit fsl-eula-unpack pkgconfig deploy
+inherit pkgconfig deploy
 
-SRC_URI = "${FSL_MIRROR}/${PN}-${PV}.bin;fsl-eula=true"
+SRC_URI = "${DIGI_PKG_SRC}/${PN}-${PV}.tar.gz"
 
-SRC_URI[md5sum] = "9dcdbdae491bd6b027ccab0e354870cb"
-SRC_URI[sha256sum] = "46e487605c31f44b4fe0280e57e4e0a3fe51c375300766805ae1161c39021766"
+SRC_URI[md5sum] = "2b403986a9a0e47528baa3138015ce02"
+SRC_URI[sha256sum] = "dbdffdd9b0d527218a1bf90aad2ef8dcee1b4c5170e5a983ae6f5e54b062cddc"
 
 S = "${WORKDIR}/${PN}-${PV}"
 
-BOARD_TYPE ?= "mek"
-SC_FIRMWARE_NAME ?= "mx8qm-mek-scfw-tcm.bin"
-SC_FIRMWARE_NAME_mx8qm = "mx8qm-${BOARD_TYPE}-scfw-tcm.bin"
-SC_FIRMWARE_NAME_mx8qxp = "mx8qx-${BOARD_TYPE}-scfw-tcm.bin"
+SC_FIRMWARE_NAME ?= "mx8qx-${DIGI_FAMILY}-scfw-tcm.bin"
 symlink_name = "scfw_tcm.bin"
 
 SYSROOT_DIRS += "/boot"
@@ -47,4 +45,4 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 FILES_${PN} = "/boot"
 
-COMPATIBLE_MACHINE = "(mx8qm|mx8qxp)"
+COMPATIBLE_MACHINE = "(ccimx8x)"
