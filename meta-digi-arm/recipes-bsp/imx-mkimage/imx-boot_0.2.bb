@@ -147,6 +147,8 @@ do_compile () {
         cp ${S}/${SOC_TARGET}/${DCD_NAME} ${S}/${SOC_TARGET}/${DCD_NAME}-${type}
         rm ${S}/${SOC_TARGET}/${DCD_SRC_NAME}
         rm ${S}/${SOC_TARGET}/u-boot.bin
+        # Remove u-boot-atf.bin so it gets generated with the next iteration's U-Boot
+        rm ${S}/${SOC_TARGET}/u-boot-atf.bin
     done
 }
 
