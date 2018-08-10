@@ -27,7 +27,7 @@ INHERIT += "machine-overrides-extender"
 MACHINEOVERRIDES_EXTENDER_mx6q  = "imxipu:imxvpu:imxgpu2d:imxgpu3d"
 MACHINEOVERRIDES_EXTENDER_mx6dl = "imxpxp:imxipu:imxvpu:imxgpu2d:imxgpu3d:imxepdc"
 MACHINEOVERRIDES_EXTENDER_mx6ul = "imxpxp"
-MACHINEOVERRIDES_EXTENDER_mx8qxp = "imxdrm:imxdpu:imxvpuamphion:imxgpu:imxgpu2d:imxgpu3d"
+MACHINEOVERRIDES_EXTENDER_mx8qxp = "imxdrm:imxdpu:imxgpu:imxgpu2d:imxgpu3d"
 
 # Sub-architecture support
 MACHINE_SOCARCH_SUFFIX ?= ""
