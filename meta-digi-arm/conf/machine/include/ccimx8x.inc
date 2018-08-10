@@ -42,3 +42,7 @@ MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip"
 
 # AARCH64 doesn't support self-extracting zImage
 KERNEL_IMAGETYPE = "Image.gz"
+
+# Adding 'wayland' along with 'x11' enables the xwayland backend
+# Vulkan is necessary for wayland to build
+DISTRO_FEATURES_append = " wayland vulkan"
