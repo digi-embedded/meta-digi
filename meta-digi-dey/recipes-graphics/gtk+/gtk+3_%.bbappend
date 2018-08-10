@@ -1,5 +1,3 @@
-DEPENDS_append_imxgpu2d = " virtual/egl"
+SRC_URI_remove = "file://0004-configure.ac-Fix-wayland-protocols-path.patch"
 
-PACKAGECONFIG_remove_imxgpu2d = " \
-    ${@bb.utils.contains("DISTRO_FEATURES", "wayland", "x11", "", d)} \
-"
+EXTRA_OECONF_remove = "WAYLAND_PROTOCOLS_SYSROOT_DIR=${RECIPE_SYSROOT}"
