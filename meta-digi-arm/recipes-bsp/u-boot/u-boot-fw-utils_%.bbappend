@@ -62,9 +62,9 @@ pkg_postinst_${PN}() {
 			# - Both copies starting at the same offset
 			ENV_REDUND_OFFSET="${UBOOT_ENV_OFFSET}"
 			# - Calculated erase block size
-			ERASEBLOCK="$(grep "^${MTDINDEX}" ${PARTTABLE} | awk '{printf("0x%d",$3)}')"
+			ERASEBLOCK="$(grep "^${MTDINDEX}:" ${PARTTABLE} | awk '{printf("0x%d",$3)}')"
 			# - Calculated number of blocks
-			MTDSIZE="$(grep "^${MTDINDEX}" ${PARTTABLE} | awk '{printf("0x%d",$2)}')"
+			MTDSIZE="$(grep "^${MTDINDEX}:" ${PARTTABLE} | awk '{printf("0x%d",$2)}')"
 			NBLOCKS="$(((MTDSIZE - UBOOT_ENV_OFFSET) / ERASEBLOCK))"
 			# If a range was provided, calculate the number of
 			# blocks in the range and use that number, unless they
