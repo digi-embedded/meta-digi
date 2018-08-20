@@ -1,27 +1,16 @@
 # Copyright (C) 2013-2018 Digi International
 
 SUMMARY = "Linux kernel for Digi boards"
-LICENSE = "GPLv2"
-LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
 DEPENDS += "lzop-native bc-native"
 DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 inherit kernel fsl-kernel-localversion
 
-LOCALVERSION = "-dey"
-
-# Select internal or Github Linux repo
-LINUX_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}linux-2.6.git', '${DIGI_GITHUB_GIT}/linux.git', d)}"
-
-SRC_URI = " \
-    ${LINUX_GIT_URI};branch=${SRCBRANCH} \
-"
+require recipes-kernel/linux/linux-dey-src.inc
 
 # Use custom provided 'defconfig' if variable KERNEL_DEFCONFIG is cleared
 SRC_URI += "${@base_conditional('KERNEL_DEFCONFIG', '', 'file://defconfig', '', d)}"
-
-S = "${WORKDIR}/git"
 
 do_deploy[postfuncs] += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence_sign', '', d)}"
 
