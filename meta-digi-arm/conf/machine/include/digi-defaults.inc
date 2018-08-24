@@ -3,6 +3,7 @@ PREFERRED_PROVIDER_jpeg-native ?= "jpeg-native"
 PREFERRED_PROVIDER_u-boot ??= "u-boot-dey"
 PREFERRED_PROVIDER_virtual/bootloader ??= "u-boot-dey"
 PREFERRED_PROVIDER_virtual/kernel ??= "linux-dey"
+PREFERRED_PROVIDER_virtual/kernel_use-mainline-bsp ??= "linux-4.18.y"
 PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 
 #
