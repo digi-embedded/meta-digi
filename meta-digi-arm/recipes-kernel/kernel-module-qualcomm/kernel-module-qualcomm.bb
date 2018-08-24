@@ -24,11 +24,11 @@ QUALCOMM_WIFI_INTERFACE ?= "sdio"
 QUALCOMM_WIFI_INTERFACE_ccimx8x = "pci"
 
 SRC_URI_append = " \
+    file://81-qcom-wifi.rules \
     file://qualcomm.sh \
 "
 
 FILES_SDIO = " \
-    file://81-sdio-qcom.rules \
     file://modprobe-qualcomm.conf \
 "
 
@@ -62,8 +62,6 @@ do_install_append() {
 	if [ "${QUALCOMM_WIFI_INTERFACE}" = "sdio" ]; then
 		install -d ${D}${sysconfdir}/modprobe.d
 		install -m 0644 ${WORKDIR}/modprobe-qualcomm.conf ${D}${sysconfdir}/modprobe.d/qualcomm.conf
-		install -d ${D}${sysconfdir}/udev/rules.d
-		install -m 0644 ${WORKDIR}/81-sdio-qcom.rules ${D}${sysconfdir}/udev/rules.d/
 	fi
 
 	install -d ${D}${base_libdir}/firmware/wlan/
@@ -71,6 +69,8 @@ do_install_append() {
 	install -m 0644 ${WORKDIR}/git/firmware_bin/WCNSS_qcom_cfg.ini ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
 	install -d ${D}${sysconfdir}/udev/scripts
 	install -m 0755 ${WORKDIR}/qualcomm.sh ${D}${sysconfdir}/udev/scripts/
+	install -d ${D}${sysconfdir}/udev/rules.d
+	install -m 0644 ${WORKDIR}/81-qcom-wifi.rules ${D}${sysconfdir}/udev/rules.d/
 }
 
 FILES_${PN} += " \
