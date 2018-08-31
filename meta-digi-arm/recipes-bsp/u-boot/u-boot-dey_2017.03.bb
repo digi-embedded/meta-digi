@@ -12,7 +12,7 @@ DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-n
 
 PROVIDES += "u-boot"
 
-SRCBRANCH = "v2017.03/master"
+SRCBRANCH = "v2017.03/maint"
 SRCREV = "${AUTOREV}"
 
 S = "${WORKDIR}/git"
