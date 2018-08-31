@@ -1,6 +1,6 @@
 # Copyright (C) 2012-2018 Digi International
 
-require u-boot.inc
+require u-boot-2015.04.inc
 
 DESCRIPTION = "Bootloader for Digi platforms"
 LICENSE = "GPLv2+"

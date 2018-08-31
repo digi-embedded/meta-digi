@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2017, Digi International Inc.
+# Copyright (C) 2013-2018, Digi International Inc.
 
 SUMMARY = "DEY examples packagegroup"
 
@@ -9,34 +9,37 @@ inherit packagegroup
 
 RDEPENDS_${PN} = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "alsa", "dey-examples-alsa", "", d)} \
-	dey-examples-gpio-sysfs \
-	${@bb.utils.contains("MACHINE_FEATURES", "rtc", "dey-examples-rtc", "", d)} \
-	dey-examples-spidev \
 	${@bb.utils.contains("MACHINE_FEATURES", "alsa", "dey-examples-vplay", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "cryptochip", "dey-examples-cryptochip", "", d)} \
+	awsiotsdk-demo \
+	dey-examples-can \
+	dey-examples-cloudconnector \
+	dey-examples-digiapix \
+	dey-examples-gpio-sysfs \
+	dey-examples-rtc \
+	dey-examples-spidev \
 	dey-examples-watchdog \
 "
 
 RDEPENDS_${PN}_append_ccimx6 = "\
-	awsiotsdk-demo \
-	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
-	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
-	dey-examples-can \
-	dey-examples-cloudconnector \
-	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \
 	dey-examples-v4l2 \
 "
 
 RDEPENDS_${PN}_append_ccimx6ul = "\
-	awsiotsdk-demo \
-	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
-	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
 	dey-examples-adc \
 	dey-examples-adc-cmp \
-	dey-examples-can \
-	dey-examples-cloudconnector \ 
-	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 	dey-examples-tamper \
 "
 
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"
+RDEPENDS_${PN}_append_ccimx8x = "\
+	dey-examples-adc \
+	dey-examples-adc-cmp \
+	dey-examples-tamper \
+	dey-examples-v4l2 \
+"
+
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x)"

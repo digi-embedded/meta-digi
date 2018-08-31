@@ -12,6 +12,9 @@ include conf/machine/include/tune-cortexa9.inc
 UBOOT_SUFFIX = "imx"
 UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
+# Linux kernel configuration
+KERNEL_DEFCONFIG ?= "arch/arm/configs/ccimx6sbc_defconfig"
+
 # Wireless external module
 WIRELESS_MODULE ?= ""
 
@@ -30,7 +33,7 @@ MACHINE_EXTRA_RDEPENDS += " \
 MACHINE_EXTRA_RRECOMMENDS += " \
     ${MACHINE_FIRMWARE} \
     ${WIRELESS_MODULE} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
+    ${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
     cryptodev-module \
 "
 

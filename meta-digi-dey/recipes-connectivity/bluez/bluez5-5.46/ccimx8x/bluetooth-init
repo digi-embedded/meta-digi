@@ -1,0 +1,93 @@
+#!/bin/sh
+#===============================================================================
+#
+#  Copyright (C) 2018 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Initialize bluetooth hardware
+#
+#===============================================================================
+
+# Bluetooth power GPIO
+BT_EN_QCA_GPIO_NR="394"
+
+# set_gpio_value <gpio_nr> <value>
+set_gpio_value() {
+	local SG_GPIONR="${1}"
+	local SG_GPIOVAL="${2}"
+	local SG_GPIOPATH="/sys/class/gpio/gpio${SG_GPIONR}"
+
+	[ -d "${SG_GPIOPATH}" ] || printf "%s" "${SG_GPIONR}" > /sys/class/gpio/export
+	printf out > "${SG_GPIOPATH}/direction" && sleep .2
+	printf "${SG_GPIOVAL}" > "${SG_GPIOPATH}/value" && sleep .2
+	[ -d "${SG_GPIOPATH}" ] && printf "%s" "${SG_GPIONR}" > /sys/class/gpio/unexport
+}
+
+# powercycle_gpio <gpio_nr>
+powercycle_gpio() {
+	set_gpio_value "${1}" 0
+	set_gpio_value "${1}" 1
+}
+
+error() {
+	echo ${1}
+	exit 1
+}
+
+bluetooth_init() {
+	# Get MAC address from the device tree. Use a default value if it has not been set.
+	BT_MACADDR="$(hexdump -ve '1/1 "%02X" ":"' /proc/device-tree/bluetooth/mac-address 2>/dev/null | sed 's/:$//g')"
+	if [ -z "${BT_MACADDR}" ] || [ "${BT_MACADDR}" = "00:00:00:00:00:00" ]; then
+		BT_MACADDR="00:04:F3:FF:FF:BB"
+	fi
+
+	# Start the Bluetooth driver and bring up the interface
+	HCIATTACH_LOG="/var/log/hciattach.log"
+
+	for RETRY in $(seq 1 5)
+	do
+		killproc hciattach
+		powercycle_gpio "${BT_EN_QCA_GPIO_NR}"
+		if hciattach ttyBt qca ${BT_RATE:-3000000} -t30 ${BT_FLOW:-flow} unused ${BT_MACADDR} >${HCIATTACH_LOG} 2>&1; then
+			return
+		fi
+		sleep 1
+	done
+	BT_ERROR="FAIL (hciattach)"
+}
+
+# Source function library
+. /etc/init.d/functions
+
+case "$1" in
+	start)
+		if [ -d "/proc/device-tree/bluetooth" ]; then
+			echo -n "Starting bluetooth hardware: "
+			bluetooth_init
+			echo "${BT_ERROR:-done.}"
+		fi
+		;;
+	stop)
+		if [ -d "/sys/class/bluetooth/hci0" ]; then
+			echo -n "Stopping bluetooth hardware: "
+			killproc hciattach
+			# Power down bluetooth
+			set_gpio_value "${BT_EN_QCA_GPIO_NR}" 0
+			echo "done."
+		fi
+		;;
+	restart)
+		$0 stop
+		sleep 1
+		$0 start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+		;;
+esac

@@ -9,17 +9,10 @@ DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-n
 
 inherit kernel fsl-kernel-localversion
 
-LOCALVERSION = "-dey"
+require recipes-kernel/linux/linux-dey-src.inc
 
-# Select internal or Github Linux repo
-LINUX_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}linux-2.6.git', '${DIGI_GITHUB_GIT}/linux.git', d)}"
-
-SRC_URI = " \
-    ${LINUX_GIT_URI};branch=${SRCBRANCH} \
-    file://defconfig \
-"
-
-S = "${WORKDIR}/git"
+# Use custom provided 'defconfig' if variable KERNEL_DEFCONFIG is cleared
+SRC_URI += "${@base_conditional('KERNEL_DEFCONFIG', '', 'file://defconfig', '', d)}"
 
 do_deploy[postfuncs] += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence_sign', '', d)}"
 
@@ -58,3 +51,21 @@ FILES_kernel-image += "/boot/config-${KERNEL_VERSION}"
 
 # Don't include kernels in standard images
 RDEPENDS_kernel-base = ""
+
+# A user can provide his own kernel 'defconfig' file by:
+# - setting the variable KERNEL_DEFCONFIG to a custom kernel configuration file
+#   inside the kernel repository.
+# - setting the variable KERNEL_DEFCONFIG to a kernel configuration file using
+#   the full path to the file.
+# - clearing the variable KERNEL_DEFCONFIG and providing a kernel configuration
+#   file in the layer (in this case the file must be named 'defconfig').
+# Otherwise the default platform's kernel configuration file will be taken from
+# the Linux source code tree.
+do_copy_defconfig[vardeps] += "KERNEL_DEFCONFIG"
+do_copy_defconfig[dirs] = "${S}"
+do_copy_defconfig () {
+	if [ -n "${KERNEL_DEFCONFIG}" ]; then
+		cp -f ${KERNEL_DEFCONFIG} ${WORKDIR}/defconfig
+	fi
+}
+addtask copy_defconfig after do_patch before do_preconfigure

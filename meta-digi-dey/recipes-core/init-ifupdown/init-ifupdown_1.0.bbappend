@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2017 Digi International Inc.
+# Copyright (C) 2013-2018 Digi International Inc.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
@@ -18,6 +18,12 @@ SRC_URI_append_ccimx6qpsbc = "\
 "
 
 SRC_URI_append_ccimx6ul = "\
+    file://interfaces.wlan1.static \
+    file://interfaces.wlan1.dhcp \
+    file://virtwlans.sh \
+"
+
+SRC_URI_append_ccimx8x = "\
     file://interfaces.wlan1.static \
     file://interfaces.wlan1.dhcp \
     file://virtwlans.sh \
@@ -49,54 +55,46 @@ do_install_append() {
 	sed -i -e "s,##P2P0_STATIC_GATEWAY##,${P2P0_STATIC_GATEWAY},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##P2P0_STATIC_DNS##,${P2P0_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WPA_DRIVER##,${WPA_DRIVER},g" ${D}${sysconfdir}/network/interfaces
+
+	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
 }
 
-do_install_append_ccimx6sbc() {
-	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
+install_virtwlans() {
+	install -d ${D}${base_bindir}
+	install -m 0755 ${WORKDIR}/virtwlans.sh ${D}${base_bindir}
+}
+
+install_wlan1() {
+	if [ -n "${HAVE_WIFI}" ]; then
+		cat ${WORKDIR}/interfaces.wlan1.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
+	fi
+
+	# Remove config entries if corresponding variable is not defined
+	[ -z "${WLAN1_STATIC_DNS}" ] && sed -i -e "/##WLAN1_STATIC_DNS##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${WLAN1_STATIC_GATEWAY}" ] && sed -i -e "/##WLAN1_STATIC_GATEWAY##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${WLAN1_STATIC_IP}" ] && sed -i -e "/##WLAN1_STATIC_IP##/d" ${D}${sysconfdir}/network/interfaces
+	[ -z "${WLAN1_STATIC_NETMASK}" ] && sed -i -e "/##WLAN1_STATIC_NETMASK##/d" ${D}${sysconfdir}/network/interfaces
+
+	# Replace interface parameters
+	sed -i -e "s,##WLAN1_STATIC_IP##,${WLAN1_STATIC_IP},g" ${D}${sysconfdir}/network/interfaces
+	sed -i -e "s,##WLAN1_STATIC_NETMASK##,${WLAN1_STATIC_NETMASK},g" ${D}${sysconfdir}/network/interfaces
+	sed -i -e "s,##WLAN1_STATIC_GATEWAY##,${WLAN1_STATIC_GATEWAY},g" ${D}${sysconfdir}/network/interfaces
+	sed -i -e "s,##WLAN1_STATIC_DNS##,${WLAN1_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
 }
 
 do_install_append_ccimx6qpsbc() {
-	install -d ${D}${base_bindir}
-	install -m 0755 ${WORKDIR}/virtwlans.sh ${D}${base_bindir}
-	if [ -n "${HAVE_WIFI}" ]; then
-		cat ${WORKDIR}/interfaces.wlan1.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
-	fi
-
-	# Remove config entries if corresponding variable is not defined
-	[ -z "${WLAN1_STATIC_DNS}" ] && sed -i -e "/##WLAN1_STATIC_DNS##/d" ${D}${sysconfdir}/network/interfaces
-	[ -z "${WLAN1_STATIC_GATEWAY}" ] && sed -i -e "/##WLAN1_STATIC_GATEWAY##/d" ${D}${sysconfdir}/network/interfaces
-	[ -z "${WLAN1_STATIC_IP}" ] && sed -i -e "/##WLAN1_STATIC_IP##/d" ${D}${sysconfdir}/network/interfaces
-	[ -z "${WLAN1_STATIC_NETMASK}" ] && sed -i -e "/##WLAN1_STATIC_NETMASK##/d" ${D}${sysconfdir}/network/interfaces
-
-	# Replace interface parameters
-	sed -i -e "s,##WLAN1_STATIC_IP##,${WLAN1_STATIC_IP},g" ${D}${sysconfdir}/network/interfaces
-	sed -i -e "s,##WLAN1_STATIC_NETMASK##,${WLAN1_STATIC_NETMASK},g" ${D}${sysconfdir}/network/interfaces
-	sed -i -e "s,##WLAN1_STATIC_GATEWAY##,${WLAN1_STATIC_GATEWAY},g" ${D}${sysconfdir}/network/interfaces
-	sed -i -e "s,##WLAN1_STATIC_DNS##,${WLAN1_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
-
-	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
+	install_virtwlans
+	install_wlan1
 }
 
 do_install_append_ccimx6ul() {
-	install -d ${D}${base_bindir}
-	install -m 0755 ${WORKDIR}/virtwlans.sh ${D}${base_bindir}
-	if [ -n "${HAVE_WIFI}" ]; then
-		cat ${WORKDIR}/interfaces.wlan1.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
-	fi
+	install_virtwlans
+	install_wlan1
+}
 
-	# Remove config entries if corresponding variable is not defined
-	[ -z "${WLAN1_STATIC_DNS}" ] && sed -i -e "/##WLAN1_STATIC_DNS##/d" ${D}${sysconfdir}/network/interfaces
-	[ -z "${WLAN1_STATIC_GATEWAY}" ] && sed -i -e "/##WLAN1_STATIC_GATEWAY##/d" ${D}${sysconfdir}/network/interfaces
-	[ -z "${WLAN1_STATIC_IP}" ] && sed -i -e "/##WLAN1_STATIC_IP##/d" ${D}${sysconfdir}/network/interfaces
-	[ -z "${WLAN1_STATIC_NETMASK}" ] && sed -i -e "/##WLAN1_STATIC_NETMASK##/d" ${D}${sysconfdir}/network/interfaces
-
-	# Replace interface parameters
-	sed -i -e "s,##WLAN1_STATIC_IP##,${WLAN1_STATIC_IP},g" ${D}${sysconfdir}/network/interfaces
-	sed -i -e "s,##WLAN1_STATIC_NETMASK##,${WLAN1_STATIC_NETMASK},g" ${D}${sysconfdir}/network/interfaces
-	sed -i -e "s,##WLAN1_STATIC_GATEWAY##,${WLAN1_STATIC_GATEWAY},g" ${D}${sysconfdir}/network/interfaces
-	sed -i -e "s,##WLAN1_STATIC_DNS##,${WLAN1_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
-
-	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
+do_install_append_ccimx8x() {
+	install_virtwlans
+	install_wlan1
 }
 
 # Disable wireless interfaces on first boot for non-wireless variants

@@ -12,6 +12,9 @@ include conf/machine/include/tune-cortexa7.inc
 UBOOT_SUFFIX = "imx"
 UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
+# Linux kernel configuration
+KERNEL_DEFCONFIG ?= "arch/arm/configs/ccimx6ul_defconfig"
+
 # Wireless external module
 WIRELESS_MODULE ?= ""
 WIRELESS_MODULE_append = " ${@base_conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
@@ -32,12 +35,13 @@ MACHINE_EXTRA_RDEPENDS += " \
 MACHINE_EXTRA_RRECOMMENDS += " \
     ${MACHINE_FIRMWARE} \
     ${WIRELESS_MODULE} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
+    ${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
     cryptoauthlib \
     cryptodev-module \
+    cryptoauth-openssl-engine \
 "
 
-MACHINE_FEATURES += "wifi bluetooth"
+MACHINE_FEATURES += "wifi bluetooth cryptochip"
 
 MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6564-bt', '', d)}"
 MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6564-wifi', '', d)}"

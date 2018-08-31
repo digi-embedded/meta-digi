@@ -10,15 +10,16 @@ SRC_URI += " \
     file://0003-port-test-discovery-to-python3.patch \
 "
 
-QCA6564_COMMON_PATCHES = " \
+QCA65XX_COMMON_PATCHES = " \
     file://0004-QCA_bluetooth_chip_support.patch \
     file://0005-hciattach_rome-Respect-the-user-indication-for-noflo.patch \
     file://0006-hciattach-If-the-user-supplies-a-bdaddr-use-it.patch \
     file://0007-hciattach-Add-verbosity-option.patch \
 "
 
-SRC_URI_append_ccimx6ul = " ${QCA6564_COMMON_PATCHES}"
-SRC_URI_append_ccimx6qpsbc = " ${QCA6564_COMMON_PATCHES}"
+SRC_URI_append_ccimx6ul = " ${QCA65XX_COMMON_PATCHES}"
+SRC_URI_append_ccimx6qpsbc = " ${QCA65XX_COMMON_PATCHES}"
+SRC_URI_append_ccimx8x = " ${QCA65XX_COMMON_PATCHES}"
 
 inherit update-rc.d
 

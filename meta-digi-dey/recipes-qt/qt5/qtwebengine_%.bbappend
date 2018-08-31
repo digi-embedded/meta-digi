@@ -1,4 +1,12 @@
-# Copyright (C) 2015 Digi International
+# Copyright (C) 2015-2018 Digi International
+
+do_install_append() {
+	if ls ${D}${libdir}/pkgconfig/Qt5*.pc >/dev/null 2>&1; then
+		sed -i 's,-L${STAGING_DIR_HOST}/usr/lib,,' ${D}${libdir}/pkgconfig/Qt5*.pc
+	fi
+}
+
+COMPATIBLE_MACHINE_aarch64 = "(.*)"
 
 # Decrease memory used by the linker to avoid being killed due to
 # out of memory.
