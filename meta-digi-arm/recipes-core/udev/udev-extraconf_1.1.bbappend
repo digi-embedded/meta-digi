@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2017 Digi International.
+# Copyright (C) 2013-2018 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
@@ -6,6 +6,7 @@ SRC_URI += " \
     file://mount_bootparts.sh \
     file://mount_partition.sh \
     file://81-spi-spidev.rules \
+    file://blacklist.conf \
 "
 
 do_install_append() {
@@ -20,7 +21,12 @@ do_install_append() {
 		       "KERNEL==\"${BT_TTY}\", MODE=\"0660\", GROUP=\"dialout\", SYMLINK+=\"ttyBt\"" \
 		       >> ${D}${sysconfdir}/udev/rules.d/localextra.rules
 	fi
+
+	install -d ${D}${sysconfdir}/modprobe.d
+	install -m 0644 ${WORKDIR}/blacklist.conf ${D}${sysconfdir}/modprobe.d
 }
+
+FILES_${PN}_append = " ${sysconfdir}/modprobe.d"
 
 # BT_TTY is machine specific (defined in machine config file)
 PACKAGE_ARCH = "${MACHINE_ARCH}"
