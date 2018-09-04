@@ -14,6 +14,10 @@ UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS = "imx-boot"
+IMAGE_BOOTLOADER = "imx-boot"
+# BOOTLOADER_SEEK is 33 for step A of the silicon and 32 for step B
+BOOTLOADER_SEEK = "33"
+UBOOT_SYMLINK = "imx-boot-${MACHINE}.bin"
 
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8x_defconfig"
