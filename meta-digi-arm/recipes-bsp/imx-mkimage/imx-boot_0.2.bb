@@ -218,6 +218,7 @@ do_deploy () {
         done
         cd ${DEPLOYDIR}
         ln -sf ${BOOT_CONFIG_MACHINE}-${type}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOT_CONFIG_MACHINE}-${type}.bin
+        ln -sf ${BOOT_CONFIG_MACHINE}-${type}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOT_CONFIG_MACHINE}-${MACHINE}.bin
         cd -
     done
 }
