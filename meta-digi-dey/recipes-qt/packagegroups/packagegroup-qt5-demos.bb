@@ -9,7 +9,6 @@ inherit packagegroup
 
 RDEPENDS_${PN}_append = " \
     qtserialport \
-    qtsmarthome \
 "
 
 # Install the following apps on SoC with GPU
