@@ -5,6 +5,11 @@ Digi Embedded Yocto provides the following image recipes:
     By default the image is XWayland-based so it provides a full Weston
     desktop environment.
 
+    To compile the image for the framebuffer (instead of XWayland) add
+    the following line to the project's conf/local.conf:
+
+    DISTRO_FEATURES_remove = "x11 wayland vulkan"
+
   * dey-image-aws: console-only image supporting Amazon Web Services IoT
 
     This image includes the AWS Greengrass Core and an AWS IoT platform
