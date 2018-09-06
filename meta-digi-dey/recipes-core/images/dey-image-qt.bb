@@ -5,7 +5,7 @@ DESCRIPTION = "DEY image with QT graphical libraries"
 LICENSE = "MIT"
 
 SOC_PACKAGES = ""
-SOC_PACKAGES_imxgpu2d = "imx-gpu-viv-demos imx-gpu-viv-tools"
+SOC_PACKAGES_ccimx6 = "imx-gpu-viv-demos imx-gpu-viv-tools"
 
 IMAGE_INSTALL = " \
     packagegroup-dey-core \
