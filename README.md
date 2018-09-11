@@ -63,9 +63,13 @@ Software for the following hardware platforms is in production support:
 
 ## ConnectCore 8X
 * ConnectCore 8X System-on-Module (SOM)
-  * [P/N TBD](https://www.digi.com/cc8x)
+  * [CC-WMX-JM7D-NN](https://www.digi.com/cc8x)
+  * [CC-WMX-JM8E-NN](https://www.digi.com/cc8x)
+  * [CC-MX-JM8D-ZN](https://www.digi.com/cc8x)
+  * [CC-WMX-JN7D-NN](https://www.digi.com/cc8x)
+  * [CC-MX-JN7D-ZN](https://www.digi.com/cc8x)
 * ConnectCore 8X SBC Express
-  * [P/N TBD](https://www.digi.com/cc8x)
+  * [CC-WMX8-EXPRESS](https://www.digi.com/cc8x)
 
 Previous versions of Digi Embedded Yocto include support for additional Digi
 hardware.
