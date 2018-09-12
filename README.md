@@ -222,7 +222,6 @@ boot a signed U-Boot only.
   * The following features are not supported in this release:
     * Trustfence (TM)
     * Digi Remote Manager
-    * Cloud connector
     * Amazon Web Services
 
 # Support Contact Information
