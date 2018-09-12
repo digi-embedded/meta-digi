@@ -22,7 +22,3 @@ RDEPENDS_${PN}_append_imxgpu = " \
     qt5-demo-extrafiles \
     qt5everywheredemo \
 "
-
-RDEPENDS_${PN}_append_imxgpu3d = " \
-    qt3d-examples \
-"
