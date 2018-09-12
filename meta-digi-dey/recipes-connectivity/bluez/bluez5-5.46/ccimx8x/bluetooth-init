@@ -46,6 +46,21 @@ bluetooth_init() {
 		BT_MACADDR="00:04:F3:FF:FF:BB"
 	fi
 
+	# Module version older than revision 2 has swapped CTS and RTS lines
+	MOD_VERSION="$(($(cat /proc/device-tree/digi,hwid,hv 2>/dev/null | tr -d '\0' || true)))"
+	if [ "${MOD_VERSION}" -lt "2" ]; then
+		# Reduce the rate to avoid the need for HW flow control
+		BT_RATE="115200"
+		BT_RATE_CODE="00" # 115200 bps
+		BT_FLOW="noflow"
+
+		# Modify the baudrate in the firmware file
+		BT_FW_FILE="/lib/firmware/qca/nvm_tlv_3.2.bin"
+		if [ "$(hexdump -s 56 -n 1 -ve '1/1 "%.2x"' ${BT_FW_FILE})" != "${BT_RATE_CODE}" ]; then
+			printf "\x${BT_RATE_CODE}" | dd of="${BT_FW_FILE}" bs=1 seek=56 count=1 conv=notrunc,fsync 2>/dev/null
+		fi
+	fi
+
 	# Start the Bluetooth driver and bring up the interface
 	HCIATTACH_LOG="/var/log/hciattach.log"
 
