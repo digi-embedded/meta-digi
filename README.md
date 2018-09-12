@@ -218,7 +218,12 @@ boot a signed U-Boot only.
     future releases of the hardware.
   * MCA tamper pins configuration is not supported. It will be available in
     future releases.
-  * Trustfence (TM) is not supported. It will be available in future releases.
+* Digi Embedded Yocto
+  * The following features are not supported in this release:
+    * Trustfence (TM)
+    * Digi Remote Manager
+    * Cloud connector
+    * Amazon Web Services
 
 # Support Contact Information
 
