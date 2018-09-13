@@ -21,8 +21,10 @@ fi
 
 # Determine U-Boot file to program basing on module variant
 if test -n "${module_variant}"; then
-	if test "${module_variant}" = "0x01"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx8x-sbc-express.bin;
+	if test "${module_variant}" = "0x01" || test "${module_variant}" = "0x04" || test "${module_variant}" = "0x05"; then
+		setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express1GB.bin;
+	elif test "${module_variant}" = "0x02" || test "${module_variant}" = "0x03"; then
+		setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express2GB.bin;
 	fi
 fi
 # Use 'test -n ...' because 'test -z ...' does not work well on old versions of
@@ -35,7 +37,9 @@ else
 	echo "";
 	echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 8X variant:";
 	echo "   - For a QuadXPlus CPU with 1GB DDR3, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx8x-sbc-express.bin";
+	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express1GB.bin";
+	echo "   - For a QuadXPlus CPU with 2GB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express2GB.bin";
 	echo "";
 	echo "2. Run the install script again.";
 	echo "";
