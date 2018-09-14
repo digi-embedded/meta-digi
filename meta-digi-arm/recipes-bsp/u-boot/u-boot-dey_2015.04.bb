@@ -12,13 +12,13 @@ DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-n
 PROVIDES += "u-boot"
 
 SRCBRANCH = "v2015.04/maint"
-SRCREV = "5ea79bed5143fc47e5b11af2d44a04bab9af4092"
+SRCREV = "${AUTOREV}"
 
 # Select internal or Github U-Boot repo
 UBOOT_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}u-boot-denx.git', '${DIGI_GITHUB_GIT}/u-boot.git', d)}"
 
 SRC_URI = " \
-    ${UBOOT_GIT_URI};nobranch=1 \
+    ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
 "
 
 SRC_URI_append = " \
