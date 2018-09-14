@@ -92,15 +92,18 @@ fi
 # Set 'bootcmd' to the second part of the script that will
 #  - Reset environment to defaults
 #  - Save the environment
+#  - Force on-the-fly updates to avoid possible verification errors
 #  - Partition the eMMC user data area for Linux
 #  - Update the 'linux' partition
 #  - Update the 'recovery' partition
 #  - Update the 'rootfs' partition
 #  - Configure recovery to wipe 'update' partition
+#  - Disable on-the-fly updates
 #  - Run 'recovery' and let the system boot after
 setenv bootcmd "
 	env default -a;
 	saveenv;
+	setenv otf-update yes;
 	echo \"\";
 	echo \"\";
 	echo \">> Creating Linux partition table on the eMMC\";
@@ -152,6 +155,7 @@ setenv bootcmd "
 	echo \"\";
 	setenv boot_recovery yes;
 	setenv recovery_command wipe_update;
+	setenv otf-update;
 	saveenv;
 	echo \"\";
 	echo \"\";
