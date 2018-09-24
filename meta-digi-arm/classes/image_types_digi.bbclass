@@ -228,6 +228,10 @@ BOARD_BOOTIMAGE_PARTITION_SIZE ??= "65536"
 # SD card image name
 SDIMG = "${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.sdcard"
 
+IMAGE_BOOTLOADER ?= "u-boot"
+BOOTLOADER_SEEK ?= "1"
+
+SDIMG_BOOTLOADER ?= "${DEPLOY_DIR_IMAGE}/${UBOOT_SYMLINK}"
 SDIMG_BOOTFS_TYPE ?= "boot.vfat"
 SDIMG_BOOTFS = "${IMGDEPLOYDIR}/${IMAGE_NAME}.${SDIMG_BOOTFS_TYPE}"
 SDIMG_ROOTFS_TYPE ?= "ext4"
@@ -237,7 +241,7 @@ do_image_sdcard[depends] = " \
     dosfstools-native:do_populate_sysroot \
     mtools-native:do_populate_sysroot \
     parted-native:do_populate_sysroot \
-    u-boot:do_deploy \
+    ${IMAGE_BOOTLOADER}:do_deploy \
     virtual/kernel:do_deploy \
 "
 
@@ -274,14 +278,14 @@ IMAGE_CMD_sdcard() {
 	parted -s ${SDIMG} -- unit KiB mkpart primary ext2 $(expr ${IMAGE_ROOTFS_ALIGNMENT} \+ ${BOOT_SPACE_ALIGNED}) -1s
 	parted -s ${SDIMG} unit KiB print
 
+	# FIXME: adapt trustfence handling for imx-boot
 	# Set u-boot image to flash depending on whether TRUSTFENCE_SIGN is enabled
-	SDIMG_UBOOT="${DEPLOY_DIR_IMAGE}/${UBOOT_SYMLINK}"
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
-		SDIMG_UBOOT="$(readlink -e ${SDIMG_UBOOT} | sed -e 's,u-boot-,u-boot-signed-,g')"
+		SDIMG_BOOTLOADER="$(readlink -e ${SDIMG_BOOTLOADER} | sed -e 's,u-boot-,u-boot-signed-,g')"
 	fi
 
 	# Burn bootloader, boot and rootfs partitions
-	dd if=${SDIMG_UBOOT} of=${SDIMG} conv=notrunc,fsync seek=2 bs=512
+	dd if=${SDIMG_BOOTLOADER} of=${SDIMG} conv=notrunc,fsync seek=${BOOTLOADER_SEEK} bs=1K
 	dd if=${SDIMG_BOOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024)
 	dd if=${SDIMG_ROOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024 + ${BOOT_SPACE_ALIGNED} \* 1024)
 }

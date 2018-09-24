@@ -36,8 +36,8 @@ ZIP_INSTALLER_CFG="
 DEY_IMAGE_INSTALLER = \"1\"
 "
 
-X11_REMOVAL_CFG="
-DISTRO_FEATURES_remove = \"x11\"
+BACKEND_REMOVAL_CFG="
+DISTRO_FEATURES_remove = \"x11 wayland vulkan\"
 "
 
 REPO="$(which repo)"
@@ -117,7 +117,9 @@ swu_recipe_name() {
 # Per-platform data
 while read _pl _tgt; do
 	[ -n "${DY_TARGET}" ] && _tgt="${DY_TARGET}" || true
-	eval "${_pl}_tgt=\"${_tgt}\""
+	# Dashes are not allowed in variables so let's substitute them on
+	# the fly with underscores.
+	eval "${_pl//-/_}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
 	ccimx8x-sbc-express  dey-image-qt
 	ccimx6qpsbc          dey-image-qt
@@ -159,7 +161,9 @@ fi
 # Create projects and build
 rm -rf ${YOCTO_IMGS_DIR} ${YOCTO_PROJ_DIR}
 for platform in ${DY_PLATFORMS}; do
-	eval platform_targets="\${${platform}_tgt}"
+	# The variables <platform>_var|tgt got their dashes converted to
+	# underscores, so we must convert also the ones in ${platform}.
+	eval platform_targets=\"\${${platform//-/_}_tgt}\"
 	_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}"
 	_this_img_dir="${YOCTO_IMGS_DIR}/${platform}"
 	mkdir -p ${_this_img_dir} ${_this_prj_dir}
@@ -175,9 +179,9 @@ for platform in ${DY_PLATFORMS}; do
 				conf/local.conf
 			printf "${RM_WORK_CFG}" >> conf/local.conf
 			printf "${ZIP_INSTALLER_CFG}" >> conf/local.conf
-			# Remove 'x11' distro feature if building framebuffer images
+			# Remove all desktop backend distro features if building framebuffer images
 			if [ "${DY_FB_IMAGE}" = "true" ]; then
-				printf "${X11_REMOVAL_CFG}" >> conf/local.conf
+				printf "${BACKEND_REMOVAL_CFG}" >> conf/local.conf
 			fi
 			for target in ${platform_targets}; do
 				printf "\n[INFO] Building the ${target} target.\n"

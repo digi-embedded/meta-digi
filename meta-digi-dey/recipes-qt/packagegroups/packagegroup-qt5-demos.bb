@@ -9,7 +9,6 @@ inherit packagegroup
 
 RDEPENDS_${PN}_append = " \
     qtserialport \
-    qtsmarthome \
 "
 
 # Install the following apps on SoC with GPU
@@ -22,8 +21,4 @@ RDEPENDS_${PN}_append_imxgpu = " \
     qtsvg-examples \
     qt5-demo-extrafiles \
     qt5everywheredemo \
-"
-
-RDEPENDS_${PN}_append_imxgpu3d = " \
-    qt3d-examples \
 "

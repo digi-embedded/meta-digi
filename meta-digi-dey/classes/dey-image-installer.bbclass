@@ -27,8 +27,8 @@ generate_installer_zip () {
 		fi
 	done
 	for ubconf in ${UBOOT_CONFIG}; do
-		if readlink -e "${DEPLOY_DIR_IMAGE}/u-boot-${ubconf}.${UBOOT_SUFFIX}" >/dev/null; then
-			INSTALLER_FILELIST="${INSTALLER_FILELIST} ${DEPLOY_DIR_IMAGE}/u-boot-${ubconf}.${UBOOT_SUFFIX}"
+		if readlink -e "${DEPLOY_DIR_IMAGE}/${IMAGE_BOOTLOADER}-${ubconf}.${UBOOT_SUFFIX}" >/dev/null; then
+			INSTALLER_FILELIST="${INSTALLER_FILELIST} ${DEPLOY_DIR_IMAGE}/${IMAGE_BOOTLOADER}-${ubconf}.${UBOOT_SUFFIX}"
 		fi
 	done
 

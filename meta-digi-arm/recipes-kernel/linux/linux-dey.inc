@@ -1,6 +1,8 @@
 # Copyright (C) 2013-2018 Digi International
 
 SUMMARY = "Linux kernel for Digi boards"
+LICENSE = "GPLv2"
+LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
 DEPENDS += "lzop-native bc-native"
 DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"

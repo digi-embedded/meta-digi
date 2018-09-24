@@ -14,15 +14,15 @@ AWS_USER_LED_ccimx6ulsbc ?= "488"
 AWS_USER_LED_ccimx6sbc ?= "34"
 AWS_USER_LED_ccimx6qpsbc ?= "34"
 
-SRCBRANCH = "master"
-SRCREV = "${AUTOREV}"
+SRCBRANCH = "dey-2.4/maint"
+SRCREV = "6bb9699c29107cad06654bf537e92e4c9ec1b45c"
 
 CC_STASH = "${DIGI_MTK_GIT}dey/dey-examples.git;protocol=ssh"
 CC_GITHUB = "${DIGI_GITHUB_GIT}/dey-examples.git;protocol=git"
 
 CC_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${CC_STASH}', '${CC_GITHUB}', d)}"
 
-SRC_URI = "${CC_GIT_URI};branch=${SRCBRANCH}"
+SRC_URI = "${CC_GIT_URI};nobranch=1"
 
 S = "${WORKDIR}/git/awsiot-sample"
 
