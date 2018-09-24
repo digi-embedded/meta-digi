@@ -7,15 +7,15 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 DEPENDS = "cryptoauthlib"
 
-SRCBRANCH = "dey-2.4/maint"
-SRCREV = "6bb9699c29107cad06654bf537e92e4c9ec1b45c"
+SRCBRANCH = "master"
+SRCREV = "${AUTOREV}"
 
 CC_STASH = "${DIGI_MTK_GIT}dey/dey-examples.git;protocol=ssh"
 CC_GITHUB = "${DIGI_GITHUB_GIT}/dey-examples.git;protocol=git"
 
 CC_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${CC_STASH}', '${CC_GITHUB}', d)}"
 
-SRC_URI = "${CC_GIT_URI};nobranch=1"
+SRC_URI = "${CC_GIT_URI};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git/cryptochip-get-random"
 
