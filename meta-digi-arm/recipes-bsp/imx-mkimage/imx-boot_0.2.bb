@@ -122,7 +122,7 @@ do_compile () {
         cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${SC_FIRMWARE_NAME} ${S}/${SOC_TARGET}/scfw_tcm.bin
         cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${ATF_MACHINE_NAME} ${S}/${SOC_TARGET}/bl31.bin
         for type in ${UBOOT_CONFIG}; do
-            cp ${DEPLOY_DIR_IMAGE}/${UBOOT_NAME}-${type}         ${S}/${SOC_TARGET}/u-boot.bin-${type}
+            cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_NAME}-${type}         ${S}/${SOC_TARGET}/u-boot.bin-${type}
         done
     fi
 
@@ -167,10 +167,7 @@ DEPLOYDIR_IMXBOOT = "${BOOT_TOOLS}"
 do_deploy () {
     install -d ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
 
-    # copy the tool mkimage to deploy path and sc fw, dcd and uboot
-    for type in ${UBOOT_CONFIG}; do
-        install -m 0644 ${DEPLOY_DIR_IMAGE}/${UBOOT_NAME}-${type} ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
-    done
+    # copy the tool mkimage to deploy path along with sc fw and dcd
     if [ "${SOC_TARGET}" = "iMX8M" ]; then
         install -m 0644 ${DEPLOY_DIR_IMAGE}/u-boot-spl.bin-${MACHINE}-${UBOOT_CONFIG} ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
         for ddr_firmware in ${DDR_FIRMWARE_NAME}; do
