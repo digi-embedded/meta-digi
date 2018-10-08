@@ -163,7 +163,7 @@ index fad176c9b804..dda639cabca3 100644
  			FLOW_CTL, DISABLE_PM, NULL, ath3k_ps, ath3k_pm  },
  
 +	/* QCA ROME */
-+        { "qca",    0x0000, 0x0000, HCI_UART_IBS, 115200, 115200,
++        { "qca",    0x0000, 0x0000, HCI_UART_H4, 115200, 115200,
 +                        FLOW_CTL, DISABLE_PM, NULL, qca, NULL },
 +
  	/* QUALCOMM BTS */
