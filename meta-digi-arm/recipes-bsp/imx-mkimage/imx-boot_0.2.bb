@@ -71,8 +71,6 @@ DCD_NAME ?= "imx8qm_dcd.cfg.tmp"
 DCD_NAME_mx8qm = "imx8qm_dcd.cfg.tmp"
 DCD_NAME_mx8qxp = "imx8qx_dcd.cfg.tmp"
 
-DCD_SRC_NAME = "imx8qx_dcd_1.2GHz.cfg"
-
 UBOOT_NAME = "u-boot-${MACHINE}.bin"
 BOOT_CONFIG_MACHINE = "${BOOT_NAME}"
 
@@ -92,9 +90,6 @@ IMXBOOT_TARGETS ?= "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_flexspi'
 IMXBOOT_TARGETS_mx8qxp = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_flexspi', \
                        bb.utils.contains('UBOOT_CONFIG', 'nand', 'flash_nand', \
                                                                  'flash_all flash', d), d)}"
-IMXBOOT_TARGETS_ccimx8x = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_flexspi_a0', \
-                       bb.utils.contains('UBOOT_CONFIG', 'nand', 'flash_nand_a0', \
-                                                                 'flash_dcd_a0 flash_multi_cores_a0', d), d)}"
 IMXBOOT_TARGETS_imx8qxpddr3arm2 = "flash_ddr3_dcd_a0"
 
 S = "${WORKDIR}/git"
@@ -129,10 +124,11 @@ do_compile () {
         cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_rpmsg_lite_pingpong_rtos_linux_remote.bin ${S}/${SOC_TARGET}/m40_tcm.bin
         cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_rpmsg_lite_pingpong_rtos_linux_remote.bin ${S}/${SOC_TARGET}/CM4.bin
         cp ${DEPLOY_DIR_IMAGE}/ahab-container.img ${S}/${SOC_TARGET}/
-        cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${SC_FIRMWARE_NAME} ${S}/${SOC_TARGET}/scfw_tcm.bin
         cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${ATF_MACHINE_NAME} ${S}/${SOC_TARGET}/bl31.bin
         for type in ${UBOOT_CONFIG}; do
+            RAM_SIZE="$(echo ${type} | sed -e 's,.*\([0-9]\+GB\),\1,g')"
             cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_NAME}-${type}         ${S}/${SOC_TARGET}/u-boot.bin-${type}
+            cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${SC_FIRMWARE_NAME}-${RAM_SIZE} ${S}/${SOC_TARGET}/scfw_tcm.bin-${RAM_SIZE}
         done
     fi
 
@@ -146,7 +142,7 @@ do_compile () {
         cd ${S}/${SOC_TARGET}
         ln -sf u-boot.bin-${type} u-boot.bin
         RAM_SIZE="$(echo ${type} | sed -e 's,.*\([0-9]\+GB\),\1,g')"
-        ln -sf ${DCD_SRC_NAME}-${RAM_SIZE} ${DCD_SRC_NAME}
+        ln -sf scfw_tcm.bin-${RAM_SIZE} scfw_tcm.bin
         cd -
         for target in ${IMXBOOT_TARGETS}; do
             echo "building ${SOC_TARGET} - ${type} - ${target}"
@@ -155,8 +151,7 @@ do_compile () {
                 cp ${S}/${SOC_TARGET}/flash.bin ${S}/${BOOT_CONFIG_MACHINE}-${type}.bin-${target}
             fi
         done
-        cp ${S}/${SOC_TARGET}/${DCD_NAME} ${S}/${SOC_TARGET}/${DCD_NAME}-${type}
-        rm ${S}/${SOC_TARGET}/${DCD_SRC_NAME}
+        rm ${S}/${SOC_TARGET}/scfw_tcm.bin
         rm ${S}/${SOC_TARGET}/u-boot.bin
         # Remove u-boot-atf.bin so it gets generated with the next iteration's U-Boot
         rm ${S}/${SOC_TARGET}/u-boot-atf.bin
@@ -194,10 +189,6 @@ do_deploy () {
 
         install -m 0755 ${S}/${TOOLS_NAME} ${DEPLOYDIR}/${BOOT_TOOLS}
     else
-        # the DCD only needs to get copied when using an A0 CPU
-        for type in ${UBOOT_CONFIG}; do
-            install -m 0644 ${S}/${SOC_TARGET}/${DCD_NAME}-${type} ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
-        done
         install -m 0644 ${S}/${SOC_TARGET}/ahab-container.img ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
         install -m 0644 ${S}/${SOC_TARGET}/m40_tcm.bin ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
         install -m 0644 ${S}/${SOC_TARGET}/CM4.bin ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}

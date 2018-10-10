@@ -23,18 +23,24 @@ SYSROOT_DIRS += "/boot"
 
 do_install () {
     install -d ${D}/boot
-    install -m 0644 ${S}/${SC_FIRMWARE_NAME} ${D}/boot/
+    for type in ${UBOOT_CONFIG}; do
+        RAM_SIZE="$(echo ${type} | sed -e 's,.*\([0-9]\+GB\),\1,g')"
+        install -m 0644 ${S}/${SC_FIRMWARE_NAME}-${RAM_SIZE} ${D}/boot/
+    done
 }
 
 BOOT_TOOLS = "imx-boot-tools"
 
 do_deploy () {
     install -d ${DEPLOYDIR}/${BOOT_TOOLS}
-    install -m 0644 ${S}/${SC_FIRMWARE_NAME} ${DEPLOYDIR}/${BOOT_TOOLS}/
-    cd ${DEPLOYDIR}/${BOOT_TOOLS}/
-    rm -f ${symlink_name}
-    ln -sf ${SC_FIRMWARE_NAME} ${symlink_name}
-    cd -
+    for type in ${UBOOT_CONFIG}; do
+        RAM_SIZE="$(echo ${type} | sed -e 's,.*\([0-9]\+GB\),\1,g')"
+        install -m 0644 ${S}/${SC_FIRMWARE_NAME}-${RAM_SIZE} ${DEPLOYDIR}/${BOOT_TOOLS}/
+        cd ${DEPLOYDIR}/${BOOT_TOOLS}/
+        rm -f ${symlink_name}-${RAM_SIZE}
+        ln -sf ${SC_FIRMWARE_NAME}-${RAM_SIZE} ${symlink_name}-${RAM_SIZE}
+        cd -
+    done
 }
 
 addtask deploy after do_install
