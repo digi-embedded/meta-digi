@@ -16,7 +16,7 @@ UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 EXTRA_IMAGEDEPENDS = "imx-boot"
 IMAGE_BOOTLOADER = "imx-boot"
 # BOOTLOADER_SEEK is 33 for step A of the silicon and 32 for step B
-BOOTLOADER_SEEK = "33"
+BOOTLOADER_SEEK = "32"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/imx-boot-${MACHINE}.bin"
 
 # Linux kernel configuration
