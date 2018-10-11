@@ -135,7 +135,8 @@ do_compile () {
     for type in ${UBOOT_CONFIG}; do
         cd ${S}/${SOC_TARGET}
         ln -sf u-boot.bin-${type} u-boot.bin
-        ln -sf ${DCD_SRC_NAME}-${type} ${DCD_SRC_NAME}
+        RAM_SIZE="$(echo ${type} | sed -e 's,.*\([0-9]\+GB\),\1,g')"
+        ln -sf ${DCD_SRC_NAME}-${RAM_SIZE} ${DCD_SRC_NAME}
         cd -
         for target in ${IMXBOOT_TARGETS}; do
             echo "building ${SOC_TARGET} - ${type} - ${target}"
