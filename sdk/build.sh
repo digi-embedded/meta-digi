@@ -171,6 +171,7 @@ while read _pl _var _tgt; do
 	eval "${_pl//-/_}_var=\"${_var//,/ }\""
 	eval "${_pl//-/_}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
+	ccimx8x-sbc-pro      DONTBUILDVARIANTS   dey-image-qt
 	ccimx8x-sbc-express  DONTBUILDVARIANTS   dey-image-qt
 	ccimx6qpsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
 	ccimx6sbc            DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
