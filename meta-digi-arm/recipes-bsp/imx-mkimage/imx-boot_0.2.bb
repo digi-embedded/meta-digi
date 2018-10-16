@@ -31,6 +31,7 @@ DEPENDS += " \
     ${@bb.utils.contains('COMBINED_FEATURES', 'optee', 'optee-os-imx', '', d)} \
 "
 DEPENDS_append_mx8mq = " dtc-native"
+DEPENDS_append_ccimx8x = " coreutils-native"
 
 # For i.MX 8, this package aggregates the imx-m4-demos
 # output. Note that this aggregation replaces the aggregation
