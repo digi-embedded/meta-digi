@@ -9,11 +9,6 @@ require imx-mkimage_git.inc
 
 inherit deploy
 
-SRC_URI_append = " \
-    file://0001-cc8x-configure-DDRC-for-Micron-MT53B256M32D1.patch \
-    file://0002-cc8x-add-second-DCD-for-the-2GB-variant-of-the-cc8x.patch \
-"
-
 # Add CFLAGS with native INCDIR & LIBDIR for imx-mkimage build
 CFLAGS = "-O2 -Wall -std=c99 -static -I ${STAGING_INCDIR_NATIVE} -L ${STAGING_LIBDIR_NATIVE}"
 
