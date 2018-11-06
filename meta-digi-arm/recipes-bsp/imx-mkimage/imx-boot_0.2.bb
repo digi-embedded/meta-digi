@@ -37,8 +37,8 @@ DEPENDS_append_mx8mq = " dtc-native"
 # that would otherwise be done in the image build as controlled
 # by IMAGE_BOOTFILES_DEPENDS and IMAGE_BOOTFILES in image_types_fsl.bbclass
 IMX_M4_DEMOS        = ""
-IMX_M4_DEMOS_mx8qm  = "imx-m4-demos:do_deploy"
-IMX_M4_DEMOS_mx8qxp = "imx-m4-demos:do_deploy"
+IMX_M4_DEMOS_mx8qm  = "imx-m4-demos"
+IMX_M4_DEMOS_mx8qxp = "imx-m4-demos"
 
 # This package aggregates output deployed by other packages,
 # so set the appropriate dependencies
@@ -46,8 +46,18 @@ do_compile[depends] += " \
     virtual/bootloader:do_deploy \
     ${@' '.join('%s:do_deploy' % r for r in '${IMX_FIRMWARE}'.split() )} \
     imx-atf:do_deploy \
-    ${IMX_M4_DEMOS} \
+    ${@' '.join('%s:do_deploy' % r for r in '${IMX_M4_DEMOS}'.split() )} \
     ${@bb.utils.contains('COMBINED_FEATURES', 'optee', 'optee-os-imx:do_deploy', '', d)} \
+"
+
+# This package aggregates dependencies with other packages,
+# so also define the license dependencies.
+do_populate_lic[depends] += " \
+    virtual/bootloader:do_populate_lic \
+    ${@' '.join('%s:do_populate_lic' % r for r in '${IMX_FIRMWARE}'.split() )} \
+    imx-atf:do_populate_lic \
+    ${@' '.join('%s:do_populate_lic' % r for r in '${IMX_M4_DEMOS}'.split() )} \
+    ${@bb.utils.contains('COMBINED_FEATURES', 'optee', 'optee-os-imx:do_populate_lic', '', d)} \
 "
 
 SC_FIRMWARE_NAME ?= "scfw_tcm.bin"
