@@ -65,7 +65,7 @@ struct adc_data adc_list[] = {
 		.nbits 		= 12,
 	},
 	{
-		.type 		= ADC_TYPE_MCA_C6UL,
+		.type 		= ADC_TYPE_MCA_CC6UL,
 		.name 		= "MCA-CC6UL",
 		.dev_name 	= "mca-cc6ul-adc",
 		.nbits 		= 12,
