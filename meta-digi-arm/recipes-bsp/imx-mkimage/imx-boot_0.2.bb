@@ -18,7 +18,7 @@ PROVIDES = "${BOOT_NAME}"
 
 IMX_FIRMWARE       = "imx-sc-firmware"
 IMX_FIRMWARE_mx8mq = "firmware-imx"
-IMX_FIRMWARE_mx8qxp = "firmware-imx imx-sc-firmware"
+IMX_FIRMWARE_mx8qxp = "firmware-imx digi-sc-firmware"
 DEPENDS += " \
     u-boot \
     ${IMX_FIRMWARE} \

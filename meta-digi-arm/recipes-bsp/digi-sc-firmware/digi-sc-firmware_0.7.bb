@@ -2,7 +2,7 @@
 # Copyright 2017-2018 NXP
 # Copyright (C) 2018 Digi International.
 
-DESCRIPTION = "i.MX System Controller Firmware"
+DESCRIPTION = "i.MX System Controller Firmware, customized for Digi platforms"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=ab61cab9599935bfe9f700405ef00f28"
 SECTION = "BSP"
