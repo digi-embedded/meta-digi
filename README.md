@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 2.4
-## Release 2.4-r2.4-beta
+## Release 2.4-r2.1
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -93,12 +93,12 @@ Documentation is available online on the Digi documentation site:
 
 # Downloads
 
-* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.4/r2-beta/images/
-* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.4/r2-beta/sdk/
+* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.4/r2/images/
+* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.4/r2/sdk/
 
 # Release Changelog
 
-## 2.4-r2.4-beta
+## 2.4-r2.1
 
 * Added support for ConnectCore 8X platform. Supported features:
     * Bluetooth and Wireless interfaces (STA, SoftAP, P2P, Concurrence)
