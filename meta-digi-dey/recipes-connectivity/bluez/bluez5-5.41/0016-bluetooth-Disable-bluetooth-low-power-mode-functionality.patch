@@ -1,0 +1,28 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Wed, 10 Oct 2018 09:14:56 +0200
+Subject: [PATCH] bluetooth: Disable bluetooth low power mode functionality
+
+In some conditions the low power modes cause communication
+errors between the BT chip and the system, for this reason
+we disable it by default.
+
+https://jira.digi.com/browse/DEL-3711
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ tools/hciattach.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/hciattach.c b/tools/hciattach.c
+index 4aacdafed..234283882 100644
+--- a/tools/hciattach.c
++++ b/tools/hciattach.c
+@@ -1120,7 +1120,7 @@ struct uart_t uart[] = {
+ 			FLOW_CTL, DISABLE_PM, NULL, ath3k_ps, ath3k_pm  },
+ 
+ 	/* QCA ROME */
+-        { "qca",    0x0000, 0x0000, HCI_UART_IBS, 115200, 115200,
++        { "qca",    0x0000, 0x0000, HCI_UART_H4, 115200, 115200,
+                         FLOW_CTL, DISABLE_PM, NULL, qca, NULL },
+ 
+ 	/* QUALCOMM BTS */

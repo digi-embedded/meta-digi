@@ -12,9 +12,6 @@ include conf/machine/include/tune-cortexa7.inc
 UBOOT_SUFFIX = "imx"
 UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
-# Linux kernel configuration
-KERNEL_DEFCONFIG ?= "arch/arm/configs/ccimx6ul_defconfig"
-
 # Wireless external module
 WIRELESS_MODULE ?= ""
 WIRELESS_MODULE_append = " ${@base_conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
@@ -40,6 +37,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     cryptodev-module \
     cryptoauth-openssl-engine \
 "
+MACHINE_EXTRA_RRECOMMENDS_remove_use-mainline-bsp = "${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)}"
 
 MACHINE_FEATURES += "wifi bluetooth cryptochip"
 

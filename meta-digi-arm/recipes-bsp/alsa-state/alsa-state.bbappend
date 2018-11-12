@@ -12,6 +12,8 @@ SRC_URI_append_ccimx6 = " \
 
 SRC_URI_append_ccimx6ul = " file://asound.state"
 
+SRC_URI_append_ccimx8x = " file://asound.state"
+
 do_install_append_ccimx6() {
 	ln -sf asound.micro_play.state ${D}${localstatedir}/lib/alsa/asound.state
 }

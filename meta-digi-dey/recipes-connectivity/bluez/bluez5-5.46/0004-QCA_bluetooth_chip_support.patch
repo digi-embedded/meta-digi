@@ -1,3 +1,4 @@
+From 8e337d77edfbc4f69d326e3abbd8f4f1ca65bffb Mon Sep 17 00:00:00 2001
 From: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
 Date: Mon, 8 Jan 2018 10:29:51 +0100
 Subject: [PATCH 1/4] Add hciattach rome support for Qualcomm chip QCA6564
@@ -11,10 +12,10 @@ Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
  Makefile.tools         |    3 +-
  profiles/audio/avrcp.c |   27 +-
  tools/hciattach.c      |   45 +-
- tools/hciattach.h      |   14 +-
+ tools/hciattach.h      |    2 +
  tools/hciattach_rome.c | 1941 ++++++++++++++++++++++++++++++++++++++++++++++++
  tools/hciattach_rome.h |  390 ++++++++++
- 6 files changed, 2406 insertions(+), 14 deletions(-)
+ 6 files changed, 2400 insertions(+), 8 deletions(-)
  create mode 100644 tools/hciattach_rome.c
  create mode 100644 tools/hciattach_rome.h
 
@@ -163,7 +164,7 @@ index fad176c9b804..dda639cabca3 100644
  			FLOW_CTL, DISABLE_PM, NULL, ath3k_ps, ath3k_pm  },
  
 +	/* QCA ROME */
-+        { "qca",    0x0000, 0x0000, HCI_UART_IBS, 115200, 115200,
++        { "qca",    0x0000, 0x0000, HCI_UART_H4, 115200, 115200,
 +                        FLOW_CTL, DISABLE_PM, NULL, qca, NULL },
 +
  	/* QUALCOMM BTS */
@@ -231,26 +232,14 @@ index fad176c9b804..dda639cabca3 100644
  	return 0;
  }
 diff --git a/tools/hciattach.h b/tools/hciattach.h
-index 249aab49e90d..481e3a65f685 100644
+index 249aab49e90d..5724b03bf2a6 100644
 --- a/tools/hciattach.h
 +++ b/tools/hciattach.h
-@@ -39,12 +39,13 @@
- #define HCI_UART_H4DS	3
- #define HCI_UART_LL	4
- #define HCI_UART_ATH3K  5
--#define HCI_UART_INTEL	6
--#define HCI_UART_BCM	7
--#define HCI_UART_QCA	8
--#define HCI_UART_AG6XX	9
--#define HCI_UART_NOKIA	10
--#define HCI_UART_MRVL	11
-+#define HCI_UART_IBS	6
-+#define HCI_UART_INTEL	7
-+#define HCI_UART_BCM	8
-+#define HCI_UART_QCA	9
-+#define HCI_UART_AG6XX	10
-+#define HCI_UART_NOKIA	11
-+#define HCI_UART_MRVL	12
+@@ -45,6 +45,7 @@
+ #define HCI_UART_AG6XX	9
+ #define HCI_UART_NOKIA	10
+ #define HCI_UART_MRVL	11
++#define HCI_UART_IBS	12
  
  #define HCI_UART_RAW_DEVICE	0
  #define HCI_UART_RESET_ON_INIT	1

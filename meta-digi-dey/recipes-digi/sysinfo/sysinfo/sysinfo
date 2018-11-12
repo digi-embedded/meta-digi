@@ -236,10 +236,12 @@ make_report(){
 	echo "--------------------------------------"
 	echo ""
 
-	if [ "$(($(cat /sys/fsl_otp/HW_OCOTP_CFG5) & 2))" != "0" ]; then
-		echo "Device status: [CLOSED]"
-	else
-		echo "Device status: [OPEN]"
+	if [ -e /sys/fsl_otp/HW_OCOTP_CFG5 ]; then
+		if [ "$(($(cat /sys/fsl_otp/HW_OCOTP_CFG5) & 2))" != "0" ]; then
+			echo "Device status: [CLOSED]"
+		else
+			echo "Device status: [OPEN]"
+		fi
 	fi
 
 	if [ -f "/proc/device-tree/digi,uboot-env,encrypted" ]; then
@@ -260,7 +262,7 @@ if [ -z "${UBOOT_VERSION}" ]; then
 	[ -c "/dev/mtd0" ] && UBOOT_PARTITION="/dev/mtd0"
 	UBOOT_VERSION="$(strings ${UBOOT_PARTITION} | grep -m 1 dub | cut -d' ' -f2)"
 fi
-MACHINE="$(cat /proc/device-tree/digi,machine,name | tr -d '\0')"
+MACHINE="$(cat /proc/device-tree/compatible | tr '\0' '\t' | cut -f 1)"
 BOARD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant | tr -d '\0')"
 BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn | tr -d '\0')"
 BOARD_VERSION="$(cat /proc/device-tree/digi,carrierboard,version | tr -d '\0')"

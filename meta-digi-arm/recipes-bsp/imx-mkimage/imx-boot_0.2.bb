@@ -37,8 +37,8 @@ DEPENDS_append_mx8mq = " dtc-native"
 # that would otherwise be done in the image build as controlled
 # by IMAGE_BOOTFILES_DEPENDS and IMAGE_BOOTFILES in image_types_fsl.bbclass
 IMX_M4_DEMOS        = ""
-IMX_M4_DEMOS_mx8qm  = "imx-m4-demos:do_deploy"
-IMX_M4_DEMOS_mx8qxp = "imx-m4-demos:do_deploy"
+IMX_M4_DEMOS_mx8qm  = "imx-m4-demos"
+IMX_M4_DEMOS_mx8qxp = "imx-m4-demos"
 
 # This package aggregates output deployed by other packages,
 # so set the appropriate dependencies
@@ -46,8 +46,18 @@ do_compile[depends] += " \
     virtual/bootloader:do_deploy \
     ${@' '.join('%s:do_deploy' % r for r in '${IMX_FIRMWARE}'.split() )} \
     imx-atf:do_deploy \
-    ${IMX_M4_DEMOS} \
+    ${@' '.join('%s:do_deploy' % r for r in '${IMX_M4_DEMOS}'.split() )} \
     ${@bb.utils.contains('COMBINED_FEATURES', 'optee', 'optee-os-imx:do_deploy', '', d)} \
+"
+
+# This package aggregates dependencies with other packages,
+# so also define the license dependencies.
+do_populate_lic[depends] += " \
+    virtual/bootloader:do_populate_lic \
+    ${@' '.join('%s:do_populate_lic' % r for r in '${IMX_FIRMWARE}'.split() )} \
+    imx-atf:do_populate_lic \
+    ${@' '.join('%s:do_populate_lic' % r for r in '${IMX_M4_DEMOS}'.split() )} \
+    ${@bb.utils.contains('COMBINED_FEATURES', 'optee', 'optee-os-imx:do_populate_lic', '', d)} \
 "
 
 SC_FIRMWARE_NAME ?= "scfw_tcm.bin"
@@ -122,7 +132,7 @@ do_compile () {
         cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${SC_FIRMWARE_NAME} ${S}/${SOC_TARGET}/scfw_tcm.bin
         cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${ATF_MACHINE_NAME} ${S}/${SOC_TARGET}/bl31.bin
         for type in ${UBOOT_CONFIG}; do
-            cp ${DEPLOY_DIR_IMAGE}/${UBOOT_NAME}-${type}         ${S}/${SOC_TARGET}/u-boot.bin-${type}
+            cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_NAME}-${type}         ${S}/${SOC_TARGET}/u-boot.bin-${type}
         done
     fi
 
@@ -135,7 +145,8 @@ do_compile () {
     for type in ${UBOOT_CONFIG}; do
         cd ${S}/${SOC_TARGET}
         ln -sf u-boot.bin-${type} u-boot.bin
-        ln -sf ${DCD_SRC_NAME}-${type} ${DCD_SRC_NAME}
+        RAM_SIZE="$(echo ${type} | sed -e 's,.*\([0-9]\+GB\),\1,g')"
+        ln -sf ${DCD_SRC_NAME}-${RAM_SIZE} ${DCD_SRC_NAME}
         cd -
         for target in ${IMXBOOT_TARGETS}; do
             echo "building ${SOC_TARGET} - ${type} - ${target}"
@@ -167,10 +178,7 @@ DEPLOYDIR_IMXBOOT = "${BOOT_TOOLS}"
 do_deploy () {
     install -d ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
 
-    # copy the tool mkimage to deploy path and sc fw, dcd and uboot
-    for type in ${UBOOT_CONFIG}; do
-        install -m 0644 ${DEPLOY_DIR_IMAGE}/${UBOOT_NAME}-${type} ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
-    done
+    # copy the tool mkimage to deploy path along with sc fw and dcd
     if [ "${SOC_TARGET}" = "iMX8M" ]; then
         install -m 0644 ${DEPLOY_DIR_IMAGE}/u-boot-spl.bin-${MACHINE}-${UBOOT_CONFIG} ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
         for ddr_firmware in ${DDR_FIRMWARE_NAME}; do

@@ -169,4 +169,13 @@ do_deploy_append() {
 	rm -f ${TMP_BOOTSCR}
 }
 
+BOOT_TOOLS = "imx-boot-tools"
+
+do_deploy_append_ccimx8x() {
+	# Move all U-Boot artifacts to the imx-boot-tools folder
+	# U-Boot images are not bootable on the i.MX8X
+	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
+	mv ${DEPLOYDIR}/u-boot* ${DEPLOYDIR}/${BOOT_TOOLS}/
+}
+
 COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x)"

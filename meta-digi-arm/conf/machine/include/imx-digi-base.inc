@@ -63,6 +63,7 @@ MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf udev-rules-imx"
 
 # GStreamer 1.0 plugins
 MACHINE_GSTREAMER_1_0_PLUGIN ?= ""
+MACHINE_GSTREAMER_1_0_PLUGIN_use-mainline-bsp ?= "gstreamer1.0-plugins-imx-meta"
 MACHINE_GSTREAMER_1_0_PLUGIN_mx6q ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
 MACHINE_GSTREAMER_1_0_PLUGIN_mx6dl ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
 MACHINE_GSTREAMER_1_0_PLUGIN_mx6ul ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
