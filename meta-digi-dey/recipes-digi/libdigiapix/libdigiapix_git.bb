@@ -6,7 +6,7 @@ SECTION = "libs"
 LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
 
-DEPENDS = "libsoc"
+DEPENDS = "libsoc libsocketcan"
 
 SRCBRANCH ?= "master"
 SRCREV = "${AUTOREV}"
