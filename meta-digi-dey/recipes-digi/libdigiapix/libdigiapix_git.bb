@@ -9,7 +9,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 DEPENDS = "libsoc libsocketcan"
 
 SRCBRANCH ?= "master"
-SRCREV = "${AUTOREV}"
+SRCREV = "780f117f0dbd5d64912221650c1be391921fca40"
 
 LIBDIGIAPIX_URI_STASH = "${DIGI_MTK_GIT}dey/libdigiapix.git;protocol=ssh"
 LIBDIGIAPIX_URI_GITHUB = "git://github.com/digi-embedded/libdigiapix.git;protocol=git"
@@ -17,7 +17,7 @@ LIBDIGIAPIX_URI_GITHUB = "git://github.com/digi-embedded/libdigiapix.git;protoco
 LIBDIGIAPIX_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${LIBDIGIAPIX_URI_STASH}', '${LIBDIGIAPIX_URI_GITHUB}', d)}"
 
 SRC_URI = " \
-    ${LIBDIGIAPIX_GIT_URI};branch=${SRCBRANCH} \
+    ${LIBDIGIAPIX_GIT_URI};nobranch=1 \
     file://99-digiapix.rules \
     file://board.conf \
     file://digiapix.sh \
