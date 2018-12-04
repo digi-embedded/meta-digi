@@ -6,9 +6,6 @@ Digi International's professional embedded Yocto development environment.
 
 Digi Embedded Yocto 2.4 is based on the Yocto Project(TM) 2.4 (Rocko) release.
 
-This is a beta release for the ConnectCore 8X SBC Express. The rest of the
-platforms are supported but have not been fully tested.
-
 For a full list of supported features and interfaces please refer to the
 online documentation.
 
@@ -70,6 +67,8 @@ Software for the following hardware platforms is in production support:
   * [CC-MX-JN7D-ZN](https://www.digi.com/cc8x)
 * ConnectCore 8X SBC Express
   * [CC-WMX8-EXPRESS](https://www.digi.com/cc8x)
+* ConnectCore 8X SBC Pro
+  * [CC-WMX8-PRO](https://www.digi.com/cc8x)
 
 Previous versions of Digi Embedded Yocto include support for additional Digi
 hardware.
@@ -83,13 +82,7 @@ To install, please follow the instructions at the dey-manifest [README](https://
 
 # Documentation
 
-Documentation is available online on the Digi documentation site:
-
-* [ConnectCore 6UL SBC Express](https://www.digi.com/resources/documentation/digidocs/90001548/default.htm)
-* [ConnectCore 6UL SBC Pro](https://www.digi.com/resources/documentation/digidocs/90001547/default.htm)
-* [ConnectCore 6 SBC](https://www.digi.com/resources/documentation/digidocs/90001546/default.htm)
-* [ConnectCore 6 Plus SBC](https://www.digi.com/resources/documentation/digidocs/90002275/default.htm)
-* [ConnectCore 8X SBC Express](https://www.digi.com/cc8x/documentation)
+Documentation is available online at https://www.digi.com/resources/documentation/digidocs/embedded/
 
 # Downloads
 
@@ -103,13 +96,12 @@ Documentation is available online on the Digi documentation site:
 * Added support for ConnectCore 8X platform. Supported features:
     * Bluetooth and Wireless interfaces (STA, SoftAP, P2P, Concurrence)
     * MCA: Reset, Watchdog, RTC, GPIOs and ADCs
-    * SBC Express interfaces: Ethernet, microSD, UART, I2C, CAN, SPI, USB host,
-      USB device, GPIOs, XBee, LVDS Display, Touch Screen controller
-    * Graphics and Video
-* Updated U-Boot to version 2017.03-r1
+* Updated U-Boot to version 2017.03-r2
 * Fixed XBee RESET_N polarity assertion. Requires updating polarity of the
 ``digi,reset-gpio`` property of node ``xbee`` on device tree files derived from
 ConnectCore 6UL SBC Pro to use polarity **GPIO_ACTIVE_LOW**
+* Updated AWS Greengrass core to version 1.7.0
+* Updated kernel version to v4.9.135 for i.MX6 and i.MX6UL platforms.
 
 ## 2.4-r1
 
@@ -139,6 +131,7 @@ boot a signed U-Boot only.
 * For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
   devices (ConnectCore 6UL and ConnectCore 6 Plus) running a 4.9 kernel
   version fail to join to autonomous groups.
+* Trustfence secure console is not supported on U-Boot v2017.03. In order to use this functionality, U-Boot v2015.04 will be required.
 
 ## ConnectCore 6UL
 
@@ -192,10 +185,6 @@ boot a signed U-Boot only.
 * i.MX8QXP Processor
   * The following processor features are not supported in this BSP release:
     Power Management, PWM, ADC, RS485. They will be implemented in future releases.
-  * VPU unit is not fully functional, hence hardware video encoding/decoding is
-    not available. On this release, video encoding/decoding can be done via
-    software plugins, reducing the performance of video playback. This will be
-    available in future releases of the hardware.
   * GPU maximum performance reduced. The maximum frequency targets are 850 MHz
     for the shaders and 700 MHz for the core. However, in this hardware release
     the maximum frequency is limited to 650 MHz for the shaders and 600 MHz for
@@ -203,26 +192,12 @@ boot a signed U-Boot only.
     be met in future releases of the hardware.
   * BSDL operation is not supported. It will be available in future releases
     of the hardware.
-* ConnectCore 8X System-on-Module (SOM)
-  * The UART connected to the Bluetooth chip on early versions of the ConnectCore
-    8X System-on-Module (hardware version = 1) cannot properly execute flow
-    control. To work around this issue, UART1 of these SOM versions has been
-    configured to operate at 115200 bps and without hardware flow control,
-    reducing the maximum throughput of this interface. It will be fixed in
-    future releases of the hardware.
-  * MCA firmware cannot be updated without a debugger on early versions of the
-    ConnectCore 8X System-on-Module (hardware version = 1). It will be fixed in
-    future releases of the hardware.
-  * MCA internal voltage reference cannot be enabled on early versions of the
-    ConnectCore 8X System-on-Module (hardware version = 1). It will be fixed in
-    future releases of the hardware.
-  * MCA tamper pins configuration is not supported. It will be available in
-    future releases.
+* ConnectCore 8X SBC Pro
+  * USB 3.0 not supported.
 * Digi Embedded Yocto
-  * The following features are not supported in this release:
+  * The following features are not supported in this release for the ConnectCore 8X plaform:
     * Trustfence (TM)
     * Digi Remote Manager
-    * Amazon Web Services
 
 # Support Contact Information
 
