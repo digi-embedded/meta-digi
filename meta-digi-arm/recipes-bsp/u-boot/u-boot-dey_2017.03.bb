@@ -117,7 +117,7 @@ do_deploy_append() {
 	#    u-boot-<type>
 	# and add a more suitable symlink in the form:
 	#    u-boot-<platform>-<config>.<ext>
-	if [ -n "${UBOOT_CONFIG}" ] && [ "${TRUSTFENCE_SIGN}" = "1" ]
+	if [ -n "${UBOOT_CONFIG}" ]
 	then
 		for config in ${UBOOT_MACHINE}; do
 			i=$(expr $i + 1);
@@ -125,19 +125,25 @@ do_deploy_append() {
 				j=$(expr $j + 1);
 				if [ $j -eq $i ]
 				then
-					install ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
-					ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
-
-					install ${B}/${config}/u-boot-dtb-signed-${type}.${UBOOT_SUFFIX} u-boot-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-					ln -sf u-boot-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-signed-${type}.${UBOOT_SUFFIX}
-
-					install ${B}/${config}/u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX} u-boot-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-					ln -sf u-boot-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX}
-
-					if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]
+					cd ${DEPLOYDIR}
+					rm -r ${UBOOT_BINARY}-${type}
+					ln -sf u-boot-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-${type}.${UBOOT_SUFFIX}
+					if [ "${TRUSTFENCE_SIGN}" = "1" ]
 					then
-						install ${B}/${config}/u-boot-dtb-encrypted-${type}.${UBOOT_SUFFIX} u-boot-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-						ln -sf u-boot-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-encrypted-${type}.${UBOOT_SUFFIX}
+						install ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
+						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
+
+						install ${B}/${config}/u-boot-dtb-signed-${type}.${UBOOT_SUFFIX} u-boot-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+						ln -sf u-boot-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-signed-${type}.${UBOOT_SUFFIX}
+
+						install ${B}/${config}/u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX} u-boot-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+						ln -sf u-boot-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX}
+
+						if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]
+						then
+							install ${B}/${config}/u-boot-dtb-encrypted-${type}.${UBOOT_SUFFIX} u-boot-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+							ln -sf u-boot-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-encrypted-${type}.${UBOOT_SUFFIX}
+						fi
 					fi
 				fi
 			done
