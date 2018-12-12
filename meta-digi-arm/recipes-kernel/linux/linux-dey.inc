@@ -6,16 +6,16 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 LIC_FILES_CHKSUM_use-mainline-bsp = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
 DEPENDS += "lzop-native bc-native"
-DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
+DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 inherit kernel fsl-kernel-localversion
 
 require recipes-kernel/linux/linux-dey-src.inc
 
 # Use custom provided 'defconfig' if variable KERNEL_DEFCONFIG is cleared
-SRC_URI += "${@base_conditional('KERNEL_DEFCONFIG', '', 'file://defconfig', '', d)}"
+SRC_URI += "${@oe.utils.conditional('KERNEL_DEFCONFIG', '', 'file://defconfig', '', d)}"
 
-do_deploy[postfuncs] += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence_sign', '', d)}"
+do_deploy[postfuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence_sign', '', d)}"
 
 trustfence_sign() {
 	# Set environment variables for trustfence configuration

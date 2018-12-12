@@ -20,7 +20,7 @@ SRCREV = "${AUTOREV}"
 CC_STASH = "${DIGI_MTK_GIT}dey/dey-examples.git;protocol=ssh"
 CC_GITHUB = "${DIGI_GITHUB_GIT}/dey-examples.git;protocol=git"
 
-CC_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${CC_STASH}', '${CC_GITHUB}', d)}"
+CC_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${CC_STASH}', '${CC_GITHUB}', d)}"
 
 SRC_URI = "${CC_GIT_URI};branch=${SRCBRANCH}"
 

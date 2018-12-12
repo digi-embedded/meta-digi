@@ -213,7 +213,7 @@ trustence_sign_cpio() {
 }
 CONVERSIONTYPES += "tf"
 CONVERSION_CMD_tf = "trustence_sign_cpio ${IMAGE_NAME}.rootfs.${type}"
-CONVERSION_DEPENDS_tf = "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
+CONVERSION_DEPENDS_tf = "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 IMAGE_TYPES += "cpio.gz.u-boot.tf"
 
 ################################################################################

@@ -31,7 +31,7 @@ inherit ${@bb.utils.contains("IMAGE_FEATURES", "dey-qt", "populate_sdk_qt5", "",
 # Generate ZIP installer if configured in the project's local.conf
 #
 DEY_IMAGE_INSTALLER ?= "0"
-inherit ${@base_conditional("DEY_IMAGE_INSTALLER", "1", "dey-image-installer", "", d)}
+inherit ${@oe.utils.conditional("DEY_IMAGE_INSTALLER", "1", "dey-image-installer", "", d)}
 
 #
 # Create a dey-version file when populating the toolchain/SDK

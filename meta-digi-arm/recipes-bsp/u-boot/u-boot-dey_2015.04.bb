@@ -7,7 +7,7 @@ LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://Licenses/README;md5=c7383a594871c03da76b3707929d2919"
 
 DEPENDS += "dtc-native u-boot-mkimage-native"
-DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
+DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 PROVIDES += "u-boot"
 
@@ -15,7 +15,7 @@ SRCBRANCH = "v2015.04/master"
 SRCREV = "${AUTOREV}"
 
 # Select internal or Github U-Boot repo
-UBOOT_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}u-boot-denx.git', '${DIGI_GITHUB_GIT}/u-boot.git', d)}"
+UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}u-boot-denx.git', '${DIGI_GITHUB_GIT}/u-boot.git', d)}"
 
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \

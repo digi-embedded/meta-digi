@@ -14,7 +14,7 @@ SRCREV = "${AUTOREV}"
 LIBDIGIAPIX_URI_STASH = "${DIGI_MTK_GIT}dey/libdigiapix.git;protocol=ssh"
 LIBDIGIAPIX_URI_GITHUB = "git://github.com/digi-embedded/libdigiapix.git;protocol=git"
 
-LIBDIGIAPIX_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${LIBDIGIAPIX_URI_STASH}', '${LIBDIGIAPIX_URI_GITHUB}', d)}"
+LIBDIGIAPIX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${LIBDIGIAPIX_URI_STASH}', '${LIBDIGIAPIX_URI_GITHUB}', d)}"
 
 SRC_URI = " \
     ${LIBDIGIAPIX_GIT_URI};branch=${SRCBRANCH} \

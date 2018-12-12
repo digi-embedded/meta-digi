@@ -13,7 +13,7 @@ SRCBRANCH = "dey-2.4/master"
 SRCBRANCH_ccimx8x = "dey-2.4/master_cc8x"
 SRCREV = "${AUTOREV}"
 
-QCOM_GIT_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git', d)}"
+QCOM_GIT_URI = "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git', d)}"
 
 SRC_URI = " \
     ${QCOM_GIT_URI};branch=${SRCBRANCH} \
@@ -32,7 +32,7 @@ FILES_SDIO = " \
     file://modprobe-qualcomm.conf \
 "
 
-SRC_URI_append = "${@base_conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${FILES_SDIO}', '', d)}"
+SRC_URI_append = "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${FILES_SDIO}', '', d)}"
 
 S = "${WORKDIR}/git"
 
@@ -47,10 +47,10 @@ EXTRA_OEMAKE += "CONFIG_NON_QC_PLATFORM=y"
 EXTRA_OEMAKE += "BUILD_DEBUG_VERSION=0"
 # Flags for SDIO interface with wifi
 FLAGS_SDIO = "CONFIG_CLD_HL_SDIO_CORE=y"
-EXTRA_OEMAKE += "${@base_conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${FLAGS_SDIO}', '', d)}"
+EXTRA_OEMAKE += "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${FLAGS_SDIO}', '', d)}"
 # Flags for PCI interface with wifi
 FLAGS_PCI = "CONFIG_ROME_IF=pci CONFIG_HIF_PCI=1 CONFIG_ATH_PCIE_ACCESS_DEBUG=1 CONFIG_ATH_PCIE_MAX_PERF=1"
-EXTRA_OEMAKE += "${@base_conditional('QUALCOMM_WIFI_INTERFACE', 'pci' , '${FLAGS_PCI}', '', d)}"
+EXTRA_OEMAKE += "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'pci' , '${FLAGS_PCI}', '', d)}"
 # Flags required for QCA6574
 EXTRA_OEMAKE_append_ccimx8x = " CONFIG_ARCH_MSM=n CONFIG_ARCH_QCOM=n CONFIG_ATH_11AC_TXCOMPACT=1"
 

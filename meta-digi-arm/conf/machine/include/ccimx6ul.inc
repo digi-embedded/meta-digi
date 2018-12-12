@@ -14,7 +14,7 @@ UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
 # Wireless external module
 WIRELESS_MODULE ?= ""
-WIRELESS_MODULE_append = " ${@base_conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
+WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
 
 # Wireless p2p interface
 WLAN_P2P_INTERFACE ?= "p2p0"
@@ -41,8 +41,8 @@ MACHINE_EXTRA_RRECOMMENDS_remove_use-mainline-bsp = "${@bb.utils.contains('COMBI
 
 MACHINE_FEATURES += "wifi bluetooth cryptochip"
 
-MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6564-bt', '', d)}"
-MACHINE_FIRMWARE_append = " ${@base_conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6564-wifi', '', d)}"
+MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6564-bt', '', d)}"
+MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6564-wifi', '', d)}"
 
 # mkfs.ubifs parameters for boot partition (the one holding kernel and device tree files)
 # Max LEB count (-c 255) calculated for a partition of up to 32 MiB considering 128 KiB erase-block size.

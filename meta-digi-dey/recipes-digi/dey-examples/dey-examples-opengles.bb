@@ -11,7 +11,7 @@ SRC_URI = "file://opengles"
 
 S = "${WORKDIR}/opengles"
 
-EXTRA_OEMAKE = "EGL_FLAVOUR=${@base_conditional('HAVE_GUI', '1' , 'x11', 'fb', d)}"
+EXTRA_OEMAKE = "EGL_FLAVOUR=${@oe.utils.conditional('HAVE_GUI', '1' , 'x11', 'fb', d)}"
 
 do_install () {
 	oe_runmake DEST_DIR="${D}" install

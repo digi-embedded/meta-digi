@@ -22,7 +22,7 @@ INITSCRIPT_PARAMS = "start 99 5 ."
 
 do_install () {
 	install -m 0755 -d ${D}${sysconfdir}/default
-	AUTOGETTY_ENABLE='${@base_conditional( "TRUSTFENCE_CONSOLE_DISABLE", "1", "1", "0", d )}'
+	AUTOGETTY_ENABLE='${@oe.utils.conditional( "TRUSTFENCE_CONSOLE_DISABLE", "1", "1", "0", d )}'
 	install -m 0644 ${WORKDIR}/autogetty ${D}${sysconfdir}/default/autogetty
 	sed -i -e "s/##ENABLED##/${AUTOGETTY_ENABLE}/g" ${D}${sysconfdir}/default/autogetty
 
