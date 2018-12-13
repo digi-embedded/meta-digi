@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 2.4
-## Release 2.4-r2.1
+## Release 2.4-r2.2
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
