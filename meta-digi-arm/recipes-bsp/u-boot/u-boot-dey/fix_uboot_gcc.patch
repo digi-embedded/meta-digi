@@ -1,0 +1,26 @@
+diff --git a/Makefile b/Makefile
+index c9d8e6d..6002726 100644
+--- a/Makefile
++++ b/Makefile
+@@ -348,7 +348,7 @@ OBJCOPY		= $(CROSS_COMPILE)objcopy
+ OBJDUMP		= $(CROSS_COMPILE)objdump
+ AWK		= awk
+ PERL		= perl
+-PYTHON		= python
++PYTHON		?= python
+ DTC		= dtc
+ CHECK		= sparse
+ 
+diff --git a/tools/Makefile b/tools/Makefile
+index 1247999..b47f475 100644
+--- a/tools/Makefile
++++ b/tools/Makefile
+@@ -120,7 +120,7 @@ _libfdt.so-sharedobjs += $(LIBFDT_OBJS)
+ libfdt:
+ 
+ tools/_libfdt.so: $(patsubst %.o,%.c,$(LIBFDT_OBJS)) tools/libfdt_wrap.c
+-	LDFLAGS="$(HOSTLDFLAGS)" python $(srctree)/lib/libfdt/setup.py \
++	LDFLAGS="$(HOSTLDFLAGS)" ${PYTHON} $(srctree)/lib/libfdt/setup.py \
+ 		"$(_hostc_flags)" $^
+ 	mv _libfdt.so $@
+ 

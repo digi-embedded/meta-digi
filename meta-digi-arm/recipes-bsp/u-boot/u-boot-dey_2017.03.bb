@@ -27,6 +27,7 @@ SRC_URI = " \
 SRC_URI_append = " \
     file://boot.txt \
     file://install_linux_fw_sd.txt \
+    file://fix_uboot_gcc.patch \
 "
 
 LOCALVERSION ?= ""
