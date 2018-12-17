@@ -29,13 +29,9 @@ do_install_append_ccimx8x() {
 	install -m 0644 ${WORKDIR}/hostapd_wlan1.conf ${D}${sysconfdir}
 }
 
-pkg_postinst_${PN}() {
+pkg_postinst_ontarget_${PN}() {
 	# Append the last two bytes of the wlan0 MAC address to the SSID of the
 	# hostAP configuration files
-	# (execute on first boot)
-	if [ -n "$D" ]; then
-		exit 1
-	fi
 
 	# Get the last two bytes of the wlan0 MAC address
 	MAC="$(cut -d ':' -f5,6 /sys/class/net/wlan0/address | tr -d ':')"
@@ -48,11 +44,9 @@ pkg_postinst_${PN}() {
 	find "${sysconfdir}" -type f -name 'hostapd_wlan?.conf' -exec \
 		sed -i -e "s,##MAC##,${MAC},g" {} \;
 
-	# Create the symlinks in the different runlevels
+	# Do not autostart hostapd daemon, it will conflict with wpa-supplicant.
 	if type update-rc.d >/dev/null 2>/dev/null; then
-		update-rc.d ${INITSCRIPT_NAME} ${INITSCRIPT_PARAMS}
+		# Remove all symlinks in the different runlevels
+		update-rc.d -f ${INITSCRIPT_NAME} remove
 	fi
 }
-
-# Do not autostart hostapd daemon, it will conflict with wpa-supplicant.
-INITSCRIPT_PARAMS = "remove"

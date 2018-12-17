@@ -35,11 +35,7 @@ do_install_append() {
 	install -m 0644 ${WORKDIR}/fw_env.config ${D}${sysconfdir}/
 }
 
-pkg_postinst_${PN}() {
-	# run the postinst script on first boot
-	if [ x"$D" != "x" ]; then
-		exit 1
-	fi
+pkg_postinst_ontarget_${PN}() {
 	CONFIG_FILE="/etc/fw_env.config"
 	MMCDEV="$(sed -ne 's,.*root=/dev/mmcblk\([0-9]\)p.*,\1,g;T;p' /proc/cmdline)"
 	if [ -n "${MMCDEV}" ]; then

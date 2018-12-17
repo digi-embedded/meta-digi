@@ -98,11 +98,7 @@ do_install_append_ccimx8x() {
 }
 
 # Disable wireless interfaces on first boot for non-wireless variants
-pkg_postinst_${PN}() {
-	if [ -n "$D" ]; then
-		exit 1
-	fi
-
+pkg_postinst_ontarget_${PN}() {
 	if [ ! -d "/proc/device-tree/wireless" ]; then
 		sed -i -e '/^auto wlan/{s,^,#,g};/^auto p2p/{s,^,#,g}' /etc/network/interfaces
 	fi

@@ -159,7 +159,7 @@ do_install() {
 	sed -i -e "/useSystemd/{s,\[yes|no],${GG_USESYSTEMD},g}" ${D}/${BPN}/config/config.json
 }
 
-pkg_postinst_${PN}() {
+pkg_postinst_ontarget_${PN}() {
 	# Enable protection for hardlinks and symlinks
 	if ! grep -qs 'protected_.*links' $D${sysconfdir}/sysctl.conf; then
 		cat >> $D${sysconfdir}/sysctl.conf <<-_EOF_
