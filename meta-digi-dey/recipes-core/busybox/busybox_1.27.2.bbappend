@@ -2,9 +2,7 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
-SRC_URI += "file://0001-del-baudrates.patch \
-            file://0002-ntpd-indefinitely-try-to-resolve-peer-addresses.patch \
-            file://standby \
+SRC_URI += "file://standby \
             file://busybox-ntpd \
             file://index.html \
             file://digi-logo.png \
