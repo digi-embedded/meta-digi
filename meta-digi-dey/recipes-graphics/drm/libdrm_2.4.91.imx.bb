@@ -10,18 +10,18 @@ LIC_FILES_CHKSUM = "file://xf86drm.c;beginline=9;endline=32;md5=c8a3b961af7667c5
 PROVIDES = "drm"
 DEPENDS = "libpthread-stubs libpciaccess"
 
-SRC_URI = "http://dri.freedesktop.org/libdrm/${BP}.tar.bz2 \
+IMX_LIBDRM_SRC ?= "git://source.codeaurora.org/external/imx/libdrm-imx.git;protocol=https"
+IMX_LIBDRM_BRANCH = "libdrm-imx-2.4.91"
+SRC_URI = "${IMX_LIBDRM_SRC};branch=${IMX_LIBDRM_BRANCH} \
            file://installtests.patch \
            file://fix_O_CLOEXEC_undeclared.patch \
            file://0001-configure.ac-Allow-explicit-enabling-of-cunit-tests.patch \
           "
+SRCREV = "49cca25f6319f3607b121093e46e474fe528aa39"
 
-SRC_URI[md5sum] = "35b9544bc2ad864acd1abaa1a2b99092"
-SRC_URI[sha256sum] = "7ae9c24d91139ac9a2cdee06fe46dbe1c401a1eda1c0bd2a6d1ecf72f479e0aa"
+DEFAULT_PREFERENCE = "-1"
 
-# IMX: Remove manpages which is added in pyro
-#inherit autotools pkgconfig manpages
-inherit autotools pkgconfig
+inherit autotools pkgconfig manpages
 
 EXTRA_OECONF += "--disable-cairo-tests \
                  --without-cunit \
@@ -30,9 +30,7 @@ EXTRA_OECONF += "--disable-cairo-tests \
                  --enable-install-test-programs \
                  --disable-valgrind \
                 "
-# IMX: Remove manpages which is added in pyro
-#PACKAGECONFIG[manpages] = "--enable-manpages, --disable-manpages, libxslt-native xmlto-native"
-EXTRA_OECONF += "--disable-manpages"
+PACKAGECONFIG[manpages] = "--enable-manpages, --disable-manpages, libxslt-native xmlto-native"
 
 ALLOW_EMPTY_${PN}-drivers = "1"
 PACKAGES =+ "${PN}-tests ${PN}-drivers ${PN}-radeon ${PN}-nouveau ${PN}-omap \
@@ -53,3 +51,15 @@ FILES_${PN}-kms = "${libdir}/libkms*.so.*"
 FILES_${PN}-freedreno = "${libdir}/libdrm_freedreno.so.*"
 FILES_${PN}-amdgpu = "${libdir}/libdrm_amdgpu.so.*"
 FILES_${PN}-etnaviv = "${libdir}/libdrm_etnaviv.so.*"
+
+EXTRA_OECONF_append_imxgpu = " --enable-vivante-experimental-api"
+
+PACKAGES_prepend_imxgpu = "${PN}-vivante "
+
+RRECOMMENDS_${PN}-drivers_append_imxgpu = " ${PN}-vivante"
+
+FILES_${PN}-vivante = "${libdir}/libdrm_vivante.so.*"
+
+S = "${WORKDIR}/git"
+
+PACKAGE_ARCH_imxgpu2d = "${MACHINE_SOCARCH}"
