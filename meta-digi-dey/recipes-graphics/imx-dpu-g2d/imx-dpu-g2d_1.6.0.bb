@@ -2,9 +2,9 @@
 # Copyright 2017-2018 NXP
 # Released under the MIT license (see COPYING.MIT for the terms)
 
-DESCRIPTION = "GPU G2D library and apps for imx8"
+DESCRIPTION = "GPU G2D library and apps for i.MX with 2D GPU and DPU"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=ab61cab9599935bfe9f700405ef00f28"
+LIC_FILES_CHKSUM = "file://COPYING;md5=6dfb32a488e5fd6bae52fbf6c7ebb086"
 
 RDEPENDS_${PN} = "libgal-imx libdrm"
 
@@ -16,10 +16,11 @@ S="${WORKDIR}/${PN}-${PV}"
 
 inherit fsl-eula-unpack
 
-SRC_URI[md5sum] = "c18c4bd215bac23b035b1e8a55cbaaf2"
-SRC_URI[sha256sum] = "dd111f3a9c76bd9c338407658af849c325b424541bb2166ffe1f6dd31c834100"
+SRC_URI[md5sum] = "080de224085c37db107b5e477bd7900a"
+SRC_URI[sha256sum] = "854014164be517467252a2f0a79145bdcdd2892243b317ba25a3157d85a612ba"
 
 do_install () {
+
     install -d ${D}${libdir}
     install -d ${D}${includedir}
 
