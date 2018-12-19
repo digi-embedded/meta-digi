@@ -8,9 +8,6 @@ SRC_URI += " \
 "
 
 do_install_append () {
-	# Fix path for OpenGLES example
-	sed -i -e '/Exec/{s,hellogl_es2,hellogl2,g}' ${D}${datadir}/applications/hellogl_es2.desktop
-
 	# Add qmlvideo shortcut
 	install -m 0644 ${WORKDIR}/qmlvideo.desktop ${D}${datadir}/applications/
 	install -m 0644 ${WORKDIR}/qmlvideo.png ${D}${datadir}/pixmaps/

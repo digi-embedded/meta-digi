@@ -1,24 +1,24 @@
 require recipes-multimedia/gstreamer/gstreamer1.0-plugins-good.inc
-FILESEXTRAPATHS_prepend := "${BSPDIR}/sources/meta-fsl-bsp-release/imx/meta-sdk/recipes-qt5/qt5/${PN}:"
+FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/files:"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=a6f89e2100d9b6cdffcea4f398e37343 \
                     file://common/coverage/coverage-report.pl;beginline=2;endline=17;md5=a4e1830fce078028c8f0974161272607 \
                     file://gst/replaygain/rganalysis.c;beginline=1;endline=23;md5=b60ebefd5b2f5a8e0cab6bfee391a5fe"
 
 GST1.0-PLUGINS-GOOD_SRC ?= "gitsm://source.codeaurora.org/external/imx/gst-plugins-good.git;protocol=https"
-SRCBRANCH = "MM_04.04.00_1805_L4.9.88_MX8QXP_BETA2"
+SRCBRANCH = "MM_04.04.04_1811_L4.14.78_GA"
 
 SRC_URI = " \
     ${GST1.0-PLUGINS-GOOD_SRC};branch=${SRCBRANCH} \
     file://0001-configure.ac-Add-prefix-to-correct-the-QT_PATH.patch \
 "
-SRCREV = "037e2bf9a152de410623235974c68be21948985a"
+SRCREV = "cec0ef39784a3acfd2b442d107f054c6ab10181e"
 
-# gstgldisplay_viv_fb.h from gst-base is needed by qmlgl plugin
-DEPENDS_append = " gstreamer1.0-plugins-base"
-# Need libdrm_fourcc.h for DMA buf support in opengl plugins
-DEPENDS_append_mx7ulp = " libdrm"
-DEPENDS_append_mx8 = " libdrm"
+DEPENDS += "gstreamer1.0-plugins-base virtual/kernel \
+            ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'qtwayland', '', d)} \
+"
+# Make sure kernel sources are available
+do_configure[depends] += "virtual/kernel:do_shared_workdir"
 
 # Qt5 configuratin only support "--disable-qt"
 # And in default, it is disabled, need to remove the default setting to enable it.
@@ -40,7 +40,7 @@ PACKAGECONFIG[qt5] = '--enable-qt \
                       --with-moc="${STAGING_DIR_NATIVE}/usr/bin/qt5/moc" \
                       --with-uic="${STAGING_DIR_NATIVE}/usr/bin/qt5/uic" \
                       --with-rcc="${STAGING_DIR_NATIVE}/usr/bin/qt5/rcc" \
-                     ,--disable-qt,qtbase qtdeclarative qtbase-native'
+                     ,--disable-qt,qtbase qtdeclarative qtbase-native qtx11extras'
 
 # This remove "--exclude=autopoint" option from autoreconf argument to avoid
 # configure.ac:30: error: required file './ABOUT-NLS' not found

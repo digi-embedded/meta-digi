@@ -4,7 +4,7 @@
 
 DESCRIPTION = "Freescale QT Multimedia applications"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=08fd295cce89b0a9c74b9b83ed74f671"
+LIC_FILES_CHKSUM = "file://COPYING;md5=5ab1a30d0cd181e3408077727ea5a2db"
 
 inherit fsl-eula-unpack pkgconfig
 
@@ -13,8 +13,8 @@ DEPENDS += "qtmultimedia gstreamer1.0 gstreamer1.0-plugins-base imx-gst1.0-plugi
 
 SRC_URI = "${FSL_MIRROR}/${PN}-${PV}.bin;fsl-eula=true \
 "
-SRC_URI[md5sum] = "a4df8c4b998d9de7fde469d20d3cd8b1"
-SRC_URI[sha256sum] = "8f64a8d232dc1e3f03873b6702c281750bae9d720e89e414c0104f0ded3d2f84"
+SRC_URI[md5sum] = "3f17dca2b5668b97dda46eff8719e53f"
+SRC_URI[sha256sum] = "a9c5511668b7f37d3d8a610da99952d78e044147fad9fc1b4e88aaa80ebc01b9"
 
 do_install () {
     install -d ${D}${datadir}/qt5/examples/multimedia/

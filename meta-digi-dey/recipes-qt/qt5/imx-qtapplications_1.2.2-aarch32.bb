@@ -4,7 +4,7 @@
 
 DESCRIPTION = "Freescale QT Multimedia applications"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=6b552f505eedab4a11ab538cf3db743a"
+LIC_FILES_CHKSUM = "file://COPYING;md5=5ab1a30d0cd181e3408077727ea5a2db"
 
 inherit fsl-eula-unpack pkgconfig
 
@@ -15,8 +15,8 @@ SRC_URI = "${FSL_MIRROR}/${PN}-${PV}.bin;fsl-eula=true \
            file://qtimxplayer.desktop \
            file://qtimxcamera.desktop \
 "
-SRC_URI[md5sum] = "e65c9a365a4ed76efd4e5de8c3b35293"
-SRC_URI[sha256sum] = "4a43cc4ec58827dda287e2f3c4700bfa821c5075ffefa06056a33290ccaede9a"
+SRC_URI[md5sum] = "b81dd59f4f3e3bd46550ffb615d0d0b3"
+SRC_URI[sha256sum] = "fa44c036766f8c4e1c277edd76960c58130a3b46a4dc0d87edb849360efcdd36"
 
 USE_X11 = "${@bb.utils.contains("DISTRO_FEATURES", "x11", "yes", "no", d)}"
 PLATFORM_HAS_VPU = " "
