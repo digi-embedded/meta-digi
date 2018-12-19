@@ -7,10 +7,11 @@ DESCRIPTION = "Gstreamer freescale plugins"
 LICENSE = "GPLv2 & LGPLv2 & LGPLv2.1"
 SECTION = "multimedia"
 
-DEPENDS = "imx-codec imx-parser virtual/kernel gstreamer1.0 gstreamer1.0-plugins-base gstreamer1.0-plugins-bad"
+DEPENDS = "imx-codec imx-parser virtual/kernel libdrm gstreamer1.0 gstreamer1.0-plugins-base gstreamer1.0-plugins-bad"
+do_configure[depends] += "virtual/kernel:do_shared_workdir"
 DEPENDS_append_mx6 = " imx-lib"
 DEPENDS_append_mx7 = " imx-lib"
-DEPENDS_append_imxvpu = " imx-vpuwrap libdrm"
+DEPENDS_append_imxvpu = " imx-vpuwrap"
 
 # For backwards compatibility
 RREPLACES_${PN} = "gst1.0-fsl-plugin"
@@ -21,17 +22,14 @@ LIC_FILES_CHKSUM = "file://COPYING-LGPL-2;md5=5f30f0716dfdd0d91eb439ebec522ec2 \
                     file://COPYING-LGPL-2.1;md5=fbc093901857fcd118f065f900982c24"
 
 IMXGST_SRC ?= "git://source.codeaurora.org/external/imx/imx-gst1.0-plugin.git;protocol=https"
-SRCBRANCH = "MM_04.04.00_1805_L4.9.88_MX8QXP_BETA2"
+SRCBRANCH = "MM_04.04.04_1811_L4.14.78_GA"
 
 SRC_URI = "${IMXGST_SRC};branch=${SRCBRANCH}"
-SRCREV = "ded3b04018ca71306da9bc38b0037b9ea99abd29"
+SRCREV = "79cf42955b5100cd1a3b2ea2647ceb7cfa50fffb"
 
 S = "${WORKDIR}/git"
 
 inherit autotools pkgconfig
-
-# Make sure kernel sources are available
-do_configure[depends] += "virtual/kernel:do_shared_workdir"
 
 PLATFORM_mx6 = "MX6"
 PLATFORM_mx6sl = "MX6SL"

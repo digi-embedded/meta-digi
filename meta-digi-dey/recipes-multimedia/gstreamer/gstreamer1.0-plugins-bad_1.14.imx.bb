@@ -10,8 +10,8 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 LIC_FILES_CHKSUM = "file://COPYING;md5=73a5855a8119deb017f5f13cf327095d \
                     file://COPYING.LIB;md5=21682e4e8fea52413fd26c60acb907e5 "
 
+DEPENDS += "libdrm"
 DEPENDS_append_imxgpu2d = " virtual/libg2d"
-DEPENDS_append_mx8 = " libdrm"
 
 PACKAGECONFIG_append_mx6q = " opencv"
 PACKAGECONFIG_append_mx6qp = " opencv"
@@ -20,7 +20,10 @@ PACKAGECONFIG_append_mx8 = " opencv kms"
 #Remove unrecognised configure option for 1.14
 PACKAGECONFIG_remove = " gles2"
 
-PACKAGECONFIG[wayland] = "--enable-wayland,--disable-wayland,wayland-native wayland wayland-protocols libdrm"
+#Remove vulkan as it's incompatible for i.MX 8M Mini
+PACKAGECONFIG_remove_mx8mm = " vulkan"
+
+PACKAGECONFIG[wayland] = "--enable-wayland,--disable-wayland,wayland-native wayland wayland-protocols"
 
 # Disable introspection to fix [GstGL-1.0.gir] Error
 EXTRA_OECONF_append = " --disable-introspection"
@@ -37,13 +40,14 @@ SRC_URI_remove = "file://0001-Prepend-PKG_CONFIG_SYSROOT_DIR-to-pkg-config-outpu
 EXTRA_OECONF_remove = "WAYLAND_PROTOCOLS_SYSROOT_DIR=${RECIPE_SYSROOT}"
 
 GST1.0-PLUGINS-BAD_SRC ?= "gitsm://source.codeaurora.org/external/imx/gst-plugins-bad.git;protocol=https"
-SRCBRANCH = "MM_04.04.00_1805_L4.9.88_MX8QXP_BETA2"
+SRCBRANCH = "MM_04.04.04_1811_L4.14.78_GA"
 
 SRC_URI = " \
     ${GST1.0-PLUGINS-BAD_SRC};branch=${SRCBRANCH} \
+    file://0001-opencv-Fix-build-for-opencv-3.4.2.patch \
 "
 
-SRCREV = "07ad0bb676a16c2dffb0f0e415a873f0924cfdc0"
+SRCREV = "7e8a87fcbf5bd44b6982f6d15f2d28aa5f49a6be"
 
 # This remove "--exclude=autopoint" option from autoreconf argument to avoid
 # configure.ac:30: error: required file './ABOUT-NLS' not found
