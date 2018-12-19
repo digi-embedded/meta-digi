@@ -5,7 +5,7 @@
 DESCRIPTION = "GPU driver and apps for imx"
 SECTION = "libs"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=ab61cab9599935bfe9f700405ef00f28"
+LIC_FILES_CHKSUM = "file://COPYING;md5=6dfb32a488e5fd6bae52fbf6c7ebb086"
 
 DEPENDS += \
     "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'wayland', \
@@ -33,6 +33,7 @@ EXTRA_PROVIDES_append_mx6q = " \
 "
 EXTRA_PROVIDES_append_mx8 = " \
     virtual/libopenvx \
+    virtual/libgbm \
     virtual/opencl-icd \
     opencl-headers \
 "
@@ -50,7 +51,9 @@ RPROVIDES_${PN}_imxgpu3d += "imx-gpu-viv"
 
 PE = "1"
 
-inherit fsl-eula-unpack
+inherit fsl-eula-unpack distro_features_check
+
+REQUIRED_DISTRO_FEATURES_mx8 = "wayland"
 
 SRC_URI = "${FSL_MIRROR}/${PN}-${PV}.bin;fsl-eula=true"
 
@@ -197,7 +200,7 @@ do_install () {
 
         # Regular framebuffer
         install -m 0644 ${S}/gpu-core/usr/lib/pkgconfig/egl_linuxfb.pc ${D}${libdir}/pkgconfig/egl.pc
-        
+
         backend=fb
 
     fi
@@ -260,7 +263,7 @@ do_install () {
     if [ "${IS_MX6SL}" = "1" ]; then
         rm -rf ${D}${libdir}/libCLC* ${D}${includedir}/CL \
                \
-               ${D}${libdir}/libGL* ${D}${includedir}/GL* ${D}${libdir}/pkgconfig/gl.pc \ 
+               ${D}${libdir}/libGL* ${D}${includedir}/GL* ${D}${libdir}/pkgconfig/gl.pc \
                \
                ${D}${libdir}/libGLES* ${D}${libdir}/pkgconfig/gles*.pc \
                \
