@@ -3,13 +3,16 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 # Specify the opencv_extra source. The version should match the overall opencv version.
 # Recording the opencv_extra version here allows us to raise a fatal error if the
 # package version is updated but this section is not.
-SRC_URI += "git://github.com/opencv/opencv_extra.git;destsuffix=opencv_extra;name=opencv_extra"
-SRCREV_opencv_extra = "c533012eb214ec3db851586f74f9dc43ea20c065"
-OPENCV_EXTRA_VERSION = "3.4.1"
+SRC_URI += "git://github.com/opencv/opencv_extra.git;branch=3.4;destsuffix=opencv_extra;name=opencv_extra"
+SRCREV_opencv_extra = "cc18e9a17c5afe034341c8c70a5aaa9ac86e5601"
+OPENCV_EXTRA_VERSION = "3.4.2"
 
 SRC_URI_remove = "file://javagen.patch"
 SRC_URI += "file://fix_openvx_samples.patch"
 SRC_URI += "file://fix_python_bindings.patch"
+SRC_URI += "file://0001-photo-avoid-resizing-a-const-Mat-in-decolor.patch \
+            file://0002-photo-Decolor-corrections.patch \
+"
 
 PACKAGECONFIG_remove_imx   = "eigen"
 PACKAGECONFIG_remove_mx8   = "${@bb.utils.contains('DISTRO_FEATURES', 'wayland x11', 'gtk', '', d)}"
@@ -44,16 +47,6 @@ do_check_opencv_extra_version() {
 }
 addtask check_opencv_extra_version before do_fetch
 
-do_compile_prepend() {
-    # A build break occurs if dnn and python3 are configured. Work around
-    # the problem by building opencv_dnn first. See
-    # https://github.com/opencv/opencv/issues/10474.
-    if ${@bb.utils.contains("PACKAGECONFIG", "dnn python3", "true", "false", d)}; then
-        bbnote VERBOSE=1 cmake --build '${B}' --target opencv_dnn -- ${PARALLEL_MAKE}
-        VERBOSE=1 cmake --build '${B}' --target opencv_dnn -- ${PARALLEL_MAKE}
-    fi
-}
-
 do_install_append() {
     if ${@bb.utils.contains("PACKAGECONFIG", "samples", "true", "false", d)}; then
         install -d ${D}${datadir}/OpenCV/samples/data
@@ -66,5 +59,3 @@ do_install_append() {
 
 RDEPENDS_opencv-apps += \
     "${@bb.utils.contains('PACKAGECONFIG', 'test', 'bash', '', d)}"
-
-PACKAGE_ARCH = "${MACHINE_SOCARCH}"
