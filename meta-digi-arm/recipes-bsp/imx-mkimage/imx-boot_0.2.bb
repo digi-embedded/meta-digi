@@ -119,7 +119,7 @@ do_compile () {
         echo 8QX boot binary build
         cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_rpmsg_lite_pingpong_rtos_linux_remote.bin ${S}/${SOC_TARGET}/m40_tcm.bin
         cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_rpmsg_lite_pingpong_rtos_linux_remote.bin ${S}/${SOC_TARGET}/CM4.bin
-        cp ${DEPLOY_DIR_IMAGE}/ahab-container.img ${S}/${SOC_TARGET}/
+        cp ${DEPLOY_DIR_IMAGE}/mx8qx-ahab-container.img ${S}/${SOC_TARGET}/
         cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${ATF_MACHINE_NAME} ${S}/${SOC_TARGET}/bl31.bin
         for type in ${UBOOT_CONFIG}; do
             RAM_SIZE="$(echo ${type} | sed -e 's,.*\([0-9]\+GB\),\1,g')"
@@ -185,7 +185,7 @@ do_deploy () {
 
         install -m 0755 ${S}/${TOOLS_NAME} ${DEPLOYDIR}/${BOOT_TOOLS}
     else
-        install -m 0644 ${S}/${SOC_TARGET}/ahab-container.img ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
+        install -m 0644 ${S}/${SOC_TARGET}/mx8qx-ahab-container.img ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
         install -m 0644 ${S}/${SOC_TARGET}/m40_tcm.bin ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
         install -m 0644 ${S}/${SOC_TARGET}/CM4.bin ${DEPLOYDIR}/${DEPLOYDIR_IMXBOOT}
 
