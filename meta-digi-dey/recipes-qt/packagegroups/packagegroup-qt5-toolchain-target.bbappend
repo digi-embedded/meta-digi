@@ -7,6 +7,9 @@ RDEPENDS_${PN}_remove = "qtquick1-dev \
     qtwebkit-dev \
     qtwebkit-mkspecs \
     qtwebkit-qmlplugins \
+    qt3d-dev \
+    qt3d-mkspecs \
+    qt3d-qmlplugins \
 "
 
 RDEPENDS_${PN}_append_imxgpu = " \
