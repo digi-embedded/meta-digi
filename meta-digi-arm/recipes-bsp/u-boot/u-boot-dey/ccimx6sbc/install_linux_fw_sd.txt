@@ -27,7 +27,7 @@ if test -n "${module_variant}"; then
 		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc.imx;
 	elif test "${module_variant}" = "0x03" || test "${module_variant}" = "0x0e" || test "${module_variant}" = "0x0f"; then
 		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc512MB.imx;
-	elif test "${module_variant}" = "0x0b"; then
+	elif test "${module_variant}" = "0x0b" || test "${module_variant}" = "0x15"; then
 		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc.imx;
 	elif test "${module_variant}" = "0x0c" || test "${module_variant}" = "0x13"; then
 		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc512MB.imx;

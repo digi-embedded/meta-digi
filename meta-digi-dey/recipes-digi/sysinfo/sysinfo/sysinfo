@@ -267,8 +267,13 @@ BOARD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant | tr -d '\0')"
 BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn | tr -d '\0')"
 BOARD_VERSION="$(cat /proc/device-tree/digi,carrierboard,version | tr -d '\0')"
 BOARD_ID="$(cat /proc/device-tree/digi,carrierboard,id | tr -d '\0')"
+
 if grep -qs '\<digi,ccimx6ul\>' /proc/device-tree/compatible; then
 	MCA_NODE="/sys/bus/i2c/devices/0-007e"
+elif grep -qs '\<digi,ccimx8x\>' /proc/device-tree/compatible; then
+	MCA_NODE="/sys/bus/i2c/devices/0-0063"
+fi
+if [ -d "$MCA_NODE" ]; then
 	MCA_HW_VERSION=$(cat ${MCA_NODE}/hw_version 2>/dev/null | tr -d '\0') || MCA_HW_VERSION="??"
 	MCA_FW_VERSION=$(cat ${MCA_NODE}/fw_version 2>/dev/null | tr -d '\0') || MCA_FW_VERSION="??"
 	MCA_VERSION="HW_VERSION=${MCA_HW_VERSION}  FW_VERSION=${MCA_FW_VERSION}"
