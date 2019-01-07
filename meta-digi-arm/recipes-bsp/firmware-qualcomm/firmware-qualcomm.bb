@@ -8,11 +8,10 @@ LIC_FILES_CHKSUM = "file://${DIGI_EULA_FILE};md5=8c0ad592dd48ace3d25eed5bbb26ba7
 # Selects whether to use proprietary or community driver
 QUALCOMM_WIFI_DRIVER ?= "proprietary"
 
+# Bluetooth firmware files
 FW_QUALCOMM_BT = " \
-    file://qca/nvm_tlv_3.0.bin \
-    file://qca/nvm_tlv_3.2.bin \
-    file://qca/rampatch_tlv_3.0.tlv \
-    file://qca/rampatch_tlv_3.2.tlv \
+    file://${QCA_MODEL}_bt/nvm_tlv_3.2.bin \
+    file://${QCA_MODEL}_bt/rampatch_tlv_3.2.tlv \
 "
 
 # Firmware files for QCA6564 (Qualcomm proprietary driver)
