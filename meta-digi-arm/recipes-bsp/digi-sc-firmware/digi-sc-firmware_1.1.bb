@@ -1,18 +1,18 @@
 # Copyright (C) 2016 Freescale Semiconductor
 # Copyright 2017-2018 NXP
-# Copyright (C) 2018 Digi International.
+# Copyright (C) 2018-2019 Digi International.
 
 DESCRIPTION = "i.MX System Controller Firmware, customized for Digi platforms"
 LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://COPYING;md5=ab61cab9599935bfe9f700405ef00f28"
+LIC_FILES_CHKSUM = "file://COPYING;md5=6dfb32a488e5fd6bae52fbf6c7ebb086"
 SECTION = "BSP"
 
 inherit pkgconfig deploy
 
 SRC_URI = "${DIGI_PKG_SRC}/${PN}-${PV}.tar.gz"
 
-SRC_URI[md5sum] = "3b6f34d30d2d6b72e0bda741eec71573"
-SRC_URI[sha256sum] = "9879c904532815e4fe1ae1375b10d49b2f90f06e21790049867d0d258c2c030e"
+SRC_URI[md5sum] = "bc8b696ea4f75747bed9fabd352f9596"
+SRC_URI[sha256sum] = "e3cf8163a02d71e06bbf64ea50e3a661dbecf60a57ff890d3dc1ee9ffdcda9ee"
 
 S = "${WORKDIR}/${PN}-${PV}"
 
