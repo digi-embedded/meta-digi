@@ -48,10 +48,10 @@ trustfence_sign[dirs] = "${DEPLOYDIR}"
 
 do_deploy[vardeps] += "TRUSTFENCE_SIGN_KEYS_PATH TRUSTFENCE_KEY_INDEX TRUSTFENCE_DEK_PATH"
 
-FILES_kernel-image += "/boot/config-${KERNEL_VERSION}"
+FILES_${KERNEL_PACKAGE_NAME}-image += "/boot/config-${KERNEL_VERSION}"
 
 # Don't include kernels in standard images
-RDEPENDS_kernel-base = ""
+RDEPENDS_${KERNEL_PACKAGE_NAME}-base = ""
 
 # A user can provide his own kernel 'defconfig' file by:
 # - setting the variable KERNEL_DEFCONFIG to a custom kernel configuration file
