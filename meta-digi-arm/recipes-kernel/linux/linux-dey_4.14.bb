@@ -1,4 +1,4 @@
-# Copyright (C) 2017, 2018 Digi International
+# Copyright (C) 2019 Digi International
 
 require recipes-kernel/linux/linux-dey.inc
 
