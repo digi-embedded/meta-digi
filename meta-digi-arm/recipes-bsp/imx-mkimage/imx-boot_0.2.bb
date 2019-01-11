@@ -106,8 +106,9 @@ do_compile () {
         done
         rm ${S}/${SOC_DIR}/scfw_tcm.bin
         rm ${S}/${SOC_DIR}/u-boot.bin
-        # Remove u-boot-atf.bin so it gets generated with the next iteration's U-Boot
+        # Remove u-boot-atf.bin and u-boot-hash.bin so they get generated with the next iteration's U-Boot
         rm ${S}/${SOC_DIR}/u-boot-atf.bin
+        rm ${S}/${SOC_DIR}/u-boot-hash.bin
     done
 }
 
