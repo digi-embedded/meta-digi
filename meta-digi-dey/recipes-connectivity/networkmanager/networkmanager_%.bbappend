@@ -24,9 +24,9 @@ PACKAGECONFIG_remove = "consolekit"
 
 # Adjust other compile time options to save space
 PACKAGECONFIG_remove = "netconfig nss"
-PACKAGECONFIG_append = " concheck gnutls modemmanager ppp"
+PACKAGECONFIG_append = " gnutls modemmanager ppp"
 
-EXTRA_OECONF_append = " --disable-introspection"
+EXTRA_OECONF_append = " --disable-introspection --enable-concheck"
 
 #
 # NetworkManager only accepts IP addresses in CIDR format
@@ -94,3 +94,7 @@ do_install_append() {
 # NetworkManager needs to be started after DBUS
 INITSCRIPT_NAME = "networkmanager"
 INITSCRIPT_PARAMS = "start 03 2 3 4 5 . stop 80 0 6 1 ."
+
+FILES_${PN} += " \
+    ${libdir}/pppd/*/nm-pppd-plugin.so \
+"
