@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2018 Digi International.
+# Copyright (C) 2012-2019 Digi International.
 #
 SUMMARY = "Wireless packagegroup for DEY image"
 
@@ -9,7 +9,6 @@ inherit packagegroup
 RDEPENDS_${PN} = "\
     crda \
     iw \
-    wireless-tools \
     wpa-supplicant \
     wpa-supplicant-cli \
     wpa-supplicant-passphrase \
