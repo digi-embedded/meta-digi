@@ -105,7 +105,7 @@ if [ -f "${syspower}" ]; then
 	suspend_interfaces
 
 	# Suspend the device
-	printf "freeze" > ${syspower}
+	printf "mem" > ${syspower}
 
 	# Post-resume actions
 	resume_interfaces
