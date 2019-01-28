@@ -37,9 +37,9 @@ EXTRA_OECONF += "STAGING_DIR=${STAGING_DIR_NATIVE} --disable-introspection"
 PACKAGECONFIG += "qt5"
 
 PACKAGECONFIG[qt5] = '--enable-qt \
-                      --with-moc="${STAGING_DIR_NATIVE}/usr/bin/qt5/moc" \
-                      --with-uic="${STAGING_DIR_NATIVE}/usr/bin/qt5/uic" \
-                      --with-rcc="${STAGING_DIR_NATIVE}/usr/bin/qt5/rcc" \
+                      --with-moc="${STAGING_DIR_NATIVE}/usr/bin/moc" \
+                      --with-uic="${STAGING_DIR_NATIVE}/usr/bin/uic" \
+                      --with-rcc="${STAGING_DIR_NATIVE}/usr/bin/rcc" \
                      ,--disable-qt,qtbase qtdeclarative qtbase-native qtx11extras'
 
 # This remove "--exclude=autopoint" option from autoreconf argument to avoid

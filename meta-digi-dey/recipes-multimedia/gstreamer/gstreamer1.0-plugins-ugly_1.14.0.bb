@@ -1,4 +1,4 @@
-require recipes-multimedia/gstreamer/gstreamer1.0-plugins-ugly.inc
+require gstreamer1.0-plugins-ugly.inc
 
 # Re-use patch files from 1.12.2 recipe
 FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/files:"
@@ -16,3 +16,5 @@ SRC_URI[sha256sum] = "3fb9ea5fc8a2de4b3eaec4128d71c6a2d81dd19befe1cd87cb833b98bc
 
 S = "${WORKDIR}/gst-plugins-ugly-${PV}"
 
+# Remove unrecognized otions to avoid build error
+EXTRA_OECONF_remove = " --disable-twolame --enable-mpg123 --enable-lame"

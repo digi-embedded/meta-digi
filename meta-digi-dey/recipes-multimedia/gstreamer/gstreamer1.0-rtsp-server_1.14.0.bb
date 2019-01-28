@@ -1,4 +1,4 @@
-require recipes-multimedia/gstreamer/gstreamer1.0-rtsp-server.inc
+require gstreamer1.0-rtsp-server.inc
 
 # Re-use patch files from 1.12.2 recipe
 FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/files:"
