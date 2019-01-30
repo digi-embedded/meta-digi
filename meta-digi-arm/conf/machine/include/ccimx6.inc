@@ -19,7 +19,7 @@ KERNEL_DEFCONFIG ?= "arch/arm/configs/ccimx6sbc_defconfig"
 WIRELESS_MODULE ?= ""
 
 # Firmware
-MACHINE_FIRMWARE ?= ""
+MACHINE_FIRMWARE ?= "firmware-imx-sdma"
 MACHINE_FIRMWARE_append_mx6q = " firmware-imx-vpu-imx6q"
 MACHINE_FIRMWARE_append_mx6dl = " firmware-imx-vpu-imx6d"
 

@@ -26,7 +26,7 @@ KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8x_defconfig"
 WIRELESS_MODULE ?= ""
 
 # Firmware
-MACHINE_FIRMWARE ?= "firmware-imx-vpu-imx8"
+MACHINE_FIRMWARE ?= "firmware-imx-vpu-imx8 firmware-imx-sdma"
 
 MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
