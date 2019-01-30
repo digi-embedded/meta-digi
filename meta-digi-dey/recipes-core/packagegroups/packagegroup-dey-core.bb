@@ -31,7 +31,6 @@ RDEPENDS_${PN} = "\
     base-passwd \
     busybox \
     busybox-acpid \
-    busybox-static-nodes \
     cloudconnector \
     ${@bb.utils.contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "rtc", "busybox-hwclock", "", d)} \

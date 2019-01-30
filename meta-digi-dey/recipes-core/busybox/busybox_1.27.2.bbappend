@@ -10,7 +10,6 @@ SRC_URI += "file://standby \
             file://acpid.map \
             file://pswitch-standby \
             file://pswitch-poweroff \
-            file://busybox-static-nodes \
             file://bridgeifupdown \
            "
 
@@ -36,13 +35,6 @@ INITSCRIPT_NAME_${PN}-acpid = "busybox-acpid"
 # Start busybox-syslog at a very early state
 INITSCRIPT_PARAMS_${PN}-syslog = "defaults 02"
 
-# static-nodes package (create static nodes from /etc/device_table)
-PACKAGES =+ "${PN}-static-nodes"
-FILES_${PN}-static-nodes = "${sysconfdir}/init.d/busybox-static-nodes"
-INITSCRIPT_PACKAGES =+ "${PN}-static-nodes"
-INITSCRIPT_NAME_${PN}-static-nodes = "busybox-static-nodes"
-INITSCRIPT_PARAMS_${PN}-static-nodes = "start 07 S ."
-
 do_install_append() {
 	if grep "CONFIG_NTPD=y" ${WORKDIR}/defconfig; then
 		install -m 0755 ${WORKDIR}/busybox-ntpd ${D}${sysconfdir}/init.d/
@@ -61,9 +53,6 @@ do_install_append() {
 		install -m 0755 ${WORKDIR}/acpid.map ${D}${sysconfdir}/acpi/
 		install -m 0755 ${WORKDIR}/pswitch-standby ${D}${sysconfdir}/acpi/
 		install -m 0755 ${WORKDIR}/pswitch-poweroff ${D}${sysconfdir}/acpi/
-	fi
-	if grep "CONFIG_MAKEDEVS=y" ${WORKDIR}/defconfig; then
-		install -m 0755 ${WORKDIR}/busybox-static-nodes ${D}${sysconfdir}/init.d/
 	fi
 
 	# Install bridgeifupdown script
