@@ -33,5 +33,5 @@ RDEPENDS_${PN} = "\
 	${VIRTUAL-RUNTIME_http-server} \
 	${VIRTUAL-RUNTIME_network-utils} \
 	${VIRTUAL-RUNTIME_snmp-manager} \
-	${VIRTUAL-RUNTIME_ntp-client} \
+	${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '', '${VIRTUAL-RUNTIME_ntp-client}', d)} \
 "
