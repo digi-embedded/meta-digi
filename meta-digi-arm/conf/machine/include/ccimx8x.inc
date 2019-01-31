@@ -41,7 +41,6 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     ${WIRELESS_MODULE} \
     cryptodev-module \
     cryptoauthlib \
-    cryptoauth-openssl-engine \
 "
 
 MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip"

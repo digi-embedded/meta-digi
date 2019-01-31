@@ -37,7 +37,6 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     ${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
     cryptoauthlib \
     cryptodev-module \
-    cryptoauth-openssl-engine \
 "
 MACHINE_EXTRA_RRECOMMENDS_remove_use-mainline-bsp = "${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)}"
 
