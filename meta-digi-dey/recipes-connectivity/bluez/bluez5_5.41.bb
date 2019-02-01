@@ -53,3 +53,6 @@ NOINST_TOOLS_EXPERIMENTAL ?= " \
     tools/gatt-service \
     profiles/iap/iapd \
 "
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"
+COMPATIBLE_MACHINE = "(ccimx6|ccimx6ul)"
