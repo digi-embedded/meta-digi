@@ -34,3 +34,6 @@ RDEPENDS_${PN}_append_ccimx6 = " \
 RDEPENDS_${PN}_append_ccimx6ul = " \
     mtd-utils-ubifs \
 "
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"
+COMPATIBLE_MACHINE = "(ccimx6|ccimx6ul)"
