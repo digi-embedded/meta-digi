@@ -32,3 +32,6 @@ FILES_${PN}-cert = "${sysconfdir}/ssl/certs/Digi_Int-ca-cert-public.crt"
 CONFFILES_${PN} += "${sysconfdir}/cc.conf"
 
 RDEPENDS_${PN} = "${PN}-cert"
+
+# Disable extra compilation checks from SECURITY_CFLAGS to avoid build errors
+lcl_maybe_fortify_pn-cloudconnector = ""
