@@ -1,0 +1,17 @@
+ACTION!="add|change|move|bind", GOTO="mm_net_device_blacklist_end"
+
+# ModemManager documentation states that the best practice is to use the DEVPATH
+# this way rather than other rules such as KERNEL, so be careful when modifying
+
+# Remove CAN interfaces from ModemManager probing
+SUBSYSTEM=="net", DEVPATH=="/devices/platform/5a8e0000.can*", ENV{ID_MM_CANDIDATE}="0", ENV{ID_MM_DEVICE_IGNORE}="1"
+SUBSYSTEM=="net", DEVPATH=="/devices/platform/5a8f0000.can*", ENV{ID_MM_CANDIDATE}="0", ENV{ID_MM_DEVICE_IGNORE}="1"
+
+# Remove Ethernet interfaces from ModemManager probing
+SUBSYSTEM=="net", DEVPATH=="/devices/platform/5b040000.ethernet*", ENV{ID_MM_CANDIDATE}="0", ENV{ID_MM_DEVICE_IGNORE}="1"
+SUBSYSTEM=="net", DEVPATH=="/devices/platform/5b050000.ethernet*", ENV{ID_MM_CANDIDATE}="0", ENV{ID_MM_DEVICE_IGNORE}="1"
+
+# Remove PCIe interfaces from ModemManager probing
+SUBSYSTEM=="net", DEVPATH=="/devices/platform/5f010000.pcie*", ENV{ID_MM_CANDIDATE}="0", ENV{ID_MM_DEVICE_IGNORE}="1"
+
+LABEL="mm_net_device_blacklist_end"
