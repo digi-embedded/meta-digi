@@ -25,7 +25,7 @@ trustfence_sign() {
 
 	# Sign/encrypt the kernel images
 	for type in ${KERNEL_IMAGETYPES}; do
-		KERNEL_IMAGE="${type}-${KERNEL_IMAGE_BASE_NAME}.bin"
+		KERNEL_IMAGE="${type}-${KERNEL_IMAGE_NAME}.bin"
 		TMP_KERNEL_IMAGE_SIGNED="$(mktemp ${KERNEL_IMAGE}-signed.XXXXXX)"
 		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -l "${KERNEL_IMAGE}" "${TMP_KERNEL_IMAGE_SIGNED}"
 		mv "${TMP_KERNEL_IMAGE_SIGNED}" "${KERNEL_IMAGE}"
@@ -37,7 +37,7 @@ trustfence_sign() {
 		DTB_EXT=${DTB##*.}
 		DTB_BASE_NAME=`basename ${DTB} ."${DTB_EXT}"`
 		for type in ${KERNEL_IMAGETYPES}; do
-			DTB_IMAGE="$(echo ${type}-${KERNEL_IMAGE_BASE_NAME} | sed "s/${MACHINE}/${DTB_BASE_NAME}/g").${DTB_EXT}"
+			DTB_IMAGE="$(echo ${type}-${KERNEL_IMAGE_NAME} | sed "s/${MACHINE}/${DTB_BASE_NAME}/g").${DTB_EXT}"
 			TMP_DTB_IMAGE_SIGNED="$(mktemp ${DTB_IMAGE}-signed.XXXXXX)"
 			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -d "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
 			mv "${TMP_DTB_IMAGE_SIGNED}" "${DTB_IMAGE}"
