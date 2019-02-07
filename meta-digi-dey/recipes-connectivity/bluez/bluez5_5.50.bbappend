@@ -5,6 +5,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 SRC_URI += " \
     file://bluetooth-init \
     file://bluetooth-init.service \
+    file://bluetooth.service-add-customizations.patch \
     file://main.conf \
     file://0001-hcitool-do-not-show-unsupported-refresh-option.patch \
     file://0002-hcitool-increase-the-shown-connection-limit-to-20.patch \
