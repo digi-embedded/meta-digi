@@ -23,9 +23,9 @@ IMAGE_CMD_boot.vfat() {
 		for DTB in ${KERNEL_DEVICETREE}; do
 			# Remove potential sub-folders
 			DTB="$(basename ${DTB})"
-			if [ -e "${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}" ]; then
-				BOOTIMG_FILES="${BOOTIMG_FILES} $(readlink -e ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB})"
-				BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}"
+			if [ -e "${DEPLOY_DIR_IMAGE}/${DTB}" ]; then
+				BOOTIMG_FILES="${BOOTIMG_FILES} $(readlink -e ${DEPLOY_DIR_IMAGE}/${DTB})"
+				BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${DTB}"
 			fi
 		done
 	fi
@@ -85,8 +85,8 @@ IMAGE_CMD_boot.ubifs() {
 		for DTB in ${KERNEL_DEVICETREE}; do
 			# Remove potential sub-folders
 			DTB="$(basename ${DTB})"
-			if [ -e "${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}" ]; then
-				BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}"
+			if [ -e "${DEPLOY_DIR_IMAGE}/${DTB}" ]; then
+				BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${DTB}"
 			fi
 		done
 	fi
@@ -155,8 +155,8 @@ IMAGE_CMD_recovery.ubifs() {
 		for DTB in ${KERNEL_DEVICETREE}; do
 			# Remove potential sub-folders
 			DTB="$(basename ${DTB})"
-			if [ -e "${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}" ]; then
-				RECOVERYIMG_FILES_SYMLINK="${RECOVERYIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB}"
+			if [ -e "${DEPLOY_DIR_IMAGE}/${DTB}" ]; then
+				RECOVERYIMG_FILES_SYMLINK="${RECOVERYIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${DTB}"
 			fi
 		done
 	fi
