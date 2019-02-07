@@ -2,9 +2,9 @@
 # U-Boot bootscript for NAND images created by Yocto.
 #
 if test "${board}" = "ccimx6ulsbc"; then
-	setenv fdt_file zImage-imx6ul-ccimx6ulsbcpro.dtb
+	setenv fdt_file imx6ul-ccimx6ulsbcpro.dtb
 else
-	setenv fdt_file zImage-imx6ul-ccimx6ulsbcexpress.dtb
+	setenv fdt_file imx6ul-ccimx6ulsbcexpress.dtb
 fi
 
 if test "${mtdbootpart}" = "recovery"; then
