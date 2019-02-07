@@ -1,0 +1,10 @@
+[Unit]
+Description=Initialization of the bluetooth chip
+
+[Service]
+Type=forking
+ExecStart=/etc/bluetooth-init start
+ExecStop=/etc/bluetooth-init stop
+
+[Install]
+RequiredBy=bluetooth.service

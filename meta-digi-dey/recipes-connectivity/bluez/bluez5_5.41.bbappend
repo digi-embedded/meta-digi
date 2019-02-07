@@ -4,6 +4,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
 SRC_URI += " \
     file://bluetooth-init \
+    file://bluetooth-init.service \
     file://main.conf \
     file://0001-hcitool-do-not-show-unsupported-refresh-option.patch \
     file://0002-hcitool-increase-the-shown-connection-limit-to-20.patch \
@@ -35,7 +36,10 @@ PACKAGECONFIG_append = " experimental"
 
 do_install_append() {
 	install -d ${D}${sysconfdir}/init.d/
-	install -m 0755 ${WORKDIR}/bluetooth-init ${D}${sysconfdir}/init.d/bluetooth-init
+	install -m 0755 ${WORKDIR}/bluetooth-init ${D}${sysconfdir}/bluetooth-init
+	ln -sf /etc/bluetooth-init ${D}${sysconfdir}/init.d/bluetooth-init
+	install -d ${D}${systemd_unitdir}/system/
+	install -m 0644 ${WORKDIR}/bluetooth-init.service ${D}${systemd_unitdir}/system/bluetooth-init.service
 	install -m 0644 ${WORKDIR}/main.conf ${D}${sysconfdir}/bluetooth/
 	if [ -n "${@bb.utils.contains('PACKAGECONFIG', 'experimental', 'experimental', '', d)}" ]; then
 		sed -i '/^SSD_OPTIONS/a SSD_OPTIONS="${SSD_OPTIONS} --experimental"' ${D}${INIT_D_DIR}/bluetooth
@@ -45,10 +49,15 @@ do_install_append() {
 PACKAGES =+ "${PN}-init"
 
 FILES_${PN} += " ${sysconfdir}/bluetooth/main.conf"
-FILES_${PN}-init = "${sysconfdir}/init.d/bluetooth-init"
+FILES_${PN}-init = " ${sysconfdir}/bluetooth-init \
+                     ${sysconfdir}/init.d/bluetooth-init \
+                     ${systemd_unitdir}/system/bluetooth-init.service \
+"
 
 INITSCRIPT_PACKAGES += "${PN}-init"
 INITSCRIPT_NAME_${PN}-init = "bluetooth-init"
 INITSCRIPT_PARAMS_${PN}-init = "start 19 2 3 4 5 . stop 21 0 1 6 ."
+
+SYSTEMD_SERVICE_${PN}-init = "bluetooth-init.service"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
