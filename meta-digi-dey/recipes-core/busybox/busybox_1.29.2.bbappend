@@ -3,6 +3,8 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
 SRC_URI += "file://standby \
+            file://standby-actions \
+            file://standby-systemd \
             file://busybox-ntpd \
             file://index.html \
             file://digi-logo.png \
@@ -13,8 +15,12 @@ SRC_URI += "file://standby \
             file://bridgeifupdown \
            "
 
+HAS_SYSTEMD = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}"
+
 # hwclock bootscript init parameters
 INITSCRIPT_PARAMS_${PN}-hwclock = "start 20 S . stop 20 0 6 ."
+
+FILES_${PN}_append = " ${systemd_unitdir}/system-sleep/"
 
 # NTPD package
 PACKAGES =+ "${PN}-ntpd"
@@ -43,8 +49,17 @@ do_install_append() {
 		install -m 0644 ${WORKDIR}/index.html ${D}/srv/www/
 		install -m 0644 ${WORKDIR}/digi-logo.png ${D}/srv/www/
 	fi
-	# Install 'standby' script
-	install -m 0755 ${WORKDIR}/standby ${D}${base_bindir}
+	# Install one standby script or another depending on having systemd or not
+	if ${HAS_SYSTEMD}; then
+		# Install systemd version of 'standby' script
+		install -m 0755 ${WORKDIR}/standby-systemd ${D}${base_bindir}/standby
+		# Install systemd 'standby-actions' hook
+		install -d ${D}${systemd_unitdir}/system-sleep/
+		install -m 0755 ${WORKDIR}/standby-actions ${D}${systemd_unitdir}/system-sleep/
+	else
+		# Install 'standby' script
+		install -m 0755 ${WORKDIR}/standby ${D}${base_bindir}
+	fi
 	# Create a symlink called suspend to maintain backward compatibility
 	ln -s standby ${D}${base_bindir}/suspend
 	if grep "CONFIG_ACPID=y" ${WORKDIR}/defconfig; then
