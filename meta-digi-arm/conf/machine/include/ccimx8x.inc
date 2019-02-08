@@ -49,6 +49,7 @@ MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip"
 KERNEL_IMAGETYPE = "Image.gz"
 
 VIRTUAL-RUNTIME_init_manager ?= "systemd"
+VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend
 # Vulkan is necessary for wayland to build
