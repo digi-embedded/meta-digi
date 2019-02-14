@@ -23,5 +23,3 @@ IMAGE_ROOTFS_SIZE ?= "8192"
 
 IMAGE_FSTYPES_remove = "ext4"
 IMAGE_FSTYPES_append = " ext2"
-
-BAD_RECOMMENDATIONS += "busybox-syslog"

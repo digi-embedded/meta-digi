@@ -55,6 +55,7 @@ RDEPENDS_${PN} = "\
 "
 
 RRECOMMENDS_${PN} = "\
+    busybox-syslog \
     ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS} \
     ${MACHINE_EXTRA_RRECOMMENDS} \
 "
