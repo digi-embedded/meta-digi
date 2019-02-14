@@ -30,16 +30,16 @@ do_install_append_ccimx8x() {
 }
 
 pkg_postinst_ontarget_${PN}() {
+	# Exit if there is no wireless hardware available
+	if [ ! -e /proc/device-tree/wireless/mac-address ]; then
+		exit 0
+	fi
+
 	# Append the last two bytes of the wlan0 MAC address to the SSID of the
 	# hostAP configuration files
 
 	# Get the last two bytes of the wlan0 MAC address
-	MAC="$(cut -d ':' -f5,6 /sys/class/net/wlan0/address | tr -d ':')"
-
-	# If wlan0 is not available, use a random value with no hexadecimal characters
-	if [ -z "${MAC}" ]; then
-		MAC="$(cat /dev/urandom | tr -dc 'G-Z' | fold -w 4 | head -n 1)"
-	fi
+	MAC="$(dd conv=swab if=/proc/device-tree/wireless/mac-address 2>/dev/null | hexdump | head -n 1 | cut -d ' ' -f 4)"
 
 	find "${sysconfdir}" -type f -name 'hostapd_wlan?.conf' -exec \
 		sed -i -e "s,##MAC##,${MAC},g" {} \;
