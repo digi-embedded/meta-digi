@@ -1,37 +1,47 @@
 From: Javier Viguera <javier.viguera@digi.com>
-Date: Thu, 16 Feb 2017 14:53:44 +0100
+Date: Fri, 15 Feb 2019 09:23:50 +0100
 Subject: [PATCH 3/4] fw_env: add support to unlock emmc boot partition
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
 ---
- tools/env/fw_env.c | 32 ++++++++++++++++++++++++++++++++
- 1 file changed, 32 insertions(+)
+ tools/env/fw_env.c | 39 +++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 39 insertions(+)
 
 diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
-index de2e693e9f93..db1182c7216e 100644
+index ab06415898..5ebd7d6208 100644
 --- a/tools/env/fw_env.c
 +++ b/tools/env/fw_env.c
-@@ -1173,9 +1173,31 @@ static int flash_read (int fd)
+@@ -1052,13 +1052,42 @@ static int flash_read (int fd)
+ 		return -1;
+
  	return 0;
  }
- 
+
 +/*
 + * Set mmcboot partition read-write protection
 + */
 +static int sysfs_mmcboot_set_protection(const char *device, int value)
 +{
 +	int fd;
++	ssize_t nbytes;
 +	char buf[64];
-+
 +	snprintf(buf, sizeof(buf), "/sys/block/%s/force_ro", device);
 +	fd = open(buf, O_WRONLY);
 +	if (fd < 0) {
-+		perror("sysfs_mmcboot_set_protection");
++		perror("sysfs_mmcboot_set_protection: error opening mmcblk");
 +		return fd;
 +	}
 +	snprintf(buf, sizeof(buf), "%s", value ? "1" : "0");
-+	write(fd, buf, 2);
++	nbytes = write(fd, buf, 2);
 +	close(fd);
++
++	/* Verify bytes written */
++	if (nbytes < 2)
++	{
++		perror("sysfs_mmcboot_set_protection: error writing mmcblk protection");
++		return nbytes >=0 ? -EIO : nbytes;
++	}
 +
 +	return 0;
 +}
@@ -40,25 +50,40 @@ index de2e693e9f93..db1182c7216e 100644
  {
  	int fd_current, fd_target, rc, dev_target;
 +	char *mmcblk = NULL;
- 
+
  	/* dev_current: fd_current, erase_current */
  	fd_current = open (DEVNAME (dev_current), mode);
-@@ -1205,8 +1227,18 @@ static int flash_io (int mode)
+ 	if (fd_current < 0) {
+ 		fprintf (stderr,
+@@ -1084,10 +1113,15 @@ static int flash_io (int mode)
+ 		} else {
+ 			dev_target = dev_current;
  			fd_target = fd_current;
  		}
- 
-+
+
 +		/* Disable mmcboot protection if using EMMC (set read-write) */
 +		mmcblk = strstr(DEVNAME(dev_target), "mmcblk");
 +		if (mmcblk)
 +			sysfs_mmcboot_set_protection(mmcblk, 0);
 +
  		rc = flash_write (fd_current, fd_target, dev_target);
- 
+
+ 		if (fsync(fd_current) &&
+ 		    !(errno == EINVAL || errno == EROFS)) {
+ 			fprintf (stderr,
+@@ -1109,10 +1143,15 @@ static int flash_io (int mode)
+ 					DEVNAME (dev_target),
+ 					strerror (errno));
+ 				rc = -1;
+ 			}
+ 		}
++
 +		/* Re-enable mmcboot protection (set read-only) */
 +		if (mmcblk)
 +			sysfs_mmcboot_set_protection(mmcblk, 1);
 +
- 		if (fsync(fd_current) &&
- 		    !(errno == EINVAL || errno == EROFS)) {
- 			fprintf (stderr,
+ 	} else {
+ 		rc = flash_read (fd_current);
+ 	}
+
+ exit:
