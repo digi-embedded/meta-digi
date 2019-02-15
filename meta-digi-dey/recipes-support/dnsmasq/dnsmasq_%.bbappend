@@ -4,5 +4,6 @@
 PACKAGECONFIG_append = " dbus"
 
 # NetworkManager will launch 'dnsmasq' using DBUS, so disable the creation
-# of runlevel's symlinks.
+# of runlevel's symlinks and disable its systemd service.
 INHIBIT_UPDATERCD_BBCLASS = "1"
+SYSTEMD_AUTO_ENABLE = "disable"
