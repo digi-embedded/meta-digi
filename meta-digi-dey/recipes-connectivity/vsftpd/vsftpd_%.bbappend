@@ -1,3 +1,11 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013-2019 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+
+do_install_append() {
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
+        install -d ${D}${sysconfdir}/tmpfiles.d
+        echo "d /run/vsftpd/empty 0755 root root -" \
+        > ${D}${sysconfdir}/tmpfiles.d/${BPN}.conf
+    fi
+}
