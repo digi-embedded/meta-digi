@@ -197,7 +197,7 @@ do_install () {
 
         # Regular framebuffer
         install -m 0644 ${S}/gpu-core/usr/lib/pkgconfig/egl_linuxfb.pc ${D}${libdir}/pkgconfig/egl.pc
-        
+
         backend=fb
 
     fi
@@ -260,7 +260,7 @@ do_install () {
     if [ "${IS_MX6SL}" = "1" ]; then
         rm -rf ${D}${libdir}/libCLC* ${D}${includedir}/CL \
                \
-               ${D}${libdir}/libGL* ${D}${includedir}/GL* ${D}${libdir}/pkgconfig/gl.pc \ 
+               ${D}${libdir}/libGL* ${D}${includedir}/GL* ${D}${libdir}/pkgconfig/gl.pc \
                \
                ${D}${libdir}/libGLES* ${D}${libdir}/pkgconfig/gles*.pc \
                \
@@ -299,7 +299,6 @@ FILES_libegl-imx-dev = "${includedir}/EGL ${includedir}/KHR ${libdir}/pkgconfig/
 
 FILES_libgal-imx = "${libdir}/libGAL${SOLIBS} ${libdir}/libGAL_egl${SOLIBS}"
 FILES_libgal-imx-dev = "${libdir}/libGAL${SOLIBSDEV} ${includedir}/HAL"
-RDEPENDS_libgal-imx += "kernel-module-imx-gpu-viv"
 RPROVIDES_libgal-imx += "libgal-imx"
 INSANE_SKIP_libgal-imx += "build-deps"
 

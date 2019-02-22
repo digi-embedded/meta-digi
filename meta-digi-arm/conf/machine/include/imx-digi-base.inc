@@ -51,7 +51,6 @@ MACHINE_SOCARCH_FILTER_append_mx8 = " \
 INHERIT += "fsl-dynamic-packagearch"
 
 SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS_append = " \
-    imx-gpu-viv->kernel-module-imx-gpu-viv \
     libimxvpuapi->imx-vpu \
     imx-vpuwrap->imx-vpu \
     imx-codec->imx-vpu \
