@@ -28,6 +28,7 @@ CELLULAR_PKGS = "\
 
 RDEPENDS_${PN} = "\
 	iproute2 \
+	batctl \
 	${@bb.utils.contains('DISTRO_FEATURES', 'cellular', '${CELLULAR_PKGS}', '', d)} \
 	${VIRTUAL-RUNTIME_ftp-server} \
 	${VIRTUAL-RUNTIME_http-server} \
