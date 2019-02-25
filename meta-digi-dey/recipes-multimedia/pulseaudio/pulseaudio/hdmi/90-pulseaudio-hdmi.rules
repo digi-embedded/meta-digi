@@ -1,0 +1,4 @@
+# Digi ConnectCore HDMI sound card
+ATTRS{id}=="imxhdmisoc", ENV{PULSE_PROFILE_SET}="dey-audio-hdmi.conf"
+
+SUBSYSTEM=="platform", KERNEL=="*hdmi_video", ACTION=="change", RUN+="/etc/udev/scripts/hdmi_hotplug.sh"

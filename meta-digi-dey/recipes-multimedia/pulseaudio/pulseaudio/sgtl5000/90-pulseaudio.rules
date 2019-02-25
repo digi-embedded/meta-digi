@@ -1,0 +1,2 @@
+# Digi ConnectCore SGTL5000 sound card
+ATTRS{id}=="sgtl5000audio", ENV{PULSE_PROFILE_SET}="dey-audio-sgtl5000.conf"
