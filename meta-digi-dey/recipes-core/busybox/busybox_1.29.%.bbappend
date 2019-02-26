@@ -1,6 +1,6 @@
-# Copyright (C) 2013-2018 Digi International.
+# Copyright (C) 2013-2019 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 SRC_URI += "file://standby \
             file://standby-actions \
