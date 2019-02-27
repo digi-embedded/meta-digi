@@ -89,6 +89,10 @@ do_install_append() {
 			-e "s,##CELLULAR_PASSWORD##,${CELLULAR_PASSWORD},g" \
 			${D}${sysconfdir}/NetworkManager/system-connections/nm.cellular
 	fi
+
+	# Disable terminal colors by default
+	install -d ${D}${sysconfdir}/terminal-colors.d
+	touch ${D}${sysconfdir}/terminal-colors.d/nmcli.disable
 }
 
 # NetworkManager needs to be started after DBUS
