@@ -98,7 +98,3 @@ do_install_append() {
 # NetworkManager needs to be started after DBUS
 INITSCRIPT_NAME = "networkmanager"
 INITSCRIPT_PARAMS = "start 03 2 3 4 5 . stop 80 0 6 1 ."
-
-FILES_${PN} += " \
-    ${libdir}/pppd/*/nm-pppd-plugin.so \
-"
