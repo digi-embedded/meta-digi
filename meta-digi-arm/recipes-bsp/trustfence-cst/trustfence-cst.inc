@@ -1,4 +1,4 @@
-# Copyright (C) 2017, 2018 Digi International
+# Copyright (C) 2017-2019 Digi International
 SUMMARY = "NXP Code signing Tool for the High Assurance Boot library"
 DESCRIPTION = "Provides software code signing support designed for use with \
 i.MX processors that integrate the HAB library in the internal boot ROM."
@@ -7,8 +7,10 @@ LICENSE = "CLOSED"
 
 DEPENDS = "openssl"
 
+CST_EXTENSION ?= "tar.gz"
+
 SRC_URI = " \
-    ${@base_conditional('TRUSTFENCE_SIGN', '1', 'file://cst-${PV}.tar.gz', '', d)} \
+    ${@base_conditional('TRUSTFENCE_SIGN', '1', 'file://cst-${PV}.${CST_EXTENSION}', '', d)} \
     file://0001-gen_auth_encrypted_data-reuse-existing-DEK-file.patch \
     file://0002-hab4_pki_tree.sh-automate-script.patch \
     file://0003-openssl_helper-use-dev-urandom-as-seed-source.patch \
