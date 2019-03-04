@@ -1,4 +1,4 @@
-# Copyright (C) 2017, 2018 Digi International
+# Copyright (C) 2017-2019 Digi International
 SUMMARY = "NXP Code signing Tool for the High Assurance Boot library"
 DESCRIPTION = "Provides software code signing support designed for use with \
 i.MX processors that integrate the HAB library in the internal boot ROM."
@@ -8,7 +8,7 @@ LICENSE = "CLOSED"
 DEPENDS = "openssl"
 
 SRC_URI = " \
-    ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'file://cst-${PV}.tar.gz', '', d)} \
+    ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'file://cst-${PV}.tgz', '', d)} \
     file://0001-gen_auth_encrypted_data-reuse-existing-DEK-file.patch \
     file://0002-hab4_pki_tree.sh-automate-script.patch \
     file://0003-openssl_helper-use-dev-urandom-as-seed-source.patch \
@@ -27,7 +27,7 @@ python() {
         d.setVar('PREMIRRORS', "file://cst.* %s \\n %s" % (source_mirror_url, premirrors))
 }
 
-S = "${WORKDIR}/cst-${PV}"
+S = "${WORKDIR}/release"
 
 do_configure() {
 	cp -f ${WORKDIR}/Makefile .
@@ -46,6 +46,8 @@ do_install() {
 	install -m 0755 ca/v3_ca.cnf ${D}${bindir}/v3_ca.cnf
 	install -m 0755 ca/v3_usr.cnf ${D}${bindir}/v3_usr.cnf
 }
+
+INSANE_SKIP_${PN} += "already-stripped"
 
 FILES_${PN} = "${bindir}"
 BBCLASSEXTEND = "native nativesdk"

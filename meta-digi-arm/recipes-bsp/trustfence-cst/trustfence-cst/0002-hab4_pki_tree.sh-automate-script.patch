@@ -57,19 +57,19 @@ index 7dd67f68c8df..b2c6b71b604e 100755
 -if [ $use_ecc = "y" ]
 -then
 -    printf "Enter length for elliptic curve to be used for PKI tree:\n"
--    printf "Possible values p192, p256, p521:   \b"
+-    printf "Possible values p256, p384, p521:   \b"
 -    read kl
 -
 -    # Confirm that a valid key length has been entered
 -    case $kl in
--        p192)
--            cn="secp112r1" ;;
 -        p256)
 -            cn="prime256v1" ;;
+-        p384)
+-            cn="secp384r1" ;;
 -        p521)
 -            cn="secp521r1" ;;
 -        *)
--            echo Invalid key length. Supported key lengths: 192, 256, 521
+-            echo Invalid key length. Supported key lengths: 256, 384, 521
 -        exit 1 ;;
 -    esac
 -else
