@@ -36,12 +36,10 @@ trustfence_sign() {
 		DTB=`normalize_dtb "${DTB}"`
 		DTB_EXT=${DTB##*.}
 		DTB_BASE_NAME=`basename ${DTB} ."${DTB_EXT}"`
-		for type in ${KERNEL_IMAGETYPES}; do
-			DTB_IMAGE="$(echo ${type}-${KERNEL_IMAGE_NAME} | sed "s/${MACHINE}/${DTB_BASE_NAME}/g").${DTB_EXT}"
-			TMP_DTB_IMAGE_SIGNED="$(mktemp ${DTB_IMAGE}-signed.XXXXXX)"
-			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -d "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
-			mv "${TMP_DTB_IMAGE_SIGNED}" "${DTB_IMAGE}"
-		done
+		DTB_IMAGE="${DTB_BASE_NAME}-${KERNEL_IMAGE_NAME}.${DTB_EXT}"
+		TMP_DTB_IMAGE_SIGNED="$(mktemp ${DTB_IMAGE}-signed.XXXXXX)"
+		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -d "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
+		mv "${TMP_DTB_IMAGE_SIGNED}" "${DTB_IMAGE}"
 	done
 }
 trustfence_sign[dirs] = "${DEPLOYDIR}"
