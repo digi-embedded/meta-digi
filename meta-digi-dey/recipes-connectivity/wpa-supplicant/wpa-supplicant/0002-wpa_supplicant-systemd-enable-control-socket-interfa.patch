@@ -1,0 +1,29 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Thu, 7 Mar 2019 09:47:52 +0100
+Subject: [PATCH] wpa_supplicant: systemd: enable control socket interface for
+ systemd service
+
+Otherwise the command "wpa_cli" fails with:
+
+Failed to connect to non-global ctrl_ifname
+
+https://jira.digi.com/browse/DEL-6483
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ wpa_supplicant/systemd/wpa_supplicant.service.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/wpa_supplicant/systemd/wpa_supplicant.service.in b/wpa_supplicant/systemd/wpa_supplicant.service.in
+index bc5d49a..6c38238 100644
+--- a/wpa_supplicant/systemd/wpa_supplicant.service.in
++++ b/wpa_supplicant/systemd/wpa_supplicant.service.in
+@@ -6,7 +6,7 @@ Wants=network.target
+ [Service]
+ Type=dbus
+ BusName=@DBUS_INTERFACE@
+-ExecStart=@BINDIR@/wpa_supplicant -u
++ExecStart=@BINDIR@/wpa_supplicant -u -O /var/run/wpa_supplicant
+
+ [Install]
+ WantedBy=multi-user.target
