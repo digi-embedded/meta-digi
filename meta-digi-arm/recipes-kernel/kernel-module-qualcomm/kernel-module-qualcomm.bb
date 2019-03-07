@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2018 Digi International.
+# Copyright (C) 2016-2019 Digi International.
 
 SUMMARY = "Qualcomm's wireless driver for qca65xx"
 DESCRIPTION = "qcacld-2.0 module"
@@ -6,11 +6,11 @@ LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
 
 # Reference Qualcomm tag/version
-PV = "v4.2.80.63"
+PV = "v4.2.89.63"
 PV_ccimx8x = "v4.0.11.208Q"
 
-SRCBRANCH = "dey-2.4/master"
-SRCBRANCH_ccimx8x = "dey-2.4/master_cc8x"
+SRCBRANCH = "qca6564/master"
+SRCBRANCH_ccimx8x = "qca6574/master"
 SRCREV = "${AUTOREV}"
 
 QCOM_GIT_URI = "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git', d)}"
@@ -56,6 +56,10 @@ EXTRA_OEMAKE_append_ccimx8x = " CONFIG_ARCH_MSM=n CONFIG_ARCH_QCOM=n CONFIG_ATH_
 
 do_compile_prepend() {
 	export BUILD_VER=${PV}
+}
+
+do_install_prepend_ccimx6ul() {
+    sed -i -e "s/gVhtTxMCS=2/gVhtTxMCS=0/g" ${WORKDIR}/git/firmware_bin/WCNSS_qcom_cfg.ini
 }
 
 do_install_append() {
