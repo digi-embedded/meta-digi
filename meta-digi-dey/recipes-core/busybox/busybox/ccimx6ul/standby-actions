@@ -56,6 +56,7 @@ elif [ "${1}" == "post" ]; then
 	# Resume bluetooth interface
 	if [ -d "/proc/device-tree/bluetooth" ]; then
 		if [ -e "/tmp/up_bt_on_resume" ]; then
+			systemctl start bluetooth-init
 			systemctl start bluetooth
 			rm -f /tmp/up_bt_on_resume
 		fi

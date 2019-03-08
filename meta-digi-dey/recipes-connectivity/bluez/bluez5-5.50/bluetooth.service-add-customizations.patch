@@ -3,32 +3,28 @@ Date: Thu, 7 Feb 2019 13:15:43 +0100
 Subject: [PATCH] bluetooth.service: add Digi customizations
 
 These changes include:
-* Adding the bluetooth-init service as a dependency
-* Changing the path condition so the service only starts on bluetooth-capable
-boards
-* Changing the service's target so it starts on boot
+
+* Adding the bluetooth-init service as a soft dependency.
+* Having the bluetooth stack start automatically on boot.
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 ---
- src/bluetooth.service.in | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ src/bluetooth.service.in | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/src/bluetooth.service.in b/src/bluetooth.service.in
-index f799f65..ced1055 100644
+index f799f65..d8b150c 100644
 --- a/src/bluetooth.service.in
 +++ b/src/bluetooth.service.in
-@@ -1,7 +1,9 @@
- [Unit]
+@@ -2,6 +2,7 @@
  Description=Bluetooth service
  Documentation=man:bluetoothd(8)
--ConditionPathIsDirectory=/sys/class/bluetooth
-+ConditionPathIsDirectory=/proc/device-tree/bluetooth
-+Requires=bluetooth-init.service
-+After=bluetooth-init.service
+ ConditionPathIsDirectory=/sys/class/bluetooth
++Wants=bluetooth-init.service
  
  [Service]
  Type=dbus
-@@ -16,5 +18,5 @@ ProtectHome=true
+@@ -16,5 +17,5 @@ ProtectHome=true
  ProtectSystem=full
  
  [Install]

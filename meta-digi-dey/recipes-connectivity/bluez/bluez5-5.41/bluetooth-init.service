@@ -1,5 +1,7 @@
 [Unit]
 Description=Initialization of the bluetooth chip
+ConditionPathIsDirectory=/proc/device-tree/bluetooth
+Before=bluetooth.service
 
 [Service]
 Type=forking
@@ -7,4 +9,4 @@ ExecStart=/etc/bluetooth-init start
 ExecStop=/etc/bluetooth-init stop
 
 [Install]
-RequiredBy=bluetooth.service
+WantedBy=multi-user.target
