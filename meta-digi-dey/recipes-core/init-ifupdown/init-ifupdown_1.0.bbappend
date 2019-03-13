@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2018 Digi International Inc.
+# Copyright (C) 2013-2019 Digi International Inc.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
@@ -64,6 +64,9 @@ install_virtwlans() {
 	install -m 0755 ${WORKDIR}/virtwlans.sh ${D}${base_bindir}
 }
 
+WLAN1_POST_UP_ACTION = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemctl start hostapd@wlan1.service', '/etc/init.d/hostapd start', d)}"
+WLAN1_PRE_DOWN_ACTION = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemctl stop hostapd@wlan1.service', '/etc/init.d/hostapd stop', d)}"
+
 install_wlan1() {
 	if [ -n "${HAVE_WIFI}" ]; then
 		cat ${WORKDIR}/interfaces.wlan1.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
@@ -80,6 +83,8 @@ install_wlan1() {
 	sed -i -e "s,##WLAN1_STATIC_NETMASK##,${WLAN1_STATIC_NETMASK},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WLAN1_STATIC_GATEWAY##,${WLAN1_STATIC_GATEWAY},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WLAN1_STATIC_DNS##,${WLAN1_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
+	sed -i -e "s,##WLAN1_POST_UP_ACTION##,${WLAN1_POST_UP_ACTION},g" ${D}${sysconfdir}/network/interfaces
+	sed -i -e "s,##WLAN1_PRE_DOWN_ACTION##,${WLAN1_PRE_DOWN_ACTION},g" ${D}${sysconfdir}/network/interfaces
 }
 
 do_install_append_ccimx6qpsbc() {
