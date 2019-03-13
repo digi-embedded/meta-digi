@@ -1,0 +1,13 @@
+[Unit]
+Description=Interface initialization via ifupdown
+After=systemd-udev-settle.service
+Requires=systemd-udev-settle.service
+
+[Service]
+Type=oneshot
+ExecStart=@SBINDIR@/ifup -a
+ExecStop=@SBINDIR@/ifdown -a
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

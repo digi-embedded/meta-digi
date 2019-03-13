@@ -5,10 +5,13 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 INITSCRIPT_NAME = "networking"
 INITSCRIPT_PARAMS = "start 03 2 3 4 5 . stop 80 0 6 1 ."
 
+inherit systemd
+
 SRC_URI_append = " \
     file://interfaces.br0.example \
     file://interfaces.p2p \
     file://resolv \
+    file://ifupdown.service \
 "
 
 SRC_URI_append_ccimx6qpsbc = "\
@@ -29,11 +32,17 @@ SRC_URI_append_ccimx8x = "\
     file://virtwlans.sh \
 "
 
+SYSTEMD_SERVICE_${PN} = "ifupdown.service"
+
 WPA_DRIVER ?= "nl80211"
 
 do_install_append() {
 	# Install DNS servers handler
 	install -m 0755 ${WORKDIR}/resolv ${D}${sysconfdir}/network/if-up.d/resolv
+	# Install systemd service
+	install -d ${D}${systemd_unitdir}/system/
+	install -m 0644 ${WORKDIR}/ifupdown.service ${D}${systemd_unitdir}/system/
+	sed -i -e 's,@SBINDIR@,${base_sbindir},g' ${D}${systemd_unitdir}/system/ifupdown.service
 
 	if [ -n "${HAVE_WIFI}" ]; then
 		if [ -n "${WLAN_P2P_INTERFACE}" ]; then
