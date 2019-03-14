@@ -1,6 +1,6 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
-
+SRC_URI += "file://0001-udev-use-the-usual-set-of-load-paths-for-udev-rules.patch"
 
 #FIX-it: Workaround as missing ending slash in FIRMWARE_PATH [YOCIMX-2831]
 EXTRA_OEMESON_remove = "-Dfirmware-path=${nonarch_base_libdir}/firmware "
