@@ -24,6 +24,7 @@ LIC_FILES_CHKSUM = " \
 SRC_URI_arm = " \
     http:///not/exist/greengrass-linux-armv7l-${PV}.tar.gz;name=arm \
     file://greengrass-init \
+    file://greengrass.service \
 "
 
 SRC_URI[arm.md5sum] = "a7f3667ac9f24e434e7a85908d1db256"
@@ -32,6 +33,7 @@ SRC_URI[arm.sha256sum] ="339656dca947f1cff29635fbe7570b5ea04ca7256fd2177cf396711
 SRC_URI_aarch64 = " \
     http:///not/exist/greengrass-linux-aarch64-${PV}.tar.gz;name=aarch64 \
     file://greengrass-init \
+    file://greengrass.service \
 "
 
 # For ARCH64 we use another tarball.
@@ -52,7 +54,7 @@ python() {
 
 S = "${WORKDIR}/${BPN}"
 
-inherit aws-iot update-rc.d useradd
+inherit aws-iot update-rc.d useradd systemd
 
 GG_USESYSTEMD = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'yes', 'no', d)}"
 
@@ -67,8 +69,13 @@ do_install() {
 
 	# Install wrapper bootscript to launch Greengrass core on boot
 	install -d ${D}${sysconfdir}/init.d
-	install -m 0755 ${WORKDIR}/greengrass-init ${D}${sysconfdir}/init.d/greengrass
-	sed -i -e "s,##GG_INSTALL_DIR##,/${BPN},g" ${D}${sysconfdir}/init.d/greengrass
+	install -m 0755 ${WORKDIR}/greengrass-init ${D}${sysconfdir}/greengrass
+	sed -i -e "s,##GG_INSTALL_DIR##,/${BPN},g" ${D}${sysconfdir}/greengrass
+	ln -sf ${sysconfdir}/greengrass ${D}${sysconfdir}/init.d/greengrass
+
+	# Install systemd service
+	install -d ${D}${systemd_unitdir}/system/
+	install -m 0644 ${WORKDIR}/greengrass.service ${D}${systemd_unitdir}/system/greengrass.service
 
 	# If certificates do exist, install them and update the config file
 	if [ -f "${AWS_IOT_CERTS_DIR}/${AWS_GGCORE_ROOT_CA}" ] && \
@@ -131,12 +138,14 @@ pkg_postinst_ontarget_${PN}() {
 	fi
 }
 
-FILES_${PN} = "/${BPN} ${sysconfdir}"
+FILES_${PN} = "/${BPN} ${sysconfdir} ${systemd_unitdir}"
 
 CONFFILES_${PN} += "/${BPN}/config/config.json"
 
 INITSCRIPT_NAME = "greengrass"
 INITSCRIPT_PARAMS = "defaults 80 20"
+
+SYSTEMD_SERVICE_${PN} = "greengrass.service"
 
 USERADD_PACKAGES = "${PN}"
 GROUPADD_PARAM_${PN} = "-r ggc_group"
