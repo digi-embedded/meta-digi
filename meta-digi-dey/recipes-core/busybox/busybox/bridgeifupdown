@@ -23,9 +23,6 @@ start_stop_wpa_supplicant() {
 		start-stop-daemon --start --quiet \
 			--name ${WPA_SUP_PNAME} --startas ${WPA_SUP_BIN} --pidfile ${WPA_SUP_PIDFILE} \
 			-- ${WPA_SUP_OPTIONS} -c ${IF_BRIDGE_WPA_CONF} -D ${IF_BRIDGE_WPA_DRIVER} -b ${IFACE}
-
-		# Wait for wireless to be ready
-		sleep 0.5
 		;;
 	stop)
 		if [ "${VERBOSITY}" = "1" ]; then
@@ -57,9 +54,14 @@ if [ "$MODE" = "start" ] && [ ! -d /sys/class/net/$IFACE ]; then
 
 	# For all the interfaces in bridge ports, attach to the bridge and remove ip
 	for port in $INTERFACES; do
-		if [ -d "/sys/class/net/${port}/wireless" ] && [ -n "${IF_BRIDGE_WPA_CONF}" ]; then
-			# Launch wpa_supplicant with bridge support
-			start_stop_wpa_supplicant ${port}
+		if [ -d "/sys/class/net/${port}/wireless" ]; then
+			if [ -n "${IF_BRIDGE_WPA_CONF}" ]; then
+				# Launch wpa_supplicant with bridge support
+				start_stop_wpa_supplicant ${port}
+			fi
+
+			# Wait for wireless to be ready
+			sleep 0.5
 		fi
 
 		# Turn up the interface and include in the bridge
