@@ -1,6 +1,6 @@
 From: Hector Palacios <hector.palacios@digi.com>
 Date: Mon, 22 Jan 2018 10:18:18 +0100
-Subject: [PATCH] tools: env: add support to set dynamic location of
+Subject: [PATCH 4/4] tools: env: add support to set dynamic location of
  environment copies
 
 A mechanism was added in U-Boot to set the location of environment copies
@@ -18,27 +18,28 @@ of the area, like in this example:
 Signed-off-by: Hector Palacios <hector.palacios@digi.com>
 
 https://jira.digi.com/browse/DUB-741
+Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
 ---
  tools/env/fw_env.c | 87 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
  1 file changed, 87 insertions(+)
 
 diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
-index db1182c7216e..820feb3946f5 100644
+index b87cd83..041dc1b 100644
 --- a/tools/env/fw_env.c
 +++ b/tools/env/fw_env.c
-@@ -127,6 +127,8 @@ static int env_aes_cbc_crypt(char *data, const int enc, uint8_t *key);
+@@ -129,6 +129,8 @@ static struct environment environment = {
+
+ static int have_redund_env;
  static int caam_encryption_flag;
- 
- static int HaveRedundEnv = 0;
 +static int have_dynamic_env;
 +static off_t top_of_range;	/* end of the last block we may use */
- 
+
  static unsigned char active_flag = 1;
  /* obsolete_flag must be 0 to efficiently set it on NOR flash without erasing */
-@@ -847,6 +849,22 @@ static int flash_read_buf (int dev, int fd, void *buf, size_t count,
+@@ -1031,6 +1033,22 @@ static int flash_read_buf(int dev, int fd, void *buf, size_t count,
  		 */
- 		blocklen = DEVESIZE (dev);
- 
+ 		blocklen = DEVESIZE(dev);
+
 +		if (!have_dynamic_env) {
 +			/*
 +			 * To calculate the top of the range, we have to use the
@@ -58,10 +59,10 @@ index db1182c7216e..820feb3946f5 100644
  		/* Limit to one block for the first read */
  		if (readlen > blocklen - block_seek)
  			readlen = blocklen - block_seek;
-@@ -1194,6 +1212,63 @@ static int sysfs_mmcboot_set_protection(const char *device, int value)
+@@ -1411,6 +1429,63 @@ static int sysfs_mmcboot_set_protection(const char *device, int value)
  	return 0;
  }
- 
+
 +static int set_dynamic_location(void)
 +{
 +	int fd, i, nsectors;
@@ -70,7 +71,7 @@ index db1182c7216e..820feb3946f5 100644
 +	int copies = 1;
 +	int rc = 0;
 +
-+	if (HaveRedundEnv)
++	if (have_redund_env)
 +		copies++;
 +
 +	fd = open(DEVNAME(dev), O_RDONLY);
@@ -119,18 +120,18 @@ index db1182c7216e..820feb3946f5 100644
 +	return rc;
 +}
 +
- static int flash_io (int mode)
+ static int flash_io_write(int fd_current)
  {
- 	int fd_current, fd_target, rc, dev_target;
-@@ -1327,6 +1402,18 @@ int fw_env_open(struct env_opts *opts)
- 		environment.data	= single->data;
+ 	int fd_target = -1, rc, dev_target;
+@@ -1586,6 +1661,18 @@ int fw_env_open(struct env_opts *opts)
+ 		environment.data = single->data;
  	}
- 
+
 +	/*
 +	 * Trigger dynamic location of environment if redundant copy has the
 +	 * same offset than primary copy.
 +	 */
-+	if (HaveRedundEnv && (DEVOFFSET(0) == DEVOFFSET(1))) {
++	if (have_redund_env && (DEVOFFSET(0) == DEVOFFSET(1))) {
 +		have_dynamic_env = 1;
 +		top_of_range = DEVOFFSET(0) + (ENVSECTORS(0) * DEVESIZE(0));
 +

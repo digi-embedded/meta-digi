@@ -6,39 +6,40 @@ Subject: [PATCH 1/4] tools: env: implement support for environment encryption
 https://jira.digi.com/browse/DEL-2836
 
 Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
+Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
 ---
  configs/sandbox_defconfig |   1 +
  tools/env/Makefile        |   2 +-
  tools/env/caam_keyblob.h  |  45 +++++++++++++++
- tools/env/fw_env.c        | 139 ++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 186 insertions(+), 1 deletion(-)
+ tools/env/fw_env.c        | 140 ++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 187 insertions(+), 1 deletion(-)
  create mode 100644 tools/env/caam_keyblob.h
 
 diff --git a/configs/sandbox_defconfig b/configs/sandbox_defconfig
-index 4c4e4809be76..82ebe96067b5 100644
+index 2fc84a1..f033d9c 100644
 --- a/configs/sandbox_defconfig
 +++ b/configs/sandbox_defconfig
-@@ -193,3 +193,4 @@ CONFIG_UNIT_TEST=y
- CONFIG_UT_TIME=y
+@@ -200,3 +200,4 @@ CONFIG_UT_TIME=y
  CONFIG_UT_DM=y
  CONFIG_UT_ENV=y
+ CONFIG_UT_OVERLAY=y
 +CONFIG_MD5=y
 diff --git a/tools/env/Makefile b/tools/env/Makefile
-index 95b28c0b3a3c..c10ff66c7772 100644
+index 4633e0e..33e41f5 100644
 --- a/tools/env/Makefile
 +++ b/tools/env/Makefile
-@@ -25,7 +25,7 @@ hostprogs-y := fw_printenv
- 
+@@ -23,7 +23,7 @@ hostprogs-y := fw_printenv
+
  lib-y += fw_env.o \
  	crc32.o ctype.o linux_string.o \
--	env_attr.o env_flags.o aes.o
-+	env_attr.o env_flags.o aes.o ../../lib/md5.o
- 
+-	env_attr.o env_flags.o
++	env_attr.o env_flags.o ../../lib/md5.o
+
  fw_printenv-objs := fw_env_main.o $(lib-y)
- 
+
 diff --git a/tools/env/caam_keyblob.h b/tools/env/caam_keyblob.h
 new file mode 100644
-index 000000000000..1cdf3946c1ba
+index 0000000..1cdf394
 --- /dev/null
 +++ b/tools/env/caam_keyblob.h
 @@ -0,0 +1,45 @@
@@ -88,7 +89,7 @@ index 000000000000..1cdf3946c1ba
 +
 +#endif /* CAAM_KEYBLOB_H */
 diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
-index ab06415898c2..de2e693e9f93 100644
+index a5d7595..b124b1e 100644
 --- a/tools/env/fw_env.c
 +++ b/tools/env/fw_env.c
 @@ -24,6 +24,7 @@
@@ -97,16 +98,16 @@ index ab06415898c2..de2e693e9f93 100644
  #include <sys/stat.h>
 +#include <u-boot/md5.h>
  #include <unistd.h>
- 
- #ifdef MTD_OLD
-@@ -34,9 +35,19 @@
- # include <mtd/mtd-user.h>
- #endif
- 
+ #include <dirent.h>
+
+@@ -37,9 +38,19 @@
+
+ #include <mtd/ubi-user.h>
+
 +#include "caam_keyblob.h"
  #include "fw_env_private.h"
  #include "fw_env.h"
- 
+
 +/*
 + * The BLOB includes a random AES-256 key (32 bytes) and a
 + * Message Authentication Code (MAC) (16 bytes)
@@ -119,19 +120,18 @@ index ab06415898c2..de2e693e9f93 100644
  struct env_opts default_opts = {
  #ifdef CONFIG_FILE
  	.config_file = CONFIG_FILE
-@@ -113,6 +124,8 @@ static struct environment environment = {
- 
- static int env_aes_cbc_crypt(char *data, const int enc, uint8_t *key);
- 
+@@ -117,6 +128,7 @@ static struct environment environment = {
+ };
+
+ static int have_redund_env;
 +static int caam_encryption_flag;
-+
- static int HaveRedundEnv = 0;
- 
+
  static unsigned char active_flag = 1;
-@@ -245,6 +258,103 @@ int parse_aes_key(char *key, uint8_t *bin_key)
- 	return 0;
+ /* obsolete_flag must be 0 to efficiently set it on NOR flash without erasing */
+@@ -442,6 +454,103 @@ char *fw_getdefenv(char *name)
+ 	return NULL;
  }
- 
+
 +static void check_caam_encryption(void)
 +{
 +	const char *dt_prop = "/proc/device-tree/digi,uboot-env,encrypted";
@@ -232,10 +232,15 @@ index ab06415898c2..de2e693e9f93 100644
  /*
   * Print the current definition of one, or more, or all
   * environment variables
-@@ -323,6 +433,15 @@ int fw_env_flush(struct env_opts *opts)
- 		}
- 	}
- 
+@@ -505,9 +614,20 @@ int fw_printenv(int argc, char *argv[], int value_only, struct env_opts *opts)
+
+ int fw_env_flush(struct env_opts *opts)
+ {
++	int ret;
++
+ 	if (!opts)
+ 		opts = &default_opts;
+
 +	if (caam_encryption_flag) {
 +		ret = env_caam_crypt(environment.data, 1);
 +		if (ret) {
@@ -248,19 +253,19 @@ index ab06415898c2..de2e693e9f93 100644
  	/*
  	 * Update CRC
  	 */
-@@ -1144,6 +1263,8 @@ int fw_env_open(struct env_opts *opts)
+@@ -1396,6 +1516,8 @@ int fw_env_open(struct env_opts *opts)
  	struct env_image_single *single;
  	struct env_image_redundant *redundant;
- 
+
 +	check_caam_encryption();
 +
  	if (!opts)
  		opts = &default_opts;
- 
-@@ -1189,6 +1310,15 @@ int fw_env_open(struct env_opts *opts)
- 			goto open_cleanup;
- 	}
- 
+
+@@ -1434,6 +1556,15 @@ int fw_env_open(struct env_opts *opts)
+
+ 	crc0 = crc32(0, (uint8_t *)environment.data, ENV_SIZE);
+
 +	if (caam_encryption_flag) {
 +		ret = env_caam_crypt(environment.data, 0);
 +		if (ret) {
@@ -271,12 +276,12 @@ index ab06415898c2..de2e693e9f93 100644
 +	}
 +
  	crc0_ok = (crc0 == *environment.crc);
- 	if (!HaveRedundEnv) {
+ 	if (!have_redund_env) {
  		if (!crc0_ok) {
-@@ -1251,6 +1381,15 @@ int fw_env_open(struct env_opts *opts)
- 				goto open_cleanup;
- 		}
- 
+@@ -1491,6 +1622,15 @@ int fw_env_open(struct env_opts *opts)
+
+ 		crc1 = crc32(0, (uint8_t *)redundant->data, ENV_SIZE);
+
 +		if (caam_encryption_flag) {
 +			ret = env_caam_crypt(redundant->data, 0);
 +			if (ret) {
@@ -288,4 +293,3 @@ index ab06415898c2..de2e693e9f93 100644
 +
  		crc1_ok = (crc1 == redundant->crc);
  		flag1 = redundant->flags;
- 
