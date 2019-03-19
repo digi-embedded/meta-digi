@@ -287,8 +287,7 @@ if [ -d "$IOEXP_NODE" ]; then
 fi
 
 DATE="$(date "+%Y%m%d%H%M%S")"
-FILE="/tmp/sysinfo-${DEY_VERSION}-${BOARD_SN}-${DATE}.txt"
-printf "\n\n"
+REPORT_PATH="/tmp/sysinfo-${DEY_VERSION}-${BOARD_SN}-${DATE}"
 
 (
 	echo "-------------------------------------"
@@ -307,9 +306,10 @@ printf "\n\n"
 	[ -n "${MCA_VERSION}" ] && echo "|| MCA | ${MCA_VERSION}"
 	[ -n "${IOEXP_VERSION}" ] && echo "|| I/O Expander | ${IOEXP_VERSION}"
 	printf "\n\n"
-) | tee ${FILE}
+) | tee "${REPORT_PATH}.txt"
 
-make_report >> ${FILE}
-gzip ${FILE}
-echo "Report generated in ${FILE}.gz"
-printf "\n\n"
+make_report >> "${REPORT_PATH}.txt"
+tar -zhcf "${REPORT_PATH}.tar.gz" -C $(dirname ${REPORT_PATH}) $(basename "${REPORT_PATH}.txt") /proc/device-tree 2> /dev/null
+echo "Report generated in ${REPORT_PATH}.tar.gz"
+
+rm -rf "${REPORT_PATH}.txt"
