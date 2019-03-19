@@ -103,7 +103,7 @@ esac
 # and reduce the console log level to avoid debug messages at boot time
 LOGLEVEL="$(sed -ne 's,^kernel.printk[^=]*=[[:blank:]]*\(.*\)$,\1,g;T;p' /etc/sysctl.conf 2>/dev/null)"
 [ -n "${LOGLEVEL}" ] && sysctl -q -w kernel.printk="${LOGLEVEL}"
-modprobe wlan
+modprobe wlan enable_p2p=0
 
 # Verify the interface is present
 if [ -d "/sys/class/net/wlan0" ]; then
