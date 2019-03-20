@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2018 Digi International.
+# Copyright (C) 2016-2019 Digi International.
 
 SUMMARY = "MCA firmware management tool"
 SECTION = "console/tools"
@@ -8,13 +8,13 @@ PKGNAME = "mca_tool"
 
 # ARM tarball
 SRC_URI_arm = "${DIGI_PKG_SRC}/${PKGNAME}-${PV}-${TUNE_ARCH}.tar.gz;name=arm"
-SRC_URI[arm.md5sum] = "8069da600af8b607c96d1edf9c5dad8c"
-SRC_URI[arm.sha256sum] = "54a13f497161106c785e81e8dfe506ce46c6c1ecf3e81185055112c9217506d3"
+SRC_URI[arm.md5sum] = "d6043cd754a8ea0449a4b1afc80b9775"
+SRC_URI[arm.sha256sum] = "4219efae7d3b327bac7940b992a446cdbf4cd3ed25d3234e1ef63ed32b6db595"
 
 # AARCH64 tarball
 SRC_URI_aarch64 = "${DIGI_PKG_SRC}/${PKGNAME}-${PV}-${TUNE_ARCH}.tar.gz;name=aarch64"
-SRC_URI[aarch64.md5sum] = "ee0b11428450b48b8ad3f27d3ebe0556"
-SRC_URI[aarch64.sha256sum] = "032691491e2b5f294992fab453f2864666b3af495b439be897f23adacb312827"
+SRC_URI[aarch64.md5sum] = "937f910b33aa9f6fe0d24317836fd620"
+SRC_URI[aarch64.sha256sum] = "225c64e07c7158e0849cdd730d3c073cc87089a60b42d4e86a82c882761adb6c"
 
 S = "${WORKDIR}/${PKGNAME}-${PV}"
 
