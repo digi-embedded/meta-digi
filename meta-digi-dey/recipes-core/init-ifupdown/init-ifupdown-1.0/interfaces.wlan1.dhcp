@@ -1,5 +1,5 @@
 
-auto wlan1
+#auto wlan1
 iface wlan1 inet dhcp
        udhcpc_opts -S -b >/dev/null &
        post-up ##WLAN1_POST_UP_ACTION##

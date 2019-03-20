@@ -79,6 +79,7 @@ WLAN1_PRE_DOWN_ACTION = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'sys
 install_wlan1() {
 	if [ -n "${HAVE_WIFI}" ]; then
 		cat ${WORKDIR}/interfaces.wlan1.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
+		[ -n "${WLAN1_AUTO}" ] && sed -i -e 's/^#auto wlan1/auto wlan1/g' ${D}${sysconfdir}/network/interfaces
 	fi
 
 	# Remove config entries if corresponding variable is not defined
