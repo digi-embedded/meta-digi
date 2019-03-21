@@ -106,10 +106,4 @@ LOGLEVEL="$(sed -ne 's,^kernel.printk[^=]*=[[:blank:]]*\(.*\)$,\1,g;T;p' /etc/sy
 modprobe wlan enable_p2p=0
 
 # Verify the interface is present
-if [ -d "/sys/class/net/wlan0" ]; then
-	# Create 'wlan1' virtual interface
-	VIRTWLANS_OUT="$(virtwlans.sh)"
-	[ -n "${VIRTWLANS_OUT}" ] && log "3" "${VIRTWLANS_OUT}"
-else
-	log "3" "[ERROR] Loading qca6564 module"
-fi
+[ -d "/sys/class/net/wlan0" ] || log "3" "[ERROR] Loading qca6564 module"
