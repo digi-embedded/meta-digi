@@ -17,19 +17,19 @@ SRC_URI_append = " \
 SRC_URI_append_ccimx6qpsbc = "\
     file://interfaces.wlan1.static \
     file://interfaces.wlan1.dhcp \
-    file://virtwlans.sh \
+    file://virtwlans \
 "
 
 SRC_URI_append_ccimx6ul = "\
     file://interfaces.wlan1.static \
     file://interfaces.wlan1.dhcp \
-    file://virtwlans.sh \
+    file://virtwlans \
 "
 
 SRC_URI_append_ccimx8x = "\
     file://interfaces.wlan1.static \
     file://interfaces.wlan1.dhcp \
-    file://virtwlans.sh \
+    file://virtwlans \
 "
 
 SYSTEMD_SERVICE_${PN} = "ifupdown.service"
@@ -69,8 +69,9 @@ do_install_append() {
 }
 
 install_virtwlans() {
-	install -d ${D}${base_bindir}
-	install -m 0755 ${WORKDIR}/virtwlans.sh ${D}${base_bindir}
+	install -d ${D}${sysconfdir}/network/if-pre-up.d
+	install -m 0755 ${WORKDIR}/virtwlans ${D}${sysconfdir}/network/if-pre-up.d/
+	ln -s ../if-pre-up.d/virtwlans ${D}${sysconfdir}/network/if-post-down.d/virtwlans
 }
 
 WLAN1_POST_UP_ACTION = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemctl start hostapd@wlan1.service', '/etc/init.d/hostapd start', d)}"
