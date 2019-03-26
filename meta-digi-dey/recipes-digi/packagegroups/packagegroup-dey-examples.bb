@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2018, Digi International Inc.
+# Copyright (C) 2013-2019, Digi International Inc.
 
 SUMMARY = "DEY examples packagegroup"
 
@@ -15,13 +15,9 @@ RDEPENDS_${PN} = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "cryptochip", "dey-examples-cryptochip", "", d)} \
 	awsiotsdk-demo \
-	dey-examples-can \
 	dey-examples-cloudconnector \
 	dey-examples-digiapix \
-	dey-examples-gpio-sysfs \
 	dey-examples-rtc \
-	dey-examples-spidev \
-	dey-examples-watchdog \
 "
 
 RDEPENDS_${PN}_append_ccimx6 = "\
@@ -30,13 +26,11 @@ RDEPENDS_${PN}_append_ccimx6 = "\
 "
 
 RDEPENDS_${PN}_append_ccimx6ul = "\
-	dey-examples-adc \
 	dey-examples-adc-cmp \
 	dey-examples-tamper \
 "
 
 RDEPENDS_${PN}_append_ccimx8x = "\
-	dey-examples-adc \
 	dey-examples-adc-cmp \
 	dey-examples-tamper \
 	dey-examples-v4l2 \

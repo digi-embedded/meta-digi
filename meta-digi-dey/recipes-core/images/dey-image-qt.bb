@@ -58,4 +58,5 @@ export IMAGE_BASENAME = "dey-image-qt-${GRAPHICAL_BACKEND}"
 CORE_IMAGE_EXTRA_INSTALL += " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston-init weston-examples gtk+3-demo clutter-1.0-examples', '', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland xterm', '', d)} \
+    dey-examples-digiapix \
 "
