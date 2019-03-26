@@ -1,4 +1,6 @@
-# Copyright (C) 2017, 2018 Digi International.
+# Copyright (C) 2017-2019, Digi International Inc.
+
+require recipes-digi/dey-examples/dey-examples-src.inc
 
 SUMMARY = "DEY examples: Cryptochip example application"
 SECTION = "examples"
@@ -7,15 +9,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 DEPENDS = "cryptoauthlib"
 
-SRCBRANCH = "master"
-SRCREV = "${AUTOREV}"
-
-CC_STASH = "${DIGI_MTK_GIT}dey/dey-examples.git;protocol=ssh"
-CC_GITHUB = "${DIGI_GITHUB_GIT}/dey-examples.git;protocol=git"
-
-CC_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${CC_STASH}', '${CC_GITHUB}', d)}"
-
-SRC_URI = "${CC_GIT_URI};branch=${SRCBRANCH}"
+SRC_URI = "${DEY_EXAMPLES_GIT_URI};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git/cryptochip-get-random"
 

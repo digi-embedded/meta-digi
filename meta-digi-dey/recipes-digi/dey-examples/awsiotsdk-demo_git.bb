@@ -1,4 +1,6 @@
-# Copyright (C) 2017 Digi International.
+# Copyright (C) 2017-2019, Digi International Inc.
+
+require recipes-digi/dey-examples/dey-examples-src.inc
 
 SUMMARY = "AWS IoT device SDK Demo"
 DESCRIPTION = "Demo application for AWS IoT device SDK"
@@ -14,15 +16,7 @@ AWS_USER_LED_ccimx6ulsbc ?= "488"
 AWS_USER_LED_ccimx6sbc ?= "34"
 AWS_USER_LED_ccimx6qpsbc ?= "34"
 
-SRCBRANCH = "master"
-SRCREV = "${AUTOREV}"
-
-CC_STASH = "${DIGI_MTK_GIT}dey/dey-examples.git;protocol=ssh"
-CC_GITHUB = "${DIGI_GITHUB_GIT}/dey-examples.git;protocol=git"
-
-CC_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${CC_STASH}', '${CC_GITHUB}', d)}"
-
-SRC_URI = "${CC_GIT_URI};branch=${SRCBRANCH}"
+SRC_URI = "${DEY_EXAMPLES_GIT_URI};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git/awsiot-sample"
 

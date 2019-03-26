@@ -1,4 +1,6 @@
-# Copyright (C) 2017, 2018, Digi International Inc.
+# Copyright (C) 2017-2019, Digi International Inc.
+
+require recipes-digi/dey-examples/dey-examples-src.inc
 
 SUMMARY = "DEY Digi APIX examples"
 SECTION = "examples"
@@ -7,15 +9,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 
 DEPENDS = "libdigiapix"
 
-SRCBRANCH = "master"
-SRCREV = "${AUTOREV}"
-
-LIBDIGIAPIX_STASH = "${DIGI_MTK_GIT}dey/dey-examples.git;protocol=ssh"
-LIBDIGIAPIX_GITHUB = "${DIGI_GITHUB_GIT}/dey-examples.git;protocol=git"
-
-LIBDIGIAPIX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${LIBDIGIAPIX_STASH}', '${LIBDIGIAPIX_GITHUB}', d)}"
-
-SRC_URI = "${LIBDIGIAPIX_GIT_URI};branch=${SRCBRANCH}"
+SRC_URI = "${DEY_EXAMPLES_GIT_URI};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git"
 
