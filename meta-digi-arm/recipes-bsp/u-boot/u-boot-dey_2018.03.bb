@@ -2,7 +2,7 @@
 
 require digi-u-boot.inc
 
-SRCBRANCH = "v2018.03/master"
+SRCBRANCH = "v2018.03/maint"
 SRCREV = "${AUTOREV}"
 
 COMPATIBLE_MACHINE = "(ccimx8x)"

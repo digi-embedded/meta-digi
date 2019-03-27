@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 
 DEPENDS = "libsoc libsocketcan"
 
-SRCBRANCH ?= "master"
+SRCBRANCH ?= "dey-2.6/maint"
 SRCREV = "${AUTOREV}"
 
 LIBDIGIAPIX_URI_STASH = "${DIGI_MTK_GIT}dey/libdigiapix.git;protocol=ssh"
