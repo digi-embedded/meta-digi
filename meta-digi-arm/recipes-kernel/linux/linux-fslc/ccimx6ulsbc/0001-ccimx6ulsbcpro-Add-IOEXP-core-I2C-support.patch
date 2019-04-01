@@ -1,0 +1,892 @@
+From f56dbb1e8b6a501e84d69ac5f18ec7a66cb4faa7 Mon Sep 17 00:00:00 2001
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Mon, 23 Apr 2018 11:46:52 +0200
+Subject: [PATCH] ccimx6ulsbcpro: Add IOEXP core I2C support
+
+Synched with v4.14.78/master at:
+3f8b03950b323db4ca89b1cdc1c2288f79facaa3
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ arch/arm/configs/imx_v6_v7_defconfig    |   1 +
+ drivers/mfd/Kconfig                     |  10 +
+ drivers/mfd/Makefile                    |   4 +-
+ drivers/mfd/mca-ioexp-core.c            | 415 ++++++++++++++++++++++++++++++++
+ drivers/mfd/mca-ioexp-i2c.c             | 186 ++++++++++++++
+ drivers/mfd/mca-ioexp-irq.c             |  89 +++++++
+ include/linux/mfd/mca-ioexp/core.h      |  87 +++++++
+ include/linux/mfd/mca-ioexp/registers.h |  15 ++
+ 8 files changed, 805 insertions(+), 2 deletions(-)
+ create mode 100644 drivers/mfd/mca-ioexp-core.c
+ create mode 100644 drivers/mfd/mca-ioexp-i2c.c
+ create mode 100644 drivers/mfd/mca-ioexp-irq.c
+ create mode 100644 include/linux/mfd/mca-ioexp/core.h
+ create mode 100644 include/linux/mfd/mca-ioexp/registers.h
+
+diff --git a/arch/arm/configs/imx_v6_v7_defconfig b/arch/arm/configs/imx_v6_v7_defconfig
+index ed31623082ac..a269983e3cba 100644
+--- a/arch/arm/configs/imx_v6_v7_defconfig
++++ b/arch/arm/configs/imx_v6_v7_defconfig
+@@ -242,6 +242,7 @@ CONFIG_MFD_DA9063=y
+ CONFIG_MFD_MC13XXX_SPI=y
+ CONFIG_MFD_MC13XXX_I2C=y
+ CONFIG_MFD_RN5T618=y
++CONFIG_MFD_MCA_IOEXP=y
+ CONFIG_MFD_STMPE=y
+ CONFIG_REGULATOR=y
+ CONFIG_REGULATOR_FIXED_VOLTAGE=y
+diff --git a/drivers/mfd/Kconfig b/drivers/mfd/Kconfig
+index 42c72334d645..5b87d592aece 100644
+--- a/drivers/mfd/Kconfig
++++ b/drivers/mfd/Kconfig
+@@ -458,6 +458,16 @@ config MFD_MCA_CC8X
+ 	  Additional drivers must be enabled in order to use the functionality
+ 	  of the device (RTC, watchdog, ...).
+ 
++config MFD_MCA_IOEXP
++	bool "Digi IO Expander"
++	select MFD_CORE
++	select REGMAP_I2C
++	select REGMAP_IRQ
++	depends on I2C=y
++	help
++	  Select this option to enable support for the Digi IO Expander.
++	  This includes the GPIO and ADC drivers.
++
+ config MFD_MX25_TSADC
+ 	tristate "Freescale i.MX25 integrated Touchscreen and ADC unit"
+ 	select REGMAP_MMIO
+diff --git a/drivers/mfd/Makefile b/drivers/mfd/Makefile
+index 28443313ba92..bfbaaba0d74f 100644
+--- a/drivers/mfd/Makefile
++++ b/drivers/mfd/Makefile
+@@ -249,5 +249,5 @@ obj-$(CONFIG_MFD_ROHM_BD718XX)	+= rohm-bd718x7.o
+ 
+ mca-cc6ul-objs			:= mca-cc6ul-core.o mca-cc6ul-irq.o mca-cc6ul-i2c.o
+ obj-$(CONFIG_MFD_MCA_CC6UL)	+= mca-cc6ul.o
+-mca-cc8x-objs			:= mca-cc8x-core.o mca-cc8x-irq.o mca-cc8x-i2c.o
+-obj-$(CONFIG_MFD_MCA_CC8X)	+= mca-cc8x.o
++mca-ioexp-objs			:= mca-ioexp-core.o mca-ioexp-irq.o mca-ioexp-i2c.o
++obj-$(CONFIG_MFD_MCA_IOEXP)	+= mca-ioexp.o
+diff --git a/drivers/mfd/mca-ioexp-core.c b/drivers/mfd/mca-ioexp-core.c
+new file mode 100644
+index 000000000000..19b3c7f2b4be
+--- /dev/null
++++ b/drivers/mfd/mca-ioexp-core.c
+@@ -0,0 +1,415 @@
++/*
++ *  Copyright 2017 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#include <linux/device.h>
++#include <linux/sysfs.h>
++#include <linux/delay.h>
++#include <linux/interrupt.h>
++#include <linux/mfd/core.h>
++#include <linux/slab.h>
++#include <linux/module.h>
++#include <linux/regmap.h>
++#include <linux/suspend.h>
++#include <linux/proc_fs.h>
++#include <linux/kthread.h>
++#include <linux/uaccess.h>
++#include <linux/reboot.h>
++
++#include <linux/mfd/mca-common/core.h>
++#include <linux/mfd/mca-ioexp/core.h>
++
++#include <asm/unaligned.h>
++
++static struct resource mca_ioexp_gpios_resources[] = {
++	{
++		.name   = MCA_IRQ_GPIO_BANK_0_NAME,
++		.start  = MCA_IOEXP_IRQ_GPIO_BANK_0,
++		.end    = MCA_IOEXP_IRQ_GPIO_BANK_0,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_GPIO_BANK_1_NAME,
++		.start  = MCA_IOEXP_IRQ_GPIO_BANK_1,
++		.end    = MCA_IOEXP_IRQ_GPIO_BANK_1,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_GPIO_BANK_2_NAME,
++		.start  = MCA_IOEXP_IRQ_GPIO_BANK_2,
++		.end    = MCA_IOEXP_IRQ_GPIO_BANK_2,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_GPIO_BANK_3_NAME,
++		.start  = MCA_IOEXP_IRQ_GPIO_BANK_3,
++		.end    = MCA_IOEXP_IRQ_GPIO_BANK_3,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_GPIO_BANK_4_NAME,
++		.start  = MCA_IOEXP_IRQ_GPIO_BANK_4,
++		.end    = MCA_IOEXP_IRQ_GPIO_BANK_4,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_GPIO_BANK_5_NAME,
++		.start  = MCA_IOEXP_IRQ_GPIO_BANK_5,
++		.end    = MCA_IOEXP_IRQ_GPIO_BANK_5,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static const struct mfd_cell mca_ioexp_devs[] = {
++	{
++		.name           = MCA_IOEXP_DRVNAME_GPIO,
++		.num_resources	= ARRAY_SIZE(mca_ioexp_gpios_resources),
++		.resources	= mca_ioexp_gpios_resources,
++		.of_compatible = "digi,mca-ioexp-gpio",
++	},
++	{
++		.name           = MCA_IOEXP_DRVNAME_ADC,
++		.of_compatible = "digi,mca-ioexp-adc",
++	},
++};
++
++static ssize_t hwver_show(struct device *dev, struct device_attribute *attr,
++			  char *buf)
++{
++	struct mca_ioexp *ioexp = dev_get_drvdata(dev);
++
++	return sprintf(buf, "%d\n", ioexp->hw_version);
++}
++static DEVICE_ATTR(hw_version, S_IRUGO, hwver_show, NULL);
++
++static ssize_t fwver_show(struct device *dev, struct device_attribute *attr,
++			  char *buf)
++{
++	struct mca_ioexp *ioexp = dev_get_drvdata(dev);
++
++	return sprintf(buf, "%d.%02d %s\n", MCA_FW_VER_MAJOR(ioexp->fw_version),
++		       MCA_FW_VER_MINOR(ioexp->fw_version),
++		       ioexp->fw_is_alpha ? "(alpha)" : "");
++}
++static DEVICE_ATTR(fw_version, S_IRUGO, fwver_show, NULL);
++
++static struct attribute *mca_ioexp_sysfs_entries[] = {
++	&dev_attr_hw_version.attr,
++	&dev_attr_fw_version.attr,
++	NULL,
++};
++
++static struct attribute_group mca_ioexp_attr_group = {
++	.name	= NULL,			/* put in device directory */
++	.attrs	= mca_ioexp_sysfs_entries,
++};
++
++static int read_reg_group(struct mca_ioexp *ioexp,
++			  unsigned int start_addr,
++			  unsigned int count,
++			  uint8_t *dest)
++{
++	unsigned int i;
++	unsigned int error;
++
++	if (count == 0 || !dest)
++		return -1;
++
++	for (i = 0; i < count; i++) {
++		const unsigned int reg_addr = start_addr + i;
++		unsigned int value;
++
++		error = regmap_read(ioexp->regmap, reg_addr, &value);
++		if (error) {
++			dev_err(ioexp->dev,
++				"Error reading register %02X (%d)\n",
++				reg_addr, error);
++			return -1;
++		}
++		dest[i] = value;
++	}
++
++	return 0;
++}
++
++int mca_ioexp_suspend(struct device *dev)
++{
++	struct mca_ioexp *ioexp = dev_get_drvdata(dev);
++	int error;
++
++	if (!ioexp->preserved_regs)
++		return 0;
++
++
++	error = read_reg_group(ioexp, MCA_GPIO_DIR_0,
++			       ioexp->preserved_regs->gpio_dir.cnt,
++			       ioexp->preserved_regs->gpio_dir.values);
++	if (error) {
++		dev_err(ioexp->dev,
++			"Failed to preserve MCA_GPIO_DIR registers.\n");
++		goto exit;
++	}
++
++	error = read_reg_group(ioexp, MCA_GPIO_DATA_0,
++			       ioexp->preserved_regs->gpio_data.cnt,
++			       ioexp->preserved_regs->gpio_data.values);
++	if (error) {
++		dev_err(ioexp->dev,
++			"Failed to preserve MCA_GPIO_DATA registers.\n");
++		goto exit;
++	}
++
++	error = read_reg_group(ioexp, MCA_GPIO_IRQ_CFG_0,
++			       ioexp->preserved_regs->irq_cfg.cnt,
++			       ioexp->preserved_regs->irq_cfg.values);
++	if (error) {
++		dev_err(ioexp->dev,
++			"Failed to preserve MCA_GPIO_IRQ_CFG registers.\n");
++		goto exit;
++	}
++
++	error = read_reg_group(ioexp, MCA_IRQ_MASK_0,
++			       ioexp->preserved_regs->irq_mask.cnt,
++			       ioexp->preserved_regs->irq_mask.values);
++	if (error) {
++		dev_err(ioexp->dev,
++			"Failed to preserve MCA_IRQ_MASK registers.\n");
++		goto exit;
++	}
++
++	error = read_reg_group(ioexp, MCA_REG_ADC_CFG0_0,
++			       ioexp->preserved_regs->adc_cfg.cnt,
++			       ioexp->preserved_regs->adc_cfg.values);
++	if (error) {
++		dev_err(ioexp->dev,
++			"Failed to preserve MCA_REG_ADC_CFG registers.\n");
++		goto exit;
++	}
++
++	disable_irq(ioexp->chip_irq);
++	return 0;
++
++exit:
++	if (error)
++		dev_err(ioexp->dev, "Configuration will be lost on resume. The IOs in use might need to be reconfigured in order to work properly.\n");
++
++	disable_irq(ioexp->chip_irq);
++
++	/* Do not return errors or the device will not go to sleep. */
++	return 0;
++}
++
++static int write_reg_group(struct mca_ioexp *ioexp,
++			   unsigned int start_addr,
++			   unsigned int count,
++			   uint8_t *values)
++{
++	unsigned int i;
++	unsigned int error;
++
++	if (count == 0 || !values)
++		return -1;
++
++	for (i = 0; i < count; i++) {
++		const unsigned int reg_addr = start_addr + i;
++		const unsigned int value = values[i];
++
++		error = regmap_write(ioexp->regmap, reg_addr, value);
++		if (error) {
++			dev_err(ioexp->dev,
++				"Error writing register %02X (%d)\n",
++				reg_addr, error);
++		}
++	}
++
++	return error;
++}
++
++int mca_ioexp_resume(struct device *dev)
++{
++	struct mca_ioexp *ioexp = dev_get_drvdata(dev);
++	int error;
++
++	if (!ioexp->preserved_regs)
++		return 0;
++
++	error = write_reg_group(ioexp, MCA_GPIO_DIR_0,
++				ioexp->preserved_regs->gpio_dir.cnt,
++				ioexp->preserved_regs->gpio_dir.values);
++	if (error)
++		dev_err(ioexp->dev,
++			"Failed to restore MCA_GPIO_DIR registers.\n");
++
++	error = write_reg_group(ioexp, MCA_GPIO_DATA_0,
++				ioexp->preserved_regs->gpio_data.cnt,
++				ioexp->preserved_regs->gpio_data.values);
++	if (error)
++		dev_err(ioexp->dev,
++			"Failed to restore MCA_GPIO_DATA registers.\n");
++
++	error = write_reg_group(ioexp, MCA_GPIO_IRQ_CFG_0,
++				ioexp->preserved_regs->irq_cfg.cnt,
++				ioexp->preserved_regs->irq_cfg.values);
++	if (error)
++		dev_err(ioexp->dev,
++			"Failed to restore MCA_GPIO_IRQ_CFG registers.\n");
++
++	error = write_reg_group(ioexp, MCA_IRQ_MASK_0,
++				ioexp->preserved_regs->irq_mask.cnt,
++				ioexp->preserved_regs->irq_mask.values);
++	if (error)
++		dev_err(ioexp->dev,
++			"Failed to restore MCA_IRQ_MASK registers.\n");
++
++	error = write_reg_group(ioexp, MCA_REG_ADC_CFG0_0,
++				ioexp->preserved_regs->adc_cfg.cnt,
++				ioexp->preserved_regs->adc_cfg.values);
++	if (error)
++		dev_err(ioexp->dev,
++			"Failed to restore MCA_REG_ADC_CFG registers.\n");
++
++	enable_irq(ioexp->chip_irq);
++	return 0;
++}
++
++int mca_ioexp_device_init(struct mca_ioexp *ioexp, u32 irq)
++{
++	int ret;
++	unsigned int val;
++
++	ret = regmap_read(ioexp->regmap, MCA_DEVICE_ID, &val);
++	if (ret) {
++		dev_err(ioexp->dev,
++			"Cannot read MCA IO Expander Device ID (%d)\n",
++			ret);
++		return ret;
++	}
++	ioexp->dev_id = (u8)val;
++
++	if (ioexp->dev_id != MCA_IOEXP_DEVICE_ID_VAL) {
++		dev_err(ioexp->dev, "Invalid MCA IO Expander Device ID (%x)\n",
++			ioexp->dev_id);
++		return -ENODEV;
++	}
++
++	ret = regmap_read(ioexp->regmap, MCA_HW_VER, &val);
++	if (ret) {
++		dev_err(ioexp->dev, "Cannot read MCA Hardware Version (%d)\n",
++			ret);
++		return ret;
++	}
++	ioexp->hw_version = (u8)val;
++
++	ret = regmap_bulk_read(ioexp->regmap, MCA_FW_VER_L, &val, 2);
++	if (ret) {
++		dev_err(ioexp->dev,
++			"Cannot read MCA IO Expander Firmware Version (%d)\n",
++			ret);
++		return ret;
++	}
++	ioexp->fw_version = (u16)(val & ~MCA_FW_VER_ALPHA_MASK);
++	ioexp->fw_is_alpha = val & MCA_FW_VER_ALPHA_MASK ? true : false;
++
++	ioexp->chip_irq = irq;
++	ioexp->gpio_base = -1;
++
++	if (of_find_property(ioexp->dev->of_node, "restore-config-on-resume",
++			     NULL)) {
++		unsigned int gpio_num;
++
++		ioexp->preserved_regs = kzalloc(sizeof *ioexp->preserved_regs,
++						GFP_KERNEL | GFP_DMA);
++		if (!ioexp->preserved_regs) {
++			dev_err(ioexp->dev,
++				"Failed to allocate memory for preserved registers.\n");
++			return -ENOMEM;
++		}
++
++		ret = regmap_read(ioexp->regmap, MCA_GPIO_NUM, &gpio_num);
++		if (ret) {
++			dev_err(ioexp->dev,
++				"Error reading MCA_GPIO_NUM (%d)\n", ret);
++			return ret;
++		}
++
++		ioexp->preserved_regs->gpio_dir.cnt = (gpio_num + 7) / 8;
++		ioexp->preserved_regs->gpio_dir.values =
++				kzalloc(ioexp->preserved_regs->gpio_dir.cnt,
++					GFP_KERNEL | GFP_DMA);
++		ioexp->preserved_regs->gpio_data.cnt = (gpio_num + 7) / 8;
++		ioexp->preserved_regs->gpio_data.values =
++				kzalloc(ioexp->preserved_regs->gpio_data.cnt,
++					GFP_KERNEL | GFP_DMA);
++		ioexp->preserved_regs->irq_cfg.cnt = gpio_num;
++		ioexp->preserved_regs->irq_cfg.values =
++				kzalloc(ioexp->preserved_regs->irq_cfg.cnt,
++					GFP_KERNEL | GFP_DMA);
++		ioexp->preserved_regs->irq_mask.cnt = 4;
++		ioexp->preserved_regs->irq_mask.values =
++				kzalloc(ioexp->preserved_regs->irq_mask.cnt,
++					GFP_KERNEL | GFP_DMA);
++		ioexp->preserved_regs->adc_cfg.cnt = gpio_num;
++		ioexp->preserved_regs->adc_cfg.values =
++				kzalloc(ioexp->preserved_regs->adc_cfg.cnt,
++					GFP_KERNEL | GFP_DMA);
++
++	} else {
++		ioexp->preserved_regs = NULL;
++	}
++	ret = mca_ioexp_irq_init(ioexp);
++	if (ret) {
++		dev_err(ioexp->dev, "Cannot initialize interrupts (%d)\n", ret);
++		return ret;
++	}
++
++	ret = mfd_add_devices(ioexp->dev, -1, mca_ioexp_devs,
++			      ARRAY_SIZE(mca_ioexp_devs), NULL, ioexp->irq_base,
++			      regmap_irq_get_domain(ioexp->regmap_irq));
++
++	if (ret) {
++		dev_err(ioexp->dev, "Cannot add MFD cells (%d)\n", ret);
++		goto out_irq;
++	}
++
++	ret = sysfs_create_group(&ioexp->dev->kobj, &mca_ioexp_attr_group);
++	if (ret) {
++		dev_err(ioexp->dev, "Cannot create sysfs entries (%d)\n", ret);
++		goto out_dev;
++	}
++
++	return 0;
++
++out_dev:
++	mfd_remove_devices(ioexp->dev);
++out_irq:
++	mca_ioexp_irq_exit(ioexp);
++
++	return ret;
++}
++
++void mca_ioexp_device_exit(struct mca_ioexp *ioexp)
++{
++	sysfs_remove_group(&ioexp->dev->kobj, &mca_ioexp_attr_group);
++	mfd_remove_devices(ioexp->dev);
++	mca_ioexp_irq_exit(ioexp);
++
++	if (!ioexp->preserved_regs) {
++		kfree(ioexp->preserved_regs->gpio_dir.values);
++		kfree(ioexp->preserved_regs->gpio_data.values);
++		kfree(ioexp->preserved_regs->irq_cfg.values);
++		kfree(ioexp->preserved_regs->irq_mask.values);
++		kfree(ioexp->preserved_regs->adc_cfg.values);
++		kfree(ioexp->preserved_regs);
++
++		ioexp->preserved_regs = NULL;
++	}
++}
++
++MODULE_AUTHOR("Digi International Inc");
++MODULE_DESCRIPTION("MCA IO Expander driver");
++MODULE_LICENSE("GPL");
+diff --git a/drivers/mfd/mca-ioexp-i2c.c b/drivers/mfd/mca-ioexp-i2c.c
+new file mode 100644
+index 000000000000..29a5587ce683
+--- /dev/null
++++ b/drivers/mfd/mca-ioexp-i2c.c
+@@ -0,0 +1,186 @@
++/*
++ *  Copyright 2017 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/i2c.h>
++#include <linux/regmap.h>
++#include <linux/delay.h>
++#include <linux/slab.h>
++#include <linux/err.h>
++#include <linux/of.h>
++
++#include <linux/mfd/core.h>
++#include <linux/mfd/mca-common/core.h>
++#include <linux/mfd/mca-ioexp/core.h>
++
++static const struct regmap_range mca_ioexp_readable_ranges[] = {
++};
++
++static const struct regmap_range mca_ioexp_writeable_ranges[] = {
++	regmap_reg_range(MCA_IRQ_STATUS_0, MCA_IRQ_MASK_3),
++	regmap_reg_range(MCA_GPIO_DIR_0, MCA_GPIO_IRQ_CFG_63),
++	regmap_reg_range(MCA_REG_ADC_CFG0_0, MCA_REG_ADC_CFG0_31),
++	regmap_reg_range(MCA_REG_ADC_CFG1_0, MCA_REG_ADC_CFG1_31),
++	regmap_reg_range(MCA_REG_ADC_CFG2_0, MCA_REG_ADC_CFG2_31),
++};
++
++static const struct regmap_range mca_ioexp_volatile_ranges[] = {
++	/* Real volatile registers */
++	regmap_reg_range(MCA_IRQ_STATUS_0, MCA_IRQ_STATUS_3),
++	regmap_reg_range(MCA_GPIO_DATA_0, MCA_GPIO_DATA_7),
++	regmap_reg_range(MCA_GPIO_IRQ_STATUS_0, MCA_GPIO_IRQ_STATUS_7),
++	regmap_reg_range(MCA_REG_ADC_VAL_L_0, MCA_REG_ADC_VAL_H_31),
++
++	/*
++	 * Fake volatile registers.
++	 *
++	 * These registers could be cached but non-volatile registers makes
++	 * regmap access each register one by one which has some drawbacks:
++	 * - Breaks CRC in the protocol.
++	 * - Requires the MCA firmware to process each access as a separate
++	 *   access, even when the data requested must be returned in bulk.
++	 *
++	 * For this reasons we will consider all registers volatile.
++	 */
++	regmap_reg_range(MCA_DEVICE_ID, MCA_UID_9),
++	regmap_reg_range(MCA_IRQ_MASK_0, MCA_IRQ_MASK_3),
++	regmap_reg_range(MCA_GPIO_NUM, MCA_GPIO_DIR_7),
++	regmap_reg_range(MCA_GPIO_IRQ_CFG_0, MCA_GPIO_IRQ_CFG_63),
++	regmap_reg_range(MCA_REG_ADC_NUM_CH, MCA_REG_ADC_NUM_BYTES),
++	regmap_reg_range(MCA_REG_ADC_CFG0_0, MCA_REG_ADC_CFG0_31),
++	regmap_reg_range(MCA_REG_ADC_CFG1_0, MCA_REG_ADC_CFG1_31),
++	regmap_reg_range(MCA_REG_ADC_CFG2_0, MCA_REG_ADC_CFG2_31),
++};
++
++static const struct regmap_access_table mca_ioexp_readable_table = {
++	.yes_ranges	= mca_ioexp_readable_ranges,
++	.n_yes_ranges	= ARRAY_SIZE(mca_ioexp_readable_ranges),
++};
++
++static const struct regmap_access_table mca_ioexp_writeable_table = {
++	.yes_ranges	= mca_ioexp_writeable_ranges,
++	.n_yes_ranges	= ARRAY_SIZE(mca_ioexp_writeable_ranges),
++};
++
++static const struct regmap_access_table mca_ioexp_volatile_table = {
++	.yes_ranges	= mca_ioexp_volatile_ranges,
++	.n_yes_ranges	= ARRAY_SIZE(mca_ioexp_volatile_ranges),
++};
++
++static struct regmap_config mca_ioexp_regmap_config = {
++	.reg_bits	= 16,
++	.val_bits	= 8,
++	.max_register	= 0xFFFF,
++
++	.rd_table	= &mca_ioexp_readable_table,
++	.wr_table	= &mca_ioexp_writeable_table,
++	.volatile_table = &mca_ioexp_volatile_table,
++
++	.cache_type	= REGCACHE_RBTREE,
++};
++
++static const struct of_device_id mca_ioexp_dt_ids[] = {
++	{ .compatible = "digi,mca_ioexp", },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, mca_ioexp_dt_ids);
++
++static int mca_ioexp_i2c_probe(struct i2c_client *i2c,
++			       const struct i2c_device_id *id)
++{
++	struct mca_ioexp *ioexp;
++	int ret;
++
++	ioexp = devm_kzalloc(&i2c->dev, sizeof(struct mca_ioexp), GFP_KERNEL);
++	if (ioexp == NULL)
++		return -ENOMEM;
++
++	i2c_set_clientdata(i2c, ioexp);
++	ioexp->dev = &i2c->dev;
++	ioexp->chip_irq = i2c->irq;
++	ioexp->regmap = devm_regmap_init_i2c(i2c, &mca_ioexp_regmap_config);
++	if (IS_ERR(ioexp->regmap)) {
++		ret = PTR_ERR(ioexp->regmap);
++		dev_err(ioexp->dev, "Failed to allocate register map (%d)\n", ret);
++		goto err_regmap;
++	}
++
++	ret = mca_ioexp_device_init(ioexp, i2c->irq);
++	if (ret) {
++		dev_err(ioexp->dev, "Failed to init i2c device (%d)\n", ret);
++		goto err_regmap;
++	}
++
++	return 0;
++
++err_regmap:
++	devm_kfree(ioexp->dev, ioexp);
++
++	return ret;
++}
++
++static int mca_ioexp_i2c_remove(struct i2c_client *i2c)
++{
++	struct mca_ioexp *ioexp = i2c_get_clientdata(i2c);
++
++	mca_ioexp_device_exit(ioexp);
++	devm_kfree(ioexp->dev, ioexp);
++
++	return 0;
++}
++
++static void mca_ioexp_i2c_shutdown(struct i2c_client *i2c)
++{
++	struct mca_ioexp *ioexp = i2c_get_clientdata(i2c);
++
++	/*
++	 * Disable the IRQ so that the I/O Expander does not wake-up the MCA
++	 * when powered off.
++	 */
++	disable_irq(ioexp->chip_irq);
++}
++
++#ifdef CONFIG_PM
++static int mca_ioexp_i2c_suspend(struct device *dev)
++{
++	return mca_ioexp_suspend(dev);
++}
++
++static int mca_ioexp_i2c_resume(struct device *dev)
++{
++	return mca_ioexp_resume(dev);
++}
++
++static SIMPLE_DEV_PM_OPS(mca_ioexp_i2c_pm_ops,
++			 mca_ioexp_i2c_suspend,
++			 mca_ioexp_i2c_resume);
++#endif
++
++static const struct i2c_device_id mca_ioexp_i2c_id[] = {
++        {"mca_ioexp", 0},
++        {},
++};
++MODULE_DEVICE_TABLE(i2c, mca_ioexp_i2c_id);
++
++static struct i2c_driver mca_ioexp_i2c_driver = {
++	.driver = {
++		.name = "mca_ioexp",
++		.of_match_table = of_match_ptr(mca_ioexp_dt_ids),
++#ifdef CONFIG_PM
++		.pm = &mca_ioexp_i2c_pm_ops,
++#endif
++	},
++	.probe    = mca_ioexp_i2c_probe,
++	.remove   = mca_ioexp_i2c_remove,
++	.shutdown = mca_ioexp_i2c_shutdown,
++	.id_table = mca_ioexp_i2c_id,
++};
++
++module_i2c_driver(mca_ioexp_i2c_driver);
+diff --git a/drivers/mfd/mca-ioexp-irq.c b/drivers/mfd/mca-ioexp-irq.c
+new file mode 100644
+index 000000000000..439149765dd0
+--- /dev/null
++++ b/drivers/mfd/mca-ioexp-irq.c
+@@ -0,0 +1,89 @@
++/*
++ *  Copyright 2017 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/irq.h>
++#include <linux/mfd/core.h>
++#include <linux/interrupt.h>
++#include <linux/regmap.h>
++#include <linux/mfd/mca-ioexp/core.h>
++#include <linux/mfd/mca-common/core.h>
++
++#define MCA_IOEXP_IRQ_0_OFFSET		0
++#define MCA_IOEXP_IRQ_1_OFFSET		1
++#define MCA_IOEXP_IRQ_2_OFFSET		2
++#define MCA_IOEXP_IRQ_3_OFFSET		3
++
++static const struct regmap_irq mca_ioexp_irqs[] = {
++	[MCA_IOEXP_IRQ_GPIO_BANK_0] = {
++		.reg_offset = MCA_IOEXP_IRQ_1_OFFSET,
++		.mask = MCA_GPIO_BANK_0,
++	},
++	[MCA_IOEXP_IRQ_GPIO_BANK_1] = {
++		.reg_offset = MCA_IOEXP_IRQ_1_OFFSET,
++		.mask = MCA_GPIO_BANK_1,
++	},
++	[MCA_IOEXP_IRQ_GPIO_BANK_2] = {
++		.reg_offset = MCA_IOEXP_IRQ_1_OFFSET,
++		.mask = MCA_GPIO_BANK_2,
++	},
++	[MCA_IOEXP_IRQ_GPIO_BANK_3] = {
++		.reg_offset = MCA_IOEXP_IRQ_1_OFFSET,
++		.mask = MCA_GPIO_BANK_3,
++	},
++	[MCA_IOEXP_IRQ_GPIO_BANK_4] = {
++		.reg_offset = MCA_IOEXP_IRQ_1_OFFSET,
++		.mask = MCA_GPIO_BANK_4,
++	},
++	[MCA_IOEXP_IRQ_GPIO_BANK_5] = {
++		.reg_offset = MCA_IOEXP_IRQ_1_OFFSET,
++		.mask = MCA_GPIO_BANK_5,
++	},
++};
++
++static const struct regmap_irq_chip mca_ioexp_irq_chip = {
++	.name = "mca-ioexp-irq",
++	.irqs = mca_ioexp_irqs,
++	.num_irqs = ARRAY_SIZE(mca_ioexp_irqs),
++	.num_regs = MCA_IOEXP_NUM_IRQ_REGS,
++	.status_base = MCA_IRQ_STATUS_0,
++	.mask_base = MCA_IRQ_MASK_0,
++	.ack_base = MCA_IRQ_STATUS_0,
++	.init_ack_masked = true,
++};
++
++int mca_ioexp_irq_init(struct mca_ioexp *ioexp)
++{
++	int ret;
++	const int irq_flags = IRQF_TRIGGER_FALLING | IRQF_ONESHOT | IRQF_SHARED;
++
++	if (!ioexp->chip_irq) {
++		dev_err(ioexp->dev, "No IRQ configured\n");
++		return -EINVAL;
++	}
++
++	ioexp->irq_base = -1;
++	ret = regmap_add_irq_chip(ioexp->regmap, ioexp->chip_irq,
++				  irq_flags,
++				  ioexp->irq_base, &mca_ioexp_irq_chip,
++				  &ioexp->regmap_irq);
++	if (ret) {
++		dev_err(ioexp->dev, "Failed to request IRQ %d (%d)\n",
++			ioexp->chip_irq, ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++void mca_ioexp_irq_exit(struct mca_ioexp *ioexp)
++{
++	regmap_del_irq_chip(ioexp->chip_irq, ioexp->regmap_irq);
++}
+diff --git a/include/linux/mfd/mca-ioexp/core.h b/include/linux/mfd/mca-ioexp/core.h
+new file mode 100644
+index 000000000000..cb9969262da5
+--- /dev/null
++++ b/include/linux/mfd/mca-ioexp/core.h
+@@ -0,0 +1,87 @@
++/*
++ *  Copyright 2017 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#ifndef MFD_MCA_IOEXP_CORE_H_
++#define MFD_MCA_IOEXP_CORE_H_
++
++#include <linux/interrupt.h>
++#include <linux/mfd/mca-ioexp/registers.h>
++
++#define MCA_IOEXP_DRVNAME_ADC		"mca-ioexp-adc"
++#define MCA_IOEXP_DRVNAME_GPIO		"mca-ioexp-gpio"
++
++#define MCA_IOEXP_DEVICE_ID_VAL		0x37
++#define MCA_IOEXP_ADDR_LEN		2
++#define MCA_IOEXP_MAX_FRAME_DATA_LEN	256
++
++/* Interrupts */
++enum mca_ioexp_irqs {
++	MCA_IOEXP_IRQ_GPIO_BANK_0,
++	MCA_IOEXP_IRQ_GPIO_BANK_1,
++	MCA_IOEXP_IRQ_GPIO_BANK_2,
++	MCA_IOEXP_IRQ_GPIO_BANK_3,
++	MCA_IOEXP_IRQ_GPIO_BANK_4,
++	MCA_IOEXP_IRQ_GPIO_BANK_5,
++	/* ... */
++
++	MCA_IOEXP_NUM_IRQS,
++};
++
++/* Number of interrupt registers */
++#define MCA_IOEXP_NUM_IRQ_REGS		4
++
++struct mca_ioexp {
++	struct device *dev;
++	u8 dev_id;
++	u8 hw_version;
++	bool fw_is_alpha;
++	u16 fw_version;
++	u32 flags;
++	struct regmap *regmap;
++	struct regmap_irq_chip_data *regmap_irq;
++	int chip_irq;
++	u32 irq_base;
++	int gpio_base;
++
++	struct {
++		struct {
++			uint8_t *values;
++			uint8_t cnt;
++		} gpio_dir;
++
++		struct {
++			uint8_t *values;
++			uint8_t cnt;
++		} gpio_data;
++
++		struct {
++			uint8_t *values;
++			uint8_t cnt;
++		} irq_cfg;
++
++		struct {
++			uint8_t *values;
++			uint8_t cnt;
++		} irq_mask;
++
++		struct {
++			uint8_t *values;
++			uint8_t cnt;
++		} adc_cfg;
++	} *preserved_regs;
++};
++
++int mca_ioexp_device_init(struct mca_ioexp *ioexp, u32 irq);
++int mca_ioexp_irq_init(struct mca_ioexp *ioexp);
++void mca_ioexp_device_exit(struct mca_ioexp *ioexp);
++void mca_ioexp_irq_exit(struct mca_ioexp *ioexp);
++int mca_ioexp_suspend(struct device *dev);
++int mca_ioexp_resume(struct device *dev);
++
++#endif /* MFD_MCA_IOEXP_CORE_H_ */
+diff --git a/include/linux/mfd/mca-ioexp/registers.h b/include/linux/mfd/mca-ioexp/registers.h
+new file mode 100644
+index 000000000000..9359c9953e0d
+--- /dev/null
++++ b/include/linux/mfd/mca-ioexp/registers.h
+@@ -0,0 +1,15 @@
++/*
++ *  Copyright 2017 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#ifndef MCA_IOEXP_REGISTERS_H_
++#define MCA_IOEXP_REGISTERS_H_
++
++#include <linux/bitops.h>
++
++#endif /* MCA_IOEXP_REGISTERS_H_ */

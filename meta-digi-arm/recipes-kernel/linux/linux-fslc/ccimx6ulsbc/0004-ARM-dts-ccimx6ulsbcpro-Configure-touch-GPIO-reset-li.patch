@@ -1,0 +1,38 @@
+From ac65a7be2a14e2c5f90319674527257a53e59402 Mon Sep 17 00:00:00 2001
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Tue, 8 Jan 2019 16:42:40 +0100
+Subject: [PATCH] ARM: dts: ccimx6ulsbcpro: Configure touch GPIO reset line
+
+The Goodix touch requires both the INT and reset lines in order to fix
+an I2C address at startup.
+
+This commit uses the IOEXP GPIO29 to control the DISP_5V supply which
+controls the voltage source for the reset line pull-up. It also sets the
+internal pull-up on the INT line so the line is not left floating.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts b/arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts
+index 14274a0d6435..62133ede2736 100644
+--- a/arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts
++++ b/arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts
+@@ -128,6 +128,7 @@
+ 		interrupt-parent = <&gpio5>;
+ 		interrupts = <2 IRQ_TYPE_EDGE_RISING>;
+ 		irq-gpios = <&gpio5 2 GPIO_ACTIVE_HIGH>;
++		reset-gpios = <&mca_ioexp_gpio 29 GPIO_ACTIVE_HIGH>;
+ 		status = "okay";
+ 	};
+ 
+@@ -366,7 +367,7 @@
+ 
+ 	pinctrl_goodix_touch: goodixgrp{
+ 		fsl,pins = <
+-			MX6UL_PAD_SNVS_TAMPER2__GPIO5_IO02	0x1020
++			MX6UL_PAD_SNVS_TAMPER2__GPIO5_IO02	0x1b0b0
+ 		>;
+ 	};
+ 

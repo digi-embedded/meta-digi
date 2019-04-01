@@ -13,3 +13,10 @@ SRC_URI_append_ccimx6ul_use-mainline-bsp = " \
     file://0010-imx6ul-Add-RTC-MCA-support-for-ConnectCore-6UL-SOM.patch \
     file://0011-imx6ul-Add-MCA-power-key-support-for-ConnectCore-6UL.patch \
 "
+
+SRC_URI_append_ccimx6ulsbc_use-mainline-bsp = " \
+    file://0001-ccimx6ulsbcpro-Add-IOEXP-core-I2C-support.patch \
+    file://0002-ccimx6ulsbcpro-Add-IOEXP-GPIO-support.patch \
+    file://0003-ccimx6ulsbcpro-Add-IOEXP-ADC-support.patch \
+    file://0004-ARM-dts-ccimx6ulsbcpro-Configure-touch-GPIO-reset-li.patch \
+"
