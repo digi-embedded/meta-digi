@@ -14,4 +14,4 @@ do_install() {
 	install -m 0755 hdp-test.py ${D}${bindir}
 }
 
-RDEPENDS_${PN} = "python3 python3-argparse python3-crypt python3-dbus python3-pygobject"
+RDEPENDS_${PN} = "python3 python3-crypt python3-dbus python3-pygobject"
