@@ -1,0 +1,167 @@
+From 2313935f3b195aa7d930961bcd44a5fac61a945e Mon Sep 17 00:00:00 2001
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Fri, 20 Apr 2018 19:13:02 +0200
+Subject: [PATCH] ARM: Add support for the ConnectCore 6UL System-On-Module
+
+* Getter functions for hwid information
+* Define "digi,ccimx6ul" in the compatible property so the MCA can be
+  managed using the available tools.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ arch/arm/boot/dts/imx6ul-ccimx6ulsbcexpress.dts |  2 +-
+ arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts     |  3 +-
+ arch/arm/configs/imx_v6_v7_defconfig            |  2 +-
+ arch/arm/mach-imx/Kconfig                       |  8 +++
+ arch/arm/mach-imx/Makefile                      |  2 +-
+ arch/arm/mach-imx/som-ccimx6ul.c                | 69 +++++++++++++++++++++++++
+ 6 files changed, 82 insertions(+), 4 deletions(-)
+ create mode 100644 arch/arm/mach-imx/som-ccimx6ul.c
+
+diff --git a/arch/arm/boot/dts/imx6ul-ccimx6ulsbcexpress.dts b/arch/arm/boot/dts/imx6ul-ccimx6ulsbcexpress.dts
+index 3792679c0c90..dc773f350999 100644
+--- a/arch/arm/boot/dts/imx6ul-ccimx6ulsbcexpress.dts
++++ b/arch/arm/boot/dts/imx6ul-ccimx6ulsbcexpress.dts
+@@ -15,7 +15,7 @@
+ / {
+ 	model = "Digi International ConnectCore 6UL SBC Express.";
+ 	compatible = "digi,ccimx6ulsbcexpress", "digi,ccimx6ulsom",
+-		     "fsl,imx6ul";
++		     "digi,ccimx6ul", "fsl,imx6ul";
+ };
+ 
+ &adc1 {
+diff --git a/arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts b/arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts
+index 3749fdda3611..aed1db57ed3b 100644
+--- a/arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts
++++ b/arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts
+@@ -14,7 +14,8 @@
+ 
+ / {
+ 	model = "Digi International ConnectCore 6UL SBC Pro.";
+-	compatible = "digi,ccimx6ulsbcpro", "digi,ccimx6ulsom", "fsl,imx6ul";
++	compatible = "digi,ccimx6ulsbcpro", "digi,ccimx6ulsom",
++		     "digi,ccimx6ul", "fsl,imx6ul";
+ 
+ 	lcd_backlight: backlight {
+ 		compatible = "pwm-backlight";
+diff --git a/arch/arm/configs/imx_v6_v7_defconfig b/arch/arm/configs/imx_v6_v7_defconfig
+index 6985d61eddb3..2d32ab117fb5 100644
+--- a/arch/arm/configs/imx_v6_v7_defconfig
++++ b/arch/arm/configs/imx_v6_v7_defconfig
+@@ -36,7 +36,7 @@ CONFIG_SOC_IMX6Q=y
+ CONFIG_SOC_IMX6SL=y
+ CONFIG_SOC_IMX6SLL=y
+ CONFIG_SOC_IMX6SX=y
+-CONFIG_SOC_IMX6UL=y
++CONFIG_SOM_CC6UL=y
+ CONFIG_SOC_IMX7D=y
+ CONFIG_SOC_VF610=y
+ CONFIG_PCI=y
+diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
+index abc337111eff..2451ee423496 100644
+--- a/arch/arm/mach-imx/Kconfig
++++ b/arch/arm/mach-imx/Kconfig
+@@ -523,6 +523,14 @@ config SOC_IMX6UL
+ 	help
+ 	  This enables support for Freescale i.MX6 UltraLite processor.
+ 
++config SOM_CC6UL
++	bool "Digi ConnectCore 6UL System-On-Module support"
++	select SOC_IMX6UL
++	select SOC_IMX6
++
++	help
++	  This enables support for Digi ConnectCore 6UL System-On-Module.
++
+ config SOC_LS1021A
+ 	bool "Freescale LS1021A support"
+ 	select ARM_GIC
+diff --git a/arch/arm/mach-imx/Makefile b/arch/arm/mach-imx/Makefile
+index bae179af21f6..0cd7cdfc5e49 100644
+--- a/arch/arm/mach-imx/Makefile
++++ b/arch/arm/mach-imx/Makefile
+@@ -83,7 +83,7 @@ obj-$(CONFIG_SOC_IMX6SX) += mach-imx6sx.o
+ obj-$(CONFIG_SOC_IMX6UL) += mach-imx6ul.o
+ obj-$(CONFIG_SOC_IMX7D_CA7) += mach-imx7d.o
+ obj-$(CONFIG_SOC_IMX7D_CM4) += mach-imx7d-cm4.o
+-
++obj-$(CONFIG_SOM_CC6UL) += som-ccimx6ul.o
+ ifeq ($(CONFIG_SUSPEND),y)
+ AFLAGS_suspend-imx6.o :=-Wa,-march=armv7-a
+ obj-$(CONFIG_SOC_IMX6) += suspend-imx6.o
+diff --git a/arch/arm/mach-imx/som-ccimx6ul.c b/arch/arm/mach-imx/som-ccimx6ul.c
+new file mode 100644
+index 000000000000..269b526ee020
+--- /dev/null
++++ b/arch/arm/mach-imx/som-ccimx6ul.c
+@@ -0,0 +1,69 @@
++/*
++ *  Copyright 2018 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#include <linux/kernel.h>
++#include <linux/export.h>
++#include <linux/errno.h>
++#include <linux/of.h>
++#include <linux/string.h>
++
++static int digi_board_version = -EINVAL;
++
++int digi_get_board_version(void)
++{
++	struct device_node *np = NULL;
++	const char *boardver_str;
++	char buf[4];
++
++	/* Only need to read the carrier board once */
++	if (digi_board_version > 0)
++		return digi_board_version;
++
++	np = of_find_node_by_path("/");
++	if (!np)
++		return -EPERM;
++
++	if (!of_property_read_string(np, "digi,carrierboard,version",
++				&boardver_str)) {
++		strncpy(buf, boardver_str, sizeof(buf));
++		if (!kstrtoint(boardver_str, 10, &digi_board_version))
++			pr_debug("Board version: %d\n", digi_board_version);
++	}
++	of_node_put(np);
++
++	return digi_board_version;
++}
++EXPORT_SYMBOL(digi_get_board_version);
++
++static int digi_som_hv = -EINVAL;
++
++int digi_get_som_hv(void)
++{
++	struct device_node *np = NULL;
++	const char *som_hv_str;
++	char buf[4];
++
++	/* Only need to read the HV once */
++	if (digi_som_hv > 0)
++		return digi_som_hv;
++
++	np = of_find_node_by_path("/");
++	if (!np)
++		return -EPERM;
++
++	if (!of_property_read_string(np, "digi,hwid,hv", &som_hv_str)) {
++		strncpy(buf, som_hv_str, sizeof(buf));
++		if (!kstrtoint(som_hv_str, 16, &digi_som_hv))
++			pr_debug("SOM HV: %d\n", digi_som_hv);
++	}
++	of_node_put(np);
++
++	return digi_som_hv;
++}
++EXPORT_SYMBOL(digi_get_som_hv);

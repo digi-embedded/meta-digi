@@ -1,0 +1,33 @@
+From 7350cbc80f98eacb84a67049c2181f758ca3add6 Mon Sep 17 00:00:00 2001
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Fri, 15 Jun 2018 09:18:15 +0200
+Subject: [PATCH] imx6ul: Add MCA IOMUX support to the ConnectCore 6UL SOM
+
+Synched with v4.14.78/master at.
+3f8b03950b323db4ca89b1cdc1c2288f79facaa3
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ arch/arm/boot/dts/imx6ul-ccimx6ulsom.dtsi | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/arch/arm/boot/dts/imx6ul-ccimx6ulsom.dtsi b/arch/arm/boot/dts/imx6ul-ccimx6ulsom.dtsi
+index 8d475051acf2..b96a0873cd88 100644
+--- a/arch/arm/boot/dts/imx6ul-ccimx6ulsom.dtsi
++++ b/arch/arm/boot/dts/imx6ul-ccimx6ulsom.dtsi
+@@ -286,6 +286,15 @@
+ 			MX6UL_PAD_SNVS_TAMPER9__GPIO5_IO09      0x3000
+ 		>;
+ 	};
++
++	pinctrl_mca_cc6ul: mcagrp {
++		fsl,pins = <
++			/* MCA_nINT */
++			MX6UL_PAD_SNVS_TAMPER4__GPIO5_IO04	0xb0b1
++			/* MCA_FW_UPDATE */
++			MX6UL_PAD_NAND_CE1_B__GPIO4_IO14	0x30
++		>;
++	};
+ };
+ 
+ &reg_arm {
