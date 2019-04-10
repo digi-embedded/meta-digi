@@ -1,0 +1,70 @@
+#!/bin/sh
+
+# Linux GPIOs on XBee lines
+XBEE_RESET_N_GPIO="##XBEE_RESET_N_GPIO##"
+XBEE_SLEEP_RQ_GPIO="##XBEE_SLEEP_RQ_GPIO##"
+
+# request_gpio <gpio_nr>
+request_gpio_out() {
+	local SG_GPIONR="${1}"
+	local SG_GPIOPATH="/sys/class/gpio/gpio${SG_GPIONR}"
+
+	[ -d "${SG_GPIOPATH}" ] || printf "%s" "${SG_GPIONR}" > /sys/class/gpio/export
+	printf out > "${SG_GPIOPATH}/direction" && sleep .2
+}
+
+# free_gpio <gpio_nr>
+free_gpio() {
+	local SG_GPIONR="${1}"
+	local SG_GPIOPATH="/sys/class/gpio/gpio${SG_GPIONR}"
+
+	[ -d "${SG_GPIOPATH}" ] && printf "%s" "${SG_GPIONR}" > /sys/class/gpio/unexport
+}
+
+# set_gpio_value <gpio_nr> <value>
+set_gpio_value() {
+	local SG_GPIONR="${1}"
+	local SG_GPIOVAL="${2}"
+	local SG_GPIOPATH="/sys/class/gpio/gpio${SG_GPIONR}"
+
+	printf out > "${SG_GPIOPATH}/direction" && sleep .2
+	printf "${SG_GPIOVAL}" > "${SG_GPIOPATH}/value" && sleep .2
+}
+
+xbee_init() {
+	# Power cycle XBEE_RESET_N
+	request_gpio_out ${XBEE_RESET_N_GPIO}
+	set_gpio_value ${XBEE_RESET_N_GPIO} 0
+	set_gpio_value ${XBEE_RESET_N_GPIO} 1
+
+	# Set low XBEE_SLEEP_RQ
+	request_gpio_out ${XBEE_SLEEP_RQ_GPIO}
+	set_gpio_value ${XBEE_SLEEP_RQ_GPIO} 0
+}
+
+xbee_stop() {
+	free_gpio ${XBEE_RESET_N_GPIO}
+	free_gpio ${XBEE_SLEEP_RQ_GPIO}
+}
+
+case "$1" in
+	start)
+		echo -n "Starting XBee hardware: "
+		xbee_init
+		echo "done."
+		;;
+	stop)
+		echo -n "Stopping XBee hardware: "
+		xbee_stop
+		echo "done."
+		;;
+	restart)
+		$0 stop
+		sleep 1
+		$0 start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+		;;
+esac

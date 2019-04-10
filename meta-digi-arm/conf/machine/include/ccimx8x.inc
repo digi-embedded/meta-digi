@@ -34,6 +34,7 @@ MACHINE_EXTRA_RDEPENDS += " \
     mca-tool \
     parted \
     u-boot-fw-utils \
+    xbee-init \
 "
 
 MACHINE_EXTRA_RRECOMMENDS += " \
