@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 2.6
-## Release 2.6-r1.1
+## Release 2.6-r1.2
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -77,7 +77,7 @@ Documentation is available online at https://www.digi.com/resources/documentatio
   * Updated bluez5 to v5.50
   * Updated OpenSSL to v1.1.1a
   * Package upgrades and security fixes
-* Updated kernel version to v4.14.107 for i.MX8X and i.MX6UL platforms
+* Updated kernel version to v4.14.111 for i.MX8X and i.MX6UL platforms
 * Updated U-Boot to version 2018.03-r1 for i.MX8X platform
 * Updated AWS Greengrass core to version 1.8.0
 * Added support for Code Signing Tool 3.1.0
@@ -130,7 +130,7 @@ updated list can be found on the online documentation.
   * BSDL operation is not supported. It will be available in future releases
     of the hardware.
 * Digi Embedded Yocto
-  * The following features are not supported in this release for the ConnectCore 8X plaform:
+  * The following features are not supported in this release for the ConnectCore 8X platform:
     * Trustfence (TM)
     * Digi Remote Manager
 
