@@ -1,7 +1,7 @@
 # Copyright (C) 2019, Digi International Inc.
 
 SRCBRANCH = "dey-2.6/maint"
-SRCREV = "e8baba6de87ff637afe68493957ec114b2aa38d7"
+SRCREV = "${AUTOREV}"
 
 DEY_EXAMPLES_STASH = "${DIGI_MTK_GIT}dey/dey-examples.git;protocol=ssh"
 DEY_EXAMPLES_GITHUB = "${DIGI_GITHUB_GIT}/dey-examples.git;protocol=git"
