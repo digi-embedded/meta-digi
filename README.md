@@ -97,7 +97,6 @@ updated list can be found on the online documentation.
 * For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
   devices (ConnectCore 6UL) running a 4.14 kernel version fail to join to
   autonomous groups.
-* Disabling Trustfence secure console via GPIO is not supported on U-Boot v2017.03.
 * Trustfence is not yet supported on U-Boot v2018.03.
 
 ## ConnectCore 6UL
