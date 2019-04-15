@@ -19,7 +19,7 @@ LIBDIGIAPIX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${LI
 SRC_URI = " \
     ${LIBDIGIAPIX_GIT_URI};branch=${SRCBRANCH} \
     file://99-digiapix.rules \
-    file://board.conf \
+    file://libdigiapix.conf \
     file://digiapix.sh \
 "
 
@@ -36,7 +36,7 @@ do_install() {
 	install -m 0755 ${WORKDIR}/digiapix.sh ${D}${sysconfdir}/udev/scripts/
 
 	# Install board config file
-	install -m 0644 ${WORKDIR}/board.conf ${D}${sysconfdir}/libdigiapix.conf
+	install -m 0644 ${WORKDIR}/libdigiapix.conf ${D}${sysconfdir}/
 }
 
 USERADD_PACKAGES = "${PN}"
