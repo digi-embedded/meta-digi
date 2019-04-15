@@ -116,3 +116,7 @@ MACHINEOVERRIDES =. "imx:"
 # U-Boot 2017.X requires a specific dtc version.
 PREFERRED_VERSION_dtc-native_mx6 ?= "1.4.5"
 PREFERRED_VERSION_nativesdk-dtc_mx6 ?= "1.4.5"
+
+# Don't add default PIE support to gcc, since static PIE executables don't work
+# very well with gcc 7.x and the glibc we use isn't configured to support them.
+GCCPIE ?= ""
