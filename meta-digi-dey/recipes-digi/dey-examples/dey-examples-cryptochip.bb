@@ -9,7 +9,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 DEPENDS = "cryptoauthlib"
 
-SRC_URI = "${DEY_EXAMPLES_GIT_URI};branch=${SRCBRANCH}"
+SRC_URI = "${DEY_EXAMPLES_GIT_URI};nobranch=1"
 
 S = "${WORKDIR}/git/cryptochip-get-random"
 
