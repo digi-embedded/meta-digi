@@ -1,0 +1,18 @@
+Digi Embedded Yocto provides the following image recipes:
+
+  * dey-image-qt: graphical QT image
+
+    By default the image is X11-based so it provides a full SATO theme
+    desktop environment.
+
+    To compile the image for the framebuffer (instead of X11) add the
+    following line to the project's conf/local.conf:
+
+    DISTRO_FEATURES_remove = "x11"
+
+  * dey-image-aws: console-only image supporting Amazon Web Services IoT
+
+    This image includes the AWS Greengrass Core and an AWS IoT platform
+    example application. For more information on AWS support in Digi
+    Embedded Yocto see the online documentation.
+
