@@ -1,0 +1,47 @@
+From 4a2907834799eda9bd681ccd85557d6433666903 Mon Sep 17 00:00:00 2001
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Mon, 23 Apr 2018 11:47:38 +0200
+Subject: [PATCH] ccimx6ulsbcpro: Add IOEXP GPIO support
+
+Synched with v4.14.78/master at:
+3f8b03950b323db4ca89b1cdc1c2288f79facaa3
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+
+diff --git a/arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts b/arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts
+index afc87b34f441..a818aec68959 100644
+--- a/arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts
++++ b/arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts
+@@ -130,6 +130,29 @@
+ 		irq-gpios = <&gpio5 2 GPIO_ACTIVE_HIGH>;
+ 		status = "okay";
+ 	};
++
++	mca_ioexp: mca_io@6e {
++		compatible = "digi,mca_ioexp";
++		reg = <0x6e>;
++		interrupt-parent = <&mca_gpio>;
++		interrupts = <0 IRQ_TYPE_EDGE_FALLING>;
++		restore-config-on-resume;
++		status = "okay";
++
++		interrupt-controller;
++		#interrupt-cells = <2>;
++		pinctrl-names = "default";
++
++		mca_ioexp_gpio: gpio {
++			compatible = "digi,mca-ioexp-gpio";
++			gpio-controller;
++			#gpio-cells = <2>;
++
++			interrupt-parent = <&mca_ioexp>;
++			interrupt-controller;
++			#interrupt-cells = <2>;
++		};
++	};
+ };
+ 
+ &lcdif {

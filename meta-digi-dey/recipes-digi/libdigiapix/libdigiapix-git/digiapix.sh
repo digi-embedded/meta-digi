@@ -19,13 +19,17 @@ if basename "${DEVPATH}" | grep -qs "gpiochip0$"; then
 	# Use 'gpiochip0' event to set group and mode for 'export/unexport' files
 	chown root:digiapix /sys/class/gpio/export /sys/class/gpio/unexport
 	chmod g+w /sys/class/gpio/export /sys/class/gpio/unexport
-elif basename "${DEVPATH}" | grep -qs "pwmchip[0-9]\+$"; then
+elif basename "${DEVPATH}" | grep -qs "pwmchip[0-9]\+$" && [ "${ACTION}" = "add" ] ; then
 	# Set group and mode for pwmchip's 'export/unexport' files
 	chown root:digiapix /sys${DEVPATH}/export /sys${DEVPATH}/unexport
 	chmod g+w /sys${DEVPATH}/export /sys${DEVPATH}/unexport
+elif basename "${DEVPATH}" | grep -qs "pwmchip[0-9]\+$" && [ "${ACTION}" = "change" ] ; then
+	# Set group and mode for 'pwmX' channel and all files inside it...
+	chown root:digiapix /sys${DEVPATH}/${EXPORT} /sys${DEVPATH}/${EXPORT}/*
+	chmod g+w /sys${DEVPATH}/${EXPORT}/*
 else
 	# Change group and mode of the sysfs files created whenever a 'gpioX'
-	# or 'pwmX' is exported
+	# is exported
 	chown -h root:digiapix /sys${DEVPATH}/*
 	chmod g+w /sys${DEVPATH}/*
 fi

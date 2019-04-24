@@ -19,4 +19,4 @@ SUBSYSTEM=="spidev",  GROUP="digiapix", MODE="0660"
 SUBSYSTEM=="gpio", KERNEL=="gpiochip0", ACTION=="add", RUN="/etc/udev/scripts/digiapix.sh"
 SUBSYSTEM=="gpio", KERNEL!="gpiochip*", ACTION=="add", RUN="/etc/udev/scripts/digiapix.sh"
 
-SUBSYSTEM=="pwm", ACTION=="add", RUN="/etc/udev/scripts/digiapix.sh"
+SUBSYSTEM=="pwm", ACTION=="add|change", RUN="/etc/udev/scripts/digiapix.sh"

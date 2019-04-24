@@ -1,0 +1,12 @@
+[Unit]
+Description=XBee GPIOs initialization
+Before=ModemManager.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/etc/xbee-init start
+ExecStop=/etc/xbee-init stop
+
+[Install]
+WantedBy=multi-user.target

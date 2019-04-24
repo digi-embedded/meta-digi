@@ -14,6 +14,7 @@ IMX_M4_DEMOS = "imx-m4-demos"
 # so set the appropriate dependencies
 do_compile[depends] += " \
 	${@' '.join('%s:do_deploy' % r for r in '${IMX_M4_DEMOS}'.split() )} \
+	firmware-imx:do_deploy \
 "
 
 # This package aggregates dependencies with other packages,
@@ -23,6 +24,7 @@ do_populate_lic[depends] += " \
 	${@' '.join('%s:do_populate_lic' % r for r in '${IMX_EXTRA_FIRMWARE}'.split() )} \
 	imx-atf:do_populate_lic \
 	${@' '.join('%s:do_populate_lic' % r for r in '${IMX_M4_DEMOS}'.split() )} \
+	firmware-imx:do_populate_lic \
 "
 
 UBOOT_NAME = "u-boot-${MACHINE}.bin"

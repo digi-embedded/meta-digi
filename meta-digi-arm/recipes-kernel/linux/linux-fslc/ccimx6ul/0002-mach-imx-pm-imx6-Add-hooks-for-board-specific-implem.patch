@@ -1,0 +1,65 @@
+From d0520a166cdeccf2821a45483602fc24a1772569 Mon Sep 17 00:00:00 2001
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Fri, 20 Apr 2018 20:20:30 +0200
+Subject: [PATCH] mach-imx: pm-imx6: Add hooks for board specific
+ implementation
+
+This commit implements two new pm hooks in pm_imx6.c (begin & end) that,
+optionally, can be implemented by the platform code.
+This is needed on platforms like the CC6UL where the i.MX6UL has to
+notify the MCA when suspending the system or resuming from suspend.
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+Signed-off-by: Pedro Perez de Heredia <pedro.perez@digi.com>
+---
+ arch/arm/mach-imx/pm-imx6.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/arch/arm/mach-imx/pm-imx6.c b/arch/arm/mach-imx/pm-imx6.c
+index 87f45b926c78..1a4d1ea92687 100644
+--- a/arch/arm/mach-imx/pm-imx6.c
++++ b/arch/arm/mach-imx/pm-imx6.c
+@@ -69,6 +69,14 @@ static void __iomem *suspend_ocram_base;
+ static void (*imx6_suspend_in_ocram_fn)(void __iomem *ocram_vbase);
+ 
+ /*
++ * Function pointers to optional board pm functions
++ */
++int (*imx6_board_pm_begin)(suspend_state_t);
++void (*imx6_board_pm_end)(void);
++EXPORT_SYMBOL(imx6_board_pm_begin);
++EXPORT_SYMBOL(imx6_board_pm_end);
++
++/*
+  * suspend ocram space layout:
+  * ======================== high address ======================
+  *                              .
+@@ -427,12 +435,28 @@ static int imx6q_pm_enter(suspend_state_t state)
+ 	return 0;
+ }
+ 
++static int imx6q_pm_begin(suspend_state_t state)
++{
++	if (imx6_board_pm_begin)
++		return imx6_board_pm_begin(state);
++
++	return 0;
++}
++
++static void imx6q_pm_end(void)
++{
++	if (imx6_board_pm_end)
++		imx6_board_pm_end();
++}
++
+ static int imx6q_pm_valid(suspend_state_t state)
+ {
+ 	return (state == PM_SUSPEND_STANDBY || state == PM_SUSPEND_MEM);
+ }
+ 
+ static const struct platform_suspend_ops imx6q_pm_ops = {
++	.begin = imx6q_pm_begin,
++	.end = imx6q_pm_end,
+ 	.enter = imx6q_pm_enter,
+ 	.valid = imx6q_pm_valid,
+ };

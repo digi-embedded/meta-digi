@@ -1,0 +1,30 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Thu, 28 Mar 2019 17:40:00 +0100
+Subject: [PATCH] sd-resolve: forcefully cancel worker threads during
+ resolve_free
+
+For services that use sd-resolve, such as timesyncd, this prevents the system
+from stalling whenever the service stops while a worker thread is busy calling
+getaddrinfo().
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ src/libsystemd/sd-resolve/sd-resolve.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/libsystemd/sd-resolve/sd-resolve.c b/src/libsystemd/sd-resolve/sd-resolve.c
+index a189f14..571604c 100644
+--- a/src/libsystemd/sd-resolve/sd-resolve.c
++++ b/src/libsystemd/sd-resolve/sd-resolve.c
+@@ -577,8 +577,10 @@ static void resolve_free(sd_resolve *resolve) {
+ 
+         /* Now terminate them and wait until they are gone.
+            If we get an error than most likely the thread already exited. */
+-        for (i = 0; i < resolve->n_valid_workers; i++)
++        for (i = 0; i < resolve->n_valid_workers; i++) {
++                pthread_cancel(resolve->workers[i]);
+                 (void) pthread_join(resolve->workers[i], NULL);
++        }
+ 
+         /* Close all communication channels */
+         close_many(resolve->fds, _FD_MAX);

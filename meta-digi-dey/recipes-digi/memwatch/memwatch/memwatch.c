@@ -193,7 +193,7 @@ int main( int argc, char** argv )
 	}
 
 	if( filename != NULL ) {
-		if( ( fd_file = open( filename, O_RDWR | O_CREAT ) ) < 0 ) {
+		if( ( fd_file = open( filename, O_RDWR | O_CREAT , 0600 ) ) < 0 ) {
 			fprintf( stderr, "Error opening file: %s (%d)\n",
 				filename, errno );
 			release_resources_and_exit( EXIT_FAILURE );

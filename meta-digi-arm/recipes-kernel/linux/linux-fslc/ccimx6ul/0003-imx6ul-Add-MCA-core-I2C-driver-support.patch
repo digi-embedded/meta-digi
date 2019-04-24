@@ -1,0 +1,4452 @@
+From 2269c7056da80faf5821787373d72e1d9b3edadc Mon Sep 17 00:00:00 2001
+From: Alex Gonzalez <alex.gonzalez@digi.com>
+Date: Mon, 1 Apr 2019 13:52:06 +0200
+Subject: [PATCH] imx6ul: Add MCA core I2C driver support
+
+Synched with v4.14.78/master at
+3f8b03950b323db4ca89b1cdc1c2288f79facaa3
+
+Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
+---
+ arch/arm/boot/dts/imx6ul-ccimx6ulsom.dtsi |   12 +
+ drivers/mfd/Kconfig                       |   24 +
+ drivers/mfd/Makefile                      |    4 +
+ drivers/mfd/mca-cc6ul-core.c              |  989 +++++++++++++++++++++
+ drivers/mfd/mca-cc6ul-i2c.c               |  219 +++++
+ drivers/mfd/mca-cc6ul-irq.c               |  113 +++
+ drivers/mfd/mca-cc8x-core.c               | 1040 ++++++++++++++++++++++
+ drivers/mfd/mca-cc8x-i2c.c                |  222 +++++
+ drivers/mfd/mca-cc8x-irq.c                |  143 +++
+ include/linux/mfd/mca-cc6ul/core.h        |   56 ++
+ include/linux/mfd/mca-cc6ul/registers.h   |   61 ++
+ include/linux/mfd/mca-common/core.h       |   71 ++
+ include/linux/mfd/mca-common/registers.h  | 1373 +++++++++++++++++++++++++++++
+ 13 files changed, 4327 insertions(+)
+ create mode 100644 drivers/mfd/mca-cc6ul-core.c
+ create mode 100644 drivers/mfd/mca-cc6ul-i2c.c
+ create mode 100644 drivers/mfd/mca-cc6ul-irq.c
+ create mode 100644 drivers/mfd/mca-cc8x-core.c
+ create mode 100644 drivers/mfd/mca-cc8x-i2c.c
+ create mode 100644 drivers/mfd/mca-cc8x-irq.c
+ create mode 100644 include/linux/mfd/mca-cc6ul/core.h
+ create mode 100644 include/linux/mfd/mca-cc6ul/registers.h
+ create mode 100644 include/linux/mfd/mca-common/core.h
+ create mode 100644 include/linux/mfd/mca-common/registers.h
+
+diff --git a/arch/arm/boot/dts/imx6ul-ccimx6ulsom.dtsi b/arch/arm/boot/dts/imx6ul-ccimx6ulsom.dtsi
+index 82fa176bf138..03c62926ca2b 100644
+--- a/arch/arm/boot/dts/imx6ul-ccimx6ulsom.dtsi
++++ b/arch/arm/boot/dts/imx6ul-ccimx6ulsom.dtsi
+@@ -48,6 +48,18 @@
+ 	pinctrl-0 = <&pinctrl_i2c1>;
+ 	status = "okay";
+ 
++	mca_cc6ul: mca@7e {
++		compatible = "digi,mca_cc6ul_dt_ids";
++		reg = <0x7e>;
++		interrupt-parent = <&gpio5>;
++		interrupts = <4 IRQ_TYPE_EDGE_FALLING>;
++		interrupt-controller;
++		#interrupt-cells = <2>;
++		fw-update-gpio = <&gpio4 14 GPIO_ACTIVE_LOW>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_mca_cc6ul>;
++	};
++
+ 	pfuze3000: pmic@8 {
+ 		compatible = "fsl,pfuze3000";
+ 		reg = <0x08>;
+diff --git a/drivers/mfd/Kconfig b/drivers/mfd/Kconfig
+index 8c5dfdce4326..25f1acff2d0a 100644
+--- a/drivers/mfd/Kconfig
++++ b/drivers/mfd/Kconfig
+@@ -434,6 +434,30 @@ config MFD_MXS_LRADC
+ 	  This driver can also be built as a module. If so, the module will be
+ 	  called mxs-lradc.
+ 
++config MFD_MCA_CC6UL
++	bool "Digi Micro Controller Assist for ConnectCore 6UL"
++	select MFD_CORE
++	select REGMAP_I2C
++	select REGMAP_IRQ
++	depends on I2C=y
++	help
++	  Select this option to enable support for MCA on the ConnectCore 6UL.
++	  This includes the I2C driver and core APIs.
++	  Additional drivers must be enabled in order to use the functionality
++	  of the device (RTC, watchdog, ...).
++
++config MFD_MCA_CC8X
++	bool "Digi Micro Controller Assist for ConnectCore 8X"
++	select MFD_CORE
++	select REGMAP_I2C
++	select REGMAP_IRQ
++	depends on I2C=y
++	help
++	  Select this option to enable support for MCA on the ConnectCore 8X.
++	  This includes the I2C driver and core APIs.
++	  Additional drivers must be enabled in order to use the functionality
++	  of the device (RTC, watchdog, ...).
++
+ config MFD_MX25_TSADC
+ 	tristate "Freescale i.MX25 integrated Touchscreen and ADC unit"
+ 	select REGMAP_MMIO
+diff --git a/drivers/mfd/Makefile b/drivers/mfd/Makefile
+index 12980a4ad460..28998c947184 100644
+--- a/drivers/mfd/Makefile
++++ b/drivers/mfd/Makefile
+@@ -242,3 +242,7 @@ obj-$(CONFIG_MFD_SC27XX_PMIC)	+= sprd-sc27xx-spi.o
+ obj-$(CONFIG_RAVE_SP_CORE)	+= rave-sp.o
+ obj-$(CONFIG_MFD_ROHM_BD718XX)	+= rohm-bd718x7.o
+ 
++mca-cc6ul-objs			:= mca-cc6ul-core.o mca-cc6ul-irq.o mca-cc6ul-i2c.o
++obj-$(CONFIG_MFD_MCA_CC6UL)	+= mca-cc6ul.o
++mca-cc8x-objs			:= mca-cc8x-core.o mca-cc8x-irq.o mca-cc8x-i2c.o
++obj-$(CONFIG_MFD_MCA_CC8X)	+= mca-cc8x.o
+diff --git a/drivers/mfd/mca-cc6ul-core.c b/drivers/mfd/mca-cc6ul-core.c
+new file mode 100644
+index 000000000000..443cfe7e3ca1
+--- /dev/null
++++ b/drivers/mfd/mca-cc6ul-core.c
+@@ -0,0 +1,989 @@
++/*
++ *  Copyright 2016 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#include <linux/device.h>
++#include <linux/sysfs.h>
++#include <linux/delay.h>
++#include <linux/gpio.h>
++#include <linux/of_gpio.h>
++#include <linux/interrupt.h>
++#include <linux/mfd/core.h>
++#include <linux/slab.h>
++#include <linux/module.h>
++#include <linux/regmap.h>
++#include <linux/suspend.h>
++#include <linux/pm_runtime.h>
++#include <linux/proc_fs.h>
++#include <linux/kthread.h>
++#include <linux/uaccess.h>
++#include <linux/reboot.h>
++
++#include <linux/mfd/mca-common/core.h>
++#include <linux/mfd/mca-cc6ul/core.h>
++
++#include <asm/unaligned.h>
++
++#define MCA_CC6UL_NVRAM_SIZE	(MCA_CC6UL_MPU_NVRAM_END - MCA_CC6UL_MPU_NVRAM_START + 1)
++
++extern int digi_get_som_hv(void);
++
++struct dyn_attribute {
++	u16			since;	/* Minimum firmware version required */
++	struct attribute	*attr;
++};
++
++struct mca_reason {
++	u32 		flag;
++	const char	*text;
++};
++
++static const struct mca_reason last_mca_reset[] = {
++	{MCA_CC6UL_LAST_MCA_RST_LLW,	"LL Wakeup"},
++	{MCA_CC6UL_LAST_MCA_RST_LVD,	"Low Voltage"},
++	{MCA_CC6UL_LAST_MCA_RST_WD,	"Watchdog"},
++	{MCA_CC6UL_LAST_MCA_RST_PIN,	"Reset Pin"},
++	{MCA_CC6UL_LAST_MCA_RST_PWRON,	"Power On"},
++	{MCA_CC6UL_LAST_MCA_RST_LOCKUP,	"Core Lockup"},
++	{MCA_CC6UL_LAST_MCA_RST_SW,	"Software"},
++	{MCA_CC6UL_LAST_MCA_RST_MDMAPP,	"MDM-APP debuger"},
++	{MCA_CC6UL_LAST_MCA_RST_SMAE, 	"Stop Mode Ack Error"},
++};
++
++static const struct mca_reason last_mpu_reset[] = {
++	{MCA_CC6UL_LAST_MPU_RST_PWRON,	"Power On"},
++	{MCA_CC6UL_LAST_MPU_RST_SYSR,	"System Reset"},
++	{MCA_CC6UL_LAST_MPU_RST_WD,	"Watchdog"},
++	{MCA_CC6UL_LAST_MPU_RST_OFFWAKE,"Off wakeup"},
++	{MCA_CC6UL_LAST_MPU_RST_MCARST,	"MCA reset"},
++};
++
++static const struct mca_reason last_wakeup[] = {
++	{MCA_CC6UL_LAST_WAKEUP_PWRIO,	"Power IO"},
++	{MCA_CC6UL_LAST_WAKEUP_TIMER,	"Timer"},
++	{MCA_CC6UL_LAST_WAKEUP_RTC,	"RTC"},
++	{MCA_CC6UL_LAST_WAKEUP_LPUART,	"LP UART"},
++	{MCA_CC6UL_LAST_WAKEUP_TAMPER0,	"Tamper0"},
++	{MCA_CC6UL_LAST_WAKEUP_TAMPER1,	"Tamper1"},
++	{MCA_CC6UL_LAST_WAKEUP_TAMPER2,	"Tamper2"},
++	{MCA_CC6UL_LAST_WAKEUP_TAMPER3,	"Tamper3"},
++	{MCA_CC6UL_LAST_WAKEUP_IO0,	"IO0"},
++	{MCA_CC6UL_LAST_WAKEUP_IO1,	"IO1"},
++	{MCA_CC6UL_LAST_WAKEUP_IO2,	"IO2"},
++	{MCA_CC6UL_LAST_WAKEUP_IO3,	"IO3"},
++	{MCA_CC6UL_LAST_WAKEUP_IO4,	"IO4"},
++	{MCA_CC6UL_LAST_WAKEUP_IO5,	"IO5"},
++	{MCA_CC6UL_LAST_WAKEUP_IO6,	"IO6"},
++	{MCA_CC6UL_LAST_WAKEUP_IO7,	"IO7"},
++	{MCA_CC6UL_LAST_WAKEUP_VCC,	"Vcc"},
++	{MCA_CC6UL_LAST_WAKEUP_CPU,	"CPU"},
++};
++
++static struct mca_drv *pmca;
++
++static const char _enabled[] = "enabled";
++static const char _disabled[] = "disabled";
++
++static struct resource mca_cc6ul_rtc_resources[] = {
++	{
++		.name   = MCA_IRQ_RTC_ALARM_NAME,
++		.start  = MCA_CC6UL_IRQ_RTC_ALARM,
++		.end    = MCA_CC6UL_IRQ_RTC_ALARM,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_RTC_1HZ_NAME,
++		.start  = MCA_CC6UL_IRQ_RTC_1HZ,
++		.end    = MCA_CC6UL_IRQ_RTC_1HZ,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static struct resource mca_cc6ul_watchdog_resources[] = {
++	{
++		.name   = MCA_IRQ_WATCHDOG_NAME,
++		.start  = MCA_CC6UL_IRQ_WATCHDOG,
++		.end    = MCA_CC6UL_IRQ_WATCHDOG,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static struct resource mca_cc6ul_pwrkey_resources[] = {
++	{
++		.name   = MCA_IRQ_PWR_SLEEP_NAME,
++		.start  = MCA_CC6UL_IRQ_PWR_SLEEP,
++		.end    = MCA_CC6UL_IRQ_PWR_SLEEP,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_PWR_OFF_NAME,
++		.start  = MCA_CC6UL_IRQ_PWR_OFF,
++		.end    = MCA_CC6UL_IRQ_PWR_OFF,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static struct resource mca_cc6ul_adc_resources[] = {
++	{
++		.name   = MCA_IRQ_ADC_NAME,
++		.start  = MCA_CC6UL_IRQ_ADC,
++		.end    = MCA_CC6UL_IRQ_ADC,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static struct resource mca_cc6ul_tamper_resources[] = {
++	{
++		.name   = MCA_IRQ_TAMPER0_NAME,
++		.start  = MCA_CC6UL_IRQ_TAMPER0,
++		.end    = MCA_CC6UL_IRQ_TAMPER0,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_TAMPER1_NAME,
++		.start  = MCA_CC6UL_IRQ_TAMPER1,
++		.end    = MCA_CC6UL_IRQ_TAMPER1,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_TAMPER2_NAME,
++		.start  = MCA_CC6UL_IRQ_TAMPER2,
++		.end    = MCA_CC6UL_IRQ_TAMPER2,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_TAMPER3_NAME,
++		.start  = MCA_CC6UL_IRQ_TAMPER3,
++		.end    = MCA_CC6UL_IRQ_TAMPER3,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static struct resource mca_cc6ul_gpios_resources[] = {
++	{
++		.name   = MCA_IRQ_GPIO_BANK_0_NAME,
++		.start  = MCA_CC6UL_IRQ_GPIO_BANK_0,
++		.end    = MCA_CC6UL_IRQ_GPIO_BANK_0,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static struct resource mca_cc6ul_uart_resources[] = {
++	{
++		.name   = MCA_IRQ_UART_NAME,
++		.start  = MCA_CC6UL_IRQ_UART,
++		.end    = MCA_CC6UL_IRQ_UART,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static const struct mfd_cell mca_cc6ul_devs[] = {
++	{
++		.name           = MCA_CC6UL_DRVNAME_RTC,
++		.num_resources  = ARRAY_SIZE(mca_cc6ul_rtc_resources),
++		.resources      = mca_cc6ul_rtc_resources,
++		.of_compatible  = "digi,mca-cc6ul-rtc",
++	},
++	{
++		.name           = MCA_CC6UL_DRVNAME_WATCHDOG,
++		.num_resources	= ARRAY_SIZE(mca_cc6ul_watchdog_resources),
++		.resources	= mca_cc6ul_watchdog_resources,
++		.of_compatible  = "digi,mca-cc6ul-watchdog",
++	},
++	{
++		.name           = MCA_CC6UL_DRVNAME_GPIO,
++		.num_resources	= ARRAY_SIZE(mca_cc6ul_gpios_resources),
++		.resources	= mca_cc6ul_gpios_resources,
++		.of_compatible = "digi,mca-cc6ul-gpio",
++	},
++	{
++		.name           = MCA_CC6UL_DRVNAME_PWRKEY,
++		.num_resources  = ARRAY_SIZE(mca_cc6ul_pwrkey_resources),
++		.resources      = mca_cc6ul_pwrkey_resources,
++		.of_compatible = "digi,mca-cc6ul-pwrkey",
++	},
++	{
++		.name           = MCA_CC6UL_DRVNAME_ADC,
++		.of_compatible = "digi,mca-cc6ul-adc",
++		.num_resources  = ARRAY_SIZE(mca_cc6ul_adc_resources),
++		.resources      = mca_cc6ul_adc_resources,
++	},
++	{
++		.name           = MCA_CC6UL_DRVNAME_TAMPER,
++		.num_resources  = ARRAY_SIZE(mca_cc6ul_tamper_resources),
++		.resources      = mca_cc6ul_tamper_resources,
++		.of_compatible = "digi,mca-cc6ul-tamper",
++	},
++	{
++		.name           = MCA_CC6UL_DRVNAME_UART,
++		.num_resources  = ARRAY_SIZE(mca_cc6ul_uart_resources),
++		.resources      = mca_cc6ul_uart_resources,
++		.of_compatible = "digi,mca-cc6ul-uart",
++	},
++};
++
++/* Read a block of registers */
++int mca_cc6ul_read_block(struct mca_drv *mca, u16 addr, u8 *data,
++			 size_t nregs)
++{
++	int ret;
++
++	/* TODO, check limits nregs... */
++
++	ret = regmap_raw_read(mca->regmap, addr, data, nregs);
++	if (ret != 0)
++		return ret;
++
++	return ret;
++
++}
++EXPORT_SYMBOL_GPL(mca_cc6ul_read_block);
++
++/* Write a block of data into MCA registers */
++int mca_cc6ul_write_block(struct mca_drv *mca , u16 addr, u8 *data,
++			  size_t nregs)
++{
++	u8 *frame;	/* register address + payload */
++	u8 *payload;
++	int ret;
++
++	/* TODO, check limits nregs... */
++
++	frame = kzalloc(sizeof(addr) + nregs, GFP_KERNEL | GFP_DMA);
++	if (!frame)
++		return -ENOMEM;
++
++	payload = frame + sizeof(addr);
++	memcpy(payload, data, nregs);
++
++	/* Write payload */
++	ret = regmap_raw_write(mca->regmap, addr, payload, nregs);
++
++	kfree(frame);
++	return ret;
++}
++EXPORT_SYMBOL_GPL(mca_cc6ul_write_block);
++
++static int mca_cc6ul_unlock_ctrl(struct mca_drv *mca)
++{
++	int ret;
++	const uint8_t unlock_pattern[] = {'C', 'T', 'R', 'U'};
++
++	ret = regmap_bulk_write(mca->regmap, MCA_CTRL_UNLOCK_0,
++				unlock_pattern, sizeof(unlock_pattern));
++	if (ret)
++		dev_warn(mca->dev, "failed to unlock CTRL registers (%d)\n",
++			 ret);
++
++	return ret;
++}
++
++static int mca_cc6ul_get_tick_cnt(struct mca_drv *mca, u32 *tick)
++{
++	return regmap_bulk_read(mca->regmap, MCA_TIMER_TICK_0,
++				tick, sizeof(*tick));
++}
++
++/* sysfs attributes */
++static ssize_t ext_32khz_show(struct device *dev, struct device_attribute *attr,
++			      char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	unsigned int val;
++	int ret;
++
++	ret = regmap_read(mca->regmap, MCA_CTRL_0, &val);
++	if (ret) {
++		dev_err(mca->dev, "Cannot read MCA CTRL_0 register(%d)\n",
++			ret);
++		return 0;
++	}
++
++	return sprintf(buf, "%s\n", val & MCA_EXT32K_EN ?
++		       _enabled : _disabled);
++}
++
++static ssize_t ext_32khz_store(struct device *dev, struct device_attribute *attr,
++			       const char *buf, size_t count)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	bool enable;
++	int ret;
++
++	if (!strncmp(buf, _enabled, sizeof(_enabled) - 1))
++		enable = true;
++	else if (!strncmp(buf, _disabled, sizeof(_disabled) - 1))
++		enable = false;
++	else
++		return -EINVAL;
++
++	ret = mca_cc6ul_unlock_ctrl(mca);
++	if (ret)
++		return ret;
++
++	ret = regmap_update_bits(mca->regmap, MCA_CTRL_0,
++				 MCA_EXT32K_EN,
++				 enable ? MCA_EXT32K_EN : 0);
++	if (ret) {
++		dev_err(mca->dev, "Cannot update MCA CTRL_0 register (%d)\n", ret);
++		return ret;
++	}
++
++	return count;
++}
++static DEVICE_ATTR(ext_32khz, 0600, ext_32khz_show, ext_32khz_store);
++
++static ssize_t vref_show(struct device *dev, struct device_attribute *attr,
++			 char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	unsigned int val;
++	int ret;
++
++	ret = regmap_read(mca->regmap, MCA_CTRL_0, &val);
++	if (ret) {
++		dev_err(mca->dev, "Cannot read MCA CTRL_0 register(%d)\n",
++			ret);
++		return 0;
++	}
++
++	return sprintf(buf, "%s\n", val & MCA_VREF_EN ?
++	_enabled : _disabled);
++}
++
++static ssize_t vref_store(struct device *dev, struct device_attribute *attr,
++			  const char *buf, size_t count)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	bool enable;
++	int ret;
++
++	if (!strncmp(buf, _enabled, sizeof(_enabled) - 1))
++		enable = true;
++	else if (!strncmp(buf, _disabled, sizeof(_disabled) - 1))
++		enable = false;
++	else
++		return -EINVAL;
++
++	ret = mca_cc6ul_unlock_ctrl(mca);
++	if (ret)
++		return ret;
++
++	ret = regmap_update_bits(mca->regmap, MCA_CTRL_0,
++				 MCA_VREF_EN,
++				 enable ? MCA_VREF_EN : 0);
++	if (ret) {
++		dev_err(mca->dev, "Cannot update MCA CTRL_0 register (%d)\n", ret);
++		return ret;
++	}
++
++	return count;
++}
++static DEVICE_ATTR(vref, 0600, vref_show, vref_store);
++
++static ssize_t hwver_show(struct device *dev, struct device_attribute *attr,
++			  char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++
++	return sprintf(buf, "%d\n", mca->hw_version);
++}
++static DEVICE_ATTR(hw_version, S_IRUGO, hwver_show, NULL);
++
++static ssize_t fwver_show(struct device *dev, struct device_attribute *attr,
++			  char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++
++	return sprintf(buf, "%d.%02d %s\n", MCA_FW_VER_MAJOR(mca->fw_version),
++		       MCA_FW_VER_MINOR(mca->fw_version),
++		       mca->fw_is_alpha ? "(alpha)" : "");
++}
++static DEVICE_ATTR(fw_version, S_IRUGO, fwver_show, NULL);
++
++static ssize_t tick_cnt_show(struct device *dev, struct device_attribute *attr,
++			     char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	u32 tick_cnt;
++	int ret;
++
++	ret = mca_cc6ul_get_tick_cnt(mca, &tick_cnt);
++	if (ret) {
++		dev_err(mca->dev, "Cannot read MCA tick counter(%d)\n", ret);
++		return ret;
++	}
++
++	return sprintf(buf, "%u\n", tick_cnt);
++}
++static DEVICE_ATTR(tick_cnt, S_IRUGO, tick_cnt_show, NULL);
++
++static ssize_t fw_update_show(struct device *dev, struct device_attribute *attr,
++			      char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++
++	if (!gpio_is_valid(mca->fw_update_gpio))
++		return -EINVAL;
++
++	return sprintf(buf, "%d\n",
++		       gpio_get_value_cansleep(mca->fw_update_gpio));
++}
++
++static ssize_t fw_update_store(struct device *dev,
++			       struct device_attribute *attr,
++			       const char *buf, size_t count)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	ssize_t status;
++	long value;
++
++	if (!gpio_is_valid(mca->fw_update_gpio))
++		return -EINVAL;
++
++	status = kstrtol(buf, 0, &value);
++	if (status == 0) {
++		gpio_set_value_cansleep(mca->fw_update_gpio, value);
++		status = count;
++	}
++
++	return status;
++}
++static DEVICE_ATTR(fw_update, 0600, fw_update_show, fw_update_store);
++
++static ssize_t last_wakeup_reason_show(struct device *dev,
++				       struct device_attribute *attr,
++				       char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	bool comma = false;
++	u32 last_wakeup_val;
++	int ret, i;
++
++	ret = regmap_bulk_read(mca->regmap, MCA_LAST_WAKEUP_REASON_0,
++			       &last_wakeup_val, sizeof(last_wakeup_val));
++	if (ret) {
++		dev_err(mca->dev,
++			"Cannot read last MCA wakeup reason (%d)\n",
++			ret);
++		return ret;
++	}
++
++	buf[0] = 0;
++
++	for (i = 0; i < ARRAY_SIZE(last_wakeup); i++) {
++		if (last_wakeup[i].flag & last_wakeup_val) {
++			if (comma)
++				strcat(buf, ", ");
++			strcat(buf, last_wakeup[i].text);
++			comma = true;
++		}
++	}
++
++	if (comma)
++		strcat(buf, "\n");
++
++	return strlen(buf);
++}
++static DEVICE_ATTR(last_wakeup_reason, S_IRUGO, last_wakeup_reason_show, NULL);
++
++static ssize_t last_mca_reset_show(struct device *dev,
++				   struct device_attribute *attr, char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	bool comma = false;
++	int i;
++
++	buf[0] = 0;
++
++	for (i = 0; i < ARRAY_SIZE(last_mca_reset); i++) {
++		if (last_mca_reset[i].flag & mca->last_mca_reset) {
++			if (comma)
++				strcat(buf, ", ");
++			strcat(buf, last_mca_reset[i].text);
++			comma = true;
++		}
++	}
++
++	if (comma)
++		strcat(buf, "\n");
++
++	return strlen(buf);
++}
++static DEVICE_ATTR(last_mca_reset, S_IRUGO, last_mca_reset_show, NULL);
++
++static ssize_t last_mpu_reset_show(struct device *dev,
++				   struct device_attribute *attr, char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	bool comma = false;
++	int i;
++
++	buf[0] = 0;
++
++	for (i = 0; i < ARRAY_SIZE(last_mpu_reset); i++) {
++		if (last_mpu_reset[i].flag & mca->last_mpu_reset) {
++			if (comma)
++				strcat(buf, ", ");
++			strcat(buf, last_mpu_reset[i].text);
++			comma = true;
++		}
++	}
++
++	if (comma)
++		strcat(buf, "\n");
++
++	return strlen(buf);
++}
++static DEVICE_ATTR(last_mpu_reset, S_IRUGO, last_mpu_reset_show, NULL);
++
++static ssize_t nvram_read(struct file *filp, struct kobject *kobj,
++			  struct bin_attribute *attr, char *buf, loff_t off,
++			  size_t count)
++{
++	struct device *dev = kobj_to_dev(kobj);
++	struct mca_drv *mca;
++	int ret;
++
++	if (!dev || (mca = dev_get_drvdata(dev)) == NULL)
++		return -ENODEV;
++
++	if (unlikely(off >= MCA_CC6UL_NVRAM_SIZE) || unlikely(!count))
++		return 0;
++	if ((off + count) > MCA_CC6UL_NVRAM_SIZE)
++		count = MCA_CC6UL_NVRAM_SIZE - off;
++
++	ret = regmap_bulk_read(mca->regmap,
++			       MCA_CC6UL_MPU_NVRAM_START + off, buf, count);
++	if (ret) {
++		dev_err(mca->dev, "%s error (%d)\n", __func__, ret);
++		return ret;
++	}
++
++	return count;
++}
++
++static ssize_t nvram_write(struct file *filp, struct kobject *kobj,
++			   struct bin_attribute *attr, char *buf, loff_t off,
++			   size_t count)
++{
++	struct device *dev = kobj_to_dev(kobj);
++	struct mca_drv *mca;
++	int ret;
++
++	if (!dev || (mca = dev_get_drvdata(dev)) == NULL)
++		return -ENODEV;
++
++	if (unlikely(off >= MCA_CC6UL_NVRAM_SIZE))
++		return -EFBIG;
++	if ((off + count) > MCA_CC6UL_NVRAM_SIZE)
++		count = MCA_CC6UL_NVRAM_SIZE - off;
++	if (unlikely(!count))
++		return count;
++
++	ret = regmap_bulk_write(mca->regmap,
++				MCA_CC6UL_MPU_NVRAM_START + off, buf, count);
++	if (ret) {
++		dev_err(mca->dev, "%s error (%d)\n", __func__, ret);
++		return ret;
++	}
++
++	return count;
++}
++
++static struct attribute *mca_cc6ul_sysfs_entries[] = {
++	&dev_attr_ext_32khz.attr,
++	&dev_attr_hw_version.attr,
++	&dev_attr_fw_version.attr,
++	&dev_attr_fw_update.attr,
++	NULL,
++};
++
++static struct attribute_group mca_cc6ul_attr_group = {
++	.name	= NULL,			/* put in device directory */
++	.attrs	= mca_cc6ul_sysfs_entries,
++};
++
++static struct dyn_attribute mca_cc6ul_sysfs_dyn_entries[] = {
++	{
++		.since =	MCA_MAKE_FW_VER(0,15),
++		.attr =		&dev_attr_tick_cnt.attr,
++	},
++	{
++		.since =	MCA_MAKE_FW_VER(0,15),
++		.attr =		&dev_attr_vref.attr,
++	},
++	{
++		.since =	MCA_MAKE_FW_VER(1,2),
++		.attr =		&dev_attr_last_wakeup_reason.attr,
++	},
++	{
++		.since =	MCA_MAKE_FW_VER(1,2),
++		.attr =		&dev_attr_last_mca_reset.attr,
++	},
++	{
++		.since =	MCA_MAKE_FW_VER(1,2),
++		.attr =		&dev_attr_last_mpu_reset.attr,
++	},
++};
++
++int mca_cc6ul_suspend(struct device *dev)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++
++	if (!mca) {
++		dev_err(dev, " mca was null in %s\n", __func__);
++		return -ENODEV;
++	}
++
++	/* Set the suspend bit in PWR_CTRL_0 */
++	return regmap_update_bits(pmca->regmap, MCA_PWR_CTRL_0,
++				  MCA_PWR_GO_SUSPEND,
++				  MCA_PWR_GO_SUSPEND);
++}
++
++#define MCA_MAX_RESUME_RD_RETRIES 10
++int mca_cc6ul_resume(struct device *dev)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	unsigned int val;
++	int ret, retries = 0;
++
++	if (!mca) {
++		dev_err(dev, " mca was null in %s\n", __func__);
++		return -ENODEV;
++	}
++
++	/*
++	 * Generate traffic on the i2c bus to wakeup the MCA, in case it was in
++	 * low power
++	 */
++	do {
++		ret = regmap_read(mca->regmap, MCA_DEVICE_ID, &val);
++		if (!ret && mca->dev_id == (u8)val)
++			break;
++		udelay(50);
++	} while (++retries < MCA_MAX_RESUME_RD_RETRIES);
++
++	if (retries == MCA_MAX_RESUME_RD_RETRIES) {
++		dev_err(mca->dev, "unable to wake up MCA (%d)\n", ret);
++		return ret;
++	}
++
++	/* Reset the suspend bit in PWR_CTRL_0 */
++	return regmap_update_bits(pmca->regmap, MCA_PWR_CTRL_0,
++				  MCA_PWR_GO_SUSPEND,
++				  0);
++}
++
++#define MCA_MAX_PWROFF_TRIES 5
++static void mca_cc6ul_power_off(void)
++{
++	int try = 0;
++	int ret;
++
++	if (!pmca) {
++		printk(KERN_ERR "ERROR: unable to power off [%s:%d/%s()]!\n",
++		       __FILE__, __LINE__, __func__);
++		return;
++	}
++
++	do {
++		/* Set power off bit in PWR_CTRL_0 register to shutdown */
++		ret = regmap_update_bits(pmca->regmap, MCA_PWR_CTRL_0,
++					 MCA_PWR_GO_OFF,
++					 MCA_PWR_GO_OFF);
++		if (ret)
++			printk(KERN_ERR "ERROR: accesing PWR_CTRL_0 register "
++			       "[%s:%d/%s()]!\n", __FILE__, __LINE__, __func__);
++
++		/*
++		 * Even if the regmap update returned with success, retry...
++		 * we are powering off, so there is nothing bad by doing it.
++		 */
++		mdelay(50);
++	} while (++try < MCA_MAX_PWROFF_TRIES);
++
++	/* Print a warning and return, so at least userland can log the issue */
++	printk(KERN_ERR "ERROR: unable to power off [%s:%d/%s()]!\n",
++	       __FILE__, __LINE__, __func__);
++}
++
++#define MCA_MAX_RESET_TRIES 5
++static int mca_cc6ul_restart_handler(struct notifier_block *nb,
++				     unsigned long mode, void *cmd)
++{
++	int ret;
++	int try = 0;
++	struct mca_drv *mca = container_of(nb, struct mca_drv,
++					     restart_handler);
++	const uint8_t unlock_pattern[] = {'C', 'T', 'R', 'U'};
++
++	do {
++		ret = regmap_bulk_write(mca->regmap, MCA_CTRL_UNLOCK_0,
++					unlock_pattern, sizeof(unlock_pattern));
++		if (ret) {
++			dev_err(mca->dev, "failed to unlock ctrl regs (%d)\n",
++				ret);
++			goto reset_retry;
++		}
++
++		ret = regmap_write(pmca->regmap, MCA_CTRL_0,
++				   MCA_RESET);
++		if (ret)
++			dev_err(mca->dev, "failed to reset (%d)\n", ret);
++
++		/*
++		 * The MCA will reset the cpu, so the retry should not happen...
++		 * and if it happens, something went wrong, and retrying is the
++		 * right thing to do.
++		 */
++reset_retry:
++		mdelay(10);
++	} while (++try < MCA_MAX_RESET_TRIES);
++
++	dev_err(mca->dev, "failed to reboot!\n");
++
++	return NOTIFY_DONE;
++}
++
++static int mca_cc6ul_add_dyn_sysfs_entries(struct mca_drv *mca,
++					   const struct dyn_attribute *dattr,
++					   int num_entries,
++					   const struct attribute_group *grp)
++{
++	int ret, i;
++
++	if (!mca || !dattr || !grp)
++		return -EINVAL;
++
++	for (i = 0; i < num_entries; i++, dattr++) {
++		if (!dattr->attr)
++			continue;
++
++		/* Create the sysfs files if the MCA fw supports the feature*/
++		if (mca->fw_version >= dattr->since) {
++			ret = sysfs_add_file_to_group(&mca->dev->kobj,
++						      dattr->attr,
++						      grp->name);
++			if (ret)
++				dev_warn(mca->dev,
++					 "Cannot create sysfs file %s (%d)\n",
++					 dattr->attr->name, ret);
++		}
++	}
++
++	return 0;
++}
++
++int mca_cc6ul_device_init(struct mca_drv *mca, u32 irq)
++{
++	int ret;
++	unsigned int val;
++
++	ret = regmap_read(mca->regmap, MCA_DEVICE_ID, &val);
++	if (ret != 0) {
++		dev_err(mca->dev, "Cannot read MCA Device ID (%d)\n", ret);
++		return ret;
++	}
++	mca->dev_id = (u8)val;
++
++	if (mca->dev_id != MCA_CC6UL_DEVICE_ID_VAL) {
++		dev_err(mca->dev, "Invalid MCA Device ID (%x)\n", mca->dev_id);
++		return -ENODEV;
++	}
++
++	ret = regmap_read(mca->regmap, MCA_HW_VER, &val);
++	if (ret != 0) {
++		dev_err(mca->dev, "Cannot read MCA Hardware Version (%d)\n",
++			ret);
++		return ret;
++	}
++	mca->hw_version = (u8)val;
++
++	ret = regmap_bulk_read(mca->regmap, MCA_FW_VER_L, &val, 2);
++	if (ret != 0) {
++		dev_err(mca->dev, "Cannot read MCA Firmware Version (%d)\n",
++			ret);
++		return ret;
++	}
++	mca->fw_version = (u16)(val & ~MCA_FW_VER_ALPHA_MASK);
++	mca->fw_is_alpha = val & MCA_FW_VER_ALPHA_MASK ? true : false;
++
++	if (mca->fw_version >= MCA_MAKE_FW_VER(1, 2)) {
++		ret = regmap_bulk_read(mca->regmap, MCA_LAST_MCA_RESET_0,
++				       &mca->last_mca_reset,
++				       sizeof(mca->last_mca_reset));
++		if (ret) {
++			dev_err(mca->dev,
++				"Cannot read MCA last reset (%d)\n", ret);
++			return ret;
++		}
++
++		ret = regmap_bulk_read(mca->regmap, MCA_LAST_MPU_RESET_0,
++				       &mca->last_mpu_reset,
++				       sizeof(mca->last_mpu_reset));
++		if (ret) {
++			dev_err(mca->dev,
++				"Cannot read MPU last reset (%d)\n", ret);
++			return ret;
++		}
++	}
++
++	/* Write the SOM hardware version to MCA register */
++	mca->som_hv = digi_get_som_hv();
++	if (mca->som_hv > 0) {
++		ret = regmap_write(mca->regmap, MCA_HWVER_SOM,
++				   mca->som_hv);
++		if (ret != 0)
++			dev_warn(mca->dev,
++				 "Cannot set SOM hardware version (%d)\n", ret);
++	}
++
++	mca->fw_update_gpio = of_get_named_gpio(mca->dev->of_node,
++						"fw-update-gpio", 0);
++	if (gpio_is_valid(mca->fw_update_gpio) && mca->som_hv >= 4) {
++		/*
++		 * On the CC6UL HV >= 4 this GPIO must be driven low
++		 * so that the CPU resets together with the reset button.
++		 */
++		if (devm_gpio_request_one(mca->dev, mca->fw_update_gpio,
++					  GPIOF_OUT_INIT_LOW, "mca-fw-update"))
++			dev_warn(mca->dev, "failed to get fw-update-gpio: %d\n",
++				 ret);
++	} else {
++		/* Invalidate GPIO */
++		mca->fw_update_gpio = -EINVAL;
++	}
++
++	mca->chip_irq = irq;
++	mca->gpio_base = -1;
++
++	ret = mca_cc6ul_irq_init(mca);
++	if (ret != 0) {
++		dev_err(mca->dev, "Cannot initialize interrupts (%d)\n", ret);
++		return ret;
++	}
++
++	ret = mfd_add_devices(mca->dev, -1, mca_cc6ul_devs,
++			      ARRAY_SIZE(mca_cc6ul_devs), NULL, mca->irq_base,
++			      regmap_irq_get_domain(mca->regmap_irq));
++	if (ret) {
++		dev_err(mca->dev, "Cannot add MFD cells (%d)\n", ret);
++		goto out_irq;
++	}
++
++	ret = sysfs_create_group(&mca->dev->kobj, &mca_cc6ul_attr_group);
++	if (ret) {
++		dev_err(mca->dev, "Cannot create sysfs entries (%d)\n", ret);
++		goto out_dev;
++	}
++	if (mca->fw_update_gpio == -EINVAL) {
++		/* Remove fw_update entry */
++		sysfs_remove_file(&mca->dev->kobj, &dev_attr_fw_update.attr);
++	}
++
++	ret = mca_cc6ul_add_dyn_sysfs_entries(mca, mca_cc6ul_sysfs_dyn_entries,
++					      ARRAY_SIZE(mca_cc6ul_sysfs_dyn_entries),
++					      &mca_cc6ul_attr_group);
++	if (ret) {
++		dev_err(mca->dev, "Cannot create sysfs dynamic entries (%d)\n",
++			ret);
++		goto out_sysfs_remove;
++	}
++
++	pmca = mca;
++
++	if (pm_power_off != NULL) {
++		dev_warn(mca->dev, "pm_power_off function already registered. "
++			 "Will be override by MCA function.\n");
++	}
++	pm_power_off = mca_cc6ul_power_off;
++
++	/*
++	 * To avoid error messages when resuming from suspend, increase the I2C
++	 * bus' usage counter so the linux pm_runtime framework wakes it from
++	 * suspend before trying to read the MCA's IRQ status. This indicates that
++	 * the bus is in use when the system is going to suspend, making linux wake
++	 * it up as soon as possible so any operations that were halted continue
++	 * without issues after resuming.
++	 *
++	 * The device hierarchy is the following:
++	 *
++	 * mca_cc8x 0-0063 -> i2c i2c-0 -> imx-lpi2c 5a800000.i2c
++	 */
++	pm_runtime_get_noresume(mca->dev->parent->parent);
++
++	/*
++	 * Register the MCA restart handler with high priority to ensure it is
++	 * called first
++	 */
++	mca->restart_handler.notifier_call = mca_cc6ul_restart_handler;
++	mca->restart_handler.priority = 200;
++	ret = register_restart_handler(&mca->restart_handler);
++	if (ret) {
++		dev_err(mca->dev,
++			"failed to register restart handler (%d)\n", ret);
++		goto out_pwr_off;
++	}
++
++	if (mca->fw_version >= MCA_MAKE_FW_VER(1, 2)) {
++		mca->nvram = devm_kzalloc(mca->dev, sizeof(struct bin_attribute),
++					  GFP_KERNEL);
++		if (!mca->nvram) {
++			dev_err(mca->dev, "Cannot allocate memory for nvram\n");
++			goto out_pwr_off;
++		}
++
++		sysfs_bin_attr_init(mca->nvram);
++
++		mca->nvram->attr.name = "nvram";
++		mca->nvram->attr.mode = S_IRUGO | S_IWUSR;
++
++		mca->nvram->read = nvram_read;
++		mca->nvram->write = nvram_write;
++
++		ret = sysfs_create_bin_file(&mca->dev->kobj, mca->nvram);
++		if (ret) {
++			dev_err(mca->dev, "Cannot create sysfs file: %s\n",
++				mca->nvram->attr.name);
++			goto out_nvram;
++		}
++	}
++
++	return 0;
++
++out_nvram:
++	kfree(mca->nvram);
++out_pwr_off:
++	pm_power_off = NULL;
++out_sysfs_remove:
++	pmca = NULL;
++	sysfs_remove_group(&mca->dev->kobj, &mca_cc6ul_attr_group);
++out_dev:
++	mfd_remove_devices(mca->dev);
++out_irq:
++	mca_cc6ul_irq_exit(mca);
++
++	return ret;
++}
++
++void mca_cc6ul_device_exit(struct mca_drv *mca)
++{
++	unregister_restart_handler(&mca->restart_handler);
++	pm_power_off = NULL;
++	pmca = NULL;
++	sysfs_remove_group(&mca->dev->kobj, &mca_cc6ul_attr_group);
++	mfd_remove_devices(mca->dev);
++	mca_cc6ul_irq_exit(mca);
++	kfree(mca->nvram);
++}
++
++MODULE_AUTHOR("Digi International Inc");
++MODULE_DESCRIPTION("MCA driver for ConnectCore 6UL");
++MODULE_LICENSE("GPL");
+diff --git a/drivers/mfd/mca-cc6ul-i2c.c b/drivers/mfd/mca-cc6ul-i2c.c
+new file mode 100644
+index 000000000000..59ba56a97d9d
+--- /dev/null
++++ b/drivers/mfd/mca-cc6ul-i2c.c
+@@ -0,0 +1,219 @@
++/*
++ *  Copyright 2016 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/i2c.h>
++#include <linux/regmap.h>
++#include <linux/delay.h>
++#include <linux/slab.h>
++#include <linux/err.h>
++
++#include <linux/mfd/core.h>
++#include <linux/mfd/mca-common/core.h>
++#include <linux/mfd/mca-cc6ul/core.h>
++
++#include <linux/of.h>
++#include <linux/regulator/of_regulator.h>
++
++static const struct regmap_range mca_cc6ul_readable_ranges[] = {
++};
++
++static const struct regmap_range mca_cc6ul_writeable_ranges[] = {
++	regmap_reg_range(MCA_HWVER_SOM, MCA_HWVER_SOM),
++	regmap_reg_range(MCA_IRQ_STATUS_0, MCA_IRQ_MASK_3),
++	regmap_reg_range(MCA_PWR_CTRL_0, MCA_PWR_KEY_GUARD),
++	regmap_reg_range(MCA_CTRL_UNLOCK_0, MCA_CTRL_UNLOCK_3),
++	regmap_reg_range(MCA_CTRL_0, MCA_CTRL_0),
++	regmap_reg_range(MCA_TAMPER0_CFG0, MCA_TAMPER0_EVENT),
++	regmap_reg_range(MCA_TAMPER1_CFG0, MCA_TAMPER1_EVENT),
++	regmap_reg_range(MCA_TAMPER2_CFG0, MCA_TAMPER2_THRESH_HI_H),
++	regmap_reg_range(MCA_TAMPER3_CFG0, MCA_TAMPER3_THRESH_HI_H),
++	regmap_reg_range(MCA_RTC_CONTROL, MCA_RTC_CONTROL),
++	regmap_reg_range(MCA_RTC_COUNT_YEAR_L, MCA_RTC_ALARM_SEC),
++	regmap_reg_range(MCA_WDT_CONTROL, MCA_WDT_REFRESH_3),
++	regmap_reg_range(MCA_GPIO_DIR_0, MCA_GPIO_DEB_CNT_63),
++	regmap_reg_range(MCA_REG_ADC_CFG0_0, MCA_REG_ADC_CFG0_7),
++	regmap_reg_range(MCA_REG_ADC_CFG1_0, MCA_REG_ADC_CFG1_7),
++	regmap_reg_range(MCA_REG_ADC_CFG2_0, MCA_REG_ADC_CFG2_7),
++	regmap_reg_range(MCA_REG_ADC_SAMPLES_CNT_0, MCA_REG_ADC_SAMPLES_CNT_7),
++	regmap_reg_range(MCA_REG_ADC_THRESH_LO_L_0, MCA_REG_ADC_THRESH_LO_H_7),
++	regmap_reg_range(MCA_REG_ADC_THRESH_HI_L_0, MCA_REG_ADC_THRESH_HI_H_7),
++	regmap_reg_range(MCA_REG_ADC_TICKS_L_0, MCA_REG_ADC_TICKS_H_7),
++	regmap_reg_range(MCA_REG_ADC_IRQ_0, MCA_REG_ADC_IRQ_7),
++	regmap_reg_range(MCA_REG_ADC_CFG_0, MCA_REG_ADC_CFG_2),
++	regmap_reg_range(MCA_REG_ADC_BUFF_CH, MCA_REG_ADC_BUFF_SAMPLE_7),
++	regmap_reg_range(MCA_REG_UART_THR, MCA_REG_UART_RTSPIN),
++	regmap_reg_range(MCA_CC6UL_MPU_NVRAM_START, MCA_CC6UL_MPU_NVRAM_END),
++};
++
++static const struct regmap_range mca_cc6ul_volatile_ranges[] = {
++	/* Real volatile registers */
++	regmap_reg_range(MCA_IRQ_STATUS_0, MCA_IRQ_STATUS_3),
++	regmap_reg_range(MCA_TAMPER0_DATE_START, MCA_TAMPER0_EVENT),
++	regmap_reg_range(MCA_TAMPER1_DATE_START, MCA_TAMPER1_EVENT),
++	regmap_reg_range(MCA_TAMPER2_DATE_START, MCA_TAMPER2_EVENT),
++	regmap_reg_range(MCA_TAMPER3_DATE_START, MCA_TAMPER3_EVENT),
++	regmap_reg_range(MCA_TIMER_TICK_0, MCA_TIMER_TICK_3),
++	regmap_reg_range(MCA_LAST_MCA_RESET_0, MCA_LAST_MCA_RESET_3),
++	regmap_reg_range(MCA_LAST_MPU_RESET_0, MCA_LAST_MPU_RESET_3),
++	regmap_reg_range(MCA_LAST_WAKEUP_REASON_0, MCA_LAST_WAKEUP_REASON_3),
++	regmap_reg_range(MCA_CC6UL_MPU_NVRAM_START, MCA_CC6UL_MPU_NVRAM_END),
++	regmap_reg_range(MCA_RTC_COUNT_YEAR_L, MCA_RTC_COUNT_SEC),
++	regmap_reg_range(MCA_GPIO_DATA_0, MCA_GPIO_DATA_7),
++	regmap_reg_range(MCA_GPIO_IRQ_STATUS_0, MCA_GPIO_IRQ_STATUS_7),
++	regmap_reg_range(MCA_PWR_CTRL_0, MCA_PWR_STATUS_0),
++	regmap_reg_range(MCA_REG_ADC_VAL_L_0, MCA_REG_ADC_VAL_H_7),
++
++	/*
++	 * Fake volatile registers.
++	 *
++	 * These registers could be cached but non-volatile registers makes
++	 * regmap access each register one by one which has some drawbacks:
++	 * - Breaks CRC in the protocol.
++	 * - Requires the MCA firmware to process each access as a separate
++	 *   access, even when the data requested must be returned in bulk.
++	 *
++	 * For this reasons we will consider all registers volatile.
++	 */
++	regmap_reg_range(MCA_HWVER_SOM, MCA_HWVER_SOM),
++	regmap_reg_range(MCA_DEVICE_ID, MCA_UID_9),
++	regmap_reg_range(MCA_IRQ_MASK_0, MCA_IRQ_MASK_3),
++	regmap_reg_range(MCA_PWR_KEY_DEBOUNCE, MCA_PWR_KEY_GUARD),
++	regmap_reg_range(MCA_CTRL_0, MCA_CTRL_0),
++	regmap_reg_range(MCA_TAMPER0_CFG0, MCA_TAMPER0_DELAY_PWROFF),
++	regmap_reg_range(MCA_TAMPER1_CFG0, MCA_TAMPER1_DELAY_PWROFF),
++	regmap_reg_range(MCA_TAMPER2_CFG0, MCA_TAMPER2_THRESH_HI_H),
++	regmap_reg_range(MCA_TAMPER3_CFG0, MCA_TAMPER3_THRESH_HI_H),
++	regmap_reg_range(MCA_RTC_CONTROL, MCA_RTC_CONTROL),
++	regmap_reg_range(MCA_RTC_ALARM_YEAR_L, MCA_RTC_ALARM_SEC),
++	regmap_reg_range(MCA_WDT_CONTROL, MCA_WDT_TIMEOUT),
++	regmap_reg_range(MCA_GPIO_NUM, MCA_GPIO_DIR_7),
++	regmap_reg_range(MCA_GPIO_IRQ_CFG_0, MCA_GPIO_IRQ_CFG_63),
++	regmap_reg_range(MCA_REG_ADC_NUM_CH, MCA_REG_ADC_NUM_BYTES),
++	regmap_reg_range(MCA_REG_ADC_CFG0_0, MCA_REG_ADC_CFG0_7),
++	regmap_reg_range(MCA_REG_ADC_CFG1_0, MCA_REG_ADC_CFG1_7),
++	regmap_reg_range(MCA_REG_ADC_CFG2_0, MCA_REG_ADC_CFG2_7),
++	regmap_reg_range(MCA_REG_ADC_SAMPLES_CNT_0, MCA_REG_ADC_SAMPLES_CNT_7),
++	regmap_reg_range(MCA_REG_ADC_THRESH_LO_L_0, MCA_REG_ADC_THRESH_LO_H_7),
++	regmap_reg_range(MCA_REG_ADC_THRESH_HI_L_0, MCA_REG_ADC_THRESH_HI_H_7),
++	regmap_reg_range(MCA_REG_ADC_TICKS_L_0, MCA_REG_ADC_TICKS_H_7),
++	regmap_reg_range(MCA_REG_ADC_IRQ_0, MCA_REG_ADC_IRQ_7),
++	regmap_reg_range(MCA_REG_ADC_CFG_0, MCA_REG_ADC_CFG_2),
++	regmap_reg_range(MCA_REG_ADC_BUFF_CH, MCA_REG_ADC_BUFF_SAMPLE_7),
++	regmap_reg_range(MCA_REG_UART_RHR, MCA_REG_UART_RTSPIN),
++};
++
++static const struct regmap_access_table mca_cc6ul_readable_table = {
++	.yes_ranges = mca_cc6ul_readable_ranges,
++	.n_yes_ranges = ARRAY_SIZE(mca_cc6ul_readable_ranges),
++};
++
++static const struct regmap_access_table mca_cc6ul_writeable_table = {
++	.yes_ranges = mca_cc6ul_writeable_ranges,
++	.n_yes_ranges = ARRAY_SIZE(mca_cc6ul_writeable_ranges),
++};
++
++static const struct regmap_access_table mca_cc6ul_volatile_table = {
++	.yes_ranges = mca_cc6ul_volatile_ranges,
++	.n_yes_ranges = ARRAY_SIZE(mca_cc6ul_volatile_ranges),
++};
++
++static struct regmap_config mca_cc6ul_regmap_config = {
++	.reg_bits = 16,
++	.val_bits = 8,
++	.max_register = 0xFFFF,
++
++	.rd_table = &mca_cc6ul_readable_table,
++	.wr_table = &mca_cc6ul_writeable_table,
++	.volatile_table = &mca_cc6ul_volatile_table,
++
++	.cache_type = REGCACHE_NONE,
++};
++
++static const struct of_device_id mca_cc6ul_dt_ids[] = {
++	{ .compatible = "digi,mca_cc6ul_dt_ids", },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, mca_cc6ul_dt_ids);
++
++static int mca_cc6ul_i2c_probe(struct i2c_client *i2c,
++			       const struct i2c_device_id *id)
++{
++	struct mca_drv *mca;
++	int ret;
++
++	mca = devm_kzalloc(&i2c->dev, sizeof(struct mca_drv), GFP_KERNEL);
++	if (mca == NULL)
++		return -ENOMEM;
++
++	i2c_set_clientdata(i2c, mca);
++	mca->dev = &i2c->dev;
++	mca->chip_irq = i2c->irq;
++
++	mca->regmap = devm_regmap_init_i2c(i2c, &mca_cc6ul_regmap_config);
++	if (IS_ERR(mca->regmap)) {
++		ret = PTR_ERR(mca->regmap);
++		dev_err(mca->dev, "Failed to allocate register map: %d\n", ret);
++		return ret;
++	}
++
++	return mca_cc6ul_device_init(mca, i2c->irq);
++}
++
++static int mca_cc6ul_i2c_remove(struct i2c_client *i2c)
++{
++	struct mca_drv *mca = i2c_get_clientdata(i2c);
++
++	mca_cc6ul_device_exit(mca);
++
++	return 0;
++}
++
++#ifdef CONFIG_PM
++static int mca_cc6ul_i2c_suspend(struct device *dev)
++{
++	return mca_cc6ul_suspend(dev);
++}
++
++static int mca_cc6ul_i2c_resume(struct device *dev)
++{
++	return mca_cc6ul_resume(dev);
++}
++
++/*
++ * Use suspend_late/resume_early so the mca_cc6ul continues being functional
++ * during the regular suspend/resume callbacks of other drivers, just in case
++ * they use any functionality of the mca.
++ */
++static const struct dev_pm_ops mca_cc6ul_i2c_pm_ops = {
++	SET_LATE_SYSTEM_SLEEP_PM_OPS(mca_cc6ul_i2c_suspend, mca_cc6ul_i2c_resume)
++};
++#endif
++
++static const struct i2c_device_id mca_cc6ul_i2c_id[] = {
++        {"mca_cc6ul", 0},
++        {},
++};
++MODULE_DEVICE_TABLE(i2c, mca_cc6ul_i2c_id);
++
++static struct i2c_driver mca_cc6ul_i2c_driver = {
++	.driver = {
++		.name = "mca_cc6ul",
++		.of_match_table = of_match_ptr(mca_cc6ul_dt_ids),
++#ifdef CONFIG_PM
++		.pm = &mca_cc6ul_i2c_pm_ops,
++#endif
++	},
++	.probe    = mca_cc6ul_i2c_probe,
++	.remove   = mca_cc6ul_i2c_remove,
++	.id_table = mca_cc6ul_i2c_id,
++};
++
++module_i2c_driver(mca_cc6ul_i2c_driver);
+diff --git a/drivers/mfd/mca-cc6ul-irq.c b/drivers/mfd/mca-cc6ul-irq.c
+new file mode 100644
+index 000000000000..0807e974cb60
+--- /dev/null
++++ b/drivers/mfd/mca-cc6ul-irq.c
+@@ -0,0 +1,113 @@
++/*
++ *  Copyright 2016 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/irq.h>
++#include <linux/mfd/core.h>
++#include <linux/interrupt.h>
++#include <linux/regmap.h>
++#include <linux/mfd/mca-common/core.h>
++#include <linux/mfd/mca-cc6ul/core.h>
++
++#define MCA_IRQ_0_OFFSET		0
++#define MCA_IRQ_1_OFFSET		1
++#define MCA_IRQ_2_OFFSET		2
++#define MCA_IRQ_3_OFFSET		3
++
++static const struct regmap_irq mca_cc6ul_irqs[] = {
++	/* MCA irqs A register */
++	[MCA_CC6UL_IRQ_RTC_ALARM] = {
++                .reg_offset = MCA_IRQ_0_OFFSET,
++                .mask = MCA_M_RTC_ALARM,
++        },
++	[MCA_CC6UL_IRQ_RTC_1HZ] = {
++                .reg_offset = MCA_IRQ_0_OFFSET,
++                .mask = MCA_M_RTC_1HZ,
++        },
++	[MCA_CC6UL_IRQ_WATCHDOG] = {
++                .reg_offset = MCA_IRQ_0_OFFSET,
++                .mask = MCA_M_WATCHDOG,
++        },
++	[MCA_CC6UL_IRQ_PWR_SLEEP] = {
++                .reg_offset = MCA_IRQ_0_OFFSET,
++                .mask = MCA_M_PWR_SLEEP,
++        },
++	[MCA_CC6UL_IRQ_PWR_OFF] = {
++                .reg_offset = MCA_IRQ_0_OFFSET,
++                .mask = MCA_M_PWR_OFF,
++        },
++	[MCA_CC6UL_IRQ_TAMPER0] = {
++		.reg_offset = MCA_IRQ_0_OFFSET,
++		.mask = MCA_M_TAMPER0,
++	},
++	[MCA_CC6UL_IRQ_TAMPER1] = {
++		.reg_offset = MCA_IRQ_0_OFFSET,
++		.mask = MCA_M_TAMPER1,
++	},
++	[MCA_CC6UL_IRQ_ADC] = {
++		.reg_offset = MCA_IRQ_0_OFFSET,
++		.mask = MCA_M_ADC,
++	},
++	[MCA_CC6UL_IRQ_GPIO_BANK_0] = {
++		.reg_offset = MCA_IRQ_1_OFFSET,
++		.mask = MCA_GPIO_BANK_0,
++	},
++	[MCA_CC6UL_IRQ_TAMPER2] = {
++		.reg_offset = MCA_IRQ_2_OFFSET,
++		.mask = MCA_M_TAMPER2,
++	},
++	[MCA_CC6UL_IRQ_TAMPER3] = {
++		.reg_offset = MCA_IRQ_2_OFFSET,
++		.mask = MCA_M_TAMPER3,
++	},
++	[MCA_CC6UL_IRQ_UART] = {
++		.reg_offset = MCA_IRQ_2_OFFSET,
++		.mask = MCA_M_UART,
++	},
++};
++
++static const struct regmap_irq_chip mca_cc6ul_irq_chip = {
++	.name = "mca-cc6ul-irq",
++	.irqs = mca_cc6ul_irqs,
++	.num_irqs = ARRAY_SIZE(mca_cc6ul_irqs),
++	.num_regs = MCA_NUM_IRQ_REGS,
++	.status_base = MCA_IRQ_STATUS_0,
++	.mask_base = MCA_IRQ_MASK_0,
++	.ack_base = MCA_IRQ_STATUS_0,
++	.init_ack_masked = true,
++};
++
++int mca_cc6ul_irq_init(struct mca_drv *mca)
++{
++	int ret;
++
++	if (!mca->chip_irq) {
++		dev_err(mca->dev, "No IRQ configured\n");
++		return -EINVAL;
++	}
++
++	mca->irq_base = -1;
++	ret = regmap_add_irq_chip(mca->regmap, mca->chip_irq,
++				  IRQF_TRIGGER_LOW | IRQF_ONESHOT | IRQF_SHARED,
++				  mca->irq_base, &mca_cc6ul_irq_chip,
++				  &mca->regmap_irq);
++	if (ret) {
++		dev_err(mca->dev, "Failed to reguest IRQ %d: %d\n",
++			mca->chip_irq, ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++void mca_cc6ul_irq_exit(struct mca_drv *mca)
++{
++        regmap_del_irq_chip(mca->chip_irq, mca->regmap_irq);
++}
+diff --git a/drivers/mfd/mca-cc8x-core.c b/drivers/mfd/mca-cc8x-core.c
+new file mode 100644
+index 000000000000..19931618b683
+--- /dev/null
++++ b/drivers/mfd/mca-cc8x-core.c
+@@ -0,0 +1,1040 @@
++/*
++ *  Copyright 2018 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#include <linux/device.h>
++#include <linux/sysfs.h>
++#include <linux/delay.h>
++#include <linux/gpio.h>
++#include <linux/of_gpio.h>
++#include <linux/interrupt.h>
++#include <linux/mfd/core.h>
++#include <linux/slab.h>
++#include <linux/module.h>
++#include <linux/regmap.h>
++#include <linux/suspend.h>
++#include <linux/pm_runtime.h>
++#include <linux/proc_fs.h>
++#include <linux/kthread.h>
++#include <linux/uaccess.h>
++#include <linux/reboot.h>
++#include <linux/i2c.h>
++
++#include <linux/mfd/mca-common/core.h>
++#include <linux/mfd/mca-cc8x/core.h>
++
++#include <asm/unaligned.h>
++
++#define MCA_CC8X_NVRAM_SIZE	(MCA_CC8X_MPU_NVRAM_END - MCA_CC8X_MPU_NVRAM_START + 1)
++
++struct dyn_attribute {
++	u16			since;	/* Minimum firmware version required */
++	struct attribute	*attr;
++};
++
++struct mca_reason {
++	u32 		flag;
++	const char	*text;
++};
++
++enum lpi2c_imx_mode {
++	STANDARD,	/* 100+Kbps */
++	FAST,		/* 400+Kbps */
++	FAST_PLUS,	/* 1.0+Mbps */
++	HS,		/* 3.4+Mbps */
++	ULTRA_FAST,	/* 5.0+Mbps */
++};
++
++struct lpi2c_imx_struct {
++	struct i2c_adapter	adapter;
++	int			irq;
++	struct clk		*clk_per;
++	struct clk		*clk_ipg;
++	void __iomem		*base;
++	__u8			*rx_buf;
++	__u8			*tx_buf;
++	struct completion	complete;
++	unsigned int		msglen;
++	unsigned int		delivered;
++	unsigned int		block_data;
++	unsigned int		bitrate;
++	enum lpi2c_imx_mode	mode;
++	unsigned int		hold_time;
++};
++
++static const struct mca_reason last_mca_reset[] = {
++	{MCA_CC8X_LAST_MCA_RST_LLW,	"LL Wakeup"},
++	{MCA_CC8X_LAST_MCA_RST_LVD,	"Low Voltage"},
++	{MCA_CC8X_LAST_MCA_RST_WD,	"Watchdog"},
++	{MCA_CC8X_LAST_MCA_RST_PIN,	"Reset Pin"},
++	{MCA_CC8X_LAST_MCA_RST_PWRON,	"Power On"},
++	{MCA_CC8X_LAST_MCA_RST_LOCKUP,	"Core Lockup"},
++	{MCA_CC8X_LAST_MCA_RST_SW,	"Software"},
++	{MCA_CC8X_LAST_MCA_RST_MDMAPP,	"MDM-APP debuger"},
++	{MCA_CC8X_LAST_MCA_RST_SMAE, 	"Stop Mode Ack Error"},
++};
++
++static const struct mca_reason last_mpu_reset[] = {
++	{MCA_CC8X_LAST_MPU_RST_PWRON,	"Power On"},
++	{MCA_CC8X_LAST_MPU_RST_SYSR,	"System Reset"},
++	{MCA_CC8X_LAST_MPU_RST_WD,	"Watchdog"},
++	{MCA_CC8X_LAST_MPU_RST_OFFWAKE,"Off wakeup"},
++	{MCA_CC8X_LAST_MPU_RST_MCARST,	"MCA reset"},
++};
++
++static const struct mca_reason last_wakeup[] = {
++	{MCA_CC8X_LAST_WAKEUP_PWRIO,	"Power IO"},
++	{MCA_CC8X_LAST_WAKEUP_TIMER,	"Timer"},
++	{MCA_CC8X_LAST_WAKEUP_RTC,	"RTC"},
++	{MCA_CC8X_LAST_WAKEUP_LPUART,	"LP UART"},
++	{MCA_CC8X_LAST_WAKEUP_TAMPER0,	"Tamper0"},
++	{MCA_CC8X_LAST_WAKEUP_TAMPER1,	"Tamper1"},
++	{MCA_CC8X_LAST_WAKEUP_TAMPER2,	"Tamper2"},
++	{MCA_CC8X_LAST_WAKEUP_TAMPER3,	"Tamper3"},
++	{MCA_CC8X_LAST_WAKEUP_IO0,	"IO0"},
++	{MCA_CC8X_LAST_WAKEUP_IO1,	"IO1"},
++	{MCA_CC8X_LAST_WAKEUP_IO2,	"IO2"},
++	{MCA_CC8X_LAST_WAKEUP_IO3,	"IO3"},
++	{MCA_CC8X_LAST_WAKEUP_IO4,	"IO4"},
++	{MCA_CC8X_LAST_WAKEUP_IO5,	"IO5"},
++	{MCA_CC8X_LAST_WAKEUP_IO6,	"IO6"},
++	{MCA_CC8X_LAST_WAKEUP_IO7,	"IO7"},
++	{MCA_CC8X_LAST_WAKEUP_IO8,	"IO8"},
++	{MCA_CC8X_LAST_WAKEUP_IO9,	"IO9"},
++	{MCA_CC8X_LAST_WAKEUP_IO10,	"IO10"},
++	{MCA_CC8X_LAST_WAKEUP_IO11,	"IO11"},
++	{MCA_CC8X_LAST_WAKEUP_IO12,	"IO12"},
++	{MCA_CC8X_LAST_WAKEUP_IO13,	"IO13"},
++	{MCA_CC8X_LAST_WAKEUP_IO14,	"IO14"},
++	{MCA_CC8X_LAST_WAKEUP_IO15,	"IO15"},
++	{MCA_CC8X_LAST_WAKEUP_IO16,	"IO16"},
++	{MCA_CC8X_LAST_WAKEUP_IO17,	"IO17"},
++	{MCA_CC8X_LAST_WAKEUP_IO18,	"IO18"},
++	{MCA_CC8X_LAST_WAKEUP_IO19,	"IO19"},
++	{MCA_CC8X_LAST_WAKEUP_IO20,	"IO20"},
++	{MCA_CC8X_LAST_WAKEUP_IO21,	"IO21"},
++	{MCA_CC8X_LAST_WAKEUP_VCC,	"Vcc"},
++	{MCA_CC8X_LAST_WAKEUP_CPU,	"CPU"},
++};
++
++static struct mca_drv *pmca;
++
++static const char _enabled[] = "enabled";
++static const char _disabled[] = "disabled";
++
++static struct resource mca_cc8x_rtc_resources[] = {
++	{
++		.name   = MCA_IRQ_RTC_ALARM_NAME,
++		.start  = MCA_CC8X_IRQ_RTC_ALARM,
++		.end    = MCA_CC8X_IRQ_RTC_ALARM,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_RTC_1HZ_NAME,
++		.start  = MCA_CC8X_IRQ_RTC_1HZ,
++		.end    = MCA_CC8X_IRQ_RTC_1HZ,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static struct resource mca_cc8x_watchdog_resources[] = {
++	{
++		.name   = MCA_IRQ_WATCHDOG_NAME,
++		.start  = MCA_CC8X_IRQ_WATCHDOG,
++		.end    = MCA_CC8X_IRQ_WATCHDOG,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static struct resource mca_cc8x_pwrkey_resources[] = {
++	{
++		.name   = MCA_IRQ_PWR_SLEEP_NAME,
++		.start  = MCA_CC8X_IRQ_PWR_SLEEP,
++		.end    = MCA_CC8X_IRQ_PWR_SLEEP,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_PWR_OFF_NAME,
++		.start  = MCA_CC8X_IRQ_PWR_OFF,
++		.end    = MCA_CC8X_IRQ_PWR_OFF,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static struct resource mca_cc8x_adc_resources[] = {
++	{
++		.name   = MCA_IRQ_ADC_NAME,
++		.start  = MCA_CC8X_IRQ_ADC,
++		.end    = MCA_CC8X_IRQ_ADC,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static struct resource mca_cc8x_tamper_resources[] = {
++	{
++		.name   = MCA_IRQ_TAMPER0_NAME,
++		.start  = MCA_CC8X_IRQ_TAMPER0,
++		.end    = MCA_CC8X_IRQ_TAMPER0,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_TAMPER1_NAME,
++		.start  = MCA_CC8X_IRQ_TAMPER1,
++		.end    = MCA_CC8X_IRQ_TAMPER1,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_TAMPER2_NAME,
++		.start  = MCA_CC8X_IRQ_TAMPER2,
++		.end    = MCA_CC8X_IRQ_TAMPER2,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_TAMPER3_NAME,
++		.start  = MCA_CC8X_IRQ_TAMPER3,
++		.end    = MCA_CC8X_IRQ_TAMPER3,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static struct resource mca_cc8x_gpios_resources[] = {
++	{
++		.name   = MCA_IRQ_GPIO_BANK_0_NAME,
++		.start  = MCA_CC8X_IRQ_GPIO_BANK_0,
++		.end    = MCA_CC8X_IRQ_GPIO_BANK_0,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_GPIO_BANK_1_NAME,
++		.start  = MCA_CC8X_IRQ_GPIO_BANK_1,
++		.end    = MCA_CC8X_IRQ_GPIO_BANK_1,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.name   = MCA_IRQ_GPIO_BANK_2_NAME,
++		.start  = MCA_CC8X_IRQ_GPIO_BANK_2,
++		.end    = MCA_CC8X_IRQ_GPIO_BANK_2,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static struct resource mca_cc8x_uart_resources[] = {
++	{
++		.name   = MCA_IRQ_UART_NAME,
++		.start  = MCA_CC8X_IRQ_UART,
++		.end    = MCA_CC8X_IRQ_UART,
++		.flags  = IORESOURCE_IRQ,
++	},
++};
++
++static const struct mfd_cell mca_cc8x_devs[] = {
++	{
++		.name           = MCA_CC8X_DRVNAME_RTC,
++		.num_resources  = ARRAY_SIZE(mca_cc8x_rtc_resources),
++		.resources      = mca_cc8x_rtc_resources,
++		.of_compatible  = "digi,mca-cc8x-rtc",
++	},
++	{
++		.name           = MCA_CC8X_DRVNAME_WATCHDOG,
++		.num_resources	= ARRAY_SIZE(mca_cc8x_watchdog_resources),
++		.resources	= mca_cc8x_watchdog_resources,
++		.of_compatible  = "digi,mca-cc8x-watchdog",
++	},
++	{
++		.name           = MCA_CC8X_DRVNAME_GPIO,
++		.num_resources	= ARRAY_SIZE(mca_cc8x_gpios_resources),
++		.resources	= mca_cc8x_gpios_resources,
++		.of_compatible = "digi,mca-cc8x-gpio",
++	},
++	{
++		.name           = MCA_CC8X_DRVNAME_PWRKEY,
++		.num_resources  = ARRAY_SIZE(mca_cc8x_pwrkey_resources),
++		.resources      = mca_cc8x_pwrkey_resources,
++		.of_compatible = "digi,mca-cc8x-pwrkey",
++	},
++	{
++		.name           = MCA_CC8X_DRVNAME_ADC,
++		.of_compatible = "digi,mca-cc8x-adc",
++		.num_resources  = ARRAY_SIZE(mca_cc8x_adc_resources),
++		.resources      = mca_cc8x_adc_resources,
++	},
++	{
++		.name           = MCA_CC8X_DRVNAME_TAMPER,
++		.num_resources  = ARRAY_SIZE(mca_cc8x_tamper_resources),
++		.resources      = mca_cc8x_tamper_resources,
++		.of_compatible = "digi,mca-cc8x-tamper",
++	},
++	{
++		.name           = MCA_CC8X_DRVNAME_UART,
++		.num_resources  = ARRAY_SIZE(mca_cc8x_uart_resources),
++		.resources      = mca_cc8x_uart_resources,
++		.of_compatible = "digi,mca-cc8x-uart",
++	},
++	{
++		.name           = MCA_CC8X_DRVNAME_PWM,
++		.of_compatible	= "digi,mca-pwm",
++	},
++};
++
++/* Read a block of registers */
++int mca_cc8x_read_block(struct mca_drv *mca, u16 addr, u8 *data,
++			 size_t nregs)
++{
++	int ret;
++
++	/* TODO, check limits nregs... */
++
++	ret = regmap_raw_read(mca->regmap, addr, data, nregs);
++	if (ret != 0)
++		return ret;
++
++	return ret;
++
++}
++EXPORT_SYMBOL_GPL(mca_cc8x_read_block);
++
++/* Write a block of data into MCA registers */
++int mca_cc8x_write_block(struct mca_drv *mca , u16 addr, u8 *data,
++			  size_t nregs)
++{
++	u8 *frame;	/* register address + payload */
++	u8 *payload;
++	int ret;
++
++	/* TODO, check limits nregs... */
++
++	frame = kzalloc(sizeof(addr) + nregs, GFP_KERNEL | GFP_DMA);
++	if (!frame)
++		return -ENOMEM;
++
++	payload = frame + sizeof(addr);
++	memcpy(payload, data, nregs);
++
++	/* Write payload */
++	ret = regmap_raw_write(mca->regmap, addr, payload, nregs);
++
++	kfree(frame);
++	return ret;
++}
++EXPORT_SYMBOL_GPL(mca_cc8x_write_block);
++
++static int mca_cc8x_unlock_ctrl(struct mca_drv *mca)
++{
++	int ret;
++	const uint8_t unlock_pattern[] = {'C', 'T', 'R', 'U'};
++
++	ret = regmap_bulk_write(mca->regmap, MCA_CTRL_UNLOCK_0,
++				unlock_pattern, sizeof(unlock_pattern));
++	if (ret)
++		dev_warn(mca->dev, "failed to unlock CTRL registers (%d)\n",
++			 ret);
++
++	return ret;
++}
++
++static int mca_cc8x_get_tick_cnt(struct mca_drv *mca, u32 *tick)
++{
++	return regmap_bulk_read(mca->regmap, MCA_TIMER_TICK_0,
++				tick, sizeof(*tick));
++}
++
++/* sysfs attributes */
++static ssize_t ext_32khz_show(struct device *dev, struct device_attribute *attr,
++			      char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	unsigned int val;
++	int ret;
++
++	ret = regmap_read(mca->regmap, MCA_CTRL_0, &val);
++	if (ret) {
++		dev_err(mca->dev, "Cannot read MCA CTRL_0 register(%d)\n",
++			ret);
++		return 0;
++	}
++
++	return sprintf(buf, "%s\n", val & MCA_EXT32K_EN ?
++		       _enabled : _disabled);
++}
++
++static ssize_t ext_32khz_store(struct device *dev, struct device_attribute *attr,
++			       const char *buf, size_t count)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	bool enable;
++	int ret;
++
++	if (!strncmp(buf, _enabled, sizeof(_enabled) - 1))
++		enable = true;
++	else if (!strncmp(buf, _disabled, sizeof(_disabled) - 1))
++		enable = false;
++	else
++		return -EINVAL;
++
++	ret = mca_cc8x_unlock_ctrl(mca);
++	if (ret)
++		return ret;
++
++	ret = regmap_update_bits(mca->regmap, MCA_CTRL_0,
++				 MCA_EXT32K_EN,
++				 enable ? MCA_EXT32K_EN : 0);
++	if (ret) {
++		dev_err(mca->dev, "Cannot update MCA CTRL_0 register (%d)\n", ret);
++		return ret;
++	}
++
++	return count;
++}
++static DEVICE_ATTR(ext_32khz, 0600, ext_32khz_show, ext_32khz_store);
++
++static ssize_t vref_show(struct device *dev, struct device_attribute *attr,
++			 char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	unsigned int val;
++	int ret;
++
++	ret = regmap_read(mca->regmap, MCA_CTRL_0, &val);
++	if (ret) {
++		dev_err(mca->dev, "Cannot read MCA CTRL_0 register(%d)\n",
++			ret);
++		return 0;
++	}
++
++	return sprintf(buf, "%s\n", val & MCA_VREF_EN ?
++	_enabled : _disabled);
++}
++
++static ssize_t vref_store(struct device *dev, struct device_attribute *attr,
++			  const char *buf, size_t count)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	bool enable;
++	int ret;
++
++	if (!strncmp(buf, _enabled, sizeof(_enabled) - 1))
++		enable = true;
++	else if (!strncmp(buf, _disabled, sizeof(_disabled) - 1))
++		enable = false;
++	else
++		return -EINVAL;
++
++	ret = mca_cc8x_unlock_ctrl(mca);
++	if (ret)
++		return ret;
++
++	ret = regmap_update_bits(mca->regmap, MCA_CTRL_0,
++				 MCA_VREF_EN,
++				 enable ? MCA_VREF_EN : 0);
++	if (ret) {
++		dev_err(mca->dev, "Cannot update MCA CTRL_0 register (%d)\n", ret);
++		return ret;
++	}
++
++	return count;
++}
++static DEVICE_ATTR(vref, 0600, vref_show, vref_store);
++
++static ssize_t hwver_show(struct device *dev, struct device_attribute *attr,
++			  char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++
++	return sprintf(buf, "%d\n", mca->hw_version);
++}
++static DEVICE_ATTR(hw_version, S_IRUGO, hwver_show, NULL);
++
++static ssize_t fwver_show(struct device *dev, struct device_attribute *attr,
++			  char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++
++	return sprintf(buf, "%d.%02d %s\n", MCA_FW_VER_MAJOR(mca->fw_version),
++		       MCA_FW_VER_MINOR(mca->fw_version),
++		       mca->fw_is_alpha ? "(alpha)" : "");
++}
++static DEVICE_ATTR(fw_version, S_IRUGO, fwver_show, NULL);
++
++static ssize_t tick_cnt_show(struct device *dev, struct device_attribute *attr,
++			     char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	u32 tick_cnt;
++	int ret;
++
++	ret = mca_cc8x_get_tick_cnt(mca, &tick_cnt);
++	if (ret) {
++		dev_err(mca->dev, "Cannot read MCA tick counter(%d)\n", ret);
++		return ret;
++	}
++
++	return sprintf(buf, "%u\n", tick_cnt);
++}
++static DEVICE_ATTR(tick_cnt, S_IRUGO, tick_cnt_show, NULL);
++
++static ssize_t fw_update_show(struct device *dev, struct device_attribute *attr,
++			      char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++
++	if (!gpio_is_valid(mca->fw_update_gpio))
++		return -EINVAL;
++
++	return sprintf(buf, "%d\n",
++		       gpio_get_value_cansleep(mca->fw_update_gpio));
++}
++
++static ssize_t fw_update_store(struct device *dev,
++			       struct device_attribute *attr,
++			       const char *buf, size_t count)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	ssize_t status;
++	long value;
++	struct lpi2c_imx_struct *lpi2c_imx = dev_get_drvdata(mca->i2c_adapter_dev);
++
++	if (!gpio_is_valid(mca->fw_update_gpio))
++		return -EINVAL;
++
++	/* Set i2c bus speed to 100kbps during firmware update */
++	lpi2c_imx->bitrate = 100000;
++
++	status = kstrtol(buf, 0, &value);
++	if (status == 0) {
++		gpio_set_value_cansleep(mca->fw_update_gpio, value);
++		status = count;
++	}
++
++	return status;
++}
++static DEVICE_ATTR(fw_update, 0600, fw_update_show, fw_update_store);
++
++static ssize_t last_wakeup_reason_show(struct device *dev,
++				       struct device_attribute *attr,
++				       char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	bool comma = false;
++	u32 last_wakeup_val;
++	int ret, i;
++
++	ret = regmap_bulk_read(mca->regmap, MCA_LAST_WAKEUP_REASON_0,
++			       &last_wakeup_val, sizeof(last_wakeup_val));
++	if (ret) {
++		dev_err(mca->dev,
++			"Cannot read last MCA wakeup reason (%d)\n",
++			ret);
++		return ret;
++	}
++
++	buf[0] = 0;
++
++	for (i = 0; i < ARRAY_SIZE(last_wakeup); i++) {
++		if (last_wakeup[i].flag & last_wakeup_val) {
++			if (comma)
++				strcat(buf, ", ");
++			strcat(buf, last_wakeup[i].text);
++			comma = true;
++		}
++	}
++
++	if (comma)
++		strcat(buf, "\n");
++
++	return strlen(buf);
++}
++static DEVICE_ATTR(last_wakeup_reason, S_IRUGO, last_wakeup_reason_show, NULL);
++
++static ssize_t last_mca_reset_show(struct device *dev,
++				   struct device_attribute *attr, char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	bool comma = false;
++	int i;
++
++	buf[0] = 0;
++
++	for (i = 0; i < ARRAY_SIZE(last_mca_reset); i++) {
++		if (last_mca_reset[i].flag & mca->last_mca_reset) {
++			if (comma)
++				strcat(buf, ", ");
++			strcat(buf, last_mca_reset[i].text);
++			comma = true;
++		}
++	}
++
++	if (comma)
++		strcat(buf, "\n");
++
++	return strlen(buf);
++}
++static DEVICE_ATTR(last_mca_reset, S_IRUGO, last_mca_reset_show, NULL);
++
++static ssize_t last_mpu_reset_show(struct device *dev,
++				   struct device_attribute *attr, char *buf)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	bool comma = false;
++	int i;
++
++	buf[0] = 0;
++
++	for (i = 0; i < ARRAY_SIZE(last_mpu_reset); i++) {
++		if (last_mpu_reset[i].flag & mca->last_mpu_reset) {
++			if (comma)
++				strcat(buf, ", ");
++			strcat(buf, last_mpu_reset[i].text);
++			comma = true;
++		}
++	}
++
++	if (comma)
++		strcat(buf, "\n");
++
++	return strlen(buf);
++}
++static DEVICE_ATTR(last_mpu_reset, S_IRUGO, last_mpu_reset_show, NULL);
++
++static ssize_t nvram_read(struct file *filp, struct kobject *kobj,
++			  struct bin_attribute *attr, char *buf, loff_t off,
++			  size_t count)
++{
++	struct device *dev = kobj_to_dev(kobj);
++	struct mca_drv *mca;
++	int ret;
++
++	if (!dev || (mca = dev_get_drvdata(dev)) == NULL)
++		return -ENODEV;
++
++	if (unlikely(off >= MCA_CC8X_NVRAM_SIZE) || unlikely(!count))
++		return 0;
++	if ((off + count) > MCA_CC8X_NVRAM_SIZE)
++		count = MCA_CC8X_NVRAM_SIZE - off;
++
++	ret = regmap_bulk_read(mca->regmap,
++			       MCA_CC8X_MPU_NVRAM_START + off, buf, count);
++	if (ret) {
++		dev_err(mca->dev, "%s error (%d)\n", __func__, ret);
++		return ret;
++	}
++
++	return count;
++}
++
++static ssize_t nvram_write(struct file *filp, struct kobject *kobj,
++			   struct bin_attribute *attr, char *buf, loff_t off,
++			   size_t count)
++{
++	struct device *dev = kobj_to_dev(kobj);
++	struct mca_drv *mca;
++	int ret;
++
++	if (!dev || (mca = dev_get_drvdata(dev)) == NULL)
++		return -ENODEV;
++
++	if (unlikely(off >= MCA_CC8X_NVRAM_SIZE))
++		return -EFBIG;
++	if ((off + count) > MCA_CC8X_NVRAM_SIZE)
++		count = MCA_CC8X_NVRAM_SIZE - off;
++	if (unlikely(!count))
++		return count;
++
++	ret = regmap_bulk_write(mca->regmap,
++				MCA_CC8X_MPU_NVRAM_START + off, buf, count);
++	if (ret) {
++		dev_err(mca->dev, "%s error (%d)\n", __func__, ret);
++		return ret;
++	}
++
++	return count;
++}
++
++static struct attribute *mca_cc8x_sysfs_entries[] = {
++	&dev_attr_ext_32khz.attr,
++	&dev_attr_hw_version.attr,
++	&dev_attr_fw_version.attr,
++	&dev_attr_fw_update.attr,
++	NULL,
++};
++
++static struct attribute_group mca_cc8x_attr_group = {
++	.name	= NULL,			/* put in device directory */
++	.attrs	= mca_cc8x_sysfs_entries,
++};
++
++static struct dyn_attribute mca_cc8x_sysfs_dyn_entries[] = {
++	{
++		.since =	MCA_MAKE_FW_VER(0,0),
++		.attr =		&dev_attr_tick_cnt.attr,
++	},
++	{
++		.since =	MCA_MAKE_FW_VER(0,11),
++		.attr =		&dev_attr_vref.attr,
++	},
++	{
++		.since =	MCA_MAKE_FW_VER(0,4),
++		.attr =		&dev_attr_last_wakeup_reason.attr,
++	},
++	{
++		.since =	MCA_MAKE_FW_VER(0,4),
++		.attr =		&dev_attr_last_mca_reset.attr,
++	},
++	{
++		.since =	MCA_MAKE_FW_VER(0,4),
++		.attr =		&dev_attr_last_mpu_reset.attr,
++	},
++};
++
++int mca_cc8x_suspend(struct device *dev)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++
++	if (!mca) {
++		dev_err(dev, " mca was null in %s\n", __func__);
++		return -ENODEV;
++	}
++
++	/* Set the suspend bit in PWR_CTRL_0 */
++	return regmap_update_bits(pmca->regmap, MCA_PWR_CTRL_0,
++				  MCA_PWR_GO_SUSPEND,
++				  MCA_PWR_GO_SUSPEND);
++}
++
++#define MCA_MAX_RESUME_RD_RETRIES 10
++int mca_cc8x_resume(struct device *dev)
++{
++	struct mca_drv *mca = dev_get_drvdata(dev);
++	unsigned int val;
++	int ret, retries = 0;
++
++	if (!mca) {
++		dev_err(dev, " mca was null in %s\n", __func__);
++		return -ENODEV;
++	}
++
++	/*
++	 * Generate traffic on the i2c bus to wakeup the MCA, in case it was in
++	 * low power
++	 */
++	do {
++		ret = regmap_read(mca->regmap, MCA_DEVICE_ID, &val);
++		if (!ret && mca->dev_id == (u8)val)
++			break;
++		udelay(50);
++	} while (++retries < MCA_MAX_RESUME_RD_RETRIES);
++
++	if (retries == MCA_MAX_RESUME_RD_RETRIES) {
++		dev_err(mca->dev, "unable to wake up MCA (%d)\n", ret);
++		return ret;
++	}
++
++	/* Reset the suspend bit in PWR_CTRL_0 */
++	return regmap_update_bits(pmca->regmap, MCA_PWR_CTRL_0,
++				  MCA_PWR_GO_SUSPEND,
++				  0);
++}
++
++#define MCA_MAX_PWROFF_TRIES 5
++static void mca_cc8x_power_off(void)
++{
++	int try = 0;
++	int ret;
++
++	if (!pmca) {
++		printk(KERN_ERR "ERROR: unable to power off [%s:%d/%s()]!\n",
++		       __FILE__, __LINE__, __func__);
++		return;
++	}
++
++	do {
++		/* Set power off bit in PWR_CTRL_0 register to shutdown */
++		ret = regmap_update_bits(pmca->regmap, MCA_PWR_CTRL_0,
++					 MCA_PWR_GO_OFF,
++					 MCA_PWR_GO_OFF);
++		if (ret)
++			printk(KERN_ERR "ERROR: accesing PWR_CTRL_0 register "
++			       "[%s:%d/%s()]!\n", __FILE__, __LINE__, __func__);
++
++		/*
++		 * Even if the regmap update returned with success, retry...
++		 * we are powering off, so there is nothing bad by doing it.
++		 */
++		mdelay(50);
++	} while (++try < MCA_MAX_PWROFF_TRIES);
++
++	/* Print a warning and return, so at least userland can log the issue */
++	printk(KERN_ERR "ERROR: unable to power off [%s:%d/%s()]!\n",
++	       __FILE__, __LINE__, __func__);
++}
++
++#define MCA_MAX_RESET_TRIES 5
++static int mca_cc8x_restart_handler(struct notifier_block *nb,
++				     unsigned long mode, void *cmd)
++{
++	int ret;
++	int try = 0;
++	struct mca_drv *mca = container_of(nb, struct mca_drv,
++					     restart_handler);
++	const uint8_t unlock_pattern[] = {'C', 'T', 'R', 'U'};
++
++	do {
++		ret = regmap_bulk_write(mca->regmap, MCA_CTRL_UNLOCK_0,
++					unlock_pattern, sizeof(unlock_pattern));
++		if (ret) {
++			dev_err(mca->dev, "failed to unlock ctrl regs (%d)\n",
++				ret);
++			goto reset_retry;
++		}
++
++		ret = regmap_write(pmca->regmap, MCA_CTRL_0,
++				   MCA_RESET);
++		if (ret)
++			dev_err(mca->dev, "failed to reset (%d)\n", ret);
++
++		/*
++		 * The MCA will reset the cpu, so the retry should not happen...
++		 * and if it happens, something went wrong, and retrying is the
++		 * right thing to do.
++		 */
++reset_retry:
++		mdelay(10);
++	} while (++try < MCA_MAX_RESET_TRIES);
++
++	dev_err(mca->dev, "failed to reboot!\n");
++
++	return NOTIFY_DONE;
++}
++
++static int mca_cc8x_add_dyn_sysfs_entries(struct mca_drv *mca,
++					   const struct dyn_attribute *dattr,
++					   int num_entries,
++					   const struct attribute_group *grp)
++{
++	int ret, i;
++
++	if (!mca || !dattr || !grp)
++		return -EINVAL;
++
++	for (i = 0; i < num_entries; i++, dattr++) {
++		if (!dattr->attr)
++			continue;
++
++		/* Create the sysfs files if the MCA fw supports the feature*/
++		if (mca->fw_version >= dattr->since) {
++			ret = sysfs_add_file_to_group(&mca->dev->kobj,
++						      dattr->attr,
++						      grp->name);
++			if (ret)
++				dev_warn(mca->dev,
++					 "Cannot create sysfs file %s (%d)\n",
++					 dattr->attr->name, ret);
++		}
++	}
++
++	return 0;
++}
++
++int mca_cc8x_device_init(struct mca_drv *mca, u32 irq)
++{
++	int ret;
++	unsigned int val;
++
++	ret = regmap_read(mca->regmap, MCA_DEVICE_ID, &val);
++	if (ret != 0) {
++		dev_err(mca->dev, "Cannot read MCA Device ID (%d)\n", ret);
++		return ret;
++	}
++	mca->dev_id = (u8)val;
++
++	if (mca->dev_id != MCA_CC8X_DEVICE_ID_VAL) {
++		dev_err(mca->dev, "Invalid MCA Device ID (%x)\n", mca->dev_id);
++		return -ENODEV;
++	}
++
++	ret = regmap_read(mca->regmap, MCA_HW_VER, &val);
++	if (ret != 0) {
++		dev_err(mca->dev, "Cannot read MCA Hardware Version (%d)\n",
++			ret);
++		return ret;
++	}
++	mca->hw_version = (u8)val;
++
++	ret = regmap_bulk_read(mca->regmap, MCA_FW_VER_L, &val, 2);
++	if (ret != 0) {
++		dev_err(mca->dev, "Cannot read MCA Firmware Version (%d)\n",
++			ret);
++		return ret;
++	}
++	mca->fw_version = (u16)(val & ~MCA_FW_VER_ALPHA_MASK);
++	mca->fw_is_alpha = val & MCA_FW_VER_ALPHA_MASK ? true : false;
++
++	if (mca->fw_version >= MCA_MAKE_FW_VER(0, 4)) {
++		ret = regmap_bulk_read(mca->regmap, MCA_LAST_MCA_RESET_0,
++				       &mca->last_mca_reset,
++				       sizeof(mca->last_mca_reset));
++		if (ret) {
++			dev_err(mca->dev,
++				"Cannot read MCA last reset (%d)\n", ret);
++			return ret;
++		}
++
++		ret = regmap_bulk_read(mca->regmap, MCA_LAST_MPU_RESET_0,
++				       &mca->last_mpu_reset,
++				       sizeof(mca->last_mpu_reset));
++		if (ret) {
++			dev_err(mca->dev,
++				"Cannot read MPU last reset (%d)\n", ret);
++			return ret;
++		}
++	}
++
++	/*
++	 * Read the SOM hardware version the MCA is using. For CC8X module it
++	 * is set by uboot
++	 */
++	ret = regmap_read(mca->regmap, MCA_HWVER_SOM, &mca->som_hv);
++	if (ret != 0)
++		dev_warn(mca->dev,
++			 "Cannot read SOM hardware version (%d)\n", ret);
++
++	mca->fw_update_gpio = of_get_named_gpio(mca->dev->of_node,
++						"fw-update-gpio", 0);
++	if (!gpio_is_valid(mca->fw_update_gpio) ||
++	    devm_gpio_request_one(mca->dev, mca->fw_update_gpio,
++				  GPIOF_OUT_INIT_LOW, "mca-fw-update")) {
++		dev_warn(mca->dev, "failed to get fw-update-gpio: %d\n", ret);
++		mca->fw_update_gpio = -EINVAL;
++	}
++
++	mca->chip_irq = irq;
++	mca->gpio_base = -1;
++
++	ret = mca_cc8x_irq_init(mca);
++	if (ret != 0) {
++		dev_err(mca->dev, "Cannot initialize interrupts (%d)\n", ret);
++		return ret;
++	}
++
++	ret = mfd_add_devices(mca->dev, -1, mca_cc8x_devs,
++			      ARRAY_SIZE(mca_cc8x_devs), NULL, mca->irq_base,
++			      regmap_irq_get_domain(mca->regmap_irq));
++	if (ret) {
++		dev_err(mca->dev, "Cannot add MFD cells (%d)\n", ret);
++		goto out_irq;
++	}
++
++	ret = sysfs_create_group(&mca->dev->kobj, &mca_cc8x_attr_group);
++	if (ret) {
++		dev_err(mca->dev, "Cannot create sysfs entries (%d)\n", ret);
++		goto out_dev;
++	}
++	if (mca->fw_update_gpio == -EINVAL) {
++		/* Remove fw_update entry */
++		sysfs_remove_file(&mca->dev->kobj, &dev_attr_fw_update.attr);
++	}
++
++	ret = mca_cc8x_add_dyn_sysfs_entries(mca, mca_cc8x_sysfs_dyn_entries,
++					      ARRAY_SIZE(mca_cc8x_sysfs_dyn_entries),
++					      &mca_cc8x_attr_group);
++	if (ret) {
++		dev_err(mca->dev, "Cannot create sysfs dynamic entries (%d)\n",
++			ret);
++		goto out_sysfs_remove;
++	}
++
++	pmca = mca;
++
++	if (pm_power_off != NULL) {
++		dev_warn(mca->dev, "pm_power_off function already registered. "
++			 "Will be override by MCA function.\n");
++	}
++	pm_power_off = mca_cc8x_power_off;
++
++	/*
++	 * To avoid error messages when resuming from suspend, increase the I2C
++	 * bus' usage counter so the linux pm_runtime framework wakes it from
++	 * suspend before trying to read the MCA's IRQ status. This indicates that
++	 * the bus is in use when the system is going to suspend, making linux wake
++	 * it up as soon as possible so any operations that were halted continue
++	 * without issues after resuming.
++	 *
++	 * The device hierarchy is the following:
++	 *
++	 * mca_cc8x 0-0063 -> i2c i2c-0 -> imx-lpi2c 5a800000.i2c
++	 */
++	pm_runtime_get_noresume(mca->dev->parent->parent);
++
++	/*
++	 * Register the MCA restart handler with high priority to ensure it is
++	 * called first
++	 */
++	mca->restart_handler.notifier_call = mca_cc8x_restart_handler;
++	mca->restart_handler.priority = 200;
++	ret = register_restart_handler(&mca->restart_handler);
++	if (ret) {
++		dev_err(mca->dev,
++			"failed to register restart handler (%d)\n", ret);
++		goto out_pwr_off;
++	}
++
++	if (mca->fw_version >= MCA_MAKE_FW_VER(0, 8)) {
++		mca->nvram = devm_kzalloc(mca->dev, sizeof(struct bin_attribute),
++					  GFP_KERNEL);
++		if (!mca->nvram) {
++			dev_err(mca->dev, "Cannot allocate memory for nvram\n");
++			goto out_pwr_off;
++		}
++
++		sysfs_bin_attr_init(mca->nvram);
++
++		mca->nvram->attr.name = "nvram";
++		mca->nvram->attr.mode = S_IRUGO | S_IWUSR;
++
++		mca->nvram->read = nvram_read;
++		mca->nvram->write = nvram_write;
++
++		ret = sysfs_create_bin_file(&mca->dev->kobj, mca->nvram);
++		if (ret) {
++			dev_err(mca->dev, "Cannot create sysfs file: %s\n",
++				mca->nvram->attr.name);
++			goto out_nvram;
++		}
++	}
++
++	return 0;
++
++out_nvram:
++	kfree(mca->nvram);
++out_pwr_off:
++	pm_power_off = NULL;
++out_sysfs_remove:
++	pmca = NULL;
++	sysfs_remove_group(&mca->dev->kobj, &mca_cc8x_attr_group);
++out_dev:
++	mfd_remove_devices(mca->dev);
++out_irq:
++	mca_cc8x_irq_exit(mca);
++
++	return ret;
++}
++
++void mca_cc8x_device_exit(struct mca_drv *mca)
++{
++	unregister_restart_handler(&mca->restart_handler);
++	pm_power_off = NULL;
++	pmca = NULL;
++	pm_runtime_put_noidle(mca->dev->parent->parent);
++	sysfs_remove_group(&mca->dev->kobj, &mca_cc8x_attr_group);
++	mfd_remove_devices(mca->dev);
++	mca_cc8x_irq_exit(mca);
++	kfree(mca->nvram);
++}
++
++MODULE_AUTHOR("Digi International Inc");
++MODULE_DESCRIPTION("MCA driver for ConnectCore 8X");
++MODULE_LICENSE("GPL");
+diff --git a/drivers/mfd/mca-cc8x-i2c.c b/drivers/mfd/mca-cc8x-i2c.c
+new file mode 100644
+index 000000000000..43e1b9e9d9d8
+--- /dev/null
++++ b/drivers/mfd/mca-cc8x-i2c.c
+@@ -0,0 +1,222 @@
++/*
++ *  Copyright 2018 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/i2c.h>
++#include <linux/regmap.h>
++#include <linux/delay.h>
++#include <linux/slab.h>
++#include <linux/err.h>
++
++#include <linux/mfd/core.h>
++#include <linux/mfd/mca-common/core.h>
++#include <linux/mfd/mca-cc8x/core.h>
++
++#include <linux/of.h>
++#include <linux/regulator/of_regulator.h>
++
++static const struct regmap_range mca_cc8x_readable_ranges[] = {
++};
++
++static const struct regmap_range mca_cc8x_writeable_ranges[] = {
++	regmap_reg_range(MCA_HWVER_SOM, MCA_HWVER_SOM),
++	regmap_reg_range(MCA_IRQ_STATUS_0, MCA_IRQ_MASK_3),
++	regmap_reg_range(MCA_PWR_CTRL_0, MCA_PWR_KEY_GUARD),
++	regmap_reg_range(MCA_CTRL_UNLOCK_0, MCA_CTRL_UNLOCK_3),
++	regmap_reg_range(MCA_CTRL_0, MCA_CTRL_0),
++	regmap_reg_range(MCA_TAMPER0_CFG0, MCA_TAMPER0_EVENT),
++	regmap_reg_range(MCA_TAMPER1_CFG0, MCA_TAMPER1_EVENT),
++	regmap_reg_range(MCA_TAMPER2_CFG0, MCA_TAMPER2_THRESH_HI_H),
++	regmap_reg_range(MCA_TAMPER3_CFG0, MCA_TAMPER3_THRESH_HI_H),
++	regmap_reg_range(MCA_RTC_CONTROL, MCA_RTC_CONTROL),
++	regmap_reg_range(MCA_RTC_COUNT_YEAR_L, MCA_RTC_ALARM_SEC),
++	regmap_reg_range(MCA_WDT_CONTROL, MCA_WDT_REFRESH_3),
++	regmap_reg_range(MCA_GPIO_DIR_0, MCA_GPIO_DEB_CNT_63),
++	regmap_reg_range(MCA_REG_ADC_CFG0_0, MCA_REG_ADC_CFG0_21),
++	regmap_reg_range(MCA_REG_ADC_CFG1_0, MCA_REG_ADC_CFG1_21),
++	regmap_reg_range(MCA_REG_ADC_CFG2_0, MCA_REG_ADC_CFG2_21),
++	regmap_reg_range(MCA_REG_ADC_SAMPLES_CNT_0, MCA_REG_ADC_SAMPLES_CNT_21),
++	regmap_reg_range(MCA_REG_ADC_THRESH_LO_L_0, MCA_REG_ADC_THRESH_LO_H_21),
++	regmap_reg_range(MCA_REG_ADC_THRESH_HI_L_0, MCA_REG_ADC_THRESH_HI_H_21),
++	regmap_reg_range(MCA_REG_ADC_TICKS_L_0, MCA_REG_ADC_TICKS_H_21),
++	regmap_reg_range(MCA_REG_ADC_IRQ_0, MCA_REG_ADC_IRQ_7),
++	regmap_reg_range(MCA_REG_ADC_CFG_0, MCA_REG_ADC_CFG_2),
++	regmap_reg_range(MCA_REG_ADC_BUFF_CH, MCA_REG_ADC_BUFF_SAMPLE_21),
++	regmap_reg_range(MCA_REG_UART_THR, MCA_REG_UART_RTSPIN),
++	regmap_reg_range(MCA_CC8X_MPU_NVRAM_START, MCA_CC8X_MPU_NVRAM_END),
++	regmap_reg_range(MCA_REG_TPM0_CFG0, MCA_REG_TPM2_CH7_CNT1),
++};
++
++static const struct regmap_range mca_cc8x_volatile_ranges[] = {
++	/* Real volatile registers */
++	regmap_reg_range(MCA_IRQ_STATUS_0, MCA_IRQ_STATUS_3),
++	regmap_reg_range(MCA_TAMPER0_DATE_START, MCA_TAMPER0_EVENT),
++	regmap_reg_range(MCA_TAMPER1_DATE_START, MCA_TAMPER1_EVENT),
++	regmap_reg_range(MCA_TAMPER2_DATE_START, MCA_TAMPER2_EVENT),
++	regmap_reg_range(MCA_TAMPER3_DATE_START, MCA_TAMPER3_EVENT),
++	regmap_reg_range(MCA_TIMER_TICK_0, MCA_TIMER_TICK_3),
++	regmap_reg_range(MCA_LAST_MCA_RESET_0, MCA_LAST_MCA_RESET_3),
++	regmap_reg_range(MCA_LAST_MPU_RESET_0, MCA_LAST_MPU_RESET_3),
++	regmap_reg_range(MCA_LAST_WAKEUP_REASON_0, MCA_LAST_WAKEUP_REASON_3),
++	regmap_reg_range(MCA_CC8X_MPU_NVRAM_START, MCA_CC8X_MPU_NVRAM_END),
++	regmap_reg_range(MCA_RTC_COUNT_YEAR_L, MCA_RTC_COUNT_SEC),
++	regmap_reg_range(MCA_GPIO_DATA_0, MCA_GPIO_DATA_7),
++	regmap_reg_range(MCA_GPIO_IRQ_STATUS_0, MCA_GPIO_IRQ_STATUS_7),
++	regmap_reg_range(MCA_PWR_CTRL_0, MCA_PWR_STATUS_0),
++	regmap_reg_range(MCA_REG_ADC_VAL_L_0, MCA_REG_ADC_VAL_H_21),
++
++	/*
++	 * Fake volatile registers.
++	 *
++	 * These registers could be cached but non-volatile registers makes
++	 * regmap access each register one by one which has some drawbacks:
++	 * - Breaks CRC in the protocol.
++	 * - Requires the MCA firmware to process each access as a separate
++	 *   access, even when the data requested must be returned in bulk.
++	 *
++	 * For this reasons we will consider all registers volatile.
++	 */
++	regmap_reg_range(MCA_HWVER_SOM, MCA_HWVER_SOM),
++	regmap_reg_range(MCA_DEVICE_ID, MCA_UID_9),
++	regmap_reg_range(MCA_IRQ_MASK_0, MCA_IRQ_MASK_3),
++	regmap_reg_range(MCA_PWR_KEY_DEBOUNCE, MCA_PWR_KEY_GUARD),
++	regmap_reg_range(MCA_CTRL_0, MCA_CTRL_0),
++	regmap_reg_range(MCA_TAMPER0_CFG0, MCA_TAMPER0_DELAY_PWROFF),
++	regmap_reg_range(MCA_TAMPER1_CFG0, MCA_TAMPER1_DELAY_PWROFF),
++	regmap_reg_range(MCA_TAMPER2_CFG0, MCA_TAMPER2_THRESH_HI_H),
++	regmap_reg_range(MCA_TAMPER3_CFG0, MCA_TAMPER3_THRESH_HI_H),
++	regmap_reg_range(MCA_RTC_CONTROL, MCA_RTC_CONTROL),
++	regmap_reg_range(MCA_RTC_ALARM_YEAR_L, MCA_RTC_ALARM_SEC),
++	regmap_reg_range(MCA_WDT_CONTROL, MCA_WDT_TIMEOUT),
++	regmap_reg_range(MCA_GPIO_NUM, MCA_GPIO_DIR_7),
++	regmap_reg_range(MCA_GPIO_IRQ_CFG_0, MCA_GPIO_IRQ_CFG_63),
++	regmap_reg_range(MCA_REG_ADC_NUM_CH, MCA_REG_ADC_NUM_BYTES),
++	regmap_reg_range(MCA_REG_ADC_CFG0_0, MCA_REG_ADC_CFG0_21),
++	regmap_reg_range(MCA_REG_ADC_CFG1_0, MCA_REG_ADC_CFG1_21),
++	regmap_reg_range(MCA_REG_ADC_CFG2_0, MCA_REG_ADC_CFG2_21),
++	regmap_reg_range(MCA_REG_ADC_SAMPLES_CNT_0, MCA_REG_ADC_SAMPLES_CNT_21),
++	regmap_reg_range(MCA_REG_ADC_THRESH_LO_L_0, MCA_REG_ADC_THRESH_LO_H_21),
++	regmap_reg_range(MCA_REG_ADC_THRESH_HI_L_0, MCA_REG_ADC_THRESH_HI_H_21),
++	regmap_reg_range(MCA_REG_ADC_TICKS_L_0, MCA_REG_ADC_TICKS_H_21),
++	regmap_reg_range(MCA_REG_ADC_IRQ_0, MCA_REG_ADC_IRQ_7),
++	regmap_reg_range(MCA_REG_ADC_CFG_0, MCA_REG_ADC_CFG_2),
++	regmap_reg_range(MCA_REG_ADC_BUFF_CH, MCA_REG_ADC_BUFF_SAMPLE_21),
++	regmap_reg_range(MCA_REG_UART_RHR, MCA_REG_UART_RTSPIN),
++	regmap_reg_range(MCA_REG_TPM0_CFG0, MCA_REG_TPM2_CH7_CNT1),
++};
++
++static const struct regmap_access_table mca_cc8x_readable_table = {
++	.yes_ranges = mca_cc8x_readable_ranges,
++	.n_yes_ranges = ARRAY_SIZE(mca_cc8x_readable_ranges),
++};
++
++static const struct regmap_access_table mca_cc8x_writeable_table = {
++	.yes_ranges = mca_cc8x_writeable_ranges,
++	.n_yes_ranges = ARRAY_SIZE(mca_cc8x_writeable_ranges),
++};
++
++static const struct regmap_access_table mca_cc8x_volatile_table = {
++	.yes_ranges = mca_cc8x_volatile_ranges,
++	.n_yes_ranges = ARRAY_SIZE(mca_cc8x_volatile_ranges),
++};
++
++static struct regmap_config mca_cc8x_regmap_config = {
++	.reg_bits = 16,
++	.val_bits = 8,
++	.max_register = 0xFFFF,
++
++	.rd_table = &mca_cc8x_readable_table,
++	.wr_table = &mca_cc8x_writeable_table,
++	.volatile_table = &mca_cc8x_volatile_table,
++
++	.cache_type = REGCACHE_NONE,
++};
++
++static const struct of_device_id mca_cc8x_dt_ids[] = {
++	{ .compatible = "digi,mca_cc8x", },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, mca_cc8x_dt_ids);
++
++static int mca_cc8x_i2c_probe(struct i2c_client *i2c,
++			       const struct i2c_device_id *id)
++{
++	struct mca_drv *mca;
++	int ret;
++
++	mca = devm_kzalloc(&i2c->dev, sizeof(struct mca_drv), GFP_KERNEL);
++	if (mca == NULL)
++		return -ENOMEM;
++
++	i2c_set_clientdata(i2c, mca);
++	mca->dev = &i2c->dev;
++	mca->chip_irq = i2c->irq;
++	mca->i2c_adapter_dev = &i2c->adapter->dev;
++
++	mca->regmap = devm_regmap_init_i2c(i2c, &mca_cc8x_regmap_config);
++	if (IS_ERR(mca->regmap)) {
++		ret = PTR_ERR(mca->regmap);
++		dev_err(mca->dev, "Failed to allocate register map: %d\n", ret);
++		return ret;
++	}
++
++	return mca_cc8x_device_init(mca, i2c->irq);
++}
++
++static int mca_cc8x_i2c_remove(struct i2c_client *i2c)
++{
++	struct mca_drv *mca = i2c_get_clientdata(i2c);
++
++	mca_cc8x_device_exit(mca);
++
++	return 0;
++}
++
++#ifdef CONFIG_PM
++static int mca_cc8x_i2c_suspend(struct device *dev)
++{
++	return mca_cc8x_suspend(dev);
++}
++
++static int mca_cc8x_i2c_resume(struct device *dev)
++{
++	return mca_cc8x_resume(dev);
++}
++
++/*
++ * Use suspend_late/resume_early so the mca_drv continues being functional
++ * during the regular suspend/resume callbacks of other drivers, just in case
++ * they use any functionality of the mca.
++ */
++static const struct dev_pm_ops mca_cc8x_i2c_pm_ops = {
++	SET_LATE_SYSTEM_SLEEP_PM_OPS(mca_cc8x_i2c_suspend, mca_cc8x_i2c_resume)
++};
++#endif
++
++static const struct i2c_device_id mca_cc8x_i2c_id[] = {
++        {"mca_cc8x", 0},
++        {},
++};
++MODULE_DEVICE_TABLE(i2c, mca_cc8x_i2c_id);
++
++static struct i2c_driver mca_cc8x_i2c_driver = {
++	.driver = {
++		.name = "mca_cc8x",
++		.of_match_table = of_match_ptr(mca_cc8x_dt_ids),
++#ifdef CONFIG_PM
++		.pm = &mca_cc8x_i2c_pm_ops,
++#endif
++	},
++	.probe    = mca_cc8x_i2c_probe,
++	.remove   = mca_cc8x_i2c_remove,
++	.id_table = mca_cc8x_i2c_id,
++};
++
++module_i2c_driver(mca_cc8x_i2c_driver);
+diff --git a/drivers/mfd/mca-cc8x-irq.c b/drivers/mfd/mca-cc8x-irq.c
+new file mode 100644
+index 000000000000..1036e602d1f9
+--- /dev/null
++++ b/drivers/mfd/mca-cc8x-irq.c
+@@ -0,0 +1,143 @@
++/*
++ *  Copyright 2018 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/irq.h>
++#include <linux/mfd/core.h>
++#include <linux/interrupt.h>
++#include <linux/regmap.h>
++#include <linux/mfd/mca-common/core.h>
++#include <linux/mfd/mca-cc8x/core.h>
++
++#include <soc/imx8/sc/svc/irq/api.h>
++
++#define MCA_IRQ_0_OFFSET		0
++#define MCA_IRQ_1_OFFSET		1
++#define MCA_IRQ_2_OFFSET		2
++#define MCA_IRQ_3_OFFSET		3
++
++static const struct regmap_irq mca_cc8x_irqs[] = {
++	/* MCA irqs A register */
++	[MCA_CC8X_IRQ_RTC_ALARM] = {
++                .reg_offset = MCA_IRQ_0_OFFSET,
++                .mask = MCA_M_RTC_ALARM,
++        },
++	[MCA_CC8X_IRQ_RTC_1HZ] = {
++                .reg_offset = MCA_IRQ_0_OFFSET,
++                .mask = MCA_M_RTC_1HZ,
++        },
++	[MCA_CC8X_IRQ_WATCHDOG] = {
++                .reg_offset = MCA_IRQ_0_OFFSET,
++                .mask = MCA_M_WATCHDOG,
++        },
++	[MCA_CC8X_IRQ_PWR_SLEEP] = {
++                .reg_offset = MCA_IRQ_0_OFFSET,
++                .mask = MCA_M_PWR_SLEEP,
++        },
++	[MCA_CC8X_IRQ_PWR_OFF] = {
++                .reg_offset = MCA_IRQ_0_OFFSET,
++                .mask = MCA_M_PWR_OFF,
++        },
++	[MCA_CC8X_IRQ_TAMPER0] = {
++		.reg_offset = MCA_IRQ_0_OFFSET,
++		.mask = MCA_M_TAMPER0,
++	},
++	[MCA_CC8X_IRQ_TAMPER1] = {
++		.reg_offset = MCA_IRQ_0_OFFSET,
++		.mask = MCA_M_TAMPER1,
++	},
++	[MCA_CC8X_IRQ_ADC] = {
++		.reg_offset = MCA_IRQ_0_OFFSET,
++		.mask = MCA_M_ADC,
++	},
++	[MCA_CC8X_IRQ_GPIO_BANK_0] = {
++		.reg_offset = MCA_IRQ_1_OFFSET,
++		.mask = MCA_GPIO_BANK_0,
++	},
++	[MCA_CC8X_IRQ_GPIO_BANK_1] = {
++		.reg_offset = MCA_IRQ_1_OFFSET,
++		.mask = MCA_GPIO_BANK_1,
++	},
++	[MCA_CC8X_IRQ_GPIO_BANK_2] = {
++		.reg_offset = MCA_IRQ_1_OFFSET,
++		.mask = MCA_GPIO_BANK_2,
++	},
++	[MCA_CC8X_IRQ_TAMPER2] = {
++		.reg_offset = MCA_IRQ_2_OFFSET,
++		.mask = MCA_M_TAMPER2,
++	},
++	[MCA_CC8X_IRQ_TAMPER3] = {
++		.reg_offset = MCA_IRQ_2_OFFSET,
++		.mask = MCA_M_TAMPER3,
++	},
++	[MCA_CC8X_IRQ_UART] = {
++		.reg_offset = MCA_IRQ_2_OFFSET,
++		.mask = MCA_M_UART,
++	},
++};
++
++/*
++ * This hook is used to call the SCU MU interrupt handler to manage the SC
++ * interrupts that could have been signaled by the SCU.
++ * This is needed because the MCA ISR replaces the original SCU MU ISR because
++ * both can not be registered as shared irq handlers.
++ */
++static int mca_cc8x_pre_irq(void *irq_drv_data)
++{
++	return imx8_scu_mu_isr(0, NULL);
++}
++
++static const struct regmap_irq_chip mca_cc8x_irq_chip = {
++	.name		= "mca-cc8x-irq",
++	.irqs		= mca_cc8x_irqs,
++	.num_irqs	= ARRAY_SIZE(mca_cc8x_irqs),
++	.num_regs	= MCA_NUM_IRQ_REGS,
++	.status_base	= MCA_IRQ_STATUS_0,
++	.mask_base	= MCA_IRQ_MASK_0,
++	.ack_base	= MCA_IRQ_STATUS_0,
++	.handle_pre_irq	= mca_cc8x_pre_irq,
++	.init_ack_masked = true,
++};
++
++int mca_cc8x_irq_init(struct mca_drv *mca)
++{
++	int ret;
++
++	if (!mca->chip_irq) {
++		dev_err(mca->dev, "No IRQ configured\n");
++		return -EINVAL;
++	}
++
++	mca->irq_base = -1;
++	ret = regmap_add_irq_chip(mca->regmap, mca->chip_irq,
++				  IRQF_ONESHOT | IRQF_SHARED,
++				  mca->irq_base, &mca_cc8x_irq_chip,
++				  &mca->regmap_irq);
++	if (ret) {
++		dev_err(mca->dev, "Failed to reguest IRQ %d: %d\n",
++			mca->chip_irq, ret);
++		return ret;
++	}
++
++	ret = imx8_mu_enable_sc_irqs(SC_IRQ_TEMP_MCA | SC_IRQ_TEMP_PMIC0_HIGH | \
++				     SC_IRQ_TEMP_PMIC1_HIGH,
++				     SC_IRQ_RTC,
++				     SC_IRQ_BUTTON,
++				     SC_IRQ_WDOG);
++	if (ret)
++		dev_err(mca->dev, "Failed to reguest SC MU IRQs (%d)\n", ret);
++
++	return ret;
++}
++
++void mca_cc8x_irq_exit(struct mca_drv *mca)
++{
++        regmap_del_irq_chip(mca->chip_irq, mca->regmap_irq);
++}
+diff --git a/include/linux/mfd/mca-cc6ul/core.h b/include/linux/mfd/mca-cc6ul/core.h
+new file mode 100644
+index 000000000000..497a79dfb419
+--- /dev/null
++++ b/include/linux/mfd/mca-cc6ul/core.h
+@@ -0,0 +1,56 @@
++/*
++ *  Copyright 2016 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#ifndef MFD_MCA_CC6UL_CORE_H_
++#define MFD_MCA_CC6UL_CORE_H_
++
++#include <linux/interrupt.h>
++#include <linux/mfd/mca-common/core.h>
++#include <linux/mfd/mca-cc6ul/registers.h>
++
++/* MCA CC6UL modules */
++#define MCA_CC6UL_DRVNAME_CORE		"mca-cc6ul-core"
++#define MCA_CC6UL_DRVNAME_RTC		"mca-cc6ul-rtc"
++#define MCA_CC6UL_DRVNAME_WATCHDOG	"mca-cc6ul-watchdog"
++#define MCA_CC6UL_DRVNAME_GPIO		"mca-cc6ul-gpio"
++#define MCA_CC6UL_DRVNAME_PWRKEY	"mca-cc6ul-pwrkey"
++#define MCA_CC6UL_DRVNAME_ADC		"mca-cc6ul-adc"
++#define MCA_CC6UL_DRVNAME_TAMPER	"mca-cc6ul-tamper"
++#define MCA_CC6UL_DRVNAME_COMPARATOR	"mca-cc6ul-comparator"
++#define MCA_CC6UL_DRVNAME_UART		"mca-cc6ul-uart"
++
++#define MCA_CC6UL_DEVICE_ID_VAL		0x61
++
++/* Interrupts */
++enum mca_cc6ul_irqs {
++	MCA_CC6UL_IRQ_RTC_ALARM,
++	MCA_CC6UL_IRQ_RTC_1HZ,
++	MCA_CC6UL_IRQ_WATCHDOG,
++	MCA_CC6UL_IRQ_PWR_SLEEP,
++	MCA_CC6UL_IRQ_PWR_OFF,
++	MCA_CC6UL_IRQ_TAMPER0,
++	MCA_CC6UL_IRQ_TAMPER1,
++	MCA_CC6UL_IRQ_ADC,
++	MCA_CC6UL_IRQ_GPIO_BANK_0,
++	MCA_CC6UL_IRQ_TAMPER2,
++	MCA_CC6UL_IRQ_TAMPER3,
++	MCA_CC6UL_IRQ_UART,
++	/* ... */
++
++	MCA_CC6UL_NUM_IRQS,
++};
++
++int mca_cc6ul_device_init(struct mca_drv *mca, u32 irq);
++int mca_cc6ul_irq_init(struct mca_drv *mca);
++void mca_cc6ul_device_exit(struct mca_drv *mca);
++void mca_cc6ul_irq_exit(struct mca_drv *mca);
++int mca_cc6ul_suspend(struct device *dev);
++int mca_cc6ul_resume(struct device *dev);
++
++#endif /* MFD_MCA_CC6UL_CORE_H_ */
+diff --git a/include/linux/mfd/mca-cc6ul/registers.h b/include/linux/mfd/mca-cc6ul/registers.h
+new file mode 100644
+index 000000000000..21a1dd3e5168
+--- /dev/null
++++ b/include/linux/mfd/mca-cc6ul/registers.h
+@@ -0,0 +1,61 @@
++/*
++ *  Copyright 2017 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#ifndef MCA_CC6UL_REGISTERS_H_
++#define MCA_CC6UL_REGISTERS_H_
++
++#include <linux/bitops.h>
++
++/* EP0: Control and status */
++#define MCA_CC6UL_MPU_NVRAM_START	0x00b0
++#define MCA_CC6UL_MPU_NVRAM_END		0x00b7
++
++/*
++ * MCA registers bitfields
++ */
++
++/* MCA_CC6UL_LAST_MCA_RESET_n (addr=0x0098 & 0x009b) */
++#define MCA_CC6UL_LAST_MCA_RST_LLW	BIT(0)
++#define MCA_CC6UL_LAST_MCA_RST_LVD	BIT(1)
++#define MCA_CC6UL_LAST_MCA_RST_WD	BIT(5)
++#define MCA_CC6UL_LAST_MCA_RST_PIN	BIT(6)
++#define MCA_CC6UL_LAST_MCA_RST_PWRON	BIT(7)
++#define MCA_CC6UL_LAST_MCA_RST_LOCKUP	BIT(9)
++#define MCA_CC6UL_LAST_MCA_RST_SW	BIT(10)
++#define MCA_CC6UL_LAST_MCA_RST_MDMAPP	BIT(11)
++#define MCA_CC6UL_LAST_MCA_RST_SMAE	BIT(13)
++
++/* MCA_CC6UL_LAST_MPU_RESET_n (addr=0x009c & 0x009f) */
++#define MCA_CC6UL_LAST_MPU_RST_PWRON	BIT(0)
++#define MCA_CC6UL_LAST_MPU_RST_SYSR	BIT(1)
++#define MCA_CC6UL_LAST_MPU_RST_WD	BIT(2)
++#define MCA_CC6UL_LAST_MPU_RST_OFFWAKE	BIT(3)
++#define MCA_CC6UL_LAST_MPU_RST_MCARST	BIT(4)
++
++/* MCA_CC6UL_LAST_WAKEUP_REASON_n (addr=0x00a0 & 0x00a3) */
++#define MCA_CC6UL_LAST_WAKEUP_PWRIO	BIT(0)
++#define MCA_CC6UL_LAST_WAKEUP_TIMER	BIT(1)
++#define MCA_CC6UL_LAST_WAKEUP_RTC	BIT(2)
++#define MCA_CC6UL_LAST_WAKEUP_LPUART	BIT(3)
++#define MCA_CC6UL_LAST_WAKEUP_TAMPER0	BIT(4)
++#define MCA_CC6UL_LAST_WAKEUP_TAMPER1	BIT(5)
++#define MCA_CC6UL_LAST_WAKEUP_TAMPER2	BIT(6)
++#define MCA_CC6UL_LAST_WAKEUP_TAMPER3	BIT(7)
++#define MCA_CC6UL_LAST_WAKEUP_IO0	BIT(8)
++#define MCA_CC6UL_LAST_WAKEUP_IO1	BIT(9)
++#define MCA_CC6UL_LAST_WAKEUP_IO2	BIT(10)
++#define MCA_CC6UL_LAST_WAKEUP_IO3	BIT(11)
++#define MCA_CC6UL_LAST_WAKEUP_IO4	BIT(12)
++#define MCA_CC6UL_LAST_WAKEUP_IO5	BIT(13)
++#define MCA_CC6UL_LAST_WAKEUP_IO6	BIT(14)
++#define MCA_CC6UL_LAST_WAKEUP_IO7	BIT(15)
++#define MCA_CC6UL_LAST_WAKEUP_VCC	BIT(16)
++#define MCA_CC6UL_LAST_WAKEUP_CPU	BIT(17)
++
++#endif /* MCA_CC6UL_REGISTERS_H_ */
+diff --git a/include/linux/mfd/mca-common/core.h b/include/linux/mfd/mca-common/core.h
+new file mode 100644
+index 000000000000..f8b06dfab66b
+--- /dev/null
++++ b/include/linux/mfd/mca-common/core.h
+@@ -0,0 +1,71 @@
++/*
++ *  Copyright 2017 - 2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#ifndef MFD_MCA_COMMON_CORE_H_
++#define MFD_MCA_COMMON_CORE_H_
++
++#include <linux/interrupt.h>
++#include <linux/platform_device.h>
++#include <linux/mfd/mca-common/registers.h>
++#include <linux/gpio.h>
++
++#define MCA_MAKE_FW_VER(a,b)		(u16)(((a) << 8) | ((b) & 0xff))
++#define MCA_FW_VER_MAJOR(v)		(((v) >> 8) & 0xff)
++#define MCA_FW_VER_MINOR(v)		((v) & 0xff)
++#define MCA_FW_VER_ALPHA_MASK		BIT(15)
++
++#define MCA_IRQ_GPIO_BANK_0_NAME	"GPIO_BANK0"
++#define MCA_IRQ_GPIO_BANK_1_NAME	"GPIO_BANK1"
++#define MCA_IRQ_GPIO_BANK_2_NAME	"GPIO_BANK2"
++#define MCA_IRQ_GPIO_BANK_3_NAME	"GPIO_BANK3"
++#define MCA_IRQ_GPIO_BANK_4_NAME	"GPIO_BANK4"
++#define MCA_IRQ_GPIO_BANK_5_NAME	"GPIO_BANK5"
++#define MCA_IRQ_RTC_ALARM_NAME		"RTC ALARM"
++#define MCA_IRQ_RTC_1HZ_NAME		"RTC 1HZ"
++#define MCA_IRQ_PWR_SLEEP_NAME		"SLEEP"
++#define MCA_IRQ_PWR_OFF_NAME		"PWR OFF"
++#define MCA_IRQ_WATCHDOG_NAME		"WATCHDOG"
++#define MCA_IRQ_TAMPER0_NAME		"TAMPER0"
++#define MCA_IRQ_TAMPER1_NAME		"TAMPER1"
++#define MCA_IRQ_TAMPER2_NAME		"TAMPER2"
++#define MCA_IRQ_TAMPER3_NAME		"TAMPER3"
++#define MCA_IRQ_ADC_NAME		"ADC"
++#define MCA_IRQ_UART_NAME		"UART"
++
++/* Number of interrupt registers */
++#define MCA_NUM_IRQ_REGS		4
++/* Max number of IOs */
++#define MCA_MAX_IOS			64
++
++#define MCA_MAX_GPIO_IRQ_BANKS		6
++
++#define MCA_MAX_IO_BYTES		((MCA_MAX_IOS + 7) / 8)
++
++struct mca_drv {
++	struct device *dev;
++	u8 dev_id;
++	u8 hw_version;
++	bool fw_is_alpha;
++	u16 fw_version;
++	u32 flags;
++	struct regmap *regmap;
++	struct regmap_irq_chip_data *regmap_irq;
++	struct notifier_block restart_handler;
++	int chip_irq;
++	u32 irq_base;
++	int gpio_base;
++	int fw_update_gpio;
++	int som_hv;
++	u32 last_mca_reset;
++	u32 last_mpu_reset;
++	struct bin_attribute *nvram;
++	struct device *i2c_adapter_dev;
++};
++
++#endif /* MFD_MCA_COMMON_CORE_H_ */
+diff --git a/include/linux/mfd/mca-common/registers.h b/include/linux/mfd/mca-common/registers.h
+new file mode 100644
+index 000000000000..913ba71c9738
+--- /dev/null
++++ b/include/linux/mfd/mca-common/registers.h
+@@ -0,0 +1,1373 @@
++/*
++ *  Copyright 2017-2019 Digi International Inc
++ *
++ *  This program is free software; you can redistribute  it and/or modify it
++ *  under  the terms of  the GNU General  Public License as published by the
++ *  Free Software Foundation;  either version 2 of the  License, or (at your
++ *  option) any later version.
++ */
++
++#ifndef MCA_COMMON_REGISTERS_H_
++#define MCA_COMMON_REGISTERS_H_
++
++#include <linux/bitops.h>
++
++/* EP0: Control and status */
++#define MCA_DEVICE_ID			0x0001
++#define MCA_HW_VER			0x0002
++#define MCA_FW_VER_L			0x0003
++#define MCA_FW_VER_H			0x0004
++#define MCA_UID_0			0x0005
++#define MCA_UID_1			0x0006
++#define MCA_UID_2			0x0007
++#define MCA_UID_3			0x0008
++#define MCA_UID_4			0x0009
++#define MCA_UID_5			0x000A
++#define MCA_UID_6			0x000B
++#define MCA_UID_7			0x000C
++#define MCA_UID_8			0x000D
++#define MCA_UID_9			0x000E
++#define MCA_HWVER_SOM			0x000F
++
++#define MCA_IRQ_STATUS_0		0x0020
++#define MCA_IRQ_STATUS_1		0x0021
++#define MCA_IRQ_STATUS_2		0x0022
++#define MCA_IRQ_STATUS_3		0x0023
++
++#define MCA_IRQ_MASK_0			0x0024
++#define MCA_IRQ_MASK_1			0x0025
++#define MCA_IRQ_MASK_2			0x0026
++#define MCA_IRQ_MASK_3			0x0027
++
++#define MCA_PWR_CTRL_0			0x0028
++#define MCA_PWR_STATUS_0		0x0029
++#define MCA_PWR_KEY_DEBOUNCE		0x002a
++#define MCA_PWR_KEY_DELAY		0x002b
++#define MCA_PWR_KEY_GUARD		0x002c
++
++#define MCA_CTRL_UNLOCK_0		0x002d
++#define MCA_CTRL_UNLOCK_1		0x002e
++#define MCA_CTRL_UNLOCK_2		0x002f
++#define MCA_CTRL_UNLOCK_3		0x0030
++
++#define MCA_CTRL_0			0x0031
++#define MCA_CTRL_1			0x0032
++
++#define MCA_TAMPER0_CFG0		0x0037
++#define MCA_TAMPER0_CFG1		0x0038
++#define MCA_TAMPER0_IO_IN		0x0039
++#define MCA_TAMPER0_IO_OUT		0x003a
++#define MCA_TAMPER0_DELAY_PWROFF	0x003b
++/* 1 byte for padding */
++#define MCA_TAMPER0_DATE_START		0x003d
++#define MCA_TAMPER0_DATE_END		0x0043
++/* 1 byte for padding */
++#define MCA_TAMPER0_EVENT		0x0045
++
++#define MCA_TAMPER1_CFG0		0x0046
++#define MCA_TAMPER1_CFG1		0x0047
++#define MCA_TAMPER1_IO_IN		0x0048
++#define MCA_TAMPER1_IO_OUT		0x0049
++#define MCA_TAMPER1_DELAY_PWROFF	0x004a
++/* 1 byte for padding */
++#define MCA_TAMPER1_DATE_START		0x004c
++#define MCA_TAMPER1_DATE_END		0x0052
++/* 1 byte for padding */
++#define MCA_TAMPER1_EVENT		0x0054
++
++#define MCA_TAMPER_REGS_LEN	(MCA_TAMPER1_CFG0 - \
++					 MCA_TAMPER0_CFG0)
++
++#define MCA_TIMER_TICK_0		0x0057
++#define MCA_TIMER_TICK_1		0x0058
++#define MCA_TIMER_TICK_2		0x0059
++#define MCA_TIMER_TICK_3		0x005a
++
++#define MCA_TAMPER2_CFG0		0x0060
++#define MCA_TAMPER2_CFG1		0x0061
++#define MCA_TAMPER2_IO_IN		0x0062
++#define MCA_TAMPER2_IO_OUT		0x0063
++#define MCA_TAMPER2_DELAY_PWROFF	0x0064
++/* 1 byte for padding */
++/* Tamper event time-stamp follows the same format used by the RTC registers*/
++#define MCA_TAMPER2_DATE_START		0x0066
++/* ... */
++#define MCA_TAMPER2_DATE_END		0x006C
++/* 1 byte for padding */
++#define MCA_TAMPER2_EVENT		0x006E
++/* 1 byte for padding */
++#define MCA_TAMPER2_TICKS_L		0x0070
++#define MCA_TAMPER2_TICKS_H		0x0071
++#define MCA_TAMPER2_THRESH_LO_L		0x0072
++#define MCA_TAMPER2_THRESH_LO_H		0x0073
++#define MCA_TAMPER2_THRESH_HI_L		0x0074
++#define MCA_TAMPER2_THRESH_HI_H		0x0075
++
++#define MCA_TAMPER3_CFG0		0x0080
++#define MCA_TAMPER3_CFG1		0x0081
++#define MCA_TAMPER3_IO_IN		0x0082
++#define MCA_TAMPER3_IO_OUT		0x0083
++#define MCA_TAMPER3_DELAY_PWROFF	0x0084
++/* 1 byte for padding */
++/* Tamper event time-stamp follows the same format used by the RTC registers*/
++#define MCA_TAMPER3_DATE_START		0x0086
++/* ... */
++#define MCA_TAMPER3_DATE_END		0x008C
++/* 1 byte for padding */
++#define MCA_TAMPER3_EVENT		0x008E
++/* 1 byte for padding */
++#define MCA_TAMPER3_TICKS_L		0x0090
++#define MCA_TAMPER3_TICKS_H		0x0091
++#define MCA_TAMPER3_THRESH_LO_L		0x0092
++#define MCA_TAMPER3_THRESH_LO_H		0x0093
++#define MCA_TAMPER3_THRESH_HI_L		0x0094
++#define MCA_TAMPER3_THRESH_HI_H		0x0095
++
++#define MCA_LAST_MCA_RESET_0		0x0098
++#define MCA_LAST_MCA_RESET_3		0x009b
++#define MCA_LAST_MPU_RESET_0		0x009c
++#define MCA_LAST_MPU_RESET_3		0x009f
++#define MCA_LAST_WAKEUP_REASON_0	0x00a0
++#define MCA_LAST_WAKEUP_REASON_3	0x00a3
++
++/* EP1: RTC */
++#define MCA_RTC_CONTROL			0x0101
++
++#define MCA_RTC_COUNT_YEAR_L		0x0103
++#define MCA_RTC_COUNT_YEAR_H		0x0104
++#define MCA_RTC_COUNT_MONTH		0x0105
++#define MCA_RTC_COUNT_DAY		0x0106
++#define MCA_RTC_COUNT_HOUR		0x0107
++#define MCA_RTC_COUNT_MIN		0x0108
++#define MCA_RTC_COUNT_SEC		0x0109
++#define MCA_RTC_ALARM_YEAR_L		0x010A
++#define MCA_RTC_ALARM_YEAR_H		0x010B
++#define MCA_RTC_ALARM_MONTH		0x010C
++#define MCA_RTC_ALARM_DAY		0x010D
++#define MCA_RTC_ALARM_HOUR		0x010E
++#define MCA_RTC_ALARM_MIN		0x010F
++#define MCA_RTC_ALARM_SEC		0x0110
++
++
++/* EP2: Watchdog */
++#define MCA_WDT_CONTROL			0x0201
++#define MCA_WDT_TIMEOUT			0x0202
++#define MCA_WDT_REFRESH_0		0x0203
++#define MCA_WDT_REFRESH_1		0x0204
++#define MCA_WDT_REFRESH_2		0x0205
++#define MCA_WDT_REFRESH_3		0x0206
++
++
++/* EP3: GPIO */
++#define MCA_GPIO_NUM			0x0301
++#define MCA_GPIO_DIR_0			0x0302
++#define MCA_GPIO_DIR_1			0x0303
++#define MCA_GPIO_DIR_2			0x0304
++#define MCA_GPIO_DIR_3			0x0305
++#define MCA_GPIO_DIR_4			0x0306
++#define MCA_GPIO_DIR_5			0x0307
++#define MCA_GPIO_DIR_6			0x0308
++#define MCA_GPIO_DIR_7			0x0309
++#define MCA_GPIO_DATA_0			0x030A
++#define MCA_GPIO_DATA_1			0x030B
++#define MCA_GPIO_DATA_2			0x030C
++#define MCA_GPIO_DATA_3			0x030D
++#define MCA_GPIO_DATA_4			0x030E
++#define MCA_GPIO_DATA_5			0x030F
++#define MCA_GPIO_DATA_6			0x0310
++#define MCA_GPIO_DATA_7			0x0311
++#define MCA_GPIO_SET_0			0x0312
++#define MCA_GPIO_SET_1			0x0313
++#define MCA_GPIO_SET_2			0x0314
++#define MCA_GPIO_SET_3			0x0315
++#define MCA_GPIO_SET_4			0x0316
++#define MCA_GPIO_SET_5			0x0317
++#define MCA_GPIO_SET_6			0x0318
++#define MCA_GPIO_SET_7			0x0319
++#define MCA_GPIO_CLEAR_0		0x031A
++#define MCA_GPIO_CLEAR_1		0x031B
++#define MCA_GPIO_CLEAR_2		0x031C
++#define MCA_GPIO_CLEAR_3		0x031D
++#define MCA_GPIO_CLEAR_4		0x031E
++#define MCA_GPIO_CLEAR_5		0x031F
++#define MCA_GPIO_CLEAR_6		0x0320
++#define MCA_GPIO_CLEAR_7		0x0321
++#define MCA_GPIO_TOGGLE_0		0x0322
++#define MCA_GPIO_TOGGLE_1		0x0323
++#define MCA_GPIO_TOGGLE_2		0x0324
++#define MCA_GPIO_TOGGLE_3		0x0325
++#define MCA_GPIO_TOGGLE_4		0x0326
++#define MCA_GPIO_TOGGLE_5		0x0327
++#define MCA_GPIO_TOGGLE_6		0x0328
++#define MCA_GPIO_TOGGLE_7		0x0329
++#define MCA_GPIO_IRQ_STATUS_0		0x032a
++#define MCA_GPIO_IRQ_STATUS_1		0x032b
++#define MCA_GPIO_IRQ_STATUS_2		0x032c
++#define MCA_GPIO_IRQ_STATUS_3		0x032d
++#define MCA_GPIO_IRQ_STATUS_4		0x032e
++#define MCA_GPIO_IRQ_STATUS_5		0x032f
++#define MCA_GPIO_IRQ_STATUS_6		0x0330
++#define MCA_GPIO_IRQ_STATUS_7		0x0331
++/* Note, there is one IRQ configuration register per GPIO pin */
++#define MCA_GPIO_IRQ_CFG_0		0x0332
++#define MCA_GPIO_IRQ_CFG_1		0x0333
++#define MCA_GPIO_IRQ_CFG_2		0x0334
++#define MCA_GPIO_IRQ_CFG_3		0x0335
++#define MCA_GPIO_IRQ_CFG_4		0x0336
++#define MCA_GPIO_IRQ_CFG_5		0x0337
++#define MCA_GPIO_IRQ_CFG_6		0x0338
++#define MCA_GPIO_IRQ_CFG_7		0x0339
++/* ... */
++#define MCA_GPIO_IRQ_CFG_63		0x0371
++
++#define MCA_GPIO_DEB_CFG_0		0x0372
++/* ... */
++#define MCA_GPIO_DEB_CFG_7		0x0379
++
++#define MCA_GPIO_DEB_CNT_0		0x037a
++/* ... */
++#define MCA_GPIO_DEB_CNT_63		0x03b9
++
++/* EP4, ADCs Configuration (0 - 31) */
++#define MCA_REG_ADC_NUM_CH		0x0401
++#define MCA_REG_ADC_NUM_BYTES		0x0402
++#define MCA_REG_ADC_CFG0_0		0x0404
++#define MCA_REG_ADC_CFG0_1		0x0405
++#define MCA_REG_ADC_CFG0_2		0x0406
++#define MCA_REG_ADC_CFG0_3		0x0407
++#define MCA_REG_ADC_CFG0_4		0x0408
++#define MCA_REG_ADC_CFG0_5		0x0409
++#define MCA_REG_ADC_CFG0_6		0x040a
++#define MCA_REG_ADC_CFG0_7		0x040b
++#define MCA_REG_ADC_CFG0_8		0x040c
++#define MCA_REG_ADC_CFG0_9		0x040d
++#define MCA_REG_ADC_CFG0_10		0x040e
++#define MCA_REG_ADC_CFG0_11		0x040f
++#define MCA_REG_ADC_CFG0_12		0x0410
++#define MCA_REG_ADC_CFG0_13		0x0411
++#define MCA_REG_ADC_CFG0_14		0x0412
++#define MCA_REG_ADC_CFG0_15		0x0413
++#define MCA_REG_ADC_CFG0_16		0x0414
++#define MCA_REG_ADC_CFG0_17		0x0415
++#define MCA_REG_ADC_CFG0_18		0x0416
++#define MCA_REG_ADC_CFG0_19		0x0417
++#define MCA_REG_ADC_CFG0_20		0x0418
++#define MCA_REG_ADC_CFG0_21		0x0419
++#define MCA_REG_ADC_CFG0_22		0x041a
++#define MCA_REG_ADC_CFG0_23		0x041b
++#define MCA_REG_ADC_CFG0_24		0x041c
++#define MCA_REG_ADC_CFG0_25		0x041d
++#define MCA_REG_ADC_CFG0_26		0x041e
++#define MCA_REG_ADC_CFG0_27		0x041f
++#define MCA_REG_ADC_CFG0_28		0x0420
++#define MCA_REG_ADC_CFG0_29		0x0421
++#define MCA_REG_ADC_CFG0_30		0x0422
++#define MCA_REG_ADC_CFG0_31		0x0423
++
++#define MCA_REG_ADC_CFG1_0		0x0424
++#define MCA_REG_ADC_CFG1_1		0x0425
++#define MCA_REG_ADC_CFG1_2		0x0426
++#define MCA_REG_ADC_CFG1_3		0x0427
++#define MCA_REG_ADC_CFG1_4		0x0428
++#define MCA_REG_ADC_CFG1_5		0x0429
++#define MCA_REG_ADC_CFG1_6		0x042a
++#define MCA_REG_ADC_CFG1_7		0x042b
++#define MCA_REG_ADC_CFG1_8		0x042c
++#define MCA_REG_ADC_CFG1_9		0x042d
++#define MCA_REG_ADC_CFG1_10		0x042e
++#define MCA_REG_ADC_CFG1_11		0x042f
++#define MCA_REG_ADC_CFG1_12		0x0430
++#define MCA_REG_ADC_CFG1_13		0x0431
++#define MCA_REG_ADC_CFG1_14		0x0432
++#define MCA_REG_ADC_CFG1_15		0x0433
++#define MCA_REG_ADC_CFG1_16		0x0434
++#define MCA_REG_ADC_CFG1_17		0x0435
++#define MCA_REG_ADC_CFG1_18		0x0436
++#define MCA_REG_ADC_CFG1_19		0x0437
++#define MCA_REG_ADC_CFG1_20		0x0438
++#define MCA_REG_ADC_CFG1_21		0x0439
++#define MCA_REG_ADC_CFG1_22		0x043a
++#define MCA_REG_ADC_CFG1_23		0x043b
++#define MCA_REG_ADC_CFG1_24		0x043c
++#define MCA_REG_ADC_CFG1_25		0x043d
++#define MCA_REG_ADC_CFG1_26		0x043e
++#define MCA_REG_ADC_CFG1_27		0x043f
++#define MCA_REG_ADC_CFG1_28		0x0440
++#define MCA_REG_ADC_CFG1_29		0x0441
++#define MCA_REG_ADC_CFG1_30		0x0442
++#define MCA_REG_ADC_CFG1_31		0x0443
++
++#define MCA_REG_ADC_CFG2_0		0x0444
++#define MCA_REG_ADC_CFG2_1		0x0445
++#define MCA_REG_ADC_CFG2_2		0x0446
++#define MCA_REG_ADC_CFG2_3		0x0447
++#define MCA_REG_ADC_CFG2_4		0x0448
++#define MCA_REG_ADC_CFG2_5		0x0449
++#define MCA_REG_ADC_CFG2_6		0x044a
++#define MCA_REG_ADC_CFG2_7		0x044b
++#define MCA_REG_ADC_CFG2_8		0x044c
++#define MCA_REG_ADC_CFG2_9		0x044d
++#define MCA_REG_ADC_CFG2_10		0x044e
++#define MCA_REG_ADC_CFG2_11		0x044f
++#define MCA_REG_ADC_CFG2_12		0x0450
++#define MCA_REG_ADC_CFG2_13		0x0451
++#define MCA_REG_ADC_CFG2_14		0x0452
++#define MCA_REG_ADC_CFG2_15		0x0453
++#define MCA_REG_ADC_CFG2_16		0x0454
++#define MCA_REG_ADC_CFG2_17		0x0455
++#define MCA_REG_ADC_CFG2_18		0x0456
++#define MCA_REG_ADC_CFG2_19		0x0457
++#define MCA_REG_ADC_CFG2_20		0x0458
++#define MCA_REG_ADC_CFG2_21		0x0459
++#define MCA_REG_ADC_CFG2_22		0x045a
++#define MCA_REG_ADC_CFG2_23		0x045b
++#define MCA_REG_ADC_CFG2_24		0x045c
++#define MCA_REG_ADC_CFG2_25		0x045d
++#define MCA_REG_ADC_CFG2_26		0x045e
++#define MCA_REG_ADC_CFG2_27		0x045f
++#define MCA_REG_ADC_CFG2_28		0x0460
++#define MCA_REG_ADC_CFG2_29		0x0461
++#define MCA_REG_ADC_CFG2_30		0x0462
++#define MCA_REG_ADC_CFG2_31		0x0463
++
++#define MCA_REG_ADC_VAL_L_0		0x464
++#define MCA_REG_ADC_VAL_H_0		0x465
++#define MCA_REG_ADC_VAL_L_1		0x466
++#define MCA_REG_ADC_VAL_H_1		0x467
++#define MCA_REG_ADC_VAL_L_2		0x468
++#define MCA_REG_ADC_VAL_H_2		0x469
++#define MCA_REG_ADC_VAL_L_3		0x46a
++#define MCA_REG_ADC_VAL_H_3		0x46b
++#define MCA_REG_ADC_VAL_L_4		0x46c
++#define MCA_REG_ADC_VAL_H_4		0x46d
++#define MCA_REG_ADC_VAL_L_5		0x46e
++#define MCA_REG_ADC_VAL_H_5		0x46f
++#define MCA_REG_ADC_VAL_L_6		0x470
++#define MCA_REG_ADC_VAL_H_6		0x471
++#define MCA_REG_ADC_VAL_L_7		0x472
++#define MCA_REG_ADC_VAL_H_7		0x473
++#define MCA_REG_ADC_VAL_L_8		0x474
++#define MCA_REG_ADC_VAL_H_8		0x475
++#define MCA_REG_ADC_VAL_L_9		0x476
++#define MCA_REG_ADC_VAL_H_9		0x477
++#define MCA_REG_ADC_VAL_L_10		0x478
++#define MCA_REG_ADC_VAL_H_10		0x479
++#define MCA_REG_ADC_VAL_L_11		0x47a
++#define MCA_REG_ADC_VAL_H_11		0x47b
++#define MCA_REG_ADC_VAL_L_12		0x47c
++#define MCA_REG_ADC_VAL_H_12		0x47d
++#define MCA_REG_ADC_VAL_L_13		0x47e
++#define MCA_REG_ADC_VAL_H_13		0x47f
++#define MCA_REG_ADC_VAL_L_14		0x480
++#define MCA_REG_ADC_VAL_H_14		0x481
++#define MCA_REG_ADC_VAL_L_15		0x482
++#define MCA_REG_ADC_VAL_H_15		0x483
++#define MCA_REG_ADC_VAL_L_16		0x484
++#define MCA_REG_ADC_VAL_H_16		0x485
++#define MCA_REG_ADC_VAL_L_17		0x486
++#define MCA_REG_ADC_VAL_H_17		0x487
++#define MCA_REG_ADC_VAL_L_18		0x488
++#define MCA_REG_ADC_VAL_H_18		0x489
++#define MCA_REG_ADC_VAL_L_19		0x48a
++#define MCA_REG_ADC_VAL_H_19		0x48b
++#define MCA_REG_ADC_VAL_L_20		0x48c
++#define MCA_REG_ADC_VAL_H_20		0x48d
++#define MCA_REG_ADC_VAL_L_21		0x48e
++#define MCA_REG_ADC_VAL_H_21		0x48f
++#define MCA_REG_ADC_VAL_L_22		0x490
++#define MCA_REG_ADC_VAL_H_22		0x491
++#define MCA_REG_ADC_VAL_L_23		0x492
++#define MCA_REG_ADC_VAL_H_23		0x493
++#define MCA_REG_ADC_VAL_L_24		0x494
++#define MCA_REG_ADC_VAL_H_24		0x495
++#define MCA_REG_ADC_VAL_L_25		0x496
++#define MCA_REG_ADC_VAL_H_25		0x497
++#define MCA_REG_ADC_VAL_L_26		0x498
++#define MCA_REG_ADC_VAL_H_26		0x499
++#define MCA_REG_ADC_VAL_L_27		0x49a
++#define MCA_REG_ADC_VAL_H_27		0x49b
++#define MCA_REG_ADC_VAL_L_28		0x49c
++#define MCA_REG_ADC_VAL_H_28		0x49d
++#define MCA_REG_ADC_VAL_L_29		0x49e
++#define MCA_REG_ADC_VAL_H_29		0x49f
++#define MCA_REG_ADC_VAL_L_30		0x4a0
++#define MCA_REG_ADC_VAL_H_30		0x4a1
++#define MCA_REG_ADC_VAL_L_31		0x4a2
++#define MCA_REG_ADC_VAL_H_31		0x4a3
++
++#define MCA_REG_ADC_SAMPLES_CNT_0	0x04a4
++#define MCA_REG_ADC_SAMPLES_CNT_1	0x04a5
++#define MCA_REG_ADC_SAMPLES_CNT_2	0x04a6
++#define MCA_REG_ADC_SAMPLES_CNT_3	0x04a7
++#define MCA_REG_ADC_SAMPLES_CNT_4	0x04a8
++#define MCA_REG_ADC_SAMPLES_CNT_5	0x04a9
++#define MCA_REG_ADC_SAMPLES_CNT_6	0x04aa
++#define MCA_REG_ADC_SAMPLES_CNT_7	0x04ab
++#define MCA_REG_ADC_SAMPLES_CNT_8	0x04ac
++#define MCA_REG_ADC_SAMPLES_CNT_9	0x04ad
++#define MCA_REG_ADC_SAMPLES_CNT_10	0x04ae
++#define MCA_REG_ADC_SAMPLES_CNT_11	0x04af
++#define MCA_REG_ADC_SAMPLES_CNT_12	0x04b0
++#define MCA_REG_ADC_SAMPLES_CNT_13	0x04b1
++#define MCA_REG_ADC_SAMPLES_CNT_14	0x04b2
++#define MCA_REG_ADC_SAMPLES_CNT_15	0x04b3
++#define MCA_REG_ADC_SAMPLES_CNT_16	0x04b4
++#define MCA_REG_ADC_SAMPLES_CNT_17	0x04b5
++#define MCA_REG_ADC_SAMPLES_CNT_18	0x04b6
++#define MCA_REG_ADC_SAMPLES_CNT_19	0x04b7
++#define MCA_REG_ADC_SAMPLES_CNT_20	0x04b8
++#define MCA_REG_ADC_SAMPLES_CNT_21	0x04b9
++#define MCA_REG_ADC_SAMPLES_CNT_22	0x04ba
++#define MCA_REG_ADC_SAMPLES_CNT_23	0x04bb
++#define MCA_REG_ADC_SAMPLES_CNT_24	0x04bc
++#define MCA_REG_ADC_SAMPLES_CNT_25	0x04bd
++#define MCA_REG_ADC_SAMPLES_CNT_26	0x04be
++#define MCA_REG_ADC_SAMPLES_CNT_27	0x04bf
++#define MCA_REG_ADC_SAMPLES_CNT_28	0x04c0
++#define MCA_REG_ADC_SAMPLES_CNT_29	0x04c1
++#define MCA_REG_ADC_SAMPLES_CNT_30	0x04c2
++#define MCA_REG_ADC_SAMPLES_CNT_31	0x04c3
++
++/* EP5, ADCs Thresholds (0 - 31) */
++#define MCA_REG_ADC_THRESH_LO_L_0	0x0500
++#define MCA_REG_ADC_THRESH_LO_H_0	0x0501
++#define MCA_REG_ADC_THRESH_LO_L_1	0x0502
++#define MCA_REG_ADC_THRESH_LO_H_1	0x0503
++#define MCA_REG_ADC_THRESH_LO_L_2	0x0504
++#define MCA_REG_ADC_THRESH_LO_H_2	0x0505
++#define MCA_REG_ADC_THRESH_LO_L_3	0x0506
++#define MCA_REG_ADC_THRESH_LO_H_3	0x0507
++#define MCA_REG_ADC_THRESH_LO_L_4	0x0508
++#define MCA_REG_ADC_THRESH_LO_H_4	0x0509
++#define MCA_REG_ADC_THRESH_LO_L_5	0x050a
++#define MCA_REG_ADC_THRESH_LO_H_5	0x050b
++#define MCA_REG_ADC_THRESH_LO_L_6	0x050c
++#define MCA_REG_ADC_THRESH_LO_H_6	0x050d
++#define MCA_REG_ADC_THRESH_LO_L_7	0x050e
++#define MCA_REG_ADC_THRESH_LO_H_7	0x050f
++#define MCA_REG_ADC_THRESH_LO_L_8	0x0510
++#define MCA_REG_ADC_THRESH_LO_H_8	0x0511
++#define MCA_REG_ADC_THRESH_LO_L_9	0x0512
++#define MCA_REG_ADC_THRESH_LO_H_9	0x0513
++#define MCA_REG_ADC_THRESH_LO_L_10	0x0514
++#define MCA_REG_ADC_THRESH_LO_H_10	0x0515
++#define MCA_REG_ADC_THRESH_LO_L_11	0x0516
++#define MCA_REG_ADC_THRESH_LO_H_11	0x0517
++#define MCA_REG_ADC_THRESH_LO_L_12	0x0518
++#define MCA_REG_ADC_THRESH_LO_H_12	0x0519
++#define MCA_REG_ADC_THRESH_LO_L_13	0x051a
++#define MCA_REG_ADC_THRESH_LO_H_13	0x051b
++#define MCA_REG_ADC_THRESH_LO_L_14	0x051c
++#define MCA_REG_ADC_THRESH_LO_H_14	0x051d
++#define MCA_REG_ADC_THRESH_LO_L_15	0x051e
++#define MCA_REG_ADC_THRESH_LO_H_15	0x051f
++#define MCA_REG_ADC_THRESH_LO_L_16	0x0520
++#define MCA_REG_ADC_THRESH_LO_H_16	0x0521
++#define MCA_REG_ADC_THRESH_LO_L_17	0x0522
++#define MCA_REG_ADC_THRESH_LO_H_17	0x0523
++#define MCA_REG_ADC_THRESH_LO_L_18	0x0524
++#define MCA_REG_ADC_THRESH_LO_H_18	0x0525
++#define MCA_REG_ADC_THRESH_LO_L_19	0x0526
++#define MCA_REG_ADC_THRESH_LO_H_19	0x0527
++#define MCA_REG_ADC_THRESH_LO_L_20	0x0528
++#define MCA_REG_ADC_THRESH_LO_H_20	0x0529
++#define MCA_REG_ADC_THRESH_LO_L_21	0x052a
++#define MCA_REG_ADC_THRESH_LO_H_21	0x052b
++#define MCA_REG_ADC_THRESH_LO_L_22	0x052c
++#define MCA_REG_ADC_THRESH_LO_H_22	0x052d
++#define MCA_REG_ADC_THRESH_LO_L_23	0x052e
++#define MCA_REG_ADC_THRESH_LO_H_23	0x052f
++#define MCA_REG_ADC_THRESH_LO_L_24	0x0530
++#define MCA_REG_ADC_THRESH_LO_H_24	0x0531
++#define MCA_REG_ADC_THRESH_LO_L_25	0x0532
++#define MCA_REG_ADC_THRESH_LO_H_25	0x0533
++#define MCA_REG_ADC_THRESH_LO_L_26	0x0534
++#define MCA_REG_ADC_THRESH_LO_H_26	0x0535
++#define MCA_REG_ADC_THRESH_LO_L_27	0x0536
++#define MCA_REG_ADC_THRESH_LO_H_27	0x0537
++#define MCA_REG_ADC_THRESH_LO_L_28	0x0538
++#define MCA_REG_ADC_THRESH_LO_H_28	0x0539
++#define MCA_REG_ADC_THRESH_LO_L_29	0x053a
++#define MCA_REG_ADC_THRESH_LO_H_29	0x053b
++#define MCA_REG_ADC_THRESH_LO_L_30	0x053c
++#define MCA_REG_ADC_THRESH_LO_H_30	0x053d
++#define MCA_REG_ADC_THRESH_LO_L_31	0x053e
++#define MCA_REG_ADC_THRESH_LO_H_31	0x053f
++
++#define MCA_REG_ADC_THRESH_HI_L_0	0x0540
++#define MCA_REG_ADC_THRESH_HI_H_0	0x0541
++#define MCA_REG_ADC_THRESH_HI_L_1	0x0542
++#define MCA_REG_ADC_THRESH_HI_H_1	0x0543
++#define MCA_REG_ADC_THRESH_HI_L_2	0x0544
++#define MCA_REG_ADC_THRESH_HI_H_2	0x0545
++#define MCA_REG_ADC_THRESH_HI_L_3	0x0546
++#define MCA_REG_ADC_THRESH_HI_H_3	0x0547
++#define MCA_REG_ADC_THRESH_HI_L_4	0x0548
++#define MCA_REG_ADC_THRESH_HI_H_4	0x0549
++#define MCA_REG_ADC_THRESH_HI_L_5	0x054a
++#define MCA_REG_ADC_THRESH_HI_H_5	0x054b
++#define MCA_REG_ADC_THRESH_HI_L_6	0x054c
++#define MCA_REG_ADC_THRESH_HI_H_6	0x054d
++#define MCA_REG_ADC_THRESH_HI_L_7	0x054e
++#define MCA_REG_ADC_THRESH_HI_H_7	0x054f
++#define MCA_REG_ADC_THRESH_HI_L_8	0x0550
++#define MCA_REG_ADC_THRESH_HI_H_8	0x0551
++#define MCA_REG_ADC_THRESH_HI_L_9	0x0552
++#define MCA_REG_ADC_THRESH_HI_H_9	0x0553
++#define MCA_REG_ADC_THRESH_HI_L_10	0x0554
++#define MCA_REG_ADC_THRESH_HI_H_10	0x0555
++#define MCA_REG_ADC_THRESH_HI_L_11	0x0556
++#define MCA_REG_ADC_THRESH_HI_H_11	0x0557
++#define MCA_REG_ADC_THRESH_HI_L_12	0x0558
++#define MCA_REG_ADC_THRESH_HI_H_12	0x0559
++#define MCA_REG_ADC_THRESH_HI_L_13	0x055a
++#define MCA_REG_ADC_THRESH_HI_H_13	0x055b
++#define MCA_REG_ADC_THRESH_HI_L_14	0x055c
++#define MCA_REG_ADC_THRESH_HI_H_14	0x055d
++#define MCA_REG_ADC_THRESH_HI_L_15	0x055e
++#define MCA_REG_ADC_THRESH_HI_H_15	0x055f
++#define MCA_REG_ADC_THRESH_HI_L_16	0x0560
++#define MCA_REG_ADC_THRESH_HI_H_16	0x0561
++#define MCA_REG_ADC_THRESH_HI_L_17	0x0562
++#define MCA_REG_ADC_THRESH_HI_H_17	0x0563
++#define MCA_REG_ADC_THRESH_HI_L_18	0x0564
++#define MCA_REG_ADC_THRESH_HI_H_18	0x0565
++#define MCA_REG_ADC_THRESH_HI_L_19	0x0566
++#define MCA_REG_ADC_THRESH_HI_H_19	0x0567
++#define MCA_REG_ADC_THRESH_HI_L_20	0x0568
++#define MCA_REG_ADC_THRESH_HI_H_20	0x0569
++#define MCA_REG_ADC_THRESH_HI_L_21	0x056a
++#define MCA_REG_ADC_THRESH_HI_H_21	0x056b
++#define MCA_REG_ADC_THRESH_HI_L_22	0x056c
++#define MCA_REG_ADC_THRESH_HI_H_22	0x056d
++#define MCA_REG_ADC_THRESH_HI_L_23	0x056e
++#define MCA_REG_ADC_THRESH_HI_H_23	0x056f
++#define MCA_REG_ADC_THRESH_HI_L_24	0x0570
++#define MCA_REG_ADC_THRESH_HI_H_24	0x0571
++#define MCA_REG_ADC_THRESH_HI_L_25	0x0572
++#define MCA_REG_ADC_THRESH_HI_H_25	0x0573
++#define MCA_REG_ADC_THRESH_HI_L_26	0x0574
++#define MCA_REG_ADC_THRESH_HI_H_26	0x0575
++#define MCA_REG_ADC_THRESH_HI_L_27	0x0576
++#define MCA_REG_ADC_THRESH_HI_H_27	0x0577
++#define MCA_REG_ADC_THRESH_HI_L_28	0x0578
++#define MCA_REG_ADC_THRESH_HI_H_28	0x0579
++#define MCA_REG_ADC_THRESH_HI_L_29	0x057a
++#define MCA_REG_ADC_THRESH_HI_H_29	0x057b
++#define MCA_REG_ADC_THRESH_HI_L_30	0x057c
++#define MCA_REG_ADC_THRESH_HI_H_30	0x057d
++#define MCA_REG_ADC_THRESH_HI_L_31	0x057e
++#define MCA_REG_ADC_THRESH_HI_H_31	0x057f
++
++#define MCA_REG_ADC_TICKS_L_0		0x0580
++#define MCA_REG_ADC_TICKS_H_0		0x0581
++#define MCA_REG_ADC_TICKS_L_1		0x0582
++#define MCA_REG_ADC_TICKS_H_1		0x0583
++#define MCA_REG_ADC_TICKS_L_2		0x0584
++#define MCA_REG_ADC_TICKS_H_2		0x0585
++#define MCA_REG_ADC_TICKS_L_3		0x0586
++#define MCA_REG_ADC_TICKS_H_3		0x0587
++#define MCA_REG_ADC_TICKS_L_4		0x0588
++#define MCA_REG_ADC_TICKS_H_4		0x0589
++#define MCA_REG_ADC_TICKS_L_5		0x058a
++#define MCA_REG_ADC_TICKS_H_5		0x058b
++#define MCA_REG_ADC_TICKS_L_6		0x058c
++#define MCA_REG_ADC_TICKS_H_6		0x058d
++#define MCA_REG_ADC_TICKS_L_7		0x058e
++#define MCA_REG_ADC_TICKS_H_7		0x058f
++#define MCA_REG_ADC_TICKS_L_8		0x0590
++#define MCA_REG_ADC_TICKS_H_8		0x0591
++#define MCA_REG_ADC_TICKS_L_9		0x0592
++#define MCA_REG_ADC_TICKS_H_9		0x0593
++#define MCA_REG_ADC_TICKS_L_10		0x0594
++#define MCA_REG_ADC_TICKS_H_10		0x0595
++#define MCA_REG_ADC_TICKS_L_11		0x0596
++#define MCA_REG_ADC_TICKS_H_11		0x0597
++#define MCA_REG_ADC_TICKS_L_12		0x0598
++#define MCA_REG_ADC_TICKS_H_12		0x0599
++#define MCA_REG_ADC_TICKS_L_13		0x059a
++#define MCA_REG_ADC_TICKS_H_13		0x059b
++#define MCA_REG_ADC_TICKS_L_14		0x059c
++#define MCA_REG_ADC_TICKS_H_14		0x059d
++#define MCA_REG_ADC_TICKS_L_15		0x059e
++#define MCA_REG_ADC_TICKS_H_15		0x059f
++#define MCA_REG_ADC_TICKS_L_16		0x05a0
++#define MCA_REG_ADC_TICKS_H_16		0x05a1
++#define MCA_REG_ADC_TICKS_L_17		0x05a2
++#define MCA_REG_ADC_TICKS_H_17		0x05a3
++#define MCA_REG_ADC_TICKS_L_18		0x05a4
++#define MCA_REG_ADC_TICKS_H_18		0x05a5
++#define MCA_REG_ADC_TICKS_L_19		0x05a6
++#define MCA_REG_ADC_TICKS_H_19		0x05a7
++#define MCA_REG_ADC_TICKS_L_20		0x05a8
++#define MCA_REG_ADC_TICKS_H_20		0x05a9
++#define MCA_REG_ADC_TICKS_L_21		0x05aa
++#define MCA_REG_ADC_TICKS_H_21		0x05ab
++#define MCA_REG_ADC_TICKS_L_22		0x05ac
++#define MCA_REG_ADC_TICKS_H_22		0x05ad
++#define MCA_REG_ADC_TICKS_L_23		0x05ae
++#define MCA_REG_ADC_TICKS_H_23		0x05af
++#define MCA_REG_ADC_TICKS_L_24		0x05b0
++#define MCA_REG_ADC_TICKS_H_24		0x05b1
++#define MCA_REG_ADC_TICKS_L_25		0x05b2
++#define MCA_REG_ADC_TICKS_H_25		0x05b3
++#define MCA_REG_ADC_TICKS_L_26		0x05b4
++#define MCA_REG_ADC_TICKS_H_26		0x05b5
++#define MCA_REG_ADC_TICKS_L_27		0x05b6
++#define MCA_REG_ADC_TICKS_H_27		0x05b7
++#define MCA_REG_ADC_TICKS_L_28		0x05b8
++#define MCA_REG_ADC_TICKS_H_28		0x05b9
++#define MCA_REG_ADC_TICKS_L_29		0x05ba
++#define MCA_REG_ADC_TICKS_H_29		0x05bb
++#define MCA_REG_ADC_TICKS_L_30		0x05bc
++#define MCA_REG_ADC_TICKS_H_30		0x05bd
++#define MCA_REG_ADC_TICKS_L_31		0x05be
++#define MCA_REG_ADC_TICKS_H_31		0x05bf
++
++/* EP4, ADCs Configuration (32 - 63) */
++#define MCA_REG_ADC_CFG0_32		0x0604
++#define MCA_REG_ADC_CFG0_33		0x0605
++#define MCA_REG_ADC_CFG0_34		0x0606
++#define MCA_REG_ADC_CFG0_35		0x0607
++#define MCA_REG_ADC_CFG0_36		0x0608
++#define MCA_REG_ADC_CFG0_37		0x0609
++#define MCA_REG_ADC_CFG0_38		0x060a
++#define MCA_REG_ADC_CFG0_39		0x060b
++#define MCA_REG_ADC_CFG0_40		0x060c
++#define MCA_REG_ADC_CFG0_41		0x060d
++#define MCA_REG_ADC_CFG0_42		0x060e
++#define MCA_REG_ADC_CFG0_43		0x060f
++#define MCA_REG_ADC_CFG0_44		0x0610
++#define MCA_REG_ADC_CFG0_45		0x0611
++#define MCA_REG_ADC_CFG0_46		0x0612
++#define MCA_REG_ADC_CFG0_47		0x0613
++#define MCA_REG_ADC_CFG0_48		0x0614
++#define MCA_REG_ADC_CFG0_49		0x0615
++#define MCA_REG_ADC_CFG0_50		0x0616
++#define MCA_REG_ADC_CFG0_51		0x0617
++#define MCA_REG_ADC_CFG0_52		0x0618
++#define MCA_REG_ADC_CFG0_53		0x0619
++#define MCA_REG_ADC_CFG0_54		0x061a
++#define MCA_REG_ADC_CFG0_55		0x061b
++#define MCA_REG_ADC_CFG0_56		0x061c
++#define MCA_REG_ADC_CFG0_57		0x061d
++#define MCA_REG_ADC_CFG0_58		0x061e
++#define MCA_REG_ADC_CFG0_59		0x061f
++#define MCA_REG_ADC_CFG0_60		0x0620
++#define MCA_REG_ADC_CFG0_61		0x0621
++#define MCA_REG_ADC_CFG0_62		0x0622
++#define MCA_REG_ADC_CFG0_63		0x0623
++
++#define MCA_REG_ADC_CFG1_32		0x0644
++#define MCA_REG_ADC_CFG1_33		0x0645
++#define MCA_REG_ADC_CFG1_34		0x0646
++#define MCA_REG_ADC_CFG1_35		0x0647
++#define MCA_REG_ADC_CFG1_36		0x0648
++#define MCA_REG_ADC_CFG1_37		0x0649
++#define MCA_REG_ADC_CFG1_38		0x064a
++#define MCA_REG_ADC_CFG1_39		0x064b
++#define MCA_REG_ADC_CFG1_40		0x064c
++#define MCA_REG_ADC_CFG1_41		0x064d
++#define MCA_REG_ADC_CFG1_42		0x064e
++#define MCA_REG_ADC_CFG1_43		0x064f
++#define MCA_REG_ADC_CFG1_44		0x0650
++#define MCA_REG_ADC_CFG1_45		0x0651
++#define MCA_REG_ADC_CFG1_46		0x0652
++#define MCA_REG_ADC_CFG1_47		0x0653
++#define MCA_REG_ADC_CFG1_48		0x0654
++#define MCA_REG_ADC_CFG1_49		0x0655
++#define MCA_REG_ADC_CFG1_50		0x0656
++#define MCA_REG_ADC_CFG1_51		0x0657
++#define MCA_REG_ADC_CFG1_52		0x0658
++#define MCA_REG_ADC_CFG1_53		0x0659
++#define MCA_REG_ADC_CFG1_54		0x065a
++#define MCA_REG_ADC_CFG1_55		0x065b
++#define MCA_REG_ADC_CFG1_56		0x065c
++#define MCA_REG_ADC_CFG1_57		0x065d
++#define MCA_REG_ADC_CFG1_58		0x065e
++#define MCA_REG_ADC_CFG1_59		0x065f
++#define MCA_REG_ADC_CFG1_60		0x0660
++#define MCA_REG_ADC_CFG1_61		0x0661
++#define MCA_REG_ADC_CFG1_62		0x0662
++#define MCA_REG_ADC_CFG1_63		0x0663
++
++#define MCA_REG_ADC_CFG2_32		0x0664
++#define MCA_REG_ADC_CFG2_33		0x0665
++#define MCA_REG_ADC_CFG2_34		0x0666
++#define MCA_REG_ADC_CFG2_35		0x0667
++#define MCA_REG_ADC_CFG2_36		0x0668
++#define MCA_REG_ADC_CFG2_37		0x0669
++#define MCA_REG_ADC_CFG2_38		0x066a
++#define MCA_REG_ADC_CFG2_39		0x066b
++#define MCA_REG_ADC_CFG2_40		0x066c
++#define MCA_REG_ADC_CFG2_41		0x066d
++#define MCA_REG_ADC_CFG2_42		0x066e
++#define MCA_REG_ADC_CFG2_43		0x066f
++#define MCA_REG_ADC_CFG2_44		0x0670
++#define MCA_REG_ADC_CFG2_45		0x0671
++#define MCA_REG_ADC_CFG2_46		0x0672
++#define MCA_REG_ADC_CFG2_47		0x0673
++#define MCA_REG_ADC_CFG2_48		0x0674
++#define MCA_REG_ADC_CFG2_49		0x0675
++#define MCA_REG_ADC_CFG2_50		0x0676
++#define MCA_REG_ADC_CFG2_51		0x0677
++#define MCA_REG_ADC_CFG2_52		0x0678
++#define MCA_REG_ADC_CFG2_53		0x0679
++#define MCA_REG_ADC_CFG2_54		0x067a
++#define MCA_REG_ADC_CFG2_55		0x067b
++#define MCA_REG_ADC_CFG2_56		0x067c
++#define MCA_REG_ADC_CFG2_57		0x067d
++#define MCA_REG_ADC_CFG2_58		0x067e
++#define MCA_REG_ADC_CFG2_59		0x067f
++#define MCA_REG_ADC_CFG2_60		0x0680
++#define MCA_REG_ADC_CFG2_61		0x0681
++#define MCA_REG_ADC_CFG2_62		0x0682
++#define MCA_REG_ADC_CFG2_63		0x0683
++
++#define MCA_REG_ADC_SAMPLES_CNT_32	0x06a4
++#define MCA_REG_ADC_SAMPLES_CNT_33	0x06a5
++#define MCA_REG_ADC_SAMPLES_CNT_34	0x06a6
++#define MCA_REG_ADC_SAMPLES_CNT_35	0x06a7
++#define MCA_REG_ADC_SAMPLES_CNT_36	0x06a8
++#define MCA_REG_ADC_SAMPLES_CNT_37	0x06a9
++#define MCA_REG_ADC_SAMPLES_CNT_38	0x06aa
++#define MCA_REG_ADC_SAMPLES_CNT_39	0x06ab
++#define MCA_REG_ADC_SAMPLES_CNT_40	0x06ac
++#define MCA_REG_ADC_SAMPLES_CNT_41	0x06ad
++#define MCA_REG_ADC_SAMPLES_CNT_42	0x06ae
++#define MCA_REG_ADC_SAMPLES_CNT_43	0x06af
++#define MCA_REG_ADC_SAMPLES_CNT_44	0x06b0
++#define MCA_REG_ADC_SAMPLES_CNT_45	0x06b1
++#define MCA_REG_ADC_SAMPLES_CNT_46	0x06b2
++#define MCA_REG_ADC_SAMPLES_CNT_47	0x06b3
++#define MCA_REG_ADC_SAMPLES_CNT_48	0x06b4
++#define MCA_REG_ADC_SAMPLES_CNT_49	0x06b5
++#define MCA_REG_ADC_SAMPLES_CNT_50	0x06b6
++#define MCA_REG_ADC_SAMPLES_CNT_51	0x06b7
++#define MCA_REG_ADC_SAMPLES_CNT_52	0x06b8
++#define MCA_REG_ADC_SAMPLES_CNT_53	0x06b9
++#define MCA_REG_ADC_SAMPLES_CNT_54	0x06ba
++#define MCA_REG_ADC_SAMPLES_CNT_55	0x06bb
++#define MCA_REG_ADC_SAMPLES_CNT_56	0x06bc
++#define MCA_REG_ADC_SAMPLES_CNT_57	0x06bd
++#define MCA_REG_ADC_SAMPLES_CNT_58	0x06be
++#define MCA_REG_ADC_SAMPLES_CNT_59	0x06bf
++#define MCA_REG_ADC_SAMPLES_CNT_60	0x06c0
++#define MCA_REG_ADC_SAMPLES_CNT_61	0x06c1
++#define MCA_REG_ADC_SAMPLES_CNT_62	0x06c2
++#define MCA_REG_ADC_SAMPLES_CNT_63	0x06c3
++
++/* EP7, ADCs Thresholds (32 - 63) */
++#define MCA_REG_ADC_THRESH_LO_L_32	0x0700
++#define MCA_REG_ADC_THRESH_LO_H_32	0x0701
++#define MCA_REG_ADC_THRESH_LO_L_33	0x0702
++#define MCA_REG_ADC_THRESH_LO_H_33	0x0703
++#define MCA_REG_ADC_THRESH_LO_L_34	0x0704
++#define MCA_REG_ADC_THRESH_LO_H_34	0x0705
++#define MCA_REG_ADC_THRESH_LO_L_35	0x0706
++#define MCA_REG_ADC_THRESH_LO_H_35	0x0707
++#define MCA_REG_ADC_THRESH_LO_L_36	0x0708
++#define MCA_REG_ADC_THRESH_LO_H_36	0x0709
++#define MCA_REG_ADC_THRESH_LO_L_37	0x070a
++#define MCA_REG_ADC_THRESH_LO_H_37	0x070b
++#define MCA_REG_ADC_THRESH_LO_L_38	0x070c
++#define MCA_REG_ADC_THRESH_LO_H_38	0x070d
++#define MCA_REG_ADC_THRESH_LO_L_39	0x070e
++#define MCA_REG_ADC_THRESH_LO_H_39	0x070f
++#define MCA_REG_ADC_THRESH_LO_L_40	0x0710
++#define MCA_REG_ADC_THRESH_LO_H_40	0x0711
++#define MCA_REG_ADC_THRESH_LO_L_41	0x0712
++#define MCA_REG_ADC_THRESH_LO_H_41	0x0713
++#define MCA_REG_ADC_THRESH_LO_L_42	0x0714
++#define MCA_REG_ADC_THRESH_LO_H_42	0x0715
++#define MCA_REG_ADC_THRESH_LO_L_43	0x0716
++#define MCA_REG_ADC_THRESH_LO_H_43	0x0717
++#define MCA_REG_ADC_THRESH_LO_L_44	0x0718
++#define MCA_REG_ADC_THRESH_LO_H_44	0x0719
++#define MCA_REG_ADC_THRESH_LO_L_45	0x071a
++#define MCA_REG_ADC_THRESH_LO_H_45	0x071b
++#define MCA_REG_ADC_THRESH_LO_L_46	0x071c
++#define MCA_REG_ADC_THRESH_LO_H_46	0x071d
++#define MCA_REG_ADC_THRESH_LO_L_47	0x071e
++#define MCA_REG_ADC_THRESH_LO_H_47	0x071f
++#define MCA_REG_ADC_THRESH_LO_L_48	0x0720
++#define MCA_REG_ADC_THRESH_LO_H_48	0x0721
++#define MCA_REG_ADC_THRESH_LO_L_49	0x0722
++#define MCA_REG_ADC_THRESH_LO_H_49	0x0723
++#define MCA_REG_ADC_THRESH_LO_L_50	0x0724
++#define MCA_REG_ADC_THRESH_LO_H_50	0x0725
++#define MCA_REG_ADC_THRESH_LO_L_51	0x0726
++#define MCA_REG_ADC_THRESH_LO_H_51	0x0727
++#define MCA_REG_ADC_THRESH_LO_L_52	0x0728
++#define MCA_REG_ADC_THRESH_LO_H_52	0x0729
++#define MCA_REG_ADC_THRESH_LO_L_53	0x072a
++#define MCA_REG_ADC_THRESH_LO_H_53	0x072b
++#define MCA_REG_ADC_THRESH_LO_L_54	0x072c
++#define MCA_REG_ADC_THRESH_LO_H_54	0x072d
++#define MCA_REG_ADC_THRESH_LO_L_55	0x072e
++#define MCA_REG_ADC_THRESH_LO_H_55	0x072f
++#define MCA_REG_ADC_THRESH_LO_L_56	0x0730
++#define MCA_REG_ADC_THRESH_LO_H_56	0x0731
++#define MCA_REG_ADC_THRESH_LO_L_57	0x0732
++#define MCA_REG_ADC_THRESH_LO_H_57	0x0733
++#define MCA_REG_ADC_THRESH_LO_L_58	0x0734
++#define MCA_REG_ADC_THRESH_LO_H_58	0x0735
++#define MCA_REG_ADC_THRESH_LO_L_59	0x0736
++#define MCA_REG_ADC_THRESH_LO_H_59	0x0737
++#define MCA_REG_ADC_THRESH_LO_L_60	0x0738
++#define MCA_REG_ADC_THRESH_LO_H_60	0x0739
++#define MCA_REG_ADC_THRESH_LO_L_61	0x073a
++#define MCA_REG_ADC_THRESH_LO_H_61	0x073b
++#define MCA_REG_ADC_THRESH_LO_L_62	0x073c
++#define MCA_REG_ADC_THRESH_LO_H_62	0x073d
++#define MCA_REG_ADC_THRESH_LO_L_63	0x073e
++#define MCA_REG_ADC_THRESH_LO_H_63	0x073f
++
++#define MCA_REG_ADC_THRESH_HI_L_32	0x0740
++#define MCA_REG_ADC_THRESH_HI_H_32	0x0741
++#define MCA_REG_ADC_THRESH_HI_L_33	0x0742
++#define MCA_REG_ADC_THRESH_HI_H_33	0x0743
++#define MCA_REG_ADC_THRESH_HI_L_34	0x0744
++#define MCA_REG_ADC_THRESH_HI_H_34	0x0745
++#define MCA_REG_ADC_THRESH_HI_L_35	0x0746
++#define MCA_REG_ADC_THRESH_HI_H_35	0x0747
++#define MCA_REG_ADC_THRESH_HI_L_36	0x0748
++#define MCA_REG_ADC_THRESH_HI_H_36	0x0749
++#define MCA_REG_ADC_THRESH_HI_L_37	0x074a
++#define MCA_REG_ADC_THRESH_HI_H_37	0x074b
++#define MCA_REG_ADC_THRESH_HI_L_38	0x074c
++#define MCA_REG_ADC_THRESH_HI_H_38	0x074d
++#define MCA_REG_ADC_THRESH_HI_L_39	0x074e
++#define MCA_REG_ADC_THRESH_HI_H_39	0x074f
++#define MCA_REG_ADC_THRESH_HI_L_40	0x0750
++#define MCA_REG_ADC_THRESH_HI_H_40	0x0751
++#define MCA_REG_ADC_THRESH_HI_L_41	0x0752
++#define MCA_REG_ADC_THRESH_HI_H_41	0x0753
++#define MCA_REG_ADC_THRESH_HI_L_42	0x0754
++#define MCA_REG_ADC_THRESH_HI_H_42	0x0755
++#define MCA_REG_ADC_THRESH_HI_L_43	0x0756
++#define MCA_REG_ADC_THRESH_HI_H_43	0x0757
++#define MCA_REG_ADC_THRESH_HI_L_44	0x0758
++#define MCA_REG_ADC_THRESH_HI_H_44	0x0759
++#define MCA_REG_ADC_THRESH_HI_L_45	0x075a
++#define MCA_REG_ADC_THRESH_HI_H_45	0x075b
++#define MCA_REG_ADC_THRESH_HI_L_46	0x075c
++#define MCA_REG_ADC_THRESH_HI_H_46	0x075d
++#define MCA_REG_ADC_THRESH_HI_L_47	0x075e
++#define MCA_REG_ADC_THRESH_HI_H_47	0x075f
++#define MCA_REG_ADC_THRESH_HI_L_48	0x0760
++#define MCA_REG_ADC_THRESH_HI_H_48	0x0761
++#define MCA_REG_ADC_THRESH_HI_L_49	0x0762
++#define MCA_REG_ADC_THRESH_HI_H_49	0x0763
++#define MCA_REG_ADC_THRESH_HI_L_50	0x0764
++#define MCA_REG_ADC_THRESH_HI_H_50	0x0765
++#define MCA_REG_ADC_THRESH_HI_L_51	0x0766
++#define MCA_REG_ADC_THRESH_HI_H_51	0x0767
++#define MCA_REG_ADC_THRESH_HI_L_52	0x0768
++#define MCA_REG_ADC_THRESH_HI_H_52	0x0769
++#define MCA_REG_ADC_THRESH_HI_L_53	0x076a
++#define MCA_REG_ADC_THRESH_HI_H_53	0x076b
++#define MCA_REG_ADC_THRESH_HI_L_54	0x076c
++#define MCA_REG_ADC_THRESH_HI_H_54	0x076d
++#define MCA_REG_ADC_THRESH_HI_L_55	0x076e
++#define MCA_REG_ADC_THRESH_HI_H_55	0x076f
++#define MCA_REG_ADC_THRESH_HI_L_56	0x0770
++#define MCA_REG_ADC_THRESH_HI_H_56	0x0771
++#define MCA_REG_ADC_THRESH_HI_L_57	0x0772
++#define MCA_REG_ADC_THRESH_HI_H_57	0x0773
++#define MCA_REG_ADC_THRESH_HI_L_58	0x0774
++#define MCA_REG_ADC_THRESH_HI_H_58	0x0775
++#define MCA_REG_ADC_THRESH_HI_L_59	0x0776
++#define MCA_REG_ADC_THRESH_HI_H_59	0x0777
++#define MCA_REG_ADC_THRESH_HI_L_60	0x0778
++#define MCA_REG_ADC_THRESH_HI_H_60	0x0779
++#define MCA_REG_ADC_THRESH_HI_L_61	0x077a
++#define MCA_REG_ADC_THRESH_HI_H_61	0x077b
++#define MCA_REG_ADC_THRESH_HI_L_62	0x077c
++#define MCA_REG_ADC_THRESH_HI_H_62	0x077d
++#define MCA_REG_ADC_THRESH_HI_L_63	0x077e
++#define MCA_REG_ADC_THRESH_HI_H_63	0x077f
++
++#define MCA_REG_ADC_TICKS_L_32		0x0780
++#define MCA_REG_ADC_TICKS_H_32		0x0781
++#define MCA_REG_ADC_TICKS_L_33		0x0782
++#define MCA_REG_ADC_TICKS_H_33		0x0783
++#define MCA_REG_ADC_TICKS_L_34		0x0784
++#define MCA_REG_ADC_TICKS_H_34		0x0785
++#define MCA_REG_ADC_TICKS_L_35		0x0786
++#define MCA_REG_ADC_TICKS_H_35		0x0787
++#define MCA_REG_ADC_TICKS_L_36		0x0788
++#define MCA_REG_ADC_TICKS_H_36		0x0789
++#define MCA_REG_ADC_TICKS_L_37		0x078a
++#define MCA_REG_ADC_TICKS_H_37		0x078b
++#define MCA_REG_ADC_TICKS_L_38		0x078c
++#define MCA_REG_ADC_TICKS_H_38		0x078d
++#define MCA_REG_ADC_TICKS_L_39		0x078e
++#define MCA_REG_ADC_TICKS_H_39		0x078f
++#define MCA_REG_ADC_TICKS_L_40		0x0790
++#define MCA_REG_ADC_TICKS_H_40		0x0791
++#define MCA_REG_ADC_TICKS_L_41		0x0792
++#define MCA_REG_ADC_TICKS_H_41		0x0793
++#define MCA_REG_ADC_TICKS_L_42		0x0794
++#define MCA_REG_ADC_TICKS_H_42		0x0795
++#define MCA_REG_ADC_TICKS_L_43		0x0796
++#define MCA_REG_ADC_TICKS_H_43		0x0797
++#define MCA_REG_ADC_TICKS_L_44		0x0798
++#define MCA_REG_ADC_TICKS_H_44		0x0799
++#define MCA_REG_ADC_TICKS_L_45		0x079a
++#define MCA_REG_ADC_TICKS_H_45		0x079b
++#define MCA_REG_ADC_TICKS_L_46		0x079c
++#define MCA_REG_ADC_TICKS_H_46		0x079d
++#define MCA_REG_ADC_TICKS_L_47		0x079e
++#define MCA_REG_ADC_TICKS_H_47		0x079f
++#define MCA_REG_ADC_TICKS_L_48		0x07a0
++#define MCA_REG_ADC_TICKS_H_48		0x07a1
++#define MCA_REG_ADC_TICKS_L_49		0x07a2
++#define MCA_REG_ADC_TICKS_H_49		0x07a3
++#define MCA_REG_ADC_TICKS_L_50		0x07a4
++#define MCA_REG_ADC_TICKS_H_50		0x07a5
++#define MCA_REG_ADC_TICKS_L_51		0x07a6
++#define MCA_REG_ADC_TICKS_H_51		0x07a7
++#define MCA_REG_ADC_TICKS_L_52		0x07a8
++#define MCA_REG_ADC_TICKS_H_52		0x07a9
++#define MCA_REG_ADC_TICKS_L_53		0x07aa
++#define MCA_REG_ADC_TICKS_H_53		0x07ab
++#define MCA_REG_ADC_TICKS_L_54		0x07ac
++#define MCA_REG_ADC_TICKS_H_54		0x07ad
++#define MCA_REG_ADC_TICKS_L_55		0x07ae
++#define MCA_REG_ADC_TICKS_H_55		0x07af
++#define MCA_REG_ADC_TICKS_L_56		0x07b0
++#define MCA_REG_ADC_TICKS_H_56		0x07b1
++#define MCA_REG_ADC_TICKS_L_57		0x07b2
++#define MCA_REG_ADC_TICKS_H_57		0x07b3
++#define MCA_REG_ADC_TICKS_L_58		0x07b4
++#define MCA_REG_ADC_TICKS_H_58		0x07b5
++#define MCA_REG_ADC_TICKS_L_59		0x07b6
++#define MCA_REG_ADC_TICKS_H_59		0x07b7
++#define MCA_REG_ADC_TICKS_L_60		0x07b8
++#define MCA_REG_ADC_TICKS_H_60		0x07b9
++#define MCA_REG_ADC_TICKS_L_61		0x07ba
++#define MCA_REG_ADC_TICKS_H_61		0x07bb
++#define MCA_REG_ADC_TICKS_L_62		0x07bc
++#define MCA_REG_ADC_TICKS_H_62		0x07bd
++#define MCA_REG_ADC_TICKS_L_63		0x07be
++#define MCA_REG_ADC_TICKS_H_63		0x07bf
++
++/* EP8, ADCs Buffered samples */
++#define MCA_REG_ADC_IRQ_0		0x0800
++#define MCA_REG_ADC_IRQ_1		0x0801
++#define MCA_REG_ADC_IRQ_2		0x0802
++#define MCA_REG_ADC_IRQ_3		0x0803
++#define MCA_REG_ADC_IRQ_4		0x0804
++#define MCA_REG_ADC_IRQ_5		0x0805
++#define MCA_REG_ADC_IRQ_6		0x0806
++#define MCA_REG_ADC_IRQ_7		0x0807
++
++#define MCA_REG_ADC_CFG_0		0x0808
++#define MCA_REG_ADC_CFG_1		0x0809
++#define MCA_REG_ADC_CFG_2		0x080A
++
++#define MCA_REG_ADC_BUFF_CH		0x0810
++#define MCA_REG_ADC_BUFF_CNT		0x0811
++#define MCA_REG_ADC_BUFF_SAMPLE_0	0x8010
++#define MCA_REG_ADC_BUFF_SAMPLE_1	0x8011
++#define MCA_REG_ADC_BUFF_SAMPLE_2	0x8012
++#define MCA_REG_ADC_BUFF_SAMPLE_3	0x8013
++#define MCA_REG_ADC_BUFF_SAMPLE_4	0x8014
++#define MCA_REG_ADC_BUFF_SAMPLE_5	0x8015
++#define MCA_REG_ADC_BUFF_SAMPLE_6	0x8016
++#define MCA_REG_ADC_BUFF_SAMPLE_7	0x8017
++#define MCA_REG_ADC_BUFF_SAMPLE_8	0x8018
++#define MCA_REG_ADC_BUFF_SAMPLE_9	0x8019
++#define MCA_REG_ADC_BUFF_SAMPLE_10	0x801a
++#define MCA_REG_ADC_BUFF_SAMPLE_11	0x801b
++#define MCA_REG_ADC_BUFF_SAMPLE_12	0x801c
++#define MCA_REG_ADC_BUFF_SAMPLE_13	0x801d
++#define MCA_REG_ADC_BUFF_SAMPLE_14	0x801e
++#define MCA_REG_ADC_BUFF_SAMPLE_15	0x801f
++#define MCA_REG_ADC_BUFF_SAMPLE_16	0x8020
++#define MCA_REG_ADC_BUFF_SAMPLE_17	0x8021
++#define MCA_REG_ADC_BUFF_SAMPLE_18	0x8022
++#define MCA_REG_ADC_BUFF_SAMPLE_19	0x8023
++#define MCA_REG_ADC_BUFF_SAMPLE_20	0x8024
++#define MCA_REG_ADC_BUFF_SAMPLE_21	0x8025
++#define MCA_REG_ADC_BUFF_SAMPLE_22	0x8026
++#define MCA_REG_ADC_BUFF_SAMPLE_23	0x8027
++#define MCA_REG_ADC_BUFF_SAMPLE_24	0x8028
++#define MCA_REG_ADC_BUFF_SAMPLE_25	0x8029
++#define MCA_REG_ADC_BUFF_SAMPLE_26	0x802a
++#define MCA_REG_ADC_BUFF_SAMPLE_27	0x802b
++#define MCA_REG_ADC_BUFF_SAMPLE_28	0x802c
++#define MCA_REG_ADC_BUFF_SAMPLE_29	0x802d
++#define MCA_REG_ADC_BUFF_SAMPLE_30	0x802e
++#define MCA_REG_ADC_BUFF_SAMPLE_31	0x802f
++
++/* EP9, UART */
++#define MCA_REG_UART_THR		0x0900
++#define MCA_REG_UART_RHR		MCA_REG_UART_THR
++#define MCA_REG_UART_IER		0x0901
++#define MCA_REG_UART_IIR		0x0902
++#define MCA_REG_UART_LSR		0x0903
++#define MCA_REG_UART_MSR		0x0904
++#define MCA_REG_UART_RX_ERRORS		0x0905
++#define MCA_REG_UART_TXLVL		0x0906
++#define MCA_REG_UART_RXLVL		0x0907
++#define MCA_REG_UART_RXWM		0x0908
++#define MCA_REG_UART_TXWM		0x0909
++#define MCA_REG_UART_RXSIZE		0x090A
++#define MCA_REG_UART_TXSIZE		0x090B
++#define MCA_REG_UART_CFG0		0x090C
++#define MCA_REG_UART_CFG1		0x090D
++#define MCA_REG_UART_BAUD		0x090E
++#define MCA_REG_UART_RXPIN		0x090F
++#define MCA_REG_UART_TXPIN		0x0910
++#define MCA_REG_UART_CTSPIN		0x0911
++#define MCA_REG_UART_RTSPIN		0x0912
++
++#define MCA_REG_UART_IER_RHR		BIT(0)
++#define MCA_REG_UART_IER_THR		BIT(1)
++#define MCA_REG_UART_IER_RLSE		BIT(2)
++#define MCA_REG_UART_IER_MSR		BIT(3)
++
++#define MCA_REG_UART_IIR_RHR		MCA_REG_UART_IER_RHR
++#define MCA_REG_UART_IIR_THR		MCA_REG_UART_IER_THR
++#define MCA_REG_UART_IIR_RLSE		MCA_REG_UART_IER_RLSE
++#define MCA_REG_UART_IIR_MSR		MCA_REG_UART_IER_MSR
++
++#define MCA_REG_UART_LSR_NO_ERROR	0
++#define MCA_REG_UART_LSR_FRAMING_ERROR	BIT(0)
++#define MCA_REG_UART_LSR_PARITY_ERROR	BIT(1)
++#define MCA_REG_UART_LSR_FIFO_OR_ERROR	BIT(2)
++#define MCA_REG_UART_LSR_HW_OR_ERROR	BIT(3)
++#define MCA_REG_UART_LSR_BREAK		BIT(4)
++
++#define MCA_REG_UART_MSR_CTS		BIT(0)
++#define MCA_REG_UART_MSR_RTS		BIT(1)
++
++#define MCA_REG_UART_CFG0_ENABLE	BIT(0)
++#define MCA_REG_UART_CFG0_WAKEUP	BIT(1)
++#define MCA_REG_UART_CFG0_FORCE_WAKEUP	BIT(2)
++#define MCA_REG_UART_CFG0_PWR_ON	BIT(3)
++#define MCA_REG_UART_CFG0_RXEN		BIT(4)
++#define MCA_REG_UART_CFG0_TXEN		BIT(5)
++#define MCA_REG_UART_CFG0_CRX		BIT(6)
++#define MCA_REG_UART_CFG0_CTX		BIT(7)
++
++#define MCA_REG_UART_CFG1_PARITY_EN	BIT(0)
++#define MCA_REG_UART_CFG1_PARITY_ODD	BIT(1)
++#define MCA_REG_UART_CFG1_TWO_STOPBITS	BIT(2)
++#define MCA_REG_UART_CFG1_CTS_EN	BIT(3)
++#define MCA_REG_UART_CFG1_RTS_EN	BIT(4)
++#define MCA_REG_UART_CFG1_THROTTLE	BIT(5)
++
++#define MCA_REG_UART_BAUD_1200		0
++#define MCA_REG_UART_BAUD_2400		1
++#define MCA_REG_UART_BAUD_4800		2
++#define MCA_REG_UART_BAUD_9600		3
++#define MCA_REG_UART_BAUD_19200		4
++#define MCA_REG_UART_BAUD_38400		5
++#define MCA_REG_UART_BAUD_57600		6
++#define MCA_REG_UART_BAUD_115200	7
++#define MCA_REG_UART_BAUD_230400	8
++
++/* EP10, TPMs */
++/* Reserved 4 bytes */
++#define MCA_REG_TPM0_CFG0		0x0a04
++#define MCA_REG_TPM0_CFG1		0x0a05
++#define MCA_REG_TPM0_CFG2		0x0a06
++#define MCA_REG_TPM0_PRESCALER		0x0a07
++/* ... */
++#define MCA_REG_TPM0_FREQ_0		0x0a0c
++#define MCA_REG_TPM0_FREQ_1		0x0a0d
++#define MCA_REG_TPM0_FREQ_2		0x0a0e
++#define MCA_REG_TPM0_FREQ_3		0x0a0f
++#define MCA_REG_TPM0_CH0_CFG		0x0a10
++#define MCA_REG_TPM0_CH0_DUTY		0x0a11
++#define MCA_REG_TPM0_CH0_CNT0		0x0a12
++#define MCA_REG_TPM0_CH0_CNT1		0x0a13
++#define MCA_REG_TPM0_CH1_CFG		0x0a14
++#define MCA_REG_TPM0_CH1_DUTY		0x0a15
++#define MCA_REG_TPM0_CH1_CNT0		0x0a16
++#define MCA_REG_TPM0_CH1_CNT1		0x0a17
++#define MCA_REG_TPM0_CH2_CFG		0x0a18
++#define MCA_REG_TPM0_CH2_DUTY		0x0a19
++#define MCA_REG_TPM0_CH2_CNT0		0x0a1a
++#define MCA_REG_TPM0_CH2_CNT1		0x0a1b
++#define MCA_REG_TPM0_CH3_CFG		0x0a1c
++#define MCA_REG_TPM0_CH3_DUTY		0x0a1d
++#define MCA_REG_TPM0_CH3_CNT0		0x0a1e
++#define MCA_REG_TPM0_CH3_CNT1		0x0a1f
++#define MCA_REG_TPM0_CH4_CFG		0x0a20
++#define MCA_REG_TPM0_CH4_DUTY		0x0a21
++#define MCA_REG_TPM0_CH4_CNT0		0x0a22
++#define MCA_REG_TPM0_CH4_CNT1		0x0a23
++#define MCA_REG_TPM0_CH5_CFG		0x0a24
++#define MCA_REG_TPM0_CH5_DUTY		0x0a25
++#define MCA_REG_TPM0_CH5_CNT0		0x0a26
++#define MCA_REG_TPM0_CH5_CNT1		0x0a27
++#define MCA_REG_TPM0_CH6_CFG		0x0a28
++#define MCA_REG_TPM0_CH6_DUTY		0x0a29
++#define MCA_REG_TPM0_CH6_CNT0		0x0a2a
++#define MCA_REG_TPM0_CH6_CNT1		0x0a2b
++#define MCA_REG_TPM0_CH7_CFG		0x0a2c
++#define MCA_REG_TPM0_CH7_DUTY		0x0a2d
++#define MCA_REG_TPM0_CH7_CNT0		0x0a2e
++#define MCA_REG_TPM0_CH7_CNT1		0x0a2f
++#define MCA_REG_TPM1_CFG0		0x0a34
++#define MCA_REG_TPM1_CFG1		0x0a35
++#define MCA_REG_TPM1_CFG2		0x0a36
++#define MCA_REG_TPM1_PRESCALER		0x0a37
++/* ... */
++#define MCA_REG_TPM1_FREQ_0		0x0a3c
++#define MCA_REG_TPM1_FREQ_1		0x0a3d
++#define MCA_REG_TPM1_FREQ_2		0x0a3e
++#define MCA_REG_TPM1_FREQ_3		0x0a3f
++#define MCA_REG_TPM1_CH0_CFG		0x0a40
++#define MCA_REG_TPM1_CH0_DUTY		0x0a41
++#define MCA_REG_TPM1_CH0_CNT0		0x0a42
++#define MCA_REG_TPM1_CH0_CNT1		0x0a43
++#define MCA_REG_TPM1_CH1_CFG		0x0a44
++#define MCA_REG_TPM1_CH1_DUTY		0x0a45
++#define MCA_REG_TPM1_CH1_CNT0		0x0a46
++#define MCA_REG_TPM1_CH1_CNT1		0x0a47
++#define MCA_REG_TPM1_CH2_CFG		0x0a48
++#define MCA_REG_TPM1_CH2_DUTY		0x0a49
++#define MCA_REG_TPM1_CH2_CNT0		0x0a4a
++#define MCA_REG_TPM1_CH2_CNT1		0x0a4b
++#define MCA_REG_TPM1_CH3_CFG		0x0a4c
++#define MCA_REG_TPM1_CH3_DUTY		0x0a4d
++#define MCA_REG_TPM1_CH3_CNT0		0x0a4e
++#define MCA_REG_TPM1_CH3_CNT1		0x0a4f
++#define MCA_REG_TPM1_CH4_CFG		0x0a50
++#define MCA_REG_TPM1_CH4_DUTY		0x0a51
++#define MCA_REG_TPM1_CH4_CNT0		0x0a52
++#define MCA_REG_TPM1_CH4_CNT1		0x0a53
++#define MCA_REG_TPM1_CH5_CFG		0x0a54
++#define MCA_REG_TPM1_CH5_DUTY		0x0a55
++#define MCA_REG_TPM1_CH5_CNT0		0x0a56
++#define MCA_REG_TPM1_CH5_CNT1		0x0a57
++#define MCA_REG_TPM1_CH6_CFG		0x0a58
++#define MCA_REG_TPM1_CH6_DUTY		0x0a59
++#define MCA_REG_TPM1_CH6_CNT0		0x0a5a
++#define MCA_REG_TPM1_CH6_CNT1		0x0a5b
++#define MCA_REG_TPM1_CH7_CFG		0x0a5c
++#define MCA_REG_TPM1_CH7_DUTY		0x0a5d
++#define MCA_REG_TPM1_CH7_CNT0		0x0a5e
++#define MCA_REG_TPM1_CH7_CNT1		0x0a5f
++#define MCA_REG_TPM2_CFG0		0x0a64
++#define MCA_REG_TPM2_CFG1		0x0a65
++#define MCA_REG_TPM2_CFG2		0x0a66
++#define MCA_REG_TPM2_PRESCALER		0x0a67
++/* ... */
++#define MCA_REG_TPM2_FREQ_0		0x0a6c
++#define MCA_REG_TPM2_FREQ_1		0x0a6d
++#define MCA_REG_TPM2_FREQ_2		0x0a6e
++#define MCA_REG_TPM2_FREQ_3		0x0a6f
++#define MCA_REG_TPM2_CH0_CFG		0x0a70
++#define MCA_REG_TPM2_CH0_DUTY		0x0a71
++#define MCA_REG_TPM2_CH0_CNT0		0x0a72
++#define MCA_REG_TPM2_CH0_CNT1		0x0a73
++#define MCA_REG_TPM2_CH1_CFG		0x0a74
++#define MCA_REG_TPM2_CH1_DUTY		0x0a75
++#define MCA_REG_TPM2_CH1_CNT0		0x0a76
++#define MCA_REG_TPM2_CH1_CNT1		0x0a77
++#define MCA_REG_TPM2_CH2_CFG		0x0a78
++#define MCA_REG_TPM2_CH2_DUTY		0x0a79
++#define MCA_REG_TPM2_CH2_CNT0		0x0a7a
++#define MCA_REG_TPM2_CH2_CNT1		0x0a7b
++#define MCA_REG_TPM2_CH3_CFG		0x0a7c
++#define MCA_REG_TPM2_CH3_DUTY		0x0a7d
++#define MCA_REG_TPM2_CH3_CNT0		0x0a7e
++#define MCA_REG_TPM2_CH3_CNT1		0x0a7f
++#define MCA_REG_TPM2_CH4_CFG		0x0a80
++#define MCA_REG_TPM2_CH4_DUTY		0x0a81
++#define MCA_REG_TPM2_CH4_CNT0		0x0a82
++#define MCA_REG_TPM2_CH4_CNT1		0x0a83
++#define MCA_REG_TPM2_CH5_CFG		0x0a84
++#define MCA_REG_TPM2_CH5_DUTY		0x0a85
++#define MCA_REG_TPM2_CH5_CNT0		0x0a86
++#define MCA_REG_TPM2_CH5_CNT1		0x0a87
++#define MCA_REG_TPM2_CH6_CFG		0x0a88
++#define MCA_REG_TPM2_CH6_DUTY		0x0a89
++#define MCA_REG_TPM2_CH6_CNT0		0x0a8a
++#define MCA_REG_TPM2_CH6_CNT1		0x0a8b
++#define MCA_REG_TPM2_CH7_CFG		0x0a8c
++#define MCA_REG_TPM2_CH7_DUTY		0x0a8d
++#define MCA_REG_TPM2_CH7_CNT0		0x0a8e
++#define MCA_REG_TPM2_CH7_CNT1		0x0a8f
++
++#define MCA_PWM_TPM_LEN			(MCA_REG_TPM1_CFG0 - MCA_REG_TPM0_CFG0)
++#define MCA_PWM_CH_LEN			(MCA_REG_TPM0_CH1_CFG - MCA_REG_TPM0_CH0_CFG)
++
++/*
++ * MCA registers bitfields
++ */
++
++/* MCA_IRQ_STATUS_0 (addr=0x0020) */
++#define MCA_RTC_ALARM		BIT(0)
++#define MCA_RTC_1HZ		BIT(1)
++#define MCA_WATCHDOG		BIT(2)
++#define MCA_PWR_SLEEP		BIT(3)
++#define MCA_PWR_OFF		BIT(4)
++#define MCA_TAMPER0		BIT(5)
++#define MCA_TAMPER1		BIT(6)
++#define MCA_ADC			BIT(7)
++
++/* MCA_IRQ_STATUS_1 (addr=0x0021) */
++#define MCA_GPIO_BANK_0		BIT(0)
++#define MCA_GPIO_BANK_1		BIT(1)
++#define MCA_GPIO_BANK_2		BIT(2)
++#define MCA_GPIO_BANK_3		BIT(3)
++#define MCA_GPIO_BANK_4		BIT(4)
++#define MCA_GPIO_BANK_5		BIT(5)
++#define MCA_GPIO_BANK_6		BIT(6)
++#define MCA_GPIO_BANK_7		BIT(7)
++
++/* MCA_GPIO_IRQ_CFG_n (addr=0x0332... 0x0369) */
++#define MCA_GPIO_IRQ_EN		BIT(0)
++#define MCA_GPIO_IRQ_LEVEL	BIT(1)
++#define MCA_GPIO_IRQ_EDGE_RISE	BIT(2)
++#define MCA_GPIO_IRQ_EDGE_FALL	BIT(3)
++#define MCA_GPIO_IRQ_EDGE_BOTH	(MCA_GPIO_IRQ_EDGE_RISE | \
++				 MCA_GPIO_IRQ_EDGE_FALL)
++#define MCA_M_GPIO_IRQ_CFG	(MCA_GPIO_IRQ_LEVEL | \
++				 MCA_GPIO_IRQ_EDGE_BOTH)
++#define MCA_GPIO_IRQ_CAPABLE	BIT(7)
++
++/* MCA_IRQ_MASK_0 (addr=0x0024) */
++#define MCA_M_RTC_ALARM		BIT(0)
++#define MCA_M_RTC_1HZ		BIT(1)
++#define MCA_M_WATCHDOG		BIT(2)
++#define MCA_M_PWR_SLEEP		BIT(3)
++#define MCA_M_PWR_OFF		BIT(4)
++#define MCA_M_TAMPER0		BIT(5)
++#define MCA_M_TAMPER1		BIT(6)
++#define MCA_M_ADC		BIT(7)
++
++/* MCA_IRQ_MASK_1 (addr=0x0025) */
++#define MCA_M_GPIO_BANK_0	BIT(0)
++#define MCA_M_GPIO_BANK_1	BIT(1)
++#define MCA_M_GPIO_BANK_2	BIT(2)
++#define MCA_M_GPIO_BANK_3	BIT(3)
++#define MCA_M_GPIO_BANK_4	BIT(4)
++#define MCA_M_GPIO_BANK_5	BIT(5)
++#define MCA_M_GPIO_BANK_6	BIT(6)
++#define MCA_M_GPIO_BANK_7	BIT(7)
++
++/* MCA_IRQ_MASK_2 */
++#define MCA_M_TAMPER2		BIT(0)
++#define MCA_M_TAMPER3		BIT(1)
++#define MCA_M_UART		BIT(2)
++
++/* MCA_PWR_CTRL_0 (addr=0x0028) */
++#define MCA_PWR_KEY_SLEEP_EN	BIT(0)
++#define MCA_PWR_KEY_OFF_EN	BIT(1)
++#define MCA_PWR_GUARD_EN	BIT(2)
++#define MCA_PWR_GO_OFF		BIT(3)
++#define MCA_PWR_GO_SUSPEND	BIT(4)
++
++/* MCA_CTRL_0 (addr=0x0031) */
++#define MCA_RESET		BIT(0)
++#define MCA_EXT32K_EN		BIT(1)
++#define MCA_JMP_BL		BIT(2)
++#define MCA_VREF_EN		BIT(5)
++
++/* MCA_TAMPERn_CFG0 (addr=0x0037 & 0x0046) */
++#define MCA_TAMPER_DET_EN		BIT(0)
++#define MCA_TAMPER_RECONF_EN	BIT(1)
++#define MCA_TAMPER_IN_ACT_HIGH	BIT(2)
++#define MCA_TAMPER_IRQ_EN		BIT(3)
++#define MCA_TAMPER_OUT_EN		BIT(4)
++#define MCA_TAMPER_OUT_ACT_HIGH	BIT(5)
++#define MCA_TAMPER_PWROFF_EN	BIT(6)
++#define MCA_TAMPER_CLR_EV_EN	BIT(7)
++
++/* MCA_TAMPERm_EVENT (addr=0x0045 & 0x0054) */
++#define MCA_TAMPER_SIGNALED	BIT(0)
++#define MCA_TAMPER_ACKED		BIT(1)
++#define MCA_TAMPER_CLEAR		0
++
++/* MCA_WDT_CONTROL (addr=0x0201) */
++#define MCA_WDT_ENABLE		BIT(0)
++#define MCA_WDT_NOWAYOUT	BIT(1)
++#define MCA_WDT_IRQNORESET	BIT(2)
++#define MCA_WDT_PRETIMEOUT	BIT(3)
++#define MCA_WDT_FULLRESET	BIT(4)
++
++/* MCA_WDT_TIMEOUT (addr=0x0202) */
++#define MCA_WDT_TIMEOUT_MASK	0xFF
++
++/* MCA_WDT_REFRESH_X (addr=0x0203..0x0206) */
++#define MCA_WDT_REFRESH_X_MASK	0xFF
++
++/* MCA_GPIO_NUM (addr=0x0302) */
++#define MCA_GPIO_NUM_MASK	0x7F
++
++/* MCA_ADC_CFG0 (addr=0x0404..0x040b) */
++#define MCA_REG_ADC_CFG0_EN		BIT(0)
++#define MCA_REG_ADC_CFG0_RUNS_LP	BIT(1)
++#define MCA_REG_ADC_CFG0_MODE_0		BIT(2)
++#define MCA_REG_ADC_CFG0_MODE_1		BIT(3)
++#define MCA_REG_ADC_CFG0_AVG_0		BIT(4)
++#define MCA_REG_ADC_CFG0_AVG_1		BIT(5)
++#define MCA_REG_ADC_CFG0_IRQ_EN		BIT(6)
++#define MCA_REG_ADC_CFG0_CAPABLE	BIT(7)
++
++#define MCA_REG_ADC_CFG0_AVG_MASK	(MCA_REG_ADC_CFG0_AVG_0 |\
++					 MCA_REG_ADC_CFG0_AVG_1)
++#define MCA_REG_ADC_CFG0_AVG_SHIFT	4
++
++/* ADC CFG1 flags */
++#define MCA_REG_ADC_CFG1_EN_RISING	BIT(0)
++#define MCA_REG_ADC_CFG1_EN_FALLING	BIT(1)
++#define MCA_REG_ADC_CFG1_LEVEL_EDGE	BIT(2)
++#define MCA_REG_ADC_CFG1_INVERT_CMP	BIT(3)
++#define MCA_REG_ADC_CFG1_CMP_OUT	BIT(4)
++#define MCA_REG_ADC_CFG1_RISING_MASK	BIT(5)
++#define MCA_REG_ADC_CFG1_FALLING_MASK	BIT(6)
++#define MCA_REG_ADC_CFG1_IRQ		BIT(7)
++#define MCA_REG_ADC_CFG1_IRQ_FLAGS_MASK	0xE0
++#define MCA_REG_ADC_CFG1_RO_MASK	0xF0
++
++/* Global ADC CFG_0 flags */
++#define MCA_REG_ADC_CFG_0_INT_VREF	(1 << 0)
++
++/* MCA_RTC_CONTROL (addr=0x0101) */
++#define MCA_RTC_EN		BIT(0)
++#define MCA_RTC_ALARM_EN	BIT(1)
++#define MCA_RTC_1HZ_EN		BIT(2)
++#define MCA_RTC_32KHZ_OUT_EN	BIT(3)
++
++/* MCA_RTC_COUNT_YEAR_L (addr=0x0103) */
++/* MCA_RTC_ALARM_YEAR_L (addr=0x010A) */
++#define MCA_RTC_YEAR_L_MASK	0xFF
++
++/* MCA_RTC_COUNT_YEAR_H (addr=0x0104) */
++/* MCA_RTC_ALARM_YEAR_H (addr=0x010B) */
++#define MCA_RTC_YEAR_H_MASK	0xFF
++
++/* MCA_RTC_COUNT_MONTH (addr=0x0105) */
++/* MCA_RTC_ALARM_MONTH (addr=0x010C) */
++#define MCA_RTC_MONTH_MASK	0x0F
++
++/* MCA_RTC_COUNT_DAY (addr=0x0106) */
++/* MCA_RTC_ALARM_DAY (addr=0x010D) */
++#define MCA_RTC_DAY_MASK	0x1F
++
++/* MCA_RTC_COUNT_HOUR (addr=0x0107) */
++/* MCA_RTC_ALARM_HOUR (addr=0x010E) */
++#define MCA_RTC_HOUR_MASK	0x1F
++
++/* MCA_RTC_COUNT_MIN (addr=0x0108) */
++/* MCA_RTC_ALARM_MIN (addr=0x010F) */
++#define MCA_RTC_MIN_MASK	0x3F
++
++/* MCA_RTC_COUNT_SEC (addr=0x0109) */
++/* MCA_RTC_ALARM_SEC (addr=0x0110) */
++#define MCA_RTC_SEC_MASK	0x3F
++
++/* MCA_REG_TPMx_CH0_CFG	(addr=0x0a10...) */
++#define MCA_TPM_CH_EN			BIT(0)
++#define MCA_TPM_CH_POL_HIGH		BIT(1)
++
++#endif /* MCA_COMMON_REGISTERS_H_ */

@@ -1,0 +1,8 @@
+[Unit]
+Description=Late modems scan timer
+
+[Timer]
+OnActiveSec=40s
+
+[Install]
+WantedBy=multi-user.target

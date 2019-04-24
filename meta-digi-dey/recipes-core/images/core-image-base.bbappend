@@ -13,9 +13,7 @@ IMAGE_FEATURES += " \
     ${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'dey-wireless', '', d)} \
 "
 
-IMAGE_INSTALL = " \
-    dey-examples-digiapix \
-"
+CORE_IMAGE_BASE_INSTALL += "dey-examples-digiapix"
 
 # SDK features (for toolchains generated from an image with populate_sdk)
 SDKIMAGE_FEATURES ?= "dev-pkgs dbg-pkgs staticdev-pkgs"
