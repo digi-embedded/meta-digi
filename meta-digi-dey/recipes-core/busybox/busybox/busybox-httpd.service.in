@@ -1,0 +1,12 @@
+[Unit]
+Description=Busybox HTTP daemon
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=@sbindir@/httpd -h /srv/www
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

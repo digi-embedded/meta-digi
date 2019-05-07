@@ -8,6 +8,8 @@ SRC_URI += "file://standby \
             file://busybox-ntpd \
             file://index.html \
             file://digi-logo.png \
+            file://busybox-httpd.service.in \
+            file://nm \
             file://busybox-acpid \
             file://acpid.map \
             file://pswitch-standby \
@@ -21,6 +23,11 @@ HAS_SYSTEMD = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false
 INITSCRIPT_PARAMS_${PN}-hwclock = "start 20 S . stop 20 0 6 ."
 
 FILES_${PN}_append = " ${systemd_unitdir}/system-sleep/"
+
+# HTTPD package
+FILES_${PN}-httpd_append = " ${systemd_unitdir}/system/busybox-httpd.service"
+SYSTEMD_PACKAGES += "${PN}-httpd"
+SYSTEMD_SERVICE_${PN}-httpd = "busybox-httpd.service"
 
 # NTPD package
 PACKAGES =+ "${PN}-ntpd"
@@ -46,8 +53,15 @@ do_install_append() {
 		install -m 0755 ${WORKDIR}/busybox-ntpd ${D}${sysconfdir}/init.d/
 	fi
 	if grep "CONFIG_HTTPD=y" ${WORKDIR}/defconfig; then
+		install -d ${D}/srv/www/cgi-bin
 		install -m 0644 ${WORKDIR}/index.html ${D}/srv/www/
 		install -m 0644 ${WORKDIR}/digi-logo.png ${D}/srv/www/
+		install -m 0755 ${WORKDIR}/nm ${D}/srv/www/cgi-bin/
+		if ${HAS_SYSTEMD}; then
+			install -d ${D}${systemd_unitdir}/system
+			sed 's,@sbindir@,${sbindir},g' < ${WORKDIR}/busybox-httpd.service.in \
+				> ${D}${systemd_unitdir}/system/busybox-httpd.service
+		fi
 	fi
 	# Install one standby script or another depending on having systemd or not
 	if ${HAS_SYSTEMD}; then

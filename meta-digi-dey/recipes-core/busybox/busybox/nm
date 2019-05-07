@@ -1,0 +1,6 @@
+#!/bin/sh
+
+printf "Content-Type: text/plain; charset=utf-8\r\n"
+printf "X-NetworkManager-Status: online\r\n"
+printf "\r\n"
+printf "NetworkManager is online\r\n"
