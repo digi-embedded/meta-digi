@@ -1,7 +1,10 @@
 # libdigiapix: configure interfaces so they can be used by group 'digiapix'
 
 SUBSYSTEM=="i2c-dev", GROUP="digiapix", MODE="0660"
+SUBSYSTEM=="iio",     GROUP="digiapix", MODE="0660"
+SUBSYSTEM=="misc",    GROUP="digiapix", MODE="0660", ENV{DEVNAME}=="/dev/watchdog"
 SUBSYSTEM=="spidev",  GROUP="digiapix", MODE="0660"
+SUBSYSTEM=="watchdog",GROUP="digiapix", MODE="0660"
 
 #
 # Use two different rules for GPIO's.
@@ -20,3 +23,4 @@ SUBSYSTEM=="gpio", KERNEL=="gpiochip0", ACTION=="add", RUN="/etc/udev/scripts/di
 SUBSYSTEM=="gpio", KERNEL!="gpiochip*", ACTION=="add", RUN="/etc/udev/scripts/digiapix.sh"
 
 SUBSYSTEM=="pwm", ACTION=="add|change", RUN="/etc/udev/scripts/digiapix.sh"
+SUBSYSTEM=="iio", ACTION=="add", RUN="/etc/udev/scripts/digiapix.sh"
