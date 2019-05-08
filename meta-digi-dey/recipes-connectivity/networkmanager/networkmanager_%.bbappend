@@ -14,6 +14,8 @@ SRC_URI += " \
     file://nm.eth1.static \
     file://nm.wlan0.dhcp \
     file://nm.wlan0.static \
+    file://01dispatcher \
+    file://ifdownup \
 "
 
 # 'polkit' depends on 'consolekit', and this requires 'x11' distro feature. So
@@ -90,6 +92,14 @@ do_install_append() {
 			-e "s,##CELLULAR_PASSWORD##,${CELLULAR_PASSWORD},g" \
 			${D}${sysconfdir}/NetworkManager/system-connections/nm.cellular
 	fi
+
+	# Install main dispatcher script and create directories
+	install -d ${D}${sysconfdir}/NetworkManager/dispatcher.d/up.d \
+		${D}${sysconfdir}/NetworkManager/dispatcher.d/down.d \
+		${D}${sysconfdir}/NetworkManager/dispatcher.d/connectivity-change.d \
+		${D}${sysconfdir}/NetworkManager/dispatcher.d/device-connectivity-change.d
+	install -m 0755 ${WORKDIR}/01dispatcher ${D}${sysconfdir}/NetworkManager/dispatcher.d/
+	install -m 0755 ${WORKDIR}/ifdownup ${D}${sysconfdir}/NetworkManager/dispatcher.d/device-connectivity-change.d/
 
 	# Disable terminal colors by default
 	install -d ${D}${sysconfdir}/terminal-colors.d
