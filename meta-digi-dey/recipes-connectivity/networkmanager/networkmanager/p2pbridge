@@ -1,0 +1,65 @@
+#!/bin/sh
+#
+# Copyright 2019, Digi International Inc.
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, you can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+# Description: create P2P (BATMAN) bridge
+#
+
+# This script is specific to create a P2P (BATMAN) bridge, so
+# require the CONNECTION_ID to be "p2p-bridge"
+[ "${CONNECTION_ID}" = "p2p-bridge" ] || exit 0
+
+log() {
+	systemd-cat -p "${1}" -t p2pbridge printf "%s" "${2}"
+}
+
+case "${NM_DISPATCHER_ACTION}" in
+pre-up)
+	# Reset virtual interfaces
+	{ batctl if destroy; ifdown -f p2p0; } >/dev/null 2>&1
+
+	# Bring P2P link up
+	log info "bring P2P link UP"
+	ifup p2p0 || { log err "p2p link NOT created"; exit 1; }
+	for P2P_IFNAME in $(basename $(echo /sys/class/net/p2p-p2p0-*)); do
+		echo "${P2P_IFNAME}" | grep -qs 'p2p-p2p0-\*' && continue
+		ifconfig "${P2P_IFNAME}" 0.0.0.0
+		p2p_iface_found="1"
+		break
+	done
+	[ -z "${p2p_iface_found}" ] && { log err "p2p interface NOT found"; exit 1; }
+
+	# Bring P2P bridge up
+	log info "bring P2P bridge up"
+	batctl if add "${P2P_IFNAME}"
+	ifconfig eth0 0.0.0.0 up
+	ifconfig bat0 0.0.0.0 up
+	brctl addif "${DEVICE_IP_IFACE}" bat0
+	brctl addif "${DEVICE_IP_IFACE}" eth0
+	log info "P2P bridge created"
+	;;
+down)
+	log info "bring P2P bridge DOWN"
+	brctl delif "${DEVICE_IP_IFACE}" bat0
+	brctl delif "${DEVICE_IP_IFACE}" eth0
+	batctl if destroy
+
+	log info "bring P2P link DOWN"
+	ifdown -f p2p0 || { log err "unable to bring P2P link DOWN"; exit 1; }
+	;;
+*)
+	# Do nothing
+	;;
+esac

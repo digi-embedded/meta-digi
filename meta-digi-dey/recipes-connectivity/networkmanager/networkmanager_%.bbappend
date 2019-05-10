@@ -16,6 +16,7 @@ SRC_URI += " \
     file://nm.wlan0.static \
     file://01dispatcher \
     file://ifdownup \
+    file://p2pbridge \
 "
 
 # 'polkit' depends on 'consolekit', and this requires 'x11' distro feature. So
@@ -93,13 +94,15 @@ do_install_append() {
 			${D}${sysconfdir}/NetworkManager/system-connections/nm.cellular
 	fi
 
-	# Install main dispatcher script and create directories
+	# Install dispatcher scripts and create directories
 	install -d ${D}${sysconfdir}/NetworkManager/dispatcher.d/up.d \
 		${D}${sysconfdir}/NetworkManager/dispatcher.d/down.d \
 		${D}${sysconfdir}/NetworkManager/dispatcher.d/connectivity-change.d \
 		${D}${sysconfdir}/NetworkManager/dispatcher.d/device-connectivity-change.d
 	install -m 0755 ${WORKDIR}/01dispatcher ${D}${sysconfdir}/NetworkManager/dispatcher.d/
 	install -m 0755 ${WORKDIR}/ifdownup ${D}${sysconfdir}/NetworkManager/dispatcher.d/device-connectivity-change.d/
+	install -m 0755 ${WORKDIR}/p2pbridge ${D}${sysconfdir}/NetworkManager/dispatcher.d/pre-up.d/
+	ln -s ../pre-up.d/p2pbridge ${D}${sysconfdir}/NetworkManager/dispatcher.d/down.d/p2pbridge
 
 	# Disable terminal colors by default
 	install -d ${D}${sysconfdir}/terminal-colors.d
