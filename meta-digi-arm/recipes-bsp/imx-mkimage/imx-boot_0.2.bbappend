@@ -1,5 +1,9 @@
 # Copyright 2019 Digi International, Inc.
 
+# Use the v4.14 ga BSP branch
+SRCBRANCH = "imx_4.14.98_2.0.0_ga"
+SRCREV = "dd0234001713623c79be92b60fa88bc07b07f24f"
+
 IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware"
 
 DEPENDS_append_ccimx8x = " coreutils-native"
@@ -26,18 +30,18 @@ do_populate_lic[depends] += " \
 	${@' '.join('%s:do_populate_lic' % r for r in '${IMX_M4_DEMOS}'.split() )} \
 	firmware-imx:do_populate_lic \
 "
+ATF_MACHINE_NAME_mx8qxp = "bl31-imx8qx.bin"
 
 UBOOT_NAME = "u-boot-${MACHINE}.bin"
 BOOT_CONFIG_MACHINE = "${BOOT_NAME}"
 
 IMXBOOT_TARGETS_ccimx8x = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_flexspi', \
-			      bb.utils.contains('UBOOT_CONFIG', 'nand', 'flash_nand', \
-									'flash flash_all', d), d)}"
+                                                'flash flash_regression_linux_m4', d)}"
 
 do_compile () {
 	bbnote 8QX boot binary build
 	cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_srtm_demo.bin       ${BOOT_STAGING}/m40_tcm.bin
-	cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_srtm_demo.bin       ${BOOT_STAGING}/CM4.bin
+	cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_srtm_demo.bin       ${BOOT_STAGING}/m4_image.bin
 	cp ${DEPLOY_DIR_IMAGE}/mx8qx-ahab-container.img          ${BOOT_STAGING}/
 	cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${ATF_MACHINE_NAME} ${BOOT_STAGING}/bl31.bin
 	for type in ${UBOOT_CONFIG}; do
@@ -83,7 +87,7 @@ do_deploy () {
 	# copy the tool mkimage to deploy path and sc fw, dcd and uboot
 	install -m 0644 ${BOOT_STAGING}/mx8qx-ahab-container.img ${DEPLOYDIR}/${BOOT_TOOLS}
 	install -m 0644 ${BOOT_STAGING}/m40_tcm.bin              ${DEPLOYDIR}/${BOOT_TOOLS}
-	install -m 0644 ${BOOT_STAGING}/CM4.bin                  ${DEPLOYDIR}/${BOOT_TOOLS}
+	install -m 0644 ${BOOT_STAGING}/m4_image.bin             ${DEPLOYDIR}/${BOOT_TOOLS}
 	install -m 0755 ${S}/${TOOLS_NAME}                       ${DEPLOYDIR}/${BOOT_TOOLS}
 
 	# copy makefile (soc.mak) for reference
