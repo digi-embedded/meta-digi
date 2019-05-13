@@ -1,5 +1,5 @@
 # Copyright (C) 2014,2016 Freescale Semiconductor
-# Copyright 2017-2018 NXP
+# Copyright 2017-2019 NXP
 # Copyright (C) 2012-2015 O.S. Systems Software LTDA.
 # Released under the MIT license (see COPYING.MIT for the terms)
 
@@ -7,8 +7,7 @@ DESCRIPTION = "Gstreamer freescale plugins"
 LICENSE = "GPLv2 & LGPLv2 & LGPLv2.1"
 SECTION = "multimedia"
 
-DEPENDS = "imx-codec imx-parser virtual/kernel libdrm gstreamer1.0 gstreamer1.0-plugins-base gstreamer1.0-plugins-bad"
-do_configure[depends] += "virtual/kernel:do_shared_workdir"
+DEPENDS = "imx-codec imx-parser libdrm gstreamer1.0 gstreamer1.0-plugins-base gstreamer1.0-plugins-bad"
 DEPENDS_append_mx6 = " imx-lib"
 DEPENDS_append_mx7 = " imx-lib"
 DEPENDS_append_imxvpu = " imx-vpuwrap"
@@ -22,14 +21,16 @@ LIC_FILES_CHKSUM = "file://COPYING-LGPL-2;md5=5f30f0716dfdd0d91eb439ebec522ec2 \
                     file://COPYING-LGPL-2.1;md5=fbc093901857fcd118f065f900982c24"
 
 IMXGST_SRC ?= "git://source.codeaurora.org/external/imx/imx-gst1.0-plugin.git;protocol=https"
-SRCBRANCH = "MM_04.04.04_1811_L4.14.78_GA"
+SRCBRANCH = "MM_04.04.05_1902_L4.14.98_GA"
 
-SRC_URI = "${IMXGST_SRC};branch=${SRCBRANCH}"
-SRCREV = "79cf42955b5100cd1a3b2ea2647ceb7cfa50fffb"
+SRC_URI = "${IMXGST_SRC};branch=${SRCBRANCH} \
+           file://0001-imx-gst1.0-plugin-Update-KERNEL_VERSION-check.patch \
+"
+SRCREV = "0c5f48b3aee473d8c8f3e853eb2078f054caa4d2"
 
 S = "${WORKDIR}/git"
 
-inherit autotools pkgconfig
+inherit autotools pkgconfig use-imx-headers
 
 PLATFORM_mx6 = "MX6"
 PLATFORM_mx6sl = "MX6SL"
@@ -42,7 +43,7 @@ PLATFORM_mx8 = "MX8"
 
 # Todo add a mechanism to map possible build targets
 EXTRA_OECONF = "PLATFORM=${PLATFORM} \
-                CPPFLAGS="-I${STAGING_KERNEL_BUILDDIR}/include/generated/uapi -I${STAGING_KERNEL_DIR}/include/uapi -I${STAGING_KERNEL_DIR}/include" \
+                CPPFLAGS="-I${STAGING_INCDIR_IMX}" \
                 CROSS_ROOT=${PKG_CONFIG_SYSROOT_DIR} \
                 ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', bb.utils.contains('DISTRO_FEATURES', 'x11', '--disable-x11', '', d), '', d)}"
 
