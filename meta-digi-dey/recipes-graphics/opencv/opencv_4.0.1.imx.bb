@@ -10,11 +10,12 @@ ARM_INSTRUCTION_SET_armv5 = "arm"
 
 DEPENDS = "libtool swig-native bzip2 zlib glib-2.0 libwebp"
 
-SRCREV_opencv = "9e1b1e5389237c2b9f6c7b9d7715d9836c0a5de1"
-SRCREV_contrib = "d4e02869454998c9af5af1a5c3392cdc0c31dd22"
-SRCREV_ipp = "a62e20676a60ee0ad6581e217fe7e4bada3b95db"
+SRCREV_opencv = "737f8fad1318607bf78eff76e3e4364db11663e0"
+SRCREV_contrib = "25221244732dcf44c1450d0f93edc2529a61c0e1"
+SRCREV_ipp = "32e315a5b106a7b89dbed51c28f8120a48b368b4"
 SRCREV_boostdesc = "34e4206aef44d50e6bbcd0ab06354b52e7466d26"
 SRCREV_vgg = "fccf7cd6a4b12079f73bbfb21745f9babcd4eb1d"
+SRCREV_extra = "d29d003e00dacf4ed686577c3f2c0aa048d5a80a"
 SRC_URI[tinydnn.md5sum] = "adb1c512e09ca2c7a6faef36f9c53e59"
 SRC_URI[tinydnn.sha256sum] = "e2c61ce8c5debaa644121179e9dbdcf83f497f39de853f8dd5175846505aa18b"
 
@@ -22,38 +23,38 @@ def ipp_filename(d):
     import re
     arch = d.getVar('TARGET_ARCH', True)
     if re.match("i.86$", arch):
-        return "ippicv_2017u2_lnx_ia32_20170418.tgz"
+        return "ippicv_2019_lnx_ia32_general_20180723.tgz"
     else:
-        return "ippicv_2017u2_lnx_intel64_20170418.tgz"
+        return "ippicv_2019_lnx_intel64_general_20180723.tgz"
 
 def ipp_md5sum(d):
     import re
     arch = d.getVar('TARGET_ARCH', True)
     if re.match("i.86$", arch):
-        return "f2cece00d802d4dea86df52ed095257e"
+        return "ea72de74dae3c604eb6348395366e78e"
     else:
-        return "808b791a6eac9ed78d32a7666804320e"
+        return "b7cc351267db2d34b9efa1cd22ff0572"
 
 IPP_FILENAME = "${@ipp_filename(d)}"
 IPP_MD5 = "${@ipp_md5sum(d)}"
 
-SRCREV_FORMAT = "opencv_contrib_ipp_boostdesc_vgg"
-SRC_URI = "git://github.com/opencv/opencv.git;branch=3.4;name=opencv \
-    git://github.com/opencv/opencv_contrib.git;branch=3.4;destsuffix=contrib;name=contrib \
-    git://github.com/opencv/opencv_3rdparty.git;branch=ippicv/master_20170418;destsuffix=ipp;name=ipp \
+SRCREV_FORMAT = "opencv_contrib_ipp_boostdesc_vgg_extra"
+OPENCV_SRC ?= "git://source.codeaurora.org/external/imx/opencv-imx.git;protocol=https"
+SRCBRANCH = "4.0.1_imx"
+SRC_URI = "${OPENCV_SRC};branch=${SRCBRANCH};name=opencv \
+    git://github.com/opencv/opencv_contrib.git;destsuffix=contrib;name=contrib \
+    git://github.com/opencv/opencv_3rdparty.git;branch=ippicv/master_20180723;destsuffix=ipp;name=ipp \
     git://github.com/opencv/opencv_3rdparty.git;branch=contrib_xfeatures2d_boostdesc_20161012;destsuffix=boostdesc;name=boostdesc \
     git://github.com/opencv/opencv_3rdparty.git;branch=contrib_xfeatures2d_vgg_20160317;destsuffix=vgg;name=vgg \
+    git://github.com/opencv/opencv_extra.git;destsuffix=extra;name=extra \
     https://github.com/tiny-dnn/tiny-dnn/archive/v1.0.0a3.tar.gz;destsuffix=git/3rdparty/tinydnn/tiny-dnn-1.0.0a3;name=tinydnn;unpack=false \
     file://0001-3rdparty-ippicv-Use-pre-downloaded-ipp.patch \
-    file://fixpkgconfig.patch \
     file://uselocalxfeatures.patch;patchdir=../contrib/ \
     file://0003-To-fix-errors-as-following.patch \
+    file://0001-Temporarliy-work-around-deprecated-ffmpeg-RAW-functi.patch \
     file://0001-Dont-use-isystem.patch \
-    file://javagen.patch \
-    file://0001-dnn-allow-to-use-external-protobuf.patch \
 "
-
-PV = "3.4.2+git${SRCPV}"
+PV = "4.0.1.imx+git${SRCPV}"
 
 S = "${WORKDIR}/git"
 
@@ -68,6 +69,7 @@ addtask unpack_extra after do_unpack before do_patch
 
 EXTRA_OECMAKE = "-DOPENCV_EXTRA_MODULES_PATH=${WORKDIR}/contrib/modules \
     -DWITH_1394=OFF \
+    -DENABLE_PRECOMPILED_HEADERS=OFF \
     -DCMAKE_SKIP_RPATH=ON \
     -DOPENCV_ICV_HASH=${IPP_MD5} \
     -DIPPROOT=${WORKDIR}/ippicv_lnx \
@@ -77,9 +79,26 @@ EXTRA_OECMAKE = "-DOPENCV_EXTRA_MODULES_PATH=${WORKDIR}/contrib/modules \
 "
 EXTRA_OECMAKE_append_x86 = " -DX86=ON"
 
-PACKAGECONFIG ??= "python3 eigen jpeg png tiff v4l libv4l gstreamer samples tbb gphoto2 \
-    ${@bb.utils.contains("DISTRO_FEATURES", "x11", "gtk", "", d)} \
+PACKAGECONFIG_GTK ?= " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'gtk', '', d)} \
+"
+PACKAGECONFIG_GTK_mx8 ?= " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland x11',    '', \
+       bb.utils.contains('DISTRO_FEATURES',         'x11', 'gtk', \
+                                                              '', d), d)} \
+"
+PACKAGECONFIG ??= "python3 jpeg png tiff v4l libv4l gstreamer samples tbb gphoto2 \
+    ${PACKAGECONFIG_GTK} \
     ${@bb.utils.contains("LICENSE_FLAGS_WHITELIST", "commercial", "libav", "", d)}"
+
+PACKAGECONFIG_append_mx8   = " dnn text"
+PACKAGECONFIG_append_mx8dv = " openvx"
+PACKAGECONFIG_append_mx8qm = " openvx"
+
+PACKAGECONFIG_OPENCL       = ""
+PACKAGECONFIG_OPENCL_mx8   = "opencl"
+PACKAGECONFIG_OPENCL_mx8mm = ""
+PACKAGECONFIG_append       = " ${PACKAGECONFIG_OPENCL}"
 
 PACKAGECONFIG[amdblas] = "-DWITH_OPENCLAMDBLAS=ON,-DWITH_OPENCLAMDBLAS=OFF,libclamdblas,"
 PACKAGECONFIG[amdfft] = "-DWITH_OPENCLAMDFFT=ON,-DWITH_OPENCLAMDFFT=OFF,libclamdfft,"
@@ -95,12 +114,15 @@ PACKAGECONFIG[jpeg] = "-DWITH_JPEG=ON,-DWITH_JPEG=OFF,jpeg,"
 PACKAGECONFIG[libav] = "-DWITH_FFMPEG=ON,-DWITH_FFMPEG=OFF,libav,"
 PACKAGECONFIG[libv4l] = "-DWITH_LIBV4L=ON,-DWITH_LIBV4L=OFF,v4l-utils,"
 PACKAGECONFIG[opencl] = "-DWITH_OPENCL=ON,-DWITH_OPENCL=OFF,opencl-headers virtual/opencl-icd,"
+PACKAGECONFIG[openvx] = "-DWITH_OPENVX=ON -DOPENVX_ROOT=${STAGING_LIBDIR} -DOPENVX_LIB_CANDIDATES='OpenVX;OpenVXU',-DWITH_OPENVX=OFF,virtual/libopenvx,"
 PACKAGECONFIG[oracle-java] = "-DJAVA_INCLUDE_PATH=${ORACLE_JAVA_HOME}/include -DJAVA_INCLUDE_PATH2=${ORACLE_JAVA_HOME}/include/linux -DJAVA_AWT_INCLUDE_PATH=${ORACLE_JAVA_HOME}/include -DJAVA_AWT_LIBRARY=${ORACLE_JAVA_HOME}/lib/amd64/libjawt.so -DJAVA_JVM_LIBRARY=${ORACLE_JAVA_HOME}/lib/amd64/server/libjvm.so,,ant-native oracle-jse-jdk oracle-jse-jdk-native,"
 PACKAGECONFIG[png] = "-DWITH_PNG=ON,-DWITH_PNG=OFF,libpng,"
 PACKAGECONFIG[python2] = "-DPYTHON2_NUMPY_INCLUDE_DIRS:PATH=${STAGING_LIBDIR}/${PYTHON_DIR}/site-packages/numpy/core/include,,python-numpy,"
 PACKAGECONFIG[python3] = "-DPYTHON3_NUMPY_INCLUDE_DIRS:PATH=${STAGING_LIBDIR}/${PYTHON_DIR}/site-packages/numpy/core/include,,python3-numpy,"
+PACKAGECONFIG[qt5] = "-DWITH_QT=ON -DWITH_GTK=OFF -DOE_QMAKE_PATH_EXTERNAL_HOST_BINS=${STAGING_BINDIR_NATIVE}/qt5 -DCMAKE_PREFIX_PATH=${STAGING_BINDIR_NATIVE}/cmake,-DWITH_QT=OFF,qtbase qtbase-native,"
 PACKAGECONFIG[samples] = "-DBUILD_EXAMPLES=ON -DINSTALL_PYTHON_EXAMPLES=ON,-DBUILD_EXAMPLES=OFF,,"
 PACKAGECONFIG[tbb] = "-DWITH_TBB=ON,-DWITH_TBB=OFF,tbb,"
+PACKAGECONFIG[test] = "-DBUILD_TESTS=ON -DINSTALL_TESTS=ON -DOPENCV_TEST_DATA_PATH=${S}/../extra/testdata, -DBUILD_TESTS=OFF -DINSTALL_TESTS=OFF,"
 PACKAGECONFIG[text] = "-DBUILD_opencv_text=ON,-DBUILD_opencv_text=OFF,tesseract,"
 PACKAGECONFIG[tiff] = "-DWITH_TIFF=ON,-DWITH_TIFF=OFF,tiff,"
 PACKAGECONFIG[v4l] = "-DWITH_V4L=ON,-DWITH_V4L=OFF,v4l-utils,"
@@ -155,13 +177,13 @@ python populate_packages_prepend () {
 
 PACKAGES_DYNAMIC += "^libopencv-.*"
 
-FILES_${PN} = ""
-FILES_${PN}-dbg += "${datadir}/OpenCV/java/.debug/* ${datadir}/OpenCV/samples/bin/.debug/*"
-FILES_${PN}-dev = "${includedir} ${libdir}/pkgconfig ${datadir}/OpenCV/*.cmake"
+FILES_${PN} = "${datadir}/licenses"
+FILES_${PN}-dbg += "${datadir}/OpenCV/java/.debug/* ${datadir}/OpenCV/samples/bin/.debug/* ${datadir}/opencv4/valgrind*.supp"
+FILES_${PN}-dev = "${includedir} ${libdir}/pkgconfig ${datadir}/OpenCV/*.cmake ${libdir}/cmake"
 FILES_${PN}-staticdev += "${datadir}/OpenCV/3rdparty/lib/*.a"
 FILES_${PN}-apps = "${bindir}/* ${datadir}/OpenCV"
 FILES_${PN}-java = "${datadir}/OpenCV/java"
-FILES_${PN}-samples = "${datadir}/OpenCV/samples/"
+FILES_${PN}-samples = "${datadir}/OpenCV/samples ${datadir}/opencv4/samples ${datadir}/opencv4/*cascades ${datadir}/opencv4/testdata/"
 
 INSANE_SKIP_${PN}-java = "libdir"
 INSANE_SKIP_${PN}-dbg = "libdir"
@@ -177,8 +199,8 @@ FILES_python3-opencv = "${PYTHON_SITEPACKAGES_DIR}/*"
 RDEPENDS_python3-opencv = "python3-core python3-numpy"
 
 do_install_append() {
-    cp ${S}/include/opencv/*.h ${D}${includedir}/opencv/
-    sed -i '/blobtrack/d' ${D}${includedir}/opencv/cvaux.h
+    # Fix OpenCV 2 compatibility, broken by OpenCV 4
+    ln -sf opencv4/opencv2 ${D}${includedir}/opencv2
 
     # Move Python files into correct library folder (for multilib build)
     if [ "$libdir" != "/usr/lib" -a -d ${D}/usr/lib ]; then
@@ -187,7 +209,12 @@ do_install_append() {
     fi
 
     if ${@bb.utils.contains("PACKAGECONFIG", "samples", "true", "false", d)}; then
+        install -d ${D}${datadir}/OpenCV/samples/data
+        cp -r ${S}/samples/data/* ${D}${datadir}/OpenCV/samples/data
+
         install -d ${D}${datadir}/OpenCV/samples/bin/
         cp -f bin/example_* ${D}${datadir}/OpenCV/samples/bin/
     fi
 }
+
+RDEPENDS_opencv-apps += "bash"
