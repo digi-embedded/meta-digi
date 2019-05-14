@@ -1,0 +1,215 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Tue, 14 May 2019 16:44:03 +0200
+Subject: [PATCH] connectivity: add config option for response timeout
+
+Instead of the 20 seconds hardcoded currently in the code, allow to
+configure the response timeout in the connectivity section of the main
+NetworkManager config file.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ src/nm-config-data.c  | 25 +++++++++++++++++++++++++
+ src/nm-config-data.h  |  2 ++
+ src/nm-config.c       |  6 ++++++
+ src/nm-config.h       |  1 +
+ src/nm-connectivity.c | 11 ++++++++++-
+ 5 files changed, 44 insertions(+), 1 deletion(-)
+
+diff --git a/src/nm-config-data.c b/src/nm-config-data.c
+index 8d84e74abc5a..1493f69a2664 100644
+--- a/src/nm-config-data.c
++++ b/src/nm-config-data.c
+@@ -68,6 +68,7 @@ NM_GOBJECT_PROPERTIES_DEFINE_BASE (
+ 	PROP_CONNECTIVITY_ENABLED,
+ 	PROP_CONNECTIVITY_URI,
+ 	PROP_CONNECTIVITY_INTERVAL,
++	PROP_CONNECTIVITY_TIMEOUT,
+ 	PROP_CONNECTIVITY_RESPONSE,
+ 	PROP_NO_AUTO_DEFAULT,
+ );
+@@ -93,6 +94,7 @@ typedef struct {
+ 		char *uri;
+ 		char *response;
+ 		guint interval;
++		guint timeout;
+ 	} connectivity;
+ 
+ 	int autoconnect_retries_default;
+@@ -269,6 +271,14 @@ nm_config_data_get_connectivity_interval (const NMConfigData *self)
+ 	return NM_CONFIG_DATA_GET_PRIVATE (self)->connectivity.interval;
+ }
+ 
++guint
++nm_config_data_get_connectivity_timeout (const NMConfigData *self)
++{
++	g_return_val_if_fail (self, 0);
++
++	return NM_CONFIG_DATA_GET_PRIVATE (self)->connectivity.timeout;
++}
++
+ const char *
+ nm_config_data_get_connectivity_response (const NMConfigData *self)
+ {
+@@ -1499,6 +1509,7 @@ nm_config_data_diff (NMConfigData *old_data, NMConfigData *new_data)
+ 
+ 	if (   nm_config_data_get_connectivity_enabled (old_data) != nm_config_data_get_connectivity_enabled (new_data)
+ 	    || nm_config_data_get_connectivity_interval (old_data) != nm_config_data_get_connectivity_interval (new_data)
++	    || nm_config_data_get_connectivity_timeout (old_data) != nm_config_data_get_connectivity_timeout (new_data)
+ 	    || g_strcmp0 (nm_config_data_get_connectivity_uri (old_data), nm_config_data_get_connectivity_uri (new_data))
+ 	    || g_strcmp0 (nm_config_data_get_connectivity_response (old_data), nm_config_data_get_connectivity_response (new_data)))
+ 		changes |= NM_CONFIG_CHANGE_CONNECTIVITY;
+@@ -1547,6 +1558,9 @@ get_property (GObject *object,
+ 	case PROP_CONNECTIVITY_INTERVAL:
+ 		g_value_set_uint (value, nm_config_data_get_connectivity_interval (self));
+ 		break;
++	case PROP_CONNECTIVITY_TIMEOUT:
++		g_value_set_uint (value, nm_config_data_get_connectivity_timeout (self));
++		break;
+ 	case PROP_CONNECTIVITY_RESPONSE:
+ 		g_value_set_string (value, nm_config_data_get_connectivity_response (self));
+ 		break;
+@@ -1652,6 +1666,11 @@ constructed (GObject *object)
+ 	priv->connectivity.interval = _nm_utils_ascii_str_to_int64 (str, 10, 0, G_MAXUINT, NM_CONFIG_DEFAULT_CONNECTIVITY_INTERVAL);
+ 	g_free (str);
+ 
++	/* On missing config value, fallback to the default value */
++	str = g_key_file_get_string (priv->keyfile, NM_CONFIG_KEYFILE_GROUP_CONNECTIVITY, "timeout", NULL);
++	priv->connectivity.timeout = _nm_utils_ascii_str_to_int64 (str, 10, 1, G_MAXUINT, NM_CONFIG_DEFAULT_CONNECTIVITY_TIMEOUT);
++	g_free (str);
++
+ 	priv->dns_mode = nm_strstrip (g_key_file_get_string (priv->keyfile, NM_CONFIG_KEYFILE_GROUP_MAIN, "dns", NULL));
+ 	priv->rc_manager = nm_strstrip (g_key_file_get_string (priv->keyfile, NM_CONFIG_KEYFILE_GROUP_MAIN, "rc-manager", NULL));
+ 
+@@ -1803,6 +1822,12 @@ nm_config_data_class_init (NMConfigDataClass *config_class)
+ 	                        G_PARAM_READABLE |
+ 	                        G_PARAM_STATIC_STRINGS);
+ 
++	obj_properties[PROP_CONNECTIVITY_TIMEOUT] =
++	     g_param_spec_uint(NM_CONFIG_DATA_CONNECTIVITY_TIMEOUT, "", "",
++	                       0, G_MAXUINT, 0,
++	                       G_PARAM_READABLE |
++	                       G_PARAM_STATIC_STRINGS);
++
+ 	obj_properties[PROP_CONNECTIVITY_RESPONSE] =
+ 	     g_param_spec_string (NM_CONFIG_DATA_CONNECTIVITY_RESPONSE, "", "",
+ 	                          NULL,
+diff --git a/src/nm-config-data.h b/src/nm-config-data.h
+index b52ddcc4f85f..a0b35ac972af 100644
+--- a/src/nm-config-data.h
++++ b/src/nm-config-data.h
+@@ -35,6 +35,7 @@
+ #define NM_CONFIG_DATA_CONNECTIVITY_ENABLED  "connectivity-enabled"
+ #define NM_CONFIG_DATA_CONNECTIVITY_URI      "connectivity-uri"
+ #define NM_CONFIG_DATA_CONNECTIVITY_INTERVAL "connectivity-interval"
++#define NM_CONFIG_DATA_CONNECTIVITY_TIMEOUT  "connectivity-timeout"
+ #define NM_CONFIG_DATA_CONNECTIVITY_RESPONSE "connectivity-response"
+ #define NM_CONFIG_DATA_NO_AUTO_DEFAULT       "no-auto-default"
+ #define NM_CONFIG_DATA_DNS_MODE              "dns"
+@@ -161,6 +162,7 @@ char **nm_config_data_get_plugins (const NMConfigData *config_data, gboolean all
+ gboolean nm_config_data_get_connectivity_enabled (const NMConfigData *config_data);
+ const char *nm_config_data_get_connectivity_uri (const NMConfigData *config_data);
+ guint nm_config_data_get_connectivity_interval (const NMConfigData *config_data);
++guint nm_config_data_get_connectivity_timeout (const NMConfigData *config_data);
+ const char *nm_config_data_get_connectivity_response (const NMConfigData *config_data);
+ 
+ int nm_config_data_get_autoconnect_retries_default (const NMConfigData *config_data);
+diff --git a/src/nm-config.c b/src/nm-config.c
+index 628eca4f13f0..87c7791a49c5 100644
+--- a/src/nm-config.c
++++ b/src/nm-config.c
+@@ -60,6 +60,7 @@ struct NMConfigCmdLineOptions {
+ 	 * set or not via GOptionEntry
+ 	 */
+ 	int connectivity_interval;
++	int connectivity_timeout;
+ 	char *connectivity_response;
+ 
+ 	/* @first_start is not provided by command line. It is a convenient hack
+@@ -470,6 +471,7 @@ _nm_config_cmd_line_options_clear (NMConfigCmdLineOptions *cli)
+ 	g_clear_pointer (&cli->connectivity_uri, g_free);
+ 	g_clear_pointer (&cli->connectivity_response, g_free);
+ 	cli->connectivity_interval = -1;
++	cli->connectivity_timeout = -1;
+ 	cli->first_start = FALSE;
+ }
+ 
+@@ -493,6 +495,7 @@ _nm_config_cmd_line_options_copy (const NMConfigCmdLineOptions *cli, NMConfigCmd
+ 	dst->connectivity_uri = g_strdup (cli->connectivity_uri);
+ 	dst->connectivity_response = g_strdup (cli->connectivity_response);
+ 	dst->connectivity_interval = cli->connectivity_interval;
++	dst->connectivity_timeout = cli->connectivity_timeout;
+ 	dst->first_start = cli->first_start;
+ }
+ 
+@@ -572,6 +575,7 @@ nm_config_cmd_line_options_add_to_entries (NMConfigCmdLineOptions *cli,
+ 			/* These three are hidden for now, and should eventually just go away. */
+ 		{ "connectivity-uri", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_STRING, &cli->connectivity_uri, N_("An http(s) address for checking internet connectivity"), "http://example.com" },
+ 		{ "connectivity-interval", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_INT, &cli->connectivity_interval, N_("The interval between connectivity checks (in seconds)"), G_STRINGIFY (NM_CONFIG_DEFAULT_CONNECTIVITY_INTERVAL) },
++		{ "connectivity-timeout", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_INT, &cli->connectivity_timeout, N_("The timeout for the connectivity checks (in seconds)"), G_STRINGIFY (NM_CONFIG_DEFAULT_CONNECTIVITY_TIMEOUT) },
+ 		{ "connectivity-response", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_STRING, &cli->connectivity_response, N_("The expected start of the response"), NM_CONFIG_DEFAULT_CONNECTIVITY_RESPONSE },
+ 		{ 0 },
+ 	};
+@@ -1119,6 +1123,8 @@ read_entire_config (const NMConfigCmdLineOptions *cli,
+ 			g_key_file_set_string (keyfile, NM_CONFIG_KEYFILE_GROUP_CONNECTIVITY, "uri", cli->connectivity_uri);
+ 		if (cli->connectivity_interval >= 0)
+ 			g_key_file_set_integer (keyfile, NM_CONFIG_KEYFILE_GROUP_CONNECTIVITY, "interval", cli->connectivity_interval);
++		if (cli->connectivity_timeout >= 0)
++			g_key_file_set_integer (keyfile, NM_CONFIG_KEYFILE_GROUP_CONNECTIVITY, "timeout", cli->connectivity_timeout);
+ 		if (cli->connectivity_response && cli->connectivity_response[0])
+ 			g_key_file_set_string (keyfile, NM_CONFIG_KEYFILE_GROUP_CONNECTIVITY, "response", cli->connectivity_response);
+ 	}
+diff --git a/src/nm-config.h b/src/nm-config.h
+index c65572ce3fe5..654567779282 100644
+--- a/src/nm-config.h
++++ b/src/nm-config.h
+@@ -39,6 +39,7 @@
+ #define NM_CONFIG_SIGNAL_CONFIG_CHANGED             "config-changed"
+ 
+ #define NM_CONFIG_DEFAULT_CONNECTIVITY_INTERVAL 300
++#define NM_CONFIG_DEFAULT_CONNECTIVITY_TIMEOUT 20
+ #define NM_CONFIG_DEFAULT_CONNECTIVITY_RESPONSE "NetworkManager is online" /* NOT LOCALIZED */
+ 
+ #define NM_CONFIG_KEYFILE_LIST_SEPARATOR ','
+diff --git a/src/nm-connectivity.c b/src/nm-connectivity.c
+index 8a6e955ae56f..6a491eb22e96 100644
+--- a/src/nm-connectivity.c
++++ b/src/nm-connectivity.c
+@@ -101,6 +101,7 @@ typedef struct {
+ 	char *response;
+ 	gboolean enabled;
+ 	guint interval;
++	guint timeout;
+ 	NMConfig *config;
+ #if WITH_CONCHECK
+ 	struct {
+@@ -601,7 +602,7 @@ nm_connectivity_check_start (NMConnectivity *self,
+ 			curl_easy_setopt (ehandle, CURLOPT_INTERFACE, cb_data->ifspec);
+ 			curl_multi_add_handle (priv->concheck.curl_mhandle, ehandle);
+ 
+-			cb_data->timeout_id = g_timeout_add_seconds (20, _timeout_cb, cb_data);
++			cb_data->timeout_id = g_timeout_add_seconds (priv->timeout, _timeout_cb, cb_data);
+ 
+ 			_LOG2D ("start request to '%s'", priv->uri);
+ 			return cb_data;
+@@ -652,6 +653,7 @@ update_config (NMConnectivity *self, NMConfigData *config_data)
+ 	NMConnectivityPrivate *priv = NM_CONNECTIVITY_GET_PRIVATE (self);
+ 	const char *uri, *response;
+ 	guint interval;
++	guint timeout;
+ 	gboolean enabled;
+ 	gboolean changed = FALSE;
+ 
+@@ -704,6 +706,13 @@ update_config (NMConnectivity *self, NMConfigData *config_data)
+ 		changed = TRUE;
+ 	}
+ 
++	/* Set the timeout */
++	timeout = nm_config_data_get_connectivity_timeout (config_data);
++	if (priv->timeout != timeout) {
++		priv->timeout = timeout;
++		changed = TRUE;
++	}
++
+ 	/* Set the response. */
+ 	response = nm_config_data_get_connectivity_response (config_data);
+ 	if (!nm_streq0 (response, priv->response)) {

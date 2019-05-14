@@ -1,9 +1,10 @@
-# Copyright (C) 2017, Digi International Inc.
+# Copyright (C) 2017-2019, Digi International Inc.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
     file://0001-networkmanager-trigger-dispatcher-on-per-device-conn.patch \
+    file://0002-connectivity-add-config-option-for-response-timeout.patch \
     file://NetworkManager.conf \
     file://networkmanager-init \
     file://nm.cellular \
