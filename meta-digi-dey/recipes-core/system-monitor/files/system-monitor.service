@@ -1,0 +1,12 @@
+[Unit]
+Description=System monitor
+
+[Service]
+Type=notify
+ExecStart=system-monitor.sh
+Restart=always
+RestartSec=1
+WatchdogSec=200
+
+[Install]
+WantedBy=multi-user.target

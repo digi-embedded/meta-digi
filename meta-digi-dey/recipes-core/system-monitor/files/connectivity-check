@@ -1,0 +1,3 @@
+#!/bin/sh
+
+[ "$(nmcli n c)" = "full" ]
