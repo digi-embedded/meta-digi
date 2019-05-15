@@ -45,6 +45,7 @@ RDEPENDS_${PN} = "\
     os-release \
     recovery-utils \
     sysinfo \
+    system-monitor \
     usbutils \
     ${VIRTUAL-RUNTIME_base-utils} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '', '${VIRTUAL-RUNTIME_base-utils-acpid}', d)} \

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+REBOOT_THRESHOLD="9"
+checks_failed="${1}"
+
+if [ "${checks_failed}" -ge "${REBOOT_THRESHOLD}" ]; then
+	reboot
+fi
