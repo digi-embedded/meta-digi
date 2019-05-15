@@ -10,7 +10,12 @@ do_install_append() {
 	install -m 0644 ${WORKDIR}/sysctl.conf ${D}${sysconfdir}/
 }
 
-pkg_postinst_${PN}_ccimx6() {
+pkg_postinst_${PN}() {
+	# run the postinst script on first boot
+	if [ x"$D" != "x" ]; then
+		exit 1
+	fi
+
 	get_emmc_block_device() {
 		emmc_number="$(sed -ne 's,.*mmcblk\(.\)boot0.*,\1,g;T;p' /proc/partitions)"
 		if [ -b "/dev/mmcblk${emmc_number}" ] &&
