@@ -25,9 +25,9 @@ pkg_postinst_ontarget_${PN}() {
 	DM_BLOCK_DEVICE="/dev/dm-"
 	EMMC_BLOCK_DEVICE="$(get_emmc_block_device)"
 	if [ -x "${RESIZE2FS}" -a -n "${EMMC_BLOCK_DEVICE}" ]; then
-		PARTITIONS="$(blkid | sed -ne "{s,\(^${EMMC_BLOCK_DEVICE}[^:]\+\):.*TYPE=\"ext4\".*,\1,g;T;p}" | sort -u)"
+		PARTITIONS="$(blkid ${EMMC_BLOCK_DEVICE}p* | sed -ne "{s,\(^${EMMC_BLOCK_DEVICE}[^:]\+\):.*TYPE=\"ext4\".*,\1,g;T;p}" | sort -u)"
 		# Add possible device mapper devices
-		PARTITIONS="${PARTITIONS} $(blkid | sed -ne "{s,\(^${DM_BLOCK_DEVICE}[^:]\+\):.*TYPE=\"ext4\".*,\1,g;T;p}" | sort -u)"
+		PARTITIONS="${PARTITIONS} $(blkid ${DM_BLOCK_DEVICE}* | sed -ne "{s,\(^${DM_BLOCK_DEVICE}[^:]\+\):.*TYPE=\"ext4\".*,\1,g;T;p}" | sort -u)"
 		for i in ${PARTITIONS}; do
 			if ! ${RESIZE2FS} ${i} 2>/dev/null; then
 				echo "ERROR: resize2fs ${i}"
