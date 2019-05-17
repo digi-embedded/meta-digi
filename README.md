@@ -82,6 +82,10 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 * Updated AWS Greengrass core to version 1.8.0
 * Added support for Code Signing Tool 3.1.0
 * Changed initialization manager in ConnectCore 8X platforms to systemd
+* System monitor framework
+* Automatic Wi-Fi direct connection setup
+* Automatic Wi-Fi extender bridge setup
+* Network connection recovery framework
 
 # Known Issues and Limitations
 
