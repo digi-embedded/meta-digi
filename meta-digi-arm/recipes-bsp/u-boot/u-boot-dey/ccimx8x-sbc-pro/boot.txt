@@ -9,14 +9,33 @@ if test -n "${board_id}"; then
 	setenv fdt_file ccimx8x-sbc-pro-id${board_id}.dtb
 else
 	#
-	# Set device tree filename depending on the hardware variant
+	# Set device tree filename depending on the hardware capabilities
 	#
-	if test "${module_variant}" = "0x01" || test "${module_variant}" = "0x02" || test "${module_variant}" = "0x04"; then
-		setenv fdt_file ccimx8x-sbc-pro-wb.dtb
-	elif test "${module_variant}" = "0x03" || test "${module_variant}" = "0x05"; then
-		setenv fdt_file ccimx8x-sbc-pro.dtb
+	if test -n "${module_ram}"; then
+		setexpr module_has_wifi ${hwid_3} \& 1
+		setexpr module_has_bt ${hwid_3} \& 2
+		setexpr module_has_bt ${module_has_bt} / 2
+
+		if test "${module_has_wifi}" = "1" &&
+		   test "${module_has_bt}" = "1"; then
+			setenv fdt_file ccimx8x-sbc-pro-wb.dtb
+		else
+			setenv fdt_file ccimx8x-sbc-pro.dtb
+		fi
 	else
-		setenv fdt_file ccimx8x-sbc-pro-wb.dtb
+		#
+		# Set device tree filename depending on the hardware variant
+		#
+		if test "${module_variant}" = "0x01" ||
+		   test "${module_variant}" = "0x02" ||
+		   test "${module_variant}" = "0x04"; then
+			setenv fdt_file ccimx8x-sbc-pro-wb.dtb
+		elif test "${module_variant}" = "0x03" ||
+		     test "${module_variant}" = "0x05"; then
+			setenv fdt_file ccimx8x-sbc-pro.dtb
+		else
+			setenv fdt_file ccimx8x-sbc-pro-wb.dtb
+		fi
 	fi
 fi
 
