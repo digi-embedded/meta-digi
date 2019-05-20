@@ -19,14 +19,23 @@ if test $? -eq 1; then
 	exit;
 fi
 
-# Determine U-Boot file to program basing on module variant
-if test -n "${module_variant}"; then
-	if test "${module_variant}" = "0x01" || test "${module_variant}" = "0x04" || test "${module_variant}" = "0x05"; then
-		setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express1GB.bin;
-	elif test "${module_variant}" = "0x02" || test "${module_variant}" = "0x03"; then
-		setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express2GB.bin;
+# Determine U-Boot file to program basing on SOM's RAM size
+if test -n "${module_ram}"; then
+	setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express${module_ram}.bin;
+else
+	# Determine U-Boot file to program basing on SOM's variant
+	if test -n "${module_variant}"; then
+		if test "${module_variant}" = "0x01" ||
+		   test "${module_variant}" = "0x04" ||
+		   test "${module_variant}" = "0x05"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express1GB.bin;
+		elif test "${module_variant}" = "0x02" ||
+		     test "${module_variant}" = "0x03"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express2GB.bin;
+		fi
 	fi
 fi
+
 # Use 'test -n ...' because 'test -z ...' does not work well on old versions of
 # u-boot when the checked value is empty.
 if test -n "${INSTALL_UBOOT_FILENAME}"; then
