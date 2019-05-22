@@ -63,23 +63,22 @@ do_install() {
 
 	# Wifi firmware
 	if [ "${QUALCOMM_WIFI_DRIVER}" = "community" ]; then
-		WIFI_FW_PATH="${D}${base_libdir}/firmware/ath10k/QCA6174/hw3.0"
+		WIFI_FW_PATH="${base_libdir}/firmware/ath10k/QCA6174/hw3.0"
 	else
-		WIFI_FW_PATH="${D}${base_libdir}/firmware"
+		WIFI_FW_PATH="${base_libdir}/firmware"
 	fi
-	install -d ${WIFI_FW_PATH}
+	install -d ${D}${WIFI_FW_PATH}
 	# Remove preceeding 'file://' from variable with files list
 	FW_WIFI_FILES="$(echo ${FW_QUALCOMM_WIFI} | sed -e 's,file\:\/\/,,g')"
-	install -m 0644 ${FW_WIFI_FILES} ${WIFI_FW_PATH}
-	cd ${WIFI_FW_PATH}
+	install -m 0644 ${FW_WIFI_FILES} ${D}${WIFI_FW_PATH}
 	if [ "${QUALCOMM_WIFI_DRIVER}" = "community" ]; then
 		# If using community driver, create symlink 'board.bin' to
 		# proprietary 'fakeboar.bin'
-		ln -s fakeboar.bin board.bin
+		ln -s fakeboar.bin ${D}${WIFI_FW_PATH}/board.bin
 	else
 		if [ "${FW_QUALCOMM_WIFI}" = "${FW_QCA6574_WIFI_PROPRIETARY}" ]; then
-			ln -s qwlan30.bin athwlan.bin
-			ln -s otp.bin athsetup.bin
+			ln -s qwlan30.bin ${D}${WIFI_FW_PATH}/athwlan.bin
+			ln -s otp.bin ${D}${WIFI_FW_PATH}/athsetup.bin
 		fi
 	fi
 }
