@@ -1,0 +1,33 @@
+From f70e3ceb9e947bbda01de089894077956f35668f Mon Sep 17 00:00:00 2001
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Tue, 19 Mar 2019 12:39:19 +0100
+Subject: [PATCH] mmc: remove check for max EXT_CSD_REV
+
+The check for maximum supported EXT_CSD_REV is causing trouble
+in old kernels when a new model of eMMC is assembled.
+Remove the check completely and asume the driver is able to work
+with the new models.
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+---
+ drivers/mmc/core/mmc.c | 7 -------
+ 1 file changed, 7 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 61fb652dfcfa..4c9672b9cb25 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -396,13 +396,6 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 	}
+ 
+ 	card->ext_csd.rev = ext_csd[EXT_CSD_REV];
+-	if (card->ext_csd.rev > 7) {
+-		pr_err("%s: unrecognised EXT_CSD revision %d\n",
+-			mmc_hostname(card->host), card->ext_csd.rev);
+-		err = -EINVAL;
+-		goto out;
+-	}
+-
+ 	card->ext_csd.raw_sectors[0] = ext_csd[EXT_CSD_SEC_CNT + 0];
+ 	card->ext_csd.raw_sectors[1] = ext_csd[EXT_CSD_SEC_CNT + 1];
+ 	card->ext_csd.raw_sectors[2] = ext_csd[EXT_CSD_SEC_CNT + 2];
