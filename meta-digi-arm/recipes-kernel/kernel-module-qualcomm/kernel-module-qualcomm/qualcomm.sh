@@ -18,7 +18,7 @@
 # At this point of the boot (udev script), the system log (syslog) is not
 # available yet, so use the kernel log buffer from userspace.
 log() {
-	printf "<$1>qca6564: $2\n" >/dev/kmsg
+	printf "<$1>qca65x4: $2\n" >/dev/kmsg
 }
 
 # Do nothing if the wireless node does not exist on the device tree
@@ -109,4 +109,4 @@ LOGLEVEL="$(sed -ne 's,^kernel.printk[^=]*=[[:blank:]]*\(.*\)$,\1,g;T;p' /etc/sy
 modprobe wlan
 
 # Verify the interface is present
-[ -d "/sys/class/net/wlan0" ] || log "3" "[ERROR] Loading qca6564 module"
+[ -d "/sys/class/net/wlan0" ] || log "3" "[ERROR] Loading wlan module"
