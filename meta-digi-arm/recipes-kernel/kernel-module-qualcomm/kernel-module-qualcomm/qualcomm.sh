@@ -21,6 +21,9 @@ log() {
 	printf "<$1>qca6564: $2\n" >/dev/kmsg
 }
 
+# Do nothing if the wireless node does not exist on the device tree
+[ -d "/proc/device-tree/wireless" ] || exit 0
+
 # Do nothing if the module is already loaded
 grep -qws 'wlan' /proc/modules && exit 0
 
