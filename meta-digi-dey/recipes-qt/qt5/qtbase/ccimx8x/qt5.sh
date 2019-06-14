@@ -1,7 +1,7 @@
 #!/bin/sh
 export QT_QPA_PLATFORM="wayland"
 
-[ -f "/etc/profile.d/weston.sh" ] && exit 0
+[ -f "/etc/profile.d/weston.sh" ] && return
 
 export QT_QPA_PLATFORM="xcb"
 
