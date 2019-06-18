@@ -138,7 +138,6 @@ boot a signed U-Boot only.
 * For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
   devices (ConnectCore 6UL and ConnectCore 6 Plus) running a 4.9 kernel
   version fail to join to autonomous groups.
-* Trustfence secure console is not supported on U-Boot v2017.03. In order to use this functionality, U-Boot v2015.04 will be required.
 
 ## ConnectCore 6UL
 
