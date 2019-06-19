@@ -40,4 +40,4 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     cryptodev-module \
 "
 
-MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth"
+MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth pci"

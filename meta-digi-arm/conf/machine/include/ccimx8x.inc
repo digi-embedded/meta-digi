@@ -51,7 +51,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     cryptoauthlib \
 "
 
-MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip"
+MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip pci"
 
 # AARCH64 doesn't support self-extracting zImage
 KERNEL_IMAGETYPE = "Image.gz"
