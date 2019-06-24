@@ -93,9 +93,11 @@ bluetooth_init() {
 case "$1" in
 	start)
 		if [ -d "/proc/device-tree/bluetooth" ]; then
-			echo -n "Starting bluetooth hardware: "
-			bluetooth_init
-			echo "${BT_ERROR:-done.}"
+			if [ "$(tr -d '\0' 2>/dev/null </proc/device-tree/bluetooth/status)" != "disabled" ]; then
+				echo -n "Starting bluetooth hardware: "
+				bluetooth_init
+				echo "${BT_ERROR:-done.}"
+			fi
 		fi
 		;;
 	stop)
