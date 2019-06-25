@@ -1,6 +1,6 @@
-# Copyright (C) 2015-2018 Digi International.
+# Copyright (C) 2015-2019 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:${THISDIR}/${BP}:"
 
 SRC_URI += " \
     file://bluetooth-init \
