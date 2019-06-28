@@ -16,6 +16,7 @@ RDEPENDS_${PN} = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "cryptochip", "dey-examples-cryptochip", "", d)} \
 	awsiotsdk-demo \
+	dey-examples-caamblob \
 	dey-examples-cloudconnector \
 	dey-examples-digiapix \
 	dey-examples-rtc \
