@@ -32,6 +32,8 @@ else
 		elif test "${module_variant}" = "0x02" ||
 		     test "${module_variant}" = "0x03"; then
 			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_pro2GB.bin;
+		elif test "${module_variant}" = "0x06"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_pro512MB.bin;
 		fi
 	fi
 fi
@@ -49,6 +51,8 @@ else
 	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_pro1GB.bin";
 	echo "   - For a QuadXPlus CPU with 2GB DDR3, run:";
 	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_pro2GB.bin";
+	echo "   - For a DualX CPU with 512MB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_pro512MB.bin";
 	echo "";
 	echo "2. Run the install script again.";
 	echo "";

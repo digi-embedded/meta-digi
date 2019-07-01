@@ -36,7 +36,8 @@ else
 		   test "${module_variant}" = "0x04"; then
 			setenv fdt_file ccimx${soc_type}-sbc-express-wb.dtb
 		elif test "${module_variant}" = "0x03" ||
-		     test "${module_variant}" = "0x05"; then
+		     test "${module_variant}" = "0x05" ||
+		     test "${module_variant}" = "0x06"; then
 			setenv fdt_file ccimx${soc_type}-sbc-express.dtb
 		else
 			setenv fdt_file ccimx${soc_type}-sbc-express-wb.dtb
