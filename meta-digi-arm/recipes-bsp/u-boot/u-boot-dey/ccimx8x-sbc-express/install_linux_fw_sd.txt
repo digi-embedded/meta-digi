@@ -45,9 +45,9 @@ else
 	echo "[ERROR] Cannot determine U-Boot file for this module!";
 	echo "";
 	echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 8X variant:";
-	echo "   - For a QuadXPlus CPU with 1GB DDR3, run:";
+	echo "   - For a QuadXPlus CPU with 1GB LPDDR4, run:";
 	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express1GB.bin";
-	echo "   - For a QuadXPlus CPU with 2GB DDR3, run:";
+	echo "   - For a QuadXPlus CPU with 2GB LPDDR4, run:";
 	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express2GB.bin";
 	echo "";
 	echo "2. Run the install script again.";
