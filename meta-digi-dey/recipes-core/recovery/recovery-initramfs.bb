@@ -53,8 +53,6 @@ PACKAGES = "${PN}"
 
 FILES_${PN} = "/"
 
-RDEPENDS_${PN}_append_ccimx6sbc = " \
+RDEPENDS_${PN}_append = " \
     cryptsetup \
 "
-
-RDEPENDS_${PN}_append_ccimx6qpsbc = " cryptsetup"
