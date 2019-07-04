@@ -19,6 +19,11 @@ IMAGE_BOOTLOADER = "imx-boot"
 BOOTLOADER_SEEK = "32"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/imx-boot-${MACHINE}.bin"
 
+# RAM variants
+# This determines the number of different DCD files, and thus the number of
+# different U-Boot binaries required.
+RAM_CONFIGS = "1.2GHz_512MB_16bit 1.2GHz_1GB_16bit 1.2GHz_1GB_32bit 1.2GHz_2GB_32bit"
+
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8x_defconfig"
 
