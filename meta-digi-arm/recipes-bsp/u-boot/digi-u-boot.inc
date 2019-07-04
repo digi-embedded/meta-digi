@@ -100,9 +100,7 @@ do_compile () {
 	fi
 }
 
-TF_BOOTSCRIPT_SEDFILTER = ""
-TF_BOOTSCRIPT_SEDFILTER_ccimx6 = "${@tf_bootscript_sedfilter(d)}"
-TF_BOOTSCRIPT_SEDFILTER_ccimx6ul = "${@tf_bootscript_sedfilter(d)}"
+TF_BOOTSCRIPT_SEDFILTER = "${@tf_bootscript_sedfilter(d)}"
 
 def tf_bootscript_sedfilter(d):
     tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
