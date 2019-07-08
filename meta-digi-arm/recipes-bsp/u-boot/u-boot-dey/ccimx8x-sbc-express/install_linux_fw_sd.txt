@@ -19,19 +19,25 @@ if test $? -eq 1; then
 	exit;
 fi
 
-# Determine U-Boot file to program basing on SOM's RAM size
-if test -n "${module_ram}"; then
-	setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express${module_ram}.bin;
+# Determine U-Boot file to program basing on SOM's RAM size and SOC type (linked to bus width)
+ram_freq="1.2GHz"
+bus_width="32bit"
+if test -n "${module_ram}" && test -n "${soc_type}"; then
+	if test "${soc_type}" == "dx"; then
+		bus_width="16bit"
+	fi
+	setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express-${ram_freq}_${module_ram}_${bus_width}.bin;
 else
 	# Determine U-Boot file to program basing on SOM's variant
 	if test -n "${module_variant}"; then
-		if test "${module_variant}" = "0x01" ||
-		   test "${module_variant}" = "0x04" ||
-		   test "${module_variant}" = "0x05"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express1GB.bin;
+		if test "${module_variant}" = "0x01"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express-1.2GHz_1GB_32bit.bin;
 		elif test "${module_variant}" = "0x02" ||
 		     test "${module_variant}" = "0x03"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express2GB.bin;
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express-1.2GHz_2GB_32bit.bin;
+		elif test "${module_variant}" = "0x04" ||
+		     test "${module_variant}" = "0x05"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express-1.2GHz_1GB_16bit.bin;
 		fi
 	fi
 fi
@@ -46,9 +52,11 @@ else
 	echo "";
 	echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 8X variant:";
 	echo "   - For a QuadXPlus CPU with 1GB LPDDR4, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express1GB.bin";
+	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express-1.2GHz_1GB_32bit.bin";
 	echo "   - For a QuadXPlus CPU with 2GB LPDDR4, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express2GB.bin";
+	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express-1.2GHz_2GB_32bit.bin";
+	echo "   - For a DualX CPU with 1GB LPDDR4, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_express-1.2GHz_1GB_16bit.bin";
 	echo "";
 	echo "2. Run the install script again.";
 	echo "";
