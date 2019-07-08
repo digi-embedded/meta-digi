@@ -45,38 +45,50 @@ do_compile () {
 	cp ${DEPLOY_DIR_IMAGE}/mx8qx-ahab-container.img          ${BOOT_STAGING}/
 	cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${ATF_MACHINE_NAME} ${BOOT_STAGING}/bl31.bin
 	for type in ${UBOOT_CONFIG}; do
-		RAM_SIZE="$(echo ${type} | sed -e 's,.*\([0-9]\+GB\),\1,g')"
 		cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_NAME}-${type}           ${BOOT_STAGING}/u-boot.bin-${type}
-		cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${SC_FIRMWARE_NAME}-${RAM_SIZE} ${BOOT_STAGING}/scfw_tcm.bin-${RAM_SIZE}
+	done
+	for ramc in ${RAM_CONFIGS}; do
+		cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${SC_FIRMWARE_NAME}-${ramc} ${BOOT_STAGING}/scfw_tcm.bin-${ramc}
 	done
 
 	# mkimage for i.MX8
 	for type in ${UBOOT_CONFIG}; do
-		cd ${BOOT_STAGING}
-		ln -sf u-boot.bin-${type} u-boot.bin
-		RAM_SIZE="$(echo ${type} | sed -e 's,.*\([0-9]\+GB\),\1,g')"
-		ln -sf scfw_tcm.bin-${RAM_SIZE} scfw_tcm.bin
-		cd -
-		for target in ${IMXBOOT_TARGETS}; do
-			bbnote "building ${SOC_TARGET} - ${type} - ${target}"
-			make SOC=${SOC_TARGET} ${target}
-			if [ -e "${BOOT_STAGING}/flash.bin" ]; then
-				cp ${BOOT_STAGING}/flash.bin ${S}/${BOOT_CONFIG_MACHINE}-${type}.bin-${target}
+		RAM_SIZE="$(echo ${type} | sed -e 's,.*[a-z]\+\([0-9]\+[M|G]B\)$,\1,g')"
+		for ramc in ${RAM_CONFIGS}; do
+			if echo "${ramc}" | grep -qs "${RAM_SIZE}"; then
+				# Match U-Boot memory size and and SCFW memory configuration
+				cd ${BOOT_STAGING}
+				ln -sf u-boot.bin-${type} u-boot.bin
+				ln -sf scfw_tcm.bin-${ramc} scfw_tcm.bin
+				cd -
+				for target in ${IMXBOOT_TARGETS}; do
+					bbnote "building ${SOC_TARGET} - ${ramc} - ${target}"
+					make SOC=${SOC_TARGET} ${target}
+					if [ -e "${BOOT_STAGING}/flash.bin" ]; then
+						cp ${BOOT_STAGING}/flash.bin ${S}/${BOOT_CONFIG_MACHINE}-${ramc}.bin-${target}
+					fi
+					SCFWBUILT="yes"
+				done
+				rm ${BOOT_STAGING}/scfw_tcm.bin
+				rm ${BOOT_STAGING}/u-boot.bin
+				# Remove u-boot-atf.bin and u-boot-hash.bin so they get generated with the next iteration's U-Boot
+				rm ${BOOT_STAGING}/u-boot-atf.bin
+				rm ${BOOT_STAGING}/u-boot-hash.bin
 			fi
 		done
-		rm ${BOOT_STAGING}/scfw_tcm.bin
-		rm ${BOOT_STAGING}/u-boot.bin
-		# Remove u-boot-atf.bin and u-boot-hash.bin so they get generated with the next iteration's U-Boot
-		rm ${BOOT_STAGING}/u-boot-atf.bin
-		rm ${BOOT_STAGING}/u-boot-hash.bin
 	done
+
+	# Check that SCFW was built at least once
+	if [ "${SCFWBUILT}" != "yes" ]; then
+		bbfatal "SCFW was not built!"
+	fi
 }
 
 do_install () {
 	install -d ${D}/boot
-	for type in ${UBOOT_CONFIG}; do
+	for ramc in ${RAM_CONFIGS}; do
 		for target in ${IMXBOOT_TARGETS}; do
-			install -m 0644 ${S}/${BOOT_CONFIG_MACHINE}-${type}.bin-${target} ${D}/boot/
+			install -m 0644 ${S}/${BOOT_CONFIG_MACHINE}-${ramc}.bin-${target} ${D}/boot/
 		done
 	done
 }
@@ -94,7 +106,7 @@ do_deploy () {
 	install -m 0644 ${BOOT_STAGING}/soc.mak     ${DEPLOYDIR}/${BOOT_TOOLS}
 
 	# copy the generated boot image to deploy path
-	for type in ${UBOOT_CONFIG}; do
+	for ramc in ${RAM_CONFIGS}; do
 		IMAGE_IMXBOOT_TARGET=""
 		for target in ${IMXBOOT_TARGETS}; do
 			# Use first "target" as IMAGE_IMXBOOT_TARGET
@@ -102,12 +114,12 @@ do_deploy () {
 				IMAGE_IMXBOOT_TARGET="$target"
 				echo "Set boot target as $IMAGE_IMXBOOT_TARGET"
 			fi
-			install -m 0644 ${S}/${BOOT_CONFIG_MACHINE}-${type}.bin-${target} ${DEPLOYDIR}
+			install -m 0644 ${S}/${BOOT_CONFIG_MACHINE}-${ramc}.bin-${target} ${DEPLOYDIR}
 		done
-	cd ${DEPLOYDIR}
-	ln -sf ${BOOT_CONFIG_MACHINE}-${type}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOT_CONFIG_MACHINE}-${type}.bin
-	ln -sf ${BOOT_CONFIG_MACHINE}-${type}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOT_CONFIG_MACHINE}-${MACHINE}.bin
-	cd -
+		cd ${DEPLOYDIR}
+		ln -sf ${BOOT_CONFIG_MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOT_CONFIG_MACHINE}-${ramc}.bin
+		ln -sf ${BOOT_CONFIG_MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin
+		cd -
 	done
 }
 
