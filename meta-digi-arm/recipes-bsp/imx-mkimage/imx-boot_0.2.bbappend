@@ -65,7 +65,7 @@ do_compile () {
 					bbnote "building ${SOC_TARGET} - ${ramc} - ${target}"
 					make SOC=${SOC_TARGET} ${target}
 					if [ -e "${BOOT_STAGING}/flash.bin" ]; then
-						cp ${BOOT_STAGING}/flash.bin ${S}/${BOOT_CONFIG_MACHINE}-${ramc}.bin-${target}
+						cp ${BOOT_STAGING}/flash.bin ${S}/${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin-${target}
 					fi
 					SCFWBUILT="yes"
 				done
@@ -88,7 +88,7 @@ do_install () {
 	install -d ${D}/boot
 	for ramc in ${RAM_CONFIGS}; do
 		for target in ${IMXBOOT_TARGETS}; do
-			install -m 0644 ${S}/${BOOT_CONFIG_MACHINE}-${ramc}.bin-${target} ${D}/boot/
+			install -m 0644 ${S}/${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin-${target} ${D}/boot/
 		done
 	done
 }
@@ -114,11 +114,10 @@ do_deploy () {
 				IMAGE_IMXBOOT_TARGET="$target"
 				echo "Set boot target as $IMAGE_IMXBOOT_TARGET"
 			fi
-			install -m 0644 ${S}/${BOOT_CONFIG_MACHINE}-${ramc}.bin-${target} ${DEPLOYDIR}
+			install -m 0644 ${S}/${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin-${target} ${DEPLOYDIR}
 		done
 		cd ${DEPLOYDIR}
-		ln -sf ${BOOT_CONFIG_MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOT_CONFIG_MACHINE}-${ramc}.bin
-		ln -sf ${BOOT_CONFIG_MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin
+		ln -sf ${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin
 		cd -
 	done
 }
