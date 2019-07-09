@@ -32,6 +32,16 @@ do_install_append() {
 	install -d ${D}${systemd_unitdir}/system/
 	install -m 0644 ${WORKDIR}/bluetooth-init.service ${D}${systemd_unitdir}/system/bluetooth-init.service
 	install -m 0644 ${WORKDIR}/main.conf ${D}${sysconfdir}/bluetooth/
+
+	# Staging bluetooth internal headers and libs to allow other recipes
+	# to link against them
+	install -d ${D}${includedir}/bluetooth-internal/
+	install -m 0644 ${WORKDIR}/bluez-${PV}/src/shared/*.h ${D}${includedir}/bluetooth-internal/
+	install -m 0644 ${WORKDIR}/bluez-${PV}/lib/uuid.h ${D}${includedir}/bluetooth-internal/
+	install -m 0644 ${B}/lib/.libs/libbluetooth-internal.a ${D}${libdir}/
+	install -m 0644 ${B}/src/.libs/libshared-mainloop.a ${D}${libdir}/
+	# Fix include path for att-types.h
+	sed -i -e '/#include/{s,src/shared/,,g}' ${D}${includedir}/bluetooth-internal/att.h
 }
 
 PACKAGES =+ "${PN}-init"
