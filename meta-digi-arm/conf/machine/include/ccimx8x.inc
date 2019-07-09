@@ -17,11 +17,13 @@ EXTRA_IMAGEDEPENDS = "imx-boot"
 IMAGE_BOOTLOADER = "imx-boot"
 # BOOTLOADER_SEEK is 33 for step A of the silicon and 32 for step B
 BOOTLOADER_SEEK = "32"
-SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/imx-boot-${MACHINE}.bin"
+BOOTABLE_FILENAME = "imx-boot-${MACHINE}.bin"
+SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 
 # RAM variants
 # This determines the number of different DCD files, and thus the number of
 # different U-Boot binaries required.
+# Last one is the default (the one the symlinks point at)
 RAM_CONFIGS = "1.2GHz_512MB_16bit 1.2GHz_1GB_16bit 1.2GHz_1GB_32bit 1.2GHz_2GB_32bit"
 
 # Linux kernel configuration

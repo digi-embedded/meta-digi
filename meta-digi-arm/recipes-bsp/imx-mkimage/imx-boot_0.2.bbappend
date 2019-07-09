@@ -118,6 +118,9 @@ do_deploy () {
 		done
 		cd ${DEPLOYDIR}
 		ln -sf ${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin
+		# Link to default bootable U-Boot filename. It gets overwritten
+		# on every loop so the only last RAM_CONFIG will survive.
+		ln -sf ${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
 		cd -
 	done
 }
