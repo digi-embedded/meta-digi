@@ -30,7 +30,7 @@ if test -n "${module_ram}" && test -n "${soc_type}"; then
 else
 	# Determine U-Boot file to program basing on SOM's variant
 	if test -n "${module_variant}"; then
-		if test "${module_variant}" = "0x01" ||
+		if test "${module_variant}" = "0x01"; then
 			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x_sbc_pro-1.2GHz_1GB_32bit.bin;
 		elif test "${module_variant}" = "0x02" ||
 		     test "${module_variant}" = "0x03"; then
