@@ -32,8 +32,6 @@ do_populate_lic[depends] += " \
 "
 ATF_MACHINE_NAME_mx8qxp = "bl31-imx8qx.bin"
 
-UBOOT_NAME = "u-boot-${MACHINE}.bin"
-
 IMXBOOT_TARGETS_ccimx8x = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_flexspi', \
                                                 'flash flash_regression_linux_m4', d)}"
 
@@ -44,10 +42,10 @@ do_compile () {
 	cp ${DEPLOY_DIR_IMAGE}/mx8qx-ahab-container.img          ${BOOT_STAGING}/
 	cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${ATF_MACHINE_NAME} ${BOOT_STAGING}/bl31.bin
 	for type in ${UBOOT_CONFIG}; do
-		cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_NAME}-${type}           ${BOOT_STAGING}/u-boot.bin-${type}
+		cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/u-boot-${type}.bin           ${BOOT_STAGING}/
 	done
 	for ramc in ${RAM_CONFIGS}; do
-		cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${SC_FIRMWARE_NAME}-${ramc} ${BOOT_STAGING}/scfw_tcm.bin-${ramc}
+		cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${SC_FIRMWARE_NAME}-${ramc} ${BOOT_STAGING}/
 	done
 
 	# mkimage for i.MX8
@@ -57,8 +55,8 @@ do_compile () {
 			if echo "${ramc}" | grep -qs "${RAM_SIZE}"; then
 				# Match U-Boot memory size and and SCFW memory configuration
 				cd ${BOOT_STAGING}
-				ln -sf u-boot.bin-${type} u-boot.bin
-				ln -sf scfw_tcm.bin-${ramc} scfw_tcm.bin
+				ln -sf u-boot-${type}.bin u-boot.bin
+				ln -sf ${SC_FIRMWARE_NAME}-${ramc} scfw_tcm.bin
 				cd -
 				for target in ${IMXBOOT_TARGETS}; do
 					bbnote "building ${SOC_TARGET} - ${ramc} - ${target}"
