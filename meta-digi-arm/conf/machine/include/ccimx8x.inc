@@ -9,15 +9,15 @@ include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/arm/arch-arm64.inc
 
 # Platform u-boot settings
+UBOOT_PREFIX = "imx-boot"
 UBOOT_SUFFIX = "bin"
-UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS = "imx-boot"
-IMAGE_BOOTLOADER = "imx-boot"
+BOOTLOADER_IMAGE_RECIPE = "imx-boot"
 # BOOTLOADER_SEEK is 33 for step A of the silicon and 32 for step B
 BOOTLOADER_SEEK = "32"
-BOOTABLE_FILENAME = "imx-boot-${MACHINE}.bin"
+BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 
 # RAM variants

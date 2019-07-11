@@ -9,8 +9,8 @@ include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/tune-cortexa9.inc
 
 # Platform u-boot settings
+UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"
-UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm/configs/ccimx6sbc_defconfig"

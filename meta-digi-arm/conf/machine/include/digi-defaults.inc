@@ -50,3 +50,6 @@ USE_VT ?= "0"
 # Add the machine variant to the valid machine override
 MACHINE_VARIANT ?= ""
 MACHINEOVERRIDES .= "${@['', ':${MACHINE_VARIANT}']['${MACHINE_VARIANT}' != '']}"
+
+# U-Boot symlink
+UBOOT_SYMLINK ?= "${UBOOT_PREFIX}-${MACHINE}.${UBOOT_SUFFIX}"
