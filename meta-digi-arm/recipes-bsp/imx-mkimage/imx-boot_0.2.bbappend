@@ -33,7 +33,6 @@ do_populate_lic[depends] += " \
 ATF_MACHINE_NAME_mx8qxp = "bl31-imx8qx.bin"
 
 UBOOT_NAME = "u-boot-${MACHINE}.bin"
-BOOT_CONFIG_MACHINE = "${BOOT_NAME}"
 
 IMXBOOT_TARGETS_ccimx8x = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_flexspi', \
                                                 'flash flash_regression_linux_m4', d)}"
@@ -65,7 +64,7 @@ do_compile () {
 					bbnote "building ${SOC_TARGET} - ${ramc} - ${target}"
 					make SOC=${SOC_TARGET} ${target}
 					if [ -e "${BOOT_STAGING}/flash.bin" ]; then
-						cp ${BOOT_STAGING}/flash.bin ${S}/${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin-${target}
+						cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target}
 					fi
 					SCFWBUILT="yes"
 				done
@@ -88,7 +87,7 @@ do_install () {
 	install -d ${D}/boot
 	for ramc in ${RAM_CONFIGS}; do
 		for target in ${IMXBOOT_TARGETS}; do
-			install -m 0644 ${S}/${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin-${target} ${D}/boot/
+			install -m 0644 ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target} ${D}/boot/
 		done
 	done
 }
@@ -114,13 +113,13 @@ do_deploy () {
 				IMAGE_IMXBOOT_TARGET="$target"
 				echo "Set boot target as $IMAGE_IMXBOOT_TARGET"
 			fi
-			install -m 0644 ${S}/${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin-${target} ${DEPLOYDIR}
+			install -m 0644 ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target} ${DEPLOYDIR}
 		done
 		cd ${DEPLOYDIR}
-		ln -sf ${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin
+		ln -sf ${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin
 		# Link to default bootable U-Boot filename. It gets overwritten
 		# on every loop so the only last RAM_CONFIG will survive.
-		ln -sf ${BOOT_CONFIG_MACHINE}-${MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
+		ln -sf ${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
 		cd -
 	done
 }
