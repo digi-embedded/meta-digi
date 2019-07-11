@@ -41,6 +41,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
 MACHINE_EXTRA_RRECOMMENDS_remove_use-mainline-bsp = "${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)}"
 
 MACHINE_FEATURES += "wifi bluetooth cryptochip"
+MACHINE_FEATURES_remove_use-mainline-bsp = "wifi"
 
 # mkfs.ubifs parameters for boot partition (the one holding kernel and device tree files)
 # Max LEB count (-c 255) calculated for a partition of up to 32 MiB considering 128 KiB erase-block size.
