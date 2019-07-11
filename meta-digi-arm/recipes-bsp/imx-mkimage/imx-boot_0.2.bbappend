@@ -1,4 +1,5 @@
 # Copyright 2019 Digi International, Inc.
+inherit boot-artifacts
 
 # Use the v4.14 ga BSP branch
 SRCBRANCH = "imx_4.14.98_2.0.0_ga"
@@ -83,7 +84,7 @@ do_compile () {
 
 do_install () {
 	install -d ${D}/boot
-	for ramc in ${RAM_CONFIGS}; do
+	for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 		for target in ${IMXBOOT_TARGETS}; do
 			install -m 0644 ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target} ${D}/boot/
 		done
@@ -103,7 +104,7 @@ do_deploy () {
 	install -m 0644 ${BOOT_STAGING}/soc.mak     ${DEPLOYDIR}/${BOOT_TOOLS}
 
 	# copy the generated boot image to deploy path
-	for ramc in ${RAM_CONFIGS}; do
+	for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 		IMAGE_IMXBOOT_TARGET=""
 		for target in ${IMXBOOT_TARGETS}; do
 			# Use first "target" as IMAGE_IMXBOOT_TARGET
