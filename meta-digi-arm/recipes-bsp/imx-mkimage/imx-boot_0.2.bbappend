@@ -5,6 +5,9 @@ inherit boot-artifacts
 SRCBRANCH = "imx_4.14.98_2.0.0_ga"
 SRCREV = "dd0234001713623c79be92b60fa88bc07b07f24f"
 
+FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+SRC_URI_append_ccimx8x = " file://0001-iMX8QX-remove-SC_BD_FLAGS_ALT_CONFIG-flag-in-flash_r.patch"
+
 IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware"
 
 DEPENDS_append_ccimx8x = " coreutils-native"
