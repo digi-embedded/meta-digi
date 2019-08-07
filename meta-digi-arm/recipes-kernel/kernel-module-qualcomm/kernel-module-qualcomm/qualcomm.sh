@@ -47,7 +47,15 @@ done
 
 # Override the MAC firmware file only if the MAC file has changed.
 if ! cmp -s ${TMP_MACFILE} ${MACFILE}; then
-	cp ${TMP_MACFILE} ${MACFILE}
+	if [ ! -w ${MACFILE} ]; then
+		mount_point="$(df $(dirname "${MACFILE}") | awk '!/^Filesystem/{ print $6 }')"
+		log "6" "[INFO] ${MACFILE} is not writable, remounting '${mount_point}' as rw"
+		mount -o remount,rw ${mount_point}
+	fi
+
+	if cp ${TMP_MACFILE} ${MACFILE}; then
+		log "3" "[ERROR] Could not create ${MACFILE}"
+	fi
 fi
 rm -f "${TMP_MACFILE}"
 
