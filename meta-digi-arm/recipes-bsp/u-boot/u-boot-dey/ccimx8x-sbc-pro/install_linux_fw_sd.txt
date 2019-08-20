@@ -23,7 +23,7 @@ fi
 ram_freq="1.2GHz"
 bus_width="32bit"
 if test -n "${module_ram}" && test -n "${soc_type}"; then
-	if test "${soc_type}" = "8dx"; then
+	if test "${soc_type}" = "imx8dx"; then
 		bus_width="16bit"
 	fi
 	setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${ram_freq}_${module_ram}_${bus_width}.bin;
