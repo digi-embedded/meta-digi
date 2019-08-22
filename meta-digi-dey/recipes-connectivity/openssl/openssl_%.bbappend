@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2018 Digi International.
+# Copyright (C) 2016-2019 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
@@ -14,3 +14,6 @@ SRC_URI_remove = " \
 SRC_URI += " \
     ${@bb.utils.contains("MACHINE_FEATURES", "cryptochip", "${CRYPTOCHIP_COMMON_PATCHES}", "", d)} \
 "
+
+# Add the openssl binary whenever the base package is pulled in via a dependency
+RRECOMMENDS_libcrypto += "openssl-bin"
