@@ -3,7 +3,7 @@
 # Copyright (C) 2018-2019 Digi International.
 
 DESCRIPTION = "i.MX System Controller Firmware, customized for Digi platforms"
-LICENSE = "MIT"
+LICENSE = "Proprietary"
 LIC_FILES_CHKSUM = "file://COPYING;md5=fb0303e4ee8b0e71c094171e2272bd44"
 SECTION = "BSP"
 
