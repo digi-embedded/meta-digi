@@ -5,7 +5,7 @@
 
 DESCRIPTION = "GPU G2D library and apps for i.MX with 2D GPU and no DPU"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=80c0478f4339af024519b3723023fe28"
+LIC_FILES_CHKSUM = "file://COPYING;md5=72c0f70181bb6e83eee6aab8de12a9f3" 
 
 DEPENDS += "libgal-imx"
 PROVIDES += "virtual/libg2d"
@@ -13,10 +13,10 @@ PROVIDES += "virtual/libg2d"
 FSLBIN_NAME = "${PN}-${PV}-${TARGET_ARCH}"
 
 SRC_URI = "${FSL_MIRROR}/${FSLBIN_NAME}.bin;name=${TARGET_ARCH};fsl-eula=true"
-SRC_URI[aarch64.md5sum] = "ec8d8662ac31b96122a1af7736831482"
-SRC_URI[aarch64.sha256sum] = "362265b9c6c6ce05b1fafb412efe6617cf142669eb21302beec5e87ebbfe6a25"
-SRC_URI[arm.md5sum] = "bb1ef2e365b5d72e2a03c3b39d2016cc"
-SRC_URI[arm.sha256sum] = "27557094f4b5e7bef87c73131959503f3d0c3a6ea1c4f010d86c1668078f7f22"
+SRC_URI[aarch64.md5sum] = "a2d9e2b0f373a14bb41621a1cded3112"
+SRC_URI[aarch64.sha256sum] = "b5bd824386c30fbe167a529344a3e6f7c87adf9e9bdd4184680e28968d1e9853"
+SRC_URI[arm.md5sum] = "83777eac2bcd959894ca964f9cb5c9a0"
+SRC_URI[arm.sha256sum] = "2210c5590a822a764838dfdefed08c882c70c14dc29fba04c255cee8b4df5196"
 
 S="${WORKDIR}/${FSLBIN_NAME}"
 
