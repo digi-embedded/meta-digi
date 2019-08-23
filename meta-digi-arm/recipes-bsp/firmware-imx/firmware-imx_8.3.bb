@@ -6,14 +6,14 @@ SUMMARY = "Freescale IMX firmware"
 DESCRIPTION = "Freescale IMX firmware such as for the VPU"
 SECTION = "base"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=fb0303e4ee8b0e71c094171e2272bd44"
+LIC_FILES_CHKSUM = "file://COPYING;md5=72c0f70181bb6e83eee6aab8de12a9f3"
 
 PE = "1"
 
 SRC_URI = "${FSL_MIRROR}/firmware-imx-${PV}.bin;fsl-eula=true "
 
-SRC_URI[md5sum] = "b494c9a2ba9f8906de73ac33068789a2"
-SRC_URI[sha256sum] = "c115d5d0d115fc14754671bd2428f672f9f99677988588accef2fbca2c3f749c"
+SRC_URI[md5sum] = "776c7fa64a6e96d9f0d9cd50bbf79ffc"
+SRC_URI[sha256sum] = "48e4b9e4064930e2b6cd7f20f39177c8f4c5ef1a296f2ebc6ed422412ab56681"
 
 inherit fsl-eula-unpack allarch
 
@@ -43,6 +43,8 @@ do_install() {
 
     mv ${D}${base_libdir}/firmware/epdc/ ${D}${base_libdir}/firmware/imx/epdc/
     mv ${D}${base_libdir}/firmware/imx/epdc/epdc_ED060XH2C1.fw.nonrestricted ${D}${base_libdir}/firmware/imx/epdc/epdc_ED060XH2C1.fw
+
+    mv ${D}${base_libdir}/firmware/easrc/ ${D}${base_libdir}/firmware/imx/easrc/
 
     find ${D}${base_libdir}/firmware -type f -exec chmod 644 '{}' ';'
     find ${D}${base_libdir}/firmware -type f -exec chown root:root '{}' ';'
@@ -101,8 +103,9 @@ ALLOW_EMPTY_${PN} = "1"
 
 PACKAGES_DYNAMIC = "${PN}-vpu-* ${PN}-sdma-*"
 
-PACKAGES =+ "${PN}-epdc ${PN}-scfw ${PN}-sdma"
+PACKAGES =+ "${PN}-epdc ${PN}-scfw ${PN}-sdma ${PN}-easrc"
 
 FILES_${PN}-epdc = "${base_libdir}/firmware/imx/epdc/"
 FILES_${PN}-scfw = "${base_libdir}/firmware/scfw/"
 FILES_${PN}-sdma = " ${base_libdir}/firmware/imx/sdma"
+FILES_${PN}-easrc = "${base_libdir}/firmware/imx/easrc/"
