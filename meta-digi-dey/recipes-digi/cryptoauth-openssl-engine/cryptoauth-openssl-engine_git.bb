@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=3fdaa96f37898a0641820700bbf5f7b8"
 SRCBRANCH = "master"
 SRCREV = "a69a4f92af6bee9cb13035c2f859912744796380"
 
-GIT_URI ?= "git://github.com/MicrochipTech/cryptoauth-openssl-engine.git;protocol=git"
+GIT_URI ?= "git://github.com/MicrochipTech/cryptoauth-openssl-engine.git;protocol=https"
 
 SRC_URI = " \
     ${GIT_URI};nobranch=1 \

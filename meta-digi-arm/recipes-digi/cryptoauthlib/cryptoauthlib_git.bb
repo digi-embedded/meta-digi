@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://license.txt;endline=19;md5=5bcd26c644867b127c2cce8296
 SRCBRANCH = "master"
 SRCREV = "c6da3358a102c10d954372598c6efef8ad84c9ee"
 
-GIT_URI ?= "git://github.com/MicrochipTech/cryptoauthlib.git;protocol=git"
+GIT_URI ?= "git://github.com/MicrochipTech/cryptoauthlib.git;protocol=https"
 
 SRC_URI = " \
     ${GIT_URI};nobranch=1 \
