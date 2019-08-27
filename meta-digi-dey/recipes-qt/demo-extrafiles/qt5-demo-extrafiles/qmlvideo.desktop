@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Qt5 QML player
-Exec=/bin/sh -c "cd /usr/share/qt5/examples/multimedia/video/qmlvideo; ./qmlvideo"
+Exec=/bin/sh -c "cd /usr/share/examples/multimedia/video/qmlvideo; ./qmlvideo"
 Icon=qmlvideo
 Terminal=false
 Type=Application
