@@ -53,9 +53,7 @@ if ! cmp -s ${TMP_MACFILE} ${MACFILE}; then
 		mount -o remount,rw ${mount_point}
 	fi
 
-	if cp ${TMP_MACFILE} ${MACFILE}; then
-		log "3" "[ERROR] Could not create ${MACFILE}"
-	fi
+	cp ${TMP_MACFILE} ${MACFILE} || log "3" "[ERROR] Could not create ${MACFILE}"
 fi
 rm -f "${TMP_MACFILE}"
 
