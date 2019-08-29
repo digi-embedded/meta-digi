@@ -10,8 +10,8 @@ inherit image-buildinfo
 #
 # Set root password using 'extrausers' class if 'debug-tweaks' is NOT enabled
 #
-# To get the encrypted password (with escaped '$' char: '\$') run following
-# command in your development computer:
+# To get the hash of the password (with escaped '$' char: '\$') run
+# the following command in your development computer:
 #
 #   echo -n 'root' | mkpasswd -5 -s | sed -e 's,\$,\\$,g'
 #
