@@ -177,4 +177,5 @@ do_deploy_append_ccimx8x() {
 	# U-Boot images are not bootable on the i.MX8X
 	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
 	mv ${DEPLOYDIR}/u-boot* ${DEPLOYDIR}/${BOOT_TOOLS}/
+	mv ${DEPLOYDIR}/${UBOOT_SYMLINK}-* ${DEPLOYDIR}/${BOOT_TOOLS}/
 }
