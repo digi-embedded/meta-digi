@@ -18,9 +18,9 @@ FW_QUALCOMM_BT = " \
 FW_QCA6564_WIFI_PROPRIETARY = " \
     file://bdwlan30_US.bin \
     file://LICENCE.atheros_firmware \
-    file://otp30.bin \
-    file://qwlan30.bin \
-    file://utf30.bin \
+    file://qca6564_proprietary/otp30.bin \
+    file://qca6564_proprietary/qwlan30.bin \
+    file://qca6564_proprietary/utf30.bin \
 "
 
 # Firmware files for QCA6574 (Qualcomm proprietary driver)
