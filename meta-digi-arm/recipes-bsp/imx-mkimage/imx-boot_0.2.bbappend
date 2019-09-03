@@ -1,4 +1,12 @@
 # Copyright 2019 Digi International, Inc.
+inherit boot-artifacts
+
+# Use the v4.14 ga BSP branch
+SRCBRANCH = "imx_4.14.98_2.0.0_ga"
+SRCREV = "dd0234001713623c79be92b60fa88bc07b07f24f"
+
+FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+SRC_URI_append_ccimx8x = " file://0001-iMX8QX-remove-SC_BD_FLAGS_ALT_CONFIG-flag-in-flash_r.patch"
 
 IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware"
 
@@ -26,53 +34,62 @@ do_populate_lic[depends] += " \
 	${@' '.join('%s:do_populate_lic' % r for r in '${IMX_M4_DEMOS}'.split() )} \
 	firmware-imx:do_populate_lic \
 "
-
-UBOOT_NAME = "u-boot-${MACHINE}.bin"
-BOOT_CONFIG_MACHINE = "${BOOT_NAME}"
+ATF_MACHINE_NAME_mx8qxp = "bl31-imx8qx.bin"
 
 IMXBOOT_TARGETS_ccimx8x = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_flexspi', \
-			      bb.utils.contains('UBOOT_CONFIG', 'nand', 'flash_nand', \
-									'flash flash_all', d), d)}"
+                                                'flash flash_regression_linux_m4', d)}"
 
 do_compile () {
 	bbnote 8QX boot binary build
 	cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_srtm_demo.bin       ${BOOT_STAGING}/m40_tcm.bin
-	cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_srtm_demo.bin       ${BOOT_STAGING}/CM4.bin
+	cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_srtm_demo.bin       ${BOOT_STAGING}/m4_image.bin
 	cp ${DEPLOY_DIR_IMAGE}/mx8qx-ahab-container.img          ${BOOT_STAGING}/
 	cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${ATF_MACHINE_NAME} ${BOOT_STAGING}/bl31.bin
 	for type in ${UBOOT_CONFIG}; do
-		RAM_SIZE="$(echo ${type} | sed -e 's,.*\([0-9]\+GB\),\1,g')"
-		cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_NAME}-${type}           ${BOOT_STAGING}/u-boot.bin-${type}
-		cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${SC_FIRMWARE_NAME}-${RAM_SIZE} ${BOOT_STAGING}/scfw_tcm.bin-${RAM_SIZE}
+		cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/u-boot-${type}.bin           ${BOOT_STAGING}/
+	done
+	for ramc in ${RAM_CONFIGS}; do
+		cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${SC_FIRMWARE_NAME}-${ramc} ${BOOT_STAGING}/
 	done
 
 	# mkimage for i.MX8
 	for type in ${UBOOT_CONFIG}; do
-		cd ${BOOT_STAGING}
-		ln -sf u-boot.bin-${type} u-boot.bin
-		RAM_SIZE="$(echo ${type} | sed -e 's,.*\([0-9]\+GB\),\1,g')"
-		ln -sf scfw_tcm.bin-${RAM_SIZE} scfw_tcm.bin
-		cd -
-		for target in ${IMXBOOT_TARGETS}; do
-			bbnote "building ${SOC_TARGET} - ${type} - ${target}"
-			make SOC=${SOC_TARGET} ${target}
-			if [ -e "${BOOT_STAGING}/flash.bin" ]; then
-				cp ${BOOT_STAGING}/flash.bin ${S}/${BOOT_CONFIG_MACHINE}-${type}.bin-${target}
+		RAM_SIZE="$(echo ${type} | sed -e 's,.*[a-z]\+\([0-9]\+[M|G]B\)$,\1,g')"
+		for ramc in ${RAM_CONFIGS}; do
+			if echo "${ramc}" | grep -qs "${RAM_SIZE}"; then
+				# Match U-Boot memory size and and SCFW memory configuration
+				cd ${BOOT_STAGING}
+				ln -sf u-boot-${type}.bin u-boot.bin
+				ln -sf ${SC_FIRMWARE_NAME}-${ramc} scfw_tcm.bin
+				cd -
+				for target in ${IMXBOOT_TARGETS}; do
+					bbnote "building ${SOC_TARGET} - ${ramc} - ${target}"
+					make SOC=${SOC_TARGET} ${target}
+					if [ -e "${BOOT_STAGING}/flash.bin" ]; then
+						cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target}
+					fi
+					SCFWBUILT="yes"
+				done
+				rm ${BOOT_STAGING}/scfw_tcm.bin
+				rm ${BOOT_STAGING}/u-boot.bin
+				# Remove u-boot-atf.bin and u-boot-hash.bin so they get generated with the next iteration's U-Boot
+				rm ${BOOT_STAGING}/u-boot-atf.bin
+				rm ${BOOT_STAGING}/u-boot-hash.bin
 			fi
 		done
-		rm ${BOOT_STAGING}/scfw_tcm.bin
-		rm ${BOOT_STAGING}/u-boot.bin
-		# Remove u-boot-atf.bin and u-boot-hash.bin so they get generated with the next iteration's U-Boot
-		rm ${BOOT_STAGING}/u-boot-atf.bin
-		rm ${BOOT_STAGING}/u-boot-hash.bin
 	done
+
+	# Check that SCFW was built at least once
+	if [ "${SCFWBUILT}" != "yes" ]; then
+		bbfatal "SCFW was not built!"
+	fi
 }
 
 do_install () {
 	install -d ${D}/boot
-	for type in ${UBOOT_CONFIG}; do
+	for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 		for target in ${IMXBOOT_TARGETS}; do
-			install -m 0644 ${S}/${BOOT_CONFIG_MACHINE}-${type}.bin-${target} ${D}/boot/
+			install -m 0644 ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target} ${D}/boot/
 		done
 	done
 }
@@ -83,14 +100,17 @@ do_deploy () {
 	# copy the tool mkimage to deploy path and sc fw, dcd and uboot
 	install -m 0644 ${BOOT_STAGING}/mx8qx-ahab-container.img ${DEPLOYDIR}/${BOOT_TOOLS}
 	install -m 0644 ${BOOT_STAGING}/m40_tcm.bin              ${DEPLOYDIR}/${BOOT_TOOLS}
-	install -m 0644 ${BOOT_STAGING}/CM4.bin                  ${DEPLOYDIR}/${BOOT_TOOLS}
+	install -m 0644 ${BOOT_STAGING}/m4_image.bin             ${DEPLOYDIR}/${BOOT_TOOLS}
 	install -m 0755 ${S}/${TOOLS_NAME}                       ${DEPLOYDIR}/${BOOT_TOOLS}
 
 	# copy makefile (soc.mak) for reference
 	install -m 0644 ${BOOT_STAGING}/soc.mak     ${DEPLOYDIR}/${BOOT_TOOLS}
 
+	# Move all M4 demo artifacts to the imx-boot-tools folder
+	mv ${DEPLOY_DIR_IMAGE}/imx8qx_m4_* ${DEPLOYDIR}/${BOOT_TOOLS}/
+
 	# copy the generated boot image to deploy path
-	for type in ${UBOOT_CONFIG}; do
+	for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 		IMAGE_IMXBOOT_TARGET=""
 		for target in ${IMXBOOT_TARGETS}; do
 			# Use first "target" as IMAGE_IMXBOOT_TARGET
@@ -98,12 +118,14 @@ do_deploy () {
 				IMAGE_IMXBOOT_TARGET="$target"
 				echo "Set boot target as $IMAGE_IMXBOOT_TARGET"
 			fi
-			install -m 0644 ${S}/${BOOT_CONFIG_MACHINE}-${type}.bin-${target} ${DEPLOYDIR}
+			install -m 0644 ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target} ${DEPLOYDIR}
 		done
-	cd ${DEPLOYDIR}
-	ln -sf ${BOOT_CONFIG_MACHINE}-${type}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOT_CONFIG_MACHINE}-${type}.bin
-	ln -sf ${BOOT_CONFIG_MACHINE}-${type}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOT_CONFIG_MACHINE}-${MACHINE}.bin
-	cd -
+		cd ${DEPLOYDIR}
+		ln -sf ${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin
+		# Link to default bootable U-Boot filename. It gets overwritten
+		# on every loop so the only last RAM_CONFIG will survive.
+		ln -sf ${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
+		cd -
 	done
 }
 

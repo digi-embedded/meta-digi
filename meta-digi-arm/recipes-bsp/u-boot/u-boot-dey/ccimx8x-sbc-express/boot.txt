@@ -2,27 +2,46 @@
 # U-Boot bootscript for EMMC/SD images created by Yocto.
 #
 
+# Set SOC type to "imx8qxp" if not already defined by U-Boot
+if test ! -n "${soc_type}"; then
+	setenv soc_type "imx8qxp"
+fi
+
 #
 # Set device tree filename depending on the board ID (if defined)
 #
 if test -n "${board_id}"; then
-	setenv fdt_file ccimx8x-sbc-express-id${board_id}.dtb
+	setenv fdt_file cc${soc_type}-sbc-express-id${board_id}.dtb
 else
 	#
-	# Set device tree filename depending on the hardware variant
+	# Set device tree filename depending on the hardware capabilities
 	#
-	if test "${module_variant}" = "0x01"; then
-		setenv fdt_file ccimx8x-sbc-express-wb.dtb
-	elif test "${module_variant}" = "0x02"; then
-		setenv fdt_file ccimx8x-sbc-express-wb.dtb
-	elif test "${module_variant}" = "0x03"; then
-		setenv fdt_file ccimx8x-sbc-express.dtb
-	elif test "${module_variant}" = "0x04"; then
-		setenv fdt_file ccimx8x-sbc-express-wb.dtb
-	elif test "${module_variant}" = "0x05"; then
-		setenv fdt_file ccimx8x-sbc-express.dtb
+	if test -n "${module_ram}"; then
+		setexpr module_has_wifi ${hwid_3} \& 1
+		setexpr module_has_bt ${hwid_3} \& 2
+		setexpr module_has_bt ${module_has_bt} / 2
+
+		if test "${module_has_wifi}" = "1" &&
+		   test "${module_has_bt}" = "1"; then
+			setenv fdt_file cc${soc_type}-sbc-express-wb.dtb
+		else
+			setenv fdt_file cc${soc_type}-sbc-express.dtb
+		fi
 	else
-		setenv fdt_file ccimx8x-sbc-express-wb.dtb
+		#
+		# Set device tree filename depending on the hardware variant
+		#
+		if test "${module_variant}" = "0x01" ||
+		   test "${module_variant}" = "0x02" ||
+		   test "${module_variant}" = "0x04"; then
+			setenv fdt_file cc${soc_type}-sbc-express-wb.dtb
+		elif test "${module_variant}" = "0x03" ||
+		     test "${module_variant}" = "0x05" ||
+		     test "${module_variant}" = "0x06"; then
+			setenv fdt_file cc${soc_type}-sbc-express.dtb
+		else
+			setenv fdt_file cc${soc_type}-sbc-express-wb.dtb
+		fi
 	fi
 fi
 

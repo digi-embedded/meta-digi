@@ -24,16 +24,29 @@
 #include <string.h>
 
 #define	PROGRAM			"rtc_test"
-#define VERSION			"3.1"
+#define VERSION			"3.2"
 
 #define	DEFAULT_RTC_DEVICE_FILE	"/dev/rtc"
 
+// Digi RTC IOCTLs custom implementation using MCA
+#define RTC_IOCTL_DIGI 		0x100
+#define RTC_MCA_UIE_ON 		(RTC_IOCTL_DIGI + RTC_UIE_ON)
+#define RTC_MCA_UIE_OFF 	(RTC_IOCTL_DIGI + RTC_UIE_OFF)
+#define RTC_MCA_PIE_ON 		(RTC_IOCTL_DIGI + RTC_PIE_ON)
+#define RTC_MCA_PIE_OFF 	(RTC_IOCTL_DIGI + RTC_PIE_OFF)
+#define RTC_MCA_IRQP_READ	(RTC_IOCTL_DIGI + RTC_IRQP_READ)
+#define RTC_MCA_IRQP_SET 	(RTC_IOCTL_DIGI + RTC_IRQP_SET)
+
 /* test options */
-#define	RTC_TEST_RD_TIME	(1<<0)
-#define	RTC_TEST_SET_TIME	(1<<1)
-#define	RTC_TEST_RD_ALARM	(1<<2)
-#define	RTC_TEST_SET_ALARM	(1<<3)
-#define	RTC_TEST_ALARM_IRQ	(1<<4)
+#define	RTC_TEST_RD_TIME		(1<<0)
+#define	RTC_TEST_SET_TIME		(1<<1)
+#define	RTC_TEST_RD_ALARM		(1<<2)
+#define	RTC_TEST_SET_ALARM		(1<<3)
+#define	RTC_TEST_ALARM_IRQ		(1<<4)
+#define	RTC_TEST_STD_PERIODIC_IRQ	(1<<5)
+#define	RTC_TEST_STD_1HZ_IRQ		(1<<6)
+#define	RTC_TEST_DIGI_PERIODIC_IRQ	(1<<7)
+#define	RTC_TEST_DIGI_1HZ_IRQ		(1<<8)
 
 #define	RTC_DEFAULT_TEST_OPS	0	/* None, pass it through the command line */
 
@@ -48,6 +61,10 @@
         "  -c : Read the alarm programed value\n" \
         "  -d : Set the alarm to trigger in the specified seconds\n" \
         "  -e : Test the alarm interrupt with the specified seconds\n" \
+        "  -p : Test the standard periodic interrupts (uses timers, doesn't wake from low power)\n" \
+        "  -u : Test the standard 1 Hz interrupt (uses RTC ALARM)\n" \
+        "  -v : Test MCA periodic interrupts (uses RTC PERIODIC_IRQ)\n" \
+        "  -w : Test MCA 1 Hz interrupt (uses RTC 1HZ)\n" \
         "  -f : Use specified device (default is /dev/rtc)\n" \
 	"  -h : Help\n" \
 	"  -m : Alarm has minutes resolution. (seconds by default)." \
@@ -65,6 +82,8 @@ static int rtc_test_time_set(int fd, struct rtc_time *tm);
 static int rtc_test_alarm_read(int fd);
 static int rtc_test_alarm_set(int fd, struct rtc_time *tm);
 static int rtc_test_alarm_irq(int fd, struct rtc_wkalrm *wkalrm);
+static int rtc_test_periodic_irq(int fd, int digi);
+static int rtc_test_1hz_irq(int fd, int digi);
 static void rtc_test_display_test_results(unsigned int test_ops, unsigned int test_results);
 
 static int seconds = 5;
@@ -119,13 +138,13 @@ int main(int argc, char *argv[])
 	unsigned int test_results = 0;
 	struct rtc_time rtc_tm;
 	struct rtc_wkalrm wkalrm;
-	const char rtc_device_file[10] = DEFAULT_RTC_DEVICE_FILE;
+	char rtc_device_file[10] = DEFAULT_RTC_DEVICE_FILE;
 
 	memset(&rtc_tm, 0, sizeof(struct rtc_time));
 	memset(&wkalrm, 0, sizeof(struct rtc_wkalrm));
 
 	if (argc > 1) {
-		while ((opt = getopt(argc, argv, "abcdef:hms:")) > 0) {
+		while ((opt = getopt(argc, argv, "abcdepuvwf:hms:")) > 0) {
 			switch (opt) {
 			case 'a':
 				test_ops |= RTC_TEST_RD_TIME;
@@ -141,6 +160,18 @@ int main(int argc, char *argv[])
 				break;
 			case 'e':
 				test_ops |= RTC_TEST_ALARM_IRQ;
+				break;
+			case 'p':
+				test_ops |= RTC_TEST_STD_PERIODIC_IRQ;
+				break;
+			case 'u':
+				test_ops |= RTC_TEST_STD_1HZ_IRQ;
+				break;
+			case 'v':
+				test_ops |= RTC_TEST_DIGI_PERIODIC_IRQ;
+				break;
+			case 'w':
+				test_ops |= RTC_TEST_DIGI_1HZ_IRQ;
 				break;
 			case 'f':
 				strncpy(rtc_device_file,optarg,10);
@@ -209,6 +240,30 @@ int main(int argc, char *argv[])
 			test_results &= ~RTC_TEST_ALARM_IRQ;
 	}
 
+	if (test_ops & (RTC_TEST_STD_PERIODIC_IRQ)) {
+		retval = rtc_test_periodic_irq(rtc_fd, 0);
+		if (retval == 1)
+			test_results |= RTC_TEST_STD_PERIODIC_IRQ;
+	}
+
+	if (test_ops & (RTC_TEST_STD_1HZ_IRQ)) {
+		retval = rtc_test_1hz_irq(rtc_fd, 0);
+		if (retval == 1)
+			test_results |= RTC_TEST_STD_1HZ_IRQ;
+	}
+
+	if (test_ops & (RTC_TEST_DIGI_PERIODIC_IRQ)) {
+		retval = rtc_test_periodic_irq(rtc_fd, 1);
+		if (retval == 1)
+			test_results |= RTC_TEST_DIGI_PERIODIC_IRQ;
+	}
+
+	if (test_ops & (RTC_TEST_DIGI_1HZ_IRQ)) {
+		retval = rtc_test_1hz_irq(rtc_fd, 1);
+		if (retval == 1)
+			test_results |= RTC_TEST_DIGI_1HZ_IRQ;
+	}
+
 	rtc_test_display_test_results(test_ops, test_results);
 
 	close(rtc_fd);
@@ -249,6 +304,22 @@ static void rtc_test_display_test_results(unsigned int test_ops,
 	if (test_ops & RTC_TEST_ALARM_IRQ)
 		printf("Alarm interrupt test:          %s\n",
 		       test_results & RTC_TEST_ALARM_IRQ ? "OK" :
+				"Failure or not supported");
+	if (test_ops & RTC_TEST_STD_PERIODIC_IRQ)
+		printf("Std periodic interrupt test:   %s\n",
+		       test_results & RTC_TEST_STD_PERIODIC_IRQ ? "OK" :
+				"Failure or not supported");
+	if (test_ops & RTC_TEST_STD_1HZ_IRQ)
+		printf("Std 1 Hz interrupt test:        %s\n",
+		       test_results & RTC_TEST_STD_1HZ_IRQ ? "OK" :
+				"Failure or not supported");
+	if (test_ops & RTC_TEST_DIGI_PERIODIC_IRQ)
+		printf("Digi periodic interrupt test:  %s\n",
+		       test_results & RTC_TEST_DIGI_PERIODIC_IRQ ? "OK" :
+				"Failure or not supported");
+	if (test_ops & RTC_TEST_DIGI_1HZ_IRQ)
+		printf("Digi 1 Hz interrupt test:       %s\n",
+		       test_results & RTC_TEST_DIGI_1HZ_IRQ ? "OK" :
 				"Failure or not supported");
 }
 
@@ -426,4 +497,162 @@ static int rtc_test_alarm_irq(int fd, struct rtc_wkalrm *wkalrm)
 	}
 
 	return result;
+}
+
+/*
+ * Function:    rtc_test_periodic_irq
+ * Description: check periodic irq
+ */
+static int rtc_test_periodic_irq(int fd, int digi)
+{
+	int retval, i, irqcount = 0;
+	unsigned long tmp, data;
+	struct timeval start, end, diff;
+	int result = 1;
+
+	/* Read periodic IRQ rate */
+	retval = ioctl(fd, digi ? RTC_MCA_IRQP_READ : RTC_IRQP_READ, &tmp);
+	if (retval == -1) {
+		/* not all RTCs support periodic IRQs */
+		if (errno == EINVAL) {
+			fprintf(stderr, "\nNo periodic IRQ support\n");
+		}
+		perror("IRQP_READ ioctl");
+		return 0;
+	}
+	fprintf(stderr, "\nPeriodic IRQ rate is %ld Hz.\n", tmp);
+
+	fprintf(stderr, "Counting 20 interrupts at:");
+	fflush(stderr);
+
+	/* The frequencies 128 Hz, 256 Hz, ... 8192Hz are only allowed for root. */
+	for (tmp = 2; tmp <= 64; tmp *= 2) {
+		retval = ioctl(fd, digi ? RTC_MCA_IRQP_SET : RTC_IRQP_SET, tmp);
+		if (retval == -1) {
+			/* not all RTCs can change their periodic IRQ rate */
+			if (errno == EINVAL) {
+				fprintf(stderr,
+					"\n...Periodic IRQ rate is fixed\n");
+			}
+			perror("IRQP_SET ioctl");
+			return 0;
+		}
+
+		fprintf(stderr, "\n%ld Hz:\t", tmp);
+		fflush(stderr);
+
+		/* Enable periodic interrupts */
+		retval = ioctl(fd, digi ? RTC_MCA_PIE_ON : RTC_PIE_ON, 0);
+		if (retval == -1) {
+			perror("PIE_ON ioctl");
+			return 0;
+		}
+
+		for (i = 1; i < 21; i++) {
+			gettimeofday(&start, NULL);
+			/* This blocks */
+			retval = read(fd, &data, sizeof(unsigned long));
+			if (retval == -1) {
+				perror("read");
+				exit(errno);
+			}
+			gettimeofday(&end, NULL);
+			timersub(&end, &start, &diff);
+			if (diff.tv_sec > 0 ||
+			    diff.tv_usec > ((1000000L / tmp) * 1.10)) {
+				fprintf(stderr, "\nPIE delta error: %ld.%06ld should be close to 0.%06ld\n",
+				       diff.tv_sec, diff.tv_usec,
+				       (1000000L / tmp));
+				fflush(stdout);
+				result = 0;
+			}
+
+			fprintf(stderr, " %d",i);
+			fflush(stderr);
+			irqcount++;
+		}
+
+		/* Disable periodic interrupts */
+		retval = ioctl(fd, digi ? RTC_MCA_PIE_OFF : RTC_PIE_OFF, 0);
+		if (retval == -1) {
+			perror("PIE_OFF ioctl");
+			return 0;
+		}
+	}
+	fprintf(stderr, "\n\n");
+	fflush(stderr);
+
+	return result;
+}
+
+/*
+ * Function:    rtc_test_1hz_irq
+ * Description: check 1 Hz irq
+ */
+static int rtc_test_1hz_irq(int fd, int digi)
+{
+	int retval, i, irqcount = 0;
+	unsigned long tmp, data;
+	struct timeval start, end, diff;
+
+	/* Turn on update interrupts (one per second) */
+	retval = ioctl(fd, digi ? RTC_MCA_UIE_ON : RTC_UIE_ON, 0);
+	if (retval == -1) {
+		if (errno == EINVAL) {
+			fprintf(stderr,
+				"\n...Update IRQs not supported.\n");
+		}
+		perror("UIE_ON ioctl");
+		return 0;
+	}
+
+	fprintf(stderr, "Counting 5 update (1/sec) interrupts from reading rtc");
+	fflush(stderr);
+	for (i = 1; i < 6; i++) {
+		/* This read will block */
+		retval = read(fd, &data, sizeof(unsigned long));
+		if (retval == -1) {
+			perror("read");
+			exit(errno);
+		}
+		fprintf(stderr, " %d",i);
+		fflush(stderr);
+		irqcount++;
+	}
+
+	fprintf(stderr, "\nCounting 5 update (1/sec) interrupts from using select(2) on /dev/rtc:");
+	fflush(stderr);
+	for (i = 1; i < 6; i++) {
+		struct timeval tv = {5, 0};     /* 5 second timeout on select */
+		fd_set readfds;
+
+		FD_ZERO(&readfds);
+		FD_SET(fd, &readfds);
+		/* The select will wait until an RTC interrupt happens. */
+		retval = select(fd + 1, &readfds, NULL, NULL, &tv);
+		if (retval == -1) {
+		        perror("select");
+		        exit(errno);
+		}
+		/* This read won't block unlike the select-less case above. */
+		retval = read(fd, &data, sizeof(unsigned long));
+		if (retval == -1) {
+		        perror("read");
+		        exit(errno);
+		}
+		fprintf(stderr, " %d",i);
+		fflush(stderr);
+		irqcount++;
+	}
+
+	/* Turn off update interrupts */
+	retval = ioctl(fd, digi ? RTC_MCA_UIE_OFF : RTC_UIE_OFF, 0);
+	if (retval == -1) {
+		perror("UIE_OFF ioctl");
+		return 0;
+	}
+	fprintf(stderr, "\n");
+	fflush(stderr);
+
+	return 1;
 }

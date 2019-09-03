@@ -18,8 +18,11 @@
 # At this point of the boot (udev script), the system log (syslog) is not
 # available yet, so use the kernel log buffer from userspace.
 log() {
-	printf "<$1>qca6564: $2\n" >/dev/kmsg
+	printf "<$1>qca65x4: $2\n" >/dev/kmsg
 }
+
+# Do nothing if the wireless node does not exist on the device tree
+[ -d "/proc/device-tree/wireless" ] || exit 0
 
 # Do nothing if the module is already loaded
 grep -qws 'wlan' /proc/modules && exit 0
@@ -44,7 +47,13 @@ done
 
 # Override the MAC firmware file only if the MAC file has changed.
 if ! cmp -s ${TMP_MACFILE} ${MACFILE}; then
-	cp ${TMP_MACFILE} ${MACFILE}
+	if [ ! -w ${MACFILE} ]; then
+		mount_point="$(df $(dirname "${MACFILE}") | awk '!/^Filesystem/{ print $6 }')"
+		log "6" "[INFO] ${MACFILE} is not writable, remounting '${mount_point}' as rw"
+		mount -o remount,rw ${mount_point}
+	fi
+
+	cp ${TMP_MACFILE} ${MACFILE} || log "3" "[ERROR] Could not create ${MACFILE}"
 fi
 rm -f "${TMP_MACFILE}"
 
@@ -106,4 +115,4 @@ LOGLEVEL="$(sed -ne 's,^kernel.printk[^=]*=[[:blank:]]*\(.*\)$,\1,g;T;p' /etc/sy
 modprobe wlan
 
 # Verify the interface is present
-[ -d "/sys/class/net/wlan0" ] || log "3" "[ERROR] Loading qca6564 module"
+[ -d "/sys/class/net/wlan0" ] || log "3" "[ERROR] Loading wlan module"

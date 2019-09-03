@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2017, Digi International Inc.
+# Copyright (c) 2017-2019, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -28,8 +28,7 @@ elif basename "${DEVPATH}" | grep -qs "pwmchip[0-9]\+$" && [ "${ACTION}" = "chan
 	chown root:digiapix /sys${DEVPATH}/${EXPORT} /sys${DEVPATH}/${EXPORT}/*
 	chmod g+w /sys${DEVPATH}/${EXPORT}/*
 else
-	# Change group and mode of the sysfs files created whenever a 'gpioX'
-	# is exported
+	# Change group and mode of the sysfs files
 	chown -h root:digiapix /sys${DEVPATH}/*
 	chmod g+w /sys${DEVPATH}/*
 fi

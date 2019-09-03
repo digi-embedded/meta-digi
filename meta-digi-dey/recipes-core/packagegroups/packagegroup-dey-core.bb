@@ -43,6 +43,7 @@ RDEPENDS_${PN} = "\
     netbase \
     networkmanager \
     os-release \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'pci', 'pciutils', '',d)} \
     recovery-utils \
     sysinfo \
     system-monitor \

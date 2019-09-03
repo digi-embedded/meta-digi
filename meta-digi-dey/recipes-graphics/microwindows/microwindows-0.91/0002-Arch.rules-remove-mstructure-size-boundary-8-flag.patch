@@ -1,0 +1,24 @@
+From: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
+Date: Fri, 2 Aug 2019 14:28:35 +0200
+Subject: [PATCH] Arch.rules: remove 'mstructure-size-boundary' flag
+
+This flag is not supported in ARM64 toolchains.
+
+Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
+---
+ Arch.rules | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Arch.rules b/Arch.rules
+index b01225d0f514..2fd57bf635b9 100644
+--- a/Arch.rules
++++ b/Arch.rules
+@@ -46,7 +46,7 @@ COMPILER = gcc
+ CXX_COMPILER = g++
+ TOOLSPREFIX = $(ARMTOOLSPREFIX)
+ DEFINES += -DLINUX=1 -DUNIX=1
+-CFLAGS += $(GCC_WARNINGS) $(OPTFLAGS) -mstructure-size-boundary=8
++CFLAGS += $(GCC_WARNINGS) $(OPTFLAGS)
+ LDFLAGS +=
+ endif
+ 

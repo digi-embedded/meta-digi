@@ -9,6 +9,9 @@ SRC_URI += " \
 EXTRA_OEMESON_remove = "-Dfirmware-path=${nonarch_base_libdir}/firmware "
 EXTRA_OEMESON   += "-Dfirmware-path=${nonarch_base_libdir}/firmware/ "
 
+# Remove systemd-networkd from our images, since we already use NetworkManager
+PACKAGECONFIG_remove = "networkd"
+
 do_install_append () {
     # Disable the assignment of the fixed network interface name
     install -d ${D}${sysconfdir}/systemd/network

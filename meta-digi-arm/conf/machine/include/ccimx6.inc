@@ -9,14 +9,17 @@ include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/tune-cortexa9.inc
 
 # Platform u-boot settings
+UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"
-UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm/configs/ccimx6sbc_defconfig"
 
 # Wireless external module
 WIRELESS_MODULE ?= ""
+
+# Use our recipe of linux-imx-headers instead of the meta-freescale one
+PREFERRED_VERSION_linux-imx-headers ?= "4.9"
 
 # Firmware
 MACHINE_FIRMWARE ?= "firmware-imx-sdma"
@@ -37,4 +40,4 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     cryptodev-module \
 "
 
-MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth"
+MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth pci"

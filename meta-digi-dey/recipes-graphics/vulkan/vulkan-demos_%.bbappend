@@ -1,2 +1,3 @@
 
-COMPATIBLE_MACHINE = "(mx8)"
+DEPENDS_remove = "vulkan"
+DEPENDS_append = " vulkan-headers vulkan-loader"

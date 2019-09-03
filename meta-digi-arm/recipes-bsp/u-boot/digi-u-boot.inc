@@ -15,7 +15,7 @@ PROVIDES += "u-boot"
 S = "${WORKDIR}/git"
 
 # Select internal or Github U-Boot repo
-UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}u-boot-denx.git', '${DIGI_GITHUB_GIT}/u-boot.git', d)}"
+UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}u-boot-denx.git', '${DIGI_GITHUB_GIT}/u-boot.git;protocol=https', d)}"
 
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
@@ -100,9 +100,7 @@ do_compile () {
 	fi
 }
 
-TF_BOOTSCRIPT_SEDFILTER = ""
-TF_BOOTSCRIPT_SEDFILTER_ccimx6 = "${@tf_bootscript_sedfilter(d)}"
-TF_BOOTSCRIPT_SEDFILTER_ccimx6ul = "${@tf_bootscript_sedfilter(d)}"
+TF_BOOTSCRIPT_SEDFILTER = "${@tf_bootscript_sedfilter(d)}"
 
 def tf_bootscript_sedfilter(d):
     tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
@@ -179,4 +177,5 @@ do_deploy_append_ccimx8x() {
 	# U-Boot images are not bootable on the i.MX8X
 	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
 	mv ${DEPLOYDIR}/u-boot* ${DEPLOYDIR}/${BOOT_TOOLS}/
+	mv ${DEPLOYDIR}/${UBOOT_SYMLINK}-* ${DEPLOYDIR}/${BOOT_TOOLS}/
 }

@@ -3,6 +3,8 @@ inherit image_types
 ################################################################################
 #                                 BOOT IMAGES                                  #
 ################################################################################
+BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
+
 def TRUSTFENCE_BOOTIMAGE_DEPENDS(d):
     tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
     return "%s:do_image_complete" % tf_initramfs if tf_initramfs else ""
@@ -11,7 +13,7 @@ do_image_boot_vfat[depends] += " \
     coreutils-native:do_populate_sysroot \
     dosfstools-native:do_populate_sysroot \
     mtools-native:do_populate_sysroot \
-    u-boot:do_deploy \
+    ${BOOTLOADER_IMAGE_RECIPE}:do_deploy \
     virtual/kernel:do_deploy \
     ${@TRUSTFENCE_BOOTIMAGE_DEPENDS(d)} \
 "
@@ -74,7 +76,7 @@ do_image_boot_vfat[imgsuffix] = "."
 
 do_image_boot_ubifs[depends] += " \
     mtd-utils-native:do_populate_sysroot \
-    u-boot:do_deploy \
+    ${BOOTLOADER_IMAGE_RECIPE}:do_deploy \
     virtual/kernel:do_deploy \
     ${@TRUSTFENCE_BOOTIMAGE_DEPENDS(d)} \
 "
@@ -144,7 +146,7 @@ IMAGE_TYPEDEP_recovery.vfat = "boot.vfat"
 
 do_image_recovery_ubifs[depends] += " \
     mtd-utils-native:do_populate_sysroot \
-    u-boot:do_deploy \
+    ${BOOTLOADER_IMAGE_RECIPE}:do_deploy \
     virtual/kernel:do_deploy \
     ${RECOVERY_INITRAMFS_IMAGE}:do_image_complete \
 "
@@ -228,7 +230,6 @@ BOARD_BOOTIMAGE_PARTITION_SIZE ??= "65536"
 # SD card image name
 SDIMG = "${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.sdcard"
 
-IMAGE_BOOTLOADER ?= "u-boot"
 BOOTLOADER_SEEK ?= "1"
 
 SDIMG_BOOTLOADER ?= "${DEPLOY_DIR_IMAGE}/${UBOOT_SYMLINK}"
@@ -241,7 +242,7 @@ do_image_sdcard[depends] = " \
     dosfstools-native:do_populate_sysroot \
     mtools-native:do_populate_sysroot \
     parted-native:do_populate_sysroot \
-    ${IMAGE_BOOTLOADER}:do_deploy \
+    ${BOOTLOADER_IMAGE_RECIPE}:do_deploy \
     virtual/kernel:do_deploy \
 "
 

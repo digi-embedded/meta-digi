@@ -11,7 +11,7 @@ SRCBRANCH = "master"
 SRCREV = "${AUTOREV}"
 
 CC_STASH = "gitsm://git@stash.digi.com/cc/cc_dey.git;protocol=ssh"
-CC_GITHUB = "gitsm://github.com/digi-embedded/cc_dey.git;protocol=git"
+CC_GITHUB = "gitsm://github.com/digi-embedded/cc_dey.git;protocol=https"
 
 CC_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${CC_STASH}', '${CC_GITHUB}', d)}"
 

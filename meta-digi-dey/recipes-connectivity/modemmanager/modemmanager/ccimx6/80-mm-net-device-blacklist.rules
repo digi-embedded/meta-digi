@@ -1,0 +1,16 @@
+ACTION!="add|change|move|bind", GOTO="mm_net_device_blacklist_end"
+
+# ModemManager documentation states that the best practice is to use the DEVPATH
+# this way rather than other rules such as KERNEL, so be careful when modifying
+
+# Remove CAN interfaces from ModemManager probing
+SUBSYSTEM=="net", DEVPATH=="/devices/soc0/soc/2000000.aips-bus/2090000.flexcan*", ENV{ID_MM_CANDIDATE}="0", ENV{ID_MM_DEVICE_IGNORE}="1"
+SUBSYSTEM=="net", DEVPATH=="/devices/soc0/soc/2000000.aips-bus/2094000.flexcan*", ENV{ID_MM_CANDIDATE}="0", ENV{ID_MM_DEVICE_IGNORE}="1"
+
+# Remove Ethernet interfaces from ModemManager probing
+SUBSYSTEM=="net", DEVPATH=="/devices/soc0/soc/2100000.aips-bus/2188000.ethernet*", ENV{ID_MM_CANDIDATE}="0", ENV{ID_MM_DEVICE_IGNORE}="1"
+
+# Remove MMC interfaces from ModemManager probing
+SUBSYSTEM=="net", DEVPATH=="/devices/soc0/soc/2100000.aips-bus/2190000.usdhc/mmc_host*", ENV{ID_MM_CANDIDATE}="0", ENV{ID_MM_DEVICE_IGNORE}="1"
+
+LABEL="mm_net_device_blacklist_end"

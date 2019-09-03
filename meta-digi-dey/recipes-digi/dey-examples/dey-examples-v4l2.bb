@@ -5,11 +5,10 @@ SECTION = "examples"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
 
-DEPENDS = "virtual/kernel"
+inherit use-imx-headers
 
 SRC_URI = "file://v4l2_test"
-INCLUDE_PATH = "-I${STAGING_KERNEL_DIR}/include"
-INCLUDE_PATH_ccimx6 = "-I${STAGING_KERNEL_DIR}/arch/arm/include -I${STAGING_KERNEL_DIR}/include/uapi -I${STAGING_KERNEL_DIR}/include"
+INCLUDE_PATH = "-I${STAGING_INCDIR_IMX}"
 
 S = "${WORKDIR}/v4l2_test"
 

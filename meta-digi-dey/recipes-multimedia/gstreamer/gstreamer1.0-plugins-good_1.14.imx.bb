@@ -8,12 +8,12 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=a6f89e2100d9b6cdffcea4f398e37343 \
 DEPENDS += "libdrm"
 
 GST1.0-PLUGINS-GOOD_SRC ?= "gitsm://source.codeaurora.org/external/imx/gst-plugins-good.git;protocol=https"
-SRCBRANCH = "MM_04.04.04_1811_L4.14.78_GA"
+SRCBRANCH = "MM_04.04.07_1906_L4.14.98"
 
 SRC_URI = " \
     ${GST1.0-PLUGINS-GOOD_SRC};branch=${SRCBRANCH} \
 "
-SRCREV = "cec0ef39784a3acfd2b442d107f054c6ab10181e" 
+SRCREV = "36d46a8a9a7dcf173f9a0a0145b6cfa44f879670"
 
 EXTRA_AUTORECONF = ""
 PACKAGECONFIG_append = " vpx"
@@ -21,7 +21,7 @@ PACKAGECONFIG_append = " vpx"
 # Fix: unrecognised options: --disable-sunaudio [unknown-configure-option]
 EXTRA_OECONF_remove = " --disable-sunaudio"
 
-PV = "1.14.0.imx"
+PV = "1.14.4.imx"
 
 S = "${WORKDIR}/git"
 

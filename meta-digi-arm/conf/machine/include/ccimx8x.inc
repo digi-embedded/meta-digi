@@ -9,15 +9,22 @@ include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/arm/arch-arm64.inc
 
 # Platform u-boot settings
+UBOOT_PREFIX = "imx-boot"
 UBOOT_SUFFIX = "bin"
-UBOOT_SYMLINK = "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
 
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS = "imx-boot"
-IMAGE_BOOTLOADER = "imx-boot"
+BOOTLOADER_IMAGE_RECIPE = "imx-boot"
 # BOOTLOADER_SEEK is 33 for step A of the silicon and 32 for step B
 BOOTLOADER_SEEK = "32"
-SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/imx-boot-${MACHINE}.bin"
+BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
+SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
+
+# RAM variants
+# This determines the number of different DCD files, and thus the number of
+# different U-Boot binaries required.
+# Last one is the default (the one the symlinks point at)
+RAM_CONFIGS = "1.2GHz_512MB_16bit 1.2GHz_1GB_16bit 1.2GHz_1GB_32bit 1.2GHz_2GB_32bit"
 
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8x_defconfig"
@@ -44,7 +51,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     cryptoauthlib \
 "
 
-MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip"
+MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip pci"
 
 # AARCH64 doesn't support self-extracting zImage
 KERNEL_IMAGETYPE = "Image.gz"

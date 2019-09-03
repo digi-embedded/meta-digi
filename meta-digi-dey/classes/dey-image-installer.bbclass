@@ -3,6 +3,7 @@
 #
 # Copyright 2017, Digi International Inc.
 #
+inherit boot-artifacts
 
 DEPENDS += "zip-native"
 
@@ -26,9 +27,9 @@ generate_installer_zip () {
 			INSTALLER_FILELIST="${INSTALLER_FILELIST} ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.${ext}"
 		fi
 	done
-	for ubconf in ${UBOOT_CONFIG}; do
-		if readlink -e "${DEPLOY_DIR_IMAGE}/${IMAGE_BOOTLOADER}-${ubconf}.${UBOOT_SUFFIX}" >/dev/null; then
-			INSTALLER_FILELIST="${INSTALLER_FILELIST} ${DEPLOY_DIR_IMAGE}/${IMAGE_BOOTLOADER}-${ubconf}.${UBOOT_SUFFIX}"
+	for artifact in ${BOOTABLE_ARTIFACTS}; do
+		if readlink -e "${DEPLOY_DIR_IMAGE}/${artifact}" >/dev/null; then
+			INSTALLER_FILELIST="${INSTALLER_FILELIST} ${DEPLOY_DIR_IMAGE}/${artifact}"
 		fi
 	done
 

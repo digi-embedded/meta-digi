@@ -10,6 +10,7 @@ DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-too
 inherit kernel fsl-kernel-localversion
 
 require recipes-kernel/linux/linux-dey-src.inc
+require ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'linux-virtualization.inc', '', d)}
 
 # Use custom provided 'defconfig' if variable KERNEL_DEFCONFIG is cleared
 SRC_URI += "${@oe.utils.conditional('KERNEL_DEFCONFIG', '', 'file://defconfig', '', d)}"

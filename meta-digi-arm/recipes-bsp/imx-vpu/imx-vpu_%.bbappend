@@ -1,3 +1,0 @@
-PLATFORM_mx8 = "IMX8"
-
-COMPATIBLE_MACHINE = "(mx6|mx8x)"

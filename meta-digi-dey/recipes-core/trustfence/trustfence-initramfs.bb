@@ -35,5 +35,9 @@ RDEPENDS_${PN}_append_ccimx6ul = " \
     mtd-utils-ubifs \
 "
 
+RDEPENDS_${PN}_append_ccimx8x = " \
+    cryptsetup \
+"
+
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6|ccimx6ul)"
+COMPATIBLE_MACHINE = "(ccimx6|ccimx6ul|ccimx8x)"
