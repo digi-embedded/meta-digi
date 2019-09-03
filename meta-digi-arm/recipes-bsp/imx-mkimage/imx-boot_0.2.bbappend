@@ -106,9 +106,6 @@ do_deploy () {
 	# copy makefile (soc.mak) for reference
 	install -m 0644 ${BOOT_STAGING}/soc.mak     ${DEPLOYDIR}/${BOOT_TOOLS}
 
-	# Move all M4 demo artifacts to the imx-boot-tools folder
-	mv ${DEPLOY_DIR_IMAGE}/imx8qx_m4_* ${DEPLOYDIR}/${BOOT_TOOLS}/
-
 	# copy the generated boot image to deploy path
 	for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 		IMAGE_IMXBOOT_TARGET=""
