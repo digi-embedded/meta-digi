@@ -1,4 +1,3 @@
-From 46843c8681ddafbea6f491b7af4de6529e93f5bd Mon Sep 17 00:00:00 2001
 From: Jun Zhu <junzhu@nxp.com>
 Date: Sun, 30 Sep 2018 15:31:26 +0800
 Subject: [PATCH] weston-touch-calibrator: Advertise the touchscreen calibrator
@@ -15,12 +14,12 @@ Signed-off-by: Jun Zhu <junzhu@nxp.com>
  1 file changed, 3 insertions(+)
 
 diff --git a/weston.ini.in b/weston.ini.in
-index 83dd56e..6e20e11 100644
+index d9094b1f58f5..8adcc646a30b 100644
 --- a/weston.ini.in
 +++ b/weston.ini.in
-@@ -3,6 +3,9 @@
- idle-time=0
- #use-g2d=1
+@@ -7,6 +7,9 @@ idle-time=0
+ #[shell]
+ #size=1920x1080
  
 +[libinput]
 +touchscreen_calibrator=true
