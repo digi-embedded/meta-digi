@@ -30,7 +30,11 @@
 [ "${IFACE}" = "p2p0" ] || exit 0
 
 log() {
-	systemd-cat -p "${1}" -t p2plink printf "%s" "${2}"
+	if type "systemd-cat" >/dev/null 2>/dev/null; then
+		systemd-cat -p "${1}" -t p2plink printf "%s" "${2}"
+	else
+		logger -p "${1}" -t p2plink "${2}"
+	fi
 }
 
 # Exit without error if the peer MAC address is not available

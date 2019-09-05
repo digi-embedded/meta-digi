@@ -23,7 +23,11 @@
 WDOG_TIME_SEC=$((WATCHDOG_USEC / 1000000 / 4))
 
 log() {
-	systemd-cat -p "${1}" -t system-monitor printf "%s" "${2}"
+	if type "systemd-cat" >/dev/null 2>/dev/null; then
+		systemd-cat -p "${1}" -t system-monitor printf "%s" "${2}"
+	else
+		logger -p "${1}" -t system-monitor "${2}"
+	fi
 }
 
 checks_failed=0
