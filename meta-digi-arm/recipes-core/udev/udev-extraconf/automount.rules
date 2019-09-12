@@ -13,19 +13,17 @@
 # %% the '%' char itself
 #
 
-# Boot partitions
-SUBSYSTEM=="block", ENV{ID_PART_ENTRY_NAME}=="linux*", ACTION=="add", RUN+="/etc/udev/scripts/mount_bootparts.sh", GOTO="automount_rules_end"
+# Digi-mounted partitions: linux, update
+SUBSYSTEM=="block", ENV{ID_PART_ENTRY_NAME}=="linux*|update*", ACTION=="add", RUN+="/etc/udev/scripts/mount_digiparts.sh", GOTO="automount_rules_end"
+SUBSYSTEM=="mtd", ATTRS{name}=="linux*|update*", ACTION=="add", RUN+="/etc/udev/scripts/mount_digiparts.sh", GOTO="automount_rules_end"
 
-# Update partition
-SUBSYSTEM=="block", ENV{ID_PART_ENTRY_NAME}=="update*", ACTION=="add", RUN+="/etc/udev/scripts/mount_partition.sh 'update'", GOTO="automount_rules_end"
-SUBSYSTEM=="mtd", ATTRS{name}=="update", ACTION=="add", RUN+="/etc/udev/scripts/mount_partition.sh 'update'", GOTO="automount_rules_end"
-
-# Recovery partition
+# Avoid mounting recovery partition
 SUBSYSTEM=="block", ENV{ID_PART_ENTRY_NAME}=="recovery*", ACTION=="add", GOTO="automount_rules_end"
-SUBSYSTEM=="mtd", ATTRS{name}=="recovery", ACTION=="add", GOTO="automount_rules_end"
+SUBSYSTEM=="mtd", ATTRS{name}=="recovery*", ACTION=="add", GOTO="automount_rules_end"
 
 # Media automounting
 SUBSYSTEM=="block", ACTION=="add"    RUN+="/etc/udev/scripts/mount.sh"
 SUBSYSTEM=="block", ACTION=="remove" RUN+="/etc/udev/scripts/mount.sh"
 SUBSYSTEM=="block", ACTION=="change", ENV{DISK_MEDIA_CHANGE}=="1" RUN+="/etc/udev/scripts/mount.sh"
+
 LABEL="automount_rules_end"
