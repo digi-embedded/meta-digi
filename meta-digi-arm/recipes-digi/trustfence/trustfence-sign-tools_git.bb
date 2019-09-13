@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 DEPENDS = "trustfence-cst coreutils util-linux"
 
 SRCBRANCH = "v2017.03/maint"
-SRCREV = "${AUTOREV}"
+SRCREV = "98d7b2a83c63db520c1344535c053c43f88267b6"
 
 S = "${WORKDIR}"
 
@@ -14,7 +14,7 @@ S = "${WORKDIR}"
 UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}u-boot-denx.git', '${DIGI_GITHUB_GIT}/u-boot.git;protocol=https', d)}"
 
 SRC_URI = " \
-    ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
+    ${UBOOT_GIT_URI};nobranch=1 \
     file://trustfence-sign-kernel.sh;name=kernel-script \
     file://sign_uimage;name=kernel-sign \
     file://encrypt_uimage;name=kernel-encrypt \
