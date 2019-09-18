@@ -11,8 +11,6 @@ inherit bluetooth
 
 DEPENDS = "${BLUEZ}"
 
-SRC_URI = "${DEY_EXAMPLES_GIT_URI};branch=${SRCBRANCH}"
-
 S = "${WORKDIR}/git/ble-gatt-server-example"
 
 do_install() {

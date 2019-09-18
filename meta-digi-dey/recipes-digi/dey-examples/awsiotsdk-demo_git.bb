@@ -16,8 +16,6 @@ AWS_USER_LED_ccimx6ulsbc ?= "488"
 AWS_USER_LED_ccimx6sbc ?= "34"
 AWS_USER_LED_ccimx6qpsbc ?= "34"
 
-SRC_URI = "${DEY_EXAMPLES_GIT_URI};branch=${SRCBRANCH}"
-
 S = "${WORKDIR}/git/awsiot-sample"
 
 inherit aws-iot pkgconfig
