@@ -106,8 +106,7 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 * Updated U-Boot to version 2017.03-r4 for i.MX6 and i.MX6UL platforms
 * Updated AWS Greengrass core to v1.9.2
 * Updated i.MX8 SCU firmware to v1.2.5 (see [important note](#scfw-note))
-* Updated QCA65x7 Wi-Fi and Bluetooth firmware to r10007.1
-
+* Updated QCA65x4 Wi-Fi and Bluetooth firmware
 
 ## 2.6-r1
 
