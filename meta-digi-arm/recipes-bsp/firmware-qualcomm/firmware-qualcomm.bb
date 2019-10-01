@@ -27,21 +27,21 @@ FW_QCA6564_WIFI_PROPRIETARY = " \
 FW_QCA6574_WIFI_PROPRIETARY = " \
     file://LICENCE.atheros_firmware \
     file://qca6574_proprietary/qwlan30.bin \
-    file://qca6574_proprietary/fakeboar.bin \
+    file://qca6574_proprietary/fakeboar_US.bin \
     file://qca6574_proprietary/otp.bin \
     file://qca6574_proprietary/utf.bin \
 "
 
 # Firmware files for QCA6574 (Qualcomm community driver)
 # NOTE: the community file 'board.bin' must be substituted by proprietary
-# 'fakeboar.bin'
+# 'fakeboar_US.bin'
 FW_QCA6574_WIFI_COMMUNITY = " \
     file://qca6574_community/board-2.bin \
     file://qca6574_community/firmware-4.bin \
     file://qca6574_community/firmware-6.bin \
     file://qca6574_community/notice_ath10k_firmware-4.txt \
     file://qca6574_community/notice_ath10k_firmware-6.txt \
-    file://qca6574_proprietary/fakeboar.bin \
+    file://qca6574_proprietary/fakeboar_US.bin \
 "
 
 FW_QUALCOMM_WIFI ?= "${FW_QCA6564_WIFI_PROPRIETARY}"
@@ -72,8 +72,8 @@ do_install() {
 	install -m 0644 ${FW_WIFI_FILES} ${D}${WIFI_FW_PATH}
 	if [ "${QUALCOMM_WIFI_DRIVER}" = "community" ]; then
 		# If using community driver, create symlink 'board.bin' to
-		# proprietary 'fakeboar.bin'
-		ln -s fakeboar.bin ${D}${WIFI_FW_PATH}/board.bin
+		# proprietary 'fakeboar_US.bin'
+		ln -s fakeboar_US.bin ${D}${WIFI_FW_PATH}/board.bin
 	else
 		if [ "${FW_QUALCOMM_WIFI}" = "${FW_QCA6574_WIFI_PROPRIETARY}" ]; then
 			ln -s qwlan30.bin ${D}${WIFI_FW_PATH}/athwlan.bin
