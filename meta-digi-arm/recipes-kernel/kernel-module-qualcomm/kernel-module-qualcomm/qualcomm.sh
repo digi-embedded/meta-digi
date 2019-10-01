@@ -80,14 +80,33 @@ esac
 (
 	cd "${FIRMWARE_DIR}"
 
-	BDATA_SOURCE="bdwlan30_US.bin"
+	if [ -f "bdwlan30_US.bin" ] || [ -f "bdwlan30_World.bin" ]; then
+		BDATA_US="bdwlan30_US.bin"
+		BDATA_WW="bdwlan30_World.bin"
+		BDATA_LINK="bdwlan30.bin"
+		UTFBDATA_LINK="utfbd30.bin"
+	elif [ -f "fakeboar_US.bin" ] || [ -f "fakeboar_World.bin" ]; then
+		BDATA_US="fakeboar_US.bin"
+		BDATA_WW="fakeboar_World.bin"
+		# Use different links for propietary and community drivers
+		if [ -f "board.bin" ]; then
+			BDATA_LINK="board.bin"
+		else
+			BDATA_LINK="fakeboar.bin"
+		fi
+	else
+		log "5" "[ERROR] Could not locate board data files"
+		exit 1
+	fi
+
+	BDATA_SOURCE="${BDATA_US}"
 	case "${REGULATORY_DOMAIN}" in
 		${US_CODE})
 			log "5" "Setting US wireless region";;
 		${WW_CODE}|${JP_CODE})
-			if [ -f "bdwlan30_World.bin" ]; then
+			if [ -f "${BDATA_WW}" ]; then
 				log "5" "Setting WW (world wide) wireless region"
-				BDATA_SOURCE="bdwlan30_World.bin"
+				BDATA_SOURCE="${BDATA_WW}"
 			else
 				log "5" "[WARN] No WW (worldwide) board data file, using US"
 			fi
@@ -98,12 +117,16 @@ esac
 			log "5" "[WARN] Invalid region code, using US";;
 	esac
 
-	# We don't want to rewrite NAND every time we boot so only
-	# change the links if they are wrong.
-	BDATA_LINK="bdwlan30.bin"
-	UTFBDATA_LINK="utfbd30.bin"
-	if [ ! -e "${BDATA_LINK}" ] || ! cmp -s "${BDATA_LINK}" "${BDATA_SOURCE}"; then
+	# When defined, update the links only if they are wrong so we don't
+	# rewrite the internal memory every time we boot
+	if [ -n "${BDATA_LINK}" ] &&
+	   ([ ! -f "${BDATA_LINK}" ] ||
+	   ! cmp -s "${BDATA_LINK}" "${BDATA_SOURCE}"); then
 		ln -sf "${BDATA_SOURCE}" "${BDATA_LINK}"
+	fi
+	if [ -n "${UTFBDATA_LINK}" ] &&
+	   ([ ! -f "${UTFBDATA_LINK}" ] ||
+	   ! cmp -s "${UTFBDATA_LINK}" "${BDATA_SOURCE}"); then
 		ln -sf "${BDATA_SOURCE}" "${UTFBDATA_LINK}"
 	fi
 )
