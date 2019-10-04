@@ -6,9 +6,9 @@
 [ -f "/etc/profile.d/weston.sh" ] && source /etc/profile.d/weston.sh
 [ -f "/etc/X11/Xsession.d/13xdgbasedirs.sh" ] && source /etc/X11/Xsession.d/13xdgbasedirs.sh
 
-export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
+export DBUS_SESSION_BUS_ADDRESS=unix:path=${XDG_RUNTIME_DIR}/bus
 
 pulseaudio --start
 
 # Create a symlink to the daemon's PID file in a more accesible directory
-ln -sf $XDG_RUNTIME_DIR/pulse/pid /run/pulse.pid
+ln -sf ${XDG_RUNTIME_DIR}/pulse/pid /run/pulse.pid
