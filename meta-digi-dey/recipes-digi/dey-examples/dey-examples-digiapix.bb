@@ -9,8 +9,6 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 
 DEPENDS = "libdigiapix"
 
-SRC_URI = "${DEY_EXAMPLES_GIT_URI};branch=${SRCBRANCH}"
-
 S = "${WORKDIR}/git"
 
 inherit pkgconfig

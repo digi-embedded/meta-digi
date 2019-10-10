@@ -22,7 +22,11 @@
 [ "${CONNECTION_ID}" = "p2p-bridge" ] || exit 0
 
 log() {
-	systemd-cat -p "${1}" -t p2pbridge printf "%s" "${2}"
+	if type "systemd-cat" >/dev/null 2>/dev/null; then
+		systemd-cat -p "${1}" -t p2pbridge printf "%s" "${2}"
+	else
+		logger -p "${1}" -t p2pbridge "${2}"
+	fi
 }
 
 case "${NM_DISPATCHER_ACTION}" in

@@ -21,9 +21,9 @@ LIC_FILES_CHKSUM = " \
     file://ggc/core/THIRD-PARTY-LICENSES;md5=53b6a4caa097863bc3971d5e0ac6d1db \
 "
 
-SRC_URI[arm.md5sum] = "57e408134eccbbda40f08dbbf52101c2"
-SRC_URI[arm.sha256sum] ="ded5d88a3ec1479d79c842b16fef11f91ee331bd4b79dbba1ca639b3e51922a3"
+SRC_URI[arm.md5sum] = "63a1f6aae22260be19f34f278f7e7833"
+SRC_URI[arm.sha256sum] ="4bc0bc8a938cdb3d846df92e502155c6ec8cbaf1b63dfa9f3cc3a51372d95af5"
 
 # For ARCH64 we use another tarball.
-SRC_URI[aarch64.md5sum] = "c8e5488e302905583829f95d55d7a912"
-SRC_URI[aarch64.sha256sum] ="9cd00902090e8fc34de18bf1ff21dca5e90af12ced886e6ac46e1f6899b059e1"
+SRC_URI[aarch64.md5sum] = "967cd25ac77e733b0a1b42d83dc96ed1"
+SRC_URI[aarch64.sha256sum] ="4cbaf91e5354fe49ded160415394413f068426c2bba13089e6b8a28775990a9c"

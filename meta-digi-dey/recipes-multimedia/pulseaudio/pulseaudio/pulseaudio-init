@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Export the XDG_RUNTIME_DIR and DBUS_SESSION_BUS_ADDRESS variables
+# prior to starting pulseaudio. XDG_RUNTIME_DIR is sourced from a
+# different file depending on the backend (xwayland or x11).
+[ -f "/etc/profile.d/weston.sh" ] && source /etc/profile.d/weston.sh
+[ -f "/etc/X11/Xsession.d/13xdgbasedirs.sh" ] && source /etc/X11/Xsession.d/13xdgbasedirs.sh
+
+export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
+
+pulseaudio --start

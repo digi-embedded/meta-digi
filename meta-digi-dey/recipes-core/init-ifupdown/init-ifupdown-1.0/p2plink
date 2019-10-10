@@ -24,13 +24,18 @@
 #     p2p-freq <channel-freq>
 #     p2p-local-address <local-ip>
 #     p2p-local-netmask <local-netmask>
+#     p2p-network-id <wpa_supplicant_conf P2P network ID>
 #
 
 # Execute only for the p2p0 interface
 [ "${IFACE}" = "p2p0" ] || exit 0
 
 log() {
-	systemd-cat -p "${1}" -t p2plink printf "%s" "${2}"
+	if type "systemd-cat" >/dev/null 2>/dev/null; then
+		systemd-cat -p "${1}" -t p2plink printf "%s" "${2}"
+	else
+		logger -p "${1}" -t p2plink "${2}"
+	fi
 }
 
 # Exit without error if the peer MAC address is not available
@@ -50,7 +55,7 @@ if [ "${MODE}" = "start" ]; then
 
 	# Peer found, establish the link
 	log info "establish P2P link"
-	wpa_cli -i"${IFACE}" p2p_connect "${IF_P2P_PEER_MAC}" pbc go_intent=7 ${IF_P2P_FREQ:+freq=${IF_P2P_FREQ}}
+	wpa_cli -i"${IFACE}" p2p_connect "${IF_P2P_PEER_MAC}" pbc ${IF_P2P_NETWORK_ID:+persistent=${IF_P2P_NETWORK_ID}} ${IF_P2P_FREQ:+freq=${IF_P2P_FREQ}} auto
 	for _ in $(seq 20); do
 		if wpa_cli status 2>&1 | grep -qs "^wpa_state=COMPLETED$"; then
 			if wpa_cli status 2>&1 | grep -qs "^mode=P2P GO$"; then

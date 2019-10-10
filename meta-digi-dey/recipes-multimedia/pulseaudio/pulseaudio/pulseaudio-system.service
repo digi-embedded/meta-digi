@@ -1,0 +1,11 @@
+[Unit]
+Description=System-wide sound service
+After=dbus.service
+
+[Service]
+Type=forking
+ExecStart=/etc/pulseaudio-init
+ExecStop=kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target

@@ -3,15 +3,15 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
-    file://mount_bootparts.sh \
-    file://mount_partition.sh \
+    file://mount_digiparts.sh \
     file://81-spi-spidev.rules \
     file://blacklist.conf \
 "
 
 do_install_append() {
-	install -m 0755 ${WORKDIR}/mount_bootparts.sh ${D}${sysconfdir}/udev/scripts/
-	install -m 0755 ${WORKDIR}/mount_partition.sh ${D}${sysconfdir}/udev/scripts/
+	install -m 0755 ${WORKDIR}/mount_digiparts.sh ${D}${sysconfdir}/udev/scripts/
+        sed -i -e 's|@base_sbindir@|${base_sbindir}|g' ${D}${sysconfdir}/udev/scripts/mount_digiparts.sh
+        sed -i -e 's|@systemd_unitdir@|${systemd_unitdir}|g' ${D}${sysconfdir}/udev/scripts/mount_digiparts.sh
 	install -m 0644 ${WORKDIR}/81-spi-spidev.rules ${D}${sysconfdir}/udev/rules.d/
 
 	# Bluetooth tty symlink

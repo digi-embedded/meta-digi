@@ -30,6 +30,8 @@ SRC_URI_append = " \
     ${@oe.utils.conditional('SOUND_CARD', 'sgtl5000', '${CFG_SGTL5000}', '', d)} \
     ${@oe.utils.conditional('SOUND_CARD', 'max98089', '${CFG_MAX98089}', '', d)} \
     ${@oe.utils.conditional('AUDIO_HDMI', 'yes', '${CFG_HDMI}', '', d)} \
+    file://pulseaudio-init \
+    file://pulseaudio-system.service \
 "
 
 SRC_URI_append_ccimx6ulsbc = " \
@@ -38,12 +40,23 @@ SRC_URI_append_ccimx6ulsbc = " \
 
 EXTRA_OECONF_append_ccimx6 = " --disable-memfd"
 
+FILES_${PN}-server_append = " ${systemd_unitdir}/* ${sysconfdir}/pulseaudio-init"
+
+SYSTEMD_SERVICE_${PN}-server = "pulseaudio-system.service"
+SYSTEMD_PACKAGES = "${PN}-server"
+
 do_install_append() {
 	install -d ${D}${datadir}/pulseaudio/alsa-mixer/profile-sets
 	install -m 0644 ${WORKDIR}/${SOUND_CARD}/dey-audio-*.conf ${D}${datadir}/pulseaudio/alsa-mixer/profile-sets
 
 	install -d ${D}${base_libdir}/udev/rules.d
 	install -m 0644 ${WORKDIR}/${SOUND_CARD}/90-pulseaudio.rules ${D}${base_libdir}/udev/rules.d
+
+	install -d ${D}${sysconfdir}
+	install -m 0755 ${WORKDIR}/pulseaudio-init ${D}/${sysconfdir}
+
+	install -d ${D}${systemd_unitdir}/system
+	install -m 0644 ${WORKDIR}/pulseaudio-system.service ${D}/${systemd_unitdir}/system
 
 	# Configuration files for HDMI sound card
 	if [ "${AUDIO_HDMI}" = "yes" ]; then

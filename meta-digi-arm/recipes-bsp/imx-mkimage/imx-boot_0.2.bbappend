@@ -1,9 +1,9 @@
 # Copyright 2019 Digi International, Inc.
 inherit boot-artifacts
 
-# Use the v4.14 ga BSP branch
-SRCBRANCH = "imx_4.14.98_2.0.0_ga"
-SRCREV = "dd0234001713623c79be92b60fa88bc07b07f24f"
+# Use the v4.14 latest BSP branch
+SRCBRANCH = "imx_4.14.98_2.1.0"
+SRCREV = "abd6ce551a7b81fc6953d32d92b24a4a1d4b214e"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 SRC_URI_append_ccimx8x = " file://0001-iMX8QX-remove-SC_BD_FLAGS_ALT_CONFIG-flag-in-flash_r.patch"
@@ -105,9 +105,6 @@ do_deploy () {
 
 	# copy makefile (soc.mak) for reference
 	install -m 0644 ${BOOT_STAGING}/soc.mak     ${DEPLOYDIR}/${BOOT_TOOLS}
-
-	# Move all M4 demo artifacts to the imx-boot-tools folder
-	mv ${DEPLOY_DIR_IMAGE}/imx8qx_m4_* ${DEPLOYDIR}/${BOOT_TOOLS}/
 
 	# copy the generated boot image to deploy path
 	for ramc in ${UBOOT_RAM_COMBINATIONS}; do
