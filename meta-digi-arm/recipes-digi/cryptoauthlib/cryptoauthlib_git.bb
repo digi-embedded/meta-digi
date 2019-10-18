@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2019 Digi International Inc.
+# Copyright (C) 2017-2020 Digi International Inc.
 
 SUMMARY = "Microchip CryptoAuthentication Library"
 SECTION = "libs"
@@ -25,6 +25,7 @@ I2C_BUS = ""
 I2C_BUS_ccimx6qpsbc = "1"
 I2C_BUS_ccimx6ul = "0"
 I2C_BUS_ccimx8x = "0"
+I2C_BUS_ccimx8mn = "0"
 
 I2C_SPEED ?= "100000"
 
@@ -50,4 +51,4 @@ RDEPENDS_${PN}-test = "${PN}"
 RRECOMMENDS_${PN} = "${PN}-test"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul|ccimx8x)"
+COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul|ccimx8x|ccimx8m)"
