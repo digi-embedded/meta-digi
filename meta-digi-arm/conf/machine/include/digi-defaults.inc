@@ -13,6 +13,7 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 # -------------------------------------------------
 # ccimx6ul      4.14, 4.20         2017.03
 # ccimx8x       4.14               2018.03, 2017.03 (both packaged in imx-boot)
+# ccimx8mn      4.14               2018.03 (packaged in imx-boot)
 #
 
 # Help variables used in recipes

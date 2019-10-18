@@ -28,6 +28,7 @@ MACHINEOVERRIDES_EXTENDER_mx6q   = "imxfbdev:imxipu:imxvpu:imxvpucnm:imxgpu:imxg
 MACHINEOVERRIDES_EXTENDER_mx6dl  = "imxfbdev:imxipu:imxpxp:imxvpu:imxvpucnm:imxgpu:imxgpu2d:imxdpublit:imxgpu3d:imxepdc"
 MACHINEOVERRIDES_EXTENDER_mx6ul  = "imxfbdev:imxpxp"
 MACHINEOVERRIDES_EXTENDER_mx8qxp = "imxdrm:imxdpu:imxgpu:imxgpu2d:imxgpu3d"
+MACHINEOVERRIDES_EXTENDER_mx8mn  = "imxdrm:imxgpu:imxgpu3d"
 
 # Sub-architecture support
 MACHINE_SOCARCH_SUFFIX ?= ""
@@ -37,6 +38,7 @@ MACHINE_SOCARCH_SUFFIX_mx6ul = "-mx6ul"
 MACHINE_SOCARCH_SUFFIX_mx8qxp = "-mx8qxp"
 MACHINE_SOCARCH_SUFFIX_mx8dxp = "-mx8dxp"
 MACHINE_SOCARCH_SUFFIX_mx8dx = "-mx8dx"
+MACHINE_SOCARCH_SUFFIX_mx8mn  = "-mx8mn"
 
 MACHINE_ARCH_FILTER = "virtual/kernel"
 MACHINE_SOCARCH_FILTER_append_imxvpu = " imx-vpu libimxvpuapi imx-codec imx-vpuwrap imx-parser"
