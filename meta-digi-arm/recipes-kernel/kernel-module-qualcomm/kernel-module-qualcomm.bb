@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2019 Digi International.
+# Copyright (C) 2016-2020 Digi International.
 
 SUMMARY = "Qualcomm's wireless driver for qca65xx"
 DESCRIPTION = "qcacld-2.0 module"
@@ -84,4 +84,4 @@ FILES_${PN} += " \
     ${base_libdir}/firmware/wlan/qcom_cfg.ini \
 "
 
-COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul|ccimx8x)"
+COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul|ccimx8x|ccimx8m)"
