@@ -1,4 +1,4 @@
-# Copyright (C) 2019 Digi International Inc.
+# Copyright (C) 2019,2020 Digi International Inc.
 
 SUMMARY = "Digi XBee initialization"
 DESCRIPTION = "Initialization scripts for XBee hardware of Digi boards"
@@ -40,4 +40,4 @@ SYSTEMD_PACKAGES = "${PN}-init"
 SYSTEMD_SERVICE_${PN}-init = "xbee-init.service"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx8x)"
+COMPATIBLE_MACHINE = "(ccimx8x|ccimx8m)"
