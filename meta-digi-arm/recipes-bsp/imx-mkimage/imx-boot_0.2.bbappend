@@ -8,7 +8,7 @@ SRCREV = "abd6ce551a7b81fc6953d32d92b24a4a1d4b214e"
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 SRC_URI_append_ccimx8x = " file://0001-iMX8QX-remove-SC_BD_FLAGS_ALT_CONFIG-flag-in-flash_r.patch"
 
-IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware"
+IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware imx-seco"
 
 DEPENDS_append_ccimx8x = " coreutils-native"
 
