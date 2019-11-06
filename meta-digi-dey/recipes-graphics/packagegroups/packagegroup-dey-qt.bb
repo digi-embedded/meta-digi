@@ -28,7 +28,7 @@ QT5_RDEPENDS_imxgpu2d = "${@bb.utils.contains('DISTRO_FEATURES', 'x11','${QT5_RD
     'qtbase qtbase-plugins', d)}"
 
 QT5_RDEPENDS_imxpxp = "${@bb.utils.contains('DISTRO_FEATURES', 'x11','${QT5_RDEPENDS_common}', \
-    'qtbase qtbase-examples qtbase-plugins', d)}"
+    'qtbase qtbase-examples qtbase-plugins qtquickcontrols2 qtquickcontrols2-qmlplugins', d)}"
 
 QT5_RDEPENDS_imxgpu3d = " \
     ${QT5_RDEPENDS_common} \
