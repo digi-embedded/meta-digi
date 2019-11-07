@@ -1,0 +1,82 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Thu, 7 Nov 2019 14:16:53 +0100
+Subject: [PATCH 4/6] lib: install pkg-config file and header files
+
+These are needed to be able to develop using cryptoauthlib.
+
+https://jira.digi.com/browse/DEL-6826
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ CMakeLists.txt          | 15 +++++++++++++++
+ lib/CMakeLists.txt      |  4 ++++
+ lib/cryptoauthlib.pc.in | 11 +++++++++++
+ 3 files changed, 30 insertions(+)
+ create mode 100644 lib/cryptoauthlib.pc.in
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 00214d3..f95736d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -33,6 +33,10 @@ set(DEFAULT_CONF_PATH "${CMAKE_INSTALL_FULL_SYSCONFDIR}/${PROJECT_NAME}" CACHE
+     STRING "The default location of ${PROJECT_NAME}.conf")
+ set(DEFAULT_STORE_PATH "${CMAKE_INSTALL_FULL_LOCALSTATEDIR}/lib/${PROJECT_NAME}" CACHE
+     STRING "The default location of the filestore directory")
++set(DEFAULT_PKGCONFIG_PATH "${DEFAULT_LIB_PATH}/pkgconfig" CACHE
++    STRING "The default location of the library's pkg-config file")
++set(DEFAULT_INCLUDE_PATH "${CMAKE_INSTALL_FULL_INCLUDEDIR}" CACHE
++    STRING "The default location of the library's header files")
+ endif()
+ 
+ set(DEFAULT_CONF_FILE_NAME "${PROJECT_NAME}.conf" CACHE 
+@@ -49,6 +53,9 @@ endif()
+ # Set up a default configuration file to install
+ configure_file(${PROJECT_SOURCE_DIR}/app/pkcs11/cryptoauthlib.conf.in ${PROJECT_BINARY_DIR}/${DEFAULT_CONF_FILE_NAME})
+ 
++# Set up the pkg-config file
++configure_file(${PROJECT_SOURCE_DIR}/lib/${PROJECT_NAME}.pc.in ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc @ONLY)
++
+ message(STATUS "Building Configuration: ${CMAKE_BUILD_TYPE}")
+ 
+ # Packaging
+@@ -86,3 +93,11 @@ install(CODE "
+         endif()
+         ")
+ 
++install(DIRECTORY DESTINATION ${DEFAULT_PKGCONFIG_PATH})
++install(CODE "
++        if(NOT EXISTS ${DEFAULT_PKGCONFIG_PATH}/${PROJECT_NAME}.pc)
++            file(INSTALL ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc
++                 DESTINATION ${DEFAULT_PKGCONFIG_PATH})
++        endif()
++        ")
++
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index 88533f1..d4749ec 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -128,3 +128,7 @@ endif()
+ if(DEFAULT_LIB_PATH)
+ install(TARGETS ${PROJECT_NAME} DESTINATION ${DEFAULT_LIB_PATH})
+ endif()
++
++if(DEFAULT_INCLUDE_PATH)
++install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" DESTINATION "${DEFAULT_INCLUDE_PATH}" FILES_MATCHING PATTERN "*.h")
++endif()
+diff --git a/lib/cryptoauthlib.pc.in b/lib/cryptoauthlib.pc.in
+new file mode 100644
+index 0000000..e682913
+--- /dev/null
++++ b/lib/cryptoauthlib.pc.in
+@@ -0,0 +1,11 @@
++prefix=/usr
++exec_prefix=${prefix}
++libdir=@CMAKE_INSTALL_FULL_LIBDIR@
++includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
++
++Name: @PROJECT_NAME@
++Description: Atmel Cryptochip library for ATECC508A
++Version: @VERSION@
++
++Libs: -L${libdir} -lcryptoauth
++Cflags: -I${includedir} -I${includedir}/@PROJECT_NAME@

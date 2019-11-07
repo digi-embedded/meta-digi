@@ -1,0 +1,30 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Mon, 4 Nov 2019 16:11:48 +0100
+Subject: [PATCH 2/6] lib: apply library version number to CMake VERSION
+ property
+
+This way, CMake will generate a shared library with the version number and an
+additional symlink without it. This avoids bitbake errors that appear when
+creating *-dev packages, as Yocto development packages should only include
+the soname symlinks instead of the actual library file.
+
+https://jira.digi.com/browse/DEL-6826
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ lib/CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index b198d1f..88533f1 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -93,6 +93,8 @@ endif()
+ 
+ add_library(cryptoauth ${CRYPTOAUTH_SRC} ${ATCACERT_DEF_SRC})
+ 
++set_property(TARGET cryptoauth PROPERTY VERSION "${VERSION}")
++
+ set_property(TARGET cryptoauth PROPERTY C_STANDARD 99)
+ 
+ if(ATCA_PRINTF)

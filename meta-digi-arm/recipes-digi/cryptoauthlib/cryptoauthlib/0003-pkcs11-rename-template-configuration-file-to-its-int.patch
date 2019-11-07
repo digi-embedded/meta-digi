@@ -1,0 +1,84 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Thu, 7 Nov 2019 13:43:53 +0100
+Subject: [PATCH 3/6] pkcs11: rename template configuration file to its
+ intended name
+
+Otherwise, users will need to manually rename the file in the rootfs to use
+the pkcs11 feature.
+
+https://jira.digi.com/browse/DEL-6835
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ CMakeLists.txt            |  4 ++--
+ app/pkcs11/0.conf         | 19 +++++++++++++++++++
+ app/pkcs11/slot.conf.tmpl | 19 -------------------
+ 3 files changed, 21 insertions(+), 21 deletions(-)
+ create mode 100644 app/pkcs11/0.conf
+ delete mode 100644 app/pkcs11/slot.conf.tmpl
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9326fd1..00214d3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -80,8 +80,8 @@ install(CODE "
+ install(DIRECTORY DESTINATION ${DEFAULT_STORE_PATH})
+ install(CODE "execute_process(COMMAND chmod 1777 ${DEFAULT_STORE_PATH})")
+ install(CODE "
+-        if(NOT EXISTS ${DEFAULT_STORE_PATH}/slot.conf.tmpl)
+-            file(INSTALL ${PROJECT_SOURCE_DIR}/app/pkcs11/slot.conf.tmpl
++        if(NOT EXISTS ${DEFAULT_STORE_PATH}/0.conf)
++            file(INSTALL ${PROJECT_SOURCE_DIR}/app/pkcs11/0.conf
+                  DESTINATION ${DEFAULT_STORE_PATH})
+         endif()
+         ")
+diff --git a/app/pkcs11/0.conf b/app/pkcs11/0.conf
+new file mode 100644
+index 0000000..b637abd
+--- /dev/null
++++ b/app/pkcs11/0.conf
+@@ -0,0 +1,19 @@
++# Reserved Configuration for a device
++# The objects in this file will be created and marked as undeletable
++# These are processed in order. Configuration parameters must be comma
++# delimited and may not contain spaces
++
++interface = i2c,0xB0
++freeslots = 1,2,3
++
++# Slot 0 is the primary private key
++object = private,device,0
++
++# Slot 10 is the certificate data for the device's public key
++#object = certificate,device,10
++
++# Slot 12 is the intermedate/signer certificate data
++#object = certificate,signer,12
++
++# Slot 15 is a public key
++object = public,root,15
+diff --git a/app/pkcs11/slot.conf.tmpl b/app/pkcs11/slot.conf.tmpl
+deleted file mode 100644
+index b637abd..0000000
+--- a/app/pkcs11/slot.conf.tmpl
++++ /dev/null
+@@ -1,19 +0,0 @@
+-# Reserved Configuration for a device
+-# The objects in this file will be created and marked as undeletable
+-# These are processed in order. Configuration parameters must be comma
+-# delimited and may not contain spaces
+-
+-interface = i2c,0xB0
+-freeslots = 1,2,3
+-
+-# Slot 0 is the primary private key
+-object = private,device,0
+-
+-# Slot 10 is the certificate data for the device's public key
+-#object = certificate,device,10
+-
+-# Slot 12 is the intermedate/signer certificate data
+-#object = certificate,signer,12
+-
+-# Slot 15 is a public key
+-object = public,root,15
