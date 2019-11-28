@@ -34,15 +34,18 @@ DEY_IMAGE_INSTALLER ?= "0"
 inherit ${@oe.utils.conditional("DEY_IMAGE_INSTALLER", "1", "dey-image-installer", "", d)}
 
 #
-# Create a dey-version file when populating the toolchain/SDK
+# Create a dey-version file when populating the toolchain/SDK and modify the
+# default SDK installation path so it includes the proper 'IMAGE_BASENAME'
+# value.
 #
 # 'SDK_POSTPROCESS_COMMAND' variable is originally defined in populate_sdk_base
 # class: poky/meta/classes/populate_sdk_base.bbclass
-# It is redefined here to be able to tweak the resulting SDK before packaging,
-# using the proper 'IMAGE_BASENAME' value.
+# It is redefined here to be able to tweak the resulting SDK before and after
+# packaging, using the proper 'IMAGE_BASENAME' value.
 #
 SDK_PREPACKAGING_COMMAND ?= "toolchain_create_sdk_dey_version"
-SDK_POSTPROCESS_COMMAND = " create_sdk_files; check_sdk_sysroots; ${SDK_PREPACKAGING_COMMAND}; tar_sdk; ${SDK_PACKAGING_COMMAND} "
+SDK_POSTPACKAGING_COMMAND ?= "toolchain_modify_default_path"
+SDK_POSTPROCESS_COMMAND = " create_sdk_files; check_sdk_sysroots; ${SDK_PREPACKAGING_COMMAND}; tar_sdk; ${SDK_PACKAGING_COMMAND} ${SDK_POSTPACKAGING_COMMAND}; "
 
 # This function creates a DEY version information file
 fakeroot toolchain_create_sdk_dey_version() {
@@ -55,4 +58,10 @@ fakeroot toolchain_create_sdk_dey_version() {
 	echo 'Image: ${IMAGE_BASENAME}' >> $deyversionfile
 }
 toolchain_create_sdk_dey_version[vardepsexclude] = "DATETIME"
+
+# This function appends IMAGE_BASENAME to the default installation path
+fakeroot toolchain_modify_default_path() {
+	sed -i -e 's#^DEFAULT_INSTALL_DIR="${SDKPATH}"#DEFAULT_INSTALL_DIR="${SDKPATH}/${IMAGE_BASENAME}"#g' \
+		${SDKDEPLOYDIR}/${TOOLCHAIN_OUTPUTNAME}.sh
+}
 
