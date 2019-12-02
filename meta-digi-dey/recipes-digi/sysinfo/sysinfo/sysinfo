@@ -231,6 +231,25 @@ make_report(){
 
 	echo "--------------------------------------"
 	echo "-                                    -"
+	echo "-             OTP values             -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	if [ -d /sys/fsl_otp ]; then
+		for f in /sys/fsl_otp/*; do
+			echo -e "$f:\t$(cat $f)"
+		done
+		echo ""
+	fi
+	for d in /sys/bus/nvmem/devices/*; do
+		[ -e $d ] || continue
+		echo "$d:"
+		hexdump -C $d/nvmem
+		echo ""
+	done
+
+	echo "--------------------------------------"
+	echo "-                                    -"
 	echo "-             TrustFence             -"
 	echo "-                                    -"
 	echo "--------------------------------------"
