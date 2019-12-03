@@ -21,6 +21,34 @@ log() {
 	printf "<$1>qca65x4: $2\n" >/dev/kmsg
 }
 
+# Get the permissions of the filesystem containing the given path
+get_filesystem_access() {
+	[ -z "${1}" ] && return
+
+	fs_device="$(df ${1} | awk 'NR==2 { print $1 }')"
+	fs_access="$(awk -v dev="${fs_device}" '$0 ~ dev { print substr($4,1,2) }' < /proc/mounts)"
+	echo ${fs_access}
+}
+
+# Get the mount point of the filesystem containing the given path
+get_filesystem_mount_point() {
+	[ -z "${1}" ] && return
+
+	fs_device="$(df ${1} | awk 'NR==2 { print $1 }')"
+	fs_mount_point="$(awk -v dev="${fs_device}" '$0 ~ dev { print $2 }' < /proc/mounts)"
+	echo ${fs_mount_point}
+}
+
+# Remount the filesystem containing the given path as 'read-write' if it was
+# mounted as 'read-only'.
+set_filesystem_rw_access() {
+	[ -z "${1}" ] && return
+
+	if [ "$(get_filesystem_access ${1})" = "ro" ]; then
+		mount -o remount,rw $(get_filesystem_mount_point ${1})
+	fi
+}
+
 # Do nothing if the wireless node does not exist on the device tree
 [ -d "/proc/device-tree/wireless" ] || exit 0
 
@@ -30,6 +58,7 @@ grep -qws 'wlan' /proc/modules && exit 0
 FIRMWARE_DIR="/lib/firmware"
 MACFILE="${FIRMWARE_DIR}/wlan/wlan_mac.bin"
 TMP_MACFILE="$(mktemp -t wlan_mac.XXXXXX)"
+FS_ORIGINAL_ACCESS="$(get_filesystem_access ${FIRMWARE_DIR})"
 
 # Read the MACs from DeviceTree. We can have up to four wireless interfaces
 # The only required one is wlan0 that is mapped with device tree mac address
@@ -47,12 +76,7 @@ done
 
 # Override the MAC firmware file only if the MAC file has changed.
 if ! cmp -s ${TMP_MACFILE} ${MACFILE}; then
-	if [ ! -w ${MACFILE} ]; then
-		mount_point="$(df $(dirname "${MACFILE}") | awk '!/^Filesystem/{ print $6 }')"
-		log "6" "[INFO] ${MACFILE} is not writable, remounting '${mount_point}' as rw"
-		mount -o remount,rw ${mount_point}
-	fi
-
+	set_filesystem_rw_access ${FIRMWARE_DIR}
 	cp ${TMP_MACFILE} ${MACFILE} || log "3" "[ERROR] Could not create ${MACFILE}"
 fi
 rm -f "${TMP_MACFILE}"
@@ -139,3 +163,9 @@ modprobe wlan
 
 # Verify the interface is present
 [ -d "/sys/class/net/wlan0" ] || log "3" "[ERROR] Loading wlan module"
+
+# Restore the filesystem with the original access permissions if it has been
+# changed inside the script.
+if [ "$(get_filesystem_access ${FIRMWARE_DIR})" != "${FS_ORIGINAL_ACCESS}" ]; then
+	mount -o remount,${FS_ORIGINAL_ACCESS} $(get_filesystem_mount_point ${FIRMWARE_DIR})
+fi
