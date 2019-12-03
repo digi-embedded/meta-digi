@@ -146,11 +146,13 @@ esac
 	if [ -n "${BDATA_LINK}" ] &&
 	   ([ ! -f "${BDATA_LINK}" ] ||
 	   ! cmp -s "${BDATA_LINK}" "${BDATA_SOURCE}"); then
+		set_filesystem_rw_access ${FIRMWARE_DIR}
 		ln -sf "${BDATA_SOURCE}" "${BDATA_LINK}"
 	fi
 	if [ -n "${UTFBDATA_LINK}" ] &&
 	   ([ ! -f "${UTFBDATA_LINK}" ] ||
 	   ! cmp -s "${UTFBDATA_LINK}" "${BDATA_SOURCE}"); then
+		set_filesystem_rw_access ${FIRMWARE_DIR}
 		ln -sf "${BDATA_SOURCE}" "${UTFBDATA_LINK}"
 	fi
 )
