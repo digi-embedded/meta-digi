@@ -59,8 +59,8 @@ Documentation is available online on the Digi documentation site:
 
 # Downloads
 
-* Demo images: ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r5/images/
-* Software Development Kit (SDK): ftp://ftp1.digi.com/support/digiembeddedyocto/2.0/r5/sdk/
+* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/2.0/r5/images/
+* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/2.0/r5/sdk/
 
 # Release Changelog
 
