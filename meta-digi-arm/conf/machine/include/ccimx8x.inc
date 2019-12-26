@@ -27,7 +27,7 @@ SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 RAM_CONFIGS = "1.2GHz_512MB_16bit 1.2GHz_1GB_16bit 1.2GHz_1GB_32bit 1.2GHz_2GB_32bit"
 
 # Linux kernel configuration
-KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8x_defconfig"
+KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8_defconfig"
 
 STORAGE_MEDIA = "mmc"
 
