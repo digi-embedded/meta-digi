@@ -1,4 +1,4 @@
-# Copyright (C) 2016, 2017 Digi International Inc.
+# Copyright (C) 2016-2020 Digi International Inc.
 
 SUMMARY = "Trustfence initramfs required files"
 LICENSE = "GPL-2.0"
@@ -39,5 +39,9 @@ RDEPENDS_${PN}_append_ccimx8x = " \
     cryptsetup \
 "
 
+RDEPENDS_${PN}_append_ccimx8m = " \
+    cryptsetup \
+"
+
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6|ccimx6ul|ccimx8x)"
+COMPATIBLE_MACHINE = "(ccimx6|ccimx6ul|ccimx8x|ccimx8m)"

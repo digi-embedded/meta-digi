@@ -1,0 +1,81 @@
+#!/bin/sh
+#===============================================================================
+#
+#  trustfence-initramfs-init
+#
+#  Copyright (C) 2020 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Init script for Trustfence initramfs
+#
+#===============================================================================
+
+POWEROFF_TIME="10"
+
+error() {
+	[ "${#}" != "0" ] && printf "\n[ERROR]: %s\n\n" "${1}"
+	echo "The system will poweroff in ${POWEROFF_TIME} seconds"
+	sleep "${POWEROFF_TIME}"
+	sync && poweroff -f
+}
+
+# Main
+#------------------------------------------------------------------------------
+# Setup the environment.
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+mkdir -p /proc /sys /dev
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+
+# Set kernel console loglevel
+LOGLEVEL="$(sysctl -n kernel.printk)"
+sysctl -q -w kernel.printk=4
+
+for arg in $(cat /proc/cmdline); do
+	case "${arg}" in
+		init=*|rescue=1|root=*) eval ${arg};;
+	esac
+done
+
+# Translate "PARTUUID=..." to real device
+root="$(findfs ${root})"
+
+# Jump to a rescue shell if requested
+if [ -n "${rescue}" ]; then
+	# Expand console and respawn if exited
+	while true; do
+		setsid cttyhack sh -l
+		sleep 1
+	done
+fi
+
+# Open LUKS encrypted device
+if trustfence-tool ${root} cryptroot; then
+	# Reset root variable to the decrypted mapped device
+	root="/dev/mapper/cryptroot"
+else
+	error "unable to open encrypted partition."
+fi
+
+# Mount mapped device
+mkdir -p /newroot
+FSTYPE="$(blkid ${root} | sed -e 's,.*TYPE="\([^"]\+\)".*,\1,g')"
+mount ${FSTYPE:+-t ${FSTYPE}} ${root} /newroot
+
+#
+# Clean-up and do the switch_root to the final rootfs
+#
+# - restore previous kernel console loglevel
+# - umount virtual filesystems
+#
+[ -n "${LOGLEVEL}" ] && sysctl -q -w kernel.printk="${LOGLEVEL}"
+mount --move /dev /newroot/dev
+umount /sys /proc
+exec switch_root /newroot ${init:-/sbin/init}
