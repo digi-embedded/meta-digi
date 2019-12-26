@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2018 Digi International.
+# Copyright (C) 2013-2020 Digi International.
 
 SUMMARY = "DEY examples: V4L2 test application"
 SECTION = "examples"
@@ -24,4 +24,4 @@ do_install() {
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx8x)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx8x|ccimx8m)"

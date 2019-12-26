@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2019, Digi International Inc.
+# Copyright (C) 2013-2020, Digi International Inc.
 
 SUMMARY = "DEY examples packagegroup"
 
@@ -38,4 +38,10 @@ RDEPENDS_${PN}_append_ccimx8x = "\
 	dey-examples-v4l2 \
 "
 
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x)"
+RDEPENDS_${PN}_append_ccimx8m = "\
+	dey-examples-adc-cmp \
+	dey-examples-tamper \
+	dey-examples-v4l2 \
+"
+
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x|ccimx8m)"

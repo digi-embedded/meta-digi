@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2019, Digi International Inc.
+# Copyright (C) 2017-2020, Digi International Inc.
 
 require recipes-digi/dey-examples/dey-examples-src.inc
 
@@ -18,4 +18,4 @@ do_install() {
 }
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul|ccimx8x)"
+COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul|ccimx8x|ccimx8m)"
