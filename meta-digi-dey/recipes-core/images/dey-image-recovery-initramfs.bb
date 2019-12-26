@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2017, Digi International Inc.
+# Copyright (C) 2016-2020, Digi International Inc.
 
 DESCRIPTION = "Recovery initramfs image"
 LICENSE = "MIT"
@@ -16,6 +16,7 @@ PACKAGE_INSTALL = " \
 PACKAGE_INSTALL_append_ccimx6 = " e2fsprogs-mke2fs"
 PACKAGE_INSTALL_append_ccimx6ul = " mtd-utils-ubifs"
 PACKAGE_INSTALL_append_ccimx8x = " e2fsprogs-mke2fs"
+PACKAGE_INSTALL_append_ccimx8mn = " e2fsprogs-mke2fs"
 
 # Do not pollute the initrd image with rootfs features
 IMAGE_FEATURES = ""
