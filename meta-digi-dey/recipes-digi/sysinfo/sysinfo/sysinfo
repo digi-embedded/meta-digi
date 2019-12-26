@@ -3,7 +3,7 @@
 #
 #  sysinfo
 #
-#  Copyright (C) 2016-2018 by Digi International Inc.
+#  Copyright (C) 2016-2020 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -289,7 +289,7 @@ BOARD_ID="$(cat /proc/device-tree/digi,carrierboard,id | tr -d '\0')"
 
 if grep -qs '\<digi,ccimx6ul\>' /proc/device-tree/compatible; then
 	MCA_NODE="/sys/bus/i2c/devices/0-007e"
-elif grep -qs '\<digi,ccimx8x\>' /proc/device-tree/compatible; then
+elif grep -qs '\<digi,ccimx8\(x\|m\)\>' /proc/device-tree/compatible; then
 	MCA_NODE="/sys/bus/i2c/devices/0-0063"
 fi
 if [ -d "$MCA_NODE" ]; then
