@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2019 Digi International.
+# Copyright (C) 2016-2020 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
@@ -9,6 +9,7 @@ SRC_URI_append = " \
 SRC_URI_append_ccimx6ul = " file://hostapd_wlan1.conf"
 SRC_URI_append_ccimx6qpsbc = " file://hostapd_wlan1.conf"
 SRC_URI_append_ccimx8x = " file://hostapd_wlan1.conf"
+SRC_URI_append_ccimx8mn = " file://hostapd_wlan1.conf"
 
 SYSTEMD_SERVICE_${PN}_append = " hostapd@.service"
 
@@ -33,6 +34,11 @@ do_install_append_ccimx6qpsbc() {
 }
 
 do_install_append_ccimx8x() {
+	# Install custom hostapd_IFACE.conf file
+	install -m 0644 ${WORKDIR}/hostapd_wlan1.conf ${D}${sysconfdir}
+}
+
+do_install_append_ccimx8mn() {
 	# Install custom hostapd_IFACE.conf file
 	install -m 0644 ${WORKDIR}/hostapd_wlan1.conf ${D}${sysconfdir}
 }
