@@ -1,0 +1,32 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Fri, 27 Dec 2019 09:42:48 +0100
+Subject: [PATCH] imx8mn: Disable M7 debug console
+
+The Cortex-M7 uses the UART4 as debug console, and it is
+shared with the Cortex-A53.
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ plat/imx/imx8mn/imx8mn_bl31_setup.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/plat/imx/imx8mn/imx8mn_bl31_setup.c b/plat/imx/imx8mn/imx8mn_bl31_setup.c
+index 57db28a..a36c2d5 100644
+--- a/plat/imx/imx8mn/imx8mn_bl31_setup.c
++++ b/plat/imx/imx8mn/imx8mn_bl31_setup.c
+@@ -242,11 +242,12 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ #endif
+ 	bl31_tzc380_setup();
+ 
+ 	/* Assign M7 to domain 1 */
+ 	mmio_write_32(IMX_RDC_BASE + 0x204, 0x1);
+-	mmio_write_32(IMX_RDC_BASE + 0x518, 0xfc);
++	/* Uncomment to use the M7 debug console (shared with A53 UART4) */
++	/*mmio_write_32(IMX_RDC_BASE + 0x518, 0xfc);*/
+ 	mmio_write_32(IMX_RDC_BASE + 0x5A4, 0xf3);
+ }
+ 
+ void bl31_plat_arch_setup(void)
+ {
+-- 
+

@@ -15,6 +15,8 @@ SRCBRANCH = "imx_4.14.98_2.2.0"
 SRC_URI = "${ATF_SRC};branch=${SRCBRANCH}"
 SRCREV = "1355c5d12d75c9c7bdd08826796096bab519b3d5"
 
+SRC_URI_append_ccimx8mn = " file://0001-imx8mn-Disable-M7-debug-console.patch"
+
 S = "${WORKDIR}/git"
 
 BOOT_TOOLS = "imx-boot-tools"
