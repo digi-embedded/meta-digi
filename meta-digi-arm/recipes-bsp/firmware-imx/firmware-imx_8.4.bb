@@ -61,16 +61,7 @@ inherit deploy
 addtask deploy before do_build after do_install
 do_deploy () {
     # Deploy i.MX8 related firmware files
-    if [ "${IS_MX8}" = "8m" ]; then
-        # Deploy ddr/synopsys
-        for ddr_firmware in ${DDR_FIRMWARE_NAME}; do
-            install -m 0644 ${S}/firmware/ddr/synopsys/${ddr_firmware} ${DEPLOYDIR}
-        done
-
-        # Deploy hdmi/cadence
-        install -m 0644 ${S}/firmware/hdmi/cadence/signed_dp_imx8m.bin ${DEPLOYDIR}
-        install -m 0644 ${S}/firmware/hdmi/cadence/signed_hdmi_imx8m.bin ${DEPLOYDIR}
-    elif [ "${IS_MX8}" = "8qm" ]; then
+    if [ "${IS_MX8}" = "8qm" ]; then
         # Deploy hdmi/cadence
         install -m 0644 ${S}/firmware/hdmi/cadence/hdmitxfw.bin ${DEPLOYDIR}
         install -m 0644 ${S}/firmware/hdmi/cadence/hdmirxfw.bin ${DEPLOYDIR}

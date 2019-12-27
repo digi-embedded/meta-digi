@@ -19,6 +19,9 @@ BOOTLOADER_SEEK = "32"
 BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 
+# Set LPDDR4 FIRMWARE
+DDR_FIRMWARE_NAME = "lpddr4_pmu_train_1d_imem.bin lpddr4_pmu_train_1d_dmem.bin lpddr4_pmu_train_2d_imem.bin lpddr4_pmu_train_2d_dmem.bin"
+
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8_defconfig"
 
