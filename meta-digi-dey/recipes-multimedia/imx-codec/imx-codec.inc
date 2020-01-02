@@ -49,6 +49,11 @@ python __set_insane_skip() {
         if p == 'imx-codec-test-bin':
             # FIXME: includes the DUT .so files so we need to deploy those
             d.setVar("INSANE_SKIP_%s" % p, "ldflags textrel libdir")
+
+            # Skip 'file-rdeps' for builds with MUSL C library
+            overrides = d.getVar("OVERRIDES").split(":")
+            if "libc-musl" in overrides:
+                d.appendVar("INSANE_SKIP_%s" % p, " file-rdeps")
         else:
             d.setVar("INSANE_SKIP_%s" % p, "ldflags textrel")
 }
