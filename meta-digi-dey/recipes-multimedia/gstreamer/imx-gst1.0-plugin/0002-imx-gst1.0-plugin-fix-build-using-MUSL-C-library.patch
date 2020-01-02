@@ -1,0 +1,36 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Thu, 2 Jan 2020 16:49:51 +0100
+Subject: [PATCH] imx-gst1.0-plugin: fix build using MUSL C library
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ tools/gplay2/gplay2.c       | 1 -
+ tools/grecorder/grecorder.c | 2 ++
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/tools/gplay2/gplay2.c b/tools/gplay2/gplay2.c
+index 3fa056a86307..a6e5db5535d2 100755
+--- a/tools/gplay2/gplay2.c
++++ b/tools/gplay2/gplay2.c
+@@ -26,7 +26,6 @@
+  */
+ 
+ 
+-#include <termio.h>
+ #include <unistd.h>
+ #include <pthread.h>
+ #include <stdio.h>
+diff --git a/tools/grecorder/grecorder.c b/tools/grecorder/grecorder.c
+index 1fec19f900fe..dc912d36e056 100644
+--- a/tools/grecorder/grecorder.c
++++ b/tools/grecorder/grecorder.c
+@@ -24,7 +24,9 @@
+ #include <pthread.h>
+ #include <signal.h>
+ #include <getopt.h>
++#include <unistd.h>
+ #define __USE_LARGEFILE64
++#define _GNU_SOURCE  # For MUSL statvfs64
+ #include <sys/statvfs.h>
+ 
+ #include "recorder_engine.h"
