@@ -57,3 +57,5 @@ MKUBIFS_BOOT_ARGS ?= "-m 2048 -e 126976 -c 255"
 # mkfs.ubifs parameters for rootfs partition
 # Max LEB count (-c 8191) calculated for a partition of up to 1 GiB considering 128 KiB erase-block size.
 MKUBIFS_ARGS ?= "-m 2048 -e 126976 -c 8191"
+
+SIGN_MODE = "HAB"

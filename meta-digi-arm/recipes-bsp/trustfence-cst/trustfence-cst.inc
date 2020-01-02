@@ -13,6 +13,8 @@ SRC_URI = " \
     file://0002-hab4_pki_tree.sh-automate-script.patch \
     file://0003-openssl_helper-use-dev-urandom-as-seed-source.patch \
     file://0004-hab4_pki_tree.sh-usa-a-random-password-for-the-defau.patch \
+    file://0005-ahab_pki_tree.sh-automate-script.patch \
+    file://0006-ahab_pki_tree.sh-use-a-random-password-for-the-defau.patch \
     file://Makefile \
 "
 
@@ -41,7 +43,14 @@ do_install() {
 	install -d ${D}${bindir}
 	install -m 0755 linux64/cst ${D}${bindir}/cst
 	install -m 0755 $(find linux64 -type f -name srktool) ${D}${bindir}/srktool
-	install -m 0755 keys/hab4_pki_tree.sh ${D}${bindir}/trustfence-gen-pki.sh
+	if [ "${SIGN_MODE}" = "AHAB" ]; then
+		install -m 0755 keys/ahab_pki_tree.sh ${D}${bindir}/trustfence-gen-pki.sh
+	elif [ "${SIGN_MODE}" = "HAB" ]; then
+		install -m 0755 keys/hab4_pki_tree.sh ${D}${bindir}/trustfence-gen-pki.sh
+	else
+		bberror "Unkown SIGN_MODE value"
+		exit 1
+	fi
 	install -m 0755 ca/openssl.cnf ${D}${bindir}/openssl.cnf
 	install -m 0755 ca/v3_ca.cnf ${D}${bindir}/v3_ca.cnf
 	install -m 0755 ca/v3_usr.cnf ${D}${bindir}/v3_usr.cnf

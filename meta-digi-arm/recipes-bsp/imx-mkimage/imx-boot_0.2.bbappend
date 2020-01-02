@@ -11,6 +11,7 @@ SRC_URI_append_ccimx8x = " file://0001-iMX8QX-remove-SC_BD_FLAGS_ALT_CONFIG-flag
 IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware imx-seco"
 
 DEPENDS_append_ccimx8x = " coreutils-native"
+DEPENDS_append_ccimx8x += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 # For i.MX 8, this package aggregates the imx-m4-demos
 # output. Note that this aggregation replaces the aggregation
@@ -201,6 +202,24 @@ do_deploy () {
 		done
 	fi
 
+}
+
+do_deploy_append () {
+	if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${SIGN_MODE}" = "AHAB" ]; then
+		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
+		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
+
+		# Sign U-boot image
+		for ramc in ${RAM_CONFIGS}; do
+			trustfence-sign-ahab-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}-signed.bin
+		done
+
+		cd ${DEPLOYDIR}
+		cp ${B}/${config}SRK_efuses.bin ${DEPLOYDIR}
+		install ${B}/${config}SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
+		ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
+	fi
 }
 
 COMPATIBLE_MACHINE = "(ccimx8x|ccimx8mn)"
