@@ -15,7 +15,10 @@ SRCBRANCH = "imx_4.14.98_2.2.0"
 SRC_URI = "${ATF_SRC};branch=${SRCBRANCH}"
 SRCREV = "1355c5d12d75c9c7bdd08826796096bab519b3d5"
 
-SRC_URI_append_ccimx8mn = " file://0001-imx8mn-Disable-M7-debug-console.patch"
+SRC_URI_append_ccimx8mn = " \
+    file://0001-imx8mn-Disable-M7-debug-console.patch \
+    file://0002-plat-imx8m-update-the-lpddr4-retention-flow-for-imx8.patch \
+"
 
 S = "${WORKDIR}/git"
 

@@ -1,0 +1,26 @@
+From: Jacky Bai <ping.bai@nxp.com>
+Date: Wed, 23 Oct 2019 13:44:28 +0800
+Subject: [PATCH] plat: imx8m: update the lpddr4 retention flow for imx8mn
+
+for i.MX8MN, it can only support 16bit DDR, so
+it is not necessary to config the DDR_SS_GPR register.
+
+Signed-off-by: Jacky Bai <ping.bai@nxp.com>
+---
+ plat/imx/common/imx8m/lpddr4_retention.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/plat/imx/common/imx8m/lpddr4_retention.c b/plat/imx/common/imx8m/lpddr4_retention.c
+index 8cc44c8..dbec3d5 100644
+--- a/plat/imx/common/imx8m/lpddr4_retention.c
++++ b/plat/imx/common/imx8m/lpddr4_retention.c
+@@ -184,7 +184,9 @@ void lpddr4_exit_retention(void)
+ 
+ 	/* before write Dynamic reg, sw_done should be 0 */
+ 	mmio_write_32(DDRC_SWCTL(0), 0x00000000);
++#if !defined(PLAT_imx8mn)
+ 	mmio_write_32(DDRC_DDR_SS_GPR0, 0x01); /*LPDDR4 mode */
++#endif
+ 	mmio_write_32(DDRC_DFIMISC(0), 0x00000000);
+ 
+ 	/* dram phy re-init */
