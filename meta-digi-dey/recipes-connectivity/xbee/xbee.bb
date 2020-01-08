@@ -36,6 +36,7 @@ INITSCRIPT_PACKAGES += "${PN}-init"
 INITSCRIPT_NAME_${PN}-init = "xbee-init"
 INITSCRIPT_PARAMS_${PN}-init = "start 19 2 3 4 5 . stop 21 0 1 6 ."
 
+SYSTEMD_PACKAGES = "${PN}-init"
 SYSTEMD_SERVICE_${PN}-init = "xbee-init.service"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
