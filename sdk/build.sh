@@ -273,6 +273,9 @@ for platform in ${DY_PLATFORMS}; do
 				if [ "${DY_MFG_IMAGE}" = "true" ] && ! grep -qs "meta-digi-mfg" conf/bblayers.conf; then
 					sed -i -e "/meta-digi-dey/a\  ${YOCTO_INST_DIR}/sources/meta-digi-mfg \\\\" conf/bblayers.conf
 				fi
+				printf "\n[INFO] Show customized local.conf.\n"
+				cat conf/local.conf
+
 				for target in ${platform_targets}; do
 					printf "\n[INFO] Building the ${target} target.\n"
 					time bitbake ${target} $(swu_recipe_name ${target})
