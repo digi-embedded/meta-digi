@@ -33,6 +33,8 @@ do_install_append() {
 	install -d ${D}${systemd_unitdir}/system/
 	install -m 0644 ${WORKDIR}/bluetooth-init.service ${D}${systemd_unitdir}/system/bluetooth-init.service
 	install -m 0644 ${WORKDIR}/main.conf ${D}${sysconfdir}/bluetooth/
+	sed -i -e "s,##BT_DEVICE_NAME##,${BT_DEVICE_NAME},g" \
+		${D}${sysconfdir}/bluetooth/main.conf
 
 	# Staging bluetooth internal headers and libs to allow other recipes
 	# to link against them

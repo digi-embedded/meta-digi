@@ -22,6 +22,9 @@ SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8_defconfig"
 
+# Bluetooth interface
+BT_DEVICE_NAME ?= "cc8mn"
+
 # Wireless external module
 WIRELESS_MODULE ?= ""
 WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"

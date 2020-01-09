@@ -12,6 +12,9 @@ include conf/machine/include/tune-cortexa7.inc
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"
 
+# Bluetooth interface
+BT_DEVICE_NAME ?= "cc6ul"
+
 # Wireless external module
 WIRELESS_MODULE ?= ""
 WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
