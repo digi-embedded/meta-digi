@@ -35,6 +35,7 @@ BT_DEVICE_NAME ?= "cc8x"
 # Wireless external module
 WIRELESS_MODULE ?= ""
 WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
+HAS_WIFI_VIRTWLANS = "true"
 
 # Wireless p2p interface
 WLAN_P2P_INTERFACE ?= "p2p0"

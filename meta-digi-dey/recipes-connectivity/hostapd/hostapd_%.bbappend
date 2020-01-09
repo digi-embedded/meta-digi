@@ -5,11 +5,8 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 SRC_URI_append = " \
     file://hostapd_wlan0.conf \
     file://hostapd@.service \
+    ${@oe.utils.conditional('HAS_WIFI_VIRTWLANS', 'true', 'file://hostapd_wlan1.conf', '', d)} \
 "
-SRC_URI_append_ccimx6ul = " file://hostapd_wlan1.conf"
-SRC_URI_append_ccimx6qpsbc = " file://hostapd_wlan1.conf"
-SRC_URI_append_ccimx8x = " file://hostapd_wlan1.conf"
-SRC_URI_append_ccimx8mn = " file://hostapd_wlan1.conf"
 
 SYSTEMD_SERVICE_${PN}_append = " hostapd@.service"
 
@@ -21,26 +18,11 @@ do_install_append() {
 	# Install interface-specific systemd service
 	install -m 0644 ${WORKDIR}/hostapd@.service ${D}${systemd_unitdir}/system/
 	sed -i -e 's,@SBINDIR@,${sbindir},g' -e 's,@SYSCONFDIR@,${sysconfdir},g' ${D}${systemd_unitdir}/system/hostapd@.service
-}
 
-do_install_append_ccimx6ul() {
-	# Install custom hostapd_IFACE.conf file
-	install -m 0644 ${WORKDIR}/hostapd_wlan1.conf ${D}${sysconfdir}
-}
-
-do_install_append_ccimx6qpsbc() {
-	# Install custom hostapd_IFACE.conf file
-	install -m 0644 ${WORKDIR}/hostapd_wlan1.conf ${D}${sysconfdir}
-}
-
-do_install_append_ccimx8x() {
-	# Install custom hostapd_IFACE.conf file
-	install -m 0644 ${WORKDIR}/hostapd_wlan1.conf ${D}${sysconfdir}
-}
-
-do_install_append_ccimx8mn() {
-	# Install custom hostapd_IFACE.conf file
-	install -m 0644 ${WORKDIR}/hostapd_wlan1.conf ${D}${sysconfdir}
+	if ${HAS_WIFI_VIRTWLANS}; then
+		# Install custom hostapd_IFACE.conf file
+		install -m 0644 ${WORKDIR}/hostapd_wlan1.conf ${D}${sysconfdir}
+	fi
 }
 
 pkg_postinst_ontarget_${PN}() {
