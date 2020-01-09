@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2019 Digi International.
+# Copyright (C) 2013-2020 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
@@ -12,6 +12,27 @@ SRC_URI += " \
 
 do_install_append() {
 	install -m 600 ${WORKDIR}/wpa_supplicant_p2p.conf ${D}${sysconfdir}/wpa_supplicant_p2p.conf
+	sed -i -e "s,##WLAN_P2P_DEVICE_NAME##,${WLAN_P2P_DEVICE_NAME},g" \
+	       ${D}${sysconfdir}/wpa_supplicant_p2p.conf
+}
+
+do_install_append_ccimx6sbc() {
+    # Customize supplicant file
+    cat <<EOF >>${D}${sysconfdir}/wpa_supplicant.conf
+
+# -- SoftAP mode
+# ap_scan=2
+# network={
+# 	ssid="ath6kl-ap"
+# 	mode=2
+# 	frequency=2412
+# 	key_mgmt=WPA-PSK
+# 	proto=RSN
+# 	pairwise=CCMP
+# 	psk="12345678"
+# }
+
+EOF
 }
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

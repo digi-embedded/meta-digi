@@ -31,9 +31,16 @@ KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8x_defconfig"
 
 # Wireless external module
 WIRELESS_MODULE ?= ""
+WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
+
+# Wireless p2p interface
+WLAN_P2P_INTERFACE ?= "p2p0"
+WLAN_P2P_DEVICE_NAME ?= "ccimx8x-p2p"
 
 # Firmware
 MACHINE_FIRMWARE ?= "firmware-imx-vpu-imx8 firmware-imx-sdma"
+MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6574-bt', '', d)}"
+MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6574-wifi', '', d)}"
 
 MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
