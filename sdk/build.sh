@@ -184,6 +184,7 @@ _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
 YOCTO_INST_DIR="${WORKSPACE}/digi-yocto-sdk.$(echo ${DY_REVISION} | tr '/' '_')"
+YOCTO_DOWNLOAD_DIR="${WORKSPACE}/downloads"
 YOCTO_PROJ_DIR="${WORKSPACE}/projects"
 
 CPUS="$(grep -c processor /proc/cpuinfo)"
@@ -212,8 +213,16 @@ if pushd ${YOCTO_INST_DIR}; then
 	popd
 fi
 
-# Create projects and build
+# Clean downloads directory
+if [ "${DY_RM_DOWNLOADS}" = "true" ]; then
+	printf "\n[INFO] Removing the downloads folder.\n"
+	rm -rf ${YOCTO_DOWNLOAD_DIR}
+fi
+
+# Clean images and projects folders
 rm -rf ${YOCTO_IMGS_DIR} ${YOCTO_PROJ_DIR}
+
+# Create projects and build
 for platform in ${DY_PLATFORMS}; do
 	# The variables <platform>_var|tgt got their dashes converted to
 	# underscores, so we must convert also the ones in ${platform}.
@@ -236,7 +245,7 @@ for platform in ${DY_PLATFORMS}; do
 				export TEMPLATECONF="${TEMPLATECONF:+${TEMPLATECONF}/${platform}}"
 				MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p ${platform} ${MACHINES_LAYER} ${_this_var_arg} <<< "y"
 				# Set a common DL_DIR and SSTATE_DIR for all platforms
-				sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_PROJ_DIR}/downloads\"" \
+				sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_DOWNLOAD_DIR}\"" \
 					-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
 					conf/local.conf
 				# Set the DISTRO and remove 'meta-digi-dey' layer if distro is not DEY based
