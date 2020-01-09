@@ -12,6 +12,8 @@ include conf/machine/include/tune-cortexa7.inc
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"
 
+STORAGE_MEDIA = "mtd"
+
 # Bluetooth interface
 BT_DEVICE_NAME ?= "cc6ul"
 

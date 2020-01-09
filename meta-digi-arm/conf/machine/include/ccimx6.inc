@@ -15,6 +15,8 @@ UBOOT_SUFFIX = "imx"
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm/configs/ccimx6sbc_defconfig"
 
+STORAGE_MEDIA = "mmc"
+
 # Wireless external module
 WIRELESS_MODULE ?= ""
 

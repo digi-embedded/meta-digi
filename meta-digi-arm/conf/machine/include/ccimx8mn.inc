@@ -22,6 +22,8 @@ SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8_defconfig"
 
+STORAGE_MEDIA = "mmc"
+
 # Bluetooth interface
 BT_DEVICE_NAME ?= "cc8mn"
 

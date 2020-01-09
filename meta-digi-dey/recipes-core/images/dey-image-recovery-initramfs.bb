@@ -5,6 +5,8 @@ LICENSE = "MIT"
 
 PACKAGE_INSTALL = " \
     busybox \
+    ${@bb.utils.contains('STORAGE_MEDIA', 'mmc', 'e2fsprogs-mke2fs', '', d)} \
+    ${@bb.utils.contains('STORAGE_MEDIA', 'mtd', 'mtd-utils-ubifs', '', d)} \
     psplash \
     recovery-initramfs \
     swupdate \
@@ -12,11 +14,6 @@ PACKAGE_INSTALL = " \
     u-boot-fw-utils \
     wipe \
 "
-
-PACKAGE_INSTALL_append_ccimx6 = " e2fsprogs-mke2fs"
-PACKAGE_INSTALL_append_ccimx6ul = " mtd-utils-ubifs"
-PACKAGE_INSTALL_append_ccimx8x = " e2fsprogs-mke2fs"
-PACKAGE_INSTALL_append_ccimx8mn = " e2fsprogs-mke2fs"
 
 # Do not pollute the initrd image with rootfs features
 IMAGE_FEATURES = ""

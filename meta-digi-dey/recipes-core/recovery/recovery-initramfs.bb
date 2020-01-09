@@ -53,7 +53,4 @@ PACKAGES = "${PN}"
 
 FILES_${PN} = "/"
 
-RDEPENDS_${PN}_append_ccimx6sbc = " cryptsetup"
-RDEPENDS_${PN}_append_ccimx6qpsbc = " cryptsetup"
-RDEPENDS_${PN}_append_ccimx8x = " cryptsetup"
-RDEPENDS_${PN}_append_ccimx8mn = " cryptsetup"
+RDEPENDS_${PN}_append = "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', ' cryptsetup', '', d)}"

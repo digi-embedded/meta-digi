@@ -29,6 +29,8 @@ RAM_CONFIGS = "1.2GHz_512MB_16bit 1.2GHz_1GB_16bit 1.2GHz_1GB_32bit 1.2GHz_2GB_3
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8x_defconfig"
 
+STORAGE_MEDIA = "mmc"
+
 # Bluetooth interface
 BT_DEVICE_NAME ?= "cc8x"
 
