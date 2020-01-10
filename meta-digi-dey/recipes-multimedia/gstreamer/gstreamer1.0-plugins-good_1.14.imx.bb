@@ -8,12 +8,12 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=a6f89e2100d9b6cdffcea4f398e37343 \
 DEPENDS += "libdrm"
 
 GST1.0-PLUGINS-GOOD_SRC ?= "gitsm://source.codeaurora.org/external/imx/gst-plugins-good.git;protocol=https"
-SRCBRANCH = "MM_04.04.07_1906_L4.14.98"
+SRCBRANCH = "MM_04.05.00_1908_L4.14.98"
 
 SRC_URI = " \
     ${GST1.0-PLUGINS-GOOD_SRC};branch=${SRCBRANCH} \
 "
-SRCREV = "36d46a8a9a7dcf173f9a0a0145b6cfa44f879670"
+SRCREV = "6aa0b5632a610ea09278624826fb312db9f7b1b9"
 
 EXTRA_AUTORECONF = ""
 PACKAGECONFIG_append = " vpx"
