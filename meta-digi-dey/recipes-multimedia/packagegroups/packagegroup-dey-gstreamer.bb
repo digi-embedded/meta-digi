@@ -30,7 +30,7 @@ MACHINE_GSTREAMER_1_0_PKGS_ccimx6ul = " \
 "
 
 MACHINE_GSTREAMER_1_0_EXTRA_INSTALL ?= ""
-MACHINE_GSTREAMER_1_0_EXTRA_INSTALL_imxgpu2d ?= " \
+MACHINE_GSTREAMER_1_0_EXTRA_INSTALL_imxgpu ?= " \
     gstreamer1.0-plugins-bad-meta \
     gstreamer1.0-plugins-ugly-meta \
     gstreamer1.0-rtsp-server-meta \
