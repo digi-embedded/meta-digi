@@ -6,14 +6,14 @@ SUMMARY = "Freescale IMX firmware"
 DESCRIPTION = "Freescale IMX firmware such as for the VPU"
 SECTION = "base"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=6c12031a11b81db21cdfe0be88cac4b3"
+LIC_FILES_CHKSUM = "file://COPYING;md5=fd4b227530cd88a82af6a5982cfb724d"
 
 PE = "1"
 
 SRC_URI = "${FSL_MIRROR}/firmware-imx-${PV}.bin;fsl-eula=true "
 
-SRC_URI[md5sum] = "d2d02f96dad4fb8350696eaa979d50e1"
-SRC_URI[sha256sum] = "0bd050d5fceb7829201d33b19948b5717db106e3b676a777488c24130eba54b9"
+SRC_URI[md5sum] = "70bdefdd7fb58f782237acf4c648f5cd"
+SRC_URI[sha256sum] = "f04b2deb4f126e6b6cd4460462292acd72183b9f799e3b873fb390ff0f18eb55"
 
 inherit fsl-eula-unpack allarch
 
