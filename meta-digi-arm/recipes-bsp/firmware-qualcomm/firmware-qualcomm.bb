@@ -10,8 +10,8 @@ QUALCOMM_WIFI_DRIVER ?= "proprietary"
 
 # Bluetooth firmware files
 FW_QUALCOMM_BT = " \
-    file://${QCA_MODEL}_bt/nvm_tlv_3.2.bin \
-    file://${QCA_MODEL}_bt/rampatch_tlv_3.2.tlv \
+    file://qca65X4_bt/nvm_tlv_3.2.bin \
+    file://qca65X4_bt/rampatch_tlv_3.2.tlv \
 "
 
 # Firmware files for QCA6564 (Qualcomm proprietary driver)
@@ -81,6 +81,16 @@ do_install() {
 			ln -s otp30.bin ${D}${WIFI_FW_PATH}/athsetup.bin
 		fi
 	fi
+
+	# Disable IBS over H4 for all the platforms in the bluetooth firmware
+	printf \"\\x02\" | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=54 count=1 conv=notrunc,fsync
+}
+
+do_install_append_ccimx6ul() {
+	# Disable DEEP SLEEP in the bluetooth firmware
+	printf \"\\x00\" | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=74 count=1 conv=notrunc,fsync
+	# Enable Internal Clock in the bluetooth firmware
+	printf \"\\x01\\x00\" | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=93 count=2 conv=notrunc,fsync
 }
 
 QCA_MODEL ?= "qca6564"
