@@ -41,13 +41,39 @@ MACHINE_SOCARCH_SUFFIX_mx8dx = "-mx8dx"
 MACHINE_SOCARCH_SUFFIX_mx8mn  = "-mx8mn"
 
 MACHINE_ARCH_FILTER = "virtual/kernel"
-MACHINE_SOCARCH_FILTER_append_imxvpu = " imx-vpu libimxvpuapi imx-codec imx-vpuwrap imx-parser"
-MACHINE_SOCARCH_FILTER_append_imxgpu2d = " virtual/libopenvg virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl virtual/libg2d cairo pango"
-MACHINE_SOCARCH_FILTER_append_imxpxp = " imx-codec imx-parser"
+MACHINE_SOCARCH_FILTER_append_imxvpu = " \
+    imx-codec \
+    imx-vpu \
+    imx-vpuwrap \
+    libimxvpuapi \
+"
+MACHINE_SOCARCH_FILTER_append_imxgpu = " \
+    virtual/egl \
+    virtual/mesa \
+    virtual/libg2d \
+    libgal-imx \
+    virtual/libopenvg \
+    cairo \
+    opencv \
+    pango \
+"
+
+MACHINE_SOCARCH_FILTER_append_imxgpu3d = " \
+    virtual/libgl \
+    virtual/libgles1 \
+    virtual/libgles2 \
+"
+MACHINE_SOCARCH_FILTER_append_mx6q = " \
+    virtual/opencl-icd \
+    opencl-headers \
+"
 MACHINE_SOCARCH_FILTER_append_mx8 = " \
     virtual/libopenvx \
     virtual/opencl-icd \
     opencl-headers \
+"
+MACHINE_SOCARCH_FILTER_append_imxpxp = " \
+    imx-codec \
 "
 
 INHERIT += "fsl-dynamic-packagearch"
