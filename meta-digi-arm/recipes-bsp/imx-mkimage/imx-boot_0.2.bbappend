@@ -1,4 +1,4 @@
-# Copyright 2019 Digi International, Inc.
+# Copyright 2019,2020 Digi International, Inc.
 inherit boot-artifacts
 
 # Use the v4.14 latest BSP branch
@@ -39,6 +39,12 @@ do_populate_lic[depends] += " \
 ATF_MACHINE_NAME_mx8qxp = "bl31-imx8qx.bin"
 ATF_MACHINE_NAME_mx8mn = "bl31-imx8mn.bin"
 
+SECO_FIRMWARE ?= ""
+SECO_FIRMWARE_mx8qm  = "mx8qmb0-ahab-container.img"
+SECO_FIRMWARE_mx8qxp = "mx8qxb0-ahab-container.img"
+# i.MX8QXP C0 support
+#SECO_FIRMWARE_mx8qxp = "mx8qxc0-ahab-container.img"
+
 # 8MQ/8MM/8MN share the same soc folder
 BOOT_STAGING_mx8mn = "${S}/iMX8M"
 
@@ -51,9 +57,9 @@ IMXBOOT_TARGETS_ccimx8mn = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_
 
 compile_mx8x() {
 	bbnote 8QX boot binary build
-	cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_srtm_demo.bin       ${BOOT_STAGING}/m40_tcm.bin
-	cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_srtm_demo.bin       ${BOOT_STAGING}/m4_image.bin
-	cp ${DEPLOY_DIR_IMAGE}/mx8qx-ahab-container.img          ${BOOT_STAGING}/
+	cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_power_mode_switch.bin       ${BOOT_STAGING}/m40_tcm.bin
+	cp ${DEPLOY_DIR_IMAGE}/imx8qx_m4_TCM_power_mode_switch.bin       ${BOOT_STAGING}/m4_image.bin
+	cp ${DEPLOY_DIR_IMAGE}/${SECO_FIRMWARE}          ${BOOT_STAGING}/
 	cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${ATF_MACHINE_NAME} ${BOOT_STAGING}/bl31.bin
 	for type in ${UBOOT_CONFIG}; do
 		cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/u-boot-${type}.bin           ${BOOT_STAGING}/
@@ -94,6 +100,8 @@ do_compile () {
 				    for target in ${IMXBOOT_TARGETS}; do
 					    bbnote "building ${SOC_TARGET} - ${ramc} - ${target}"
 					    make SOC=${SOC_TARGET} ${target}
+					    # i.MX8QXP C0 support
+					    #make SOC=${SOC_TARGET} REV=C0 ${target}
 					    if [ -e "${BOOT_STAGING}/flash.bin" ]; then
 						    cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target}
 					    fi
@@ -147,7 +155,7 @@ do_deploy () {
 
 	# copy the tool mkimage to deploy path and sc fw, dcd and uboot
 	if [ "${SOC_TARGET}" = "iMX8QX" ]; then
-		install -m 0644 ${BOOT_STAGING}/mx8qx-ahab-container.img ${DEPLOYDIR}/${BOOT_TOOLS}
+		install -m 0644 ${BOOT_STAGING}/${SECO_FIRMWARE} ${DEPLOYDIR}/${BOOT_TOOLS}
 		install -m 0644 ${BOOT_STAGING}/m40_tcm.bin              ${DEPLOYDIR}/${BOOT_TOOLS}
 		install -m 0644 ${BOOT_STAGING}/m4_image.bin             ${DEPLOYDIR}/${BOOT_TOOLS}
 	fi
