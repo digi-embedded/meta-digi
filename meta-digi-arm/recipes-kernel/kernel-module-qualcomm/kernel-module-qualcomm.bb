@@ -6,11 +6,9 @@ LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
 
 # Reference Qualcomm tag/version
-PV = "v4.2.89.63"
-PV_ccimx8x = "v4.0.11.208Q"
+PV = "v4.0.11.213X"
 
-SRCBRANCH = "qca6564/master"
-SRCBRANCH_ccimx8x = "qca6574/master"
+SRCBRANCH = "qca65X4/master"
 SRCREV = "${AUTOREV}"
 
 QCOM_GIT_URI = "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git;protocol=https', d)}"

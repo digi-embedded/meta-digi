@@ -109,15 +109,6 @@ esac
 		BDATA_WW="bdwlan30_World.bin"
 		BDATA_LINK="bdwlan30.bin"
 		UTFBDATA_LINK="utfbd30.bin"
-	elif [ -f "fakeboar_US.bin" ] || [ -f "fakeboar_World.bin" ]; then
-		BDATA_US="fakeboar_US.bin"
-		BDATA_WW="fakeboar_World.bin"
-		# Use different links for propietary and community drivers
-		if [ -f "board.bin" ]; then
-			BDATA_LINK="board.bin"
-		else
-			BDATA_LINK="fakeboar.bin"
-		fi
 	else
 		log "5" "[ERROR] Could not locate board data files"
 		exit 1

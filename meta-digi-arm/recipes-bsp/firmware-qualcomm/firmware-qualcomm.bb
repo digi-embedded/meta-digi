@@ -15,27 +15,28 @@ FW_QUALCOMM_BT = " \
 "
 
 # Firmware files for QCA6564 (Qualcomm proprietary driver)
-FW_QCA6564_WIFI_PROPRIETARY = " \
+FW_QCA65X4_SDIO_PROPRIETARY = " \
     file://bdwlan30_US.bin \
     file://LICENCE.atheros_firmware \
-    file://qca6564_proprietary/otp30.bin \
-    file://qca6564_proprietary/qwlan30.bin \
-    file://qca6564_proprietary/utf30.bin \
+    file://qca65X4_sdio_proprietary/otp30.bin \
+    file://qca65X4_sdio_proprietary/qwlan30.bin \
+    file://qca65X4_sdio_proprietary/utf30.bin \
 "
 
 # Firmware files for QCA6574 (Qualcomm proprietary driver)
-FW_QCA6574_WIFI_PROPRIETARY = " \
+FW_QCA65X4_PCIE_PROPRIETARY = " \
+    file://bdwlan30_US.bin \
     file://LICENCE.atheros_firmware \
-    file://qca6574_proprietary/qwlan30.bin \
-    file://qca6574_proprietary/fakeboar_US.bin \
-    file://qca6574_proprietary/otp.bin \
-    file://qca6574_proprietary/utf.bin \
+    file://qca65X4_pcie_proprietary/otp30.bin \
+    file://qca65X4_pcie_proprietary/qwlan30.bin \
+    file://qca65X4_pcie_proprietary/utf30.bin \
 "
 
 # Firmware files for QCA6574 (Qualcomm community driver)
 # NOTE: the community file 'board.bin' must be substituted by proprietary
-# 'fakeboar_US.bin'
+# 'bdwlan30_US.bin'
 FW_QCA6574_WIFI_COMMUNITY = " \
+    file://bdwlan30_US.bin \
     file://qca6574_community/board-2.bin \
     file://qca6574_community/firmware-4.bin \
     file://qca6574_community/firmware-6.bin \
@@ -44,8 +45,8 @@ FW_QCA6574_WIFI_COMMUNITY = " \
     file://qca6574_proprietary/fakeboar_US.bin \
 "
 
-FW_QUALCOMM_WIFI ?= "${FW_QCA6564_WIFI_PROPRIETARY}"
-FW_QUALCOMM_WIFI_ccimx8x = "${@oe.utils.conditional('QUALCOMM_WIFI_DRIVER', 'community', '${FW_QCA6574_WIFI_COMMUNITY}', '${FW_QCA6574_WIFI_PROPRIETARY}', d)}"
+FW_QUALCOMM_WIFI ?= "${FW_QCA65X4_SDIO_PROPRIETARY}"
+FW_QUALCOMM_WIFI_ccimx8x = "${@oe.utils.conditional('QUALCOMM_WIFI_DRIVER', 'community', '${FW_QCA6574_WIFI_COMMUNITY}', '${FW_QCA65X4_PCIE_PROPRIETARY}', d)}"
 
 SRC_URI = " \
     ${FW_QUALCOMM_BT} \
@@ -72,12 +73,12 @@ do_install() {
 	install -m 0644 ${FW_WIFI_FILES} ${D}${WIFI_FW_PATH}
 	if [ "${QUALCOMM_WIFI_DRIVER}" = "community" ]; then
 		# If using community driver, create symlink 'board.bin' to
-		# proprietary 'fakeboar_US.bin'
-		ln -s fakeboar_US.bin ${D}${WIFI_FW_PATH}/board.bin
+		# proprietary 'bdwlan30_US.bin'
+		ln -s bdwlan30_US.bin ${D}${WIFI_FW_PATH}/board.bin
 	else
-		if [ "${FW_QUALCOMM_WIFI}" = "${FW_QCA6574_WIFI_PROPRIETARY}" ]; then
+		if [ "${FW_QUALCOMM_WIFI}" = "${FW_QCA65X4_PCIE_PROPRIETARY}" ]; then
 			ln -s qwlan30.bin ${D}${WIFI_FW_PATH}/athwlan.bin
-			ln -s otp.bin ${D}${WIFI_FW_PATH}/athsetup.bin
+			ln -s otp30.bin ${D}${WIFI_FW_PATH}/athsetup.bin
 		fi
 	fi
 }
