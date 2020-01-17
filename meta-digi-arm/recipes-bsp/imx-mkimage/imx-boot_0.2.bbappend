@@ -2,8 +2,8 @@
 inherit boot-artifacts
 
 # Use the v4.14 latest BSP branch
-SRCBRANCH = "imx_4.14.98_2.2.0"
-SRCREV = "c00cd78d2e80178171d2d7f8d0d1ce6e2ea41ac5"
+SRCBRANCH = "imx_4.14.98_2.3.0"
+SRCREV = "2556000499f667123094af22326cfd8e4cbadaac"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 SRC_URI_append_ccimx8x = " file://0001-iMX8QX-remove-SC_BD_FLAGS_ALT_CONFIG-flag-in-flash_r.patch"
