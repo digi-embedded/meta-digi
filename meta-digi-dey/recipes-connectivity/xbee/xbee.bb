@@ -18,8 +18,8 @@ do_install() {
 	install -d ${D}${sysconfdir}/init.d/
 	install -m 0755 ${WORKDIR}/xbee-init ${D}${sysconfdir}/
 	ln -sf /etc/xbee-init ${D}${sysconfdir}/init.d/xbee-init
-	sed -i -e "s,##XBEE_RESET_N_GPIO##,${XBEE_RESET_N_GPIO},g" \
-	       -e "s,##XBEE_SLEEP_RQ_GPIO##,${XBEE_SLEEP_RQ_GPIO},g" \
+	sed -i -e "s/##XBEE_RESET_N_GPIO##/${XBEE_RESET_N_GPIO}/g" \
+	       -e "s/##XBEE_SLEEP_RQ_GPIO##/${XBEE_SLEEP_RQ_GPIO}/g" \
 	       ${D}${sysconfdir}/xbee-init
 
 	install -d ${D}${systemd_unitdir}/system/
