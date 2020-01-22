@@ -42,7 +42,6 @@ FW_QCA6574_WIFI_COMMUNITY = " \
     file://qca6574_community/firmware-6.bin \
     file://qca6574_community/notice_ath10k_firmware-4.txt \
     file://qca6574_community/notice_ath10k_firmware-6.txt \
-    file://qca6574_proprietary/fakeboar_US.bin \
 "
 
 FW_QUALCOMM_WIFI ?= "${FW_QCA65X4_SDIO_PROPRIETARY}"
