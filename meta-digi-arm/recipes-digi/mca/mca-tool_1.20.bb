@@ -8,13 +8,13 @@ PKGNAME = "mca_tool"
 
 # ARM tarball
 SRC_URI_arm = "${DIGI_PKG_SRC}/${PKGNAME}-${PV}-${TUNE_ARCH}.tar.gz;name=arm"
-SRC_URI[arm.md5sum] = "f677ccb2b6b627838c028f2281aa5b8c"
-SRC_URI[arm.sha256sum] = "180ad5cdb9ddce7980db8019e9e710fcabde39ed896614f3ec8a05fedeb479f1"
+SRC_URI[arm.md5sum] = "2007a858cd8f82ae2ddbff43f437335a"
+SRC_URI[arm.sha256sum] = "d9a0c1ca1c9f20041602edd585c31bd79b75bc8d8a74648d1809350e731af3d5"
 
 # AARCH64 tarball
 SRC_URI_aarch64 = "${DIGI_PKG_SRC}/${PKGNAME}-${PV}-${TUNE_ARCH}.tar.gz;name=aarch64"
-SRC_URI[aarch64.md5sum] = "183966e276383585048b85bfdf38fb49"
-SRC_URI[aarch64.sha256sum] = "e7d0f375bd50b2f1936ba4770e64e8dc8f14af39cee4a85e26e4a22843a5638a"
+SRC_URI[aarch64.md5sum] = "600451f7312a130c63f3b3b5c7abdbb6"
+SRC_URI[aarch64.sha256sum] = "1acc7498943662e7e5bd26a67d2733a4814823170ba0756313459cb0e68e6e5f"
 
 S = "${WORKDIR}/${PKGNAME}-${PV}"
 
