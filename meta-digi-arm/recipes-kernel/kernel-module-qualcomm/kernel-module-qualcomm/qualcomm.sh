@@ -81,69 +81,21 @@ if ! cmp -s ${TMP_MACFILE} ${MACFILE}; then
 fi
 rm -f "${TMP_MACFILE}"
 
-OTP_REGION_CODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null | tr -d '\0')"
-DTB_REGION_CODE="$(cat /proc/device-tree/wireless/regulatory-domain 2>/dev/null | tr -d '\0')"
-US_CODE="0x0"
-WW_CODE="0x1"
-JP_CODE="0x2"
-# Check if the DTB_REGION_CODE is in the list of valid codes,
-# if not use the OTP programmed value.
-case "${DTB_REGION_CODE}" in
-	${US_CODE} | ${WW_CODE} | ${JP_CODE})
-		REGULATORY_DOMAIN="${DTB_REGION_CODE}";;
-	*)
-		if [ -n "${DTB_REGION_CODE}" ]; then
-			log "5" "[WARN] Invalid region code in device tree, using OTP value"
-		fi
-		REGULATORY_DOMAIN="${OTP_REGION_CODE}";;
-esac
-
-
 # Create symbolic links to the proper FW files depending on the country region
 # Use a sub-shell here to change to firmware directory
 (
 	cd "${FIRMWARE_DIR}"
 
-	if [ -f "bdwlan30_US.bin" ] || [ -f "bdwlan30_World.bin" ]; then
-		BDATA_US="bdwlan30_US.bin"
-		BDATA_WW="bdwlan30_World.bin"
-		BDATA_LINK="bdwlan30.bin"
-		UTFBDATA_LINK="utfbd30.bin"
-	else
-		log "5" "[ERROR] Could not locate board data files"
-		exit 1
-	fi
-
-	BDATA_SOURCE="${BDATA_US}"
-	case "${REGULATORY_DOMAIN}" in
-		${US_CODE})
-			log "5" "Setting US wireless region";;
-		${WW_CODE}|${JP_CODE})
-			if [ -f "${BDATA_WW}" ]; then
-				log "5" "Setting WW (world wide) wireless region"
-				BDATA_SOURCE="${BDATA_WW}"
-			else
-				log "5" "[WARN] No WW (worldwide) board data file, using US"
-			fi
-			;;
-		"")
-			log "5" "[WARN] region code not found, using US";;
-		*)
-			log "5" "[WARN] Invalid region code, using US";;
-	esac
+	BDATA_SOURCE="bdwlan30_US.bin"
+	log "5" "Setting US wireless region"
 
 	# When defined, update the links only if they are wrong so we don't
 	# rewrite the internal memory every time we boot
-	if [ -n "${BDATA_LINK}" ] &&
-	   ([ ! -f "${BDATA_LINK}" ] ||
-	   ! cmp -s "${BDATA_LINK}" "${BDATA_SOURCE}"); then
+	BDATA_LINK="bdwlan30.bin"
+	UTFBDATA_LINK="utfbd30.bin"
+	if ([ ! -f "${BDATA_LINK}" ] || ! cmp -s "${BDATA_LINK}" "${BDATA_SOURCE}"); then
 		set_filesystem_rw_access ${FIRMWARE_DIR}
 		ln -sf "${BDATA_SOURCE}" "${BDATA_LINK}"
-	fi
-	if [ -n "${UTFBDATA_LINK}" ] &&
-	   ([ ! -f "${UTFBDATA_LINK}" ] ||
-	   ! cmp -s "${UTFBDATA_LINK}" "${BDATA_SOURCE}"); then
-		set_filesystem_rw_access ${FIRMWARE_DIR}
 		ln -sf "${BDATA_SOURCE}" "${UTFBDATA_LINK}"
 	fi
 )
