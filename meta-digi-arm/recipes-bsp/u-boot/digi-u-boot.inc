@@ -4,7 +4,7 @@ require recipes-bsp/u-boot/u-boot.inc
 
 DESCRIPTION = "Bootloader for Digi platforms"
 LICENSE = "GPLv2+"
-LIC_FILES_CHKSUM = "file://Licenses/README;md5=30503fd321432fc713238f582193b78e"
+LIC_FILES_CHKSUM = "file://Licenses/README;md5=a2c678cfd4a4d97135585cad908541c6"
 SECTION = "bootloaders"
 
 DEPENDS += "bc-native dtc-native u-boot-mkimage-native"
