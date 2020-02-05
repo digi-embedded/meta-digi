@@ -3,22 +3,16 @@ ctrl_interface_group=0
 fast_reauth=1
 update_config=1
 
-## -- Example MANAGED network
-ap_scan=1	# MANAGED mode
+ap_scan=1
+
+# Static scheduled scan interval time in seconds
+#
+# The wpa-supplicant dynamically adjusts the scheduled scan time interval. On
+# occassions, fixing the interval time is helpful, for example on DFS channels.
+#sched_scan_interval=2
+
 network={
 	scan_ssid=1
 	ssid=""
 	key_mgmt=NONE
 }
-
-# -- SoftAP mode
-# ap_scan=2
-# network={
-# 	ssid="ath6kl-ap"
-# 	mode=2
-# 	frequency=2412
-# 	key_mgmt=WPA-PSK
-# 	proto=RSN
-# 	pairwise=CCMP
-# 	psk="12345678"
-# }

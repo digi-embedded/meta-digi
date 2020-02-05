@@ -12,12 +12,19 @@ include conf/machine/include/tune-cortexa7.inc
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"
 
+STORAGE_MEDIA = "mtd"
+
+# Bluetooth interface
+BT_DEVICE_NAME ?= "cc6ul"
+
 # Wireless external module
 WIRELESS_MODULE ?= ""
 WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
+HAS_WIFI_VIRTWLANS = "true"
 
 # Wireless p2p interface
 WLAN_P2P_INTERFACE ?= "p2p0"
+WLAN_P2P_DEVICE_NAME ?= "ccimx6ul-p2p"
 
 # Firmware
 MACHINE_FIRMWARE ?= "firmware-imx-sdma"
@@ -50,3 +57,5 @@ MKUBIFS_BOOT_ARGS ?= "-m 2048 -e 126976 -c 255"
 # mkfs.ubifs parameters for rootfs partition
 # Max LEB count (-c 8191) calculated for a partition of up to 1 GiB considering 128 KiB erase-block size.
 MKUBIFS_ARGS ?= "-m 2048 -e 126976 -c 8191"
+
+SIGN_MODE = "HAB"

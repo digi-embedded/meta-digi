@@ -3,7 +3,7 @@
 #
 #  build-github.sh
 #
-#  Copyright (C) 2015-2018 by Digi International Inc.
+#  Copyright (C) 2015-2019 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -22,7 +22,7 @@
 
 set -e
 
-AVAILABLE_PLATFORMS="ccimx8x-sbc-pro ccimx8x-sbc-express ccimx6qpsbc ccimx6sbc ccimx6ulsbc ccimx6ulstarter"
+AVAILABLE_PLATFORMS="ccimx8mn-dvk ccimx8x-sbc-pro ccimx8x-sbc-express ccimx6qpsbc ccimx6sbc ccimx6ulsbc ccimx6ulstarter"
 
 MANIFEST_URL="https://github.com/digi-embedded/dey-manifest.git"
 
@@ -121,6 +121,7 @@ while read _pl _tgt; do
 	# the fly with underscores.
 	eval "${_pl//-/_}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
+	ccimx8mn-dvk         dey-image-qt
 	ccimx8x-sbc-pro      dey-image-qt
 	ccimx8x-sbc-express  dey-image-qt
 	ccimx6qpsbc          dey-image-qt

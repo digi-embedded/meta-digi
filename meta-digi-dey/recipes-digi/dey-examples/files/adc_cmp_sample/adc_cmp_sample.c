@@ -1,7 +1,7 @@
 /*
- * ConnectCore 6UL Analog Comparator sample application.
+ * ConnectCore Analog Comparator sample application.
  *
- * Copyright (c) 2017 Digi International Inc.
+ * Copyright (c) 2017-2020 Digi International Inc.
  * All rights reserved.
  *
  * Based on iio_event_monitor.c from the tools/iio directory, of the linux
@@ -32,7 +32,7 @@
 	"Usage:\n"							\
 	"adc_cmp_sample -c channel [options]\n\n"			\
 	"Options:\n"							\
-	"  -t : ADC_type ('MCA-CC6UL', 'MCA-CC8X')\n"			\
+	"  -t : ADC_type ('MCA-CC6UL', 'MCA-CC8X', 'MCA-CC8M')\n"	\
 	"  -c : channel number to read from\n"				\
 	"  -h : Threshold_high higher limit of the comparator window\n"	\
 	"  -l : Threshold_low lower limit of the comparator window\n"	\
@@ -44,6 +44,7 @@ enum adc_type {
 	ADC_TYPE_UNKNOWN,
 	ADC_TYPE_MCA_CC6UL,
 	ADC_TYPE_MCA_CC8X,
+	ADC_TYPE_MCA_CC8M,
 };
 
 struct adc_data {
@@ -64,6 +65,12 @@ struct adc_data adc_list[] = {
 		.type 		= ADC_TYPE_MCA_CC8X,
 		.name 		= "MCA-CC8X",
 		.dev_name 	= "mca-cc8x-adc",
+		.nbits 		= 12,
+	},
+	{
+		.type 		= ADC_TYPE_MCA_CC8M,
+		.name 		= "MCA-CC8M",
+		.dev_name 	= "mca-cc8m-adc",
 		.nbits 		= 12,
 	},
 };

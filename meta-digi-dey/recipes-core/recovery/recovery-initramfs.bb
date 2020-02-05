@@ -40,7 +40,14 @@ do_install() {
 		KEY_INDEX_1=$(expr ${KEY_INDEX} + 1)
 
 		# Find the certificate to use.
-		CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/IMG${KEY_INDEX_1}*crt.pem)"
+		if [ "${SIGN_MODE}" = "HAB" ]; then
+			CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/IMG${KEY_INDEX_1}*crt.pem)"
+		elif [ "${SIGN_MODE}" = "AHAB" ]; then
+			CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK${KEY_INDEX_1}*_ca_crt.pem)"
+		else
+			bberror "Unkown SIGN_MODE value"
+			exit 1
+		fi
 
 		# Extract the public key from the certificate.
 		install -d ${D}${sysconfdir}/ssl/certs
@@ -53,6 +60,4 @@ PACKAGES = "${PN}"
 
 FILES_${PN} = "/"
 
-RDEPENDS_${PN}_append_ccimx6sbc = " cryptsetup"
-RDEPENDS_${PN}_append_ccimx6qpsbc = " cryptsetup"
-RDEPENDS_${PN}_append_ccimx8x = " cryptsetup"
+RDEPENDS_${PN}_append = "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', ' cryptsetup', '', d)}"

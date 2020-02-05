@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2019 Digi International Inc.
+# Copyright (C) 2013-2020 Digi International Inc.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
@@ -7,30 +7,19 @@ INITSCRIPT_PARAMS = "start 03 2 3 4 5 . stop 80 0 6 1 ."
 
 inherit systemd
 
+WIFI_VIRTWLANS_FILES = " \
+    file://interfaces.wlan1.static \
+    file://interfaces.wlan1.dhcp \
+    file://virtwlans \
+"
+
 SRC_URI_append = " \
     file://ifupdown.service \
     file://interfaces.br0.example \
     file://interfaces.p2p \
     file://p2plink \
     file://resolv \
-"
-
-SRC_URI_append_ccimx6qpsbc = "\
-    file://interfaces.wlan1.static \
-    file://interfaces.wlan1.dhcp \
-    file://virtwlans \
-"
-
-SRC_URI_append_ccimx6ul = "\
-    file://interfaces.wlan1.static \
-    file://interfaces.wlan1.dhcp \
-    file://virtwlans \
-"
-
-SRC_URI_append_ccimx8x = "\
-    file://interfaces.wlan1.static \
-    file://interfaces.wlan1.dhcp \
-    file://virtwlans \
+    ${@oe.utils.conditional('HAS_WIFI_VIRTWLANS', 'true', '${WIFI_VIRTWLANS_FILES}', '', d)} \
 "
 
 SYSTEMD_SERVICE_${PN} = "ifupdown.service"
@@ -69,6 +58,12 @@ do_install_append() {
 	sed -i -e "s,##WPA_DRIVER##,${WPA_DRIVER},g" ${D}${sysconfdir}/network/interfaces
 
 	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
+
+	# Install virtual wlans files
+	if ${HAS_WIFI_VIRTWLANS}; then
+		install_virtwlans
+		install_wlan1
+	fi
 }
 
 install_virtwlans() {
@@ -99,21 +94,6 @@ install_wlan1() {
 	sed -i -e "s,##WLAN1_STATIC_DNS##,${WLAN1_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WLAN1_POST_UP_ACTION##,${WLAN1_POST_UP_ACTION},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WLAN1_PRE_DOWN_ACTION##,${WLAN1_PRE_DOWN_ACTION},g" ${D}${sysconfdir}/network/interfaces
-}
-
-do_install_append_ccimx6qpsbc() {
-	install_virtwlans
-	install_wlan1
-}
-
-do_install_append_ccimx6ul() {
-	install_virtwlans
-	install_wlan1
-}
-
-do_install_append_ccimx8x() {
-	install_virtwlans
-	install_wlan1
 }
 
 # Disable wireless interfaces on first boot for non-wireless variants

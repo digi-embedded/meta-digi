@@ -24,7 +24,7 @@ PACKAGECONFIG[gio-unix-2.0] = ""
 EXTRA_OECONF_append = " --disable-opengl --enable-wayland"
 
 GST1.0-PLUGINS-BASE_SRC ?= "gitsm://source.codeaurora.org/external/imx/gst-plugins-base.git;protocol=https"
-SRCBRANCH = "MM_04.04.07_1906_L4.14.98"
+SRCBRANCH = "MM_04.05.02_1911_L4.14.98"
 
 SRC_URI = " \
     ${GST1.0-PLUGINS-BASE_SRC};branch=${SRCBRANCH} \

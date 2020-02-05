@@ -3,7 +3,7 @@
 #
 #  build.sh
 #
-#  Copyright (C) 2013-2018 by Digi International Inc.
+#  Copyright (C) 2013-2019 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -171,6 +171,7 @@ while read _pl _var _tgt; do
 	eval "${_pl//-/_}_var=\"${_var//,/ }\""
 	eval "${_pl//-/_}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
+	ccimx8mn-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
 	ccimx8x-sbc-pro      DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
 	ccimx8x-sbc-express  DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
 	ccimx6qpsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
@@ -183,6 +184,7 @@ _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
 YOCTO_INST_DIR="${WORKSPACE}/digi-yocto-sdk.$(echo ${DY_REVISION} | tr '/' '_')"
+YOCTO_DOWNLOAD_DIR="${WORKSPACE}/downloads"
 YOCTO_PROJ_DIR="${WORKSPACE}/projects"
 
 CPUS="$(grep -c processor /proc/cpuinfo)"
@@ -211,8 +213,16 @@ if pushd ${YOCTO_INST_DIR}; then
 	popd
 fi
 
-# Create projects and build
+# Clean downloads directory
+if [ "${DY_RM_DOWNLOADS}" = "true" ]; then
+	printf "\n[INFO] Removing the downloads folder.\n"
+	rm -rf ${YOCTO_DOWNLOAD_DIR}
+fi
+
+# Clean images and projects folders
 rm -rf ${YOCTO_IMGS_DIR} ${YOCTO_PROJ_DIR}
+
+# Create projects and build
 for platform in ${DY_PLATFORMS}; do
 	# The variables <platform>_var|tgt got their dashes converted to
 	# underscores, so we must convert also the ones in ${platform}.
@@ -235,7 +245,7 @@ for platform in ${DY_PLATFORMS}; do
 				export TEMPLATECONF="${TEMPLATECONF:+${TEMPLATECONF}/${platform}}"
 				MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p ${platform} ${MACHINES_LAYER} ${_this_var_arg} <<< "y"
 				# Set a common DL_DIR and SSTATE_DIR for all platforms
-				sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_PROJ_DIR}/downloads\"" \
+				sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_DOWNLOAD_DIR}\"" \
 					-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
 					conf/local.conf
 				# Set the DISTRO and remove 'meta-digi-dey' layer if distro is not DEY based
@@ -263,6 +273,9 @@ for platform in ${DY_PLATFORMS}; do
 				if [ "${DY_MFG_IMAGE}" = "true" ] && ! grep -qs "meta-digi-mfg" conf/bblayers.conf; then
 					sed -i -e "/meta-digi-dey/a\  ${YOCTO_INST_DIR}/sources/meta-digi-mfg \\\\" conf/bblayers.conf
 				fi
+				printf "\n[INFO] Show customized local.conf.\n"
+				cat conf/local.conf
+
 				for target in ${platform_targets}; do
 					printf "\n[INFO] Building the ${target} target.\n"
 					time bitbake ${target} $(swu_recipe_name ${target})

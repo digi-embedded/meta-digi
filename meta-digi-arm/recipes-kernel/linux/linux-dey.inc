@@ -24,23 +24,49 @@ trustfence_sign() {
 	[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
 
 	# Sign/encrypt the kernel images
-	for type in ${KERNEL_IMAGETYPES}; do
-		KERNEL_IMAGE="${type}-${KERNEL_IMAGE_NAME}.bin"
-		TMP_KERNEL_IMAGE_SIGNED="$(mktemp ${KERNEL_IMAGE}-signed.XXXXXX)"
-		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -l "${KERNEL_IMAGE}" "${TMP_KERNEL_IMAGE_SIGNED}"
-		mv "${TMP_KERNEL_IMAGE_SIGNED}" "${KERNEL_IMAGE}"
-	done
+	if [ "${SIGN_MODE}" = "HAB" ]; then
+		for type in ${KERNEL_IMAGETYPES}; do
+			KERNEL_IMAGE="${type}-${KERNEL_IMAGE_NAME}.bin"
+			TMP_KERNEL_IMAGE_SIGNED="$(mktemp ${KERNEL_IMAGE}-signed.XXXXXX)"
+			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -l "${KERNEL_IMAGE}" "${TMP_KERNEL_IMAGE_SIGNED}"
+			mv "${TMP_KERNEL_IMAGE_SIGNED}" "${KERNEL_IMAGE}"
+		done
 
-	# Sign/encrypt the device tree blobs
-	for DTB in ${KERNEL_DEVICETREE}; do
-		DTB=`normalize_dtb "${DTB}"`
-		DTB_EXT=${DTB##*.}
-		DTB_BASE_NAME=`basename ${DTB} ."${DTB_EXT}"`
-		DTB_IMAGE="${DTB_BASE_NAME}-${KERNEL_IMAGE_NAME}.${DTB_EXT}"
-		TMP_DTB_IMAGE_SIGNED="$(mktemp ${DTB_IMAGE}-signed.XXXXXX)"
-		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -d "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
-		mv "${TMP_DTB_IMAGE_SIGNED}" "${DTB_IMAGE}"
-	done
+		# Sign/encrypt the device tree blobs
+		for DTB in ${KERNEL_DEVICETREE}; do
+			DTB=`normalize_dtb "${DTB}"`
+			DTB_EXT=${DTB##*.}
+			DTB_BASE_NAME=`basename ${DTB} ."${DTB_EXT}"`
+			DTB_IMAGE="${DTB_BASE_NAME}-${KERNEL_IMAGE_NAME}.${DTB_EXT}"
+			TMP_DTB_IMAGE_SIGNED="$(mktemp ${DTB_IMAGE}-signed.XXXXXX)"
+			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -d "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
+			mv "${TMP_DTB_IMAGE_SIGNED}" "${DTB_IMAGE}"
+		done
+	elif [ "${SIGN_MODE}" = "AHAB" ]; then
+		# Sign the kernel images
+		for type in ${KERNEL_IMAGETYPES}; do
+			KERNEL_IMAGE="${type}-${KERNEL_IMAGE_NAME}.bin"
+			${DEPLOY_DIR_IMAGE}/imx-boot-tools/mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${WORKDIR}/build/arch/arm64/boot/Image a35 ${RAM_CONTAINER_LOC_BOOT} -out flash_os.bin
+			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -l "flash_os.bin" "${type}-${MACHINE}-signed.bin"
+			gzip ${type}-${MACHINE}-signed.bin
+			mv ${type}-${MACHINE}-signed.bin.gz "${KERNEL_IMAGE}"
+		done
+
+		# Sign/encrypt the device tree blobs
+		for DTB in ${KERNEL_DEVICETREE}; do
+			DTB=`normalize_dtb "${DTB}"`
+			DTB_EXT=${DTB##*.}
+			DTB_BASE_NAME=`basename ${DTB} ."${DTB_EXT}"`
+			DTB_IMAGE="${DTB_BASE_NAME}-${KERNEL_IMAGE_NAME}.${DTB_EXT}"
+			${DEPLOY_DIR_IMAGE}/imx-boot-tools/mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${DTB_IMAGE} a35 ${RAM_CONTAINER_LOC_DTB} -out ${DTB_IMAGE}-mkimg-signed
+			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -d "${DTB_IMAGE}-mkimg-signed" "${DTB_IMAGE}-signed"
+			mv "${DTB_IMAGE}-signed" "${DTB_IMAGE}"
+			rm -f ${DTB_IMAGE}-mkimg-signed
+		done
+	else
+		bberror "Unkown SIGN_MODE value"
+		exit 1
+	fi
 }
 trustfence_sign[dirs] = "${DEPLOYDIR}"
 

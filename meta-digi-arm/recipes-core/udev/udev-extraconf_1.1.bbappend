@@ -22,6 +22,14 @@ do_install_append() {
 		       >> ${D}${sysconfdir}/udev/rules.d/localextra.rules
 	fi
 
+	# XBee TTY symlink
+	if [ -n "${XBEE_TTY}" ]; then
+		printf "%s\n%s\n" \
+		       "# Symlink to the XBee tty" \
+		       "KERNEL==\"${XBEE_TTY}\", MODE=\"0660\", GROUP=\"tty\", SYMLINK+=\"ttyXBee\"" \
+		       >> ${D}${sysconfdir}/udev/rules.d/localextra.rules
+	fi
+
 	install -d ${D}${sysconfdir}/modprobe.d
 	install -m 0644 ${WORKDIR}/blacklist.conf ${D}${sysconfdir}/modprobe.d
 }

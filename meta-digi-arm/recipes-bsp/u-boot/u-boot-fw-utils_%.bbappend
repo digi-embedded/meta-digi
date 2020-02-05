@@ -82,5 +82,3 @@ pkg_postinst_ontarget_${PN}() {
 			${CONFIG_FILE}
 	fi
 }
-
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x)"

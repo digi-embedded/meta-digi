@@ -1,0 +1,63 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Thu, 31 Oct 2019 11:49:06 +0100
+Subject: [PATCH 1/6] lib: add parameters to be able to modify default I2C bus
+ index and speed
+
+https://jira.digi.com/browse/DEL-6826
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ lib/CMakeLists.txt |  8 ++++++++
+ lib/atca_cfgs.c    | 15 +++++++++++++--
+ 2 files changed, 21 insertions(+), 2 deletions(-)
+
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index 9816ed1..b198d1f 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -66,6 +66,14 @@ add_definitions(-DATCA_HAL_I2C)
+ set(CRYPTOAUTH_SRC ${CRYPTOAUTH_SRC} ${TWI_SRC})
+ endif(LINUX AND ATCA_HAL_I2C)
+ 
++if(ATCA_HAL_I2C_BUS)
++add_definitions(-DATCA_HAL_I2C_BUS=${ATCA_HAL_I2C_BUS})
++endif(ATCA_HAL_I2C_BUS)
++
++if(ATCA_HAL_I2C_SPEED)
++add_definitions(-DATCA_HAL_I2C_SPEED=${ATCA_HAL_I2C_SPEED})
++endif(ATCA_HAL_I2C_SPEED)
++
+ if(ATCA_HAL_CUSTOM)
+ add_definitions(-DATCA_HAL_CUSTOM)
+ endif()
+diff --git a/lib/atca_cfgs.c b/lib/atca_cfgs.c
+index a79e02b..60727f7 100644
+--- a/lib/atca_cfgs.c
++++ b/lib/atca_cfgs.c
+@@ -37,13 +37,24 @@
+ 
+ /* if the number of these configurations grows large, we can #ifdef them based on required device support */
+ 
++/* Default I2C configuration */
++#ifndef ATCA_HAL_I2C_BUS
++#define ATCA_HAL_I2C_BUS 0
++#warning "Using default value for ATCA_HAL_I2C_BUS: 0"
++#endif
++
++#ifndef ATCA_HAL_I2C_SPEED
++#define ATCA_HAL_I2C_SPEED 400000
++#warning "Using default value for ATCA_HAL_I2C_SPEED: 400000"
++#endif
++
+ /** \brief default configuration for an ECCx08A device */
+ ATCAIfaceCfg cfg_ateccx08a_i2c_default = {
+     .iface_type             = ATCA_I2C_IFACE,
+     .devtype                = ATECC608A,
+     .atcai2c.slave_address  = 0xC0,
+-    .atcai2c.bus            = 1,
+-    .atcai2c.baud           = 400000,
++    .atcai2c.bus            = ATCA_HAL_I2C_BUS,
++    .atcai2c.baud           = ATCA_HAL_I2C_SPEED,
+     //.atcai2c.baud = 100000,
+     .wake_delay             = 1500,
+     .rx_retries             = 20

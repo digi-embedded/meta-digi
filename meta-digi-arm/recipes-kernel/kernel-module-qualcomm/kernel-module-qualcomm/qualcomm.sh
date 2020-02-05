@@ -21,6 +21,34 @@ log() {
 	printf "<$1>qca65x4: $2\n" >/dev/kmsg
 }
 
+# Get the permissions of the filesystem containing the given path
+get_filesystem_access() {
+	[ -z "${1}" ] && return
+
+	fs_device="$(df ${1} | awk 'NR==2 { print $1 }')"
+	fs_access="$(awk -v dev="${fs_device}" '$0 ~ dev { print substr($4,1,2) }' < /proc/mounts)"
+	echo ${fs_access}
+}
+
+# Get the mount point of the filesystem containing the given path
+get_filesystem_mount_point() {
+	[ -z "${1}" ] && return
+
+	fs_device="$(df ${1} | awk 'NR==2 { print $1 }')"
+	fs_mount_point="$(awk -v dev="${fs_device}" '$0 ~ dev { print $2 }' < /proc/mounts)"
+	echo ${fs_mount_point}
+}
+
+# Remount the filesystem containing the given path as 'read-write' if it was
+# mounted as 'read-only'.
+set_filesystem_rw_access() {
+	[ -z "${1}" ] && return
+
+	if [ "$(get_filesystem_access ${1})" = "ro" ]; then
+		mount -o remount,rw $(get_filesystem_mount_point ${1})
+	fi
+}
+
 # Do nothing if the wireless node does not exist on the device tree
 [ -d "/proc/device-tree/wireless" ] || exit 0
 
@@ -30,6 +58,7 @@ grep -qws 'wlan' /proc/modules && exit 0
 FIRMWARE_DIR="/lib/firmware"
 MACFILE="${FIRMWARE_DIR}/wlan/wlan_mac.bin"
 TMP_MACFILE="$(mktemp -t wlan_mac.XXXXXX)"
+FS_ORIGINAL_ACCESS="$(get_filesystem_access ${FIRMWARE_DIR})"
 
 # Read the MACs from DeviceTree. We can have up to four wireless interfaces
 # The only required one is wlan0 that is mapped with device tree mac address
@@ -47,86 +76,26 @@ done
 
 # Override the MAC firmware file only if the MAC file has changed.
 if ! cmp -s ${TMP_MACFILE} ${MACFILE}; then
-	if [ ! -w ${MACFILE} ]; then
-		mount_point="$(df $(dirname "${MACFILE}") | awk '!/^Filesystem/{ print $6 }')"
-		log "6" "[INFO] ${MACFILE} is not writable, remounting '${mount_point}' as rw"
-		mount -o remount,rw ${mount_point}
-	fi
-
+	set_filesystem_rw_access ${FIRMWARE_DIR}
 	cp ${TMP_MACFILE} ${MACFILE} || log "3" "[ERROR] Could not create ${MACFILE}"
 fi
 rm -f "${TMP_MACFILE}"
-
-OTP_REGION_CODE="$(cat /proc/device-tree/digi,hwid,cert 2>/dev/null | tr -d '\0')"
-DTB_REGION_CODE="$(cat /proc/device-tree/wireless/regulatory-domain 2>/dev/null | tr -d '\0')"
-US_CODE="0x0"
-WW_CODE="0x1"
-JP_CODE="0x2"
-# Check if the DTB_REGION_CODE is in the list of valid codes,
-# if not use the OTP programmed value.
-case "${DTB_REGION_CODE}" in
-	${US_CODE} | ${WW_CODE} | ${JP_CODE})
-		REGULATORY_DOMAIN="${DTB_REGION_CODE}";;
-	*)
-		if [ -n "${DTB_REGION_CODE}" ]; then
-			log "5" "[WARN] Invalid region code in device tree, using OTP value"
-		fi
-		REGULATORY_DOMAIN="${OTP_REGION_CODE}";;
-esac
-
 
 # Create symbolic links to the proper FW files depending on the country region
 # Use a sub-shell here to change to firmware directory
 (
 	cd "${FIRMWARE_DIR}"
 
-	if [ -f "bdwlan30_US.bin" ] || [ -f "bdwlan30_World.bin" ]; then
-		BDATA_US="bdwlan30_US.bin"
-		BDATA_WW="bdwlan30_World.bin"
-		BDATA_LINK="bdwlan30.bin"
-		UTFBDATA_LINK="utfbd30.bin"
-	elif [ -f "fakeboar_US.bin" ] || [ -f "fakeboar_World.bin" ]; then
-		BDATA_US="fakeboar_US.bin"
-		BDATA_WW="fakeboar_World.bin"
-		# Use different links for propietary and community drivers
-		if [ -f "board.bin" ]; then
-			BDATA_LINK="board.bin"
-		else
-			BDATA_LINK="fakeboar.bin"
-		fi
-	else
-		log "5" "[ERROR] Could not locate board data files"
-		exit 1
-	fi
-
-	BDATA_SOURCE="${BDATA_US}"
-	case "${REGULATORY_DOMAIN}" in
-		${US_CODE})
-			log "5" "Setting US wireless region";;
-		${WW_CODE}|${JP_CODE})
-			if [ -f "${BDATA_WW}" ]; then
-				log "5" "Setting WW (world wide) wireless region"
-				BDATA_SOURCE="${BDATA_WW}"
-			else
-				log "5" "[WARN] No WW (worldwide) board data file, using US"
-			fi
-			;;
-		"")
-			log "5" "[WARN] region code not found, using US";;
-		*)
-			log "5" "[WARN] Invalid region code, using US";;
-	esac
+	BDATA_SOURCE="bdwlan30_US.bin"
+	log "5" "Setting US wireless region"
 
 	# When defined, update the links only if they are wrong so we don't
 	# rewrite the internal memory every time we boot
-	if [ -n "${BDATA_LINK}" ] &&
-	   ([ ! -f "${BDATA_LINK}" ] ||
-	   ! cmp -s "${BDATA_LINK}" "${BDATA_SOURCE}"); then
+	BDATA_LINK="bdwlan30.bin"
+	UTFBDATA_LINK="utfbd30.bin"
+	if ([ ! -f "${BDATA_LINK}" ] || ! cmp -s "${BDATA_LINK}" "${BDATA_SOURCE}"); then
+		set_filesystem_rw_access ${FIRMWARE_DIR}
 		ln -sf "${BDATA_SOURCE}" "${BDATA_LINK}"
-	fi
-	if [ -n "${UTFBDATA_LINK}" ] &&
-	   ([ ! -f "${UTFBDATA_LINK}" ] ||
-	   ! cmp -s "${UTFBDATA_LINK}" "${BDATA_SOURCE}"); then
 		ln -sf "${BDATA_SOURCE}" "${UTFBDATA_LINK}"
 	fi
 )
@@ -139,3 +108,9 @@ modprobe wlan
 
 # Verify the interface is present
 [ -d "/sys/class/net/wlan0" ] || log "3" "[ERROR] Loading wlan module"
+
+# Restore the filesystem with the original access permissions if it has been
+# changed inside the script.
+if [ "$(get_filesystem_access ${FIRMWARE_DIR})" != "${FS_ORIGINAL_ACCESS}" ]; then
+	mount -o remount,${FS_ORIGINAL_ACCESS} $(get_filesystem_mount_point ${FIRMWARE_DIR})
+fi

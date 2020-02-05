@@ -300,7 +300,9 @@ FILES_libegl-imx-dev = "${includedir}/EGL ${includedir}/KHR ${libdir}/pkgconfig/
 
 FILES_libgal-imx = "${libdir}/libGAL${SOLIBS} ${libdir}/libGAL_egl${SOLIBS}"
 FILES_libgal-imx-dev = "${libdir}/libGAL${SOLIBSDEV} ${includedir}/HAL"
-RDEPENDS_libgal-imx += "kernel-module-imx-gpu-viv"
+# Digi custom change: we include the imx-gpu-viv driver as built-in in the
+# kernel, so this dependency isn't necessary
+#RDEPENDS_libgal-imx += "kernel-module-imx-gpu-viv"
 RPROVIDES_libgal-imx += "libgal-imx"
 INSANE_SKIP_libgal-imx += "build-deps"
 

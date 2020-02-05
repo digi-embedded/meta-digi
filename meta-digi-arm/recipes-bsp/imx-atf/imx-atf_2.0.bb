@@ -10,10 +10,12 @@ inherit fsl-eula-unpack pkgconfig deploy
 PV = "2.0+git${SRCPV}"
 
 ATF_SRC ?= "git://source.codeaurora.org/external/imx/imx-atf.git;protocol=https"
-SRCBRANCH = "imx_4.14.98_2.1.0"
+SRCBRANCH = "imx_4.14.98_2.3.0"
 
 SRC_URI = "${ATF_SRC};branch=${SRCBRANCH}"
-SRCREV = "727cf896a4c79d152dae4537e28400c747bf39b9"
+SRCREV = "09c5cc994634060ad7dfef4620866838d19694a4"
+
+SRC_URI_append_ccimx8mn = " file://0001-imx8mn-Disable-M7-debug-console.patch"
 
 S = "${WORKDIR}/git"
 

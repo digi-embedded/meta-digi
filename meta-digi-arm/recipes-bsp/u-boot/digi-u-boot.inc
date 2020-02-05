@@ -63,7 +63,6 @@ do_compile () {
 				if [ $j -eq $i ]
 				then
 					oe_runmake -C ${S} O=${B}/${config} ${config}
-
 					# Reconfigure U-Boot with Digi UBOOT_EXTRA_CONF
 					for var in ${UBOOT_EXTRA_CONF}; do
 						echo "${var}" >> ${B}/${config}/.config
@@ -80,7 +79,7 @@ do_compile () {
 					unset k
 
 					# Secure boot artifacts
-					if [ "${TRUSTFENCE_SIGN}" = "1" ]
+					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${SIGN_MODE}" = "HAB" ]
 					then
 						cp ${B}/${config}/u-boot-dtb-signed.imx ${B}/${config}/u-boot-dtb-signed-${type}.${UBOOT_SUFFIX}
 						cp ${B}/${config}/u-boot-dtb-usb-signed.imx ${B}/${config}/u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX}
@@ -123,8 +122,7 @@ do_deploy_append() {
 					cd ${DEPLOYDIR}
 					rm -r ${UBOOT_BINARY}-${type}
 					ln -sf u-boot-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-${type}.${UBOOT_SUFFIX}
-					if [ "${TRUSTFENCE_SIGN}" = "1" ]
-					then
+					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${SIGN_MODE}" = "HAB" ]; then
 						install ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
 						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
 
@@ -163,9 +161,11 @@ do_deploy_append() {
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
 
 		# Sign boot script
-		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
-		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
-		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
+		if [ "${SIGN_MODE}" = "HAB" ]; then
+			TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
+			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
+			mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
+		fi
 	fi
 	rm -f ${TMP_BOOTSCR}
 }
@@ -178,4 +178,36 @@ do_deploy_append_ccimx8x() {
 	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
 	mv ${DEPLOYDIR}/u-boot* ${DEPLOYDIR}/${BOOT_TOOLS}/
 	mv ${DEPLOYDIR}/${UBOOT_SYMLINK}-* ${DEPLOYDIR}/${BOOT_TOOLS}/
+	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+		${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${DEPLOYDIR}/boot.scr a35 ${RAM_CONTAINER_LOC_BOOT} -out ${DEPLOYDIR}/boot-mkimg.scr
+		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot-mkimg.scr" "${DEPLOYDIR}/boot.scr"
+		rm -f ${DEPLOYDIR}/boot-mkimg.scr
+	fi
+}
+
+do_deploy_append_ccimx8mn() {
+	# Move all U-Boot artifacts to the imx-boot-tools folder
+	# U-Boot images are not bootable on the i.MX8M
+	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
+	mv ${DEPLOYDIR}/u-boot-spl* ${DEPLOYDIR}/${BOOT_TOOLS}/
+
+	# Deploy the mkimage, u-boot-nodtb.bin and ccimx8mn-dvk.dtb for mkimage to generate boot binary
+	if [ -n "${UBOOT_CONFIG}" ]
+	then
+		for config in ${UBOOT_MACHINE}; do
+			i=$(expr $i + 1);
+			for type in ${UBOOT_CONFIG}; do
+				j=$(expr $j + 1);
+				if [ $j -eq $i ]
+				then
+					install -d ${DEPLOYDIR}/${BOOT_TOOLS}
+					install -m 0777 ${B}/${config}/arch/arm/dts/${UBOOT_DTB_NAME}  ${DEPLOYDIR}/${BOOT_TOOLS}
+					install -m 0777 ${B}/${config}/tools/mkimage  ${DEPLOYDIR}/${BOOT_TOOLS}/mkimage_uboot
+					install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin-${MACHINE}-${UBOOT_CONFIG}
+				fi
+			done
+			unset  j
+		done
+		unset  i
+	fi
 }

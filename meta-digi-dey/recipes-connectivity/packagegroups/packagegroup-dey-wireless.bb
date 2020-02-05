@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2019 Digi International.
+# Copyright (C) 2012-2020 Digi International.
 #
 SUMMARY = "Wireless packagegroup for DEY image"
 
@@ -8,12 +8,11 @@ inherit packagegroup
 
 RDEPENDS_${PN} = "\
     crda \
+    hostapd \
     iw \
     wpa-supplicant \
     wpa-supplicant-cli \
     wpa-supplicant-passphrase \
 "
 
-RDEPENDS_${PN}_append_ccimx6ul = " hostapd"
-RDEPENDS_${PN}_append_ccimx6qpsbc = " hostapd"
-RDEPENDS_${PN}_append_ccimx8x = " hostapd"
+RDEPENDS_${PN}_remove_ccimx6sbc = "hostapd"

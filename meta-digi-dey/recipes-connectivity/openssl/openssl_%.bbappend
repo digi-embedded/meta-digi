@@ -3,7 +3,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 CRYPTOCHIP_COMMON_PATCHES = " \
-    file://0001-Modify-openssl.cnf-to-automatically-load-the-cryptoc.patch \
+    file://0001-Modify-openssl.cnf-to-automatically-load-the-pkcs11-.patch \
 "
 
 SRC_URI_remove = " \

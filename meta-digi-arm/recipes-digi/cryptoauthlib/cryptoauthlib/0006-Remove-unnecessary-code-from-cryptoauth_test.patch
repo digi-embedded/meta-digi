@@ -1,0 +1,470 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Thu, 31 Oct 2019 16:15:30 +0100
+Subject: [PATCH 6/6] Remove unnecessary code from cryptoauth_test
+
+Some test commands apply to chips other than the ATECC508A, and can cause
+errors when used incorrectly. Remove all code that doesn't apply to our
+platforms.
+
+https://jira.digi.com/browse/DEL-6826
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ test/cmd-processor.c | 360 ++-------------------------------------------------
+ 1 file changed, 12 insertions(+), 348 deletions(-)
+
+diff --git a/test/cmd-processor.c b/test/cmd-processor.c
+index c0f819f..07ecf2a 100644
+--- a/test/cmd-processor.c
++++ b/test/cmd-processor.c
+@@ -61,13 +61,8 @@ static void lock_config(void);
+ static void lock_data(void);
+ static void info(void);
+ static void sernum(void);
+-static void discover(void);
+ static void select_device(ATCADeviceType device_type);
+ static int run_test(void* fptest);
+-static void select_204(void);
+-static void select_108(void);
+-static void select_508(void);
+-static void select_608(void);
+ static void run_basic_tests(void);
+ static void run_unit_tests(void);
+ static void run_otpzero_tests(void);
+@@ -75,10 +70,6 @@ static void run_helper_tests(void);
+ static void help(void);
+ static int parse_cmd(const char *command);
+ static void run_all_tests(void);
+-static ATCA_STATUS set_chip_mode(uint8_t i2c_user_extra_add, uint8_t ttl_enable, uint8_t watchdog, uint8_t clock_divider);
+-static void set_clock_divider_m0(void);
+-static void set_clock_divider_m1(void);
+-static void set_clock_divider_m2(void);
+ static void tng22_tests(void);
+ static void tngtn_tests(void);
+ 
+@@ -87,11 +78,6 @@ static const char* argv[] = { "manual", "-v" };
+ static t_menu_info mas_menu_info[] =
+ {
+     { "help",     "Display Menu",                                   help                                 },
+-    { "discover", "Discover Buses and Devices",                     discover                             },
+-    { "204",      "Set Target Device to ATSHA204A",                 select_204                           },
+-    { "108",      "Set Target Device to ATECC108A",                 select_108                           },
+-    { "508",      "Set Target Device to ATECC508A",                 select_508                           },
+-    { "608",      "Set Target Device to ATECC608A",                 select_608                           },
+     { "info",     "Get the Chip Revision",                          info                                 },
+     { "sernum",   "Get the Chip Serial Number",                     sernum                               },
+     { "rand",     "Generate Some Random Numbers",                   (fp_menu_handler)do_randoms          },
+@@ -107,9 +93,6 @@ static t_menu_info mas_menu_info[] =
+     { "unit",     "Run Unit Test on Selected Device",               run_unit_tests                       },
+     { "otpzero",  "Zero Out OTP Zone",                              run_otpzero_tests                    },
+     { "util",     "Run Helper Function Tests",                      run_helper_tests                     },
+-    { "clkdivm0", "Set ATECC608A to ClockDivider M0(0x00)",         set_clock_divider_m0                 },
+-    { "clkdivm1", "Set ATECC608A to ClockDivider M1(0x05)",         set_clock_divider_m1                 },
+-    { "clkdivm2", "Set ATECC608A to ClockDivider M2(0x0D)",         set_clock_divider_m2                 },
+     #endif
+     #ifndef DO_NOT_TEST_CERT
+     { "cd",       "Run Unit Tests on Cert Data",                    (fp_menu_handler)certdata_unit_tests },
+@@ -130,6 +113,8 @@ int main(int argc, char* argv[])
+ {
+     char buffer[1024];
+ 
++    select_device(ATECC508A);
++
+     while (true)
+     {
+         printf("$ ");
+@@ -202,101 +187,13 @@ static void help(void)
+     }
+ }
+ 
+-static void select_204(void)
+-{
+-    select_device(ATSHA204A);
+-}
+-static void select_108(void)
+-{
+-    select_device(ATECC108A);
+-}
+-static void select_508(void)
+-{
+-    select_device(ATECC508A);
+-}
+-static void select_608(void)
+-{
+-    select_device(ATECC608A);
+-}
+-
+-static void update_chip_mode(uint8_t* chip_mode, uint8_t i2c_user_extra_add, uint8_t ttl_enable, uint8_t watchdog, uint8_t clock_divider)
+-{
+-    if (i2c_user_extra_add != 0xFF)
+-    {
+-        *chip_mode &= ~ATCA_CHIPMODE_I2C_ADDRESS_FLAG;
+-        *chip_mode |= i2c_user_extra_add & ATCA_CHIPMODE_I2C_ADDRESS_FLAG;
+-    }
+-    if (ttl_enable != 0xFF)
+-    {
+-        *chip_mode &= ~ATCA_CHIPMODE_TTL_ENABLE_FLAG;
+-        *chip_mode |= ttl_enable & ATCA_CHIPMODE_TTL_ENABLE_FLAG;
+-    }
+-    if (watchdog != 0xFF)
+-    {
+-        *chip_mode &= ~ATCA_CHIPMODE_WATCHDOG_MASK;
+-        *chip_mode |= watchdog & ATCA_CHIPMODE_WATCHDOG_MASK;
+-    }
+-    if (clock_divider != 0xFF)
+-    {
+-        *chip_mode &= ~ATCA_CHIPMODE_CLOCK_DIV_MASK;
+-        *chip_mode |= clock_divider & ATCA_CHIPMODE_CLOCK_DIV_MASK;
+-    }
+-}
+-
+-static ATCA_STATUS check_clock_divider(void)
+-{
+-    ATCA_STATUS status;
+-    uint8_t chip_mode = 0;
+-
+-    if (gCfg->devtype != ATECC608A)
+-    {
+-        printf("Current device doesn't support clock divider settings (only ATECC608A)\r\n");
+-        return ATCA_GEN_FAIL;
+-    }
+-
+-    // Update the actual ATECC608A chip mode so it takes effect immediately
+-    status = atcab_init(gCfg);
+-    if (status != ATCA_SUCCESS)
+-    {
+-        printf("atcab_init() failed with ret=0x%08X\r\n", status);
+-        return status;
+-    }
+-
+-    do
+-    {
+-        // Read current config values
+-        status = atcab_read_bytes_zone(ATCA_ZONE_CONFIG, 0, ATCA_CHIPMODE_OFFSET, &chip_mode, 1);
+-        if (status != ATCA_SUCCESS)
+-        {
+-            printf("atcab_read_bytes_zone() failed with ret=0x%08X\r\n", status);
+-            break;
+-        }
+-
+-        // Update the ATECC608A test config data so all the unit tests will run with the new chip mode
+-        update_chip_mode(&test_ecc608_configdata[ATCA_CHIPMODE_OFFSET], 0xFF, 0xFF, chip_mode & ATCA_CHIPMODE_WATCHDOG_MASK, chip_mode & ATCA_CHIPMODE_CLOCK_DIV_MASK);
+-
+-    }
+-    while (0);
+-
+-    atcab_release();
+-    return status;
+-}
+-
+ static void run_basic_tests(void)
+ {
+-    if (gCfg->devtype == ATECC608A)
+-    {
+-        check_clock_divider();
+-    }
+     run_test(RunAllBasicTests);
+ }
+ 
+ static void run_unit_tests(void)
+ {
+-    if (gCfg->devtype == ATECC608A)
+-    {
+-        check_clock_divider();
+-    }
+     run_test(RunAllFeatureTests);
+ }
+ static void run_otpzero_tests(void)
+@@ -431,38 +328,6 @@ static ATCA_STATUS do_randoms(void)
+ 
+     return status;
+ }
+-
+-static void discover(void)
+-{
+-    ATCAIfaceCfg ifaceCfgs[10];
+-    int i;
+-    const char *devname[] = { "ATSHA204A", "ATECC108A", "ATECC508A", "ATECC608A" };  // indexed by ATCADeviceType
+-
+-    for (i = 0; i < (int)(sizeof(ifaceCfgs) / sizeof(ATCAIfaceCfg)); i++)
+-    {
+-        ifaceCfgs[i].devtype = ATCA_DEV_UNKNOWN;
+-        ifaceCfgs[i].iface_type = ATCA_UNKNOWN_IFACE;
+-    }
+-
+-    printf("Searching...\r\n");
+-    atcab_cfg_discover(ifaceCfgs, sizeof(ifaceCfgs) / sizeof(ATCAIfaceCfg));
+-    for (i = 0; i < (int)(sizeof(ifaceCfgs) / sizeof(ATCAIfaceCfg)); i++)
+-    {
+-        if (ifaceCfgs[i].devtype != ATCA_DEV_UNKNOWN)
+-        {
+-            printf("Found %s ", devname[ifaceCfgs[i].devtype]);
+-            if (ifaceCfgs[i].iface_type == ATCA_I2C_IFACE)
+-            {
+-                printf("@ bus %d addr %02x", ifaceCfgs[i].atcai2c.bus, ifaceCfgs[i].atcai2c.slave_address);
+-            }
+-            if (ifaceCfgs[i].iface_type == ATCA_SWI_IFACE)
+-            {
+-                printf("@ bus %d", ifaceCfgs[i].atcaswi.bus);
+-            }
+-            printf("\r\n");
+-        }
+-    }
+-}
+ static void info(void)
+ {
+     ATCA_STATUS status;
+@@ -640,18 +505,7 @@ static ATCA_STATUS get_serial_no(uint8_t *sernum)
+ 
+ static void select_device(ATCADeviceType device_type)
+ {
+-    ATCA_STATUS status;
+-
+-    status = set_test_config(device_type);
+-
+-    if (status == ATCA_SUCCESS)
+-    {
+-        printf("Device Selected.\r\n");
+-    }
+-    else
+-    {
+-        printf("IFace Cfg are NOT available\r\n");
+-    }
++    set_test_config(device_type);
+ }
+ 
+ static int run_test(void* fptest)
+@@ -674,11 +528,6 @@ static void run_all_tests(void)
+     bool is_data_locked = false;
+     int fails = 0;
+ 
+-    if (gCfg->devtype == ATECC608A)
+-    {
+-        check_clock_divider();
+-    }
+-
+     info();
+     sernum();
+     do_randoms();
+@@ -826,212 +675,27 @@ static ATCA_STATUS set_test_config(ATCADeviceType deviceType)
+     gCfg->devtype = ATCA_DEV_UNKNOWN;
+     gCfg->iface_type = ATCA_UNKNOWN_IFACE;
+ 
+-    switch (deviceType)
+-    {
+-    case ATSHA204A:
+-#if defined(ATCA_HAL_I2C)
+-        *gCfg = cfg_atsha204a_i2c_default;
+-#elif defined(ATCA_HAL_SWI)
+-        *gCfg = cfg_atsha204a_swi_default;
+-#elif defined(ATCA_HAL_KIT_HID)
+-        *gCfg = cfg_atsha204a_kithid_default;
+-#elif defined(ATCA_HAL_KIT_CDC)
+-        *gCfg = cfg_atsha204a_kitcdc_default;
+-#elif defined(ATCA_HAL_CUSTOM)
+-        *gCfg = g_cfg_atsha204a_custom;
+-#else
+-#error "HAL interface is not selected";
+-#endif
+-        break;
+-
+-    case ATECC108A:
+ #if defined(ATCA_HAL_I2C)
+-        *gCfg = cfg_ateccx08a_i2c_default;
+-        gCfg->devtype = deviceType;
++    *gCfg = cfg_ateccx08a_i2c_default;
++    gCfg->devtype = deviceType;
+ #elif defined(ATCA_HAL_SWI)
+-        *gCfg = cfg_ateccx08a_swi_default;
+-        gCfg->devtype = deviceType;
++    *gCfg = cfg_ateccx08a_swi_default;
++    gCfg->devtype = deviceType;
+ #elif defined(ATCA_HAL_KIT_HID)
+-        *gCfg = cfg_ateccx08a_kithid_default;
+-        gCfg->devtype = deviceType;
++    *gCfg = cfg_ateccx08a_kithid_default;
++    gCfg->devtype = deviceType;
+ #elif defined(ATCA_HAL_KIT_CDC)
+-        *gCfg = cfg_ateccx08a_kitcdc_default;
+-        gCfg->devtype = deviceType;
++    *gCfg = cfg_ateccx08a_kitcdc_default;
++    gCfg->devtype = deviceType;
+ #elif defined(ATCA_HAL_CUSTOM)
+-        *gCfg = g_cfg_atecc108a_custom;
++    *gCfg = g_cfg_atecc508a_custom;
+ #else
+ #error "HAL interface is not selected";
+ #endif
+-        break;
+-
+-    case ATECC508A:
+-#if defined(ATCA_HAL_I2C)
+-        *gCfg = cfg_ateccx08a_i2c_default;
+-        gCfg->devtype = deviceType;
+-#elif defined(ATCA_HAL_SWI)
+-        *gCfg = cfg_ateccx08a_swi_default;
+-        gCfg->devtype = deviceType;
+-#elif defined(ATCA_HAL_KIT_HID)
+-        *gCfg = cfg_ateccx08a_kithid_default;
+-        gCfg->devtype = deviceType;
+-#elif defined(ATCA_HAL_KIT_CDC)
+-        *gCfg = cfg_ateccx08a_kitcdc_default;
+-        gCfg->devtype = deviceType;
+-#elif defined(ATCA_HAL_CUSTOM)
+-        *gCfg = g_cfg_atecc508a_custom;
+-#else
+-#error "HAL interface is not selected";
+-#endif
+-        break;
+-
+-    case ATECC608A:
+-#if defined(ATCA_HAL_I2C)
+-        *gCfg = cfg_ateccx08a_i2c_default;
+-        gCfg->devtype = deviceType;
+-#elif defined(ATCA_HAL_SWI)
+-        *gCfg = cfg_ateccx08a_swi_default;
+-        gCfg->devtype = deviceType;
+-#elif defined(ATCA_HAL_KIT_HID)
+-        *gCfg = cfg_ateccx08a_kithid_default;
+-        gCfg->devtype = deviceType;
+-#elif defined(ATCA_HAL_KIT_CDC)
+-        *gCfg = cfg_ateccx08a_kitcdc_default;
+-        gCfg->devtype = deviceType;
+-#elif defined(ATCA_HAL_CUSTOM)
+-        *gCfg = g_cfg_atecc608a_custom;
+-#else
+-#error "HAL interface is not selected";
+-#endif
+-        break;
+-
+-    default:
+-        //device type wasn't found, return with error
+-        return ATCA_GEN_FAIL;
+-    }
+-
+-    #ifdef ATCA_RASPBERRY_PI_3
+-    gCfg->atcai2c.bus = 1;
+-    #endif
+ 
+     return ATCA_SUCCESS;
+ }
+ 
+-static ATCA_STATUS set_chip_mode(uint8_t i2c_user_extra_add, uint8_t ttl_enable, uint8_t watchdog, uint8_t clock_divider)
+-{
+-    ATCA_STATUS status;
+-    uint8_t config_word[ATCA_WORD_SIZE];
+-    bool is_config_locked = false;
+-
+-    if (gCfg->devtype != ATECC608A)
+-    {
+-        printf("Current device doesn't support clock divider settings (only ATECC608A)\r\n");
+-        return ATCA_GEN_FAIL;
+-    }
+-
+-    status = is_device_locked(LOCK_ZONE_CONFIG, &is_config_locked);
+-    if (status != ATCA_SUCCESS)
+-    {
+-        printf("is_device_locked() failed with ret=0x%08X\r\n", status);
+-        return status;
+-    }
+-
+-    if (is_config_locked)
+-    {
+-        printf("Current device is config locked. Can't change clock divider. ");
+-    }
+-
+-    // Update the actual ATECC608A chip mode so it takes effect immediately
+-    status = atcab_init(gCfg);
+-    if (status != ATCA_SUCCESS)
+-    {
+-        printf("atcab_init() failed with ret=0x%08X\r\n", status);
+-        return status;
+-    }
+-
+-    do
+-    {
+-        // Read current config values
+-        status = atcab_read_bytes_zone(ATCA_ZONE_CONFIG, 0, 16, config_word, 4);
+-        if (status != ATCA_SUCCESS)
+-        {
+-            printf("atcab_read_bytes_zone() failed with ret=0x%08X\r\n", status);
+-            break;
+-        }
+-
+-        if (is_config_locked)
+-        {
+-            printf("Currently set to 0x%02X.\r\n", (int)(config_word[3] >> 3));
+-            status = ATCA_GEN_FAIL;
+-            break;
+-        }
+-
+-        // Update ChipMode
+-        update_chip_mode(&config_word[3], i2c_user_extra_add, ttl_enable, watchdog, clock_divider);
+-
+-        // Write config values back to chip
+-        status = atcab_write_bytes_zone(ATCA_ZONE_CONFIG, 0, 16, config_word, 4);
+-        if (status != ATCA_SUCCESS)
+-        {
+-            printf("atcab_write_bytes_zone() failed with ret=0x%08X\r\n", status);
+-            break;
+-        }
+-
+-        // Put to sleep so new values take effect
+-        status = atcab_wakeup();
+-        if (status != ATCA_SUCCESS)
+-        {
+-            printf("atcab_wakeup() failed with ret=0x%08X\r\n", status);
+-            break;
+-        }
+-        status = atcab_sleep();
+-        if (status != ATCA_SUCCESS)
+-        {
+-            printf("atcab_sleep() failed with ret=0x%08X\r\n", status);
+-            break;
+-        }
+-
+-        // Update the ATECC608A test config data so all the unit tests will run with the new chip mode
+-        update_chip_mode(&test_ecc608_configdata[ATCA_CHIPMODE_OFFSET], i2c_user_extra_add, ttl_enable, watchdog, clock_divider);
+-
+-    }
+-    while (0);
+-
+-    atcab_release();
+-    return status;
+-}
+-
+-static void set_clock_divider_m0(void)
+-{
+-    ATCA_STATUS status = set_chip_mode(0xFF, 0xFF, ATCA_CHIPMODE_WATCHDOG_SHORT, ATCA_CHIPMODE_CLOCK_DIV_M0);
+-
+-    if (status == ATCA_SUCCESS)
+-    {
+-        printf("Set device to clock divider M0 (0x%02X) and watchdog to 1.3s nominal.\r\n", ATCA_CHIPMODE_CLOCK_DIV_M0 >> 3);
+-    }
+-}
+-
+-static void set_clock_divider_m1(void)
+-{
+-    ATCA_STATUS status = set_chip_mode(0xFF, 0xFF, ATCA_CHIPMODE_WATCHDOG_SHORT, ATCA_CHIPMODE_CLOCK_DIV_M1);
+-
+-    if (status == ATCA_SUCCESS)
+-    {
+-        printf("Set device to clock divider M1 (0x%02X) and watchdog to 1.3s nominal.\r\n", ATCA_CHIPMODE_CLOCK_DIV_M1 >> 3);
+-    }
+-}
+-
+-static void set_clock_divider_m2(void)
+-{
+-    // Additionally set watchdog to long settings (~13s) as some commands
+-    // can't complete in time on the faster watchdog setting.
+-    ATCA_STATUS status = set_chip_mode(0xFF, 0xFF, ATCA_CHIPMODE_WATCHDOG_LONG, ATCA_CHIPMODE_CLOCK_DIV_M2);
+-
+-    if (status == ATCA_SUCCESS)
+-    {
+-        printf("Set device to clock divider M2 (0x%02X) and watchdog to 13s nominal.\r\n", ATCA_CHIPMODE_CLOCK_DIV_M2 >> 3);
+-    }
+-}
+-
+ static void tng22_tests(void)
+ {
+     ATCA_STATUS status;

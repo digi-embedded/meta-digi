@@ -27,13 +27,26 @@ SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 RAM_CONFIGS = "1.2GHz_512MB_16bit 1.2GHz_1GB_16bit 1.2GHz_1GB_32bit 1.2GHz_2GB_32bit"
 
 # Linux kernel configuration
-KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8x_defconfig"
+KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8_defconfig"
+
+STORAGE_MEDIA = "mmc"
+
+# Bluetooth interface
+BT_DEVICE_NAME ?= "cc8x"
 
 # Wireless external module
 WIRELESS_MODULE ?= ""
+WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
+HAS_WIFI_VIRTWLANS = "true"
+
+# Wireless p2p interface
+WLAN_P2P_INTERFACE ?= "p2p0"
+WLAN_P2P_DEVICE_NAME ?= "ccimx8x-p2p"
 
 # Firmware
 MACHINE_FIRMWARE ?= "firmware-imx-vpu-imx8 firmware-imx-sdma"
+MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6574-bt', '', d)}"
+MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6574-wifi', '', d)}"
 
 MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
@@ -58,6 +71,16 @@ KERNEL_IMAGETYPE = "Image.gz"
 
 VIRTUAL-RUNTIME_init_manager ?= "systemd"
 VIRTUAL-RUNTIME_initscripts ?= "initscripts"
+
+# For i.MX 8 silicon chip revision
+MX8_CHIP_REV ?= "B0"
+MX8_SOC_VAR ?= "QX"
+SIGN_MODE = "AHAB"
+
+# For Trustfence container header RAM locations
+RAM_CONTAINER_LOC_BOOT = "0x80280000"
+RAM_CONTAINER_LOC_DTB = "0x82000000"
+RAM_CONTAINER_LOC_TF = "0x82100000"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend
 # Vulkan is necessary for wayland to build

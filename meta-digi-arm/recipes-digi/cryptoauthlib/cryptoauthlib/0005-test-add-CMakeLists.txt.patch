@@ -1,0 +1,96 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Thu, 7 Nov 2019 16:36:35 +0100
+Subject: [PATCH 5/6] test: add CMakeLists.txt
+
+This file was ported form the master branch to be able to compile the
+cryptoauth_test app. Additional installation instructions were added as well.
+
+Move the ATCA_HAL_I2C build option to the root CMake file to enable it for both
+the library and the test app.
+
+https://jira.digi.com/browse/DEL-6826
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ CMakeLists.txt      |  3 +++
+ lib/CMakeLists.txt  |  1 -
+ test/CMakeLists.txt | 44 ++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 47 insertions(+), 1 deletion(-)
+ create mode 100644 test/CMakeLists.txt
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 429c06c..a490557 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,6 +1,9 @@
+ cmake_minimum_required(VERSION 2.6.4)
+ project (cryptoauthlib)
+ 
++# Enable the I2C build option at a global level by default to use it for both the library and the test app
++option(ATCA_HAL_I2C "Include the I2C Hal Driver - Linux & MCU only" ON)
++
+ # Set the current release version
+ set(VERSION "2018.10.26")
+ set(VERSION_MAJOR 2028)
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index 88533f1..6a00f7c 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -3,7 +3,6 @@ project(cryptoauth)
+ 
+ # Various Options for Build
+ option(ATCA_HAL_KIT_HID "Include the HID HAL Driver")
+-option(ATCA_HAL_I2C "Include the I2C Hal Driver - Linux & MCU only" ON)
+ option(ATCA_HAL_CUSTOM "Include support for Custom/Plug-in Hal Driver" ON)
+ option(ATCA_PRINTF "Enable Debug print statements in library")
+ option(ATCA_PKCS11 "Build PKCS11 Library")
+diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
+new file mode 100644
+index 0000000..7155f38
+--- /dev/null
++++ b/test/CMakeLists.txt
+@@ -0,0 +1,44 @@
++cmake_minimum_required(VERSION 2.6.4)
++project (cryptoauth_test)
++
++file(GLOB TEST_ATCACERT_SRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "atcacert/*.c")
++file(GLOB TEST_JWT_SRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "jwt/*.c")
++file(GLOB TEST_TNG_SRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "tng/*.c")
++file(GLOB TEST_SRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.c")
++
++if(ATCA_HAL_KIT_HID)
++add_definitions(-DATCA_HAL_KIT_HID)
++endif(ATCA_HAL_KIT_HID)
++
++if(ATCA_HAL_KIT_CDC)
++add_definitions(-DATCA_HAL_KIT_CDC)
++endif(ATCA_HAL_KIT_CDC)
++
++if(ATCA_HAL_I2C)
++add_definitions(-DATCA_HAL_I2C)
++endif(ATCA_HAL_I2C)
++
++if(ATCA_HAL_CUSTOM)
++add_definitions(-DATCA_HAL_CUSTOM)
++endif()
++
++add_executable(cryptoauth_test ${TEST_SRC} ${TEST_TNG_SRC} ${TEST_JWT_SRC} ${TEST_ATCACERT_SRC})
++
++include_directories(cryptoauth_test ${CMAKE_CURRENT_SOURCE_DIR}/../ ${CMAKE_CURRENT_SOURCE_DIR}/../lib)
++
++target_link_libraries(cryptoauth_test cryptoauth)
++
++if(UNIX)
++target_link_libraries(cryptoauth_test pthread)
++endif()
++
++set(DEFAULT_BIN_PATH "${CMAKE_INSTALL_FULL_BINDIR}" CACHE
++    STRING "The default absolute test app path")
++
++install(DIRECTORY DESTINATION ${DEFAULT_BIN_PATH})
++install(CODE "
++        if(NOT EXISTS ${DEFAULT_BIN_PATH}/cryptoauth_test)
++            file(INSTALL ${PROJECT_BINARY_DIR}/cryptoauth_test
++                 DESTINATION ${DEFAULT_BIN_PATH})
++        endif()
++        ")

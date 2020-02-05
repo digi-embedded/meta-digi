@@ -33,29 +33,47 @@ set_gpio_value() {
 
 xbee_init() {
 	# Power cycle XBEE_RESET_N
-	request_gpio_out ${XBEE_RESET_N_GPIO}
-	set_gpio_value ${XBEE_RESET_N_GPIO} 0
-	set_gpio_value ${XBEE_RESET_N_GPIO} 1
+	request_gpio_out ${1}
+	set_gpio_value ${1} 0
+	set_gpio_value ${1} 1
 
 	# Set low XBEE_SLEEP_RQ
-	request_gpio_out ${XBEE_SLEEP_RQ_GPIO}
-	set_gpio_value ${XBEE_SLEEP_RQ_GPIO} 0
+	request_gpio_out ${2}
+	set_gpio_value ${2} 0
 }
 
 xbee_stop() {
-	free_gpio ${XBEE_RESET_N_GPIO}
-	free_gpio ${XBEE_SLEEP_RQ_GPIO}
+	free_gpio ${1}
+	free_gpio ${2}
+}
+
+xbee_iterate_list() {
+	i=0
+	for RESET in $(echo ${XBEE_RESET_N_GPIO} | sed "s/,/ /g"); do
+		j=0
+		for SLEEP in $(echo ${XBEE_SLEEP_RQ_GPIO} | sed "s/,/ /g"); do
+			if [ "${i}" = "${j}" ]; then
+				if [ "${1}" = "start" ]; then
+					xbee_init ${RESET} ${SLEEP}
+				elif [ "${1}" = "stop" ]; then
+					xbee_stop ${RESET} ${SLEEP}
+				fi
+			fi
+			j="$((j + 1))"
+		done
+		i="$((i + 1))"
+	done
 }
 
 case "$1" in
 	start)
 		echo -n "Starting XBee hardware: "
-		xbee_init
+		xbee_iterate_list start
 		echo "done."
 		;;
 	stop)
 		echo -n "Stopping XBee hardware: "
-		xbee_stop
+		xbee_iterate_list stop
 		echo "done."
 		;;
 	restart)
