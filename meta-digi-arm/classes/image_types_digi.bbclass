@@ -216,8 +216,8 @@ trustence_sign_cpio() {
 }
 CONVERSIONTYPES += "tf"
 CONVERSION_CMD_tf = "trustence_sign_cpio ${IMAGE_NAME}.rootfs.${type}"
-CONVERSION_DEPENDS_tf = "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
-CONVERSION_DEPENDS_tf += "${@oe.utils.conditional('SIGN_MODE', 'AHAB', 'imx-mkimage', '', d)}"
+CONVERSION_DEPENDS_tf = "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', \
+			    oe.utils.conditional('SIGN_MODE', 'AHAB', 'trustfence-sign-tools-native imx-mkimage', 'trustfence-sign-tools-native', d), '', d)}"
 IMAGE_TYPES += "cpio.gz.u-boot.tf"
 
 ################################################################################
