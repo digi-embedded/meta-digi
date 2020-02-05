@@ -212,6 +212,9 @@ trustence_sign_cpio() {
 		fi
 		# Sign/encrypt the ramdisk
 		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -i "${1}" "${1}.tf"
+	else
+		# Copy the image with no changes
+		cp "${1}" "${1}.tf"
 	fi
 }
 CONVERSIONTYPES += "tf"
