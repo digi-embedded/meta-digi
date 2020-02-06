@@ -86,10 +86,22 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 # Downloads
 
-* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/2.6/r2/images/
-* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/2.6/r2/sdk/
+* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/2.6/r3/images/
+* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/2.6/r3/sdk/
 
 # Release Changelog
+
+## 2.6-r3
+
+* Release based on [Yocto 2.6 (Thud)](https://www.yoctoproject.org/software-overview/downloads) including:
+  * Package upgrades and security fixes
+* Added support for ConnectCore 8M Nano platform
+* Updated kernel version to v4.14.170 for i.MX8X and i.MX6UL platforms
+* Updated kernel version to v4.9.212 for i.MX6 platforms
+* Updated U-Boot to version 2019.04-r1 for i.MX8X platform
+* Updated U-Boot to version 2017.03-r5 for i.MX6 and i.MX6UL platforms
+* Updated i.MX8 SCU firmware to v1.3.0
+* Updated QCA65x4 Wi-Fi and Bluetooth firmware
 
 ## 2.6-r2
 
@@ -144,6 +156,14 @@ updated list can be found on the online documentation.
 * For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
   devices (ConnectCore 6UL, ConnectCore 6 Plus) fail to join autonomous groups.
 * Trustfence is not yet supported on U-Boot v2018.03.
+
+## ConnectCore 8M Nano
+
+* ConnectCore 8M Nano System-on-Module (SOM)
+  * CPU wake-up sources are not yet supported
+* ConnectCore 8M Nano DVK
+  * The maximum bitrate for CAN interface is 125 Kbits/s. This is a software
+  limitation from the CAN controller.
 
 ## ConnectCore 8X
 
