@@ -5,8 +5,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 DEPENDS = "trustfence-cst coreutils util-linux"
 
-SRCBRANCH = "v2017.03/maint"
-SRCBRANCH_ccimx8x = "v2019.04/maint"
+SRCBRANCH = "v2019.04/maint"
 SRCREV = "${AUTOREV}"
 
 S = "${WORKDIR}"
