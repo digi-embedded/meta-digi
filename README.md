@@ -96,6 +96,8 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 * Release based on [Yocto 2.6 (Thud)](https://www.yoctoproject.org/software-overview/downloads) including:
   * Package upgrades and security fixes
 * Added support for ConnectCore 8M Nano platform
+* Add TrustFence support (phase 1) for ConnectCore 8X platform
+  (with U-Boot v2019.04).
 * Updated kernel version to v4.14.170 for i.MX8X and i.MX6UL platforms
 * Updated kernel version to v4.9.212 for i.MX6 platforms
 * Updated U-Boot to version 2019.04-r1 for i.MX8X platform
@@ -155,7 +157,7 @@ updated list can be found on the online documentation.
     (over 255 characters).
 * For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
   devices (ConnectCore 6UL, ConnectCore 6 Plus) fail to join autonomous groups.
-* Trustfence is not yet supported on U-Boot v2018.03.
+* Trustfence is not yet supported on the ConnectCore 8M Nano.
 
 ## ConnectCore 8M Nano
 
@@ -175,22 +177,20 @@ updated list can be found on the online documentation.
     be met in future releases of the hardware.
   * BSDL operation is not supported. It will be available in future releases
     of the hardware.
-* Digi Embedded Yocto
-  * The following features are not supported in this release for the ConnectCore 8X platform:
-    * Trustfence (TM)
 
 <a name="scfw-note"></a>
 
 ---
- **IMPORTANT**: This release updates the firmware of the _System Control Unit_ (SCU).
- This is an NXP proprietary firmware and its last version is **not compatible** with
- the previous one released on DEY-2.6-r1. As a consequence:
+ **IMPORTANT**: DEY-2.6-r2 and DEY-2.6-r3 releases update the firmware of the
+ _System Control Unit_ (SCU).
+ This is an NXP proprietary firmware and its version in these releases is
+ **not compatible** with the one released on DEY-2.6-r1. As a consequence:
 
-* Old U-Boot v2018.03-r1 **cannot boot** images from this release DEY-2.6-r2.
-* New U-Boot v2018.03-r2 **cannot boot** images from previous release DEY-2.6-r1.
+* Old U-Boot v2018.03-r1 **cannot boot** images from DEY-2.6-r2 or newer releases.
+* U-Boot v2018.03-r2 or newer **cannot boot** images from release DEY-2.6-r1.
 
- To succesfully run DEY-2.6-r2 images you need to update the U-Boot on your device.
-
+ To successfully run DEY-2.6-r2 or newer images you need to update the U-Boot on
+ your device.
  ---
 
 ## ConnectCore 6UL
