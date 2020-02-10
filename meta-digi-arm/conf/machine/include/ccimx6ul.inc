@@ -58,4 +58,5 @@ MKUBIFS_BOOT_ARGS ?= "-m 2048 -e 126976 -c 255"
 # Max LEB count (-c 8191) calculated for a partition of up to 1 GiB considering 128 KiB erase-block size.
 MKUBIFS_ARGS ?= "-m 2048 -e 126976 -c 8191"
 
-SIGN_MODE = "HAB"
+# TrustFence
+TRUSTFENCE_SIGN_MODE = "HAB"

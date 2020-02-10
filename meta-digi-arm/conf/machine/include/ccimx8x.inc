@@ -75,8 +75,9 @@ VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 # For i.MX 8 silicon chip revision
 MX8_CHIP_REV ?= "B0"
 MX8_SOC_VAR ?= "QX"
-SIGN_MODE = "AHAB"
 
+# TrustFence
+TRUSTFENCE_SIGN_MODE = "AHAB"
 # For Trustfence container header RAM locations
 RAM_CONTAINER_LOC_BOOT = "0x80280000"
 RAM_CONTAINER_LOC_DTB = "0x82000000"

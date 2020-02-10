@@ -24,7 +24,7 @@ trustfence_sign() {
 	[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
 
 	# Sign/encrypt the kernel images
-	if [ "${SIGN_MODE}" = "HAB" ]; then
+	if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
 		for type in ${KERNEL_IMAGETYPES}; do
 			KERNEL_IMAGE="${type}-${KERNEL_IMAGE_NAME}.bin"
 			TMP_KERNEL_IMAGE_SIGNED="$(mktemp ${KERNEL_IMAGE}-signed.XXXXXX)"
@@ -42,7 +42,7 @@ trustfence_sign() {
 			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -d "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
 			mv "${TMP_DTB_IMAGE_SIGNED}" "${DTB_IMAGE}"
 		done
-	elif [ "${SIGN_MODE}" = "AHAB" ]; then
+	elif [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
 		# Sign the kernel images
 		for type in ${KERNEL_IMAGETYPES}; do
 			KERNEL_IMAGE="${type}-${KERNEL_IMAGE_NAME}.bin"
@@ -64,7 +64,7 @@ trustfence_sign() {
 			rm -f ${DTB_IMAGE}-mkimg-signed
 		done
 	else
-		bberror "Unkown SIGN_MODE value"
+		bberror "Unkown TRUSTFENCE_SIGN_MODE value"
 		exit 1
 	fi
 }

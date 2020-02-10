@@ -44,4 +44,5 @@ MACHINE_EXTRA_RRECOMMENDS += " \
 
 MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth pci"
 
-SIGN_MODE = "HAB"
+# TrustFence
+TRUSTFENCE_SIGN_MODE = "HAB"

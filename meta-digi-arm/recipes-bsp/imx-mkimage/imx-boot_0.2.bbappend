@@ -205,7 +205,7 @@ do_deploy () {
 }
 
 do_deploy_append () {
-	if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${SIGN_MODE}" = "AHAB" ]; then
+	if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"

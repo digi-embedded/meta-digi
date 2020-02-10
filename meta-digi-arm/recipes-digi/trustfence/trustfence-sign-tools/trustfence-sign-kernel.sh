@@ -69,7 +69,7 @@ TARGET="$(readlink -m ${2})"
 
 # Negative offset with respect to CONFIG_RAM_START in which U-Boot
 # copies the DEK blob.
-if [ "${SIGN_MODE}" = "HAB" ]; then
+if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	DEK_BLOB_OFFSET="0x100"
 	CONFIG_CSF_SIZE="0x4000"
 fi
@@ -83,7 +83,7 @@ if [ -z "${CONFIG_SIGN_KEYS_PATH}" ]; then
 fi
 [ -d "${CONFIG_SIGN_KEYS_PATH}" ] || mkdir "${CONFIG_SIGN_KEYS_PATH}"
 
-if [ "${SIGN_MODE}" = "HAB" ]; then
+if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	if [ -n "${CONFIG_DEK_PATH}" ]; then
 		if [ ! -f "${CONFIG_DEK_PATH}" ]; then
 			echo "DEK not found. Generating random 256 bit DEK."
@@ -129,14 +129,14 @@ fi
 CONFIG_KEY_INDEX_1="$((CONFIG_KEY_INDEX + 1))"
 
 SRK_KEYS="$(echo ${CONFIG_SIGN_KEYS_PATH}/crts/SRK*crt.pem | sed s/\ /\,/g)"
-if [ "${SIGN_MODE}" = "HAB" ]; then
+if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	CERT_CSF="$(echo ${CONFIG_SIGN_KEYS_PATH}/crts/CSF${CONFIG_KEY_INDEX_1}*crt.pem)"
 	CERT_IMG="$(echo ${CONFIG_SIGN_KEYS_PATH}/crts/IMG${CONFIG_KEY_INDEX_1}*crt.pem)"
 fi
 
 n_commas="$(echo ${SRK_KEYS} | grep -o "," | wc -l)"
 
-if [ "${SIGN_MODE}" = "HAB" ]; then
+if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	if [ "${n_commas}" -eq 3 ] && [ -f "${CERT_CSF}" ] && [ -f "${CERT_IMG}" ]; then
 		# PKI tree already exists.
 		echo "Using existing PKI tree"
@@ -151,11 +151,11 @@ if [ "${SIGN_MODE}" = "HAB" ]; then
 		echo "Inconsistent CST folder."
 		exit 1
 	fi
-elif [ "${SIGN_MODE}" = "AHAB" ]; then
-	if [ "${n_commas}" -eq 3 ] && [ "${SIGN_MODE}" = "AHAB" ]; then
+elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
+	if [ "${n_commas}" -eq 3 ] && [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 		# PKI tree already exists. Do nothing
 		echo "Using existing PKI tree"
-	elif [ "${n_commas}" -eq 0 ] && [ "${SIGN_MODE}" = "AHAB" ]; then
+	elif [ "${n_commas}" -eq 0 ] && [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 		# Generate PKI
 		trustfence-gen-pki.sh "${CONFIG_SIGN_KEYS_PATH}"
 
@@ -167,7 +167,7 @@ elif [ "${SIGN_MODE}" = "AHAB" ]; then
 fi
 
 SRK_TABLE="$(pwd)/SRK_table.bin"
-if [ "${SIGN_MODE}" = "HAB" ]; then
+if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	HAB_VER="hab_ver 4"
 	DIGEST="digest"
 	DIGEST_ALGO="sha256"
@@ -281,7 +281,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-if [ "${SIGN_MODE}" = "HAB" ]; then
+if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	# Pad to IVT
 	objcopy -I binary -O binary --pad-to "${pad_len}" --gap-fill="${GAP_FILLER}" "${UIMAGE_PATH}" "${TARGET}"
 

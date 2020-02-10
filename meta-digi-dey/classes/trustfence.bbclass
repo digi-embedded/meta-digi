@@ -84,7 +84,7 @@ python () {
         key_index_1 = key_index + 1
 
         # Set the private key template, it will be expanded later in 'swu' recipes once keys are generated.
-        if (d.getVar("SIGN_MODE", "") == "AHAB"):
+        if (d.getVar("TRUSTFENCE_SIGN_MODE", "") == "AHAB"):
             d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", keys_path + "/keys/SRK" + str(key_index_1) + "*key.pem")
             d.setVar("CONFIG_SIGN_MODE", "AHAB")
         else:
