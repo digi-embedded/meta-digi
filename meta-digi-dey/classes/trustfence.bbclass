@@ -63,11 +63,7 @@ python () {
         if (d.getVar("TRUSTFENCE_DEK_PATH", True) not in [None, "0"]):
             d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_DEK_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_DEK_PATH", True))
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT", True) == "1"):
-        if ("ccimx8x" in d.getVar("MACHINE", True)):
-            bb.fatal("Environment encryption is not currently supported on the ccimx8x SOM")
-            return
-        else:
-            d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y')
+        d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y')
 
     # Provide sane default values for SWUPDATE class in case Trustfence is enabled
     if (d.getVar("TRUSTFENCE_SIGN", True) == "1"):

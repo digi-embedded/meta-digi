@@ -78,6 +78,8 @@ MX8_SOC_VAR ?= "QX"
 
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "AHAB"
+# TODO: not yet supported
+TRUSTFENCE_ENCRYPT_ENVIRONMENT = "0"
 # For Trustfence container header RAM locations
 RAM_CONTAINER_LOC_BOOT = "0x80280000"
 RAM_CONTAINER_LOC_DTB = "0x82000000"
