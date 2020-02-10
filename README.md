@@ -111,7 +111,7 @@ Documentation is available online at https://www.digi.com/resources/documentatio
   * Updated busybox to v1.29.3
   * Updated OpenSSL to v1.1.1b
   * Package upgrades and security fixes
-* Added support for ConnetCore 6 and ConnectCore 6 Plus platforms
+* Added support for ConnectCore 6 and ConnectCore 6 Plus platforms
 * Updated kernel version to v4.14.141 for i.MX8X and i.MX6UL platforms
 * Updated kernel version to v4.9.190 for i.MX6 platforms
 * Updated U-Boot to version 2018.03-r2 for i.MX8X platform
