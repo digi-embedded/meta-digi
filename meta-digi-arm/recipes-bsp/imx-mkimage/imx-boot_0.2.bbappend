@@ -212,7 +212,7 @@ do_deploy_append () {
 
 		# Sign U-boot image
 		for ramc in ${RAM_CONFIGS}; do
-			trustfence-sign-ahab-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}-signed.bin
+			trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}-signed.bin
 		done
 
 		cd ${DEPLOYDIR}

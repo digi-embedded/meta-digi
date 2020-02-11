@@ -28,15 +28,14 @@ do_install() {
 	install -d ${D}${bindir}/csf_templates
 	if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
 		install -m 0755 sign_ahab ${D}${bindir}/csf_templates/
-		install -m 0755 git/scripts/sign.sh ${D}${bindir}/trustfence-sign-ahab-uboot.sh
 	elif [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
 		install -m 0755 sign_hab ${D}${bindir}/csf_templates/
 		install -m 0755 encrypt_hab ${D}${bindir}/csf_templates/
-		install -m 0755 git/scripts/sign.sh ${D}${bindir}/trustfence-sign-uboot.sh
 	else
 		bberror "Unkown TRUSTFENCE_SIGN_MODE value"
 		exit 1
 	fi
+	install -m 0755 git/scripts/sign.sh ${D}${bindir}/trustfence-sign-uboot.sh
 	install -m 0755 trustfence-sign-kernel.sh ${D}${bindir}/
 	install -m 0755 git/scripts/csf_templates/* ${D}${bindir}/csf_templates
 }
