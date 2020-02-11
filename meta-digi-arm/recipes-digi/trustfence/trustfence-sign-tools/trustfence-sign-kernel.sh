@@ -171,7 +171,6 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	HAB_VER="hab_ver 4"
 	DIGEST="digest"
 	DIGEST_ALGO="sha256"
-	SRK_EFUSES="/dev/null"
 
 	# Other constants
 	GAP_FILLER="0x00"
@@ -243,8 +242,6 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 		"${SCRIPT_PATH}/csf_templates/sign_hab" > csf_descriptor
 	fi
 else
-	SRK_EFUSES="$(pwd)/SRK_efuses.bin"
-
 	# Other constants
 	KERNEL_START_OFFSET="0x0"
 	KERNEL_SIG_BLOCK_OFFSET="0x90"
@@ -275,7 +272,7 @@ else
 fi
 
 # Generate SRK tables
-srktool --${HAB_VER} --certs "${SRK_KEYS}" --table "${SRK_TABLE}" --efuses "${SRK_EFUSES}" --${DIGEST} "${DIGEST_ALGO}"
+srktool --${HAB_VER} --certs "${SRK_KEYS}" --table "${SRK_TABLE}" --efuses /dev/null --${DIGEST} "${DIGEST_ALGO}"
 if [ $? -ne 0 ]; then
 	echo "[ERROR] Could not generate SRK tables"
 	exit 1
