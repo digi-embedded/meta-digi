@@ -20,6 +20,12 @@ OS versions:
 
 Software for the following hardware platforms is in production support:
 
+## ConnectCore 8M Nano
+* ConnectCore 8M Nano System-on-Module (SOM)
+  * [CC-WMX-FS7D-NN](https://www.digi.com/cc8mnano)
+* ConnectCore 8M Nano Development Kit
+  * [CC-WMX8MN-KIT](https://www.digi.com/products/models/cc-wmx8mn-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/2.6/cc8mnano/yocto-gs_index))
+
 ## ConnectCore 8X
 * ConnectCore 8X System-on-Module (SOM)
   * [CC-WMX-JM8E-NN](https://www.digi.com/products/models/cc-wmx-jm8e-nn)
@@ -102,7 +108,7 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 * Updated kernel version to v4.9.212 for i.MX6 platforms
 * Updated U-Boot to version 2019.04-r1 for i.MX8X platform
 * Updated U-Boot to version 2017.03-r5 for i.MX6 and i.MX6UL platforms
-* Updated i.MX8 SCU firmware to v1.3.0
+* Updated i.MX8 SCU firmware to v1.3.0 (see [important note](#scfw-note))
 * Updated QCA65x4 Wi-Fi and Bluetooth firmware
 
 ## 2.6-r2
