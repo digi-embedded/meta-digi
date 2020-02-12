@@ -215,10 +215,7 @@ do_deploy_append () {
 			trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}-signed.bin
 		done
 
-		cd ${DEPLOYDIR}
-		cp ${B}/${config}SRK_efuses.bin ${DEPLOYDIR}
-		install ${B}/${config}SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
-		ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
+		cp ${B}/SRK_efuses.bin ${DEPLOYDIR}
 	fi
 }
 
