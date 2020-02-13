@@ -57,13 +57,13 @@ do_install_append() {
 	sed -i -e "s,##P2P0_STATIC_DNS##,${P2P0_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WPA_DRIVER##,${WPA_DRIVER},g" ${D}${sysconfdir}/network/interfaces
 
-	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
-
 	# Install virtual wlans files
 	if ${HAS_WIFI_VIRTWLANS}; then
 		install_virtwlans
 		install_wlan1
 	fi
+
+	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
 }
 
 install_virtwlans() {
