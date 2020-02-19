@@ -69,7 +69,7 @@ copy_images() {
 	# Copy individual packages only for 'release' builds, not for 'daily'.
 	# For 'daily' builds just copy the firmware images (the buildserver
 	# cannot afford such amount of disk space)
-	if echo ${JOB_NAME} | grep -qs 'dey.*release'; then
+	if [ "${DY_BUILD_RELEASE}" = "true" ]; then
 		cp -r tmp/deploy/* ${1}/
 	else
 		cp -r tmp/deploy/images ${1}/
@@ -135,8 +135,10 @@ swu_recipe_name() {
 # Set default settings if Jenkins does not do it
 [ -z "${DY_DISTRO}" ] && DY_DISTRO="dey"
 
+[ -z "${DY_BUILD_RELEASE}" ] && [[ "${JOB_NAME}" =~ dey-.*-release ]] && DY_BUILD_RELEASE="true"
+
 # If DY_BUILD_TCHAIN is unset, set it for release jobs
-[ -z "${DY_BUILD_TCHAIN}" ] && [[ "${JOB_NAME}" =~ dey-.*-release ]] && DY_BUILD_TCHAIN="true"
+[ -z "${DY_BUILD_TCHAIN}" ] && [ "${DY_BUILD_RELEASE}" = "true" ] && DY_BUILD_TCHAIN="true"
 
 # If DY_FB_IMAGE is unset, set it depending on the job name
 if [ -z "${DY_FB_IMAGE}" ] && echo ${JOB_NAME} | grep -qs 'dey.*fb'; then
