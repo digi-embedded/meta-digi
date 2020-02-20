@@ -43,12 +43,12 @@ do_install() {
 	install -d ${D}${bindir}
 	install -m 0755 linux64/cst ${D}${bindir}/cst
 	install -m 0755 $(find linux64 -type f -name srktool) ${D}${bindir}/srktool
-	if [ "${SIGN_MODE}" = "AHAB" ]; then
+	if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
 		install -m 0755 keys/ahab_pki_tree.sh ${D}${bindir}/trustfence-gen-pki.sh
-	elif [ "${SIGN_MODE}" = "HAB" ]; then
+	elif [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
 		install -m 0755 keys/hab4_pki_tree.sh ${D}${bindir}/trustfence-gen-pki.sh
 	else
-		bberror "Unkown SIGN_MODE value"
+		bberror "Unkown TRUSTFENCE_SIGN_MODE value"
 		exit 1
 	fi
 	install -m 0755 ca/openssl.cnf ${D}${bindir}/openssl.cnf

@@ -8,7 +8,8 @@ LIC_FILES_CHKSUM = "file://Licenses/README;md5=a2c678cfd4a4d97135585cad908541c6"
 SECTION = "bootloaders"
 
 DEPENDS += "bc-native dtc-native u-boot-mkimage-native"
-DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
+DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', \
+			    oe.utils.conditional('TRUSTFENCE_SIGN_MODE', 'AHAB', 'trustfence-sign-tools-native imx-mkimage', 'trustfence-sign-tools-native', d), '', d)}"
 
 PROVIDES += "u-boot"
 
@@ -79,7 +80,7 @@ do_compile () {
 					unset k
 
 					# Secure boot artifacts
-					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${SIGN_MODE}" = "HAB" ]
+					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]
 					then
 						cp ${B}/${config}/u-boot-dtb-signed.imx ${B}/${config}/u-boot-dtb-signed-${type}.${UBOOT_SUFFIX}
 						cp ${B}/${config}/u-boot-dtb-usb-signed.imx ${B}/${config}/u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX}
@@ -122,7 +123,7 @@ do_deploy_append() {
 					cd ${DEPLOYDIR}
 					rm -r ${UBOOT_BINARY}-${type}
 					ln -sf u-boot-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-${type}.${UBOOT_SUFFIX}
-					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${SIGN_MODE}" = "HAB" ]; then
+					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
 						install ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
 						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
 
@@ -159,9 +160,10 @@ do_deploy_append() {
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
+		[ -n "${TRUSTFENCE_SIGN_MODE}" ] && export CONFIG_SIGN_MODE="${TRUSTFENCE_SIGN_MODE}"
 
 		# Sign boot script
-		if [ "${SIGN_MODE}" = "HAB" ]; then
+		if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
 			TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
 			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
 			mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"

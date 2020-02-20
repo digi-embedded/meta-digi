@@ -160,7 +160,6 @@ do_deploy () {
 		install -m 0644 ${BOOT_STAGING}/m40_tcm.bin              ${DEPLOYDIR}/${BOOT_TOOLS}
 		install -m 0644 ${BOOT_STAGING}/m4_image.bin             ${DEPLOYDIR}/${BOOT_TOOLS}
 	fi
-	install -m 0755 ${S}/${TOOLS_NAME}                       ${DEPLOYDIR}/${BOOT_TOOLS}
 
 	# copy makefile (soc.mak) for reference
 	install -m 0644 ${BOOT_STAGING}/soc.mak     ${DEPLOYDIR}/${BOOT_TOOLS}
@@ -205,20 +204,18 @@ do_deploy () {
 }
 
 do_deploy_append () {
-	if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${SIGN_MODE}" = "AHAB" ]; then
+	if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
+		[ -n "${TRUSTFENCE_SIGN_MODE}" ] && export CONFIG_SIGN_MODE="${TRUSTFENCE_SIGN_MODE}"
 
 		# Sign U-boot image
 		for ramc in ${RAM_CONFIGS}; do
-			trustfence-sign-ahab-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}-signed.bin
+			trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}-signed.bin
 		done
 
-		cd ${DEPLOYDIR}
-		cp ${B}/${config}SRK_efuses.bin ${DEPLOYDIR}
-		install ${B}/${config}SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
-		ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
+		cp ${B}/SRK_efuses.bin ${DEPLOYDIR}
 	fi
 }
 

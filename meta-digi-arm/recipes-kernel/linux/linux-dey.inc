@@ -5,7 +5,8 @@ LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
 DEPENDS += "lzop-native bc-native"
-DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
+DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', \
+		oe.utils.conditional('TRUSTFENCE_SIGN_MODE', 'AHAB', 'trustfence-sign-tools-native imx-mkimage', 'trustfence-sign-tools-native', d), '', d)}"
 
 inherit kernel fsl-kernel-localversion
 
@@ -22,9 +23,10 @@ trustfence_sign() {
 	export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 	[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 	[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
+	[ -n "${TRUSTFENCE_SIGN_MODE}" ] && export CONFIG_SIGN_MODE="${TRUSTFENCE_SIGN_MODE}"
 
 	# Sign/encrypt the kernel images
-	if [ "${SIGN_MODE}" = "HAB" ]; then
+	if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
 		for type in ${KERNEL_IMAGETYPES}; do
 			KERNEL_IMAGE="${type}-${KERNEL_IMAGE_NAME}.bin"
 			TMP_KERNEL_IMAGE_SIGNED="$(mktemp ${KERNEL_IMAGE}-signed.XXXXXX)"
@@ -42,7 +44,7 @@ trustfence_sign() {
 			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -d "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
 			mv "${TMP_DTB_IMAGE_SIGNED}" "${DTB_IMAGE}"
 		done
-	elif [ "${SIGN_MODE}" = "AHAB" ]; then
+	elif [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
 		# Sign the kernel images
 		for type in ${KERNEL_IMAGETYPES}; do
 			KERNEL_IMAGE="${type}-${KERNEL_IMAGE_NAME}.bin"
@@ -64,7 +66,7 @@ trustfence_sign() {
 			rm -f ${DTB_IMAGE}-mkimg-signed
 		done
 	else
-		bberror "Unkown SIGN_MODE value"
+		bberror "Unkown TRUSTFENCE_SIGN_MODE value"
 		exit 1
 	fi
 }

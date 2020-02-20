@@ -32,10 +32,10 @@ else
 	if test -n "${module_variant}"; then
 		if test "${module_variant}" = "0x01"; then
 			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-1.2GHz_1GB_32bit.bin;
-		elif test "${module_variant}" = "0x02" ||
+		elif test "${module_variant}" = "0x02" || \
 		     test "${module_variant}" = "0x03"; then
 			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-1.2GHz_2GB_32bit.bin;
-		elif test "${module_variant}" = "0x04" ||
+		elif test "${module_variant}" = "0x04" || \
 		     test "${module_variant}" = "0x05"; then
 			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-1.2GHz_1GB_16bit.bin;
 		fi

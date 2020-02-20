@@ -38,7 +38,7 @@ def get_bootable_artifacts(d):
     # For platforms without RAM_CONFIGS, build the artifacts from UBOOT_CONFIG
     if ram_configs == "":
         for t in types.split(" "):
-            artifacts.append("%s-%s.%s" % (uboot_prefix, t, uboot_suffix))
+            artifacts.append("%s-%s.%s" % (uboot_prefix, t.replace("_","-"), uboot_suffix))
         return " ".join(artifacts)
     else:
         machine = d.getVar('MACHINE', True) or ""

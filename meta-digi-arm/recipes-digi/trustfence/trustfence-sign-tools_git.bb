@@ -5,8 +5,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 DEPENDS = "trustfence-cst coreutils util-linux"
 
-SRCBRANCH = "v2017.03/master"
-SRCBRANCH_ccimx8x = "v2019.04/master"
+SRCBRANCH = "v2019.04/master"
 SRCREV = "${AUTOREV}"
 
 S = "${WORKDIR}"
@@ -27,17 +26,16 @@ do_compile[noexec] = "1"
 
 do_install() {
 	install -d ${D}${bindir}/csf_templates
-	if [ "${SIGN_MODE}" = "AHAB" ]; then
+	if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
 		install -m 0755 sign_ahab ${D}${bindir}/csf_templates/
-		install -m 0755 git/scripts/sign.sh ${D}${bindir}/trustfence-sign-ahab-uboot.sh
-	elif [ "${SIGN_MODE}" = "HAB" ]; then
+	elif [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
 		install -m 0755 sign_hab ${D}${bindir}/csf_templates/
 		install -m 0755 encrypt_hab ${D}${bindir}/csf_templates/
-		install -m 0755 git/scripts/sign.sh ${D}${bindir}/trustfence-sign-uboot.sh
 	else
-		bberror "Unkown SIGN_MODE value"
+		bberror "Unkown TRUSTFENCE_SIGN_MODE value"
 		exit 1
 	fi
+	install -m 0755 git/scripts/sign.sh ${D}${bindir}/trustfence-sign-uboot.sh
 	install -m 0755 trustfence-sign-kernel.sh ${D}${bindir}/
 	install -m 0755 git/scripts/csf_templates/* ${D}${bindir}/csf_templates
 }

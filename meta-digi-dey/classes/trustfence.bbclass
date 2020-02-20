@@ -63,11 +63,7 @@ python () {
         if (d.getVar("TRUSTFENCE_DEK_PATH", True) not in [None, "0"]):
             d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_DEK_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_DEK_PATH", True))
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT", True) == "1"):
-        if ("ccimx8x" in d.getVar("MACHINE", True)):
-            bb.fatal("Environment encryption is not currently supported on the ccimx8x SOM")
-            return
-        else:
-            d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y')
+        d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y')
 
     # Provide sane default values for SWUPDATE class in case Trustfence is enabled
     if (d.getVar("TRUSTFENCE_SIGN", True) == "1"):
@@ -84,7 +80,7 @@ python () {
         key_index_1 = key_index + 1
 
         # Set the private key template, it will be expanded later in 'swu' recipes once keys are generated.
-        if (d.getVar("SIGN_MODE", "") == "AHAB"):
+        if (d.getVar("TRUSTFENCE_SIGN_MODE", "") == "AHAB"):
             d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", keys_path + "/keys/SRK" + str(key_index_1) + "*key.pem")
             d.setVar("CONFIG_SIGN_MODE", "AHAB")
         else:
