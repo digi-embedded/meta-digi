@@ -39,6 +39,7 @@ RDEPENDS_${PN} = "\
     ${@bb.utils.contains("MACHINE_FEATURES", "touchscreen", "${VIRTUAL-RUNTIME_touchscreen}", "",d)} \
     init-ifupdown \
     libdigiapix \
+    libgpiod \
     modutils-initscripts \
     netbase \
     networkmanager \
