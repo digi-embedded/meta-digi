@@ -6,7 +6,6 @@ Before=ModemManager.service
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/etc/xbee-init start
-ExecStop=/etc/xbee-init stop
 
 [Install]
 WantedBy=multi-user.target
