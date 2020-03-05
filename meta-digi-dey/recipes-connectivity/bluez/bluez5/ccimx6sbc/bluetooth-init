@@ -14,24 +14,17 @@
 #===============================================================================
 
 # Bluetooth power GPIO
-BT_PWR_GPIO_NR="244"
+BT_PWR_GPIO_NR="da9063-gpio 4"
 
 # set_gpio_value <gpio_nr> <value>
 set_gpio_value() {
-	local SG_GPIONR="${1}"
-	local SG_GPIOVAL="${2}"
-	local SG_GPIOPATH="/sys/class/gpio/gpio${SG_GPIONR}"
-
-	[ -d "${SG_GPIOPATH}" ] || printf "%s" "${SG_GPIONR}" > /sys/class/gpio/export
-	printf out > "${SG_GPIOPATH}/direction" && sleep .2
-	printf "${SG_GPIOVAL}" > "${SG_GPIOPATH}/value" && sleep .2
-	[ -d "${SG_GPIOPATH}" ] && printf "%s" "${SG_GPIONR}" > /sys/class/gpio/unexport
+	gpioset ${1}=${2}
 }
 
 # powercycle_gpio <gpio_nr>
 powercycle_gpio() {
-	set_gpio_value "${1}" 0
-	set_gpio_value "${1}" 1
+	gpioset ${1}=0
+	gpioset ${1}=1
 }
 
 error() {
