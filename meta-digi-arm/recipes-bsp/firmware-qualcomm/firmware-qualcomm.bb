@@ -82,14 +82,14 @@ do_install() {
 	fi
 
 	# Disable IBS over H4 for all the platforms in the bluetooth firmware
-	printf \"\\x02\" | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=54 count=1 conv=notrunc,fsync
+	awk 'BEGIN{printf "%c", 0x02}' | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=54 count=1 conv=notrunc,fsync
 }
 
 do_install_append_ccimx6ul() {
 	# Disable DEEP SLEEP in the bluetooth firmware
-	printf \"\\x00\" | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=74 count=1 conv=notrunc,fsync
+	awk 'BEGIN{printf "%c", 0x00}' | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=74 count=1 conv=notrunc,fsync
 	# Enable Internal Clock in the bluetooth firmware
-	printf \"\\x01\\x00\" | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=93 count=2 conv=notrunc,fsync
+	awk 'BEGIN{printf "%c%c", 0x01, 0x00}' | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=93 count=2 conv=notrunc,fsync
 }
 
 QCA_MODEL ?= "qca6564"
