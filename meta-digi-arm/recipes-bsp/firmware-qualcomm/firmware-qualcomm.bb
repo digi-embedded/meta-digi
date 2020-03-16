@@ -8,6 +8,9 @@ LIC_FILES_CHKSUM = "file://${DIGI_EULA_FILE};md5=8c0ad592dd48ace3d25eed5bbb26ba7
 # Selects whether to use proprietary or community driver
 QUALCOMM_WIFI_DRIVER ?= "proprietary"
 
+# Selects whether to apply the "Deep Sleep + Internal Clock" workaround
+BT_INTCLOCK_WORKAROUND ?= "0"
+BT_INTCLOCK_WORKAROUND_ccimx6ul = "1"
 # Bluetooth firmware files
 FW_QUALCOMM_BT = " \
     file://qca65X4_bt/nvm_tlv_3.2.bin \
@@ -83,13 +86,13 @@ do_install() {
 
 	# Disable IBS over H4 for all the platforms in the bluetooth firmware
 	awk 'BEGIN{printf "%c", 0x02}' | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=54 count=1 conv=notrunc,fsync
-}
 
-do_install_append_ccimx6ul() {
-	# Disable DEEP SLEEP in the bluetooth firmware
-	awk 'BEGIN{printf "%c", 0x00}' | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=74 count=1 conv=notrunc,fsync
-	# Enable Internal Clock in the bluetooth firmware
-	awk 'BEGIN{printf "%c%c", 0x01, 0x00}' | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=93 count=2 conv=notrunc,fsync
+	if "${@oe.utils.conditional('BT_INTCLOCK_WORKAROUND', '1', 'true', 'false', d)}"; then
+		# Disable DEEP SLEEP in the bluetooth firmware
+		awk 'BEGIN{printf "%c", 0x00}' | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=74 count=1 conv=notrunc,fsync
+		# Enable Internal Clock in the bluetooth firmware
+		awk 'BEGIN{printf "%c%c", 0x01, 0x00}' | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=93 count=2 conv=notrunc,fsync
+	fi
 }
 
 QCA_MODEL ?= "qca6564"
