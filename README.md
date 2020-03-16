@@ -161,8 +161,19 @@ updated list can be found on the online documentation.
 * Cloud Connector
   * Remote file system management fails with long file names and paths
     (over 255 characters).
-* For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
-  devices (ConnectCore 6UL, ConnectCore 6 Plus) fail to join autonomous groups.
+* Wireless
+  * Performance of the wireless interface is reduced when using concurrent mode,
+    as the wireless interface is shared between several different
+    functionalities.
+  * When using wireless concurrent mode, Digi recommends you keep the different
+    modes on the same frequency channels. For example, when configuring access
+    point mode on channel 36 in the 5GHz band, connect to the same channel both
+    in station mode and Wi-Fi direct so that the radio performance is optimized.
+  * When working as an access point, DFS-capable channels in the 5GHz band are
+    not supported.
+  * For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
+    devices (ConnectCore 6UL, ConnectCore 6 Plus, ConnectCore 8M Nano) fail to
+    join autonomous groups.
 * Trustfence is not yet supported on the ConnectCore 8M Nano.
 
 ## ConnectCore 8M Nano
@@ -207,15 +218,6 @@ updated list can be found on the online documentation.
     control. To work around this issue, UART1 of these SOM versions has been
     configured to operate at 115200 bps and without hardware flow control,
     reducing the maximum throughput of this interface.
-  * When using wireless concurrent mode as the wireless interface is shared
-    between several different functionalities performance is reduced.
-  * When using wireless concurrent mode Digi recommends to keep the different
-    modes on the same frequency channels. For example, when configuring access
-    point mode on channel 36 on band A, the recommendation would be to connect
-    to the same channel both in station mode and WiFi direct so that the radio
-    performance is optimized.
-  * When working as an access point, DFS capable channels in band A are not
-    currently supported.
   * The QCA6564 wireless chip does not support Wake On Wireless LAN.
 
 ## ConnectCore 6 Plus
@@ -232,8 +234,6 @@ updated list can be found on the online documentation.
 * ConnectCore 6 System-on-Module (SOM)
   * NXP i.MX6 processor has a documented errata (ERR004512) whereby the maximum
     performance of the Gigabit FEC is limited to 400Mbps (total for Tx and Rx).
-  * When using softAP mode on Band A on the Qualcomm AR6233, channels used for
-    Dynamic Frequency Selection (DFS) are not supported.
   * The Qualcomm AR6233 firmware does not support the following configuration
     modes:
     * Concurrent modes involving P2P mode, such as P2P + softAP or P2P + STA.
