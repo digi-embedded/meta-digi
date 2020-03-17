@@ -10,25 +10,25 @@ Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
 ---
  configs/sandbox_defconfig |   1 +
  tools/env/Makefile        |   2 +-
- tools/env/caam_keyblob.h  |  45 +++++++++++++++
- tools/env/fw_env.c        | 140 ++++++++++++++++++++++++++++++++++++++++++++++
+ tools/env/caam_keyblob.h  |  45 ++++++++++++
+ tools/env/fw_env.c        | 140 ++++++++++++++++++++++++++++++++++++++
  4 files changed, 187 insertions(+), 1 deletion(-)
  create mode 100644 tools/env/caam_keyblob.h
 
 diff --git a/configs/sandbox_defconfig b/configs/sandbox_defconfig
-index 2fc84a1..f033d9c 100644
+index 6894262b89..f01e70b1c4 100644
 --- a/configs/sandbox_defconfig
 +++ b/configs/sandbox_defconfig
-@@ -200,3 +200,4 @@ CONFIG_UT_TIME=y
+@@ -219,3 +219,4 @@ CONFIG_TEST_FDTDEC=y
+ CONFIG_UNIT_TEST=y
+ CONFIG_UT_TIME=y
  CONFIG_UT_DM=y
- CONFIG_UT_ENV=y
- CONFIG_UT_OVERLAY=y
 +CONFIG_MD5=y
 diff --git a/tools/env/Makefile b/tools/env/Makefile
-index 4633e0e..33e41f5 100644
+index b627796e94..fc7c44baa2 100644
 --- a/tools/env/Makefile
 +++ b/tools/env/Makefile
-@@ -23,7 +23,7 @@ hostprogs-y := fw_printenv
+@@ -24,7 +24,7 @@ hostprogs-y := fw_printenv
 
  lib-y += fw_env.o \
  	crc32.o ctype.o linux_string.o \
@@ -39,7 +39,7 @@ index 4633e0e..33e41f5 100644
 
 diff --git a/tools/env/caam_keyblob.h b/tools/env/caam_keyblob.h
 new file mode 100644
-index 0000000..1cdf394
+index 0000000000..1cdf3946c1
 --- /dev/null
 +++ b/tools/env/caam_keyblob.h
 @@ -0,0 +1,45 @@
@@ -89,7 +89,7 @@ index 0000000..1cdf394
 +
 +#endif /* CAAM_KEYBLOB_H */
 diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
-index a5d7595..b124b1e 100644
+index eef12dd2b7..b804314093 100644
 --- a/tools/env/fw_env.c
 +++ b/tools/env/fw_env.c
 @@ -24,6 +24,7 @@
