@@ -11,6 +11,8 @@ QUALCOMM_WIFI_DRIVER ?= "proprietary"
 # Selects whether to apply the "Deep Sleep + Internal Clock" workaround
 BT_INTCLOCK_WORKAROUND ?= "0"
 BT_INTCLOCK_WORKAROUND_ccimx6ul = "1"
+BT_INTCLOCK_WORKAROUND_ccimx6qpsbc = "1"
+
 # Bluetooth firmware files
 FW_QUALCOMM_BT = " \
     file://qca65X4_bt/nvm_tlv_3.2.bin \
