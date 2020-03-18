@@ -14,5 +14,5 @@ do_configure_append() {
 do_install_append() {
 	# Copy the 'progress' binary.
 	install -d ${D}${bindir}/
-	install -m 0755 tools/progress_unstripped ${D}${bindir}/progress
+	install -m 0755 tools/swupdate-progress ${D}${bindir}/progress
 }
