@@ -175,6 +175,12 @@ int reboot_recovery(unsigned int reboot_timeout)
 
 	sync();
 
+	printf("\nThe recovery commands have been properly configured and "
+	       "the system will reboot into recovery mode in %d seconds "
+	       "(^C to cancel).\n\n", reboot_timeout);
+	fflush(stdout);
+	sleep(reboot_timeout);
+
 	/* Configure system to boot into recovery mode */
 	ret = uboot_setenv("boot_recovery", "yes");
 	if (ret) {
@@ -182,11 +188,6 @@ int reboot_recovery(unsigned int reboot_timeout)
 		goto err;
 	}
 
-	printf("\nThe recovery commands have been properly configured and "
-	       "the system will reboot into recovery mode in %d seconds "
-	       "(^C to cancel).\n\n", reboot_timeout);
-	fflush(stdout);
-	sleep(reboot_timeout);
 	reboot(RB_AUTOBOOT);
 
 err:
