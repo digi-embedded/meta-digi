@@ -39,6 +39,10 @@
 #LIBS = -lssl
 ###############################################################################
 
+
+# Driver interface for Host AP driver
+CONFIG_DRIVER_HOSTAP=y
+
 # Driver interface for Agere driver
 #CONFIG_DRIVER_HERMES=y
 # Change include directories to match with the local setup
@@ -396,10 +400,6 @@ CONFIG_PEERKEY=y
 #CONFIG_NDIS_EVENTS_INTEGRATED=y
 #PLATFORMSDKLIB="/opt/Program Files/Microsoft Platform SDK/Lib"
 
-# Add support for old DBus control interface
-# (fi.epitest.hostap.WPASupplicant)
-CONFIG_CTRL_IFACE_DBUS=y
-
 # Add support for new DBus control interface
 # (fi.w1.hostap.wpa_supplicant1)
 CONFIG_CTRL_IFACE_DBUS_NEW=y
@@ -537,6 +537,8 @@ CONFIG_IEEE80211N=y
 # WPA2-Personal while more complex configurations like WPA2-Enterprise with an
 # external RADIUS server can be supported with hostapd.
 CONFIG_AP=y
+
+CONFIG_BGSCAN_SIMPLE=y
 
 # P2P (Wi-Fi Direct)
 # This can be used to enable P2P support in wpa_supplicant. See README-P2P for

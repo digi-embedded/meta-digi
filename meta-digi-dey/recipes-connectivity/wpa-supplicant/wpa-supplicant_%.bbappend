@@ -7,6 +7,7 @@ PACKAGECONFIG ?= "openssl"
 SRC_URI += " \
     file://0001-wpa_supplicant-enable-control-socket-interface-when-.patch \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'file://0002-wpa_supplicant-systemd-enable-control-socket-interfa.patch', '', d)} \
+    file://0003-mesh-encapsulate-VHT-property-with-the-proper-CONFIG.patch \
     file://wpa_supplicant_p2p.conf \
 "
 

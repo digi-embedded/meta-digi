@@ -8,24 +8,13 @@ Otherwise trying to use the "wpa_cli" fails with:
 Failed to connect to non-global ctrl_ifname
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
 ---
- wpa_supplicant/dbus/fi.epitest.hostap.WPASupplicant.service.in | 2 +-
- wpa_supplicant/dbus/fi.w1.wpa_supplicant1.service.in           | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ wpa_supplicant/dbus/fi.w1.wpa_supplicant1.service.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/wpa_supplicant/dbus/fi.epitest.hostap.WPASupplicant.service.in b/wpa_supplicant/dbus/fi.epitest.hostap.WPASupplicant.service.in
-index a75918f9380b..9cce6331d92e 100644
---- a/wpa_supplicant/dbus/fi.epitest.hostap.WPASupplicant.service.in
-+++ b/wpa_supplicant/dbus/fi.epitest.hostap.WPASupplicant.service.in
-@@ -1,5 +1,5 @@
- [D-BUS Service]
- Name=fi.epitest.hostap.WPASupplicant
--Exec=@BINDIR@/wpa_supplicant -u
-+Exec=@BINDIR@/wpa_supplicant -u -O /var/run/wpa_supplicant
- User=root
- SystemdService=wpa_supplicant.service
 diff --git a/wpa_supplicant/dbus/fi.w1.wpa_supplicant1.service.in b/wpa_supplicant/dbus/fi.w1.wpa_supplicant1.service.in
-index d97ff392175d..98b72cf32481 100644
+index d97ff3921..98b72cf32 100644
 --- a/wpa_supplicant/dbus/fi.w1.wpa_supplicant1.service.in
 +++ b/wpa_supplicant/dbus/fi.w1.wpa_supplicant1.service.in
 @@ -1,5 +1,5 @@
