@@ -24,7 +24,9 @@ set_gpio_value() {
 # powercycle_gpio <gpio_nr>
 powercycle_gpio() {
 	gpioset ${1}=0
+	sleep .2
 	gpioset ${1}=1
+	sleep .2
 }
 
 error() {
