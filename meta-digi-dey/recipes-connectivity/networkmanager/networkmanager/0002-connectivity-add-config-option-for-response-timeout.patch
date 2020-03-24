@@ -12,14 +12,14 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  src/nm-config-data.h  |  2 ++
  src/nm-config.c       |  6 ++++++
  src/nm-config.h       |  1 +
- src/nm-connectivity.c | 11 ++++++++++-
- 5 files changed, 44 insertions(+), 1 deletion(-)
+ src/nm-connectivity.c | 12 +++++++++++-
+ 5 files changed, 45 insertions(+), 1 deletion(-)
 
 diff --git a/src/nm-config-data.c b/src/nm-config-data.c
-index 8d84e74abc5a..1493f69a2664 100644
+index 608b7e5..393f723 100644
 --- a/src/nm-config-data.c
 +++ b/src/nm-config-data.c
-@@ -68,6 +68,7 @@ NM_GOBJECT_PROPERTIES_DEFINE_BASE (
+@@ -66,6 +66,7 @@ NM_GOBJECT_PROPERTIES_DEFINE_BASE (
  	PROP_CONNECTIVITY_ENABLED,
  	PROP_CONNECTIVITY_URI,
  	PROP_CONNECTIVITY_INTERVAL,
@@ -27,7 +27,7 @@ index 8d84e74abc5a..1493f69a2664 100644
  	PROP_CONNECTIVITY_RESPONSE,
  	PROP_NO_AUTO_DEFAULT,
  );
-@@ -93,6 +94,7 @@ typedef struct {
+@@ -91,6 +92,7 @@ typedef struct {
  		char *uri;
  		char *response;
  		guint interval;
@@ -35,7 +35,7 @@ index 8d84e74abc5a..1493f69a2664 100644
  	} connectivity;
  
  	int autoconnect_retries_default;
-@@ -269,6 +271,14 @@ nm_config_data_get_connectivity_interval (const NMConfigData *self)
+@@ -268,6 +270,14 @@ nm_config_data_get_connectivity_interval (const NMConfigData *self)
  	return NM_CONFIG_DATA_GET_PRIVATE (self)->connectivity.interval;
  }
  
@@ -50,7 +50,7 @@ index 8d84e74abc5a..1493f69a2664 100644
  const char *
  nm_config_data_get_connectivity_response (const NMConfigData *self)
  {
-@@ -1499,6 +1509,7 @@ nm_config_data_diff (NMConfigData *old_data, NMConfigData *new_data)
+@@ -1538,6 +1548,7 @@ nm_config_data_diff (NMConfigData *old_data, NMConfigData *new_data)
  
  	if (   nm_config_data_get_connectivity_enabled (old_data) != nm_config_data_get_connectivity_enabled (new_data)
  	    || nm_config_data_get_connectivity_interval (old_data) != nm_config_data_get_connectivity_interval (new_data)
@@ -58,7 +58,7 @@ index 8d84e74abc5a..1493f69a2664 100644
  	    || g_strcmp0 (nm_config_data_get_connectivity_uri (old_data), nm_config_data_get_connectivity_uri (new_data))
  	    || g_strcmp0 (nm_config_data_get_connectivity_response (old_data), nm_config_data_get_connectivity_response (new_data)))
  		changes |= NM_CONFIG_CHANGE_CONNECTIVITY;
-@@ -1547,6 +1558,9 @@ get_property (GObject *object,
+@@ -1586,6 +1597,9 @@ get_property (GObject *object,
  	case PROP_CONNECTIVITY_INTERVAL:
  		g_value_set_uint (value, nm_config_data_get_connectivity_interval (self));
  		break;
@@ -68,7 +68,7 @@ index 8d84e74abc5a..1493f69a2664 100644
  	case PROP_CONNECTIVITY_RESPONSE:
  		g_value_set_string (value, nm_config_data_get_connectivity_response (self));
  		break;
-@@ -1652,6 +1666,11 @@ constructed (GObject *object)
+@@ -1705,6 +1719,11 @@ constructed (GObject *object)
  	priv->connectivity.interval = _nm_utils_ascii_str_to_int64 (str, 10, 0, G_MAXUINT, NM_CONFIG_DEFAULT_CONNECTIVITY_INTERVAL);
  	g_free (str);
  
@@ -77,10 +77,10 @@ index 8d84e74abc5a..1493f69a2664 100644
 +	priv->connectivity.timeout = _nm_utils_ascii_str_to_int64 (str, 10, 1, G_MAXUINT, NM_CONFIG_DEFAULT_CONNECTIVITY_TIMEOUT);
 +	g_free (str);
 +
- 	priv->dns_mode = nm_strstrip (g_key_file_get_string (priv->keyfile, NM_CONFIG_KEYFILE_GROUP_MAIN, "dns", NULL));
- 	priv->rc_manager = nm_strstrip (g_key_file_get_string (priv->keyfile, NM_CONFIG_KEYFILE_GROUP_MAIN, "rc-manager", NULL));
- 
-@@ -1803,6 +1822,12 @@ nm_config_data_class_init (NMConfigDataClass *config_class)
+ 	priv->dns_mode = nm_strstrip (g_key_file_get_string (priv->keyfile,
+ 	                                                     NM_CONFIG_KEYFILE_GROUP_MAIN,
+ 	                                                     NM_CONFIG_KEYFILE_KEY_MAIN_DNS,
+@@ -1873,6 +1892,12 @@ nm_config_data_class_init (NMConfigDataClass *config_class)
  	                        G_PARAM_READABLE |
  	                        G_PARAM_STATIC_STRINGS);
  
@@ -94,7 +94,7 @@ index 8d84e74abc5a..1493f69a2664 100644
  	     g_param_spec_string (NM_CONFIG_DATA_CONNECTIVITY_RESPONSE, "", "",
  	                          NULL,
 diff --git a/src/nm-config-data.h b/src/nm-config-data.h
-index b52ddcc4f85f..a0b35ac972af 100644
+index c043aa3..78b2818 100644
 --- a/src/nm-config-data.h
 +++ b/src/nm-config-data.h
 @@ -35,6 +35,7 @@
@@ -114,10 +114,10 @@ index b52ddcc4f85f..a0b35ac972af 100644
  
  int nm_config_data_get_autoconnect_retries_default (const NMConfigData *config_data);
 diff --git a/src/nm-config.c b/src/nm-config.c
-index 628eca4f13f0..87c7791a49c5 100644
+index 3e82bde..1c7dbd7 100644
 --- a/src/nm-config.c
 +++ b/src/nm-config.c
-@@ -60,6 +60,7 @@ struct NMConfigCmdLineOptions {
+@@ -59,6 +59,7 @@ struct NMConfigCmdLineOptions {
  	 * set or not via GOptionEntry
  	 */
  	int connectivity_interval;
@@ -125,7 +125,7 @@ index 628eca4f13f0..87c7791a49c5 100644
  	char *connectivity_response;
  
  	/* @first_start is not provided by command line. It is a convenient hack
-@@ -470,6 +471,7 @@ _nm_config_cmd_line_options_clear (NMConfigCmdLineOptions *cli)
+@@ -483,6 +484,7 @@ _nm_config_cmd_line_options_clear (NMConfigCmdLineOptions *cli)
  	g_clear_pointer (&cli->connectivity_uri, g_free);
  	g_clear_pointer (&cli->connectivity_response, g_free);
  	cli->connectivity_interval = -1;
@@ -133,7 +133,7 @@ index 628eca4f13f0..87c7791a49c5 100644
  	cli->first_start = FALSE;
  }
  
-@@ -493,6 +495,7 @@ _nm_config_cmd_line_options_copy (const NMConfigCmdLineOptions *cli, NMConfigCmd
+@@ -506,6 +508,7 @@ _nm_config_cmd_line_options_copy (const NMConfigCmdLineOptions *cli, NMConfigCmd
  	dst->connectivity_uri = g_strdup (cli->connectivity_uri);
  	dst->connectivity_response = g_strdup (cli->connectivity_response);
  	dst->connectivity_interval = cli->connectivity_interval;
@@ -141,7 +141,7 @@ index 628eca4f13f0..87c7791a49c5 100644
  	dst->first_start = cli->first_start;
  }
  
-@@ -572,6 +575,7 @@ nm_config_cmd_line_options_add_to_entries (NMConfigCmdLineOptions *cli,
+@@ -585,6 +588,7 @@ nm_config_cmd_line_options_add_to_entries (NMConfigCmdLineOptions *cli,
  			/* These three are hidden for now, and should eventually just go away. */
  		{ "connectivity-uri", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_STRING, &cli->connectivity_uri, N_("An http(s) address for checking internet connectivity"), "http://example.com" },
  		{ "connectivity-interval", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_INT, &cli->connectivity_interval, N_("The interval between connectivity checks (in seconds)"), G_STRINGIFY (NM_CONFIG_DEFAULT_CONNECTIVITY_INTERVAL) },
@@ -149,7 +149,7 @@ index 628eca4f13f0..87c7791a49c5 100644
  		{ "connectivity-response", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_STRING, &cli->connectivity_response, N_("The expected start of the response"), NM_CONFIG_DEFAULT_CONNECTIVITY_RESPONSE },
  		{ 0 },
  	};
-@@ -1119,6 +1123,8 @@ read_entire_config (const NMConfigCmdLineOptions *cli,
+@@ -1301,6 +1305,8 @@ read_entire_config (const NMConfigCmdLineOptions *cli,
  			g_key_file_set_string (keyfile, NM_CONFIG_KEYFILE_GROUP_CONNECTIVITY, "uri", cli->connectivity_uri);
  		if (cli->connectivity_interval >= 0)
  			g_key_file_set_integer (keyfile, NM_CONFIG_KEYFILE_GROUP_CONNECTIVITY, "interval", cli->connectivity_interval);
@@ -159,7 +159,7 @@ index 628eca4f13f0..87c7791a49c5 100644
  			g_key_file_set_string (keyfile, NM_CONFIG_KEYFILE_GROUP_CONNECTIVITY, "response", cli->connectivity_response);
  	}
 diff --git a/src/nm-config.h b/src/nm-config.h
-index c65572ce3fe5..654567779282 100644
+index 66f1b69..debdce7 100644
 --- a/src/nm-config.h
 +++ b/src/nm-config.h
 @@ -39,6 +39,7 @@
@@ -171,35 +171,43 @@ index c65572ce3fe5..654567779282 100644
  
  #define NM_CONFIG_KEYFILE_LIST_SEPARATOR ','
 diff --git a/src/nm-connectivity.c b/src/nm-connectivity.c
-index 8a6e955ae56f..6a491eb22e96 100644
+index aee6c57..274a909 100644
 --- a/src/nm-connectivity.c
 +++ b/src/nm-connectivity.c
-@@ -101,6 +101,7 @@ typedef struct {
- 	char *response;
- 	gboolean enabled;
- 	guint interval;
-+	guint timeout;
+@@ -121,6 +121,7 @@ typedef struct {
+ 	CList completed_handles_lst_head;
  	NMConfig *config;
- #if WITH_CONCHECK
- 	struct {
-@@ -601,7 +602,7 @@ nm_connectivity_check_start (NMConnectivity *self,
- 			curl_easy_setopt (ehandle, CURLOPT_INTERFACE, cb_data->ifspec);
- 			curl_multi_add_handle (priv->concheck.curl_mhandle, ehandle);
+ 	ConConfig *con_config;
++	guint timeout;
+ 	guint interval;
  
--			cb_data->timeout_id = g_timeout_add_seconds (20, _timeout_cb, cb_data);
-+			cb_data->timeout_id = g_timeout_add_seconds (priv->timeout, _timeout_cb, cb_data);
+ 	bool enabled:1;
+@@ -668,6 +669,7 @@ _idle_cb (gpointer user_data)
+ static void
+ do_curl_request (NMConnectivityCheckHandle *cb_data)
+ {
++	NMConnectivityPrivate *priv = NM_CONNECTIVITY_GET_PRIVATE (cb_data->self);
+ 	CURLM *mhandle;
+ 	CURL *ehandle;
+ 	long resolve;
+@@ -688,7 +690,7 @@ do_curl_request (NMConnectivityCheckHandle *cb_data)
+ 	cb_data->concheck.curl_mhandle = mhandle;
+ 	cb_data->concheck.curl_ehandle = ehandle;
+ 	cb_data->concheck.request_headers = curl_slist_append (NULL, "Connection: close");
+-	cb_data->timeout_id = g_timeout_add_seconds (20, _timeout_cb, cb_data);
++	cb_data->timeout_id = g_timeout_add_seconds (priv->timeout, _timeout_cb, cb_data);
  
- 			_LOG2D ("start request to '%s'", priv->uri);
- 			return cb_data;
-@@ -652,6 +653,7 @@ update_config (NMConnectivity *self, NMConfigData *config_data)
+ 	curl_multi_setopt (mhandle, CURLMOPT_SOCKETFUNCTION, multi_socket_cb);
+ 	curl_multi_setopt (mhandle, CURLMOPT_SOCKETDATA, cb_data);
+@@ -1079,6 +1081,7 @@ update_config (NMConnectivity *self, NMConfigData *config_data)
+ {
  	NMConnectivityPrivate *priv = NM_CONNECTIVITY_GET_PRIVATE (self);
- 	const char *uri, *response;
  	guint interval;
 +	guint timeout;
  	gboolean enabled;
  	gboolean changed = FALSE;
- 
-@@ -704,6 +706,13 @@ update_config (NMConnectivity *self, NMConfigData *config_data)
+ 	const char *cur_uri = priv->con_config ? priv->con_config->uri : NULL;
+@@ -1165,6 +1168,13 @@ update_config (NMConnectivity *self, NMConfigData *config_data)
  		changed = TRUE;
  	}
  
@@ -210,6 +218,6 @@ index 8a6e955ae56f..6a491eb22e96 100644
 +		changed = TRUE;
 +	}
 +
- 	/* Set the response. */
- 	response = nm_config_data_get_connectivity_response (config_data);
- 	if (!nm_streq0 (response, priv->response)) {
+ 	if (changed)
+ 		g_signal_emit (self, signals[CONFIG_CHANGED], 0);
+ }

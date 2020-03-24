@@ -11,17 +11,17 @@ interface.
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
 ---
- shared/nm-dispatcher-api.h |  1 +
- src/devices/nm-device.c    |  4 ++++
- src/nm-dispatcher.c        | 40 +++++++++++++++++++++++++++++++++++++-
- src/nm-dispatcher.h        | 10 +++++++++-
+ shared/nm-libnm-core-aux/nm-dispatcher-api.h |  1 +
+ src/devices/nm-device.c                      |  4 ++
+ src/nm-dispatcher.c                          | 40 +++++++++++++++++++-
+ src/nm-dispatcher.h                          | 10 ++++-
  4 files changed, 53 insertions(+), 2 deletions(-)
 
-diff --git a/shared/nm-dispatcher-api.h b/shared/nm-dispatcher-api.h
-index b1f28e71d..e83835b03 100644
---- a/shared/nm-dispatcher-api.h
-+++ b/shared/nm-dispatcher-api.h
-@@ -50,6 +50,7 @@
+diff --git a/shared/nm-libnm-core-aux/nm-dispatcher-api.h b/shared/nm-libnm-core-aux/nm-dispatcher-api.h
+index e6d0d92..123d737 100644
+--- a/shared/nm-libnm-core-aux/nm-dispatcher-api.h
++++ b/shared/nm-libnm-core-aux/nm-dispatcher-api.h
+@@ -53,6 +53,7 @@
  #define NMD_ACTION_DHCP4_CHANGE "dhcp4-change"
  #define NMD_ACTION_DHCP6_CHANGE "dhcp6-change"
  #define NMD_ACTION_CONNECTIVITY_CHANGE "connectivity-change"
@@ -30,25 +30,25 @@ index b1f28e71d..e83835b03 100644
  typedef enum {
  	DISPATCH_RESULT_UNKNOWN = 0,
 diff --git a/src/devices/nm-device.c b/src/devices/nm-device.c
-index f2dbe6594..865e68bd9 100644
+index 43f0373..b99fd41 100644
 --- a/src/devices/nm-device.c
 +++ b/src/devices/nm-device.c
-@@ -2771,6 +2771,10 @@ concheck_update_state (NMDevice *self, NMConnectivityState state, gboolean allow
+@@ -2853,6 +2853,10 @@ concheck_update_state (NMDevice *self,
  	_LOGD (LOGD_CONCHECK, "connectivity state changed from %s to %s",
- 	       nm_connectivity_state_to_string (priv->connectivity_state),
+ 	       nm_connectivity_state_to_string (priv->concheck_x[IS_IPv4].state),
  	       nm_connectivity_state_to_string (state));
 +
-+	if (priv->connectivity_state == NM_CONNECTIVITY_FULL)
++	if (priv->concheck_x[IS_IPv4].state == NM_CONNECTIVITY_FULL)
 +		nm_dispatcher_call_device_connectivity(state, self, NULL, NULL, NULL);
 +
- 	priv->connectivity_state = state;
+ 	priv->concheck_x[IS_IPv4].state = state;
 
- 	_notify (self, PROP_CONNECTIVITY);
+ 	_notify (self, IS_IPv4 ? PROP_IP4_CONNECTIVITY : PROP_IP6_CONNECTIVITY);
 diff --git a/src/nm-dispatcher.c b/src/nm-dispatcher.c
-index 368b781ad..a49b3ea61 100644
+index d656edc..39b781c 100644
 --- a/src/nm-dispatcher.c
 +++ b/src/nm-dispatcher.c
-@@ -467,7 +467,8 @@ static const char *action_table[] = {
+@@ -464,7 +464,8 @@ static const char *action_table[] = {
  	[NM_DISPATCHER_ACTION_VPN_DOWN]     = NMD_ACTION_VPN_DOWN,
  	[NM_DISPATCHER_ACTION_DHCP4_CHANGE] = NMD_ACTION_DHCP4_CHANGE,
  	[NM_DISPATCHER_ACTION_DHCP6_CHANGE] = NMD_ACTION_DHCP6_CHANGE,
@@ -58,7 +58,7 @@ index 368b781ad..a49b3ea61 100644
  };
 
  static const char *
-@@ -915,6 +916,43 @@ nm_dispatcher_call_connectivity (NMConnectivityState connectivity_state,
+@@ -912,6 +913,43 @@ nm_dispatcher_call_connectivity (NMConnectivityState connectivity_state,
  	                         callback, user_data, out_call_id);
  }
 
@@ -103,7 +103,7 @@ index 368b781ad..a49b3ea61 100644
  nm_dispatcher_call_cancel (guint call_id)
  {
 diff --git a/src/nm-dispatcher.h b/src/nm-dispatcher.h
-index 1cdeeb882..9902a77ba 100644
+index 1cdeeb8..9902a77 100644
 --- a/src/nm-dispatcher.h
 +++ b/src/nm-dispatcher.h
 @@ -36,7 +36,8 @@ typedef enum {
