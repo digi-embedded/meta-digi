@@ -21,12 +21,12 @@ LIC_FILES_CHKSUM = "file://COPYING-LGPL-2;md5=5f30f0716dfdd0d91eb439ebec522ec2 \
                     file://COPYING-LGPL-2.1;md5=fbc093901857fcd118f065f900982c24"
 
 IMXGST_SRC ?= "git://source.codeaurora.org/external/imx/imx-gst1.0-plugin.git;protocol=https"
-SRCBRANCH = "MM_04.05.02_1911_L4.14.98"
+SRCBRANCH = "MM_04.05.04_2002_L5.4.3"
 
 SRC_URI = "${IMXGST_SRC};branch=${SRCBRANCH} \
            file://0001-imx-gst1.0-plugin-Update-KERNEL_VERSION-check.patch \
 "
-SRCREV = "a975ecbe1ad86d4951198ddd97d66309e526f7b2" 
+SRCREV = "77760c4e4177f2afd80d7d09f3d1fb137b96adfa"
 
 S = "${WORKDIR}/git"
 
