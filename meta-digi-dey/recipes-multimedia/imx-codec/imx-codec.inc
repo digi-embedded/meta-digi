@@ -10,7 +10,7 @@ PROVIDES += "libfslcodec"
 
 inherit fsl-eula-unpack autotools pkgconfig
 
-SRC_URI = "${FSL_MIRROR}/${PN}-${PV}.bin;fsl-eula=true"
+SRC_URI = "${FSL_MIRROR}/${BP}.bin;fsl-eula=true"
 
 # Choose between 32bit and 64bit binaries
 EXTRA_OECONF = "${@bb.utils.contains('TUNE_FEATURES', 'aarch64', '--enable-armv8', \
@@ -49,11 +49,6 @@ python __set_insane_skip() {
         if p == 'imx-codec-test-bin':
             # FIXME: includes the DUT .so files so we need to deploy those
             d.setVar("INSANE_SKIP_%s" % p, "ldflags textrel libdir")
-
-            # Skip 'file-rdeps' for builds with MUSL C library
-            overrides = d.getVar("OVERRIDES").split(":")
-            if "libc-musl" in overrides:
-                d.appendVar("INSANE_SKIP_%s" % p, " file-rdeps")
         else:
             d.setVar("INSANE_SKIP_%s" % p, "ldflags textrel")
 }
@@ -95,7 +90,7 @@ PACKAGES_DYNAMIC = "${PN}-*"
 INHIBIT_PACKAGE_STRIP = "1"
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 
-PACKAGES += "${PN}-meta ${PN}-test-bin ${PN}-test-source"
+PACKAGES += "${PN}-meta ${PN}-test-bin ${PN}-test-source lib-src-ppp-arm11-elinux1"
 
 ALLOW_EMPTY_${PN} = "1"
 ALLOW_EMPTY_${PN}-meta = "1"
@@ -115,5 +110,6 @@ FILES_${PN}-test-source += "${datadir}/imx-mm/*"
 FILES_${PN}-oggvorbis += "${libdir}/imx-mm/audio-codec/wrap/lib_vorbisd_wrap_arm*_elinux.so.*"
 FILES_${PN}-nb += "${libdir}/imx-mm/audio-codec/wrap/lib_nbamrd_wrap_arm*_elinux.so.*"
 FILES_${PN}-wb += "${libdir}/imx-mm/audio-codec/wrap/lib_wbamrd_wrap_arm*_elinux.so.*"
+FILES_lib-src-ppp-arm11-elinux1 += "${libdir}/lib_src_ppp_arm11_elinux.so.1"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
