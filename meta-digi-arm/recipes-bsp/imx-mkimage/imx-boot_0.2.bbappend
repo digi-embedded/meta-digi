@@ -90,40 +90,40 @@ do_compile () {
 	# mkimage for i.MX8
 	for type in ${UBOOT_CONFIG}; do
 		if [ "${SOC_TARGET}" = "iMX8QX" ]; then
-		    RAM_SIZE="$(echo ${type} | sed -e 's,.*[a-z]\+\([0-9]\+[M|G]B\)$,\1,g')"
-		    for ramc in ${RAM_CONFIGS}; do
-			    if echo "${ramc}" | grep -qs "${RAM_SIZE}"; then
-				    # Match U-Boot memory size and and SCFW memory configuration
-				    cd ${BOOT_STAGING}
-				    ln -sf u-boot-${type}.bin u-boot.bin
-				    ln -sf ${SC_FIRMWARE_NAME}-${ramc} scfw_tcm.bin
-				    cd -
-				    for target in ${IMXBOOT_TARGETS}; do
-					    bbnote "building ${SOC_TARGET} - ${ramc} - ${target}"
-					    make SOC=${SOC_TARGET} ${target}
-					    # i.MX8QXP C0 support
-					    #make SOC=${SOC_TARGET} REV=C0 ${target}
-					    if [ -e "${BOOT_STAGING}/flash.bin" ]; then
-						    cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target}
-					    fi
-					    SCFWBUILT="yes"
-				    done
-				    rm ${BOOT_STAGING}/scfw_tcm.bin
-				    rm ${BOOT_STAGING}/u-boot.bin
-				    # Remove u-boot-atf.bin and u-boot-hash.bin so they get generated with the next iteration's U-Boot
-				    rm ${BOOT_STAGING}/u-boot-atf.bin
-				    rm ${BOOT_STAGING}/u-boot-hash.bin
-			    fi
-		    done
+			RAM_SIZE="$(echo ${type} | sed -e 's,.*[a-z]\+\([0-9]\+[M|G]B\)$,\1,g')"
+			for ramc in ${RAM_CONFIGS}; do
+				if echo "${ramc}" | grep -qs "${RAM_SIZE}"; then
+					# Match U-Boot memory size and and SCFW memory configuration
+					cd ${BOOT_STAGING}
+					ln -sf u-boot-${type}.bin u-boot.bin
+					ln -sf ${SC_FIRMWARE_NAME}-${ramc} scfw_tcm.bin
+					cd -
+					for target in ${IMXBOOT_TARGETS}; do
+						bbnote "building ${SOC_TARGET} - ${ramc} - ${target}"
+						make SOC=${SOC_TARGET} ${target}
+						# i.MX8QXP C0 support
+						#make SOC=${SOC_TARGET} REV=C0 ${target}
+						if [ -e "${BOOT_STAGING}/flash.bin" ]; then
+							cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target}
+						fi
+						SCFWBUILT="yes"
+					done
+					rm ${BOOT_STAGING}/scfw_tcm.bin
+					rm ${BOOT_STAGING}/u-boot.bin
+					# Remove u-boot-atf.bin and u-boot-hash.bin so they get generated with the next iteration's U-Boot
+					rm ${BOOT_STAGING}/u-boot-atf.bin
+					rm ${BOOT_STAGING}/u-boot-hash.bin
+				fi
+			done
 		else
-		    # mkimage for i.MX8M
-		    for target in ${IMXBOOT_TARGETS}; do
-			bbnote "building ${SOC_TARGET} - ${target}"
-			make SOC=${SOC_TARGET} ${target}
-			if [ -e "${BOOT_STAGING}/flash.bin" ]; then
-			    cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}.bin-${target}
-			fi
-		    done
+			# mkimage for i.MX8M
+			for target in ${IMXBOOT_TARGETS}; do
+				bbnote "building ${SOC_TARGET} - ${target}"
+				make SOC=${SOC_TARGET} ${target}
+				if [ -e "${BOOT_STAGING}/flash.bin" ]; then
+					cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}.bin-${target}
+				fi
+			done
 		fi
 	done
 
