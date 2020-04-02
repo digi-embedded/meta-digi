@@ -204,16 +204,20 @@ do_deploy () {
 }
 
 do_deploy_append () {
-	if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
+	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
 		[ -n "${TRUSTFENCE_SIGN_MODE}" ] && export CONFIG_SIGN_MODE="${TRUSTFENCE_SIGN_MODE}"
 
 		# Sign U-boot image
-		for ramc in ${RAM_CONFIGS}; do
-			trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}-signed.bin
-		done
+		if [ "${UBOOT_RAM_COMBINATIONS}" = "" ]; then
+			trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}.bin ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-signed.bin
+		else
+			for ramc in ${UBOOT_RAM_COMBINATIONS}; do
+				trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${ramc}-signed.bin
+			done
+		fi
 
 		cp ${B}/SRK_efuses.bin ${DEPLOYDIR}
 	fi

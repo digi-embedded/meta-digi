@@ -28,6 +28,8 @@ SRC_URI_append = " \
     ${@oe.utils.conditional('UBOOT_HAS_FASTBOOT', 'true', 'file://install_linux_fw_uuu.sh', '', d)} \
 "
 
+BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
+
 LOCALVERSION ?= ""
 inherit fsl-u-boot-localversion
 
@@ -81,7 +83,7 @@ do_compile () {
 					unset k
 
 					# Secure boot artifacts
-					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]
+					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]
 					then
 						cp ${B}/${config}/u-boot-dtb-signed.imx ${B}/${config}/u-boot-dtb-signed-${type}.${UBOOT_SUFFIX}
 						cp ${B}/${config}/u-boot-dtb-usb-signed.imx ${B}/${config}/u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX}
@@ -124,7 +126,7 @@ do_deploy_append() {
 					cd ${DEPLOYDIR}
 					rm -r ${UBOOT_BINARY}-${type}
 					ln -sf u-boot-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-${type}.${UBOOT_SUFFIX}
-					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
+					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
 						install ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
 						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
 
@@ -170,7 +172,7 @@ do_deploy_append() {
 		[ -n "${TRUSTFENCE_SIGN_MODE}" ] && export CONFIG_SIGN_MODE="${TRUSTFENCE_SIGN_MODE}"
 
 		# Sign boot script
-		if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
+		if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ] && [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
 			TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
 			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
 			mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
