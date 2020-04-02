@@ -35,9 +35,15 @@ do_install() {
 		bberror "Unkown TRUSTFENCE_SIGN_MODE value"
 		exit 1
 	fi
-	install -m 0755 git/scripts/sign.sh ${D}${bindir}/trustfence-sign-uboot.sh
 	install -m 0755 trustfence-sign-kernel.sh ${D}${bindir}/
 	install -m 0755 git/scripts/csf_templates/* ${D}${bindir}/csf_templates
+
+	# Select U-Boot sign script depending on U-Boot including an SPL image
+	if [ -n "${SPL_BINARY}" ]; then
+		install -m 0755 git/scripts/sign_spl_fit.sh ${D}${bindir}/trustfence-sign-uboot.sh
+	else
+		install -m 0755 git/scripts/sign.sh ${D}${bindir}/trustfence-sign-uboot.sh
+	fi
 }
 
 FILES_${PN} = "${bindir}"

@@ -69,6 +69,11 @@ KERNEL_IMAGETYPE = "Image.gz"
 VIRTUAL-RUNTIME_init_manager ?= "systemd"
 VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 
+# TrustFence
+TRUSTFENCE_SIGN_MODE = "HAB"
+# TODO: not yet supported
+TRUSTFENCE_ENCRYPT_ENVIRONMENT = "0"
+
 # Adding 'wayland' along with 'x11' enables the xwayland backend
 # Vulkan is necessary for wayland to build
 DISTRO_FEATURES_append = " wayland vulkan systemd pam"

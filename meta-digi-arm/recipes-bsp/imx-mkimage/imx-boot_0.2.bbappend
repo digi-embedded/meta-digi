@@ -11,7 +11,7 @@ SRC_URI_append_ccimx8x = " file://0001-iMX8QX-remove-SC_BD_FLAGS_ALT_CONFIG-flag
 IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware imx-seco"
 
 DEPENDS_append_ccimx8x = " coreutils-native"
-DEPENDS_append_ccimx8x += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
+DEPENDS_append_mx8 += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 # For i.MX 8, this package aggregates the imx-m4-demos
 # output. Note that this aggregation replaces the aggregation
@@ -119,11 +119,17 @@ do_compile () {
 			# mkimage for i.MX8M
 			for target in ${IMXBOOT_TARGETS}; do
 				bbnote "building ${SOC_TARGET} - ${target}"
-				make SOC=${SOC_TARGET} ${target}
+				make SOC=${SOC_TARGET} ${target} > mkimage-${target}.log 2>&1
 				if [ -e "${BOOT_STAGING}/flash.bin" ]; then
 					cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}.bin-${target}
 				fi
 			done
+
+			if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+				# Log HAB FIT information
+				bbnote "building ${SOC_TARGET} - print_fit_hab"
+				make SOC=${SOC_TARGET} print_fit_hab > mkimage-print_fit_hab.log 2>&1
+			fi
 		fi
 	done
 
@@ -180,6 +186,8 @@ do_deploy () {
 		# Link to default bootable U-Boot filename.
 		ln -sf ${UBOOT_PREFIX}-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
 		cd -
+		# Link to first "target" mkimage log
+		ln -sf mkimage-${IMAGE_IMXBOOT_TARGET}.log mkimage.log
 	else
 		for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 			IMAGE_IMXBOOT_TARGET=""
