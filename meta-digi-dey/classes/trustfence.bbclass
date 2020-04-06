@@ -62,6 +62,8 @@ python () {
             d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_KEY_INDEX=%s " % d.getVar("TRUSTFENCE_KEY_INDEX", True))
         if (d.getVar("TRUSTFENCE_DEK_PATH", True) not in [None, "0"]):
             d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_DEK_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_DEK_PATH", True))
+        if d.getVar("TRUSTFENCE_SIGN_MODE", True):
+            d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_SIGN_MODE=\\"%s\\" ' % d.getVar("TRUSTFENCE_SIGN_MODE", True))
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y')
 
