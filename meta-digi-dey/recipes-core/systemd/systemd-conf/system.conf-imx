@@ -1,0 +1,3 @@
+[Manager]
+# Digi-specific
+DefaultTimeoutStopSec=15s

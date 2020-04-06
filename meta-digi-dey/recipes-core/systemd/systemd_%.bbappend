@@ -1,13 +1,8 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
-    file://0001-Revert-udev-remove-userspace-firmware-loading-suppor.patch \
-    file://0001-udev-use-the-usual-set-of-load-paths-for-udev-rules.patch \
     file://0002-sd-resolve-forcefully-cancel-worker-threads-during-r.patch \
-    file://0007-Revert-rules-remove-firmware-loading-rules.patch \
 "
-
-EXTRA_OEMESON   += "-Dfirmware-path=${nonarch_base_libdir}/firmware/ "
 
 # Remove systemd-networkd from our images, since we already use NetworkManager
 PACKAGECONFIG_remove = "networkd"
