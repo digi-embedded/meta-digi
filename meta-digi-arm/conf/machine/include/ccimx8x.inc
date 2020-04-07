@@ -3,7 +3,7 @@
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore 8X module.
 
 DIGI_FAMILY = "ccimx8x"
-MACHINEOVERRIDES =. "mx8:mx8x:mx8qxp:mx8dxp:mx8dx:${DIGI_FAMILY}:"
+MACHINEOVERRIDES =. "mx8:mx8x:mx8qxp:${DIGI_FAMILY}:"
 
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/arm/arch-arm64.inc
