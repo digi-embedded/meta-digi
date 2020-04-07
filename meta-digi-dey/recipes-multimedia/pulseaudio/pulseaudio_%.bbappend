@@ -27,6 +27,8 @@ AUDIO_HDMI ?= ""
 AUDIO_HDMI_ccimx6 = "yes"
 
 SRC_URI_append = " \
+    file://0001-Fix-pulseaudio-mutex-issue-when-do-pause-in-gstreame.patch \
+    file://0002-alsa-mixer-make-the-mono-mapping-a-fallback-only.patch \
     ${@oe.utils.conditional('SOUND_CARD', 'sgtl5000', '${CFG_SGTL5000}', '', d)} \
     ${@oe.utils.conditional('SOUND_CARD', 'max98089', '${CFG_MAX98089}', '', d)} \
     ${@oe.utils.conditional('AUDIO_HDMI', 'yes', '${CFG_HDMI}', '', d)} \
@@ -37,6 +39,16 @@ SRC_URI_append = " \
 SRC_URI_append_ccimx6ulsbc = " \
     file://0001-pulseaudio-keep-headphones-volume-in-platforms-witho.patch \
 "
+
+# This default setting should be added on all i.MX SoC,
+# For now, the setting for mx6(including mx6ul & mx6sll)/mx7 has been upstreamed
+SRC_URI_append_mx8 = " \
+    file://daemon.conf \
+    file://default.pa \
+"
+
+# Enable allow-autospawn-for-root as default
+PACKAGECONFIG_append = " autospawn-for-root"
 
 EXTRA_OECONF_append_ccimx6 = " --disable-memfd"
 
