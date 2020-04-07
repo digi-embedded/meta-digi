@@ -1,4 +1,4 @@
-# Copyright 2019 NXP
+# Copyright 2019-20 NXP
 
 SUMMARY = "NXP i.MX SECO library"
 DESCRIPTION = "NXP IMX SECO library"
@@ -8,10 +8,10 @@ LIC_FILES_CHKSUM = "file://LA_OPT_NXP_Software_License.htm;md5=6a8fcab25f3d3f5c2
 
 DEPENDS = "zlib"
 
-SRCBRANCH = "master"
+SRCBRANCH = "imx_5.4.3_2.0.0"
 SECO_LIB_SRC ?= "git://github.com/NXP/imx-seco-libs.git;protocol=https"
 SRC_URI = "${SECO_LIB_SRC};branch=${SRCBRANCH}"
-SRCREV = "1afb4e66ba26cc723bd5bf96eb2e79a6c81daa70"
+SRCREV = "0fe2ad0d0f0ef88387aaf72e7a23c9b598340c3b"
 
 S = "${WORKDIR}/git"
 
@@ -21,4 +21,5 @@ do_install () {
 	oe_runmake DESTDIR=${D} install
 }
 
-COMPATIBLE_MACHINE = "(mx8qm|mx8qxp)"
+COMPATIBLE_MACHINE = "(mx8)"
+COMPATIBLE_MACHINE_mx8m = "(^$)"
