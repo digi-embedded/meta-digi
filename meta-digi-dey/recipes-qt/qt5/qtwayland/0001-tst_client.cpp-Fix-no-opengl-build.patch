@@ -1,6 +1,5 @@
-From 9e2f959060d8767f8710e113621c0004f21ace93 Mon Sep 17 00:00:00 2001
 From: Yuqing Zhu <carol.zhu@nxp.com>
-Date: Fri, 11 May 2018 13:51:55 +0800
+Date: Tue, 8 Jan 2019 17:51:59 +0800
 Subject: [PATCH] tst_client.cpp: Fix no-opengl build error
 
 The error is introduced by bf09c7a1493c01a65ee0f110b37a04e653edc08e
@@ -8,15 +7,14 @@ The error is introduced by bf09c7a1493c01a65ee0f110b37a04e653edc08e
 Upstream-Status: Pending
 
 Signed-off-by: Yuqing Zhu <carol.zhu@nxp.com>
-Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
 ---
  tests/auto/client/client/tst_client.cpp | 6 ++++++
  1 file changed, 6 insertions(+)
 
-diff --git a/tests/auto/client/client/tst_client.cpp b/tests/auto/client/client/tst_client.cpp
-index 874de82c..af414d4f 100644
---- a/tests/auto/client/client/tst_client.cpp
-+++ b/tests/auto/client/client/tst_client.cpp
+Index: git/tests/auto/client/client/tst_client.cpp
+===================================================================
+--- git.orig/tests/auto/client/client/tst_client.cpp
++++ git/tests/auto/client/client/tst_client.cpp
 @@ -107,6 +107,7 @@ public:
      QPoint mousePressPos;
  };
@@ -33,18 +31,17 @@ index 874de82c..af414d4f 100644
 
  class tst_WaylandClient : public QObject
  {
-@@ -180,8 +182,10 @@ private slots:
+@@ -176,7 +178,9 @@ private slots:
      void dontCrashOnMultipleCommits();
      void hiddenTransientParent();
      void hiddenPopupParent();
-+#ifndef  QT_NO_OPENGL
++#ifndef QT_NO_OPENGL
      void glWindow();
-     void longWindowTitle();
 +#endif // QT_NO_OPENGL
+     void longWindowTitle();
+     void longWindowTitleWithUtf16Characters();
 
- private:
-     MockCompositor *compositor = nullptr;
-@@ -558,6 +562,7 @@ void tst_WaylandClient::hiddenPopupParent()
+@@ -459,6 +463,7 @@ void tst_WaylandClient::hiddenPopupParen
      QTRY_VERIFY(compositor->surface());
  }
 
@@ -52,7 +49,7 @@ index 874de82c..af414d4f 100644
  void tst_WaylandClient::glWindow()
  {
      QSKIP("Skipping GL tests, as not supported by all CI systems: See https://bugreports.qt.io/browse/QTBUG-65802");
-@@ -583,6 +588,7 @@ void tst_WaylandClient::glWindow()
+@@ -484,6 +489,7 @@ void tst_WaylandClient::glWindow()
      testWindow->setVisible(false);
      QTRY_VERIFY(!compositor->surface());
  }
@@ -60,6 +57,3 @@ index 874de82c..af414d4f 100644
 
  void tst_WaylandClient::longWindowTitle()
  {
---
-2.20.1
-

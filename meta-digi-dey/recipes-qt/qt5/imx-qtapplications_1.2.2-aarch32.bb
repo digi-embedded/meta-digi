@@ -1,5 +1,5 @@
 # Copyright (C) 2014-2016 Freescale Semiconductor
-# Copyright 2017 NXP
+# Copyright 2017-2018 NXP
 # Released under the MIT license (see COPYING.MIT for the terms)
 
 DESCRIPTION = "Freescale QT Multimedia applications"
@@ -11,7 +11,7 @@ inherit fsl-eula-unpack pkgconfig
 # base on QtMultimedia v5.2.1
 DEPENDS += "qtmultimedia gstreamer1.0 gstreamer1.0-plugins-base imx-gst1.0-plugin qtquickcontrols"
 
-SRC_URI = "${FSL_MIRROR}/${PN}-${PV}.bin;fsl-eula=true \
+SRC_URI = "${FSL_MIRROR}/${BP}.bin;fsl-eula=true \
            file://qtimxplayer.desktop \
            file://qtimxcamera.desktop \
 "
