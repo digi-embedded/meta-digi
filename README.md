@@ -1,10 +1,10 @@
-# Digi Embedded Yocto (DEY) 2.6
-## Release 2.6-r4
+# Digi Embedded Yocto (DEY) 3.0
+## Release 3.0-r1
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
 
-Digi Embedded Yocto 2.6 is based on the Yocto Project(TM) 2.6 (Thud) release.
+Digi Embedded Yocto 3.0 is based on the Yocto Project(TM) 3.0 (Zeus) release.
 
 For a full list of supported features and interfaces please refer to the
 online documentation.
@@ -14,7 +14,7 @@ online documentation.
 The current release has been verified and tested with the following
 OS versions:
 
-* Ubuntu 16.04
+* Ubuntu 18.04
 
 # Supported Platforms
 
@@ -24,7 +24,7 @@ Software for the following hardware platforms is in production support:
 * ConnectCore 8M Nano System-on-Module (SOM)
   * [CC-WMX-FS7D-NN](https://www.digi.com/cc8mnano)
 * ConnectCore 8M Nano Development Kit
-  * [CC-WMX8MN-KIT](https://www.digi.com/products/models/cc-wmx8mn-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/2.6/cc8mnano/yocto-gs_index))
+  * [CC-WMX8MN-KIT](https://www.digi.com/products/models/cc-wmx8mn-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/3.0/cc8mnano/yocto-gs_index))
 
 ## ConnectCore 8X
 * ConnectCore 8X System-on-Module (SOM)
@@ -36,7 +36,7 @@ Software for the following hardware platforms is in production support:
   * [CC-MX-JQ7D-ZN](https://www.digi.com/cc8x)
   * [CC-WMX-JQ7D-ZN](https://www.digi.com/cc8x)
 * ConnectCore 8X SBC Pro
-  * [CC-WMX8-PRO](https://www.digi.com/products/embedded-systems/single-board-computers/digi-connectcore-8x-sbc-pro) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/2.6/cc8x/yocto-gs_index))
+  * [CC-WMX8-PRO](https://www.digi.com/products/embedded-systems/single-board-computers/digi-connectcore-8x-sbc-pro) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/3.0/cc8x/yocto-gs_index))
 
 ## ConnectCore 6UL
 * ConnectCore 6UL System-on-Module (SOM)
@@ -44,17 +44,17 @@ Software for the following hardware platforms is in production support:
   * [CC-MX-JN58-Z1](https://www.digi.com/products/models/cc-mx-jn58-z1)
   * CC-WMX-JN7A-NE
 * ConnectCore 6UL SBC Express
-  * [CC-WMX6UL-START](https://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/2.6/cc6ul/yocto-gs_index))
+  * [CC-WMX6UL-START](https://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/3.0/cc6ul/yocto-gs_index))
   * [CC-SBE-WMX-JN58](https://www.digi.com/products/models/cc-sbe-wmx-jn58)
 * ConnectCore 6UL SBC Pro
-  * [CC-WMX6UL-KIT](https://www.digi.com/products/models/cc-wmx6ul-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/2.6/cc6ul/yocto-gs_index))
+  * [CC-WMX6UL-KIT](https://www.digi.com/products/models/cc-wmx6ul-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/3.0/cc6ul/yocto-gs_index))
   * [CC-SBP-WMX-JN58](https://www.digi.com/products/models/cc-sbp-wmx-jn58)
 
 ## ConnectCore 6 Plus
 * ConnectCore 6 Plus System-on-Module (SOM)
   * [CC-WMX-KK8D-TN](https://www.digi.com/products/models/cc-wmx-kk8d-tn)
 * ConnectCore 6 Plus professional development kit
-  * [CC-WMX6P-KIT](https://www.digi.com/products/models/cc-wmx6p-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/2.6/cc6plus/yocto-gs_index))
+  * [CC-WMX6P-KIT](https://www.digi.com/products/models/cc-wmx6p-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/3.0/cc6plus/yocto-gs_index))
 
 ## ConnectCore 6
 * ConnectCore 6 System-on-Module (SOM)
@@ -71,7 +71,7 @@ Software for the following hardware platforms is in production support:
   * CC-WMX-J98C-FJA
   * CC-WMX-J98C-FJA-1
 * ConnectCore 6 Jumpstart Development Kit (SBC with Connectore 6 module)
-  * [CC-WMX6-KIT](https://www.digi.com/products/models/cc-wmx6-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/2.6/cc6/yocto-gs_index))
+  * [CC-WMX6-KIT](https://www.digi.com/products/models/cc-wmx6-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/3.0/cc6/yocto-gs_index))
   * [CC-SB-WMX-J97C-1](https://www.digi.com/products/models/cc-sb-wmx-j97c-1)
   * [CC-SB-WMX-L87C-1](https://www.digi.com/products/models/cc-sb-wmx-l87c-1)
   * [CC-SB-WMX-L76C-1](https://www.digi.com/products/models/cc-sb-wmx-l76c-1)
@@ -82,7 +82,7 @@ hardware.
 # Installation
 
 Digi Embedded Yocto is composed of a set of different Yocto layers that work in
-parallel. The layers are specified on a [manifest](https://github.com/digi-embedded/dey-manifest/blob/thud/default.xml) file.
+parallel. The layers are specified on a [manifest](https://github.com/digi-embedded/dey-manifest/blob/zeus/default.xml) file.
 
 To install, please follow the instructions at the dey-manifest [README](https://github.com/digi-embedded/dey-manifest)
 
@@ -92,63 +92,25 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 # Downloads
 
-* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/2.6/r3/images/
-* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/2.6/r3/sdk/
+* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/3.0/r1/images/
+* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/3.0/r1/sdk/
 
 # Release Changelog
 
-## 2.6-r3
+## 3.0-r1
 
-* Release based on [Yocto 2.6 (Thud)](https://www.yoctoproject.org/software-overview/downloads) including:
+* Release based on [Yocto 3.0 (Zeus)](https://www.yoctoproject.org/software-overview/downloads) including:
+  * New toolchain based on GLIBC-2.30
+  * Updated Qt 5.13.2
+  * Updated NetworkManager to v1.18.4
+  * Updated Wpa-supplicant to v2.9
+  * Updated gstreamer1.0 to v1.16.0
+  * Updated busybox to v1.31.0
+  * Removed support to bluez4
+  * Updated OpenSSL to v1.1.1d
   * Package upgrades and security fixes
-* Added support for ConnectCore 8M Nano platform
-* Add TrustFence support (phase 1) for ConnectCore 8X platform
-  (with U-Boot v2019.04).
-* Updated kernel version to v4.14.170 for i.MX8X and i.MX6UL platforms
-* Updated kernel version to v4.9.212 for i.MX6 platforms
+* Updated kernel version to v5.4 for i.MX8X, i.MX8MN and i.MX6UL platforms
 * Updated U-Boot to version 2019.04-r1 for i.MX8X platform
-* Updated U-Boot to version 2017.03-r5 for i.MX6 and i.MX6UL platforms
-* Updated i.MX8 SCU firmware to v1.3.0 (see [important note](#scfw-note))
-* Updated QCA65x4 Wi-Fi and Bluetooth firmware
-
-## 2.6-r2
-
-* Release based on [Yocto 2.6 (Thud)](https://www.yoctoproject.org/software-overview/downloads) including:
-  * Updated GCC toolchain to v8.2.0 (from v7.3.0)
-  * Updated gstreamer1.0 to v1.14.4
-  * Updated busybox to v1.29.3
-  * Updated OpenSSL to v1.1.1b
-  * Package upgrades and security fixes
-* Added support for ConnectCore 6 and ConnectCore 6 Plus platforms
-* Updated kernel version to v4.14.141 for i.MX8X and i.MX6UL platforms
-* Updated kernel version to v4.9.190 for i.MX6 platforms
-* Updated U-Boot to version 2018.03-r2 for i.MX8X platform
-* Updated U-Boot to version 2017.03-r4 for i.MX6 and i.MX6UL platforms
-* Updated AWS Greengrass core to v1.9.2
-* Updated i.MX8 SCU firmware to v1.2.5 (see [important note](#scfw-note))
-* Updated QCA65x4 Wi-Fi and Bluetooth firmware
-
-## 2.6-r1
-
-* Release based on [Yocto 2.6 (Thud)](https://www.yoctoproject.org/software-overview/downloads) including:
-  * New toolchain based on GLIBC-2.28
-  * Updated Qt 5.11.3
-  * Updated NetworkManager to v1.14.4
-  * Updated Wpa-supplicant to v2.6
-  * Updated gstreamer1.0 to v1.14.0
-  * Updated busybox to v1.29.2
-  * Updated bluez5 to v5.50
-  * Updated OpenSSL to v1.1.1a
-  * Package upgrades and security fixes
-* Updated kernel version to v4.14.111 for i.MX8X and i.MX6UL platforms
-* Updated U-Boot to version 2018.03-r1 for i.MX8X platform
-* Updated AWS Greengrass core to version 1.8.0
-* Added support for Code Signing Tool 3.1.0
-* Changed initialization manager in ConnectCore 8X platforms to systemd
-* System monitor framework
-* Automatic Wi-Fi direct connection setup
-* Automatic Wi-Fi extender bridge setup
-* Network connection recovery framework
 
 # Known Issues and Limitations
 
@@ -194,21 +156,6 @@ updated list can be found on the online documentation.
     be met in future releases of the hardware.
   * BSDL operation is not supported. It will be available in future releases
     of the hardware.
-
-<a name="scfw-note"></a>
-
----
- **IMPORTANT**: DEY-2.6-r2 and DEY-2.6-r3 releases update the firmware of the
- _System Control Unit_ (SCU).
- This is an NXP proprietary firmware and its version in these releases is
- **not compatible** with the one released on DEY-2.6-r1. As a consequence:
-
-* Old U-Boot v2018.03-r1 **cannot boot** images from DEY-2.6-r2 or newer releases.
-* U-Boot v2018.03-r2 or newer **cannot boot** images from release DEY-2.6-r1.
-
- To successfully run DEY-2.6-r2 or newer images you need to update the U-Boot on
- your device.
- ---
 
 ## ConnectCore 6UL
 
