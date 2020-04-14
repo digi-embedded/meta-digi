@@ -1,0 +1,48 @@
+From: Hector Bujanda <hector.bujanda@digi.com>
+Date: Tue, 14 Apr 2020 15:51:52 -0700
+Subject: [PATCH] gpio: uapi: add userspace support for setting debounce on
+ GPIO line
+
+Added GPIO_SET_DEBOUNCE_IOCTL define and gpioline_debounce struct.
+This allows calling gpiod_set_debounce() function through char device ioctl to
+gpiolib.
+
+https://jira.digi.com/browse/DEL-6425
+
+Signed-off-by: Hector Bujanda <hector.bujanda@digi.com>
+---
+ include/uapi/linux/gpio.h | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/include/uapi/linux/gpio.h b/include/uapi/linux/gpio.h
+index 1bf6e6df084b..4b092990d4c8 100644
+--- a/include/uapi/linux/gpio.h
++++ b/include/uapi/linux/gpio.h
+@@ -53,6 +53,17 @@ struct gpioline_info {
+ 	char consumer[32];
+ };
+ 
++/**
++ * struct gpioline_debounce - GPIO line debounce
++ * @line_offset: the local offset on this GPIO device, fill this in when
++ * requesting the line information from the kernel
++ * @debounce_usec: debounce in uSeconds to set for this line
++ */
++struct gpioline_debounce {
++	__u32 line_offset;
++	__u32 debounce_usec;
++};
++
+ /* Maximum number of requested handles */
+ #define GPIOHANDLES_MAX 64
+ 
+@@ -154,5 +165,6 @@ struct gpioevent_data {
+ #define GPIO_GET_LINEINFO_IOCTL _IOWR(0xB4, 0x02, struct gpioline_info)
+ #define GPIO_GET_LINEHANDLE_IOCTL _IOWR(0xB4, 0x03, struct gpiohandle_request)
+ #define GPIO_GET_LINEEVENT_IOCTL _IOWR(0xB4, 0x04, struct gpioevent_request)
++#define GPIO_SET_DEBOUNCE_IOCTL _IOW(0xB4, 0x05, struct gpioline_debounce)
+ 
+ #endif /* _UAPI_GPIO_H_ */
+-- 
+2.17.1
+
