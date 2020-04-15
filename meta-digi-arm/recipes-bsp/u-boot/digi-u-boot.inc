@@ -197,12 +197,7 @@ do_deploy_append_ccimx8x() {
 }
 
 do_deploy_append_ccimx8mn() {
-	# Move all U-Boot artifacts to the imx-boot-tools folder
-	# U-Boot images are not bootable on the i.MX8M
-	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
-	mv ${DEPLOYDIR}/u-boot-spl* ${DEPLOYDIR}/${BOOT_TOOLS}/
-
-	# Deploy the mkimage, u-boot-nodtb.bin and ccimx8mn-dvk.dtb for mkimage to generate boot binary
+	# Deploy u-boot-nodtb.bin and ccimx8mn-dvk.dtb, to be packaged in boot binary by imx-boot
 	if [ -n "${UBOOT_CONFIG}" ]
 	then
 		for config in ${UBOOT_MACHINE}; do

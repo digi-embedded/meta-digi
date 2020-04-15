@@ -45,9 +45,9 @@ compile_mx8m() {
 	done
 	cp ${DEPLOY_DIR_IMAGE}/signed_dp_imx8m.bin               ${BOOT_STAGING}
 	cp ${DEPLOY_DIR_IMAGE}/signed_hdmi_imx8m.bin             ${BOOT_STAGING}
-	cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/u-boot-spl.bin-${MACHINE}-${UBOOT_CONFIG} \
+	cp ${DEPLOY_DIR_IMAGE}/u-boot-spl.bin-${MACHINE}-${UBOOT_CONFIG} \
                                                              ${BOOT_STAGING}/u-boot-spl.bin
-	cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_DTB_NAME}   ${BOOT_STAGING}/fsl-imx8mn-evk.dtb
+	cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_DTB_NAME}   ${BOOT_STAGING}
 	cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/u-boot-nodtb.bin-${MACHINE}-${UBOOT_CONFIG} \
                                                              ${BOOT_STAGING}/u-boot-nodtb.bin
 	bbnote "\
@@ -76,7 +76,7 @@ do_compile () {
 					cd -
 					for target in ${IMXBOOT_TARGETS}; do
 						bbnote "building ${SOC_TARGET} - ${ramc} - ${REV_OPTION} ${target}"
-						make SOC=${SOC_TARGET} ${REV_OPTION} ${target}
+						make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} ${REV_OPTION} ${target}
 						if [ -e "${BOOT_STAGING}/flash.bin" ]; then
 							cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target}
 						fi
@@ -93,7 +93,7 @@ do_compile () {
 			# mkimage for i.MX8M
 			for target in ${IMXBOOT_TARGETS}; do
 				bbnote "building ${SOC_TARGET} - ${REV_OPTION} ${target}"
-				make SOC=${SOC_TARGET} ${REV_OPTION} ${target} > mkimage-${target}.log 2>&1
+				make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} ${REV_OPTION} ${target} > mkimage-${target}.log 2>&1
 				if [ -e "${BOOT_STAGING}/flash.bin" ]; then
 					cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}.bin-${target}
 				fi
@@ -129,20 +129,6 @@ do_install () {
 			done
 		done
 	fi
-}
-
-deploy_mx8m() {
-    install -d ${DEPLOYDIR}/${BOOT_TOOLS}
-    install -m 0644 ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/u-boot-spl.bin-${MACHINE}-${UBOOT_CONFIG} \
-                                                             ${DEPLOYDIR}/${BOOT_TOOLS}
-    for ddr_firmware in ${DDR_FIRMWARE_NAME}; do
-        install -m 0644 ${DEPLOY_DIR_IMAGE}/${ddr_firmware}  ${DEPLOYDIR}/${BOOT_TOOLS}
-    done
-    install -m 0644 ${BOOT_STAGING}/signed_dp_imx8m.bin      ${DEPLOYDIR}/${BOOT_TOOLS}
-    install -m 0644 ${BOOT_STAGING}/signed_hdmi_imx8m.bin    ${DEPLOYDIR}/${BOOT_TOOLS}
-    install -m 0755 ${BOOT_STAGING}/${TOOLS_NAME}            ${DEPLOYDIR}/${BOOT_TOOLS}
-    install -m 0755 ${BOOT_STAGING}/mkimage_fit_atf.sh       ${DEPLOYDIR}/${BOOT_TOOLS}
-    install -m 0755 ${BOOT_STAGING}/mkimage_uboot            ${DEPLOYDIR}/${BOOT_TOOLS}
 }
 
 do_deploy () {
