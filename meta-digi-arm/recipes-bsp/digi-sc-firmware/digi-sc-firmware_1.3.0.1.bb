@@ -9,7 +9,7 @@ SECTION = "BSP"
 
 inherit pkgconfig deploy
 
-SRC_URI = "${DIGI_PKG_SRC}/${PN}-${PV}.tar.gz"
+SRC_URI = "${DIGI_PKG_SRC}/${BPN}-${PV}.tar.gz"
 
 SRC_URI[md5sum] = "29c2ab80f539dd285a8d99a23d616d3e"
 SRC_URI[sha256sum] = "cb3f90c07e7ba547a8c467012bef23083a8e8c414c4a90e1b88c5a70dd7ece19"
