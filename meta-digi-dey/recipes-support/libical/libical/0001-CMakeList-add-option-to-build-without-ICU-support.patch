@@ -9,23 +9,23 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 3 insertions(+)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 366c285edd1a..ab7eac96e70d 100644
+index 61ab244..9bc2a22 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -126,6 +126,8 @@ endif()
+@@ -170,6 +170,8 @@ endif()
  # libicu is highly recommended for RSCALE support
  #  libicu can be found at http://www.icu-project.org
  #  RSCALE info at http://tools.ietf.org/html/rfc7529
 +option(WITH_LIBICU "Build with ICU support. Libicu is highly recommended for RSCALE support")
 +if(WITH_LIBICU)
  find_package(ICU)
- if(ICU_FOUND)
-   set(ICUUC_LIBS "-licuuc") #for libical.pc
-@@ -140,6 +142,7 @@ if(ICU_I18N_FOUND)
+ set_package_properties(ICU PROPERTIES
+   TYPE RECOMMENDED
+@@ -192,6 +194,7 @@ endif()
+ if(ICU_I18N_FOUND)
    set(HAVE_LIBICU_I18N 1)
-   set(ICUI18N_LIBS "-licui18n") #for libical.pc
  endif()
 +endif()
- 
- # MSVC specific definitions
- if(WIN32)
+
+ # compile in Berkeley DB support
+ find_package(BDB)
