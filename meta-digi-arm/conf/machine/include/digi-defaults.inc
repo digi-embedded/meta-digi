@@ -6,6 +6,9 @@ PREFERRED_PROVIDER_virtual/kernel ??= "linux-dey"
 PREFERRED_PROVIDER_virtual/kernel_use-mainline-bsp ??= "linux-fslc"
 PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 
+# Update default libc version
+LINUXLIBCVERSION ?= "5.4%"
+
 #
 # Linux and U-Boot supported versions:
 #
