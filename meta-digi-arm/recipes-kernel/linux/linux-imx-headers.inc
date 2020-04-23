@@ -47,6 +47,8 @@ do_install() {
 	done
 }
 
+DEPENDS += "rsync-native"
+
 ALLOW_EMPTY_${PN} = "1"
 
 PACKAGE_ARCH = "${MACHINE_SOCARCH}"
