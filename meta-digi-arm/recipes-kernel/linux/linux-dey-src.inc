@@ -1,10 +1,10 @@
-# Copyright (C) 2018, 2019 Digi International
+# Copyright (C) 2018-2020 Digi International
 
 LICENSE = "GPLv2"
-LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
+LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
 LOCALVERSION = "-dey"
-SRCBRANCH = "v4.14.98/master"
+SRCBRANCH = "v5.4.3/master"
 SRCBRANCH_ccimx6 = "v4.9/dey-2.6/maint"
 SRCREV = "${AUTOREV}"
 

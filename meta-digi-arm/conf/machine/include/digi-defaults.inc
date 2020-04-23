@@ -11,9 +11,9 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 #
 # Platform      Linux              U-Boot
 # -------------------------------------------------
-# ccimx6ul      4.14, 4.20         2017.03
-# ccimx8x       4.14               2019.04, 2018.03, 2017.03 (all packaged in imx-boot)
-# ccimx8mn      4.14               2018.03 (packaged in imx-boot)
+# ccimx6ul      5.4               2017.03
+# ccimx8x       5.4               2019.04, 2018.03, 2017.03 (all packaged in imx-boot)
+# ccimx8mn      5.4               2018.03 (packaged in imx-boot)
 #
 
 # Help variables used in recipes
