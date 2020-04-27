@@ -26,3 +26,6 @@ RDEPENDS_libopenvg-imx += "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 's
 # Digi custom change: we include the imx-gpu-viv driver as built-in in the
 # kernel, so this dependency isn't necessary
 RDEPENDS_libgal-imx_remove = "kernel-module-imx-gpu-viv"
+
+# Remove wayland as a requirement to build framebuffer images
+REQUIRED_DISTRO_FEATURES_mx8_remove = "wayland"
