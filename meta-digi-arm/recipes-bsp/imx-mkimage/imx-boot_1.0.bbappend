@@ -72,12 +72,14 @@ do_compile () {
 					ln -sf ${SC_FIRMWARE_NAME}-${ramc} scfw_tcm.bin
 					cd -
 					for target in ${IMXBOOT_TARGETS}; do
-						bbnote "building ${SOC_TARGET} - ${ramc} - ${REV_OPTION} ${target}"
-						make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} ${REV_OPTION} ${target}
-						if [ -e "${BOOT_STAGING}/flash.bin" ]; then
-							cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target}
-						fi
-						SCFWBUILT="yes"
+						for rev in ${SOC_REVISIONS}; do
+							bbnote "building ${SOC_TARGET} - ${ramc} - REV=${rev} ${target}"
+							make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target}
+							if [ -e "${BOOT_STAGING}/flash.bin" ]; then
+								cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target}
+							fi
+							SCFWBUILT="yes"
+						done
 					done
 					rm ${BOOT_STAGING}/scfw_tcm.bin
 					rm ${BOOT_STAGING}/u-boot.bin
@@ -122,7 +124,9 @@ do_install () {
 	else
 		for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 			for target in ${IMXBOOT_TARGETS}; do
-				install -m 0644 ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target} ${D}/boot/
+				for rev in ${SOC_REVISIONS}; do
+					install -m 0644 ${S}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${D}/boot/
+				done
 			done
 		done
 	fi
@@ -156,21 +160,23 @@ do_deploy () {
 		ln -sf mkimage-${IMAGE_IMXBOOT_TARGET}.log mkimage.log
 	else
 		for ramc in ${UBOOT_RAM_COMBINATIONS}; do
-			IMAGE_IMXBOOT_TARGET=""
-			for target in ${IMXBOOT_TARGETS}; do
-				# Use first "target" as IMAGE_IMXBOOT_TARGET
-				if [ "$IMAGE_IMXBOOT_TARGET" = "" ]; then
-					IMAGE_IMXBOOT_TARGET="$target"
-					echo "Set boot target as $IMAGE_IMXBOOT_TARGET"
-				fi
-				install -m 0644 ${S}/${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${target} ${DEPLOYDIR}
+			for rev in ${SOC_REVISIONS}; do
+				IMAGE_IMXBOOT_TARGET=""
+				for target in ${IMXBOOT_TARGETS}; do
+					# Use first "target" as IMAGE_IMXBOOT_TARGET
+					if [ "$IMAGE_IMXBOOT_TARGET" = "" ]; then
+						IMAGE_IMXBOOT_TARGET="$target"
+						echo "Set boot target as $IMAGE_IMXBOOT_TARGET"
+					fi
+					install -m 0644 ${S}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}
+				done
+				cd ${DEPLOYDIR}
+				ln -sf ${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin
+				# Link to default bootable U-Boot filename. It gets overwritten
+				# on every loop so the only last RAM_CONFIG will survive.
+				ln -sf ${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
+				cd -
 			done
-			cd ${DEPLOYDIR}
-			ln -sf ${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin
-			# Link to default bootable U-Boot filename. It gets overwritten
-			# on every loop so the only last RAM_CONFIG will survive.
-			ln -sf ${UBOOT_PREFIX}-${MACHINE}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
-			cd -
 		done
 	fi
 
