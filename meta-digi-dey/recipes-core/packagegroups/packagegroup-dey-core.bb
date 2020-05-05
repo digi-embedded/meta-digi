@@ -34,6 +34,7 @@ RDEPENDS_${PN} = "\
     base-files \
     base-passwd \
     cloudconnector \
+    cryptodev-module \
     ${@bb.utils.contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '', bb.utils.contains("MACHINE_FEATURES", "rtc", "${VIRTUAL-RUNTIME_base-utils-hwclock}", "", d), d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "touchscreen", "${VIRTUAL-RUNTIME_touchscreen}", "",d)} \
@@ -48,6 +49,7 @@ RDEPENDS_${PN} = "\
     recovery-utils \
     sysinfo \
     system-monitor \
+    u-boot-fw-utils \
     usbutils \
     ${VIRTUAL-RUNTIME_base-utils} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '', '${VIRTUAL-RUNTIME_base-utils-acpid}', d)} \

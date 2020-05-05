@@ -45,14 +45,12 @@ MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
     e2fsprogs-resize2fs \
     parted \
-    u-boot-fw-utils \
     xbee-init \
 "
 
 MACHINE_EXTRA_RRECOMMENDS += " \
     ${MACHINE_FIRMWARE} \
     ${WIRELESS_MODULE} \
-    cryptodev-module \
 "
 
 MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip pci mca"

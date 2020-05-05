@@ -32,14 +32,12 @@ MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
     e2fsprogs-resize2fs \
     parted \
-    u-boot-fw-utils \
 "
 
 MACHINE_EXTRA_RRECOMMENDS += " \
     ${MACHINE_FIRMWARE} \
     ${WIRELESS_MODULE} \
     ${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
-    cryptodev-module \
 "
 
 MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth pci"
