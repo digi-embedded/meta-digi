@@ -14,9 +14,6 @@ UBOOT_SUFFIX = "imx"
 
 STORAGE_MEDIA = "mtd"
 
-# Bluetooth interface
-BT_DEVICE_NAME ?= "cc6ul"
-
 # Wireless external module
 WIRELESS_MODULE ?= ""
 WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"

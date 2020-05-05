@@ -46,6 +46,7 @@ P2P0_STATIC_IP       ?= "192.168.45.30"
 P2P0_STATIC_NETMASK  ?= "255.255.255.0"
 WLAN_P2P_INTERFACE   ?= "p2p0"
 WLAN_P2P_DEVICE_NAME ??= "${DIGI_FAMILY}-p2p"
+BT_DEVICE_NAME       ??= "${DIGI_FAMILY}"
 
 # Digi BSP default settings
 IMAGE_CLASSES = "image_types_digi"

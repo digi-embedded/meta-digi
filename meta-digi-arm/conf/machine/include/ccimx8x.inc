@@ -31,9 +31,6 @@ KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8_defconfig"
 
 STORAGE_MEDIA = "mmc"
 
-# Bluetooth interface
-BT_DEVICE_NAME ?= "cc8x"
-
 # Wireless external module
 WIRELESS_MODULE ?= ""
 WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
