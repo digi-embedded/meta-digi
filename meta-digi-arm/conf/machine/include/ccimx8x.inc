@@ -53,7 +53,6 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     ${MACHINE_FIRMWARE} \
     ${WIRELESS_MODULE} \
     cryptodev-module \
-    cryptoauthlib \
 "
 
 MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip pci mca"

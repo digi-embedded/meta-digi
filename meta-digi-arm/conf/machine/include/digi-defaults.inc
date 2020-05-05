@@ -66,3 +66,7 @@ BOOTABLE_ARTIFACTS ?= ""
 MACHINE_EXTRA_RDEPENDS += " \
     ${@bb.utils.contains("MACHINE_FEATURES", "mca", "mca-tool", "", d)} \
 "
+# Extra RRECOMMENDS
+MACHINE_EXTRA_RRECOMMENDS += " \
+    ${@bb.utils.contains("MACHINE_FEATURES", "cryptochip", "cryptoauthlib", "", d)} \
+"
