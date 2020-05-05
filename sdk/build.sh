@@ -184,7 +184,7 @@ _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
 YOCTO_INST_DIR="${WORKSPACE}/digi-yocto-sdk.$(echo ${DY_REVISION} | tr '/' '_')"
-YOCTO_DOWNLOAD_DIR="${WORKSPACE}/downloads"
+YOCTO_DOWNLOAD_DIR="${DY_DOWNLOADS:-${WORKSPACE}}/downloads"
 YOCTO_PROJ_DIR="${WORKSPACE}/projects"
 
 CPUS="$(grep -c processor /proc/cpuinfo)"
