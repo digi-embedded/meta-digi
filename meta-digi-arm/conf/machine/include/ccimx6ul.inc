@@ -26,7 +26,6 @@ MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-
 
 MACHINE_EXTRA_RDEPENDS += " \
     imx-kobs \
-    mca-tool \
     mtd-utils-ubifs \
     u-boot-fw-utils \
 "
@@ -40,7 +39,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
 "
 MACHINE_EXTRA_RRECOMMENDS_remove_use-mainline-bsp = "${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)}"
 
-MACHINE_FEATURES += "wifi bluetooth cryptochip"
+MACHINE_FEATURES += "wifi bluetooth cryptochip mca"
 MACHINE_FEATURES_remove_use-mainline-bsp = "wifi"
 
 # mkfs.ubifs parameters for boot partition (the one holding kernel and device tree files)

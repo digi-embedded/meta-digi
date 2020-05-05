@@ -44,7 +44,6 @@ MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-
 MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
     e2fsprogs-resize2fs \
-    mca-tool \
     parted \
     u-boot-fw-utils \
     xbee-init \
@@ -57,7 +56,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     cryptoauthlib \
 "
 
-MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip pci"
+MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip pci mca"
 
 # AARCH64 doesn't support self-extracting zImage
 KERNEL_IMAGETYPE = "Image.gz"

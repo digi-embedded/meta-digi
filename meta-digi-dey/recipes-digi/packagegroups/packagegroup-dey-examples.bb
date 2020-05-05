@@ -15,6 +15,8 @@ RDEPENDS_${PN} = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt-gatt-server", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "cryptochip", "dey-examples-cryptochip", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "mca", "dey-examples-adc-cmp \
+							 dey-examples-tamper", "", d)} \
 	awsiotsdk-demo \
 	dey-examples-caamblob \
 	dey-examples-cloudconnector \
@@ -27,20 +29,11 @@ RDEPENDS_${PN}_append_ccimx6 = "\
 	dey-examples-v4l2 \
 "
 
-RDEPENDS_${PN}_append_ccimx6ul = "\
-	dey-examples-adc-cmp \
-	dey-examples-tamper \
-"
-
 RDEPENDS_${PN}_append_ccimx8x = "\
-	dey-examples-adc-cmp \
-	dey-examples-tamper \
 	dey-examples-v4l2 \
 "
 
 RDEPENDS_${PN}_append_ccimx8m = "\
-	dey-examples-adc-cmp \
-	dey-examples-tamper \
 	dey-examples-v4l2 \
 "
 

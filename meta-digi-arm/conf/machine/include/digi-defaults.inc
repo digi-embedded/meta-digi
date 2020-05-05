@@ -61,3 +61,8 @@ MACHINEOVERRIDES .= "${@['', ':${MACHINE_VARIANT}']['${MACHINE_VARIANT}' != '']}
 # U-Boot symlink
 UBOOT_SYMLINK ?= "${UBOOT_PREFIX}-${MACHINE}.${UBOOT_SUFFIX}"
 BOOTABLE_ARTIFACTS ?= ""
+
+# Extra RDEPENDS
+MACHINE_EXTRA_RDEPENDS += " \
+    ${@bb.utils.contains("MACHINE_FEATURES", "mca", "mca-tool", "", d)} \
+"
