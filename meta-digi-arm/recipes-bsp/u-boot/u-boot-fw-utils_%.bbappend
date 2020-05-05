@@ -1,9 +1,9 @@
-# Copyright (C) 2015-2017 Digi International
+# Copyright (C) 2015-2020 Digi International
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
-    file://fw_env.config \
+    file://${STORAGE_MEDIA}/fw_env.config \
 "
 
 UBOOT_FW_UTILS_PATCHES = " \
