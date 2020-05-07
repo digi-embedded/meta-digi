@@ -32,7 +32,7 @@ UBOOT_CONFIG[sandbox] = "sandbox_defconfig"
 do_install_append() {
 	install -d ${D}${includedir}/libubootenv
 	install -m 0644 ${S}/tools/env/ubootenv.h ${D}${includedir}/libubootenv/
-	install -m 0644 ${WORKDIR}/fw_env.config ${D}${sysconfdir}/
+	install -m 0644 ${WORKDIR}/${STORAGE_MEDIA}/fw_env.config ${D}${sysconfdir}/
 }
 
 pkg_postinst_ontarget_${PN}() {
