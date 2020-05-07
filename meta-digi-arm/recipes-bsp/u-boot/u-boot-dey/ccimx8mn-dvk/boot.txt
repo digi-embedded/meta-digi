@@ -37,6 +37,7 @@ else
 
 		if test "${som_hv}" = "1"; then
 			setenv overlays cc${soc_type}_ov_v1.dtbo,${overlays}
+		fi
 	fi
 fi
 
