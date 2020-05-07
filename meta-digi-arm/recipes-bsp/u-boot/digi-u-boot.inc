@@ -153,10 +153,10 @@ do_deploy_append() {
 	sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_sd.txt
 	mkimage -T script -n "DEY firmware install script" -C none -d ${WORKDIR}/install_linux_fw_sd.txt ${DEPLOYDIR}/install_linux_fw_sd.scr
 
-	if [  ${@oe.utils.conditional('UBOOT_HAS_FASTBOOT', 'true', '', '', d)}  ]; then
+	if [ "${@oe.utils.conditional('UBOOT_HAS_FASTBOOT', 'true', 'true', '', d)}" = "true" ]; then
 		# DEY firmware install uuu script
 		sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_uuu.sh
-		install 775 ${WORKDIR}/install_linux_fw_uuu.sh ${DEPLOYDIR}/
+		install -m 775 ${WORKDIR}/install_linux_fw_uuu.sh ${DEPLOYDIR}/
 	fi
 
 	# Boot script for DEY images (reconfigure on-the-fly if TRUSTFENCE is enabled)
