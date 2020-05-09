@@ -12,13 +12,15 @@ do_install_append() {
 
 pkg_postinst_ontarget_${PN}() {
 	get_emmc_block_device() {
-		emmc_number="$(sed -ne 's,.*mmcblk\(.\)boot0.*,\1,g;T;p' /proc/partitions)"
-		if [ -b "/dev/mmcblk${emmc_number}" ] &&
-		[ -b "/dev/mmcblk${emmc_number}boot0" ] &&
-		[ -b "/dev/mmcblk${emmc_number}boot1" ] &&
-		[ -b "/dev/mmcblk${emmc_number}rpmb" ]; then
-			echo "/dev/mmcblk${emmc_number}"
-		fi
+		for emmc_number in $(seq 0 9); do
+			if [ -b "/dev/mmcblk${emmc_number}" ] &&
+			   [ -b "/dev/mmcblk${emmc_number}boot0" ] &&
+			   [ -b "/dev/mmcblk${emmc_number}boot1" ] &&
+			   [ -c "/dev/mmcblk${emmc_number}rpmb" ]; then
+				echo "/dev/mmcblk${emmc_number}"
+				break
+			fi
+		done
 	}
 
 	RESIZE2FS="$(which resize2fs)"
