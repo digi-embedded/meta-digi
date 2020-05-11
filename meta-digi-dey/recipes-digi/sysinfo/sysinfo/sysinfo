@@ -241,7 +241,7 @@ make_report(){
 		done
 		echo ""
 	fi
-	for d in /sys/bus/nvmem/devices/*; do
+	for d in /sys/bus/nvmem/devices/imx-ocotp*; do
 		[ -e $d ] || continue
 		echo "$d:"
 		hexdump -C $d/nvmem
