@@ -19,15 +19,7 @@ clear
 # Parse uuu cmd output
 function getenv()
 {
-	while read line; do
-		if echo "${line}" | grep -i "$1"; then
-			# Get the U-boot variable content
-			echo "${line}" | sed -e 's,'${1}=',,g'
-		else
-			# Delete the line to return nothing
-			sed -e 'd'
-		fi
-	done < <(uuu -v fb: ucmd printenv ${1})
+	uuu -v fb: ucmd printenv "${1}" | sed -ne "s,^${1}=,,g;T;p"
 }
 
 #
