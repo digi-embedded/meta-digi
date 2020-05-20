@@ -5,7 +5,6 @@ SRC_URI_append = " \
     file://0001-Compositor-Fix-access-to-member-of-null-reference.patch \
     file://0002-Compositor-Fix-crashes-when-destroying-uninitialized.patch \
     file://0003-Client-Fix-crash-when-showing-a-child-window-with-a-.patch \
-    file://0004-Client-really-use-OpenGL-ES-2-API-for-decoration-bli.patch \
     file://0005-Client-Always-close-popups-when-hiding-a-window.patch \
     file://0006-Avoid-potential-double-deletion.patch \
 "
