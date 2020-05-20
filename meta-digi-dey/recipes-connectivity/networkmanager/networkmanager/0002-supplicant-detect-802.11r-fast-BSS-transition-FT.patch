@@ -1,0 +1,235 @@
+From: Lubomir Rintel <lkundrak@v3.sk>
+Date: Mon, 15 Jul 2019 11:30:15 +0000
+Subject: [PATCH 2/7] supplicant: detect 802.11r fast BSS transition (FT)
+
+---
+ src/supplicant/nm-supplicant-interface.c | 33 +++++++++++++++++++++++-
+ src/supplicant/nm-supplicant-interface.h |  8 +++++-
+ src/supplicant/nm-supplicant-manager.c   | 20 +++++++++++---
+ 3 files changed, 55 insertions(+), 6 deletions(-)
+
+diff --git a/src/supplicant/nm-supplicant-interface.c b/src/supplicant/nm-supplicant-interface.c
+index e94c98765..2eaa1401e 100644
+--- a/src/supplicant/nm-supplicant-interface.c
++++ b/src/supplicant/nm-supplicant-interface.c
+@@ -113,6 +113,7 @@ NM_GOBJECT_PROPERTIES_DEFINE (NMSupplicantInterface,
+ 	PROP_FILS_SUPPORT,
+ 	PROP_P2P_SUPPORT,
+ 	PROP_WFD_SUPPORT,
++	PROP_FT_SUPPORT,
+ );
+
+ typedef struct {
+@@ -125,6 +126,7 @@ typedef struct {
+ 	NMSupplicantFeature fils_support;
+ 	NMSupplicantFeature p2p_support;
+ 	NMSupplicantFeature wfd_support;
++	NMSupplicantFeature ft_support;
+ 	guint32        max_scan_ssids;
+ 	guint32        ready_count;
+
+@@ -786,6 +788,12 @@ nm_supplicant_interface_get_wfd_support (NMSupplicantInterface *self)
+ 	return NM_SUPPLICANT_INTERFACE_GET_PRIVATE (self)->wfd_support;
+ }
+
++NMSupplicantFeature
++nm_supplicant_interface_get_ft_support (NMSupplicantInterface *self)
++{
++	return NM_SUPPLICANT_INTERFACE_GET_PRIVATE (self)->ft_support;
++}
++
+ void
+ nm_supplicant_interface_set_ap_support (NMSupplicantInterface *self,
+                                         NMSupplicantFeature ap_support)
+@@ -844,6 +852,15 @@ nm_supplicant_interface_set_wfd_support (NMSupplicantInterface *self,
+ 	priv->wfd_support = wfd_support;
+ }
+
++void
++nm_supplicant_interface_set_ft_support (NMSupplicantInterface *self,
++                                        NMSupplicantFeature ft_support)
++{
++	NMSupplicantInterfacePrivate *priv = NM_SUPPLICANT_INTERFACE_GET_PRIVATE (self);
++
++	priv->ft_support = ft_support;
++}
++
+ /*****************************************************************************/
+
+ static void
+@@ -2684,6 +2701,10 @@ set_property (GObject *object,
+ 		/* construct-only */
+ 		priv->wfd_support = g_value_get_int (value);
+ 		break;
++	case PROP_FT_SUPPORT:
++		/* construct-only */
++		priv->ft_support = g_value_get_int (value);
++		break;
+ 	default:
+ 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+ 		break;
+@@ -2709,7 +2730,8 @@ nm_supplicant_interface_new (const char *ifname,
+                              NMSupplicantFeature pmf_support,
+                              NMSupplicantFeature fils_support,
+                              NMSupplicantFeature p2p_support,
+-                             NMSupplicantFeature wfd_support)
++                             NMSupplicantFeature wfd_support,
++                             NMSupplicantFeature ft_support)
+ {
+ 	/* One of ifname or path need to be set */
+ 	g_return_val_if_fail (ifname != NULL || object_path != NULL, NULL);
+@@ -2725,6 +2747,7 @@ nm_supplicant_interface_new (const char *ifname,
+ 	                     NM_SUPPLICANT_INTERFACE_FILS_SUPPORT, (int) fils_support,
+ 	                     NM_SUPPLICANT_INTERFACE_P2P_SUPPORT, (int) p2p_support,
+ 	                     NM_SUPPLICANT_INTERFACE_WFD_SUPPORT, (int) wfd_support,
++	                     NM_SUPPLICANT_INTERFACE_FT_SUPPORT, (int) ft_support,
+ 	                     NULL);
+ }
+
+@@ -2883,6 +2906,14 @@ nm_supplicant_interface_class_init (NMSupplicantInterfaceClass *klass)
+ 	                      G_PARAM_WRITABLE |
+ 	                      G_PARAM_CONSTRUCT_ONLY |
+ 	                      G_PARAM_STATIC_STRINGS);
++	obj_properties[PROP_FT_SUPPORT] =
++	    g_param_spec_int (NM_SUPPLICANT_INTERFACE_FT_SUPPORT, "", "",
++	                      NM_SUPPLICANT_FEATURE_UNKNOWN,
++	                      NM_SUPPLICANT_FEATURE_YES,
++	                      NM_SUPPLICANT_FEATURE_UNKNOWN,
++	                      G_PARAM_WRITABLE |
++	                      G_PARAM_CONSTRUCT_ONLY |
++	                      G_PARAM_STATIC_STRINGS);
+
+ 	g_object_class_install_properties (object_class, _PROPERTY_ENUMS_LAST, obj_properties);
+
+diff --git a/src/supplicant/nm-supplicant-interface.h b/src/supplicant/nm-supplicant-interface.h
+index 2e124df92..0b33a4e41 100644
+--- a/src/supplicant/nm-supplicant-interface.h
++++ b/src/supplicant/nm-supplicant-interface.h
+@@ -68,6 +68,7 @@ typedef enum {
+ #define NM_SUPPLICANT_INTERFACE_FILS_SUPPORT     "fils-support"
+ #define NM_SUPPLICANT_INTERFACE_P2P_SUPPORT      "p2p-support"
+ #define NM_SUPPLICANT_INTERFACE_WFD_SUPPORT      "wfd-support"
++#define NM_SUPPLICANT_INTERFACE_FT_SUPPORT       "ft-support"
+
+ /* Signals */
+ #define NM_SUPPLICANT_INTERFACE_STATE            "state"
+@@ -95,7 +96,8 @@ NMSupplicantInterface * nm_supplicant_interface_new (const char *ifname,
+                                                      NMSupplicantFeature pmf_support,
+                                                      NMSupplicantFeature fils_support,
+                                                      NMSupplicantFeature p2p_support,
+-                                                     NMSupplicantFeature wfd_support);
++                                                     NMSupplicantFeature wfd_support,
++                                                     NMSupplicantFeature ft_support);
+
+ void nm_supplicant_interface_set_supplicant_available (NMSupplicantInterface *self,
+                                                        gboolean available);
+@@ -161,6 +163,7 @@ NMSupplicantFeature nm_supplicant_interface_get_pmf_support (NMSupplicantInterfa
+ NMSupplicantFeature nm_supplicant_interface_get_fils_support (NMSupplicantInterface *self);
+ NMSupplicantFeature nm_supplicant_interface_get_p2p_support (NMSupplicantInterface *self);
+ NMSupplicantFeature nm_supplicant_interface_get_wfd_support (NMSupplicantInterface *self);
++NMSupplicantFeature nm_supplicant_interface_get_ft_support (NMSupplicantInterface *self);
+
+ void nm_supplicant_interface_set_ap_support (NMSupplicantInterface *self,
+                                              NMSupplicantFeature apmode);
+@@ -180,6 +183,9 @@ void nm_supplicant_interface_set_p2p_support (NMSupplicantInterface *self,
+ void nm_supplicant_interface_set_wfd_support (NMSupplicantInterface *self,
+                                               NMSupplicantFeature wfd_support);
+
++void nm_supplicant_interface_set_ft_support (NMSupplicantInterface *self,
++                                             NMSupplicantFeature ft_support);
++
+ void nm_supplicant_interface_enroll_wps (NMSupplicantInterface *self,
+                                          const char *const type,
+                                          const char *bssid,
+diff --git a/src/supplicant/nm-supplicant-manager.c b/src/supplicant/nm-supplicant-manager.c
+index 2945d21ca..f7a3bdbf2 100644
+--- a/src/supplicant/nm-supplicant-manager.c
++++ b/src/supplicant/nm-supplicant-manager.c
+@@ -40,6 +40,7 @@ typedef struct {
+ 	NMSupplicantFeature fils_support;
+ 	NMSupplicantFeature p2p_support;
+ 	NMSupplicantFeature wfd_support;
++	NMSupplicantFeature ft_support;
+ 	guint             die_count_reset_id;
+ 	guint             die_count;
+ } NMSupplicantManagerPrivate;
+@@ -231,7 +232,8 @@ nm_supplicant_manager_create_interface (NMSupplicantManager *self,
+ 	                                     priv->pmf_support,
+ 	                                     priv->fils_support,
+ 	                                     priv->p2p_support,
+-	                                     priv->wfd_support);
++	                                     priv->wfd_support,
++	                                     priv->ft_support);
+
+ 	priv->ifaces = g_slist_prepend (priv->ifaces, iface);
+ 	g_object_add_toggle_ref ((GObject *) iface, _sup_iface_last_ref, self);
+@@ -288,7 +290,8 @@ nm_supplicant_manager_create_interface_from_path (NMSupplicantManager *self,
+ 	                                     priv->pmf_support,
+ 	                                     priv->fils_support,
+ 	                                     priv->p2p_support,
+-	                                     priv->wfd_support);
++	                                     priv->wfd_support,
++	                                     priv->ft_support);
+
+ 	priv->ifaces = g_slist_prepend (priv->ifaces, iface);
+ 	g_object_add_toggle_ref ((GObject *) iface, _sup_iface_last_ref, self);
+@@ -324,8 +327,9 @@ update_capabilities (NMSupplicantManager *self)
+ 	priv->ap_support = NM_SUPPLICANT_FEATURE_UNKNOWN;
+ 	priv->pmf_support = NM_SUPPLICANT_FEATURE_UNKNOWN;
+ 	priv->fils_support = NM_SUPPLICANT_FEATURE_UNKNOWN;
+-	/* P2P support is newer than the capabilities property */
++	/* Support for the following is newer than the capabilities property */
+ 	priv->p2p_support = NM_SUPPLICANT_FEATURE_NO;
++	priv->ft_support = NM_SUPPLICANT_FEATURE_NO;
+
+ 	value = g_dbus_proxy_get_cached_property (priv->proxy, "Capabilities");
+ 	if (value) {
+@@ -335,6 +339,7 @@ update_capabilities (NMSupplicantManager *self)
+ 			priv->pmf_support = NM_SUPPLICANT_FEATURE_NO;
+ 			priv->fils_support = NM_SUPPLICANT_FEATURE_NO;
+ 			priv->p2p_support = NM_SUPPLICANT_FEATURE_NO;
++			priv->ft_support = NM_SUPPLICANT_FEATURE_NO;
+ 			if (array) {
+ 				if (g_strv_contains (array, "ap"))
+ 					priv->ap_support = NM_SUPPLICANT_FEATURE_YES;
+@@ -344,18 +349,21 @@ update_capabilities (NMSupplicantManager *self)
+ 					priv->fils_support = NM_SUPPLICANT_FEATURE_YES;
+ 				if (g_strv_contains (array, "p2p"))
+ 					priv->p2p_support = NM_SUPPLICANT_FEATURE_YES;
++				if (g_strv_contains (array, "ft"))
++					priv->ft_support = NM_SUPPLICANT_FEATURE_YES;
+ 				g_free (array);
+ 			}
+ 		}
+ 		g_variant_unref (value);
+ 	}
+
+-	/* Tell all interfaces about results of the AP/PMF/FILS/P2P check */
++	/* Tell all interfaces about results of the AP/PMF/FILS/P2P/FT check */
+ 	for (ifaces = priv->ifaces; ifaces; ifaces = ifaces->next) {
+ 		nm_supplicant_interface_set_ap_support (ifaces->data, priv->ap_support);
+ 		nm_supplicant_interface_set_pmf_support (ifaces->data, priv->pmf_support);
+ 		nm_supplicant_interface_set_fils_support (ifaces->data, priv->fils_support);
+ 		nm_supplicant_interface_set_p2p_support (ifaces->data, priv->p2p_support);
++		nm_supplicant_interface_set_ft_support (ifaces->data, priv->ft_support);
+ 	}
+
+ 	_LOGD ("AP mode is %ssupported",
+@@ -370,6 +378,9 @@ update_capabilities (NMSupplicantManager *self)
+ 	_LOGD ("P2P is %ssupported",
+ 	       (priv->p2p_support == NM_SUPPLICANT_FEATURE_YES) ? "" :
+ 	           (priv->p2p_support == NM_SUPPLICANT_FEATURE_NO) ? "not " : "possibly ");
++	_LOGD ("FT is %ssupported",
++	       (priv->ft_support == NM_SUPPLICANT_FEATURE_YES) ? "" :
++	           (priv->ft_support == NM_SUPPLICANT_FEATURE_NO) ? "not " : "possibly ");
+
+ 	/* EAP-FAST */
+ 	priv->fast_support = NM_SUPPLICANT_FEATURE_NO;
+@@ -508,6 +519,7 @@ name_owner_cb (GDBusProxy *proxy, GParamSpec *pspec, gpointer user_data)
+ 		priv->fast_support = NM_SUPPLICANT_FEATURE_UNKNOWN;
+ 		priv->pmf_support = NM_SUPPLICANT_FEATURE_UNKNOWN;
+ 		priv->fils_support = NM_SUPPLICANT_FEATURE_UNKNOWN;
++		priv->ft_support = NM_SUPPLICANT_FEATURE_UNKNOWN;
+
+ 		set_running (self, FALSE);
+ 	}
