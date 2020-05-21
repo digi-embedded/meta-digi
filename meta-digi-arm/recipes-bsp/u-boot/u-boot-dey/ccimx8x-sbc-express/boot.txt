@@ -8,39 +8,39 @@ if test ! -n "${soc_type}"; then
 fi
 
 #
-# Set device tree filename depending on the board ID (if defined)
+# Set the base device tree filename
 #
-if test -n "${board_id}"; then
-	setenv fdt_file cc${soc_type}-sbc-express-id${board_id}.dtb
+setenv fdt_file cc${soc_type}-sbc-express.dtb
+
+#
+# Set predetermined overlays for specific board IDs
+#
+if test "${board_id}" = "129"; then
+	setenv overlays ccimx8x_ov_bt.dtbo,ccimx8x_ov_wifi.dtbo,${overlays}
 else
 	#
-	# Set device tree filename depending on the hardware capabilities
+	# Set overlays depending on the hardware capabilities
 	#
 	if test -n "${module_ram}"; then
 		setexpr module_has_wifi ${hwid_3} \& 1
 		setexpr module_has_bt ${hwid_3} \& 2
 		setexpr module_has_bt ${module_has_bt} / 2
 
-		if test "${module_has_wifi}" = "1" &&
-		   test "${module_has_bt}" = "1"; then
-			setenv fdt_file cc${soc_type}-sbc-express-wb.dtb
-		else
-			setenv fdt_file cc${soc_type}-sbc-express.dtb
+		if test "${module_has_bt}" = "1"; then
+			setenv overlays ccimx8x_ov_bt.dtbo,${overlays}
+		fi
+
+		if test "${module_has_wifi}" = "1"; then
+			setenv overlays ccimx8x_ov_wifi.dtbo,${overlays}
 		fi
 	else
 		#
-		# Set device tree filename depending on the hardware variant
+		# Set overlays depending on the hardware variant
 		#
 		if test "${module_variant}" = "0x01" ||
 		   test "${module_variant}" = "0x02" ||
 		   test "${module_variant}" = "0x04"; then
-			setenv fdt_file cc${soc_type}-sbc-express-wb.dtb
-		elif test "${module_variant}" = "0x03" ||
-		     test "${module_variant}" = "0x05" ||
-		     test "${module_variant}" = "0x06"; then
-			setenv fdt_file cc${soc_type}-sbc-express.dtb
-		else
-			setenv fdt_file cc${soc_type}-sbc-express-wb.dtb
+			setenv overlays ccimx8x_ov_bt.dtbo,ccimx8x_ov_wifi.dtbo,${overlays}
 		fi
 	fi
 fi
