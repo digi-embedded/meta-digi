@@ -10,7 +10,7 @@ fi
 #
 # Set the base device tree filename
 #
-setenv fdt_file cc${soc_type}-sbc-express.dtb
+setenv fdt_file ccimx8x-sbc-express.dtb
 
 #
 # Set predetermined overlays for specific board IDs
@@ -43,6 +43,11 @@ else
 			setenv overlays ccimx8x_ov_bt.dtbo,ccimx8x_ov_wifi.dtbo,${overlays}
 		fi
 	fi
+fi
+
+# Apply QXP overlay if the SOC type is "imx8qxp"
+if test "${soc_type}" = "imx8qxp""; then
+	setenv overlays ccimx8x_ov_qxp.dtbo,${overlays}
 fi
 
 # Get the UUID of the configured boot partition.
