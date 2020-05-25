@@ -24,7 +24,7 @@ SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 # This determines the number of different DCD files, and thus the number of
 # different U-Boot binaries required.
 # Last one is the default (the one the symlinks point at)
-RAM_CONFIGS = "1.2GHz_512MB_16bit 1.2GHz_1GB_16bit 1.2GHz_1GB_32bit 1.2GHz_2GB_32bit"
+RAM_CONFIGS = "512MB_16bit 1GB_16bit 1GB_32bit 2GB_32bit"
 
 # The original variable used by NXP to store the mkimage "REV" parameter,
 # REV_OPTION, has a format of "REV=X0". Since we are interested in building

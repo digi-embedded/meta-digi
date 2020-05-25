@@ -76,10 +76,10 @@ if [ -z "${module_ram}" ]; then
 		else
 			module_ram="512MB"
 		fi
-		INSTALL_UBOOT_FILENAME="imx-boot-ccimx8x-sbc-pro-${soc_rev}-1.2GHz_${module_ram}_${bus_width}.bin"
+		INSTALL_UBOOT_FILENAME="imx-boot-ccimx8x-sbc-pro-${soc_rev}-${module_ram}_${bus_width}.bin"
 	fi
 else
-	INSTALL_UBOOT_FILENAME="imx-boot-ccimx8x-sbc-pro-${soc_rev}-1.2GHz_${module_ram}_${bus_width}.bin"
+	INSTALL_UBOOT_FILENAME="imx-boot-ccimx8x-sbc-pro-${soc_rev}-${module_ram}_${bus_width}.bin"
 fi
 
 # remove redirect
@@ -94,13 +94,13 @@ else
 	echo ""
 	echo "1. Add U-boot file name, depending on your ConnectCore 8X variant, to script command line:"
 	echo "   - For a QuadXPlus CPU with 1GB LPDDR4, run:"
-	echo "     => ./install_linux_fs_uuu.sh imx-boot-ccimx8x-sbc-pro-${soc_rev}-1.2GHz_1GB_32bit.bin"
+	echo "     => ./install_linux_fs_uuu.sh imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_32bit.bin"
 	echo "   - For a QuadXPlus CPU with 2GB LPDDR4, run:"
-	echo "     => ./install_linux_fs_uuu.sh imx-boot-ccimx8x-sbc-pro-${soc_rev}-1.2GHz_2GB_32bit.bin"
+	echo "     => ./install_linux_fs_uuu.sh imx-boot-ccimx8x-sbc-pro-${soc_rev}-2GB_32bit.bin"
 	echo "   - For a DualX CPU with 1GB LPDDR4, run:"
-	echo "     => ./install_linux_fs_uuu.sh imx-boot-ccimx8x-sbc-pro-${soc_rev}-1.2GHz_1GB_16bit.bin"
+	echo "     => ./install_linux_fs_uuu.sh imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_16bit.bin"
 	echo "   - For a DualX CPU with 512MB LPDDR4, run:"
-	echo "     => ./install_linux_fs_uuu.sh imx-boot-ccimx8x-sbc-pro-${soc_rev}-1.2GHz_512MB_16bit.bin"
+	echo "     => ./install_linux_fs_uuu.sh imx-boot-ccimx8x-sbc-pro-${soc_rev}-512MB_16bit.bin"
 	echo ""
 	echo "2. Run the install script again."
 	echo ""
