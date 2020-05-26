@@ -8,36 +8,28 @@ if test ! -n "${soc_type}"; then
 fi
 
 #
-# Set device tree filename depending on the board ID (if defined)
+# Determine overlays to apply depending on the hardware capabilities
+# described by the HWID, SOM version, and carrier board version.
 #
-if test -n "${board_id}"; then
-	setenv fdt_file cc${soc_type}-dvk-id${board_id}.dtb
-else
-	#
-	# Set device tree filename depending on the hardware capabilities
-	#
-	if test -n "${module_ram}"; then
-		setexpr som_hv ${hwid_2} \& 38
-		setexpr som_hv ${som_hv} / 8
+if test -n "${module_ram}"; then
+	setexpr som_hv ${hwid_2} \& 38
+	setexpr som_hv ${som_hv} / 8
 
-		setexpr module_has_wifi ${hwid_2} \& 10000
-		setexpr module_has_wifi ${module_has_wifi} / 10000
-		setexpr module_has_bt ${hwid_2} \& 20000
-		setexpr module_has_bt ${module_has_bt} / 20000
+	setexpr module_has_wifi ${hwid_2} \& 10000
+	setexpr module_has_wifi ${module_has_wifi} / 10000
+	setexpr module_has_bt ${hwid_2} \& 20000
+	setexpr module_has_bt ${module_has_bt} / 20000
 
-		setenv fdt_file cc${soc_type}-dvk.dtb
+	if test "${module_has_bt}" = "1"; then
+		setenv overlays cc${soc_type}_ov_bt.dtbo,${overlays}
+	fi
 
-		if test "${module_has_bt}" = "1"; then
-			setenv overlays cc${soc_type}_ov_bt.dtbo,${overlays}
-		fi
+	if test "${module_has_wifi}" = "1"; then
+		setenv overlays cc${soc_type}_ov_wifi.dtbo,${overlays}
+	fi
 
-		if test "${module_has_wifi}" = "1"; then
-			setenv overlays cc${soc_type}_ov_wifi.dtbo,${overlays}
-		fi
-
-		if test "${som_hv}" = "1"; then
-			setenv overlays cc${soc_type}_ov_v1.dtbo,${overlays}
-		fi
+	if test "${som_hv}" = "1"; then
+		setenv overlays cc${soc_type}_ov_v1.dtbo,${overlays}
 	fi
 fi
 
