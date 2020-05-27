@@ -6,6 +6,16 @@ IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware imx-seco"
 DEPENDS_append_ccimx8x = " coreutils-native"
 DEPENDS_append_mx8 += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
+IMX_M7_DEMOS        = ""
+IMX_M7_DEMOS_mx8mn  = "imx-m7-demos:do_deploy"
+
+M7_DEFAULT_IMAGE ?= "m7_image.bin"
+M7_DEFAULT_IMAGE_mx8mn = "imx8mn_m7_TCM_hello_world.bin"
+
+do_compile[depends] += " \
+    ${IMX_M7_DEMOS} \
+"
+
 # This package aggregates dependencies with other packages,
 # so also define the license dependencies.
 do_populate_lic[depends] += " \
@@ -13,6 +23,7 @@ do_populate_lic[depends] += " \
 	${@' '.join('%s:do_populate_lic' % r for r in '${IMX_EXTRA_FIRMWARE}'.split() )} \
 	imx-atf:do_populate_lic \
 	${@bb.utils.contains('IMX_M4_DEMOS', 'imx-m4-demos:do_deploy', 'imx-m4-demos:do_populate_lic', '', d)} \
+	${@bb.utils.contains('IMX_M7_DEMOS', 'imx-m7-demos:do_deploy', 'imx-m7-demos:do_populate_lic', '', d)} \
 	firmware-imx:do_populate_lic \
 "
 
@@ -36,6 +47,10 @@ compile_mx8x() {
 
 compile_mx8m() {
 	bbnote 8MQ/8MM/8MN boot binary build
+	if [ -e ${DEPLOY_DIR_IMAGE}/${M7_DEFAULT_IMAGE} ] ; then
+		cp ${DEPLOY_DIR_IMAGE}/${M7_DEFAULT_IMAGE}           ${BOOT_STAGING}/m7_image.bin
+	fi
+
 	for ddr_firmware in ${DDR_FIRMWARE_NAME}; do
 		bbnote "Copy ddr_firmware: ${ddr_firmware} from ${DEPLOY_DIR_IMAGE} -> ${BOOT_STAGING} "
 		cp ${DEPLOY_DIR_IMAGE}/${ddr_firmware}               ${BOOT_STAGING}
@@ -129,6 +144,12 @@ do_install () {
 				done
 			done
 		done
+	fi
+}
+
+deploy_mx8m_append() {
+	if [ -e ${BOOT_STAGING}/m7_image.bin ] ; then
+		cp ${BOOT_STAGING}/m7_image.bin                      ${DEPLOYDIR}/${BOOT_TOOLS}
 	fi
 }
 
