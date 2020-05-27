@@ -35,7 +35,7 @@ else
 fi
 
 # Apply QXP overlay if the SOC type is "imx8qxp"
-if test "${soc_type}" = "imx8qxp""; then
+if test "${soc_type}" = "imx8qxp"; then
 	setenv overlays ccimx8x_ov_qxp.dtbo,${overlays}
 fi
 
