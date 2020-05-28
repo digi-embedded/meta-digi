@@ -55,7 +55,7 @@ Usage: ${SCRIPT_NAME} [OPTIONS] input-unsigned-image output-signed-image
     -i               sign/encrypt initramfs
     -l               sign/encrypt Linux image
 
-Supported platforms: ccimx6, ccimx6ul, ccimx8x
+Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn
 
 EOF
 }
@@ -101,9 +101,13 @@ elif [ "${PLATFORM}" = "ccimx8x" ]; then
 	CONFIG_FDT_LOADADDR="0x82000000"
 	CONFIG_RAMDISK_LOADADDR="0x82100000"
 	CONFIG_KERNEL_LOADADDR="0x80280000"
+elif [ "${PLATFORM}" = "ccimx8mn" ]; then
+	CONFIG_FDT_LOADADDR="0x43000000"
+	CONFIG_RAMDISK_LOADADDR="0x43800000"
+	CONFIG_KERNEL_LOADADDR="0x40480000"
 else
 	echo "Invalid platform: ${PLATFORM}"
-	echo "Supported platforms: ccimx6, ccimx6ul, ccimx8x"
+	echo "Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn"
 	exit 1
 fi
 
@@ -176,6 +180,22 @@ elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 	fi
 fi
 
+LINUX64_MAGIC="0x644d5241"
+
+get_image_size()
+{
+	# Check if LINUX_ARM64 image magic number is found
+	magic_number="$(hexdump -n 4 -s 56 -e '/4 "0x%08x\t" "\n"' ${UIMAGE_PATH})"
+	if [ ${magic_number} = "${LINUX64_MAGIC}" ]; then
+		# LINUX_ARM64, read the size from the file header
+		image_size="$(hexdump -n 4 -s 16 -e '/4 "0x%08x\t" "\n"' ${UIMAGE_PATH})"
+	else
+		# Unknown image type, return the actual filesize
+		image_size="$(stat -L -c %s ${UIMAGE_PATH})"
+	fi
+	echo ${image_size}
+}
+
 SRK_TABLE="$(pwd)/SRK_table.bin"
 if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	HAB_VER="hab_ver 4"
@@ -189,7 +209,7 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	dek_blob_offset="$((CONFIG_KERNEL_LOADADDR - DEK_BLOB_OFFSET))"
 
 	# Compute the layout: sizes and offsets.
-	uimage_size="$(stat -L -c %s ${UIMAGE_PATH})"
+	uimage_size="$(get_image_size)"
 	uimage_offset="0x0"
 	pad_len="$(((uimage_size + 0x1000 - 1) & ~(0x1000 - 1)))"
 	auth_len="$((pad_len + 0x20))"
