@@ -68,13 +68,6 @@ fi
 UIMAGE_PATH="$(readlink -e ${1})"
 TARGET="$(readlink -m ${2})"
 
-# Negative offset with respect to CONFIG_RAM_START in which U-Boot
-# copies the DEK blob.
-if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
-	DEK_BLOB_OFFSET="0x100"
-	CONFIG_CSF_SIZE="0x4000"
-fi
-
 # Read user configuration file (if used)
 [ -f .config ] && . ./.config
 
@@ -93,10 +86,12 @@ if [ "${PLATFORM}" = "ccimx6" ]; then
 	CONFIG_FDT_LOADADDR="0x18000000"
 	CONFIG_RAMDISK_LOADADDR="0x19000000"
 	CONFIG_KERNEL_LOADADDR="0x12000000"
+	CONFIG_CSF_SIZE="0x4000"
 elif [ "${PLATFORM}" = "ccimx6ul" ]; then
 	CONFIG_FDT_LOADADDR="0x83000000"
 	CONFIG_RAMDISK_LOADADDR="0x83800000"
 	CONFIG_KERNEL_LOADADDR="0x80800000"
+	CONFIG_CSF_SIZE="0x4000"
 elif [ "${PLATFORM}" = "ccimx8x" ]; then
 	CONFIG_FDT_LOADADDR="0x82000000"
 	CONFIG_RAMDISK_LOADADDR="0x82100000"
@@ -105,6 +100,7 @@ elif [ "${PLATFORM}" = "ccimx8mn" ]; then
 	CONFIG_FDT_LOADADDR="0x43000000"
 	CONFIG_RAMDISK_LOADADDR="0x43800000"
 	CONFIG_KERNEL_LOADADDR="0x40480000"
+	CONFIG_CSF_SIZE="0x2000"
 else
 	echo "Invalid platform: ${PLATFORM}"
 	echo "Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn"
@@ -123,6 +119,9 @@ if [ -z "${CONFIG_RAM_START}" ]; then
 fi
 
 if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
+	# Negative offset with respect to CONFIG_RAM_START in which U-Boot
+	# copies the DEK blob.
+	DEK_BLOB_OFFSET="0x100"
 	if [ -n "${CONFIG_DEK_PATH}" ]; then
 		if [ ! -f "${CONFIG_DEK_PATH}" ]; then
 			echo "DEK not found. Generating random 256 bit DEK."
