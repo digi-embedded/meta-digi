@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  trustfence-sign-kernel.sh
+#  trustfence-sign-artifact.sh
 #
 #  Copyright (C) 2016-2020 by Digi International Inc.
 #  All rights reserved.
@@ -12,10 +12,11 @@
 #
 #
 #  Description:
-#    Script for building signed and encrypted kernel uImages using NXP CST.
+#    Script for building signed and encrypted artifacts using NXP CST.
 #
 #    The following environment variables define the script behaviour:
 #      CONFIG_SIGN_KEYS_PATH: (mandatory) path to the CST folder by NXP with keys generated.
+#      CONFIG_SIGN_MODE: (mandatory) Signing method: HAB/AHAB
 #      CONFIG_KEY_INDEX: (optional) key index to use for signing. Default is 0.
 #      CONFIG_DEK_PATH: (optional) Path to keyfile. Define it to generate
 #			encrypted images

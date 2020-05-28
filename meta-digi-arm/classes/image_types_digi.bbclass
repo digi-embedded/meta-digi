@@ -212,7 +212,7 @@ trustence_sign_cpio() {
 			mv "${1}-mkimg" "${1}"
 		fi
 		# Sign/encrypt the ramdisk
-		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -i "${1}" "${1}.tf"
+		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -i "${1}" "${1}.tf"
 	else
 		# Copy the image with no changes
 		cp "${1}" "${1}.tf"
