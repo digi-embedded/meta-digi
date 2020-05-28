@@ -116,7 +116,7 @@ do_compile () {
 			if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 				# Log HAB FIT information
 				bbnote "building ${SOC_TARGET} - print_fit_hab"
-				make SOC=${SOC_TARGET} print_fit_hab > mkimage-print_fit_hab.log 2>&1
+				make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} print_fit_hab > mkimage-print_fit_hab.log 2>&1
 			fi
 		fi
 	done
