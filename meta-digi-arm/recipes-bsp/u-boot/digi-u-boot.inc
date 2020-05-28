@@ -171,7 +171,7 @@ do_deploy_append() {
 		[ -n "${TRUSTFENCE_SIGN_MODE}" ] && export CONFIG_SIGN_MODE="${TRUSTFENCE_SIGN_MODE}"
 
 		# Sign boot script
-		if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ] && [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
+		if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
 			TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
 			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
 			mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
