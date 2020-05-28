@@ -53,7 +53,11 @@ trustfence_sign() {
 		DTB_IMAGE="${DTB_BASE_NAME}-${KERNEL_IMAGE_NAME}.${DTB_EXT}"
 
 		TMP_DTB_IMAGE_SIGNED="$(mktemp ${DTB_IMAGE}-signed.XXXXXX)"
-		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -d "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
+		if [ "${DTB_EXT}" = "dtbo" ]; then
+			trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -o "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
+		else
+			trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -d "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
+		fi
 		mv "${TMP_DTB_IMAGE_SIGNED}" "${DTB_IMAGE}"
 	done
 }

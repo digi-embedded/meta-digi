@@ -33,12 +33,13 @@ done
 SCRIPT_NAME="$(basename ${0})"
 SCRIPT_PATH="$(cd $(dirname ${0}) && pwd)"
 
-while getopts "bdilp:" c; do
+while getopts "bdilop:" c; do
 	case "${c}" in
 		b) ARTIFACT_BOOTSCRIPT="y";;
 		d) ARTIFACT_DTB="y";;
 		i) ARTIFACT_INITRAMFS="y";;
 		l) ARTIFACT_KERNEL="y";;
+		o) ARTIFACT_DTB_OVERLAY="y";;
 		p) PLATFORM="${OPTARG}";;
 	esac
 done
@@ -54,6 +55,7 @@ Usage: ${SCRIPT_NAME} [OPTIONS] input-unsigned-image output-signed-image
     -d               sign/encrypt DTB
     -i               sign/encrypt initramfs
     -l               sign/encrypt Linux image
+    -o               sign/encrypt DTB overlay
 
 Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn
 
@@ -112,9 +114,11 @@ fi
 [ "${ARTIFACT_KERNEL}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
 # bootscripts are loaded to $loadaddr, just like the kernel
 [ "${ARTIFACT_BOOTSCRIPT}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
+# DTB overlays are loaded to $initrd_addr, just like the ramdisk
+[ "${ARTIFACT_DTB_OVERLAY}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
 
 if [ -z "${CONFIG_RAM_START}" ]; then
-	echo "Specify the type of image to process (-b, -i, -d, or -l)"
+	echo "Specify the type of image to process (-b, -i, -d, -l, or -o)"
 	exit 1
 fi
 
