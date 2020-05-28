@@ -171,11 +171,14 @@ do_deploy_append() {
 		[ -n "${TRUSTFENCE_SIGN_MODE}" ] && export CONFIG_SIGN_MODE="${TRUSTFENCE_SIGN_MODE}"
 
 		# Sign boot script
-		if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
-			TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
-			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
-			mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
+		if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
+			mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${DEPLOYDIR}/boot.scr a35 ${RAM_CONTAINER_LOC_BOOT} -out boot.scr-mkimg
+			mv "boot.scr-mkimg" "${DEPLOYDIR}/boot.scr"
 		fi
+
+		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
+		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
+		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
 	fi
 	rm -f ${TMP_BOOTSCR}
 }
@@ -188,11 +191,6 @@ do_deploy_append_ccimx8x() {
 	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
 	mv ${DEPLOYDIR}/u-boot* ${DEPLOYDIR}/${BOOT_TOOLS}/
 	mv ${DEPLOYDIR}/${UBOOT_SYMLINK}-* ${DEPLOYDIR}/${BOOT_TOOLS}/
-	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
-		mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${DEPLOYDIR}/boot.scr a35 ${RAM_CONTAINER_LOC_BOOT} -out ${DEPLOYDIR}/boot-mkimg.scr
-		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot-mkimg.scr" "${DEPLOYDIR}/boot.scr"
-		rm -f ${DEPLOYDIR}/boot-mkimg.scr
-	fi
 }
 
 do_deploy_append_ccimx8mn() {
