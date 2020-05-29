@@ -4,6 +4,7 @@ LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
 
 DEPENDS = "trustfence-cst coreutils util-linux"
+DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN_MODE', 'AHAB', 'imx-mkimage', '', d)}"
 
 SRCBRANCH = "v2019.04/master"
 SRCREV = "${AUTOREV}"

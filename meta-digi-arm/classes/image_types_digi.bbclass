@@ -208,7 +208,7 @@ trustence_sign_cpio() {
 		[ -n "${TRUSTFENCE_SIGN_MODE}" ] && export CONFIG_SIGN_MODE="${TRUSTFENCE_SIGN_MODE}"
 
 		if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
-			${DEPLOY_DIR_IMAGE}/imx-boot-tools/mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${1} a35 ${RAM_CONTAINER_LOC_TF} -out ${1}-mkimg
+			mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${1} a35 ${RAM_CONTAINER_LOC_TF} -out ${1}-mkimg
 			mv "${1}-mkimg" "${1}"
 		fi
 		# Sign/encrypt the ramdisk
@@ -220,8 +220,7 @@ trustence_sign_cpio() {
 }
 CONVERSIONTYPES += "tf"
 CONVERSION_CMD_tf = "trustence_sign_cpio ${IMAGE_NAME}.rootfs.${type}"
-CONVERSION_DEPENDS_tf = "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', \
-			    oe.utils.conditional('TRUSTFENCE_SIGN_MODE', 'AHAB', 'trustfence-sign-tools-native imx-mkimage', 'trustfence-sign-tools-native', d), '', d)}"
+CONVERSION_DEPENDS_tf = "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 IMAGE_TYPES += "cpio.gz.u-boot.tf"
 
 ################################################################################

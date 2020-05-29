@@ -8,8 +8,7 @@ LIC_FILES_CHKSUM = "file://Licenses/README;md5=a2c678cfd4a4d97135585cad908541c6"
 SECTION = "bootloaders"
 
 DEPENDS += "bc-native dtc-native u-boot-mkimage-native"
-DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', \
-			    oe.utils.conditional('TRUSTFENCE_SIGN_MODE', 'AHAB', 'trustfence-sign-tools-native imx-mkimage', 'trustfence-sign-tools-native', d), '', d)}"
+DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 PROVIDES += "u-boot"
 
@@ -190,7 +189,7 @@ do_deploy_append_ccimx8x() {
 	mv ${DEPLOYDIR}/u-boot* ${DEPLOYDIR}/${BOOT_TOOLS}/
 	mv ${DEPLOYDIR}/${UBOOT_SYMLINK}-* ${DEPLOYDIR}/${BOOT_TOOLS}/
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
-		${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${DEPLOYDIR}/boot.scr a35 ${RAM_CONTAINER_LOC_BOOT} -out ${DEPLOYDIR}/boot-mkimg.scr
+		mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${DEPLOYDIR}/boot.scr a35 ${RAM_CONTAINER_LOC_BOOT} -out ${DEPLOYDIR}/boot-mkimg.scr
 		trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot-mkimg.scr" "${DEPLOYDIR}/boot.scr"
 		rm -f ${DEPLOYDIR}/boot-mkimg.scr
 	fi

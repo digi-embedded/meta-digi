@@ -31,8 +31,5 @@ do_install () {
     install -m 0755 mkimage_imx8 ${D}${bindir}/mkimage_imx8
 }
 
-do_deploy () {
-    install -m 0644 ${S}/iMX8QM/imx8qm_dcd.cfg.tmp ${DEPLOYDIR}
-    install -m 0644 ${S}/iMX8QX/imx8qx_dcd.cfg.tmp ${DEPLOYDIR}
-}
-addtask deploy before do_build after do_install
+FILES_${PN} = "${bindir}"
+BBCLASSEXTEND = "native nativesdk"

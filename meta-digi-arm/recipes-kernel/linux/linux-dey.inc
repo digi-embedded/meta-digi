@@ -5,8 +5,7 @@ LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
 DEPENDS += "lzop-native bc-native"
-DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', \
-		oe.utils.conditional('TRUSTFENCE_SIGN_MODE', 'AHAB', 'trustfence-sign-tools-native imx-mkimage', 'trustfence-sign-tools-native', d), '', d)}"
+DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 inherit kernel fsl-kernel-localversion
 
@@ -48,7 +47,7 @@ trustfence_sign() {
 		# Sign the kernel images
 		for type in ${KERNEL_IMAGETYPES}; do
 			KERNEL_IMAGE="${type}-${KERNEL_IMAGE_NAME}.bin"
-			${DEPLOY_DIR_IMAGE}/imx-boot-tools/mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${WORKDIR}/build/arch/arm64/boot/Image a35 ${RAM_CONTAINER_LOC_BOOT} -out flash_os.bin
+			mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${WORKDIR}/build/arch/arm64/boot/Image a35 ${RAM_CONTAINER_LOC_BOOT} -out flash_os.bin
 			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -l "flash_os.bin" "${type}-${MACHINE}-signed.bin"
 			gzip ${type}-${MACHINE}-signed.bin
 			mv ${type}-${MACHINE}-signed.bin.gz "${KERNEL_IMAGE}"
@@ -60,7 +59,7 @@ trustfence_sign() {
 			DTB_EXT=${DTB##*.}
 			DTB_BASE_NAME=`basename ${DTB} ."${DTB_EXT}"`
 			DTB_IMAGE="${DTB_BASE_NAME}-${KERNEL_IMAGE_NAME}.${DTB_EXT}"
-			${DEPLOY_DIR_IMAGE}/imx-boot-tools/mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${DTB_IMAGE} a35 ${RAM_CONTAINER_LOC_DTB} -out ${DTB_IMAGE}-mkimg-signed
+			mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${DTB_IMAGE} a35 ${RAM_CONTAINER_LOC_DTB} -out ${DTB_IMAGE}-mkimg-signed
 			trustfence-sign-kernel.sh -p "${DIGI_FAMILY}" -d "${DTB_IMAGE}-mkimg-signed" "${DTB_IMAGE}-signed"
 			mv "${DTB_IMAGE}-signed" "${DTB_IMAGE}"
 			rm -f ${DTB_IMAGE}-mkimg-signed
