@@ -60,7 +60,9 @@ VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "HAB"
-# TODO: not yet supported
+# TODO: Encryption not yet supported
+TRUSTFENCE_DEK_PATH = "0"
+TRUSTFENCE_INITRAMFS_IMAGE = ""
 TRUSTFENCE_ENCRYPT_ENVIRONMENT = "0"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend
