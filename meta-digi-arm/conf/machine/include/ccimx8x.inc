@@ -68,18 +68,10 @@ KERNEL_IMAGETYPE = "Image.gz"
 VIRTUAL-RUNTIME_init_manager ?= "systemd"
 VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 
-# For i.MX 8 silicon chip revision
-MX8_CHIP_REV ?= "B0"
-MX8_SOC_VAR ?= "QX"
-
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "AHAB"
 # TODO: not yet supported
 TRUSTFENCE_ENCRYPT_ENVIRONMENT = "0"
-# For Trustfence container header RAM locations
-RAM_CONTAINER_LOC_BOOT = "0x80280000"
-RAM_CONTAINER_LOC_DTB = "0x82000000"
-RAM_CONTAINER_LOC_TF = "0x82100000"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend
 # Vulkan is necessary for wayland to build

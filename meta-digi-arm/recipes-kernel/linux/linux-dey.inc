@@ -32,11 +32,6 @@ trustfence_sign() {
 			KERNEL_IMAGE=${WORKDIR}/build/arch/arm64/boot/Image
 		fi
 
-		if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
-			mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${KERNEL_IMAGE} a35 ${RAM_CONTAINER_LOC_BOOT} -out ${KERNEL_IMAGE}-mkimg
-			mv "${KERNEL_IMAGE}-mkimg" "${KERNEL_IMAGE}"
-		fi
-
 		TMP_KERNEL_IMAGE_SIGNED="$(mktemp ${KERNEL_IMAGE}-signed.XXXXXX)"
 		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -l "${KERNEL_IMAGE}" "${TMP_KERNEL_IMAGE_SIGNED}"
 
@@ -56,11 +51,6 @@ trustfence_sign() {
 		DTB_EXT=${DTB##*.}
 		DTB_BASE_NAME=`basename ${DTB} ."${DTB_EXT}"`
 		DTB_IMAGE="${DTB_BASE_NAME}-${KERNEL_IMAGE_NAME}.${DTB_EXT}"
-
-		if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
-			mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${DTB_IMAGE} a35 ${RAM_CONTAINER_LOC_DTB} -out ${DTB_IMAGE}-mkimg
-			mv "${DTB_IMAGE}-mkimg" "${DTB_IMAGE}"
-		fi
 
 		TMP_DTB_IMAGE_SIGNED="$(mktemp ${DTB_IMAGE}-signed.XXXXXX)"
 		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -d "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"

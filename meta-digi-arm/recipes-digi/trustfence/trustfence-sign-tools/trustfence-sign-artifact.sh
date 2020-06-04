@@ -88,6 +88,36 @@ if [ -z "${CONFIG_SIGN_MODE}" ]; then
 	exit 1
 fi
 
+# Get RAM_START address
+if [ "${PLATFORM}" = "ccimx6" ]; then
+	CONFIG_FDT_LOADADDR="0x18000000"
+	CONFIG_RAMDISK_LOADADDR="0x19000000"
+	CONFIG_KERNEL_LOADADDR="0x12000000"
+elif [ "${PLATFORM}" = "ccimx6ul" ]; then
+	CONFIG_FDT_LOADADDR="0x83000000"
+	CONFIG_RAMDISK_LOADADDR="0x83800000"
+	CONFIG_KERNEL_LOADADDR="0x80800000"
+elif [ "${PLATFORM}" = "ccimx8x" ]; then
+	CONFIG_FDT_LOADADDR="0x82000000"
+	CONFIG_RAMDISK_LOADADDR="0x82100000"
+	CONFIG_KERNEL_LOADADDR="0x80280000"
+else
+	echo "Invalid platform: ${PLATFORM}"
+	echo "Supported platforms: ccimx6, ccimx6ul, ccimx8x"
+	exit 1
+fi
+
+[ "${ARTIFACT_DTB}" = "y" ] && CONFIG_RAM_START="${CONFIG_FDT_LOADADDR}"
+[ "${ARTIFACT_INITRAMFS}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
+[ "${ARTIFACT_KERNEL}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
+# bootscripts are loaded to $loadaddr, just like the kernel
+[ "${ARTIFACT_BOOTSCRIPT}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
+
+if [ -z "${CONFIG_RAM_START}" ]; then
+	echo "Specify the type of image to process (-b, -i, -d, or -l)"
+	exit 1
+fi
+
 if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	if [ -n "${CONFIG_DEK_PATH}" ]; then
 		if [ ! -f "${CONFIG_DEK_PATH}" ]; then
@@ -101,31 +131,6 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 			exit 1
 		fi
 		ENCRYPT="true"
-	fi
-
-	if [ "${PLATFORM}" = "ccimx6" ]; then
-		CONFIG_FDT_LOADADDR="0x18000000"
-		CONFIG_RAMDISK_LOADADDR="0x19000000"
-		CONFIG_KERNEL_LOADADDR="0x12000000"
-	elif [ "${PLATFORM}" = "ccimx6ul" ]; then
-		CONFIG_FDT_LOADADDR="0x83000000"
-		CONFIG_RAMDISK_LOADADDR="0x83800000"
-		CONFIG_KERNEL_LOADADDR="0x80800000"
-	else
-		echo "Invalid platform: ${PLATFORM}"
-		echo "Supported platforms: ccimx6, ccimx6ul"
-		exit 1
-	fi
-
-	[ "${ARTIFACT_DTB}" = "y" ] && CONFIG_RAM_START="${CONFIG_FDT_LOADADDR}"
-	[ "${ARTIFACT_INITRAMFS}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
-	[ "${ARTIFACT_KERNEL}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
-	# bootscripts are loaded to $loadaddr, just like the kernel
-	[ "${ARTIFACT_BOOTSCRIPT}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
-
-	if [ -z "${CONFIG_RAM_START}" ]; then
-		echo "Specify the type of image to process (-b, -i, -d, or -l)"
-		exit 1
 	fi
 fi
 
@@ -314,6 +319,11 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 
 	objcopy -I binary -O binary --pad-to "${sig_len}" --gap-fill="${GAP_FILLER}" "${TARGET}"
 else
+	# Prepare the image container
+	mkimage_imx8 -soc "QX" -rev "B0" -c -ap ${UIMAGE_PATH} a35 ${CONFIG_RAM_START} -out temp-mkimg
+	mv temp-mkimg "${UIMAGE_PATH}"
+
+	# Sign the image
 	CURRENT_PATH="$(pwd)"
 	cst -o "${TARGET}" -i "${CURRENT_PATH}/csf_descriptor" >/dev/null
 	if [ $? -ne 0 ]; then

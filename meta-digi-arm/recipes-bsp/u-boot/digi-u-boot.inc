@@ -171,11 +171,6 @@ do_deploy_append() {
 		[ -n "${TRUSTFENCE_SIGN_MODE}" ] && export CONFIG_SIGN_MODE="${TRUSTFENCE_SIGN_MODE}"
 
 		# Sign boot script
-		if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
-			mkimage_imx8 -soc ${MX8_SOC_VAR} -rev ${MX8_CHIP_REV} -c -ap ${DEPLOYDIR}/boot.scr a35 ${RAM_CONTAINER_LOC_BOOT} -out boot.scr-mkimg
-			mv "boot.scr-mkimg" "${DEPLOYDIR}/boot.scr"
-		fi
-
 		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
 		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
 		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
