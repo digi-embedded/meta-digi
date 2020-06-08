@@ -1,0 +1,15 @@
+# The SDMA firmware needs to be loaded in order for the kernel to carry out
+# SPI tranfers with DMA. Such transfers are required when probing the mcp25xxfd
+# module, so make sure the firmware is loaded before the module is by adding
+# the appropriate dependencies in this service.
+
+[Unit]
+Description=User Space SDMA Firmware Loading
+Before=systemd-modules-load.service
+DefaultDependencies=no
+
+[Service]
+ExecStart=/etc/sdma
+
+[Install]
+WantedBy=sysinit.target
