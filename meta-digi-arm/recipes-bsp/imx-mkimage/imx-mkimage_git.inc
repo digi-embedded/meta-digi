@@ -1,6 +1,6 @@
 # Copyright 2017-2019 NXP
- 
-DEPENDS = "zlib-native openssl-native"
+
+DEPENDS = "zlib openssl"
 
 SRCBRANCH = "imx_5.4.3_2.0.0"
 IMX_MKIMAGE_SRC ?= "git://source.codeaurora.org/external/imx/imx-mkimage.git;protocol=https"
