@@ -212,11 +212,15 @@ do_deploy_append () {
 
 		# Sign U-boot image
 		if [ "${UBOOT_RAM_COMBINATIONS}" = "" ]; then
-			trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}.bin ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}.bin
+			for target in ${IMXBOOT_TARGETS}; do
+				trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}.bin-${target}
+			done
 		else
 			for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 				for rev in ${SOC_REVISIONS}; do
-					trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}-${ramc}.bin
+					for target in ${IMXBOOT_TARGETS}; do
+						trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}-${ramc}.bin-${target}
+					done
 				done
 			done
 		fi
