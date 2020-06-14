@@ -283,7 +283,7 @@ IMAGE_CMD_sdcard() {
 	# Set u-boot image to flash depending on whether TRUSTFENCE_SIGN is enabled
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 		if [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
-			SDIMG_BOOT="$(readlink -e ${SDIMG_BOOTLOADER} | sed -e 's,u-boot-,u-boot-signed-,g')"
+			SDIMG_BOOT="$(readlink -e ${SDIMG_BOOTLOADER} | sed -e 's,u-boot-,u-boot-dtb-signed-,g')"
 		else
 			SDIMG_BOOT="$(readlink -e ${SDIMG_BOOTLOADER} | sed -e 's,imx-boot-,imx-boot-signed-,g')"
 		fi
