@@ -280,14 +280,19 @@ IMAGE_CMD_sdcard() {
 	parted -s ${SDIMG} -- unit KiB mkpart primary ext2 $(expr ${IMAGE_ROOTFS_ALIGNMENT} \+ ${BOOT_SPACE_ALIGNED}) -1s
 	parted -s ${SDIMG} unit KiB print
 
-	# FIXME: adapt trustfence handling for imx-boot
 	# Set u-boot image to flash depending on whether TRUSTFENCE_SIGN is enabled
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
-		SDIMG_BOOTLOADER="$(readlink -e ${SDIMG_BOOTLOADER} | sed -e 's,u-boot-,u-boot-signed-,g')"
+		if [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
+			SDIMG_BOOT="$(readlink -e ${SDIMG_BOOTLOADER} | sed -e 's,u-boot-,u-boot-signed-,g')"
+		else
+			SDIMG_BOOT="$(readlink -e ${SDIMG_BOOTLOADER} | sed -e 's,imx-boot-,imx-boot-signed-,g')"
+		fi
+	else
+		SDIMG_BOOT="$(readlink -e ${SDIMG_BOOTLOADER})"
 	fi
 
 	# Burn bootloader, boot and rootfs partitions
-	dd if=${SDIMG_BOOTLOADER} of=${SDIMG} conv=notrunc,fsync seek=${BOOTLOADER_SEEK} bs=1K
+	dd if=${SDIMG_BOOT} of=${SDIMG} conv=notrunc,fsync seek=${BOOTLOADER_SEEK} bs=1K
 	dd if=${SDIMG_BOOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024)
 	dd if=${SDIMG_ROOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024 + ${BOOT_SPACE_ALIGNED} \* 1024)
 }
