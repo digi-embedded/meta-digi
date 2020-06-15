@@ -278,11 +278,14 @@ else
 	# Other constants
 	KERNEL_START_OFFSET="0x0"
 	KERNEL_SIG_BLOCK_OFFSET="0x90"
-	KERNEL_NAME="${1}"
 
 	HAB_VER="ahab"
 	DIGEST="sign_digest"
 	DIGEST_ALGO="sha512"
+
+	# Prepare the image container
+	mkimage_imx8 -soc "QX" -rev "B0" -c -ap ${UIMAGE_PATH} a35 ${CONFIG_RAM_START} -out temp-mkimg
+	KERNEL_NAME="$(readlink -e temp-mkimg)"
 
 	# Compute the layout: sizes and offsets.
 	container_header_offset="${KERNEL_START_OFFSET}"
@@ -342,10 +345,6 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 
 	objcopy -I binary -O binary --pad-to "${sig_len}" --gap-fill="${GAP_FILLER}" "${TARGET}"
 else
-	# Prepare the image container
-	mkimage_imx8 -soc "QX" -rev "B0" -c -ap ${UIMAGE_PATH} a35 ${CONFIG_RAM_START} -out temp-mkimg
-	mv temp-mkimg "${UIMAGE_PATH}"
-
 	# Sign the image
 	CURRENT_PATH="$(pwd)"
 	cst -o "${TARGET}" -i "${CURRENT_PATH}/csf_descriptor" >/dev/null
@@ -357,4 +356,4 @@ fi
 
 [ "${ENCRYPT}" = "true" ] && ENCRYPTED_MSG="and encrypted "
 echo "Signed ${ENCRYPTED_MSG}image ready: ${TARGET}"
-rm -f "${SRK_TABLE}" csf_descriptor csf.bin 2> /dev/null
+rm -f "${SRK_TABLE}" csf_descriptor csf.bin temp-mkimg 2> /dev/null
