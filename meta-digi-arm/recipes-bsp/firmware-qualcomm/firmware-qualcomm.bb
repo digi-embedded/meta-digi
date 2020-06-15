@@ -34,7 +34,7 @@ FW_QCA65X4_PCIE_PROPRIETARY = " \
     file://LICENCE.atheros_firmware \
     file://qca65X4_pcie_proprietary/otp30.bin \
     file://qca65X4_pcie_proprietary/qwlan30.bin \
-    file://qca65X4_pcie_proprietary/utf30.bin \
+    file://qca65X4_pcie_proprietary/utf.bin \
 "
 
 # Firmware files for QCA6574 (Qualcomm community driver)
