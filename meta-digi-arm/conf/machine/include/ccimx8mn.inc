@@ -34,7 +34,7 @@ WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-mod
 HAS_WIFI_VIRTWLANS = "true"
 
 # Firmware
-MACHINE_FIRMWARE ?= "firmware-imx-sdma firmware-imx-easrc"
+MACHINE_FIRMWARE ?= "firmware-imx-sdma firmware-imx-easrc firmware-imx-regulatory"
 MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6564-bt', '', d)}"
 MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6564-wifi', '', d)}"
 
