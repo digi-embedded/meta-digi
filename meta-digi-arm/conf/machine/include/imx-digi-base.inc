@@ -9,7 +9,7 @@ XSERVER = "xserver-xorg \
            ${XSERVER_DRIVER}"
 
 # Ship kernel modules
-MACHINE_EXTRA_RRECOMMENDS = "kernel-modules"
+MACHINE_EXTRA_RRECOMMENDS += "kernel-modules"
 
 # Tunes for hard/soft float-point selection. Note that we allow building for
 # thumb support giving distros the chance to enable thumb by setting
