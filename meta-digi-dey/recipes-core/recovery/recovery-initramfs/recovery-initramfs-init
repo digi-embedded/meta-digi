@@ -374,16 +374,13 @@ mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
 mount -t tmpfs tmpfs /tmp
 
-# Register mdev as device manager
-if [ -f /proc/sys/kernel/hotplug ]; then
-	echo > /dev/mdev.seq
-	echo > /dev/mdev.log
-	echo "/sbin/mdev" > /proc/sys/kernel/hotplug
-	mdev -s
-fi
-
-# Give some time for the devices to settle down
+# Give some time for the devices to settle down so mdev can mount all of them
 sleep 2
+
+# Register mdev as device manager
+echo > /dev/mdev.seq
+echo > /dev/mdev.log
+mdev -s
 
 # Run all shell scripts in postinstall folder
 run-parts /etc/*-postinsts
