@@ -253,7 +253,7 @@ do_image_sdcard[depends] = " \
 "
 
 #
-# Create an image that can by written onto a SD card using dd.
+# Create an image that can be written onto a SD card using dd.
 #
 # The disk layout used is:
 #
