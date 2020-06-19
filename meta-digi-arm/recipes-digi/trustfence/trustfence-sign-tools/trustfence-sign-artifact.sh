@@ -53,9 +53,9 @@ Usage: ${SCRIPT_NAME} [OPTIONS] input-unsigned-image output-signed-image
     -p <platform>    select platform for the project
     -b               sign/encrypt bootscript
     -d               sign/encrypt DTB
+    -o               sign/encrypt DTB overlay
     -i               sign/encrypt initramfs
     -l               sign/encrypt Linux image
-    -o               sign/encrypt DTB overlay
 
 Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn
 
