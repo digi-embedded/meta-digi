@@ -219,7 +219,10 @@ do_deploy_append () {
 			for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 				for rev in ${SOC_REVISIONS}; do
 					for target in ${IMXBOOT_TARGETS}; do
-						trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}-${ramc}.bin-${target}
+						# Do not sign "flash_regression_linux_m4" target files
+						if [ "${target}" != "flash_regression_linux_m4" ]; then
+							trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}-${ramc}.bin-${target}
+						fi
 					done
 				done
 			done
