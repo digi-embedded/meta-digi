@@ -34,7 +34,7 @@ WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-mod
 HAS_WIFI_VIRTWLANS = "true"
 
 # Firmware
-MACHINE_FIRMWARE ?= "firmware-imx-sdma firmware-imx-easrc"
+MACHINE_FIRMWARE ?= "firmware-imx-sdma firmware-imx-easrc firmware-imx-regulatory"
 MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6564-bt', '', d)}"
 MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6564-wifi', '', d)}"
 
@@ -60,7 +60,9 @@ VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "HAB"
-# TODO: not yet supported
+# TODO: Encryption not yet supported
+TRUSTFENCE_DEK_PATH = "0"
+TRUSTFENCE_INITRAMFS_IMAGE = ""
 TRUSTFENCE_ENCRYPT_ENVIRONMENT = "0"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend

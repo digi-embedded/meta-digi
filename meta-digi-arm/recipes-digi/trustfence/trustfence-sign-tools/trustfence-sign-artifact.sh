@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  trustfence-sign-kernel.sh
+#  trustfence-sign-artifact.sh
 #
 #  Copyright (C) 2016-2020 by Digi International Inc.
 #  All rights reserved.
@@ -12,10 +12,11 @@
 #
 #
 #  Description:
-#    Script for building signed and encrypted kernel uImages using NXP CST.
+#    Script for building signed and encrypted artifacts using NXP CST.
 #
 #    The following environment variables define the script behaviour:
 #      CONFIG_SIGN_KEYS_PATH: (mandatory) path to the CST folder by NXP with keys generated.
+#      CONFIG_SIGN_MODE: (mandatory) Signing method: HAB/AHAB
 #      CONFIG_KEY_INDEX: (optional) key index to use for signing. Default is 0.
 #      CONFIG_DEK_PATH: (optional) Path to keyfile. Define it to generate
 #			encrypted images
@@ -32,12 +33,13 @@ done
 SCRIPT_NAME="$(basename ${0})"
 SCRIPT_PATH="$(cd $(dirname ${0}) && pwd)"
 
-while getopts "bdilp:" c; do
+while getopts "bdilop:" c; do
 	case "${c}" in
 		b) ARTIFACT_BOOTSCRIPT="y";;
 		d) ARTIFACT_DTB="y";;
 		i) ARTIFACT_INITRAMFS="y";;
 		l) ARTIFACT_KERNEL="y";;
+		o) ARTIFACT_DTB_OVERLAY="y";;
 		p) PLATFORM="${OPTARG}";;
 	esac
 done
@@ -51,10 +53,11 @@ Usage: ${SCRIPT_NAME} [OPTIONS] input-unsigned-image output-signed-image
     -p <platform>    select platform for the project
     -b               sign/encrypt bootscript
     -d               sign/encrypt DTB
+    -o               sign/encrypt DTB overlay
     -i               sign/encrypt initramfs
     -l               sign/encrypt Linux image
 
-Supported platforms: ccimx6, ccimx6ul, ccimx8x
+Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn
 
 EOF
 }
@@ -67,13 +70,6 @@ fi
 UIMAGE_PATH="$(readlink -e ${1})"
 TARGET="$(readlink -m ${2})"
 
-# Negative offset with respect to CONFIG_RAM_START in which U-Boot
-# copies the DEK blob.
-if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
-	DEK_BLOB_OFFSET="0x100"
-	CONFIG_CSF_SIZE="0x4000"
-fi
-
 # Read user configuration file (if used)
 [ -f .config ] && . ./.config
 
@@ -82,8 +78,54 @@ if [ -z "${CONFIG_SIGN_KEYS_PATH}" ]; then
 	exit 1
 fi
 [ -d "${CONFIG_SIGN_KEYS_PATH}" ] || mkdir "${CONFIG_SIGN_KEYS_PATH}"
+if [ -z "${CONFIG_SIGN_MODE}" ]; then
+	echo "Undefined CONFIG_SIGN_MODE";
+	exit 1
+fi
+
+# Get RAM_START address
+if [ "${PLATFORM}" = "ccimx6" ]; then
+	CONFIG_FDT_LOADADDR="0x18000000"
+	CONFIG_RAMDISK_LOADADDR="0x19000000"
+	CONFIG_KERNEL_LOADADDR="0x12000000"
+	CONFIG_CSF_SIZE="0x4000"
+elif [ "${PLATFORM}" = "ccimx6ul" ]; then
+	CONFIG_FDT_LOADADDR="0x83000000"
+	CONFIG_RAMDISK_LOADADDR="0x83800000"
+	CONFIG_KERNEL_LOADADDR="0x80800000"
+	CONFIG_CSF_SIZE="0x4000"
+elif [ "${PLATFORM}" = "ccimx8x" ]; then
+	CONFIG_FDT_LOADADDR="0x82000000"
+	CONFIG_RAMDISK_LOADADDR="0x82100000"
+	CONFIG_KERNEL_LOADADDR="0x80280000"
+elif [ "${PLATFORM}" = "ccimx8mn" ]; then
+	CONFIG_FDT_LOADADDR="0x43000000"
+	CONFIG_RAMDISK_LOADADDR="0x43800000"
+	CONFIG_KERNEL_LOADADDR="0x40480000"
+	CONFIG_CSF_SIZE="0x2000"
+else
+	echo "Invalid platform: ${PLATFORM}"
+	echo "Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn"
+	exit 1
+fi
+
+[ "${ARTIFACT_DTB}" = "y" ] && CONFIG_RAM_START="${CONFIG_FDT_LOADADDR}"
+[ "${ARTIFACT_INITRAMFS}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
+[ "${ARTIFACT_KERNEL}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
+# bootscripts are loaded to $loadaddr, just like the kernel
+[ "${ARTIFACT_BOOTSCRIPT}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
+# DTB overlays are loaded to $initrd_addr, just like the ramdisk
+[ "${ARTIFACT_DTB_OVERLAY}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
+
+if [ -z "${CONFIG_RAM_START}" ]; then
+	echo "Specify the type of image to process (-b, -i, -d, -l, or -o)"
+	exit 1
+fi
 
 if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
+	# Negative offset with respect to CONFIG_RAM_START in which U-Boot
+	# copies the DEK blob.
+	DEK_BLOB_OFFSET="0x100"
 	if [ -n "${CONFIG_DEK_PATH}" ]; then
 		if [ ! -f "${CONFIG_DEK_PATH}" ]; then
 			echo "DEK not found. Generating random 256 bit DEK."
@@ -96,31 +138,6 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 			exit 1
 		fi
 		ENCRYPT="true"
-	fi
-
-	if [ "${PLATFORM}" = "ccimx6" ]; then
-		CONFIG_FDT_LOADADDR="0x18000000"
-		CONFIG_RAMDISK_LOADADDR="0x19000000"
-		CONFIG_KERNEL_LOADADDR="0x12000000"
-	elif [ "${PLATFORM}" = "ccimx6ul" ]; then
-		CONFIG_FDT_LOADADDR="0x83000000"
-		CONFIG_RAMDISK_LOADADDR="0x83800000"
-		CONFIG_KERNEL_LOADADDR="0x80800000"
-	else
-		echo "Invalid platform: ${PLATFORM}"
-		echo "Supported platforms: ccimx6, ccimx6ul"
-		exit 1
-	fi
-
-	[ "${ARTIFACT_DTB}" = "y" ] && CONFIG_RAM_START="${CONFIG_FDT_LOADADDR}"
-	[ "${ARTIFACT_INITRAMFS}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
-	[ "${ARTIFACT_KERNEL}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
-	# bootscripts are loaded to $loadaddr, just like the kernel
-	[ "${ARTIFACT_BOOTSCRIPT}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
-
-	if [ -z "${CONFIG_RAM_START}" ]; then
-		echo "Specify the type of image to process (-b, -i, -d, or -l)"
-		exit 1
 	fi
 fi
 
@@ -166,6 +183,22 @@ elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 	fi
 fi
 
+LINUX64_MAGIC="0x644d5241"
+
+get_image_size()
+{
+	# Check if LINUX_ARM64 image magic number is found
+	magic_number="$(hexdump -n 4 -s 56 -e '/4 "0x%08x\t" "\n"' ${UIMAGE_PATH})"
+	if [ ${magic_number} = "${LINUX64_MAGIC}" ]; then
+		# LINUX_ARM64, read the size from the file header
+		image_size="$(hexdump -n 4 -s 16 -e '/4 "0x%08x\t" "\n"' ${UIMAGE_PATH})"
+	else
+		# Unknown image type, return the actual filesize
+		image_size="$(stat -L -c %s ${UIMAGE_PATH})"
+	fi
+	echo ${image_size}
+}
+
 SRK_TABLE="$(pwd)/SRK_table.bin"
 if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	HAB_VER="hab_ver 4"
@@ -179,7 +212,7 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	dek_blob_offset="$((CONFIG_KERNEL_LOADADDR - DEK_BLOB_OFFSET))"
 
 	# Compute the layout: sizes and offsets.
-	uimage_size="$(stat -L -c %s ${UIMAGE_PATH})"
+	uimage_size="$(get_image_size)"
 	uimage_offset="0x0"
 	pad_len="$(((uimage_size + 0x1000 - 1) & ~(0x1000 - 1)))"
 	auth_len="$((pad_len + 0x20))"
@@ -245,11 +278,14 @@ else
 	# Other constants
 	KERNEL_START_OFFSET="0x0"
 	KERNEL_SIG_BLOCK_OFFSET="0x90"
-	KERNEL_NAME="${1}"
 
 	HAB_VER="ahab"
 	DIGEST="sign_digest"
 	DIGEST_ALGO="sha512"
+
+	# Prepare the image container
+	mkimage_imx8 -soc "QX" -rev "B0" -c -ap ${UIMAGE_PATH} a35 ${CONFIG_RAM_START} -out temp-mkimg
+	KERNEL_NAME="$(readlink -e temp-mkimg)"
 
 	# Compute the layout: sizes and offsets.
 	container_header_offset="${KERNEL_START_OFFSET}"
@@ -309,6 +345,7 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 
 	objcopy -I binary -O binary --pad-to "${sig_len}" --gap-fill="${GAP_FILLER}" "${TARGET}"
 else
+	# Sign the image
 	CURRENT_PATH="$(pwd)"
 	cst -o "${TARGET}" -i "${CURRENT_PATH}/csf_descriptor" >/dev/null
 	if [ $? -ne 0 ]; then
@@ -319,4 +356,4 @@ fi
 
 [ "${ENCRYPT}" = "true" ] && ENCRYPTED_MSG="and encrypted "
 echo "Signed ${ENCRYPTED_MSG}image ready: ${TARGET}"
-rm -f "${SRK_TABLE}" csf_descriptor csf.bin 2> /dev/null
+rm -f "${SRK_TABLE}" csf_descriptor csf.bin temp-mkimg 2> /dev/null

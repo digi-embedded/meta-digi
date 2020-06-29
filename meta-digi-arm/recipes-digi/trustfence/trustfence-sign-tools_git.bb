@@ -16,10 +16,10 @@ UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT
 
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
-    file://trustfence-sign-kernel.sh;name=kernel-script \
-    file://sign_hab;name=kernel-sign \
-    file://encrypt_hab;name=kernel-encrypt \
-    file://sign_ahab;name=kernel-sign \
+    file://trustfence-sign-artifact.sh;name=artifact-sign-script \
+    file://sign_hab;name=artifact-hab-sign \
+    file://encrypt_hab;name=artifact-hab-encrypt \
+    file://sign_ahab;name=artifact-ahab-sign \
 "
 
 do_configure[noexec] = "1"
@@ -36,7 +36,7 @@ do_install() {
 		bberror "Unkown TRUSTFENCE_SIGN_MODE value"
 		exit 1
 	fi
-	install -m 0755 trustfence-sign-kernel.sh ${D}${bindir}/
+	install -m 0755 trustfence-sign-artifact.sh ${D}${bindir}/
 	install -m 0755 git/scripts/csf_templates/* ${D}${bindir}/csf_templates
 
 	# Select U-Boot sign script depending on U-Boot including an SPL image

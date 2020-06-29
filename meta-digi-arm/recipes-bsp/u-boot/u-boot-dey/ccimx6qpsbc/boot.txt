@@ -32,4 +32,5 @@ else
 	# We are booting from the SD card.
 	setenv mmcroot /dev/mmcblk${mmcbootdev}p2
 fi
+setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
 dboot linux mmc ${mmcbootdev}:${mmcpart}

@@ -116,7 +116,7 @@ do_compile () {
 			if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 				# Log HAB FIT information
 				bbnote "building ${SOC_TARGET} - print_fit_hab"
-				make SOC=${SOC_TARGET} print_fit_hab > mkimage-print_fit_hab.log 2>&1
+				make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} print_fit_hab > mkimage-print_fit_hab.log 2>&1
 			fi
 		fi
 	done
@@ -212,11 +212,18 @@ do_deploy_append () {
 
 		# Sign U-boot image
 		if [ "${UBOOT_RAM_COMBINATIONS}" = "" ]; then
-			trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}.bin ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-signed.bin
+			for target in ${IMXBOOT_TARGETS}; do
+				trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}.bin-${target}
+			done
 		else
 			for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 				for rev in ${SOC_REVISIONS}; do
-					trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}-signed.bin
+					for target in ${IMXBOOT_TARGETS}; do
+						# Do not sign "flash_regression_linux_m4" target files
+						if [ "${target}" != "flash_regression_linux_m4" ]; then
+							trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}-${ramc}.bin-${target}
+						fi
+					done
 				done
 			done
 		fi

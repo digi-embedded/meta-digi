@@ -14,14 +14,6 @@ IMX_BACKEND = \
 SRC_URI_append = " \
     file://qt5-${IMX_BACKEND}.sh \
 "
-# Technically, we should add the following patches to imxgpu platforms, but
-# doing so duplicates them for imxgpu2d platforms and causes build errors.
-# As of now, the only SoC that is imxgpu and not imxgpu2d is the i.MX8MN, so
-# append the patches to that SoC only.
-SRC_URI_append_mx8mn = " \
-    file://0014-Add-IMX-GPU-support.patch \
-    file://0001-egl.prf-Fix-build-error-when-egl-headers-need-platfo.patch \
-"
 SRC_URI_append_imxgpu3d = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'x11', \
         '', \

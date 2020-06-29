@@ -26,4 +26,5 @@ if test "${mtdbootpart}" = "recovery"; then
 else
 	true
 fi
+setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
 dboot linux nand ${mtdbootpart}

@@ -44,7 +44,7 @@ WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-mod
 HAS_WIFI_VIRTWLANS = "true"
 
 # Firmware
-MACHINE_FIRMWARE ?= "firmware-imx-vpu-imx8 firmware-imx-sdma"
+MACHINE_FIRMWARE ?= "firmware-imx-vpu-imx8 firmware-imx-sdma firmware-imx-regulatory"
 MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6574-bt', '', d)}"
 MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6574-wifi', '', d)}"
 
@@ -68,18 +68,12 @@ KERNEL_IMAGETYPE = "Image.gz"
 VIRTUAL-RUNTIME_init_manager ?= "systemd"
 VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 
-# For i.MX 8 silicon chip revision
-MX8_CHIP_REV ?= "B0"
-MX8_SOC_VAR ?= "QX"
-
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "AHAB"
-# TODO: not yet supported
+# TODO: Encryption not yet supported
+TRUSTFENCE_DEK_PATH = "0"
+TRUSTFENCE_INITRAMFS_IMAGE = ""
 TRUSTFENCE_ENCRYPT_ENVIRONMENT = "0"
-# For Trustfence container header RAM locations
-RAM_CONTAINER_LOC_BOOT = "0x80280000"
-RAM_CONTAINER_LOC_DTB = "0x82000000"
-RAM_CONTAINER_LOC_TF = "0x82100000"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend
 # Vulkan is necessary for wayland to build
