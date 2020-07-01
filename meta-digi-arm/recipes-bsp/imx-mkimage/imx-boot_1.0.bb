@@ -1,4 +1,4 @@
-# Copyright 2017-2019 NXP
+# Copyright 2017-2020 NXP
 
 require imx-mkimage_git.inc
 require recipes-bsp/imx-seco/imx-seco.inc
@@ -32,10 +32,10 @@ IMX_M4_DEMOS_mx8x   = "imx-m4-demos:do_deploy"
 IMX_M4_DEMOS_mx8dxl = "imx-m4-demos:do_deploy"
 
 M4_DEFAULT_IMAGE ?= "m4_image.bin"
-M4_DEFAULT_IMAGE_mx8qxp = "imx8qx_m4_TCM_srtm_demo.bin"
+M4_DEFAULT_IMAGE_mx8qxp = "imx8qx_m4_TCM_power_mode_switch.bin"
 M4_DEFAULT_IMAGE_mx8phantomdxl = "imx8dxl-phantom_m4_TCM_srtm_demo.bin"
-M4_DEFAULT_IMAGE_mx8dxl = "imx8dxl-phantom_m4_TCM_srtm_demo.bin"
-M4_DEFAULT_IMAGE_mx8dx = "imx8qx_m4_TCM_srtm_demo.bin"
+M4_DEFAULT_IMAGE_mx8dxl = "imx8dxl_m4_TCM_power_mode_switch.bin"
+M4_DEFAULT_IMAGE_mx8dx = "imx8qx_m4_TCM_power_mode_switch.bin"
 
 # This package aggregates output deployed by other packages,
 # so set the appropriate dependencies
@@ -126,7 +126,7 @@ compile_mx8() {
         cp ${DEPLOY_DIR_IMAGE}/u-boot-spl.bin-${MACHINE}-${UBOOT_CONFIG} \
                                                              ${BOOT_STAGING}/u-boot-spl.bin
     fi
-    cp ${DEPLOY_DIR_IMAGE}/imx8qm_m4_0_TCM_rpmsg_lite_pingpong_rtos_linux_remote_m40.bin \
+    cp ${DEPLOY_DIR_IMAGE}/imx8qm_m4_0_TCM_power_mode_switch_m40.bin \
                                                              ${BOOT_STAGING}/m4_image.bin
     cp ${DEPLOY_DIR_IMAGE}/imx8qm_m4_1_TCM_power_mode_switch_m41.bin \
                                                              ${BOOT_STAGING}/m4_1_image.bin
@@ -153,8 +153,14 @@ do_compile() {
     fi
     # mkimage for i.MX8
     for target in ${IMXBOOT_TARGETS}; do
-        bbnote "building ${SOC_TARGET} - ${REV_OPTION} ${target}"
-        make SOC=${SOC_TARGET} ${REV_OPTION} ${target}
+        if [ "$target" = "flash_linux_m4_no_v2x" ]; then
+           # Special target build for i.MX 8DXL with V2X off
+           bbnote "building ${SOC_TARGET} - ${REV_OPTION} V2X=NO ${target}"
+           make SOC=${SOC_TARGET} ${REV_OPTION} V2X=NO  flash_linux_m4
+        else
+           bbnote "building ${SOC_TARGET} - ${REV_OPTION} ${target}"
+           make SOC=${SOC_TARGET} ${REV_OPTION} ${target}
+        fi
         if [ -e "${BOOT_STAGING}/flash.bin" ]; then
             cp ${BOOT_STAGING}/flash.bin ${S}/${BOOT_CONFIG_MACHINE}-${target}
         fi
