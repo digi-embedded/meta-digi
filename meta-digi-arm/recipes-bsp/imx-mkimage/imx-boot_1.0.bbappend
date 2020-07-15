@@ -177,8 +177,6 @@ do_deploy () {
 		# Link to default bootable U-Boot filename.
 		ln -sf ${UBOOT_PREFIX}-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
 		cd -
-		# Link to first "target" mkimage log
-		ln -sf mkimage-${IMAGE_IMXBOOT_TARGET}.log mkimage.log
 	else
 		for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 			for rev in ${SOC_REVISIONS}; do
@@ -213,6 +211,8 @@ do_deploy_append () {
 		# Sign U-boot image
 		if [ "${UBOOT_RAM_COMBINATIONS}" = "" ]; then
 			for target in ${IMXBOOT_TARGETS}; do
+				# Link to current "target" mkimage log
+				ln -sf mkimage-${target}.log mkimage.log
 				trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}.bin-${target}
 			done
 		else
