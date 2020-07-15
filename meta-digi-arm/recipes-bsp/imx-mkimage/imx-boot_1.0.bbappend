@@ -89,7 +89,7 @@ do_compile () {
 					for target in ${IMXBOOT_TARGETS}; do
 						for rev in ${SOC_REVISIONS}; do
 							bbnote "building ${SOC_TARGET} - ${ramc} - REV=${rev} ${target}"
-							make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target}
+							make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target} > mkimage-${target}.log 2>&1
 							if [ -e "${BOOT_STAGING}/flash.bin" ]; then
 								cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target}
 							fi
@@ -219,10 +219,9 @@ do_deploy_append () {
 			for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 				for rev in ${SOC_REVISIONS}; do
 					for target in ${IMXBOOT_TARGETS}; do
-						# Do not sign "flash_regression_linux_m4" target files
-						if [ "${target}" != "flash_regression_linux_m4" ]; then
-							trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}-${ramc}.bin-${target}
-						fi
+						# Link to current "target" mkimage log
+						ln -sf mkimage-${target}.log mkimage.log
+						trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}-${ramc}.bin-${target}
 					done
 				done
 			done
