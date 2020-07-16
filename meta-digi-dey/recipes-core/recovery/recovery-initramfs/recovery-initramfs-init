@@ -26,6 +26,9 @@ PUBLIC_KEY="/etc/ssl/certs/key.pub"
 USB_MOUNT_DIR="/run/media"
 UPDATE_MOUNT_DIR="/mnt/update"
 
+ROOTFS_NEEDS_FORMAT="no"
+SWUPDATE_OUTPUT="swupdate_output.txt"
+
 REBOOT_TIME=10
 
 # Functions.
@@ -297,13 +300,18 @@ check_swu_package() {
 
 	# Check software update package.
 	if [ -f "${PUBLIC_KEY}" ]; then
-		swupdate -c -i "${update_package}" -k "${PUBLIC_KEY}"
+		swupdate -c -v -i "${update_package}" -k "${PUBLIC_KEY}" > "${SWUPDATE_OUTPUT}"
 	else
-		swupdate -c -i "${update_package}"
+		swupdate -c -v -i "${update_package}" > "${SWUPDATE_OUTPUT}"
 	fi
 
 	if [ "$?" != "0" ]; then
 		quit_with_error "Invalid update package '$(basename ${1})'"
+	fi
+
+	# Format the rootfs partition if and only if the package contains a rootfs image.
+	if [ "$(is_nand)" = "yes" ]; then
+		grep "Found Image" "${SWUPDATE_OUTPUT}" | grep -qs "rootfs" && ROOTFS_NEEDS_FORMAT="yes"
 	fi
 }
 
@@ -475,11 +483,13 @@ if [ -n "${update_package_bool}" ]; then
 	psplash_message "Updating firmware..."
 	psplash_progress "0"
 
-	# Format the UBI volume before updating.
+	# Format the UBI volume before updating if needed.
 	if [ "$(is_nand)" = "yes" ]; then
-		psplash_message "Formatting rootfs partition..."
-		format_ubi_volume rootfs
-		psplash_progress "0"
+		if [ "$ROOTFS_NEEDS_FORMAT" = "yes" ]; then
+			psplash_message "Formatting rootfs partition..."
+			format_ubi_volume rootfs
+			psplash_progress "0"
+		fi
 	fi
 
 	log "Update package location: ${update_package}"
