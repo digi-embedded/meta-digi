@@ -1,32 +1,50 @@
-From: Arturo Buzarra <arturo.buzarra@digi.com>
-Date: Fri, 27 Dec 2019 09:42:48 +0100
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Thu, 16 Jul 2020 12:57:59 +0200
 Subject: [PATCH] imx8mn: Disable M7 debug console
 
 The Cortex-M7 uses the UART4 as debug console, and it is
 shared with the Cortex-A53.
 
-Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
 ---
- plat/imx/imx8mn/imx8mn_bl31_setup.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/plat/imx/imx8mn/imx8mn_bl31_setup.c b/plat/imx/imx8mn/imx8mn_bl31_setup.c
-index 57db28a..a36c2d5 100644
---- a/plat/imx/imx8mn/imx8mn_bl31_setup.c
-+++ b/plat/imx/imx8mn/imx8mn_bl31_setup.c
-@@ -242,11 +242,12 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
- #endif
- 	bl31_tzc380_setup();
+diff --git a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
+index 841ec5a..ae9aeb9 100644
+--- a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
++++ b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
+@@ -57,7 +57,7 @@ static const struct imx_rdc_cfg rdc[] = {
+ 	RDC_MDAn(RDC_MDA_M7, DID1),
  
- 	/* Assign M7 to domain 1 */
- 	mmio_write_32(IMX_RDC_BASE + 0x204, 0x1);
--	mmio_write_32(IMX_RDC_BASE + 0x518, 0xfc);
-+	/* Uncomment to use the M7 debug console (shared with A53 UART4) */
-+	/*mmio_write_32(IMX_RDC_BASE + 0x518, 0xfc);*/
- 	mmio_write_32(IMX_RDC_BASE + 0x5A4, 0xf3);
- }
+ 	/* peripherals domain permission */
+-	RDC_PDAPn(RDC_PDAP_UART4, D1R | D1W),
++	/*RDC_PDAPn(RDC_PDAP_UART4, D1R | D1W),*/
+ 	RDC_PDAPn(RDC_PDAP_UART2, D0R | D0W),
  
- void bl31_plat_arch_setup(void)
+ 	/* memory region */
+@@ -131,7 +131,7 @@ static void bl31_tzc380_setup(void)
+ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ 		u_register_t arg2, u_register_t arg3)
  {
+-	static console_uart_t console;
++	/*static console_uart_t console;*/
+ 	int i;
+ 
+ 	/* Enable CSU NS access permission */
+@@ -150,10 +150,11 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ 
+ 	imx8m_caam_init();
+ 
+-	console_imx_uart_register(IMX_BOOT_UART_BASE, IMX_BOOT_UART_CLK_IN_HZ,
++	/* Uncomment to use the M7 debug console (shared with A53 UART4) */
++	/*console_imx_uart_register(IMX_BOOT_UART_BASE, IMX_BOOT_UART_CLK_IN_HZ,
+ 		IMX_CONSOLE_BAUDRATE, &console);
+-	/* This console is only used for boot stage */
+-	console_set_scope(&console.console, CONSOLE_FLAG_BOOT);
++	 This console is only used for boot stage 
++	console_set_scope(&console.console, CONSOLE_FLAG_BOOT);*/
+ 
+ 	/*
+ 	 * tell BL3-1 where the non-secure software image is located
 -- 
-
