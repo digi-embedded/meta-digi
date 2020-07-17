@@ -94,21 +94,15 @@ err:
  */
 static int is_device_closed(void)
 {
-	const char *path = "/sys/fsl_otp/HW_OCOTP_CFG5";
-	FILE *fd = NULL;
-	unsigned int value = 0;
-	long open = 0;
+	const char *path_closed = "/proc/device-tree/digi,tf-closed";
 
-	if ((fd = fopen(path, "r")) == NULL) {
-		fprintf(stderr, "Cannot check device status. Assuming closed...\n");
+	if (access(path_closed, F_OK) != -1)
 		return 1;
-	}
+	else
+		fprintf(stderr,
+			"Cannot check device status. Assuming open...\n");
 
-	open = (fscanf(fd, "%x", &value) == 1) && (value & OTP_CLOSED_BIT);
-
-	fclose(fd);
-
-	return open;
+	return 0;
 }
 
 /*
