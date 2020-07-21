@@ -6,14 +6,14 @@ This is needed in order to avoid indefinitely blocking.
 
 Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
 ---
- code/back_end/src/openssl_helper.c | 2 +-
+ code/cst/code/common/src/openssl_helper.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/code/back_end/src/openssl_helper.c b/code/back_end/src/openssl_helper.c
-index 3c9c779092c5..f0cd4e06f0dd 100644
---- a/code/back_end/src/openssl_helper.c
-+++ b/code/back_end/src/openssl_helper.c
-@@ -486,7 +486,7 @@ void print_version(void)
+diff --git a/code/cst/code/common/src/openssl_helper.c b/code/cst/code/common/src/openssl_helper.c
+index 871cf55..b62c8a8 100755
+--- a/code/cst/code/common/src/openssl_helper.c
++++ b/code/cst/code/common/src/openssl_helper.c
+@@ -414,7 +414,7 @@ void print_version(void)
  ---------------------------*/
  uint32_t seed_prng(uint32_t bytes)
  {

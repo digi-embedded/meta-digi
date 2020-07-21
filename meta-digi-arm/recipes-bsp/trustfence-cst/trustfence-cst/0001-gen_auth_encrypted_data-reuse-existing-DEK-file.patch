@@ -12,18 +12,18 @@ https://jira.digi.com/browse/DUB-608
 
 Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
 ---
- code/back_end/src/adapt_layer_openssl.c | 1 +
+ code/cst/code/back_end/src/adapt_layer_openssl.c | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/code/back_end/src/adapt_layer_openssl.c b/code/back_end/src/adapt_layer_openssl.c
-index 8513046269ea..ce6e370f2c6a 100644
---- a/code/back_end/src/adapt_layer_openssl.c
-+++ b/code/back_end/src/adapt_layer_openssl.c
-@@ -945,6 +945,7 @@ int32_t gen_auth_encrypted_data(const char* in_file,
-         }
+diff --git a/code/cst/code/back_end/src/adapt_layer_openssl.c b/code/cst/code/back_end/src/adapt_layer_openssl.c
+index 38b8bf5..f389e23 100755
+--- a/code/cst/code/back_end/src/adapt_layer_openssl.c
++++ b/code/cst/code/back_end/src/adapt_layer_openssl.c
+@@ -1146,6 +1146,7 @@ int32_t gen_auth_encrypted_data(const char* in_file,
          printf("\n");
  #endif
-+        reuse_dek = 1;
-         if (reuse_dek) {
-             fh = fopen(key_file, "rb");
-             if (fh == NULL) {
+         if (0 == key_init_done) {
++            reuse_dek = 1;
+             if (reuse_dek) {
+                 fh = fopen(key_file, "rb");
+                 if (fh == NULL) {
