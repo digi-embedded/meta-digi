@@ -1,5 +1,5 @@
 # The syntax for this file is documented in the HAB Code Signing Tool
-# User's Guid which is included in the CST package distributed by NXP
+# User's Guide which is included in the CST package distributed by NXP
 [Header]
     Version = 4.0
     Hash Algorithm = sha256
