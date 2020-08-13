@@ -23,17 +23,8 @@ RDEPENDS_${PN} = "\
 	dey-examples-digiapix \
 	dey-examples-rtc \
 "
-
 RDEPENDS_${PN}_append_ccimx6 = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \
-	dey-examples-v4l2 \
-"
-
-RDEPENDS_${PN}_append_ccimx8x = "\
-	dey-examples-v4l2 \
-"
-
-RDEPENDS_${PN}_append_ccimx8m = "\
 	dey-examples-v4l2 \
 "
 
