@@ -53,6 +53,9 @@ uuu fb: ucmd setenv forced_update 1
 # Update U-Boot
 uuu fb: flash bootloader ${INSTALL_UBOOT_FILENAME}
 
+# Set MMC to boot from BOOT1 partition
+uuu fb: ucmd mmc partconf 0 1 1 1
+
 # Set 'bootcmd' for the second part of the script that will
 #  - Reset environment to defaults
 #  - Save the environment
