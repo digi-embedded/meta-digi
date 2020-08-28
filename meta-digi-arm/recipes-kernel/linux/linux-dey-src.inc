@@ -5,7 +5,6 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
 LOCALVERSION = "-dey"
 SRCBRANCH = "v5.4/dey-3.0/maint"
-SRCBRANCH_ccimx6 = "v4.9/dey-2.6/maint"
 SRCREV = "${AUTOREV}"
 
 # Select internal or Github Linux repo
