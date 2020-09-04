@@ -221,11 +221,12 @@ do_deploy_append () {
 					for target in ${IMXBOOT_TARGETS}; do
 						# Link to current "target" mkimage log
 						ln -sf mkimage-${target}.log mkimage.log
+						trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}-${ramc}.bin-${target}
+
 						if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
 							export ENABLE_ENCRYPTION=y
 							trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-encrypted-${MACHINE}-${rev}-${ramc}.bin-${target}
-						else
-							trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}-${ramc}.bin-${target}
+							unset ENABLE_ENCRYPTION
 						fi
 					done
 				done
