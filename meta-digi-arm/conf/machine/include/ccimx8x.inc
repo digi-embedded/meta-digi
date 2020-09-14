@@ -70,7 +70,6 @@ VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "AHAB"
-TRUSTFENCE_ENCRYPT_ENVIRONMENT = "0"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend
 # Vulkan is necessary for wayland to build
