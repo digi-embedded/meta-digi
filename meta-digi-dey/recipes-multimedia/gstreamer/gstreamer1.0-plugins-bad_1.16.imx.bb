@@ -3,14 +3,14 @@ require recipes-multimedia/gstreamer/gstreamer1.0-plugins-bad_1.16.2.bb
 DEPENDS += "jpeg libdrm"
 DEPENDS_append_imxgpu2d = " virtual/libg2d"
 
-PV = "1.16.0.imx"
+PV = "1.16.1.imx"
 
 FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/${PN}:"
 FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/files:"
 
 GST1.0-PLUGINS-BAD_SRC ?= "gitsm://source.codeaurora.org/external/imx/gst-plugins-bad.git;protocol=https"
-SRCBRANCH = "MM_04.05.04_2002_L5.4.3"
-SRCREV = "eea4cfe9315a9c648d116cfff3cd532e9a31237d" 
+SRCBRANCH = "MM_04.05.05_2005_L5.4.24"
+SRCREV = "2fdaef1839ebfef7ea3bc8c1c59463a9ef0ae19a"
 SRC_URI = " \
     ${GST1.0-PLUGINS-BAD_SRC};branch=${SRCBRANCH} \
     file://configure-allow-to-disable-libssh2.patch \

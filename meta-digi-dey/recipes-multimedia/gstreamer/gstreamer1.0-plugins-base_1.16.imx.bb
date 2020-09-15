@@ -1,14 +1,14 @@
 require recipes-multimedia/gstreamer/gstreamer1.0-plugins-base_1.16.2.bb
 
-PV = "1.16.0.imx"
+PV = "1.16.1.imx"
 
 FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/files:"
 FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/${PN}:"
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 GST1.0-PLUGINS-BASE_SRC ?= "gitsm://source.codeaurora.org/external/imx/gst-plugins-base.git;protocol=https"
-SRCBRANCH = "MM_04.05.04_2002_L5.4.3"
-SRCREV = "5221bd72a116341738ab060b195b38a2cbed1c58" 
+SRCBRANCH = "MM_04.05.05_2005_L5.4.24"
+SRCREV = "cad00a3c4318c787c9661990e8f9328e4a69a329"
 SRC_URI = " \
     ${GST1.0-PLUGINS-BASE_SRC};branch=${SRCBRANCH} \
     file://0001-introspection.m4-prefix-pkgconfig-paths-with-PKG_CON.patch \

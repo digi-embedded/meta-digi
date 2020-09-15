@@ -5,7 +5,7 @@ i.MX processors that integrate the HAB library in the internal boot ROM."
 HOMEPAGE = "https://www.nxp.com/webapp/Download?colCode=IMX_CST_TOOL"
 LICENSE = "CLOSED"
 
-DEPENDS = "openssl"
+DEPENDS = "openssl byacc flex"
 
 SRC_URI = " \
     ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'file://cst-${PV}.tgz', '', d)} \
@@ -15,7 +15,6 @@ SRC_URI = " \
     file://0004-hab4_pki_tree.sh-usa-a-random-password-for-the-defau.patch \
     file://0005-ahab_pki_tree.sh-automate-script.patch \
     file://0006-ahab_pki_tree.sh-use-a-random-password-for-the-defau.patch \
-    file://Makefile \
 "
 
 # Usually local files (with file:// protocol) are not checked for
@@ -29,20 +28,18 @@ python() {
         d.setVar('PREMIRRORS', "file://cst.* %s \\n %s" % (source_mirror_url, premirrors))
 }
 
-S = "${WORKDIR}/release"
-
-do_configure() {
-	cp -f ${WORKDIR}/Makefile .
-}
+S = "${WORKDIR}/cst-${PV}/"
 
 do_compile() {
-	oe_runmake clean && oe_runmake
+	cd ${S}/code/cst
+	oe_runmake OSTYPE=linux64 clean
+	oe_runmake OSTYPE=linux64 rel_bin
 }
 
 do_install() {
 	install -d ${D}${bindir}
-	install -m 0755 linux64/cst ${D}${bindir}/cst
-	install -m 0755 $(find linux64 -type f -name srktool) ${D}${bindir}/srktool
+	install -m 0755 $(find ${S}/code/cst/release/linux64 -type f -name cst) ${D}${bindir}/cst
+	install -m 0755 $(find ${S}/code/cst/release/linux64 -type f -name srktool) ${D}${bindir}/srktool
 	if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
 		install -m 0755 keys/ahab_pki_tree.sh ${D}${bindir}/trustfence-gen-pki.sh
 	elif [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then

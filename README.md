@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 3.0
-## Release 3.0-r1
+## Release 3.0-r2
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -43,6 +43,10 @@ Software for the following hardware platforms is in production support:
   * [CC-WMX-JN58-NE](https://www.digi.com/products/models/cc-wmx-jn58-ne)
   * [CC-MX-JN58-Z1](https://www.digi.com/products/models/cc-mx-jn58-z1)
   * CC-WMX-JN7A-NE
+  * [CC-WMX-JN7A-CBX](https://www.digi.com/products/models/cc-wmx-jn7a-cbx)
+  * [CC-WMX-JN68-NN](https://www.digi.com/products/models/cc-wmx-jn68-nn)
+  * [CC-WMX-JN69-NN](https://www.digi.com/products/models/cc-wmx-jn69-nn)
+  * [CC-MX-JN69-ZN](hhtps://www.digi.com/products/models/cc-mx-jn69-zn)
 * ConnectCore 6UL SBC Express
   * [CC-WMX6UL-START](https://www.digi.com/products/models/cc-wmx6ul-start) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/3.0/cc6ul/yocto-gs_index))
   * [CC-SBE-WMX-JN58](https://www.digi.com/products/models/cc-sbe-wmx-jn58)

@@ -89,7 +89,7 @@ do_compile () {
 					for target in ${IMXBOOT_TARGETS}; do
 						for rev in ${SOC_REVISIONS}; do
 							bbnote "building ${SOC_TARGET} - ${ramc} - REV=${rev} ${target}"
-							make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target}
+							make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target} > mkimage-${target}.log 2>&1
 							if [ -e "${BOOT_STAGING}/flash.bin" ]; then
 								cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target}
 							fi
@@ -177,8 +177,6 @@ do_deploy () {
 		# Link to default bootable U-Boot filename.
 		ln -sf ${UBOOT_PREFIX}-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
 		cd -
-		# Link to first "target" mkimage log
-		ln -sf mkimage-${IMAGE_IMXBOOT_TARGET}.log mkimage.log
 	else
 		for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 			for rev in ${SOC_REVISIONS}; do
@@ -213,15 +211,22 @@ do_deploy_append () {
 		# Sign U-boot image
 		if [ "${UBOOT_RAM_COMBINATIONS}" = "" ]; then
 			for target in ${IMXBOOT_TARGETS}; do
+				# Link to current "target" mkimage log
+				ln -sf mkimage-${target}.log mkimage.log
 				trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}.bin-${target}
 			done
 		else
 			for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 				for rev in ${SOC_REVISIONS}; do
 					for target in ${IMXBOOT_TARGETS}; do
-						# Do not sign "flash_regression_linux_m4" target files
-						if [ "${target}" != "flash_regression_linux_m4" ]; then
-							trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}-${ramc}.bin-${target}
+						# Link to current "target" mkimage log
+						ln -sf mkimage-${target}.log mkimage.log
+						trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}-${ramc}.bin-${target}
+
+						if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+							export ENABLE_ENCRYPTION=y
+							trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-encrypted-${MACHINE}-${rev}-${ramc}.bin-${target}
+							unset ENABLE_ENCRYPTION
 						fi
 					done
 				done

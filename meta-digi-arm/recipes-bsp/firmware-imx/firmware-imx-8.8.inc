@@ -1,5 +1,5 @@
 # Copyright (C) 2012-2016 Freescale Semiconductor
-# Copyright 2017-2019 NXP
+# Copyright 2017-2020 NXP
 # Copyright (C) 2018 O.S. Systems Software LTDA.
 SECTION = "base"
 LICENSE = "Proprietary"
@@ -9,8 +9,8 @@ SRC_URI = " \
     ${FSL_MIRROR}/firmware-imx-${PV}.bin;fsl-eula=true \
 "
 
-SRC_URI[md5sum] = "ee442e4d975578736f3f72593906f41c"
-SRC_URI[sha256sum] = "92c1713f61a99b1ff5046a795789e6021db1e8bb5534c02e4b719f1436e15615"
+SRC_URI[md5sum] = "eabb27d28bba375a9f14d6306c07af5f"
+SRC_URI[sha256sum] = "5ca1f8b6e6b191594d17ac7b51c38cdbc2ff808d15568ab4b0bbeb5dc6c621f6"
 
 S = "${WORKDIR}/firmware-imx-${PV}"
 

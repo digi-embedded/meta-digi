@@ -1,19 +1,19 @@
 # Copyright (C) 2013-2018 O.S. Systems Software LTDA.
 # Copyright (C) 2013-2016 Freescale Semiconductor
-# Copyright 2017-2018 NXP
+# Copyright 2017-2020 NXP
 
 DESCRIPTION = "Freescale VPU library"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=72c0f70181bb6e83eee6aab8de12a9f3"
+LIC_FILES_CHKSUM = "file://COPYING;md5=228c72f2a91452b8a03c4cab30f30ef9"
 
 PROVIDES = "virtual/imxvpu"
 RPROVIDES_${PN} = "virtual/imxvpu"
 
 PE = "1"
 
-SRC_URI = "${FSL_MIRROR}/${PN}-${PV}.bin;fsl-eula=true"
-SRC_URI[md5sum] = "12d42949b342b50365d24d148e67cf28"
-SRC_URI[sha256sum] = "8b9fd257a2dd79dae1e208f08e56a4a47550b892a6f4e3b8fee0d6cbeb09ec12"
+SRC_URI = "${FSL_MIRROR}/${BP}.bin;fsl-eula=true"
+SRC_URI[md5sum] = "6d6302189a6704874375afe62a65def0"
+SRC_URI[sha256sum] = "87cb799a57df654db29403cb74a75ca5185a1517022d3a4a16b8d69056c36127"
 
 inherit fsl-eula-unpack use-imx-headers
 

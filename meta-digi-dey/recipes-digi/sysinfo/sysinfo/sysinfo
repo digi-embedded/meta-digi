@@ -297,6 +297,7 @@ BOARD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant | tr -d '\0')"
 BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn | tr -d '\0')"
 BOARD_VERSION="$(cat /proc/device-tree/digi,carrierboard,version | tr -d '\0')"
 BOARD_ID="$(cat /proc/device-tree/digi,carrierboard,id | tr -d '\0')"
+SOC_REV="$(cat /proc/device-tree/cpus/rev | tr -d '\0')"
 
 if grep -qs '\<digi,ccimx6ul\>' /proc/device-tree/compatible; then
 	MCA_NODE="/sys/bus/i2c/devices/0-007e"
@@ -328,7 +329,11 @@ REPORT_PATH="/tmp/sysinfo-${DEY_VERSION}-${BOARD_SN}-${DATE}"
 	echo ""
 
 	echo "||*Component*||*Version*"
-	echo "|| DUT | SN-${BOARD_SN}, ${MACHINE} ${BOARD_VARIANT} SBCv${BOARD_VERSION} board_ID=${BOARD_ID}."
+	if [ -n "$SOC_REV" ]; then
+		echo "|| DUT | SN-${BOARD_SN}, ${MACHINE} ${BOARD_VARIANT} SBCv${BOARD_VERSION} board_ID=${BOARD_ID} SOC_REV=${SOC_REV}."
+	else
+		echo "|| DUT | SN-${BOARD_SN}, ${MACHINE} ${BOARD_VARIANT} SBCv${BOARD_VERSION} board_ID=${BOARD_ID}."
+	fi
 	echo "|| U-Boot | ${UBOOT_VERSION}"
 	echo "|| Firmware | ${DISTRO}-${DEY_VERSION}-$(cat /etc/version)"
 	echo "|| Kernel | $(uname -a)"
