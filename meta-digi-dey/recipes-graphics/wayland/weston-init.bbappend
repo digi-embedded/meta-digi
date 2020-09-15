@@ -17,6 +17,11 @@ INI_UNCOMMENT_ASSIGNMENTS_append_mx8mp = " \
     use-g2d=1 \
 "
 
+# Digi: use g2d on ccimx6sbc to fix desktop window issue
+INI_UNCOMMENT_ASSIGNMENTS_append_ccimx6sbc = " \
+    use-g2d=1 \
+"
+
 do_install_append() {
     install -Dm0755 ${WORKDIR}/profile ${D}${sysconfdir}/profile.d/weston.sh
 
