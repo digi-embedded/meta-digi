@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Digi International Inc.
+# Copyright (C) 2017-2020 Digi International Inc.
 
 SUMMARY = "Digi APIX library"
 DESCRIPTION = "C library to access and manage your ConnectCore platform interfaces in an easy manner"
@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 
 DEPENDS = "libsoc libsocketcan libgpiod"
 
-SRCBRANCH ?= "master"
+SRCBRANCH ?= "dey-3.0/maint"
 SRCREV = "${AUTOREV}"
 
 LIBDIGIAPIX_URI_STASH = "${DIGI_MTK_GIT}dey/libdigiapix.git;protocol=ssh"

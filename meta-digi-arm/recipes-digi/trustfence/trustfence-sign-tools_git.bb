@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2018 Digi International
+# Copyright (C) 2017-2020 Digi International
 SUMMARY = "TrustFence signing and encryption scripts"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 DEPENDS = "trustfence-cst coreutils util-linux"
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN_MODE', 'AHAB', 'imx-mkimage', '', d)}"
 
-SRCBRANCH = "v2019.04/master"
+SRCBRANCH = "v2020.04/maint"
 SRCREV = "${AUTOREV}"
 
 S = "${WORKDIR}"
