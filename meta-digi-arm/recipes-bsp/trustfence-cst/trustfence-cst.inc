@@ -7,6 +7,11 @@ LICENSE = "CLOSED"
 
 DEPENDS = "openssl byacc flex"
 
+# Explicitly add byacc-native as a dependency when building the package for the
+# SDK, otherwise, it won't get installed in the sysroot, causing a compilation
+# error.
+DEPENDS_append_class-nativesdk = " byacc-native"
+
 SRC_URI = " \
     ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'file://cst-${PV}.tgz', '', d)} \
     file://0001-gen_auth_encrypted_data-reuse-existing-DEK-file.patch \
