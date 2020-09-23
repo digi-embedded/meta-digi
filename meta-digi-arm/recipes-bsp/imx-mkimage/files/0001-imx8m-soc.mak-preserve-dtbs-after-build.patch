@@ -1,0 +1,42 @@
+From: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
+Date: Wed, 23 Sep 2020 10:15:08 +0200
+Subject: [PATCH] imx8m: soc.mak: preserve dtbs after build
+
+On commit ab433440269bbd5383b47ee60957e9906cda0b3b a dtb preprocess
+was introduced to have compatibility with old U-Boots.
+
+As part of those changes, the content of variable $(dtbs) was deleted
+at the end of the build.
+
+Since we added the dtbs variable as an argument, building is causing the
+original dtb file to be removed, and a second build is failing since the
+file pointed at by the dtbs variable does no longer exist.
+
+Remove the file removal to avoid this.
+
+Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
+---
+ iMX8M/soc.mak | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
+index b7b3986..fa84c6a 100644
+--- a/iMX8M/soc.mak
++++ b/iMX8M/soc.mak
+@@ -143,7 +143,7 @@ u-boot.itb: $(dtbs)
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtbs)
+ 	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtbs) > u-boot.its
+ 	./mkimage_uboot -E -p 0x3000 -f u-boot.its u-boot.itb
+-	@rm -f u-boot.its $(dtbs)
++	@rm -f u-boot.its
+ 
+ dtbs_ddr3l = valddr3l.dtb
+ $(dtbs_ddr3l):
+@@ -256,7 +256,6 @@ print_fit_hab: u-boot-nodtb.bin bl31.bin $(dtbs)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtbs)
+ 	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ./print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtbs)
+-	@rm -f $(dtbs)
+ 
+ print_fit_hab_ddr4: u-boot-nodtb.bin bl31.bin $(dtbs_ddr4_evk)
+ 	./$(PAD_IMAGE) tee.bin
