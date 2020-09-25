@@ -27,9 +27,11 @@ else
 	#
 	# Set overlays depending on the hardware variant
 	#
-	if test "${module_variant}" = "0x01" ||
-	   test "${module_variant}" = "0x02" ||
-	   test "${module_variant}" = "0x04"; then
+	if test "${module_variant}" = "0x01"; then
+		setenv overlays ccimx8x_ov_bt.dtbo,ccimx8x_ov_wifi.dtbo,${overlays}
+	elif test "${module_variant}" = "0x02"; then
+		setenv overlays ccimx8x_ov_bt.dtbo,ccimx8x_ov_wifi.dtbo,${overlays}
+	elif test "${module_variant}" = "0x04"; then
 		setenv overlays ccimx8x_ov_bt.dtbo,ccimx8x_ov_wifi.dtbo,${overlays}
 	fi
 fi
