@@ -6,13 +6,9 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-IMX_BACKEND = \
-    "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'wayland',\
-        bb.utils.contains('DISTRO_FEATURES',     'x11',     'x11', \
-                                                             'fb', d), d)}"
-
+# Digi: we use a custom script per platform, not per backend like NXP does
 SRC_URI_append = " \
-    file://qt5-${IMX_BACKEND}.sh \
+    file://qt5.sh \
 "
 SRC_URI_append_imxgpu3d = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'x11', \
@@ -52,7 +48,7 @@ do_install_append () {
         sed -i 's,-L${STAGING_DIR_HOST}/usr/lib,,' ${D}${libdir}/pkgconfig/Qt5*.pc
     fi
     install -d ${D}${sysconfdir}/profile.d/
-    install -m 0755 ${WORKDIR}/qt5-${IMX_BACKEND}.sh ${D}${sysconfdir}/profile.d/qt5.sh
+    install -m 0755 ${WORKDIR}/qt5.sh ${D}${sysconfdir}/profile.d/qt5.sh
 }
 
 FILES_${PN} += "${sysconfdir}/profile.d/qt5.sh"
