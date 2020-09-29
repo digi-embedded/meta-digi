@@ -21,21 +21,21 @@ if test -n "${module_ram}"; then
 	setexpr module_has_bt ${module_has_bt} / 20000
 
 	if test "${module_has_bt}" = "1"; then
-		setenv overlays ccimx8mn_ov_bt.dtbo,${overlays}
+		setenv overlays _ov_som_bt_ccimx8mn.dtbo,${overlays}
 	fi
 
 	if test "${module_has_wifi}" = "1"; then
-		setenv overlays ccimx8mn_ov_wifi.dtbo,${overlays}
+		setenv overlays _ov_som_wifi_ccimx8mn.dtbo,${overlays}
 	fi
 
 	if test "${som_hv}" = "1"; then
-		setenv overlays ccimx8mn_ov_v1.dtbo,${overlays}
+		setenv overlays _ov_som_v1_ccimx8mn.dtbo,${overlays}
 	fi
 fi
 
 # Apply quad overlay if the SOC type is "imx8mn"
 if test "${soc_type}" = "imx8mn"; then
-	setenv overlays ccimx8mn_ov_quad.dtbo,${overlays}
+	setenv overlays _ov_som_quad_ccimx8mn.dtbo,${overlays}
 fi
 
 # Get the UUID of the configured boot partition.

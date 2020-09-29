@@ -17,28 +17,28 @@ if test -n "${module_ram}"; then
 	setexpr module_has_bt ${module_has_bt} / 2
 
 	if test "${module_has_bt}" = "1"; then
-		setenv overlays ccimx8x_ov_bt.dtbo,${overlays}
+		setenv overlays _ov_som_bt_ccimx8x.dtbo,${overlays}
 	fi
 
 	if test "${module_has_wifi}" = "1"; then
-		setenv overlays ccimx8x_ov_wifi.dtbo,${overlays}
+		setenv overlays _ov_som_wifi_ccimx8x.dtbo,${overlays}
 	fi
 else
 	#
 	# Set overlays depending on the hardware variant
 	#
 	if test "${module_variant}" = "0x01"; then
-		setenv overlays ccimx8x_ov_bt.dtbo,ccimx8x_ov_wifi.dtbo,${overlays}
+		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
 	elif test "${module_variant}" = "0x02"; then
-		setenv overlays ccimx8x_ov_bt.dtbo,ccimx8x_ov_wifi.dtbo,${overlays}
+		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
 	elif test "${module_variant}" = "0x04"; then
-		setenv overlays ccimx8x_ov_bt.dtbo,ccimx8x_ov_wifi.dtbo,${overlays}
+		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
 	fi
 fi
 
 # Apply QXP overlay if the SOC type is "imx8qxp"
 if test "${soc_type}" = "imx8qxp"; then
-	setenv overlays ccimx8x_ov_qxp.dtbo,${overlays}
+	setenv overlays _ov_som_quad_ccimx8x.dtbo,${overlays}
 fi
 
 # Get the UUID of the configured boot partition.
