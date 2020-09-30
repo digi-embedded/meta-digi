@@ -5,6 +5,7 @@ SUBSYSTEM=="iio",     GROUP="digiapix", MODE="0660"
 SUBSYSTEM=="misc",    GROUP="digiapix", MODE="0660", ENV{DEVNAME}=="/dev/watchdog"
 SUBSYSTEM=="spidev",  GROUP="digiapix", MODE="0660"
 SUBSYSTEM=="watchdog",GROUP="digiapix", MODE="0660"
+SUBSYSTEM=="gpio",    GROUP="digiapix", MODE="0660", ACTION=="add"
 
 #
 # Use two different rules for GPIO's.
