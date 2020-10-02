@@ -6,9 +6,11 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
+SCRIPT_DIR = "${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'xwayland', 'fb', d)}"
+
 # Digi: we use a custom script per platform, not per backend like NXP does
 SRC_URI_append = " \
-    file://qt5.sh \
+    file://${SCRIPT_DIR}/qt5.sh \
 "
 SRC_URI_append_imxgpu3d = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'x11', \
