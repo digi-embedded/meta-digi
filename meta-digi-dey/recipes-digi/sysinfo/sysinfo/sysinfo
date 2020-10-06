@@ -254,7 +254,7 @@ make_report(){
 	echo "--------------------------------------"
 	echo ""
 
-	if grep -qs '\<digi,ccimx8x\>' /proc/device-tree/compatible; then
+	if grep -qs '\<digi,ccimx8\(x\|m\)\>' /proc/device-tree/compatible; then
 		if [ -f "/proc/device-tree/digi,tf-closed" ]; then
 			echo "Security status: [CLOSED]"
 		elif [ -f "/proc/device-tree/digi,tf-open" ]; then
