@@ -87,10 +87,11 @@ Documentation is available online at https://www.digi.com/resources/documentatio
   * Removed support to bluez4
   * Updated OpenSSL to v1.1.1d
   * Package upgrades and security fixes
-* Updated kernel version to v5.4 for i.MX8X, i.MX8MN and i.MX6UL platforms
-* Updated U-Boot to version 2017.03-r6 for i.MX6UL platform
-* Updated U-Boot to version 2018.03-r4 for i.MX8MN platform
-* Updated U-Boot to version 2019.04-r2 for i.MX8X platform
+* Updated kernel version to v5.4 for ConnectCore 8X, ConnecCore 8M Nano and
+  ConnectCore 6UL
+* Updated U-Boot to version 2017.03-r6 for ConnectCore 6UL
+* Updated U-Boot to version 2018.03-r4 for ConnectCore 8 MNano platform
+* Updated U-Boot to version 2019.04-r2 for ConnectCore 8X platform
 * Added support for ConnectCore 8M Nano v2 SOM
 * Added initial TrustFence support for ConnectCore 8M Nano
 
