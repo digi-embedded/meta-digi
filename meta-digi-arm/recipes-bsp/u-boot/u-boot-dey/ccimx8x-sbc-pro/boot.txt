@@ -1,0 +1,78 @@
+#
+# U-Boot bootscript for EMMC/SD images created by Yocto.
+#
+
+# Back up environment variables
+setenv ORIG_overlays ${overlays}
+setenv ORIG_extra_bootargs ${extra_bootargs}
+
+# Set SOC type to "imx8qxp" if not already defined by U-Boot
+if test ! -n "${soc_type}"; then
+	setenv soc_type "imx8qxp"
+fi
+
+#
+# Determine overlays to apply depending on the hardware capabilities
+# described by the HWID, SOM version, and carrier board version.
+#
+if test -n "${module_ram}"; then
+	setexpr module_has_wifi ${hwid_3} \& 1
+	setexpr module_has_bt ${hwid_3} \& 2
+	setexpr module_has_bt ${module_has_bt} / 2
+
+	if test "${module_has_bt}" = "1"; then
+		setenv overlays _ov_som_bt_ccimx8x.dtbo,${overlays}
+	fi
+
+	if test "${module_has_wifi}" = "1"; then
+		setenv overlays _ov_som_wifi_ccimx8x.dtbo,${overlays}
+	fi
+else
+	#
+	# Set overlays depending on the hardware variant
+	#
+	if test "${module_variant}" = "0x01"; then
+		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
+	elif test "${module_variant}" = "0x02"; then
+		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
+	elif test "${module_variant}" = "0x04"; then
+		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
+	fi
+fi
+
+# Apply QXP overlay if the SOC type is "imx8qxp"
+if test "${soc_type}" = "imx8qxp"; then
+	setenv overlays _ov_som_quad_ccimx8x.dtbo,${overlays}
+fi
+
+# Apply SBCv3 overlay if the board_version is 3 or lesser
+if test "${board_version}" -le "3"; then
+	setenv overlays _ov_board_v1-v3_ccimx8x-sbc-pro.dtbo,${overlays}
+fi
+
+# Get the UUID of the configured boot partition.
+part uuid mmc ${mmcbootdev}:${mmcpart} bootpart
+# Check the boot source.
+if test "${bootpart}" = "${part1_uuid}"; then
+	# We are booting from the eMMC using 'linux'.
+	true
+elif test "${bootpart}" = "${part2_uuid}"; then
+	# We are booting from the eMMC using 'recovery'.
+	setenv boot_initrd true
+	setenv initrd_file uramdisk-recovery.img
+else
+	# We are booting from the SD card.
+	setenv mmcroot /dev/mmcblk${mmcbootdev}p2
+fi
+setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
+dboot linux mmc ${mmcbootdev}:${mmcpart}
+
+
+
+# We only get here in case of an error on the dboot command.
+
+# Undo changes to environment variables
+setenv overlays ${ORIG_overlays}
+setenv ORIG_overlays
+setenv extra_bootargs ${ORIG_extra_bootargs}
+setenv ORIG_extra_bootargs
