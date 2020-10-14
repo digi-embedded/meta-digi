@@ -42,6 +42,11 @@ if test "${soc_type}" = "imx8mn"; then
 	setenv overlays _ov_som_quad_ccimx8mn.dtbo,${overlays}
 fi
 
+# Apply DVK v1-v2 overlay if the board version is < 3
+if test "${board_version}" -lt "3"; then
+	setenv overlays _ov_board_v1-v2_ccimx8mn-dvk.dtbo,${overlays}
+fi
+
 # Get the UUID of the configured boot partition.
 part uuid mmc ${mmcbootdev}:${mmcpart} bootpart
 # Check the boot source.
