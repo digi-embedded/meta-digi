@@ -263,7 +263,7 @@ make_report(){
 	else
 		if [ -e ${OTP_PATH}/nvmem ]; then
 			# Check SEC_CONFIG on OCOTP_CFG5 (ADDR=6) bit 1.
-			SEC_CONFIG_WORD=$(dd if=${OTP_PATH}/nvmem of=/dev/stdout bs=4 skip=6 count=1 status=none | hexdump -n 4 -v -e '1/4 "%08x\n"')
+			SEC_CONFIG_WORD=$(dd if=${OTP_PATH}/nvmem of=/dev/stdout bs=4 skip=6 count=1 status=none | hexdump -n 4 -v -e '1/4 "0x%08x\n"')
 			if [ "$((${SEC_CONFIG_WORD} & 0x2))" != "0" ]; then
 				echo "Security status: [CLOSED]"
 			else
