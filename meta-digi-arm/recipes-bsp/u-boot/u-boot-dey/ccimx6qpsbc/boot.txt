@@ -16,6 +16,10 @@ else
 	#
 	if test "${module_variant}" = "0x01"; then
 		setenv fdt_file imx6qp-ccimx6qpsbc-wb.dtb
+	elif test "${module_variant}" = "0x02"; then
+		setenv fdt_file imx6qp-ccimx6qpsbc-wb.dtb
+	elif test "${module_variant}" = "0x03"; then
+		setenv fdt_file imx6qp-ccimx6qpsbc.dtb
 	else
 		setenv fdt_file imx6qp-ccimx6qpsbc-wb.dtb
 	fi
