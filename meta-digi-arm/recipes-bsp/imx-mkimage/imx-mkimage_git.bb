@@ -8,6 +8,8 @@ LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
 SECTION = "BSP"
 
+SRC_URI_append_ccimx8mn = " file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch"
+
 # Beware: applied last to first
 DEBUG_PREFIX_MAP = "-fdebug-prefix-map=${WORKDIR}=/usr/src/debug/${PN}/${EXTENDPE}${PV}-${PR} \
                     -fdebug-prefix-map=${STAGING_DIR_HOST}= \

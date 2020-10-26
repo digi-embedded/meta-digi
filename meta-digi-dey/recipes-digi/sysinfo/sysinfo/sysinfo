@@ -254,7 +254,7 @@ make_report(){
 	echo "--------------------------------------"
 	echo ""
 
-	if grep -qs '\<digi,ccimx8x\>' /proc/device-tree/compatible; then
+	if grep -qs '\<digi,ccimx8\(x\|m\)\>' /proc/device-tree/compatible; then
 		if [ -f "/proc/device-tree/digi,tf-closed" ]; then
 			echo "Security status: [CLOSED]"
 		elif [ -f "/proc/device-tree/digi,tf-open" ]; then
@@ -263,7 +263,7 @@ make_report(){
 	else
 		if [ -e ${OTP_PATH}/nvmem ]; then
 			# Check SEC_CONFIG on OCOTP_CFG5 (ADDR=6) bit 1.
-			SEC_CONFIG_WORD=$(dd if=${OTP_PATH}/nvmem of=/dev/stdout bs=4 skip=6 count=1 status=none | hexdump -n 4 -v -e '1/4 "%08x\n"')
+			SEC_CONFIG_WORD=$(dd if=${OTP_PATH}/nvmem of=/dev/stdout bs=4 skip=6 count=1 status=none | hexdump -n 4 -v -e '1/4 "0x%08x\n"')
 			if [ "$((${SEC_CONFIG_WORD} & 0x2))" != "0" ]; then
 				echo "Security status: [CLOSED]"
 			else
@@ -297,7 +297,7 @@ BOARD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant | tr -d '\0')"
 BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn | tr -d '\0')"
 BOARD_VERSION="$(cat /proc/device-tree/digi,carrierboard,version | tr -d '\0')"
 BOARD_ID="$(cat /proc/device-tree/digi,carrierboard,id | tr -d '\0')"
-SOC_REV="$(cat /proc/device-tree/cpus/rev | tr -d '\0')"
+[ -e "/proc/device-tree/cpus/rev" ] && SOC_REV="$(cat /proc/device-tree/cpus/rev | tr -d '\0')"
 
 if grep -qs '\<digi,ccimx6ul\>' /proc/device-tree/compatible; then
 	MCA_NODE="/sys/bus/i2c/devices/0-007e"

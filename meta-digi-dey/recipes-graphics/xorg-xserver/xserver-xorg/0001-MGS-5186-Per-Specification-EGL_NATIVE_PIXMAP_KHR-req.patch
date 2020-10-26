@@ -15,10 +15,10 @@ Signed-off-by: Prabhu Sundararaj <prabhu.sundarara@nxp.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/hw/xwayland/xwayland-glamor-gbm.c b/hw/xwayland/xwayland-glamor-gbm.c
-index 80655fd16..e8c623e56 100644
+index a211e09..f5be403 100644
 --- a/hw/xwayland/xwayland-glamor-gbm.c
 +++ b/hw/xwayland/xwayland-glamor-gbm.c
-@@ -174,7 +174,7 @@ xwl_glamor_gbm_create_pixmap_for_bo(ScreenPtr screen, struct gbm_bo *bo,
+@@ -166,7 +166,7 @@ xwl_glamor_gbm_create_pixmap_for_bo(ScreenPtr screen, struct gbm_bo *bo,
      xwl_pixmap->bo = bo;
      xwl_pixmap->buffer = NULL;
      xwl_pixmap->image = eglCreateImageKHR(xwl_screen->egl_display,
@@ -26,7 +26,7 @@ index 80655fd16..e8c623e56 100644
 +                                          EGL_NO_CONTEXT /*xwl_screen->egl_context*/,
                                            EGL_NATIVE_PIXMAP_KHR,
                                            xwl_pixmap->bo, NULL);
-     if (xwl_pixmap->image == EGL_NO_IMAGE_KHR)
+
 -- 
 2.17.1
 

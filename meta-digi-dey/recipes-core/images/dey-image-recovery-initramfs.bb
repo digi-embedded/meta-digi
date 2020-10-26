@@ -29,6 +29,7 @@ IMAGE_ROOTFS_SIZE = "8192"
 
 # Remove some packages added via recommendations
 BAD_RECOMMENDATIONS += " \
+    openssl-bin \
     openssl-conf \
 "
 

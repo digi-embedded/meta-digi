@@ -16,5 +16,3 @@ RDEPENDS_${PN} = "\
 "
 
 RDEPENDS_${PN}_remove_ccimx6sbc = "hostapd"
-RDEPENDS_${PN}_remove_ccimx6 = "wireless-regdb-static"
-RDEPENDS_${PN}_append_ccimx6 = " crda"

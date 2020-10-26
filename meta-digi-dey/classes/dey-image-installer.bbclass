@@ -39,8 +39,8 @@ generate_installer_zip () {
 
 	# Create README file
 	cat >${IMGDEPLOYDIR}/README.txt <<_EOF_
-Digi Embedded Yocto kit installer
----------------------------------
+${DISTRO_NAME} ${DISTRO_VERSION} kit installer
+----------------------------------------
 
 _EOF_
 	md5sum ${INSTALLER_FILELIST} | sed -e "s,${DEPLOY_DIR_IMAGE}/,,g;s,${IMGDEPLOYDIR}/,,g" >> ${IMGDEPLOYDIR}/README.txt

@@ -20,9 +20,6 @@ STORAGE_MEDIA = "mmc"
 # Wireless external module
 WIRELESS_MODULE ?= ""
 
-# Use our recipe of linux-imx-headers instead of the meta-freescale one
-PREFERRED_VERSION_linux-imx-headers ?= "4.9"
-
 # Firmware
 MACHINE_FIRMWARE ?= "firmware-imx-sdma"
 MACHINE_FIRMWARE_append_mx6q = " firmware-imx-vpu-imx6q"
@@ -44,3 +41,6 @@ MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth pci"
 
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "HAB"
+
+# Adding 'wayland' along with 'x11' enables the xwayland backend
+DISTRO_FEATURES_append = " wayland"

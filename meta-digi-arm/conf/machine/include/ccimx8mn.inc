@@ -62,7 +62,6 @@ VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 TRUSTFENCE_SIGN_MODE = "HAB"
 # TODO: Encryption not yet supported
 TRUSTFENCE_DEK_PATH = "0"
-TRUSTFENCE_ENCRYPT_ENVIRONMENT = "0"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend
 # Vulkan is necessary for wayland to build

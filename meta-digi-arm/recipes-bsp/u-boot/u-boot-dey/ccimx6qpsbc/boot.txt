@@ -2,19 +2,26 @@
 # U-Boot bootscript for EMMC/SD images created by Yocto.
 #
 
+# Back up environment variables
+setenv ORIG_extra_bootargs ${extra_bootargs}
+
 #
 # Set device tree filename depending on the board ID (if defined)
 #
 if test -n "${board_id}"; then
-	setenv fdt_file ${soc_family}-ccimx6qpsbc-id${board_id}.dtb
+	setenv fdt_file imx6qp-ccimx6qpsbc-id${board_id}.dtb
 else
 	#
 	# Set device tree filename depending on the hardware variant
 	#
 	if test "${module_variant}" = "0x01"; then
-		setenv fdt_file ${soc_family}-ccimx6qpsbc-wb.dtb
+		setenv fdt_file imx6qp-ccimx6qpsbc-wb.dtb
+	elif test "${module_variant}" = "0x02"; then
+		setenv fdt_file imx6qp-ccimx6qpsbc-wb.dtb
+	elif test "${module_variant}" = "0x03"; then
+		setenv fdt_file imx6qp-ccimx6qpsbc.dtb
 	else
-		setenv fdt_file ${soc_family}-ccimx6qpsbc-wb.dtb
+		setenv fdt_file imx6qp-ccimx6qpsbc-wb.dtb
 	fi
 fi
 
@@ -34,3 +41,11 @@ else
 fi
 setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
 dboot linux mmc ${mmcbootdev}:${mmcpart}
+
+
+
+# We only get here in case of an error on the dboot command.
+
+# Undo changes to environment variables
+setenv extra_bootargs ${ORIG_extra_bootargs}
+setenv ORIG_extra_bootargs

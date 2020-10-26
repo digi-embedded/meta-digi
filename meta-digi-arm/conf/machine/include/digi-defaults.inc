@@ -14,8 +14,10 @@ LINUXLIBCVERSION ?= "5.4%"
 #
 # Platform      Linux              U-Boot
 # -------------------------------------------------
+# ccimx6        5.4               2017.03
+# ccimx6qp      5.4               2017.03
 # ccimx6ul      5.4               2017.03
-# ccimx8x       5.4               2019.04, 2018.03, 2017.03 (all packaged in imx-boot)
+# ccimx8x       5.4               2020.04 (packaged in imx-boot)
 # ccimx8mn      5.4               2018.03 (packaged in imx-boot)
 #
 
