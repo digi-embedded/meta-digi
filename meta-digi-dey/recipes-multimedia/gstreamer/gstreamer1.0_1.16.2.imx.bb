@@ -1,13 +1,11 @@
 require recipes-multimedia/gstreamer/gstreamer1.0_1.16.2.bb
 
-PV = "1.16.1.imx"
-
 FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/files:"
 
 # Use i.MX fork of GST for customizations
 GST1.0_SRC ?= "gitsm://source.codeaurora.org/external/imx/gstreamer.git;protocol=https"
-SRCBRANCH = "MM_04.05.05_2005_L5.4.24"
-SRCREV = "beca1b382febc2ba38a21fcb8f5092209773eb7f"
+SRCBRANCH = "MM_04.05.06_2008_L5.4.47"
+SRCREV = "8514bc61ccab208a65e387eab9347276a8e770e7"
 SRC_URI = " \
     ${GST1.0_SRC};branch=${SRCBRANCH} \
     file://0001-introspection.m4-prefix-pkgconfig-paths-with-PKG_CON.patch \

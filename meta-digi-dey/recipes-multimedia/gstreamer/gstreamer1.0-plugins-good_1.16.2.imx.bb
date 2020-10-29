@@ -1,13 +1,11 @@
 require recipes-multimedia/gstreamer/gstreamer1.0-plugins-good_1.16.2.bb
 
-PV = "1.16.1.imx"
-
 FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/${PN}:"
 FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/files:"
 
 GST1.0-PLUGINS-GOOD_SRC ?= "gitsm://source.codeaurora.org/external/imx/gst-plugins-good.git;protocol=https"
-SRCBRANCH = "MM_04.05.05_2005_L5.4.24"
-SRCREV = "fc6d8ccf3bd775517fafb1ce1d9224312d2812d8"
+SRCBRANCH = "MM_04.05.06_2008_L5.4.47"
+SRCREV = "a1ba15d53aab342dd921261148562f47eeed7d98"
 
 SRC_URI = " \
     ${GST1.0-PLUGINS-GOOD_SRC};branch=${SRCBRANCH} \
