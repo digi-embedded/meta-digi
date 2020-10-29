@@ -9,9 +9,9 @@ SECTION = "multimedia"
 LIC_FILES_CHKSUM = "file://COPYING;md5=228c72f2a91452b8a03c4cab30f30ef9"
 
 IMX_VPUWRAP_SRC ?= "git://github.com/NXP/imx-vpuwrap.git;protocol=https"
-SRCBRANCH = "MM_04.05.05_2005_L5.4.24"
+SRCBRANCH = "MM_04.05.06_2008_L5.4.47"
 SRC_URI = "${IMX_VPUWRAP_SRC};branch=${SRCBRANCH}"
-SRCREV = "76225d8e15b2b72cd11ce073706473473e446294"
+SRCREV = "7d16e588b805163ef1c67dc92615ffa29bbb3dfb"
 S = "${WORKDIR}/git"
 
 inherit autotools pkgconfig
