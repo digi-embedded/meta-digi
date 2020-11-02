@@ -2,7 +2,7 @@ require recipes-support/opencv/opencv_4.1.0.bb
 
 LIC_FILES_CHKSUM = "file://LICENSE;md5=014935351b2df6f3094bf25de8d50ed8"
 
-SRCREV_opencv = "c4fbe8651af1d7e22e707dba7a93d001eaca4a15" 
+SRCREV_opencv = "7187501b6bc89e111f4dd5694b58151ca98b7d9a" 
 SRCREV_contrib = "65abc7090dedc84bbedec4dfd143f0340e52114f"
 SRCREV_extra = "322b475403899abc2411c4fbf68318afa77d3191"
 SRC_URI[tinydnn.md5sum] = "adb1c512e09ca2c7a6faef36f9c53e59"
@@ -21,6 +21,7 @@ SRC_URI += " \
     https://github.com/tiny-dnn/tiny-dnn/archive/v1.0.0a3.tar.gz;destsuffix=git/3rdparty/tinydnn/tiny-dnn-1.0.0a3;name=tinydnn;unpack=false \
     file://uselocalxfeatures.patch;patchdir=../contrib/ \
     file://OpenCV_DNN_examples.patch \
+    file://0001-Add-smaller-version-of-download_models.py.patch;patchdir=../extra \
 "
 PV = "4.2.0.imx"
 
@@ -51,6 +52,9 @@ do_install_append() {
     cp -r ${S}/samples/data/* ${D}${datadir}/OpenCV/samples/data
     install -d ${D}${datadir}/OpenCV/samples/bin/
     cp -f bin/example_* ${D}${datadir}/OpenCV/samples/bin/
+    if ${@bb.utils.contains('PACKAGECONFIG', 'test', 'true', 'false', d)}; then
+        cp -r share/opencv4/testdata/cv/face/* ${D}${datadir}/opencv4/testdata/cv/face/
+    fi
 }
 
 FILES_${PN}-samples += "${datadir}/OpenCV/samples"
