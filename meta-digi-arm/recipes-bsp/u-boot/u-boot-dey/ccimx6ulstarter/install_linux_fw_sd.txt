@@ -21,7 +21,7 @@ fi
 
 # Determine U-Boot file to program basing on module variant
 if test -n "${module_variant}"; then
-	if test "${module_variant}" = "0x02" || test "${module_variant}" = "0x03" || test "${module_variant}" = "0x06" || test "${module_variant}" = "0x0a; then
+	if test "${module_variant}" = "0x02" || test "${module_variant}" = "0x03" || test "${module_variant}" = "0x06" || test "${module_variant}" = "0x0a"; then
 		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulstarter.imx;
 	elif test "${module_variant}" = "0x04" || test "${module_variant}" = "0x05" || test "${module_variant}" = "0x07"; then
 		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulstarter1GB.imx;
