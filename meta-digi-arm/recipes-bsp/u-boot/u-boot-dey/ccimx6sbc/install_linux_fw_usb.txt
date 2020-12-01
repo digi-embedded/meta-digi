@@ -1,0 +1,179 @@
+#
+# U-Boot script for installing Linux images created by Yocto from a USB stick
+# into the eMMC
+#
+
+echo "#######################################################"
+echo "#           Linux firmware install from USB           #"
+echo "#######################################################"
+echo ""
+echo " This process will erase your eMMC and will install a new"
+echo " U-Boot and Linux firmware images on the eMMC."
+echo ""
+echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
+echo " to continue."
+
+sleep 10
+if test $? -eq 1; then
+	echo "Aborted by user.";
+	exit;
+fi
+
+# Determine U-Boot file to program basing on module variant
+if test -n "${module_variant}"; then
+	if test "${module_variant}" = "0x12"; then
+		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc2GB.imx;
+	elif test "${module_variant}" = "0x02" || test "${module_variant}" = "0x04" || test "${module_variant}" = "0x05" || test "${module_variant}" = "0x11" || test "${module_variant}" = "0x14"; then
+		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc.imx;
+	elif test "${module_variant}" = "0x03" || test "${module_variant}" = "0x0e" || test "${module_variant}" = "0x0f"; then
+		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc512MB.imx;
+	elif test "${module_variant}" = "0x0b" || test "${module_variant}" = "0x15"; then
+		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc.imx;
+	elif test "${module_variant}" = "0x0c" || test "${module_variant}" = "0x13"; then
+		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc512MB.imx;
+	fi
+fi
+# Use 'test -n ...' because 'test -z ...' does not work well on old versions of
+# u-boot when the checked value is empty.
+if test -n "${INSTALL_UBOOT_FILENAME}"; then
+	true;
+else
+	echo "";
+	echo "[ERROR] Cannot determine U-Boot file for this module!";
+	echo "";
+	echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 6 variant:";
+	echo "   - For a Quad/Dual CPU with 2GB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc2GB.imx";
+	echo "   - For a Quad/Dual CPU with 1GB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc.imx";
+	echo "   - For a Quad/Dual CPU with 512MB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc512MB.imx";
+	echo "   - For a DualLite/Solo CPU with 1GB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc.imx";
+	echo "   - For a DualLite/Solo CPU with 512MB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc512MB.imx";
+	echo "";
+	echo "2. Run the install script again.";
+	echo "";
+	echo "Aborted";
+	echo "";
+	exit;
+fi;
+
+setenv INSTALL_USBDEV 0
+setenv INSTALL_LINUX_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6sbc.boot.vfat
+setenv INSTALL_RECOVERY_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6sbc.recovery.vfat
+setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6sbc.ext4
+
+# Check for presence of firmware files on the USB
+for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do
+	if test ! -e usb ${INSTALL_USBDEV} ${install_f}; then
+		echo "ERROR: Could not find file ${install_f}";
+		install_abort=1;
+	fi;
+done
+if test -n "${install_abort}"; then
+	echo "Aborted.";
+	exit;
+fi
+
+# Skip user confirmation for U-Boot update
+setenv forced_update 1
+
+# Set bootdelay to zero so that firmware update is run immediately after
+# the first reset.
+setenv bootdelay 0
+
+# Set target MMC device index to eMMC
+setenv mmcdev 0
+
+# Update U-Boot
+echo ""
+echo ""
+echo ">> Installing U-Boot boot loader (target will reset)"
+echo ""
+echo ""
+update uboot usb ${INSTALL_USBDEV} fat ${INSTALL_UBOOT_FILENAME}
+if test $? -eq 1; then
+	echo "[ERROR] Failed to update U-Boot boot loader!";
+	echo "";
+	echo "Aborted.";
+	exit;
+fi
+
+# Set 'bootcmd' to the second part of the script that will
+#  - Reset environment to defaults
+#  - Save the environment
+#  - Partition the eMMC user data area for Linux
+#  - Update the 'linux' partition
+#  - Update the 'recovery' partition
+#  - Update the 'rootfs' partition
+#  - Configure recovery to wipe 'update' partition
+#  - Run 'recovery' and let the system boot after
+setenv bootcmd "
+	env default -a;
+	saveenv;
+	echo \"\";
+	echo \"\";
+	echo \">> Creating Linux partition table on the eMMC\";
+	echo \"\";
+	echo \"\";
+	run partition_mmc_linux;
+	if test \$? -eq 1; then
+		echo \"[ERROR] Failed to create Linux partition table!\";
+		echo \"\";
+		echo \"Aborted.\";
+		exit;
+	fi;
+	usb start;
+	echo \"\";
+	echo \"\";
+	echo \">> Installing Linux kernel and device tree files\";
+	echo \"\";
+	echo \"\";
+	update linux usb ${INSTALL_USBDEV} fat ${INSTALL_LINUX_FILENAME};
+	if test \$? -eq 1; then
+		echo \"[ERROR] Failed to update linux partition!\";
+		echo \"\";
+		echo \"Aborted.\";
+		exit;
+	fi;
+	echo \"\";
+	echo \"\";
+	echo \">> Installing recovery\";
+	echo \"\";
+	echo \"\";
+	update recovery usb ${INSTALL_USBDEV} fat ${INSTALL_RECOVERY_FILENAME};
+	if test \$? -eq 1; then
+		echo \"[ERROR] Failed to update recovery partition!\";
+		echo \"\";
+		echo \"Aborted.\";
+		exit;
+	fi;
+	echo \"\";
+	echo \"\";
+	echo \">> Installing Linux root file system\";
+	echo \"\";
+	echo \"\";
+	update rootfs usb ${INSTALL_USBDEV} fat ${INSTALL_ROOTFS_FILENAME};
+	if test \$? -eq 1; then
+		echo \"[ERROR] Failed to update rootfs partition!\";
+		echo \"\";
+		echo \"Aborted.\";
+		exit;
+	fi;
+	echo \"\";
+	setenv boot_recovery yes;
+	setenv recovery_command wipe_update;
+	saveenv;
+	echo \"\";
+	echo \"\";
+	echo \">> Firmware installation complete. Rebooting into recovery mode for final deployment.\";
+	echo \"\";
+	echo \"\";
+	sleep 1;
+	reset;
+"
+
+saveenv
+reset

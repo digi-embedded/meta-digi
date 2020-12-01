@@ -21,7 +21,8 @@ FSTYPES_WHITELIST = " \
 
 generate_installer_zip () {
 	# Get list of files to pack
-	INSTALLER_FILELIST="${DEPLOY_DIR_IMAGE}/install_linux_fw_sd.scr"
+	INSTALLER_FILELIST="${DEPLOY_DIR_IMAGE}/install_linux_fw_sd.scr \
+			    ${DEPLOY_DIR_IMAGE}/install_linux_fw_usb.scr"
 	# Get UUU installation script
 	if readlink -e "${DEPLOY_DIR_IMAGE}/install_linux_fw_uuu.sh"; then
 		INSTALLER_FILELIST="${INSTALLER_FILELIST} ${DEPLOY_DIR_IMAGE}/install_linux_fw_uuu.sh"
