@@ -17,6 +17,7 @@ BBLAYERS ?= " \
   ##DIGIBASE##/meta-swupdate \
   ##DIGIBASE##/meta-freescale \
   ##DIGIBASE##/meta-fsl-demos \
+  ##DIGIBASE##/meta-webkit \
   ##DIGIBASE##/meta-digi/meta-digi-arm \
   ##DIGIBASE##/meta-digi/meta-digi-dey \
   "
