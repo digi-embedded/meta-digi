@@ -16,9 +16,13 @@ require digi-webkit-examples.inc
 
 RDEPENDS_${PN} = " \
     cog \
+    video-examples \
     webglsamples \
     ${WEBSERVER_PACKAGE} \
 "
+
+VPU_NOTE = "This means that, if the video format is supported by the VPU, WebKit will use the VPU to decode the video."
+VPU_NOTE_ccimx8mn = "Since the ConnectCore 8M Nano doesn't have a VPU, WebKit will decode the videos using gstreamer software."
 
 # The package contains static webpages, no need to configure or compile
 do_configure[noexec] = "1"
@@ -41,4 +45,20 @@ do_install() {
 	SAMPLE_LIST="${SAMPLE_LIST}\n"
 
 	sed -i s,##WEBGL_SAMPLE_LIST##,"${SAMPLE_LIST}",g ${D}/${WEBSERVER_ROOT}/index.html
+
+	# Add a note regarding the video decoding process, which depends on the
+	# platform.
+	sed -i s/##VPU_NOTE##/"${VPU_NOTE}"/g ${D}/${WEBSERVER_ROOT}/index.html
+
+	# Use the same method to dynamically generate the list of video
+	# examples.
+	SAMPLE_LIST=""
+	ENTRY='<li><p><a href="videos/_name_\">_name_</a></p></li>'
+	for sample in ${VIDEO_SAMPLES}; do
+		SAMPLE_LIST="${SAMPLE_LIST}\n$(echo ${ENTRY} | sed s/_name_/${sample}/g)"
+	done
+
+	SAMPLE_LIST="${SAMPLE_LIST}\n"
+
+	sed -i s,##VIDEO_SAMPLE_LIST##,"${SAMPLE_LIST}",g ${D}/${WEBSERVER_ROOT}/index.html
 }

@@ -35,6 +35,12 @@ WEBGL_REQUIRED = " \
     ${WEBGL_SAMPLE_DEPS} \
 "
 
+# List of video samples
+VIDEO_SAMPLES = " \
+    big_buck_bunny.mov \
+    big_buck_bunny.webm \
+"
+
 # All packages involved in the webkit examples install their files in the
 # webserver directory
 FILES_${PN} = "/${WEBSERVER_ROOT}/*"
