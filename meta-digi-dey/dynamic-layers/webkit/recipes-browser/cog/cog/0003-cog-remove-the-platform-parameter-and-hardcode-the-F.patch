@@ -1,0 +1,66 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Tue, 10 Nov 2020 16:32:15 +0100
+Subject: [PATCH 3/4] cog: remove the --platform parameter and hardcode the FDO
+ platform
+
+We don't want users to accidentally generate errors by using different
+platforms, so always use the FDO one by default.
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ cog.c | 27 ++++-----------------------
+ 1 file changed, 4 insertions(+), 23 deletions(-)
+
+diff --git a/cog.c b/cog.c
+index 950b14d..5f47d87 100644
+--- a/cog.c
++++ b/cog.c
+@@ -43,10 +43,7 @@ static struct {
+     GStrv    arguments;
+     char    *background_color;
+ #if !COG_USE_WEBKITGTK
+-    union {
+-        char *platform_name;
+-        CogPlatform *platform;
+-    };
++    CogPlatform *platform;
+ #endif // !COG_USE_WEBKITGTK
+     union {
+         char *action_name;
+@@ -95,11 +92,6 @@ static GOptionEntry s_cli_options[] =
+     { "bg-color", 'b', 0, G_OPTION_ARG_STRING, &s_options.background_color,
+         "Background color, as a CSS name or in #RRGGBBAA hex syntax (default: white)",
+         "BG_COLOR" },
+-#if !COG_USE_WEBKITGTK
+-    { "platform", 'P', 0, G_OPTION_ARG_STRING, &s_options.platform_name,
+-        "Platform plug-in to use.",
+-        "NAME" },
+-#endif // !COG_USE_WEBKITGTK
+     { "web-extensions-dir", '\0', 0, G_OPTION_ARG_STRING, &s_options.web_extensions_dir,
+       "Load Web Extensions from given directory.",
+       "PATH"},
+@@ -301,21 +293,10 @@ platform_setup (CogShell *shell)
+      * a given platform.
+      */
+ 
+-    g_debug ("%s: Platform name: %s", __func__, s_options.platform_name);
+-
+-    if (!s_options.platform_name)
+-        return FALSE;
+-
+-    g_autofree char *platform_soname =
+-        g_strdup_printf ("libcogplatform-%s.so", s_options.platform_name);
+-    g_clear_pointer (&s_options.platform_name, g_free);
+-
+-    g_debug ("%s: Platform plugin: %s", __func__, platform_soname);
+-
+     g_autoptr(CogPlatform) platform = cog_platform_new ();
+-    if (!cog_platform_try_load (platform, platform_soname)) {
+-        g_warning ("Could not load: %s (possible cause: %s).\n",
+-                   platform_soname, strerror (errno));
++    if (!cog_platform_try_load (platform, "libcogplatform-fdo.so")) {
++        g_warning ("Could not load: libcogplatform-fdo.so (possible cause: %s).\n",
++                   strerror (errno));
+         return FALSE;
+     }
+ 
