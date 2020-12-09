@@ -9,4 +9,4 @@ SRC_URI_append = " \
     file://0004-cog-platform-fdo-always-use-fullscreen-mode.patch \
 "
 
-EXTRA_OECMAKE += "-DCOG_HOME_URI=www.digi.com"
+EXTRA_OECMAKE += "-DCOG_HOME_URI=http://127.0.0.1/"
