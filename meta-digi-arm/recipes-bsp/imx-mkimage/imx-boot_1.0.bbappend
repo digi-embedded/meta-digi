@@ -70,6 +70,10 @@ mkimage is compatible for this use, and using it saves us from having to \
 maintain a custom recipe."
 	ln -sf ${STAGING_DIR_NATIVE}${bindir}/mkimage            ${BOOT_STAGING}/mkimage_uboot
 	cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${ATF_MACHINE_NAME} ${BOOT_STAGING}/bl31.bin
+	# Create dummy DEK blob
+	if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+		dd if=/dev/zero of=${BOOT_STAGING}/dek_blob_fit_dummy.bin bs=96 count=1 && sync
+	fi
 }
 
 do_compile () {
