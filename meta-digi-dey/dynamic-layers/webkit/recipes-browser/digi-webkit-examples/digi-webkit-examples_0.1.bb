@@ -5,12 +5,12 @@ DESCRIPTION = "This webpage provides examples that show how the WPE WebKit lever
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
 
-SRC_URI = " \
-    file://index.html \
-    file://digi.css \
-"
+SRC_URI = "${DIGI_PKG_SRC}/${BPN}-${PV}.tar.gz"
 
-S = "${WORKDIR}"
+SRC_URI[md5sum] = "cc4b81cf92135be3e231375e9a22fe6a"
+SRC_URI[sha256sum] = "26ed0fafcf9d66eabac4c6963ea2e3fb46d3cc94d76d50413883f28f9c28f737"
+
+S = "${WORKDIR}/${PN}-${PV}"
 
 require digi-webkit-examples.inc
 
@@ -21,44 +21,36 @@ RDEPENDS_${PN} = " \
     ${WEBSERVER_PACKAGE} \
 "
 
-VPU_NOTE = "This means that, if the video format is supported by the VPU, WebKit will use the VPU to decode the video."
-VPU_NOTE_ccimx8mn = "Since the ConnectCore 8M Nano doesn't have a VPU, WebKit will decode the videos using gstreamer software."
-
 # The package contains static webpages, no need to configure or compile
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 
 do_install() {
-	install -d ${D}/${WEBSERVER_ROOT}
+	install -d ${D}/${WEBSERVER_ROOT}/style
+	install -d ${D}/${WEBSERVER_ROOT}/images
+	install -m 644 ${S}/examples_viewer.html ${D}/${WEBSERVER_ROOT}
 	install -m 644 ${S}/index.html ${D}/${WEBSERVER_ROOT}
-	install -m 644 ${S}/digi.css ${D}/${WEBSERVER_ROOT}
+	install -m 644 ${S}/style/* ${D}/${WEBSERVER_ROOT}/style
+	install -m 644 ${S}/images/* ${D}/${WEBSERVER_ROOT}/images
 
 	# Most entry points for the WebGL samples have the same format:
 	# <name>/<name>.html. Since we might define different sample lists per
 	# platform, we should generate the list of samples dynamically.
 	SAMPLE_LIST=""
-	ENTRY='<li><p><a href="_name_/_name_.html">_name_</a></p></li>'
 	for sample in ${WEBGL_SAMPLES}; do
-		SAMPLE_LIST="${SAMPLE_LIST}\n$(echo ${ENTRY} | sed s/_name_/${sample}/g)"
+		SAMPLE_LIST="${SAMPLE_LIST}\n$(sed s/_name_/${sample}/g ${S}/webgl_demo_template)"
 	done
 
-	SAMPLE_LIST="${SAMPLE_LIST}\n"
-
 	sed -i s,##WEBGL_SAMPLE_LIST##,"${SAMPLE_LIST}",g ${D}/${WEBSERVER_ROOT}/index.html
-
-	# Add a note regarding the video decoding process, which depends on the
-	# platform.
-	sed -i s/##VPU_NOTE##/"${VPU_NOTE}"/g ${D}/${WEBSERVER_ROOT}/index.html
 
 	# Use the same method to dynamically generate the list of video
 	# examples.
 	SAMPLE_LIST=""
-	ENTRY='<li><p><a href="videos/_name_\">_name_</a></p></li>'
-	for sample in ${VIDEO_SAMPLES}; do
-		SAMPLE_LIST="${SAMPLE_LIST}\n$(echo ${ENTRY} | sed s/_name_/${sample}/g)"
+	for format in ${VIDEO_FORMATS}; do
+		SAMPLE_LIST="${SAMPLE_LIST}\n$(sed s/_fmt_/${format}/g ${S}/video_demo_template | \
+		                               sed s/_name_/${VIDEO_NAME}/g | \
+		                               sed s/_name-upper_/"${VIDEO_NAME_UPPERCASE}"/g)"
 	done
-
-	SAMPLE_LIST="${SAMPLE_LIST}\n"
 
 	sed -i s,##VIDEO_SAMPLE_LIST##,"${SAMPLE_LIST}",g ${D}/${WEBSERVER_ROOT}/index.html
 }

@@ -35,11 +35,14 @@ WEBGL_REQUIRED = " \
     ${WEBGL_SAMPLE_DEPS} \
 "
 
-# List of video samples
-VIDEO_SAMPLES = " \
-    big_buck_bunny.mov \
-    big_buck_bunny.webm \
+# List of video sample formats
+VIDEO_FORMATS = " \
+    mov \
+    webm \
 "
+# Name of the video sample
+VIDEO_NAME = "big_buck_bunny"
+VIDEO_NAME_UPPERCASE = "Big Buck Bunny"
 
 # All packages involved in the webkit examples install their files in the
 # webserver directory

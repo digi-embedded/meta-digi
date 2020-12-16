@@ -22,7 +22,7 @@ do_compile[noexec] = "1"
 do_install() {
 	install -d ${D}/${WEBSERVER_ROOT}/videos
 
-	for sample in ${VIDEO_SAMPLES}; do
-		install -m 644 ${S}/${sample} ${D}/${WEBSERVER_ROOT}/videos
+	for format in ${VIDEO_FORMATS}; do
+		install -m 644 ${S}/${VIDEO_NAME}.${format} ${D}/${WEBSERVER_ROOT}/videos
 	done
 }
