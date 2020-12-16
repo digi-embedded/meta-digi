@@ -10,7 +10,9 @@ DEPENDS = "openssl byacc flex"
 # Explicitly add byacc-native as a dependency when building the package for the
 # SDK, otherwise, it won't get installed in the sysroot, causing a compilation
 # error.
-DEPENDS_append_class-nativesdk = " byacc-native"
+# Explicitly add openssl-native for the SDK build to correctly link to the
+# openssl libraries in the native dependencies folder.
+DEPENDS_append_class-nativesdk = " byacc-native openssl-native"
 
 SRC_URI = " \
     ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'file://cst-${PV}.tgz', '', d)} \
@@ -20,6 +22,7 @@ SRC_URI = " \
     file://0004-hab4_pki_tree.sh-usa-a-random-password-for-the-defau.patch \
     file://0005-ahab_pki_tree.sh-automate-script.patch \
     file://0006-ahab_pki_tree.sh-use-a-random-password-for-the-defau.patch \
+    file://0007-Makefile-statically-link-libcrypto.patch \
 "
 
 # Usually local files (with file:// protocol) are not checked for
@@ -36,6 +39,8 @@ python() {
 S = "${WORKDIR}/cst-${PV}/"
 
 do_compile() {
+	export LDLIBPATH=-L${WORKDIR}/recipe-sysroot-native/usr/lib
+	export COPTIONS=-I${WORKDIR}/recipe-sysroot-native/usr/include
 	cd ${S}/code/cst
 	oe_runmake OSTYPE=linux64 clean
 	oe_runmake OSTYPE=linux64 rel_bin
