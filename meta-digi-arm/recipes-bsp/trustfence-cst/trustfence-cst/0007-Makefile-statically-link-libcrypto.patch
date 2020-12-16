@@ -1,0 +1,27 @@
+From: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
+Date: Tue, 15 Dec 2020 17:01:45 +0100
+Subject: [PATCH] Makefile: statically link libcrypto
+
+Statically link libcrypto so the host machine does not require to have
+installed the same openssl version that was used to build the binaries.
+
+This requires dynamically linking the libpthread and libdl libraries.
+
+Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
+---
+ code/cst/code/build/make/gcc.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/code/cst/code/build/make/gcc.mk b/code/cst/code/build/make/gcc.mk
+index 0394f5a..cc57f6b 100755
+--- a/code/cst/code/build/make/gcc.mk
++++ b/code/cst/code/build/make/gcc.mk
+@@ -28,7 +28,7 @@ COPTIONS += -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Werror -pedantic -fPIC -g
+ #==============================================================================
+ LDOPTIONS += -g
+ 
+-LDLIBS := -lcrypto
++LDLIBS := -Wl,-Bstatic -lcrypto -Wl,-Bdynamic -lpthread -ldl
+ 
+ # Archiver flags
+ #==============================================================================
