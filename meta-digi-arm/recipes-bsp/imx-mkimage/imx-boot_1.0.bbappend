@@ -220,6 +220,12 @@ do_deploy_append () {
 				# Link to current "target" mkimage log
 				ln -sf mkimage-${target}.log mkimage.log
 				trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}.bin-${target}
+
+				if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+					export ENABLE_ENCRYPTION=y
+					trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-encrypted-${MACHINE}.bin-${target}
+					unset ENABLE_ENCRYPTION
+				fi
 			done
 		else
 			for ramc in ${UBOOT_RAM_COMBINATIONS}; do
