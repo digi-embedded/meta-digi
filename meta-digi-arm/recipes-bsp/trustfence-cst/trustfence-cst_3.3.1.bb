@@ -29,17 +29,6 @@ SRC_URI = " \
 SRC_URI[md5sum] = "27ba9c8bc0b8a7f14d23185775c53794"
 SRC_URI[sha256sum] = "8b7e44e3e126f814f5caf8a634646fe64021405302ca59ff02f5c8f3b9a5abb9"
 
-# Usually local files (with file:// protocol) are not checked for
-# premirrors. But in this case we want to be able to download the 'cst'
-# package from a premirror in case it's not already in the DL_DIR, so prepend
-# a premirror for the 'file://' protocol.
-python() {
-    source_mirror_url = d.getVar('SOURCE_MIRROR_URL', True)
-    if source_mirror_url:
-        premirrors = d.getVar('PREMIRRORS', True)
-        d.setVar('PREMIRRORS', "file://cst.* %s \\n %s" % (source_mirror_url, premirrors))
-}
-
 S = "${WORKDIR}/cst-${PV}/"
 
 do_compile() {
