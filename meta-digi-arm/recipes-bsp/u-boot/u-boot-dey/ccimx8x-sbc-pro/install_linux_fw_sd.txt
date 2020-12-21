@@ -52,6 +52,16 @@ else
 			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_16bit.bin;
 		elif test "${module_variant}" = "0x06"; then
 			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-512MB_16bit.bin;
+		elif test "${module_variant}" = "0x07"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_32bit.bin;
+		elif test "${module_variant}" = "0x08"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_32bit.bin;
+		elif test "${module_variant}" = "0x09"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-512MB_16bit.bin;
+		elif test "${module_variant}" = "0x0A"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_16bit.bin;
+		elif test "${module_variant}" = "0x0B"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_16bit.bin;
 		fi
 	fi
 fi
