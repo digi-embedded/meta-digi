@@ -1,0 +1,67 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Tue, 10 Nov 2020 16:36:21 +0100
+Subject: [PATCH 4/4] cog-platform-fdo: always use fullscreen mode
+
+Otherwise, the browser will spawn on a random place on the desktop every time.
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ platform/cog-platform-fdo.c | 44 ++++++++++---------------------------
+ 1 file changed, 12 insertions(+), 32 deletions(-)
+
+diff --git a/platform/cog-platform-fdo.c b/platform/cog-platform-fdo.c
+index 7bdf075..08b0b21 100644
+--- a/platform/cog-platform-fdo.c
++++ b/platform/cog-platform-fdo.c
+@@ -1911,39 +1911,19 @@ create_window (GError **error)
+         configure_surface_geometry (0, 0);
+     }
+ 
+-    const char* env_var;
+-    if ((env_var = g_getenv ("COG_PLATFORM_FDO_VIEW_FULLSCREEN")) &&
+-        g_ascii_strtoll (env_var, NULL, 10) > 0)
+-    {
+-        win_data.is_maximized = false;
+-        win_data.is_fullscreen = true;
+-
+-        if (wl_data.xdg_shell != NULL) {
+-            xdg_toplevel_set_fullscreen (win_data.xdg_toplevel, NULL);
+-        } else if (wl_data.shell != NULL) {
+-            wl_shell_surface_set_fullscreen (win_data.shell_surface,
+-                                             WL_SHELL_SURFACE_FULLSCREEN_METHOD_SCALE,
+-                                             0,
+-                                             NULL);
+-        } else {
+-            g_warning ("No available shell capable of fullscreening.");
+-            win_data.is_fullscreen = false;
+-        }
+-    }
+-    else if ((env_var = g_getenv ("COG_PLATFORM_FDO_VIEW_MAXIMIZE")) &&
+-             g_ascii_strtoll (env_var, NULL, 10) > 0)
+-    {
+-        win_data.is_maximized = true;
+-        win_data.is_fullscreen = false;
++    win_data.is_maximized = false;
++    win_data.is_fullscreen = true;
+ 
+-        if (wl_data.xdg_shell != NULL) {
+-            xdg_toplevel_set_maximized (win_data.xdg_toplevel);
+-        } else if (wl_data.shell != NULL) {
+-            wl_shell_surface_set_maximized (win_data.shell_surface, NULL);
+-        } else {
+-            g_warning ("No available shell capable of maximizing.");
+-            win_data.is_maximized = false;
+-        }
++    if (wl_data.xdg_shell != NULL) {
++        xdg_toplevel_set_fullscreen (win_data.xdg_toplevel, NULL);
++    } else if (wl_data.shell != NULL) {
++        wl_shell_surface_set_fullscreen (win_data.shell_surface,
++                                         WL_SHELL_SURFACE_FULLSCREEN_METHOD_SCALE,
++                                         0,
++                                         NULL);
++    } else {
++        g_warning ("No available shell capable of fullscreening.");
++        win_data.is_fullscreen = false;
+     }
+ 
+     return TRUE;

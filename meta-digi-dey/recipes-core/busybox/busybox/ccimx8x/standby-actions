@@ -36,6 +36,17 @@ if [ "${1}" == "pre" ]; then
 		systemctl stop bluetooth
 		systemctl stop bluetooth-init
 	fi
+
+	# Configure Power LED for blinking in standby
+	if [ -d "/sys/class/leds/power:green" ]; then
+		# Configure LED for blinking
+		echo timer > /sys/class/leds/power\:green/trigger
+		# Turn LED on at max brightness
+		echo 19 > /sys/class/leds/power\:green/brightness
+		# Configure blinking timings
+		echo 100 > /sys/class/leds/power\:green/delay_on
+		echo 1000 > /sys/class/leds/power\:green/delay_off
+	fi
 elif [ "${1}" == "post" ]; then
 	# Resume wireless interfaces
 	if [ -d "/proc/device-tree/wireless" ]; then
@@ -60,5 +71,13 @@ elif [ "${1}" == "post" ]; then
 			systemctl start bluetooth
 			rm -f /tmp/up_bt_on_resume
 		fi
+	fi
+
+	# Configure Power LED solid on after resume
+	if [ -d "/sys/class/leds/power:green" ]; then
+		# Reset LED settings by writing 0 to brigtness descriptor
+		echo 0 > /sys/class/leds/power\:green/brightness
+		# Turn LED on at max brightness
+		echo 19 > /sys/class/leds/power\:green/brightness
 	fi
 fi

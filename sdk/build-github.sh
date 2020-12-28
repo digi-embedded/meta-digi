@@ -29,7 +29,7 @@ MANIFEST_URL="https://github.com/digi-embedded/dey-manifest.git"
 RM_WORK_CFG="
 INHERIT += \"rm_work\"
 # Exclude rm_work for some key packages (for debugging purposes)
-RM_WORK_EXCLUDE += \"dey-image-qt linux-dey qtbase u-boot-dey\"
+RM_WORK_EXCLUDE += \"dey-image-qt dey-image-webkit linux-dey qtbase u-boot-dey\"
 "
 
 ZIP_INSTALLER_CFG="
@@ -91,6 +91,7 @@ purge_sstate() {
 		packagegroup-dey-gstreamer \
 		packagegroup-dey-network \
 		packagegroup-dey-qt \
+		packagegroup-dey-webkit \
 		packagegroup-dey-wireless \
 	"
 	bitbake -k -c cleansstate ${PURGE_PKGS} >/dev/null 2>&1 || true

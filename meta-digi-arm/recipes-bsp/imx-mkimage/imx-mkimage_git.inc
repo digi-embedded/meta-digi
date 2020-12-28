@@ -2,10 +2,10 @@
 
 DEPENDS = "zlib openssl"
 
-SRCBRANCH = "imx_5.4.24_2.1.0"
+SRCBRANCH = "imx_5.4.47_2.2.0"
 IMX_MKIMAGE_SRC ?= "git://source.codeaurora.org/external/imx/imx-mkimage.git;protocol=https"
 SRC_URI = "${IMX_MKIMAGE_SRC};branch=${SRCBRANCH}"
-SRCREV = "6745ccdcf15384891639b7ced3aa6ce938682365"
+SRCREV = "8da5cd231881df44b5fa21a36820536d86e413db"
 S = "${WORKDIR}/git"
 
 BOOT_TOOLS = "imx-boot-tools"

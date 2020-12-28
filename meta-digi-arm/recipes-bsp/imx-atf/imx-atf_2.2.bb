@@ -7,11 +7,11 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/BSD-3-Clause;m
 
 PV .= "+git${SRCPV}"
 
-SRCBRANCH = "imx_5.4.24_2.1.0"
+SRCBRANCH = "imx_5.4.47_2.2.0"
 ATF_SRC ?= "git://source.codeaurora.org/external/imx/imx-atf.git;protocol=https"
 SRC_URI = "${ATF_SRC};branch=${SRCBRANCH} \
 "
-SRCREV = "b0a00f22b09c13572d3e87902a1069dee34763bd"
+SRCREV = "c949a888e909811db191500c51456391dff61284"
 
 SRC_URI_append_ccimx8mn = " file://0001-imx8mn-Disable-M7-debug-console.patch"
 
@@ -22,7 +22,7 @@ inherit deploy
 BOOT_TOOLS = "imx-boot-tools"
 
 PLATFORM        ?= "INVALID"
-PLATFORM_imx8dxlevk = "imx8dxl"
+PLATFORM_mx8dxl = "imx8dxl"
 PLATFORM_mx8dx  = "imx8dx"
 PLATFORM_mx8dxlevk-phantom = "imx8qx"
 PLATFORM_mx8mm  = "imx8mm"

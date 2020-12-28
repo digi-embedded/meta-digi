@@ -42,7 +42,7 @@ BB_GENERATE_MIRROR_TARBALLS = \"1\"
 RM_WORK_CFG="
 INHERIT += \"rm_work\"
 # Exclude rm_work for some key packages (for debugging purposes)
-RM_WORK_EXCLUDE += \"dey-image-qt linux-dey qtbase u-boot-dey\"
+RM_WORK_EXCLUDE += \"dey-image-qt dey-image-webkit linux-dey qtbase u-boot-dey\"
 "
 
 ZIP_INSTALLER_CFG="
@@ -109,6 +109,7 @@ purge_sstate() {
 		packagegroup-dey-gstreamer \
 		packagegroup-dey-network \
 		packagegroup-dey-qt \
+		packagegroup-dey-webkit \
 		packagegroup-dey-wireless \
 	"
 	bitbake -k -c cleansstate ${PURGE_PKGS} >/dev/null 2>&1 || true
@@ -173,11 +174,11 @@ while read _pl _var _tgt; do
 	eval "${_pl//-/_}_var=\"${_var//,/ }\""
 	eval "${_pl//-/_}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
-	ccimx8mn-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
-	ccimx8x-sbc-pro      DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
-	ccimx8x-sbc-express  DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
-	ccimx6qpsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
-	ccimx6sbc            DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
+	ccimx8mn-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-webkit,dey-image-aws
+	ccimx8x-sbc-pro      DONTBUILDVARIANTS   dey-image-qt,dey-image-webkit,dey-image-aws
+	ccimx8x-sbc-express  DONTBUILDVARIANTS   dey-image-qt,dey-image-webkit,dey-image-aws
+	ccimx6qpsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-webkit,dey-image-aws
+	ccimx6sbc            DONTBUILDVARIANTS   dey-image-qt,dey-image-webkit,dey-image-aws
 	ccimx6ulsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
 	ccimx6ulstarter      DONTBUILDVARIANTS   core-image-base,dey-image-aws
 	ccimx6ulsom          DONTBUILDVARIANTS   dey-image-mft-module-min

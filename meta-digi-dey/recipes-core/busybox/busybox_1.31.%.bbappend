@@ -6,8 +6,6 @@ SRC_URI += "file://standby \
             file://standby-actions \
             file://standby-systemd \
             file://busybox-ntpd \
-            file://index.html \
-            file://digi-logo.png \
             file://busybox-httpd.service.in \
             file://nm \
             file://busybox-acpid \
@@ -16,6 +14,10 @@ SRC_URI += "file://standby \
             file://pswitch-poweroff \
             file://bridgeifupdown \
            "
+
+SRC_URI_append_ccimx6ul = " file://index.html \
+                            file://digi-logo.png \
+                          "
 
 HAS_SYSTEMD = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}"
 
@@ -54,8 +56,6 @@ do_install_append() {
 	fi
 	if grep "CONFIG_HTTPD=y" ${WORKDIR}/defconfig; then
 		install -d ${D}/srv/www/cgi-bin
-		install -m 0644 ${WORKDIR}/index.html ${D}/srv/www/
-		install -m 0644 ${WORKDIR}/digi-logo.png ${D}/srv/www/
 		install -m 0755 ${WORKDIR}/nm ${D}/srv/www/cgi-bin/
 		if ${HAS_SYSTEMD}; then
 			install -d ${D}${systemd_unitdir}/system
@@ -90,6 +90,15 @@ do_install_append() {
 		install -d ${D}${sysconfdir}/network/if-post-down.d/
 		install -m 0755 ${WORKDIR}/bridgeifupdown ${D}${sysconfdir}/network/if-pre-up.d/
 		ln -s ../if-pre-up.d/bridgeifupdown ${D}${sysconfdir}/network/if-post-down.d/bridgeifupdown
+	fi
+}
+
+do_install_append_ccimx6ul() {
+	install -d ${D}/srv/www
+	if grep "CONFIG_HTTPD=y" ${WORKDIR}/defconfig; then
+		install -m 0644 ${WORKDIR}/index.html ${D}/srv/www/
+		install -m 0644 ${WORKDIR}/digi-logo.png ${D}/srv/www/
+
 	fi
 }
 

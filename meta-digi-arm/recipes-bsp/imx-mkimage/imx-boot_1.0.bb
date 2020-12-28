@@ -95,6 +95,7 @@ SOC_FAMILY_mx8x = "mx8x"
 
 REV_OPTION ?= ""
 REV_OPTION_mx8qxpc0 = "REV=C0"
+REV_OPTION_mx8phantomdxl = "REV=C0"
 
 compile_mx8m() {
     bbnote 8MQ/8MM boot binary build
@@ -126,9 +127,9 @@ compile_mx8() {
         cp ${DEPLOY_DIR_IMAGE}/u-boot-spl.bin-${MACHINE}-${UBOOT_CONFIG} \
                                                              ${BOOT_STAGING}/u-boot-spl.bin
     fi
-    cp ${DEPLOY_DIR_IMAGE}/imx8qm_m4_0_TCM_power_mode_switch_m40.bin \
+    cp ${DEPLOY_DIR_IMAGE}/imx8qm_m4_TCM_power_mode_switch_m40.bin \
                                                              ${BOOT_STAGING}/m4_image.bin
-    cp ${DEPLOY_DIR_IMAGE}/imx8qm_m4_1_TCM_power_mode_switch_m41.bin \
+    cp ${DEPLOY_DIR_IMAGE}/imx8qm_m4_TCM_power_mode_switch_m41.bin \
                                                              ${BOOT_STAGING}/m4_1_image.bin
     cp ${DEPLOY_DIR_IMAGE}/${SECO_FIRMWARE_NAME}             ${BOOT_STAGING}
 }

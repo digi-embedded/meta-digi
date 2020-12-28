@@ -50,7 +50,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     ${WIRELESS_MODULE} \
 "
 
-MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip mca"
+MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip mca optee"
 
 # AARCH64 doesn't support self-extracting zImage
 KERNEL_IMAGETYPE = "Image.gz"
@@ -60,8 +60,6 @@ VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "HAB"
-# TODO: Encryption not yet supported
-TRUSTFENCE_DEK_PATH = "0"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend
 # Vulkan is necessary for wayland to build
