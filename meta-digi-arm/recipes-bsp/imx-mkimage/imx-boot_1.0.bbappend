@@ -72,7 +72,7 @@ maintain a custom recipe."
 	cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${ATF_MACHINE_NAME} ${BOOT_STAGING}/bl31.bin
 	# Create dummy DEK blob
 	if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
-		dd if=/dev/zero of=${BOOT_STAGING}/dek_blob_fit_dummy.bin bs=96 count=1 && sync
+		dd if=/dev/zero of=${BOOT_STAGING}/dek_blob_fit_dummy.bin bs=96 count=1 oflag=sync
 	fi
 }
 
