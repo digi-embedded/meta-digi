@@ -53,7 +53,11 @@ echo ""
 echo ">> Installing U-Boot boot loader (target will reset)"
 echo ""
 echo ""
-update uboot mmc ${INSTALL_MMCDEV} fat ${INSTALL_UBOOT_FILENAME}
+update uboot mmc ${INSTALL_MMCDEV} ${INSTALL_UBOOT_FILENAME}
+if test $? -eq 1; then
+	# Use old-style update with source file system argument
+	update uboot mmc ${INSTALL_MMCDEV} fat ${INSTALL_UBOOT_FILENAME}
+fi
 if test $? -eq 1; then
 	echo "[ERROR] Failed to update U-Boot boot loader!";
 	echo "";
@@ -93,7 +97,7 @@ setenv bootcmd "
 	echo \">> Installing Linux kernel and device tree files\";
 	echo \"\";
 	echo \"\";
-	update linux mmc ${INSTALL_MMCDEV} fat ${INSTALL_LINUX_FILENAME};
+	update linux mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update linux partition!\";
 		echo \"\";
@@ -105,7 +109,7 @@ setenv bootcmd "
 	echo \">> Installing recovery\";
 	echo \"\";
 	echo \"\";
-	update recovery mmc ${INSTALL_MMCDEV} fat ${INSTALL_RECOVERY_FILENAME};
+	update recovery mmc ${INSTALL_MMCDEV} ${INSTALL_RECOVERY_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update recovery partition!\";
 		echo \"\";
@@ -117,7 +121,7 @@ setenv bootcmd "
 	echo \">> Installing Linux root file system\";
 	echo \"\";
 	echo \"\";
-	update rootfs mmc ${INSTALL_MMCDEV} fat ${INSTALL_ROOTFS_FILENAME};
+	update rootfs mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update rootfs partition!\";
 		echo \"\";
