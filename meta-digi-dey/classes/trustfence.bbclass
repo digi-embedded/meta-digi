@@ -23,6 +23,7 @@ TRUSTFENCE_SIGN ?= "1"
 TRUSTFENCE_SIGN_KEYS_PATH ?= "default"
 TRUSTFENCE_DEK_PATH ?= "default"
 TRUSTFENCE_ENCRYPT_ENVIRONMENT ?= "1"
+TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 
 # Trustfence initramfs image recipe
 TRUSTFENCE_INITRAMFS_IMAGE ?= "dey-image-trustfence-initramfs"
