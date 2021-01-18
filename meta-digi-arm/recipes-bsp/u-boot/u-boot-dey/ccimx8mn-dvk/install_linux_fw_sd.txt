@@ -57,12 +57,12 @@ update uboot mmc ${INSTALL_MMCDEV} ${INSTALL_UBOOT_FILENAME}
 if test $? -eq 1; then
 	# Use old-style update with source file system argument
 	update uboot mmc ${INSTALL_MMCDEV} fat ${INSTALL_UBOOT_FILENAME}
-fi
-if test $? -eq 1; then
-	echo "[ERROR] Failed to update U-Boot boot loader!";
-	echo "";
-	echo "Aborted.";
-	exit;
+	if test $? -eq 1; then
+		echo "[ERROR] Failed to update U-Boot boot loader!";
+		echo "";
+		echo "Aborted.";
+		exit;
+	fi
 fi
 
 # Set 'bootcmd' to the second part of the script that will
