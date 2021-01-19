@@ -100,6 +100,7 @@ fi
 #  - Update the 'linux' partition
 #  - Update the 'recovery' partition
 #  - Update the 'rootfs' partition
+#  - Erase the 'update' partition
 #  - Configure recovery to wipe 'update' partition
 #  - Run 'recovery' and let the system boot after
 setenv bootcmd "
@@ -146,6 +147,7 @@ setenv bootcmd "
 		exit;
 	fi;
 	echo \"\";
+	nand erase.part update;
 	setenv boot_recovery yes;
 	setenv recovery_command wipe_update;
 	saveenv;

@@ -119,6 +119,7 @@ nand_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000
 #  - Update the 'linux' partition
 #  - Update the 'recovery' partition
 #  - Update the 'rootfs' partition
+#  - Erase the 'update' partition
 uuu fb: ucmd setenv bootcmd "
 	env default -a;
 	saveenv;
@@ -151,6 +152,9 @@ nand_update "recovery" "${INSTALL_RECOVERY_FILENAME}" 15000
 
 # Update Rootfs
 nand_update "rootfs" "${INSTALL_ROOTFS_FILENAME}" 90000
+
+# Erase the 'Update' partition
+uuu fb: ucmd nand erase.part update
 
 # Configure u-boot to boot into recovery mode
 uuu fb: ucmd setenv boot_recovery yes
