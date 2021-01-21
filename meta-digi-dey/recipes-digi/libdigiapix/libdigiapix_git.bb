@@ -9,7 +9,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 DEPENDS = "libsoc libsocketcan libgpiod"
 
 SRCBRANCH ?= "dey-3.0/maint"
-SRCREV = "${AUTOREV}"
+SRCREV = "8989ca6609ece6c1c53657141f0b2da08ff6e3d5"
 
 LIBDIGIAPIX_URI_STASH = "${DIGI_MTK_GIT}dey/libdigiapix.git;protocol=ssh"
 LIBDIGIAPIX_URI_GITHUB = "${DIGI_GITHUB_GIT}/libdigiapix.git;protocol=https"
@@ -17,7 +17,7 @@ LIBDIGIAPIX_URI_GITHUB = "${DIGI_GITHUB_GIT}/libdigiapix.git;protocol=https"
 LIBDIGIAPIX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${LIBDIGIAPIX_URI_STASH}', '${LIBDIGIAPIX_URI_GITHUB}', d)}"
 
 SRC_URI = " \
-    ${LIBDIGIAPIX_GIT_URI};branch=${SRCBRANCH} \
+    ${LIBDIGIAPIX_GIT_URI};nobranch=1 \
     file://99-digiapix.rules \
     file://libdigiapix.conf \
     file://digiapix.sh \
