@@ -108,6 +108,7 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 * TrustFence: add support for SRK revocation on ConnectCore 8X.
 * Added support to install firmware from a USB stick.
 * Added WebKit image recipe to platforms with XWayland backend.
+* Added MCA LED support for ConnectCore 8X and 8M Nano.
 * Other minor fixes.
 
 
