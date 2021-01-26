@@ -82,12 +82,16 @@ echo ""
 echo ">> Installing U-Boot boot loader (target will reset)"
 echo ""
 echo ""
-update uboot mmc ${INSTALL_MMCDEV} fat ${INSTALL_UBOOT_FILENAME}
+update uboot mmc ${INSTALL_MMCDEV} ${INSTALL_UBOOT_FILENAME}
 if test $? -eq 1; then
-	echo "[ERROR] Failed to update U-Boot boot loader!";
-	echo "";
-	echo "Aborted.";
-	exit;
+	# Use old-style update with source file system argument
+	update uboot mmc ${INSTALL_MMCDEV} fat ${INSTALL_UBOOT_FILENAME}
+	if test $? -eq 1; then
+		echo "[ERROR] Failed to update U-Boot boot loader!";
+		echo "";
+		echo "Aborted.";
+		exit;
+	fi
 fi
 
 # Set 'bootcmd' to the second part of the script that will
@@ -96,6 +100,7 @@ fi
 #  - Update the 'linux' partition
 #  - Update the 'recovery' partition
 #  - Update the 'rootfs' partition
+#  - Erase the 'update' partition
 #  - Configure recovery to wipe 'update' partition
 #  - Run 'recovery' and let the system boot after
 setenv bootcmd "
@@ -107,7 +112,7 @@ setenv bootcmd "
 	echo \"\";
 	echo \"\";
 	nand erase.part linux;
-	update linux mmc ${INSTALL_MMCDEV} fat ${INSTALL_LINUX_FILENAME};
+	update linux mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update linux partition!\";
 		echo \"\";
@@ -120,7 +125,7 @@ setenv bootcmd "
 	echo \"\";
 	echo \"\";
 	nand erase.part recovery;
-	update recovery mmc ${INSTALL_MMCDEV} fat ${INSTALL_RECOVERY_FILENAME};
+	update recovery mmc ${INSTALL_MMCDEV} ${INSTALL_RECOVERY_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update recovery partition!\";
 		echo \"\";
@@ -133,7 +138,7 @@ setenv bootcmd "
 	echo \"\";
 	echo \"\";
 	nand erase.part rootfs;
-	update rootfs mmc ${INSTALL_MMCDEV} fat ${INSTALL_ROOTFS_FILENAME};
+	update rootfs mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update rootfs partition!\";
 		echo \"\";
@@ -141,6 +146,7 @@ setenv bootcmd "
 		exit;
 	fi;
 	echo \"\";
+	nand erase.part update;
 	setenv boot_recovery yes;
 	setenv recovery_command wipe_update;
 	saveenv;

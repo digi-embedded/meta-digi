@@ -53,12 +53,16 @@ echo ""
 echo ">> Installing U-Boot boot loader (target will reset)"
 echo ""
 echo ""
-update uboot usb ${INSTALL_USBDEV} fat ${INSTALL_UBOOT_FILENAME}
+update uboot usb ${INSTALL_USBDEV} ${INSTALL_UBOOT_FILENAME}
 if test $? -eq 1; then
-	echo "[ERROR] Failed to update U-Boot boot loader!";
-	echo "";
-	echo "Aborted.";
-	exit;
+	# Use old-style update with source file system argument
+	update uboot mmc ${INSTALL_USBDEV} fat ${INSTALL_UBOOT_FILENAME}
+	if test $? -eq 1; then
+		echo "[ERROR] Failed to update U-Boot boot loader!";
+		echo "";
+		echo "Aborted.";
+		exit;
+	fi
 fi
 
 # Set 'bootcmd' to the second part of the script that will
@@ -94,7 +98,7 @@ setenv bootcmd "
 	echo \">> Installing Linux kernel and device tree files\";
 	echo \"\";
 	echo \"\";
-	update linux usb ${INSTALL_USBDEV} fat ${INSTALL_LINUX_FILENAME};
+	update linux usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update linux partition!\";
 		echo \"\";
@@ -106,7 +110,7 @@ setenv bootcmd "
 	echo \">> Installing recovery\";
 	echo \"\";
 	echo \"\";
-	update recovery usb ${INSTALL_USBDEV} fat ${INSTALL_RECOVERY_FILENAME};
+	update recovery usb ${INSTALL_USBDEV} ${INSTALL_RECOVERY_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update recovery partition!\";
 		echo \"\";
@@ -118,7 +122,7 @@ setenv bootcmd "
 	echo \">> Installing Linux root file system\";
 	echo \"\";
 	echo \"\";
-	update rootfs usb ${INSTALL_USBDEV} fat ${INSTALL_ROOTFS_FILENAME};
+	update rootfs usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update rootfs partition!\";
 		echo \"\";

@@ -52,6 +52,16 @@ else
 			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_16bit.bin;
 		elif test "${module_variant}" = "0x06"; then
 			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-512MB_16bit.bin;
+		elif test "${module_variant}" = "0x07"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_32bit.bin;
+		elif test "${module_variant}" = "0x08"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_32bit.bin;
+		elif test "${module_variant}" = "0x09"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-512MB_16bit.bin;
+		elif test "${module_variant}" = "0x0A"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_16bit.bin;
+		elif test "${module_variant}" = "0x0B"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_16bit.bin;
 		fi
 	fi
 fi
@@ -114,12 +124,16 @@ echo ""
 echo ">> Installing U-Boot boot loader (target will reset)"
 echo ""
 echo ""
-update uboot mmc ${INSTALL_MMCDEV} fat ${INSTALL_UBOOT_FILENAME}
+update uboot mmc ${INSTALL_MMCDEV} ${INSTALL_UBOOT_FILENAME}
 if test $? -eq 1; then
-	echo "[ERROR] Failed to update U-Boot boot loader!";
-	echo "";
-	echo "Aborted.";
-	exit;
+	# Use old-style update with source file system argument
+	update uboot mmc ${INSTALL_MMCDEV} fat ${INSTALL_UBOOT_FILENAME}
+	if test $? -eq 1; then
+		echo "[ERROR] Failed to update U-Boot boot loader!";
+		echo "";
+		echo "Aborted.";
+		exit;
+	fi
 fi
 
 # Set 'bootcmd' to the second part of the script that will
@@ -154,7 +168,7 @@ setenv bootcmd "
 	echo \">> Installing Linux kernel and device tree files\";
 	echo \"\";
 	echo \"\";
-	update linux mmc ${INSTALL_MMCDEV} fat ${INSTALL_LINUX_FILENAME};
+	update linux mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update linux partition!\";
 		echo \"\";
@@ -166,7 +180,7 @@ setenv bootcmd "
 	echo \">> Installing recovery\";
 	echo \"\";
 	echo \"\";
-	update recovery mmc ${INSTALL_MMCDEV} fat ${INSTALL_RECOVERY_FILENAME};
+	update recovery mmc ${INSTALL_MMCDEV} ${INSTALL_RECOVERY_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update recovery partition!\";
 		echo \"\";
@@ -178,7 +192,7 @@ setenv bootcmd "
 	echo \">> Installing Linux root file system\";
 	echo \"\";
 	echo \"\";
-	update rootfs mmc ${INSTALL_MMCDEV} fat ${INSTALL_ROOTFS_FILENAME};
+	update rootfs mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update rootfs partition!\";
 		echo \"\";

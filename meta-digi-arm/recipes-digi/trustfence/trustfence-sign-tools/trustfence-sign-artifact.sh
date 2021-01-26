@@ -3,7 +3,7 @@
 #
 #  trustfence-sign-artifact.sh
 #
-#  Copyright (C) 2016-2020 by Digi International Inc.
+#  Copyright (C) 2016-2021 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -122,29 +122,31 @@ if [ -z "${CONFIG_RAM_START}" ]; then
 	exit 1
 fi
 
+# Get DEK key
+if [ -n "${CONFIG_DEK_PATH}" ]; then
+	if [ ! -f "${CONFIG_DEK_PATH}" ]; then
+		if [ "${PLATFORM}" = "ccimx8mn" ]; then
+			echo "DEK not found. Generating random 128 bit DEK."
+			[ -d $(dirname ${CONFIG_DEK_PATH}) ] || mkdir -p $(dirname ${CONFIG_DEK_PATH})
+			dd if=/dev/urandom of="${CONFIG_DEK_PATH}" bs=16 count=1 >/dev/null 2>&1
+		else
+			echo "DEK not found. Generating random 256 bit DEK."
+			[ -d $(dirname ${CONFIG_DEK_PATH}) ] || mkdir -p $(dirname ${CONFIG_DEK_PATH})
+			dd if=/dev/urandom of="${CONFIG_DEK_PATH}" bs=32 count=1 >/dev/null 2>&1
+		fi
+	fi
+	dek_size="$((8 * $(stat -L -c %s ${CONFIG_DEK_PATH})))"
+	if [ "${dek_size}" != "128" ] && [ "${dek_size}" != "192" ] && [ "${dek_size}" != "256" ]; then
+		echo "Invalid DEK size: ${dek_size} bits. Valid sizes are 128, 192 and 256 bits"
+		exit 1
+	fi
+	ENCRYPT="true"
+fi
+
 if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	# Negative offset with respect to CONFIG_RAM_START in which U-Boot
 	# copies the DEK blob.
 	DEK_BLOB_OFFSET="0x100"
-	if [ -n "${CONFIG_DEK_PATH}" ]; then
-		if [ ! -f "${CONFIG_DEK_PATH}" ]; then
-			if [ "${PLATFORM}" = "ccimx8mn" ]; then
-				echo "DEK not found. Generating random 128 bit DEK."
-				[ -d $(dirname ${CONFIG_DEK_PATH}) ] || mkdir -p $(dirname ${CONFIG_DEK_PATH})
-				dd if=/dev/urandom of="${CONFIG_DEK_PATH}" bs=16 count=1 >/dev/null 2>&1
-			else
-				echo "DEK not found. Generating random 256 bit DEK."
-				[ -d $(dirname ${CONFIG_DEK_PATH}) ] || mkdir -p $(dirname ${CONFIG_DEK_PATH})
-				dd if=/dev/urandom of="${CONFIG_DEK_PATH}" bs=32 count=1 >/dev/null 2>&1
-			fi
-		fi
-		dek_size="$((8 * $(stat -L -c %s ${CONFIG_DEK_PATH})))"
-		if [ "${dek_size}" != "128" ] && [ "${dek_size}" != "192" ] && [ "${dek_size}" != "256" ]; then
-			echo "Invalid DEK size: ${dek_size} bits. Valid sizes are 128, 192 and 256 bits"
-			exit 1
-		fi
-		ENCRYPT="true"
-	fi
 fi
 
 # Default values
@@ -280,7 +282,7 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 		-e "s,%key_index%,${CONFIG_KEY_INDEX},g"	   \
 		"${SCRIPT_PATH}/csf_templates/sign_hab" > csf_descriptor
 	fi
-else
+elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 	# Other constants
 	KERNEL_START_OFFSET="0x0"
 	KERNEL_SIG_BLOCK_OFFSET="0x90"
@@ -299,17 +301,25 @@ else
 
 	SRK_CERT_KEY_IMG="$(echo ${CONFIG_SIGN_KEYS_PATH}/crts/SRK${CONFIG_KEY_INDEX_1}*crt.pem | sed s/\ /\,/g)"
 
-	sed -e "s,%srk_table%,${SRK_TABLE},g"		   \
-	-e "s,%cert_img%,${SRK_CERT_KEY_IMG},g"		   \
-	-e "s,%kernel-img%,${KERNEL_NAME},g"		   \
-	-e "s,%key_index%,${CONFIG_KEY_INDEX},g"	   \
-	-e "s,%container_offset%,${container_header_offset},g" \
-	-e "s,%block_offset%,${signature_block_offset},g" \
-	"${SCRIPT_PATH}/csf_templates/sign_ahab" > csf_descriptor
-
+	# Generate actual CSF descriptor file from template
 	if [ "${ENCRYPT}" = "true" ]; then
-		echo "[ERROR] Environment encryption is not supported."
-		exit 1
+		sed -e "s,%srk_table%,${SRK_TABLE},g"		   	\
+		-e "s,%cert_img%,${SRK_CERT_KEY_IMG},g"		   	\
+		-e "s,%kernel-img%,${KERNEL_NAME},g"		   	\
+		-e "s,%key_index%,${CONFIG_KEY_INDEX},g"	   	\
+		-e "s,%container_offset%,${container_header_offset},g" 	\
+		-e "s,%block_offset%,${signature_block_offset},g" 	\
+		-e "s,%dek_path%,${CONFIG_DEK_PATH},g"		   	\
+		-e "s,%dek_len%,${dek_size},g"			   	\
+		"${SCRIPT_PATH}/csf_templates/encrypt_ahab" > csf_descriptor
+	else
+		sed -e "s,%srk_table%,${SRK_TABLE},g"		   	\
+		-e "s,%cert_img%,${SRK_CERT_KEY_IMG},g"		   	\
+		-e "s,%kernel-img%,${KERNEL_NAME},g"		   	\
+		-e "s,%key_index%,${CONFIG_KEY_INDEX},g"	   	\
+		-e "s,%container_offset%,${container_header_offset},g" 	\
+		-e "s,%block_offset%,${signature_block_offset},g" 	\
+		"${SCRIPT_PATH}/csf_templates/sign_ahab" > csf_descriptor
 	fi
 fi
 
@@ -350,8 +360,8 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	cat csf.bin >> "${TARGET}"
 
 	objcopy -I binary -O binary --pad-to "${sig_len}" --gap-fill="${GAP_FILLER}" "${TARGET}"
-else
-	# Sign the image
+elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
+	# Sign and encrypt the image
 	CURRENT_PATH="$(pwd)"
 	cst -o "${TARGET}" -i "${CURRENT_PATH}/csf_descriptor" >/dev/null
 	if [ $? -ne 0 ]; then

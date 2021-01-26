@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 3.0
-## Release 3.0-r2
+## Release 3.0-r3
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -93,17 +93,31 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 # Downloads
 
-* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/3.0/r2/images/
-* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/3.0/r2/sdk/
+* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/3.0/r3/images/
+* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/3.0/r3/sdk/
 
 # Release Changelog
+
+## 3.0-r3
+
+* Updated BSP to NXP release rel_imx_5.4.47_2.2.0.
+* Updated U-Boot to version 2020.04-r2 for ConnectCore 6UL, ConnectCore 8M Nano
+  and ConnectCore 8X.
+* TrustFence: add support for encrypted artifacts on ConnectCore 8M Nano and
+  ConnectCore 8X.
+* TrustFence: add support for SRK revocation on ConnectCore 8X.
+* Added support to install firmware from a USB stick.
+* Added WebKit image recipe to platforms with XWayland backend.
+* Added MCA LED support for ConnectCore 8X and 8M Nano.
+* Other minor fixes.
+
 
 ## 3.0-r2
 
 * Updated BSP to NXP release rel_imx_5.4.24_2.1.0.
 * Added support to ConnectCore 6 and ConnectCore 6 Plus (kernel v5.4).
 * Updated U-Boot to version 2020.04-r1 for ConnectCore 8X.
-* TrustFence: added secure console and U-Boot environment encryption support.
+* TrustFence: added secure console and U-Boot environment encryption support
   to ConnectCore 8X and 8M Nano.
 * Added MCA keypad support for ConnectCore 8X and 8M Nano.
 * Fix SoftAP on 5GHz on ConnectCore 6UL.

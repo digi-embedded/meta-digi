@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2020 Digi International
+# Copyright (C) 2017-2021 Digi International
 SUMMARY = "TrustFence signing and encryption scripts"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 DEPENDS = "trustfence-cst coreutils util-linux"
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN_MODE', 'AHAB', 'imx-mkimage', '', d)}"
 
-SRCBRANCH = "v2020.04/master"
+SRCBRANCH = "v2020.04/maint"
 SRCREV = "${AUTOREV}"
 
 S = "${WORKDIR}"
@@ -20,6 +20,7 @@ SRC_URI = " \
     file://sign_hab;name=artifact-hab-sign \
     file://encrypt_hab;name=artifact-hab-encrypt \
     file://sign_ahab;name=artifact-ahab-sign \
+    file://encrypt_ahab;name=artifact-ahab-encrypt \
 "
 
 do_configure[noexec] = "1"
@@ -29,6 +30,7 @@ do_install() {
 	install -d ${D}${bindir}/csf_templates
 	if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
 		install -m 0755 sign_ahab ${D}${bindir}/csf_templates/
+		install -m 0755 encrypt_ahab ${D}${bindir}/csf_templates/
 	elif [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
 		install -m 0755 sign_hab ${D}${bindir}/csf_templates/
 		install -m 0755 encrypt_hab ${D}${bindir}/csf_templates/

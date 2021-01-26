@@ -1,4 +1,4 @@
-# The syntax for this file is documented in the HAB Code Signing Tool
+# The syntax for this file is documented in the AHAB Code Signing Tool
 # User's Guide which is included in the CST package distributed by NXP
 [Header]
     Target = AHAB
@@ -21,3 +21,9 @@
     File = "%kernel-img%"
     # Offsets = Container header Signature block (printed out by mkimage)
     Offsets = %container_offset% %block_offset%
+
+[Install Secret Key]
+    Key = "%dek_path%"
+    Key Length = %dek_len%
+    #Key Identifier = 0x1234CAFE
+    Image Indexes = 0xFFFFFFFF
