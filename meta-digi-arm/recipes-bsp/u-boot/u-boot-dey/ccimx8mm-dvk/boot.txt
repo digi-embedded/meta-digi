@@ -6,9 +6,9 @@
 setenv ORIG_overlays ${overlays}
 setenv ORIG_extra_bootargs ${extra_bootargs}
 
-# Set SOC type to "imx8mn" if not already defined by U-Boot
+# Set SOC type to "imx8mm" if not already defined by U-Boot
 if test ! -n "${soc_type}"; then
-	setenv soc_type "imx8mn"
+	setenv soc_type "imx8mm"
 fi
 
 #
@@ -31,20 +31,11 @@ if test -n "${module_ram}"; then
 	if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
 		setenv overlays _ov_som_wifi_ccimx8m.dtbo,${overlays}
 	fi
-
-	if test "${som_hv}" = "1"; then
-		setenv overlays _ov_som_v1_ccimx8mn.dtbo,${overlays}
-	fi
 fi
 
-# Apply quad overlay if the SOC type is "imx8mn"
-if test "${soc_type}" = "imx8mn"; then
+# Apply quad overlay if the SOC type is "imx8mm"
+if test "${soc_type}" = "imx8mm"; then
 	setenv overlays _ov_som_quad_ccimx8m.dtbo,${overlays}
-fi
-
-# Apply DVK v1-v2 overlay if the board version is < 3
-if test "${board_version}" -lt "3"; then
-	setenv overlays _ov_board_v1-v2_ccimx8mn-dvk.dtbo,${overlays}
 fi
 
 # Get the UUID of the configured boot partition.
