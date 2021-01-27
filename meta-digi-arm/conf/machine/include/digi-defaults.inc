@@ -19,6 +19,7 @@ LINUXLIBCVERSION ?= "5.4%"
 # ccimx6ul      5.4               2020.04
 # ccimx8x       5.4               2020.04 (packaged in imx-boot)
 # ccimx8mn      5.4               2020.04 (packaged in imx-boot)
+# ccimx8mm      5.4               2020.04 (packaged in imx-boot)
 #
 
 # Help variables used in recipes

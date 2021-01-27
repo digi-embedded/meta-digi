@@ -1,9 +1,6 @@
 #@TYPE: Machine
-#@NAME: ConnectCore 8M Nano module.
-#@DESCRIPTION: Machine configuration for Digi's ConnectCore 8M Nano module.
-
-DIGI_FAMILY = "ccimx8mn"
-MACHINEOVERRIDES =. "mx8:mx8m:mx8mn:ccimx8m:${DIGI_FAMILY}:"
+#@NAME: ConnectCore 8M family of SOMs.
+#@DESCRIPTION: Machine configuration for Digi's ConnectCore 8M family of SOMs.
 
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/arm/arch-arm64.inc
@@ -16,7 +13,6 @@ UBOOT_HAS_FASTBOOT = "true"
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS = "imx-boot"
 BOOTLOADER_IMAGE_RECIPE = "imx-boot"
-BOOTLOADER_SEEK = "32"
 BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 
