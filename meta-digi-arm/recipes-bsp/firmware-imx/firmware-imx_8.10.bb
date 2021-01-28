@@ -58,9 +58,9 @@ do_install() {
     cd -
 
     # Install SDMA Firmware: sdma-imx6q.bin & sdma-imx7d.bin into lib/firmware/imx/sdma
-    install -d ${D}${base_libdir}/firmware/imx/sdma
-    mv ${D}${base_libdir}/firmware/sdma/sdma-imx6q.bin ${D}${base_libdir}/firmware/imx/sdma
-    mv ${D}${base_libdir}/firmware/sdma/sdma-imx7d.bin ${D}${base_libdir}/firmware/imx/sdma
+    install -d ${D}${nonarch_base_libdir}/firmware/imx/sdma
+    mv ${D}${base_libdir}/firmware/sdma/sdma-imx6q.bin ${D}${nonarch_base_libdir}/firmware/imx/sdma
+    mv ${D}${base_libdir}/firmware/sdma/sdma-imx7d.bin ${D}${nonarch_base_libdir}/firmware/imx/sdma
 
     mv ${D}${base_libdir}/firmware/epdc/ ${D}${base_libdir}/firmware/imx/epdc/
     mv ${D}${base_libdir}/firmware/imx/epdc/epdc_ED060XH2C1.fw.nonrestricted ${D}${base_libdir}/firmware/imx/epdc/epdc_ED060XH2C1.fw
@@ -109,10 +109,10 @@ PACKAGES =+ "${PN}-epdc ${PN}-sdma ${PN}-easrc ${PN}-regulatory ${PN}-hdmi ${PN}
 
 FILES_${PN}-epdc = "${base_libdir}/firmware/imx/epdc/ ${sysconfdir}/epdc ${systemd_system_unitdir}/epdc-firmware.service"
 FILES_${PN}-scfw = "${base_libdir}/firmware/scfw/"
-FILES_${PN}-sdma = "${base_libdir}/firmware/imx/sdma ${sysconfdir}/sdma ${systemd_system_unitdir}/sdma-firmware.service"
+FILES_${PN}-sdma = "${nonarch_base_libdir}/firmware/imx/sdma ${sysconfdir}/sdma ${systemd_system_unitdir}/sdma-firmware.service"
 FILES_${PN}-easrc = "${base_libdir}/firmware/imx/easrc/"
 FILES_${PN}-regulatory = "${sysconfdir}/regulatory ${systemd_system_unitdir}/regulatory-firmware.service"
-FILES_${PN}-hdmi = "${base_libdir}/firmware/imx/hdmi/ ${sysconfdir}/hdmi ${systemd_system_unitdir}/hdmi-firmware.service"
+FILES_${PN}-hdmi = "${base_libdir}/firmware/imx/hdmi/ ${systemd_system_unitdir}/hdmi-firmware.service"
 FILES_${PN}-xcvr = "${base_libdir}/firmware/imx/xcvr/"
 FILES_${PN}-xuvi = "${base_libdir}/firmware/imx/xuvi/"
 
