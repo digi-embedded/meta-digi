@@ -55,6 +55,7 @@ ATF_MACHINE_NAME_mx8x  = "bl31-imx8qx.bin"
 ATF_MACHINE_NAME_mx8mq = "bl31-imx8mq.bin"
 ATF_MACHINE_NAME_mx8mm = "bl31-imx8mm.bin"
 ATF_MACHINE_NAME_mx8mn = "bl31-imx8mn.bin"
+ATF_MACHINE_NAME_mx8mnlite = "bl31-imx8mn.bin"
 ATF_MACHINE_NAME_mx8mp = "bl31-imx8mp.bin"
 ATF_MACHINE_NAME_mx8phantomdxl = "bl31-imx8qx.bin"
 ATF_MACHINE_NAME_mx8dxl = "bl31-imx8dxl.bin"
@@ -72,6 +73,7 @@ SOC_TARGET_mx8x   = "iMX8QX"
 SOC_TARGET_mx8mq  = "iMX8M"
 SOC_TARGET_mx8mm  = "iMX8MM"
 SOC_TARGET_mx8mn  = "iMX8MN"
+SOC_TARGET_mx8mnlite  = "iMX8MN"
 SOC_TARGET_mx8mp  = "iMX8MP"
 SOC_TARGET_mx8dxl = "iMX8DXL"
 SOC_TARGET_mx8phantomdxl = "iMX8QX"
@@ -107,7 +109,11 @@ compile_mx8m() {
     cp ${DEPLOY_DIR_IMAGE}/signed_hdmi_imx8m.bin             ${BOOT_STAGING}
     cp ${DEPLOY_DIR_IMAGE}/u-boot-spl.bin-${MACHINE}-${UBOOT_CONFIG} \
                                                              ${BOOT_STAGING}/u-boot-spl.bin
-    cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_DTB_NAME}   ${BOOT_STAGING}
+    if [ "${MACHINE}" = "imx8mmevk-qcawifi" ]; then
+        cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_DTB_NAME}   ${BOOT_STAGING}/imx8mm-evk.dtb
+    else
+        cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_DTB_NAME}   ${BOOT_STAGING}
+    fi
     cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/u-boot-nodtb.bin-${MACHINE}-${UBOOT_CONFIG} \
                                                              ${BOOT_STAGING}/u-boot-nodtb.bin
     bbnote "\
