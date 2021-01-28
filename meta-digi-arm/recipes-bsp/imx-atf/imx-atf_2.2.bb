@@ -7,11 +7,11 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/BSD-3-Clause;m
 
 PV .= "+git${SRCPV}"
 
-SRCBRANCH = "imx_5.4.47_2.2.0"
+SRCBRANCH = "imx_5.4.70_2.3.0"
 ATF_SRC ?= "git://source.codeaurora.org/external/imx/imx-atf.git;protocol=https"
 SRC_URI = "${ATF_SRC};branch=${SRCBRANCH} \
 "
-SRCREV = "c949a888e909811db191500c51456391dff61284"
+SRCREV = "f1d7187f261ebf4b8a2a70d638d4bfc0a9b26c29"
 
 SRC_URI_append_ccimx8mn = " file://0001-imx8mn-Disable-M7-debug-console.patch"
 SRC_URI_append_ccimx8mm = " file://0001-imx8mm-Disable-M4-debug-console.patch"
@@ -28,6 +28,7 @@ PLATFORM_mx8dx  = "imx8dx"
 PLATFORM_mx8dxlevk-phantom = "imx8qx"
 PLATFORM_mx8mm  = "imx8mm"
 PLATFORM_mx8mn  = "imx8mn"
+PLATFORM_mx8mnlite  = "imx8mn"
 PLATFORM_mx8mp  = "imx8mp"
 PLATFORM_mx8mq  = "imx8mq"
 PLATFORM_mx8qm  = "imx8qm"
