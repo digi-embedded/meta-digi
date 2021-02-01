@@ -109,30 +109,18 @@ SOC_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT_mx8   = "1"
 #   1 - machine has Vivante GPU driver support
 MACHINE_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT ?= "${SOC_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT}"
 
-# mx6 GPU libraries
-PREFERRED_PROVIDER_virtual/egl_mx6q ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/egl_mx6dl ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/egl_mx6ul ?= "mesa"
-PREFERRED_PROVIDER_virtual/egl_mx8 ?= "imx-gpu-viv"
+# Graphics libraries
+PREFERRED_PROVIDER_virtual/egl      ?= "mesa"
+PREFERRED_PROVIDER_virtual/libgl    ?= "mesa"
+PREFERRED_PROVIDER_virtual/libgles1 ?= "mesa"
+PREFERRED_PROVIDER_virtual/libgles2 ?= "mesa"
 
-PREFERRED_PROVIDER_virtual/libgles1_mx6q ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/libgles1_mx6dl ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/libgles1_mx6ul ?= "mesa"
-PREFERRED_PROVIDER_virtual/libgles1_mx8 ?= "imx-gpu-viv"
-
-PREFERRED_PROVIDER_virtual/libgles2_mx6q ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/libgles2_mx6dl ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/libgles2_mx6ul ?= "mesa"
-PREFERRED_PROVIDER_virtual/libgles2_mx8 ?= "imx-gpu-viv"
-
-PREFERRED_PROVIDER_virtual/libgl_mx6q ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/libgl_mx6dl ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/libgl_mx6ul ?= "mesa"
-PREFERRED_PROVIDER_virtual/libgl_mx8 ?= "imx-gpu-viv"
-
-PREFERRED_PROVIDER_virtual/libg2d_mx6 ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/libg2d_mx6ul = ""
-PREFERRED_PROVIDER_virtual/libg2d_mx8 = "imx-dpu-g2d"
+PREFERRED_PROVIDER_virtual/egl_imxgpu        ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/libgl_imxgpu3d    ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/libgles1_imxgpu3d ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/libgles2_imxgpu3d ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/libg2d            ?= "imx-gpu-g2d"
+PREFERRED_PROVIDER_virtual/libg2d_imxdpu     ?= "imx-dpu-g2d"
 
 EXTRA_IMAGEDEPENDS = "u-boot"
 
