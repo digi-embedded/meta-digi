@@ -4,8 +4,8 @@ FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/${PN}:
 FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/files:"
 
 GST1.0-PLUGINS-GOOD_SRC ?= "gitsm://source.codeaurora.org/external/imx/gst-plugins-good.git;protocol=https"
-SRCBRANCH = "MM_04.05.06_2008_L5.4.47"
-SRCREV = "a1ba15d53aab342dd921261148562f47eeed7d98"
+SRCBRANCH = "MM_04.05.07_2011_L5.4.70"
+SRCREV = "6005e8199ea19878f269b058ffbbbcaa314472d8"
 
 SRC_URI = " \
     ${GST1.0-PLUGINS-GOOD_SRC};branch=${SRCBRANCH} \

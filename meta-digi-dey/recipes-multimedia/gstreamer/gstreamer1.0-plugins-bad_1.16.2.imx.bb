@@ -7,8 +7,8 @@ FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/${PN}:
 FILESEXTRAPATHS_prepend := "${COREBASE}/meta/recipes-multimedia/gstreamer/files:"
 
 GST1.0-PLUGINS-BAD_SRC ?= "gitsm://source.codeaurora.org/external/imx/gst-plugins-bad.git;protocol=https"
-SRCBRANCH = "MM_04.05.06_2008_L5.4.47"
-SRCREV = "3f6c1ccbabe46a709680b32ce7d5bc521854e08e"
+SRCBRANCH = "MM_04.05.07_2011_L5.4.70"
+SRCREV = "cf7f2d0125424ce0d63ddc7f1eadc9ef71d10db1"
 SRC_URI = " \
     ${GST1.0-PLUGINS-BAD_SRC};branch=${SRCBRANCH} \
     file://configure-allow-to-disable-libssh2.patch \
