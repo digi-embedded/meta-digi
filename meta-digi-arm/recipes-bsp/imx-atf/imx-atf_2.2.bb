@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2020 NXP
+# Copyright (C) 2017-2021 NXP
 
 DESCRIPTION = "i.MX ARM Trusted Firmware"
 SECTION = "BSP"
@@ -14,6 +14,7 @@ SRC_URI = "${ATF_SRC};branch=${SRCBRANCH} \
 SRCREV = "c949a888e909811db191500c51456391dff61284"
 
 SRC_URI_append_ccimx8mn = " file://0001-imx8mn-Disable-M7-debug-console.patch"
+SRC_URI_append_ccimx8mm = " file://0001-imx8mm-Disable-M4-debug-console.patch"
 
 S = "${WORKDIR}/git"
 
