@@ -4,7 +4,7 @@ LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
 LOCALVERSION = "-dey"
-SRCBRANCH = "v5.4.47/master"
+SRCBRANCH = "v5.4.70/master"
 SRCREV = "${AUTOREV}"
 
 # Select internal or Github Linux repo
