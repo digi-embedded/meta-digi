@@ -4,15 +4,15 @@
 
 DESCRIPTION = "i.MX System Controller Firmware, customized for Digi platforms"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=983e4c77621568488dd902b27e0c2143"
+LIC_FILES_CHKSUM = "file://COPYING;md5=e9e880185bda059c90c541d40ceca922"
 SECTION = "BSP"
 
 inherit pkgconfig deploy
 
 SRC_URI = "${DIGI_PKG_SRC}/${BPN}-${PV}.tar.gz"
 
-SRC_URI[md5sum] = "0059e04701ba4fe4436610eef680907d"
-SRC_URI[sha256sum] = "1776a5eeae3641cff8fe8dc16d78219e758cd30b12efdb7223bc31c34ae1580d"
+SRC_URI[md5sum] = "d66fa41a77fb5b6f5ed5d542db3bef57"
+SRC_URI[sha256sum] = "e65d77d4e6a703d9e586b3a6f115a1638c1867e61cd4a8a8f9e41b39b05124e0"
 
 S = "${WORKDIR}/${PN}-${PV}"
 
