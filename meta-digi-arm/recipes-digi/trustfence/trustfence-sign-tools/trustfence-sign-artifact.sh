@@ -57,7 +57,7 @@ Usage: ${SCRIPT_NAME} [OPTIONS] input-unsigned-image output-signed-image
     -i               sign/encrypt initramfs
     -l               sign/encrypt Linux image
 
-Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn
+Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn, ccimx8mm
 
 EOF
 }
@@ -98,14 +98,14 @@ elif [ "${PLATFORM}" = "ccimx8x" ]; then
 	CONFIG_FDT_LOADADDR="0x82000000"
 	CONFIG_RAMDISK_LOADADDR="0x82100000"
 	CONFIG_KERNEL_LOADADDR="0x80280000"
-elif [ "${PLATFORM}" = "ccimx8mn" ]; then
+elif [ "${PLATFORM}" = "ccimx8mn" ] || [ "${PLATFORM}" = "ccimx8mm" ]; then
 	CONFIG_FDT_LOADADDR="0x43000000"
 	CONFIG_RAMDISK_LOADADDR="0x43800000"
 	CONFIG_KERNEL_LOADADDR="0x40480000"
 	CONFIG_CSF_SIZE="0x2000"
 else
 	echo "Invalid platform: ${PLATFORM}"
-	echo "Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn"
+	echo "Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn, ccimx8mm"
 	exit 1
 fi
 
@@ -125,7 +125,7 @@ fi
 # Get DEK key
 if [ -n "${CONFIG_DEK_PATH}" ]; then
 	if [ ! -f "${CONFIG_DEK_PATH}" ]; then
-		if [ "${PLATFORM}" = "ccimx8mn" ]; then
+		if [ "${PLATFORM}" = "ccimx8mn" ] || [ "${PLATFORM}" = "ccimx8mm" ]; then
 			echo "DEK not found. Generating random 128 bit DEK."
 			[ -d $(dirname ${CONFIG_DEK_PATH}) ] || mkdir -p $(dirname ${CONFIG_DEK_PATH})
 			dd if=/dev/urandom of="${CONFIG_DEK_PATH}" bs=16 count=1 >/dev/null 2>&1
