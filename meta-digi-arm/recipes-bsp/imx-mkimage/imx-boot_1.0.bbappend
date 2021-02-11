@@ -1,7 +1,7 @@
 # Copyright 2019,2020 Digi International, Inc.
 inherit boot-artifacts
 
-SRC_URI_append_ccimx8mn = " file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch"
+SRC_URI_append_ccimx8m = " file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch"
 
 IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware imx-seco"
 
