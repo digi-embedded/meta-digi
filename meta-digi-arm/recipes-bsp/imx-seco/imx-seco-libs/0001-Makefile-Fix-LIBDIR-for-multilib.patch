@@ -12,7 +12,7 @@ diff --git a/Makefile b/Makefile
 index b16cebf..492d700 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -4,7 +4,8 @@ all: she_test hsm_test v2x_test she_lib.a seco_nvm_manager.a sm_lib.a
+@@ -4,7 +4,8 @@ all: she_test hsm_test v2x_test she_lib.a seco_nvm_manager.a hsm_lib.a
  CFLAGS = -O1 -Werror -fPIC
  DESTDIR ?= export
  BINDIR ?= /usr/bin
