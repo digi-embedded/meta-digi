@@ -33,11 +33,6 @@ if test -n "${module_ram}"; then
 	fi
 fi
 
-# Apply quad overlay if the SOC type is "imx8mm"
-if test "${soc_type}" = "imx8mm"; then
-	setenv overlays _ov_som_quad_ccimx8m.dtbo,${overlays}
-fi
-
 # Get the UUID of the configured boot partition.
 part uuid mmc ${mmcbootdev}:${mmcpart} bootpart
 # Check the boot source.
