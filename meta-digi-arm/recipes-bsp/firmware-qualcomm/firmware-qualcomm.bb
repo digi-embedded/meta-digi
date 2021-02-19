@@ -13,11 +13,19 @@ BT_INTCLOCK_WORKAROUND ?= "0"
 BT_INTCLOCK_WORKAROUND_ccimx6ul = "1"
 BT_INTCLOCK_WORKAROUND_ccimx6qpsbc = "1"
 
-# Bluetooth firmware files
-FW_QUALCOMM_BT = " \
+# Bluetooth 5.0 firmware files
+FW_QUALCOMM_BT_5 = " \
     file://qca65X4_bt/nvm_tlv_3.2.bin \
     file://qca65X4_bt/rampatch_tlv_3.2.tlv \
 "
+
+# Bluetooth 4.1 firmware files
+FW_QUALCOMM_BT_4 = " \
+    file://qca65X4_bt_4/nvm_tlv_3.2.bin \
+    file://qca65X4_bt_4/rampatch_tlv_3.2.tlv \
+"
+
+FW_QUALCOMM_BT = "${@oe.utils.conditional('BT_FW_VERSION', '4', '${FW_QUALCOMM_BT_4}', '${FW_QUALCOMM_BT_5}', d)}"
 
 # Firmware files for QCA6564 (Qualcomm proprietary driver)
 FW_QCA65X4_SDIO_PROPRIETARY = " \
