@@ -2,21 +2,9 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
-# Fast BSS Transition (IEEE 802.11r)
-FT_SUPPORT = " \
-    file://0001-wifi-ap-recognize-FT-variants-of-wpa-psk-and-wpa-eap.patch \
-    file://0002-supplicant-detect-802.11r-fast-BSS-transition-FT.patch \
-    file://0003-supplicant-detect-SHA384-support.patch \
-    file://0004-supplicant-reorganize-the-routine-that-sets-key_mgmt.patch \
-    file://0005-supplicant-allow-fast-transition-for-WPA-PSK-and-WPA.patch \
-    file://0006-wifi-detect-FT-support-per-interface-and-avoid-enabl.patch \
-    file://0007-supplicant-add-FT-SAE-key-mgmt-to-verification-list.patch \
-"
-
 SRC_URI += " \
     file://0001-networkmanager-trigger-dispatcher-on-per-device-conn.patch \
     file://0002-connectivity-add-config-option-for-response-timeout.patch \
-    ${FT_SUPPORT} \
     file://NetworkManager.conf \
     file://networkmanager-init \
     file://nm.cellular \
