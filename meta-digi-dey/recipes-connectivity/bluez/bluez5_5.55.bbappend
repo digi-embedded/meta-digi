@@ -10,7 +10,6 @@ SRC_URI += " \
     file://0001-hcitool-do-not-show-unsupported-refresh-option.patch \
     file://0002-hcitool-increase-the-shown-connection-limit-to-20.patch \
     file://0003-port-test-discovery-to-python3.patch \
-    file://0008-tools-Use-l_main_run_with_signal-instead-of-open-cod.patch \
 "
 
 QCA65XX_COMMON_PATCHES = " \
