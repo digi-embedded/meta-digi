@@ -44,6 +44,7 @@ RDEPENDS_${PN} = "\
     modutils-initscripts \
     netbase \
     networkmanager \
+    networkmanager-nmcli \
     os-release \
     ${@bb.utils.contains('MACHINE_FEATURES', 'pci', 'pciutils', '',d)} \
     recovery-utils \
