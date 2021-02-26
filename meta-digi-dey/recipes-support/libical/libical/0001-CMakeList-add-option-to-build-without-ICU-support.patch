@@ -9,19 +9,19 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 3 insertions(+)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 61ab244..9bc2a22 100644
+index 47d54d6..9717a82 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -170,6 +170,8 @@ endif()
+@@ -191,6 +191,8 @@ endif()
  # libicu is highly recommended for RSCALE support
  #  libicu can be found at http://www.icu-project.org
- #  RSCALE info at http://tools.ietf.org/html/rfc7529
+ #  RSCALE info at https://tools.ietf.org/html/rfc7529
 +option(WITH_LIBICU "Build with ICU support. Libicu is highly recommended for RSCALE support")
 +if(WITH_LIBICU)
  find_package(ICU)
  set_package_properties(ICU PROPERTIES
    TYPE RECOMMENDED
-@@ -192,6 +194,7 @@ endif()
+@@ -213,6 +215,7 @@ endif()
  if(ICU_I18N_FOUND)
    set(HAVE_LIBICU_I18N 1)
  endif()
