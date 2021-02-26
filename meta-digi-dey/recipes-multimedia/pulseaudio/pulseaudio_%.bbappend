@@ -28,7 +28,6 @@ AUDIO_HDMI_ccimx6 = "yes"
 
 SRC_URI_append = " \
     file://0001-Fix-pulseaudio-mutex-issue-when-do-pause-in-gstreame.patch \
-    file://0002-alsa-mixer-make-the-mono-mapping-a-fallback-only.patch \
     ${@oe.utils.conditional('SOUND_CARD', 'sgtl5000', '${CFG_SGTL5000}', '', d)} \
     ${@oe.utils.conditional('SOUND_CARD', 'max98089', '${CFG_MAX98089}', '', d)} \
     ${@oe.utils.conditional('AUDIO_HDMI', 'yes', '${CFG_HDMI}', '', d)} \
