@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2020 Digi International Inc.
+# Copyright (C) 2017-2021 Digi International Inc.
 
 SUMMARY = "Digi APIX library"
 DESCRIPTION = "C library to access and manage your ConnectCore platform interfaces in an easy manner"

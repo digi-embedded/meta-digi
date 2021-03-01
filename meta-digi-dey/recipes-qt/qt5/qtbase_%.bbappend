@@ -16,13 +16,13 @@ SRC_URI_append_imxgpu3d = " \
         'file://0016-Configure-eglfs-with-egl-pkg-config.patch', d)} \
 "
 
-PACKAGECONFIG_GL_imxpxp   = "gles2"
-PACKAGECONFIG_GL_imxgpu2d = "${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'gl', '', d)}"
-PACKAGECONFIG_GL_imxgpu3d = "gles2"
 PACKAGECONFIG_append = " accessibility examples"
 
-PACKAGECONFIG_MX8_GPU     = ""
-PACKAGECONFIG_MX8_GPU_mx8 = " gbm kms"
+PACKAGECONFIG_PLATFORM_IMX_GPU     = ""
+PACKAGECONFIG_PLATFORM_IMX_GPU_mx8 = "eglfs"
+PACKAGECONFIG_PLATFORM_imxgpu2d += "${PACKAGECONFIG_PLATFORM_IMX_GPU}"
+PACKAGECONFIG_PLATFORM_imxgpu3d += "${PACKAGECONFIG_PLATFORM_IMX_GPU}"
+
 PACKAGECONFIG_append_imxgpu = " ${PACKAGECONFIG_MX8_GPU}"
 
 PACKAGECONFIG_append_ccimx6 = " icu"

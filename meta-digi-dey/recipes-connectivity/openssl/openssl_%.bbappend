@@ -17,3 +17,5 @@ SRC_URI += " \
 
 # Add the openssl binary whenever the base package is pulled in via a dependency
 RRECOMMENDS_libcrypto += "openssl-bin"
+
+PACKAGECONFIG += "cryptodev-linux"

@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2020 Digi International
+# Copyright (C) 2018-2021 Digi International
 
 require digi-u-boot.inc
 

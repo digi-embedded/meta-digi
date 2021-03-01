@@ -1,7 +1,7 @@
 # Copyright 2019,2020 Digi International, Inc.
 inherit boot-artifacts
 
-SRC_URI_append_ccimx8mn = " file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch"
+SRC_URI_append_ccimx8m = " file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch"
 
 IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware imx-seco"
 
@@ -32,7 +32,7 @@ do_populate_lic[depends] += " \
 IMXBOOT_TARGETS_ccimx8x = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_flexspi', \
                                                 'flash flash_regression_linux_m4', d)}"
 
-IMXBOOT_TARGETS_ccimx8mn = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_evk_flexspi', 'flash_spl_uboot', d)}"
+IMXBOOT_TARGETS_ccimx8m = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_evk_flexspi', 'flash_spl_uboot', d)}"
 
 compile_mx8x() {
 	bbnote 8QX boot binary build
@@ -133,8 +133,8 @@ do_compile () {
 	fi
 }
 
-# ConnectCore 8M Nano does not have different binaries
-UBOOT_RAM_COMBINATIONS_ccimx8mn = ""
+# ConnectCore 8M Nano and 8M Mini do not have different binaries
+UBOOT_RAM_COMBINATIONS_ccimx8m = ""
 
 do_install () {
 	install -d ${D}/boot
@@ -250,4 +250,4 @@ do_deploy_append () {
 	fi
 }
 
-COMPATIBLE_MACHINE = "(ccimx8x|ccimx8mn)"
+COMPATIBLE_MACHINE = "(ccimx8x|ccimx8m)"

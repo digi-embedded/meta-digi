@@ -192,8 +192,8 @@ do_deploy_append_ccimx8x() {
 	mv ${DEPLOYDIR}/${UBOOT_SYMLINK}-* ${DEPLOYDIR}/${BOOT_TOOLS}/
 }
 
-do_deploy_append_ccimx8mn() {
-	# Deploy u-boot-nodtb.bin and ccimx8mn-dvk.dtb, to be packaged in boot binary by imx-boot
+do_deploy_append_ccimx8m() {
+	# Deploy u-boot-nodtb.bin and ccimx8m[m|n]-dvk.dtb, to be packaged in boot binary by imx-boot
 	if [ -n "${UBOOT_CONFIG}" ]
 	then
 		for config in ${UBOOT_MACHINE}; do

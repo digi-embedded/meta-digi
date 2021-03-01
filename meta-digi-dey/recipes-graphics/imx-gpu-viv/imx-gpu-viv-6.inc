@@ -34,9 +34,6 @@ EXTRA_PROVIDES_append_imxgpu3d = " \
 EXTRA_PROVIDES_append_mx8 = " \
     virtual/libgbm \
 "
-EXTRA_PROVIDES_append_mx8qm = " \
-    virtual/libopenvx \
-"
 PROVIDES_OPENVX       = ""
 PROVIDES_OPENVX_mx8   = "virtual/libopenvx"
 PROVIDES_OPENVX_mx8mm = ""
@@ -96,9 +93,11 @@ python __anonymous () {
 USE_X11 = "${@bb.utils.contains("DISTRO_FEATURES", "x11", "yes", "no", d)}"
 USE_WL = "${@bb.utils.contains("DISTRO_FEATURES", "wayland", "yes", "no", d)}"
 
-# Inhibit warnings about files being stripped.
-INHIBIT_PACKAGE_STRIP = "1"
+# The packaged binaries have been stripped of debug info, so disable
+# operations accordingly.
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
+INHIBIT_PACKAGE_STRIP = "1"
+INHIBIT_SYSROOT_STRIP = "1"
 
 # FIXME: The provided binary doesn't provide soname. If in future BSP
 # release the libraries are fixed, we can drop this hack.
@@ -145,9 +144,8 @@ HAS_GBM     = "false"
 HAS_GBM_mx8 = "true"
 
 GLES3_HEADER_REMOVALS        = "gl31.h gl32.h"
-GLES3_HEADER_REMOVALS_mx8mq  = "gl32.h"
-GLES3_HEADER_REMOVALS_mx8mn  = "gl32.h"
-GLES3_HEADER_REMOVALS_mx8mp  = "gl32.h"
+GLES3_HEADER_REMOVALS_mx8m   = "gl32.h"
+GLES3_HEADER_REMOVALS_mx8mm  = "gl31.h gl32.h"
 GLES3_HEADER_REMOVALS_mx8qxp = ""
 GLES3_HEADER_REMOVALS_mx8qm  = ""
 
@@ -265,11 +263,7 @@ do_install () {
 
 ALLOW_EMPTY_${PN} = "1"
 
-# FIXME: Remove the following lines after adding libopenvx package
-INSANE_SKIP_imx-gpu-viv-dev += "dev-elf"
-INSANE_SKIP_libclc-imx += "dev-deps"
-
-FILES_libclc-imx = "${libdir}/libCLC${SOLIBS}"
+FILES_libclc-imx = "${libdir}/libCLC${SOLIBS} ${includedir}/CL/cl_viv_vx_ext.h"
 FILES_libclc-imx-dev = "${includedir}/CL ${libdir}/libCLC${SOLIBSDEV}"
 
 # libEGL.so is used by some demo apps from Freescale
@@ -279,21 +273,23 @@ FILES_libegl-imx-dev = "${includedir}/EGL ${includedir}/KHR ${libdir}/pkgconfig/
 
 FILES_libgal-imx = "${libdir}/libGAL${SOLIBS} ${libdir}/libGAL_egl${SOLIBS}"
 FILES_libgal-imx-dev = "${libdir}/libGAL${SOLIBSDEV} ${includedir}/HAL"
+RDEPENDS_libgal-imx += "kernel-module-imx-gpu-viv"
 RDEPENDS_libgal-imx += "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'valgrind', '', d)}"
 RPROVIDES_libgal-imx += "libgal-imx"
 INSANE_SKIP_libgal-imx += "build-deps"
 
 FILES_libvsc-imx = "${libdir}/libVSC${SOLIBS}"
 
-FILES_libgbm-imx_mx8           = "${libdir}/libgbm*${SOLIBS}"
-FILES_libgbm-imx-dev_mx8       = "${libdir}/pkgconfig/gbm.pc ${includedir}/gbm.h ${libdir}/libgbm${SOLIBSDEV}"
+FILES_libgbm-imx_mx8 = "${libdir}/libgbm${REALSOLIBS} ${libdir}/libgbm${SOLIBSDEV} ${libdir}/libgbm_viv${SOLIBSDEV}"
+FILES_libgbm-imx-dev_mx8 = "${libdir}/pkgconfig/gbm.pc ${includedir}/gbm.h"
 RDEPENDS_libgbm-imx_append_mx8 = " libdrm"
+INSANE_SKIP_libgbm-imx += "dev-so"
 
 FILES_libvulkan-imx = "${libdir}/libvulkan_VSI${SOLIBS} ${libdir}/libvulkan_VSI${REALSOLIBS} ${libdir}/libSPIRV_viv${SOLIBS}"
 FILES_libvulkan-imx-dev = "${includedir}/vulkan ${libdir}/libvulkan_VSI${SOLIBSDEV}"
 INSANE_SKIP_libvulkan-imx += "dev-so"
 
-FILES_libopenvx-imx = "${libdir}/libOpenVX${SOLIBS} ${libdir}/libOpenVX${REALSOLIBS} ${libdir}/libOvx*${SOLIBS} ${libdir}/libOpenVXC${SOLIBS} ${libdir}/libOpenVXU${SOLIBS}"
+FILES_libopenvx-imx = "${libdir}/libOpenVX${SOLIBS} ${libdir}/libOpenVX${REALSOLIBS} ${libdir}/libOvx*${SOLIBS} ${libdir}/libOpenVXC${SOLIBS} ${libdir}/libOpenVXU${SOLIBS} ${libdir}/libArchModelSw${SOLIBS}"
 FILES_libopenvx-imx-dev = "${includedir}/VX ${libdir}/libOpenVX${SOLIBSDEV}"
 RDEPENDS_libopenvx-imx = "libnn-imx"
 INSANE_SKIP_libopenvx-imx += "dev-so dev-deps"
@@ -335,11 +331,11 @@ INSANE_SKIP_libopencl-imx += "dev-so dev-deps"
 FILES_libnn-imx = "${libdir}/libNN*${SOLIBS}"
 
 INSANE_SKIP_libopenvg-imx += "dev-so"
-FILES_libopenvg-imx = "${libdir}/libOpenVG*${REALSOLIBS}"
+FILES_libopenvg-imx = "${libdir}/libOpenVG*${REALSOLIBS} ${libdir}/libOpenVG*${SOLIBS}"
 FILES_libopenvg-imx-dev = "${includedir}/VG ${libdir}/libOpenVG*${SOLIBSDEV} ${libdir}/pkgconfig/vg.pc"
 RDEPENDS_libopenvg-imx += "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemd-gpuconfig', '', d)}"
 
-FILES_libvdk-imx = "${libdir}/libVDK*${REALSOLIBS}"
+FILES_libvdk-imx = "${libdir}/libVDK*${REALSOLIBS} ${libdir}/libVDK*${SOLIBS}"
 FILES_libvdk-imx-dev = "${includedir}/*vdk*.h ${libdir}/libVDK${SOLIBSDEV}"
 INSANE_SKIP_libvdk-imx += "dev-so"
 

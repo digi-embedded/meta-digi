@@ -1,4 +1,4 @@
-# Copyright (C) 2019,2020, Digi International Inc.
+# Copyright (C) 2019-2021 Digi International Inc.
 
 SRCBRANCH = "dey-3.0/maint"
 SRCREV = "${AUTOREV}"

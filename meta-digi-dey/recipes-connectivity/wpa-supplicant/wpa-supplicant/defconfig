@@ -1,9 +1,9 @@
 # Example wpa_supplicant build time configuration
 #
 # This file lists the configuration options that are used when building the
-# hostapd binary. All lines starting with # are ignored. Configuration option
-# lines must be commented out complete, if they are not to be included, i.e.,
-# just setting VARIABLE=n is not disabling that variable.
+# wpa_supplicant binary. All lines starting with # are ignored. Configuration
+# option lines must be commented out complete, if they are not to be included,
+# i.e., just setting VARIABLE=n is not disabling that variable.
 #
 # This file is included in Makefile, so variables like CFLAGS and LIBS can also
 # be modified from here. In most cases, these lines should use += in order not
@@ -19,63 +19,6 @@
 # the kerberos files are not in the default include path. Following line can be
 # used to fix build issues on such systems (krb5.h not found).
 #CFLAGS += -I/usr/include/kerberos
-
-# Example configuration for various cross-compilation platforms
-
-#### sveasoft (e.g., for Linksys WRT54G) ######################################
-#CC=mipsel-uclibc-gcc
-#CC=/opt/brcm/hndtools-mipsel-uclibc/bin/mipsel-uclibc-gcc
-#CFLAGS += -Os
-#CPPFLAGS += -I../src/include -I../../src/router/openssl/include
-#LIBS += -L/opt/brcm/hndtools-mipsel-uclibc-0.9.19/lib -lssl
-###############################################################################
-
-#### openwrt (e.g., for Linksys WRT54G) #######################################
-#CC=mipsel-uclibc-gcc
-#CC=/opt/brcm/hndtools-mipsel-uclibc/bin/mipsel-uclibc-gcc
-#CFLAGS += -Os
-#CPPFLAGS=-I../src/include -I../openssl-0.9.7d/include \
-#	-I../WRT54GS/release/src/include
-#LIBS = -lssl
-###############################################################################
-
-
-# Driver interface for Host AP driver
-CONFIG_DRIVER_HOSTAP=y
-
-# Driver interface for Agere driver
-#CONFIG_DRIVER_HERMES=y
-# Change include directories to match with the local setup
-#CFLAGS += -I../../hcf -I../../include -I../../include/hcf
-#CFLAGS += -I../../include/wireless
-
-# Driver interface for madwifi driver
-# Deprecated; use CONFIG_DRIVER_WEXT=y instead.
-#CONFIG_DRIVER_MADWIFI=y
-# Set include directory to the madwifi source tree
-#CFLAGS += -I../../madwifi
-
-# Driver interface for ndiswrapper
-# Deprecated; use CONFIG_DRIVER_WEXT=y instead.
-#CONFIG_DRIVER_NDISWRAPPER=y
-
-# Driver interface for Atmel driver
-# CONFIG_DRIVER_ATMEL=y
-
-# Driver interface for old Broadcom driver
-# Please note that the newer Broadcom driver ("hybrid Linux driver") supports
-# Linux wireless extensions and does not need (or even work) with the old
-# driver wrapper. Use CONFIG_DRIVER_WEXT=y with that driver.
-#CONFIG_DRIVER_BROADCOM=y
-# Example path for wlioctl.h; change to match your configuration
-#CFLAGS += -I/opt/WRT54GS/release/src/include
-
-# Driver interface for Intel ipw2100/2200 driver
-# Deprecated; use CONFIG_DRIVER_WEXT=y instead.
-#CONFIG_DRIVER_IPW=y
-
-# Driver interface for Ralink driver
-#CONFIG_DRIVER_RALINK=y
 
 # Driver interface for generic Linux wireless extensions
 # Note: WEXT is deprecated in the current Linux kernel version and no new
@@ -127,11 +70,14 @@ CONFIG_LIBNL32=y
 # wpa_supplicant.
 # CONFIG_USE_NDISUIO=y
 
-# Driver interface for development testing
-#CONFIG_DRIVER_TEST=y
-
 # Driver interface for wired Ethernet drivers
 #CONFIG_DRIVER_WIRED=y
+
+# Driver interface for MACsec capable Qualcomm Atheros drivers
+#CONFIG_DRIVER_MACSEC_QCA=y
+
+# Driver interface for Linux MACsec drivers
+#CONFIG_DRIVER_MACSEC_LINUX=y
 
 # Driver interface for the Broadcom RoboSwitch family
 #CONFIG_DRIVER_ROBOSWITCH=y
@@ -143,8 +89,8 @@ CONFIG_LIBNL32=y
 #LIBS += -lsocket -ldlpi -lnsl
 #LIBS_c += -lsocket
 
-# Enable IEEE 802.1X Supplicant (automatically included if any EAP method is
-# included)
+# Enable IEEE 802.1X Supplicant (automatically included if any EAP method or
+# MACsec is included)
 CONFIG_IEEE8021X_EAPOL=y
 
 # EAP-MD5
@@ -163,10 +109,17 @@ CONFIG_EAP_PEAP=y
 CONFIG_EAP_TTLS=y
 
 # EAP-FAST
-# Note: If OpenSSL is used as the TLS library, OpenSSL 1.0 or newer is needed
-# for EAP-FAST support. Older OpenSSL releases would need to be patched, e.g.,
-# with openssl-0.9.8x-tls-extensions.patch, to add the needed functions.
 CONFIG_EAP_FAST=y
+
+# EAP-TEAP
+# Note: The current EAP-TEAP implementation is experimental and should not be
+# enabled for production use. The IETF RFC 7170 that defines EAP-TEAP has number
+# of conflicting statements and missing details and the implementation has
+# vendor specific workarounds for those and as such, may not interoperate with
+# any other implementation. This should not be used for anything else than
+# experimentation and interoperability testing until those issues has been
+# resolved.
+#CONFIG_EAP_TEAP=y
 
 # EAP-GTC
 CONFIG_EAP_GTC=y
@@ -176,6 +129,9 @@ CONFIG_EAP_OTP=y
 
 # EAP-SIM (enable CONFIG_PCSC, if EAP-SIM is used)
 CONFIG_EAP_SIM=y
+
+# Enable SIM simulator (Milenage) for EAP-SIM
+#CONFIG_SIM_SIMULATOR=y
 
 # EAP-PSK (experimental; this is _not_ needed for WPA-PSK)
 CONFIG_EAP_PSK=y
@@ -212,8 +168,6 @@ CONFIG_EAP_GPSK=y
 
 # Wi-Fi Protected Setup (WPS)
 CONFIG_WPS=y
-# Enable WSC 2.0 support
-#CONFIG_WPS2=y
 # Enable WPS external registrar functionality
 #CONFIG_WPS_ER=y
 # Disable credentials for an open network by default when acting as a WPS
@@ -227,6 +181,9 @@ CONFIG_EAP_IKEV2=y
 
 # EAP-EKE
 #CONFIG_EAP_EKE=y
+
+# MACsec
+#CONFIG_MACSEC=y
 
 # PKCS#12 (PFX) support (used to read private key and certificate file from
 # a file that usually has extension .p12 or .pfx)
@@ -287,6 +244,9 @@ CONFIG_WPA_CLI_EDIT=y
 # PSK can only be configured as the 64-octet hexstring (e.g., from
 # wpa_passphrase). This saves about 0.5 kB in code size.
 #CONFIG_NO_WPA_PASSPHRASE=y
+
+# Simultaneous Authentication of Equals (SAE), WPA3-Personal
+CONFIG_SAE=y
 
 # Disable scan result processing (ap_mode=1) to save code size by about 1 kB.
 # This can be used if ap_scan=1 mode is never enabled.
@@ -355,12 +315,16 @@ CONFIG_PEERKEY=y
 
 # IEEE 802.11w (management frame protection), also known as PMF
 # Driver support is also needed for IEEE 802.11w.
-#CONFIG_IEEE80211W=y
+CONFIG_IEEE80211W=y
+
+# Support Operating Channel Validation
+#CONFIG_OCV=y
 
 # Select TLS implementation
 # openssl = OpenSSL (default)
 # gnutls = GnuTLS
 # internal = Internal TLSv1 implementation (experimental)
+# linux = Linux kernel AF_ALG and internal TLSv1 implementation (experimental)
 # none = Empty template
 #CONFIG_TLS=openssl
 
@@ -377,6 +341,10 @@ CONFIG_PEERKEY=y
 # with TLS v1.2 message (ClientHello is sent prior to negotiating which version
 # will be used)
 #CONFIG_TLSV12=y
+
+# Select which ciphers to use by default with OpenSSL if the user does not
+# specify them.
+#CONFIG_TLS_DEFAULT_CIPHERS="DEFAULT:!EXP:!LOW"
 
 # If CONFIG_TLS=internal is used, additional library and include paths are
 # needed for LibTomMath. Alternatively, an integrated, minimal version of
@@ -428,7 +396,7 @@ CONFIG_CTRL_IFACE_DBUS_NEW=y
 # amount of memory/flash.
 #CONFIG_DYNAMIC_EAP_METHODS=y
 
-# IEEE Std 802.11r-2008 (Fast BSS Transition)
+# IEEE Std 802.11r-2008 (Fast BSS Transition) for station mode
 CONFIG_IEEE80211R=y
 
 # Add support for writing debug log to a file (/tmp/wpa_supplicant-log-#.txt)
@@ -505,6 +473,11 @@ CONFIG_IEEE80211R=y
 # that meet the requirements described above.
 #CONFIG_NO_RANDOM_POOL=y
 
+# Should we attempt to use the getrandom(2) call that provides more reliable
+# yet secure randomness source than /dev/random on Linux 3.17 and newer.
+# Requires glibc 2.25 to build, falls back to /dev/random if unavailable.
+#CONFIG_GETRANDOM=y
+
 # IEEE 802.11n (High Throughput) support (mainly for AP mode)
 CONFIG_IEEE80211N=y
 
@@ -548,8 +521,8 @@ CONFIG_P2P=y
 # Enable TDLS support
 #CONFIG_TDLS=y
 
-# Wi-Fi Direct
-# This can be used to enable Wi-Fi Direct extensions for P2P using an external
+# Wi-Fi Display
+# This can be used to enable Wi-Fi Display extensions for P2P using an external
 # program to control the additional information exchanges in the messages.
 #CONFIG_WIFI_DISPLAY=y
 

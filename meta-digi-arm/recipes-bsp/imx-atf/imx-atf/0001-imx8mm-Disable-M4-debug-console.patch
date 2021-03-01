@@ -1,0 +1,54 @@
+From 32f0fe2d607f165fbf4ab6b5c21b147b68ab46e2 Mon Sep 17 00:00:00 2001
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Fri, 29 Jan 2021 11:21:07 +0100
+Subject: [PATCH] imx8mm: Disable M4 debug console
+
+The Cortex-M4 uses the UART4 as debug console, and it is
+shared with the Cortex-A53.
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+index 049192880..f7aada323 100644
+--- a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
++++ b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+@@ -58,7 +58,7 @@ static const struct imx_rdc_cfg rdc[] = {
+ 	RDC_MDAn(RDC_MDA_M4, DID1),
+ 
+ 	/* peripherals domain permission */
+-	RDC_PDAPn(RDC_PDAP_UART4, D1R | D1W),
++	/*RDC_PDAPn(RDC_PDAP_UART4, D1R | D1W),*/
+ 	RDC_PDAPn(RDC_PDAP_UART2, D0R | D0W),
+ 
+ 	/* memory region */
+@@ -129,7 +129,7 @@ static void bl31_tzc380_setup(void)
+ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ 		u_register_t arg2, u_register_t arg3)
+ {
+-	static console_uart_t console;
++	/*static console_uart_t console;*/
+ 	int i;
+ 
+ 	/* Enable CSU NS access permission */
+@@ -144,11 +144,11 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ 	imx_csu_init(csu_cfg);
+ 
+ 	imx8m_caam_init();
+-
+-	console_imx_uart_register(IMX_BOOT_UART_BASE, IMX_BOOT_UART_CLK_IN_HZ,
++	/* Uncomment to use the M4 debug console (shared with A53 UART4) */
++	/*console_imx_uart_register(IMX_BOOT_UART_BASE, IMX_BOOT_UART_CLK_IN_HZ,
+ 		IMX_CONSOLE_BAUDRATE, &console);
+-	/* This console is only used for boot stage */
+-	console_set_scope(&console.console, CONSOLE_FLAG_BOOT);
++	 This console is only used for boot stage
++	console_set_scope(&console.console, CONSOLE_FLAG_BOOT);*/
+ 
+ 	/*
+ 	 * tell BL3-1 where the non-secure software image is located
+-- 
+2.17.1
+

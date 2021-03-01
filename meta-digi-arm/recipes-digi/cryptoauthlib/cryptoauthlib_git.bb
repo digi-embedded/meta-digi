@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2020 Digi International Inc.
+# Copyright (C) 2017-2021 Digi International Inc.
 
 SUMMARY = "Microchip CryptoAuthentication Library"
 SECTION = "libs"
@@ -25,7 +25,7 @@ I2C_BUS = ""
 I2C_BUS_ccimx6qpsbc = "1"
 I2C_BUS_ccimx6ul = "0"
 I2C_BUS_ccimx8x = "0"
-I2C_BUS_ccimx8mn = "0"
+I2C_BUS_ccimx8m = "0"
 
 I2C_SPEED ?= "100000"
 
