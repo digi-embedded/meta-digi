@@ -7,7 +7,7 @@ DEPENDS = "trustfence-cst coreutils util-linux"
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN_MODE', 'AHAB', 'imx-mkimage', '', d)}"
 
 SRCBRANCH = "v2020.04/maint"
-SRCREV = "749d90196c7d28cb6995d9ab5141d97b9079735d"
+SRCREV = "${AUTOREV}"
 
 S = "${WORKDIR}"
 
@@ -15,7 +15,7 @@ S = "${WORKDIR}"
 UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}u-boot-denx.git', '${DIGI_GITHUB_GIT}/u-boot.git;protocol=https', d)}"
 
 SRC_URI = " \
-    ${UBOOT_GIT_URI};nobranch=1 \
+    ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
     file://trustfence-sign-artifact.sh;name=artifact-sign-script \
     file://sign_hab;name=artifact-hab-sign \
     file://encrypt_hab;name=artifact-hab-encrypt \
