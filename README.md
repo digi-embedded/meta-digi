@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 3.0
-## Release 3.0-r3
+## Release 3.0-r4
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -19,6 +19,12 @@ OS versions:
 # Supported Platforms
 
 Software for the following hardware platforms is in production support:
+
+## ConnectCore 8M Mini
+* ConnectCore 8M Mini System-on-Module (SOM)
+  * [CC-WMX-ET8D-NN](https://www.digi.com/cc8mmini)
+* ConnectCore 8M Mini Development Kit
+  * [CC-WMX8MM-KIT](https://www.digi.com/products/models/cc-wmx8mm-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/3.0/cc8mmini/yocto-gs_index))
 
 ## ConnectCore 8M Nano
 * ConnectCore 8M Nano System-on-Module (SOM)
@@ -93,18 +99,28 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 # Downloads
 
-* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/3.0/r3/images/
-* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/3.0/r3/sdk/
+* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/3.0/r4/images/
+* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/3.0/r4/sdk/
 
 # Release Changelog
+
+## 3.0-r4
+
+* Added support for ConnectCore 8M platform
+* Updated BSP to NXP release rel_imx_5.4.70_2.3.1.
+* Updated U-Boot to version 2020.04-r3 for ConnectCore 6UL, ConnectCore 8M Nano,
+  ConnectCore 8M Mini and ConnectCore 8X.
+* Updated i.MX8 SCU firmware to v1.7.1
+* Other minor fixes.
+
 
 ## 3.0-r3
 
 * Updated BSP to NXP release rel_imx_5.4.47_2.2.0.
 * Updated U-Boot to version 2020.04-r2 for ConnectCore 6UL, ConnectCore 8M Nano
   and ConnectCore 8X.
-* TrustFence: add support for encrypted artifacts on ConnectCore 8M Nano and
-  ConnectCore 8X.
+* TrustFence: add support for encrypted artifacts on
+  ~~Connect Core 8M Nano and ~~ ConnectCore 8X.
 * TrustFence: add support for SRK revocation on ConnectCore 8X.
 * Added support to install firmware from a USB stick.
 * Added WebKit image recipe to platforms with XWayland backend.
