@@ -32,7 +32,7 @@ CFLAGS += -Wall -DGIT_REVISION=\"$(if $(GIT_REVISION),-g$(GIT_REVISION))\"
 #
 CFLAGS  += -I../include
 LDFLAGS += -L../lib
-LDLIBS  += -lrecovery -lubootenv
+LDLIBS  += -lrecovery -lubootenv -lz
 
 all: $(PROGRAM)
 

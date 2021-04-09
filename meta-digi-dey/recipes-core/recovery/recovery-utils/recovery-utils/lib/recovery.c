@@ -26,7 +26,7 @@
 #include <sys/reboot.h>
 #include <unistd.h>
 
-#include <libubootenv/ubootenv.h>
+#include "libuboot.h"
 
 #define FILE_PREFIX	"file://"
 

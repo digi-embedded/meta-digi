@@ -5,13 +5,13 @@ LICENSE = "MIT"
 
 PACKAGE_INSTALL = " \
     busybox \
+    libubootenv-bin \
     ${@bb.utils.contains('STORAGE_MEDIA', 'mmc', 'e2fsprogs-mke2fs', '', d)} \
     ${@bb.utils.contains('STORAGE_MEDIA', 'mtd', 'mtd-utils-ubifs', '', d)} \
     psplash \
     recovery-initramfs \
     swupdate \
     trustfence-tool \
-    u-boot-fw-utils \
     wipe \
 "
 

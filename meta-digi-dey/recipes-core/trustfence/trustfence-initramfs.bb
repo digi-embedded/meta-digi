@@ -26,12 +26,12 @@ FILES_${PN} = "/"
 
 # Runtime packages used in 'trustfence-initramfs-init'
 RDEPENDS_${PN} = " \
+    libubootenv-bin \
     ${@bb.utils.contains('STORAGE_MEDIA', 'mmc', 'cryptsetup', '', d)} \
     ${@bb.utils.contains('STORAGE_MEDIA', 'mtd', 'mtd-utils-ubifs', '', d)} \
     trustfence-tool \
     util-linux-findfs \
     wipe \
-    u-boot-fw-utils \
 "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

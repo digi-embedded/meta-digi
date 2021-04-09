@@ -41,6 +41,7 @@ RDEPENDS_${PN} = "\
     init-ifupdown \
     libdigiapix \
     libgpiod \
+    libubootenv-bin \
     modutils-initscripts \
     netbase \
     networkmanager \
@@ -50,7 +51,6 @@ RDEPENDS_${PN} = "\
     recovery-utils \
     sysinfo \
     system-monitor \
-    u-boot-fw-utils \
     usbutils \
     ${VIRTUAL-RUNTIME_base-utils} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '', '${VIRTUAL-RUNTIME_base-utils-acpid}', d)} \
