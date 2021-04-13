@@ -8,6 +8,10 @@ IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware imx-seco"
 DEPENDS_append_ccimx8x = " coreutils-native"
 DEPENDS_append_mx8 += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
+IMX_M4_DEMOS_mx8mm   = "imx-m4-demos:do_deploy"
+
+M4_DEFAULT_IMAGE_mx8mm = "imx8mm_m4_TCM_hello_world.bin"
+
 IMX_M7_DEMOS        = ""
 IMX_M7_DEMOS_mx8mn  = "imx-m7-demos:do_deploy"
 
