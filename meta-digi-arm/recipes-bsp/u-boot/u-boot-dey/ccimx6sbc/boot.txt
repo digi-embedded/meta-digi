@@ -43,6 +43,8 @@ else
 		setenv fdt_file imx6q-ccimx6sbc.dtb
 	elif test "${module_variant}" = "0x15"; then
 		setenv fdt_file imx6dl-ccimx6sbc.dtb
+	elif test "${module_variant}" = "0x16"; then
+		setenv fdt_file imx6q-ccimx6sbc-wb.dtb
 	else
 		setenv fdt_file imx6q-ccimx6sbc-wb.dtb
 	fi
