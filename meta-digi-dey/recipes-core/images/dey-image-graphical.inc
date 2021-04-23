@@ -45,7 +45,7 @@ IMAGE_LINGUAS = ""
 
 inherit core-image
 inherit dey-image
-inherit distro_features_check
+inherit features_check
 
 CONFLICT_DISTRO_FEATURES = "directfb"
 

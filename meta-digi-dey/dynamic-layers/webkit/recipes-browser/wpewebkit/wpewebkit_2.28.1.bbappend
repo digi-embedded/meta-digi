@@ -10,6 +10,6 @@ PACKAGECONFIG_remove = "qtwpe"
 
 # We can't build the WebKit with fb images, so force wayland as a required
 # distro feature.
-inherit distro_features_check
+inherit features_check
 
 REQUIRED_DISTRO_FEATURES = "wayland"
