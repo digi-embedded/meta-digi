@@ -16,7 +16,7 @@ SRC_URI_append_imxgpu3d = " \
         'file://0016-Configure-eglfs-with-egl-pkg-config.patch', d)} \
 "
 
-PACKAGECONFIG_append = " accessibility examples"
+PACKAGECONFIG += "examples"
 
 PACKAGECONFIG_PLATFORM_IMX_GPU     = ""
 PACKAGECONFIG_PLATFORM_IMX_GPU_mx8 = "eglfs"
@@ -28,20 +28,8 @@ PACKAGECONFIG_append_imxgpu = " ${PACKAGECONFIG_MX8_GPU}"
 PACKAGECONFIG_append_ccimx6 = " icu"
 PACKAGECONFIG_append_ccimx6ul = " linuxfb"
 
-# -eglfs is conditioned on GPU3D with FrameBuffer only
-# -no-opengl -linuxfb are conditioned on GPU2D only
-# Overwrite the original setting which is in meta-freescale layer
-QT_CONFIG_FLAGS_APPEND_imxpxp = "-no-eglfs"
-QT_CONFIG_FLAGS_APPEND_imxgpu2d = "-no-eglfs -no-opengl -linuxfb"
-QT_CONFIG_FLAGS_APPEND_imxgpu3d = "\
-    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', '-no-eglfs', \
-        bb.utils.contains('DISTRO_FEATURES', 'wayland', '-no-eglfs', \
-            '-eglfs', d), d)}"
-QT_CONFIG_FLAGS_append = " ${QT_CONFIG_FLAGS_APPEND}"
-
-QT_CONFIG_FLAGS_MX8_GPU     = ""
-QT_CONFIG_FLAGS_MX8_GPU_mx8 = "-eglfs -kms"
-QT_CONFIG_FLAGS_append_imxgpu = " ${QT_CONFIG_FLAGS_MX8_GPU}"
+PARALLEL_MAKEINST = ""
+PARALLEL_MAKE_task-install = "${PARALLEL_MAKEINST}"
 
 do_install_append () {
     if ls ${D}${libdir}/pkgconfig/Qt5*.pc >/dev/null 2>&1; then

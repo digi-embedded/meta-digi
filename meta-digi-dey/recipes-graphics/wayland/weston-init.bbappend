@@ -7,18 +7,6 @@ SRC_URI += " \
     file://profile \
 "
 
-
-# To customize weston.ini, start by setting the desired assignment in weston.ini,
-# commented out. For example:
-#     #xwayland=true
-# Then add the assignment to INI_UNCOMMENT_ASSIGNMENTS.
-INI_UNCOMMENT_ASSIGNMENTS_append_mx8mp = " \
-    use-g2d=1 \
-"
-INI_UNCOMMENT_ASSIGNMENTS_append_mx8 = " \
-    repaint-window=16 \
-"
-
 # Digi: use g2d on ccimx6sbc to fix desktop window issue
 # Also needed to workaround an HDMI hotplug issue on the ccimx6qpsbc
 INI_UNCOMMENT_ASSIGNMENTS_append_ccimx6 = " \

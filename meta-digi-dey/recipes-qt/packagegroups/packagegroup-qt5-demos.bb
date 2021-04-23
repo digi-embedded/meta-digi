@@ -8,17 +8,18 @@ LICENSE = "MIT"
 inherit packagegroup
 
 RDEPENDS_${PN}_append = " \
-    qtserialport \
+    qtbase-examples \
+    qtdeclarative-examples \
+    quitindicators \
+    qt5-demo-extrafiles \
 "
 
 # Install the following apps on SoC with GPU
 RDEPENDS_${PN}_append_imxgpu = " \
-    cinematicexperience \
-    qtbase-examples \
-    qtconnectivity-examples \
-    qtdeclarative-examples \
-    qtmultimedia-examples \
-    qtsvg-examples \
-    qt5-demo-extrafiles \
+    qt5ledscreen \
+    quitbattery \
     qt5everywheredemo \
+    qt5nmapcarousedemo \
+    qt5nmapper \
+    cinematicexperience-rhi \
 "
