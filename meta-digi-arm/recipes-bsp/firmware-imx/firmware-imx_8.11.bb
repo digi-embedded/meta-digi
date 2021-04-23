@@ -11,37 +11,21 @@ SRC_URI_append = " \
     file://epdc \
     file://regulatory \
     file://hdmi \
-    file://sdma-firmware.service \
-    file://epdc-firmware.service \
-    file://regulatory-firmware.service \
-    file://hdmi-firmware.service \
 "
 
 PE = "1"
 
-inherit allarch systemd
-
-SYSTEMD_PACKAGES = "${PN}-sdma ${PN}-epdc ${PN}-regulatory ${PN}-hdmi"
-SYSTEMD_SERVICE_${PN}-sdma = "sdma-firmware.service"
-SYSTEMD_SERVICE_${PN}-epdc = "epdc-firmware.service"
-SYSTEMD_SERVICE_${PN}-regulatory = "regulatory-firmware.service"
-SYSTEMD_SERVICE_${PN}-hdmi = "hdmi-firmware.service"
+inherit allarch
 
 do_install() {
     install -d ${D}${base_libdir}/firmware/imx
 
-    if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
-        install -d ${D}${sysconfdir}
-        install -d ${D}${systemd_system_unitdir}
-        install -m 0755 ${WORKDIR}/sdma ${D}${sysconfdir}
-        install -m 0755 ${WORKDIR}/epdc ${D}${sysconfdir}
-        install -m 0755 ${WORKDIR}/regulatory ${D}${sysconfdir}
-        install -m 0755 ${WORKDIR}/hdmi ${D}${sysconfdir}
-        install -m 0644 ${WORKDIR}/sdma-firmware.service ${D}${systemd_system_unitdir}
-        install -m 0644 ${WORKDIR}/epdc-firmware.service ${D}${systemd_system_unitdir}
-        install -m 0644 ${WORKDIR}/regulatory-firmware.service ${D}${systemd_system_unitdir}
-        install -m 0644 ${WORKDIR}/hdmi-firmware.service ${D}${systemd_system_unitdir}
-    fi
+    # Install loading scripts
+    install -d ${D}${sysconfdir}
+    install -m 0755 ${WORKDIR}/sdma ${D}${sysconfdir}
+    install -m 0755 ${WORKDIR}/epdc ${D}${sysconfdir}
+    install -m 0755 ${WORKDIR}/regulatory ${D}${sysconfdir}
+    install -m 0755 ${WORKDIR}/hdmi ${D}${sysconfdir}
 
     cd firmware
     for d in *; do
@@ -58,9 +42,9 @@ do_install() {
     cd -
 
     # Install SDMA Firmware: sdma-imx6q.bin & sdma-imx7d.bin into lib/firmware/imx/sdma
-    install -d ${D}${nonarch_base_libdir}/firmware/imx/sdma
-    mv ${D}${base_libdir}/firmware/sdma/sdma-imx6q.bin ${D}${nonarch_base_libdir}/firmware/imx/sdma
-    mv ${D}${base_libdir}/firmware/sdma/sdma-imx7d.bin ${D}${nonarch_base_libdir}/firmware/imx/sdma
+    install -d ${D}${base_libdir}/firmware/imx/sdma
+    mv ${D}${base_libdir}/firmware/sdma/sdma-imx6q.bin ${D}${base_libdir}/firmware/imx/sdma
+    mv ${D}${base_libdir}/firmware/sdma/sdma-imx7d.bin ${D}${base_libdir}/firmware/imx/sdma
 
     mv ${D}${base_libdir}/firmware/epdc/ ${D}${base_libdir}/firmware/imx/epdc/
     mv ${D}${base_libdir}/firmware/imx/epdc/epdc_ED060XH2C1.fw.nonrestricted ${D}${base_libdir}/firmware/imx/epdc/epdc_ED060XH2C1.fw
@@ -107,12 +91,11 @@ PACKAGES_DYNAMIC = "${PN}-vpu-* ${PN}-sdma-*"
 
 PACKAGES =+ "${PN}-epdc ${PN}-sdma ${PN}-easrc ${PN}-regulatory ${PN}-hdmi ${PN}-xcvr ${PN}-xuvi"
 
-FILES_${PN}-epdc = "${base_libdir}/firmware/imx/epdc/ ${sysconfdir}/epdc ${systemd_system_unitdir}/epdc-firmware.service"
-FILES_${PN}-scfw = "${base_libdir}/firmware/scfw/"
-FILES_${PN}-sdma = "${nonarch_base_libdir}/firmware/imx/sdma ${sysconfdir}/sdma ${systemd_system_unitdir}/sdma-firmware.service"
+FILES_${PN}-epdc = "${base_libdir}/firmware/imx/epdc/ ${sysconfdir}/epdc"
+FILES_${PN}-sdma = "${base_libdir}/firmware/imx/sdma ${sysconfdir}/sdma"
 FILES_${PN}-easrc = "${base_libdir}/firmware/imx/easrc/"
-FILES_${PN}-regulatory = "${sysconfdir}/regulatory ${systemd_system_unitdir}/regulatory-firmware.service"
-FILES_${PN}-hdmi = "${base_libdir}/firmware/imx/hdmi/ ${systemd_system_unitdir}/hdmi-firmware.service"
+FILES_${PN}-regulatory = "${sysconfdir}/regulatory"
+FILES_${PN}-hdmi = "${base_libdir}/firmware/imx/hdmi/ ${sysconfdir}/hdmi"
 FILES_${PN}-xcvr = "${base_libdir}/firmware/imx/xcvr/"
 FILES_${PN}-xuvi = "${base_libdir}/firmware/imx/xuvi/"
 
