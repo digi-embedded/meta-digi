@@ -130,6 +130,9 @@ MACHINE_FEATURES = "usbgadget usbhost vfat alsa touchscreen"
 # Add the ability to specify _imx machines
 MACHINEOVERRIDES =. "imx:"
 
+# Add the ability to use exclusive recipes for NXP BSP
+MACHINEOVERRIDES =. "use-nxp-bsp:"
+
 # U-Boot 2017.X requires a specific dtc version.
 PREFERRED_VERSION_dtc-native_mx6 ?= "1.4.5"
 PREFERRED_VERSION_nativesdk-dtc_mx6 ?= "1.4.5"
