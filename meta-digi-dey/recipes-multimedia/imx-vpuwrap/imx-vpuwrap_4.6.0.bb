@@ -6,12 +6,12 @@ DEPENDS = "virtual/imxvpu"
 DEPENDS_append_mx8mp = " imx-vpu-hantro-vc"
 LICENSE = "Proprietary"
 SECTION = "multimedia"
-LIC_FILES_CHKSUM = "file://COPYING;md5=228c72f2a91452b8a03c4cab30f30ef9"
+LIC_FILES_CHKSUM = "file://COPYING;md5=a632fefd1c359980434f9389833cab3a"
 
 IMX_VPUWRAP_SRC ?= "git://github.com/NXP/imx-vpuwrap.git;protocol=https"
-SRCBRANCH = "MM_04.05.07_2011_L5.4.70"
+SRCBRANCH = "MM_04.06.00_2012_L5.10.y"
 SRC_URI = "${IMX_VPUWRAP_SRC};branch=${SRCBRANCH}"
-SRCREV = "ccaf10a0dae7c0d7d204bd64282598bc0e3bd661" 
+SRCREV = "2dc3fcad1bcb45d62c79e202a59af5c5418319aa"
 S = "${WORKDIR}/git"
 
 inherit autotools pkgconfig
