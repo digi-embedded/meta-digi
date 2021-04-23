@@ -17,7 +17,9 @@ EXTRA_OECONF = "${@bb.utils.contains('TUNE_FEATURES', 'aarch64', '--enable-armv8
                    bb.utils.contains('TUNE_FEATURES', 'callconvention-hard', '--enable-fhw', '', d), d)}"
 
 PACKAGECONFIG ?= ""
-PACKAGECONFIG_imxvpu = "vpu"
+# Enable vpu PACKAGECONFIG for aarch32 vpu platforms only
+PACKAGECONFIG_mx6q = "vpu"
+PACKAGECONFIG_mx6dl = "vpu"
 
 PACKAGECONFIG[vpu] = "--enable-vpu,--disable-vpu,virtual/imxvpu"
 
