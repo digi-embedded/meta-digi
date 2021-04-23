@@ -1,17 +1,17 @@
 From: Arturo Buzarra <arturo.buzarra@digi.com>
-Date: Fri, 16 Apr 2021 15:03:31 +0200
+Date: Thu, 29 Apr 2021 15:02:19 +0200
 Subject: [PATCH] imx8mm: Define UART1 as console for boot stage
 
 UART1 is the default console for ConnectCore i.MX8M Mini
 
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
 ---
- plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c    | 2 +-
- plat/imx/imx8m/imx8mm/include/platform_def.h | 2 +-
+ plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c | 2 +-
+ plat/imx/imx8m/imx8mm/platform.mk         | 2 +-
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
-index 049192880..e16b72eb2 100644
+index bc2e5a0bf..e9a6a2b7f 100644
 --- a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
 +++ b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
 @@ -57,11 +57,11 @@ static const struct imx_rdc_cfg rdc[] = {
@@ -27,20 +27,20 @@ index 049192880..e16b72eb2 100644
 
  	/* Sentinel */
  	{0},
-diff --git a/plat/imx/imx8m/imx8mm/include/platform_def.h b/plat/imx/imx8m/imx8mm/include/platform_def.h
-index 42b03613e..b02dd5202 100644
---- a/plat/imx/imx8m/imx8mm/include/platform_def.h
-+++ b/plat/imx/imx8m/imx8mm/include/platform_def.h
-@@ -49,11 +49,11 @@
- #define MAX_XLAT_TABLES			8
- #define MAX_MMAP_REGIONS		16
+diff --git a/plat/imx/imx8m/imx8mm/platform.mk b/plat/imx/imx8m/imx8mm/platform.mk
+index 83ebad65b..f47bdec22 100644
+--- a/plat/imx/imx8m/imx8mm/platform.mk
++++ b/plat/imx/imx8m/imx8mm/platform.mk
+@@ -60,11 +60,11 @@ BL32_BASE		?=	0xbe000000
+ $(eval $(call add_define,BL32_BASE))
 
- #define HAB_RVT_BASE			U(0x00000900) /* HAB_RVT for i.MX8MM */
+ BL32_SIZE		?=	0x2000000
+ $(eval $(call add_define,BL32_SIZE))
 
--#define IMX_BOOT_UART_BASE		U(0x30890000)
-+#define IMX_BOOT_UART_BASE		U(0x30860000) /* UART1 for ConnectCore i.MX8M Mini */
- #define IMX_BOOT_UART_CLK_IN_HZ		24000000 /* Select 24MHz oscillator */
+-IMX_BOOT_UART_BASE	?=	0x30890000
++IMX_BOOT_UART_BASE	?=	0x30860000
+ $(eval $(call add_define,IMX_BOOT_UART_BASE))
 
- #define PLAT_CRASH_UART_BASE		IMX_BOOT_UART_BASE
- #define PLAT_CRASH_UART_CLK_IN_HZ	24000000
- #define IMX_CONSOLE_BAUDRATE		115200
+ ifeq (${SPD},trusty)
+ 	BL31_CFLAGS    +=      -DPLAT_XLAT_TABLES_DYNAMIC=1
+ endif

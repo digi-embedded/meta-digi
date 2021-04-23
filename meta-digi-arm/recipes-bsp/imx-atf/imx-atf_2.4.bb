@@ -7,11 +7,11 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/BSD-3-Clause;m
 
 PV .= "+git${SRCPV}"
 
-SRCBRANCH = "imx_5.4.70_2.3.0"
+SRCBRANCH = "lf_v2.4"
 ATF_SRC ?= "git://source.codeaurora.org/external/imx/imx-atf.git;protocol=https"
 SRC_URI = "${ATF_SRC};branch=${SRCBRANCH} \
 "
-SRCREV = "f1d7187f261ebf4b8a2a70d638d4bfc0a9b26c29"
+SRCREV = "ba76d337e9564ea97b5024640b6dcca9bd054ffb"
 
 SRC_URI_append_ccimx8mn = " file://0001-imx8mn-Define-UART1-as-console-for-boot-stage.patch \
                             file://0002-imx8mn-Disable-M7-debug-console.patch"
@@ -36,6 +36,10 @@ PLATFORM_mx8mq  = "imx8mq"
 PLATFORM_mx8qm  = "imx8qm"
 PLATFORM_mx8x   = "imx8qx"
 
+# Clear LDFLAGS to avoid the option -Wl recognize issue
+# Clear CFLAGS to avoid coherent_arm out of OCRAM size limitation (64KB) - i.MX 8MQ only
+CLEAR_FLAGS ?= "LDFLAGS"
+CLEAR_FLAGS_mx8mq = "LDFLAGS CFLAGS"
 
 EXTRA_OEMAKE += " \
     CROSS_COMPILE="${TARGET_PREFIX}" \
@@ -45,8 +49,8 @@ EXTRA_OEMAKE += " \
 BUILD_OPTEE = "${@bb.utils.contains('MACHINE_FEATURES', 'optee', 'true', 'false', d)}"
 
 do_compile() {
-    # Clear LDFLAGS to avoid the option -Wl recognize issue
-    unset LDFLAGS
+    unset ${CLEAR_FLAGS}
+
     oe_runmake bl31
     if ${BUILD_OPTEE}; then
        oe_runmake clean BUILD_BASE=build-optee
