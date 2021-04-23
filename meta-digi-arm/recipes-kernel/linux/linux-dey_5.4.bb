@@ -86,6 +86,6 @@ do_copy_defconfig () {
 		cp -f ${KERNEL_DEFCONFIG} ${WORKDIR}/defconfig
 	fi
 }
-addtask copy_defconfig after do_patch before do_preconfigure
+addtask copy_defconfig after do_patch before do_kernel_localversion
 
 COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8x|ccimx8m|ccimx6)"
