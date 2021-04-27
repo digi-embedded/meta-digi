@@ -80,6 +80,13 @@ do_compile () {
 							cp ${B}/${config}/${binary} ${B}/${config}/u-boot-${type}.${UBOOT_SUFFIX}
 						fi
 					done
+
+					# Generate the uboot-initial-env
+					if [ -n "${UBOOT_INITIAL_ENV}" ]; then
+						oe_runmake -C ${S} O=${B}/${config} u-boot-initial-env
+						cp ${B}/${config}/u-boot-initial-env ${B}/${config}/u-boot-initial-env-${type}
+					fi
+
 					unset k
 
 					# Secure boot artifacts
@@ -100,6 +107,11 @@ do_compile () {
 	else
 		oe_runmake -C ${S} O=${B} ${UBOOT_MACHINE}
 		oe_runmake -C ${S} O=${B} ${UBOOT_MAKE_TARGET}
+
+		# Generate the uboot-initial-env
+		if [ -n "${UBOOT_INITIAL_ENV}" ]; then
+			oe_runmake -C ${S} O=${B} u-boot-initial-env
+		fi
 	fi
 }
 
