@@ -4,5 +4,9 @@ FILESEXTRAPATHS_prepend_dey := "${THISDIR}/files:"
 
 SRC_URI += " \
     file://0001-colors-modify-psplash-colors-to-match-Digi-scheme.patch \
-    file://0002-bar-replace-progress-bar-with-Digi-one.patch \
+    file://psplash-digi-bar.png \
 "
+do_patch_png () {
+	cp ${WORKDIR}/psplash-digi-bar.png ${S}/base-images/psplash-bar.png
+}
+addtask patch_png after do_patch before do_configure
