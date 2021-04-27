@@ -13,8 +13,10 @@ SRC_URI = "${ATF_SRC};branch=${SRCBRANCH} \
 "
 SRCREV = "f1d7187f261ebf4b8a2a70d638d4bfc0a9b26c29"
 
-SRC_URI_append_ccimx8mn = " file://0001-imx8mn-Disable-M7-debug-console.patch"
-SRC_URI_append_ccimx8mm = " file://0001-imx8mm-Disable-M4-debug-console.patch"
+SRC_URI_append_ccimx8mn = " file://0001-imx8mn-Define-UART1-as-console-for-boot-stage.patch \
+                            file://0002-imx8mn-Disable-M7-debug-console.patch"
+SRC_URI_append_ccimx8mm = " file://0001-imx8mm-Define-UART1-as-console-for-boot-stage.patch \
+                            file://0002-imx8mm-Disable-M4-debug-console.patch"
 
 S = "${WORKDIR}/git"
 

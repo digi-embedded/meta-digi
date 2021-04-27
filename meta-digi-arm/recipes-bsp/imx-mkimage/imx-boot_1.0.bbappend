@@ -8,6 +8,10 @@ IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware imx-seco"
 DEPENDS_append_ccimx8x = " coreutils-native"
 DEPENDS_append_mx8 += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
+IMX_M4_DEMOS_mx8mm   = "imx-m4-demos:do_deploy"
+
+M4_DEFAULT_IMAGE_mx8mm = "imx8mm_m4_TCM_hello_world.bin"
+
 IMX_M7_DEMOS        = ""
 IMX_M7_DEMOS_mx8mn  = "imx-m7-demos:do_deploy"
 
@@ -214,6 +218,7 @@ do_deploy_append () {
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
 		[ -n "${TRUSTFENCE_SIGN_MODE}" ] && export CONFIG_SIGN_MODE="${TRUSTFENCE_SIGN_MODE}"
 		[ -n "${TRUSTFENCE_SRK_REVOKE_MASK}" ] && export SRK_REVOKE_MASK="${TRUSTFENCE_SRK_REVOKE_MASK}"
+		[ -n "${TRUSTFENCE_UNLOCK_KEY_REVOCATION}" ] && export CONFIG_UNLOCK_SRK_REVOKE="${TRUSTFENCE_UNLOCK_KEY_REVOCATION}"
 
 		# Sign U-boot image
 		if [ "${UBOOT_RAM_COMBINATIONS}" = "" ]; then
