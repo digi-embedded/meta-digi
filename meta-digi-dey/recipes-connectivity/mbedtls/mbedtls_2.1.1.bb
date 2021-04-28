@@ -25,7 +25,7 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=302d50a6369f5f22efdb674db908167a"
 
 SRC_URI = " \
-    https://github.com/ARMmbed/mbedtls/archive/${PN}-${PV}.tar.gz \
+    https://github.com/ARMmbed/mbedtls/archive/${BPN}-${PV}.tar.gz \
     file://0001-mbedtls-library-add-pkg-config-file.patch \
 "
 SRC_URI[md5sum] = "6f5d3e7154ce4e04bcb9b299f614775f"
