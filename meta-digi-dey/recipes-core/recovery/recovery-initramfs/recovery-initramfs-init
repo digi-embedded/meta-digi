@@ -29,6 +29,16 @@ UPDATE_MOUNT_DIR="/mnt/update"
 ROOTFS_NEEDS_FORMAT="no"
 SWUPDATE_OUTPUT="swupdate_output.txt"
 
+PART_LIST=""
+ENC_PARTS=""
+DEFAULT_ENC_PARTS="yes"
+
+NAND_PARTS_BLACKLIST="bootloader environment linux recovery safe"
+EMMC_PARTS_BLACKLIST="linux recovery safe"
+
+ENC_DIFF=""
+UNENC_DIFF=""
+
 REBOOT_TIME=10
 
 # Functions.
@@ -166,6 +176,34 @@ is_nand() {
 }
 
 #------------------------------------------------------------------------------
+# Function - contains
+#
+# Returns true if and only if the list $1 contains $2
+#------------------------------------------------------------------------------
+contains() {
+	echo "${1}" | grep -qs "\b${2}\b"
+	return $?
+}
+
+#------------------------------------------------------------------------------
+# Function - remove_duplicates
+#
+# Removes duplicate entries from a list
+#------------------------------------------------------------------------------
+remove_duplicates () {
+	echo "${1}" | tr ' ' '\n' | sort | uniq | tr '\n' ' ' | xargs
+}
+
+#------------------------------------------------------------------------------
+# Function - remove_entry
+#
+# Removes an entry from a list
+#------------------------------------------------------------------------------
+remove_entry () {
+	echo "${1}" | sed "s/\b${2}\b//g" | xargs
+}
+
+#------------------------------------------------------------------------------
 # Function - format_partition
 #
 # Formats the given partition.
@@ -188,6 +226,10 @@ format_partition() {
 # @param ${1}  - UBI Volume name to format.
 #------------------------------------------------------------------------------
 format_ubi_volume() {
+	log "Formatting '${1}' ubi volume"
+	psplash_message "Formatting '${1}' partition..."
+	psplash_progress "0"
+
 	# Find the MTD partition.
 	local mtd_num="$(sed -ne "s/mtd\([0-9]\+\):.*\<${1}\>.*/\1/g;T;p" /proc/mtd 2>/dev/null)"
 	if [ -z "${mtd_num}" ]; then
@@ -232,12 +274,25 @@ format_ubi_volume() {
 # @param ${1}  - Partition name to format.
 #------------------------------------------------------------------------------
 format_emmc_block() {
+	log "Formatting '${1}' eMMC block"
+	psplash_message "Formatting '${1}' partition..."
+	psplash_progress "0"
+
 	# Find partition block number.
 	local partition_block="/dev/mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<${1}\>.*,\1,g;T;p")"
 	if [ -b "${partition_block}" ]; then
 		# Umount in case partition is mounted, ignore errors.
 		if grep -qs "${partition_block}" /proc/mounts; then
 			umount "${partition_block}" >/dev/null 2>&1
+		fi
+		# If partition is encrypted, format with trustfence-tool first
+		if contains "${encrypt_partitions}" "${1}"; then
+			trustfence-tool --format ${partition_block} crypt${1}
+			if [ ! "$?" = "0" ]; then
+				quit_with_error "Error formatting '${1}' partition for encryption"
+			fi
+			partition_block="/dev/mapper/crypt${1}"
+			psplash_progress "50"
 		fi
 		# Format emmc block.
 		mkfs.ext4 "${partition_block}" >/dev/null 2>&1
@@ -316,15 +371,10 @@ check_swu_package() {
 }
 
 #------------------------------------------------------------------------------
-# Function - set_encryption_flag
-#
-# Set the rootfs encryption flag to the mtdparts variable.
+# Function - update_mtdparts
+# Updates the encryption flags on the mtdparts environment variable
 #------------------------------------------------------------------------------
-set_encryption_flag() {
-	if [ "$(is_nand)" = "no" ]; then
-		return
-	fi
-
+update_mtdparts() {
 	# Read the mtdparts variable.
 	read_uboot_var mtdparts mtdparts
 
@@ -333,41 +383,63 @@ set_encryption_flag() {
 		quit_with_error "No mtdparts found"
 	fi
 
-	# Parse the mtdparts value.
-	case "${mtdparts}" in
-		*\(rootfs\)enc*)
-			# Partition already flagged.
-			;;
-		*\(rootfs\)*)
-			# Add the flag to the rootfs.
-			local new_mtdparts=$(echo "${mtdparts}" | sed "s/(rootfs)/(rootfs)enc/g")
-			set_uboot_var mtdparts "${new_mtdparts}"
-			;;
-		*)
-			quit_with_error "Error flagging rootfs as encrypted"
-			;;
-	esac
+	# Add encryption flag to new encrypted partitions
+	for p in ${ENC_DIFF}; do
+		mtdparts=$(echo "${mtdparts}" | sed "s/(${p})/(${p})enc/g")
+	done
 
-	if [ -n "${update_package_bool}" ]; then
-		# Modify the recovery command not to set again the key.
-		new_command=$(echo "${COMMAND}" | sed "s/encryption_key=[^ ]*//g")
-		set_uboot_var "${ENV_RECOVERY_COMMAND}" "${new_command}"
-		psplash_progress "100"
-		reboot_system
-	fi
+	# Remove encryption flag from unencrypted partitions
+	for p in ${UNENC_DIFF}; do
+		mtdparts=$(echo "${mtdparts}" | sed "s/(${p})enc/(${p})/g")
+	done
+
+	set_uboot_var mtdparts "${mtdparts}"
 }
 
 #------------------------------------------------------------------------------
-# Function - get_kernel_version
+# Function - parse_partition_info
 #
-# Obtain the kernel version and return it in number format
-#
-# @return  - kernel version
+# Obtain a list of all partitions and a list of encrypted partitions
 #------------------------------------------------------------------------------
-get_kernel_version() {
-	major="$(uname -r | cut -d'.' -f1)"
-	minor="$(uname -r | cut -d'.' -f2)"
-	echo $(((major << 8) + minor))
+parse_partition_info() {
+	if [ "$(is_nand)" = "yes" ]; then
+		# Read the mtdparts variable.
+		read_uboot_var mtdparts mtdparts
+
+		if [ -z "${mtdparts}" ]; then
+			quit_with_error "No mtdparts found"
+		fi
+
+		TMP_LIST=$(echo ${mtdparts} | cut -d ':' -f2 | tr "," " ")
+		for p in ${TMP_LIST}; do
+			PART=$(echo $p | sed 's,.*(\(.*\)).*,\1,')
+			PART_LIST="${PART_LIST} ${PART}"
+			echo $p | grep -qs ")enc" && ENC_PARTS="${ENC_PARTS} ${PART}"
+		done
+	else
+		PART_LIST=$(fdisk -l /dev/mmcblk0 | grep '^  *' | rev | cut -d ' ' -f1 | rev)
+		# If the partition list doesn't exist, we can consider it empty
+		read_uboot_var encrypted_parts_list ENC_PARTS
+		ENC_PARTS=$(remove_duplicates "${ENC_PARTS}")
+	fi
+
+	# If a new partition list wasn't explicitly passed in the recovery
+	# command, assume the list hasn't changed. This prevents having to
+	# always pass the list even if it doesn't have any changes.
+	[ "${DEFAULT_ENC_PARTS}" = "yes" ] && encrypt_partitions="${ENC_PARTS}"
+}
+
+#------------------------------------------------------------------------------
+# Function - get_blacklist
+#
+# Return the list of partitions that can't be encrypted on the storage media
+#------------------------------------------------------------------------------
+get_blacklist() {
+	if [ "$(is_nand)" = "yes" ]; then
+		echo "${NAND_PARTS_BLACKLIST}"
+	else
+		echo "${EMMC_PARTS_BLACKLIST}"
+	fi
 }
 
 # Main
@@ -440,15 +512,71 @@ for arg in ${COMMAND}; do
 		update_package=*)
 			update_package_bool=true;
 			eval "${arg}";;
+		encrypt_partitions=*)
+			eval "${arg}";
+			DEFAULT_ENC_PARTS="no";
+			encrypt_partitions=$(echo ${encrypt_partitions} | tr "," " ");
+			encrypt_partitions=$(remove_duplicates "${encrypt_partitions}");;
+		wipe_ubi_partitions=*)
+			eval "${arg}";
+			wipe_ubi_partitions=$(echo ${wipe_ubi_partitions} | tr "," " ");
+			wipe_ubi_partitions=$(remove_duplicates "${wipe_ubi_partitions}");;
 		*)
 			# Not supported command
 			quit_with_error "Unknown recovery command '${arg}'";;
 	esac
 done
 
+# Get current partition information
+parse_partition_info
+
+# Sanitize the encrypted partition list
+BLACKLISTED=""
+for p in ${encrypt_partitions}; do
+	contains "${PART_LIST}" "${p}" || quit_with_error "Cannot encrypt nonexistant partition '${p}'"
+	# Take note of any blacklisted partitions to remove them from the list later
+	contains "$(get_blacklist)" "${p}" && BLACKLISTED="${BLACKLISTED} ${p}"
+done
+for p in ${BLACKLISTED}; do
+	log_warning "Encryption of partition '${p}' is forbidden, skipping"
+	encrypt_partitions=$(remove_entry "${encrypt_partitions}" "${p}")
+done
+
 # Sanity checks.
 if [ -n "${update_package_bool}" ]; then
 	check_swu_package "${update_package}"
+fi
+
+# Format UBI partitions
+if [ "$(is_nand)" = "yes" -a -n "${wipe_ubi_partitions}" ]; then
+	for p in ${wipe_ubi_partitions}; do
+		# To protect against manually injected commands, only format
+		# partitions that exist and aren't blacklisted.
+		contains "${PART_LIST}" "${p}" && \
+		! contains "${NAND_PARTS_BLACKLIST}" "${p}" && \
+		format_ubi_volume "${p}"
+	done
+fi
+
+# Compare the current and new encrypted partition lists and take note of the
+# differences, if any. If we know the list hasn't changed, don't bother
+# checking.
+if [ "${DEFAULT_ENC_PARTS}" = "no" ]; then
+	# Iterate through the old encrypted partition list
+	for p in ${ENC_PARTS}; do
+		if ! contains "${encrypt_partitions}" "${p}"; then
+			# Partition is no longer in the list, unencrypt it
+			UNENC_DIFF="${UNENC_DIFF} ${p}"
+		fi
+	done
+
+	# Iterate through the new encrypted partition list
+	for p in ${encrypt_partitions}; do
+		if ! contains "${ENC_PARTS}" "${p}"; then
+			# Partition is new in the list, encrypt it
+			ENC_DIFF="${ENC_DIFF} ${p}"
+		fi
+	done
 fi
 
 # Check if encryption key command is configured.
@@ -459,22 +587,65 @@ if [ -n "${encryption_key_bool}" ]; then
 
 	trustfence-tool "--newkey${encryption_key:+=${encryption_key}}"
 	if [ "$?" = "0" ]; then
-		psplash_progress "10"
+		psplash_progress "100"
 		log "Trustfence encryption key setup succeed!"
 	else
 		quit_with_error "Error configuring trustfence encryption key"
 	fi
+fi
 
-	# Set the encryption flag to the rootfs.
-	set_encryption_flag
+# Proceed with the formatting if any partitions require it
+if [ -n "${encryption_key_bool}" -a -n "${encrypt_partitions}" ] || [ -n "${ENC_DIFF}" -o -n "${UNENC_DIFF}"  ]; then
+	log "Proceeding to format partitions"
 
-	# Format partition.
-	if [ "$(is_nand)" = "no" ]; then
-		psplash_message "Formatting rootfs partition..."
-		rootfs_block="/dev/mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<rootfs\>.*,\1,g;T;p")"
-		trustfence-tool --format ${rootfs_block} cryptroot
+	# On NAND devices, if the list has changed, reflect the change in the
+	# environment now so that the MTD driver loads the partitions with
+	# their new encryption status on the second run of the recovery script.
+	if [ "$(is_nand)" = "yes" ] && [ -n "${ENC_DIFF}" -o -n "${UNENC_DIFF}" ]; then
+		update_mtdparts
 	fi
-	psplash_progress "100"
+
+	# Format all currently encrypted partitions with the new encryption key
+	if [ -n "${encryption_key_bool}" ]; then
+		ENC_DIFF="${encrypt_partitions}"
+	fi
+
+	if [ "$(is_nand)" = "yes" ]; then
+		psplash_message "Preparing new recovery command..."
+		psplash_progress "0"
+
+		# Remove the encrypted parts list from the recovery command.
+		new_command="${COMMAND}"
+		new_command=$(echo "${new_command}" | sed "s/encrypt_partitions=[^ ]*//g")
+		if [ -n "${encryption_key_bool}" ]; then
+			# Modify the recovery command to not set the key again.
+			new_command=$(echo "${new_command}" | sed "s/encryption_key=[^ ]*//g")
+		fi
+
+		# Append the list of partitions to format to the recovery command.
+		wipe_ubi_partitions=$(echo "${ENC_DIFF} ${UNENC_DIFF}" | tr " " ",")
+		new_command="${new_command} wipe_ubi_partitions=${wipe_ubi_partitions}"
+		set_uboot_var "${ENV_RECOVERY_COMMAND}" "${new_command}"
+
+		log "Rebooting to complete partition formatting..."
+		psplash_progress "100"
+		reboot_system
+	else
+		# On eMMC devices, update the new encrypted partition list
+		# gradually using the old list as a base. By the end, the list
+		# should be the same as the new one.
+		for p in ${ENC_DIFF}; do
+			format_emmc_block ${p}
+			ENC_PARTS=$(remove_duplicates "${ENC_PARTS} ${p}")
+			set_uboot_var encrypted_parts_list "${ENC_PARTS}"
+		done
+
+		for p in ${UNENC_DIFF}; do
+			format_emmc_block ${p}
+			ENC_PARTS=$(remove_entry "${ENC_PARTS}" "${p}")
+			set_uboot_var encrypted_parts_list "${ENC_PARTS}"
+		done
+	fi
 fi
 
 # Check if update package command is configured.
@@ -511,8 +682,6 @@ fi
 # Check if wipe update patition command is configured.
 if [ -n "${wipe_update_bool}" ]; then
 	log "Wipe 'update' partition requested"
-	psplash_message "Erasing update partition..."
-	psplash_progress "0"
 	format_partition update
 fi
 
