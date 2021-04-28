@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2020 NXP
+# Copyright (C) 2020 NXP
 
 SUMMARY = "OPTEE test"
 HOMEPAGE = "http://www.optee.org/"
@@ -6,24 +6,20 @@ HOMEPAGE = "http://www.optee.org/"
 LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://LICENSE.md;md5=daa2bcccc666345ab8940aab1315a4fa"
 
-inherit python3native
-
 DEPENDS = "optee-os optee-client python3-pycrypto-native openssl"
+inherit python3native cmake
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
-
-OPTEE_TEST_SRC ?= "git://source.codeaurora.org/external/imx/imx-optee-test.git;protocol=https"
-
-SRC_URI = "${OPTEE_TEST_SRC};branch=${SRCBRANCH} \
-"
 
 S = "${WORKDIR}/git"
 B = "${WORKDIR}/build"
 
-TA_DEV_KIT_DIR_aarch64 = "${STAGING_INCDIR}/optee/export-user_ta_arm64/"
+OPTEE_ARCH ?= "arm"
+OPTEE_ARCH_armv7a = "arm32"
 OPTEE_ARCH_aarch64 = "arm64"
+
 TA_DEV_KIT_DIR_arm = "${STAGING_INCDIR}/optee/export-user_ta_arm32/"
-OPTEE_ARCH_arm = "arm"
+TA_DEV_KIT_DIR_aarch64 = "${STAGING_INCDIR}/optee/export-user_ta_arm64/"
 
 EXTRA_OEMAKE = " \
     TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
@@ -36,32 +32,22 @@ EXTRA_OEMAKE = " \
     -C ${S} O=${B} \
 "
 
+EXTRA_OECMAKE = " \
+    -DOPTEE_TEST_SDK=${TA_DEV_KIT_DIR} \
+"
 do_compile () {
     export CXXFLAGS="${CXXFLAGS} --sysroot=${STAGING_DIR_HOST}"
-
-    if [ ${DEFAULTTUNE} = "aarch64" ];then
-        export TA_DEV_KIT_DIR=${STAGING_INCDIR}/optee/export-user_ta_arm64/
-        export ARCH=arm64
-    else
-        export TA_DEV_KIT_DIR=${STAGING_INCDIR}/optee/export-user_ta_arm32/
-        export ARCH=arm
-    fi
-    export OPTEE_CLIENT_EXPORT=${STAGING_DIR_HOST}/usr
-    export CROSS_COMPILE_HOST=${HOST_PREFIX}
-    export CROSS_COMPILE_TA=${HOST_PREFIX}
-    export CROSS_COMPILE=${HOST_PREFIX}
-    export OPTEE_OPENSSL_EXPORT=${STAGING_INCDIR}/
     oe_runmake V=1
 }
 
 do_install () {
-    install -d ${D}/usr/bin
-    install ${B}/xtest/xtest ${D}/usr/bin/
+	install -d ${D}/usr/bin
+	install ${B}/xtest/xtest ${D}/usr/bin/
 
-    install -d ${D}/lib/optee_armtz
-    find ${B}/ta -name '*.ta' | while read name; do
-    install -m 444 $name ${D}/lib/optee_armtz/
-    done
+	install -d ${D}/lib/optee_armtz
+	find ${B}/ta -name '*.ta' | while read name; do
+		install -m 444 $name ${D}/lib/optee_armtz/
+	done
 }
 
 FILES_${PN} = "/usr/bin/ /lib*/optee_armtz/"
