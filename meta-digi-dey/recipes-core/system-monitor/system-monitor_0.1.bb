@@ -11,7 +11,7 @@ SRC_URI = " \
 "
 S = "${WORKDIR}"
 
-inherit systemd
+inherit systemd features_check
 
 REQUIRED_DISTRO_FEATURES= "systemd"
 
