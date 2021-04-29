@@ -68,14 +68,14 @@ log_error() {
 # Main
 #------------------------------------------------------------------------------
 # Check if encrypted device is already open.
-if [ -b /dev/mapper/cryptroot ]; then
+if [ -b /dev/mapper/cryptrootfs ]; then
 	exit 0
 fi
 
 rootfs_block="/dev/mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<rootfs\>.*,\1,g;T;p")"
 
 # Open LUKS encrypted device
-trustfence-tool ${rootfs_block} cryptroot
+trustfence-tool ${rootfs_block} cryptrootfs
 if [ "$?" != "0" ]; then
 	log_error "Error executing the firmware update, cannot open virtual device"
 	exit 1
