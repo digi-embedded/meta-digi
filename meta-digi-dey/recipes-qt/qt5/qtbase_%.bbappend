@@ -16,6 +16,8 @@ SRC_URI_append_imxgpu3d = " \
         'file://0016-Configure-eglfs-with-egl-pkg-config.patch', d)} \
 "
 
+PACKAGECONFIG_DEFAULT_remove_mx8mm = "vulkan"
+
 PACKAGECONFIG += "examples"
 
 PACKAGECONFIG_PLATFORM_IMX_GPU     = ""
