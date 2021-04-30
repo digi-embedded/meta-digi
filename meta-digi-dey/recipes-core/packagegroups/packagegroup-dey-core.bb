@@ -50,7 +50,7 @@ RDEPENDS_${PN} = "\
     ${@bb.utils.contains('MACHINE_FEATURES', 'pci', 'pciutils', '',d)} \
     recovery-utils \
     sysinfo \
-    system-monitor \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'system-monitor', '',d)} \
     usbutils \
     ${VIRTUAL-RUNTIME_base-utils} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '', '${VIRTUAL-RUNTIME_base-utils-acpid}', d)} \
