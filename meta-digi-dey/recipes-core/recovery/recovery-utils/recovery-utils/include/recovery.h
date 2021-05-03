@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Digi International Inc.
+ * Copyright (c) 2017-2021, Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -48,13 +48,25 @@ int reboot_recovery(unsigned int reboot_timeout);
 int wipe_update_partition(void);
 
 /*
- * Configure recovery commands to set a file system encryption key.
+ * Configure recovery commands to set a partition encryption key.
  *
  * Params:
  *   'key' (input)  Encryption key to use, NULL or empty to generate a random one
  *
  * Return: 0 on sucess, -1 on failure
  */
-int set_fs_encryption_key(char *key);
+int set_encryption_key(char *key);
+
+/*
+ * Configure recovery commands to encrypt/un-encrypt provided partitions.
+ *
+ * Params:
+ *   'to_encrypt' (input)  Comma-separated list of partitions to be encrypted
+ *   'to_unencrypt' (input)  Comma-separated list of partition names to be un-encrypted
+ *   'force' (input) Skips warning and confirmation prompt if non-zero
+ *
+ * Return: 0 on sucess, -1 on failure and 1 on success with no recovery command set
+ */
+int encrypt_partitions(char *to_encrypt, char *to_unencrypt, unsigned char force);
 
 #endif /* RECOVERY_H */

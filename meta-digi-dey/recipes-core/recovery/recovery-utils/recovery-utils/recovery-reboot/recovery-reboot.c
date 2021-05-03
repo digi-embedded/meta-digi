@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Digi International Inc.
+ * Copyright (c) 2017-2021, Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -26,12 +26,13 @@
 
 #include <recovery.h>
 
-#define VERSION		"0.2" GIT_REVISION
+#define VERSION		"0.3" GIT_REVISION
 
 #define REBOOT_TIMEOUT	10
 
 #define CMD_RECOVERY	"recovery-reboot"
 #define CMD_UPDATEFW	"update-firmware"
+#define CMD_ENCRYPT	"encrypt-partitions"
 
 #define RECOVERY_USAGE \
 	"Reboot into recovery mode setting recovery commands.\n" \
@@ -40,13 +41,15 @@
 	"Version: %s\n" \
 	"\n" \
 	"Usage: %s [options] [<SWU-package-path>]\n\n" \
-	"  -u         --update-firmware          Perform firmware update\n" \
-	"  -k[<key>]  --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
-	"                                        Empty to generate a random key.\n" \
-	"                                        Use this option along with update firmware option (-u).\n" \
-	"  -w         --wipe-update-partition    Wipe 'update' partition\n" \
-	"  -T<N>      --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
-	"             --help                     Print help and exit\n" \
+	"  -u              --update-firmware          Perform firmware update\n" \
+	"  -e <partitions> --encrypt=<partitions>     Encrypt the list of provided partitions.\n" \
+	"  -d <partitions> --unencrypt=<partitions>   Un-encrypt the list of provided partitions.\n" \
+	"  -k [<key>]      --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
+	"                                             Empty to generate a random key.\n" \
+	"  -w              --wipe-update-partition    Wipe 'update' partition\n" \
+	"  -T <N>          --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
+	"  -f              --force                    Force (un)encryption operations.\n" \
+	"                  --help                     Print help and exit\n" \
 	"\n" \
 	"<SWU-package-path>    Absolute path to the firmware update package\n" \
 	"\n"
@@ -58,16 +61,33 @@
 	"Version: %s\n" \
 	"\n" \
 	"Usage: %s [options] <SWU-package-path>\n\n" \
-	"  -k[<key>]  --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
+	"  -k [<key>] --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
 	"                                        Empty to generate a random key.\n" \
-	"  -T<N>      --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
+	"  -T <N>     --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
 	"             --help                     Print help and exit\n" \
 	"\n" \
 	"<SWU-package-path>    Absolute path to the firmware update package\n" \
 	"\n"
 
-/* Check if application was called as update-firmware */
+#define ENCRYPT_USAGE \
+	"Encrypt/unencrypt partitions using the recovery reboot.\n" \
+	"Copyright(c) Digi International Inc.\n" \
+	"\n" \
+	"Version: %s\n" \
+	"\n" \
+	"Usage: %s [-e <partitions>] [-d <partitions>] [options]\n\n" \
+	"  -e <partitions> --encrypt=<partitions>     Encrypt the list of provided partitions.\n" \
+	"  -d <partitions> --unencrypt=<partitions>   Un-encrypt the list of provided partitions.\n" \
+	"  -k [<key>]      --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
+	"                                             Empty to generate a random key.\n" \
+	"  -T <N>          --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
+	"  -f              --force                    Force (un)encryption operations.\n" \
+	"                  --help                     Print help and exit\n" \
+	"\n"
+
+/* Check if application was called as update-firmware or encrypt-partitions */
 #define IS_UPDATEFW(cmd)	(!strcmp(cmd, CMD_UPDATEFW))
+#define IS_ENCRYPT(cmd)		(!strcmp(cmd, CMD_ENCRYPT))
 
 /* Actual command name */
 static char *cmd_name;
@@ -75,9 +95,12 @@ static char *cmd_name;
 /* Command line options */
 static char *swu_package;
 static char *key = NULL;
+static char *to_encrypt = NULL;
+static char *to_unencrypt = NULL;
 static int wipe_update;
 static int update_fw;
 static int set_key;
+static int force;
 static int reboot_timeout = REBOOT_TIMEOUT;
 
 /*
@@ -88,6 +111,9 @@ static void usage_and_exit(int exitval)
 {
 	if (IS_UPDATEFW(cmd_name))
 		fprintf(stdout, UPDATEFW_USAGE, VERSION, CMD_UPDATEFW,
+			REBOOT_TIMEOUT);
+	else if (IS_ENCRYPT(cmd_name))
+		fprintf(stdout, ENCRYPT_USAGE, VERSION, CMD_ENCRYPT,
 			REBOOT_TIMEOUT);
 	else
 		fprintf(stdout, RECOVERY_USAGE, VERSION, CMD_RECOVERY,
@@ -103,12 +129,15 @@ static void usage_and_exit(int exitval)
 static void parse_options(int argc, char *argv[])
 {
 	static int opt_index, opt;
-	static const char *short_options = "uk::wT:";
+	static const char *short_options = "uk::wT:e:d:f";
 	static const struct option long_options[] = {
 		{"update-firmware", no_argument, NULL, 'u'},
 		{"encryption-key", optional_argument, NULL, 'k'},
 		{"wipe-update-partition", no_argument, NULL, 'w'},
 		{"reboot-timeout", required_argument, NULL, 'T'},
+		{"encrypt", required_argument, NULL, 'e'},
+		{"unencrypt", required_argument, NULL, 'd'},
+		{"force", no_argument, NULL, 'f'},
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
@@ -143,6 +172,15 @@ static void parse_options(int argc, char *argv[])
 				exit(EXIT_FAILURE);
 			}
 			break;
+		case 'e':
+			to_encrypt = optarg;
+			break;
+		case 'd':
+			to_unencrypt = optarg;
+			break;
+		case 'f':
+			force = 1;
+			break;
 		case 'h':
 			usage_and_exit(EXIT_SUCCESS);
 			break;
@@ -152,9 +190,14 @@ static void parse_options(int argc, char *argv[])
 		}
 	}
 
-	/* If command is 'update-firmware' reset the options */
+	/* If command is 'update-firmware' or 'encrypt-partitions' reset the options */
 	if (IS_UPDATEFW(cmd_name)) {
 		update_fw = 1;
+		wipe_update = 0;
+		to_encrypt = NULL;
+		to_unencrypt = NULL;
+	} else if (IS_ENCRYPT(cmd_name)) {
+		update_fw = 0;
 		wipe_update = 0;
 	}
 
@@ -165,16 +208,13 @@ static void parse_options(int argc, char *argv[])
 			printf("Error: missing SWU package argument\n");
 			exit(EXIT_FAILURE);
 		}
-	} else if (set_key) {
-		/* Always need to update firmware when setting a new key */
-		printf("Error: encryption key can only be set while performing a firmware update\n");
-		exit(EXIT_FAILURE);
 	}
 }
 
 int main(int argc, char *argv[])
 {
 	int ret = 0;
+	unsigned char need_reboot = 0;
 
 	cmd_name = basename(argv[0]);
 	if (!cmd_name) {
@@ -187,11 +227,12 @@ int main(int argc, char *argv[])
 
 	if (set_key) {
 		/* Configure recovery commands to set a fs encryption key */
-		ret = set_fs_encryption_key(key);
+		ret = set_encryption_key(key);
 		if (ret) {
-			printf("Error: set_fs_encryption_key\n");
+			printf("Error: set_encryption_key\n");
 			goto out;
 		}
+		need_reboot++;
 	}
 
 	if (swu_package) {
@@ -201,6 +242,7 @@ int main(int argc, char *argv[])
 			printf("Error: update_firmware\n");
 			goto out;
 		}
+		need_reboot++;
 	}
 
 	if (wipe_update) {
@@ -210,15 +252,38 @@ int main(int argc, char *argv[])
 			printf("Error: wipe_update_partition\n");
 			goto out;
 		}
+		need_reboot++;
 	}
 
-	/* Reboot to recovery */
-	ret = reboot_recovery(reboot_timeout);
-	if (ret) {
-		printf("Error: reboot_recovery\n");
-		goto out;
+	if (to_encrypt || to_unencrypt) {
+		/* Configure recovery commands to encrypt/unencrypt partitions */
+		ret = encrypt_partitions(to_encrypt, to_unencrypt, force);
+		if (ret < 0) {
+			printf("Error: encrypt_partitions\n");
+			goto out;
+		} else if (ret == 0) {
+			/*
+			 * Only reboot if strictly necessary, since the function
+			 * might succeed without setting a recovery command
+			 * (for example, if you try to encrypt partitions that
+			 * are already encrypted).
+			 */
+			need_reboot++;
+		} else {
+			ret = 0;
+		}
 	}
 
+	if (need_reboot > 0) {
+		/* Reboot to recovery */
+		ret = reboot_recovery(reboot_timeout);
+		if (ret) {
+			printf("Error: reboot_recovery\n");
+			goto out;
+		}
+	}
+
+	printf("\nNo recovery commands configured.\n");
 out:
 	return ret;
 }

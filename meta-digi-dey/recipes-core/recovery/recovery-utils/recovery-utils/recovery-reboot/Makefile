@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017, Digi International Inc.
+# Copyright (c) 2017-2021, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -41,6 +41,7 @@ install: $(PROGRAM)
 	install -d $(DESTDIR)/usr/bin
 	install -m 0755 $(PROGRAM) $(DESTDIR)/usr/bin/
 	ln -sf $(PROGRAM) $(DESTDIR)/usr/bin/update-firmware
+	ln -sf $(PROGRAM) $(DESTDIR)/usr/bin/encrypt-partitions
 
 .PHONY: clean
 clean:
