@@ -7,11 +7,13 @@ SRC_URI += " \
     file://profile \
 "
 
-# Digi: use g2d on ccimx6sbc to fix desktop window issue
-# Also needed to workaround an HDMI hotplug issue on the ccimx6qpsbc
-INI_UNCOMMENT_ASSIGNMENTS_append_ccimx6 = " \
-    use-g2d=1 \
-"
+# Remove duplicate entries for the ccimx6 platform
+# and uncomment with an individual append
+INI_UNCOMMENT_ASSIGNMENTS_remove_ccimx6 = "use-g2d=1"
+
+do_install_append_ccimx6() {
+    uncomment "use-g2d=1" ${D}${sysconfdir}/xdg/weston/weston.ini
+}
 
 do_install_append() {
     install -Dm0755 ${WORKDIR}/profile ${D}${sysconfdir}/profile.d/weston.sh
