@@ -278,6 +278,17 @@ format_emmc_block() {
 	psplash_message "Formatting '${1}' partition..."
 	psplash_progress "0"
 
+	# If partition is encrypted, it might be open and even mounted at this point.
+	local mapped_block="/dev/mapper/crypt${1}"
+	if [ -e "${mapped_block}" ]; then
+		# Umount in case partition is mounted, ignore errors.
+		if grep -qs "${mapped_block}" /proc/mounts; then
+			umount "${mapped_block}" >/dev/null 2>&1
+		fi
+		# Close mapped device
+		cryptsetup close crypt${1}
+	fi
+
 	# Find partition block number.
 	local partition_block="/dev/mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<${1}\>.*,\1,g;T;p")"
 	if [ -b "${partition_block}" ]; then
@@ -542,6 +553,22 @@ for p in ${BLACKLISTED}; do
 	encrypt_partitions=$(remove_entry "${encrypt_partitions}" "${p}")
 done
 
+# On eMMC, if the 'update' partition is encrypted, we need to mount it manually
+if [ "$(is_nand)" = "no" ] && contains "${ENC_PARTS}" "update"; then
+	update_block="/dev/mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<update\>.*,\1,g;T;p")"
+	trustfence-tool ${update_block} cryptupdate
+	if [ "$?" = "0" ]; then
+		# Reset block path to the decrypted mapped device
+		update_block="/dev/mapper/cryptupdate"
+
+		mkdir -p ${UPDATE_MOUNT_DIR}
+		FSTYPE="$(blkid ${update_block} | sed -e 's,.*TYPE="\([^"]\+\)".*,\1,g')"
+		mount ${FSTYPE:+-t ${FSTYPE}} ${update_block} ${UPDATE_MOUNT_DIR}
+	else
+		quit_with_error "Error mounting encrypted update partition"
+	fi
+fi
+
 # Sanity checks.
 if [ -n "${update_package_bool}" ]; then
 	check_swu_package "${update_package}"
@@ -550,6 +577,11 @@ fi
 # Format UBI partitions
 if [ "$(is_nand)" = "yes" -a -n "${wipe_ubi_partitions}" ]; then
 	for p in ${wipe_ubi_partitions}; do
+		# Only format 'update' partition if it doesn't have a pending
+		# update package.
+		[ "${p}" = "update" ] && \
+		echo "${update_package}" | grep -qs "^${UPDATE_MOUNT_DIR}" && continue
+
 		# To protect against manually injected commands, only format
 		# partitions that exist and aren't blacklisted.
 		contains "${PART_LIST}" "${p}" && \
@@ -578,6 +610,41 @@ if [ "${DEFAULT_ENC_PARTS}" = "no" ]; then
 		fi
 	done
 fi
+
+# If we have an update package in the 'update' partition and we also need to
+# format said partition, avoid doing so by aborting the operation or by
+# avoiding the formatting.
+if echo "${update_package}" | grep -qs "^${UPDATE_MOUNT_DIR}"; then
+	# In the case of a state change (encrypted->unencrypted or
+	# unencrypted->encrypted), we can simply cancel it and continue with
+	# the update. Make sure to remove leading/trailing whitespaces from
+	# the diffs.
+	if contains "${UNENC_DIFF}" "update"; then
+		log_warning "Update package in 'update' partition, skip the partition's unencryption process."
+
+		encrypt_partitions="${encrypt_partitions} update"
+		UNENC_DIFF=$(remove_entry "${UNENC_DIFF}" "update")
+	elif contains "${ENC_DIFF}" "update"; then
+		log_warning "Update package in 'update' partition, skip the partition's encryption process."
+
+		encrypt_partitions=$(remove_entry "${encrypt_partitions}" "update")
+		ENC_DIFF=$(remove_entry "${ENC_DIFF}" "update")
+	fi
+
+	# Worst case scenario: the partition remains encrypted, but the key is
+	# going to be changed. Since this affects all encrypted partitions,
+	# which might also include the rootfs, we can't cancel the key change
+	# and continue with the update. To avoid unexpected behaviour, abort
+	# both operations and quit.
+	if [ -n "${encryption_key_bool}" ] && \
+	   contains "${ENC_PARTS}" "update" && \
+	   contains "${encrypt_partitions}" "update"; then
+		quit_with_error "Cannot change the encryption key with an update package in an encrypted 'update' partition."
+	fi
+fi
+
+# Remove leading/trailing whitespaces from the new encrypted partitions list.
+encrypt_partitions=$(echo "${encrypt_partitions}" | xargs)
 
 # Check if encryption key command is configured.
 if [ -n "${encryption_key_bool}" ]; then
