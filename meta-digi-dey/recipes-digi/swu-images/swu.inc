@@ -6,7 +6,6 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 SRC_URI = "file://sw-description"
 SRC_URI_append_ccimx6 = " ${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', 'file://preinstall_swu.sh', '')}"
-SRC_URI_append_ccimx6ul = " ${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '', 'file://preinstall_swu.sh')}"
 SRC_URI_append_ccimx8x = " ${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', 'file://preinstall_swu.sh', '')}"
 SRC_URI_append_ccimx8m = " ${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', 'file://preinstall_swu.sh', '')}"
 
@@ -19,6 +18,7 @@ IMG_NAME = "${IMAGE_DEPENDS}"
 SWUPDATE_IMAGES = "${IMG_NAME}"
 
 SOFTWARE_VERSION ?= "0.0.1"
+DESCRIPTION = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', 'Encrypted rootfs ${IMG_NAME} update', '${IMG_NAME} update')}"
 
 BOOTFS_EXT ?= ".boot.vfat"
 BOOTFS_EXT_ccimx6ul ?= ".boot.ubifs"
@@ -33,11 +33,8 @@ ROOTFS_ENC_DEV = "/dev/mapper/cryptrootfs"
 ROOTFS_ENC_DEV_ccimx6ul = "${ROOTFS_DEV_NAME}"
 ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
 PREINST_SCRIPT_TEMPLATE = "scripts: ( { filename = \\"preinstall_swu.sh\\"; type = \\"preinstall\\"; sha256 = \\"@preinstall_swu.sh\\"; \\x7D );"
-PREINST_SCRIPT_DESC = ""
-PREINST_SCRIPT_DESC_ccimx6 = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${PREINST_SCRIPT_TEMPLATE}', '')}"
-PREINST_SCRIPT_DESC_ccimx6ul = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '', '${PREINST_SCRIPT_TEMPLATE}')}"
-PREINST_SCRIPT_DESC_ccimx8x = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${PREINST_SCRIPT_TEMPLATE}', '')}"
-PREINST_SCRIPT_DESC_ccimx8m = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${PREINST_SCRIPT_TEMPLATE}', '')}"
+PREINST_SCRIPT_DESC = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${PREINST_SCRIPT_TEMPLATE}', '')}"
+PREINST_SCRIPT_DESC_ccimx6ul = ""
 
 python () {
     img_fstypes = d.getVar('BOOTFS_EXT', True) + " " + d.getVar('ROOTFS_EXT', True)
@@ -63,5 +60,6 @@ fill_description() {
 	sed -i -e "s,##ROOTIMG_NAME##,${IMG_NAME}-${MACHINE}${ROOTFS_EXT},g" "${WORKDIR}/sw-description"
 	sed -i -e "s,##ROOTFS_DEV##,${ROOTFS_DEV_NAME_FINAL},g" "${WORKDIR}/sw-description"
 	sed -i -e "s,##SW_VERSION##,${SOFTWARE_VERSION},g" "${WORKDIR}/sw-description"
+	sed -i -e "s,##DESCRIPTION##,${DESCRIPTION},g" "${WORKDIR}/sw-description"
 	sed -i -e "s/##PREINSTALL_SCRIPT##/${PREINST_SCRIPT_DESC}/g" "${WORKDIR}/sw-description"
 }

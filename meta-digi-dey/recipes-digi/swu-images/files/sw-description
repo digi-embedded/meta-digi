@@ -1,6 +1,7 @@
 software =
 {
     version = "##SW_VERSION##";
+    description = "##DESCRIPTION##";
 
     images: (
         {
