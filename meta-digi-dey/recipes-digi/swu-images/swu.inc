@@ -1,14 +1,14 @@
-# Copyright (C) 2016-2020 Digi International Inc.
+# Copyright (C) 2016-2021 Digi International Inc.
 SUMMARY = "Generate update package for SWUpdate"
 SECTION = "base"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
 
 SRC_URI = "file://sw-description"
-SRC_URI_append_ccimx6 = " ${@oe.utils.ifelse(d.getVar('TRUSTFENCE_INITRAMFS_IMAGE', True), 'file://preinstall_swu.sh', '')}"
-SRC_URI_append_ccimx6ul = " ${@oe.utils.ifelse(d.getVar('TRUSTFENCE_INITRAMFS_IMAGE', True), '', 'file://preinstall_swu.sh')}"
-SRC_URI_append_ccimx8x = " ${@oe.utils.ifelse(d.getVar('TRUSTFENCE_INITRAMFS_IMAGE', True), 'file://preinstall_swu.sh', '')}"
-SRC_URI_append_ccimx8m = " ${@oe.utils.ifelse(d.getVar('TRUSTFENCE_INITRAMFS_IMAGE', True), 'file://preinstall_swu.sh', '')}"
+SRC_URI_append_ccimx6 = " ${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', 'file://preinstall_swu.sh', '')}"
+SRC_URI_append_ccimx6ul = " ${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '', 'file://preinstall_swu.sh')}"
+SRC_URI_append_ccimx8x = " ${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', 'file://preinstall_swu.sh', '')}"
+SRC_URI_append_ccimx8m = " ${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', 'file://preinstall_swu.sh', '')}"
 
 inherit swupdate
 
@@ -31,13 +31,13 @@ ROOTFS_DEV_NAME ?= "/dev/mmcblk0p3"
 ROOTFS_DEV_NAME_ccimx6ul ?= "rootfs"
 ROOTFS_ENC_DEV = "/dev/mapper/cryptrootfs"
 ROOTFS_ENC_DEV_ccimx6ul = "${ROOTFS_DEV_NAME}"
-ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_INITRAMFS_IMAGE', True), '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
+ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
 PREINST_SCRIPT_TEMPLATE = "scripts: ( { filename = \\"preinstall_swu.sh\\"; type = \\"preinstall\\"; sha256 = \\"@preinstall_swu.sh\\"; \\x7D );"
 PREINST_SCRIPT_DESC = ""
-PREINST_SCRIPT_DESC_ccimx6 = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_INITRAMFS_IMAGE', True), '${PREINST_SCRIPT_TEMPLATE}', '')}"
-PREINST_SCRIPT_DESC_ccimx6ul = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_INITRAMFS_IMAGE', True), '', '${PREINST_SCRIPT_TEMPLATE}')}"
-PREINST_SCRIPT_DESC_ccimx8x = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_INITRAMFS_IMAGE', True), '${PREINST_SCRIPT_TEMPLATE}', '')}"
-PREINST_SCRIPT_DESC_ccimx8m = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_INITRAMFS_IMAGE', True), '${PREINST_SCRIPT_TEMPLATE}', '')}"
+PREINST_SCRIPT_DESC_ccimx6 = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${PREINST_SCRIPT_TEMPLATE}', '')}"
+PREINST_SCRIPT_DESC_ccimx6ul = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '', '${PREINST_SCRIPT_TEMPLATE}')}"
+PREINST_SCRIPT_DESC_ccimx8x = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${PREINST_SCRIPT_TEMPLATE}', '')}"
+PREINST_SCRIPT_DESC_ccimx8m = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${PREINST_SCRIPT_TEMPLATE}', '')}"
 
 python () {
     img_fstypes = d.getVar('BOOTFS_EXT', True) + " " + d.getVar('ROOTFS_EXT', True)

@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2019 Digi International.
+# Copyright (C) 2013-2021 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
@@ -38,7 +38,7 @@ pkg_postinst_ontarget_${PN}() {
 	fi
 
 	# Disable file system check when rootfs is encrypted
-	if [ -n "${TRUSTFENCE_INITRAMFS_IMAGE}" ]; then
+	if [ "${TRUSTFENCE_ENCRYPT_ROOTFS}" = "1" ]; then
 		for arg in $(cat /proc/cmdline); do
 			case "${arg}" in
 				root=*) eval ${arg};;

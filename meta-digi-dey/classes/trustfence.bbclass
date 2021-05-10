@@ -25,8 +25,9 @@ TRUSTFENCE_DEK_PATH ?= "default"
 TRUSTFENCE_ENCRYPT_ENVIRONMENT ?= "1"
 TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 
-# Trustfence initramfs image recipe
-TRUSTFENCE_INITRAMFS_IMAGE ?= "dey-image-trustfence-initramfs"
+# Partition encryption configuration
+TRUSTFENCE_ENCRYPT_PARTITIONS ?= "1"
+TRUSTFENCE_ENCRYPT_ROOTFS ?= "1"
 
 IMAGE_FEATURES += "dey-trustfence"
 
@@ -92,4 +93,14 @@ python () {
 
         # Set the key password.
         d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
+
+    # Enable partition encryption if rootfs encryption is enabled
+    if (d.getVar("TRUSTFENCE_ENCRYPT_ROOTFS", True) == "1"):
+        d.setVar("TRUSTFENCE_ENCRYPT_PARTITIONS", "1");
+
+    # Enable the trustfence initramfs if and only if partition encryption is enabled
+    if (d.getVar("TRUSTFENCE_ENCRYPT_PARTITIONS", True) == "1"):
+        d.setVar("TRUSTFENCE_INITRAMFS_IMAGE", "dey-image-trustfence-initramfs");
+    else:
+        d.setVar("TRUSTFENCE_INITRAMFS_IMAGE", "");
 }
