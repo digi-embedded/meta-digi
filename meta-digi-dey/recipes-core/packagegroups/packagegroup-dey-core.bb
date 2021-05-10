@@ -41,6 +41,7 @@ RDEPENDS_${PN} = "\
     init-ifupdown \
     libdigiapix \
     libgpiod \
+    libgpiod-tools \
     libubootenv-bin \
     modutils-initscripts \
     netbase \
