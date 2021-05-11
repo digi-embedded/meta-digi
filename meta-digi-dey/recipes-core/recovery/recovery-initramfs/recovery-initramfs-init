@@ -26,7 +26,8 @@ PUBLIC_KEY="/etc/ssl/certs/key.pub"
 USB_MOUNT_DIR="/run/media"
 UPDATE_MOUNT_DIR="/mnt/update"
 
-ROOTFS_NEEDS_FORMAT="no"
+ROOTFS_IMAGE_IN_PACKAGE="no"
+ENCRYPT_ROOTFS="no"
 SWUPDATE_OUTPUT="swupdate_output.txt"
 
 PART_LIST=""
@@ -305,6 +306,16 @@ format_emmc_block() {
 			partition_block="/dev/mapper/crypt${1}"
 			psplash_progress "50"
 		fi
+
+		# In the case of the rootfs, there's no need to format the
+		# partition, because we know an image will be written from
+		# an update package.
+		if [ "${1}" = "rootfs" ]; then
+			psplash_progress "100"
+			log "Partition '${1}' successfully erased!"
+			return
+		fi
+
 		# Format emmc block.
 		mkfs.ext4 "${partition_block}" >/dev/null 2>&1
 		if [ "$?" = "0" ]; then
@@ -375,9 +386,17 @@ check_swu_package() {
 		quit_with_error "Invalid update package '$(basename ${1})'"
 	fi
 
-	# Format the rootfs partition if and only if the package contains a rootfs image.
+	# Check if the update package contains a rootfs image
 	if [ "$(is_nand)" = "yes" ]; then
-		grep "Found Image" "${SWUPDATE_OUTPUT}" | grep -qs "rootfs" && ROOTFS_NEEDS_FORMAT="yes"
+		grep "Found Image" "${SWUPDATE_OUTPUT}" | grep -qs "rootfs for handler" && ROOTFS_IMAGE_IN_PACKAGE="yes"
+	else
+		# For eMMC packages, check for a *.ext4 image, which is very likely intended for the rootfs partition
+		grep "Found Image" "${SWUPDATE_OUTPUT}" | grep -qs "\.ext4 in device" && ROOTFS_IMAGE_IN_PACKAGE="yes"
+	fi
+
+	# Check if the rootfs is meant to be encrypted
+	if [ "${ROOTFS_IMAGE_IN_PACKAGE}" = "yes" ]; then
+		grep "Description" "${SWUPDATE_OUTPUT}" | grep -qs "Encrypted rootfs" && ENCRYPT_ROOTFS="yes"
 	fi
 }
 
@@ -582,6 +601,10 @@ if [ "$(is_nand)" = "yes" -a -n "${wipe_ubi_partitions}" ]; then
 		[ "${p}" = "update" ] && \
 		echo "${update_package}" | grep -qs "^${UPDATE_MOUNT_DIR}" && continue
 
+		# 'rootfs' partition is formatted prior to the update, no need
+		# to format it now.
+		[ "${p}" = "rootfs" ] && continue
+
 		# To protect against manually injected commands, only format
 		# partitions that exist and aren't blacklisted.
 		contains "${PART_LIST}" "${p}" && \
@@ -640,6 +663,42 @@ if echo "${update_package}" | grep -qs "^${UPDATE_MOUNT_DIR}"; then
 	   contains "${ENC_PARTS}" "update" && \
 	   contains "${encrypt_partitions}" "update"; then
 		quit_with_error "Cannot change the encryption key with an update package in an encrypted 'update' partition."
+	fi
+fi
+
+# Unconditionally remove the 'rootfs' partition from the diffs, since manual
+# changes aren't allowed.
+if contains "${UNENC_DIFF}" "rootfs"; then
+	log_warning "'rootfs' partition encryption status cannot be changed manually"
+
+	encrypt_partitions="${encrypt_partitions} rootfs"
+	UNENC_DIFF=$(remove_entry "${UNENC_DIFF}" "rootfs")
+elif contains "${ENC_DIFF}" "rootfs"; then
+	log_warning "'rootfs' partition encryption status cannot be changed manually"
+
+	encrypt_partitions=$(remove_entry "${encrypt_partitions}" "rootfs")
+	ENC_DIFF=$(remove_entry "${ENC_DIFF}" "rootfs")
+fi
+
+# If the rootfs is encrypted and we change the key without providing an update,
+# we will wipe it out. Abort the operation.
+if [ -n "${encryption_key_bool}" ] && \
+   [ "${ROOTFS_IMAGE_IN_PACKAGE}" = "no" ] && \
+   contains "${ENC_PARTS}" "rootfs"; then
+	quit_with_error "Cannot change the encryption key with an encrypted 'rootfs' partition and no update package"
+fi
+
+# Decide if we need to (un)encrypt the rootfs based on the information provided
+# by the update package.
+if [ "${ROOTFS_IMAGE_IN_PACKAGE}" = "yes" ]; then
+	if ! contains "${ENC_PARTS}" "rootfs" && \
+	   [ "${ENCRYPT_ROOTFS}" = "yes" ]; then
+		ENC_DIFF="${ENC_DIFF} rootfs"
+		encrypt_partitions="${encrypt_partitions} rootfs"
+	elif contains "${ENC_PARTS}" "rootfs" && \
+	     [ "${ENCRYPT_ROOTFS}" = "no" ]; then
+		UNENC_DIFF="${UNENC_DIFF} rootfs"
+		encrypt_partitions=$(remove_entry "${encrypt_partitions}" "rootfs")
 	fi
 fi
 
@@ -717,18 +776,15 @@ fi
 
 # Check if update package command is configured.
 if [ -n "${update_package_bool}" ]; then
+	# Format the UBI volume before updating if needed.
+	if [ "$(is_nand)" = "yes" ] && \
+	   [ "$ROOTFS_IMAGE_IN_PACKAGE" = "yes" ]; then
+		format_ubi_volume rootfs
+	fi
+
 	log "Firmware update requested"
 	psplash_message "Updating firmware..."
 	psplash_progress "0"
-
-	# Format the UBI volume before updating if needed.
-	if [ "$(is_nand)" = "yes" ]; then
-		if [ "$ROOTFS_NEEDS_FORMAT" = "yes" ]; then
-			psplash_message "Formatting rootfs partition..."
-			format_ubi_volume rootfs
-			psplash_progress "0"
-		fi
-	fi
 
 	log "Update package location: ${update_package}"
 	# Execute the progress binary.
