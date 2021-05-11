@@ -685,6 +685,8 @@ err:
  */
 int encrypt_partitions(char *to_encrypt, char *to_unencrypt, unsigned char force)
 {
+	char *rootfs[] = { "rootfs", NULL };
+
 	char *parts[MAX_PARTITIONS];
 	char *encrypted[MAX_PARTITIONS];
 	char *new_encrypted[MAX_PARTITIONS];
@@ -734,6 +736,20 @@ int encrypt_partitions(char *to_encrypt, char *to_unencrypt, unsigned char force
 	if (!enc_diff[0] && !unenc_diff[0]) {
 		ret = 1;
 		goto err;
+	}
+
+	/*
+	 * Special case: rootfs encryption is possible, but it can't be done
+	 * manually. Like with the blacklisted partitions, remove any
+	 * appearence of 'rootfs' from the diffs, but with a different message.
+	 */
+	if (entry_exists(rootfs[0], enc_diff)) {
+		printf("Warning: rootfs encryption cannot be done manually, skipping\n");
+		subtract_array(rootfs, enc_diff);
+	}
+	if (entry_exists(rootfs[0], unenc_diff)) {
+		printf("Warning: rootfs unencryption cannot be done manually, skipping\n");
+		subtract_array(rootfs, unenc_diff);
 	}
 
 	/*
