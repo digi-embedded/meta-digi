@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2020 Digi International.
+# Copyright (C) 2012-2021 Digi International.
 #
 SUMMARY = "Wireless packagegroup for DEY image"
 
@@ -15,4 +15,5 @@ RDEPENDS_${PN} = "\
     wpa-supplicant-passphrase \
 "
 
+RDEPENDS_${PN}_ccimx6sbc += "ath-prop-tools"
 RDEPENDS_${PN}_remove_ccimx6sbc = "hostapd"
