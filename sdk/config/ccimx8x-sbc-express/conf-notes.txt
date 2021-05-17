@@ -5,11 +5,6 @@ Digi Embedded Yocto provides the following image recipes:
     By default the image is XWayland-based so it provides a full Weston
     desktop environment.
 
-    To compile the image for the framebuffer (instead of XWayland) add
-    the following line to the project's conf/local.conf:
-
-    DISTRO_FEATURES_remove = "x11 wayland vulkan"
-
   * dey-image-webkit: graphical WebKit image
 
     By default the image is XWayland-based so it provides a full Weston

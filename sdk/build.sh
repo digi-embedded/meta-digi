@@ -49,10 +49,6 @@ ZIP_INSTALLER_CFG="
 DEY_IMAGE_INSTALLER = \"1\"
 "
 
-BACKEND_REMOVAL_CFG="
-DISTRO_FEATURES_remove = \"x11 wayland vulkan\"
-"
-
 REPO="$(which repo)"
 
 error() {
@@ -140,11 +136,6 @@ swu_recipe_name() {
 
 # If DY_BUILD_TCHAIN is unset, set it for release jobs
 [ -z "${DY_BUILD_TCHAIN}" ] && [ "${DY_BUILD_RELEASE}" = "true" ] && DY_BUILD_TCHAIN="true"
-
-# If DY_FB_IMAGE is unset, set it depending on the job name
-if [ -z "${DY_FB_IMAGE}" ] && echo ${JOB_NAME} | grep -qs 'dey.*fb'; then
-	DY_FB_IMAGE="true"
-fi
 
 # If DY_MFG_IMAGE is unset, set it depending on the job name
 if [ -z "${DY_MFG_IMAGE}" ] && echo ${JOB_NAME} | grep -qs 'dey.*mfg'; then
@@ -265,10 +256,6 @@ for platform in ${DY_PLATFORMS}; do
 					printf "${RM_WORK_CFG}" >> conf/local.conf
 				fi
 				printf "${ZIP_INSTALLER_CFG}" >> conf/local.conf
-				# Remove all desktop backend distro features if building framebuffer images
-				if [ "${DY_FB_IMAGE}" = "true" ]; then
-					printf "${BACKEND_REMOVAL_CFG}" >> conf/local.conf
-				fi
 				# Append extra configuration macros if provided from build environment
 				if [ -n "${DY_EXTRA_LOCAL_CONF}" ]; then
 					printf "%s\n" "${DY_EXTRA_LOCAL_CONF}" >> conf/local.conf
