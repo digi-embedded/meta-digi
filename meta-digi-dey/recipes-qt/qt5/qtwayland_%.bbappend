@@ -7,6 +7,7 @@ SRC_URI_append = " \
     file://0003-Client-Fix-crash-when-showing-a-child-window-with-a-.patch \
     file://0005-Client-Always-close-popups-when-hiding-a-window.patch \
     file://0006-Avoid-potential-double-deletion.patch \
+    file://0007-Client-Fix-100ms-freeze-when-applications-do-not-swa.patch \
 "
 SRC_URI_append_mx6sl = " file://0001-hardwareintegration-Do-not-include-shm-emulation-ser.patch \
 "
