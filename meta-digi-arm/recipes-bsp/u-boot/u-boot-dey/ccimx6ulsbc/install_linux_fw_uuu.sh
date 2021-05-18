@@ -132,6 +132,25 @@ fi
 # remove redirect
 uuu fb: ucmd setenv stdout serial
 
+# Determine linux, recovery, and rootfs image filenames to update
+if [ -z "${IMAGE_NAME}" ]; then
+	IMAGE_NAME="dey-image-qt"
+fi
+INSTALL_LINUX_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx6ulsbc.boot.ubifs"
+INSTALL_RECOVERY_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx6ulsbc.recovery.ubifs"
+INSTALL_ROOTFS_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx6ulsbc.ubifs"
+
+# Verify existance of files before starting the update
+FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}"
+for f in ${FILES}; do
+	if [ ! -f ${f} ]; then
+		echo "\033[31m[ERROR] Could not find file '${f}'\033[0m"
+		ABORT=true
+	fi
+done;
+
+[ "${ABORT}" = true ] && exit 1
+
 # Set fastboot buffer address to $loadaddr, just in case
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 
@@ -161,13 +180,6 @@ uuu fb: ucmd setenv bootcmd "
 
 uuu fb: ucmd saveenv
 uuu fb: acmd reset
-
-if [ -z "${IMAGE_NAME}" ]; then
-	IMAGE_NAME="dey-image-qt"
-fi
-INSTALL_LINUX_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx6ulsbc.boot.ubifs"
-INSTALL_RECOVERY_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx6ulsbc.recovery.ubifs"
-INSTALL_ROOTFS_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx6ulsbc.ubifs"
 
 # Wait for the target to reset
 sleep 3
