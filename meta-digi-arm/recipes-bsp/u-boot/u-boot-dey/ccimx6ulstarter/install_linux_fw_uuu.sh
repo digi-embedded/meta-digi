@@ -40,7 +40,7 @@ show_usage()
 	exit 2
 }
 
-# Update a NAND partition
+# Update a partition
 #   Params:
 #	1. partition
 #	2. file
@@ -48,7 +48,7 @@ show_usage()
 #   Description:
 #	- downloads image to RAM
 #	- runs 'update' command from RAM
-nand_update()
+part_update()
 {
 	echo "\033[36m"
 	echo "====================================================================================="
@@ -165,7 +165,7 @@ uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 uuu fb: ucmd setenv forced_update 1
 
 # Update U-Boot
-nand_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000
+part_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000
 
 # Set 'bootcmd' for the second part of the script that will
 #  - Reset environment to defaults
@@ -195,13 +195,13 @@ sleep 3
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 
 # Update Linux
-nand_update "linux" "${INSTALL_LINUX_FILENAME}" 15000
+part_update "linux" "${INSTALL_LINUX_FILENAME}" 15000
 
 # Update Recovery
-nand_update "recovery" "${INSTALL_RECOVERY_FILENAME}" 15000
+part_update "recovery" "${INSTALL_RECOVERY_FILENAME}" 15000
 
 # Update Rootfs
-nand_update "rootfs" "${INSTALL_ROOTFS_FILENAME}" 90000
+part_update "rootfs" "${INSTALL_ROOTFS_FILENAME}" 90000
 
 # Erase the 'Update' partition
 uuu fb: ucmd nand erase.part update

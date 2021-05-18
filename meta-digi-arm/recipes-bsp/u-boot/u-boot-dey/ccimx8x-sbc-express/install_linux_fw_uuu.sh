@@ -40,6 +40,25 @@ show_usage()
 	exit 2
 }
 
+# Update a partition
+#   Params:
+#	1. partition
+#	2. file
+part_update()
+{
+	echo "\033[36m"
+	echo "====================================================================================="
+	echo "Updating '${1}' partition with file: ${2}"
+	echo "====================================================================================="
+	echo "\033[0m"
+
+	if [ "${1}" = "bootloader" ]; then
+		uuu fb: flash "${1}" "${2}"
+	else
+		uuu fb: flash -raw2sparse "${1}" "${2}"
+	fi
+}
+
 # Command line admits the following parameters:
 # -u <u-boot-filename>
 # -i <image-name>
@@ -167,7 +186,7 @@ uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 uuu fb: ucmd setenv forced_update 1
 
 # Update U-Boot
-uuu fb: flash bootloader ${INSTALL_UBOOT_FILENAME}
+part_update "bootloader" "${INSTALL_UBOOT_FILENAME}"
 
 # Set MMC to boot from BOOT1 partition
 uuu fb: ucmd mmc partconf 0 1 1 1
@@ -210,13 +229,13 @@ uuu fb: acmd reset
 sleep 3
 
 # Update Linux
-uuu fb: flash -raw2sparse linux ${INSTALL_LINUX_FILENAME}
+part_update "linux" "${INSTALL_LINUX_FILENAME}"
 
 # Update Recovery
-uuu fb: flash -raw2sparse recovery ${INSTALL_RECOVERY_FILENAME}
+part_update "recovery" "${INSTALL_RECOVERY_FILENAME}"
 
 # Update Rootfs
-uuu fb: flash -raw2sparse rootfs ${INSTALL_ROOTFS_FILENAME}
+part_update "rootfs" "${INSTALL_ROOTFS_FILENAME}"
 
 # Configure u-boot to boot into recovery mode
 uuu fb: ucmd setenv boot_recovery yes
