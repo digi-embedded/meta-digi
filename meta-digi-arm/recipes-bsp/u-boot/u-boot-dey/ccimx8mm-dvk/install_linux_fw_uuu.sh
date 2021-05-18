@@ -15,9 +15,8 @@
 # set -x
 
 #
-# U-Boot script for installing Linux images created by Yocto into the eMMC
+# U-Boot script for installing Linux images created by Yocto
 #
-clear
 
 # Parse uuu cmd output
 getenv()
@@ -59,6 +58,11 @@ part_update()
 	fi
 }
 
+clear
+echo "############################################################"
+echo "#           Linux firmware install through USB OTG         #"
+echo "############################################################"
+
 # Command line admits the following parameters:
 # -u <u-boot-filename>
 # -i <image-name>
@@ -72,26 +76,10 @@ do
 	esac
 done
 
-if [ ! "${NOWAIT}" = true ]; then
-	WAIT=10
-	echo "############################################################"
-	echo "#           Linux firmware install through USB OTG         #"
-	echo "############################################################"
-	echo ""
-	echo " This process will erase your eMMC and will install a new"
-	echo " U-Boot and Linux firmware images on the eMMC."
-	echo ""
-	echo " Press CTRL+C now if you wish to abort."
-	echo ""
-	while [ ${WAIT} -gt 0 ]; do
-		printf "\r Update process starts in %d " ${WAIT}
-		sleep 1
-		WAIT=$(( ${WAIT} - 1 ))
-	done
-	printf "\r                                   \n"
-	echo " Starting update process"
-fi
+echo ""
+echo "Determining image files to use..."
 
+# Determine U-Boot file to program basing on SOM's SOC type (linked to bus width)
 if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 	INSTALL_UBOOT_FILENAME="imx-boot-ccimx8mm-dvk.bin"
 fi
@@ -114,6 +102,37 @@ for f in ${FILES}; do
 done;
 
 [ "${ABORT}" = true ] && exit 1
+
+# Print warning about storage media being deleted
+if [ ! "${NOWAIT}" = true ]; then
+	WAIT=10
+	echo ""
+	echo " ===================="
+	echo " =    IMPORTANT!    ="
+	echo " ===================="
+	echo " This process will erase your eMMC and will install the following files"
+	echo " on the partitions of the eMMC."
+	echo ""
+	echo "   PARTITION   FILENAME"
+	echo "   ---------   --------"
+	echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
+	echo "   linux       ${INSTALL_LINUX_FILENAME}"
+	echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
+	echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
+	echo ""
+	echo " Press CTRL+C now if you wish to abort."
+	echo ""
+	while [ ${WAIT} -gt 0 ]; do
+		printf "\r Update process starts in %d " ${WAIT}
+		sleep 1
+		WAIT=$(( ${WAIT} - 1 ))
+	done
+	printf "\r                                   \n"
+	echo " Starting update process"
+fi
+
+# Set fastboot buffer address to $loadaddr, just in case
+uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 
 # Skip user confirmation for U-Boot update
 uuu fb: ucmd setenv forced_update 1
@@ -158,7 +177,7 @@ uuu fb: ucmd setenv bootcmd "
 uuu fb: ucmd saveenv
 uuu fb: acmd reset
 
-# Wait that target returns from reset
+# Wait for the target to reset
 sleep 3
 
 # Update Linux

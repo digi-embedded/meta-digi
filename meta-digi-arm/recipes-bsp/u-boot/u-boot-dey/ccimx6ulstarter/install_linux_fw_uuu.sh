@@ -15,9 +15,8 @@
 # set -x
 
 #
-# U-Boot script for installing Linux images created by Yocto into the NAND
+# U-Boot script for installing Linux images created by Yocto
 #
-clear
 
 # Parse uuu cmd output
 getenv()
@@ -60,6 +59,11 @@ part_update()
 	uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${fastboot_bytes}
 }
 
+clear
+echo "############################################################"
+echo "#           Linux firmware install through USB OTG         #"
+echo "############################################################"
+
 # Command line admits the following parameters:
 # -u <u-boot-filename>
 # -i <image-name>
@@ -73,25 +77,8 @@ do
 	esac
 done
 
-if [ ! "${NOWAIT}" = true ]; then
-	WAIT=10
-	echo "############################################################"
-	echo "#           Linux firmware install through USB OTG         #"
-	echo "############################################################"
-	echo ""
-	echo " This process will erase your NAND and will install a new"
-	echo " U-Boot and Linux firmware images on the NAND."
-	echo ""
-	echo " Press CTRL+C now if you wish to abort."
-	echo ""
-	while [ ${WAIT} -gt 0 ]; do
-		printf "\r Update process starts in %d " ${WAIT}
-		sleep 1
-		WAIT=$(( ${WAIT} - 1 ))
-	done
-	printf "\r                                   \n"
-	echo " Starting update process"
-fi
+echo ""
+echo "Determining image files to use..."
 
 # Enable the redirect support to get u-boot variables values
 uuu fb: ucmd setenv stdout serial,fastboot
@@ -113,7 +100,10 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 		fi
 	fi
 
-	# u-boot when the checked value is empty.
+	# remove redirect
+	uuu fb: ucmd setenv stdout serial
+
+	# U-Boot when the checked value is empty.
 	if [ -n "${INSTALL_UBOOT_FILENAME}" ]; then
 		true
 	else
@@ -136,9 +126,6 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 	fi
 fi
 
-# remove redirect
-uuu fb: ucmd setenv stdout serial
-
 # Determine linux, recovery, and rootfs image filenames to update
 if [ -z "${IMAGE_NAME}" ]; then
 	IMAGE_NAME="core-image-base"
@@ -157,6 +144,34 @@ for f in ${FILES}; do
 done;
 
 [ "${ABORT}" = true ] && exit 1
+
+# Print warning about storage media being deleted
+if [ ! "${NOWAIT}" = true ]; then
+	WAIT=10
+	echo ""
+	echo " ===================="
+	echo " =    IMPORTANT!    ="
+	echo " ===================="
+	echo " This process will erase your NAND and will install the following files"
+	echo " on the partitions of the NAND."
+	echo ""
+	echo "   PARTITION   FILENAME"
+	echo "   ---------   --------"
+	echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
+	echo "   linux       ${INSTALL_LINUX_FILENAME}"
+	echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
+	echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
+	echo ""
+	echo " Press CTRL+C now if you wish to abort."
+	echo ""
+	while [ ${WAIT} -gt 0 ]; do
+		printf "\r Update process starts in %d " ${WAIT}
+		sleep 1
+		WAIT=$(( ${WAIT} - 1 ))
+	done
+	printf "\r                                   \n"
+	echo " Starting update process"
+fi
 
 # Set fastboot buffer address to $loadaddr, just in case
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}

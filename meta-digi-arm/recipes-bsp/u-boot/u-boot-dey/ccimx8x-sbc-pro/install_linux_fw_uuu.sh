@@ -15,9 +15,8 @@
 # set -x
 
 #
-# U-Boot script for installing Linux images created by Yocto into the eMMC
+# U-Boot script for installing Linux images created by Yocto
 #
-clear
 
 # Parse uuu cmd output
 getenv()
@@ -59,6 +58,11 @@ part_update()
 	fi
 }
 
+clear
+echo "############################################################"
+echo "#           Linux firmware install through USB OTG         #"
+echo "############################################################"
+
 # Command line admits the following parameters:
 # -u <u-boot-filename>
 # -i <image-name>
@@ -72,40 +76,22 @@ do
 	esac
 done
 
-if [ ! "${NOWAIT}" = true ]; then
-	WAIT=10
-	echo "############################################################"
-	echo "#           Linux firmware install through USB OTG         #"
-	echo "############################################################"
-	echo ""
-	echo " This process will erase your eMMC and will install a new"
-	echo " U-Boot and Linux firmware images on the eMMC."
-	echo ""
-	echo " Press CTRL+C now if you wish to abort."
-	echo ""
-	while [ ${WAIT} -gt 0 ]; do
-		printf "\r Update process starts in %d " ${WAIT}
-		sleep 1
-		WAIT=$(( ${WAIT} - 1 ))
-	done
-	printf "\r                                   \n"
-	echo " Starting update process"
-fi
-
-# Enable the redirect support to get u-boot variables values
-uuu fb: ucmd setenv stdout serial,fastboot
-
-# Since SOMs with the B0 SOC might have an older U-Boot that doesn't export the
-# SOC revision to the environment, use B0 by default
-soc_rev=$(getenv "soc_rev")
-if [ -z "${soc_rev}" ]; then
-	soc_rev="B0"
-fi
+echo ""
+echo "Determining image files to use..."
 
 # Determine U-Boot file to program basing on SOM's SOC type (linked to bus width)
 if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
-	bus_width="32bit"
+	# Enable the redirect support to get u-boot variables values
+	uuu fb: ucmd setenv stdout serial,fastboot
 
+	# Since SOMs with the B0 SOC might have an older U-Boot that doesn't export the
+	# SOC revision to the environment, use B0 by default
+	soc_rev=$(getenv "soc_rev")
+	if [ -z "${soc_rev}" ]; then
+		soc_rev="B0"
+	fi
+
+	bus_width="32bit"
 	soc_type=$(getenv "soc_type")
 	if [ "$soc_type" = "imx8dx"  ]; then
 		bus_width="16bit"
@@ -132,6 +118,9 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		INSTALL_UBOOT_FILENAME="imx-boot-ccimx8x-sbc-pro-${soc_rev}-${module_ram}_${bus_width}.bin"
 	fi
 
+	# remove redirect
+	uuu fb: ucmd setenv stdout serial
+
 	# U-Boot when the checked value is empty.
 	if [ -n "${INSTALL_UBOOT_FILENAME}" ]; then
 		true
@@ -157,9 +146,6 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 	fi
 fi
 
-# remove redirect
-uuu fb: ucmd setenv stdout serial
-
 # Determine linux, recovery, and rootfs image filenames to update
 if [ -z "${IMAGE_NAME}" ]; then
 	IMAGE_NAME="dey-image-qt"
@@ -179,8 +165,33 @@ done;
 
 [ "${ABORT}" = true ] && exit 1
 
-# Set fastboot buffer address to $loadaddr, just in case
-uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
+# Print warning about storage media being deleted
+if [ ! "${NOWAIT}" = true ]; then
+	WAIT=10
+	echo ""
+	echo " ===================="
+	echo " =    IMPORTANT!    ="
+	echo " ===================="
+	echo " This process will erase your eMMC and will install the following files"
+	echo " on the partitions of the eMMC."
+	echo ""
+	echo "   PARTITION   FILENAME"
+	echo "   ---------   --------"
+	echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
+	echo "   linux       ${INSTALL_LINUX_FILENAME}"
+	echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
+	echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
+	echo ""
+	echo " Press CTRL+C now if you wish to abort."
+	echo ""
+	while [ ${WAIT} -gt 0 ]; do
+		printf "\r Update process starts in %d " ${WAIT}
+		sleep 1
+		WAIT=$(( ${WAIT} - 1 ))
+	done
+	printf "\r                                   \n"
+	echo " Starting update process"
+fi
 
 # Skip user confirmation for U-Boot update
 uuu fb: ucmd setenv forced_update 1
@@ -225,8 +236,11 @@ uuu fb: ucmd setenv bootcmd "
 uuu fb: ucmd saveenv
 uuu fb: acmd reset
 
-# Wait that target returns from reset
+# Wait for the target to reset
 sleep 3
+
+# Set fastboot buffer address to $loadaddr, just in case
+uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 
 # Update Linux
 part_update "linux" "${INSTALL_LINUX_FILENAME}"
@@ -235,7 +249,7 @@ part_update "linux" "${INSTALL_LINUX_FILENAME}"
 part_update "recovery" "${INSTALL_RECOVERY_FILENAME}"
 
 # Update Rootfs
-uuu fb: flash -raw2sparse rootfs ${INSTALL_ROOTFS_FILENAME}
+part_update "rootfs" "${INSTALL_ROOTFS_FILENAME}"
 
 # Configure u-boot to boot into recovery mode
 uuu fb: ucmd setenv boot_recovery yes
