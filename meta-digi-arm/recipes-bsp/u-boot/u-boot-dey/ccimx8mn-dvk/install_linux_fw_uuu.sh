@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2020 by Digi International Inc.
+#  Copyright (C) 2020-2021 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -14,34 +14,57 @@
 #===============================================================================
 # set -x
 
+#
+# U-Boot script for installing Linux images created by Yocto into the eMMC
+#
 clear
 
 # Parse uuu cmd output
-function getenv()
+getenv()
 {
 	uuu -v fb: ucmd printenv "${1}" | sed -ne "s,^${1}=,,g;T;p"
 }
 
-#
-# U-Boot script for installing Linux images created by Yocto into the eMMC
-#
+show_usage()
+{
+	echo "Usage: $0 [options]"
+	echo ""
+	echo "  Options:"
+	echo "   -h                     Show this help."
+	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
+	echo "                          'dey-image-webkit', 'core-image-base'..."
+	echo "                          Defaults to 'dey-image-qt' if not provided."
+	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
+	echo "   -u <u-boot-filename>   U-Boot filename."
+	echo "                          Auto-determined by variant if not provided."
+	exit 2
+}
 
-echo "############################################################"
-echo "#           Linux firmware install through USB OTG         #"
-echo "############################################################"
-echo ""
-echo " This process will erase your eMMC and will install a new"
-echo " U-Boot and Linux firmware images on the eMMC."
-echo ""
-echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
-echo " to continue."
+# Command line admits the following parameters:
+# -u <u-boot-filename>
+# -i <image-name>
+while getopts 'hi:nu:' c
+do
+	case $c in
+	h) show_usage ;;
+	i) IMAGE_NAME=${OPTARG} ;;
+	n) NOWAIT=true ;;
+	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
+	esac
+done
 
-# Get U-Boot file name from cmdline when passed
-if [ -n "$1" ]; then
-	INSTALL_UBOOT_FILENAME="$1"
+if [ ! "${NOWAIT}" = true ]; then
+	echo "############################################################"
+	echo "#           Linux firmware install through USB OTG         #"
+	echo "############################################################"
+	echo ""
+	echo " This process will erase your eMMC and will install a new"
+	echo " U-Boot and Linux firmware images on the eMMC."
+	echo ""
+	echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
+	echo " to continue."
+	sleep 10
 fi
-
-sleep 10
 
 if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 	INSTALL_UBOOT_FILENAME="imx-boot-ccimx8mn-dvk.bin"
@@ -91,9 +114,12 @@ uuu fb: ucmd saveenv
 
 uuu fb: acmd reset
 
-INSTALL_LINUX_FILENAME="dey-image-qt-##GRAPHICAL_BACKEND##-ccimx8mn-dvk.boot.vfat"
-INSTALL_RECOVERY_FILENAME="dey-image-qt-##GRAPHICAL_BACKEND##-ccimx8mn-dvk.recovery.vfat"
-INSTALL_ROOTFS_FILENAME="dey-image-qt-##GRAPHICAL_BACKEND##-ccimx8mn-dvk.ext4"
+if [ -z "${IMAGE_NAME}" ]; then
+	IMAGE_NAME="dey-image-qt"
+fi
+INSTALL_LINUX_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx8mn-dvk.boot.vfat"
+INSTALL_RECOVERY_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx8mn-dvk.recovery.vfat"
+INSTALL_ROOTFS_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx8mn-dvk.ext4"
 
 # Wait that target returns from reset
 sleep 3

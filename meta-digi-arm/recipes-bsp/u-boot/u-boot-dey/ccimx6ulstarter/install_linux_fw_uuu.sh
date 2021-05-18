@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2020 by Digi International Inc.
+#  Copyright (C) 2020-2021 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -13,12 +13,31 @@
 #    Script to flash Yocto build artifacts over USB to the target.
 #===============================================================================
 # set -x
+
+#
+# U-Boot script for installing Linux images created by Yocto into the NAND
+#
 clear
 
 # Parse uuu cmd output
 getenv()
 {
 	uuu -v fb: ucmd printenv "${1}" | sed -ne "s,^${1}=,,g;T;p"
+}
+
+show_usage()
+{
+	echo "Usage: $0 [options]"
+	echo ""
+	echo "  Options:"
+	echo "   -h                     Show this help."
+	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
+	echo "                          'dey-image-webkit', 'core-image-base'..."
+	echo "                          Defaults to 'core-image-base' if not provided."
+	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
+	echo "   -u <u-boot-filename>   U-Boot filename."
+	echo "                          Auto-determined by variant if not provided."
+	exit 2
 }
 
 # Update a NAND partition
@@ -41,28 +60,37 @@ nand_update()
 	uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${fastboot_bytes}
 }
 
-#
-# U-Boot script for installing Linux images created by Yocto into the NAND
-#
-echo "############################################################"
-echo "#           Linux firmware install through USB OTG         #"
-echo "############################################################"
-echo ""
-echo " This process will erase your NAND and will install a new"
-echo " U-Boot and Linux firmware images on the NAND."
-echo ""
-echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
-echo " to continue."
+# Command line admits the following parameters:
+# -u <u-boot-filename>
+# -i <image-name>
+while getopts 'hi:nu:' c
+do
+	case $c in
+	h) show_usage ;;
+	i) IMAGE_NAME=${OPTARG} ;;
+	n) NOWAIT=true ;;
+	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
+	esac
+done
 
-sleep 10
+if [ ! "${NOWAIT}" = true ]; then
+	echo "############################################################"
+	echo "#           Linux firmware install through USB OTG         #"
+	echo "############################################################"
+	echo ""
+	echo " This process will erase your NAND and will install a new"
+	echo " U-Boot and Linux firmware images on the NAND."
+	echo ""
+	echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
+	echo " to continue."
+	sleep 10
+fi
 
 # Enable the redirect support to get u-boot variables values
 uuu fb: ucmd setenv stdout serial,fastboot
 
-# Get U-Boot file name from cmdline when passed
-if [ -n "$1" ]; then
-	INSTALL_UBOOT_FILENAME="$1"
-else
+# Determine U-Boot filename if not provided
+if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 	module_variant=$(getenv "module_variant")
 	# Determine U-Boot file to program basing on SOM's variant
 	if [ -n "$module_variant" ]; then
@@ -77,32 +105,32 @@ else
 			INSTALL_UBOOT_FILENAME="u-boot-ccimx6ulstarter.imx"
 		fi
 	fi
+
+	# u-boot when the checked value is empty.
+	if [ -n "${INSTALL_UBOOT_FILENAME}" ]; then
+		true
+	else
+		echo ""
+		echo "[ERROR] Cannot determine U-Boot file for this module!"
+		echo ""
+		echo "1. Add U-boot file name, depending on your ConnectCore 8X variant, to script command line:"
+		echo "   - For a SOM with 1GB DDR3, run:"
+		echo "     => ./install_linux_fs_uuu.sh -u u-boot-ccimx6ulstarter1GB.imx"
+		echo "   - For a SOM with 512MB DDR3, run:"
+		echo "     => ./install_linux_fs_uuu.sh -u u-boot-ccimx6ulstarter512MB.imx"
+		echo "   - For a SOM with 256MB DDR3, run:"
+		echo "     => ./install_linux_fs_uuu.sh -u u-boot-ccimx6ulstarter.imx"
+		echo ""
+		echo "2. Run the install script again."
+		echo ""
+		echo "Aborted"
+		echo ""
+		exit
+	fi
 fi
 
 # remove redirect
 uuu fb: ucmd setenv stdout serial
-
-# u-boot when the checked value is empty.
-if [ -n "${INSTALL_UBOOT_FILENAME}" ]; then
-	true
-else
-	echo ""
-	echo "[ERROR] Cannot determine U-Boot file for this module!"
-	echo ""
-	echo "1. Add U-boot file name, depending on your ConnectCore 8X variant, to script command line:"
-	echo "   - For a SOM with 1GB DDR3, run:"
-	echo "     => ./install_linux_fs_uuu.sh u-boot-ccimx6ulstarter1GB.imx"
-	echo "   - For a SOM with 512MB DDR3, run:"
-	echo "     => ./install_linux_fs_uuu.sh u-boot-ccimx6ulstarter512MB.imx"
-	echo "   - For a SOM with 256MB DDR3, run:"
-	echo "     => ./install_linux_fs_uuu.sh u-boot-ccimx6ulstarter.imx"
-	echo ""
-	echo "2. Run the install script again."
-	echo ""
-	echo "Aborted"
-	echo ""
-	exit
-fi
 
 # Set fastboot buffer address to $loadaddr, just in case
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
@@ -134,9 +162,12 @@ uuu fb: ucmd setenv bootcmd "
 uuu fb: ucmd saveenv
 uuu fb: acmd reset
 
-INSTALL_LINUX_FILENAME="dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6ulstarter.boot.ubifs"
-INSTALL_RECOVERY_FILENAME="dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6ulstarter.recovery.ubifs"
-INSTALL_ROOTFS_FILENAME="dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6ulstarter.ubifs"
+if [ -z "${IMAGE_NAME}" ]; then
+	IMAGE_NAME="core-image-base"
+fi
+INSTALL_LINUX_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx6ulstarter.boot.ubifs"
+INSTALL_RECOVERY_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx6ulstarter.recovery.ubifs"
+INSTALL_ROOTFS_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx6ulstarter.ubifs"
 
 # Wait for the target to reset
 sleep 3

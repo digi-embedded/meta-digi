@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2020 by Digi International Inc.
+#  Copyright (C) 2020-2021 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -14,34 +14,57 @@
 #===============================================================================
 # set -x
 
+#
+# U-Boot script for installing Linux images created by Yocto into the eMMC
+#
 clear
 
 # Parse uuu cmd output
-function getenv()
+getenv()
 {
 	uuu -v fb: ucmd printenv "${1}" | sed -ne "s,^${1}=,,g;T;p"
 }
 
-#
-# U-Boot script for installing Linux images created by Yocto into the eMMC
-#
+show_usage()
+{
+	echo "Usage: $0 [options]"
+	echo ""
+	echo "  Options:"
+	echo "   -h                     Show this help."
+	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
+	echo "                          'dey-image-webkit', 'core-image-base'..."
+	echo "                          Defaults to 'dey-image-qt' if not provided."
+	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
+	echo "   -u <u-boot-filename>   U-Boot filename."
+	echo "                          Auto-determined by variant if not provided."
+	exit 2
+}
 
-echo "############################################################"
-echo "#           Linux firmware install through USB OTG         #"
-echo "############################################################"
-echo ""
-echo " This process will erase your eMMC and will install a new"
-echo " U-Boot and Linux firmware images on the eMMC."
-echo ""
-echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
-echo " to continue."
+# Command line admits the following parameters:
+# -u <u-boot-filename>
+# -i <image-name>
+while getopts 'hi:nu:' c
+do
+	case $c in
+	h) show_usage ;;
+	i) IMAGE_NAME=${OPTARG} ;;
+	n) NOWAIT=true ;;
+	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
+	esac
+done
 
-# Get U-Boot file name from cmdline when passed
-if [ -n "$1" ]; then
-	INSTALL_UBOOT_FILENAME="$1"
+if [ ! "${NOWAIT}" = true ]; then
+	echo "############################################################"
+	echo "#           Linux firmware install through USB OTG         #"
+	echo "############################################################"
+	echo ""
+	echo " This process will erase your eMMC and will install a new"
+	echo " U-Boot and Linux firmware images on the eMMC."
+	echo ""
+	echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
+	echo " to continue."
+	sleep 10
 fi
-
-sleep 10
 
 # Enable the redirect support to get u-boot variables values
 uuu fb: ucmd setenv stdout serial,fastboot
@@ -54,60 +77,62 @@ if [ -z "${soc_rev}" ]; then
 fi
 
 # Determine U-Boot file to program basing on SOM's SOC type (linked to bus width)
-bus_width="32bit"
+if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
+	bus_width="32bit"
 
-soc_type=$(getenv "soc_type")
-if [ "$soc_type" == "imx8dx"  ]; then
-	bus_width="16bit"
-fi
+	soc_type=$(getenv "soc_type")
+	if [ "$soc_type" = "imx8dx"  ]; then
+		bus_width="16bit"
+	fi
 
-module_ram=$(getenv "module_ram")
-if [ -z "${module_ram}" ]; then
-	module_variant=$(getenv "module_variant")
-	# Determine U-Boot file to program basing on SOM's variant
-	if [ -n "$module_variant" ]; then
-		if [ "$module_variant" == "0x01" ] || \
-		     [ "$module_variant" == "0x04" ] || \
-		     [ "$module_variant" == "0x05" ]; then
-			module_ram="1GB"
-		elif [ "$module_variant" == "0x02" ] || \
-		     [ "$module_variant" == "0x03" ]; then
-			module_ram="2GB"
-		else
-			module_ram="512MB"
+	module_ram=$(getenv "module_ram")
+	if [ -z "${module_ram}" ]; then
+		module_variant=$(getenv "module_variant")
+		# Determine U-Boot file to program basing on SOM's variant
+		if [ -n "$module_variant" ]; then
+			if [ "$module_variant" == "0x01" ] || \
+			   [ "$module_variant" == "0x04" ] || \
+			   [ "$module_variant" == "0x05" ]; then
+				module_ram="1GB"
+			elif [ "$module_variant" == "0x02" ] || \
+			     [ "$module_variant" == "0x03" ]; then
+				module_ram="2GB"
+			else
+				module_ram="512MB"
+			fi
+			INSTALL_UBOOT_FILENAME="imx-boot-ccimx8x-sbc-pro-${soc_rev}-${module_ram}_${bus_width}.bin"
 		fi
+	else
 		INSTALL_UBOOT_FILENAME="imx-boot-ccimx8x-sbc-pro-${soc_rev}-${module_ram}_${bus_width}.bin"
 	fi
-else
-	INSTALL_UBOOT_FILENAME="imx-boot-ccimx8x-sbc-pro-${soc_rev}-${module_ram}_${bus_width}.bin"
+
+	# U-Boot when the checked value is empty.
+	if [ -n "${INSTALL_UBOOT_FILENAME}" ]; then
+		true
+	else
+		echo ""
+		echo "[ERROR] Cannot determine U-Boot file for this module!"
+		echo ""
+		echo "1. Add U-boot file name, depending on your ConnectCore 8X variant, to script command line:"
+		echo "   - For a QuadXPlus CPU with 1GB LPDDR4, run:"
+		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_32bit.bin"
+		echo "   - For a QuadXPlus CPU with 2GB LPDDR4, run:"
+		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-ccimx8x-sbc-pro-${soc_rev}-2GB_32bit.bin"
+		echo "   - For a DualX CPU with 1GB LPDDR4, run:"
+		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_16bit.bin"
+		echo "   - For a DualX CPU with 512MB LPDDR4, run:"
+		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-ccimx8x-sbc-pro-${soc_rev}-512MB_16bit.bin"
+		echo ""
+		echo "2. Run the install script again."
+		echo ""
+		echo "Aborted"
+		echo ""
+		exit
+	fi
 fi
 
 # remove redirect
 uuu fb: ucmd setenv stdout serial
-
-# u-boot when the checked value is empty.
-if [ -n "${INSTALL_UBOOT_FILENAME}" ]; then
-	true
-else
-	echo ""
-	echo "[ERROR] Cannot determine U-Boot file for this module!"
-	echo ""
-	echo "1. Add U-boot file name, depending on your ConnectCore 8X variant, to script command line:"
-	echo "   - For a QuadXPlus CPU with 1GB LPDDR4, run:"
-	echo "     => ./install_linux_fs_uuu.sh imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_32bit.bin"
-	echo "   - For a QuadXPlus CPU with 2GB LPDDR4, run:"
-	echo "     => ./install_linux_fs_uuu.sh imx-boot-ccimx8x-sbc-pro-${soc_rev}-2GB_32bit.bin"
-	echo "   - For a DualX CPU with 1GB LPDDR4, run:"
-	echo "     => ./install_linux_fs_uuu.sh imx-boot-ccimx8x-sbc-pro-${soc_rev}-1GB_16bit.bin"
-	echo "   - For a DualX CPU with 512MB LPDDR4, run:"
-	echo "     => ./install_linux_fs_uuu.sh imx-boot-ccimx8x-sbc-pro-${soc_rev}-512MB_16bit.bin"
-	echo ""
-	echo "2. Run the install script again."
-	echo ""
-	echo "Aborted"
-	echo ""
-	exit
-fi
 
 # Skip user confirmation for U-Boot update
 uuu fb: ucmd setenv forced_update 1
@@ -153,9 +178,12 @@ uuu fb: ucmd saveenv
 
 uuu fb: acmd reset
 
-INSTALL_LINUX_FILENAME="dey-image-qt-##GRAPHICAL_BACKEND##-ccimx8x-sbc-pro.boot.vfat"
-INSTALL_RECOVERY_FILENAME="dey-image-qt-##GRAPHICAL_BACKEND##-ccimx8x-sbc-pro.recovery.vfat"
-INSTALL_ROOTFS_FILENAME="dey-image-qt-##GRAPHICAL_BACKEND##-ccimx8x-sbc-pro.ext4"
+if [ -z "${IMAGE_NAME}" ]; then
+	IMAGE_NAME="dey-image-qt"
+fi
+INSTALL_LINUX_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx8x-sbc-pro.boot.vfat"
+INSTALL_RECOVERY_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx8x-sbc-pro.recovery.vfat"
+INSTALL_ROOTFS_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx8x-sbc-pro.ext4"
 
 # Wait that target returns from reset
 sleep 3
