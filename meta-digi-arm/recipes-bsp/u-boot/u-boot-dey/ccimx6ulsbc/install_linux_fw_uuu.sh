@@ -74,6 +74,7 @@ do
 done
 
 if [ ! "${NOWAIT}" = true ]; then
+	WAIT=10
 	echo "############################################################"
 	echo "#           Linux firmware install through USB OTG         #"
 	echo "############################################################"
@@ -81,9 +82,15 @@ if [ ! "${NOWAIT}" = true ]; then
 	echo " This process will erase your NAND and will install a new"
 	echo " U-Boot and Linux firmware images on the NAND."
 	echo ""
-	echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
-	echo " to continue."
-	sleep 10
+	echo " Press CTRL+C now if you wish to abort."
+	echo ""
+	while [ ${WAIT} -gt 0 ]; do
+		printf "\r Update process starts in %d " ${WAIT}
+		sleep 1
+		WAIT=$(( ${WAIT} - 1 ))
+	done
+	printf "\r                                   \n"
+	echo " Starting update process"
 fi
 
 # Enable the redirect support to get u-boot variables values
