@@ -29,6 +29,7 @@ if test -n "${module_variant}"; then
 		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##512MB.imx
 	fi
 fi
+
 # Use 'test -n ...' because 'test -z ...' does not work well on old versions of
 # u-boot when the checked value is empty.
 if test -n "${INSTALL_UBOOT_FILENAME}"; then
@@ -53,9 +54,26 @@ else
 fi;
 
 setenv INSTALL_MMCDEV 0
-setenv INSTALL_LINUX_FILENAME core-image-base-##MACHINE##.boot.ubifs
-setenv INSTALL_RECOVERY_FILENAME core-image-base-##MACHINE##.recovery.ubifs
-setenv INSTALL_ROOTFS_FILENAME core-image-base-##MACHINE##.ubifs
+
+if test ! -n "${image-name}"; then
+	if test "${board_name}" == "ccimx6ulstarter"; then
+		setenv image-name core-image-base
+	else
+		setenv image-name dey-image-qt
+	fi
+fi
+GRAPHICAL_IMAGES="dey-image-qt dey-image-webkit"
+for g in ${GRAPHICAL_IMAGES}; do
+	if test "${image-name}" = "${g}"; then
+		BASEFILENAME="${image-name}-##GRAPHICAL_BACKEND##"
+	fi
+done
+if test -z "${BASEFILENAME}"; then
+	BASEFILENAME="${image-name}"
+fi
+setenv INSTALL_LINUX_FILENAME ${BASEFILENAME}-##MACHINE##.boot.ubifs
+setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.ubifs
+setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.ubifs
 
 # Check for presence of firmware files on the SD card
 for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do

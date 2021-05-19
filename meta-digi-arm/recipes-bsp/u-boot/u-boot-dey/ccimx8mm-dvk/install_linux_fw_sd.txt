@@ -21,9 +21,22 @@ fi
 
 setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##.bin;
 setenv INSTALL_MMCDEV 1
-setenv INSTALL_LINUX_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-##MACHINE##.boot.vfat
-setenv INSTALL_RECOVERY_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-##MACHINE##.recovery.vfat
-setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-##MACHINE##.ext4
+
+if test -z "${image-name}"; then
+	setenv image-name dey-image-qt
+fi
+GRAPHICAL_IMAGES="dey-image-qt dey-image-webkit"
+for g in ${GRAPHICAL_IMAGES}; do
+	if test "${image-name}" = "${g}"; then
+		BASEFILENAME="${image-name}-##GRAPHICAL_BACKEND##"
+	fi
+done
+if test -z "${BASEFILENAME}"; then
+	BASEFILENAME="${image-name}"
+fi
+setenv INSTALL_LINUX_FILENAME ${BASEFILENAME}-##MACHINE##.boot.vfat
+setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.vfat
+setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.ext4
 
 # Check for presence of firmware files on the SD card
 for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do
