@@ -6,11 +6,6 @@
 setenv ORIG_overlays ${overlays}
 setenv ORIG_extra_bootargs ${extra_bootargs}
 
-# Set SOC type to "imx8mm" if not already defined by U-Boot
-if test ! -n "${soc_type}"; then
-	setenv soc_type "imx8mm"
-fi
-
 #
 # Determine overlays to apply depending on the hardware capabilities
 # described by the HWID, SOM version, and carrier board version.
