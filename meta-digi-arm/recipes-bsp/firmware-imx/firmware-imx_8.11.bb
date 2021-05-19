@@ -11,21 +11,29 @@ SRC_URI_append = " \
     file://epdc \
     file://regulatory \
     file://hdmi \
+    file://sdma-firmware.service \
 "
 
 PE = "1"
 
-inherit allarch
+inherit allarch systemd
+
+SYSTEMD_PACKAGES = "${PN}-sdma"
+SYSTEMD_SERVICE_${PN}-sdma = "sdma-firmware.service"
 
 do_install() {
     install -d ${D}${base_libdir}/firmware/imx
 
-    # Install loading scripts
-    install -d ${D}${sysconfdir}
-    install -m 0755 ${WORKDIR}/sdma ${D}${sysconfdir}
-    install -m 0755 ${WORKDIR}/epdc ${D}${sysconfdir}
-    install -m 0755 ${WORKDIR}/regulatory ${D}${sysconfdir}
-    install -m 0755 ${WORKDIR}/hdmi ${D}${sysconfdir}
+    if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+        # Install loading scripts
+        install -d ${D}${sysconfdir}
+        install -d ${D}${systemd_system_unitdir}
+        install -m 0755 ${WORKDIR}/sdma ${D}${sysconfdir}
+        install -m 0755 ${WORKDIR}/epdc ${D}${sysconfdir}
+        install -m 0755 ${WORKDIR}/regulatory ${D}${sysconfdir}
+        install -m 0755 ${WORKDIR}/hdmi ${D}${sysconfdir}
+        install -m 0644 ${WORKDIR}/sdma-firmware.service ${D}${systemd_system_unitdir}
+    fi
 
     cd firmware
     for d in *; do
