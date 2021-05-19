@@ -90,13 +90,13 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 	if [ -n "$module_variant" ]; then
 		if [ "$module_variant" = "0x08" ] || \
 		   [ "$module_variant" = "0x09" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-ccimx6ulstarter512MB.imx"
+			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##512MB.imx"
 		elif [ "$module_variant" = "0x04" ] || \
 		     [ "$module_variant" = "0x05" ] || \
 		     [ "$module_variant" = "0x07" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-ccimx6ulstarter1GB.imx"
+			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##1GB.imx"
 		else
-			INSTALL_UBOOT_FILENAME="u-boot-ccimx6ulstarter.imx"
+			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##.imx"
 		fi
 	fi
 
@@ -112,11 +112,11 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 		echo ""
 		echo "1. Add U-boot file name, depending on your ConnectCore 8X variant, to script command line:"
 		echo "   - For a SOM with 1GB DDR3, run:"
-		echo "     => ./install_linux_fs_uuu.sh -u u-boot-ccimx6ulstarter1GB.imx"
+		echo "     => ./install_linux_fs_uuu.sh -u u-boot-##MACHINE##1GB.imx"
 		echo "   - For a SOM with 512MB DDR3, run:"
-		echo "     => ./install_linux_fs_uuu.sh -u u-boot-ccimx6ulstarter512MB.imx"
+		echo "     => ./install_linux_fs_uuu.sh -u u-boot-##MACHINE##512MB.imx"
 		echo "   - For a SOM with 256MB DDR3, run:"
-		echo "     => ./install_linux_fs_uuu.sh -u u-boot-ccimx6ulstarter.imx"
+		echo "     => ./install_linux_fs_uuu.sh -u u-boot-##MACHINE##.imx"
 		echo ""
 		echo "2. Run the install script again."
 		echo ""
@@ -139,9 +139,9 @@ done
 if [ -z "${BASEFILENAME}" ]; then
 	BASEFILENAME="${IMAGE_NAME}"
 fi
-INSTALL_LINUX_FILENAME="${BASEFILENAME}-ccimx6ulstarter.boot.ubifs"
-INSTALL_RECOVERY_FILENAME="${BASEFILENAME}-ccimx6ulstarter.recovery.ubifs"
-INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-ccimx6ulstarter.ubifs"
+INSTALL_LINUX_FILENAME="${BASEFILENAME}-##MACHINE##.boot.ubifs"
+INSTALL_RECOVERY_FILENAME="${BASEFILENAME}-##MACHINE##.recovery.ubifs"
+INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.ubifs"
 
 # Verify existance of files before starting the update
 FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}"

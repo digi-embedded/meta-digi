@@ -19,11 +19,11 @@ if test $? -eq 1; then
 	exit;
 fi
 
-setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8mm-dvk.bin;
+setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##.bin;
 setenv INSTALL_USBDEV 0
-setenv INSTALL_LINUX_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx8mm-dvk.boot.vfat
-setenv INSTALL_RECOVERY_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx8mm-dvk.recovery.vfat
-setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx8mm-dvk.ext4
+setenv INSTALL_LINUX_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-##MACHINE##.boot.vfat
+setenv INSTALL_RECOVERY_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-##MACHINE##.recovery.vfat
+setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-##MACHINE##.ext4
 
 # Check for presence of firmware files on the USB
 for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do

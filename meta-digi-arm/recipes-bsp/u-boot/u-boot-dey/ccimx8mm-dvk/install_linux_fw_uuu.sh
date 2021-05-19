@@ -81,7 +81,7 @@ echo "Determining image files to use..."
 
 # Determine U-Boot file to program basing on SOM's SOC type (linked to bus width)
 if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
-	INSTALL_UBOOT_FILENAME="imx-boot-ccimx8mm-dvk.bin"
+	INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##.bin"
 fi
 
 # Determine linux, recovery, and rootfs image filenames to update
@@ -97,9 +97,9 @@ done
 if [ -z "${BASEFILENAME}" ]; then
 	BASEFILENAME="${IMAGE_NAME}"
 fi
-INSTALL_LINUX_FILENAME="${BASEFILENAME}-ccimx8mm-dvk.boot.vfat"
-INSTALL_RECOVERY_FILENAME="${BASEFILENAME}-ccimx8mm-dvk.recovery.vfat"
-INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-ccimx8mm-dvk.ext4"
+INSTALL_LINUX_FILENAME="${BASEFILENAME}-##MACHINE##.boot.vfat"
+INSTALL_RECOVERY_FILENAME="${BASEFILENAME}-##MACHINE##.recovery.vfat"
+INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.ext4"
 
 # Verify existance of files before starting the update
 FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}"

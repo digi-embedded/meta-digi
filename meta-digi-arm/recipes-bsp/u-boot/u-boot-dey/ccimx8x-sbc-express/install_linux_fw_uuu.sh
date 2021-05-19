@@ -112,10 +112,10 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 			else
 				module_ram="512MB"
 			fi
-			INSTALL_UBOOT_FILENAME="imx-boot-ccimx8x-sbc-express-${soc_rev}-${module_ram}_${bus_width}.bin"
+			INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##-${soc_rev}-${module_ram}_${bus_width}.bin"
 		fi
 	else
-		INSTALL_UBOOT_FILENAME="imx-boot-ccimx8x-sbc-express-${soc_rev}-${module_ram}_${bus_width}.bin"
+		INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##-${soc_rev}-${module_ram}_${bus_width}.bin"
 	fi
 
 	# remove redirect
@@ -130,13 +130,13 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		echo ""
 		echo "1. Add U-boot file name, depending on your ConnectCore 8X variant, to script command line:"
 		echo "   - For a QuadXPlus CPU with 1GB LPDDR4, run:"
-		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-ccimx8x-sbc-express-${soc_rev}-1GB_32bit.bin"
+		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin"
 		echo "   - For a QuadXPlus CPU with 2GB LPDDR4, run:"
-		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-ccimx8x-sbc-express-${soc_rev}-2GB_32bit.bin"
+		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin"
 		echo "   - For a DualX CPU with 1GB LPDDR4, run:"
-		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-ccimx8x-sbc-express-${soc_rev}-1GB_16bit.bin"
+		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin"
 		echo "   - For a DualX CPU with 512MB LPDDR4, run:"
-		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-ccimx8x-sbc-express-${soc_rev}-512MB_16bit.bin"
+		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-512MB_16bit.bin"
 		echo ""
 		echo "2. Run the install script again."
 		echo ""
@@ -159,9 +159,9 @@ done
 if [ -z "${BASEFILENAME}" ]; then
 	BASEFILENAME="${IMAGE_NAME}"
 fi
-INSTALL_LINUX_FILENAME="${BASEFILENAME}-ccimx8x-sbc-express.boot.vfat"
-INSTALL_RECOVERY_FILENAME="${BASEFILENAME}-ccimx8x-sbc-express.recovery.vfat"
-INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-ccimx8x-sbc-express.ext4"
+INSTALL_LINUX_FILENAME="${BASEFILENAME}-##MACHINE##.boot.vfat"
+INSTALL_RECOVERY_FILENAME="${BASEFILENAME}-##MACHINE##.recovery.vfat"
+INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.ext4"
 
 # Verify existance of files before starting the update
 FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}"

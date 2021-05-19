@@ -22,11 +22,11 @@ fi
 # Determine U-Boot file to program basing on module variant
 if test -n "${module_variant}"; then
 	if test "${module_variant}" = "0x02" || test "${module_variant}" = "0x03" || test "${module_variant}" = "0x06" || test "${module_variant}" = "0x0a"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulstarter.imx;
+		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##.imx;
 	elif test "${module_variant}" = "0x04" || test "${module_variant}" = "0x05" || test "${module_variant}" = "0x07"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulstarter1GB.imx;
+		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx;
 	elif test "${module_variant}" = "0x08" || test "${module_variant}" = "0x09"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulstarter512MB.imx
+		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##512MB.imx
 	fi
 fi
 # Use 'test -n ...' because 'test -z ...' does not work well on old versions of
@@ -39,11 +39,11 @@ else
 	echo "";
 	echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 6UL variant:";
 	echo "   - For a SOM with 1GB DDR3, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulstarter1GB.imx";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx";
 	echo "   - For a SOM with 512MB DDR3, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulstarter512MB.imx";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##512MB.imx";
 	echo "   - For a SOM with 256MB DDR3, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6ulstarter.imx";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##.imx";
 	echo "";
 	echo "2. Run the install script again.";
 	echo "";
@@ -53,9 +53,9 @@ else
 fi;
 
 setenv INSTALL_MMCDEV 0
-setenv INSTALL_LINUX_FILENAME core-image-base-ccimx6ulstarter.boot.ubifs
-setenv INSTALL_RECOVERY_FILENAME core-image-base-ccimx6ulstarter.recovery.ubifs
-setenv INSTALL_ROOTFS_FILENAME core-image-base-ccimx6ulstarter.ubifs
+setenv INSTALL_LINUX_FILENAME core-image-base-##MACHINE##.boot.ubifs
+setenv INSTALL_RECOVERY_FILENAME core-image-base-##MACHINE##.recovery.ubifs
+setenv INSTALL_ROOTFS_FILENAME core-image-base-##MACHINE##.ubifs
 
 # Check for presence of firmware files on the SD card
 for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do

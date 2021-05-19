@@ -36,32 +36,32 @@ if test -n "${module_ram}" && test -n "${soc_type}"; then
 	if test "${soc_type}" = "imx8dx"; then
 		bus_width="16bit"
 	fi
-	setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-${module_ram}_${bus_width}.bin;
+	setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-${module_ram}_${bus_width}.bin;
 else
 	# Determine U-Boot file to program basing on SOM's variant
 	if test -n "${module_variant}"; then
 		if test "${module_variant}" = "0x01"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-1GB_32bit.bin;
+			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin;
 		elif test "${module_variant}" = "0x02"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-2GB_32bit.bin;
+			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin;
 		elif test "${module_variant}" = "0x03"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-2GB_32bit.bin;
+			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin;
 		elif test "${module_variant}" = "0x04"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-1GB_16bit.bin;
+			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin;
 		elif test "${module_variant}" = "0x05"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-1GB_16bit.bin;
+			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin;
 		elif test "${module_variant}" = "0x06"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-512MB_16bit.bin;
+			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-512MB_16bit.bin;
 		elif test "${module_variant}" = "0x07"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-1GB_32bit.bin;
+			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin;
 		elif test "${module_variant}" = "0x08"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-1GB_32bit.bin;
+			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin;
 		elif test "${module_variant}" = "0x09"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-512MB_16bit.bin;
+			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-512MB_16bit.bin;
 		elif test "${module_variant}" = "0x0A"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-1GB_16bit.bin;
+			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin;
 		elif test "${module_variant}" = "0x0B"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-1GB_16bit.bin;
+			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin;
 		fi
 	fi
 fi
@@ -76,11 +76,11 @@ else
 	echo "";
 	echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 8X variant:";
 	echo "   - For a QuadXPlus CPU with 1GB LPDDR4, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-1GB_32bit.bin";
+	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin";
 	echo "   - For a QuadXPlus CPU with 2GB LPDDR4, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-2GB_32bit.bin";
+	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin";
 	echo "   - For a DualX CPU with 1GB LPDDR4, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-ccimx8x-sbc-express-${soc_rev}-1GB_16bit.bin";
+	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin";
 	echo "";
 	echo "2. Run the install script again.";
 	echo "";
@@ -90,9 +90,9 @@ else
 fi;
 
 setenv INSTALL_USBDEV 0
-setenv INSTALL_LINUX_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx8x-sbc-express.boot.vfat
-setenv INSTALL_RECOVERY_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx8x-sbc-express.recovery.vfat
-setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx8x-sbc-express.ext4
+setenv INSTALL_LINUX_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-##MACHINE##.boot.vfat
+setenv INSTALL_RECOVERY_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-##MACHINE##.recovery.vfat
+setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-##MACHINE##.ext4
 
 # Check for presence of firmware files on the USB
 for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do

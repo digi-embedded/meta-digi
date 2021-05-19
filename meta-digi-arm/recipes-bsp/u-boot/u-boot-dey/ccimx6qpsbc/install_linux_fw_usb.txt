@@ -22,9 +22,9 @@ fi
 # Determine U-Boot file to program basing on module variant
 if test -n "${module_variant}"; then
 	if test "${module_variant}" = "0x01" || test "${module_variant}" = "0x02"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qpsbc2GB.imx;
+		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##2GB.imx;
 	elif test "${module_variant}" = "0x03"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qpsbc1GB.imx;
+		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx;
 	fi
 fi
 # Use 'test -n ...' because 'test -z ...' does not work well on old versions of
@@ -37,9 +37,9 @@ else
 	echo "";
 	echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 6 QuadPlus variant:";
 	echo "   - For a QuadPlus CPU with 2GB DDR3, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qpsbc2GB.imx";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##2GB.imx";
 	echo "   - For a DualPlus CPU with 1GB DDR3, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qpsbc1GB.imx";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx";
 	echo "";
 	echo "";
 	echo "2. Run the install script again.";
@@ -50,9 +50,9 @@ else
 fi;
 
 setenv INSTALL_USBDEV 0
-setenv INSTALL_LINUX_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6qpsbc.boot.vfat
-setenv INSTALL_RECOVERY_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6qpsbc.recovery.vfat
-setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-ccimx6qpsbc.ext4
+setenv INSTALL_LINUX_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-##MACHINE##.boot.vfat
+setenv INSTALL_RECOVERY_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-##MACHINE##.recovery.vfat
+setenv INSTALL_ROOTFS_FILENAME dey-image-qt-##GRAPHICAL_BACKEND##-##MACHINE##.ext4
 
 # Check for presence of firmware files on the USB
 for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do
