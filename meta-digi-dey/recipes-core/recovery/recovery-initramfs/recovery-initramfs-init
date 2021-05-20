@@ -705,6 +705,19 @@ fi
 # Remove leading/trailing whitespaces from the new encrypted partitions list.
 encrypt_partitions=$(echo "${encrypt_partitions}" | xargs)
 
+# Automatically program a random encryption key if there is none and we're
+# about to encrypt at least one partition.
+if [ -n "${ENC_DIFF}" -a -z "${encryption_key_bool}" ]; then
+	trustfence-tool --key-check >/dev/null 2>&1
+	RETVAL="$?"
+	if [ "${RETVAL}" = "1" ]; then
+		log "No encryption key detected, generating a random one"
+		encryption_key_bool=true
+	elif [ "${RETVAL}" != "0" ]; then
+		quit_with_error "Unable to check if encryption key is set in the system"
+	fi
+fi
+
 # Check if encryption key command is configured.
 if [ -n "${encryption_key_bool}" ]; then
 	log "Trustfence encryption key setup requested (new key: ${encryption_key:-random})"
