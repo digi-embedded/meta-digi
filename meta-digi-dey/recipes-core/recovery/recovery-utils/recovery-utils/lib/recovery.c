@@ -70,6 +70,8 @@ static char *emmc_parts_blacklist[] = {
 	NULL
 };
 
+static char *rootfs[] = { "rootfs", NULL };
+
 /*
  * Function:    append_recovery_command
  * Description: append configuration to the 'recovery_command' variable
@@ -640,11 +642,19 @@ int wipe_update_partition(void)
  * Function:    set_encryption_key
  * Description: configure recovery commands to set a partition encryption key
  */
-int set_encryption_key(char *key)
+int set_encryption_key(char *key, unsigned char force)
 {
+	char *parts[MAX_PARTITIONS];
+	char *encrypted[MAX_PARTITIONS];
 	char *key_cmd = NULL;
+	char confirmation;
 	int generate_random_key = 0;
 	int ret = -1;
+	unsigned char i = 0;
+
+	/* Initialize arrays */
+	parts[0] = NULL;
+	encrypted[0] = NULL;
 
 	generate_random_key = (!key || strlen(key) == 0);
 
@@ -655,6 +665,46 @@ int set_encryption_key(char *key)
 	}
 
 	print_open_device_warning();
+
+	if (!force) {
+		/* Check if there are any currently encrypted partitions */
+		ret = PARSE_PARTITION_INFO(parts, encrypted, MAX_PARTITIONS);
+		if (ret) {
+			fprintf(stderr, "Error: parse_partition_info\n");
+			goto err;
+		}
+
+		/*
+		 * Key changes with an encrypted rootfs are only possible if
+		 * an update package is provided, in which case, we're already
+		 * substituting the current rootfs image with another one.
+		 * Because of this, there's no need to print the warning if the
+		 * rootfs is the only encrypted partition in the system.
+		 */
+		subtract_array(rootfs, encrypted);
+
+		/*
+		 * If we have at least one encrypted partition, ask for
+		 * confirmation before continuing.
+		 */
+		if (encrypted[0]) {
+			printf("\n"
+			       "  *****************************************************************\n"
+			       "  * Warning: Changing the encryption key will erase the contents  *\n"
+			       "  *          of all currently encrypted partitions.               *\n"
+			       "  *****************************************************************\n"
+			       "  Affected partitions:\n");
+			while (encrypted[i])
+				printf("      %s\n", encrypted[i++]);
+			printf("\n  Continue? (y/n): ");
+			confirmation = getchar();
+			if (confirmation != 'y' && confirmation != 'Y') {
+				printf("\nSkipping encryption key change\n");
+				ret = 1;
+				goto err;
+			}
+		}
+	}
 
 	key_cmd =
 	    calloc(1,
@@ -676,7 +726,10 @@ err:
 	if (!generate_random_key)
 		secure_memzero(key, strlen(key));
 
-	return ret ? -1 : 0;
+	free_array(encrypted);
+	free_array(parts);
+
+	return ret < 0 ? -1 : ret;
 }
 
 /*
@@ -685,8 +738,6 @@ err:
  */
 int encrypt_partitions(char *to_encrypt, char *to_unencrypt, unsigned char force)
 {
-	char *rootfs[] = { "rootfs", NULL };
-
 	char *parts[MAX_PARTITIONS];
 	char *encrypted[MAX_PARTITIONS];
 	char *new_encrypted[MAX_PARTITIONS];

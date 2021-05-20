@@ -52,10 +52,11 @@ int wipe_update_partition(void);
  *
  * Params:
  *   'key' (input)  Encryption key to use, NULL or empty to generate a random one
+ *   'force' (input) Skips warning and confirmation prompt if non-zero
  *
- * Return: 0 on sucess, -1 on failure
+ * Return: 0 on sucess, -1 on failure and 1 on success with no recovery command set
  */
-int set_encryption_key(char *key);
+int set_encryption_key(char *key, unsigned char force);
 
 /*
  * Configure recovery commands to encrypt/un-encrypt provided partitions.

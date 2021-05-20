@@ -48,7 +48,7 @@
 	"                                             Empty to generate a random key.\n" \
 	"  -w              --wipe-update-partition    Wipe 'update' partition\n" \
 	"  -T <N>          --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
-	"  -f              --force                    Force (un)encryption operations.\n" \
+	"  -f              --force                    Force (un)encryption and key change operations.\n" \
 	"                  --help                     Print help and exit\n" \
 	"\n" \
 	"<SWU-package-path>    Absolute path to the firmware update package\n" \
@@ -64,6 +64,7 @@
 	"  -k [<key>] --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
 	"                                        Empty to generate a random key.\n" \
 	"  -T <N>     --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
+	"  -f         --force                    Force (un)encryption and key change operations.\n" \
 	"             --help                     Print help and exit\n" \
 	"\n" \
 	"<SWU-package-path>    Absolute path to the firmware update package\n" \
@@ -81,7 +82,7 @@
 	"  -k [<key>]      --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
 	"                                             Empty to generate a random key.\n" \
 	"  -T <N>          --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
-	"  -f              --force                    Force (un)encryption operations.\n" \
+	"  -f              --force                    Force (un)encryption and key change operations.\n" \
 	"                  --help                     Print help and exit\n" \
 	"\n"
 
@@ -227,12 +228,20 @@ int main(int argc, char *argv[])
 
 	if (set_key) {
 		/* Configure recovery commands to set a fs encryption key */
-		ret = set_encryption_key(key);
-		if (ret) {
+		ret = set_encryption_key(key, force);
+		if (ret < 0) {
 			printf("Error: set_encryption_key\n");
 			goto out;
+		} else if (ret == 0) {
+			/*
+			 * Only reboot if strictly necessary, since the function
+			 * might succeed without setting a recovery command
+			 * (for example, if a user cancels the operation).
+			 */
+			need_reboot++;
+		} else {
+			ret = 0;
 		}
-		need_reboot++;
 	}
 
 	if (swu_package) {
