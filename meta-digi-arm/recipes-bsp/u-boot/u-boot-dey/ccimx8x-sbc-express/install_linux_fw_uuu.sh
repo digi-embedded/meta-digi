@@ -150,9 +150,18 @@ fi
 if [ -z "${IMAGE_NAME}" ]; then
 	IMAGE_NAME="dey-image-qt"
 fi
-INSTALL_LINUX_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx8x-sbc-express.boot.vfat"
-INSTALL_RECOVERY_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx8x-sbc-express.recovery.vfat"
-INSTALL_ROOTFS_FILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##-ccimx8x-sbc-express.ext4"
+GRAPHICAL_IMAGES="dey-image-qt dey-image-webkit"
+for g in ${GRAPHICAL_IMAGES}; do
+	if [ "${IMAGE_NAME}" = "${g}" ]; then
+		BASEFILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##"
+	fi
+done
+if [ -z "${BASEFILENAME}" ]; then
+	BASEFILENAME="${IMAGE_NAME}"
+fi
+INSTALL_LINUX_FILENAME="${BASEFILENAME}-ccimx8x-sbc-express.boot.vfat"
+INSTALL_RECOVERY_FILENAME="${BASEFILENAME}-ccimx8x-sbc-express.recovery.vfat"
+INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-ccimx8x-sbc-express.ext4"
 
 # Verify existance of files before starting the update
 FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}"
