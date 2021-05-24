@@ -14,9 +14,23 @@ else
 	#
 	# Set device tree filename depending on the hardware variant
 	#
-	if test "${module_variant}" = "0x02" || test "${module_variant}" = "0x04" || test "${module_variant}" = "0x06"; then
+	if test "${module_variant}" = "0x02"; then
 		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
-	elif test "${module_variant}" = "0x03" || test "${module_variant}" = "0x05"; then
+	elif test "${module_variant}" = "0x03"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter.dtb
+	elif test "${module_variant}" = "0x04"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
+	elif test "${module_variant}" = "0x05"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter.dtb
+	elif test "${module_variant}" = "0x06"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
+	elif test "${module_variant}" = "0x07"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
+	elif test "${module_variant}" = "0x08"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
+	elif test "${module_variant}" = "0x09"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
+	elif test "${module_variant}" = "0x0a"; then
 		setenv fdt_file imx6ul-ccimx6ulstarter.dtb
 	else
 		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
