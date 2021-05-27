@@ -1,14 +1,9 @@
-# Copyright (C) 2016-2018 Digi International.
+# Copyright (C) 2016-2021 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 CRYPTOCHIP_COMMON_PATCHES = " \
     file://0003-Modify-openssl.cnf-to-automatically-load-the-cryptoc.patch \
-"
-
-SRC_URI_remove = " \
-    file://debian1.0.2/version-script.patch \
-    file://debian1.0.2/soname.patch \
 "
 
 SRC_URI += " \
