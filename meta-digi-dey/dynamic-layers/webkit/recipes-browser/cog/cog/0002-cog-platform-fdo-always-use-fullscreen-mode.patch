@@ -1,6 +1,6 @@
 From: Gabriel Valcazar <gabriel.valcazar@digi.com>
 Date: Tue, 10 Nov 2020 16:36:21 +0100
-Subject: [PATCH 4/4] cog-platform-fdo: always use fullscreen mode
+Subject: [PATCH 2/2] cog-platform-fdo: always use fullscreen mode
 
 Otherwise, the browser will spawn on a random place on the desktop every time.
 

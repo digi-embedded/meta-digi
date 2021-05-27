@@ -1,6 +1,6 @@
 From: Gabriel Valcazar <gabriel.valcazar@digi.com>
 Date: Tue, 10 Nov 2020 16:32:15 +0100
-Subject: [PATCH 3/4] cog: remove the --platform parameter and hardcode the FDO
+Subject: [PATCH 1/2] cog: remove the --platform parameter and hardcode the FDO
  platform
 
 We don't want users to accidentally generate errors by using different
