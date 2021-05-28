@@ -32,7 +32,7 @@ show_usage()
 	echo "   -h                     Show this help."
 	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
 	echo "                          'dey-image-webkit', 'core-image-base'..."
-	echo "                          Defaults to 'dey-image-qt' if not provided."
+	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
 	echo "   -u <u-boot-filename>   U-Boot filename."
 	echo "                          Auto-determined by variant if not provided."
@@ -128,9 +128,9 @@ fi
 
 # Determine linux, recovery, and rootfs image filenames to update
 if [ -z "${IMAGE_NAME}" ]; then
-	IMAGE_NAME="dey-image-qt"
+	IMAGE_NAME="##DEFAULT_IMAGE_NAME##"
 fi
-GRAPHICAL_IMAGES="dey-image-qt dey-image-webkit"
+GRAPHICAL_IMAGES="##GRAPHICAL_IMAGES##"
 for g in ${GRAPHICAL_IMAGES}; do
 	if [ "${IMAGE_NAME}" = "${g}" ]; then
 		BASEFILENAME="${IMAGE_NAME}-##GRAPHICAL_BACKEND##"

@@ -73,3 +73,9 @@ MACHINE_EXTRA_RDEPENDS += " \
 MACHINE_EXTRA_RRECOMMENDS += " \
     ${@bb.utils.contains("MACHINE_FEATURES", "cryptochip", "cryptoauthlib", "", d)} \
 "
+
+# Default image name (for install scripts)
+DEFAULT_IMAGE_NAME ??= "dey-image-qt"
+
+# List of graphical images names (for install scripts)
+GRAPHICAL_IMAGES ?= "dey-image-qt dey-image-webkit"

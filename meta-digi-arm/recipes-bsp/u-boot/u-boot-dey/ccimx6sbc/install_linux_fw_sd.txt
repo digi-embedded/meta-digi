@@ -63,9 +63,9 @@ fi;
 setenv INSTALL_MMCDEV 1
 
 if test -z "${image-name}"; then
-	setenv image-name dey-image-qt
+	setenv image-name ##DEFAULT_IMAGE_NAME##
 fi
-GRAPHICAL_IMAGES="dey-image-qt dey-image-webkit"
+GRAPHICAL_IMAGES="##GRAPHICAL_IMAGES##"
 for g in ${GRAPHICAL_IMAGES}; do
 	if test "${image-name}" = "${g}"; then
 		BASEFILENAME="${image-name}-##GRAPHICAL_BACKEND##"

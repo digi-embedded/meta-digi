@@ -164,19 +164,20 @@ do_deploy_append() {
 		unset  i
 	fi
 
-	# DEY firmware install script
-	sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_sd.txt
-	sed -i -e 's,##MACHINE##,${MACHINE},g' ${WORKDIR}/install_linux_fw_sd.txt
+	# DEY firmware install scripts
+	sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_sd.txt ${WORKDIR}/install_linux_fw_usb.txt
+	sed -i -e 's,##MACHINE##,${MACHINE},g' ${WORKDIR}/install_linux_fw_sd.txt  ${WORKDIR}/install_linux_fw_usb.txt
+	sed -i -e 's,##GRAPHICAL_IMAGES##,${GRAPHICAL_IMAGES},g' ${WORKDIR}/install_linux_fw_sd.txt  ${WORKDIR}/install_linux_fw_usb.txt
+	sed -i -e 's,##DEFAULT_IMAGE_NAME##,${DEFAULT_IMAGE_NAME},g' ${WORKDIR}/install_linux_fw_sd.txt  ${WORKDIR}/install_linux_fw_usb.txt
 	mkimage -T script -n "DEY firmware install script" -C none -d ${WORKDIR}/install_linux_fw_sd.txt ${DEPLOYDIR}/install_linux_fw_sd.scr
-
-	sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_usb.txt
-	sed -i -e 's,##MACHINE##,${MACHINE},g' ${WORKDIR}/install_linux_fw_usb.txt
 	mkimage -T script -n "DEY firmware install script" -C none -d ${WORKDIR}/install_linux_fw_usb.txt ${DEPLOYDIR}/install_linux_fw_usb.scr
 
 	if [ "${@oe.utils.conditional('UBOOT_HAS_FASTBOOT', 'true', 'true', '', d)}" = "true" ]; then
 		# DEY firmware install uuu script
 		sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_uuu.sh
 		sed -i -e 's,##MACHINE##,${MACHINE},g' ${WORKDIR}/install_linux_fw_uuu.sh
+		sed -i -e 's,##GRAPHICAL_IMAGES##,${GRAPHICAL_IMAGES},g' ${WORKDIR}/install_linux_fw_uuu.sh
+		sed -i -e 's,##DEFAULT_IMAGE_NAME##,${DEFAULT_IMAGE_NAME},g' ${WORKDIR}/install_linux_fw_uuu.sh
 		install -m 775 ${WORKDIR}/install_linux_fw_uuu.sh ${DEPLOYDIR}/
 	fi
 

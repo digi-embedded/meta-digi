@@ -55,14 +55,10 @@ fi;
 
 setenv INSTALL_MMCDEV 0
 
-if test ! -n "${image-name}"; then
-	if test "${board_name}" == "ccimx6ulstarter"; then
-		setenv image-name core-image-base
-	else
-		setenv image-name dey-image-qt
-	fi
+if test -z "${image-name}"; then
+	setenv image-name ##DEFAULT_IMAGE_NAME##
 fi
-GRAPHICAL_IMAGES="dey-image-qt dey-image-webkit"
+GRAPHICAL_IMAGES="##GRAPHICAL_IMAGES##"
 for g in ${GRAPHICAL_IMAGES}; do
 	if test "${image-name}" = "${g}"; then
 		BASEFILENAME="${image-name}-##GRAPHICAL_BACKEND##"
