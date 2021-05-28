@@ -141,12 +141,28 @@ static int is_device_closed(void)
  */
 static int is_device_nand(void)
 {
-	const char *path_mtd = "/proc/mtd";
+	FILE *fp;
+	char dump[256];
+	char *root_start;
+	char *root_end;
+	const char *cmdline = "/proc/cmdline";
 
-	if (access(path_mtd, F_OK) != -1)
-		return 1;
+	fp = fopen(cmdline, "r");
+	if (!fp)
+		return 0;
 
-	return 0;
+	if (!fgets(dump, sizeof(dump), fp))
+		return 0;
+
+	root_start = strstr(dump, "root=");
+	if (!root_start)
+		return 0;
+	root_end = strstr(root_start, " ");
+	/* Truncate at root_end so that root_start contains the args for root */
+	if (root_end)
+		*root_end = '\0';
+
+	return strstr(root_start, "ubi") || strstr(root_start, "mtd");
 }
 
 /*
