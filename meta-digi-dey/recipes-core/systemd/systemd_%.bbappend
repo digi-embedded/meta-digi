@@ -1,6 +1,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
+    file://0001-sysv-generator-reduce-message-level-for-packages-tha.patch \
     file://0002-sd-resolve-forcefully-cancel-worker-threads-during-r.patch \
 "
 

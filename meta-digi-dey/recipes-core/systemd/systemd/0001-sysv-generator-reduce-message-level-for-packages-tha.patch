@@ -1,0 +1,27 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Mon, 31 May 2021 14:40:24 +0200
+Subject: [PATCH] sysv-generator: reduce message level for packages that still
+ ship only a SysV init script
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ src/sysv-generator/sysv-generator.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/sysv-generator/sysv-generator.c b/src/sysv-generator/sysv-generator.c
+index a2c72d1009..aafa6c9f2b 100644
+--- a/src/sysv-generator/sysv-generator.c
++++ b/src/sysv-generator/sysv-generator.c
+@@ -786,11 +786,11 @@ static int enumerate_sysv(const LookupPaths *lp, Hashmap *all_services) {
+
+                         fpath = path_join(*path, de->d_name);
+                         if (!fpath)
+                                 return log_oom();
+
+-                        log_warning("SysV service '%s' lacks a native systemd unit file. "
++                        log_debug("SysV service '%s' lacks a native systemd unit file. "
+                                     "Automatically generating a unit file for compatibility. "
+                                     "Please update package to include a native systemd unit file, in order to make it more safe and robust.", fpath);
+
+                         service = new(SysvStub, 1);
+                         if (!service)
