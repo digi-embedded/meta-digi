@@ -37,6 +37,9 @@ EXTRA_OEMAKE_append = " KCFLAGS=-fgnu89-inline"
 
 UBOOT_EXTRA_CONF ?= ""
 
+# Use default initial env name so userspace tools work as expected
+UBOOT_INITIAL_ENV = "u-boot-initial-env"
+
 python __anonymous() {
     if (d.getVar("TRUSTFENCE_DEK_PATH", True) not in ["0", None]) and (d.getVar("TRUSTFENCE_SIGN", True) != "1"):
         bb.fatal("Only signed U-Boot images can be encrypted. Generate signed images (TRUSTFENCE_SIGN = \"1\") or remove encryption (TRUSTFENCE_DEK_PATH = \"0\")")
