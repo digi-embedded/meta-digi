@@ -6,7 +6,7 @@ do_configure_append() {
 	# If Trustfence is enabled, enable the signing support in the
 	# '.config' file.
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
-		echo "CONFIG_SIGNED_IMAGES=y" >> ${S}/.config
+		echo "CONFIG_SIGNED_IMAGES=y" >> ${B}/.config
 		cml1_do_configure
 	fi
 }
