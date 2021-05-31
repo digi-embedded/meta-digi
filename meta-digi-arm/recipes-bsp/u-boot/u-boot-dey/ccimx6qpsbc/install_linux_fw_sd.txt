@@ -3,21 +3,9 @@
 # card into the eMMC
 #
 
-echo "############################################################"
-echo "#           Linux firmware install from micro SD           #"
-echo "############################################################"
-echo ""
-echo " This process will erase your eMMC and will install a new"
-echo " U-Boot and Linux firmware images on the eMMC."
-echo ""
-echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
-echo " to continue."
-
-sleep 10
-if test $? -eq 1; then
-	echo "Aborted by user.";
-	exit;
-fi
+# Reset temp variables
+install_abort=0
+BASEFILENAME=0
 
 # Determine U-Boot file to program basing on module variant
 if test -n "${module_variant}"; then
@@ -60,7 +48,7 @@ for g in ${GRAPHICAL_IMAGES}; do
 		BASEFILENAME="${image-name}-##GRAPHICAL_BACKEND##"
 	fi
 done
-if test -z "${BASEFILENAME}"; then
+if test "${BASEFILENAME} = "0"; then
 	BASEFILENAME="${image-name}"
 fi
 setenv INSTALL_LINUX_FILENAME ${BASEFILENAME}-##MACHINE##.boot.vfat
@@ -74,8 +62,31 @@ for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_R
 		install_abort=1;
 	fi;
 done
-if test -n "${install_abort}"; then
+if test "${install_abort}" = "1"; then
 	echo "Aborted.";
+	exit;
+fi
+
+echo "############################################################"
+echo "#           Linux firmware install from micro SD           #"
+echo "############################################################"
+echo ""
+echo " This process will erase your eMMC and will install the following files"
+echo " on the partitions of the eMMC."
+echo ""
+echo "   PARTITION   FILENAME"
+echo "   ---------   --------"
+echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
+echo "   linux       ${INSTALL_LINUX_FILENAME}"
+echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
+echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
+echo ""
+echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
+echo " to continue."
+
+sleep 10
+if test $? -eq 1; then
+	echo "Aborted by user.";
 	exit;
 fi
 
@@ -92,7 +103,7 @@ setenv mmcdev 0
 # Update U-Boot
 echo ""
 echo ""
-echo ">> Installing U-Boot boot loader (target will reset)"
+echo ">> Installing U-Boot boot loader image ${INSTALL_UBOOT_FILENAME} (target will reset)"
 echo ""
 echo ""
 update uboot mmc ${INSTALL_MMCDEV} fat ${INSTALL_UBOOT_FILENAME}
@@ -129,7 +140,7 @@ setenv bootcmd "
 	fi;
 	echo \"\";
 	echo \"\";
-	echo \">> Installing Linux kernel and device tree files\";
+	echo \">> Installing linux image file ${INSTALL_LINUX_FILENAME}\";
 	echo \"\";
 	echo \"\";
 	update linux mmc ${INSTALL_MMCDEV} fat ${INSTALL_LINUX_FILENAME};
@@ -141,7 +152,7 @@ setenv bootcmd "
 	fi;
 	echo \"\";
 	echo \"\";
-	echo \">> Installing recovery\";
+	echo \">> Installing recovery file ${INSTALL_RECOVERY_FILENAME}\";
 	echo \"\";
 	echo \"\";
 	update recovery mmc ${INSTALL_MMCDEV} fat ${INSTALL_RECOVERY_FILENAME};
@@ -153,7 +164,7 @@ setenv bootcmd "
 	fi;
 	echo \"\";
 	echo \"\";
-	echo \">> Installing Linux root file system\";
+	echo \">> Installing root file system file ${INSTALL_ROOTFS_FILENAME}\";
 	echo \"\";
 	echo \"\";
 	update rootfs mmc ${INSTALL_MMCDEV} fat ${INSTALL_ROOTFS_FILENAME};
