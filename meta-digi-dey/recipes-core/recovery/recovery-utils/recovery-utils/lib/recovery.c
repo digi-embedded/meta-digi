@@ -846,7 +846,12 @@ int encrypt_partitions(char *to_encrypt, char *to_unencrypt, unsigned char force
 		goto err;
 	}
 
-	print_open_device_warning();
+	/*
+	 * Print warning on open devices only if we're encrypting at least
+	 * one partition.
+	 */
+	if (enc_diff[0])
+		print_open_device_warning();
 
 	/*
 	 * At this point, we know that we have at least one partition to
