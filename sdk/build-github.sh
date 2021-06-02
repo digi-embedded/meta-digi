@@ -45,6 +45,12 @@ ZIP_INSTALLER_CFG="
 DEY_IMAGE_INSTALLER = \"1\"
 "
 
+SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(date +%s)}"
+BUILD_TIMESTAMP="
+SOURCE_DATE_EPOCH = \"${SOURCE_DATE_EPOCH}\"
+REPRODUCIBLE_TIMESTAMP_ROOTFS = \"${SOURCE_DATE_EPOCH}\"
+"
+
 BACKEND_REMOVAL_CFG="
 DISTRO_FEATURES_remove = \"x11 wayland vulkan\"
 "
@@ -192,6 +198,7 @@ for platform in ${DY_PLATFORMS}; do
 				conf/local.conf
 			printf "${RM_WORK_CFG}" >> conf/local.conf
 			printf "${ZIP_INSTALLER_CFG}" >> conf/local.conf
+			printf "${BUILD_TIMESTAMP}" >> conf/local.conf
 			# Remove all desktop backend distro features if building framebuffer images
 			if [ "${DY_FB_IMAGE}" = "true" ]; then
 				printf "${BACKEND_REMOVAL_CFG}" >> conf/local.conf

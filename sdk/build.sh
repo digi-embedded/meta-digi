@@ -49,6 +49,12 @@ ZIP_INSTALLER_CFG="
 DEY_IMAGE_INSTALLER = \"1\"
 "
 
+SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(date +%s)}"
+BUILD_TIMESTAMP="
+SOURCE_DATE_EPOCH = \"${SOURCE_DATE_EPOCH}\"
+REPRODUCIBLE_TIMESTAMP_ROOTFS = \"${SOURCE_DATE_EPOCH}\"
+"
+
 REPO="$(which repo)"
 
 error() {
@@ -259,6 +265,10 @@ for platform in ${DY_PLATFORMS}; do
 				# Append extra configuration macros if provided from build environment
 				if [ -n "${DY_EXTRA_LOCAL_CONF}" ]; then
 					printf "%s\n" "${DY_EXTRA_LOCAL_CONF}" >> conf/local.conf
+				fi
+				# Add build timestamp
+				if [ -n "${BUILD_TIMESTAMP}" ]; then
+					printf "${BUILD_TIMESTAMP}" >> conf/local.conf
 				fi
 				# Check if it is a manufacturing job and, if the mfg layer is not there, add it
 				if [ "${DY_MFG_IMAGE}" = "true" ] && ! grep -qs "meta-digi-mfg" conf/bblayers.conf; then
