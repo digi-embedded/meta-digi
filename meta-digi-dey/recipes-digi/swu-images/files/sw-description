@@ -9,12 +9,14 @@ software =
             device = "##BOOT_DEV##";
             type = "raw";
             sha256 = "@##BOOTIMG_NAME##";
+            installed-directly = true;
         },
         {
             filename = "##ROOTIMG_NAME##";
             device = "##ROOTFS_DEV##";
             type = "raw";
             sha256 = "@##ROOTIMG_NAME##";
+            installed-directly = true;
         }
     );
     ##PREINSTALL_SCRIPT##
