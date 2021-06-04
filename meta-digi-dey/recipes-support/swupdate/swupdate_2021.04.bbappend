@@ -7,8 +7,8 @@ do_configure_append() {
 	# '.config' file.
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 		echo "CONFIG_SIGNED_IMAGES=y" >> ${B}/.config
-		cml1_do_configure
 	fi
+	cml1_do_configure
 }
 
 do_install_append() {
