@@ -59,7 +59,7 @@ for g in ${GRAPHICAL_IMAGES}; do
 		BASEFILENAME="${image-name}-##GRAPHICAL_BACKEND##"
 	fi
 done
-if test "${BASEFILENAME} = "0"; then
+if test "${BASEFILENAME}" = "0"; then
 	BASEFILENAME="${image-name}"
 fi
 setenv INSTALL_LINUX_FILENAME ${BASEFILENAME}-##MACHINE##.boot.vfat
