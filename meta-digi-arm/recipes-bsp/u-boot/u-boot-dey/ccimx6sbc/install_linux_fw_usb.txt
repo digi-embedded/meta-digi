@@ -73,7 +73,7 @@ for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_R
 		install_abort=1;
 	fi;
 done
-if test -n "${install_abort}"; then
+if test "${install_abort}" = "1"; then
 	echo "Aborted.";
 	exit;
 fi
