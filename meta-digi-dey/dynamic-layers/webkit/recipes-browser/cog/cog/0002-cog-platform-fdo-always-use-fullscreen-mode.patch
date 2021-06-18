@@ -1,19 +1,19 @@
 From: Gabriel Valcazar <gabriel.valcazar@digi.com>
-Date: Tue, 10 Nov 2020 16:36:21 +0100
+Date: Wed, 23 Jun 2021 10:17:59 +0200
 Subject: [PATCH 2/2] cog-platform-fdo: always use fullscreen mode
 
 Otherwise, the browser will spawn on a random place on the desktop every time.
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 ---
- platform/cog-platform-fdo.c | 44 ++++++++++---------------------------
- 1 file changed, 12 insertions(+), 32 deletions(-)
+ platform/fdo/cog-platform-fdo.c | 50 ++++++++++-----------------------
+ 1 file changed, 15 insertions(+), 35 deletions(-)
 
-diff --git a/platform/cog-platform-fdo.c b/platform/cog-platform-fdo.c
-index 7bdf075..08b0b21 100644
---- a/platform/cog-platform-fdo.c
-+++ b/platform/cog-platform-fdo.c
-@@ -1911,39 +1911,19 @@ create_window (GError **error)
+diff --git a/platform/fdo/cog-platform-fdo.c b/platform/fdo/cog-platform-fdo.c
+index c7e1eea..4f6c0c7 100644
+--- a/platform/fdo/cog-platform-fdo.c
++++ b/platform/fdo/cog-platform-fdo.c
+@@ -2134,42 +2134,22 @@ create_window (GError **error)
          configure_surface_geometry (0, 0);
      }
  
@@ -26,6 +26,9 @@ index 7bdf075..08b0b21 100644
 -
 -        if (wl_data.xdg_shell != NULL) {
 -            xdg_toplevel_set_fullscreen (win_data.xdg_toplevel, NULL);
+-        } else if (wl_data.fshell != NULL) {
+-            win_data.should_resize_to_largest_output = true;
+-            resize_to_largest_output ();
 -        } else if (wl_data.shell != NULL) {
 -            wl_shell_surface_set_fullscreen (win_data.shell_surface,
 -                                             WL_SHELL_SURFACE_FULLSCREEN_METHOD_SCALE,
@@ -54,6 +57,9 @@ index 7bdf075..08b0b21 100644
 -        }
 +    if (wl_data.xdg_shell != NULL) {
 +        xdg_toplevel_set_fullscreen (win_data.xdg_toplevel, NULL);
++    } else if (wl_data.fshell != NULL) {
++        win_data.should_resize_to_largest_output = true;
++        resize_to_largest_output ();
 +    } else if (wl_data.shell != NULL) {
 +        wl_shell_surface_set_fullscreen (win_data.shell_surface,
 +                                         WL_SHELL_SURFACE_FULLSCREEN_METHOD_SCALE,

@@ -1,5 +1,5 @@
 From: Gabriel Valcazar <gabriel.valcazar@digi.com>
-Date: Tue, 10 Nov 2020 16:32:15 +0100
+Date: Wed, 23 Jun 2021 10:05:24 +0200
 Subject: [PATCH 1/2] cog: remove the --platform parameter and hardcode the FDO
  platform
 
@@ -8,38 +8,36 @@ platforms, so always use the FDO one by default.
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 ---
- cog.c | 27 ++++-----------------------
- 1 file changed, 4 insertions(+), 23 deletions(-)
+ cog.c | 25 ++++---------------------
+ 1 file changed, 4 insertions(+), 21 deletions(-)
 
 diff --git a/cog.c b/cog.c
-index 950b14d..5f47d87 100644
+index 2fdc7b2..bb64506 100644
 --- a/cog.c
 +++ b/cog.c
-@@ -43,10 +43,7 @@ static struct {
+@@ -40,10 +40,7 @@ static struct {
+     GStrv    dir_handlers;
      GStrv    arguments;
      char    *background_color;
- #if !COG_USE_WEBKITGTK
 -    union {
 -        char *platform_name;
 -        CogPlatform *platform;
 -    };
 +    CogPlatform *platform;
- #endif // !COG_USE_WEBKITGTK
      union {
          char *action_name;
-@@ -95,11 +92,6 @@ static GOptionEntry s_cli_options[] =
+         enum webprocess_fail_action action_id;
+@@ -92,9 +89,6 @@ static GOptionEntry s_cli_options[] =
      { "bg-color", 'b', 0, G_OPTION_ARG_STRING, &s_options.background_color,
          "Background color, as a CSS name or in #RRGGBBAA hex syntax (default: white)",
          "BG_COLOR" },
--#if !COG_USE_WEBKITGTK
 -    { "platform", 'P', 0, G_OPTION_ARG_STRING, &s_options.platform_name,
 -        "Platform plug-in to use.",
 -        "NAME" },
--#endif // !COG_USE_WEBKITGTK
      { "web-extensions-dir", '\0', 0, G_OPTION_ARG_STRING, &s_options.web_extensions_dir,
        "Load Web Extensions from given directory.",
        "PATH"},
-@@ -301,21 +293,10 @@ platform_setup (CogShell *shell)
+@@ -299,21 +293,10 @@ platform_setup (CogShell *shell)
       * a given platform.
       */
  
@@ -63,4 +61,3 @@ index 950b14d..5f47d87 100644
 +                   strerror (errno));
          return FALSE;
      }
- 
