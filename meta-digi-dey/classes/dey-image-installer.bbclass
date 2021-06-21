@@ -27,6 +27,10 @@ generate_installer_zip () {
 	if readlink -e "${DEPLOY_DIR_IMAGE}/install_linux_fw_uuu.sh"; then
 		INSTALLER_FILELIST="${INSTALLER_FILELIST} ${DEPLOY_DIR_IMAGE}/install_linux_fw_uuu.sh"
 	fi
+	# Decompress the ext4.gz image, if any
+	if readlink -e "${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.ext4.gz" >/dev/null; then
+		gzip -d -k -f ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.ext4.gz
+	fi
 	for ext in ${FSTYPES_WHITELIST}; do
 		if readlink -e "${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.${ext}" >/dev/null; then
 			INSTALLER_FILELIST="${INSTALLER_FILELIST} ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.${ext}"
@@ -49,6 +53,11 @@ _EOF_
 	# Pack the files and remove the temporary readme file
 	zip -j ${IMGDEPLOYDIR}/${IMAGE_NAME}.installer.zip ${INSTALLER_FILELIST} ${IMGDEPLOYDIR}/README.txt
 	rm -f ${IMGDEPLOYDIR}/README.txt
+
+	# Delete the decompressed ext4 image, if any
+	if readlink -e "${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.ext4" >/dev/null; then
+		rm -f ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.ext4
+	fi
 
 	# Create the symlink
 	if [ -n "${IMAGE_LINK_NAME}" ] && [ -e "${IMGDEPLOYDIR}/${IMAGE_NAME}.installer.zip" ]; then
