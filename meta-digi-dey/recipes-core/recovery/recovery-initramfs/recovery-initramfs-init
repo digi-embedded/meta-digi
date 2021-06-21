@@ -484,13 +484,14 @@ mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
 mount -t tmpfs tmpfs /tmp
 
-# Give some time for the devices to settle down so mdev can mount all of them
-sleep 2
-
 # Register mdev as device manager
 echo > /dev/mdev.seq
 echo > /dev/mdev.log
+mdev -d
 mdev -s
+
+# Give some time for the devices to settle down so mdev can mount all of them
+sleep 2
 
 # Run all shell scripts in postinstall folder
 run-parts /etc/*-postinsts
