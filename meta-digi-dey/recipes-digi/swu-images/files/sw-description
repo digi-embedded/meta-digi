@@ -18,6 +18,7 @@ software =
                     device = "##ROOTFS_DEV##";
                     type ="raw";
                     sha256 = "@##ROOTIMG_NAME##";
+                    compressed = "zlib";
                     installed-directly = true;
                 }
             );
