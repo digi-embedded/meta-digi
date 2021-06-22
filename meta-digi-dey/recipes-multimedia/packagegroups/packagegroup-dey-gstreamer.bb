@@ -27,6 +27,8 @@ MACHINE_GSTREAMER_1_0_PKGS_ccimx6ul = " \
     gstreamer1.0-plugins-good-video4linux2 \
     gstreamer1.0-plugins-good-videofilter \
     gstreamer1.0-plugins-good-vpx \
+    gstreamer1.0-plugins-good-avi \
+    gstreamer1.0-plugins-good-jpeg \
 "
 
 MACHINE_GSTREAMER_1_0_EXTRA_INSTALL ?= ""
