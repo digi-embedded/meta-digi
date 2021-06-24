@@ -110,7 +110,7 @@ if test "${install_abort}" = "1"; then
 fi
 
 echo "############################################################"
-echo "#           Linux firmware install from micro SD           #"
+echo "#           Linux firmware install from USB                #"
 echo "############################################################"
 echo ""
 echo " This process will erase your eMMC and will install the following files"
@@ -193,7 +193,7 @@ setenv bootcmd "
 	echo \">> Installing linux image file ${INSTALL_LINUX_FILENAME}\";
 	echo \"\";
 	echo \"\";
-	update linux mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
+	update linux usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update linux partition!\";
 		echo \"\";
