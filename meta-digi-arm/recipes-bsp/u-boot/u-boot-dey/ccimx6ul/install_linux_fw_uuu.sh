@@ -87,7 +87,7 @@ uuu fb: ucmd setenv stdout serial,fastboot
 if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 	module_variant=$(getenv "module_variant")
 	# Determine U-Boot file to program basing on SOM's variant
-	if [ -n "$module_variant" ]; then
+	if [ -n "$module_variant" || "$module_variant" = "0x00" ]; then
 		if [ "$module_variant" = "0x08" ] || \
 		   [ "$module_variant" = "0x09" ]; then
 			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##512MB.imx"
