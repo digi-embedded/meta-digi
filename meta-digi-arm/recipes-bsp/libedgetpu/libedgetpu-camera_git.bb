@@ -23,12 +23,13 @@ do_configure() {
 do_install() {
     # Install Gstreamer examples
     install -d ${D}/opt/libedgetpu
-    install -d ${D}/opt/libedgetpu/all_models
-    install -d ${D}/opt/libedgetpu/gstreamer
+    install -d ${D}/opt/libedgetpu/camera
+    install -d ${D}/opt/libedgetpu/camera/all_models
+    install -d ${D}/opt/libedgetpu/camera/gstreamer
     rm -f ${S}/gstreamer/install_requirements.sh
-    install -m 0555 ${S}/all_models/* ${D}/opt/libedgetpu/all_models/
-    install -m 0555 ${S}/gstreamer/* ${D}/opt/libedgetpu/gstreamer/
+    install -m 0555 ${S}/all_models/* ${D}/opt/libedgetpu/camera/all_models/
+    install -m 0555 ${S}/gstreamer/* ${D}/opt/libedgetpu/camera/gstreamer/
 }
 
-FILES_${PN} += "/opt/libedgetpu/* \
+FILES_${PN} += "/opt/libedgetpu/camera/* \
 "
