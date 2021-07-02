@@ -115,6 +115,13 @@ Documentation is available online at https://www.digi.com/resources/documentatio
   * Updated busybox to v1.32.0
   * Updated NetworkManager to v1.22.14
   * Package upgrades and security fixes
+* Added support for Dual boot mechanism
+* Added support for Google Coral AI devices
+* Trustfence: added support for generic partition encryption
+* MCA: added support for GPIO-refreshed watchdog
+* Improved WebKit performance
+* Improved installation scripts
+* Updated CC6UL RF calibration
 
 # Known Issues and Limitations
 
