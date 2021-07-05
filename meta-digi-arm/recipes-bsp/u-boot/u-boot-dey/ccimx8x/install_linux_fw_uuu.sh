@@ -101,7 +101,7 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 	if [ -z "${module_ram}" ]; then
 		module_variant=$(getenv "module_variant")
 		# Determine U-Boot file to program basing on SOM's variant
-		if [ -n "$module_variant" || "$module_variant" = "0x00" ]; then
+		if [ -n "$module_variant" ] || [ "$module_variant" = "0x00" ]; then
 			if [ "$module_variant" = "0x01" ] || \
 			   [ "$module_variant" = "0x04" ] || \
 			   [ "$module_variant" = "0x05" ]; then

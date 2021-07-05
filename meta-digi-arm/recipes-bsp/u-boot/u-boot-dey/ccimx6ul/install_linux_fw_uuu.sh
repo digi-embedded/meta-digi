@@ -87,7 +87,7 @@ uuu fb: ucmd setenv stdout serial,fastboot
 if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 	module_variant=$(getenv "module_variant")
 	# Determine U-Boot file to program basing on SOM's variant
-	if [ -n "$module_variant" || "$module_variant" = "0x00" ]; then
+	if [ -n "$module_variant" ] || [ "$module_variant" = "0x00" ]; then
 		if [ "$module_variant" = "0x08" ] || \
 		   [ "$module_variant" = "0x09" ]; then
 			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##512MB.imx"
@@ -110,7 +110,7 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 		echo ""
 		echo "[ERROR] Cannot determine U-Boot file for this module!"
 		echo ""
-		echo "1. Add U-boot file name, depending on your ConnectCore 8X variant, to script command line:"
+		echo "1. Add U-boot file name, depending on your ConnectCore 6UL variant, to script command line:"
 		echo "   - For a SOM with 1GB DDR3, run:"
 		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##MACHINE##1GB.imx"
 		echo "   - For a SOM with 512MB DDR3, run:"
