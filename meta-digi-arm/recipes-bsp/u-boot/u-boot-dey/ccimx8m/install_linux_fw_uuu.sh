@@ -205,6 +205,9 @@ sleep 3
 uuu fb: ucmd setenv fastboot_dev sata
 uuu fb: ucmd setenv fastboot_dev mmc
 
+# Set fastboot buffer address to $loadaddr, just in case
+uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
+
 # Update Linux
 part_update "linux" "${INSTALL_LINUX_FILENAME}"
 
