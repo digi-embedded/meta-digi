@@ -201,6 +201,10 @@ uuu fb: acmd reset
 # Wait for the target to reset
 sleep 3
 
+# Restart fastboot with the latest MMC partition configuration
+uuu fb: ucmd setenv fastboot_dev sata
+uuu fb: ucmd setenv fastboot_dev mmc
+
 # Update Linux
 part_update "linux" "${INSTALL_LINUX_FILENAME}"
 
