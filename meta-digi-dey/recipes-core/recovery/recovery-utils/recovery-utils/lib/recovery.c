@@ -83,6 +83,12 @@ static int append_recovery_command(const char *value)
 	int rcvr_cmd_len;
 	int ret = 0;
 
+	/* Check if we are in dualboot mode */
+	if (is_dualboot_enabled()) {
+		fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
+		goto err;
+	}
+
 	ret = uboot_getenv("recovery_command", &old_recovery_cmd);
 	if (ret) {
 		fprintf(stderr, "Error: getenv 'recovery_command'\n");
@@ -584,6 +590,12 @@ int update_firmware(const char *swu_path)
 	int file_prefix_len = 0;
 	int ret = -1;
 
+	/* Check if we are in dualboot mode */
+        if (is_dualboot_enabled()) {
+                fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
+                goto err;
+        }
+
 	/* Verify input parameter */
 	if (!swu_path) {
 		fprintf(stderr, "Error: NULL 'swu_path'\n");
@@ -623,6 +635,12 @@ err:
 int reboot_recovery(unsigned int reboot_timeout)
 {
 	int ret = 0;
+
+	/* Check if we are in dualboot mode */
+        if (is_dualboot_enabled()) {
+                fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
+                goto err;
+        }
 
 	sync();
 
@@ -667,6 +685,12 @@ int set_encryption_key(char *key, unsigned char force)
 	int generate_random_key = 0;
 	int ret = -1;
 	unsigned char i = 0;
+
+	/* Check if we are in dualboot mode */
+        if (is_dualboot_enabled()) {
+                fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
+                return ret;
+        }
 
 	/* Initialize arrays */
 	parts[0] = NULL;
@@ -767,6 +791,12 @@ int encrypt_partitions(char *to_encrypt, char *to_unencrypt, unsigned char force
 	unsigned char i = 0;
 
 	int ret;
+
+	/* Check if we are in dualboot mode */
+        if (is_dualboot_enabled()) {
+                fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
+                return 1;
+        }
 
 	/* If both lists are empty, we have nothing to do */
 	if (!to_encrypt && !to_unencrypt)
@@ -932,3 +962,27 @@ err:
 	return ret < 0 ? -1 : ret;
 }
 
+/*
+ * Function:    is_device_closed
+ * Description: check if the device is in dualboot mode
+ */
+int is_dualboot_enabled (void)
+{
+	const char *var;
+	int ret;
+
+	/* Parse dualboot */
+	ret = uboot_getenv("dualboot", &var);
+	if (ret) {
+		fprintf(stderr, "Error: getenv 'dualboot'\n");
+		return 0;
+	}
+
+	/* Is dualboot enabled */
+	if (!strcmp(var, "no"))
+		ret = 0;
+	else
+		ret = 1;
+
+	return ret;
+}
