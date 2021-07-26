@@ -22,7 +22,7 @@ DESCRIPTION = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) ==
 
 BOOTFS_EXT ?= ".boot.vfat"
 BOOTFS_EXT_ccimx6ul ?= ".boot.ubifs"
-ROOTFS_EXT ?= ".ext4"
+ROOTFS_EXT ?= ".ext4.gz"
 ROOTFS_EXT_ccimx6ul ?= ".ubifs"
 
 BOOT_DEV_NAME ?= "/dev/mmcblk0p1"

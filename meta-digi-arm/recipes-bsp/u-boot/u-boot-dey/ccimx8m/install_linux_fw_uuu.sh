@@ -101,6 +101,18 @@ INSTALL_LINUX_FILENAME="${BASEFILENAME}-##MACHINE##.boot.vfat"
 INSTALL_RECOVERY_FILENAME="${BASEFILENAME}-##MACHINE##.recovery.vfat"
 INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.ext4"
 
+COMPRESSED_ROOTFS_IMAGE="${INSTALL_ROOTFS_FILENAME}.gz"
+
+# If the rootfs image is compressed, make sure to decompress it before the update
+if [ -f ${COMPRESSED_ROOTFS_IMAGE} ] && [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; then
+	echo "\033[36m"
+	echo "====================================================================================="
+	echo "Decompressing rootfs image '${COMPRESSED_ROOTFS_IMAGE}'"
+	echo "====================================================================================="
+	echo "\033[0m"
+	gzip -d -k -f "${COMPRESSED_ROOTFS_IMAGE}"
+fi
+
 # Verify existance of files before starting the update
 FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}"
 for f in ${FILES}; do
@@ -189,6 +201,13 @@ uuu fb: acmd reset
 # Wait for the target to reset
 sleep 3
 
+# Restart fastboot with the latest MMC partition configuration
+uuu fb: ucmd setenv fastboot_dev sata
+uuu fb: ucmd setenv fastboot_dev mmc
+
+# Set fastboot buffer address to $loadaddr, just in case
+uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
+
 # Update Linux
 part_update "linux" "${INSTALL_LINUX_FILENAME}"
 
@@ -197,6 +216,11 @@ part_update "recovery" "${INSTALL_RECOVERY_FILENAME}"
 
 # Update Rootfs
 part_update "rootfs" "${INSTALL_ROOTFS_FILENAME}"
+
+# If the rootfs image was originally compressed, remove the uncompressed image
+if [ -f ${COMPRESSED_ROOTFS_IMAGE} ] && [ -f ${INSTALL_ROOTFS_FILENAME} ]; then
+	rm -f "${INSTALL_ROOTFS_FILENAME}"
+fi
 
 # Configure u-boot to boot into recovery mode
 uuu fb: ucmd setenv boot_recovery yes

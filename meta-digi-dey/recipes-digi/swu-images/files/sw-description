@@ -3,21 +3,46 @@ software =
     version = "##SW_VERSION##";
     description = "##DESCRIPTION##";
 
-    images: (
-        {
-            filename = "##BOOTIMG_NAME##";
-            device = "##BOOT_DEV##";
-            type = "raw";
-            sha256 = "@##BOOTIMG_NAME##";
-            installed-directly = true;
-        },
-        {
-            filename = "##ROOTIMG_NAME##";
-            device = "##ROOTFS_DEV##";
-            type = "raw";
-            sha256 = "@##ROOTIMG_NAME##";
-            installed-directly = true;
+    mmc = {
+        platform: {
+            images: (
+                {
+                    filename = "##BOOTIMG_NAME##";
+                    device = "##BOOT_DEV##";
+                    type = "raw";
+                    sha256 = "@##BOOTIMG_NAME##";
+                    installed-directly = true;
+                },
+                {
+                    filename = "##ROOTIMG_NAME##";
+                    device = "##ROOTFS_DEV##";
+                    type ="raw";
+                    sha256 = "@##ROOTIMG_NAME##";
+                    compressed = "zlib";
+                    installed-directly = true;
+                }
+            );
         }
-    );
-    ##PREINSTALL_SCRIPT##
+        ##PREINSTALL_SCRIPT##
+    };
+    mtd = {
+        platform: {
+            images: (
+                {
+                    filename = "##BOOTIMG_NAME##";
+                    volume = "##BOOT_DEV##";
+                    type = "ubivol";
+                    sha256 = "@##BOOTIMG_NAME##";
+                    installed-directly = true;
+                },
+                {
+                    filename = "##ROOTIMG_NAME##";
+                    volume = "##ROOTFS_DEV##";
+                    type ="ubivol";
+                    sha256 = "@##ROOTIMG_NAME##";
+                    installed-directly = true;
+                }
+            );
+        };
+    };
 }

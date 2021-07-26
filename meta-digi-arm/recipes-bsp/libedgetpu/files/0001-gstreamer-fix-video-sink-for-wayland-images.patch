@@ -1,0 +1,27 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Mon, 28 Jun 2021 15:00:58 +0200
+Subject: [PATCH] gstreamer: fix video sink for wayland images
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ gstreamer/gstreamer.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gstreamer/gstreamer.py b/gstreamer/gstreamer.py
+index 2676439..e055d77 100644
+--- a/gstreamer/gstreamer.py
++++ b/gstreamer/gstreamer.py
+@@ -249,11 +249,11 @@ def run_pipeline(user_function,
+         scale_caps = 'video/x-raw,width={width},height={height}'.format(width=scale[0], height=scale[1])
+         PIPELINE += """ ! tee name=t
+             t. ! {leaky_q} ! videoconvert ! videoscale ! {scale_caps} ! videobox name=box autocrop=true
+                ! {sink_caps} ! {sink_element}
+             t. ! {leaky_q} ! videoconvert
+-               ! rsvgoverlay name=overlay ! videoconvert ! ximagesink sync=false
++               ! rsvgoverlay name=overlay ! videoconvert ! waylandsink sync=false
+             """
+
+     SINK_ELEMENT = 'appsink name=appsink emit-signals=true max-buffers=1 drop=true'
+     SINK_CAPS = 'video/x-raw,format=RGB,width={width},height={height}'
+     LEAKY_Q = 'queue max-size-buffers=1 leaky=downstream'
+--

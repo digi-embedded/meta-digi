@@ -377,9 +377,9 @@ check_swu_package() {
 
 	# Check software update package.
 	if [ -f "${PUBLIC_KEY}" ]; then
-		swupdate -c -v -i "${update_package}" -k "${PUBLIC_KEY}" > "${SWUPDATE_OUTPUT}"
+		swupdate -c -v -i "${update_package}" -e "${SWUPDATE_IMAGE_SET}" -k "${PUBLIC_KEY}" > "${SWUPDATE_OUTPUT}"
 	else
-		swupdate -c -v -i "${update_package}" > "${SWUPDATE_OUTPUT}"
+		swupdate -c -v -e "${SWUPDATE_IMAGE_SET}" -i "${update_package}" > "${SWUPDATE_OUTPUT}"
 	fi
 
 	if [ "$?" != "0" ]; then
@@ -484,13 +484,14 @@ mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
 mount -t tmpfs tmpfs /tmp
 
-# Give some time for the devices to settle down so mdev can mount all of them
-sleep 2
-
 # Register mdev as device manager
 echo > /dev/mdev.seq
 echo > /dev/mdev.log
+mdev -d
 mdev -s
+
+# Give some time for the devices to settle down so mdev can mount all of them
+sleep 2
 
 # Run all shell scripts in postinstall folder
 run-parts /etc/*-postinsts
@@ -571,6 +572,13 @@ for p in ${BLACKLISTED}; do
 	log_warning "Encryption of partition '${p}' is forbidden, skipping"
 	encrypt_partitions=$(remove_entry "${encrypt_partitions}" "${p}")
 done
+
+# Select update package image
+if [ "$(is_nand)" = "yes" ]; then
+	SWUPDATE_IMAGE_SET="mtd,platform"
+else
+	SWUPDATE_IMAGE_SET="mmc,platform"
+fi
 
 # On eMMC, if the 'update' partition is encrypted, we need to mount it manually
 if [ "$(is_nand)" = "no" ] && contains "${ENC_PARTS}" "update"; then
@@ -804,9 +812,9 @@ if [ -n "${update_package_bool}" ]; then
 	progress -wp &
 	# Execute the software update.
 	if [ -f "${PUBLIC_KEY}" ]; then
-		swupdate -f "${SW_CONFIG}" -i "${update_package}" -k "${PUBLIC_KEY}"
+		swupdate -e "${SWUPDATE_IMAGE_SET}" -f "${SW_CONFIG}" -i "${update_package}" -k "${PUBLIC_KEY}"
 	else
-		swupdate -f "${SW_CONFIG}" -i "${update_package}"
+		swupdate -e "${SWUPDATE_IMAGE_SET}" -f "${SW_CONFIG}" -i "${update_package}"
 	fi
 	if [ "$?" = "0" ]; then
 		log "Firmware update process succeed!"

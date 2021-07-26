@@ -291,11 +291,17 @@ IMAGE_CMD_sdcard() {
 		SDIMG_BOOT="$(readlink -e ${SDIMG_BOOTLOADER})"
 	fi
 
+	# Decompress rootfs image
+	gzip -d -k ${SDIMG_ROOTFS}.gz
+
 	# Burn bootloader, boot and rootfs partitions
 	dd if=${SDIMG_BOOT} of=${SDIMG} conv=notrunc,fsync seek=${BOOTLOADER_SEEK} bs=1K
 	dd if=${SDIMG_BOOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024)
 	dd if=${SDIMG_ROOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024 + ${BOOT_SPACE_ALIGNED} \* 1024)
+
+	# Delete the decompressed rootfs image
+	rm -f ${SDIMG_ROOTFS}
 }
 
 # The sdcard image requires the boot and rootfs images to be built before
-IMAGE_TYPEDEP_sdcard = "${SDIMG_BOOTFS_TYPE} ${SDIMG_ROOTFS_TYPE}"
+IMAGE_TYPEDEP_sdcard = "${SDIMG_BOOTFS_TYPE} ${SDIMG_ROOTFS_TYPE}.gz"

@@ -101,16 +101,16 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 	if [ -z "${module_ram}" ]; then
 		module_variant=$(getenv "module_variant")
 		# Determine U-Boot file to program basing on SOM's variant
-		if [ -n "$module_variant" ]; then
-			if [ "$module_variant" == "0x01" ] || \
-			   [ "$module_variant" == "0x04" ] || \
-			   [ "$module_variant" == "0x05" ]; then
+		if [ -n "$module_variant" ] || [ "$module_variant" = "0x00" ]; then
+			if [ "$module_variant" = "0x01" ] || \
+			   [ "$module_variant" = "0x04" ] || \
+			   [ "$module_variant" = "0x05" ]; then
 				module_ram="1GB"
-			elif [ "$module_variant" == "0x02" ] || \
-			     [ "$module_variant" == "0x03" ]; then
-				module_ram="2GB"
-			else
+			elif [ "$module_variant" = "0x06" ] || \
+			     [ "$module_variant" = "0x09" ]; then
 				module_ram="512MB"
+			else
+				module_ram="2GB"
 			fi
 			INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##-${soc_rev}-${module_ram}_${bus_width}.bin"
 		fi
@@ -130,13 +130,13 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		echo ""
 		echo "1. Add U-boot file name, depending on your ConnectCore 8X variant, to script command line:"
 		echo "   - For a QuadXPlus CPU with 1GB LPDDR4, run:"
-		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin"
+		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin"
 		echo "   - For a QuadXPlus CPU with 2GB LPDDR4, run:"
-		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin"
+		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin"
 		echo "   - For a DualX CPU with 1GB LPDDR4, run:"
-		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin"
+		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin"
 		echo "   - For a DualX CPU with 512MB LPDDR4, run:"
-		echo "     => ./install_linux_fs_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-512MB_16bit.bin"
+		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-512MB_16bit.bin"
 		echo ""
 		echo "2. Run the install script again."
 		echo ""
@@ -162,6 +162,18 @@ fi
 INSTALL_LINUX_FILENAME="${BASEFILENAME}-##MACHINE##.boot.vfat"
 INSTALL_RECOVERY_FILENAME="${BASEFILENAME}-##MACHINE##.recovery.vfat"
 INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.ext4"
+
+COMPRESSED_ROOTFS_IMAGE="${INSTALL_ROOTFS_FILENAME}.gz"
+
+# If the rootfs image is compressed, make sure to decompress it before the update
+if [ -f ${COMPRESSED_ROOTFS_IMAGE} ] && [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; then
+	echo "\033[36m"
+	echo "====================================================================================="
+	echo "Decompressing rootfs image '${COMPRESSED_ROOTFS_IMAGE}'"
+	echo "====================================================================================="
+	echo "\033[0m"
+	gzip -d -k -f "${COMPRESSED_ROOTFS_IMAGE}"
+fi
 
 # Verify existance of files before starting the update
 FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}"
@@ -248,6 +260,10 @@ uuu fb: acmd reset
 # Wait for the target to reset
 sleep 3
 
+# Restart fastboot with the latest MMC partition configuration
+uuu fb: ucmd setenv fastboot_dev sata
+uuu fb: ucmd setenv fastboot_dev mmc
+
 # Set fastboot buffer address to $loadaddr, just in case
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 
@@ -259,6 +275,11 @@ part_update "recovery" "${INSTALL_RECOVERY_FILENAME}"
 
 # Update Rootfs
 part_update "rootfs" "${INSTALL_ROOTFS_FILENAME}"
+
+# If the rootfs image was originally compressed, remove the uncompressed image
+if [ -f ${COMPRESSED_ROOTFS_IMAGE} ] && [ -f ${INSTALL_ROOTFS_FILENAME} ]; then
+	rm -f "${INSTALL_ROOTFS_FILENAME}"
+fi
 
 # Configure u-boot to boot into recovery mode
 uuu fb: ucmd setenv boot_recovery yes

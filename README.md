@@ -111,10 +111,20 @@ Documentation is available online at https://www.digi.com/resources/documentatio
   * Updated Qt 5.15.2
   * Updated bluez5 to v5.55
   * Updated gstreamer1.0 to v1.16.3
-  * Updated OpenSSL to v1.1.1i
+  * Updated OpenSSL to v1.1.1k
   * Updated busybox to v1.32.0
   * Updated NetworkManager to v1.22.14
   * Package upgrades and security fixes
+* Updated i.MX8 SCU firmware to v1.7.1.1
+* Updated mca-tool to v1.24
+* Updated trustfence-tool to v2.5
+* Added support for Dual boot mechanism
+* Added support for Google Coral AI devices
+* Trustfence: added support for generic partition encryption
+* MCA: added support for GPIO-refreshed watchdog
+* Improved WebKit performance
+* Improved installation scripts
+* Updated CC6UL RF calibration
 
 # Known Issues and Limitations
 
