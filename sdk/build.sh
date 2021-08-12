@@ -188,7 +188,10 @@ YOCTO_INST_DIR="${WORKSPACE}/digi-yocto-sdk.$(echo ${DY_REVISION} | tr '/' '_')"
 YOCTO_DOWNLOAD_DIR="${DY_DOWNLOADS:-${WORKSPACE}}/downloads"
 YOCTO_PROJ_DIR="${WORKSPACE}/projects"
 
-CPUS="$(grep -c processor /proc/cpuinfo)"
+# If CPUS is unset, set it with the machine cpus
+if [ -z "${CPUS}" ]; then
+	CPUS="$(grep -c processor /proc/cpuinfo)"
+fi
 [ ${CPUS} -gt 1 ] && MAKE_JOBS="-j${CPUS}"
 
 printf "\n[INFO] Build Yocto \"${DY_REVISION}\" for \"${DY_PLATFORMS}\" (cpus=${CPUS})\n\n"
