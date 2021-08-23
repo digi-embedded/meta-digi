@@ -11,6 +11,14 @@ if test ! -n "${soc_type}"; then
 	setenv soc_type "imx8qxp"
 fi
 
+# Reset overlays when using dualboot mode, because we need to
+# save the environment in case of an installation fall back.
+if test "${dual_boot}" = "yes"; then
+	if test -n "${overlays}"; then
+		setenv overlays
+	fi
+fi
+
 #
 # Determine overlays to apply depending on the hardware capabilities
 # described by the HWID, SOM version, and carrier board version.
@@ -50,19 +58,70 @@ if test "${board_version}" -le "3"; then
 	setenv overlays _ov_board_v1-v3_ccimx8x-sbc-pro.dtbo,${overlays}
 fi
 
-# Get the UUID of the configured boot partition.
-part uuid mmc ${mmcbootdev}:${mmcpart} bootpart
-# Check the boot source.
-if test "${bootpart}" = "${part1_uuid}"; then
-	# We are booting from the eMMC using 'linux'.
-	true
-elif test "${bootpart}" = "${part2_uuid}"; then
-	# We are booting from the eMMC using 'recovery'.
-	setenv boot_initrd true
-	setenv initrd_file uramdisk-recovery.img
+# Dual boot update verification
+if test "${dualboot}" = "yes"; then
+	if test "${upgrade_available}" = "1"; then
+		echo "Update detected; Booting new system (try ${bootcount})"
+		if test "${bootcount}" = "${bootlimit}"; then
+			echo "## Update failed; Rolling back to previous version."
+			if test "${active_system}" = "linux_a"; then
+				part number mmc ${mmcbootdev} linux_b pi
+				setenv mmcpart ${pi}
+				# Save the partition index on variable rootfs_b_index
+				part number mmc ${mmcbootdev} rootfs_b rootfs_b_index
+				# Save the rootfs_b UUID into mmcroot_b
+				part uuid mmc ${mmcbootdev}:${rootfs_b_index} mmcroot_b
+				setenv mmcroot PARTUUID=${mmcroot_b}
+				setenv active_system linux_b
+			else
+				part number mmc ${mmcbootdev} linux_a pi
+				setenv mmcpart ${pi}
+				# Save the partition index on variable rootfs_a_index
+				part number mmc ${mmcbootdev} rootfs_a rootfs_a_index
+				# Save the rootfs_a UUID into mmcroot_a
+				part uuid mmc ${mmcbootdev}:${rootfs_a_index} mmcroot_a
+				setenv mmcroot PARTUUID=${mmcroot_a}
+				setenv active_system linux_a
+			fi
+			setenv upgrade_available
+			saveenv
+		fi
+	else
+		if test "${active_system}" = "linux_a"; then
+			echo "Booting from system A"
+			part number mmc ${mmcbootdev} linux_a pi
+			setenv mmcpart ${pi}
+			# Save the partition index on variable rootfs_a_index
+			part number mmc ${mmcbootdev} rootfs_a rootfs_a_index
+			# Save the rootfs_a UUID into mmcroot_a
+			part uuid mmc ${mmcbootdev}:${rootfs_a_index} mmcroot_a
+			setenv mmcroot PARTUUID=${mmcroot_a}
+		else
+			echo "Booting from system B"
+			part number mmc ${mmcbootdev} linux_b pi
+			setenv mmcpart ${pi}
+			# Save the partition index on variable rootfs_b_index
+			part number mmc ${mmcbootdev} rootfs_b rootfs_b_index
+			# Save the rootfs_b UUID into mmcroot_b
+			part uuid mmc ${mmcbootdev}:${rootfs_b_index} mmcroot_b
+			setenv mmcroot PARTUUID=${mmcroot_b}
+		fi
+	fi
 else
-	# We are booting from the SD card.
-	setenv mmcroot /dev/mmcblk${mmcbootdev}p2
+	# Get the UUID of the configured boot partition.
+	part uuid mmc ${mmcbootdev}:${mmcpart} bootpart
+	# Check the boot source.
+	if test "${bootpart}" = "${part1_uuid}"; then
+		# We are booting from the eMMC using 'linux'.
+		true
+	elif test "${bootpart}" = "${part2_uuid}"; then
+		# We are booting from the eMMC using 'recovery'.
+		setenv boot_initrd true
+		setenv initrd_file uramdisk-recovery.img
+	else
+		# We are booting from the SD card.
+		setenv mmcroot /dev/mmcblk${mmcbootdev}p2
+	fi
 fi
 setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
 dboot linux mmc ${mmcbootdev}:${mmcpart}
