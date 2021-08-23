@@ -47,10 +47,12 @@ if test "${dualboot}" = "yes"; then
 				setenv mtdbootpart linux_b
 				setenv mtdlinuxindex ${mtdlinux_b_index}
 				setenv mtdrootfsindex ${mtdrootfs_b_index}
+				setenv rootfsvol ${rootfsvol_b}
 			else
 				setenv mtdbootpart linux_a
 				setenv mtdlinuxindex ${mtdlinux_a_index}
 				setenv mtdrootfsindex ${mtdrootfs_a_index}
+				setenv rootfsvol ${rootfsvol_a}
 			fi
 			setenv active_system ${mtdbootpart}
 			setenv upgrade_available
@@ -62,11 +64,13 @@ if test "${dualboot}" = "yes"; then
 			setenv mtdbootpart ${active_system}
 			setenv mtdlinuxindex ${mtdlinux_a_index}
 			setenv mtdrootfsindex ${mtdrootfs_a_index}
+			setenv rootfsvol ${rootfsvol_a}
 		else
 			echo "Booting from system B"
 			setenv mtdbootpart ${active_system}
 			setenv mtdlinuxindex ${mtdlinux_b_index}
 			setenv mtdrootfsindex ${mtdrootfs_b_index}
+			setenv rootfsvol ${rootfsvol_b}
 		fi
 	fi
 else
