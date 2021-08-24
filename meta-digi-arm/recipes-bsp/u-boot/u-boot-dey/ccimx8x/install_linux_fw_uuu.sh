@@ -18,6 +18,9 @@
 # U-Boot script for installing Linux images created by Yocto
 #
 
+# Exit on any error
+set -e
+
 # Parse uuu cmd output
 getenv()
 {
