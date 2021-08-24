@@ -29,6 +29,9 @@ show_usage()
 	echo "Usage: $0 [options]"
 	echo ""
 	echo "  Options:"
+	echo "   -b                     Use one MTD 'system' partition to hold system UBI volumes (linux,"
+	echo "                          recovery, rootfs, update)."
+	echo "                          Default is the opposite: one UBI volume per MTD partition."
 	echo "   -h                     Show this help."
 	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
 	echo "                          'dey-image-webkit', 'core-image-base'..."
@@ -67,9 +70,10 @@ echo "############################################################"
 # Command line admits the following parameters:
 # -u <u-boot-filename>
 # -i <image-name>
-while getopts 'hi:nu:' c
+while getopts 'bhi:nu:' c
 do
 	case $c in
+	b) UBISYSVOLS=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
 	n) NOWAIT=true ;;
@@ -218,6 +222,18 @@ sleep 3
 # Set fastboot buffer address to $loadaddr
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 
+# Set up ubisysvols if so requested
+if [ "${UBISYSVOLS}" = true ]; then
+	uuu fb: ucmd setenv ubisysvols yes
+fi
+
+# Create partition table
+uuu "fb[-t 10000]:" ucmd run partition_nand_linux
+
+if [ "${UBISYSVOLS}" = true ]; then
+	uuu "fb[-t 10000]:" ucmd run ubivolscript
+fi
+
 # Update Linux
 part_update "linux" "${INSTALL_LINUX_FILENAME}" 15000
 
@@ -227,8 +243,10 @@ part_update "recovery" "${INSTALL_RECOVERY_FILENAME}" 15000
 # Update Rootfs
 part_update "rootfs" "${INSTALL_ROOTFS_FILENAME}" 90000
 
-# Erase the 'Update' partition
-uuu fb: ucmd nand erase.part update
+if [ ! "${UBISYSVOLS}" = true ]; then
+	# Erase the 'Update' partition
+	uuu fb: ucmd nand erase.part update
+fi
 
 # Configure u-boot to boot into recovery mode
 uuu fb: ucmd setenv boot_recovery yes
