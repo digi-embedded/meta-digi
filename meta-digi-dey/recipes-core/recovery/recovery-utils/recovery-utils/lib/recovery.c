@@ -439,7 +439,7 @@ static int parse_nand_partition_info(char **parts, char **encrypted, unsigned ch
 
 	/* Parse mtdparts for all partition info */
 	ret = uboot_getenv("mtdparts", &var);
-	if (ret) {
+	if (ret || !var) {
 		fprintf(stderr, "Error: getenv 'mtdparts'\n");
 		return ret;
 	}
@@ -977,6 +977,10 @@ int is_dualboot_enabled (void)
 		fprintf(stderr, "Error: getenv 'dualboot'\n");
 		return 0;
 	}
+
+	/* Consider dualboot not enabled if variable doesn't exist */
+	if (!var)
+		return 0;
 
 	/* Is dualboot enabled */
 	if (!strcmp(var, "no"))
