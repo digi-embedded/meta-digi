@@ -19,6 +19,7 @@
 
 #define _GNU_SOURCE	/* For GNU version of basename */
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,6 +72,32 @@ static char *emmc_parts_blacklist[] = {
 };
 
 static char *rootfs[] = { "rootfs", NULL };
+
+/*
+ * Function:    is_device_closed
+ * Description: check if the device is in dualboot mode
+ */
+static bool is_dualboot_enabled(void)
+{
+	const char *var;
+	bool ret = false;
+
+	/* Parse dualboot */
+	if (uboot_getenv("dualboot", &var)) {
+		fprintf(stderr, "Error: getenv 'dualboot'\n");
+		return false;
+	}
+
+	/* Consider dualboot not enabled if variable doesn't exist */
+	if (!var)
+		return false;
+
+	/* Is dualboot enabled */
+	if (!strcmp(var, "yes"))
+		ret = true;
+
+	return ret;
+}
 
 /*
  * Function:    append_recovery_command
@@ -960,33 +987,4 @@ err:
 	free_array(parts);
 
 	return ret < 0 ? -1 : ret;
-}
-
-/*
- * Function:    is_device_closed
- * Description: check if the device is in dualboot mode
- */
-int is_dualboot_enabled (void)
-{
-	const char *var;
-	int ret;
-
-	/* Parse dualboot */
-	ret = uboot_getenv("dualboot", &var);
-	if (ret) {
-		fprintf(stderr, "Error: getenv 'dualboot'\n");
-		return 0;
-	}
-
-	/* Consider dualboot not enabled if variable doesn't exist */
-	if (!var)
-		return 0;
-
-	/* Is dualboot enabled */
-	if (!strcmp(var, "no"))
-		ret = 0;
-	else
-		ret = 1;
-
-	return ret;
 }
