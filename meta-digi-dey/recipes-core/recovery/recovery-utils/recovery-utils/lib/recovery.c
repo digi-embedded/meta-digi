@@ -96,6 +96,7 @@ static bool is_dualboot_enabled(void)
 	if (!strcmp(var, "yes"))
 		ret = true;
 
+	free(var);
 	return ret;
 }
 
@@ -148,6 +149,7 @@ static int append_recovery_command(const char *value)
 	free(new_recovery_cmd);
 
 err:
+	free(old_recovery_cmd);
 	return ret ? -1 : 0;
 }
 
@@ -522,6 +524,7 @@ static int parse_nand_partition_info(char **parts, char **encrypted, unsigned ch
 err:
 	if (tmp)
 		free(tmp);
+	free(var);
 
 	/* NULL-terminate the arrays */
 	parts[i] = NULL;
@@ -588,6 +591,7 @@ err:
 		pclose(fp);
 	if (tmp)
 		free(tmp);
+	free(var);
 
 	/* NULL-terminate the parts array */
 	parts[i] = NULL;
