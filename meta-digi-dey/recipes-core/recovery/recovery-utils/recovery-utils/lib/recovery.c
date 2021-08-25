@@ -332,7 +332,7 @@ static int is_subset(char **subset, char **set)
  * Description: convert a list into a NULL-terminated string array, while checking against a blacklist and a superset
  */
 static int list_to_array(char *list, char **array, char **blacklist,
-                         char **superset, const char *delim, unsigned char limit)
+			 char **superset, const char *delim, unsigned char limit)
 {
 	char *tmp = NULL;
 	char *entry = NULL;
@@ -618,10 +618,10 @@ int update_firmware(const char *swu_path)
 	int ret = -1;
 
 	/* Check if we are in dualboot mode */
-        if (is_dualboot_enabled()) {
-                fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
-                goto err;
-        }
+	if (is_dualboot_enabled()) {
+		fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
+		goto err;
+	}
 
 	/* Verify input parameter */
 	if (!swu_path) {
@@ -664,10 +664,10 @@ int reboot_recovery(unsigned int reboot_timeout)
 	int ret = 0;
 
 	/* Check if we are in dualboot mode */
-        if (is_dualboot_enabled()) {
-                fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
-                goto err;
-        }
+	if (is_dualboot_enabled()) {
+		fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
+		goto err;
+	}
 
 	sync();
 
@@ -714,10 +714,10 @@ int set_encryption_key(char *key, unsigned char force)
 	unsigned char i = 0;
 
 	/* Check if we are in dualboot mode */
-        if (is_dualboot_enabled()) {
-                fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
-                return ret;
-        }
+	if (is_dualboot_enabled()) {
+		fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
+		return ret;
+	}
 
 	/* Initialize arrays */
 	parts[0] = NULL;
@@ -773,10 +773,8 @@ int set_encryption_key(char *key, unsigned char force)
 		}
 	}
 
-	key_cmd =
-	    calloc(1,
-		   strlen("encryption_key=") +
-		   (generate_random_key ? 0 : strlen(key)) + 1);
+	key_cmd = calloc(1, strlen("encryption_key=") +
+			 (generate_random_key ? 0 : strlen(key)) + 1);
 	if (!key_cmd) {
 		fprintf(stderr, "Error: calloc 'key_cmd'\n");
 		goto err;
@@ -820,10 +818,10 @@ int encrypt_partitions(char *to_encrypt, char *to_unencrypt, unsigned char force
 	int ret;
 
 	/* Check if we are in dualboot mode */
-        if (is_dualboot_enabled()) {
-                fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
-                return 1;
-        }
+	if (is_dualboot_enabled()) {
+		fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
+		return 1;
+	}
 
 	/* If both lists are empty, we have nothing to do */
 	if (!to_encrypt && !to_unencrypt)
