@@ -70,11 +70,4 @@ int set_encryption_key(char *key, unsigned char force);
  */
 int encrypt_partitions(char *to_encrypt, char *to_unencrypt, unsigned char force);
 
-/*
- * Check if device has dualboot enabled.
- *
- * Return: 1 if enabled and 0 if disabled, -1 on error when reading the environment
- */
-int is_dualboot_enabled(void);
-
 #endif /* RECOVERY_H */
