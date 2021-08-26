@@ -121,6 +121,8 @@ fi
 
 # Set 'bootcmd' to the second part of the script that will
 #  - Reset environment to defaults
+#  - Restore 'ubisysvols' if previously set
+#  - Run 'partition_nand_linux' script to re-partition the NAND if needed
 #  - Save the environment
 #  - Update the 'linux' partition
 #  - Update the 'recovery' partition
@@ -130,13 +132,20 @@ fi
 #  - Run 'recovery' and let the system boot after
 setenv bootcmd "
 	env default -a;
+	setenv ubisysvols ${ubisysvols};
+	run partition_nand_linux;
 	saveenv;
+	if test -n \$\{ubisysvols\} && test \$\{ubisysvols\} = yes; then
+		run ubivolscript;
+	fi;
 	echo \"\";
 	echo \"\";
 	echo \">> Installing linux image file ${INSTALL_LINUX_FILENAME}\";
 	echo \"\";
 	echo \"\";
-	nand erase.part linux;
+	if test ! -n \$\{ubisysvols\} || test \$\{ubisysvols\} = no; then
+		nand erase.part linux;
+	fi;
 	update linux mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update linux partition!\";
@@ -149,7 +158,9 @@ setenv bootcmd "
 	echo \">> Installing recovery file ${INSTALL_RECOVERY_FILENAME}\";
 	echo \"\";
 	echo \"\";
-	nand erase.part recovery;
+	if test ! -n \$\{ubisysvols\} || test \$\{ubisysvols\} = no; then
+		nand erase.part recovery;
+	fi;
 	update recovery mmc ${INSTALL_MMCDEV} ${INSTALL_RECOVERY_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update recovery partition!\";
@@ -162,7 +173,9 @@ setenv bootcmd "
 	echo \">> Installing root file system file ${INSTALL_ROOTFS_FILENAME}\";
 	echo \"\";
 	echo \"\";
-	nand erase.part rootfs;
+	if test ! -n \$\{ubisysvols\} || test \$\{ubisysvols\} = no; then
+		nand erase.part rootfs;
+	fi;
 	update rootfs mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
 	if test \$? -eq 1; then
 		echo \"[ERROR] Failed to update rootfs partition!\";
@@ -171,7 +184,9 @@ setenv bootcmd "
 		exit;
 	fi;
 	echo \"\";
-	nand erase.part update;
+	if test ! -n \$\{ubisysvols\} || test \$\{ubisysvols\} = no; then
+		nand erase.part update;
+	fi;
 	setenv boot_recovery yes;
 	setenv recovery_command wipe_update;
 	saveenv;
