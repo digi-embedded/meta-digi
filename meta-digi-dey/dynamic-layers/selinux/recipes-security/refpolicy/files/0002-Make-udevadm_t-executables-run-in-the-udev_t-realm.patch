@@ -1,0 +1,86 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Fri, 20 Aug 2021 15:06:12 +0200
+Subject: [PATCH 2/2] Make udevadm_t executables run in the udev_t realm
+
+This prevents SELinux from denying udev activity in DEY. This is a partial port
+of the following commit:
+
+https://www.spinics.net/lists/selinux-refpolicy/msg00805.html
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ policy/modules/system/udev.fc | 4 ++--
+ policy/modules/system/udev.if | 4 ++--
+ policy/modules/system/udev.te | 6 +++---
+ 3 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/policy/modules/system/udev.fc b/policy/modules/system/udev.fc
+index ceb5b70b3..36d91f3a2 100644
+--- a/policy/modules/system/udev.fc
++++ b/policy/modules/system/udev.fc
+@@ -10,7 +10,7 @@
+ /etc/udev/scripts/.+ --	gen_context(system_u:object_r:udev_helper_exec_t,s0)
+ 
+ /usr/bin/udev		--	gen_context(system_u:object_r:udev_exec_t,s0)
+-/usr/bin/udevadm	--	gen_context(system_u:object_r:udevadm_exec_t,s0)
++/usr/bin/udevadm	--	gen_context(system_u:object_r:udev_exec_t,s0)
+ /usr/bin/udevd		--	gen_context(system_u:object_r:udev_exec_t,s0)
+ /usr/bin/udevinfo	--	gen_context(system_u:object_r:udev_exec_t,s0)
+ /usr/bin/udevsend	--	gen_context(system_u:object_r:udev_exec_t,s0)
+@@ -22,7 +22,7 @@ ifdef(`distro_debian',`
+ ')
+ 
+ /usr/sbin/udev		--	gen_context(system_u:object_r:udev_exec_t,s0)
+-/usr/sbin/udevadm	--	gen_context(system_u:object_r:udevadm_exec_t,s0)
++/usr/sbin/udevadm	--	gen_context(system_u:object_r:udev_exec_t,s0)
+ /usr/sbin/udevd		--	gen_context(system_u:object_r:udev_exec_t,s0)
+ /usr/sbin/udevsend	--	gen_context(system_u:object_r:udev_exec_t,s0)
+ /usr/sbin/udevstart	--	gen_context(system_u:object_r:udev_exec_t,s0)
+diff --git a/policy/modules/system/udev.if b/policy/modules/system/udev.if
+index 468f83d2e..1b37166d2 100644
+--- a/policy/modules/system/udev.if
++++ b/policy/modules/system/udev.if
+@@ -548,10 +548,10 @@ interface(`udev_manage_runtime_files',`
+ #
+ interface(`udevadm_domtrans',`
+ 	gen_require(`
+-		type udevadm_t, udevadm_exec_t;
++		type udevadm_t, udev_exec_t;
+ 	')
+ 
+-	domtrans_pattern($1, udevadm_exec_t, udevadm_t)
++	domtrans_pattern($1, udev_exec_t, udevadm_t)
+ ')
+ 
+ ########################################
+diff --git a/policy/modules/system/udev.te b/policy/modules/system/udev.te
+index 2bd2fcdc7..3bfde5bef 100644
+--- a/policy/modules/system/udev.te
++++ b/policy/modules/system/udev.te
+@@ -8,6 +8,7 @@ attribute_role udevadm_roles;
+ 
+ type udev_t;
+ type udev_exec_t;
++typealias udev_exec_t alias udevadm_exec_t;
+ type udev_helper_exec_t;
+ kernel_domtrans_to(udev_t, udev_exec_t)
+ domain_obj_id_change_exemption(udev_t)
+@@ -17,9 +18,7 @@ init_daemon_domain(udev_t, udev_exec_t)
+ init_named_socket_activation(udev_t, udev_runtime_t)
+ 
+ type udevadm_t;
+-type udevadm_exec_t;
+-init_system_domain(udevadm_t, udevadm_exec_t)
+-application_domain(udevadm_t, udevadm_exec_t)
++application_domain(udevadm_t, udev_exec_t)
+ role udevadm_roles types udevadm_t;
+ 
+ type udev_etc_t alias etc_udev_t;
+@@ -86,6 +85,7 @@ manage_files_pattern(udev_t, udev_runtime_t, udev_runtime_t)
+ manage_lnk_files_pattern(udev_t, udev_runtime_t, udev_runtime_t)
+ manage_sock_files_pattern(udev_t, udev_runtime_t, udev_runtime_t)
+ files_runtime_filetrans(udev_t, udev_runtime_t, dir, "udev")
++allow udev_t udev_runtime_t:dir watch;
+ 
+ kernel_load_module(udev_t)
+ kernel_read_system_state(udev_t)
