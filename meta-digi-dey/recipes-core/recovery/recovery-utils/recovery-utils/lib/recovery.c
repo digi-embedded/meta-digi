@@ -74,29 +74,29 @@ static char *emmc_parts_blacklist[] = {
 static char *rootfs[] = { "rootfs", NULL };
 
 /*
- * Function:    is_device_closed
- * Description: check if the device is in dualboot mode
+ * Function:    check_uboot_var
+ * Description: Compares an env variable with a given value
  */
-static bool is_dualboot_enabled(void)
+static bool check_uboot_var(char *name, char *value)
 {
-	const char *var;
+	const char *val;
 	bool ret = false;
 
-	/* Parse dualboot */
-	if (uboot_getenv("dualboot", &var)) {
-		fprintf(stderr, "Error: getenv 'dualboot'\n");
+	/* Parse variable */
+	if (uboot_getenv(name, &val)) {
+		fprintf(stderr, "Error: getenv '%s'\n", name);
 		return false;
 	}
 
-	/* Consider dualboot not enabled if variable doesn't exist */
-	if (!var)
+	/* Return false if variable doesn't exist */
+	if (!val)
 		return false;
 
-	/* Is dualboot enabled */
-	if (!strcmp(var, "yes"))
+	/* Is val == value */
+	if (!strcmp(val, value))
 		ret = true;
 
-	free(var);
+	free(val);
 	return ret;
 }
 
@@ -112,7 +112,7 @@ static int append_recovery_command(const char *value)
 	int ret = 0;
 
 	/* Check if we are in dualboot mode */
-	if (is_dualboot_enabled()) {
+	if (check_uboot_var("dualboot", "yes")) {
 		fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
 		goto err;
 	}
@@ -622,7 +622,7 @@ int update_firmware(const char *swu_path)
 	int ret = -1;
 
 	/* Check if we are in dualboot mode */
-	if (is_dualboot_enabled()) {
+	if (check_uboot_var("dualboot", "yes")) {
 		fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
 		goto err;
 	}
@@ -668,7 +668,7 @@ int reboot_recovery(unsigned int reboot_timeout)
 	int ret = 0;
 
 	/* Check if we are in dualboot mode */
-	if (is_dualboot_enabled()) {
+	if (check_uboot_var("dualboot", "yes")) {
 		fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
 		goto err;
 	}
@@ -718,7 +718,7 @@ int set_encryption_key(char *key, unsigned char force)
 	unsigned char i = 0;
 
 	/* Check if we are in dualboot mode */
-	if (is_dualboot_enabled()) {
+	if (check_uboot_var("dualboot", "yes")) {
 		fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
 		return ret;
 	}
@@ -822,7 +822,7 @@ int encrypt_partitions(char *to_encrypt, char *to_unencrypt, unsigned char force
 	int ret;
 
 	/* Check if we are in dualboot mode */
-	if (is_dualboot_enabled()) {
+	if (check_uboot_var("dualboot", "yes")) {
 		fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
 		return 1;
 	}
