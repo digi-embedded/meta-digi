@@ -231,38 +231,56 @@ format_ubi_volume() {
 	psplash_message "Formatting '${1}' partition..."
 	psplash_progress "0"
 
-	# Find the MTD partition.
-	local mtd_num="$(sed -ne "s/mtd\([0-9]\+\):.*\<${1}\>.*/\1/g;T;p" /proc/mtd 2>/dev/null)"
-	if [ -z "${mtd_num}" ]; then
-		quit_with_error "Could not find MTD partition for volume '${1}'"
-	else
-		# Umount in case partition is mounted, ignore errors.
-		if grep -qs "${1}" /proc/mounts; then
-			local path="$(sed -ne "s/.*:${1} \(.*\) ubifs.*/\1/g;T;p" /proc/mounts 2>/dev/null)"
-			umount "${path}" >/dev/null 2>&1
-		fi
-		ubidetach -p "/dev/mtd${mtd_num}" >/dev/null 2>&1
-		# Format MTD partition.
-		if ! ubiformat "/dev/mtd${mtd_num}" -q -y; then
-			quit_with_error "Error erasing '/dev/mtd${mtd_num}' block"
-		fi
-		psplash_progress "50"
-		# Attach and get UBI device number
-		local dev_number="$(ubiattach -p /dev/mtd${mtd_num} 2>/dev/null | sed -ne 's,.*device number \([0-9]\).*,\1,g;T;p' 2>/dev/null)"
-		# Create UBI Vol.
-		ubimkvol "/dev/ubi${dev_number}" -m -N "${1}" >/dev/null 2>&1
-		if [ "$?" = "0" ]; then
-			# Configure the empty UBIFS partition to use ZLIB
-			[ "${1}" = "update" ] && UBIFS_COMPRESSION="-x zlib"
+	# Read the ubisysvols variable.
+	read_uboot_var ubisysvols ubisysvols
 
-			volid="$(ubinfo "/dev/ubi${dev_number}" -N "${1}" | sed -ne 's,Volume ID:[[:blank:]]\+\([0-9]\+\)[[:blank:]]\+.*,\1,g;T;p')"
-			mkfs.ubifs ${UBIFS_COMPRESSION} -F /dev/ubi${dev_number}_${volid}
-			psplash_progress "100"
-			log "Partition '${1}' successfully erased!"
-			# Detach MTD partition.
-			ubidetach -p "/dev/mtd${mtd_num}" >/dev/null 2>&1
+	if [ "${ubisysvols}" = "yes" ]; then
+		# Find the volume number associated to the volume name
+		for d in /dev/ubi0_*; do
+			volname="$(ubinfo ${d} | grep ^Name | awk '{print $(2)}')"
+			if [ "${volname}" = "${1}" ]; then
+				# Find mountpoint
+				mountpoint="$(mount | grep ubi0:${1} | awk '{print $(3) }')"
+				umount ${mountpoint} 2> /dev/null
+				# Wipe out volume
+				ubiupdatevol ${d} -t
+			fi
+		done
+		psplash_progress "100"
+	else
+		# Find the MTD partition.
+		local mtd_num="$(sed -ne "s/mtd\([0-9]\+\):.*\<${1}\>.*/\1/g;T;p" /proc/mtd 2>/dev/null)"
+		if [ -z "${mtd_num}" ]; then
+			quit_with_error "Could not find MTD partition for volume '${1}'"
 		else
-			quit_with_error "Error creating '${1}' UBI volume"
+			# Umount in case partition is mounted, ignore errors.
+			if grep -qs "${1}" /proc/mounts; then
+				local path="$(sed -ne "s/.*:${1} \(.*\) ubifs.*/\1/g;T;p" /proc/mounts 2>/dev/null)"
+				umount "${path}" >/dev/null 2>&1
+			fi
+			ubidetach -p "/dev/mtd${mtd_num}" >/dev/null 2>&1
+			# Format MTD partition.
+			if ! ubiformat "/dev/mtd${mtd_num}" -q -y; then
+				quit_with_error "Error erasing '/dev/mtd${mtd_num}' block"
+			fi
+			psplash_progress "50"
+			# Attach and get UBI device number
+			local dev_number="$(ubiattach -p /dev/mtd${mtd_num} 2>/dev/null | sed -ne 's,.*device number \([0-9]\).*,\1,g;T;p' 2>/dev/null)"
+			# Create UBI Vol.
+			ubimkvol "/dev/ubi${dev_number}" -m -N "${1}" >/dev/null 2>&1
+			if [ "$?" = "0" ]; then
+				# Configure the empty UBIFS partition to use ZLIB
+				[ "${1}" = "update" ] && UBIFS_COMPRESSION="-x zlib"
+
+				volid="$(ubinfo "/dev/ubi${dev_number}" -N "${1}" | sed -ne 's,Volume ID:[[:blank:]]\+\([0-9]\+\)[[:blank:]]\+.*,\1,g;T;p')"
+				mkfs.ubifs ${UBIFS_COMPRESSION} -F /dev/ubi${dev_number}_${volid}
+				psplash_progress "100"
+				log "Partition '${1}' successfully erased!"
+				# Detach MTD partition.
+				ubidetach -p "/dev/mtd${mtd_num}" >/dev/null 2>&1
+			else
+				quit_with_error "Error creating '${1}' UBI volume"
+			fi
 		fi
 	fi
 }
