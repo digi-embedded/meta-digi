@@ -32,9 +32,6 @@ show_usage()
 	echo "Usage: $0 [options]"
 	echo ""
 	echo "  Options:"
-	echo "   -b                     Use one MTD 'system' partition to hold system UBI volumes (linux,"
-	echo "                          recovery, rootfs, update)."
-	echo "                          Default is the opposite: one UBI volume per MTD partition."
 	echo "   -h                     Show this help."
 	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
 	echo "                          'dey-image-webkit', 'core-image-base'..."
@@ -73,10 +70,9 @@ echo "############################################################"
 # Command line admits the following parameters:
 # -u <u-boot-filename>
 # -i <image-name>
-while getopts 'bhi:nu:' c
+while getopts 'hi:nu:' c
 do
 	case $c in
-	b) UBISYSVOLS=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
 	n) NOWAIT=true ;;
@@ -84,11 +80,17 @@ do
 	esac
 done
 
-echo ""
-echo "Determining image files to use..."
-
 # Enable the redirect support to get u-boot variables values
 uuu fb: ucmd setenv stdout serial,fastboot
+
+# Check if ubisysvols variable is active
+ubisysvols=$(getenv "ubisysvols")
+if [ "${ubisysvols}" = "yes" ]; then
+	UBISYSVOLS=true;
+fi
+
+echo ""
+echo "Determining image files to use..."
 
 # Determine U-Boot filename if not provided
 if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
@@ -225,7 +227,7 @@ sleep 3
 # Set fastboot buffer address to $loadaddr
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 
-# Set up ubisysvols if so requested
+# Restore ubisysvols if previously active
 if [ "${UBISYSVOLS}" = true ]; then
 	uuu fb: ucmd setenv ubisysvols yes
 fi
