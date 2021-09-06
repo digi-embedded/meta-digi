@@ -24,14 +24,16 @@ SYSTEMD_SERVICE_${PN}-sdma = "sdma-firmware.service"
 do_install() {
     install -d ${D}${base_libdir}/firmware/imx
 
+    # Install loading scripts
+    install -d ${D}${sysconfdir}
+    install -m 0755 ${WORKDIR}/sdma ${D}${sysconfdir}
+    install -m 0755 ${WORKDIR}/epdc ${D}${sysconfdir}
+    install -m 0755 ${WORKDIR}/regulatory ${D}${sysconfdir}
+    install -m 0755 ${WORKDIR}/hdmi ${D}${sysconfdir}
+
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
-        # Install loading scripts
-        install -d ${D}${sysconfdir}
+        # Install SDMA systemd service
         install -d ${D}${systemd_system_unitdir}
-        install -m 0755 ${WORKDIR}/sdma ${D}${sysconfdir}
-        install -m 0755 ${WORKDIR}/epdc ${D}${sysconfdir}
-        install -m 0755 ${WORKDIR}/regulatory ${D}${sysconfdir}
-        install -m 0755 ${WORKDIR}/hdmi ${D}${sysconfdir}
         install -m 0644 ${WORKDIR}/sdma-firmware.service ${D}${systemd_system_unitdir}
     fi
 
@@ -100,7 +102,7 @@ PACKAGES_DYNAMIC = "${PN}-vpu-* ${PN}-sdma-*"
 PACKAGES =+ "${PN}-epdc ${PN}-sdma ${PN}-easrc ${PN}-regulatory ${PN}-hdmi ${PN}-xcvr ${PN}-xuvi"
 
 FILES_${PN}-epdc = "${base_libdir}/firmware/imx/epdc/ ${sysconfdir}/epdc"
-FILES_${PN}-sdma = "${base_libdir}/firmware/imx/sdma ${sysconfdir}/sdma"
+FILES_${PN}-sdma = "${base_libdir}/firmware/imx/sdma ${sysconfdir}/sdma ${systemd_system_unitdir}/sdma-firmware.service"
 FILES_${PN}-easrc = "${base_libdir}/firmware/imx/easrc/"
 FILES_${PN}-regulatory = "${sysconfdir}/regulatory"
 FILES_${PN}-hdmi = "${base_libdir}/firmware/imx/hdmi/ ${sysconfdir}/hdmi"
