@@ -10,7 +10,7 @@ DEPENDS = "cryptoauthlib"
 SRCBRANCH = "dey-2.2/maint"
 SRCREV = "${AUTOREV}"
 
-CC_STASH = "${DIGI_MTK_GIT}dey/dey-examples.git;protocol=ssh"
+CC_STASH = "${DIGI_MTK_GIT}/dey/dey-examples.git;protocol=ssh"
 CC_GITHUB = "${DIGI_GITHUB_GIT}/dey-examples.git;protocol=git"
 
 CC_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${CC_STASH}', '${CC_GITHUB}', d)}"
@@ -25,4 +25,3 @@ do_install() {
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul)"
-

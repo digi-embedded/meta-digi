@@ -10,7 +10,7 @@ DEPENDS = "libdigiapix"
 SRCBRANCH = "dey-2.2/maint"
 SRCREV = "${AUTOREV}"
 
-LIBDIGIAPIX_STASH = "${DIGI_MTK_GIT}dey/dey-examples.git;protocol=ssh"
+LIBDIGIAPIX_STASH = "${DIGI_MTK_GIT}/dey/dey-examples.git;protocol=ssh"
 LIBDIGIAPIX_GITHUB = "${DIGI_GITHUB_GIT}/dey-examples.git;protocol=git"
 
 LIBDIGIAPIX_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${LIBDIGIAPIX_STASH}', '${LIBDIGIAPIX_GITHUB}', d)}"
