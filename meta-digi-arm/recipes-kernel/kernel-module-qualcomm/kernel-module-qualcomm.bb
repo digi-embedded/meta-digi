@@ -11,7 +11,7 @@ PV = "v4.0.11.213X"
 SRCBRANCH = "qca65X4/master"
 SRCREV = "${AUTOREV}"
 
-QCOM_GIT_URI = "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git;protocol=https', d)}"
+QCOM_GIT_URI = "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}/linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git;protocol=https', d)}"
 
 SRC_URI = " \
     ${QCOM_GIT_URI};branch=${SRCBRANCH} \

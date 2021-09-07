@@ -8,7 +8,7 @@ SRCBRANCH = "v5.4.70/master"
 SRCREV = "${AUTOREV}"
 
 # Select internal or Github Linux repo
-LINUX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}linux-2.6.git', '${DIGI_GITHUB_GIT}/linux.git;protocol=https', d)}"
+LINUX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}/linux-2.6.git', '${DIGI_GITHUB_GIT}/linux.git;protocol=https', d)}"
 SRC_URI = "${LINUX_GIT_URI};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git"

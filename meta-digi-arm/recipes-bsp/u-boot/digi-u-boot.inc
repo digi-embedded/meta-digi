@@ -15,7 +15,7 @@ PROVIDES += "u-boot"
 S = "${WORKDIR}/git"
 
 # Select internal or Github U-Boot repo
-UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}u-boot-denx.git', '${DIGI_GITHUB_GIT}/u-boot.git;protocol=https', d)}"
+UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}/u-boot-denx.git', '${DIGI_GITHUB_GIT}/u-boot.git;protocol=https', d)}"
 
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
