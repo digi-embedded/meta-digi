@@ -2,28 +2,10 @@
 # U-Boot bootscript for EMMC/SD images created by Yocto.
 #
 
-# Back up environment variables
-setenv ORIG_extra_bootargs ${extra_bootargs}
-
-#
-# Set device tree filename depending on the board ID (if defined)
-#
-if test -n "${board_id}"; then
-	setenv fdt_file imx6qp-ccimx6qpsbc-id${board_id}.dtb
-else
-	#
-	# Set device tree filename depending on the hardware variant
-	#
-	if test "${module_variant}" = "0x01"; then
-		setenv fdt_file imx6qp-ccimx6qpsbc-wb.dtb
-	elif test "${module_variant}" = "0x02"; then
-		setenv fdt_file imx6qp-ccimx6qpsbc-wb.dtb
-	elif test "${module_variant}" = "0x03"; then
-		setenv fdt_file imx6qp-ccimx6qpsbc.dtb
-	else
-		setenv fdt_file imx6qp-ccimx6qpsbc-wb.dtb
-	fi
-fi
+# As the first step in the boot script, check if we are using DualBoot and
+# if an upgrade is available. This requires the script to change some variables
+# and save them, while the rest of the script changes variables only temporarily
+# without saving them.
 
 # Dual boot update verification
 if test "${dualboot}" = "yes"; then
@@ -90,6 +72,31 @@ else
 		setenv mmcroot /dev/mmcblk${mmcbootdev}p2
 	fi
 fi
+
+
+# Back up environment variables
+setenv ORIG_extra_bootargs ${extra_bootargs}
+
+#
+# Set device tree filename depending on the board ID (if defined)
+#
+if test -n "${board_id}"; then
+	setenv fdt_file imx6qp-ccimx6qpsbc-id${board_id}.dtb
+else
+	#
+	# Set device tree filename depending on the hardware variant
+	#
+	if test "${module_variant}" = "0x01"; then
+		setenv fdt_file imx6qp-ccimx6qpsbc-wb.dtb
+	elif test "${module_variant}" = "0x02"; then
+		setenv fdt_file imx6qp-ccimx6qpsbc-wb.dtb
+	elif test "${module_variant}" = "0x03"; then
+		setenv fdt_file imx6qp-ccimx6qpsbc.dtb
+	else
+		setenv fdt_file imx6qp-ccimx6qpsbc-wb.dtb
+	fi
+fi
+
 setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
 dboot linux mmc ${mmcbootdev}:${mmcpart}
 

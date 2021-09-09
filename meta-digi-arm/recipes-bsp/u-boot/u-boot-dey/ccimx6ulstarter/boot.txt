@@ -2,40 +2,10 @@
 # U-Boot bootscript for NAND images created by Yocto.
 #
 
-# Back up environment variables
-setenv ORIG_extra_bootargs ${extra_bootargs}
-
-#
-# Set device tree filename depending on the board ID (if defined)
-#
-if test -n "${board_id}"; then
-	setenv fdt_file imx6ul-ccimx6ulstarter-id${board_id}.dtb
-else
-	#
-	# Set device tree filename depending on the hardware variant
-	#
-	if test "${module_variant}" = "0x02"; then
-		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
-	elif test "${module_variant}" = "0x03"; then
-		setenv fdt_file imx6ul-ccimx6ulstarter.dtb
-	elif test "${module_variant}" = "0x04"; then
-		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
-	elif test "${module_variant}" = "0x05"; then
-		setenv fdt_file imx6ul-ccimx6ulstarter.dtb
-	elif test "${module_variant}" = "0x06"; then
-		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
-	elif test "${module_variant}" = "0x07"; then
-		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
-	elif test "${module_variant}" = "0x08"; then
-		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
-	elif test "${module_variant}" = "0x09"; then
-		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
-	elif test "${module_variant}" = "0x0a"; then
-		setenv fdt_file imx6ul-ccimx6ulstarter.dtb
-	else
-		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
-	fi
-fi
+# As the first step in the boot script, check if we are using DualBoot and
+# if an upgrade is available. This requires the script to change some variables
+# and save them, while the rest of the script changes variables only temporarily
+# without saving them.
 
 # Dual boot update verification
 if test "${dualboot}" = "yes"; then
@@ -81,6 +51,43 @@ else
 		true
 	fi
 fi
+
+
+# Back up environment variables
+setenv ORIG_extra_bootargs ${extra_bootargs}
+
+#
+# Set device tree filename depending on the board ID (if defined)
+#
+if test -n "${board_id}"; then
+	setenv fdt_file imx6ul-ccimx6ulstarter-id${board_id}.dtb
+else
+	#
+	# Set device tree filename depending on the hardware variant
+	#
+	if test "${module_variant}" = "0x02"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
+	elif test "${module_variant}" = "0x03"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter.dtb
+	elif test "${module_variant}" = "0x04"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
+	elif test "${module_variant}" = "0x05"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter.dtb
+	elif test "${module_variant}" = "0x06"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
+	elif test "${module_variant}" = "0x07"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
+	elif test "${module_variant}" = "0x08"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
+	elif test "${module_variant}" = "0x09"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
+	elif test "${module_variant}" = "0x0a"; then
+		setenv fdt_file imx6ul-ccimx6ulstarter.dtb
+	else
+		setenv fdt_file imx6ul-ccimx6ulstarter-wb.dtb
+	fi
+fi
+
 setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
 dboot linux nand ${mtdbootpart}
 

@@ -2,44 +2,10 @@
 # U-Boot bootscript for EMMC/SD images created by Yocto.
 #
 
-# Back up environment variables
-setenv ORIG_overlays ${overlays}
-setenv ORIG_extra_bootargs ${extra_bootargs}
-
-# Set SOC type to "imx8mm" if not already defined by U-Boot
-if test ! -n "${soc_type}"; then
-	setenv soc_type "imx8mm"
-fi
-
-# Reset overlays when using dualboot mode, because we need to
-# save the environment in case of an installation fall back.
-if test "${dual_boot}" = "yes"; then
-        if test -n "${overlays}"; then
-                setenv overlays
-        fi
-fi
-
-#
-# Determine overlays to apply depending on the hardware capabilities
-# described by the HWID, SOM version, and carrier board version.
-#
-if test -n "${module_ram}"; then
-	setexpr som_hv ${hwid_2} \& 38
-	setexpr som_hv ${som_hv} / 8
-
-	setexpr module_has_wifi ${hwid_2} \& 10000
-	setexpr module_has_wifi ${module_has_wifi} / 10000
-	setexpr module_has_bt ${hwid_2} \& 20000
-	setexpr module_has_bt ${module_has_bt} / 20000
-
-	if test "${module_has_bt}" = "1" && test -z "${disable_bt}"; then
-		setenv overlays _ov_som_bt_ccimx8m.dtbo,${overlays}
-	fi
-
-	if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
-		setenv overlays _ov_som_wifi_ccimx8m.dtbo,${overlays}
-	fi
-fi
+# As the first step in the boot script, check if we are using DualBoot and
+# if an upgrade is available. This requires the script to change some variables
+# and save them, while the rest of the script changes variables only temporarily
+# without saving them.
 
 # Dual boot update verification
 if test "${dualboot}" = "yes"; then
@@ -106,6 +72,39 @@ else
 		setenv mmcroot /dev/mmcblk${mmcbootdev}p2
 	fi
 fi
+
+
+# Back up environment variables
+setenv ORIG_overlays ${overlays}
+setenv ORIG_extra_bootargs ${extra_bootargs}
+
+# Set SOC type to "imx8mm" if not already defined by U-Boot
+if test ! -n "${soc_type}"; then
+	setenv soc_type "imx8mm"
+fi
+
+#
+# Determine overlays to apply depending on the hardware capabilities
+# described by the HWID, SOM version, and carrier board version.
+#
+if test -n "${module_ram}"; then
+	setexpr som_hv ${hwid_2} \& 38
+	setexpr som_hv ${som_hv} / 8
+
+	setexpr module_has_wifi ${hwid_2} \& 10000
+	setexpr module_has_wifi ${module_has_wifi} / 10000
+	setexpr module_has_bt ${hwid_2} \& 20000
+	setexpr module_has_bt ${module_has_bt} / 20000
+
+	if test "${module_has_bt}" = "1" && test -z "${disable_bt}"; then
+		setenv overlays _ov_som_bt_ccimx8m.dtbo,${overlays}
+	fi
+
+	if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
+		setenv overlays _ov_som_wifi_ccimx8m.dtbo,${overlays}
+	fi
+fi
+
 setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
 dboot linux mmc ${mmcbootdev}:${mmcpart}
 

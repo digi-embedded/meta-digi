@@ -2,56 +2,10 @@
 # U-Boot bootscript for EMMC/SD images created by Yocto.
 #
 
-# Back up environment variables
-setenv ORIG_overlays ${overlays}
-setenv ORIG_extra_bootargs ${extra_bootargs}
-
-# Set SOC type to "imx8qxp" if not already defined by U-Boot
-if test ! -n "${soc_type}"; then
-	setenv soc_type "imx8qxp"
-fi
-
-# Reset overlays when using dualboot mode, because we need to
-# save the environment in case of an installation fall back.
-if test "${dual_boot}" = "yes"; then
-	if test -n "${overlays}"; then
-		setenv overlays
-	fi
-fi
-
-#
-# Determine overlays to apply depending on the hardware capabilities
-# described by the HWID, SOM version, and carrier board version.
-#
-if test -n "${module_ram}"; then
-	setexpr module_has_wifi ${hwid_3} \& 1
-	setexpr module_has_bt ${hwid_3} \& 2
-	setexpr module_has_bt ${module_has_bt} / 2
-
-	if test "${module_has_bt}" = "1" && test -z "${disable_bt}"; then
-		setenv overlays _ov_som_bt_ccimx8x.dtbo,${overlays}
-	fi
-
-	if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
-		setenv overlays _ov_som_wifi_ccimx8x.dtbo,${overlays}
-	fi
-else
-	#
-	# Set overlays depending on the hardware variant
-	#
-	if test "${module_variant}" = "0x01"; then
-		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
-	elif test "${module_variant}" = "0x02"; then
-		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
-	elif test "${module_variant}" = "0x04"; then
-		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
-	fi
-fi
-
-# Apply QXP overlay if the SOC type is "imx8qxp"
-if test "${soc_type}" = "imx8qxp"; then
-	setenv overlays _ov_som_quad_ccimx8x.dtbo,${overlays}
-fi
+# As the first step in the boot script, check if we are using DualBoot and
+# if an upgrade is available. This requires the script to change some variables
+# and save them, while the rest of the script changes variables only temporarily
+# without saving them.
 
 # Dual boot update verification
 if test "${dualboot}" = "yes"; then
@@ -118,6 +72,51 @@ else
 		setenv mmcroot /dev/mmcblk${mmcbootdev}p2
 	fi
 fi
+
+
+# Back up environment variables
+setenv ORIG_overlays ${overlays}
+setenv ORIG_extra_bootargs ${extra_bootargs}
+
+# Set SOC type to "imx8qxp" if not already defined by U-Boot
+if test ! -n "${soc_type}"; then
+	setenv soc_type "imx8qxp"
+fi
+
+#
+# Determine overlays to apply depending on the hardware capabilities
+# described by the HWID, SOM version, and carrier board version.
+#
+if test -n "${module_ram}"; then
+	setexpr module_has_wifi ${hwid_3} \& 1
+	setexpr module_has_bt ${hwid_3} \& 2
+	setexpr module_has_bt ${module_has_bt} / 2
+
+	if test "${module_has_bt}" = "1" && test -z "${disable_bt}"; then
+		setenv overlays _ov_som_bt_ccimx8x.dtbo,${overlays}
+	fi
+
+	if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
+		setenv overlays _ov_som_wifi_ccimx8x.dtbo,${overlays}
+	fi
+else
+	#
+	# Set overlays depending on the hardware variant
+	#
+	if test "${module_variant}" = "0x01"; then
+		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
+	elif test "${module_variant}" = "0x02"; then
+		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
+	elif test "${module_variant}" = "0x04"; then
+		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
+	fi
+fi
+
+# Apply QXP overlay if the SOC type is "imx8qxp"
+if test "${soc_type}" = "imx8qxp"; then
+	setenv overlays _ov_som_quad_ccimx8x.dtbo,${overlays}
+fi
+
 setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
 dboot linux mmc ${mmcbootdev}:${mmcpart}
 
