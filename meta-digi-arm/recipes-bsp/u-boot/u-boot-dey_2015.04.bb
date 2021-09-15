@@ -11,13 +11,19 @@ DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-cst-native',
 
 PROVIDES += "u-boot"
 
-# U-Boot version dub-2015.04-r10.2
-SRCREV = "3ccec403129e8735e4db264d7bc6ed92f91e9431"
-
 # Select internal or Github U-Boot repo
 UBOOT_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}u-boot-denx.git', '${DIGI_GITHUB_GIT}/u-boot.git', d)}"
 
+SRCBRANCH = "v2015.04/maint"
+SRCREV = "${AUTOREV}"
+
 SRC_URI = " \
+    ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
+"
+
+# U-Boot version dub-2015.04-r10.2 for CC6
+SRCREV_ccimx6sbc = "3ccec403129e8735e4db264d7bc6ed92f91e9431"
+SRC_URI_ccimx6sbc = " \
     ${UBOOT_GIT_URI};nobranch=1 \
 "
 
