@@ -43,4 +43,5 @@ MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth pci"
 TRUSTFENCE_SIGN_MODE = "HAB"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend
-DISTRO_FEATURES_append = " wayland"
+# Adding pam is required for SELinux functionality
+DISTRO_FEATURES_append = " wayland pam"
