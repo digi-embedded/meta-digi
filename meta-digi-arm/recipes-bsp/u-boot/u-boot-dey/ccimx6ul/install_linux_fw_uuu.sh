@@ -83,6 +83,12 @@ done
 # Enable the redirect support to get u-boot variables values
 uuu fb: ucmd setenv stdout serial,fastboot
 
+# Check if dualboot variable is active
+dualboot=$(getenv "dualboot")
+if [ "${dualboot}" = "yes" ]; then
+	DUALBOOT=true;
+fi
+
 # Check if ubisysvols variable is active
 ubisysvols=$(getenv "ubisysvols")
 if [ "${ubisysvols}" = "yes" ]; then
@@ -163,32 +169,43 @@ done;
 
 [ "${ABORT}" = true ] && exit 1
 
+# parts names
+LINUX_NAME="linux"
+RECOVERY_NAME="recovery"
+ROOTFS_NAME="rootfs"
 # Print warning about storage media being deleted
-if [ ! "${NOWAIT}" = true ]; then
+if [ "${NOWAIT}" != true ]; then
 	WAIT=10
-	echo ""
-	echo " ===================="
-	echo " =    IMPORTANT!    ="
-	echo " ===================="
-	echo " This process will erase your NAND and will install the following files"
-	echo " on the partitions of the NAND."
-	echo ""
-	echo "   PARTITION   FILENAME"
-	echo "   ---------   --------"
-	echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
-	echo "   linux       ${INSTALL_LINUX_FILENAME}"
-	echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
-	echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
-	echo ""
-	echo " Press CTRL+C now if you wish to abort."
-	echo ""
+	printf "\n"
+	printf " ====================\n"
+	printf " =    IMPORTANT!    =\n"
+	printf " ====================\n"
+	printf " This process will erase your NAND and will install the following files\n"
+	printf " on the partitions of the NAND.\n"
+	printf "\n"
+	printf "   PARTITION\tFILENAME\n"
+	printf "   ---------\t--------\n"
+	printf "   bootloader\t${INSTALL_UBOOT_FILENAME}\n"
+	if [ "${DUALBOOT}" = true ]; then
+		printf "   ${LINUX_NAME}_a\t${INSTALL_LINUX_FILENAME}\n"
+		printf "   ${LINUX_NAME}_b\t${INSTALL_LINUX_FILENAME}\n"
+		printf "   ${ROOTFS_NAME}_a\t${INSTALL_ROOTFS_FILENAME}\n"
+		printf "   ${ROOTFS_NAME}_b\t${INSTALL_ROOTFS_FILENAME}\n"
+	else
+		printf "   ${LINUX_NAME}\t${INSTALL_LINUX_FILENAME}\n"
+		printf "   ${RECOVERY_NAME}\t${INSTALL_RECOVERY_FILENAME}\n"
+		printf "   ${ROOTFS_NAME}\t${INSTALL_ROOTFS_FILENAME}\n"
+	fi
+	printf "\n"
+	printf " Press CTRL+C now if you wish to abort.\n"
+	printf "\n"
 	while [ ${WAIT} -gt 0 ]; do
 		printf "\r Update process starts in %d " ${WAIT}
 		sleep 1
 		WAIT=$(( ${WAIT} - 1 ))
 	done
 	printf "\r                                   \n"
-	echo " Starting update process"
+	printf " Starting update process\n"
 fi
 
 # Set fastboot buffer address to $loadaddr, just in case
@@ -227,6 +244,11 @@ sleep 3
 # Set fastboot buffer address to $loadaddr
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 
+# Restore dualboot if previously active
+if [ "${DUALBOOT}" = true ]; then
+	uuu fb: ucmd setenv dualboot yes
+fi
+
 # Restore ubisysvols if previously active
 if [ "${UBISYSVOLS}" = true ]; then
 	uuu fb: ucmd setenv ubisysvols yes
@@ -239,24 +261,34 @@ if [ "${UBISYSVOLS}" = true ]; then
 	uuu "fb[-t 10000]:" ucmd run ubivolscript
 fi
 
-# Update Linux
-part_update "linux" "${INSTALL_LINUX_FILENAME}" 15000
+if [ "${DUALBOOT}" = true ]; then
+	# Update Linux A
+	part_update "${LINUX_NAME}_a" "${INSTALL_LINUX_FILENAME}" 15000
+	# Update Linux B
+	part_update "${LINUX_NAME}_b" "${INSTALL_LINUX_FILENAME}" 15000
+	# Update Rootfs A
+	part_update "${ROOTFS_NAME}_a" "${INSTALL_ROOTFS_FILENAME}" 90000
+	# Update Rootfs B
+	part_update "${ROOTFS_NAME}_b" "${INSTALL_ROOTFS_FILENAME}" 90000
+else
+	# Update Linux
+	part_update "${LINUX_NAME}" "${INSTALL_LINUX_FILENAME}" 15000
+	# Update Recovery
+	part_update "${RECOVERY_NAME}" "${INSTALL_RECOVERY_FILENAME}" 15000
+	# Update Rootfs
+	part_update "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}" 90000
+fi
 
-# Update Recovery
-part_update "recovery" "${INSTALL_RECOVERY_FILENAME}" 15000
-
-# Update Rootfs
-part_update "rootfs" "${INSTALL_ROOTFS_FILENAME}" 90000
-
-if [ ! "${UBISYSVOLS}" = true ]; then
+if [ "${UBISYSVOLS}" != true ] && [ "${DUALBOOT}" != true ]; then
 	# Erase the 'Update' partition
 	uuu fb: ucmd nand erase.part update
 fi
 
-# Configure u-boot to boot into recovery mode
-uuu fb: ucmd setenv boot_recovery yes
-uuu fb: ucmd setenv recovery_command wipe_update
-
+if [ "${DUALBOOT}" != true ]; then
+	# Configure u-boot to boot into recovery mode
+	uuu fb: ucmd setenv boot_recovery yes
+	uuu fb: ucmd setenv recovery_command wipe_update
+fi
 uuu fb: ucmd saveenv
 
 # Reset the target
