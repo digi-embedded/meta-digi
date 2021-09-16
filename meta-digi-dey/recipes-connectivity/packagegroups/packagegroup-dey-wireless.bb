@@ -9,6 +9,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
 RDEPENDS_${PN} = "\
+    hostapd \
     crda \
     iw \
     wireless-tools \
@@ -16,5 +17,3 @@ RDEPENDS_${PN} = "\
     wpa-supplicant-cli \
     wpa-supplicant-passphrase \
 "
-
-RDEPENDS_${PN}_append_ccimx6ul = " hostapd"
