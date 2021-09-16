@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2020 Digi International.
+# Copyright (C) 2016-2021 Digi International.
 
 SUMMARY = "Qualcomm firmware files for Digi's platforms."
 SECTION = "base"
@@ -11,7 +11,7 @@ QUALCOMM_WIFI_DRIVER ?= "proprietary"
 # Selects whether to apply the "Deep Sleep + Internal Clock" workaround
 BT_INTCLOCK_WORKAROUND ?= "0"
 BT_INTCLOCK_WORKAROUND_ccimx6ul = "1"
-BT_INTCLOCK_WORKAROUND_ccimx6qpsbc = "1"
+BT_INTCLOCK_WORKAROUND_ccimx6 = "1"
 
 # Bluetooth firmware files
 FW_QUALCOMM_BT = " \
@@ -107,4 +107,4 @@ FILES_${PN}-${QCA_MODEL}-bt = "/lib/firmware/qca"
 FILES_${PN}-${QCA_MODEL}-wifi = "/lib/firmware"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul|ccimx8x|ccimx8m)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x|ccimx8m)"
