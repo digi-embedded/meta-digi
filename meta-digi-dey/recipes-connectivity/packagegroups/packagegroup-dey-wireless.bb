@@ -16,4 +16,3 @@ RDEPENDS_${PN} = "\
 "
 
 RDEPENDS_${PN}_ccimx6sbc += "ath-prop-tools"
-RDEPENDS_${PN}_remove_ccimx6sbc = "hostapd"
