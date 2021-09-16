@@ -1,4 +1,4 @@
-# Copyright (C) 2016,2017 Digi International.
+# Copyright (C) 2016-2021 Digi International.
 
 SUMMARY = "Qualcomm's wireless driver for qca6564"
 DESCRIPTION = "qcacld-2.0 module"
@@ -56,4 +56,4 @@ FILES_${PN} += " \
     ${base_libdir}/firmware/wlan/qcom_cfg.ini \
 "
 
-COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"

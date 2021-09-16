@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2017 Digi International.
+# Copyright (C) 2015-2021 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
@@ -26,7 +26,7 @@ QCA6564_COMMON_PATCHES = " \
 "
 
 SRC_URI_append_ccimx6ul = " ${QCA6564_COMMON_PATCHES}"
-SRC_URI_append_ccimx6qpsbc = " ${QCA6564_COMMON_PATCHES}"
+SRC_URI_append_ccimx6 = " ${QCA6564_COMMON_PATCHES}"
 
 inherit update-rc.d
 
