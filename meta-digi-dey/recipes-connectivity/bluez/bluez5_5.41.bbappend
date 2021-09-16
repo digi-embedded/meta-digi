@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2019 Digi International.
+# Copyright (C) 2015-2021 Digi International.
 
 SRC_URI += " \
     file://bluetooth-init \
@@ -27,7 +27,7 @@ QCA65XX_COMMON_PATCHES = " \
 "
 
 SRC_URI_append_ccimx6ul = " ${QCA65XX_COMMON_PATCHES}"
-SRC_URI_append_ccimx6qpsbc = " ${QCA65XX_COMMON_PATCHES}"
+SRC_URI_append_ccimx6 = " ${QCA65XX_COMMON_PATCHES}"
 
 inherit update-rc.d
 
