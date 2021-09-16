@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2018 Digi International.
+# Copyright (C) 2016-2021 Digi International.
 
 SUMMARY = "Qualcomm firmware files for Digi's platforms."
 SECTION = "base"
@@ -93,4 +93,4 @@ FILES_${PN}-${QCA_MODEL}-bt = "/lib/firmware/qca"
 FILES_${PN}-${QCA_MODEL}-wifi = "/lib/firmware"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul|ccimx8x)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x)"
