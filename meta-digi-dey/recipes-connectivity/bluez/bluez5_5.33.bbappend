@@ -1,4 +1,4 @@
-# Copyright (C) 2015 Digi International.
+# Copyright (C) 2015-2021 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
@@ -7,9 +7,6 @@ SRC_URI += " \
     file://cve-2017-1000250.patch \
     file://0021-hcitool-do-not-show-unsupported-refresh-option.patch \
     file://0022-hcitool-increase-the-shown-connection-limit-to-20.patch \
-"
-
-SRC_URI_append_ccimx6ul = " \
     file://0001-bluetooth-Add-bluetooth-support-for-QCA6174-chip.patch \
     file://0002-bluetooth-Enable-bluetooth-low-power-mode-functional.patch \
     file://0003-bluetooth-Fix-bug-in-firmware-parsing-mechanism.patch \

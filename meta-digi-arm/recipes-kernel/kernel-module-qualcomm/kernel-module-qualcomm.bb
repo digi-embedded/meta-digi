@@ -1,4 +1,4 @@
-# Copyright (C) 2016 Digi International.
+# Copyright (C) 2016-2021 Digi International.
 
 SUMMARY = "Qualcomm's wireless driver for qca6564"
 DESCRIPTION = "qcacld-2.0 module.bbclass mechanism."
@@ -69,4 +69,4 @@ FILES_${PN} += " \
     ${sysconfdir}/udev/ \
 "
 
-COMPATIBLE_MACHINE = "(ccimx6ul)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul)"
