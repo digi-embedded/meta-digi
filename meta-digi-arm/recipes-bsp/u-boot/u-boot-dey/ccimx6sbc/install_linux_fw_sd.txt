@@ -88,9 +88,16 @@ echo ""
 echo "   PARTITION   FILENAME"
 echo "   ---------   --------"
 echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
-echo "   linux       ${INSTALL_LINUX_FILENAME}"
-echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
-echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
+if test \"\$\{dualboot\}\" = yes; then
+	echo "   linux_a     ${INSTALL_LINUX_FILENAME}"
+	echo "   linux_b     ${INSTALL_LINUX_FILENAME}"
+	echo "   rootfs_a    ${INSTALL_ROOTFS_FILENAME}"
+	echo "   rootfs_b    ${INSTALL_ROOTFS_FILENAME}"
+else
+	echo "   linux       ${INSTALL_LINUX_FILENAME}"
+	echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
+	echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
+fi
 echo ""
 echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
 echo " to continue."
@@ -127,15 +134,19 @@ fi
 
 # Set 'bootcmd' to the second part of the script that will
 #  - Reset environment to defaults
+#  - Restore 'dualboot' if previously set
 #  - Save the environment
 #  - Partition the eMMC user data area for Linux
-#  - Update the 'linux' partition
-#  - Update the 'recovery' partition
-#  - Update the 'rootfs' partition
-#  - Configure recovery to wipe 'update' partition
-#  - Run 'recovery' and let the system boot after
+#  - If Dual Boot
+#     - Update the system partitions: linux_a, linux_b, rootfs_a, rootfs_b
+#  - If Normal Boot:
+#     - Update the system partitions: linux, recovery, rootfs
+#     - Erase the 'update' partition
+#     - Configure recovery to wipe 'update' partition
+#     - Run 'recovery' and let the system boot after
 setenv bootcmd "
 	env default -a;
+	setenv dualboot ${dualboot};
 	saveenv;
 	echo \"\";
 	echo \"\";
@@ -149,49 +160,103 @@ setenv bootcmd "
 		echo \"Aborted.\";
 		exit;
 	fi;
-	echo \"\";
-	echo \"\";
-	echo \">> Installing linux image file ${INSTALL_LINUX_FILENAME}\";
-	echo \"\";
-	echo \"\";
-	update linux mmc ${INSTALL_MMCDEV} fat ${INSTALL_LINUX_FILENAME};
-	if test \$? -eq 1; then
-		echo \"[ERROR] Failed to update linux partition!\";
+	if test \"\$\{dualboot\}\" = yes; then
 		echo \"\";
-		echo \"Aborted.\";
-		exit;
-	fi;
-	echo \"\";
-	echo \"\";
-	echo \">> Installing recovery file ${INSTALL_RECOVERY_FILENAME}\";
-	echo \"\";
-	echo \"\";
-	update recovery mmc ${INSTALL_MMCDEV} fat ${INSTALL_RECOVERY_FILENAME};
-	if test \$? -eq 1; then
-		echo \"[ERROR] Failed to update recovery partition!\";
 		echo \"\";
-		echo \"Aborted.\";
-		exit;
-	fi;
-	echo \"\";
-	echo \"\";
-	echo \">> Installing root file system file ${INSTALL_ROOTFS_FILENAME}\";
-	echo \"\";
-	echo \"\";
-	update rootfs mmc ${INSTALL_MMCDEV} fat ${INSTALL_ROOTFS_FILENAME};
-	if test \$? -eq 1; then
-		echo \"[ERROR] Failed to update rootfs partition!\";
+		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_a\";
 		echo \"\";
-		echo \"Aborted.\";
-		exit;
+		echo \"\";
+		update linux_a mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update linux_a!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_b\";
+		echo \"\";
+		echo \"\";
+		update linux_b mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update linux_b!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_a\";
+		echo \"\";
+		echo \"\";
+		update rootfs_a mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update rootfs_a partition!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_b\";
+		echo \"\";
+		echo \"\";
+		update rootfs_b mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update rootfs_b partition!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+	else
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux\";
+		echo \"\";
+		echo \"\";
+		update linux mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update linux!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_RECOVERY_FILENAME} on recovery\";
+		echo \"\";
+		echo \"\";
+		update recovery mmc ${INSTALL_MMCDEV} ${INSTALL_RECOVERY_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update recovery partition!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs\";
+		echo \"\";
+		echo \"\";
+		update rootfs mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update rootfs partition!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		setenv boot_recovery yes;
+		setenv recovery_command wipe_update;
 	fi;
-	echo \"\";
-	setenv boot_recovery yes;
-	setenv recovery_command wipe_update;
 	saveenv;
 	echo \"\";
 	echo \"\";
-	echo \">> Firmware installation complete. Rebooting into recovery mode for final deployment.\";
+	echo \">> Firmware installation complete.\";
+	if test ! -n \$\{dualboot\} || test \$\{dualboot\} = no; then
+		echo \"Rebooting into recovery mode for final deployment.\";
+	fi;
 	echo \"\";
 	echo \"\";
 	sleep 1;

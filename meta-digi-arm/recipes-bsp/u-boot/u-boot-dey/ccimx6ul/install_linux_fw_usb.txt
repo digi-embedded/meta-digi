@@ -81,9 +81,16 @@ echo ""
 echo "   PARTITION   FILENAME"
 echo "   ---------   --------"
 echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
-echo "   linux       ${INSTALL_LINUX_FILENAME}"
-echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
-echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
+if test \"\$\{dualboot\}\" = yes; then
+	echo "   linux_a     ${INSTALL_LINUX_FILENAME}"
+	echo "   linux_b     ${INSTALL_LINUX_FILENAME}"
+	echo "   rootfs_a    ${INSTALL_ROOTFS_FILENAME}"
+	echo "   rootfs_b    ${INSTALL_ROOTFS_FILENAME}"
+else
+	echo "   linux       ${INSTALL_LINUX_FILENAME}"
+	echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
+	echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
+fi
 echo ""
 echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
 echo " to continue."
@@ -110,7 +117,7 @@ echo ""
 update uboot usb ${INSTALL_USBDEV} ${INSTALL_UBOOT_FILENAME}
 if test $? -eq 1; then
 	# Use old-style update with source file system argument
-	update uboot mmc ${INSTALL_USBDEV} fat ${INSTALL_UBOOT_FILENAME}
+	update uboot usb ${INSTALL_USBDEV} fat ${INSTALL_UBOOT_FILENAME}
 	if test $? -eq 1; then
 		echo "[ERROR] Failed to update U-Boot boot loader!";
 		echo "";
@@ -121,79 +128,147 @@ fi
 
 # Set 'bootcmd' to the second part of the script that will
 #  - Reset environment to defaults
-#  - Restore 'ubisysvols' if previously set
+#  - Restore 'ubisysvols' and 'dualboot' if previously set
 #  - Run 'partition_nand_linux' script to re-partition the NAND if needed
 #  - Save the environment
-#  - Update the 'linux' partition
-#  - Update the 'recovery' partition
-#  - Update the 'rootfs' partition
-#  - Erase the 'update' partition
-#  - Configure recovery to wipe 'update' partition
-#  - Run 'recovery' and let the system boot after
+#  - If Dual Boot
+#     - Update the system partitions: linux_a, linux_b, rootfs_a, rootfs_b
+#  - If Normal Boot:
+#     - Update the system partitions: linux, recovery, rootfs
+#     - Erase the 'update' partition
+#     - Configure recovery to wipe 'update' partition
+#     - Run 'recovery' and let the system boot after
 setenv bootcmd "
 	env default -a;
 	setenv ubisysvols ${ubisysvols};
+	setenv dualboot ${dualboot};
 	run partition_nand_linux;
 	saveenv;
-	if test -n \$\{ubisysvols\} && test \$\{ubisysvols\} = yes; then
+	if test \"\$\{ubisysvols\}\" = yes; then
 		run ubivolscript;
 	fi;
 	usb start;
-	echo \"\";
-	echo \"\";
-	echo \">> Installing linux image file ${INSTALL_LINUX_FILENAME}\";
-	echo \"\";
-	echo \"\";
-	if test ! -n \$\{ubisysvols\} || test \$\{ubisysvols\} = no; then
-		nand erase.part linux;
-	fi;
-	update linux usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
-	if test \$? -eq 1; then
-		echo \"[ERROR] Failed to update linux partition!\";
+	if test \"\$\{dualboot\}\" = yes; then
 		echo \"\";
-		echo \"Aborted.\";
-		exit;
-	fi;
-	echo \"\";
-	echo \"\";
-	echo \">> Installing recovery file ${INSTALL_RECOVERY_FILENAME}\";
-	echo \"\";
-	echo \"\";
-	if test ! -n \$\{ubisysvols\} || test \$\{ubisysvols\} = no; then
-		nand erase.part recovery;
-	fi;
-	update recovery usb ${INSTALL_USBDEV} ${INSTALL_RECOVERY_FILENAME};
-	if test \$? -eq 1; then
-		echo \"[ERROR] Failed to update recovery partition!\";
 		echo \"\";
-		echo \"Aborted.\";
-		exit;
-	fi;
-	echo \"\";
-	echo \"\";
-	echo \">> Installing root file system file ${INSTALL_ROOTFS_FILENAME}\";
-	echo \"\";
-	echo \"\";
-	if test ! -n \$\{ubisysvols\} || test \$\{ubisysvols\} = no; then
-		nand erase.part rootfs;
-	fi;
-	update rootfs usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME};
-	if test \$? -eq 1; then
-		echo \"[ERROR] Failed to update rootfs partition!\";
+		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_a\";
 		echo \"\";
-		echo \"Aborted.\";
-		exit;
+		echo \"\";
+		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
+			nand erase.part linux_a;
+		fi;
+		update linux_a usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update linux_a!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_b\";
+		echo \"\";
+		echo \"\";
+		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
+			nand erase.part linux_b;
+		fi;
+		update linux_b usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update linux_b!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_a\";
+		echo \"\";
+		echo \"\";
+		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
+			nand erase.part rootfs_a;
+		fi;
+		update rootfs_a usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update rootfs_a partition!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_b\";
+		echo \"\";
+		echo \"\";
+		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
+			nand erase.part rootfs_b;
+		fi;
+		update rootfs_b usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update rootfs_b partition!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+	else
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux\";
+		echo \"\";
+		echo \"\";
+		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
+			nand erase.part linux;
+		fi;
+		update linux usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update linux!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_RECOVERY_FILENAME} on recovery\";
+		echo \"\";
+		echo \"\";
+		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
+			nand erase.part recovery;
+		fi;
+		update recovery usb ${INSTALL_USBDEV} ${INSTALL_RECOVERY_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update recovery partition!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs\";
+		echo \"\";
+		echo \"\";
+		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
+			nand erase.part rootfs;
+		fi;
+		update rootfs usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update rootfs partition!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
+			nand erase.part update;
+		fi;
+		setenv boot_recovery yes;
+		setenv recovery_command wipe_update;
 	fi;
-	echo \"\";
-	if test ! -n \$\{ubisysvols\} || test \$\{ubisysvols\} = no; then
-		nand erase.part update;
-	fi;
-	setenv boot_recovery yes;
-	setenv recovery_command wipe_update;
 	saveenv;
 	echo \"\";
 	echo \"\";
-	echo \">> Firmware installation complete. Rebooting into recovery mode for final deployment.\";
+	echo \">> Firmware installation complete.\";
+	if test ! -n \$\{dualboot\} || test \$\{dualboot\} = no; then
+		echo \"Rebooting into recovery mode for final deployment.\";
+	fi;
 	echo \"\";
 	echo \"\";
 	sleep 1;
