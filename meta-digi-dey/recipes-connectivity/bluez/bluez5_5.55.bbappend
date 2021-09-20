@@ -24,6 +24,11 @@ SRC_URI_append_ccimx6 = " ${QCA65XX_COMMON_PATCHES}"
 SRC_URI_append_ccimx8x = " ${QCA65XX_COMMON_PATCHES}"
 SRC_URI_append_ccimx8m = " ${QCA65XX_COMMON_PATCHES}"
 
+SRC_URI_append_ccimx6sbc = " \
+    file://bluetooth-init_atheros \
+    file://main.conf_atheros \
+"
+
 inherit update-rc.d
 
 do_install_append() {
@@ -47,14 +52,38 @@ do_install_append() {
 	sed -i -e '/#include/{s,src/shared/,,g}' ${D}${includedir}/bluetooth-internal/att.h
 }
 
+do_install_append_ccimx6sbc() {
+	install -m 0755 ${WORKDIR}/bluetooth-init_atheros ${D}${sysconfdir}/bluetooth-init_atheros
+	install -m 0644 ${WORKDIR}/main.conf_atheros ${D}${sysconfdir}/bluetooth/
+	sed -i -e "s,##BT_DEVICE_NAME##,${BT_DEVICE_NAME},g" \
+		${D}${sysconfdir}/bluetooth/main.conf_atheros
+}
+
+pkg_postinst_ontarget_${PN}_ccimx6sbc() {
+	# Only execute the script on wireless ccimx6 platforms
+	if [ -e "/proc/device-tree/bluetooth/mac-address" ]; then
+		for id in $(find /sys/devices -name modalias -print0 | xargs -0 sort -u -z | grep sdio); do
+			if [[ "$id" == "sdio:c00v0271d0301" ]] ; then
+				mv /etc/bluetooth-init_atheros /etc/bluetooth-init
+				mv /etc/bluetooth/main.conf_atheros /etc/bluetooth/main.conf
+				break
+			elif [[ "$id" == "sdio:c00v0271d050A" ]] ; then
+				rm /etc/bluetooth-init_atheros
+				rm /etc/bluetooth/main.conf_atheros
+				break
+			fi
+		done
+	fi
+}
+
 PACKAGES =+ "${PN}-init"
 PACKAGECONFIG_append = " health-profiles \
     mesh \
     btpclient \
 "
 
-FILES_${PN} += " ${sysconfdir}/bluetooth/main.conf"
-FILES_${PN}-init = " ${sysconfdir}/bluetooth-init \
+FILES_${PN} += " ${sysconfdir}/bluetooth/main.conf*"
+FILES_${PN}-init = " ${sysconfdir}/bluetooth-init* \
                      ${sysconfdir}/init.d/bluetooth-init \
                      ${systemd_unitdir}/system/bluetooth-init.service \
 "
