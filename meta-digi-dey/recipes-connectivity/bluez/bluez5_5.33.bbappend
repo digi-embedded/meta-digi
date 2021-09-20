@@ -38,6 +38,26 @@ do_install_append() {
 	install -m 0755 ${WORKDIR}/bluez-init ${D}${sysconfdir}/init.d/bluez
 }
 
+pkg_postinst_${PN}_ccimx6sbc() {
+	if [ -n "$D" ]; then
+		exit 1
+	fi
+
+	# Only execute the script on wireless ccimx6 platforms
+	if [ -e "/proc/device-tree/bluetooth/mac-address" ]; then
+		for id in $(find /sys/devices -name modalias -print0 | xargs -0 sort -u -z | grep sdio); do
+			if [[ "$id" == "sdio:c00v0271d0301" ]] ; then
+				BT_CHIP="AR3K"
+				break
+			elif [[ "$id" == "sdio:c00v0271d050A" ]] ; then
+				BT_CHIP="QCA"
+				break
+			fi
+		done
+		sed -i -e "s,##BT_CHIP##,${BT_CHIP},g" /etc/init.d/bluez
+	fi
+}
+
 INITSCRIPT_NAME = "bluez"
 INITSCRIPT_PARAMS = "start 10 5 ."
 

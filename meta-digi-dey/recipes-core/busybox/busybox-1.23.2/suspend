@@ -3,7 +3,7 @@
 #
 #  suspend
 #
-#  Copyright (C) 2009-2014 by Digi International Inc.
+#  Copyright (C) 2009-2021 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -27,13 +27,21 @@ usage() {
 
 suspend_interfaces() {
 	if grep -qs '^wlan0' /var/run/ifstate; then
-		ifdown wlan0 && up_wlan_on_resume="1" && sleep 0.5 && rmmod ath6kl_sdio
+		ifdown wlan0 && up_wlan_on_resume="1" && sleep 0.5
 	fi
+	[ -e /sys/module/ath6kl_sdio ] && rmmod ath6kl_sdio && WLAN_DRIVER="ath"
+	[ -e /sys/module/wlan ] && rmmod wlan && WLAN_DRIVER="qcom"
 }
 
 resume_interfaces() {
 	if ! grep -qs '^wlan0' /var/run/ifstate; then
-		[ -n "${up_wlan_on_resume}" ] && modprobe ath6kl_sdio && sleep 0.5 && ifup wlan0
+		[ "${WLAN_DRIVER}" = "ath" ] && modprobe ath6kl_sdio && sleep 0.5
+		if [ "${WLAN_DRIVER}" = "qcom" ]; then
+			# Trigger wireless module loading event, and wait until the interface exists
+			udevadm trigger --action=add --attr-match="modalias=sdio:c00v0271d050A"
+			timeout -t 5 sh -c "while [ ! -d /sys/class/net/wlan0 ]; do sleep .2; done" 2>/dev/null
+		fi
+		[ -n "${up_wlan_on_resume}" ] && ifup wlan0
 	fi
 }
 
