@@ -11,6 +11,8 @@ SRC_URI += " \
     file://wpa_supplicant_p2p.conf \
 "
 
+SRC_URI_append_ccimx6sbc = " file://wpa_supplicant_p2p.conf_atheros"
+
 do_install_append() {
 	install -m 600 ${WORKDIR}/wpa_supplicant_p2p.conf ${D}${sysconfdir}/wpa_supplicant_p2p.conf
 	sed -i -e "s,##WLAN_P2P_DEVICE_NAME##,${WLAN_P2P_DEVICE_NAME},g" \
@@ -18,8 +20,19 @@ do_install_append() {
 }
 
 do_install_append_ccimx6sbc() {
-    # Customize supplicant file
-    cat <<EOF >>${D}${sysconfdir}/wpa_supplicant.conf
+	# Install atheros variant of the p2p .conf file
+	install -m 600 ${WORKDIR}/wpa_supplicant_p2p.conf_atheros ${D}${sysconfdir}/wpa_supplicant_p2p.conf_atheros
+	sed -i -e "s,##WLAN_P2P_DEVICE_NAME##,${WLAN_P2P_DEVICE_NAME},g" \
+	       ${D}${sysconfdir}/wpa_supplicant_p2p.conf_atheros
+}
+
+pkg_postinst_ontarget_${PN}_ccimx6sbc() {
+	# Only execute the script on wireless ccimx6 platforms
+	if [ -e "/proc/device-tree/wireless/mac-address" ]; then
+		for id in $(find /sys/devices -name modalias -print0 | xargs -0 sort -u -z | grep sdio); do
+			if [[ "$id" == "sdio:c00v0271d0301" ]] ; then
+				# Customize supplicant file
+				cat <<EOF >>/etc/wpa_supplicant.conf
 
 # -- SoftAP mode
 # ap_scan=2
@@ -34,6 +47,14 @@ do_install_append_ccimx6sbc() {
 # }
 
 EOF
+				mv /etc/wpa_supplicant_p2p.conf_atheros /etc/wpa_supplicant_p2p.conf
+				break
+			elif [[ "$id" == "sdio:c00v0271d050A" ]] ; then
+				rm /etc/wpa_supplicant_p2p.conf_atheros
+				break
+			fi
+		done
+	fi
 }
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
