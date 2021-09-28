@@ -128,7 +128,7 @@ fi
 
 # Set 'bootcmd' to the second part of the script that will
 #  - Reset environment to defaults
-#  - Restore 'ubisysvols' and 'dualboot' if previously set
+#  - Restore 'singlemtdsys' and 'dualboot' if previously set
 #  - Run 'partition_nand_linux' script to re-partition the NAND if needed
 #  - Save the environment
 #  - If Dual Boot
@@ -140,11 +140,11 @@ fi
 #     - Run 'recovery' and let the system boot after
 setenv bootcmd "
 	env default -a;
-	setenv ubisysvols ${ubisysvols};
+	setenv singlemtdsys ${singlemtdsys};
 	setenv dualboot ${dualboot};
 	run partition_nand_linux;
 	saveenv;
-	if test \"\$\{ubisysvols\}\" = yes; then
+	if test \"\$\{singlemtdsys\}\" = yes; then
 		run ubivolscript;
 	else
 		force_erase="-e"
@@ -237,7 +237,7 @@ setenv bootcmd "
 			exit;
 		fi;
 		echo \"\";
-		if test \"\$\{ubisysvols\}\" != yes; then
+		if test \"\$\{singlemtdsys\}\" != yes; then
 			nand erase.part update;
 		fi;
 		setenv boot_recovery yes;

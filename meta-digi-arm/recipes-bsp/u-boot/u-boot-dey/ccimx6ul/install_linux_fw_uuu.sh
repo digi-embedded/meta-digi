@@ -63,7 +63,7 @@ part_update()
 	# 'update' command except when a UBI volume is already found.
 	# On the install script, the MTD partition table may have changed, so
 	# we'd better clean the partition.
-	if [ "${UBISYSVOLS}" != true ]; then
+	if [ "${SINGLEMTDSYS}" != true ]; then
 		ERASE="-e"
 	fi
 	uuu fb: download -f "${2}"
@@ -97,10 +97,10 @@ if [ "${dualboot}" = "yes" ]; then
 	DUALBOOT=true;
 fi
 
-# Check if ubisysvols variable is active
-ubisysvols=$(getenv "ubisysvols")
-if [ "${ubisysvols}" = "yes" ]; then
-	UBISYSVOLS=true;
+# Check if singlemtdsys variable is active
+singlemtdsys=$(getenv "singlemtdsys")
+if [ "${singlemtdsys}" = "yes" ]; then
+	SINGLEMTDSYS=true;
 fi
 
 echo ""
@@ -257,15 +257,15 @@ if [ "${DUALBOOT}" = true ]; then
 	uuu fb: ucmd setenv dualboot yes
 fi
 
-# Restore ubisysvols if previously active
-if [ "${UBISYSVOLS}" = true ]; then
-	uuu fb: ucmd setenv ubisysvols yes
+# Restore singlemtdsys if previously active
+if [ "${SINGLEMTDSYS}" = true ]; then
+	uuu fb: ucmd setenv singlemtdsys yes
 fi
 
 # Create partition table
 uuu "fb[-t 10000]:" ucmd run partition_nand_linux
 
-if [ "${UBISYSVOLS}" = true ]; then
+if [ "${SINGLEMTDSYS}" = true ]; then
 	uuu "fb[-t 10000]:" ucmd run ubivolscript
 	nand erase.part system
 fi
@@ -288,7 +288,7 @@ else
 	part_update "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}" 90000
 fi
 
-if [ "${UBISYSVOLS}" != true ] && [ "${DUALBOOT}" != true ]; then
+if [ "${SINGLEMTDSYS}" != true ] && [ "${DUALBOOT}" != true ]; then
 	# Erase the 'Update' partition
 	uuu fb: ucmd nand erase.part update
 fi
