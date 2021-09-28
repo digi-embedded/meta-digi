@@ -236,7 +236,7 @@ setenv bootcmd "
 			exit;
 		fi;
 		echo \"\";
-		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
+		if test \"\$\{ubisysvols\}\" != yes; then
 			nand erase.part update;
 		fi;
 		setenv boot_recovery yes;
@@ -246,7 +246,7 @@ setenv bootcmd "
 	echo \"\";
 	echo \"\";
 	echo \">> Firmware installation complete.\";
-	if test ! -n \$\{dualboot\} || test \$\{dualboot\} = no; then
+	if test \"\$\{dualboot\}\" != yes; then
 		echo \"Rebooting into recovery mode for final deployment.\";
 	fi;
 	echo \"\";

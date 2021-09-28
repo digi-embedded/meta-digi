@@ -254,7 +254,7 @@ setenv bootcmd "
 	echo \"\";
 	echo \"\";
 	echo \">> Firmware installation complete.\";
-	if test ! -n \$\{dualboot\} || test \$\{dualboot\} = no; then
+	if test \"\$\{dualboot\}\" != yes; then
 		echo \"Rebooting into recovery mode for final deployment.\";
 	fi;
 	echo \"\";
