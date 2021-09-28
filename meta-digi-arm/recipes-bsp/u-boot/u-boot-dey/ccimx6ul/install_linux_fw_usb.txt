@@ -146,6 +146,8 @@ setenv bootcmd "
 	saveenv;
 	if test \"\$\{ubisysvols\}\" = yes; then
 		run ubivolscript;
+	else
+		force_erase="-e"
 	fi;
 	usb start;
 	if test \"\$\{dualboot\}\" = yes; then
@@ -154,10 +156,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_a\";
 		echo \"\";
 		echo \"\";
-		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
-			nand erase.part linux_a;
-		fi;
-		update linux_a usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
+		update linux_a usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME} ${force_erase};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update linux_a!\";
 			echo \"\";
@@ -169,10 +168,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_b\";
 		echo \"\";
 		echo \"\";
-		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
-			nand erase.part linux_b;
-		fi;
-		update linux_b usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
+		update linux_b usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME} ${force_erase};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update linux_b!\";
 			echo \"\";
@@ -184,10 +180,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_a\";
 		echo \"\";
 		echo \"\";
-		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
-			nand erase.part rootfs_a;
-		fi;
-		update rootfs_a usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME};
+		update rootfs_a usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME} ${force_erase};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update rootfs_a partition!\";
 			echo \"\";
@@ -199,10 +192,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_b\";
 		echo \"\";
 		echo \"\";
-		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
-			nand erase.part rootfs_b;
-		fi;
-		update rootfs_b usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME};
+		update rootfs_b usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME} ${force_erase};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update rootfs_b partition!\";
 			echo \"\";
@@ -215,10 +205,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux\";
 		echo \"\";
 		echo \"\";
-		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
-			nand erase.part linux;
-		fi;
-		update linux usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
+		update linux usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME} ${force_erase};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update linux!\";
 			echo \"\";
@@ -230,10 +217,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_RECOVERY_FILENAME} on recovery\";
 		echo \"\";
 		echo \"\";
-		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
-			nand erase.part recovery;
-		fi;
-		update recovery usb ${INSTALL_USBDEV} ${INSTALL_RECOVERY_FILENAME};
+		update recovery usb ${INSTALL_USBDEV} ${INSTALL_RECOVERY_FILENAME} ${force_erase};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update recovery partition!\";
 			echo \"\";
@@ -245,10 +229,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs\";
 		echo \"\";
 		echo \"\";
-		if test ! -n \$\{ubisysvols\} || test \"\$\{ubisysvols\}\" = no; then
-			nand erase.part rootfs;
-		fi;
-		update rootfs usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME};
+		update rootfs usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME} ${force_erase};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update rootfs partition!\";
 			echo \"\";

@@ -58,8 +58,16 @@ part_update()
 	echo "====================================================================================="
 	echo "\033[0m"
 
+	# When in Multi-MTD mode, pass -e to update command to force the erase
+	# of the MTD partition before programming. This is usually done by
+	# 'update' command except when a UBI volume is already found.
+	# On the install script, the MTD partition table may have changed, so
+	# we'd better clean the partition.
+	if [ "${UBISYSVOLS}" != true ]; then
+		ERASE="-e"
+	fi
 	uuu fb: download -f "${2}"
-	uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${fastboot_bytes}
+	uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${fastboot_bytes} ${ERASE}
 }
 
 clear
@@ -259,6 +267,7 @@ uuu "fb[-t 10000]:" ucmd run partition_nand_linux
 
 if [ "${UBISYSVOLS}" = true ]; then
 	uuu "fb[-t 10000]:" ucmd run ubivolscript
+	nand erase.part system
 fi
 
 if [ "${DUALBOOT}" = true ]; then
