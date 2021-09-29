@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2020-2021 by Digi International Inc.
+#  Copyright (C) 2021 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -93,38 +93,29 @@ echo "Determining image files to use..."
 
 # Determine U-Boot file to program basing on SOM's SOC type (linked to bus width)
 if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
-	# Since SOMs with the B0 SOC might have an older U-Boot that doesn't export the
-	# SOC revision to the environment, use B0 by default
-	soc_rev=$(getenv "soc_rev")
-	if [ -z "${soc_rev}" ]; then
-		soc_rev="B0"
-	fi
-
-	bus_width="32bit"
-	soc_type=$(getenv "soc_type")
-	if [ "$soc_type" = "imx8dx"  ]; then
-		bus_width="16bit"
-	fi
-
-	module_ram=$(getenv "module_ram")
-	if [ -z "${module_ram}" ]; then
+	soc_family=$(getenv "soc_family")
+	if [ -n "$soc_family" ]; then
 		module_variant=$(getenv "module_variant")
 		# Determine U-Boot file to program basing on SOM's variant
 		if [ -n "$module_variant" ] || [ "$module_variant" = "0x00" ]; then
-			if [ "$module_variant" = "0x01" ] || \
-			   [ "$module_variant" = "0x04" ] || \
-			   [ "$module_variant" = "0x05" ]; then
-				module_ram="1GB"
-			elif [ "$module_variant" = "0x06" ] || \
-			     [ "$module_variant" = "0x09" ]; then
-				module_ram="512MB"
+			if [ "$module_variant" = "0x12" ]; then
+				INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc2GB.imx"
+			elif [ "$module_variant" = "0x01" ] || \
+			     [ "$module_variant" = "0x02" ] || \
+			     [ "$module_variant" = "0x04" ] || \
+			     [ "$module_variant" = "0x05" ] || \
+			     [ "$module_variant" = "0x0b" ] || \
+			     [ "$module_variant" = "0x0d" ] || \
+			     [ "$module_variant" = "0x10" ] || \
+			     [ "$module_variant" = "0x11" ] || \
+			     [ "$module_variant" = "0x14" ] || \
+			     [ "$module_variant" = "0x15" ] || \
+			     [ "$module_variant" = "0x16" ]; then
+				INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc.imx"
 			else
-				module_ram="2GB"
+				INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc512MB.imx"
 			fi
-			INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##-${soc_rev}-${module_ram}_${bus_width}.bin"
 		fi
-	else
-		INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##-${soc_rev}-${module_ram}_${bus_width}.bin"
 	fi
 
 	# remove redirect
@@ -137,15 +128,17 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		echo ""
 		echo "[ERROR] Cannot determine U-Boot file for this module!"
 		echo ""
-		echo "1. Add U-boot file name, depending on your ConnectCore 8X variant, to script command line:"
-		echo "   - For a QuadXPlus CPU with 1GB LPDDR4, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin"
-		echo "   - For a QuadXPlus CPU with 2GB LPDDR4, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin"
-		echo "   - For a DualX CPU with 1GB LPDDR4, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin"
-		echo "   - For a DualX CPU with 512MB LPDDR4, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-512MB_16bit.bin"
+		echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 6 variant:"
+		echo "   - For a Quad/Dual CPU with 2GB DDR3, run:"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc2GB.imx"
+		echo "   - For a Quad/Dual CPU with 1GB DDR3, run:"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc.imx"
+		echo "   - For a Quad/Dual CPU with 512MB DDR3, run:"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc512MB.imx"
+		echo "   - For a DualLite/Solo CPU with 1GB DDR3, run:"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc.imx"
+		echo "   - For a DualLite/Solo CPU with 512MB DDR3, run:"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc512MB.imx"
 		echo ""
 		echo "2. Run the install script again."
 		echo ""
@@ -271,7 +264,7 @@ uuu fb: ucmd setenv bootcmd "
 	echo \"\";
 	echo \"\";
 	saveenv;
-	fastboot 1;
+	fastboot 0;
 "
 
 uuu fb: ucmd saveenv

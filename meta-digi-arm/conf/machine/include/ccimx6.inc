@@ -11,6 +11,7 @@ include conf/machine/include/tune-cortexa9.inc
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"
+UBOOT_HAS_FASTBOOT = "true"
 
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm/configs/ccimx6sbc_defconfig"
