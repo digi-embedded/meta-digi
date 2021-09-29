@@ -105,13 +105,13 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##${module_ram}.imx"
 	fi
 
-	# remove redirect
-	uuu fb: ucmd setenv stdout serial
-
 	# U-Boot when the checked value is empty.
 	if [ -n "${INSTALL_UBOOT_FILENAME}" ]; then
 		true
 	else
+		# remove redirect
+		uuu fb: ucmd setenv stdout serial
+
 		echo ""
 		echo "[ERROR] Cannot determine U-Boot file for this module!"
 		echo ""
@@ -129,6 +129,9 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		exit
 	fi
 fi
+
+# remove redirect
+uuu fb: ucmd setenv stdout serial
 
 # Determine linux, recovery, and rootfs image filenames to update
 if [ -z "${IMAGE_NAME}" ]; then
