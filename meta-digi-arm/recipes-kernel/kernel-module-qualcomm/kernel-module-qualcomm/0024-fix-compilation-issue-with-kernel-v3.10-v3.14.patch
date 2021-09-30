@@ -1,0 +1,46 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Thu, 16 Sep 2021 17:14:02 +0200
+Subject: [PATCH] fix compilation issue with kernel v3.10/v3.14
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ CORE/HDD/src/wlan_hdd_ocb.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/CORE/HDD/src/wlan_hdd_ocb.c b/CORE/HDD/src/wlan_hdd_ocb.c
+index 5c7f8aca4..d31552395 100644
+--- a/CORE/HDD/src/wlan_hdd_ocb.c
++++ b/CORE/HDD/src/wlan_hdd_ocb.c
+@@ -271,6 +271,7 @@ static int dot11p_validate_channel(struct wiphy *wiphy,
+ 
+ 				switch (bandwidth) {
+ 				case 0:
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,16,0))
+ 					if (current_channel->flags &
+ 					    IEEE80211_CHAN_NO_10MHZ)
+ 						bandwidth = 5;
+@@ -278,19 +279,24 @@ static int dot11p_validate_channel(struct wiphy *wiphy,
+ 						 IEEE80211_CHAN_NO_20MHZ)
+ 						bandwidth = 10;
+ 					else
++#endif
+ 						bandwidth = 20;
+ 					break;
+ 				case 5:
+ 					break;
+ 				case 10:
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,16,0))
+ 					if (current_channel->flags &
+ 					    IEEE80211_CHAN_NO_10MHZ)
+ 						return -EINVAL;
++#endif
+ 					break;
+ 				case 20:
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,16,0))
+ 					if (current_channel->flags &
+ 					    IEEE80211_CHAN_NO_20MHZ)
+ 						return -EINVAL;
++#endif
+ 					break;
+ 				default:
+ 					return -EINVAL;

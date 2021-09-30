@@ -38,6 +38,7 @@ SRC_URI = " \
     file://0021-fix-issue-with-_scan_callback.patch \
     file://0022-on-stop-cancel-scan-requests.patch \
     file://0023-qcacld-2.0-Use-wlan_hdd_cfg80211_inform_bss_frame-to.patch \
+    file://0024-fix-compilation-issue-with-kernel-v3.10-v3.14.patch \
 "
 
 S = "${WORKDIR}/${PV}"
