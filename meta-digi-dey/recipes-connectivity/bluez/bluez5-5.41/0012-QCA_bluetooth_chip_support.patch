@@ -1,11 +1,4 @@
-Add hciattach rome support for Qualcomm chip QCA6564
-
-This is a multiple patch including all the specific qualcomm commits to add
-support for its chip in bluez stack (hciattach rome).
-
-Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
-
-From e6d2fb7efcde66f9ab22a42bd6d7039a4f0c02cd Mon Sep 17 00:00:00 2001
+From 64912e658db8883637afd298b0a8eda1f49b056a Mon Sep 17 00:00:00 2001
 From: Anantha Krishnan <ananthk@codeaurora.org>
 Date: Tue, 19 Aug 2014 20:23:01 +0530
 Subject: [PATCH 01/19] bluetooth : Add bluetooth support for QCA6174 chip.
@@ -22,10 +15,10 @@ Signed-off-by: Rupesh Tatiya <rtatiya@codeaurora.org>
 ---
  Makefile.tools         |    3 +-
  tools/hciattach.c      |   25 +-
- tools/hciattach.h      |    8 +-
+ tools/hciattach.h      |    3 +
  tools/hciattach_rome.c | 1578 ++++++++++++++++++++++++++++++++++++++++++++++++
  tools/hciattach_rome.h |  317 ++++++++++
- 5 files changed, 1926 insertions(+), 5 deletions(-)
+ 5 files changed, 1924 insertions(+), 2 deletions(-)
  create mode 100644 tools/hciattach_rome.c
  create mode 100644 tools/hciattach_rome.h
 
@@ -142,24 +135,19 @@ index fad176c9b804..73811d4c4c2a 100644
  	return 0;
  }
 diff --git a/tools/hciattach.h b/tools/hciattach.h
-index 4279a3361749..0656a845223c 100644
+index 4279a3361749..93577e9474de 100644
 --- a/tools/hciattach.h
 +++ b/tools/hciattach.h
-@@ -39,9 +39,10 @@
- #define HCI_UART_H4DS	3
- #define HCI_UART_LL	4
- #define HCI_UART_ATH3K  5
--#define HCI_UART_INTEL	6
--#define HCI_UART_BCM	7
--#define HCI_UART_QCA	8
-+#define HCI_UART_IBS	6
-+#define HCI_UART_INTEL	7
-+#define HCI_UART_BCM	8
-+#define HCI_UART_QCA	9
+@@ -43,6 +43,8 @@
+ #define HCI_UART_BCM	7
+ #define HCI_UART_QCA	8
  
++#define HCI_UART_IBS	12
++
  #define HCI_UART_RAW_DEVICE	0
  #define HCI_UART_RESET_ON_INIT	1
-@@ -63,6 +64,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
+ #define HCI_UART_CREATE_AMP	2
+@@ -63,6 +65,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
  						struct termios *ti);
  int ath3k_post(int fd, int pm);
  int qualcomm_init(int fd, int speed, struct termios *ti, const char *bdaddr);
@@ -2075,7 +2063,7 @@ index 000000000000..aa59965643ec
 +};
 +#endif /* HW_ROME_H */
 
-From 333676e63694e137558e7a685d2fa1a50c499436 Mon Sep 17 00:00:00 2001
+From f84a56a539fa5f37b1a8262520bf4ab7f503cc17 Mon Sep 17 00:00:00 2001
 From: Anantha Krishnan <ananthk@codeaurora.org>
 Date: Thu, 11 Sep 2014 19:20:02 +0530
 Subject: [PATCH 02/19] bluetooth: Enable bluetooth low power mode
@@ -2106,7 +2094,7 @@ index 73811d4c4c2a..e3a915061440 100644
  
  	/* QUALCOMM BTS */
 
-From 0518592a10bff2ac0b99e4081bd01154f2eeacb6 Mon Sep 17 00:00:00 2001
+From 05c8c51fbdce151bcd050a8b742c3af7ba175ceb Mon Sep 17 00:00:00 2001
 From: Anantha Krishnan <ananthk@codeaurora.org>
 Date: Thu, 11 Sep 2014 18:57:45 +0530
 Subject: [PATCH 03/19] bluetooth: Fix bug in firmware parsing mechanism
@@ -2159,7 +2147,7 @@ index aa59965643ec..07127f30a70a 100644
      union{
          tlv_patch_hdr patch;
 
-From 78f1ab9c20956f4e6f009d7bc2b94fe1d4474a08 Mon Sep 17 00:00:00 2001
+From 480096d50d5cad31650380470f9c7f7e783f38e4 Mon Sep 17 00:00:00 2001
 From: Anantha Krishnan <ananthk@codeaurora.org>
 Date: Mon, 8 Sep 2014 15:11:02 +0530
 Subject: [PATCH 04/19] bluetooth: Configure BD Address
@@ -2275,7 +2263,7 @@ index 07127f30a70a..a4abe9f73080 100644
  typedef enum {
      USERIAL_OP_FLOW_ON,
 
-From 7f148243e9d36427734de874f291911e1f3d60d0 Mon Sep 17 00:00:00 2001
+From 91decff6ed724123a182f4ca0514b7e55b2b5d0f Mon Sep 17 00:00:00 2001
 From: Anantha Krishnan <ananthk@codeaurora.org>
 Date: Mon, 8 Sep 2014 14:33:24 +0530
 Subject: [PATCH 05/19] bluetooth: Remove unused functions in the firmware
@@ -2350,7 +2338,7 @@ index 947e1abb96c4..4fcbdf2ab82a 100644
  int rome_set_baudrate_req(int fd)
  {
 
-From 175fe3690522afc91f38933f821e4b00bd1a12c8 Mon Sep 17 00:00:00 2001
+From ec990e2f5c62417dc32cc3f23af3c5861f815837 Mon Sep 17 00:00:00 2001
 From: Anantha Krishnan <ananthk@codeaurora.org>
 Date: Mon, 8 Sep 2014 14:31:18 +0530
 Subject: [PATCH 06/19] bluetooth: Enable 3Mbps baud rate support
@@ -2502,7 +2490,7 @@ index 4fcbdf2ab82a..d0e2935b9997 100644
              /* Perform HCI reset here*/
              err = rome_hci_reset_req(fd);
 
-From 1911a9d5799d110a7d010e154b44e43c65e838ff Mon Sep 17 00:00:00 2001
+From 4acc26e112f003c23f2997f98e0e84e1875c37b1 Mon Sep 17 00:00:00 2001
 From: Anantha Krishnan <ananthk@codeaurora.org>
 Date: Tue, 30 Sep 2014 12:13:00 +0530
 Subject: [PATCH 07/19] bluetooth: Check TTY buffer for data availability
@@ -2693,7 +2681,7 @@ index a4abe9f73080..3efb71995c45 100644
  #define ROME_1_0_100022_1       0x101000221
  #define ROME_1_0_100019           0x101000190
 
-From 9d81b1dd643966ba6f2ffb3f7658a24cfcb37df4 Mon Sep 17 00:00:00 2001
+From 1f7fb6f953b1714d574181e6ae6b7b281288c0de Mon Sep 17 00:00:00 2001
 From: Anantha Krishnan <ananthk@codeaurora.org>
 Date: Wed, 20 Aug 2014 12:13:19 +0530
 Subject: [PATCH 08/19] bluetooth : Add support for TUFEELO firmware download
@@ -2739,7 +2727,7 @@ index 3efb71995c45..9d18c576fcae 100644
  /******************************************************************************
  **  Local type definitions
 
-From ac12a2a733ad6cc6eed8ccdd3462d1fe1969fc54 Mon Sep 17 00:00:00 2001
+From f1594502b2627691bf519fe163e655a3d8755e4f Mon Sep 17 00:00:00 2001
 From: Anantha Krishnan <ananthk@codeaurora.org>
 Date: Mon, 8 Dec 2014 14:52:16 +0530
 Subject: [PATCH 09/19] bluetooth: Add support for ROME 3.2 SOC.
@@ -2977,7 +2965,7 @@ index 9d18c576fcae..77e85e7e7b19 100644
  };
  #endif /* HW_ROME_H */
 
-From f7cc3b22522cfc66a7c4126630c6222f22be17f6 Mon Sep 17 00:00:00 2001
+From 4980bd625c8eab2240e7e754f2b7be99ab679fcb Mon Sep 17 00:00:00 2001
 From: Anantha Krishnan <ananthk@codeaurora.org>
 Date: Thu, 4 Dec 2014 17:23:58 +0530
 Subject: [PATCH 10/19] bluetooth: Use correct TTY ioctl calls for flow control
@@ -3168,7 +3156,7 @@ index 77e85e7e7b19..ef3647e6a69b 100644
  unsigned char vnd_local_bd_addr[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
  typedef enum {
 
-From bd7d1fce8de4639445563442a8448468d671fad2 Mon Sep 17 00:00:00 2001
+From c42651fe738f2ce0740016fcc885bb79a1909021 Mon Sep 17 00:00:00 2001
 From: Anantha Krishnan <ananthk@codeaurora.org>
 Date: Tue, 20 Jan 2015 12:43:20 +0530
 Subject: [PATCH 11/19] bluetooth: Add support for multi baud rate
@@ -3199,10 +3187,10 @@ index c3cf10843303..dda639cabca3 100644
  
  static int qualcomm(int fd, struct uart_t *u, struct termios *ti)
 diff --git a/tools/hciattach.h b/tools/hciattach.h
-index 0656a845223c..49e59321fcac 100644
+index 93577e9474de..5255251448d6 100644
 --- a/tools/hciattach.h
 +++ b/tools/hciattach.h
-@@ -64,7 +64,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
+@@ -65,7 +65,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
  						struct termios *ti);
  int ath3k_post(int fd, int pm);
  int qualcomm_init(int fd, int speed, struct termios *ti, const char *bdaddr);
@@ -3426,7 +3414,7 @@ index ef3647e6a69b..1500ddd3a79f 100644
  #define FALSE  0
  #endif
 
-From 7dc9c5e316aa9a22899259ce296136b2e257735d Mon Sep 17 00:00:00 2001
+From c3e7808efa573974bf7d7d5fb08766b140dbe8f3 Mon Sep 17 00:00:00 2001
 From: Kamal Negi <kamaln@codeaurora.org>
 Date: Tue, 30 Dec 2014 19:15:08 +0530
 Subject: [PATCH 12/19] Override PCM Settings by reading configuration file
@@ -3572,7 +3560,7 @@ index 1500ddd3a79f..f591c10e4f2b 100644
  **  Local type definitions
  ******************************************************************************/
 
-From 9eb8220969598d63be3b918b49b6258387629bf3 Mon Sep 17 00:00:00 2001
+From e435ae1aa83440aaee7833c8ebce438065168f76 Mon Sep 17 00:00:00 2001
 From: Rupesh Tatiya <rtatiya@codeaurora.org>
 Date: Thu, 29 Jan 2015 15:36:27 +0530
 Subject: [PATCH 13/19] Add support for Tufello 1.1 SOC
@@ -3743,7 +3731,7 @@ index f591c10e4f2b..95d5f1e8a5c2 100644
  };
  #endif /* HW_ROME_H */
 
-From f55d710cf43d008e42ce06ead49dc0dfbf97d3a1 Mon Sep 17 00:00:00 2001
+From f09f6d7675062407b904fb85348249b09425bbed Mon Sep 17 00:00:00 2001
 From: Anantha Krishnan <ananthk@codeaurora.org>
 Date: Wed, 4 Feb 2015 12:29:07 +0530
 Subject: [PATCH 14/19] bluetooth: Vote UART CLK ON prior to firmware download
@@ -3819,7 +3807,7 @@ index 95d5f1e8a5c2..20264f9978d9 100644
  unsigned char vnd_local_bd_addr[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
  typedef enum {
 
-From b09f8b12c937ec58df0581b2d95493e036c86432 Mon Sep 17 00:00:00 2001
+From 96e0dfef4073e19927d1a5c3e45b91fc0a7a3827 Mon Sep 17 00:00:00 2001
 From: Kamal Negi <kamaln@codeaurora.org>
 Date: Thu, 30 Apr 2015 15:53:06 +0530
 Subject: [PATCH 15/19] Override IBS settings by reading configuration file
@@ -3948,7 +3936,7 @@ index 20264f9978d9..8eaeeed8bc96 100644
  **  Local type definitions
  ******************************************************************************/
 
-From b307659dc988054c1fef32c131417cfab2b74c3e Mon Sep 17 00:00:00 2001
+From 30168b14444dad98babe8e0dc4474bb1947e60e6 Mon Sep 17 00:00:00 2001
 From: Dibyendu Roy <dibyen@codeaurora.org>
 Date: Fri, 22 May 2015 18:57:05 +0530
 Subject: [PATCH 16/19] bluetooth: Fix flow control operation
@@ -4002,7 +3990,7 @@ index 8eaeeed8bc96..3fdaf208e522 100644
  #define USERIAL_OP_CLK_OFF     0x5442
  
 
-From bec6be1174e250c60b48b51933ab6f80a27a093e Mon Sep 17 00:00:00 2001
+From ed48ba0a9558ea9e0025210ade514e86579e0801 Mon Sep 17 00:00:00 2001
 From: Dibyendu Roy <dibyen@codeaurora.org>
 Date: Thu, 11 Jun 2015 12:07:43 +0530
 Subject: [PATCH 17/19] Adding MDM specific code under _PLATFORM_MDM_
@@ -4069,7 +4057,7 @@ index 3fdaf208e522..89f7db3bef86 100644
  unsigned char vnd_local_bd_addr[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
  typedef enum {
 
-From 5ab2a193c11eaa8a68a0e060a560a5bd2ee2459c Mon Sep 17 00:00:00 2001
+From 73225f2554d77df772d026475d27413161f5aaa6 Mon Sep 17 00:00:00 2001
 From: Dibyendu Roy <dibyen@codeaurora.org>
 Date: Mon, 6 Jul 2015 13:30:53 +0530
 Subject: [PATCH 18/19] Bluetooth: Fix static analysis issues
@@ -4108,7 +4096,7 @@ index 1891de24e21a..59bdc16e4e8f 100644
  
      total_segment = tlv_size/MAX_SIZE_PER_TLV_SEGMENT;
 
-From ca52faad6e23bee353e3315f136efb43d1e9d143 Mon Sep 17 00:00:00 2001
+From cba902ee7f1d78e8b46d0ce7e2243b2d9dddf063 Mon Sep 17 00:00:00 2001
 From: Kamal Negi <kamaln@codeaurora.org>
 Date: Fri, 8 May 2015 15:01:02 +0530
 Subject: [PATCH 19/19] Handle NULL Pointer derefrencing in AVRCP Target role

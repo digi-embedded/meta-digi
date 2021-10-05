@@ -23,6 +23,7 @@ QCA6564_COMMON_PATCHES = " \
     file://0013-hciattach_rome-Respect-the-user-indication-for-noflo.patch \
     file://0014-hciattach-If-the-user-supplies-a-bdaddr-use-it.patch \
     file://0015-hciattach-Add-verbosity-option.patch \
+    file://0016-bluetooth-Disable-bluetooth-low-power-mode-functionality.patch \
 "
 
 SRC_URI_append_ccimx6ul = " ${QCA6564_COMMON_PATCHES}"
