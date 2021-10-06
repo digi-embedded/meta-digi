@@ -31,7 +31,7 @@ diff --git a/tools/hciattach.h b/tools/hciattach.h
 index 2021c33a9824..c5aa495ac3ee 100644
 --- a/tools/hciattach.h
 +++ b/tools/hciattach.h
-@@ -63,7 +63,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
+@@ -64,7 +64,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
  						struct termios *ti);
  int ath3k_post(int fd, int pm);
  int qualcomm_init(int fd, int speed, struct termios *ti, const char *bdaddr);

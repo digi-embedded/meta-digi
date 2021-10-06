@@ -14,10 +14,10 @@ Signed-off-by: Rupesh Tatiya <rtatiya@codeaurora.org>
 ---
  Makefile.tools         |    3 +-
  tools/hciattach.c      |   25 +-
- tools/hciattach.h      |    6 +-
+ tools/hciattach.h      |    2 +
  tools/hciattach_rome.c | 1578 ++++++++++++++++++++++++++++++++++++++++++++++++
  tools/hciattach_rome.h |  317 ++++++++++
- 5 files changed, 1925 insertions(+), 4 deletions(-)
+ 5 files changed, 1923 insertions(+), 2 deletions(-)
  create mode 100644 tools/hciattach_rome.c
  create mode 100644 tools/hciattach_rome.h
 
@@ -137,18 +137,15 @@ diff --git a/tools/hciattach.h b/tools/hciattach.h
 index 909ada871df2..2021c33a9824 100644
 --- a/tools/hciattach.h
 +++ b/tools/hciattach.h
-@@ -39,8 +39,9 @@
- #define HCI_UART_H4DS	3
- #define HCI_UART_LL	4
- #define HCI_UART_ATH3K  5
--#define HCI_UART_INTEL	6
--#define HCI_UART_BCM	7
-+#define HCI_UART_IBS    6
-+#define HCI_UART_INTEL	7
-+#define HCI_UART_BCM	8
+@@ -42,6 +42,8 @@
+ #define HCI_UART_INTEL	6
+ #define HCI_UART_BCM	7
  
++#define HCI_UART_IBS	12
++
  #define HCI_UART_RAW_DEVICE	0
  #define HCI_UART_RESET_ON_INIT	1
+ #define HCI_UART_CREATE_AMP	2
 @@ -62,6 +63,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
  						struct termios *ti);
  int ath3k_post(int fd, int pm);
