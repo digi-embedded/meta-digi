@@ -82,3 +82,6 @@ GRAPHICAL_IMAGES ?= "dey-image-qt dey-image-webkit"
 
 # Include DEY SELinux policy modifications by default
 DEY_SELINUX_POLICY ?= "1"
+
+# U-Boot scripts to include in 'linux' partition
+BOOT_SCRIPTS = "boot.scr:boot.scr"
