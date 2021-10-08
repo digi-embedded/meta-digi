@@ -11,30 +11,6 @@
 if test "${dualboot}" = "yes"; then
 	if test "${upgrade_available}" = "1"; then
 		echo "Update detected; Booting new system (try ${bootcount})"
-		if test "${bootcount}" = "${bootlimit}"; then
-			echo "## Update failed; Rolling back to previous version."
-			if test "${active_system}" = "linux_a"; then
-				part number mmc ${mmcbootdev} linux_b pi
-				setenv mmcpart ${pi}
-				# Save the partition index on variable rootfs_b_index
-				part number mmc ${mmcbootdev} rootfs_b rootfs_b_index
-				# Save the rootfs_b UUID into mmcroot_b
-				part uuid mmc ${mmcbootdev}:${rootfs_b_index} mmcroot_b
-				setenv mmcroot PARTUUID=${mmcroot_b}
-				setenv active_system linux_b
-			else
-				part number mmc ${mmcbootdev} linux_a pi
-				setenv mmcpart ${pi}
-				# Save the partition index on variable rootfs_a_index
-				part number mmc ${mmcbootdev} rootfs_a rootfs_a_index
-				# Save the rootfs_a UUID into mmcroot_a
-				part uuid mmc ${mmcbootdev}:${rootfs_a_index} mmcroot_a
-				setenv mmcroot PARTUUID=${mmcroot_a}
-				setenv active_system linux_a
-			fi
-			setenv upgrade_available
-			saveenv
-		fi
 	else
 		if test "${active_system}" = "linux_a"; then
 			echo "Booting from system A"
