@@ -11,6 +11,7 @@ include conf/machine/include/arm/arch-arm64.inc
 # Platform u-boot settings
 UBOOT_PREFIX = "imx-boot"
 UBOOT_SUFFIX = "bin"
+UBOOT_HAS_FASTBOOT = "true"
 
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS = "imx-boot"
