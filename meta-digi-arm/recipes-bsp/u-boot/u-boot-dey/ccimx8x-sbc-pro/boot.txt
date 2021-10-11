@@ -10,7 +10,7 @@
 # Dual boot update verification
 if test "${dualboot}" = "yes"; then
 	if test "${upgrade_available}" = "1"; then
-		echo "Update detected; Booting new system (try ${bootcount})"
+		echo "Update detected; Booting new system in ${active_system} (try ${bootcount})"
 	else
 		if test "${active_system}" = "linux_a"; then
 			echo "Booting from system A"
