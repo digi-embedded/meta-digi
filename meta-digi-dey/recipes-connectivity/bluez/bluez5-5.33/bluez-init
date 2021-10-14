@@ -137,7 +137,7 @@ bt_init_ar3k() {
 	# Start the Bluetooth driver and daemon (D-BUS must already be running)
 	RETRIES="5"
 	while [ "${RETRIES}" -gt "0" ]; do
-		hciattach ttyBt ath3k 4000000 1>${LOGFILE} && break
+		hciattach ttyBt ath3k 4000000 >${LOGFILE} 2>&1 && break
 		if [ -n "${BT_PWR_GPIO_NR}" ]; then
 			#
 			# If hciattach fails try to recover it by toggling the BT power GPIO
