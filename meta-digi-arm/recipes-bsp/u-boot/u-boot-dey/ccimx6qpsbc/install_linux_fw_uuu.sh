@@ -230,6 +230,7 @@ uuu fb: ucmd mmc partconf 0 1 1 1
 #  - Update the 'rootfs' partition
 uuu fb: ucmd setenv bootcmd "
 	env default -a;
+	setenv dualboot \${dualboot};
 	saveenv;
 	echo \"\";
 	echo \"\";
@@ -264,11 +265,6 @@ uuu fb: ucmd setenv fastboot_dev mmc
 
 # Set fastboot buffer address to $loadaddr, just in case
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
-
-# Restore dualboot if previously active
-if [ "${DUALBOOT}" = true ]; then
-	uuu fb: ucmd setenv dualboot yes
-fi
 
 if [ "${DUALBOOT}" = true ]; then
 	# Update Linux A

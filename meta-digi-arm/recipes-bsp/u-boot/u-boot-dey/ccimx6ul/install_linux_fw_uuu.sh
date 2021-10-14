@@ -237,6 +237,8 @@ part_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000
 #  - Erase the 'update' partition
 uuu fb: ucmd setenv bootcmd "
 	env default -a;
+	setenv dualboot \${dualboot};
+	setenv singlemtdsys \${singlemtdsys};
 	saveenv;
 	echo \"\";
 	echo \"\";
@@ -254,16 +256,6 @@ sleep 3
 
 # Set fastboot buffer address to $loadaddr
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
-
-# Restore dualboot if previously active
-if [ "${DUALBOOT}" = true ]; then
-	uuu fb: ucmd setenv dualboot yes
-fi
-
-# Restore singlemtdsys if previously active
-if [ "${SINGLEMTDSYS}" = true ]; then
-	uuu fb: ucmd setenv singlemtdsys yes
-fi
 
 # Create partition table
 uuu "fb[-t 10000]:" ucmd run partition_nand_linux
