@@ -93,8 +93,8 @@ do_configure_append() {
 	# Only accept fragments ending in .cfg. If the fragments contain
 	# something other than kernel configs, it will be filtered out
 	# automatically.
-	if [ -f ${WORKDIR}/*.cfg ]; then
-		${S}/scripts/kconfig/merge_config.sh -O ${B} ${B}/.config ${WORKDIR}/*.cfg
+	if [ -n "${@' '.join(find_cfgs(d))}" ]; then
+		${S}/scripts/kconfig/merge_config.sh -m -O ${B} ${B}/.config ${@" ".join(find_cfgs(d))}
 	fi
 }
 
