@@ -84,4 +84,5 @@ GRAPHICAL_IMAGES ?= "dey-image-qt dey-image-webkit"
 DEY_SELINUX_POLICY ?= "1"
 
 # U-Boot scripts to include in 'linux' partition
-BOOT_SCRIPTS = "boot.scr:boot.scr"
+# (use the '+=' operator, since other layers may append scripts to this list)
+BOOT_SCRIPTS += "boot.scr:boot.scr"
