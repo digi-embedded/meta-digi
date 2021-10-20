@@ -10,6 +10,6 @@ SRC_URI_append_ccimx6 = " \
 "
 
 SRCBRANCH = "v3.14/dey-2.0/maint"
-SRCREV = "2585087f7f9cfa69f8c2e9d9e1465e40f132161c"
+SRCREV = "359feaf8f7bfdc95735fc54f9e49e5f8b4ff34eb"
 
 COMPATIBLE_MACHINE = "(ccimx6$)"
