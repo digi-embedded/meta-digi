@@ -2,8 +2,17 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
+# Chose a between a default hard-coded config file (for read-only rootfs)
+# or a dynamically generated one (with a postinst script)
+FW_CONFIG_FILE = "${@bb.utils.contains('STORAGE_MEDIA', 'mtd', \
+			bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', \
+				'${STORAGE_MEDIA}/fw_env.config_default', \
+				'${STORAGE_MEDIA}/fw_env.config', d), \
+			'${STORAGE_MEDIA}/fw_env.config', \
+			 d)}"
+
 SRC_URI += " \
-    file://${STORAGE_MEDIA}/fw_env.config \
+    file://${FW_CONFIG_FILE} \
     file://0001-Implement-support-for-environment-encryption-by-CAAM.patch \
     file://0002-Implement-U-Boot-environment-access-functions.patch \
     file://0003-tools-env-add-support-to-set-dynamic-location-of-env.patch \
@@ -11,7 +20,7 @@ SRC_URI += " \
 
 do_install_append() {
 	install -d ${D}${sysconfdir}
-	install -m 0644 ${WORKDIR}/${STORAGE_MEDIA}/fw_env.config ${D}${sysconfdir}/
+	install -m 0644 ${WORKDIR}/${FW_CONFIG_FILE} ${D}${sysconfdir}/fw_env.config
 }
 
 pkg_postinst_ontarget_${PN}() {
