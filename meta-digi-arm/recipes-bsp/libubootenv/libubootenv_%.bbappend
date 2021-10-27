@@ -61,3 +61,5 @@ pkg_postinst_ontarget_${PN}() {
 			${CONFIG_FILE}
 	fi
 }
+
+inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}

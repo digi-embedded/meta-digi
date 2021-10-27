@@ -46,3 +46,5 @@ pkg_postinst_ontarget_${PN}() {
 		update-rc.d -f ${INITSCRIPT_NAME} remove
 	fi
 }
+
+inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}
