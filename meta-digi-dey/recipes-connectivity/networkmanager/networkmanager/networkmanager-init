@@ -3,6 +3,7 @@
 DAEMON="/usr/sbin/NetworkManager"
 PIDFILE="/var/run/NetworkManager/NetworkManager.pid"
 DESC="NetworkManager"
+DAEMON_MM="/usr/sbin/ModemManager"
 
 case "${1}" in
 	start)
@@ -14,6 +15,7 @@ case "${1}" in
 	stop)
 		echo -n "Stopping ${DESC}: "
 		start-stop-daemon -K -o -q -p ${PIDFILE}
+		start-stop-daemon -K -o -q -x ${DAEMON_MM}
 		echo "done"
 		;;
 	restart)
