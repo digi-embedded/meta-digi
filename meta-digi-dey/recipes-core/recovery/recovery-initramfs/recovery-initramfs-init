@@ -520,6 +520,9 @@ mkdir -p /var/lock
 # Set kernel console loglevel.
 sysctl -q -w kernel.printk=4
 
+# Set path for psplash communication FIFO
+export PSPLASH_FIFO_DIR="/tmp"
+
 # Start psplash.
 psplash &
 
