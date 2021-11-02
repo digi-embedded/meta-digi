@@ -11,7 +11,6 @@ DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-cst-native',
 
 PROVIDES += "u-boot"
 
-# U-Boot version dub-2015.04-r7.1
 SRCBRANCH = "v2015.04/maint"
 SRCREV = "d5a67e1890b147b3f965c8fb822dd0d043e9fa07"
 
@@ -26,7 +25,6 @@ SRC_URI_append = " \
     file://boot.txt \
     file://install_linux_fw_sd.txt \
     file://recovery.txt \
-    file://0001-mmc-add-MMC_VERSION_5_1.patch \
 "
 
 LOCALVERSION ?= ""
