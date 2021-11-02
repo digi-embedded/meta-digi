@@ -26,12 +26,6 @@ SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
 "
 
-# U-Boot version dub-2015.04-r10.2 for CC6
-SRCREV_ccimx6sbc = "3ccec403129e8735e4db264d7bc6ed92f91e9431"
-SRC_URI_ccimx6sbc = " \
-    ${UBOOT_GIT_URI};nobranch=1 \
-"
-
 SRC_URI_append = " \
     file://boot.txt \
     file://install_linux_fw_sd.txt \
