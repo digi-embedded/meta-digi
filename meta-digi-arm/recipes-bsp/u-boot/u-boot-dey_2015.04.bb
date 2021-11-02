@@ -30,7 +30,6 @@ SRC_URI = " \
 SRCREV_ccimx6sbc = "3ccec403129e8735e4db264d7bc6ed92f91e9431"
 SRC_URI_ccimx6sbc = " \
     ${UBOOT_GIT_URI};nobranch=1 \
-    file://0001-mmc-add-MMC_VERSION_5_1.patch \
 "
 
 SRC_URI_append = " \
