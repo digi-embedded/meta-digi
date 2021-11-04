@@ -8,3 +8,4 @@ iface ##WLAN_P2P_INTERFACE## inet static
         dns-nameservers ##P2P0_STATIC_DNS##
         wpa-driver ##WPA_DRIVER##
         wpa-conf /etc/wpa_supplicant_p2p.conf
+        pre-up [ -d /proc/device-tree/wireless ]

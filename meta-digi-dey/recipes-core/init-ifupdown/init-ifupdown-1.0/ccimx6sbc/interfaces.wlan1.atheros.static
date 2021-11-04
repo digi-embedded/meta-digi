@@ -1,0 +1,11 @@
+
+# Wi-Fi AP interface (Atheros AR6233)
+#auto wlan1
+iface wlan1 inet static
+	address ##WLAN1_STATIC_IP##
+	netmask ##WLAN1_STATIC_NETMASK##
+	gateway ##WLAN1_STATIC_GATEWAY##
+	dns-nameservers ##WLAN1_STATIC_DNS##
+	pre-up [ $(find /sys/devices -name modalias -print0 | xargs -0 sort -u -z | grep sdio:c00v0271d0301) ]
+	wpa-driver nl80211
+	wpa-conf /etc/wpa_supplicant.conf

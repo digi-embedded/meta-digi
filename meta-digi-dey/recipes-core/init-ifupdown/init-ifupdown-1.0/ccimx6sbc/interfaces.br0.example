@@ -5,4 +5,4 @@
 #	bridge_ports eth0 wlan1
 #	address 192.168.42.50
 #	netmask 255.255.255.0
-#	pre-up [ -d /proc/device-tree/wireless ]
+#	pre-up [ $(find /sys/devices -name modalias -print0 | xargs -0 sort -u -z | grep sdio:c00v0271d050A) ]
