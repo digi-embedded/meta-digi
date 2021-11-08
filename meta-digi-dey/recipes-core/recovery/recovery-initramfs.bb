@@ -16,6 +16,7 @@ SRC_URI = " \
     file://automount_block.sh \
     file://automount_mtd.sh \
     file://mdev.conf \
+    ${@bb.utils.contains('STORAGE_MEDIA', 'mmc', 'file://mount_cryptrootfs.sh', '', d)} \
 "
 
 S = "${WORKDIR}"
@@ -24,6 +25,9 @@ do_install() {
 	install -d ${D}${sysconfdir}
 	install -m 0755 ${WORKDIR}/recovery-initramfs-init ${D}/init
 	install -m 0644 ${WORKDIR}/swupdate.cfg ${D}${sysconfdir}
+	if [ "${STORAGE_MEDIA}" = "mmc" ]; then
+		install -m 0755 ${WORKDIR}/mount_cryptrootfs.sh ${D}${sysconfdir}
+	fi
 	install -d ${D}${base_libdir}/mdev
 	install -m 0755 ${WORKDIR}/automount_block.sh ${D}${base_libdir}/mdev/automount_block.sh
 	install -m 0755 ${WORKDIR}/automount_mtd.sh ${D}${base_libdir}/mdev/automount_mtd.sh
