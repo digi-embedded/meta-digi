@@ -409,7 +409,7 @@ check_swu_package() {
 		grep "Found Image" "${SWUPDATE_OUTPUT}" | grep -qs "rootfs for handler" && ROOTFS_IMAGE_IN_PACKAGE="yes"
 	else
 		# For eMMC packages, check for a *.ext4 image, which is very likely intended for the rootfs partition
-		grep "Found Image" "${SWUPDATE_OUTPUT}" | grep -qs "\.ext4 in device" && ROOTFS_IMAGE_IN_PACKAGE="yes"
+		grep -E "Found( compressed){0,1} Image" "${SWUPDATE_OUTPUT}" | grep -Eqs "\.ext4(\.gz){0,1} in device" && ROOTFS_IMAGE_IN_PACKAGE="yes"
 	fi
 
 	# Check if the rootfs is meant to be encrypted
