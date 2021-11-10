@@ -261,8 +261,8 @@ uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 uuu "fb[-t 10000]:" ucmd run partition_nand_linux
 
 if [ "${SINGLEMTDSYS}" = true ]; then
+	uuu "fb[-t 30000]:" ucmd nand erase.part system
 	uuu "fb[-t 10000]:" ucmd run ubivolscript
-	nand erase.part system
 fi
 
 if [ "${DUALBOOT}" = true ]; then
@@ -285,7 +285,7 @@ fi
 
 if [ "${SINGLEMTDSYS}" != true ] && [ "${DUALBOOT}" != true ]; then
 	# Erase the 'Update' partition
-	uuu fb: ucmd nand erase.part update
+	uuu "fb[-t 20000]:" ucmd nand erase.part update
 fi
 
 if [ "${DUALBOOT}" != true ]; then
