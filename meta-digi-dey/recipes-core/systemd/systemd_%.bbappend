@@ -6,7 +6,7 @@ SRC_URI += " \
 "
 
 # Remove systemd-networkd from our images, since we already use NetworkManager
-PACKAGECONFIG_remove = "networkd"
+PACKAGECONFIG_remove_dey = "networkd"
 
 do_install_append () {
     # Disable the assignment of the fixed network interface name
