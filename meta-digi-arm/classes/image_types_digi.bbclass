@@ -219,6 +219,28 @@ CONVERSION_CMD_tf = "trustence_sign_cpio ${IMAGE_NAME}.rootfs.${type}"
 CONVERSION_DEPENDS_tf = "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 IMAGE_TYPES += "cpio.gz.u-boot.tf"
 
+#
+# Sign read-only rootfs
+#
+do_image_squashfs[postfuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'rootfs_sign', '', d)}"
+
+rootfs_sign() {
+        # Set environment variables for trustfence configuration
+        export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+        [ -n "${CONFIG_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
+        [ -n "${CONFIG_SIGN_MODE}" ] && export CONFIG_SIGN_MODE="${TRUSTFENCE_SIGN_MODE}"
+
+        ROOTFS_IMAGE="${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.squashfs"
+        TMP_ROOTFS_IMAGE_SIGNED="$(mktemp ${ROOTFS_IMAGE}-signed.XXXXXX)"
+        # Sign rootfs read-only image
+        trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -r "${ROOTFS_IMAGE}" "${TMP_ROOTFS_IMAGE_SIGNED}"
+        mv "${TMP_ROOTFS_IMAGE_SIGNED}" "${ROOTFS_IMAGE}"
+}
+
+rootfs_sign[dirs] = "${DEPLOY_DIR_IMAGE}"
+
+do_image_squashfs[vardeps] += "TRUSTFENCE_SIGN_KEYS_PATH TRUSTFENCE_KEY_INDEX"
+
 ################################################################################
 #                                SDCARD IMAGES                                 #
 ################################################################################
@@ -305,3 +327,4 @@ IMAGE_CMD_sdcard() {
 
 # The sdcard image requires the boot and rootfs images to be built before
 IMAGE_TYPEDEP_sdcard = "${SDIMG_BOOTFS_TYPE} ${SDIMG_ROOTFS_TYPE}.gz"
+

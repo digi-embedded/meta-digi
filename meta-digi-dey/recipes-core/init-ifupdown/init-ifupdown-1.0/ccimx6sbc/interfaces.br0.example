@@ -1,9 +1,8 @@
 
-## Example bridge between eth0 and wlan0
+## Example bridge between eth0 and wlan1 (Qualcomm QCA65x4)
 #auto br0
 #iface br0 inet static
-#	bridge_ports eth0 wlan0
+#	bridge_ports eth0 wlan1
 #	address 192.168.42.50
 #	netmask 255.255.255.0
-#	bridge_wpa_driver nl80211
-#	bridge_wpa_conf /etc/wpa_supplicant.conf
+#	pre-up [ $(find /sys/devices -name modalias -print0 | xargs -0 sort -u -z | grep sdio:c00v0271d050A) ]

@@ -22,6 +22,8 @@ if [ "${SUBSYSTEM}" = "block" ]; then
 elif [ "${SUBSYSTEM}" = "mtd" ]; then
 	MTDN="$(echo ${DEVNAME} | cut -f 3 -d /)"
 	PARTNAME="$(grep ${MTDN} /proc/mtd | sed -ne 's,.*"\(.*\)",\1,g;T;p')"
+elif [ "${SUBSYSTEM}" = "ubi" ]; then
+	PARTNAME="$(cat /sys/${DEVPATH}/name)"
 fi
 
 MOUNT_PARAMS="-o silent"
@@ -87,6 +89,14 @@ elif [ "${SUBSYSTEM}" = "mtd" ]; then
 		fi
 	else
 		logger -t udev "ERROR: Could not mount '${PARTNAME}' partition, volume not found"
+		rmdir --ignore-fail-on-non-empty ${MOUNTPOINT}
+	fi
+elif [ "${SUBSYSTEM}" = "ubi" ]; then
+	# In the case of a 'system' partition with many UBI volumes, the device
+	# is always /dev/ubi0
+	# Mount the volume.
+	if ! mount -t ubifs ubi0:${PARTNAME} ${MOUNT_PARAMS} ${MOUNTPOINT}; then
+		logger -t udev "ERROR: Could not mount '${PARTNAME}' volume"
 		rmdir --ignore-fail-on-non-empty ${MOUNTPOINT}
 	fi
 fi

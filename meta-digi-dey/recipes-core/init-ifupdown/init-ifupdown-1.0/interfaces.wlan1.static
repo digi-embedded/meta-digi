@@ -1,9 +1,11 @@
 
+# Wi-Fi AP interface (Qualcomm QCA65x4)
 #auto wlan1
 iface wlan1 inet static
         address ##WLAN1_STATIC_IP##
         netmask ##WLAN1_STATIC_NETMASK##
         gateway ##WLAN1_STATIC_GATEWAY##
         dns-nameservers ##WLAN1_STATIC_DNS##
+        pre-up [ -d /proc/device-tree/wireless ]
         post-up ##WLAN1_POST_UP_ACTION##
         pre-down ##WLAN1_PRE_DOWN_ACTION##

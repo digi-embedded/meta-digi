@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2020 Digi International.
+# Copyright (C) 2016-2021 Digi International.
 
 SUMMARY = "Qualcomm's wireless driver for qca65xx"
 DESCRIPTION = "qcacld-2.0 module"
@@ -11,7 +11,7 @@ PV = "v4.0.11.213X"
 SRCBRANCH = "qca65X4/dey-3.2/maint"
 SRCREV = "${AUTOREV}"
 
-QCOM_GIT_URI = "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git;protocol=https', d)}"
+QCOM_GIT_URI = "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}/linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git;protocol=https', d)}"
 
 SRC_URI = " \
     ${QCOM_GIT_URI};branch=${SRCBRANCH} \

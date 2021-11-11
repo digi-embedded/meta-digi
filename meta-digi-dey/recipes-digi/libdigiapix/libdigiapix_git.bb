@@ -11,7 +11,7 @@ DEPENDS = "libsoc libsocketcan libgpiod"
 SRCBRANCH ?= "dey-3.2/maint"
 SRCREV = "${AUTOREV}"
 
-LIBDIGIAPIX_URI_STASH = "${DIGI_MTK_GIT}dey/libdigiapix.git;protocol=ssh"
+LIBDIGIAPIX_URI_STASH = "${DIGI_MTK_GIT}/dey/libdigiapix.git;protocol=ssh"
 LIBDIGIAPIX_URI_GITHUB = "${DIGI_GITHUB_GIT}/libdigiapix.git;protocol=https"
 
 LIBDIGIAPIX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${LIBDIGIAPIX_URI_STASH}', '${LIBDIGIAPIX_URI_GITHUB}', d)}"

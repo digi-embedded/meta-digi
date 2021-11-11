@@ -2,6 +2,40 @@
 # U-Boot bootscript for NAND images created by Yocto.
 #
 
+# As the first step in the boot script, check if we are using DualBoot and
+# if an upgrade is available. This requires the script to change some variables
+# and save them, while the rest of the script changes variables only temporarily
+# without saving them.
+
+# Dual boot update verification
+if test "${dualboot}" = "yes"; then
+	if test "${upgrade_available}" = "1"; then
+		echo "Update detected; Booting new system in ${active_system} (try ${bootcount})"
+	else
+		if test "${active_system}" = "linux_a"; then
+			echo "Booting from system A"
+			setenv mtdbootpart ${active_system}
+			setenv mtdlinuxindex ${mtdlinux_a_index}
+			setenv mtdrootfsindex ${mtdrootfs_a_index}
+			setenv rootfsvol ${rootfsvol_a}
+		else
+			echo "Booting from system B"
+			setenv mtdbootpart ${active_system}
+			setenv mtdlinuxindex ${mtdlinux_b_index}
+			setenv mtdrootfsindex ${mtdrootfs_b_index}
+			setenv rootfsvol ${rootfsvol_b}
+		fi
+	fi
+else
+	if test "${mtdbootpart}" = "recovery"; then
+		setenv boot_initrd true
+		setenv initrd_file uramdisk-recovery.img
+	else
+		true
+	fi
+fi
+
+
 # Back up environment variables
 setenv ORIG_extra_bootargs ${extra_bootargs}
 
@@ -37,12 +71,6 @@ else
 	fi
 fi
 
-if test "${mtdbootpart}" = "recovery"; then
-	setenv boot_initrd true
-	setenv initrd_file uramdisk-recovery.img
-else
-	true
-fi
 setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
 dboot linux nand ${mtdbootpart}
 

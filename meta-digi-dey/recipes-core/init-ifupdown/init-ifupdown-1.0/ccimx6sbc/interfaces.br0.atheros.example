@@ -1,0 +1,10 @@
+
+## Example bridge between eth0 and wlan0 (Atheros AR6233)
+#auto br0
+#iface br0 inet static
+#	bridge_ports eth0 wlan0
+#	address 192.168.42.50
+#	netmask 255.255.255.0
+#	bridge_wpa_driver nl80211
+#	bridge_wpa_conf /etc/wpa_supplicant.conf
+#	pre-up [ $(find /sys/devices -name modalias -print0 | xargs -0 sort -u -z | grep sdio:c00v0271d0301) ]

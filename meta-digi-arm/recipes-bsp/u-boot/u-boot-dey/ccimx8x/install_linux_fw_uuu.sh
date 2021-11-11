@@ -18,6 +18,9 @@
 # U-Boot script for installing Linux images created by Yocto
 #
 
+# Exit on any error
+set -e
+
 # Parse uuu cmd output
 getenv()
 {
@@ -76,14 +79,20 @@ do
 	esac
 done
 
+# Enable the redirect support to get u-boot variables values
+uuu fb: ucmd setenv stdout serial,fastboot
+
+# Check if dualboot variable is active
+dualboot=$(getenv "dualboot")
+if [ "${dualboot}" = "yes" ]; then
+	DUALBOOT=true;
+fi
+
 echo ""
 echo "Determining image files to use..."
 
 # Determine U-Boot file to program basing on SOM's SOC type (linked to bus width)
 if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
-	# Enable the redirect support to get u-boot variables values
-	uuu fb: ucmd setenv stdout serial,fastboot
-
 	# Since SOMs with the B0 SOC might have an older U-Boot that doesn't export the
 	# SOC revision to the environment, use B0 by default
 	soc_rev=$(getenv "soc_rev")
@@ -118,13 +127,13 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##-${soc_rev}-${module_ram}_${bus_width}.bin"
 	fi
 
-	# remove redirect
-	uuu fb: ucmd setenv stdout serial
-
 	# U-Boot when the checked value is empty.
 	if [ -n "${INSTALL_UBOOT_FILENAME}" ]; then
 		true
 	else
+		# remove redirect
+		uuu fb: ucmd setenv stdout serial
+
 		echo ""
 		echo "[ERROR] Cannot determine U-Boot file for this module!"
 		echo ""
@@ -145,6 +154,9 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		exit
 	fi
 fi
+
+# remove redirect
+uuu fb: ucmd setenv stdout serial
 
 # Determine linux, recovery, and rootfs image filenames to update
 if [ -z "${IMAGE_NAME}" ]; then
@@ -186,32 +198,43 @@ done;
 
 [ "${ABORT}" = true ] && exit 1
 
+# parts names
+LINUX_NAME="linux"
+RECOVERY_NAME="recovery"
+ROOTFS_NAME="rootfs"
 # Print warning about storage media being deleted
-if [ ! "${NOWAIT}" = true ]; then
+if [ "${NOWAIT}" != true ]; then
 	WAIT=10
-	echo ""
-	echo " ===================="
-	echo " =    IMPORTANT!    ="
-	echo " ===================="
-	echo " This process will erase your eMMC and will install the following files"
-	echo " on the partitions of the eMMC."
-	echo ""
-	echo "   PARTITION   FILENAME"
-	echo "   ---------   --------"
-	echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
-	echo "   linux       ${INSTALL_LINUX_FILENAME}"
-	echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
-	echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
-	echo ""
-	echo " Press CTRL+C now if you wish to abort."
-	echo ""
+	printf "\n"
+	printf " ====================\n"
+	printf " =    IMPORTANT!    =\n"
+	printf " ====================\n"
+	printf " This process will erase your eMMC and will install the following files\n"
+	printf " on the partitions of the eMMC.\n"
+	printf "\n"
+	printf "   PARTITION\tFILENAME\n"
+	printf "   ---------\t--------\n"
+	printf "   bootloader\t${INSTALL_UBOOT_FILENAME}\n"
+	if [ "${DUALBOOT}" = true ]; then
+		printf "   ${LINUX_NAME}_a\t${INSTALL_LINUX_FILENAME}\n"
+		printf "   ${LINUX_NAME}_b\t${INSTALL_LINUX_FILENAME}\n"
+		printf "   ${ROOTFS_NAME}_a\t${INSTALL_ROOTFS_FILENAME}\n"
+		printf "   ${ROOTFS_NAME}_b\t${INSTALL_ROOTFS_FILENAME}\n"
+	else
+		printf "   ${LINUX_NAME}\t${INSTALL_LINUX_FILENAME}\n"
+		printf "   ${RECOVERY_NAME}\t${INSTALL_RECOVERY_FILENAME}\n"
+		printf "   ${ROOTFS_NAME}\t${INSTALL_ROOTFS_FILENAME}\n"
+	fi
+	printf "\n"
+	printf " Press CTRL+C now if you wish to abort.\n"
+	printf "\n"
 	while [ ${WAIT} -gt 0 ]; do
 		printf "\r Update process starts in %d " ${WAIT}
 		sleep 1
 		WAIT=$(( ${WAIT} - 1 ))
 	done
 	printf "\r                                   \n"
-	echo " Starting update process"
+	printf " Starting update process\n"
 fi
 
 # Skip user confirmation for U-Boot update
@@ -232,6 +255,7 @@ uuu fb: ucmd mmc partconf 0 1 1 1
 #  - Update the 'rootfs' partition
 uuu fb: ucmd setenv bootcmd "
 	env default -a;
+	setenv dualboot \${dualboot};
 	saveenv;
 	echo \"\";
 	echo \"\";
@@ -267,24 +291,34 @@ uuu fb: ucmd setenv fastboot_dev mmc
 # Set fastboot buffer address to $loadaddr, just in case
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 
-# Update Linux
-part_update "linux" "${INSTALL_LINUX_FILENAME}"
-
-# Update Recovery
-part_update "recovery" "${INSTALL_RECOVERY_FILENAME}"
-
-# Update Rootfs
-part_update "rootfs" "${INSTALL_ROOTFS_FILENAME}"
+if [ "${DUALBOOT}" = true ]; then
+	# Update Linux A
+	part_update "${LINUX_NAME}_a" "${INSTALL_LINUX_FILENAME}"
+	# Update Linux B
+	part_update "${LINUX_NAME}_b" "${INSTALL_LINUX_FILENAME}"
+	# Update Rootfs A
+	part_update "${ROOTFS_NAME}_a" "${INSTALL_ROOTFS_FILENAME}"
+	# Update Rootfs B
+	part_update "${ROOTFS_NAME}_b" "${INSTALL_ROOTFS_FILENAME}"
+else
+	# Update Linux
+	part_update "${LINUX_NAME}" "${INSTALL_LINUX_FILENAME}"
+	# Update Recovery
+	part_update "${RECOVERY_NAME}" "${INSTALL_RECOVERY_FILENAME}"
+	# Update Rootfs
+	part_update "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}"
+fi
 
 # If the rootfs image was originally compressed, remove the uncompressed image
 if [ -f ${COMPRESSED_ROOTFS_IMAGE} ] && [ -f ${INSTALL_ROOTFS_FILENAME} ]; then
 	rm -f "${INSTALL_ROOTFS_FILENAME}"
 fi
 
-# Configure u-boot to boot into recovery mode
-uuu fb: ucmd setenv boot_recovery yes
-uuu fb: ucmd setenv recovery_command wipe_update
-
+if [ "${DUALBOOT}" != true ]; then
+	# Configure u-boot to boot into recovery mode
+	uuu fb: ucmd setenv boot_recovery yes
+	uuu fb: ucmd setenv recovery_command wipe_update
+fi
 uuu fb: ucmd saveenv
 
 # Reset the target

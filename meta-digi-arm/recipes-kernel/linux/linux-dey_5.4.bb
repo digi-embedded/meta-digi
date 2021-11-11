@@ -88,4 +88,14 @@ do_copy_defconfig () {
 }
 addtask copy_defconfig after do_patch before do_kernel_localversion
 
+# Apply configuration fragments
+do_configure_append() {
+	# Only accept fragments ending in .cfg. If the fragments contain
+	# something other than kernel configs, it will be filtered out
+	# automatically.
+	if [ -n "${@' '.join(find_cfgs(d))}" ]; then
+		${S}/scripts/kconfig/merge_config.sh -m -O ${B} ${B}/.config ${@" ".join(find_cfgs(d))}
+	fi
+}
+
 COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8x|ccimx8m|ccimx6)"

@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 Digi International Inc.
+# Copyright (C) 2013-2021 Digi International Inc.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
 
@@ -20,6 +20,12 @@ SRC_URI_append = " \
     file://p2plink \
     file://resolv \
     ${@oe.utils.conditional('HAS_WIFI_VIRTWLANS', 'true', '${WIFI_VIRTWLANS_FILES}', '', d)} \
+"
+
+SRC_URI_append_ccimx6sbc = " \
+    file://interfaces.wlan1.atheros.static \
+    file://interfaces.wlan1.atheros.dhcp \
+    file://interfaces.br0.atheros.example \
 "
 
 SYSTEMD_SERVICE_${PN} = "ifupdown.service"
@@ -64,6 +70,11 @@ do_install_append() {
 	fi
 
 	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
+	if [ "${MACHINE}" = "ccimx6sbc" ]; then
+		# On ccimx6, append also the Atheros fragments so the user can
+		# decide which one to use depending on the wireless MAC used on the SOM.
+		cat ${WORKDIR}/interfaces.br0.atheros.example >> ${D}${sysconfdir}/network/interfaces
+	fi
 }
 
 install_virtwlans() {
@@ -78,6 +89,9 @@ WLAN1_PRE_DOWN_ACTION = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'sys
 install_wlan1() {
 	if [ -n "${HAVE_WIFI}" ]; then
 		cat ${WORKDIR}/interfaces.wlan1.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
+		if [ "${MACHINE}" = "ccimx6sbc" ]; then
+			cat ${WORKDIR}/interfaces.wlan1.atheros.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
+		fi
 		[ -n "${WLAN1_AUTO}" ] && sed -i -e 's/^#auto wlan1/auto wlan1/g' ${D}${sysconfdir}/network/interfaces
 	fi
 
@@ -94,18 +108,4 @@ install_wlan1() {
 	sed -i -e "s,##WLAN1_STATIC_DNS##,${WLAN1_STATIC_DNS},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WLAN1_POST_UP_ACTION##,${WLAN1_POST_UP_ACTION},g" ${D}${sysconfdir}/network/interfaces
 	sed -i -e "s,##WLAN1_PRE_DOWN_ACTION##,${WLAN1_PRE_DOWN_ACTION},g" ${D}${sysconfdir}/network/interfaces
-}
-
-# Disable wireless interfaces on first boot for non-wireless variants
-pkg_postinst_ontarget_${PN}() {
-	if [ ! -d "/proc/device-tree/wireless" ]; then
-		sed -i -e '/^auto wlan/{s,^,#,g};/^auto p2p/{s,^,#,g}' /etc/network/interfaces
-	fi
-
-	# Create the symlinks in the different runlevels
-	if type update-rc.d >/dev/null 2>/dev/null; then
-		update-rc.d ${INITSCRIPT_NAME} ${INITSCRIPT_PARAMS}
-	fi
-
-	exit 0
 }

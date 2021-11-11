@@ -18,6 +18,9 @@
 # U-Boot script for installing Linux images created by Yocto
 #
 
+# Exit on any error
+set -e
+
 # Parse uuu cmd output
 getenv()
 {
@@ -55,8 +58,16 @@ part_update()
 	echo "====================================================================================="
 	echo "\033[0m"
 
+	# When in Multi-MTD mode, pass -e to update command to force the erase
+	# of the MTD partition before programming. This is usually done by
+	# 'update' command except when a UBI volume is already found.
+	# On the install script, the MTD partition table may have changed, so
+	# we'd better clean the partition.
+	if [ "${SINGLEMTDSYS}" != true ]; then
+		ERASE="-e"
+	fi
 	uuu fb: download -f "${2}"
-	uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${fastboot_bytes}
+	uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${fastboot_bytes} ${ERASE}
 }
 
 clear
@@ -77,11 +88,23 @@ do
 	esac
 done
 
-echo ""
-echo "Determining image files to use..."
-
 # Enable the redirect support to get u-boot variables values
 uuu fb: ucmd setenv stdout serial,fastboot
+
+# Check if dualboot variable is active
+dualboot=$(getenv "dualboot")
+if [ "${dualboot}" = "yes" ]; then
+	DUALBOOT=true;
+fi
+
+# Check if singlemtdsys variable is active
+singlemtdsys=$(getenv "singlemtdsys")
+if [ "${singlemtdsys}" = "yes" ]; then
+	SINGLEMTDSYS=true;
+fi
+
+echo ""
+echo "Determining image files to use..."
 
 # Determine U-Boot filename if not provided
 if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
@@ -100,13 +123,13 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 		fi
 	fi
 
-	# remove redirect
-	uuu fb: ucmd setenv stdout serial
-
 	# U-Boot when the checked value is empty.
 	if [ -n "${INSTALL_UBOOT_FILENAME}" ]; then
 		true
 	else
+		# remove redirect
+		uuu fb: ucmd setenv stdout serial
+
 		echo ""
 		echo "[ERROR] Cannot determine U-Boot file for this module!"
 		echo ""
@@ -125,6 +148,9 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 		exit
 	fi
 fi
+
+# remove redirect
+uuu fb: ucmd setenv stdout serial
 
 # Determine linux, recovery, and rootfs image filenames to update
 if [ -z "${IMAGE_NAME}" ]; then
@@ -154,32 +180,43 @@ done;
 
 [ "${ABORT}" = true ] && exit 1
 
+# parts names
+LINUX_NAME="linux"
+RECOVERY_NAME="recovery"
+ROOTFS_NAME="rootfs"
 # Print warning about storage media being deleted
-if [ ! "${NOWAIT}" = true ]; then
+if [ "${NOWAIT}" != true ]; then
 	WAIT=10
-	echo ""
-	echo " ===================="
-	echo " =    IMPORTANT!    ="
-	echo " ===================="
-	echo " This process will erase your NAND and will install the following files"
-	echo " on the partitions of the NAND."
-	echo ""
-	echo "   PARTITION   FILENAME"
-	echo "   ---------   --------"
-	echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
-	echo "   linux       ${INSTALL_LINUX_FILENAME}"
-	echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
-	echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
-	echo ""
-	echo " Press CTRL+C now if you wish to abort."
-	echo ""
+	printf "\n"
+	printf " ====================\n"
+	printf " =    IMPORTANT!    =\n"
+	printf " ====================\n"
+	printf " This process will erase your NAND and will install the following files\n"
+	printf " on the partitions of the NAND.\n"
+	printf "\n"
+	printf "   PARTITION\tFILENAME\n"
+	printf "   ---------\t--------\n"
+	printf "   bootloader\t${INSTALL_UBOOT_FILENAME}\n"
+	if [ "${DUALBOOT}" = true ]; then
+		printf "   ${LINUX_NAME}_a\t${INSTALL_LINUX_FILENAME}\n"
+		printf "   ${LINUX_NAME}_b\t${INSTALL_LINUX_FILENAME}\n"
+		printf "   ${ROOTFS_NAME}_a\t${INSTALL_ROOTFS_FILENAME}\n"
+		printf "   ${ROOTFS_NAME}_b\t${INSTALL_ROOTFS_FILENAME}\n"
+	else
+		printf "   ${LINUX_NAME}\t${INSTALL_LINUX_FILENAME}\n"
+		printf "   ${RECOVERY_NAME}\t${INSTALL_RECOVERY_FILENAME}\n"
+		printf "   ${ROOTFS_NAME}\t${INSTALL_ROOTFS_FILENAME}\n"
+	fi
+	printf "\n"
+	printf " Press CTRL+C now if you wish to abort.\n"
+	printf "\n"
 	while [ ${WAIT} -gt 0 ]; do
 		printf "\r Update process starts in %d " ${WAIT}
 		sleep 1
 		WAIT=$(( ${WAIT} - 1 ))
 	done
 	printf "\r                                   \n"
-	echo " Starting update process"
+	printf " Starting update process\n"
 fi
 
 # Set fastboot buffer address to $loadaddr, just in case
@@ -200,6 +237,8 @@ part_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000
 #  - Erase the 'update' partition
 uuu fb: ucmd setenv bootcmd "
 	env default -a;
+	setenv dualboot \${dualboot};
+	setenv singlemtdsys \${singlemtdsys};
 	saveenv;
 	echo \"\";
 	echo \"\";
@@ -218,22 +257,42 @@ sleep 3
 # Set fastboot buffer address to $loadaddr
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 
-# Update Linux
-part_update "linux" "${INSTALL_LINUX_FILENAME}" 15000
+# Create partition table
+uuu "fb[-t 10000]:" ucmd run partition_nand_linux
 
-# Update Recovery
-part_update "recovery" "${INSTALL_RECOVERY_FILENAME}" 15000
+if [ "${SINGLEMTDSYS}" = true ]; then
+	uuu "fb[-t 30000]:" ucmd nand erase.part system
+	uuu "fb[-t 10000]:" ucmd run ubivolscript
+fi
 
-# Update Rootfs
-part_update "rootfs" "${INSTALL_ROOTFS_FILENAME}" 90000
+if [ "${DUALBOOT}" = true ]; then
+	# Update Linux A
+	part_update "${LINUX_NAME}_a" "${INSTALL_LINUX_FILENAME}" 15000
+	# Update Linux B
+	part_update "${LINUX_NAME}_b" "${INSTALL_LINUX_FILENAME}" 15000
+	# Update Rootfs A
+	part_update "${ROOTFS_NAME}_a" "${INSTALL_ROOTFS_FILENAME}" 90000
+	# Update Rootfs B
+	part_update "${ROOTFS_NAME}_b" "${INSTALL_ROOTFS_FILENAME}" 90000
+else
+	# Update Linux
+	part_update "${LINUX_NAME}" "${INSTALL_LINUX_FILENAME}" 15000
+	# Update Recovery
+	part_update "${RECOVERY_NAME}" "${INSTALL_RECOVERY_FILENAME}" 15000
+	# Update Rootfs
+	part_update "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}" 90000
+fi
 
-# Erase the 'Update' partition
-uuu fb: ucmd nand erase.part update
+if [ "${SINGLEMTDSYS}" != true ] && [ "${DUALBOOT}" != true ]; then
+	# Erase the 'Update' partition
+	uuu "fb[-t 20000]:" ucmd nand erase.part update
+fi
 
-# Configure u-boot to boot into recovery mode
-uuu fb: ucmd setenv boot_recovery yes
-uuu fb: ucmd setenv recovery_command wipe_update
-
+if [ "${DUALBOOT}" != true ]; then
+	# Configure u-boot to boot into recovery mode
+	uuu fb: ucmd setenv boot_recovery yes
+	uuu fb: ucmd setenv recovery_command wipe_update
+fi
 uuu fb: ucmd saveenv
 
 # Reset the target

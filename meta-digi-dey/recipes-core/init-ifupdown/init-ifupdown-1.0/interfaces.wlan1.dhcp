@@ -1,6 +1,8 @@
 
+# Wi-Fi AP interface (Qualcomm QCA65x4)
 #auto wlan1
 iface wlan1 inet dhcp
        udhcpc_opts -S -b >/dev/null &
+       pre-up [ -d /proc/device-tree/wireless ]
        post-up ##WLAN1_POST_UP_ACTION##
        pre-down ##WLAN1_PRE_DOWN_ACTION##

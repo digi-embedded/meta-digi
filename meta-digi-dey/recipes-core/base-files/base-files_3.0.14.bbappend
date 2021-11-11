@@ -54,4 +54,6 @@ pkg_postinst_ontarget_${PN}() {
 	fi
 }
 
+inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}
+
 CONFFILES_${PN} += "${sysconfdir}/sysctl.conf"

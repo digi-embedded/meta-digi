@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2020 Digi International.
+# Copyright (C) 2016-2021 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
@@ -23,6 +23,12 @@ do_install_append() {
 		# Install custom hostapd_IFACE.conf file
 		install -m 0644 ${WORKDIR}/hostapd_wlan1.conf ${D}${sysconfdir}
 	fi
+
+	# Read-only rootfs: actions that substitute postinst script
+	# - append the ${DIGI_FAMILY} string to SSID
+	if [ -n "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', '1', '', d)}" ]; then
+		sed -i -e "s,##MAC##,${DIGI_FAMILY},g" ${D}${sysconfdir}/hostapd_wlan?.conf
+	fi
 }
 
 pkg_postinst_ontarget_${PN}() {
@@ -46,3 +52,5 @@ pkg_postinst_ontarget_${PN}() {
 		update-rc.d -f ${INITSCRIPT_NAME} remove
 	fi
 }
+
+inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}

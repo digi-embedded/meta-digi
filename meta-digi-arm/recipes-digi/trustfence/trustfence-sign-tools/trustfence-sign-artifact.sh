@@ -33,13 +33,14 @@ done
 SCRIPT_NAME="$(basename ${0})"
 SCRIPT_PATH="$(cd $(dirname ${0}) && pwd)"
 
-while getopts "bdilop:" c; do
+while getopts "bdilorp:" c; do
 	case "${c}" in
 		b) ARTIFACT_BOOTSCRIPT="y";;
 		d) ARTIFACT_DTB="y";;
 		i) ARTIFACT_INITRAMFS="y";;
 		l) ARTIFACT_KERNEL="y";;
 		o) ARTIFACT_DTB_OVERLAY="y";;
+		r) ARTIFACT_ROOTFS="y";;
 		p) PLATFORM="${OPTARG}";;
 	esac
 done
@@ -56,6 +57,7 @@ Usage: ${SCRIPT_NAME} [OPTIONS] input-unsigned-image output-signed-image
     -o               sign/encrypt DTB overlay
     -i               sign/encrypt initramfs
     -l               sign/encrypt Linux image
+    -r               sign read-only rootfs image
 
 Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn, ccimx8mm
 
@@ -88,20 +90,24 @@ if [ "${PLATFORM}" = "ccimx6" ]; then
 	CONFIG_FDT_LOADADDR="0x18000000"
 	CONFIG_RAMDISK_LOADADDR="0x19000000"
 	CONFIG_KERNEL_LOADADDR="0x12000000"
+	CONFIG_ROOTFS_LOADADDR="0x19800000"
 	CONFIG_CSF_SIZE="0x4000"
 elif [ "${PLATFORM}" = "ccimx6ul" ]; then
 	CONFIG_FDT_LOADADDR="0x83000000"
 	CONFIG_RAMDISK_LOADADDR="0x83800000"
 	CONFIG_KERNEL_LOADADDR="0x80800000"
+	CONFIG_ROOTFS_LOADADDR="0x84000000"
 	CONFIG_CSF_SIZE="0x4000"
 elif [ "${PLATFORM}" = "ccimx8x" ]; then
 	CONFIG_FDT_LOADADDR="0x82000000"
 	CONFIG_RAMDISK_LOADADDR="0x82100000"
 	CONFIG_KERNEL_LOADADDR="0x80280000"
+	CONFIG_ROOTFS_LOADADDR="0x82900000"
 elif [ "${PLATFORM}" = "ccimx8mn" ] || [ "${PLATFORM}" = "ccimx8mm" ]; then
 	CONFIG_FDT_LOADADDR="0x43000000"
 	CONFIG_RAMDISK_LOADADDR="0x43800000"
 	CONFIG_KERNEL_LOADADDR="0x40480000"
+	CONFIG_ROOTFS_LOADADDR="0x44000000"
 	CONFIG_CSF_SIZE="0x2000"
 else
 	echo "Invalid platform: ${PLATFORM}"
@@ -116,9 +122,10 @@ fi
 [ "${ARTIFACT_BOOTSCRIPT}" = "y" ] && CONFIG_RAM_START="${CONFIG_KERNEL_LOADADDR}"
 # DTB overlays are loaded to $initrd_addr, just like the ramdisk
 [ "${ARTIFACT_DTB_OVERLAY}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
+[ "${ARTIFACT_ROOTFS}" = "y" ] && CONFIG_RAM_START="${CONFIG_ROOTFS_LOADADDR}"
 
 if [ -z "${CONFIG_RAM_START}" ]; then
-	echo "Specify the type of image to process (-b, -i, -d, -l, or -o)"
+	echo "Specify the type of image to process (-b, -i, -d, -l, -r, or -o)"
 	exit 1
 fi
 

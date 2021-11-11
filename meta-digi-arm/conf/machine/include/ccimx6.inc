@@ -11,6 +11,7 @@ include conf/machine/include/tune-cortexa9.inc
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"
+UBOOT_HAS_FASTBOOT = "true"
 
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm/configs/ccimx6sbc_defconfig"
@@ -43,4 +44,5 @@ MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth pci"
 TRUSTFENCE_SIGN_MODE = "HAB"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend
-DISTRO_FEATURES_append = " wayland"
+# Adding pam is required for SELinux functionality
+DISTRO_FEATURES_append = " wayland pam"

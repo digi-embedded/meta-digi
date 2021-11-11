@@ -2,7 +2,7 @@
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
-LIBSOC_URI_STASH = "${DIGI_MTK_GIT}dey/libsoc.git;protocol=ssh"
+LIBSOC_URI_STASH = "${DIGI_MTK_GIT}/dey/libsoc.git;protocol=ssh"
 LIBSOC_URI_GITHUB = "git://github.com/jackmitch/libsoc.git;protocol=https"
 LIBSOC_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${LIBSOC_URI_STASH}', '${LIBSOC_URI_GITHUB}', d)}"
 
