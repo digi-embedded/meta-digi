@@ -27,7 +27,10 @@ TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 
 # Partition encryption configuration
 TRUSTFENCE_ENCRYPT_PARTITIONS ?= "1"
-TRUSTFENCE_ENCRYPT_ROOTFS ?= "1"
+TRUSTFENCE_ENCRYPT_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "0", "1", d)}"
+
+# Read-only rootfs
+TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "1", "0", d)}"
 
 IMAGE_FEATURES += "dey-trustfence"
 
@@ -56,6 +59,8 @@ python () {
 
     if (d.getVar("TRUSTFENCE_SIGN", True) == "1"):
         d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_SIGN_IMAGE=y ")
+        if (d.getVar("TRUSTFENCE_READ_ONLY_ROOTFS", True) == "1"):
+            d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_AUTHENTICATE_SQUASHFS_ROOTFS=y ")
         if d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True):
             d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_SIGN_KEYS_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True))
         if (d.getVar("TRUSTFENCE_UNLOCK_KEY_REVOCATION", True) == "1"):
