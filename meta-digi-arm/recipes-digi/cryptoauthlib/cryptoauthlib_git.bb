@@ -17,6 +17,7 @@ SRC_URI = " \
     file://0004-lib-install-pkg-config-file-and-header-files.patch \
     file://0005-test-add-CMakeLists.txt.patch \
     file://0006-Remove-unnecessary-code-from-cryptoauth_test.patch \
+    file://0007-lib-set-ATECC508A-as-default-device-type-in-default.patch \
 "
 
 S = "${WORKDIR}/git"

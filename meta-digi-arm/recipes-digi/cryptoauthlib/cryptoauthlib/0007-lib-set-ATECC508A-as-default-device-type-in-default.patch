@@ -1,0 +1,29 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Tue, 16 Nov 2021 15:44:20 +0100
+Subject: [PATCH] lib: set ATECC508A as default device type in default
+ configuration
+
+https://onedigi.atlassian.net/browse/DEL-7727
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ lib/atca_cfgs.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/atca_cfgs.c b/lib/atca_cfgs.c
+index 60727f71..1c875584 100644
+--- a/lib/atca_cfgs.c
++++ b/lib/atca_cfgs.c
+@@ -49,11 +49,11 @@
+ #endif
+
+ /** \brief default configuration for an ECCx08A device */
+ ATCAIfaceCfg cfg_ateccx08a_i2c_default = {
+     .iface_type             = ATCA_I2C_IFACE,
+-    .devtype                = ATECC608A,
++    .devtype                = ATECC508A,
+     .atcai2c.slave_address  = 0xC0,
+     .atcai2c.bus            = ATCA_HAL_I2C_BUS,
+     .atcai2c.baud           = ATCA_HAL_I2C_SPEED,
+     //.atcai2c.baud = 100000,
+     .wake_delay             = 1500,
