@@ -57,25 +57,6 @@ grep -qws 'wlan' /proc/modules && exit 0
 
 FS_ORIGINAL_ACCESS="$(get_filesystem_access ${FIRMWARE_DIR})"
 
-# Create symbolic links to the proper FW files depending on the country region
-# Use a sub-shell here to change to firmware directory
-(
-	cd "${FIRMWARE_DIR}"
-
-	BDATA_SOURCE="bdwlan30_US.bin"
-	log "5" "Setting US wireless region"
-
-	# When defined, update the links only if they are wrong so we don't
-	# rewrite the internal memory every time we boot
-	BDATA_LINK="bdwlan30.bin"
-	UTFBDATA_LINK="utfbd30.bin"
-	if ([ ! -f "${BDATA_LINK}" ] || ! cmp -s "${BDATA_LINK}" "${BDATA_SOURCE}"); then
-		set_filesystem_rw_access ${FIRMWARE_DIR}
-		ln -sf "${BDATA_SOURCE}" "${BDATA_LINK}"
-		ln -sf "${BDATA_SOURCE}" "${UTFBDATA_LINK}"
-	fi
-)
-
 # Load the wireless module with the params defined in modprobe.d/qualcomm.conf
 # and reduce the console log level to avoid debug messages at boot time
 LOGLEVEL="$(sed -ne 's,^kernel.printk[^=]*=[[:blank:]]*\(.*\)$,\1,g;T;p' /etc/sysctl.conf 2>/dev/null)"
