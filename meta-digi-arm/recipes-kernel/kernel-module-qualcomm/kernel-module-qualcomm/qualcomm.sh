@@ -55,31 +55,7 @@ set_filesystem_rw_access() {
 # Do nothing if the module is already loaded
 grep -qws 'wlan' /proc/modules && exit 0
 
-FIRMWARE_DIR="/lib/firmware"
-MACFILE="${FIRMWARE_DIR}/wlan/wlan_mac.bin"
-TMP_MACFILE="$(mktemp -t wlan_mac.XXXXXX)"
 FS_ORIGINAL_ACCESS="$(get_filesystem_access ${FIRMWARE_DIR})"
-
-# Read the MACs from DeviceTree. We can have up to four wireless interfaces
-# The only required one is wlan0 that is mapped with device tree mac address
-# without suffix.
-for index in $(seq 0 3); do
-	MAC_ADDR="$(hexdump -ve '1/1 "%02X"' /proc/device-tree/wireless/mac-address${index%0} 2>/dev/null)"
-	if [ "${index}" = "0" ] && { [ -z "${MAC_ADDR}" ] || [ "${MAC_ADDR}" = "00:00:00:00:00:00" ]; }; then
-		# Set a default MAC for wlan0
-		MAC_ADDR="0004F3FFFFFB"
-	fi
-
-	# Add the MAC address to the firmware file with the expected format
-	echo "Intf${index}MacAddress=${MAC_ADDR}" >> ${TMP_MACFILE}
-done
-
-# Override the MAC firmware file only if the MAC file has changed.
-if ! cmp -s ${TMP_MACFILE} ${MACFILE}; then
-	set_filesystem_rw_access ${FIRMWARE_DIR}
-	cp ${TMP_MACFILE} ${MACFILE} || log "3" "[ERROR] Could not create ${MACFILE}"
-fi
-rm -f "${TMP_MACFILE}"
 
 # Create symbolic links to the proper FW files depending on the country region
 # Use a sub-shell here to change to firmware directory

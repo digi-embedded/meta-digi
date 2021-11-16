@@ -88,6 +88,13 @@ do_install() {
 		# proprietary 'bdwlan30_US.bin'
 		ln -s bdwlan30_US.bin ${D}${WIFI_FW_PATH}/board.bin
 	else
+		# Create symbolic links between the mac addresses in the device tree nodes
+		# and the paths where the driver expect the MAC addresses
+		install -d ${D}${WIFI_FW_PATH}/wlan/
+		ln -s /proc/device-tree/wireless/mac-address ${D}${WIFI_FW_PATH}/wlan/wlan_mac0
+		ln -s /proc/device-tree/wireless/mac-address1 ${D}${WIFI_FW_PATH}/wlan/wlan_mac1
+		ln -s /proc/device-tree/wireless/mac-address2 ${D}${WIFI_FW_PATH}/wlan/wlan_mac2
+		ln -s /proc/device-tree/wireless/mac-address3 ${D}${WIFI_FW_PATH}/wlan/wlan_mac3
 		if [ "${FW_QUALCOMM_WIFI}" = "${FW_QCA65X4_PCIE_PROPRIETARY}" ]; then
 			ln -s qwlan30.bin ${D}${WIFI_FW_PATH}/athwlan.bin
 			ln -s otp30.bin ${D}${WIFI_FW_PATH}/athsetup.bin
