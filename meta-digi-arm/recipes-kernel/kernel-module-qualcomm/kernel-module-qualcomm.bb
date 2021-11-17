@@ -82,4 +82,4 @@ FILES_${PN} += " \
     ${base_libdir}/firmware/wlan/qcom_cfg.ini \
 "
 
-COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul|ccimx8x|ccimx8m)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x|ccimx8m)"
