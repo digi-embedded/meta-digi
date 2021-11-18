@@ -21,7 +21,7 @@ LINUX_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , \
 					'${DIGI_GITHUB_GIT}/${GITHUB_REPO};protocol=https', d)}"
 
 SRC_URI = " \
-    ${LINUX_GIT_URI};branch=${SRCBRANCH} \
+    ${LINUX_GIT_URI};nobranch=1 \
     file://defconfig \
 "
 

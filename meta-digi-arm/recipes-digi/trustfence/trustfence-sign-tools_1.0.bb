@@ -3,7 +3,7 @@ LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
 
 SRCBRANCH = "v2015.04/maint"
-SRCREV = "${AUTOREV}"
+SRCREV = "7f229e4481c4fd8ce4bc4dab3aa4024341ba552b"
 
 S = "${WORKDIR}"
 
@@ -16,7 +16,7 @@ UBOOT_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , \
 					'${DIGI_GITHUB_GIT}/${GITHUB_REPO};protocol=https', d)}"
 
 SRC_URI = " \
-    ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
+    ${UBOOT_GIT_URI};nobranch=1 \
     file://trustfence-sign-kernel.sh;name=kernel-script \
     file://sign_uimage;name=kernel-sign \
     file://encrypt_uimage;name=kernel-encrypt \
