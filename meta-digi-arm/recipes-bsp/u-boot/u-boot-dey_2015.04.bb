@@ -20,10 +20,10 @@ UBOOT_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , \
 					'${DIGI_GITHUB_GIT}/${GITHUB_REPO};protocol=https', d)}"
 
 SRCBRANCH = "v2015.04/maint"
-SRCREV = "7f229e4481c4fd8ce4bc4dab3aa4024341ba552b"
+SRCREV = "${AUTOREV}"
 
 SRC_URI = " \
-    ${UBOOT_GIT_URI};nobranch=1 \
+    ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
 "
 
 SRC_URI_append = " \
