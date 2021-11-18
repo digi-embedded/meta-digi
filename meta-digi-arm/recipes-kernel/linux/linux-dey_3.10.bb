@@ -4,7 +4,7 @@ require recipes-kernel/linux/linux-dey.inc
 require recipes-kernel/linux/linux-dtb.inc
 
 SRCBRANCH = "v3.10/dey-1.4/maint"
-SRCREV = "8a6a9230dfe407e1764b5db8ef5b15601d85cfd2"
+SRCREV = "5635e3cd253b83bd9ee16573e69b2e9a8159ac62"
 
 config_dts() {
 	for DTB in ${KERNEL_DEVICETREE}; do
