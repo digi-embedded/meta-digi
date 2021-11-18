@@ -11,13 +11,12 @@ PV_ccimx8x = "v4.0.11.208Q"
 
 SRCBRANCH = "qca6564/dey-2.4/maint"
 SRCBRANCH_ccimx8x = "qca6574/dey-2.4/maint"
-SRCREV = "93222374d5a6d8254ffee72b84b38b59e0ce63a8"
-SRCREV_ccimx8x = "9110d2e6d35b7a57019c03037fd7ee756653c3d3"
+SRCREV = "${AUTOREV}"
 
 QCOM_GIT_URI = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git', d)}"
 
 SRC_URI = " \
-    ${QCOM_GIT_URI};nobranch=1 \
+    ${QCOM_GIT_URI};branch=${SRCBRANCH} \
 "
 
 # Selects whether the interface is SDIO or PCI
