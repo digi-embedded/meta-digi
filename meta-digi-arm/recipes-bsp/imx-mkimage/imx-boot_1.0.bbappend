@@ -99,7 +99,7 @@ do_compile () {
 					for target in ${IMXBOOT_TARGETS}; do
 						for rev in ${SOC_REVISIONS}; do
 							bbnote "building ${SOC_TARGET} - ${ramc} - REV=${rev} ${target}"
-							make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target} > mkimage-${target}.log 2>&1
+							make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target} > ${S}/mkimage-${target}.log 2>&1
 							if [ -e "${BOOT_STAGING}/flash.bin" ]; then
 								cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target}
 							fi
@@ -117,17 +117,15 @@ do_compile () {
 			# mkimage for i.MX8M
 			for target in ${IMXBOOT_TARGETS}; do
 				bbnote "building ${SOC_TARGET} - ${REV_OPTION} ${target}"
-				make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} ${REV_OPTION} ${target} > mkimage-${target}.log 2>&1
+				make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} ${REV_OPTION} ${target} > ${S}/mkimage-${target}.log 2>&1
 				if [ -e "${BOOT_STAGING}/flash.bin" ]; then
 					cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}.bin-${target}
 				fi
 			done
 
-			if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
-				# Log HAB FIT information
-				bbnote "building ${SOC_TARGET} - print_fit_hab"
-				make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} print_fit_hab > mkimage-print_fit_hab.log 2>&1
-			fi
+			# Log HAB FIT information
+			bbnote "building ${SOC_TARGET} - print_fit_hab"
+			make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} print_fit_hab > ${S}/mkimage-print_fit_hab.log 2>&1
 		fi
 	done
 
@@ -181,7 +179,11 @@ do_deploy () {
 				echo "Set boot target as $IMAGE_IMXBOOT_TARGET"
 			fi
 			install -m 0644 ${S}/${UBOOT_PREFIX}-${MACHINE}.bin-${target} ${DEPLOYDIR}
+			# copy make log for reference
+			install -m 0644 ${S}/mkimage-${target}.log ${DEPLOYDIR}/${BOOT_TOOLS}
 		done
+		# copy fit_hab log for reference
+		install -m 0644 ${S}/mkimage-print_fit_hab.log ${DEPLOYDIR}/${BOOT_TOOLS}
 		cd ${DEPLOYDIR}
 		ln -sf ${UBOOT_PREFIX}-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${UBOOT_PREFIX}-${MACHINE}.bin
 		# Link to default bootable U-Boot filename.
@@ -198,6 +200,8 @@ do_deploy () {
 						echo "Set boot target as $IMAGE_IMXBOOT_TARGET"
 					fi
 					install -m 0644 ${S}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}
+					# copy make log for reference
+					install -m 0644 ${S}/mkimage-${target}.log ${DEPLOYDIR}/${BOOT_TOOLS}
 				done
 				cd ${DEPLOYDIR}
 				ln -sf ${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin
@@ -223,8 +227,9 @@ do_deploy_append () {
 		# Sign U-boot image
 		if [ "${UBOOT_RAM_COMBINATIONS}" = "" ]; then
 			for target in ${IMXBOOT_TARGETS}; do
-				# Link to current "target" mkimage log
-				ln -sf mkimage-${target}.log mkimage.log
+				# Point to make logs
+				export CONFIG_MKIMAGE_LOG_PATH="${DEPLOYDIR}/${BOOT_TOOLS}/mkimage-${target}.log"
+				export CONFIG_FIT_HAB_LOG_PATH="${DEPLOYDIR}/${BOOT_TOOLS}/mkimage-print_fit_hab.log"
 				trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}.bin-${target}
 
 				if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
@@ -237,8 +242,8 @@ do_deploy_append () {
 			for ramc in ${UBOOT_RAM_COMBINATIONS}; do
 				for rev in ${SOC_REVISIONS}; do
 					for target in ${IMXBOOT_TARGETS}; do
-						# Link to current "target" mkimage log
-						ln -sf mkimage-${target}.log mkimage.log
+						# Point to make log
+						export CONFIG_MKIMAGE_LOG_PATH="${DEPLOYDIR}/${BOOT_TOOLS}/mkimage-${target}.log"
 						trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}-${ramc}.bin-${target}
 
 						if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
