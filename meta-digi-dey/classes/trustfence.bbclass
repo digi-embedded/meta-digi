@@ -104,7 +104,10 @@ python () {
         d.setVar("TRUSTFENCE_ENCRYPT_PARTITIONS", "1");
 
     # Enable the trustfence initramfs if and only if partition encryption is enabled
-    if (d.getVar("TRUSTFENCE_ENCRYPT_PARTITIONS", True) == "1" and d.getVar("STORAGE_MEDIA", True) == "mmc"):
+    # and not using a read-only rootfs
+    if (d.getVar("TRUSTFENCE_ENCRYPT_PARTITIONS", True) == "1" and \
+        d.getVar("STORAGE_MEDIA", True) == "mmc" and \
+        d.getVar("TRUSTFENCE_READ_ONLY_ROOTFS", True) == "0"):
         d.setVar("TRUSTFENCE_INITRAMFS_IMAGE", "dey-image-trustfence-initramfs");
     else:
         d.setVar("TRUSTFENCE_INITRAMFS_IMAGE", "");
