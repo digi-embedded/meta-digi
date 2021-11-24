@@ -15,4 +15,4 @@ RDEPENDS_${PN} = "\
     wpa-supplicant-passphrase \
 "
 
-RDEPENDS_${PN}_ccimx6sbc += "ath-prop-tools"
+RDEPENDS_${PN}_append_ccimx6sbc = " ath-prop-tools"
