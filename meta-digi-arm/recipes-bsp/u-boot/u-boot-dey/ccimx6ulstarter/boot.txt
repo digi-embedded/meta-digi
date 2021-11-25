@@ -15,14 +15,12 @@ if test "${dualboot}" = "yes"; then
 		if test "${active_system}" = "linux_a"; then
 			echo "Booting from system A"
 			setenv mtdbootpart ${active_system}
-			setenv mtdlinuxindex ${mtdlinux_a_index}
-			setenv mtdrootfsindex ${mtdrootfs_a_index}
+			setenv mtdrootfspart ${rootfsvol_a}
 			setenv rootfsvol ${rootfsvol_a}
 		else
 			echo "Booting from system B"
 			setenv mtdbootpart ${active_system}
-			setenv mtdlinuxindex ${mtdlinux_b_index}
-			setenv mtdrootfsindex ${mtdrootfs_b_index}
+			setenv mtdrootfspart ${rootfsvol_b}
 			setenv rootfsvol ${rootfsvol_b}
 		fi
 	fi
