@@ -366,6 +366,17 @@ elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 		echo "[ERROR] Could not generate CSF $?"
 		exit 1
 	fi
+	if [ "${ARTIFACT_ROOTFS}" = "y" ]; then
+		echo "Get the AHAB container from the signed Squashfs"
+		dd if=${TARGET} of=ahab_signature_container bs=1 count=8192
+		# Create a copy of SquashFS without the AHAB container
+		dd if=${TARGET} of=${TARGET}-temp bs=8192 skip=1
+		echo "Append the AHAB container at the end of the Squashfs file"
+		cat ahab_signature_container >> ${TARGET}-temp
+		# overwrite the previously signed Squashfs
+		mv ${TARGET}-temp ${TARGET}
+		rm -f ahab_signature_container
+	fi
 fi
 
 [ "${ENCRYPT}" = "true" ] && ENCRYPTED_MSG="and encrypted "
