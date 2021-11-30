@@ -8,14 +8,14 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 DEPENDS = "confuse openssl recovery-utils zlib"
 
 SRCBRANCH = "master"
-SRCREV = "1986e2c8ad759e0d8d0037a9462875f6d082d323"
+SRCREV = "${AUTOREV}"
 
 CC_STASH = "gitsm://git@stash.digi.com/cc/cc_dey.git;protocol=ssh"
 CC_GITHUB = "gitsm://github.com/digi-embedded/cc_dey.git;protocol=git"
 
 CC_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${CC_STASH}', '${CC_GITHUB}', d)}"
 
-SRC_URI = "${CC_GIT_URI};nobranch=1"
+SRC_URI = "${CC_GIT_URI};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git"
 

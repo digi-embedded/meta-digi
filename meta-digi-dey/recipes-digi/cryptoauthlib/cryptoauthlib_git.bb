@@ -6,11 +6,11 @@ LICENSE = "ATMEL_CRYPTOAUTHLIB_LICENSE"
 LIC_FILES_CHKSUM = "file://lib/atca_cfgs.h;beginline=8;endline=40;md5=073d05cb7a4312aaff0af9186e4fa93e"
 
 SRCBRANCH = "dey-2.2/maint"
-SRCREV = "9c07aefd00d18ffbc4585a2a2b94f10201146b20"
+SRCREV = "${AUTOREV}"
 
 GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}/linux/atmel-cryptoauth-openssl-engine.git;protocol=ssh', '${DIGI_GITHUB_GIT}/cryptoauth-openssl-engine.git', d)}"
 
-SRC_URI = "${GIT_URI};nobranch=1"
+SRC_URI = "${GIT_URI};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git/engine_atecc/cryptoauthlib"
 
