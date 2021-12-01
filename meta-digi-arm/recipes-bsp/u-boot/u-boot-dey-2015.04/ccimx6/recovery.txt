@@ -41,8 +41,19 @@ else
 		setenv fdt_file uImage-imx6dl-ccimx6sbc-wb.dtb
 	else
 		echo "------ Using default fdt_file"
+		#
+		# Default fdt_file in recent v2015.04 U-Boots has a "zImage"
+		# prefix, build the default fdt_file by hand using "uImage" and
+		# the soc_family variable.
+		#
+		setenv fdt_file uImage-${soc_family}-ccimx6sbc.dtb
 	fi
 fi
+
+# The latest versions of Digi U-Boot v2015.04 default to using the "zimage"
+# kernel image type, but the ccimx6sbc uses "uimage". Hardcode this in the
+# bootscript to ensure the target boots correctly.
+setenv dboot_kernel_var uimage
 
 setenv boot_initrd true
 setenv initrd_file uramdisk-recovery.img
