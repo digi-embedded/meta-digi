@@ -3,7 +3,7 @@
 require digi-u-boot.inc
 
 SRCBRANCH = "v2017.03/maint"
-SRCREV = "f9055c2439feb717fac5f6266094dbb77fe45992"
+SRCREV = "${AUTOREV}"
 
 # Disable support to initial environment for U-Boot
 UBOOT_INITIAL_ENV = ""
