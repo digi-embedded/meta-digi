@@ -1,0 +1,348 @@
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Mon, 13 Dec 2021 13:16:47 +0100
+Subject: [PATCH] gatt: Fix not cleaning up when disconnected
+
+Signed-off-by: Bernie Conrad <bernie@allthenticate.net>
+
+There is a current use after free possible on a gatt server if a client
+disconnects while a WriteValue call is being processed with dbus.
+
+This patch includes the addition of a pending disconnect callback to handle
+cleanup better if a disconnect occurs during a write, an acquire write
+or read operation using bt_att_register_disconnect with the cb.
+---
+ src/gatt-database.c | 141 +++++++++++++++++++++++++++++-----------------------
+ 1 file changed, 80 insertions(+), 61 deletions(-)
+
+diff --git a/src/gatt-database.c b/src/gatt-database.c
+index 99c8ea2..2305d9f 100644
+--- a/src/gatt-database.c
++++ b/src/gatt-database.c
+@@ -151,8 +151,9 @@ struct external_desc {
+ };
+ 
+ struct pending_op {
+-	struct btd_device *device;
++	struct bt_att *att;
+ 	unsigned int id;
++	unsigned int disconn_id;
+ 	uint16_t offset;
+ 	uint8_t link_type;
+ 	struct gatt_db_attribute *attrib;
+@@ -911,6 +912,25 @@ static struct btd_device *att_get_device(struct bt_att *att)
+ 	return btd_adapter_find_device(adapter, &dst, dst_type);
+ }
+ 
++static void pending_op_free(void *data)
++{
++	struct pending_op *op = data;
++
++	if (op->owner_queue)
++		queue_remove(op->owner_queue, op);
++
++	bt_att_unregister_disconnect(op->att, op->disconn_id);
++	bt_att_unref(op->att);
++	free(op);
++}
++
++static void pending_disconnect_cb(int err, void *user_data)
++{
++	struct pending_op *op = user_data;
++
++	op->owner_queue = NULL;
++}
++
+ static struct pending_op *pending_ccc_new(struct bt_att *att,
+ 					struct gatt_db_attribute *attrib,
+ 					uint16_t value,
+@@ -929,22 +949,16 @@ static struct pending_op *pending_ccc_new(struct bt_att *att,
+ 
+ 	op->data.iov_base = UINT_TO_PTR(value);
+ 	op->data.iov_len = sizeof(value);
+-
+-	op->device = device;
++	op->att = bt_att_ref(att);
+ 	op->attrib = attrib;
+ 	op->link_type = link_type;
+ 
+-	return op;
+-}
++	bt_att_register_disconnect(att,
++				   pending_disconnect_cb,
++				   op,
++				   NULL);
+ 
+-static void pending_op_free(void *data)
+-{
+-	struct pending_op *op = data;
+-
+-	if (op->owner_queue)
+-		queue_remove(op->owner_queue, op);
+-
+-	free(op);
++	return op;
+ }
+ 
+ static void gatt_ccc_write_cb(struct gatt_db_attribute *attrib,
+@@ -1907,31 +1921,34 @@ done:
+ 	gatt_db_attribute_read_result(op->attrib, op->id, ecode, value, len);
+ }
+ 
+-static struct pending_op *pending_read_new(struct btd_device *device,
++static struct pending_op *pending_read_new(struct bt_att *att,
+ 					struct queue *owner_queue,
+ 					struct gatt_db_attribute *attrib,
+-					unsigned int id, uint16_t offset,
+-					uint8_t link_type)
++					unsigned int id, uint16_t offset)
+ {
+ 	struct pending_op *op;
+ 
+ 	op = new0(struct pending_op, 1);
+ 
+ 	op->owner_queue = owner_queue;
+-	op->device = device;
++	op->att = bt_att_ref(att);
+ 	op->attrib = attrib;
+ 	op->id = id;
+ 	op->offset = offset;
+-	op->link_type = link_type;
++	op->link_type = bt_att_get_link_type(att);
+ 	queue_push_tail(owner_queue, op);
+ 
++	op->disconn_id = bt_att_register_disconnect(att, pending_disconnect_cb,
++						    op, NULL);
++
+ 	return op;
+ }
+ 
+ static void append_options(DBusMessageIter *iter, void *user_data)
+ {
+ 	struct pending_op *op = user_data;
+-	const char *path = device_get_path(op->device);
++	struct btd_device *device = att_get_device(op->att);
++	const char *path = device_get_path(device);
+ 	const char *link;
+ 
+ 	switch (op->link_type) {
+@@ -1974,18 +1991,16 @@ static void read_setup_cb(DBusMessageIter *iter, void *user_data)
+ 	dbus_message_iter_close_container(iter, &dict);
+ }
+ 
+-static struct pending_op *send_read(struct btd_device *device,
++static struct pending_op *send_read(struct bt_att *att,
+ 					struct gatt_db_attribute *attrib,
+ 					GDBusProxy *proxy,
+ 					struct queue *owner_queue,
+ 					unsigned int id,
+-					uint16_t offset,
+-					uint8_t link_type)
++					uint16_t offset)
+ {
+ 	struct pending_op *op;
+ 
+-	op = pending_read_new(device, owner_queue, attrib, id, offset,
+-							link_type);
++	op = pending_read_new(att, owner_queue, attrib, id, offset);
+ 
+ 	if (g_dbus_proxy_method_call(proxy, "ReadValue", read_setup_cb,
+ 				read_reply_cb, op, pending_op_free) == TRUE)
+@@ -2068,15 +2083,18 @@ static void write_reply_cb(DBusMessage *message, void *user_data)
+ 	}
+ 
+ done:
+-	gatt_db_attribute_write_result(op->attrib, op->id, ecode);
++	/* Make sure that only reply if the device is connected */
++	if (!bt_att_get_fd(op->att))
++		gatt_db_attribute_write_result(op->attrib, op->id, ecode);
++
+ }
+ 
+-static struct pending_op *pending_write_new(struct btd_device *device,
++static struct pending_op *pending_write_new(struct bt_att *att,
+ 					struct queue *owner_queue,
+ 					struct gatt_db_attribute *attrib,
+ 					unsigned int id,
+ 					const uint8_t *value, size_t len,
+-					uint16_t offset, uint8_t link_type,
++					uint16_t offset,
+ 					bool is_characteristic,
+ 					bool prep_authorize)
+ {
+@@ -2087,34 +2105,38 @@ static struct pending_op *pending_write_new(struct btd_device *device,
+ 	op->data.iov_base = (uint8_t *) value;
+ 	op->data.iov_len = len;
+ 
+-	op->device = device;
++	op->att = bt_att_ref(att);
+ 	op->owner_queue = owner_queue;
+ 	op->attrib = attrib;
+ 	op->id = id;
+ 	op->offset = offset;
+-	op->link_type = link_type;
++	op->link_type = bt_att_get_link_type(att);
+ 	op->is_characteristic = is_characteristic;
+ 	op->prep_authorize = prep_authorize;
+ 	queue_push_tail(owner_queue, op);
+ 
++	bt_att_register_disconnect(att,
++				   pending_disconnect_cb,
++				   op, NULL);
++
+ 	return op;
+ }
+ 
+-static struct pending_op *send_write(struct btd_device *device,
++static struct pending_op *send_write(struct bt_att *att,
+ 					struct gatt_db_attribute *attrib,
+ 					GDBusProxy *proxy,
+ 					struct queue *owner_queue,
+ 					unsigned int id,
+ 					const uint8_t *value, size_t len,
+-					uint16_t offset, uint8_t link_type,
++					uint16_t offset,
+ 					bool is_characteristic,
+ 					bool prep_authorize)
+ {
+ 	struct pending_op *op;
+ 
+-	op = pending_write_new(device, owner_queue, attrib, id, value, len,
+-					offset, link_type, is_characteristic,
+-					prep_authorize);
++	op = pending_write_new(att, owner_queue, attrib, id, value, len,
++			       offset, is_characteristic,
++			       prep_authorize);
+ 
+ 	if (g_dbus_proxy_method_call(proxy, "WriteValue", write_setup_cb,
+ 					owner_queue ? write_reply_cb : NULL,
+@@ -2225,9 +2247,9 @@ static void acquire_write_reply(DBusMessage *message, void *user_data)
+ 	return;
+ 
+ retry:
+-	send_write(op->device, op->attrib, chrc->proxy, NULL, op->id,
++	send_write(op->att, op->attrib, chrc->proxy, NULL, op->id,
+ 				op->data.iov_base, op->data.iov_len, 0,
+-				op->link_type, false, false);
++				false, false);
+ }
+ 
+ static void acquire_write_setup(DBusMessageIter *iter, void *user_data)
+@@ -2246,7 +2268,7 @@ static void acquire_write_setup(DBusMessageIter *iter, void *user_data)
+ 
+ 	append_options(&dict, op);
+ 
+-	server = btd_device_get_gatt_server(op->device);
++	server = btd_device_get_gatt_server(op->att);
+ 
+ 	mtu = bt_gatt_server_get_mtu(server);
+ 
+@@ -2256,16 +2278,15 @@ static void acquire_write_setup(DBusMessageIter *iter, void *user_data)
+ }
+ 
+ static struct pending_op *acquire_write(struct external_chrc *chrc,
+-					struct btd_device *device,
++					struct bt_att *att,
+ 					struct gatt_db_attribute *attrib,
+ 					unsigned int id,
+-					const uint8_t *value, size_t len,
+-					uint8_t link_type)
++					const uint8_t *value, size_t len)
+ {
+ 	struct pending_op *op;
+ 
+-	op = pending_write_new(device, NULL, attrib, id, value, len, 0,
+-						link_type, false, false);
++	op = pending_write_new(att, chrc->pending_writes, attrib, id, value,
++			       len, 0, false, false);
+ 
+ 	if (g_dbus_proxy_method_call(chrc->proxy, "AcquireWrite",
+ 					acquire_write_setup,
+@@ -2332,7 +2353,7 @@ static void acquire_notify_setup(DBusMessageIter *iter, void *user_data)
+ 
+ 	append_options(&dict, op);
+ 
+-	server = btd_device_get_gatt_server(op->device);
++	server = btd_device_get_gatt_server(op->att);
+ 
+ 	mtu = bt_gatt_server_get_mtu(server);
+ 
+@@ -2539,8 +2560,8 @@ static void desc_read_cb(struct gatt_db_attribute *attrib,
+ 		goto fail;
+ 	}
+ 
+-	if (send_read(device, attrib, desc->proxy, desc->pending_reads, id,
+-					offset, bt_att_get_link_type(att)))
++	if (send_read(att, attrib, desc->proxy, desc->pending_reads, id,
++		      offset))
+ 		return;
+ 
+ fail:
+@@ -2571,10 +2592,9 @@ static void desc_write_cb(struct gatt_db_attribute *attrib,
+ 	if (opcode == BT_ATT_OP_PREP_WRITE_REQ) {
+ 		if (!device_is_trusted(device) && !desc->prep_authorized &&
+ 						desc->req_prep_authorization)
+-			send_write(device, attrib, desc->proxy,
+-					desc->pending_writes, id, value, len,
+-					offset, bt_att_get_link_type(att),
+-					false, true);
++			send_write(att, attrib, desc->proxy,
++				   desc->pending_writes, id, value, len,
++				   offset, false, true);
+ 		else
+ 			gatt_db_attribute_write_result(attrib, id, 0);
+ 
+@@ -2584,9 +2604,9 @@ static void desc_write_cb(struct gatt_db_attribute *attrib,
+ 	if (opcode == BT_ATT_OP_EXEC_WRITE_REQ)
+ 		desc->prep_authorized = false;
+ 
+-	if (send_write(device, attrib, desc->proxy, desc->pending_writes, id,
+-			value, len, offset, bt_att_get_link_type(att), false,
+-			false))
++	if (send_write(att, attrib, desc->proxy, desc->pending_writes, id,
++		       value, len, offset, false, false))
++
+ 		return;
+ 
+ fail:
+@@ -2636,8 +2656,8 @@ static void chrc_read_cb(struct gatt_db_attribute *attrib,
+ 		goto fail;
+ 	}
+ 
+-	if (send_read(device, attrib, chrc->proxy, chrc->pending_reads, id,
+-					offset, bt_att_get_link_type(att)))
++	if (send_read(att, attrib, chrc->proxy, chrc->pending_reads, id,
++		      offset))
+ 		return;
+ 
+ fail:
+@@ -2675,9 +2695,9 @@ static void chrc_write_cb(struct gatt_db_attribute *attrib,
+ 	if (opcode == BT_ATT_OP_PREP_WRITE_REQ) {
+ 		if (!device_is_trusted(device) && !chrc->prep_authorized &&
+ 						chrc->req_prep_authorization)
+-			send_write(device, attrib, chrc->proxy, queue,
+-					id, value, len, offset,
+-					bt_att_get_link_type(att), true, true);
++			send_write(att, attrib, chrc->proxy, queue,
++				   id, value, len, offset,
++				   true, true);
+ 		else
+ 			gatt_db_attribute_write_result(attrib, id, 0);
+ 
+@@ -2698,13 +2718,12 @@ static void chrc_write_cb(struct gatt_db_attribute *attrib,
+ 	}
+ 
+ 	if (g_dbus_proxy_get_property(chrc->proxy, "WriteAcquired", &iter)) {
+-		if (acquire_write(chrc, device, attrib, id, value, len,
+-						bt_att_get_link_type(att)))
++		if (acquire_write(chrc, att, attrib, id, value, len))
+ 			return;
+ 	}
+ 
+-	if (send_write(device, attrib, chrc->proxy, queue, id, value, len,
+-			offset, bt_att_get_link_type(att), false, false))
++	if (send_write(att, attrib, chrc->proxy, queue, id, value, len,
++		       offset, false, false))
+ 		return;
+ 
+ fail:
+-- 

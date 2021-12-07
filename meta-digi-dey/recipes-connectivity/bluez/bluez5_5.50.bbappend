@@ -11,6 +11,8 @@ SRC_URI += " \
     file://0002-hcitool-increase-the-shown-connection-limit-to-20.patch \
     file://0003-port-test-discovery-to-python3.patch \
     file://0008-tools-Use-l_main_run_with_signal-instead-of-open-cod.patch \
+    file://0009-gatt-Fix-not-cleaning-up-when-disconnected.patch \
+    file://0010-gatt-added-missing-disconn_id-s-and-removed-extra-ch.patch \
 "
 
 QCA65XX_COMMON_PATCHES = " \
