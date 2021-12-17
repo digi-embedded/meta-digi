@@ -1,4 +1,5 @@
 # Copyright (C) 2012-2016 Freescale Semiconductor
+# Copyright 2017-2021 NXP
 # Released under the MIT license (see COPYING.MIT for the terms)
 DESCRIPTION = "Freescale Multimedia codec libs"
 LICENSE = "Proprietary"
@@ -113,3 +114,6 @@ FILES_${PN}-oggvorbis += "${libdir}/imx-mm/audio-codec/wrap/lib_vorbisd_wrap_arm
 FILES_${PN}-nb += "${libdir}/imx-mm/audio-codec/wrap/lib_nbamrd_wrap_arm*_elinux.so.*"
 FILES_${PN}-wb += "${libdir}/imx-mm/audio-codec/wrap/lib_wbamrd_wrap_arm*_elinux.so.*"
 FILES_lib-src-ppp-arm11-elinux1 += "${libdir}/lib_src_ppp_arm11_elinux.so.1"
+
+PACKAGE_ARCH_mx6q = "${MACHINE_SOCARCH}"
+PACKAGE_ARCH_mx6dl = "${MACHINE_SOCARCH}"
