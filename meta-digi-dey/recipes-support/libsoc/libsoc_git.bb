@@ -13,7 +13,7 @@ inherit autotools pkgconfig python3-dir
 
 SRCBRANCH ?= "master"
 SRCREV = "${AUTOREV}"
-SRC_URI = "git://github.com/jackmitch/libsoc.git"
+SRC_URI = "git://github.com/jackmitch/libsoc.git;branch=master;protocol=https"
 
 S = "${WORKDIR}/git"
 
