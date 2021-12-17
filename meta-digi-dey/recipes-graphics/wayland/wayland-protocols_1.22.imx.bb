@@ -10,12 +10,10 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=c7b12b6702da38ca028ace54aae3d484 \
                     file://stable/presentation-time/presentation-time.xml;endline=26;md5=4646cd7d9edc9fa55db941f2d3a7dc53"
 
 WAYLAND_PROTOCOLS_SRC ?= "git://source.codeaurora.org/external/imx/wayland-protocols-imx.git;protocol=https"
-SRCBRANCH = "wayland-protocols-imx-1.20"
-SRC_URI = "${WAYLAND_PROTOCOLS_SRC};branch=${SRCBRANCH} "
-SRCREV = "9cacf108d0ee5863c7a656da5d2271bc2396e43d" 
+SRCBRANCH = "wayland-protocols-imx-1.22"
+SRC_URI = "${WAYLAND_PROTOCOLS_SRC};branch=${SRCBRANCH}"
+SRCREV = "0f71ffe59cf4c3f050ff79ea18f96345fcf0061e" 
 S = "${WORKDIR}/git"
-
-UPSTREAM_CHECK_URI = "https://wayland.freedesktop.org/releases.html"
 
 inherit autotools pkgconfig
 
