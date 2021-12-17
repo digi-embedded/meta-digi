@@ -1,5 +1,5 @@
 # Copyright (C) 2014,2016 Freescale Semiconductor
-# Copyright 2017-2019 NXP
+# Copyright 2017-2021 NXP
 # Copyright (C) 2012-2015 O.S. Systems Software LTDA.
 # Released under the MIT license (see COPYING.MIT for the terms)
 
@@ -10,6 +10,7 @@ SECTION = "multimedia"
 DEPENDS = "imx-codec imx-parser libdrm gstreamer1.0 gstreamer1.0-plugins-base gstreamer1.0-plugins-bad"
 DEPENDS_append_mx6 = " imx-lib"
 DEPENDS_append_mx7 = " imx-lib"
+DEPENDS_append_mx8ulp = " imx-lib"
 DEPENDS_append_imxvpu = " imx-vpuwrap"
 
 # For backwards compatibility
@@ -21,11 +22,11 @@ LIC_FILES_CHKSUM = "file://COPYING-LGPL-2;md5=5f30f0716dfdd0d91eb439ebec522ec2 \
                     file://COPYING-LGPL-2.1;md5=fbc093901857fcd118f065f900982c24"
 
 IMXGST_SRC ?= "git://source.codeaurora.org/external/imx/imx-gst1.0-plugin.git;protocol=https"
-SRCBRANCH = "MM_04.06.00_2012_L5.10.y"
+SRCBRANCH = "MM_04.06.03_2110_L5.10.y"
 
 SRC_URI = "${IMXGST_SRC};branch=${SRCBRANCH} \
 "
-SRCREV = "701041b684a5e544d1e05dc1a197d1f7b2755ffe"
+SRCREV = "9f7bae2a59c06480e4bbf4b8f84718811b9eb812"
 
 S = "${WORKDIR}/git"
 
@@ -50,6 +51,10 @@ PACKAGES =+ "${PN}-gplay ${PN}-libgplaycore ${PN}-libgstfsl ${PN}-grecorder ${PN
 # Add codec list that the beep plugin run-time depended
 BEEP_RDEPENDS = "imx-codec-aac imx-codec-mp3 imx-codec-oggvorbis"
 RDEPENDS_${PN} += "imx-parser ${BEEP_RDEPENDS} gstreamer1.0-plugins-good-id3demux "
+RDEPENDS_${PN}_append_mx8qm = " imx-dsp"
+RDEPENDS_${PN}_append_mx8qxp = " imx-dsp"
+RDEPENDS_${PN}_append_mx8mp = " imx-dsp"
+RDEPENDS_${PN}_append_mx8ulp = " imx-dsp"
 
 PACKAGECONFIG ?= ""
 
@@ -75,6 +80,3 @@ FILES_${PN}-librecorder-engine = "${libdir}/librecorder_engine-1.0${SOLIBS}"
 FILES_${PN}-libplayengine = "${libdir}/libplayengine-1.0${SOLIBS}"
 
 COMPATIBLE_MACHINE = "(mx6|mx7|mx8)"
-
-# Add restriction to ABM
-COMPATIBLE_HOST = '(aarch64|arm).*-linux'
