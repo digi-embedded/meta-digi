@@ -9,19 +9,19 @@ Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
  1 file changed, 9 insertions(+), 7 deletions(-)
 
 diff --git a/test/test-discovery b/test/test-discovery
-index cea77683d..852611c86 100755
+index eccc7c7e3..9aeace414 100755
 --- a/test/test-discovery
 +++ b/test/test-discovery
 @@ -1,4 +1,4 @@
 -#!/usr/bin/python
 +#!/usr/bin/python3
-
+ # SPDX-License-Identifier: LGPL-2.1-or-later
+ 
  from __future__ import absolute_import, print_function, unicode_literals
-
-@@ -18,9 +18,9 @@ def print_compact(address, properties):
+@@ -19,9 +19,9 @@ def print_compact(address, properties):
  	name = ""
  	address = "<unknown>"
-
+ 
 -	for key, value in properties.iteritems():
 +	for key, value in properties.items():
  		if type(value) is dbus.String:
@@ -30,7 +30,7 @@ index cea77683d..852611c86 100755
  		if (key == "Name"):
  			name = value
  		elif (key == "Address"):
-@@ -41,7 +41,7 @@ def print_normal(address, properties):
+@@ -42,7 +42,7 @@ def print_normal(address, properties):
  	for key in properties.keys():
  		value = properties[key]
  		if type(value) is dbus.String:
@@ -39,34 +39,34 @@ index cea77683d..852611c86 100755
  		if (key == "Class"):
  			print("    %s = 0x%06x" % (key, value))
  		else:
-@@ -61,6 +61,8 @@ def skip_dev(old_dev, new_dev):
+@@ -62,6 +62,8 @@ def skip_dev(old_dev, new_dev):
  	return False
-
+ 
  def interfaces_added(path, interfaces):
 +	if "org.bluez.Device1" not in interfaces.keys():
 +		return
  	properties = interfaces["org.bluez.Device1"]
  	if not properties:
  		return
-@@ -70,7 +72,7 @@ def interfaces_added(path, interfaces):
-
+@@ -71,7 +73,7 @@ def interfaces_added(path, interfaces):
+ 
  		if compact and skip_dev(dev, properties):
  			return
 -		devices[path] = dict(devices[path].items() + properties.items())
 +		devices[path] = dict(list(devices[path].items()) + list(properties.items()))
  	else:
  		devices[path] = properties
-
-@@ -93,7 +95,7 @@ def properties_changed(interface, changed, invalidated, path):
-
+ 
+@@ -94,7 +96,7 @@ def properties_changed(interface, changed, invalidated, path):
+ 
  		if compact and skip_dev(dev, changed):
  			return
 -		devices[path] = dict(devices[path].items() + changed.items())
 +		devices[path] = dict(list(devices[path].items()) + list(changed.items()))
  	else:
  		devices[path] = changed
-
-@@ -152,7 +154,7 @@ if __name__ == '__main__':
+ 
+@@ -153,7 +155,7 @@ if __name__ == '__main__':
  	om = dbus.Interface(bus.get_object("org.bluez", "/"),
  				"org.freedesktop.DBus.ObjectManager")
  	objects = om.GetManagedObjects()
