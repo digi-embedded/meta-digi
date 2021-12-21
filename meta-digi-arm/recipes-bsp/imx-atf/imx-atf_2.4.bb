@@ -11,7 +11,7 @@ SRCBRANCH = "lf_v2.4"
 ATF_SRC ?= "git://source.codeaurora.org/external/imx/imx-atf.git;protocol=https"
 SRC_URI = "${ATF_SRC};branch=${SRCBRANCH} \
 "
-SRCREV = "ba76d337e9564ea97b5024640b6dcca9bd054ffb"
+SRCREV = "5782363f92a2fdf926784449270433cf3ddf44bd"
 
 SRC_URI_append_ccimx8mn = " file://0001-imx8mn-Define-UART1-as-console-for-boot-stage.patch \
                             file://0002-imx8mn-Disable-M7-debug-console.patch"
@@ -25,16 +25,17 @@ inherit deploy
 BOOT_TOOLS = "imx-boot-tools"
 
 PLATFORM        ?= "INVALID"
-PLATFORM_mx8dxl = "imx8dxl"
-PLATFORM_mx8dx  = "imx8dx"
-PLATFORM_mx8dxlevk-phantom = "imx8qx"
+PLATFORM_mx8qm   = "imx8qm"
+PLATFORM_mx8x    = "imx8qx"
+PLATFORM_mx8mq   = "imx8mq"
 PLATFORM_mx8mm  = "imx8mm"
 PLATFORM_mx8mn  = "imx8mn"
-PLATFORM_mx8mnlite  = "imx8mn"
+PLATFORM_mx8mnul = "imx8mn"
 PLATFORM_mx8mp  = "imx8mp"
-PLATFORM_mx8mq  = "imx8mq"
-PLATFORM_mx8qm  = "imx8qm"
-PLATFORM_mx8x   = "imx8qx"
+PLATFORM_mx8mpul = "imx8mp"
+PLATFORM_mx8dx   = "imx8dx"
+PLATFORM_mx8dxl  = "imx8dxl"
+PLATFORM_mx8ulp  = "imx8ulp"
 
 # Clear LDFLAGS to avoid the option -Wl recognize issue
 # Clear CFLAGS to avoid coherent_arm out of OCRAM size limitation (64KB) - i.MX 8MQ only
