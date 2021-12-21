@@ -1,4 +1,4 @@
-# Copyright (C) 2020 NXP
+# Copyright (C) 2017-2021 NXP
 
 SUMMARY = "OPTEE test"
 HOMEPAGE = "http://www.optee.org/"
@@ -6,20 +6,29 @@ HOMEPAGE = "http://www.optee.org/"
 LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://LICENSE.md;md5=daa2bcccc666345ab8940aab1315a4fa"
 
-DEPENDS = "optee-os optee-client python3-pycrypto-native openssl"
-inherit python3native cmake
+DEPENDS = "python3-pycrypto-native python3-pycryptodomex-native optee-os optee-client openssl"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+SRCBRANCH = "lf-5.10.72_2.2.0"
+
+OPTEE_TEST_SRC ?= "git://source.codeaurora.org/external/imx/imx-optee-test.git;protocol=https"
+SRC_URI = "${OPTEE_TEST_SRC};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git"
 B = "${WORKDIR}/build"
 
-OPTEE_ARCH ?= "arm"
+SRCREV = "4d81b964a72e89a62d04187b3f055d8346b383c9"
+
+inherit python3native
+
+OPTEE_ARCH ?= "arm32"
 OPTEE_ARCH_armv7a = "arm32"
 OPTEE_ARCH_aarch64 = "arm64"
 
 TA_DEV_KIT_DIR_arm = "${STAGING_INCDIR}/optee/export-user_ta_arm32/"
 TA_DEV_KIT_DIR_aarch64 = "${STAGING_INCDIR}/optee/export-user_ta_arm64/"
+
+CFLAGS += "--sysroot=${STAGING_DIR_HOST}"
+CXXFLAGS += "--sysroot=${STAGING_DIR_HOST}"
 
 EXTRA_OEMAKE = " \
     TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
@@ -32,13 +41,10 @@ EXTRA_OEMAKE = " \
     -C ${S} O=${B} \
 "
 
-EXTRA_OECMAKE = " \
-    -DOPTEE_TEST_SDK=${TA_DEV_KIT_DIR} \
-"
-do_compile () {
-    export CXXFLAGS="${CXXFLAGS} --sysroot=${STAGING_DIR_HOST}"
-    oe_runmake V=1
+do_compile() {
+    oe_runmake all
 }
+do_compile[cleandirs] = "${B}"
 
 do_install () {
 	install -d ${D}/usr/bin
@@ -48,8 +54,11 @@ do_install () {
 	find ${B}/ta -name '*.ta' | while read name; do
 		install -m 444 $name ${D}/lib/optee_armtz/
 	done
+
+	install -d ${D}/usr/lib/tee-supplicant/plugins/
+	install ${B}/supp_plugin/*plugin ${D}/usr/lib/tee-supplicant/plugins/
 }
 
-FILES_${PN} = "/usr/bin/ /lib*/optee_armtz/"
+FILES_${PN} = "/usr/bin/ /lib*/optee_armtz/ /usr/lib/tee-supplicant/plugins/"
 
 COMPATIBLE_MACHINE = "(mx6|mx7|mx8)"
