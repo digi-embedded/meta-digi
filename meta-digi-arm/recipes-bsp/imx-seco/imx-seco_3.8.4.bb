@@ -1,22 +1,22 @@
-# Copyright 2019-2020 NXP
+# Copyright 2019-2021 NXP
 
 SUMMARY = "NXP i.MX SECO firmware"
 DESCRIPTION = "NXP IMX SECO firmware"
 SECTION = "base"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=cf3f9b8d09bc3926b1004ea71f7a248a" 
 
-require imx-seco.inc
-inherit fsl-eula-unpack deploy
+LIC_FILES_CHKSUM = "file://COPYING;md5=03bcadc8dc0a788f66ca9e2b89f56c6f"
+
+inherit fsl-eula-unpack use-imx-security-controller-firmware deploy
 
 SRC_URI = "${FSL_MIRROR}/${BP}.bin;fsl-eula=true"
 
-SRC_URI[md5sum] = "d4faca131abfc51a1dd0278d7d201159"
-SRC_URI[sha256sum] = "08cf25a4be6841ca7264a50b29c311b386eae1c02fced8a3b55fd04213acb4bc"
+SRC_URI[md5sum] = "38d298cda9ea91db945b266bd6774e07"
+SRC_URI[sha256sum] = "ed65381fac7a17a7594099191952821ed3f3f54c944937926dc19f82ecd8fef5"
 
 do_compile[noexec] = "1"
-
-do_install[noexec] = "1"
+do_install() {
+}
 
 addtask deploy after do_install
 do_deploy () {
