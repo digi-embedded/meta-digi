@@ -20,6 +20,7 @@ BBLAYERS ?= " \
   ##DIGIBASE##/meta-python2 \
   ##DIGIBASE##/meta-webkit \
   ##DIGIBASE##/meta-selinux \
+  ##DIGIBASE##/meta-timesys \
   ##DIGIBASE##/meta-digi/meta-digi-arm \
   ##DIGIBASE##/meta-digi/meta-digi-dey \
   "
