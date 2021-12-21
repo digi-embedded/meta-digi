@@ -22,7 +22,7 @@ STORAGE_MEDIA = "mmc"
 WIRELESS_MODULE ?= ""
 
 # Firmware
-MACHINE_FIRMWARE ?= "firmware-imx-sdma firmware-imx-regulatory"
+MACHINE_FIRMWARE ?= "firmware-imx-sdma-imx6q"
 MACHINE_FIRMWARE_append_mx6q = " firmware-imx-vpu-imx6q"
 MACHINE_FIRMWARE_append_mx6dl = " firmware-imx-vpu-imx6d"
 
