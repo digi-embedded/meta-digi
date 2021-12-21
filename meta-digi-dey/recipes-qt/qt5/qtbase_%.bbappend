@@ -1,7 +1,7 @@
 # Copyright (C) 2013 Eric Bénard - Eukréa Electromatique
 # Copyright (C) 2016 O.S. Systems Software LTDA.
 # Copyright (C) 2016 Freescale Semiconductor
-# Copyright 2017-2018 NXP
+# Copyright 2017-2021 NXP
 # Copyright (C) 2015-2018, Digi International Inc.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
