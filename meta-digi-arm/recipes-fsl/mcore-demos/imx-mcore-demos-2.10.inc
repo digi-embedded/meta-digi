@@ -1,28 +1,17 @@
-# Copyright 2017-2020 NXP
+# Copyright 2021 NXP
 # Released under the MIT license (see COPYING.MIT for the terms)
 
-SUMMARY = "i.MX M4/M7 core Demo images"
+SUMMARY = "i.MX M33 core Demo images"
 SECTION = "app"
 LICENSE = "Proprietary"
 
 inherit deploy fsl-eula2-unpack2
 
 SOC        ?= "INVALID"
-SOC_mx7ulp  = "imx7ulp"
-SOC_mx8dxl  = "imx8dxl"
-SOC_mx8mm   = "imx8mm"
-SOC_mx8mn   = "imx8mn"
-SOC_mx8mnlite = "imx8mnddr3l"
-SOC_mx8mp   = "imx8mp"
-SOC_mx8mq   = "imx8mq"
-SOC_mx8qm   = "imx8qm"
-SOC_mx8qxp  = "imx8qx"
-SOC_mx8phantomdxl = "imx8dxl-phantom"
+SOC_mx8ulp  = "imx8ulp"
 
-MCORE_TYPE  ?= "m4"
-MCORE_TYPE_mx8mn  = "m7"
-MCORE_TYPE_mx8mnlite  = "m7"
-MCORE_TYPE_mx8mp  = "m7"
+MCORE_TYPE  ?= "m33"
+MCORE_TYPE_mx8ulp  = "m33"
 
 IMX_PACKAGE_NAME = "${SOC}-${MCORE_TYPE}-demo-${PV}"
 SRC_URI_append = ";name=${SOC}"
@@ -36,7 +25,6 @@ do_install () {
 }
 
 DEPLOY_FILE_EXT       ?= "bin"
-DEPLOY_FILE_EXT_mx7ulp = "img"
 
 do_deploy () {
    # Install the demo binaries
