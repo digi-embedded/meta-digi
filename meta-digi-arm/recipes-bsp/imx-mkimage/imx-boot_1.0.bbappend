@@ -97,6 +97,10 @@ SRC_URI_append_ccimx8m = " file://0001-imx8m-soc.mak-preserve-dtbs-after-build.p
 
 IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware imx-seco"
 
+IMX_BOOT_SOC_TARGET_mx8mm = "iMX8MM"
+IMX_BOOT_SOC_TARGET_mx8mn = "iMX8MN"
+IMX_BOOT_SOC_TARGET_mx8x = "iMX8QX"
+
 DEPENDS_append_ccimx8x = " coreutils-native"
 DEPENDS_append_mx8 += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
@@ -179,7 +183,7 @@ do_compile () {
 	fi
 	# mkimage for i.MX8
 	for type in ${UBOOT_CONFIG}; do
-		if [ "${SOC_TARGET}" = "iMX8QX" ]; then
+		if [ "${IMX_BOOT_SOC_TARGET}" = "iMX8QX" ]; then
 			RAM_SIZE="$(echo ${type} | sed -e 's,.*[a-z]\+\([0-9]\+[M|G]B\)$,\1,g')"
 			for ramc in ${RAM_CONFIGS}; do
 				if echo "${ramc}" | grep -qs "${RAM_SIZE}"; then
@@ -190,8 +194,8 @@ do_compile () {
 					cd -
 					for target in ${IMXBOOT_TARGETS}; do
 						for rev in ${SOC_REVISIONS}; do
-							bbnote "building ${SOC_TARGET} - ${ramc} - REV=${rev} ${target}"
-							make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target} > ${S}/mkimage-${target}.log 2>&1
+							bbnote "building ${IMX_BOOT_SOC_TARGET} - ${ramc} - REV=${rev} ${target}"
+							make SOC=${IMX_BOOT_SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target} > ${S}/mkimage-${target}.log 2>&1
 							if [ -e "${BOOT_STAGING}/flash.bin" ]; then
 								cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target}
 							fi
@@ -208,21 +212,21 @@ do_compile () {
 		else
 			# mkimage for i.MX8M
 			for target in ${IMXBOOT_TARGETS}; do
-				bbnote "building ${SOC_TARGET} - ${REV_OPTION} ${target}"
-				make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} ${REV_OPTION} ${target} > ${S}/mkimage-${target}.log 2>&1
+				bbnote "building ${IMX_BOOT_SOC_TARGET} - ${REV_OPTION} ${target}"
+				make SOC=${IMX_BOOT_SOC_TARGET} dtbs=${UBOOT_DTB_NAME} ${REV_OPTION} ${target} > ${S}/mkimage-${target}.log 2>&1
 				if [ -e "${BOOT_STAGING}/flash.bin" ]; then
 					cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}.bin-${target}
 				fi
 			done
 
 			# Log HAB FIT information
-			bbnote "building ${SOC_TARGET} - print_fit_hab"
-			make SOC=${SOC_TARGET} dtbs=${UBOOT_DTB_NAME} print_fit_hab > ${S}/mkimage-print_fit_hab.log 2>&1
+			bbnote "building ${IMX_BOOT_SOC_TARGET} - print_fit_hab"
+			make SOC=${IMX_BOOT_SOC_TARGET} dtbs=${UBOOT_DTB_NAME} print_fit_hab > ${S}/mkimage-print_fit_hab.log 2>&1
 		fi
 	done
 
 	# Check that SCFW was built at least once
-	if [ "${SOC_TARGET}" = "iMX8QX" and "${SCFWBUILT}" != "yes" ]; then
+	if [ "${IMX_BOOT_SOC_TARGET}" = "iMX8QX" and "${SCFWBUILT}" != "yes" ]; then
 		bbfatal "SCFW was not built!"
 	fi
 }

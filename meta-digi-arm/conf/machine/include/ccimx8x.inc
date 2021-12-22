@@ -34,6 +34,8 @@ RAM_CONFIGS = "512MB_16bit 1GB_16bit 1GB_32bit 2GB_32bit"
 # the imx-boot recipe.
 SOC_REVISIONS = "B0 C0"
 
+ATF_PLATFORM = "imx8qx"
+
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8_defconfig"
 
