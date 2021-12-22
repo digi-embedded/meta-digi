@@ -90,6 +90,7 @@ deploy_mx8ulp() {
 # Digi customizations #
 #######################
 inherit boot-artifacts
+require recipes-bsp/imx-seco/ccimx8x-seco-fw.inc
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
