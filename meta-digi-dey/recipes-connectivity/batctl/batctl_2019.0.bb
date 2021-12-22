@@ -4,7 +4,7 @@ HOMEPAGE = "http://www.open-mesh.net/"
 SECTION = "console/network"
 PRIORITY = "optional"
 LICENSE = "GPLv2+"
-LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6"
 
 SRC_URI = "http://downloads.open-mesh.net/batman/stable/sources/batctl/batctl-${PV}.tar.gz"
 SRC_URI[md5sum] = "3eb6c6e11d293f48d4ecab6d182805c2"
