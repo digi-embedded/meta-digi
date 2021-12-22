@@ -54,7 +54,7 @@ IMAGE_CMD_boot.vfat() {
 	BOOTIMG_BLOCKS="$(expr \( \( ${BOOTIMG_BLOCKS} + 15 \) / 16 \) \* 16)"
 
 	# Build VFAT boot image and copy files into it
-	mkfs.vfat -n "Boot ${MACHINE}" -S 512 -C ${IMGDEPLOYDIR}/${IMAGE_NAME}.boot.vfat ${BOOTIMG_BLOCKS}
+	mkfs.vfat -n "Boot DEY" -S 512 -C ${IMGDEPLOYDIR}/${IMAGE_NAME}.boot.vfat ${BOOTIMG_BLOCKS}
 	mcopy -i ${IMGDEPLOYDIR}/${IMAGE_NAME}.boot.vfat ${BOOTIMG_FILES_SYMLINK} ::/
 
 	# Copy boot scripts into the VFAT image
