@@ -5,42 +5,21 @@ Subject: [PATCH] imx8mm: Define UART1 as console for boot stage
 UART1 is the default console for ConnectCore i.MX8M Mini
 
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 ---
- plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c | 2 +-
- plat/imx/imx8m/imx8mm/platform.mk         | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ plat/imx/imx8m/imx8mm/platform.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
-index bc2e5a0bf..e9a6a2b7f 100644
---- a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
-+++ b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
-@@ -57,11 +57,11 @@ static const struct imx_rdc_cfg rdc[] = {
- 	/* Master domain assignment */
- 	RDC_MDAn(RDC_MDA_M4, DID1),
-
- 	/* peripherals domain permission */
- 	RDC_PDAPn(RDC_PDAP_UART4, D1R | D1W),
--	RDC_PDAPn(RDC_PDAP_UART2, D0R | D0W),
-+	RDC_PDAPn(RDC_PDAP_UART1, D0R | D0W),
-
- 	/* memory region */
-
- 	/* Sentinel */
- 	{0},
 diff --git a/plat/imx/imx8m/imx8mm/platform.mk b/plat/imx/imx8m/imx8mm/platform.mk
 index 83ebad65b..f47bdec22 100644
 --- a/plat/imx/imx8m/imx8mm/platform.mk
 +++ b/plat/imx/imx8m/imx8mm/platform.mk
-@@ -60,11 +60,11 @@ BL32_BASE		?=	0xbe000000
- $(eval $(call add_define,BL32_BASE))
-
+@@ -62,7 +62,7 @@ $(eval $(call add_define,BL32_BASE))
  BL32_SIZE		?=	0x2000000
  $(eval $(call add_define,BL32_SIZE))
-
+ 
 -IMX_BOOT_UART_BASE	?=	0x30890000
 +IMX_BOOT_UART_BASE	?=	0x30860000
  $(eval $(call add_define,IMX_BOOT_UART_BASE))
-
+ 
  ifeq (${SPD},trusty)
- 	BL31_CFLAGS    +=      -DPLAT_XLAT_TABLES_DYNAMIC=1
- endif
