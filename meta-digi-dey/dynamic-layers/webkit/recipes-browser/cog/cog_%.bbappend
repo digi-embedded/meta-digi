@@ -8,3 +8,7 @@ SRC_URI_append = " \
 "
 
 EXTRA_OECMAKE += "-DCOG_HOME_URI=http://127.0.0.1/"
+
+# drm PACKAGECONFIG pulls in libgbm dependency, which isn't available
+# on the i.MX6
+PACKAGECONFIG_remove_ccimx6 = "drm"
