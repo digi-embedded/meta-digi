@@ -1,4 +1,12 @@
-require busybox.inc
+require recipes-core/busybox/busybox.inc
+
+# Digi: the files used in honister are practically the same as the ones in
+# hardknott with a few minor differences. Re-use most of the files from poky
+# to avoid duplicity, while giving priority to our version of the files so that we can
+# replace the hardknott versions with their respective honister ones.
+FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
+FILESEXTRAPATHS_append := ":${COREBASE}/meta/recipes-core/busybox/${PN}"
+FILESEXTRAPATHS_append := ":${COREBASE}/meta/recipes-core/busybox/files"
 
 SRC_URI = "https://busybox.net/downloads/busybox-${PV}.tar.bz2;name=tarball \
            file://busybox-udhcpc-no_deconfig.patch \
