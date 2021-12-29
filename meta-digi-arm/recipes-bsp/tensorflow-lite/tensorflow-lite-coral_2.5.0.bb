@@ -42,5 +42,8 @@ FILES_${PN} += "\
 
 INSANE_SKIP_${PN} += "already-stripped"
 
+# This package provides the same python files as NXP's tensorflow-lite
+RCONFLICTS_${PN} = "tensorflow-lite"
+
 COMPATIBLE_MACHINE = "(-)"
 COMPATIBLE_MACHINE_aarch64 = "(.*)"

@@ -22,7 +22,7 @@ RDEPENDS_${PN} = "${PYTHON_PN} \
                   ${PYTHON_PN}-pygobject \
                   ${PYTHON_PN}-pillow \
                   libedgetpu \
-                  tensorflow-lite \
+                  tensorflow-lite-coral \
 "
 
 inherit python3native
