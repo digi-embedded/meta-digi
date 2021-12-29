@@ -3,7 +3,7 @@
 #
 #  build.sh
 #
-#  Copyright (C) 2013-2021 by Digi International Inc.
+#  Copyright (C) 2013-2022 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -173,6 +173,7 @@ while read _pl _var _tgt; do
 done<<-_EOF_
 	ccimx8mm-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
 	ccimx8mn-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
+	ccimx8mp-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
 	ccimx8x-sbc-pro      DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
 	ccimx8x-sbc-express  DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
 	ccimx6qpsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-aws

@@ -3,7 +3,7 @@
 #
 #  build-github.sh
 #
-#  Copyright (C) 2015-2021 by Digi International Inc.
+#  Copyright (C) 2015-2022 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -25,6 +25,7 @@ set -e
 AVAILABLE_PLATFORMS=" \
 		     ccimx8mm-dvk \
 		     ccimx8mn-dvk \
+		     ccimx8mp-dvk \
 		     ccimx8x-sbc-pro \
 		     ccimx8x-sbc-express \
 		     ccimx6qpsbc \
@@ -139,6 +140,7 @@ while read _pl _tgt; do
 done<<-_EOF_
 	ccimx8mm-dvk         dey-image-qt
 	ccimx8mn-dvk         dey-image-qt
+	ccimx8mp-dvk         dey-image-qt
 	ccimx8x-sbc-pro      dey-image-qt
 	ccimx8x-sbc-express  dey-image-qt
 	ccimx6qpsbc          dey-image-qt
