@@ -1,6 +1,6 @@
 From: Gabriel Valcazar <gabriel.valcazar@digi.com>
 Date: Fri, 20 Aug 2021 11:59:27 +0200
-Subject: [PATCH 1/2] Apply rules for DEY prebuilt images
+Subject: [PATCH] Apply rules for DEY prebuilt images
 
 These rules were obtained by putting the system's SELinux in permissive mode,
 extracting all of the AVC denials, and then running them through audit2allow.
@@ -17,24 +17,23 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  policy/modules/kernel/corecommands.if     |  8 ++++
  policy/modules/kernel/devices.if          | 48 +++++++++++++++++++++++
  policy/modules/roles/sysadm.if            | 24 ++++++++++++
- policy/modules/roles/sysadm.te            | 47 ++++++++++++++++++++++
+ policy/modules/roles/sysadm.te            | 48 +++++++++++++++++++++++
  policy/modules/services/acpi.if           |  8 ++++
  policy/modules/services/acpi.te           | 20 ++++++++++
  policy/modules/services/apache.if         |  8 ++++
  policy/modules/services/bluetooth.if      | 10 +++++
  policy/modules/services/bluetooth.te      | 10 +++++
- policy/modules/services/consolekit.te     |  7 ++++
- policy/modules/services/dbus.if           |  8 ++++
+ policy/modules/services/dbus.if           | 16 ++++++++
  policy/modules/services/dbus.te           |  7 ++++
  policy/modules/services/modemmanager.te   | 10 +++++
  policy/modules/services/networkmanager.if |  8 ++++
- policy/modules/services/networkmanager.te | 23 +++++++++++
+ policy/modules/services/networkmanager.te | 22 +++++++++++
  policy/modules/system/init.te             |  7 ++++
  policy/modules/system/libraries.if        |  8 ++++
  policy/modules/system/locallogin.te       |  9 +++++
  policy/modules/system/logging.if          |  8 ++++
  policy/modules/system/logging.te          | 11 ++++++
- policy/modules/system/modutils.te         |  8 ++++
+ policy/modules/system/modutils.te         |  9 +++++
  policy/modules/system/mount.te            |  7 ++++
  policy/modules/system/selinuxutil.te      |  8 ++++
  policy/modules/system/sysnetwork.te       |  8 ++++
@@ -45,16 +44,16 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  policy/modules/system/userdomain.if       |  8 ++++
  policy/modules/system/userdomain.te       |  7 ++++
  policy/modules/system/xdg.if              | 16 ++++++++
- 36 files changed, 460 insertions(+)
+ 35 files changed, 462 insertions(+)
 
 diff --git a/policy/modules/admin/alsa.te b/policy/modules/admin/alsa.te
-index 09d590add..2762fc664 100644
+index 55f39a135..4a0c213d0 100644
 --- a/policy/modules/admin/alsa.te
 +++ b/policy/modules/admin/alsa.te
-@@ -111,3 +111,13 @@ optional_policy(`
- 	hal_use_fds(alsa_t)
- 	hal_write_log(alsa_t)
- ')
+@@ -106,3 +106,13 @@ miscfiles_read_localization(alsa_t)
+ userdom_manage_unpriv_user_semaphores(alsa_t)
+ userdom_manage_unpriv_user_shared_mem(alsa_t)
+ userdom_search_user_home_dirs(alsa_t)
 +
 +########################################
 +#
@@ -66,25 +65,25 @@ index 09d590add..2762fc664 100644
 +allow alsa_t alsa_var_lib_t:lnk_file read;
 +xdg_config_dirs_search(alsa_t)
 diff --git a/policy/modules/admin/dmesg.te b/policy/modules/admin/dmesg.te
-index 228baecd8..ccec67c80 100644
+index 9f4f11397..a34445e1f 100644
 --- a/policy/modules/admin/dmesg.te
 +++ b/policy/modules/admin/dmesg.te
-@@ -60,3 +60,10 @@ optional_policy(`
- optional_policy(`
- 	udev_read_db(dmesg_t)
+@@ -57,3 +57,10 @@ optional_policy(`
+ 	seutil_sigchld_newrole(dmesg_t)
  ')
-+
+ 
 +########################################
 +#
 +# DEY custom rules
 +#
 +
 +corecmd_map_exec_bin_files(dmesg_t)
++
 diff --git a/policy/modules/admin/netutils.te b/policy/modules/admin/netutils.te
-index 5cdfe2196..31e9d970c 100644
+index 1de82957b..cfdceb953 100644
 --- a/policy/modules/admin/netutils.te
 +++ b/policy/modules/admin/netutils.te
-@@ -212,3 +212,10 @@ userdom_use_inherited_user_terminals(traceroute_t)
+@@ -207,3 +207,10 @@ userdom_use_inherited_user_terminals(traceroute_t)
  # nmap searches .
  userdom_dontaudit_search_user_home_dirs(traceroute_t)
  userdom_dontaudit_search_user_home_content(traceroute_t)
@@ -116,10 +115,10 @@ index 1b9c6ccde..aeac19008 100644
  ## <summary>
  ##	Use file descriptors for
 diff --git a/policy/modules/apps/pulseaudio.te b/policy/modules/apps/pulseaudio.te
-index 3a50fc5b2..ce24736f3 100644
+index fd2df71a2..a59272c59 100644
 --- a/policy/modules/apps/pulseaudio.te
 +++ b/policy/modules/apps/pulseaudio.te
-@@ -311,3 +311,18 @@ optional_policy(`
+@@ -302,3 +302,18 @@ optional_policy(`
  optional_policy(`
  	unconfined_signull(pulseaudio_client)
  ')
@@ -139,7 +138,7 @@ index 3a50fc5b2..ce24736f3 100644
 +sysadm_use_fds(pulseaudio_t)
 +sysadm_connectto_socket(pulseaudio_t)
 diff --git a/policy/modules/kernel/corecommands.if b/policy/modules/kernel/corecommands.if
-index c605ca5f7..e7b41c32c 100644
+index 2d7f27157..e07935514 100644
 --- a/policy/modules/kernel/corecommands.if
 +++ b/policy/modules/kernel/corecommands.if
 @@ -199,6 +199,14 @@ interface(`corecmd_check_exec_bin_files',`
@@ -158,7 +157,7 @@ index c605ca5f7..e7b41c32c 100644
  ## <summary>
  ##	Read files in bin directories.
 diff --git a/policy/modules/kernel/devices.if b/policy/modules/kernel/devices.if
-index 406b29796..e4ad0d3b8 100644
+index c0578a517..18422781d 100644
 --- a/policy/modules/kernel/devices.if
 +++ b/policy/modules/kernel/devices.if
 @@ -2114,6 +2114,14 @@ interface(`dev_getattr_input_dev',`
@@ -176,8 +175,8 @@ index 406b29796..e4ad0d3b8 100644
  ########################################
  ## <summary>
  ##	Set the attributes of the event devices.
-@@ -2260,6 +2268,38 @@ interface(`dev_dontaudit_setattr_framebuffer_dev',`
- 	dontaudit $1 framebuf_device_t:chr_file setattr;
+@@ -2259,6 +2267,38 @@ interface(`dev_setattr_framebuffer_dev',`
+ 	setattr_chr_files_pattern($1, device_t, framebuf_device_t)
  ')
  
 +interface(`dev_read_write_framebuffer_dev',`
@@ -214,9 +213,9 @@ index 406b29796..e4ad0d3b8 100644
 +
  ########################################
  ## <summary>
- ##	Read the framebuffer.
-@@ -5064,6 +5104,14 @@ interface(`dev_dontaudit_getattr_video_dev',`
- 	dontaudit $1 v4l_device_t:chr_file getattr;
+ ##	Dot not audit attempts to set the attributes
+@@ -5057,6 +5097,14 @@ interface(`dev_getattr_video_dev',`
+ 	getattr_chr_files_pattern($1, device_t, v4l_device_t)
  ')
  
 +interface(`dev_handle_video_dev',`
@@ -227,9 +226,9 @@ index 406b29796..e4ad0d3b8 100644
 +	allow $1 v4l_device_t:chr_file { ioctl map open read write };
 +')
 +
- ########################################
+ ######################################
  ## <summary>
- ##	Set the attributes of video4linux device nodes.
+ ##	Read and write userio device.
 diff --git a/policy/modules/roles/sysadm.if b/policy/modules/roles/sysadm.if
 index 5c2871842..49416d26e 100644
 --- a/policy/modules/roles/sysadm.if
@@ -273,13 +272,14 @@ index 5c2871842..49416d26e 100644
  ## <summary>
  ##	Read and write sysadm user unnamed pipes.
 diff --git a/policy/modules/roles/sysadm.te b/policy/modules/roles/sysadm.te
-index 310a4fad2..4a3dc7a58 100644
+index b00fb1550..a2f799aed 100644
 --- a/policy/modules/roles/sysadm.te
 +++ b/policy/modules/roles/sysadm.te
-@@ -1375,3 +1375,50 @@ ifndef(`distro_redhat',`
+@@ -1350,3 +1350,51 @@ ifndef(`distro_redhat',`
+ 		java_role(sysadm_r, sysadm_t)
  	')
  ')
- 
++
 +########################################
 +#
 +# DEY custom rules
@@ -347,10 +347,10 @@ index e6805e1d3..849e3ea15 100644
  ## <summary>
  ##	Connect to apmd over an unix
 diff --git a/policy/modules/services/acpi.te b/policy/modules/services/acpi.te
-index 26d16a369..c54302289 100644
+index bd442ff8a..932b02c1f 100644
 --- a/policy/modules/services/acpi.te
 +++ b/policy/modules/services/acpi.te
-@@ -235,3 +235,23 @@ optional_policy(`
+@@ -236,3 +236,23 @@ optional_policy(`
  optional_policy(`
  	xserver_domtrans(acpid_t)
  ')
@@ -375,10 +375,10 @@ index 26d16a369..c54302289 100644
 +allow acpid_t self:capability net_bind_service;
 +dev_use_wireless(acpid_t)
 diff --git a/policy/modules/services/apache.if b/policy/modules/services/apache.if
-index 71696f051..366f5fdeb 100644
+index 1695af750..f5e673bd8 100644
 --- a/policy/modules/services/apache.if
 +++ b/policy/modules/services/apache.if
-@@ -1319,6 +1319,14 @@ interface(`apache_cgi_domain',`
+@@ -1357,6 +1357,14 @@ interface(`apache_cgi_domain',`
  	allow httpd_t $1:process signal;
  ')
  
@@ -415,10 +415,10 @@ index e35e86312..1580a772c 100644
  ## <summary>
  ##	Send and receive messages from
 diff --git a/policy/modules/services/bluetooth.te b/policy/modules/services/bluetooth.te
-index 63e50aeda..ec822154f 100644
+index 931021346..e6412b657 100644
 --- a/policy/modules/services/bluetooth.te
 +++ b/policy/modules/services/bluetooth.te
-@@ -223,3 +223,13 @@ optional_policy(`
+@@ -219,3 +219,13 @@ optional_policy(`
  optional_policy(`
  	xserver_user_x_domain_template(bluetooth_helper, bluetooth_helper_t, bluetooth_helper_tmpfs_t)
  ')
@@ -432,26 +432,11 @@ index 63e50aeda..ec822154f 100644
 +
 +allow bluetooth_t self:alg_socket { bind create };
 +allow bluetooth_t syslogd_runtime_t:sock_file write;
-diff --git a/policy/modules/services/consolekit.te b/policy/modules/services/consolekit.te
-index 105bd45c7..292fd5074 100644
---- a/policy/modules/services/consolekit.te
-+++ b/policy/modules/services/consolekit.te
-@@ -172,3 +172,10 @@ optional_policy(`
- optional_policy(`
- 	unconfined_stream_connect(consolekit_t)
- ')
-+
-+########################################
-+#
-+# DEY custom rules
-+#
-+
-+allow consolekit_t var_log_t:dir create;
 diff --git a/policy/modules/services/dbus.if b/policy/modules/services/dbus.if
-index 146262d88..f59642950 100644
+index d43c4fba0..2adce5cf6 100644
 --- a/policy/modules/services/dbus.if
 +++ b/policy/modules/services/dbus.if
-@@ -165,6 +165,14 @@ interface(`dbus_connect_all_session_bus',`
+@@ -167,6 +167,14 @@ interface(`dbus_connect_all_session_bus',`
  	allow $1 session_bus_type:dbus acquire_svc;
  ')
  
@@ -466,11 +451,26 @@ index 146262d88..f59642950 100644
  #######################################
  ## <summary>
  ##	Acquire service on specified
+@@ -614,6 +622,14 @@ interface(`dbus_list_system_bus_runtime',`
+ 	allow $1 system_dbusd_runtime_t:dir list_dir_perms;
+ ')
+ 
++interface(`dbus_read_system_bus_runtime_dirs',`
++	gen_require(`
++		type system_dbusd_runtime_t;
++	')
++
++	allow $1 system_dbusd_runtime_t:dir read;
++')
++
+ ########################################
+ ## <summary>
+ ##	Watch system bus runtime named sockets.
 diff --git a/policy/modules/services/dbus.te b/policy/modules/services/dbus.te
-index 8ae5c8d93..bcf8b9677 100644
+index ddb493c2c..75835a23f 100644
 --- a/policy/modules/services/dbus.te
 +++ b/policy/modules/services/dbus.te
-@@ -315,3 +315,10 @@ optional_policy(`
+@@ -317,3 +317,10 @@ optional_policy(`
  
  allow dbusd_unconfined { dbusd_session_bus_client dbusd_system_bus_client }:dbus send_msg;
  allow dbusd_unconfined { system_dbusd_t session_bus_type }:dbus all_dbus_perms;
@@ -482,11 +482,11 @@ index 8ae5c8d93..bcf8b9677 100644
 +
 +allow system_dbusd_t syslogd_runtime_t:sock_file write;
 diff --git a/policy/modules/services/modemmanager.te b/policy/modules/services/modemmanager.te
-index 784221a03..1f6f698c2 100644
+index deadee404..de5dda83f 100644
 --- a/policy/modules/services/modemmanager.te
 +++ b/policy/modules/services/modemmanager.te
-@@ -58,3 +58,13 @@ optional_policy(`
- 	udev_read_db(modemmanager_t)
+@@ -57,3 +57,13 @@ optional_policy(`
+ optional_policy(`
  	udev_manage_runtime_files(modemmanager_t)
  ')
 +
@@ -519,10 +519,10 @@ index ef738db1e..7e203a0d2 100644
  ## <summary>
  ##	Watch networkmanager etc dirs.
 diff --git a/policy/modules/services/networkmanager.te b/policy/modules/services/networkmanager.te
-index ce48909dd..e5f9e5da0 100644
+index c538bca09..dbc998296 100644
 --- a/policy/modules/services/networkmanager.te
 +++ b/policy/modules/services/networkmanager.te
-@@ -397,3 +397,26 @@ init_use_script_ptys(wpa_cli_t)
+@@ -383,3 +383,25 @@ init_use_script_ptys(wpa_cli_t)
  miscfiles_read_localization(wpa_cli_t)
  
  term_dontaudit_use_console(wpa_cli_t)
@@ -544,16 +544,15 @@ index ce48909dd..e5f9e5da0 100644
 +allow NetworkManager_t etc_t:dir watch;
 +
 +acpi_use_fds(NetworkManager_t)
-+consolekit_watch_runtime_dir(NetworkManager_t)
 +
 +acpi_write_lock(NetworkManager_t)
 +acpi_append_log(NetworkManager_t)
 +dev_read_input_dev(NetworkManager_t)
 diff --git a/policy/modules/system/init.te b/policy/modules/system/init.te
-index 6b6b723b8..f43acf976 100644
+index 9b03d3767..68d80acb5 100644
 --- a/policy/modules/system/init.te
 +++ b/policy/modules/system/init.te
-@@ -1486,3 +1486,10 @@ optional_policy(`
+@@ -1483,3 +1483,10 @@ optional_policy(`
  	userdom_dontaudit_rw_all_users_stream_sockets(systemprocess)
  	userdom_dontaudit_write_user_tmp_files(systemprocess)
  ')
@@ -584,10 +583,10 @@ index d1379fbe6..dc25cb26f 100644
  ## <summary>
  ##	dontaudit attempts to setattr on library files
 diff --git a/policy/modules/system/locallogin.te b/policy/modules/system/locallogin.te
-index 971ca40e5..da4689d33 100644
+index 313112371..531fd5001 100644
 --- a/policy/modules/system/locallogin.te
 +++ b/policy/modules/system/locallogin.te
-@@ -289,3 +289,12 @@ optional_policy(`
+@@ -287,3 +287,12 @@ optional_policy(`
  optional_policy(`
  	nscd_use(sulogin_t)
  ')
@@ -601,10 +600,10 @@ index 971ca40e5..da4689d33 100644
 +allow local_login_t initrc_t:unix_stream_socket connectto;
 +allow local_login_t syslogd_runtime_t:sock_file write;
 diff --git a/policy/modules/system/logging.if b/policy/modules/system/logging.if
-index e3cbe4f1a..81a512e7b 100644
+index 7233a108c..aa83f8fcb 100644
 --- a/policy/modules/system/logging.if
 +++ b/policy/modules/system/logging.if
-@@ -1261,6 +1261,14 @@ interface(`logging_dontaudit_write_generic_logs',`
+@@ -1264,6 +1264,14 @@ interface(`logging_dontaudit_write_generic_logs',`
  	dontaudit $1 var_log_t:file write;
  ')
  
@@ -620,10 +619,10 @@ index e3cbe4f1a..81a512e7b 100644
  ## <summary>
  ##	Read and write generic log files.
 diff --git a/policy/modules/system/logging.te b/policy/modules/system/logging.te
-index c22613c0b..b332aeb21 100644
+index bdd5c9dff..93e37cc85 100644
 --- a/policy/modules/system/logging.te
 +++ b/policy/modules/system/logging.te
-@@ -627,3 +627,14 @@ optional_policy(`
+@@ -619,3 +619,14 @@ optional_policy(`
  	# log to the xconsole
  	xserver_rw_console(syslogd_t)
  ')
@@ -639,13 +638,14 @@ index c22613c0b..b332aeb21 100644
 +udevadm_signull(syslogd_t)
 +userdom_manage_user_runtime_root_dirs(syslogd_t)
 diff --git a/policy/modules/system/modutils.te b/policy/modules/system/modutils.te
-index 8fd009742..8c9056ead 100644
+index b8769bc02..7f0bf56e0 100644
 --- a/policy/modules/system/modutils.te
 +++ b/policy/modules/system/modutils.te
-@@ -195,3 +195,11 @@ optional_policy(`
+@@ -183,3 +183,12 @@ optional_policy(`
+ 
  	xserver_getattr_log(kmod_t)
  ')
- 
++
 +########################################
 +#
 +# DEY custom rules
@@ -655,10 +655,10 @@ index 8fd009742..8c9056ead 100644
 +acpi_append_log(kmod_t)
 +dev_read_input_dev(kmod_t)
 diff --git a/policy/modules/system/mount.te b/policy/modules/system/mount.te
-index 5bb4fe631..ddd6ce396 100644
+index f55457bb0..abf2b8f41 100644
 --- a/policy/modules/system/mount.te
 +++ b/policy/modules/system/mount.te
-@@ -230,3 +230,10 @@ optional_policy(`
+@@ -229,3 +229,10 @@ optional_policy(`
  	files_etc_filetrans_etc_runtime(unconfined_mount_t, file)
  	unconfined_domain(unconfined_mount_t)
  ')
@@ -670,12 +670,12 @@ index 5bb4fe631..ddd6ce396 100644
 +
 +userdom_append_getattr(mount_t)
 diff --git a/policy/modules/system/selinuxutil.te b/policy/modules/system/selinuxutil.te
-index 09fef149b..3fd8b81c5 100644
+index a26f8db03..329f98c26 100644
 --- a/policy/modules/system/selinuxutil.te
 +++ b/policy/modules/system/selinuxutil.te
-@@ -691,3 +691,11 @@ optional_policy(`
+@@ -696,3 +696,11 @@ ifdef(`hide_broken_symptoms',`
  optional_policy(`
- 	hotplug_use_fds(setfiles_t)
+ 	apt_use_fds(setfiles_t)
  ')
 +
 +########################################
@@ -686,10 +686,10 @@ index 09fef149b..3fd8b81c5 100644
 +allow semanage_t load_policy_t:process { noatsecure rlimitinh siginh };
 +allow semanage_t setfiles_t:process { noatsecure rlimitinh siginh };
 diff --git a/policy/modules/system/sysnetwork.te b/policy/modules/system/sysnetwork.te
-index a77738924..28d7f42bb 100644
+index b6fd3f907..9b8503274 100644
 --- a/policy/modules/system/sysnetwork.te
 +++ b/policy/modules/system/sysnetwork.te
-@@ -424,3 +424,11 @@ optional_policy(`
+@@ -423,3 +423,11 @@ optional_policy(`
  	xen_append_log(ifconfig_t)
  	xen_dontaudit_rw_unix_stream_sockets(ifconfig_t)
  ')
@@ -702,10 +702,10 @@ index a77738924..28d7f42bb 100644
 +allow ifconfig_t bin_t:file { execute map read };
 +userdom_append_getattr(ifconfig_t);
 diff --git a/policy/modules/system/systemd.if b/policy/modules/system/systemd.if
-index b81300835..622682107 100644
+index 320619289..1277ebaad 100644
 --- a/policy/modules/system/systemd.if
 +++ b/policy/modules/system/systemd.if
-@@ -234,6 +234,14 @@ interface(`systemd_read_logind_runtime_files',`
+@@ -284,6 +284,14 @@ interface(`systemd_read_logind_runtime_files',`
  	allow $1 systemd_logind_runtime_t:file read_file_perms;
  ')
  
@@ -720,7 +720,7 @@ index b81300835..622682107 100644
  ######################################
  ## <summary>
  ##   Manage systemd-logind runtime pipes.
-@@ -313,6 +321,14 @@ interface(`systemd_read_logind_sessions_files',`
+@@ -363,6 +371,14 @@ interface(`systemd_read_logind_sessions_files',`
  	read_files_pattern($1, systemd_sessions_runtime_t, systemd_sessions_runtime_t)
  ')
  
@@ -735,7 +735,7 @@ index b81300835..622682107 100644
  ######################################
  ## <summary>
  ##      Write inherited logind sessions pipes.
-@@ -445,6 +461,14 @@ interface(`systemd_read_machines',`
+@@ -538,6 +554,14 @@ interface(`systemd_read_machines',`
  	allow $1 systemd_machined_runtime_t:file read_file_perms;
  ')
  
@@ -749,15 +749,15 @@ index b81300835..622682107 100644
 +
  ########################################
  ## <summary>
- ##   Send and receive messages from
+ ##     Allow connecting to /run/systemd/userdb/io.systemd.Machine socket
 diff --git a/policy/modules/system/systemd.te b/policy/modules/system/systemd.te
-index 7e573645b..4efc91a9b 100644
+index 7b2d359b7..a3d7d5a41 100644
 --- a/policy/modules/system/systemd.te
 +++ b/policy/modules/system/systemd.te
-@@ -1420,3 +1420,25 @@ userdom_mounton_user_runtime_dirs(systemd_user_runtime_dir_t)
- userdom_relabelto_user_runtime_dirs(systemd_user_runtime_dir_t)
- 
- dbus_system_bus_client(systemd_user_runtime_dir_t)
+@@ -1597,3 +1597,25 @@ userdom_relabelto_user_runtime_dirs(systemd_user_runtime_dir_t)
+ optional_policy(`
+     dbus_system_bus_client(systemd_user_runtime_dir_t)
+ ')
 +
 +########################################
 +#
@@ -777,18 +777,17 @@ index 7e573645b..4efc91a9b 100644
 +allow systemd_logind_t initrc_runtime_t:file watch;
 +allow systemd_logind_t initrc_t:unix_stream_socket connectto;
 +
-+allow systemd_resolved_t system_dbusd_runtime_t:dir read;
++dbus_read_system_bus_runtime_dirs(systemd_resolved_t)
 +allow systemd_resolved_t systemd_resolved_runtime_t:lnk_file { create rename };
-+allow systemd_resolved_t system_dbusd_runtime_t:sock_file read;
++dbus_read_system_bus_runtime_named_sockets(systemd_resolved_t)
 diff --git a/policy/modules/system/udev.if b/policy/modules/system/udev.if
-index bdfd373da..468f83d2e 100644
+index 538f28514..ab21990b1 100644
 --- a/policy/modules/system/udev.if
 +++ b/policy/modules/system/udev.if
-@@ -597,3 +597,11 @@ interface(`udevadm_exec',`
- 
- 	can_exec($1, udevadm_exec_t)
+@@ -600,6 +600,14 @@ interface(`udevadm_exec',`
+ 	udev_exec_udevadm($1)
  ')
-+
+ 
 +interface(`udevadm_signull',`
 +	gen_require(`
 +		type udevadm_t;
@@ -796,14 +795,18 @@ index bdfd373da..468f83d2e 100644
 +
 +	allow $1 udevadm_t:process signull;
 +')
++
+ ########################################
+ ## <summary>
+ ##	Execute udevadm in the caller domain.
 diff --git a/policy/modules/system/udev.te b/policy/modules/system/udev.te
-index e483d63d3..2bd2fcdc7 100644
+index daf64482f..1c8200e84 100644
 --- a/policy/modules/system/udev.te
 +++ b/policy/modules/system/udev.te
-@@ -427,3 +427,10 @@ seutil_read_file_contexts(udevadm_t)
+@@ -392,3 +392,10 @@ kernel_read_system_state(udevadm_t)
+ seutil_read_file_contexts(udevadm_t)
  
- init_dontaudit_use_fds(udevadm_t)
- term_dontaudit_use_console(udevadm_t)
+ fs_getattr_xattr_fs(udevadm_t)
 +
 +########################################
 +#
@@ -812,10 +815,10 @@ index e483d63d3..2bd2fcdc7 100644
 +
 +allow udev_t init_t:system start;
 diff --git a/policy/modules/system/userdomain.if b/policy/modules/system/userdomain.if
-index 5aab9ada7..eb1d5ffbf 100644
+index 55081d87b..8510fdabb 100644
 --- a/policy/modules/system/userdomain.if
 +++ b/policy/modules/system/userdomain.if
-@@ -4361,6 +4361,14 @@ interface(`userdom_write_user_tmp_files',`
+@@ -4444,6 +4444,14 @@ interface(`userdom_write_user_tmp_files',`
  	allow $1 user_tmp_t:file write_file_perms;
  ')
  
@@ -831,7 +834,7 @@ index 5aab9ada7..eb1d5ffbf 100644
  ## <summary>
  ##      Do not audit attempts to write users
 diff --git a/policy/modules/system/userdomain.te b/policy/modules/system/userdomain.te
-index ce69ca10b..5cb2f75bc 100644
+index 2f8e1e4c7..e66fb3645 100644
 --- a/policy/modules/system/userdomain.te
 +++ b/policy/modules/system/userdomain.te
 @@ -130,3 +130,10 @@ files_poly_member(user_runtime_t)
@@ -846,10 +849,10 @@ index ce69ca10b..5cb2f75bc 100644
 +
 +dev_associate(user_tmpfs_t)
 diff --git a/policy/modules/system/xdg.if b/policy/modules/system/xdg.if
-index 11fc43069..801c79d40 100644
+index 823042414..a3474727d 100644
 --- a/policy/modules/system/xdg.if
 +++ b/policy/modules/system/xdg.if
-@@ -215,6 +215,14 @@ interface(`xdg_create_cache_dirs',`
+@@ -251,6 +251,14 @@ interface(`xdg_create_cache_dirs',`
  	allow $1 xdg_cache_t:dir create_dir_perms;
  ')
  
@@ -864,7 +867,7 @@ index 11fc43069..801c79d40 100644
  ########################################
  ## <summary>
  ##	Manage the xdg cache home files
-@@ -465,6 +473,14 @@ interface(`xdg_create_config_dirs',`
+@@ -537,6 +545,14 @@ interface(`xdg_create_config_dirs',`
  	allow $1 xdg_config_t:dir create_dir_perms;
  ')
  
