@@ -17,6 +17,7 @@ SRC_URI = " \
     file://0004-lib-install-pkg-config-file-and-header-files.patch \
     file://0005-test-add-CMakeLists.txt.patch \
     file://0006-Remove-unnecessary-code-from-cryptoauth_test.patch \
+    file://0007-lib-set-ATECC508A-as-default-device-type-in-default.patch \
 "
 
 S = "${WORKDIR}/git"
@@ -27,7 +28,8 @@ I2C_BUS_ccimx6ul = "0"
 I2C_BUS_ccimx8x = "0"
 I2C_BUS_ccimx8m = "0"
 
-I2C_SPEED ?= "100000"
+I2C_SPEED ?= "400000"
+I2C_SPEED_ccimx6qpsbc = "100000"
 
 EXTRA_OECMAKE += "-DATCA_HAL_I2C_BUS=${I2C_BUS} -DATCA_HAL_I2C_SPEED=${I2C_SPEED} -DBUILD_TESTS=on"
 

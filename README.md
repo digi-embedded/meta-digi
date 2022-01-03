@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 3.2
-## Release 3.2-r1
+## Release 3.2-r2
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -99,10 +99,23 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 # Downloads
 
-* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/3.2/r1/images/
-* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/3.2/r1/sdk/
+* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/3.2/r2/images/
+* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/3.2/r2/sdk/
 
 # Release Changelog
+
+## 3.2-r2
+
+* Updated GLIBC to v2.33
+* Updated busybox to v1.34.1
+* Updated OpenSSL to v1.1.1l
+* Updated QCA65x4 Wi-Fi firmware
+* Updated NXP eIQ revision
+* Improved Dual boot support
+* Added support to ConnectCore 6N
+* Added support to SELinux
+* Added support to Read-only root file system
+* Other minor fixes.
 
 ## 3.2-r1
 

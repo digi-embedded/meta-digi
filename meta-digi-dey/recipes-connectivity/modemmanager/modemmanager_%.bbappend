@@ -11,7 +11,7 @@ SRC_URI += " \
 # 'polkit' depends on 'consolekit', and this requires 'x11' distro feature. So
 # remove 'polkit' support to be able to build ModemManager on a framebuffer
 # only image (without X11)
-PACKAGECONFIG_remove = " polkit"
+PACKAGECONFIG_remove_dey = " polkit"
 
 do_install_append() {
 	# Install udev rules for ModemManager blacklist devices

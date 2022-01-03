@@ -833,7 +833,7 @@ if [ -n "${update_package_bool}" ]; then
 	progress -wp &
 	# Execute the software update.
 	if [ -f "${PUBLIC_KEY}" ]; then
-		[ "${ENCRYPT_ROOTFS}" = "yes" ] && SWUPDATE_PREUPDATE_CMD="-P /etc/mount_cryptrootfs.sh"
+		[ "$(is_nand)" = "no" ] && [ "${ENCRYPT_ROOTFS}" = "yes" ] && SWUPDATE_PREUPDATE_CMD="-P /etc/mount_cryptrootfs.sh"
 		swupdate -e "${SWUPDATE_IMAGE_SET}" -f "${SW_CONFIG}" -i "${update_package}" -k "${PUBLIC_KEY}" ${SWUPDATE_PREUPDATE_CMD}
 	else
 		swupdate -e "${SWUPDATE_IMAGE_SET}" -f "${SW_CONFIG}" -i "${update_package}"

@@ -24,10 +24,10 @@ SRC_URI += " \
 # based images.
 DEPENDS_remove = "polkit"
 EXTRA_OECONF += "--enable-polkit=disabled"
-PACKAGECONFIG_remove = "consolekit"
+PACKAGECONFIG_remove_dey = "consolekit"
 
 # Adjust other compile time options to save space
-PACKAGECONFIG_remove = "netconfig nss"
+PACKAGECONFIG_remove_dey = "netconfig nss"
 PACKAGECONFIG_append = " gnutls modemmanager ppp"
 
 EXTRA_OECONF_append = " --disable-introspection --enable-concheck"

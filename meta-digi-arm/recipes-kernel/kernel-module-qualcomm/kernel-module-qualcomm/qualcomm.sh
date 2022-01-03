@@ -55,50 +55,7 @@ set_filesystem_rw_access() {
 # Do nothing if the module is already loaded
 grep -qws 'wlan' /proc/modules && exit 0
 
-FIRMWARE_DIR="/lib/firmware"
-MACFILE="${FIRMWARE_DIR}/wlan/wlan_mac.bin"
-TMP_MACFILE="$(mktemp -t wlan_mac.XXXXXX)"
 FS_ORIGINAL_ACCESS="$(get_filesystem_access ${FIRMWARE_DIR})"
-
-# Read the MACs from DeviceTree. We can have up to four wireless interfaces
-# The only required one is wlan0 that is mapped with device tree mac address
-# without suffix.
-for index in $(seq 0 3); do
-	MAC_ADDR="$(hexdump -ve '1/1 "%02X"' /proc/device-tree/wireless/mac-address${index%0} 2>/dev/null)"
-	if [ "${index}" = "0" ] && { [ -z "${MAC_ADDR}" ] || [ "${MAC_ADDR}" = "00:00:00:00:00:00" ]; }; then
-		# Set a default MAC for wlan0
-		MAC_ADDR="0004F3FFFFFB"
-	fi
-
-	# Add the MAC address to the firmware file with the expected format
-	echo "Intf${index}MacAddress=${MAC_ADDR}" >> ${TMP_MACFILE}
-done
-
-# Override the MAC firmware file only if the MAC file has changed.
-if ! cmp -s ${TMP_MACFILE} ${MACFILE}; then
-	set_filesystem_rw_access ${FIRMWARE_DIR}
-	cp ${TMP_MACFILE} ${MACFILE} || log "3" "[ERROR] Could not create ${MACFILE}"
-fi
-rm -f "${TMP_MACFILE}"
-
-# Create symbolic links to the proper FW files depending on the country region
-# Use a sub-shell here to change to firmware directory
-(
-	cd "${FIRMWARE_DIR}"
-
-	BDATA_SOURCE="bdwlan30_US.bin"
-	log "5" "Setting US wireless region"
-
-	# When defined, update the links only if they are wrong so we don't
-	# rewrite the internal memory every time we boot
-	BDATA_LINK="bdwlan30.bin"
-	UTFBDATA_LINK="utfbd30.bin"
-	if ([ ! -f "${BDATA_LINK}" ] || ! cmp -s "${BDATA_LINK}" "${BDATA_SOURCE}"); then
-		set_filesystem_rw_access ${FIRMWARE_DIR}
-		ln -sf "${BDATA_SOURCE}" "${BDATA_LINK}"
-		ln -sf "${BDATA_SOURCE}" "${UTFBDATA_LINK}"
-	fi
-)
 
 # Load the wireless module with the params defined in modprobe.d/qualcomm.conf
 # and reduce the console log level to avoid debug messages at boot time

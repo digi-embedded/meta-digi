@@ -147,7 +147,7 @@ setenv bootcmd "
 	if test \"\$\{singlemtdsys\}\" = yes; then
 		run ubivolscript;
 	else
-		force_erase="-e"
+		force_erase="-e";
 	fi;
 	if test \"\$\{dualboot\}\" = yes; then
 		echo \"\";
