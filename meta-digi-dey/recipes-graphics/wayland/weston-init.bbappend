@@ -41,6 +41,9 @@ do_install_append() {
 
     update_file "WatchdogSec=20" "WatchdogSec=${WATCHDOG_SEC}" ${D}${systemd_system_unitdir}/weston.service
 
+    update_file "Before=graphical.target" "Before=multi-user.target" ${D}${systemd_system_unitdir}/weston.service
+    update_file "WantedBy=graphical.target" "WantedBy=multi-user.target" ${D}${systemd_system_unitdir}/weston.service
+
     # Add custom background image
     install -d ${D}${datadir}/weston
     install ${WORKDIR}/digi_background.png ${D}${datadir}/weston
