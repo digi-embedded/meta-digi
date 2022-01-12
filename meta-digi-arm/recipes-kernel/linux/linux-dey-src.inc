@@ -3,6 +3,7 @@
 LICENSE = "GPLv2"
 
 LOCALVERSION = "-dey"
+SRCREV = "${AUTOREV}"
 
 # Select internal or Github Linux repo
 DIGI_LOG_REPO = "linux-2.6.git"
@@ -13,5 +14,6 @@ LINUX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , \
 					'${DIGI_GITHUB_GIT}/${GITHUB_REPO};protocol=https', d)}"
 
 SRC_URI = "${LINUX_GIT_URI};branch=${SRCBRANCH}"
+SRC_URI_stmp32mpcommon = "${LINUX_GIT_URI};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git"
