@@ -138,3 +138,5 @@ MACHINEOVERRIDES =. "use-nxp-bsp:"
 # U-Boot 2017.X requires a specific dtc version.
 PREFERRED_VERSION_dtc-native_ccimx6 ?= "1.4.5"
 PREFERRED_VERSION_nativesdk-dtc_ccimx6 ?= "1.4.5"
+
+DEY_BUILD_PLATFORM = "NXP"
