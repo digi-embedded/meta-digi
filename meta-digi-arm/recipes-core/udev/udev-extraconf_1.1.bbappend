@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2018 Digi International.
+# Copyright (C) 2013-2022 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
@@ -37,7 +37,10 @@ do_install_append() {
 	fi
 
 	install -d ${D}${sysconfdir}/modprobe.d
-	install -m 0644 ${WORKDIR}/blacklist.conf ${D}${sysconfdir}/modprobe.d
+	if ${@bb.utils.contains('MACHINE_FEATURES','gpu','false','true',d)}; then
+		# evbug debug tool
+		install -m 0644 ${WORKDIR}/blacklist.conf ${D}${sysconfdir}/modprobe.d
+	fi
 }
 
 FILES_${PN}_append = " ${sysconfdir}/modprobe.d"
