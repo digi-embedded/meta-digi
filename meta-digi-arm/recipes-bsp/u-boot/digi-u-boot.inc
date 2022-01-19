@@ -36,7 +36,6 @@ SRC_URI_append = " \
 BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
 
 LOCALVERSION ?= ""
-inherit fsl-u-boot-localversion
 
 EXTRA_OEMAKE_append = " KCFLAGS=-fgnu89-inline"
 
