@@ -3,7 +3,7 @@
 #
 #  mkproject.sh
 #
-#  Copyright (C) 2013-2017 by Digi International Inc.
+#  Copyright (C) 2013-2022 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -93,8 +93,20 @@ do_license() {
 	local MKP_LICENSE_FILES=" \
 		${MKP_SCRIPTPATH}/sources/meta-digi/meta-digi-arm/DIGI_EULA \
 		${MKP_SCRIPTPATH}/sources/meta-digi/meta-digi-arm/DIGI_OPEN_EULA \
-		${MKP_SCRIPTPATH}/sources/meta-freescale/EULA \
 	"
+	if [ "${MKP_PLATFORM}" = "ccmp15-dvk" ]; then
+		local SOC_VENDOR="STM"
+		MKP_LICENSE_FILES=" \
+			${MKP_LICENSE_FILES} \
+			${MKP_SCRIPTPATH}/sources/meta-st-stm32/EULA \
+		"
+	else
+		local SOC_VENDOR="NXP"
+		MKP_LICENSE_FILES=" \
+			${MKP_LICENSE_FILES} \
+			${MKP_SCRIPTPATH}/sources/meta-freescale/EULA \
+		"
+	fi
 	[ -z "${MKP_PAGER+x}" ] && MKP_PAGER="| more"
 	eval cat - "${MKP_LICENSE_FILES}" <<-_EOF_ ${MKP_PAGER}; printf "\n"
 		+-------------------------------------------------------------------------------+
@@ -105,7 +117,7 @@ do_license() {
 		|                                                                               |
 		|      * Digi's end user license agreement                                      |
 		|      * Digi's third party and open source license notice                      |
-		|      * NXP Semiconductors' software license agreement                         |
+		|      * ${SOC_VENDOR} Semiconductors' software license agreement                             |
 		|                                                                               |
 		|  To have the right to use those binaries in your images you need to read and  |
 		|  accept the licenses.                                                         |
