@@ -1,0 +1,69 @@
+#!/bin/sh
+#===============================================================================
+#
+#  Copyright (C) 2018,2022 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Initialize bluetooth hardware
+#
+#===============================================================================
+
+bluetooth_init() {
+	# Get MAC address from the device tree. Use a default value if it has not been set.
+	BT_MACADDR="$(hexdump -ve '1/1 "%02X" ":"' /proc/device-tree/bluetooth/mac-address 2>/dev/null | sed 's/:$//g')"
+	if [ -z "${BT_MACADDR}" ] || [ "${BT_MACADDR}" = "00:00:00:00:00:00" ]; then
+		BT_MACADDR="00:04:F3:FF:FF:BB"
+	fi
+
+	# Start the Bluetooth driver and bring up the interface
+	HCIATTACH_LOG="/var/log/hciattach.log"
+
+	for RETRY in $(seq 1 5)
+	do
+		killproc hciattach
+		modprobe btdigi
+		if hciattach ttyBt qca ${BT_RATE:-3000000} -t30 ${BT_FLOW:-flow} unused ${BT_MACADDR} >${HCIATTACH_LOG} 2>&1; then
+			return
+		fi
+		rmmod btdigi
+		sleep 1
+	done
+	BT_ERROR="FAIL (hciattach)"
+}
+
+# Source function library
+. /etc/init.d/functions
+
+case "$1" in
+	start)
+		if [ -d "/proc/device-tree/bluetooth" ]; then
+			if [ "$(tr -d '\0' 2>/dev/null </proc/device-tree/bluetooth/status)" != "disabled" ]; then
+				echo -n "Starting bluetooth hardware: "
+				bluetooth_init
+				echo "${BT_ERROR:-done.}"
+			fi
+		fi
+		;;
+	stop)
+		if [ -d "/sys/class/bluetooth/hci0" ]; then
+			echo -n "Stopping bluetooth hardware: "
+			killproc hciattach
+			rmmod btdigi
+			echo "done."
+		fi
+		;;
+	restart)
+		$0 stop
+		sleep 1
+		$0 start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+		;;
+esac
