@@ -1,0 +1,116 @@
+#!/bin/sh
+#===============================================================================
+#
+#  standby
+#
+#  Copyright (C) 2016-2018 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: suspend system to RAM
+#
+#===============================================================================
+
+scriptname="$(basename $(readlink -f ${0}))"
+syspower="/sys/power/state"
+lockfile="/var/lock/${scriptname}.lock"
+lockfd="9"
+
+BT_INIT="/etc/init.d/bluetooth-init"
+BT_DAEMON="/etc/init.d/bluetooth"
+NM_DAEMON="/etc/init.d/networkmanager"
+
+usage() {
+	printf "\nSuspend system to RAM memory\n"
+	printf "\nUsage: ${scriptname} [OPTIONS]\n
+	-h      Show this help
+	\n"
+}
+
+suspend_interfaces() {
+	# Stop NetworkManager before suspend
+	${NM_DAEMON} stop
+
+	# Suspend wireless interfaces
+	if [ -d "/proc/device-tree/wireless" ]; then
+		for i in $(sed -ne 's,^\(wlan[0-9]\)=.*,\1,g;T;p' /var/run/ifstate | sort -r); do
+			ifdown "${i}" && RESUME_IFACES="${RESUME_IFACES:+${RESUME_IFACES} }${i}"
+		done
+		grep -qs '^wlan' /proc/modules && rmmod wlan
+	fi
+
+	# Suspend bluetooth interface
+	if [ -d "/proc/device-tree/bluetooth" ]; then
+		hciconfig hci0 2>&1 | grep -qs UP && up_bt_on_resume="1"
+		${BT_DAEMON} stop >/dev/null
+		${BT_INIT} stop >/dev/null
+	fi
+}
+
+resume_interfaces() {
+	# Resume wireless interfaces
+	if [ -d "/proc/device-tree/wireless" ]; then
+		# Trigger wireless module loading event, and wait until the interface exists
+		udevadm trigger --action=add --attr-match="modalias=sdio:c00v0271d050A"
+		timeout 5 sh -c "while [ ! -d /sys/class/net/wlan0 ]; do sleep .2; done" 2>/dev/null
+
+		# Bring up the interfaces that were bring down on suspend
+		for i in $(echo ${RESUME_IFACES} | tr ' ' '\n' | sort); do
+			grep -qs "^${i}" /var/run/ifstate || ifup "${i}"
+		done
+	fi
+
+	# Resume bluetooth interface
+	if [ -d "/proc/device-tree/bluetooth" ]; then
+		if [ -n "${up_bt_on_resume}" ]; then
+			${BT_INIT} start >/dev/null
+			${BT_DAEMON} start >/dev/null
+		fi
+	fi
+
+	# Resume NetworkManager after suspend
+	${NM_DAEMON} start
+}
+
+enter_critical_section() {
+	# Create lock file
+	eval "exec ${lockfd}>${lockfile}"
+
+	# Acquire the lock in non blocking mode. Otherwise, additional calls
+	# to the script will be queued and the system will endlessly go in
+	# and out of suspend to ram
+	flock -n "${lockfd}" || exit 0
+}
+
+exit_critical_section() {
+	# Release the lock
+	flock -u "${lockfd}"
+}
+
+while getopts "h" c; do
+	case "${c}" in
+		h) usage; exit;;
+	esac
+done
+
+if [ -f "${syspower}" ]; then
+	# Avoid running multiple instances of this script in parallel
+	enter_critical_section
+
+	# Pre-suspend actions
+	suspend_interfaces
+
+	# Suspend the device
+	printf "mem" > ${syspower}
+
+	# Post-resume actions
+	resume_interfaces
+
+	exit_critical_section
+else
+	printf "\n[ERROR] File ${syspower} not found\n\n"
+fi
