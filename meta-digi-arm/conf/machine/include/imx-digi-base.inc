@@ -140,3 +140,12 @@ PREFERRED_VERSION_dtc-native_ccimx6 ?= "1.4.5"
 PREFERRED_VERSION_nativesdk-dtc_ccimx6 ?= "1.4.5"
 
 DEY_BUILD_PLATFORM = "NXP"
+
+# Use NXP's forks of packages when possible
+PREFERRED_VERSION_weston ?= "9.0.0.imx"
+PREFERRED_VERSION_wayland-protocols = "1.22.imx"
+PREFERRED_VERSION_libdrm ?= "2.4.107.imx"
+PREFERRED_VERSION_opencv ?= "4.5.2.imx"
+PREFERRED_VERSION_optee-client = "3.15.0.imx"
+PREFERRED_VERSION_optee-os = "3.15.0.imx"
+PREFERRED_VERSION_optee-test = "3.15.0.imx"
