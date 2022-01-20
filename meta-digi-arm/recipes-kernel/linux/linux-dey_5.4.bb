@@ -6,7 +6,8 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
 DEPENDS += "lzop-native bc-native"
 
-inherit kernel fsl-kernel-localversion
+inherit kernel
+inherit ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'fsl-kernel-localversion', '', d)}
 
 SRCBRANCH = "v5.4.70/master"
 require recipes-kernel/linux/linux-dey-src.inc

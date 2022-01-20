@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Digi International
+# Copyright (C) 2018-2022 Digi International
 
 LICENSE = "GPLv2"
 
