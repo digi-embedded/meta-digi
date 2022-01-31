@@ -83,7 +83,7 @@ index 2ad87f79..3800ab6e 100644
 @@ -112,16 +104,12 @@ set(EXAMPLES
  	raytracingcallable
  	raytracingreflections
- 	raytracingshadows
+ 	raytracingshadows	
  	renderheadless
  	screenshot
 -	shadowmapping
