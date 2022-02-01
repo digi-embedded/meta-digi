@@ -5,8 +5,9 @@ SUMMARY = "Installs i.MX-specific kernel headers"
 DESCRIPTION = "Installs i.MX-specific kernel headers to userspace. \
 New headers are installed in ${includedir}/imx."
 LICENSE = "GPLv2"
-LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
+LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
+SRCBRANCH = "v5.4.70/master"
 require recipes-kernel/linux/linux-dey-src.inc
 
 S = "${WORKDIR}/git"
