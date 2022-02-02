@@ -100,6 +100,7 @@ IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware imx-seco"
 
 IMX_BOOT_SOC_TARGET_mx8mm = "iMX8MM"
 IMX_BOOT_SOC_TARGET_mx8mn = "iMX8MN"
+IMX_BOOT_SOC_TARGET_mx8mp = "iMX8MP"
 IMX_BOOT_SOC_TARGET_mx8x = "iMX8QX"
 
 DEPENDS_append_ccimx8x = " coreutils-native"
