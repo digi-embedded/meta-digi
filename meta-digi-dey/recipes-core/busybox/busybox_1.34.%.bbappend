@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2019 Digi International.
+# Copyright (C) 2013-2022 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
@@ -13,6 +13,9 @@ SRC_URI += "file://standby \
             file://pswitch-standby \
             file://pswitch-poweroff \
             file://bridgeifupdown \
+            ${@bb.utils.contains("MACHINE_FEATURES", "mca", "file://poweroff_safe \
+                                                             file://reboot_safe \
+                                                            ", "", d)} \
            "
 
 SRC_URI_append_ccimx6ul = " file://index.html \
@@ -20,6 +23,7 @@ SRC_URI_append_ccimx6ul = " file://index.html \
                           "
 
 HAS_SYSTEMD = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}"
+HAS_MCA = "${@bb.utils.contains('MACHINE_FEATURES', 'mca', 'true', 'false', d)}"
 
 # hwclock bootscript init parameters
 INITSCRIPT_PARAMS_${PN}-hwclock = "start 20 S . stop 20 0 6 ."
@@ -90,6 +94,12 @@ do_install_append() {
 		install -d ${D}${sysconfdir}/network/if-post-down.d/
 		install -m 0755 ${WORKDIR}/bridgeifupdown ${D}${sysconfdir}/network/if-pre-up.d/
 		ln -s ../if-pre-up.d/bridgeifupdown ${D}${sysconfdir}/network/if-post-down.d/bridgeifupdown
+	fi
+
+	# install MCA power safe and reboot safe scripts
+	if ${HAS_MCA}; then
+		install -m 0755 ${WORKDIR}/poweroff_safe ${D}${base_bindir}/poweroff_safe
+		install -m 0755 ${WORKDIR}/reboot_safe ${D}${base_bindir}/reboot_safe
 	fi
 }
 
