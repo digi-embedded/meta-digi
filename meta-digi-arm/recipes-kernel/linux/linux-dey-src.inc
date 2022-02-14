@@ -3,7 +3,6 @@
 LICENSE = "GPLv2"
 
 LOCALVERSION = "-dey"
-SRCREV = "${AUTOREV}"
 
 # Select internal or Github Linux repo
 DIGI_LOG_REPO = "linux-2.6.git"
