@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2021 Digi International.
+# Copyright (C) 2016-2022 Digi International.
 
 SUMMARY = "MCA firmware management tool"
 SECTION = "console/tools"
@@ -22,4 +22,4 @@ inherit bin_package
 
 INSANE_SKIP_${PN} = "already-stripped"
 
-COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8x|ccimx8m)"
+COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8x|ccimx8m|ccmp15)"
