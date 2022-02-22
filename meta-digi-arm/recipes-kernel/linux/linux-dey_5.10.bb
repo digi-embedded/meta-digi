@@ -9,7 +9,7 @@ DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-too
 
 inherit kernel fsl-kernel-localversion
 
-SRCBRANCH = "v5.10.72/master"
+SRCBRANCH = "v5.10/nxp/master"
 require recipes-kernel/linux/linux-dey-src.inc
 require ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'linux-virtualization.inc', '', d)}
 
