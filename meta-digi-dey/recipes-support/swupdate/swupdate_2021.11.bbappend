@@ -1,6 +1,9 @@
-# Copyright (C) 2016-2021 Digi International Inc.
+# Copyright (C) 2016-2022 Digi International Inc.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+
+# Without libgcc, swupdate generates an error signal when terminating
+RDEPENDS_${PN} += "libgcc"
 
 do_configure_append() {
 	# If Trustfence is enabled, enable the signing support in the
