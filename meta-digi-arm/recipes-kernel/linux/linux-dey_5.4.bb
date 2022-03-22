@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 Digi International
+# Copyright (C) 2013-2022 Digi International
 
 SUMMARY = "Linux kernel for Digi boards"
 LICENSE = "GPLv2"
@@ -22,7 +22,6 @@ trustfence_sign() {
 	export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 	[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 	[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
-	[ -n "${TRUSTFENCE_SIGN_MODE}" ] && export CONFIG_SIGN_MODE="${TRUSTFENCE_SIGN_MODE}"
 
 	# Sign/encrypt the kernel images
 	for type in ${KERNEL_IMAGETYPES}; do

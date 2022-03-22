@@ -3,7 +3,7 @@
 #
 #  trustfence-sign-artifact.sh
 #
-#  Copyright (C) 2016-2021 by Digi International Inc.
+#  Copyright (C) 2016-2022 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -16,7 +16,6 @@
 #
 #    The following environment variables define the script behaviour:
 #      CONFIG_SIGN_KEYS_PATH: (mandatory) path to the CST folder by NXP with keys generated.
-#      CONFIG_SIGN_MODE: (mandatory) Signing method: HAB/AHAB
 #      CONFIG_KEY_INDEX: (optional) key index to use for signing. Default is 0.
 #      CONFIG_DEK_PATH: (optional) Path to keyfile. Define it to generate
 #			encrypted images
@@ -78,10 +77,6 @@ if [ -z "${CONFIG_SIGN_KEYS_PATH}" ]; then
 	exit 1
 fi
 [ -d "${CONFIG_SIGN_KEYS_PATH}" ] || mkdir "${CONFIG_SIGN_KEYS_PATH}"
-if [ -z "${CONFIG_SIGN_MODE}" ]; then
-	echo "Undefined CONFIG_SIGN_MODE";
-	exit 1
-fi
 
 # Get RAM_START address
 if [ "${PLATFORM}" = "ccimx6" ]; then
@@ -89,20 +84,24 @@ if [ "${PLATFORM}" = "ccimx6" ]; then
 	CONFIG_RAMDISK_LOADADDR="0x19000000"
 	CONFIG_KERNEL_LOADADDR="0x12000000"
 	CONFIG_CSF_SIZE="0x4000"
+	CONFIG_SIGN_MODE="HAB"
 elif [ "${PLATFORM}" = "ccimx6ul" ]; then
 	CONFIG_FDT_LOADADDR="0x83000000"
 	CONFIG_RAMDISK_LOADADDR="0x83800000"
 	CONFIG_KERNEL_LOADADDR="0x80800000"
 	CONFIG_CSF_SIZE="0x4000"
+	CONFIG_SIGN_MODE="HAB"
 elif [ "${PLATFORM}" = "ccimx8x" ]; then
 	CONFIG_FDT_LOADADDR="0x82000000"
 	CONFIG_RAMDISK_LOADADDR="0x82100000"
 	CONFIG_KERNEL_LOADADDR="0x80280000"
+	CONFIG_SIGN_MODE="AHAB"
 elif [ "${PLATFORM}" = "ccimx8mn" ] || [ "${PLATFORM}" = "ccimx8mm" ]; then
 	CONFIG_FDT_LOADADDR="0x43000000"
 	CONFIG_RAMDISK_LOADADDR="0x43800000"
 	CONFIG_KERNEL_LOADADDR="0x40480000"
 	CONFIG_CSF_SIZE="0x2000"
+	CONFIG_SIGN_MODE="HAB"
 else
 	echo "Invalid platform: ${PLATFORM}"
 	echo "Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn, ccimx8mm"
