@@ -54,7 +54,7 @@ python () {
         d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True) + "/dek.bin");
 
     if (d.getVar("TRUSTFENCE_SIGN", True) == "1"):
-        d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_SIGN_IMAGE=y ")
+        d.appendVar("UBOOT_EXTRA_CONF", "CONFIG_SIGN_IMAGE=y CONFIG_AUTH_ARTIFACTS=y ")
         if d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True):
             d.appendVar("UBOOT_EXTRA_CONF", 'CONFIG_SIGN_KEYS_PATH=\\"%s\\" ' % d.getVar("TRUSTFENCE_SIGN_KEYS_PATH", True))
         if (d.getVar("TRUSTFENCE_UNLOCK_KEY_REVOCATION", True) == "1"):
