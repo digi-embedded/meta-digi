@@ -82,7 +82,10 @@ do_image_boot_ubifs[depends] += " \
 "
 
 IMAGE_CMD_boot.ubifs() {
-	BOOTIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
+	if [ "${DEY_BUILD_PLATFORM}" = "STM" ]; then
+		BOOTIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/zImage-${MACHINE}.bin"
+	fi
+	BOOTIMG_FILES_SYMLINK="${BOOTIMG_FILES_SYMLINK} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
 	if [ -n "${KERNEL_DEVICETREE}" ]; then
 		for DTB in ${KERNEL_DEVICETREE}; do
 			# Remove potential sub-folders
