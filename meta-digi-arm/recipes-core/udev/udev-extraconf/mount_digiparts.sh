@@ -3,7 +3,7 @@
 #
 #  mount_bootparts.sh
 #
-#  Copyright (C) 2014-2019 by Digi International Inc.
+#  Copyright (C) 2014-2022 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -56,6 +56,8 @@ else
 	fi
 fi
 
+SINGLEMTDSYS="$(fw_printenv -n singlemtdsys 2>/dev/null)"
+
 # Create mount point if needed
 MOUNTPOINT="/mnt/${PARTNAME}"
 [ -d "${MOUNTPOINT}" ] || mkdir -p ${MOUNTPOINT}
@@ -91,7 +93,7 @@ elif [ "${SUBSYSTEM}" = "mtd" ]; then
 		logger -t udev "ERROR: Could not mount '${PARTNAME}' partition, volume not found"
 		rmdir --ignore-fail-on-non-empty ${MOUNTPOINT}
 	fi
-elif [ "${SUBSYSTEM}" = "ubi" ]; then
+elif [ "${SUBSYSTEM}" = "ubi" ] && [ "${SINGLEMTDSYS}" = "yes" ]; then
 	# In the case of a 'system' partition with many UBI volumes, the device
 	# is always /dev/ubi0
 	# Mount the volume.
