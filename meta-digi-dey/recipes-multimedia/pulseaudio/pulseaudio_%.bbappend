@@ -1,4 +1,4 @@
-# Copyright (C) 2019 Digi International
+# Copyright (C) 2019-2022 Digi International
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
@@ -37,6 +37,10 @@ SRC_URI_append = " \
 "
 
 SRC_URI_append_ccimx6ulsbc = " \
+    file://0001-pulseaudio-keep-headphones-volume-in-platforms-witho.patch \
+"
+
+SRC_URI_append_ccmp15 = " \
     file://0001-pulseaudio-keep-headphones-volume-in-platforms-witho.patch \
 "
 
