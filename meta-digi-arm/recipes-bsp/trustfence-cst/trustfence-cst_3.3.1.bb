@@ -16,7 +16,7 @@ DEPENDS = "openssl byacc flex"
 DEPENDS_append_class-nativesdk = " byacc-native openssl-native"
 
 SRC_URI = " \
-    ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', '${DIGI_PKG_SRC}/cst-${PV}.tgz', '', d)} \
+    ${DIGI_PKG_SRC}/cst-${PV}.tgz \
     file://0001-gen_auth_encrypted_data-reuse-existing-DEK-file.patch \
     file://0002-hab4_pki_tree.sh-automate-script.patch \
     file://0003-openssl_helper-use-dev-urandom-as-seed-source.patch \
