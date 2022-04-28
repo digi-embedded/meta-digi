@@ -1,0 +1,28 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Wed, 23 Feb 2022 16:38:35 +0100
+Subject: [PATCH] include: ccimx8m_common: increase rootfs partition size for 8
+ GiB eMMCs
+
+Take 2 GiB out of the update partition and use them in the rootfs in order to
+fit VRK images
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ include/configs/ccimx8m_common.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/configs/ccimx8m_common.h b/include/configs/ccimx8m_common.h
+index 4f056a05ce1..d6b1add868a 100644
+--- a/include/configs/ccimx8m_common.h
++++ b/include/configs/ccimx8m_common.h
+@@ -265,8 +265,8 @@
+ 	"start=2MiB," \
+ 	"name=linux,size=64MiB,uuid=${part1_uuid};" \
+ 	"name=recovery,size=64MiB,uuid=${part2_uuid};" \
+-	"name=rootfs,size=3GiB,uuid=${part3_uuid};" \
+-	"name=update,size=3GiB,uuid=${part4_uuid};" \
++	"name=rootfs,size=5GiB,uuid=${part3_uuid};" \
++	"name=update,size=1GiB,uuid=${part4_uuid};" \
+ 	"name=safe,size=16MiB,uuid=${part5_uuid};" \
+ 	"name=safe2,size=16MiB,uuid=${part6_uuid};" \
+ 	"name=data,size=-,uuid=${part7_uuid};" \
