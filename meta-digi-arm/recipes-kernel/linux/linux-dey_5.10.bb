@@ -14,6 +14,9 @@ SRCBRANCH = "v5.10/nxp/master"
 SRCBRANCH_stm32mpcommon = "v5.10/stm/master"
 
 require ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'STM', 'recipes-kernel/linux/linux-stm32mp.inc', '', d)}
+# Don't create custom folder for kernel artifacts
+do_deploy[sstate-outputdirs] = "${DEPLOY_DIR_IMAGE}"
+
 require recipes-kernel/linux/linux-dey-src.inc
 require ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'linux-virtualization.inc', '', d)}
 require ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'recipes-kernel/linux/linux-trustfence.inc', '', d)}
