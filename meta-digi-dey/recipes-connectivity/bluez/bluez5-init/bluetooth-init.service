@@ -9,4 +9,4 @@ ExecStart=/etc/bluetooth-init start
 ExecStop=/etc/bluetooth-init stop
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=bluetooth.service

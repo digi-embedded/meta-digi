@@ -1,10 +1,8 @@
-# Copyright (C) 2015-2021 Digi International.
+# Copyright (C) 2015-2022 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:${THISDIR}/${BP}:"
 
 SRC_URI += " \
-    file://bluetooth-init \
-    file://bluetooth-init.service \
     file://bluetooth.service-add-customizations.patch \
     file://main.conf \
     file://0001-hcitool-do-not-show-unsupported-refresh-option.patch \
@@ -25,18 +23,10 @@ SRC_URI_append_ccimx8x = " ${QCA65XX_COMMON_PATCHES}"
 SRC_URI_append_ccimx8m = " ${QCA65XX_COMMON_PATCHES}"
 
 SRC_URI_append_ccimx6sbc = " \
-    file://bluetooth-init_atheros \
     file://main.conf_atheros \
 "
 
-inherit update-rc.d
-
 do_install_append() {
-	install -d ${D}${sysconfdir}/init.d/
-	install -m 0755 ${WORKDIR}/bluetooth-init ${D}${sysconfdir}/bluetooth-init
-	ln -sf /etc/bluetooth-init ${D}${sysconfdir}/init.d/bluetooth-init
-	install -d ${D}${systemd_unitdir}/system/
-	install -m 0644 ${WORKDIR}/bluetooth-init.service ${D}${systemd_unitdir}/system/bluetooth-init.service
 	install -m 0644 ${WORKDIR}/main.conf ${D}${sysconfdir}/bluetooth/
 	sed -i -e "s,##BT_DEVICE_NAME##,${BT_DEVICE_NAME},g" \
 		${D}${sysconfdir}/bluetooth/main.conf
@@ -53,7 +43,6 @@ do_install_append() {
 }
 
 do_install_append_ccimx6sbc() {
-	install -m 0755 ${WORKDIR}/bluetooth-init_atheros ${D}${sysconfdir}/bluetooth-init_atheros
 	install -m 0644 ${WORKDIR}/main.conf_atheros ${D}${sysconfdir}/bluetooth/
 	sed -i -e "s,##BT_DEVICE_NAME##,${BT_DEVICE_NAME},g" \
 		${D}${sysconfdir}/bluetooth/main.conf_atheros
@@ -64,11 +53,9 @@ pkg_postinst_ontarget_${PN}_ccimx6sbc() {
 	if [ -e "/proc/device-tree/bluetooth/mac-address" ]; then
 		for id in $(find /sys/devices -name modalias -print0 | xargs -0 sort -u -z | grep sdio); do
 			if [[ "$id" == "sdio:c00v0271d0301" ]] ; then
-				mv /etc/bluetooth-init_atheros /etc/bluetooth-init
 				mv /etc/bluetooth/main.conf_atheros /etc/bluetooth/main.conf
 				break
 			elif [[ "$id" == "sdio:c00v0271d050A" ]] ; then
-				rm /etc/bluetooth-init_atheros
 				rm /etc/bluetooth/main.conf_atheros
 				break
 			fi
@@ -76,22 +63,11 @@ pkg_postinst_ontarget_${PN}_ccimx6sbc() {
 	fi
 }
 
-PACKAGES =+ "${PN}-init"
 PACKAGECONFIG_append = " health-profiles \
     mesh \
     btpclient \
 "
 
 FILES_${PN} += " ${sysconfdir}/bluetooth/main.conf*"
-FILES_${PN}-init = " ${sysconfdir}/bluetooth-init* \
-                     ${sysconfdir}/init.d/bluetooth-init \
-                     ${systemd_unitdir}/system/bluetooth-init.service \
-"
-
-INITSCRIPT_PACKAGES += "${PN}-init"
-INITSCRIPT_NAME_${PN}-init = "bluetooth-init"
-INITSCRIPT_PARAMS_${PN}-init = "start 19 2 3 4 5 . stop 21 0 1 6 ."
-
-SYSTEMD_SERVICE_${PN}-init = "bluetooth-init.service"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
