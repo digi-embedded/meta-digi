@@ -1,0 +1,150 @@
+From d4a40e0f9a21ae728255eaf951817880a4eabab4 Mon Sep 17 00:00:00 2001
+From: Kurt Lee <kurt.lee@cypress.com>
+Date: Tue, 2 Feb 2021 21:39:27 -0600
+Subject: [PATCH 19/20] defconfig: Set to Cypress default configuration
+
+Change defconfig as Cypress default configuration
+Signed-off-by: Kurt Lee <kurt.lee@cypress.com>
+---
+ wpa_supplicant/defconfig | 40 +++++++++++++++++++++++++---------------
+ 1 files changed, 41 insertions(+), 21 deletions(-)
+
+diff --git a/wpa_supplicant/defconfig b/wpa_supplicant/defconfig
+index cdfb1974d..48cbf03a0 100644
+--- a/wpa_supplicant/defconfig
++++ b/wpa_supplicant/defconfig
+@@ -109,7 +109,7 @@ CONFIG_EAP_PEAP=y
+ CONFIG_EAP_TTLS=y
+ 
+ # EAP-FAST
+-CONFIG_EAP_FAST=y
++#CONFIG_EAP_FAST=y
+ 
+ # EAP-TEAP
+ # Note: The current EAP-TEAP implementation is experimental and should not be
+@@ -137,10 +137,10 @@ CONFIG_EAP_OTP=y
+ #CONFIG_EAP_PSK=y
+ 
+ # EAP-pwd (secure authentication using only a password)
+-CONFIG_EAP_PWD=y
++#CONFIG_EAP_PWD=y
+ 
+ # EAP-PAX
+-CONFIG_EAP_PAX=y
++#CONFIG_EAP_PAX=y
+ 
+ # LEAP
+ CONFIG_EAP_LEAP=y
+@@ -156,15 +156,15 @@ CONFIG_EAP_LEAP=y
+ #CONFIG_USIM_SIMULATOR=y
+ 
+ # EAP-SAKE
+-CONFIG_EAP_SAKE=y
++#CONFIG_EAP_SAKE=y
+ 
+ # EAP-GPSK
+-CONFIG_EAP_GPSK=y
++#CONFIG_EAP_GPSK=y
+ # Include support for optional SHA256 cipher suite in EAP-GPSK
+-CONFIG_EAP_GPSK_SHA256=y
++#CONFIG_EAP_GPSK_SHA256=y
+ 
+ # EAP-TNC and related Trusted Network Connect support (experimental)
+-CONFIG_EAP_TNC=y
++#CONFIG_EAP_TNC=y
+ 
+ # Wi-Fi Protected Setup (WPS)
+ CONFIG_WPS=y
+@@ -177,7 +177,7 @@ CONFIG_WPS=y
+ #CONFIG_WPS_NFC=y
+ 
+ # EAP-IKEv2
+-CONFIG_EAP_IKEV2=y
++#CONFIG_EAP_IKEV2=y
+ 
+ # EAP-EKE
+ #CONFIG_EAP_EKE=y
+@@ -310,6 +310,9 @@ CONFIG_BACKEND=file
+ # bridge interfaces (commit 'bridge: respect RFC2863 operational state')').
+ #CONFIG_NO_LINUX_PACKET_SOCKET_WAR=y
+ 
++# PeerKey handshake for Station to Station Link (IEEE 802.11e DLS)
++CONFIG_PEERKEY=y
++
+ # IEEE 802.11w (management frame protection), also known as PMF
+ # Driver support is also needed for IEEE 802.11w.
+ CONFIG_IEEE80211W=y
+@@ -367,10 +370,10 @@ CONFIG_IEEE80211W=y
+ 
+ # Add support for new DBus control interface
+ # (fi.w1.hostap.wpa_supplicant1)
+-CONFIG_CTRL_IFACE_DBUS_NEW=y
++#CONFIG_CTRL_IFACE_DBUS_NEW=y
+ 
+ # Add introspection support for new DBus control interface
+-CONFIG_CTRL_IFACE_DBUS_INTRO=y
++#CONFIG_CTRL_IFACE_DBUS_INTRO=y
+ 
+ # Add support for loading EAP methods dynamically as shared libraries.
+ # When this option is enabled, each EAP method can be either included
+@@ -400,7 +403,7 @@ CONFIG_IEEE80211R=y
+ CONFIG_DEBUG_FILE=y
+ 
+ # Send debug messages to syslog instead of stdout
+-CONFIG_DEBUG_SYSLOG=y
++#CONFIG_DEBUG_SYSLOG=y
+ # Set syslog facility for debug messages
+ #CONFIG_DEBUG_SYSLOG_FACILITY=LOG_DAEMON
+ 
+@@ -482,6 +485,12 @@ CONFIG_IEEE80211N=y
+ # (depends on CONFIG_IEEE80211N)
+ CONFIG_IEEE80211AC=y
+ 
++# IEEE 802.11ax HE support (mainly for AP mode)
++# Note: This is experimental and work in progress. The definitions are still
++# subject to change and this should not be expected to interoperate with the
++# final IEEE 802.11ax version.
++CONFIG_IEEE80211AX=y
++
+ # Wireless Network Management (IEEE Std 802.11v-2011)
+ # Note: This is experimental and not complete implementation.
+ #CONFIG_WNM=y
+@@ -490,10 +499,10 @@ CONFIG_IEEE80211AC=y
+ # This can be used to enable functionality to improve interworking with
+ # external networks (GAS/ANQP to learn more about the networks and network
+ # selection based on available credentials).
+-CONFIG_INTERWORKING=y
++#CONFIG_INTERWORKING=y
+ 
+ # Hotspot 2.0
+-CONFIG_HS20=y
++#CONFIG_HS20=y
+ 
+ # Enable interface matching in wpa_supplicant
+ #CONFIG_MATCH_IFACE=y
+@@ -506,7 +515,7 @@ CONFIG_HS20=y
+ # should be noted that this is mainly aimed at simple cases like
+ # WPA2-Personal while more complex configurations like WPA2-Enterprise with an
+ # external RADIUS server can be supported with hostapd.
+-CONFIG_AP=y
++#CONFIG_AP=y
+ 
+ # P2P (Wi-Fi Direct)
+ # This can be used to enable P2P support in wpa_supplicant. See README-P2P for
+@@ -519,7 +528,7 @@ CONFIG_P2P=y
+ # Wi-Fi Display
+ # This can be used to enable Wi-Fi Display extensions for P2P using an external
+ # program to control the additional information exchanges in the messages.
+-CONFIG_WIFI_DISPLAY=y
++#CONFIG_WIFI_DISPLAY=y
+ 
+ # Autoscan
+ # This can be used to enable automatic scan support in wpa_supplicant.
+@@ -613,3 +622,4 @@ CONFIG_BGSCAN_SIMPLE=y
+ # This requires CONFIG_IEEE80211W=y to be enabled, too. (see
+ # wpa_supplicant/README-DPP for details)
+ CONFIG_DPP=y
++CONFIG_TESTING_OPTIONS=y
+-- 
+2.17.1
+

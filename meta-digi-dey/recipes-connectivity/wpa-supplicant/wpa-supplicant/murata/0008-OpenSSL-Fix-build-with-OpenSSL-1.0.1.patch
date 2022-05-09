@@ -1,0 +1,31 @@
+From 8fabb3a2f5c8c1efb7c92a03079e760e88aa04aa Mon Sep 17 00:00:00 2001
+From: Chung-Hsien Hsu <stanley.hsu@cypress.com>
+Date: Fri, 8 Nov 2019 13:23:05 -0600
+Subject: [PATCH 08/20] OpenSSL: Fix build with OpenSSL 1.0.1
+
+The openssl_debug_dump_certificate_chains() implementation used
+SSL_CERT_SET_FIRST and SSL_CERT_SET_NEXT, which were added in OpenSSL
+1.0.2. Bypass this function to fix build failure with OpenSSL 1.0.1.
+
+Signed-off-by: Chung-Hsien Hsu <stanley.hsu@cypress.com>
+---
+ src/crypto/tls_openssl.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/crypto/tls_openssl.c b/src/crypto/tls_openssl.c
+index 07d38e47b..a74af7bbf 100644
+--- a/src/crypto/tls_openssl.c
++++ b/src/crypto/tls_openssl.c
+@@ -5201,7 +5201,8 @@ static void openssl_debug_dump_certificates(SSL_CTX *ssl_ctx)
+ 
+ static void openssl_debug_dump_certificate_chains(SSL_CTX *ssl_ctx)
+ {
+-#if !defined(LIBRESSL_VERSION_NUMBER) && !defined(BORINGSSL_API_VERSION)
++#if !defined(LIBRESSL_VERSION_NUMBER) && !defined(BORINGSSL_API_VERSION) && \
++	OPENSSL_VERSION_NUMBER >= 0x10002000L
+ 	int res;
+ 
+ 	for (res = SSL_CTX_set_current_cert(ssl_ctx, SSL_CERT_SET_FIRST);
+-- 
+2.17.1
+

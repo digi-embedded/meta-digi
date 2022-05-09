@@ -1,0 +1,45 @@
+From 52e388892a333c8366de69a2a09c00b86c60fadb Mon Sep 17 00:00:00 2001
+From: Chung-Hsien Hsu <stanley.hsu@cypress.com>
+Date: Tue, 29 Oct 2019 17:13:27 +0800
+Subject: [PATCH 06/20] nl80211: Check SAE authentication offload support
+
+Set WPA_DRIVER_FLAGS_SAE_OFFLOAD flag if driver indicates SAE
+authentication offload support.
+
+Signed-off-by: Chung-Hsien Hsu <stanley.hsu@cypress.com>
+---
+ src/drivers/driver.h              | 2 ++
+ src/drivers/driver_nl80211_capa.c | 4 ++++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 2a8459ae3..a9ea3d77c 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -1659,6 +1659,8 @@ struct wpa_driver_capa {
+ #define WPA_DRIVER_FLAGS_FTM_RESPONDER		0x0100000000000000ULL
+ /** Driver support 4-way handshake offload for WPA-Personal */
+ #define WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_PSK	0x0200000000000000ULL
++/** Driver takes care of SAE authentication internally */
++#define WPA_DRIVER_FLAGS_SAE_OFFLOAD		0x0400000000000000ULL
+ 	u64 flags;
+ 
+ #define FULL_AP_CLIENT_STATE_SUPP(drv_flags) \
+diff --git a/src/drivers/driver_nl80211_capa.c b/src/drivers/driver_nl80211_capa.c
+index 8318b10ab..9aeddec22 100644
+--- a/src/drivers/driver_nl80211_capa.c
++++ b/src/drivers/driver_nl80211_capa.c
+@@ -433,6 +433,10 @@ static void wiphy_info_ext_feature_flags(struct wiphy_info_data *info,
+ 	if (ext_feature_isset(ext_features, len,
+ 			      NL80211_EXT_FEATURE_ENABLE_FTM_RESPONDER))
+ 		capa->flags |= WPA_DRIVER_FLAGS_FTM_RESPONDER;
++
++	if (ext_feature_isset(ext_features, len,
++			      NL80211_EXT_FEATURE_SAE_OFFLOAD))
++		capa->flags |= WPA_DRIVER_FLAGS_SAE_OFFLOAD;
+ }
+ 
+ 
+-- 
+2.17.1
+

@@ -1,0 +1,36 @@
+From 71d764047bfc8c858fef6cc664458a33ccd93c6a Mon Sep 17 00:00:00 2001
+From: Chung-Hsien Hsu <stanley.hsu@cypress.com>
+Date: Wed, 16 Dec 2020 01:57:36 -0600
+Subject: [PATCH 18/20] AP: Set Authenticator state properly for PSK 4-way
+ handshake offload
+
+Setup Authenticator state machines to PTKINITDONE and configure state
+variables properly while offloading 4-way handshake for WPA/WPA2-PSK.
+
+Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
+---
+ src/ap/wpa_auth.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/ap/wpa_auth.c b/src/ap/wpa_auth.c
+index c64ca6688..9b9ae9f96 100644
+--- a/src/ap/wpa_auth.c
++++ b/src/ap/wpa_auth.c
+@@ -657,6 +657,14 @@ int wpa_auth_sta_associated(struct wpa_authenticator *wpa_auth,
+ 				"4-way handshake offloading for WPA/WPA2-PSK");
+ 		sm->wpa_ptk_state = WPA_PTK_PTKINITDONE;
+ 		sm->Pair = TRUE;
++		wpa_auth_set_eapol(sm->wpa_auth, sm->addr,
++				   WPA_EAPOL_authorized, 1);
++		wpa_auth_set_eapol(sm->wpa_auth, sm->addr,
++				   WPA_EAPOL_portValid, 1);
++		wpa_auth_set_eapol(sm->wpa_auth, sm->addr,
++				   WPA_EAPOL_keyAvailable, 0);
++		wpa_auth_set_eapol(sm->wpa_auth, sm->addr,
++				   WPA_EAPOL_keyDone, 1);
+ 		return 0;
+ 	}
+ 
+-- 
+2.17.1
+

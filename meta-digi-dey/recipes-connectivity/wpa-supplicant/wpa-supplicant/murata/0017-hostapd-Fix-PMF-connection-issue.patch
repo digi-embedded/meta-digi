@@ -1,0 +1,30 @@
+From 7131adafd30b06066d51e0af10249d2236c40a13 Mon Sep 17 00:00:00 2001
+From: Ryohei Kondo <ryohei.kondo@cypress.com>
+Date: Mon, 7 Sep 2020 13:05:16 +0900
+Subject: [PATCH 17/20] hostapd: Fix PMF connection issue
+
+STA with MFPR:False MFPC:True cannot connect with SoftAP configured with hostapd.
+Change to allow wpa_key_mgmt=WPA-PSK-SHA256 to fix the issue.
+
+
+Signed-off-by: Ryohei Kondo <ryohei.kondo@cypress.com>
+---
+ src/ap/beacon.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/ap/beacon.c b/src/ap/beacon.c
+index ff179f559..c114537e5 100644
+--- a/src/ap/beacon.c
++++ b/src/ap/beacon.c
+@@ -1379,7 +1379,7 @@ int ieee802_11_build_ap_params(struct hostapd_data *hapd,
+ 	}
+ 
+ 	if ((hapd->iface->drv_flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_AP_PSK) &&
+-	    (params->key_mgmt_suites & WPA_KEY_MGMT_PSK)) {
++	    (params->key_mgmt_suites & (WPA_KEY_MGMT_PSK | WPA_KEY_MGMT_PSK_SHA256))) {
+ 		if (hapd->conf->ssid.wpa_passphrase)
+ 			params->passphrase = hapd->conf->ssid.wpa_passphrase;
+ 		if (hapd->conf->ssid.wpa_psk->psk)
+-- 
+2.17.1
+

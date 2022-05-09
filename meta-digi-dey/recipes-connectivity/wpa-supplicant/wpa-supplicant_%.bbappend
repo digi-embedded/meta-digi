@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2021 Digi International.
+# Copyright (C) 2013-2022 Digi International.
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 
@@ -11,7 +11,30 @@ SRC_URI += " \
     file://wpa_supplicant_p2p.conf \
 "
 
+MURATA_COMMON_PATCHES = " \
+    file://murata/0001-wpa_supplicant-Support-4-way-handshake-offload-for-F.patch;apply=yes \
+    file://murata/0002-wpa_supplicant-Notify-Neighbor-Report-for-driver-tri.patch;apply=yes \
+    file://murata/0003-nl80211-Report-connection-authorized-in-EVENT_ASSOC.patch;apply=yes \
+    file://murata/0004-wpa_supplicant-Add-PMKSA-cache-for-802.1X-4-way-hand.patch;apply=yes \
+    file://murata/0005-Sync-with-mac80211-next.git-include-uapi-linux-nl802.patch;apply=yes \
+    file://murata/0006-nl80211-Check-SAE-authentication-offload-support.patch;apply=yes \
+    file://murata/0007-SAE-Pass-SAE-password-on-connect-for-SAE-authenticat.patch;apply=yes \
+    file://murata/0008-OpenSSL-Fix-build-with-OpenSSL-1.0.1.patch;apply=yes \
+    file://murata/0009-non-upstream-Sync-nl80211.h-for-PSK-4-way-HS-offload.patch;apply=yes \
+    file://murata/0010-nl80211-Support-4-way-handshake-offload-for-WPA-WPA2.patch;apply=yes \
+    file://murata/0011-AP-Support-4-way-handshake-offload-for-WPA-WPA2-PSK.patch;apply=yes \
+    file://murata/0012-nl80211-Support-SAE-authentication-offload-in-AP-mod.patch;apply=yes \
+    file://murata/0013-SAE-Support-SAE-authentication-offload-in-AP-mode.patch;apply=yes \
+    file://murata/0014-P2P-Fix-P2P-authentication-failure-due-to-AP-mode-4-.patch;apply=yes \
+    file://murata/0016-DPP-Do-more-condition-test-for-AKM-type-DPP-offload.patch;apply=yes \
+    file://murata/0017-hostapd-Fix-PMF-connection-issue.patch;apply=yes \
+    file://murata/0018-AP-Set-Authenticator-state-properly-for-PSK-4-way-ha.patch;apply=yes \
+    file://murata/0019-wpa-supplicant-defconfig-Set-to-Cypress-default-configuration.patch;apply=yes \
+"
+
 SRC_URI_append_ccimx6sbc = " file://wpa_supplicant_p2p.conf_atheros"
+SRC_URI_append_ccmp1 = " ${MURATA_COMMON_PATCHES}"
+SRC_URI_append_ccimx8mp = " ${MURATA_COMMON_PATCHES}"
 
 do_install_append() {
 	install -m 600 ${WORKDIR}/wpa_supplicant_p2p.conf ${D}${sysconfdir}/wpa_supplicant_p2p.conf

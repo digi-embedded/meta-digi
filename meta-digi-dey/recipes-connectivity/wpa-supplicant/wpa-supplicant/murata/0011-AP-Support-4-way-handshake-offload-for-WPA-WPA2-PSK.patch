@@ -1,0 +1,109 @@
+From 6df8c5e8669ddf2f0921b9c87a44e7d66b4e6d56 Mon Sep 17 00:00:00 2001
+From: Chung-Hsien Hsu <stanley.hsu@cypress.com>
+Date: Tue, 10 Dec 2019 14:03:57 -0600
+Subject: [PATCH 11/20] AP: Support 4-way handshake offload for WPA/WPA2-PSK
+
+Add support for WPA/WPA2-PSK 4-way handshake offload in AP mode. In this
+case, the 4-way handshake is handled by driver instead of user space.
+
+Signed-off-by: Chung-Hsien Hsu <stanley.hsu@cypress.com>
+---
+ src/ap/beacon.c        | 8 ++++++++
+ src/ap/hostapd.c       | 8 +++++++-
+ src/ap/wpa_auth.c      | 8 ++++++++
+ src/ap/wpa_auth.h      | 1 +
+ src/ap/wpa_auth_glue.c | 2 ++
+ 5 files changed, 26 insertions(+), 1 deletion(-)
+
+diff --git a/src/ap/beacon.c b/src/ap/beacon.c
+index a51b94960..73b231ab1 100644
+--- a/src/ap/beacon.c
++++ b/src/ap/beacon.c
+@@ -1378,6 +1378,14 @@ int ieee802_11_build_ap_params(struct hostapd_data *hapd,
+ 		}
+ 	}
+ 
++	if ((hapd->iface->drv_flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_AP_PSK) &&
++	    (params->key_mgmt_suites & WPA_KEY_MGMT_PSK)) {
++		if (hapd->conf->ssid.wpa_passphrase)
++			params->passphrase = hapd->conf->ssid.wpa_passphrase;
++		if (hapd->conf->ssid.wpa_psk->psk)
++			params->psk = hapd->conf->ssid.wpa_psk->psk;
++	}
++
+ 	return 0;
+ }
+ 
+diff --git a/src/ap/hostapd.c b/src/ap/hostapd.c
+index bf1975fbd..f569e7661 100644
+--- a/src/ap/hostapd.c
++++ b/src/ap/hostapd.c
+@@ -3049,6 +3049,8 @@ int hostapd_remove_iface(struct hapd_interfaces *interfaces, char *buf)
+ void hostapd_new_assoc_sta(struct hostapd_data *hapd, struct sta_info *sta,
+ 			   int reassoc)
+ {
++	int key_mgmt = wpa_auth_sta_key_mgmt(sta->wpa_sm);
++
+ 	if (hapd->tkip_countermeasures) {
+ 		hostapd_drv_sta_deauth(hapd, sta->addr,
+ 				       WLAN_REASON_MICHAEL_MIC_FAILURE);
+@@ -3085,7 +3087,11 @@ void hostapd_new_assoc_sta(struct hostapd_data *hapd, struct sta_info *sta,
+ 	/* Start IEEE 802.1X authentication process for new stations */
+ 	ieee802_1x_new_station(hapd, sta);
+ 	if (reassoc) {
+-		if (sta->auth_alg != WLAN_AUTH_FT &&
++		if ((hapd->iface->drv_flags &
++		     WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_AP_PSK) &&
++		    wpa_key_mgmt_wpa_psk(key_mgmt))
++			wpa_auth_sta_associated(hapd->wpa_auth, sta->wpa_sm);
++		else if (sta->auth_alg != WLAN_AUTH_FT &&
+ 		    sta->auth_alg != WLAN_AUTH_FILS_SK &&
+ 		    sta->auth_alg != WLAN_AUTH_FILS_SK_PFS &&
+ 		    sta->auth_alg != WLAN_AUTH_FILS_PK &&
+diff --git a/src/ap/wpa_auth.c b/src/ap/wpa_auth.c
+index c56077001..c64ca6688 100644
+--- a/src/ap/wpa_auth.c
++++ b/src/ap/wpa_auth.c
+@@ -652,6 +652,14 @@ int wpa_auth_sta_associated(struct wpa_authenticator *wpa_auth,
+ 	}
+ #endif /* CONFIG_FILS */
+ 
++	if (wpa_auth->conf.psk_4way_hs_offload) {
++		wpa_auth_logger(wpa_auth, sm->addr, LOGGER_DEBUG,
++				"4-way handshake offloading for WPA/WPA2-PSK");
++		sm->wpa_ptk_state = WPA_PTK_PTKINITDONE;
++		sm->Pair = TRUE;
++		return 0;
++	}
++
+ 	if (sm->started) {
+ 		os_memset(&sm->key_replay, 0, sizeof(sm->key_replay));
+ 		sm->ReAuthenticationRequest = TRUE;
+diff --git a/src/ap/wpa_auth.h b/src/ap/wpa_auth.h
+index a348bc25a..82cb3f7ae 100644
+--- a/src/ap/wpa_auth.h
++++ b/src/ap/wpa_auth.h
+@@ -232,6 +232,7 @@ struct wpa_auth_config {
+ 	unsigned int fils_cache_id_set:1;
+ 	u8 fils_cache_id[FILS_CACHE_ID_LEN];
+ #endif /* CONFIG_FILS */
++	int psk_4way_hs_offload;
+ };
+ 
+ typedef enum {
+diff --git a/src/ap/wpa_auth_glue.c b/src/ap/wpa_auth_glue.c
+index 0800a8748..8d81fd785 100644
+--- a/src/ap/wpa_auth_glue.c
++++ b/src/ap/wpa_auth_glue.c
+@@ -1305,6 +1305,8 @@ int hostapd_setup_wpa(struct hostapd_data *hapd)
+ 		_conf.tx_status = 1;
+ 	if (hapd->iface->drv_flags & WPA_DRIVER_FLAGS_AP_MLME)
+ 		_conf.ap_mlme = 1;
++	if (hapd->iface->drv_flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_AP_PSK)
++		_conf.psk_4way_hs_offload = 1;
+ 	hapd->wpa_auth = wpa_init(hapd->own_addr, &_conf, &cb, hapd);
+ 	if (hapd->wpa_auth == NULL) {
+ 		wpa_printf(MSG_ERROR, "WPA initialization failed.");
+-- 
+2.17.1
+

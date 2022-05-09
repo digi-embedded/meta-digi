@@ -1,0 +1,107 @@
+From 45be35df00f026bb14d176988d1593b1ea541e60 Mon Sep 17 00:00:00 2001
+From: Chung-Hsien Hsu <stanley.hsu@cypress.com>
+Date: Tue, 29 Oct 2019 16:05:49 +0800
+Subject: [PATCH 04/20] wpa_supplicant: Add PMKSA cache for 802.1X 4-way
+ handshake
+
+Add PMKSA cache and set PMK to the driver for 802.1X 4-way handshake
+offload.
+
+Signed-off-by: Chung-Hsien Hsu <stanley.hsu@cypress.com>
+---
+ wpa_supplicant/wpas_glue.c | 59 +++++++++++++++++++++++---------------
+ 1 file changed, 36 insertions(+), 23 deletions(-)
+
+diff --git a/wpa_supplicant/wpas_glue.c b/wpa_supplicant/wpas_glue.c
+index 62af7f6b1..3a63bc7ea 100644
+--- a/wpa_supplicant/wpas_glue.c
++++ b/wpa_supplicant/wpas_glue.c
+@@ -12,6 +12,7 @@
+ #include "eapol_supp/eapol_supp_sm.h"
+ #include "eap_peer/eap.h"
+ #include "rsn_supp/wpa.h"
++#include "rsn_supp/wpa_i.h"
+ #include "eloop.h"
+ #include "config.h"
+ #include "l2_packet/l2_packet.h"
+@@ -272,6 +273,7 @@ static void wpa_supplicant_eapol_cb(struct eapol_sm *eapol,
+ 				    void *ctx)
+ {
+ 	struct wpa_supplicant *wpa_s = ctx;
++	struct wpa_sm *sm = wpa_s->wpa;
+ 	int res, pmk_len;
+ 	u8 pmk[PMK_LEN];
+ 
+@@ -306,35 +308,46 @@ static void wpa_supplicant_eapol_cb(struct eapol_sm *eapol,
+ 		   "handshake");
+ 
+ 	pmk_len = PMK_LEN;
+-	if (wpa_key_mgmt_ft(wpa_s->key_mgmt)) {
++	if (sm->cur_pmksa) {
++		pmk_len = sm->pmk_len;
++		os_memcpy(pmk, sm->pmk, pmk_len);
++	} else {
++		if (wpa_key_mgmt_ft(wpa_s->key_mgmt)) {
+ #ifdef CONFIG_IEEE80211R
+-		u8 buf[2 * PMK_LEN];
+-		wpa_printf(MSG_DEBUG, "RSN: Use FT XXKey as PMK for "
+-			   "driver-based 4-way hs and FT");
+-		res = eapol_sm_get_key(eapol, buf, 2 * PMK_LEN);
+-		if (res == 0) {
+-			os_memcpy(pmk, buf + PMK_LEN, PMK_LEN);
+-			os_memset(buf, 0, sizeof(buf));
+-		}
++			u8 buf[2 * PMK_LEN];
++			wpa_printf(MSG_DEBUG, "RSN: Use FT XXKey as PMK for "
++				   "driver-based 4-way hs and FT");
++			res = eapol_sm_get_key(eapol, buf, 2 * PMK_LEN);
++			if (res == 0) {
++				os_memcpy(pmk, buf + PMK_LEN, PMK_LEN);
++				os_memset(buf, 0, sizeof(buf));
++			}
+ #else /* CONFIG_IEEE80211R */
+-		res = -1;
++			res = -1;
+ #endif /* CONFIG_IEEE80211R */
+-	} else {
+-		res = eapol_sm_get_key(eapol, pmk, PMK_LEN);
++		} else {
++			res = eapol_sm_get_key(eapol, pmk, PMK_LEN);
++			if (res) {
++				/*
++				 * EAP-LEAP is an exception from other EAP
++				 * methods: it uses only 16-byte PMK.
++				 */
++				res = eapol_sm_get_key(eapol, pmk, 16);
++				pmk_len = 16;
++			}
++		}
++
+ 		if (res) {
+-			/*
+-			 * EAP-LEAP is an exception from other EAP methods: it
+-			 * uses only 16-byte PMK.
+-			 */
+-			res = eapol_sm_get_key(eapol, pmk, 16);
+-			pmk_len = 16;
++			wpa_printf(MSG_DEBUG, "Failed to get PMK from EAPOL "
++				   "state machines");
++			return;
+ 		}
+-	}
+ 
+-	if (res) {
+-		wpa_printf(MSG_DEBUG, "Failed to get PMK from EAPOL state "
+-			   "machines");
+-		return;
++		sm->pmk_len = pmk_len;
++		os_memcpy(sm->pmk, pmk, pmk_len);
++		pmksa_cache_add(sm->pmksa, pmk, pmk_len, NULL, NULL, 0,
++				sm->bssid, sm->own_addr,
++				sm->network_ctx, sm->key_mgmt, NULL);
+ 	}
+ 
+ 	wpa_hexdump_key(MSG_DEBUG, "RSN: Configure PMK for driver-based 4-way "
+-- 
+2.17.1
+
