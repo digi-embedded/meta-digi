@@ -19,15 +19,20 @@ DESCRIPTION = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) ==
 
 BOOTFS_EXT ?= ".boot.vfat"
 BOOTFS_EXT_ccimx6ul ?= ".boot.ubifs"
+BOOTFS_EXT_ccmp1 ?= ".boot.ubifs"
 ROOTFS_EXT ?= ".ext4.gz"
 ROOTFS_EXT_ccimx6ul ?= ".ubifs"
+ROOTFS_EXT_ccmp1 ?= ".ubifs"
 
 BOOT_DEV_NAME ?= "/dev/mmcblk0p1"
 BOOT_DEV_NAME_ccimx6ul ?= "linux"
+BOOT_DEV_NAME_ccmp1 ?= "linux"
 ROOTFS_DEV_NAME ?= "/dev/mmcblk0p3"
 ROOTFS_DEV_NAME_ccimx6ul ?= "rootfs"
+ROOTFS_DEV_NAME_ccmp1 ?= "rootfs"
 ROOTFS_ENC_DEV = "/dev/mapper/cryptrootfs"
 ROOTFS_ENC_DEV_ccimx6ul = "${ROOTFS_DEV_NAME}"
+ROOTFS_ENC_DEV_ccmp1 = "${ROOTFS_DEV_NAME}"
 ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
 
 python () {
