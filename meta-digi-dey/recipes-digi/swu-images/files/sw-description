@@ -10,14 +10,14 @@ software =
                     filename = "##BOOTIMG_NAME##";
                     device = "##BOOT_DEV##";
                     type = "raw";
-                    sha256 = "@##BOOTIMG_NAME##";
+                    sha256 = "$swupdate_get_sha256(##BOOTIMG_NAME##)";
                     installed-directly = true;
                 },
                 {
                     filename = "##ROOTIMG_NAME##";
                     device = "##ROOTFS_DEV##";
                     type ="raw";
-                    sha256 = "@##ROOTIMG_NAME##";
+                    sha256 = "$swupdate_get_sha256(##ROOTIMG_NAME##)";
                     compressed = "zlib";
                     installed-directly = true;
                 }
@@ -31,14 +31,14 @@ software =
                     filename = "##BOOTIMG_NAME##";
                     volume = "##BOOT_DEV##";
                     type = "ubivol";
-                    sha256 = "@##BOOTIMG_NAME##";
+                    sha256 = "$swupdate_get_sha256(##BOOTIMG_NAME##)";
                     installed-directly = true;
                 },
                 {
                     filename = "##ROOTIMG_NAME##";
                     volume = "##ROOTFS_DEV##";
                     type ="ubivol";
-                    sha256 = "@##ROOTIMG_NAME##";
+                    sha256 = "$swupdate_get_sha256(##ROOTIMG_NAME##)";
                     installed-directly = true;
                 }
             );
