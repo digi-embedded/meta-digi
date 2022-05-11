@@ -1,11 +1,11 @@
-# Copyright (C) 2017, Digi International Inc.
+# Copyright (C) 2017-2022, Digi International Inc.
 
 SUMMARY = "Digi's device cloud connector"
 SECTION = "libs"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
 
-DEPENDS = "confuse openssl recovery-utils zlib"
+DEPENDS = "confuse libdigiapix openssl recovery-utils zlib"
 
 SRCBRANCH = "master"
 SRCREV = "${AUTOREV}"
