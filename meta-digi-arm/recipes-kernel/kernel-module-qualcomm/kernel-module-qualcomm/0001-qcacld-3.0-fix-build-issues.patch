@@ -1,0 +1,79 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Mon, 2 May 2022 12:01:12 +0200
+Subject: [PATCH] qcacld-3.0: Fix build issues
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ core/bmi/src/ol_fw.c    | 3 +++
+ core/dp/htt/htt_rx_hl.c | 2 ++
+ core/dp/txrx/ol_txrx.c  | 1 +
+ 3 files changed, 6 insertions(+)
+
+diff --git a/core/bmi/src/ol_fw.c b/core/bmi/src/ol_fw.c
+index 52513fff23..c69420734b 100644
+--- a/core/bmi/src/ol_fw.c
++++ b/core/bmi/src/ol_fw.c
+@@ -609,11 +609,13 @@ int ol_copy_ramdump(struct hif_opaque_softc *scn)
+ 	return ret;
+ }
+ 
+ static void __ramdump_work_handler(void *data)
+ {
++#ifdef WLAN_DEBUG
+ 	int ret;
++#endif
+ 	uint32_t host_interest_address;
+ 	uint32_t dram_dump_values[4];
+ 	uint32_t target_type;
+ 	struct hif_target_info *tgt_info;
+ 	struct ol_context *ol_ctx = data;
+@@ -1044,10 +1046,11 @@ static QDF_STATUS ol_fw_populate_clk_settings(enum a_refclk_speed_t refclk,
+ 		clock_s->wlan_pll.div = 0;
+ 		clock_s->wlan_pll.rnfrac = 0;
+ 		clock_s->wlan_pll.outdiv = 0;
+ 		clock_s->pll_settling_time = 1024;
+ 		clock_s->refclk_hz = 0;
++		/* Fall through */
+ 	default:
+ 		return QDF_STATUS_E_FAILURE;
+ 	}
+ 
+ 	clock_s->refclk_hz = refclk_speed_to_hz[refclk];
+diff --git a/core/dp/htt/htt_rx_hl.c b/core/dp/htt/htt_rx_hl.c
+index 9cb2047e3d..e0cbac5ac0 100644
+--- a/core/dp/htt/htt_rx_hl.c
++++ b/core/dp/htt/htt_rx_hl.c
+@@ -419,15 +419,17 @@ htt_rx_mpdu_desc_pn_hl(
+ 		case 128:
+ 			/* bits 128:64 */
+ 			*(word_ptr + 3) = rx_desc->pn_127_96;
+ 			/* bits 63:0 */
+ 			*(word_ptr + 2) = rx_desc->pn_95_64;
++			/* Fall through */
+ 		case 48:
+ 			/* bits 48:0
+ 			 * copy 64 bits
+ 			 */
+ 			*(word_ptr + 1) = rx_desc->u0.pn_63_32;
++			/* Fall through */
+ 		case 24:
+ 			/* bits 23:0
+ 			 * copy 32 bits
+ 			 */
+ 			*(word_ptr + 0) = rx_desc->pn_31_0;
+diff --git a/core/dp/txrx/ol_txrx.c b/core/dp/txrx/ol_txrx.c
+index 2f20d49793..303f47c86d 100644
+--- a/core/dp/txrx/ol_txrx.c
++++ b/core/dp/txrx/ol_txrx.c
+@@ -4240,10 +4240,11 @@ ol_txrx_fw_stats_handler(ol_txrx_pdev_handle pdev,
+ 
+ 			case HTT_DBG_STATS_TX_PPDU_LOG:
+ 				bytes = 0;
+ 				/* TO DO: specify how many bytes are present */
+ 				/* TO DO: add copying to the requestor's buf */
++				/* Fall through */
+ 
+ 			case HTT_DBG_STATS_RX_REMOTE_RING_BUFFER_INFO:
+ 				bytes = sizeof(struct
+ 						rx_remote_buffer_mgmt_stats);
+ 				if (req->base.copy.buf) {

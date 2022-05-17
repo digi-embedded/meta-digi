@@ -1,0 +1,119 @@
+From fb4a4f20a55f945a2134e0abea897070c4f8f77f Mon Sep 17 00:00:00 2001
+From: Xueqiang Gong <quic_gongx@quicinc.com>
+Date: Fri, 1 Apr 2022 15:52:16 +0800
+Subject: [PATCH] qca-wifi-host-cmn: fix buid issue for Rome SDIO interface
+
+Change-Id: I0df0490bf9150cc3f57f27f9818dccf98831a615
+Signed-off-by: Xueqiang Gong <quic_gongx@quicinc.com>
+---
+ hif/src/dispatcher/multibus.c                   | 5 +++++
+ hif/src/hif_main.c                              | 4 ++++
+ hif/src/sdio/hif_sdio_dev.h                     | 2 +-
+ hif/src/sdio/if_sdio.h                          | 2 +-
+ hif/src/sdio/native_sdio/include/hif_internal.h | 4 ++--
+ hif/src/sdio/native_sdio/src/hif.c              | 2 +-
+ hif/src/sdio/transfer/mailbox.h                 | 2 +-
+ 7 files changed, 15 insertions(+), 6 deletions(-)
+
+diff --git a/hif/src/dispatcher/multibus.c b/hif/src/dispatcher/multibus.c
+index 06e70f0..f9b2b6b 100644
+--- a/hif/src/dispatcher/multibus.c
++++ b/hif/src/dispatcher/multibus.c
+@@ -34,6 +34,11 @@
+ #include "dummy.h"
+ #include "qdf_module.h"
+ 
++#ifdef HIF_SDIO
++#include "hif_exec.h"
++#endif
++
++
+ /**
+  * hif_initialize_default_ops() - initializes default operations values
+  *
+diff --git a/hif/src/hif_main.c b/hif/src/hif_main.c
+index b5140cc..a6b4d43 100644
+--- a/hif/src/hif_main.c
++++ b/hif/src/hif_main.c
+@@ -972,7 +972,11 @@ void hif_close(struct hif_opaque_softc *hif_ctx)
+ 	}
+ 
+ 	hif_uninit_rri_on_ddr(scn);
++#if (defined(HIF_PCI) || defined(HIF_SNOC) || defined(HIF_AHB) || \
++		 defined(HIF_IPCI))
+ 	hif_cleanup_static_buf_to_target(scn);
++#endif
++
+ 	hif_cpuhp_unregister(scn);
+ 
+ 	hif_bus_close(scn);
+diff --git a/hif/src/sdio/hif_sdio_dev.h b/hif/src/sdio/hif_sdio_dev.h
+index 7ee6582..544a57e 100644
+--- a/hif/src/sdio/hif_sdio_dev.h
++++ b/hif/src/sdio/hif_sdio_dev.h
+@@ -157,7 +157,7 @@ QDF_STATUS hif_enable_func(struct hif_softc *ol_sc, struct hif_sdio_dev *device,
+ QDF_STATUS hif_disable_func(struct hif_sdio_dev *device,
+ 			    struct sdio_func *func,
+ 			    bool reset);
+-A_STATUS hif_sdio_probe(struct hif_softc *ol_sc,
++QDF_STATUS hif_sdio_probe(struct hif_softc *ol_sc,
+ 			struct sdio_func *func,
+ 			struct hif_sdio_dev *device);
+ #endif /* HIF_SDIO_DEV_H_ */
+diff --git a/hif/src/sdio/if_sdio.h b/hif/src/sdio/if_sdio.h
+index a71e61e..c5ad71b 100644
+--- a/hif/src/sdio/if_sdio.h
++++ b/hif/src/sdio/if_sdio.h
+@@ -67,7 +67,7 @@ static inline void athdiag_procfs_remove(void)
+ }
+ #endif
+ 
+-#define DMA_MAPPING_ERROR(dev, addr) dma_mapping_error((dev), (addr))
++//#define DMA_MAPPING_ERROR(dev, addr) dma_mapping_error((dev), (addr))
+ 
+ int ath_sdio_probe(void *context, void *hif_handle);
+ void ath_sdio_remove(void *context, void *hif_handle);
+diff --git a/hif/src/sdio/native_sdio/include/hif_internal.h b/hif/src/sdio/native_sdio/include/hif_internal.h
+index 41001c8..e5c7df0 100644
+--- a/hif/src/sdio/native_sdio/include/hif_internal.h
++++ b/hif/src/sdio/native_sdio/include/hif_internal.h
+@@ -419,8 +419,8 @@ void hif_sdio_quirk_write_cccr(struct hif_softc *ol_sc, struct sdio_func *func);
+ int hif_sdio_quirk_mod_strength(struct hif_softc *ol_sc,
+ 				struct sdio_func *func);
+ int hif_sdio_quirk_async_intr(struct hif_softc *ol_sc, struct sdio_func *func);
+-int hif_sdio_set_bus_speed(struct hif_softc *ol_sc, struct sdio_func *func);
+-int hif_sdio_set_bus_width(struct hif_softc *ol_sc, struct sdio_func *func);
++QDF_STATUS hif_sdio_set_bus_speed(struct hif_softc *ol_sc, struct sdio_func *func);
++QDF_STATUS hif_sdio_set_bus_width(struct hif_softc *ol_sc, struct sdio_func *func);
+ QDF_STATUS hif_sdio_func_disable(struct hif_sdio_dev *device,
+ 				 struct sdio_func *func,
+ 				 bool reset);
+diff --git a/hif/src/sdio/native_sdio/src/hif.c b/hif/src/sdio/native_sdio/src/hif.c
+index 9ca2e21..d52eee2 100644
+--- a/hif/src/sdio/native_sdio/src/hif.c
++++ b/hif/src/sdio/native_sdio/src/hif.c
+@@ -348,7 +348,7 @@ QDF_STATUS hif_sdio_probe(struct hif_softc *ol_sc,
+ 		pld_hif_sdio_get_virt_ramdump_mem(&func->dev,
+ 						  &scn->ramdump_size);
+ 	if (!scn->ramdump_base || !scn->ramdump_size) {
+-		hf_err("Failed ramdump res alloc - base:%s, len:%lu",
++		hif_err("Failed ramdump res alloc - base:%s, len:%lu",
+ 			scn->ramdump_base ? "ok" : "null",
+ 			scn->ramdump_size);
+ 	} else {
+diff --git a/hif/src/sdio/transfer/mailbox.h b/hif/src/sdio/transfer/mailbox.h
+index 3e59132..36f3e98 100644
+--- a/hif/src/sdio/transfer/mailbox.h
++++ b/hif/src/sdio/transfer/mailbox.h
+@@ -20,7 +20,7 @@
+ 
+ 
+ #ifndef _MAILBOX_H_
+-#define _MAILBOX_H__
++#define _MAILBOX_H_
+ 
+ #include "a_debug.h"
+ #include "hif_sdio_dev.h"
+-- 
+2.7.4
+

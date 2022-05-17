@@ -1,25 +1,45 @@
-# Copyright (C) 2016-2021 Digi International.
+# Copyright (C) 2016-2022 Digi International.
 
 SUMMARY = "Qualcomm's wireless driver for qca65xx"
-DESCRIPTION = "qcacld-2.0 module"
+DESCRIPTION = "qcacld-3.0 module"
 LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
 
 # Reference Qualcomm tag/version
-PV = "v4.0.11.213X"
+PV = "v5.2.0.237G"
 
-SRCBRANCH = "qca65X4/master"
-SRCREV = "${AUTOREV}"
+QCACLD_SRCBRANCH = "wlan-cld3.driver.lnx.2.0.r51-rel"
+QCA_WIFI_HOST_CMN_SRCBRANCH = "wlan-cmn.driver.lnx.2.0.r51-rel"
+FW_API_SRCBRANCH = "wlan-api.lnx.1.0.c21.2"
+MDM_INIT_SRCBRANCH = "wlan-tools.lnx.1.0.c21.2"
 
-QCOM_GIT_URI = "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}/linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git;protocol=https', d)}"
+SRCREV_qcacld = "CHSS.LNX_FSL.5.0-01200-QCA6574AUARMSDIOHZ"
+SRCREV_qca-wifi-host = "CHSS.LNX_FSL.5.0-01200-QCA6574AUARMSDIOHZ"
+SRCREV_fw-api = "CHSS.LNX_FSL.5.0-01200-QCA6574AUARMSDIOHZ"
+SRCREV_mdm-init = "CHSS.LNX_FSL.5.0-01200-QCA6574AUARMSDIOHZ"
 
 SRC_URI = " \
-    ${QCOM_GIT_URI};branch=${SRCBRANCH} \
+    git://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/wlan/qcacld-3.0.git;protocol=https;branch=${QCACLD_SRCBRANCH};name=qcacld \
+    git://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/wlan/qca-wifi-host-cmn.git;protocol=https;branch=${QCA_WIFI_HOST_CMN_SRCBRANCH};destsuffix=qca-wifi-host-cmn;name=qca-wifi-host \
+    git://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/wlan/fw-api.git;protocol=https;branch=${FW_API_SRCBRANCH};destsuffix=fw-api;name=fw-api \
+    git://git.codelinaro.org/clo/le/qcom-opensource/mdm-init.git;protocol=https;branch=${MDM_INIT_SRCBRANCH};destsuffix=mdm-init;name=mdm-init \
+    file://0001-qcacld-3.0-fix-build-issues.patch \
+    file://0002-qcacld-3.0-support-ROME-SDIO-build.patch \
+    file://0001-qca-wifi-host-cmn-fix-buid-issue-for-Rome-SDIO-interface.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
+    file://0002-qca-wifi-host-cmn-fix-build-issue-enabling-debug-for-.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
 "
+
+inherit module
+
+DEPENDS = "virtual/kernel"
 
 # Selects whether the interface is SDIO or PCI
 QUALCOMM_WIFI_INTERFACE ?= "sdio"
 QUALCOMM_WIFI_INTERFACE_ccimx8x = "pci"
+
+WLAN_CONFIG_INI = "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , \
+                                           'QCA6574AU.LE.2.2.1_Rome_SDIO_qcacld-3.0.ini', \
+                                           'QCA6574AU.LE.2.2.1_Rome_PCIe_qcacld-3.0.ini', d)}"
 
 SRC_URI_append = " \
     file://81-qcom-wifi.rules \
@@ -34,30 +54,28 @@ SRC_URI_append = "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '$
 
 S = "${WORKDIR}/git"
 
-inherit module
+WLAN_MODULE_NAME ?= "wlan"
 
-EXTRA_OEMAKE += "CONFIG_LINUX_QCMBR=y WLAN_OPEN_SOURCE=1"
-# Explicity state it is not a QC platform, if not the driver will try to remap
-# memory that is not allowed in ARMv6 (kernel commit
-# 309caa9cc6ff39d261264ec4ff10e29489afc8f8)
-EXTRA_OEMAKE += "CONFIG_NON_QC_PLATFORM=y"
-# Flag to compile the debug version (1 - enabled, rest of values - disabled)
-EXTRA_OEMAKE += "BUILD_DEBUG_VERSION=0"
+EXTRA_OEMAKE += "CONFIG_WLAN_FEATURE_11W=y \
+                 CONFIG_LINUX_QCMBR=y \
+                 CONFIG_QCA_CLD_WLAN_PROFILE=qca6174 \
+                 CONFIG_WLAN_DISABLE_EXPORT_SYMBOL=y \
+                 MODNAME=${WLAN_MODULE_NAME} \
+"
+
 # Flags for SDIO interface with wifi
 FLAGS_SDIO = "CONFIG_CLD_HL_SDIO_CORE=y"
 EXTRA_OEMAKE += "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${FLAGS_SDIO}', '', d)}"
+
 # Flags for PCI interface with wifi
-FLAGS_PCI = "CONFIG_ROME_IF=pci CONFIG_HIF_PCI=1 CONFIG_ATH_PCIE_ACCESS_DEBUG=1 CONFIG_ATH_PCIE_MAX_PERF=1"
+FLAGS_PCI = "CONFIG_ROME_IF=pci"
 EXTRA_OEMAKE += "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'pci' , '${FLAGS_PCI}', '', d)}"
-# Flags required for QCA6574
-EXTRA_OEMAKE_append_ccimx8x = " CONFIG_ARCH_MSM=n CONFIG_ARCH_QCOM=n CONFIG_ATH_11AC_TXCOMPACT=1"
+
+# Flag to compile the debug version (y - enabled, n - disabled)
+EXTRA_OEMAKE += "BUILD_DEBUG_VERSION=n"
 
 do_compile_prepend() {
 	export BUILD_VER=${PV}
-}
-
-do_install_prepend_ccimx6ul() {
-    sed -i -e "s/gVhtTxMCS=2/gVhtTxMCS=0/g" ${WORKDIR}/git/firmware_bin/WCNSS_qcom_cfg.ini
 }
 
 do_install_append() {
@@ -67,18 +85,31 @@ do_install_append() {
 	fi
 
 	install -d ${D}${base_libdir}/firmware/wlan/
-	install -m 0644 ${WORKDIR}/git/firmware_bin/WCNSS_cfg.dat ${D}${base_libdir}/firmware/wlan/cfg.dat
-	install -m 0644 ${WORKDIR}/git/firmware_bin/WCNSS_qcom_cfg.ini ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
+	install -m 0644 ${WORKDIR}/mdm-init/wlan_standalone/${WLAN_CONFIG_INI} ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
+	# Set regulatory STRICT mode
+	sed -i -e "s/gRegulatoryChangeCountry=1/gRegulatoryChangeCountry=0/g" ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
+	# Disable SIFS Burst support
+	sed -i -e "s/gEnableSifsBurst=1/gEnableSifsBurst=0/g" ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
+	# Enable channel bonding on 2.4GHz band
+	sed -i -e "/^#Channel Bonding/a gChannelBondingMode24GHz=1" ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
+	# Disable 802.11d support
+	sed -i -e "s/g11dSupportEnabled=1/g11dSupportEnabled=0/g" ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
+
 	install -d ${D}${sysconfdir}/udev/scripts
 	install -m 0755 ${WORKDIR}/qualcomm.sh ${D}${sysconfdir}/udev/scripts/
+
 	install -d ${D}${sysconfdir}/udev/rules.d
 	install -m 0644 ${WORKDIR}/81-qcom-wifi.rules ${D}${sysconfdir}/udev/rules.d/
 }
 
+do_install_append_ccimx6ul() {
+	# Set MCS value to MCS0-7
+	sed -i -e "s/gVhtTxMCS=2/gVhtTxMCS=0/g" ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
+}
+
 FILES_${PN} += " \
-    ${sysconfdir}/modprobe.d/qualcomm.conf \
+    ${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${sysconfdir}/modprobe.d/qualcomm.conf', '', d)} \
     ${sysconfdir}/udev/ \
-    ${base_libdir}/firmware/wlan/cfg.dat \
     ${base_libdir}/firmware/wlan/qcom_cfg.ini \
 "
 

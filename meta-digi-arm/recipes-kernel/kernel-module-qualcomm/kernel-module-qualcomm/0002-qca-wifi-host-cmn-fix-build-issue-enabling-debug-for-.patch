@@ -1,0 +1,65 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Tue, 17 May 2022 15:50:32 +0200
+Subject: [PATCH] qca-wifi-host-cmn: fix build issue enabling debug for SDIO
+ interface
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ hif/src/sdio/native_sdio/src/dev_quirks.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/hif/src/sdio/native_sdio/src/dev_quirks.c b/hif/src/sdio/native_sdio/src/dev_quirks.c
+index a94ec61d0b..b5e70a51dd 100644
+--- a/hif/src/sdio/native_sdio/src/dev_quirks.c
++++ b/hif/src/sdio/native_sdio/src/dev_quirks.c
+@@ -265,12 +265,13 @@ void hif_sdio_quirk_write_cccr(struct hif_softc *ol_sc, struct sdio_func *func)
+ 				(unsigned int)writecccr1,
+ 				(unsigned int)writecccr1value,
+ 				err);
+ 		else
+ 			hif_info("%s Write CCCR 0x%02X to 0x%02X OK",
++				 __func__,
+ 				 (unsigned int)writecccr1,
+-				 writecccr1value);
++				 (unsigned int)writecccr1value);
+ 	}
+ 
+ 	if (writecccr2) {
+ 		err = func0_cmd52_write_byte(func->card, writecccr2,
+ 					     writecccr2value);
+@@ -279,10 +280,11 @@ void hif_sdio_quirk_write_cccr(struct hif_softc *ol_sc, struct sdio_func *func)
+ 				(unsigned int)writecccr2,
+ 				(unsigned int)writecccr2value,
+ 				err);
+ 		else
+ 			hif_info("%s Write CCCR 0x%02X to 0x%02X OK",
++				 __func__,
+ 				 (unsigned int)writecccr2,
+ 				 (unsigned int)writecccr2value);
+ 	}
+ 	if (writecccr3) {
+ 		err = func0_cmd52_write_byte(func->card, writecccr3,
+@@ -292,10 +294,11 @@ void hif_sdio_quirk_write_cccr(struct hif_softc *ol_sc, struct sdio_func *func)
+ 				(unsigned int)writecccr3,
+ 				(unsigned int)writecccr3value,
+ 				err);
+ 		else
+ 			hif_info("%s Write CCCR 0x%02X to 0x%02X OK",
++				 __func__,
+ 				 (unsigned int)writecccr3,
+ 				 (unsigned int)writecccr3value);
+ 	}
+ 	if (writecccr4) {
+ 		err = func0_cmd52_write_byte(func->card, writecccr4,
+@@ -305,10 +308,11 @@ void hif_sdio_quirk_write_cccr(struct hif_softc *ol_sc, struct sdio_func *func)
+ 				(unsigned int)writecccr4,
+ 				(unsigned int)writecccr4value,
+ 				err);
+ 		else
+ 			hif_info("%s Write CCCR 0x%02X to 0x%02X OK",
++				 __func__,
+ 				 (unsigned int)writecccr4,
+ 				 (unsigned int)writecccr4value);
+ 	}
+ }
+ 
