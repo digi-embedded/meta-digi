@@ -25,6 +25,7 @@ SRC_URI = " \
     git://git.codelinaro.org/clo/le/qcom-opensource/mdm-init.git;protocol=https;branch=${MDM_INIT_SRCBRANCH};destsuffix=mdm-init;name=mdm-init \
     file://0001-qcacld-3.0-fix-build-issues.patch \
     file://0002-qcacld-3.0-support-ROME-SDIO-build.patch \
+    file://0003-qcacld-3.0-cfg-try-to-get-MACs-from-device-tree-entr.patch \
     file://0001-qca-wifi-host-cmn-fix-buid-issue-for-Rome-SDIO-interface.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
     file://0002-qca-wifi-host-cmn-fix-build-issue-enabling-debug-for-.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
 "
@@ -73,6 +74,9 @@ EXTRA_OEMAKE += "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'pci' , '${F
 
 # Flag to compile the debug version (y - enabled, n - disabled)
 EXTRA_OEMAKE += "BUILD_DEBUG_VERSION=n"
+
+# Flag to define the maximum vdevs interfaces
+EXTRA_OEMAKE += "CONFIG_WLAN_MAX_VDEVS=4"
 
 do_compile_prepend() {
 	export BUILD_VER=${PV}
