@@ -1,0 +1,46 @@
+#!/bin/sh
+#===============================================================================
+#
+#  Copyright (C) 2022 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Initialize Cloud Connector service
+#
+#===============================================================================
+
+# Source function library: status, pidofproc and killproc
+. /etc/init.d/functions
+
+readonly CC_BINARY="/usr/bin/cloud-connector"
+readonly STOP_TIMEOUT="5"
+
+case "$1" in
+	start)
+		status ${CC_BINARY} > /dev/null || ${CC_BINARY} -d > /dev/null 2>&1
+		;;
+	stop)
+		# try to stop gracefully
+		killproc ${CC_BINARY} >/dev/null 2>&1
+		for i in $(seq ${STOP_TIMEOUT}); do
+			pid=$(pidofproc ${CC_BINARY}) || break
+			if [ "${i}" -eq ${STOP_TIMEOUT} ]; then
+				kill -KILL "${pid}" >/dev/null 2>&1
+			fi
+			sleep 1
+		done
+		;;
+	restart)
+		$0 stop
+		sleep 1
+		$0 start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+		;;
+esac
