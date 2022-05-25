@@ -1,21 +1,39 @@
 From: Arturo Buzarra <arturo.buzarra@digi.com>
 Date: Mon, 2 May 2022 12:01:12 +0200
-Subject: [PATCH] qcacld-3.0: Fix build issues
+Subject: [PATCH] qcacld-3.0: fix build issues
+
+Removed '-Werror' as this makes the driver build fail using newer versions
+of the compiler. For example building with gcc 11 there are new warnings:
+
+lim_api.c:1057:17: error: this 'if' clause does not guard... [-Werror=misleading-indentation]
+lim_admit_control.c:169:17: error: this 'if' clause does not guard... [-Werror=misleading-indentation]
 
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
+ Kbuild                  | 1 -
  core/bmi/src/ol_fw.c    | 3 +++
  core/dp/htt/htt_rx_hl.c | 2 ++
  core/dp/txrx/ol_txrx.c  | 1 +
- 3 files changed, 6 insertions(+)
+ 4 files changed, 6 insertions(+), 1 deletion(-)
 
+diff --git a/Kbuild b/Kbuild
+index ad086656cca2..50c01ef223c1 100644
+--- a/Kbuild
++++ b/Kbuild
+@@ -2804,7 +2804,6 @@ ccflags-y += $(INCS)
+ 
+ cppflags-y +=	-DANI_OS_TYPE_ANDROID=6 \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ cppflags-$(CONFIG_PTT_SOCK_SVC_ENABLE) += -DPTT_SOCK_SVC_ENABLE
 diff --git a/core/bmi/src/ol_fw.c b/core/bmi/src/ol_fw.c
-index 52513fff23..c69420734b 100644
+index 52513fff23b2..c69420734be7 100644
 --- a/core/bmi/src/ol_fw.c
 +++ b/core/bmi/src/ol_fw.c
-@@ -609,11 +609,13 @@ int ol_copy_ramdump(struct hif_opaque_softc *scn)
- 	return ret;
- }
+@@ -611,7 +611,9 @@ int ol_copy_ramdump(struct hif_opaque_softc *scn)
  
  static void __ramdump_work_handler(void *data)
  {
@@ -25,11 +43,7 @@ index 52513fff23..c69420734b 100644
  	uint32_t host_interest_address;
  	uint32_t dram_dump_values[4];
  	uint32_t target_type;
- 	struct hif_target_info *tgt_info;
- 	struct ol_context *ol_ctx = data;
-@@ -1044,10 +1046,11 @@ static QDF_STATUS ol_fw_populate_clk_settings(enum a_refclk_speed_t refclk,
- 		clock_s->wlan_pll.div = 0;
- 		clock_s->wlan_pll.rnfrac = 0;
+@@ -1046,6 +1048,7 @@ static QDF_STATUS ol_fw_populate_clk_settings(enum a_refclk_speed_t refclk,
  		clock_s->wlan_pll.outdiv = 0;
  		clock_s->pll_settling_time = 1024;
  		clock_s->refclk_hz = 0;
@@ -37,15 +51,11 @@ index 52513fff23..c69420734b 100644
  	default:
  		return QDF_STATUS_E_FAILURE;
  	}
- 
- 	clock_s->refclk_hz = refclk_speed_to_hz[refclk];
 diff --git a/core/dp/htt/htt_rx_hl.c b/core/dp/htt/htt_rx_hl.c
-index 9cb2047e3d..e0cbac5ac0 100644
+index 9cb2047e3d1b..e0cbac5ac004 100644
 --- a/core/dp/htt/htt_rx_hl.c
 +++ b/core/dp/htt/htt_rx_hl.c
-@@ -419,15 +419,17 @@ htt_rx_mpdu_desc_pn_hl(
- 		case 128:
- 			/* bits 128:64 */
+@@ -421,11 +421,13 @@ htt_rx_mpdu_desc_pn_hl(
  			*(word_ptr + 3) = rx_desc->pn_127_96;
  			/* bits 63:0 */
  			*(word_ptr + 2) = rx_desc->pn_95_64;
@@ -59,15 +69,11 @@ index 9cb2047e3d..e0cbac5ac0 100644
  		case 24:
  			/* bits 23:0
  			 * copy 32 bits
- 			 */
- 			*(word_ptr + 0) = rx_desc->pn_31_0;
 diff --git a/core/dp/txrx/ol_txrx.c b/core/dp/txrx/ol_txrx.c
-index 2f20d49793..303f47c86d 100644
+index 2f20d497936c..303f47c86d8e 100644
 --- a/core/dp/txrx/ol_txrx.c
 +++ b/core/dp/txrx/ol_txrx.c
-@@ -4240,10 +4240,11 @@ ol_txrx_fw_stats_handler(ol_txrx_pdev_handle pdev,
- 
- 			case HTT_DBG_STATS_TX_PPDU_LOG:
+@@ -4242,6 +4242,7 @@ ol_txrx_fw_stats_handler(ol_txrx_pdev_handle pdev,
  				bytes = 0;
  				/* TO DO: specify how many bytes are present */
  				/* TO DO: add copying to the requestor's buf */
@@ -75,5 +81,3 @@ index 2f20d49793..303f47c86d 100644
  
  			case HTT_DBG_STATS_RX_REMOTE_RING_BUFFER_INFO:
  				bytes = sizeof(struct
- 						rx_remote_buffer_mgmt_stats);
- 				if (req->base.copy.buf) {

@@ -13,11 +13,6 @@ QCA_WIFI_HOST_CMN_SRCBRANCH = "wlan-cmn.driver.lnx.2.0.r51-rel"
 FW_API_SRCBRANCH = "wlan-api.lnx.1.0.c21.2"
 MDM_INIT_SRCBRANCH = "wlan-tools.lnx.1.0.c21.2"
 
-SRCREV_qcacld = "CHSS.LNX_FSL.5.0-01200-QCA6574AUARMSDIOHZ"
-SRCREV_qca-wifi-host = "CHSS.LNX_FSL.5.0-01200-QCA6574AUARMSDIOHZ"
-SRCREV_fw-api = "CHSS.LNX_FSL.5.0-01200-QCA6574AUARMSDIOHZ"
-SRCREV_mdm-init = "CHSS.LNX_FSL.5.0-01200-QCA6574AUARMSDIOHZ"
-
 SRC_URI = " \
     git://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/wlan/qcacld-3.0.git;protocol=https;branch=${QCACLD_SRCBRANCH};name=qcacld \
     git://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/wlan/qca-wifi-host-cmn.git;protocol=https;branch=${QCA_WIFI_HOST_CMN_SRCBRANCH};destsuffix=qca-wifi-host-cmn;name=qca-wifi-host \
@@ -29,6 +24,12 @@ SRC_URI = " \
     file://0001-qca-wifi-host-cmn-fix-buid-issue-for-Rome-SDIO-interface.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
     file://0002-qca-wifi-host-cmn-fix-build-issue-enabling-debug-for-.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
 "
+
+# Tag 'CHSS.LNX_FSL.5.0-01200-QCA6574AUARMSDIOHZ' in all repos
+SRCREV_qcacld = "f1dae2986ae58c68ea740e2c505be9c369547916"
+SRCREV_qca-wifi-host = "ca5e999f4f692a45ae9974a7ad92726deaf7497f"
+SRCREV_fw-api = "62b94874003ef7aced22bba1a076c1e4b5d5a9a9"
+SRCREV_mdm-init = "3fb3bcb9f054eeeb1083bd4f6dbaf733061c5af3"
 
 inherit module
 
