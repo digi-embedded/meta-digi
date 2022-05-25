@@ -1,7 +1,6 @@
-From cd5e40f6dbef29a04cdfabec47fd3674d764f74e Mon Sep 17 00:00:00 2001
 From: Gabriel Valcazar <gabriel.valcazar@digi.com>
 Date: Wed, 7 Apr 2021 13:47:37 +0200
-Subject: [PATCH 3/3] tools: env: add support to set dynamic location of
+Subject: [PATCH] tools: env: add support to set dynamic location of
  environment copies
 
 A mechanism was added in U-Boot to set the location of environment copies
@@ -28,7 +27,7 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  2 files changed, 90 insertions(+), 2 deletions(-)
 
 diff --git a/src/uboot_env.c b/src/uboot_env.c
-index bcc4af9..71fef10 100644
+index 87f831b0cdc7..539e22f9a8ac 100644
 --- a/src/uboot_env.c
 +++ b/src/uboot_env.c
 @@ -431,6 +431,73 @@ static int check_env_device(struct uboot_ctx *ctx, struct uboot_flash_env *dev)
@@ -118,7 +117,7 @@ index bcc4af9..71fef10 100644
  
  	return true;
  }
-@@ -485,7 +558,7 @@ static int fileread(struct uboot_flash_env *dev, void *data)
+@@ -488,7 +561,7 @@ static int fileread(struct uboot_flash_env *dev, void *data)
  	return ret;
  }
  
@@ -127,7 +126,7 @@ index bcc4af9..71fef10 100644
  {
  	size_t count;
  	size_t blocksize;
-@@ -504,6 +577,17 @@ static int mtdread(struct uboot_flash_env *dev, void *data)
+@@ -507,6 +580,17 @@ static int mtdread(struct uboot_flash_env *dev, void *data)
  		ret = read(dev->fd, data, dev->envsize);
  		break;
  	case MTD_NANDFLASH:
@@ -145,7 +144,7 @@ index bcc4af9..71fef10 100644
  		if (dev->offset)
  			if (lseek(dev->fd, dev->offset, SEEK_SET) < 0) {
  				ret = -EIO;
-@@ -579,7 +663,7 @@ static int devread(struct uboot_ctx *ctx, unsigned int copy, void *data)
+@@ -582,7 +666,7 @@ static int devread(struct uboot_ctx *ctx, unsigned int copy, void *data)
  		ret = fileread(dev, data);
  		break;
  	case DEVICE_MTD:
@@ -155,7 +154,7 @@ index bcc4af9..71fef10 100644
  	case DEVICE_UBI:
  		ret = ubiread(dev, data);
 diff --git a/src/uboot_private.h b/src/uboot_private.h
-index 22c8c14..591df20 100644
+index 22c8c14ce8cc..591df20d6936 100644
 --- a/src/uboot_private.h
 +++ b/src/uboot_private.h
 @@ -113,10 +113,14 @@ struct uboot_ctx {
@@ -173,6 +172,3 @@ index 22c8c14..591df20 100644
  	/** usable environment size */
  	unsigned int usable_size;
  	/** devices where environment is stored */
--- 
-2.17.1
-
