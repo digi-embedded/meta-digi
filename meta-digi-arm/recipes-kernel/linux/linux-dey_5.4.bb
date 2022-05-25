@@ -1,7 +1,7 @@
 # Copyright (C) 2013-2022 Digi International
 
 SUMMARY = "Linux kernel for Digi boards"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
 DEPENDS += "lzop-native bc-native"

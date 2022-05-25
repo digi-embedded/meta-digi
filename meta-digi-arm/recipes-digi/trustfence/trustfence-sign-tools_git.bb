@@ -1,6 +1,7 @@
-# Copyright (C) 2017-2021 Digi International
+# Copyright (C) 2017-2022, Digi International Inc.
+
 SUMMARY = "TrustFence signing and encryption scripts"
-LICENSE = "GPL-2.0"
+LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6"
 
 DEPENDS = "trustfence-cst coreutils util-linux"

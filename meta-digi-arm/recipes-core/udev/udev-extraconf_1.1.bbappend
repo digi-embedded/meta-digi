@@ -44,7 +44,7 @@ do_install:append() {
 }
 
 FILES:${PN}:append = " ${sysconfdir}/modprobe.d"
-FILES:${PN}:append += " /mnt"
+FILES:${PN}:append = " /mnt"
 
 # BT_TTY is machine specific (defined in machine config file)
 PACKAGE_ARCH = "${MACHINE_ARCH}"

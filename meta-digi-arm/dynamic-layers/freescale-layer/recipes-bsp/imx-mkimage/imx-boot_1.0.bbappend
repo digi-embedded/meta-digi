@@ -104,7 +104,7 @@ IMX_BOOT_SOC_TARGET:mx8mp-nxp-bsp = "iMX8MP"
 IMX_BOOT_SOC_TARGET:mx8x-nxp-bsp = "iMX8QX"
 
 DEPENDS:append:ccimx8x = " coreutils-native"
-DEPENDS:append:mx8-nxp-bsp += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
+DEPENDS:append:mx8-nxp-bsp = " ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 IMX_M4_DEMOS:mx8mm-nxp-bsp   = "imx-m4-demos:do_deploy"
 

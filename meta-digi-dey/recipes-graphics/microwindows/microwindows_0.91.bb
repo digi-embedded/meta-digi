@@ -1,8 +1,8 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013-2022, Digi International Inc.
 
 SUMMARY = "Microwindows Graphical Engine"
 SECTION = "x11/wm"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 # License path relative to S = "${WORKDIR}/${PN}-${PV}/src"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=537b9004889eb701c48fc1fe78d9c30e"
 

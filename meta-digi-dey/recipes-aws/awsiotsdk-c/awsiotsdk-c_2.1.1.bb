@@ -9,17 +9,17 @@ LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=acc7a1bf87c055789657b148939e4b40"
 DEPENDS = "mbedtls"
 
 SRC_URI = " \
-    https://github.com/aws/aws-iot-device-sdk-embedded-C/archive/v${PV}.tar.gz;downloadfilename=${BP}.tar.gz \
+    git://github.com/aws/aws-iot-device-sdk-embedded-C.git;protocol=https;branch=main \
     file://aws_iot_config.h.template \
     file://awsiotsdk.pc \
     file://Makefile \
     file://Makefile.lib \
 "
 
-SRC_URI[md5sum] = "2c415af16bbd68440b62d71a7e9775c5"
-SRC_URI[sha256sum] = "74d434b3258654cea048b20eb52d4fc627f5c87e8727ce180a1d529e3285a97e"
+# Tag 'v2.1.1'
+SRCREV = "70071112bd5e1c5b9f150894fafe199637b4f63a"
 
-S = "${WORKDIR}/aws-iot-device-sdk-embedded-C-${PV}"
+S = "${WORKDIR}/git"
 
 inherit aws-iot pkgconfig
 

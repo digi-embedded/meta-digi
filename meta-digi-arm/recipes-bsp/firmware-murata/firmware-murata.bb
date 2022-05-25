@@ -2,7 +2,7 @@
 
 SUMMARY = "Murata firmware binaries"
 SECTION = "base"
-LICENSE = "BSD"
+LICENSE = "CYPRESS-EULA"
 LIC_FILES_CHKSUM = "file://${S}/cyw-bt-patch/LICENCE.cypress;md5=cbc5f665d04f741f1e006d2096236ba7"
 
 SRC_URI = " \

@@ -1,7 +1,5 @@
 # Copyright (C) 2018-2022 Digi International
 
-LICENSE = "GPLv2"
-
 LOCALVERSION = "-dey"
 SRCREV = "${AUTOREV}"
 

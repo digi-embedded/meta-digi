@@ -1,7 +1,5 @@
 # Copyright (C) 2022 Digi International
 
-LICENSE = "GPLv2"
-
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 do_deploy[postfuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence_sign', '', d)}"
