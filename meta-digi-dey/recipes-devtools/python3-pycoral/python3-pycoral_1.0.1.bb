@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://${S}/pycoral-1.0.1.dist-info/LICENSE;md5=d8927f3331d2
 
 PYTHON_PACKAGE = "pycoral-1.0.1-cp38-cp38-linux:aarch64.whl"
 
-SRC_URI = "git://github.com/google-coral/pycoral.git;protocol=https"
+SRC_URI = "git://github.com/google-coral/pycoral.git;protocol=https;branch=master"
 SRCREV = "d4b9f572fa3baef9d854483a171e02a6b3f9dbd0"
 
 SRC_URI += "https://github.com/google-coral/pycoral/releases/download/v1.0.1/${PYTHON_PACKAGE};downloadfilename=${PYTHON_PACKAGE};subdir=${BP};name=python-wheel"

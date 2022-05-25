@@ -4,7 +4,7 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 
 SRCREV = "43a5fd0578c75c9140b4f057de74f2dbac96ceff"
-SRC_URI = "git://github.com/google-coral/project-keyword-spotter.git;protocol=https"
+SRC_URI = "git://github.com/google-coral/project-keyword-spotter.git;protocol=https;branch=master"
 
 S = "${WORKDIR}/git"
 

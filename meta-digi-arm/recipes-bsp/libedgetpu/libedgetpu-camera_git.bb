@@ -4,7 +4,7 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 
 SRCREV = "19335531f599133e054ec2ddcc31733d24031ba5"
-SRC_URI = "git://github.com/google-coral/examples-camera.git;protocol=https \
+SRC_URI = "git://github.com/google-coral/examples-camera.git;protocol=https;branch=master \
            file://0001-gstreamer-fix-video-sink-for-wayland-images.patch \
            "
 

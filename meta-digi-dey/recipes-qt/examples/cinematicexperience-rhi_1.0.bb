@@ -4,7 +4,7 @@ HOMEPAGE = "http://quitcoding.com/?page=work#cinex"
 LICENSE = "CC-BY-3.0"
 LIC_FILES_CHKSUM = "file://README.md;beginline=51;endline=62;md5=894ca59686d0bd2b73d1bca0faf1032f"
 
-SRC_URI = "git://github.com/alpqr/qt5-cinematic-experience.git;protocol=https"
+SRC_URI = "git://github.com/alpqr/qt5-cinematic-experience.git;protocol=https;branch=master"
 
 SRCREV = "5d44dd7d4fd563b33570a14c2274e7fa9cc7d84f"
 

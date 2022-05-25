@@ -4,7 +4,7 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 
 SRCREV = "655a354df5f939602ff6b9da2cbc4d2c78898107"
-SRC_URI = "git://github.com/google-coral/project-bodypix.git;protocol=https"
+SRC_URI = "git://github.com/google-coral/project-bodypix.git;protocol=https;branch=master"
 
 S = "${WORKDIR}/git"
 
