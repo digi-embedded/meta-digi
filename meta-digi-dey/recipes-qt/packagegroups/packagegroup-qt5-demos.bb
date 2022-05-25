@@ -5,6 +5,8 @@
 DESCRIPTION = "Package group for Qt5 demos"
 LICENSE = "MIT"
 
+PACKAGE_ARCH = "${TUNE_PKGARCH}"
+
 inherit packagegroup
 
 RDEPENDS:${PN}:append = " \
