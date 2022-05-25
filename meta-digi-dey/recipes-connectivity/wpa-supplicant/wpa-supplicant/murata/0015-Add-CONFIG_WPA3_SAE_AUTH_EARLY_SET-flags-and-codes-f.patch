@@ -1,0 +1,112 @@
+From: Danny Chiu <Danny.Chiu@infineon.com>
+Date: Thu, 4 Nov 2021 02:44:17 -0500
+Subject: [PATCH] Add CONFIG_WPA3_SAE_AUTH_EARLY_SET flags and codes (first)
+
+Enable this flags allow the AP to set authorization to firmware earier as the SAE confirm from is ok.
+
+First part: changes not touching 'hostapd' directory.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ src/ap/ieee802_11.c           | 11 +++++++++++
+ wpa_supplicant/Android.mk     |  4 ++++
+ wpa_supplicant/Makefile       |  4 ++++
+ wpa_supplicant/android.config |  3 +++
+ wpa_supplicant/defconfig_base |  3 +++
+ 5 files changed, 25 insertions(+)
+
+diff --git a/src/ap/ieee802_11.c b/src/ap/ieee802_11.c
+index db41049287fc..3b735c09fa2d 100644
+--- a/src/ap/ieee802_11.c
++++ b/src/ap/ieee802_11.c
+@@ -87,6 +87,10 @@ static void handle_auth(struct hostapd_data *hapd,
+ 			const struct ieee80211_mgmt *mgmt, size_t len,
+ 			int rssi, int from_queue);
+ 
++#ifdef CONFIG_WPA3_SAE_AUTH_EARLY_SET
++static void sae_sme_send_external_auth_status(struct hostapd_data *hapd,
++                                              struct sta_info *sta, u16 status);
++#endif /* CONFIG_WPA3_SAE_AUTH_EARLY_SET */
+ 
+ u8 * hostapd_eid_multi_ap(struct hostapd_data *hapd, u8 *eid)
+ {
+@@ -677,6 +681,11 @@ static int auth_sae_send_confirm(struct hostapd_data *hapd,
+ 	if (data == NULL)
+ 		return WLAN_STATUS_UNSPECIFIED_FAILURE;
+ 
++#ifdef CONFIG_WPA3_SAE_AUTH_EARLY_SET
++	wpa_printf(MSG_DEBUG, "\nCalling sae_sme_send_external_auth_status\n");
++	sae_sme_send_external_auth_status(hapd, sta, WLAN_STATUS_SUCCESS);
++#endif /* CONFIG_WPA3_SAE_AUTH_EARLY_SET */
++
+ 	reply_res = send_auth_reply(hapd, sta, sta->addr, bssid,
+ 				    WLAN_AUTH_SAE, 2,
+ 				    WLAN_STATUS_SUCCESS, wpabuf_head(data),
+@@ -973,7 +982,9 @@ void sae_accept_sta(struct hostapd_data *hapd, struct sta_info *sta)
+ 	sta->sae->peer_commit_scalar = NULL;
+ 	wpa_auth_pmksa_add_sae(hapd->wpa_auth, sta->addr,
+ 			       sta->sae->pmk, sta->sae->pmkid);
++#ifndef CONFIG_WPA3_SAE_AUTH_EARLY_SET
+ 	sae_sme_send_external_auth_status(hapd, sta, WLAN_STATUS_SUCCESS);
++#endif /* CONFIG_WPA3_SAE_AUTH_EARLY_SET */
+ }
+ 
+ 
+diff --git a/wpa_supplicant/Android.mk b/wpa_supplicant/Android.mk
+index 7e597f396a07..892cb7507137 100644
+--- a/wpa_supplicant/Android.mk
++++ b/wpa_supplicant/Android.mk
+@@ -255,6 +255,10 @@ NEED_DH_GROUPS_ALL=y
+ endif
+ endif
+ 
++ifdef CONFIG_WPA3_SAE_AUTH_EARLY_SET
++L_CFLAGS += -DCONFIG_WPA3_SAE_AUTH_EARLY_SET
++endif
++
+ ifdef CONFIG_DPP
+ L_CFLAGS += -DCONFIG_DPP
+ OBJS += src/common/dpp.c
+diff --git a/wpa_supplicant/Makefile b/wpa_supplicant/Makefile
+index cb66defac7c8..66aedaff7c34 100644
+--- a/wpa_supplicant/Makefile
++++ b/wpa_supplicant/Makefile
+@@ -254,6 +254,10 @@ OBJS += mesh_mpm.o
+ OBJS += mesh_rsn.o
+ endif
+ 
++ifdef CONFIG_WPA3_SAE_AUTH_EARLY_SET
++CFLAGS += -DCONFIG_WPA3_SAE_AUTH_EARLY_SET
++endif
++
+ ifdef CONFIG_SAE
+ CFLAGS += -DCONFIG_SAE
+ OBJS += ../src/common/sae.o
+diff --git a/wpa_supplicant/android.config b/wpa_supplicant/android.config
+index 283f8eb0a995..3c28f80c9c25 100644
+--- a/wpa_supplicant/android.config
++++ b/wpa_supplicant/android.config
+@@ -534,6 +534,9 @@ CONFIG_WIFI_DISPLAY=y
+ # Experimental implementation of draft-harkins-owe-07.txt
+ #CONFIG_OWE=y
+ 
++# Set SAE Auth status early
++CONFIG_WPA3_SAE_AUTH_EARLY_SET=y
++
+ # Wired equivalent privacy (WEP)
+ # WEP is an obsolete cryptographic data confidentiality algorithm that is not
+ # considered secure. It should not be used for anything anymore. The
+diff --git a/wpa_supplicant/defconfig_base b/wpa_supplicant/defconfig_base
+index 15daf0ad2245..99c74853d404 100644
+--- a/wpa_supplicant/defconfig_base
++++ b/wpa_supplicant/defconfig_base
+@@ -248,6 +248,9 @@ CONFIG_CTRL_IFACE=y
+ # Simultaneous Authentication of Equals (SAE), WPA3-Personal
+ CONFIG_SAE=y
+ 
++# Set SAE Auth status early
++CONFIG_WPA3_SAE_AUTH_EARLY_SET=y
++
+ # Disable scan result processing (ap_scan=1) to save code size by about 1 kB.
+ # This can be used if ap_scan=1 mode is never enabled.
+ #CONFIG_NO_SCAN_PROCESSING=y

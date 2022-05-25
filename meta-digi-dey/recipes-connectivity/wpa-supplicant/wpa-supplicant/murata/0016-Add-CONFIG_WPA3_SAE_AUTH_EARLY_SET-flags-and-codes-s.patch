@@ -1,0 +1,70 @@
+From: Danny Chiu <Danny.Chiu@infineon.com>
+Date: Thu, 4 Nov 2021 02:44:17 -0500
+Subject: [PATCH] Add CONFIG_WPA3_SAE_AUTH_EARLY_SET flags and codes (second)
+
+Enable this flags allow the AP to set authorization to firmware earier as the SAE confirm from is ok.
+
+Second part: changes to 'hostapd' directory.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ hostapd/Android.mk     | 4 ++++
+ hostapd/Makefile       | 4 ++++
+ hostapd/android.config | 3 +++
+ hostapd/defconfig_base | 3 +++
+ 4 files changed, 14 insertions(+)
+
+diff --git a/hostapd/Android.mk b/hostapd/Android.mk
+index bf26e41c6b23..997e9a44737b 100644
+--- a/hostapd/Android.mk
++++ b/hostapd/Android.mk
+@@ -264,6 +264,10 @@ NEED_HMAC_SHA256_KDF=y
+ NEED_DRAGONFLY=y
+ endif
+ 
++ifdef CONFIG_WPA3_SAE_AUTH_EARLY_SET
++L_CFLAGS += -DCONFIG_WPA3_SAE_AUTH_EARLY_SET
++endif
++
+ ifdef CONFIG_OWE
+ L_CFLAGS += -DCONFIG_OWE
+ NEED_ECC=y
+diff --git a/hostapd/Makefile b/hostapd/Makefile
+index e37c13b27a6e..c65a51227838 100644
+--- a/hostapd/Makefile
++++ b/hostapd/Makefile
+@@ -290,6 +290,10 @@ CFLAGS += -DCONFIG_ETH_P_OUI
+ OBJS += ../src/ap/eth_p_oui.o
+ endif
+ 
++ifdef CONFIG_WPA3_SAE_AUTH_EARLY_SET
++CFLAGS += -DCONFIG_WPA3_SAE_AUTH_EARLY_SET
++endif
++
+ ifdef CONFIG_SAE
+ CFLAGS += -DCONFIG_SAE
+ OBJS += ../src/common/sae.o
+diff --git a/hostapd/android.config b/hostapd/android.config
+index c8b3afabef8d..3664f1773a0e 100644
+--- a/hostapd/android.config
++++ b/hostapd/android.config
+@@ -212,3 +212,6 @@ CONFIG_NO_RANDOM_POOL=y
+ # release under this optional build parameter. This functionality is subject to
+ # be completely removed in a future release.
+ CONFIG_WEP=y
++
++# Set SAE Auth status early
++CONFIG_WPA3_SAE_AUTH_EARLY_SET=y
+diff --git a/hostapd/defconfig_base b/hostapd/defconfig_base
+index 9dcf7848df92..dafcf0f6cc5b 100644
+--- a/hostapd/defconfig_base
++++ b/hostapd/defconfig_base
+@@ -399,5 +399,8 @@ CONFIG_TESTING_OPTIONS=y
+ # Simultaneous Authentication of Equals (SAE), WPA3-Personal
+ CONFIG_SAE=y
+ 
++# Set SAE Auth status early
++CONFIG_WPA3_SAE_AUTH_EARLY_SET=y
++
+ # Device Provisioning Protocol (DPP)
+ CONFIG_DPP=y

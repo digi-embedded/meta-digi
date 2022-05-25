@@ -7,29 +7,33 @@ PACKAGECONFIG ?= "openssl"
 SRC_URI += " \
     file://0001-wpa_supplicant-enable-control-socket-interface-when-.patch \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'file://0002-wpa_supplicant-systemd-enable-control-socket-interfa.patch', '', d)} \
-    file://0003-mesh-encapsulate-VHT-property-with-the-proper-CONFIG.patch \
     file://wpa_supplicant_p2p.conf \
 "
 
+# We maintain all patches from Infineon release, but do not apply the patches that
+# touches files under 'hostapd' directory, as that directory is not available in the
+# wpa_supplicant package from a release tarball.
 MURATA_COMMON_PATCHES = " \
-    file://murata/0001-wpa_supplicant-Support-4-way-handshake-offload-for-F.patch;apply=yes \
-    file://murata/0002-wpa_supplicant-Notify-Neighbor-Report-for-driver-tri.patch;apply=yes \
-    file://murata/0003-nl80211-Report-connection-authorized-in-EVENT_ASSOC.patch;apply=yes \
-    file://murata/0004-wpa_supplicant-Add-PMKSA-cache-for-802.1X-4-way-hand.patch;apply=yes \
-    file://murata/0005-Sync-with-mac80211-next.git-include-uapi-linux-nl802.patch;apply=yes \
-    file://murata/0006-nl80211-Check-SAE-authentication-offload-support.patch;apply=yes \
-    file://murata/0007-SAE-Pass-SAE-password-on-connect-for-SAE-authenticat.patch;apply=yes \
-    file://murata/0008-OpenSSL-Fix-build-with-OpenSSL-1.0.1.patch;apply=yes \
-    file://murata/0009-non-upstream-Sync-nl80211.h-for-PSK-4-way-HS-offload.patch;apply=yes \
-    file://murata/0010-nl80211-Support-4-way-handshake-offload-for-WPA-WPA2.patch;apply=yes \
-    file://murata/0011-AP-Support-4-way-handshake-offload-for-WPA-WPA2-PSK.patch;apply=yes \
-    file://murata/0012-nl80211-Support-SAE-authentication-offload-in-AP-mod.patch;apply=yes \
-    file://murata/0013-SAE-Support-SAE-authentication-offload-in-AP-mode.patch;apply=yes \
-    file://murata/0014-P2P-Fix-P2P-authentication-failure-due-to-AP-mode-4-.patch;apply=yes \
-    file://murata/0016-DPP-Do-more-condition-test-for-AKM-type-DPP-offload.patch;apply=yes \
-    file://murata/0017-hostapd-Fix-PMF-connection-issue.patch;apply=yes \
-    file://murata/0018-AP-Set-Authenticator-state-properly-for-PSK-4-way-ha.patch;apply=yes \
-    file://murata/0019-wpa-supplicant-defconfig-Set-to-Cypress-default-configuration.patch;apply=yes \
+    file://murata/0001-wpa_supplicant-Support-4-way-handshake-offload-for-F.patch \
+    file://murata/0002-wpa_supplicant-Notify-Neighbor-Report-for-driver-tri.patch \
+    file://murata/0003-nl80211-Report-connection-authorized-in-EVENT_ASSOC.patch \
+    file://murata/0004-wpa_supplicant-Add-PMKSA-cache-for-802.1X-4-way-hand.patch \
+    file://murata/0005-OpenSSL-Fix-build-with-OpenSSL-1.0.1.patch \
+    file://murata/0006-nl80211-Check-SAE-authentication-offload-support.patch \
+    file://murata/0007-SAE-Pass-SAE-password-on-connect-for-SAE-authenticat.patch \
+    file://murata/0008-nl80211-Support-4-way-handshake-offload-for-WPA-WPA2.patch \
+    file://murata/0009-AP-Support-4-way-handshake-offload-for-WPA-WPA2-PSK.patch \
+    file://murata/0010-nl80211-Support-SAE-authentication-offload-in-AP-mod.patch \
+    file://murata/0011-SAE-Support-SAE-authentication-offload-in-AP-mode.patch \
+    file://murata/0012-DPP-Do-more-condition-test-for-AKM-type-DPP-offload.patch \
+    file://murata/0013-non-upstream-defconfig_base-Add-Infineon-default-con.patch \
+    file://murata/0014-non-upstream-defconfig_base-Add-Infineon-default-con.patch;apply=no \
+    file://murata/0015-Add-CONFIG_WPA3_SAE_AUTH_EARLY_SET-flags-and-codes-f.patch \
+    file://murata/0016-Add-CONFIG_WPA3_SAE_AUTH_EARLY_SET-flags-and-codes-s.patch;apply=no \
+    file://murata/0017-SAE-Set-the-right-WPA-Versions-for-FT-SAE-key-manage.patch \
+    file://murata/0018-wpa_supplicant-Support-WPA_KEY_MGMT_FT-for-eapol-off.patch \
+    file://murata/0019-wpa_supplicant-suppress-deauth-for-PMKSA-caching-dis.patch \
+    file://murata/0020-Fix-to-check-Invalid-GTK-IE-length-in-M3-at-STA.patch \
 "
 
 SRC_URI:append:ccimx6sbc = " file://wpa_supplicant_p2p.conf_atheros"

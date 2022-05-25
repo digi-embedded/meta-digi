@@ -1,0 +1,127 @@
+From: Chien-Chia Chen <carella.chen@infineon.com>
+Date: Tue, 23 Nov 2021 21:29:08 -0600
+Subject: [PATCH] wpa_supplicant: Support WPA_KEY_MGMT_FT for eapol offloading
+ and driver base roaming
+
+Add WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_PSK / WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X /
+WPA_DRIVER_FLAGS_ROAM_OFFLOAD for IEEE80211R support
+
+Signed-off-by: Chien-Chia Chen<carella.chen@infineon.com>
+---
+ src/drivers/driver.h              | 2 ++
+ src/drivers/driver_nl80211.c      | 3 ++-
+ src/drivers/driver_nl80211_capa.c | 4 ++++
+ src/drivers/nl80211_copy.h        | 1 +
+ wpa_supplicant/events.c           | 3 ++-
+ wpa_supplicant/wpa_supplicant.c   | 5 ++++-
+ wpa_supplicant/wpas_glue.c        | 6 ++++--
+ 7 files changed, 19 insertions(+), 5 deletions(-)
+
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 45260e8c5e30..fb3f8b4a866c 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -2071,6 +2071,8 @@ struct wpa_driver_capa {
+ #define WPA_DRIVER_FLAGS2_4WAY_HANDSHAKE_AP_PSK	0x0000000000000400ULL
+ /** Driver supports SAE authentication offload in AP mode */
+ #define WPA_DRIVER_FLAGS2_SAE_OFFLOAD_AP	0x0000000000000800ULL
++/** Driver supports FT / OKC fast roaming */
++#define WPA_DRIVER_FLAGS_ROAM_OFFLOAD		0x0000000000001000ULL
+ 	u64 flags2;
+ 
+ #define FULL_AP_CLIENT_STATE_SUPP(drv_flags) \
+diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
+index 341c753b3e83..964486c11c1b 100644
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -3301,7 +3301,8 @@ static int wpa_driver_nl80211_set_key(struct i802_bss *bss,
+ #endif /* CONFIG_DRIVER_NL80211_QCA */
+ 
+ 	if (key_flag & KEY_FLAG_PMK) {
+-		if (drv->capa.flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X)
++		if ((drv->capa.flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X) ||
++			(drv->capa.flags2 & WPA_DRIVER_FLAGS_ROAM_OFFLOAD))
+ 			return nl80211_set_pmk(drv, key, key_len, addr);
+ 		/* The driver does not have any offload mechanism for PMK, so
+ 		 * there is no need to configure this key. */
+diff --git a/src/drivers/driver_nl80211_capa.c b/src/drivers/driver_nl80211_capa.c
+index ae6029a922b8..d5cdafa9f061 100644
+--- a/src/drivers/driver_nl80211_capa.c
++++ b/src/drivers/driver_nl80211_capa.c
+@@ -606,6 +606,10 @@ static void wiphy_info_ext_feature_flags(struct wiphy_info_data *info,
+ 			      NL80211_EXT_FEATURE_SAE_OFFLOAD_AP))
+ 		capa->flags2 |= WPA_DRIVER_FLAGS2_SAE_OFFLOAD_AP;
+ 
++	if (ext_feature_isset(ext_features, len,
++			      NL80211_EXT_FEATURE_ROAM_OFFLOAD))
++		capa->flags2 |= WPA_DRIVER_FLAGS_ROAM_OFFLOAD;
++
+ 	if (ext_feature_isset(ext_features, len,
+ 			      NL80211_EXT_FEATURE_MFP_OPTIONAL))
+ 		capa->flags |= WPA_DRIVER_FLAGS_MFP_OPTIONAL;
+diff --git a/src/drivers/nl80211_copy.h b/src/drivers/nl80211_copy.h
+index f962c06e9818..a3e889b35b36 100644
+--- a/src/drivers/nl80211_copy.h
++++ b/src/drivers/nl80211_copy.h
+@@ -6010,6 +6010,7 @@ enum nl80211_ext_feature_index {
+ 	NL80211_EXT_FEATURE_SAE_OFFLOAD_AP,
+ 	NL80211_EXT_FEATURE_FILS_DISCOVERY,
+ 	NL80211_EXT_FEATURE_UNSOL_BCAST_PROBE_RESP,
++	NL80211_EXT_FEATURE_ROAM_OFFLOAD,
+ 	NL80211_EXT_FEATURE_BEACON_RATE_HE,
+ 	NL80211_EXT_FEATURE_SECURE_LTF,
+ 	NL80211_EXT_FEATURE_SECURE_RTT,
+diff --git a/wpa_supplicant/events.c b/wpa_supplicant/events.c
+index f55e1846e205..fe8dbd91d50a 100644
+--- a/wpa_supplicant/events.c
++++ b/wpa_supplicant/events.c
+@@ -3425,7 +3425,8 @@ static void wpa_supplicant_event_assoc(struct wpa_supplicant *wpa_s,
+ 		wpa_supplicant_set_state(wpa_s, WPA_COMPLETED);
+ 		eapol_sm_notify_portValid(wpa_s->eapol, true);
+ 		eapol_sm_notify_eap_success(wpa_s->eapol, true);
+-	} else if ((wpa_s->drv_flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X) &&
++	} else if (((wpa_s->drv_flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X) ||
++			(wpa_s->drv_flags2 & WPA_DRIVER_FLAGS_ROAM_OFFLOAD)) &&
+ 		   wpa_key_mgmt_wpa_ieee8021x(wpa_s->key_mgmt)) {
+ 		/*
+ 		 * The driver will take care of RSN 4-way handshake, so we need
+diff --git a/wpa_supplicant/wpa_supplicant.c b/wpa_supplicant/wpa_supplicant.c
+index f00dd57da3c1..f238dadcf27f 100644
+--- a/wpa_supplicant/wpa_supplicant.c
++++ b/wpa_supplicant/wpa_supplicant.c
+@@ -1543,7 +1543,10 @@ int wpa_supplicant_set_suites(struct wpa_supplicant *wpa_s,
+ #endif /* CONFIG_SAE */
+ #ifdef CONFIG_IEEE80211R
+ 	if (!(wpa_s->drv_flags & (WPA_DRIVER_FLAGS_SME |
+-				  WPA_DRIVER_FLAGS_UPDATE_FT_IES)))
++				  WPA_DRIVER_FLAGS_UPDATE_FT_IES |
++				  WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_PSK |
++				  WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X)) &&
++		!(wpa_s->drv_flags2 & WPA_DRIVER_FLAGS_ROAM_OFFLOAD))
+ 		sel &= ~WPA_KEY_MGMT_FT;
+ #endif /* CONFIG_IEEE80211R */
+ 	wpa_dbg(wpa_s, MSG_DEBUG,
+diff --git a/wpa_supplicant/wpas_glue.c b/wpa_supplicant/wpas_glue.c
+index 0cffe52fa9be..816a884a8179 100644
+--- a/wpa_supplicant/wpas_glue.c
++++ b/wpa_supplicant/wpas_glue.c
+@@ -311,7 +311,8 @@ static void wpa_supplicant_eapol_cb(struct eapol_sm *eapol,
+ 	}
+ 
+ 	if (result != EAPOL_SUPP_RESULT_SUCCESS ||
+-	    !(wpa_s->drv_flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X))
++	    (!(wpa_s->drv_flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X) &&
++	     !(wpa_s->drv_flags2 & WPA_DRIVER_FLAGS_ROAM_OFFLOAD)))
+ 		return;
+ 
+ 	if (!wpa_key_mgmt_wpa_ieee8021x(wpa_s->key_mgmt))
+@@ -321,7 +322,8 @@ static void wpa_supplicant_eapol_cb(struct eapol_sm *eapol,
+ 		   "handshake");
+ 
+ 	pmk_len = PMK_LEN;
+-	if (sm->cur_pmksa) {
++	if (sm->cur_pmksa &&
++		wpa_s->drv_flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X) {
+ 		pmk_len = sm->pmk_len;
+ 		os_memcpy(pmk, sm->pmk, pmk_len);
+ 	} else {

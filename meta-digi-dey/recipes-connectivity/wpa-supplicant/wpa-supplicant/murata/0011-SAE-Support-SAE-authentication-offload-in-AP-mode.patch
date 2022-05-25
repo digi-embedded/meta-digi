@@ -1,29 +1,28 @@
-From e03270a1aec0a480c3803b7b560bb199443172df Mon Sep 17 00:00:00 2001
 From: Chung-Hsien Hsu <stanley.hsu@cypress.com>
 Date: Tue, 10 Dec 2019 14:06:20 -0600
-Subject: [PATCH 13/20] SAE: Support SAE authentication offload in AP mode
+Subject: [PATCH] SAE: Support SAE authentication offload in AP mode
 
 Add support for SAE authentication offload in AP mode. In this case, the
 SAE authentication process is handled by driver instead of user space.
 
-Signed-off-by: Chung-Hsien Hsu <stanley.hsu@cypress.com>
+Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---
  src/ap/beacon.c        | 11 +++++++++++
  src/ap/wpa_auth.h      |  3 +++
- src/ap/wpa_auth_glue.c |  4 ++++
+ src/ap/wpa_auth_glue.c |  5 +++++
  src/ap/wpa_auth_ie.c   |  4 +++-
- 4 files changed, 21 insertions(+), 1 deletion(-)
+ 4 files changed, 22 insertions(+), 1 deletion(-)
 
 diff --git a/src/ap/beacon.c b/src/ap/beacon.c
-index 73b231ab1..ff179f559 100644
+index 583b6836ec33..e2d7c697014d 100644
 --- a/src/ap/beacon.c
 +++ b/src/ap/beacon.c
-@@ -1386,6 +1386,17 @@ int ieee802_11_build_ap_params(struct hostapd_data *hapd,
+@@ -1763,6 +1763,17 @@ int ieee802_11_build_ap_params(struct hostapd_data *hapd,
  			params->psk = hapd->conf->ssid.wpa_psk->psk;
  	}
  
 +#ifdef CONFIG_SAE
-+	if ((hapd->iface->drv_flags & WPA_DRIVER_FLAGS_SAE_OFFLOAD) &&
++	if ((hapd->iface->drv_flags2 & WPA_DRIVER_FLAGS2_SAE_OFFLOAD_AP) &&
 +	    (params->key_mgmt_suites & WPA_KEY_MGMT_SAE)) {
 +		params->auth_algs |= WPA_AUTH_ALG_SAE;
 +		if (hapd->conf->sae_passwords)
@@ -37,12 +36,12 @@ index 73b231ab1..ff179f559 100644
  }
  
 diff --git a/src/ap/wpa_auth.h b/src/ap/wpa_auth.h
-index 82cb3f7ae..64eec2762 100644
+index d610c14804a2..140147e79f31 100644
 --- a/src/ap/wpa_auth.h
 +++ b/src/ap/wpa_auth.h
-@@ -233,6 +233,9 @@ struct wpa_auth_config {
- 	u8 fils_cache_id[FILS_CACHE_ID_LEN];
- #endif /* CONFIG_FILS */
+@@ -274,6 +274,9 @@ struct wpa_auth_config {
+ 	 */
+ 	bool force_kdk_derivation;
  	int psk_4way_hs_offload;
 +#ifdef CONFIG_SAE
 +	int sae_offload;
@@ -51,25 +50,26 @@ index 82cb3f7ae..64eec2762 100644
  
  typedef enum {
 diff --git a/src/ap/wpa_auth_glue.c b/src/ap/wpa_auth_glue.c
-index 8d81fd785..d3eb7b49a 100644
+index 26de12b5b775..c8dee2aef347 100644
 --- a/src/ap/wpa_auth_glue.c
 +++ b/src/ap/wpa_auth_glue.c
-@@ -1307,6 +1307,10 @@ int hostapd_setup_wpa(struct hostapd_data *hapd)
- 		_conf.ap_mlme = 1;
- 	if (hapd->iface->drv_flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_AP_PSK)
+@@ -1532,6 +1532,11 @@ int hostapd_setup_wpa(struct hostapd_data *hapd)
+ 	    (hapd->iface->drv_flags2 & WPA_DRIVER_FLAGS2_4WAY_HANDSHAKE_AP_PSK))
  		_conf.psk_4way_hs_offload = 1;
+ 
 +#ifdef CONFIG_SAE
-+	if (hapd->iface->drv_flags & WPA_DRIVER_FLAGS_SAE_OFFLOAD)
++	if (hapd->iface->drv_flags2 & WPA_DRIVER_FLAGS2_SAE_OFFLOAD_AP)
 +		_conf.sae_offload = 1;
 +#endif /* CONFIG_SAE */
++
  	hapd->wpa_auth = wpa_init(hapd->own_addr, &_conf, &cb, hapd);
  	if (hapd->wpa_auth == NULL) {
  		wpa_printf(MSG_ERROR, "WPA initialization failed.");
 diff --git a/src/ap/wpa_auth_ie.c b/src/ap/wpa_auth_ie.c
-index 2e5c9160d..527fbba72 100644
+index 524922e4e686..30de0c19c9f3 100644
 --- a/src/ap/wpa_auth_ie.c
 +++ b/src/ap/wpa_auth_ie.c
-@@ -916,7 +916,9 @@ int wpa_validate_wpa_ie(struct wpa_authenticator *wpa_auth,
+@@ -977,7 +977,9 @@ wpa_validate_wpa_ie(struct wpa_authenticator *wpa_auth,
  	}
  
  #ifdef CONFIG_SAE
@@ -80,6 +80,3 @@ index 2e5c9160d..527fbba72 100644
  	    !sm->pmksa) {
  		wpa_auth_vlogger(wpa_auth, sm->addr, LOGGER_DEBUG,
  				 "No PMKSA cache entry found for SAE");
--- 
-2.17.1
-

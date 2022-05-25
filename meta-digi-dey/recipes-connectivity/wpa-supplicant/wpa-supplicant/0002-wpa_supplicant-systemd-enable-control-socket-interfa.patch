@@ -15,18 +15,15 @@ Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/wpa_supplicant/systemd/wpa_supplicant.service.in b/wpa_supplicant/systemd/wpa_supplicant.service.in
-index 75a37a8cd..6d3a04a0e 100644
+index 58a622887cd9..cdc547f2ac5b 100644
 --- a/wpa_supplicant/systemd/wpa_supplicant.service.in
 +++ b/wpa_supplicant/systemd/wpa_supplicant.service.in
-@@ -4,10 +4,10 @@ Before=network.target
- Wants=network.target
-
+@@ -7,7 +7,7 @@ Wants=network.target
  [Service]
  Type=dbus
  BusName=fi.w1.wpa_supplicant1
 -ExecStart=@BINDIR@/wpa_supplicant -u
 +ExecStart=@BINDIR@/wpa_supplicant -u -O /var/run/wpa_supplicant
-
+ 
  [Install]
  WantedBy=multi-user.target
- Alias=dbus-fi.w1.wpa_supplicant1.service

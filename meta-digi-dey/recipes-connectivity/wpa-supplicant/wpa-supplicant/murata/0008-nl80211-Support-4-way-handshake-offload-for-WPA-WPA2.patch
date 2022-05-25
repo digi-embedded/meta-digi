@@ -1,34 +1,33 @@
-From 1ea301a06353817680bc85abde6f2b684d37c16e Mon Sep 17 00:00:00 2001
 From: Chung-Hsien Hsu <stanley.hsu@cypress.com>
 Date: Tue, 10 Dec 2019 14:02:39 -0600
-Subject: [PATCH 10/20] nl80211: Support 4-way handshake offload for
- WPA/WPA2-PSK in AP mode
+Subject: [PATCH] nl80211: Support 4-way handshake offload for WPA/WPA2-PSK in
+ AP mode
 
 If driver advertises support for WPA/WPA2-PSK 4-way handshake offload in
-AP mode, set WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_AP_PSK flag and pass PSK in
-NL80211_CMD_NEW_BEACON command.
+AP mode, set WPA_DRIVER_FLAGS2_4WAY_HANDSHAKE_AP_PSK flag and pass PSK
+in NL80211_CMD_NEW_BEACON command.
 
-Signed-off-by: Chung-Hsien Hsu <stanley.hsu@cypress.com>
+Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---
- src/drivers/driver.h              | 29 ++++++++++++++++++++++++++---
+ src/drivers/driver.h              | 30 +++++++++++++++++++++++++++---
  src/drivers/driver_nl80211.c      |  8 ++++++++
- src/drivers/driver_nl80211_capa.c |  3 +++
- 3 files changed, 37 insertions(+), 3 deletions(-)
+ src/drivers/driver_nl80211_capa.c |  4 ++++
+ 3 files changed, 39 insertions(+), 3 deletions(-)
 
 diff --git a/src/drivers/driver.h b/src/drivers/driver.h
-index ef47efe05..462e6f677 100644
+index 7cfa92ed8523..a42ec5e1fac5 100644
 --- a/src/drivers/driver.h
 +++ b/src/drivers/driver.h
-@@ -1450,6 +1450,27 @@ struct wpa_driver_ap_params {
- 	 * type 11 as defined in IEEE Std 802.11-2016, 9.4.2.22.13
+@@ -1590,6 +1590,27 @@ struct wpa_driver_ap_params {
+ 	 * Unsolicited broadcast Probe Response template length
  	 */
- 	const struct wpabuf *civic;
+ 	size_t unsol_bcast_probe_resp_tmpl_len;
 +
 +	/**
 +	 * passphrase - RSN passphrase for PSK
 +	 *
 +	 * This value is made available only for WPA/WPA2-Personal (PSK) and
-+	 * only for drivers that set WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_AP_PSK.
++	 * only for drivers that set WPA_DRIVER_FLAGS2_4WAY_HANDSHAKE_AP_PSK.
 +	 * This is the 8..63 character ASCII passphrase, if available. Please
 +	 * note that this can be %NULL if passphrase was not used to generate
 +	 * the PSK. In that case, the psk field must be used to fetch the PSK.
@@ -39,7 +38,7 @@ index ef47efe05..462e6f677 100644
 +	 * psk - RSN PSK (alternative for passphrase for PSK)
 +	 *
 +	 * This value is made available only for WPA/WPA2-Personal (PSK) and
-+	 * only for drivers that set WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_AP_PSK.
++	 * only for drivers that set WPA_DRIVER_FLAGS2_4WAY_HANDSHAKE_AP_PSK.
 +	 * This is the 32-octet (256-bit) PSK, if available. The driver wrapper
 +	 * should be prepared to handle %NULL value as an error.
 +	 */
@@ -47,64 +46,67 @@ index ef47efe05..462e6f677 100644
  };
  
  struct wpa_driver_mesh_bss_params {
-@@ -1539,8 +1560,8 @@ struct wpa_driver_capa {
+@@ -1872,8 +1893,9 @@ struct wpa_driver_capa {
  #define WPA_DRIVER_FLAGS_SET_KEYS_AFTER_ASSOC 0x00000002
  /** Driver takes care of all DFS operations */
  #define WPA_DRIVER_FLAGS_DFS_OFFLOAD			0x00000004
 -/** Driver takes care of RSN 4-way handshake internally; PMK is configured with
-- * struct wpa_driver_ops::set_key using alg = WPA_ALG_PMK */
+- * struct wpa_driver_ops::set_key using key_flag = KEY_FLAG_PMK */
 +/** Driver takes care of RSN 4-way handshake internally in station mode; PMK is
-+ * configured with struct wpa_driver_ops::set_key using alg = WPA_ALG_PMK */
++ * configured with struct wpa_driver_ops::set_key using key_flag = KEY_FLAG_PMK
++ */
  #define WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X		0x00000008
  /** Driver is for a wired Ethernet interface */
  #define WPA_DRIVER_FLAGS_WIRED		0x00000010
-@@ -1665,10 +1686,12 @@ struct wpa_driver_capa {
+@@ -1998,7 +2020,7 @@ struct wpa_driver_capa {
  #define WPA_DRIVER_FLAGS_SELF_MANAGED_REGULATORY       0x0080000000000000ULL
  /** Driver supports FTM responder functionality */
  #define WPA_DRIVER_FLAGS_FTM_RESPONDER		0x0100000000000000ULL
 -/** Driver support 4-way handshake offload for WPA-Personal */
-+/** Driver supports 4-way handshake offload for WPA-Personal in station mode*/
++/** Driver supports 4-way handshake offload for WPA-Personal in station mode */
  #define WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_PSK	0x0200000000000000ULL
- /** Driver takes care of SAE authentication internally */
- #define WPA_DRIVER_FLAGS_SAE_OFFLOAD		0x0400000000000000ULL
+ /** Driver supports a separate control port TX for EAPOL frames */
+ #define WPA_DRIVER_FLAGS_CONTROL_PORT		0x0400000000000000ULL
+@@ -2037,6 +2059,8 @@ struct wpa_driver_capa {
+ #define WPA_DRIVER_FLAGS2_AP_SME		0x0000000000000100ULL
+ /** Driver supports SAE authentication offload */
+ #define WPA_DRIVER_FLAGS2_SAE_OFFLOAD		0x0000000000000200ULL
 +/** Driver supports 4-way handshake offload for WPA-Personal in AP mode */
-+#define WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_AP_PSK	0x0800000000000000ULL
- 	u64 flags;
++#define WPA_DRIVER_FLAGS2_4WAY_HANDSHAKE_AP_PSK	0x0000000000000400ULL
+ 	u64 flags2;
  
  #define FULL_AP_CLIENT_STATE_SUPP(drv_flags) \
 diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
-index bd804b7f0..4679c43d9 100644
+index 91e8d44d8329..f228a071596f 100644
 --- a/src/drivers/driver_nl80211.c
 +++ b/src/drivers/driver_nl80211.c
-@@ -4188,6 +4188,14 @@ static int wpa_driver_nl80211_set_ap(void *priv,
+@@ -4677,6 +4677,14 @@ static int wpa_driver_nl80211_set_ap(void *priv,
  	    nla_put_u32(msg, NL80211_ATTR_CIPHER_SUITE_GROUP, suite))
  		goto fail;
  
 +	/* Add PSK in case of 4-way handshake offload */
 +	if (params->psk &&
-+	    (drv->capa.flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_AP_PSK)) {
++	    (drv->capa.flags2 & WPA_DRIVER_FLAGS2_4WAY_HANDSHAKE_AP_PSK)) {
 +		wpa_hexdump_key(MSG_DEBUG, "nl80211: PSK", params->psk, 32);
 +		if (nla_put(msg, NL80211_ATTR_PMK, 32, params->psk))
 +			goto fail;
 +	}
 +
- 	if (params->ht_opmode != -1) {
- 		switch (params->smps_mode) {
- 		case HT_CAP_INFO_SMPS_DYNAMIC:
+ 	if (params->beacon_ies) {
+ 		wpa_hexdump_buf(MSG_DEBUG, "nl80211: beacon_ies",
+ 				params->beacon_ies);
 diff --git a/src/drivers/driver_nl80211_capa.c b/src/drivers/driver_nl80211_capa.c
-index 9aeddec22..bd77a50ec 100644
+index a443b7c873f7..dc4988c7c383 100644
 --- a/src/drivers/driver_nl80211_capa.c
 +++ b/src/drivers/driver_nl80211_capa.c
-@@ -408,6 +408,9 @@ static void wiphy_info_ext_feature_flags(struct wiphy_info_data *info,
- 	if (ext_feature_isset(ext_features, len,
+@@ -594,6 +594,10 @@ static void wiphy_info_ext_feature_flags(struct wiphy_info_data *info,
  			      NL80211_EXT_FEATURE_4WAY_HANDSHAKE_STA_1X))
  		capa->flags |= WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X;
+ 
 +	if (ext_feature_isset(ext_features, len,
 +			      NL80211_EXT_FEATURE_4WAY_HANDSHAKE_AP_PSK))
-+		capa->flags |= WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_AP_PSK;
- 
++		capa->flags2 |= WPA_DRIVER_FLAGS2_4WAY_HANDSHAKE_AP_PSK;
++
  	if (ext_feature_isset(ext_features, len,
- 			      NL80211_EXT_FEATURE_MFP_OPTIONAL))
--- 
-2.17.1
-
+ 			      NL80211_EXT_FEATURE_SAE_OFFLOAD))
+ 		capa->flags2 |= WPA_DRIVER_FLAGS2_SAE_OFFLOAD;

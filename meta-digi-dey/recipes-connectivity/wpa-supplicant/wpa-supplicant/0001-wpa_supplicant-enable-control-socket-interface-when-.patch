@@ -14,7 +14,7 @@ Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/wpa_supplicant/dbus/fi.w1.wpa_supplicant1.service.in b/wpa_supplicant/dbus/fi.w1.wpa_supplicant1.service.in
-index d97ff3921..98b72cf32 100644
+index d97ff392175d..98b72cf32481 100644
 --- a/wpa_supplicant/dbus/fi.w1.wpa_supplicant1.service.in
 +++ b/wpa_supplicant/dbus/fi.w1.wpa_supplicant1.service.in
 @@ -1,5 +1,5 @@
