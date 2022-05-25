@@ -1,4 +1,3 @@
-From 36dceaad707ca0dbed2fdad59e4730c08caddf14 Mon Sep 17 00:00:00 2001
 From: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
 Date: Mon, 8 Jan 2018 10:29:51 +0100
 Subject: [PATCH] Add hciattach rome support for Qualcomm chip QCA6564
@@ -8,23 +7,22 @@ support for its chip in bluez stack (hciattach rome).
 
 Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
 Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
-
 ---
  Makefile.tools         |    3 +-
  profiles/audio/avrcp.c |   27 +-
  tools/hciattach.c      |   45 +-
- tools/hciattach.h      |    2 +
+ tools/hciattach.h      |    1 +
  tools/hciattach_rome.c | 1941 ++++++++++++++++++++++++++++++++++++++++
  tools/hciattach_rome.h |  390 ++++++++
- 6 files changed, 2400 insertions(+), 8 deletions(-)
+ 6 files changed, 2399 insertions(+), 8 deletions(-)
  create mode 100644 tools/hciattach_rome.c
  create mode 100644 tools/hciattach_rome.h
 
 diff --git a/Makefile.tools b/Makefile.tools
-index d5fdf2d..baafecf 100644
+index bd902fd834aa..e6d9f48781e2 100644
 --- a/Makefile.tools
 +++ b/Makefile.tools
-@@ -350,7 +350,8 @@ tools_hciattach_SOURCES = tools/hciattach.c tools/hciattach.h \
+@@ -373,7 +373,8 @@ tools_hciattach_SOURCES = tools/hciattach.c tools/hciattach.h \
  						tools/hciattach_ath3k.c \
  						tools/hciattach_qualcomm.c \
  						tools/hciattach_intel.c \
@@ -35,10 +33,10 @@ index d5fdf2d..baafecf 100644
  
  tools_hciconfig_SOURCES = tools/hciconfig.c
 diff --git a/profiles/audio/avrcp.c b/profiles/audio/avrcp.c
-index c093dea..a6168b9 100644
+index 80f34c7a77a1..5cf327367589 100644
 --- a/profiles/audio/avrcp.c
 +++ b/profiles/audio/avrcp.c
-@@ -2203,13 +2203,19 @@ static gboolean avrcp_get_play_status_rsp(struct avctp *conn, uint8_t code,
+@@ -2219,13 +2219,19 @@ static gboolean avrcp_get_play_status_rsp(struct avctp *conn, uint8_t code,
  					void *user_data)
  {
  	struct avrcp *session = user_data;
@@ -58,9 +56,9 @@ index c093dea..a6168b9 100644
 +	mp = player->user_data;
 +
  	if (pdu == NULL || code == AVC_CTYPE_REJECTED ||
- 						ntohs(pdu->params_len) != 9)
+ 					be16_to_cpu(pdu->params_len) != 9)
  		return FALSE;
-@@ -2267,12 +2273,18 @@ static gboolean avrcp_player_value_rsp(struct avctp *conn, uint8_t code,
+@@ -2281,12 +2287,18 @@ static gboolean avrcp_player_value_rsp(struct avctp *conn, uint8_t code,
  					void *user_data)
  {
  	struct avrcp *session = user_data;
@@ -81,7 +79,7 @@ index c093dea..a6168b9 100644
  	if (pdu == NULL) {
  		media_player_set_setting(mp, "Error", "Timeout");
  		return FALSE;
-@@ -2424,10 +2436,15 @@ static gboolean avrcp_get_element_attributes_rsp(struct avctp *conn,
+@@ -2442,10 +2454,15 @@ static gboolean avrcp_get_element_attributes_rsp(struct avctp *conn,
  						void *user_data)
  {
  	struct avrcp *session = user_data;
@@ -99,7 +97,7 @@ index c093dea..a6168b9 100644
  		return FALSE;
  
 diff --git a/tools/hciattach.c b/tools/hciattach.c
-index 276a4e5..d535277 100644
+index 276a4e56ef9d..d53527761bed 100644
 --- a/tools/hciattach.c
 +++ b/tools/hciattach.c
 @@ -57,6 +57,8 @@ struct uart_t {
@@ -233,18 +231,10 @@ index 276a4e5..d535277 100644
  	return 0;
  }
 diff --git a/tools/hciattach.h b/tools/hciattach.h
-index 26c0d54..00721e1 100644
+index 26c0d542434d..96ff9e38cfda 100644
 --- a/tools/hciattach.h
 +++ b/tools/hciattach.h
-@@ -32,6 +32,7 @@
- #define HCI_UART_AG6XX	9
- #define HCI_UART_NOKIA	10
- #define HCI_UART_MRVL	11
-+#define HCI_UART_IBS	12
- 
- #define HCI_UART_RAW_DEVICE	0
- #define HCI_UART_RESET_ON_INIT	1
-@@ -53,6 +54,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
+@@ -53,6 +53,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
  						struct termios *ti);
  int ath3k_post(int fd, int pm);
  int qualcomm_init(int fd, int speed, struct termios *ti, const char *bdaddr);
@@ -254,7 +244,7 @@ index 26c0d54..00721e1 100644
  		const char *bdaddr);
 diff --git a/tools/hciattach_rome.c b/tools/hciattach_rome.c
 new file mode 100644
-index 0000000..59bdc16
+index 000000000000..59bdc16e4e8f
 --- /dev/null
 +++ b/tools/hciattach_rome.c
 @@ -0,0 +1,1941 @@
@@ -2201,7 +2191,7 @@ index 0000000..59bdc16
 +}
 diff --git a/tools/hciattach_rome.h b/tools/hciattach_rome.h
 new file mode 100644
-index 0000000..89f7db3
+index 000000000000..89f7db3bef86
 --- /dev/null
 +++ b/tools/hciattach_rome.h
 @@ -0,0 +1,390 @@

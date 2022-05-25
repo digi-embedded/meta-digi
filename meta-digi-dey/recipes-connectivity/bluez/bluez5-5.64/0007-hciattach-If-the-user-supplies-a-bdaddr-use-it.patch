@@ -1,6 +1,6 @@
 From: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
 Date: Mon, 8 Jan 2018 10:30:27 +0100
-Subject: [PATCH 3/4] hciattach: If the user supplies a bdaddr, use it
+Subject: [PATCH] hciattach: If the user supplies a bdaddr, use it
 
 The QCA6564 has no non-volatile configuration file for the bluetooth
 MAC, so use the one supplied on the command line.
@@ -9,14 +9,14 @@ Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
 ---
  tools/hciattach.c      |  4 +--
- tools/hciattach_rome.c | 76 ++++++++++----------------------------------------
+ tools/hciattach_rome.c | 76 +++++++++---------------------------------
  2 files changed, 17 insertions(+), 63 deletions(-)
 
 diff --git a/tools/hciattach.c b/tools/hciattach.c
-index 81d78ab3f69a..022bbe5fa6d5 100644
+index b94eb5ad1a5b..cdef3e206931 100644
 --- a/tools/hciattach.c
 +++ b/tools/hciattach.c
-@@ -285,7 +285,7 @@ static int ath3k_pm(int fd, struct uart_t *u, struct termios *ti)
+@@ -273,7 +273,7 @@ static int ath3k_pm(int fd, struct uart_t *u, struct termios *ti)
  
  static int qca(int fd, struct uart_t *u, struct termios *ti)
  {
@@ -25,7 +25,7 @@ index 81d78ab3f69a..022bbe5fa6d5 100644
          return qca_soc_init(fd, u->speed, u->bdaddr, ti);
  }
  
-@@ -1363,7 +1363,7 @@ int main(int argc, char *argv[])
+@@ -1351,7 +1351,7 @@ int main(int argc, char *argv[])
  				fprintf(stderr, "Unknown device type or id\n");
  				exit(1);
  			}

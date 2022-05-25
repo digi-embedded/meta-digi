@@ -9,7 +9,7 @@ Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
  1 file changed, 9 insertions(+), 7 deletions(-)
 
 diff --git a/test/test-discovery b/test/test-discovery
-index eccc7c7e3..9aeace414 100755
+index eccc7c7e31f0..9aeace414ada 100755
 --- a/test/test-discovery
 +++ b/test/test-discovery
 @@ -1,4 +1,4 @@

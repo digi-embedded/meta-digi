@@ -3,18 +3,18 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:${THISDIR}/${BP}:"
 
 SRC_URI += " \
-    file://bluetooth.service-add-customizations.patch \
     file://main.conf \
-    file://0001-hcitool-do-not-show-unsupported-refresh-option.patch \
-    file://0002-hcitool-increase-the-shown-connection-limit-to-20.patch \
-    file://0003-port-test-discovery-to-python3.patch \
+    file://0001-bluetooth.service-add-Digi-customizations.patch \
+    file://0002-hcitool-do-not-show-unsupported-refresh-option.patch \
+    file://0003-hcitool-increase-the-shown-connection-limit-to-20.patch \
+    file://0004-port-test-discovery-to-python3.patch \
 "
 
 QCA65XX_COMMON_PATCHES = " \
-    file://0004-QCA_bluetooth_chip_support.patch \
-    file://0005-hciattach_rome-Respect-the-user-indication-for-noflo.patch \
-    file://0006-hciattach-If-the-user-supplies-a-bdaddr-use-it.patch \
-    file://0007-hciattach-Add-verbosity-option.patch \
+    file://0005-Add-hciattach-rome-support-for-Qualcomm-chip-QCA6564.patch \
+    file://0006-hciattach_rome-Respect-the-user-indication-for-noflo.patch \
+    file://0007-hciattach-If-the-user-supplies-a-bdaddr-use-it.patch \
+    file://0008-hciattach-Add-verbosity-option.patch \
 "
 
 SRC_URI:append:ccimx6ul = " ${QCA65XX_COMMON_PATCHES}"

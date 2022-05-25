@@ -1,6 +1,6 @@
 From: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
 Date: Mon, 8 Jan 2018 10:30:18 +0100
-Subject: [PATCH 2/4] hciattach_rome: Respect the user indication for noflow
+Subject: [PATCH] hciattach_rome: Respect the user indication for noflow
 
 When hciattach is called with noflow, it should not assume the hardware
 supports hardware flow control.
@@ -13,15 +13,15 @@ Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
 ---
  tools/hciattach.c      |  2 +-
  tools/hciattach.h      |  2 +-
- tools/hciattach_rome.c | 50 +++++++++++++++++++++++++++++++++++---------------
+ tools/hciattach_rome.c | 50 +++++++++++++++++++++++++++++-------------
  tools/hciattach_rome.h |  1 +
  4 files changed, 38 insertions(+), 17 deletions(-)
 
 diff --git a/tools/hciattach.c b/tools/hciattach.c
-index dda639cabca3..81d78ab3f69a 100644
+index d53527761bed..b94eb5ad1a5b 100644
 --- a/tools/hciattach.c
 +++ b/tools/hciattach.c
-@@ -286,7 +286,7 @@ static int ath3k_pm(int fd, struct uart_t *u, struct termios *ti)
+@@ -274,7 +274,7 @@ static int ath3k_pm(int fd, struct uart_t *u, struct termios *ti)
  static int qca(int fd, struct uart_t *u, struct termios *ti)
  {
          fprintf(stderr,"qca\n");
@@ -31,10 +31,10 @@ index dda639cabca3..81d78ab3f69a 100644
  
  static int qualcomm(int fd, struct uart_t *u, struct termios *ti)
 diff --git a/tools/hciattach.h b/tools/hciattach.h
-index 481e3a65f685..5f2764cca0b0 100644
+index 96ff9e38cfda..4370a87ca3af 100644
 --- a/tools/hciattach.h
 +++ b/tools/hciattach.h
-@@ -67,7 +67,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
+@@ -53,7 +53,7 @@ int ath3k_init(int fd, int speed, int init_speed, char *bdaddr,
  						struct termios *ti);
  int ath3k_post(int fd, int pm);
  int qualcomm_init(int fd, int speed, struct termios *ti, const char *bdaddr);

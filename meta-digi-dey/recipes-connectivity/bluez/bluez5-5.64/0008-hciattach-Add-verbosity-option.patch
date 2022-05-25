@@ -1,6 +1,6 @@
 From: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
 Date: Mon, 8 Jan 2018 10:30:49 +0100
-Subject: [PATCH 4/4] hciattach: Add verbosity option
+Subject: [PATCH] hciattach: Add verbosity option
 
 And reduce the verbosity of the hciattach_rome plugin.
 
@@ -9,14 +9,14 @@ Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
 ---
  lib/bluetooth.h        |   3 +
  tools/hciattach.c      |  13 ++-
- tools/hciattach_rome.c | 244 ++++++++++++++++++++++++-------------------------
+ tools/hciattach_rome.c | 244 ++++++++++++++++++++---------------------
  3 files changed, 132 insertions(+), 128 deletions(-)
 
 diff --git a/lib/bluetooth.h b/lib/bluetooth.h
-index eb279260e009..38e3e6900744 100644
+index 0fcf412c6c6b..b15702bdcb4c 100644
 --- a/lib/bluetooth.h
 +++ b/lib/bluetooth.h
-@@ -136,6 +136,9 @@ enum {
+@@ -171,6 +171,9 @@ enum {
  	BT_CLOSED
  };
  
@@ -27,10 +27,10 @@ index eb279260e009..38e3e6900744 100644
  #if __BYTE_ORDER == __LITTLE_ENDIAN
  #define htobs(d)  (d)
 diff --git a/tools/hciattach.c b/tools/hciattach.c
-index 022bbe5fa6d5..4aacdafeda7d 100644
+index cdef3e206931..f5ee540c58f3 100644
 --- a/tools/hciattach.c
 +++ b/tools/hciattach.c
-@@ -50,6 +50,8 @@
+@@ -38,6 +38,8 @@
  
  #include "hciattach.h"
  
@@ -39,7 +39,7 @@ index 022bbe5fa6d5..4aacdafeda7d 100644
  struct uart_t {
  	char *type;
  	int  m_id;
-@@ -125,8 +127,6 @@ int read_hci_event(int fd, unsigned char* buf, int size)
+@@ -113,8 +115,6 @@ int read_hci_event(int fd, unsigned char* buf, int size)
  		fprintf(stderr, "%s: Timing out on select for 3 secs.\n", __FUNCTION__);
  		return -1;
  	}
@@ -48,7 +48,7 @@ index 022bbe5fa6d5..4aacdafeda7d 100644
  
  	/* The first byte identifies the packet type. For HCI event packets, it
  	 * should be 0x04, so we read until we get to the 0x04. */
-@@ -285,7 +285,7 @@ static int ath3k_pm(int fd, struct uart_t *u, struct termios *ti)
+@@ -273,7 +273,7 @@ static int ath3k_pm(int fd, struct uart_t *u, struct termios *ti)
  
  static int qca(int fd, struct uart_t *u, struct termios *ti)
  {
@@ -57,7 +57,7 @@ index 022bbe5fa6d5..4aacdafeda7d 100644
          return qca_soc_init(fd, u->speed, u->bdaddr, ti);
  }
  
-@@ -1258,7 +1258,7 @@ static void usage(void)
+@@ -1246,7 +1246,7 @@ static void usage(void)
  {
  	printf("hciattach - HCI UART driver initialization utility\n");
  	printf("Usage:\n");
@@ -66,7 +66,7 @@ index 022bbe5fa6d5..4aacdafeda7d 100644
  			" <tty> <type | id> [speed] [flow|noflow]"
  			" [sleep|nosleep] [bdaddr]\n");
  	printf("\thciattach -l\n");
-@@ -1281,7 +1281,7 @@ int main(int argc, char *argv[])
+@@ -1269,7 +1269,7 @@ int main(int argc, char *argv[])
  	printpid = 0;
  	raw = 0;
  
@@ -75,7 +75,7 @@ index 022bbe5fa6d5..4aacdafeda7d 100644
  		switch(opt) {
  		case 'b':
  			send_break = 1;
-@@ -1319,6 +1319,9 @@ int main(int argc, char *argv[])
+@@ -1307,6 +1307,9 @@ int main(int argc, char *argv[])
  			fprintf(stderr, "Line_disp val : %d\n", line_disp);
  			break;
  
