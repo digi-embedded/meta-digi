@@ -1,6 +1,6 @@
 # Copyright (C) 2015-2021 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
     file://qmlvideo.desktop \
@@ -24,7 +24,7 @@ do_install () {
 # hellogl_es2.desktop & qt5basket.desktop & qt5nesting.desktop & qt5solarsystem.desktop
 # as they are not supported
 
-do_install_append_imxgpu2d () {
+do_install:append:imxgpu2d () {
     install -m 0644 ${WORKDIR}/cinematicexperience.png ${D}/${datadir}/pixmaps
     install -m 0644 ${WORKDIR}/cinematicexperience.desktop ${D}/${datadir}/applications
     install -m 0644 ${WORKDIR}/qt5everywheredemo.png ${D}/${datadir}/pixmaps

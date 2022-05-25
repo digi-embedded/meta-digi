@@ -11,8 +11,8 @@ SRC_URI[sha256sum] = "d310ef581f9e6e6d726c5dc8998178b7993680b5552c45561e56ac0e92
 
 inherit fsl-eula-unpack autotools pkgconfig
 
-INSANE_SKIP_${PN} = "already-stripped"
+INSANE_SKIP:${PN} = "already-stripped"
 
-FILES_${PN} += "${datadir}/imx-mm"
+FILES:${PN} += "${datadir}/imx-mm"
 
-COMPATIBLE_MACHINE = "(mx8)"
+COMPATIBLE_MACHINE = "(mx8-nxp-bsp)"

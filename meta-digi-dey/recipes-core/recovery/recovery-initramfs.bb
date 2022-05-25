@@ -62,6 +62,6 @@ do_install() {
 # Do not create debug/devel packages
 PACKAGES = "${PN}"
 
-FILES_${PN} = "/"
+FILES:${PN} = "/"
 
-RDEPENDS_${PN}_append = "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', ' cryptsetup', '', d)}"
+RDEPENDS:${PN}:append = "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', ' cryptsetup', '', d)}"

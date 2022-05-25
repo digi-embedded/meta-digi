@@ -1,6 +1,6 @@
 # Copyright (C) 2017-2019, Digi International Inc.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
     file://0001-networkmanager-trigger-dispatcher-on-per-device-conn.patch \
@@ -22,15 +22,15 @@ SRC_URI += " \
 # 'polkit' depends on 'consolekit', and this requires 'x11' distro feature. So
 # disable those compile time options to be able to build for framebuffer
 # based images.
-DEPENDS_remove = "polkit"
+DEPENDS:remove = "polkit"
 EXTRA_OECONF += "--enable-polkit=disabled"
-PACKAGECONFIG_remove_dey = "consolekit"
+PACKAGECONFIG:remove:dey = "consolekit"
 
 # Adjust other compile time options to save space
-PACKAGECONFIG_remove_dey = "netconfig nss"
-PACKAGECONFIG_append = " gnutls modemmanager ppp"
+PACKAGECONFIG:remove:dey = "netconfig nss"
+PACKAGECONFIG:append = " gnutls modemmanager ppp"
 
-EXTRA_OECONF_append = " --disable-introspection --enable-concheck"
+EXTRA_OECONF:append = " --disable-introspection --enable-concheck"
 
 #
 # NetworkManager only accepts IP addresses in CIDR format
@@ -49,7 +49,7 @@ WLAN0_STATIC_CIDR = "${@ipaddr_to_cidr('wlan0', d)}"
 
 inherit update-rc.d
 
-do_install_append() {
+do_install:append() {
 	install -d ${D}${sysconfdir}/init.d ${D}${sysconfdir}/NetworkManager
 	install -m 0644 ${WORKDIR}/NetworkManager.conf ${D}${sysconfdir}/NetworkManager/
 	install -m 0755 ${WORKDIR}/networkmanager-init ${D}${sysconfdir}/init.d/networkmanager

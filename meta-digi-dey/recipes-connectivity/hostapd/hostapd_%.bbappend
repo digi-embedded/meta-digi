@@ -1,16 +1,16 @@
 # Copyright (C) 2016-2021 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
-SRC_URI_append = " \
+SRC_URI:append = " \
     file://hostapd_wlan0.conf \
     file://hostapd@.service \
     ${@oe.utils.conditional('HAS_WIFI_VIRTWLANS', 'true', 'file://hostapd_wlan1.conf', '', d)} \
 "
 
-SYSTEMD_SERVICE_${PN}_append = " hostapd@.service"
+SYSTEMD_SERVICE:${PN}:append = " hostapd@.service"
 
-do_install_append() {
+do_install:append() {
 	# Remove the default hostapd.conf
 	rm -f ${WORKDIR}/hostapd.conf
 	# Install custom hostapd_IFACE.conf file
@@ -31,7 +31,7 @@ do_install_append() {
 	fi
 }
 
-pkg_postinst_ontarget_${PN}() {
+pkg_postinst_ontarget:${PN}() {
 	# Exit if there is no wireless hardware available
 	if [ ! -e /proc/device-tree/wireless/mac-address ]; then
 		exit 0

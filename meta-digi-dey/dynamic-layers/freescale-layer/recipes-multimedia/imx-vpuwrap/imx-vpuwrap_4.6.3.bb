@@ -8,7 +8,7 @@ SECTION = "multimedia"
 LIC_FILES_CHKSUM = "file://COPYING;md5=03bcadc8dc0a788f66ca9e2b89f56c6f"
 
 DEPENDS = "virtual/imxvpu"
-DEPENDS_append_mx8mp = " imx-vpu-hantro-vc"
+DEPENDS:append:mx8mp-nxp-bsp = " imx-vpu-hantro-vc"
 
 IMX_VPUWRAP_SRC ?= "git://github.com/NXP/imx-vpuwrap.git;protocol=https"
 SRC_URI = "${IMX_VPUWRAP_SRC};branch=${SRCBRANCH}"
@@ -20,7 +20,7 @@ S = "${WORKDIR}/git"
 
 inherit autotools pkgconfig
 
-do_install_append() {
+do_install:append() {
     # FIXME: Drop examples for now
     rm -r ${D}${datadir}
 }

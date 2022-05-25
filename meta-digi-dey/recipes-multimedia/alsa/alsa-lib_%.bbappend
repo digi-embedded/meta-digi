@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 IMX_PATCH += " \
     file://0001-pcm-plugin-status-fix-the-return-value-regression.patch \

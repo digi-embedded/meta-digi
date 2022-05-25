@@ -7,7 +7,7 @@ LICENSE = "MIT"
 GRAPHICAL_CORE ??= "qt"
 
 SOC_PACKAGES = ""
-SOC_PACKAGES_ccimx6 = "imx-gpu-viv-demos imx-gpu-viv-tools"
+SOC_PACKAGES:ccimx6 = "imx-gpu-viv-demos imx-gpu-viv-tools"
 
 IMAGE_INSTALL = " \
     packagegroup-dey-core \
@@ -33,10 +33,10 @@ IMAGE_FEATURES += " \
 # Separately add 'dey-gstreamer' to ccimx6ulsbc platform.
 # This platform does not have 'accel-video' but we want gstreamer for using
 # it with video/camera
-IMAGE_FEATURES_append_ccimx6ulsbc = " dey-gstreamer"
+IMAGE_FEATURES:append:ccimx6ulsbc = " dey-gstreamer"
 
 # Remove some features to reduce the rootfs size to fit in the internal storage.
-IMAGE_FEATURES_remove_ccimx6ul = "package-management"
+IMAGE_FEATURES:remove:ccimx6ul = "package-management"
 
 # SDK features (for toolchains generated from an image with populate_sdk)
 SDKIMAGE_FEATURES ?= "dev-pkgs dbg-pkgs staticdev-pkgs"

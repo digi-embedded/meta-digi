@@ -4,7 +4,7 @@ HOMEPAGE = "https://www.scipy.org"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${S}/scipy-1.7.0.dist-info/LICENSE.txt;md5=caecddab96f03de0092b62333ea77f91"
 
-PYTHON_PACKAGE = "scipy-1.7.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+PYTHON_PACKAGE = "scipy-1.7.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014:aarch64.whl"
 
 SRC_URI = "https://files.pythonhosted.org/packages/d0/8d/3dbb59d78218b6a76f1ddb55db60ea5459fa7968655acb21252a59a10bc3/${PYTHON_PACKAGE};subdir=${BP}"
 SRC_URI[md5sum] = "e2e369078c6b7ca29c952cb9971bc154"
@@ -12,10 +12,10 @@ SRC_URI[sha256sum] = "bd4399d4388ca0239a4825e312b3e61b60f743dd6daf49e58708377165
 
 DEPENDS = "python3 python3-pip-native python3-wheel-native"
 
-RDEPENDS_${PN} = "${PYTHON_PN} \
+RDEPENDS:${PN} = "${PYTHON_PN} \
                   ${PYTHON_PN}-numpy \
 "
-RPROVIDES_${PN} += "\
+RPROVIDES:${PN} += "\
     libgfortran-daac5196.so.5.0.0(GFORTRAN_8)(64bit) \
 "
 
@@ -38,11 +38,11 @@ do_install() {
         ${WORKDIR}/${BP}/scipy-*.whl
 }
 
-FILES_${PN} += "\
+FILES:${PN} += "\
     ${libdir}/${PYTHON_DIR}/site-packages/* \
 "
 
-INSANE_SKIP_${PN} += "already-stripped"
+INSANE_SKIP:${PN} += "already-stripped"
 
 COMPATIBLE_MACHINE = "(-)"
-COMPATIBLE_MACHINE_aarch64 = "(.*)"
+COMPATIBLE_MACHINE:aarch64 = "(.*)"

@@ -6,7 +6,7 @@ SUMMARY = "Debug applications packagegroup for DEY image"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
-RDEPENDS_${PN} = "\
+RDEPENDS:${PN} = "\
     evtest \
     fbtest \
     i2c-tools \

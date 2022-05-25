@@ -21,11 +21,11 @@ SRCREV = "4d81b964a72e89a62d04187b3f055d8346b383c9"
 inherit python3native
 
 OPTEE_ARCH ?= "arm32"
-OPTEE_ARCH_armv7a = "arm32"
-OPTEE_ARCH_aarch64 = "arm64"
+OPTEE_ARCH:armv7a = "arm32"
+OPTEE_ARCH:aarch64 = "arm64"
 
-TA_DEV_KIT_DIR_arm = "${STAGING_INCDIR}/optee/export-user_ta_arm32/"
-TA_DEV_KIT_DIR_aarch64 = "${STAGING_INCDIR}/optee/export-user_ta_arm64/"
+TA_DEV_KIT_DIR:arm = "${STAGING_INCDIR}/optee/export-user_ta:arm32/"
+TA_DEV_KIT_DIR:aarch64 = "${STAGING_INCDIR}/optee/export-user_ta:arm64/"
 
 CFLAGS += "--sysroot=${STAGING_DIR_HOST}"
 CXXFLAGS += "--sysroot=${STAGING_DIR_HOST}"
@@ -59,6 +59,6 @@ do_install () {
 	install ${B}/supp_plugin/*plugin ${D}/usr/lib/tee-supplicant/plugins/
 }
 
-FILES_${PN} = "/usr/bin/ /lib*/optee_armtz/ /usr/lib/tee-supplicant/plugins/"
+FILES:${PN} = "/usr/bin/ /lib*/optee_armtz/ /usr/lib/tee-supplicant/plugins/"
 
 COMPATIBLE_MACHINE = "(mx6|mx7|mx8)"

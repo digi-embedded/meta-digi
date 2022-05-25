@@ -1,6 +1,6 @@
 # Copyright 2019, Digi International Inc.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRCREV = "df01f01354d7c44a07370ae27a3d20b52255830b"
 

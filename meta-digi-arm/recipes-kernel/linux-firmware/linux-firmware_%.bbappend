@@ -5,4 +5,4 @@
 # firmware-imx recipe instead of this one
 
 # Use the latest version of sdma firmware in firmware-imx
-PACKAGES_remove = "${PN}-imx-sdma-license ${PN}-imx-sdma-imx6q ${PN}-imx-sdma-imx7d"
+PACKAGES:remove = "${PN}-imx-sdma-license ${PN}-imx-sdma-imx6q ${PN}-imx-sdma-imx7d"

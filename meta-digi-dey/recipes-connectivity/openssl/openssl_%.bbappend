@@ -1,12 +1,12 @@
 # Copyright (C) 2016-2019 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 CRYPTOCHIP_COMMON_PATCHES = " \
     file://0001-Modify-openssl.cnf-to-automatically-load-the-pkcs11-.patch \
 "
 
-SRC_URI_remove = " \
+SRC_URI:remove = " \
     file://debian1.0.2/version-script.patch \
     file://debian1.0.2/soname.patch \
 "
@@ -16,6 +16,6 @@ SRC_URI += " \
 "
 
 # Add the openssl binary whenever the base package is pulled in via a dependency
-RRECOMMENDS_libcrypto += "openssl-bin"
+RRECOMMENDS:libcrypto += "openssl-bin"
 
 PACKAGECONFIG += "cryptodev-linux"

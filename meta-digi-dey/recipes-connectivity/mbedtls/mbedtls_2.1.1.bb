@@ -44,4 +44,4 @@ EXTRA_OECMAKE = " \
     -DCMAKE_INSTALL_PREFIX:PATH=${prefix} \
 "
 
-ALLOW_EMPTY_${PN} = "1"
+ALLOW_EMPTY:${PN} = "1"

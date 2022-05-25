@@ -2,7 +2,7 @@
 
 # Empirically detected binaries that are not needed for a given platform
 REDUNDANT_BINS ?= ""
-REDUNDANT_BINS_ccimx6ul ?= " \
+REDUNDANT_BINS:ccimx6ul ?= " \
     usr/lib/imx-mm/audio-codec/wrap/lib_aacd_wrap_arm11_elinux.so* \
     usr/lib/imx-mm/audio-codec/wrap/lib_aacd_wrap_arm9_elinux.so* \
     usr/lib/imx-mm/audio-codec/wrap/lib_mp3d_wrap_arm11_elinux.so* \
@@ -24,7 +24,7 @@ REDUNDANT_BINS_ccimx6ul ?= " \
     usr/share/imx-mm/audio-codec/examples/mp3-enc/bin/test_mp3_enc_arm9_elinux* \
 "
 
-do_install_append() {
+do_install:append() {
 	for i in ${REDUNDANT_BINS}; do
 		rm -f ${D}/${i}
 	done

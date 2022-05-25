@@ -8,7 +8,7 @@ SRC_URI = "git://github.com/google-coral/project-keyword-spotter.git;protocol=ht
 
 S = "${WORKDIR}/git"
 
-RDEPENDS_${PN} = "python3-pycoral \
+RDEPENDS:${PN} = "python3-pycoral \
                   python3-pyaudio \
 "
 
@@ -29,5 +29,5 @@ do_install() {
     install -m 0555 ${S}/config/commands_v2.txt ${D}/opt/libedgetpu/keyword/config
 }
 
-FILES_${PN} += "/opt/libedgetpu/keyword/* \
+FILES:${PN} += "/opt/libedgetpu/keyword/* \
 "

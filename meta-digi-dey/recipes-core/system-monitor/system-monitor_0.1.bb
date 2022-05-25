@@ -15,7 +15,7 @@ inherit systemd features_check
 
 REQUIRED_DISTRO_FEATURES= "systemd"
 
-SYSTEMD_SERVICE_${PN} = "system-monitor.service"
+SYSTEMD_SERVICE:${PN} = "system-monitor.service"
 
 # The system-monitor.sh script is an example that needs to be customized.
 # This service also needs to be manually enabled.
@@ -33,4 +33,4 @@ do_install() {
 	install -m 0755 ${WORKDIR}/recover-bridge-action ${D}${sysconfdir}/system-monitor/recover-action.d
 }
 
-FILES_${PN} += "${systemd_unitdir}/system/system-monitor.service"
+FILES:${PN} += "${systemd_unitdir}/system/system-monitor.service"

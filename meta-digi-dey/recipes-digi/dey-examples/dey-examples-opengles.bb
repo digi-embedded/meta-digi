@@ -17,10 +17,10 @@ do_install () {
 	oe_runmake DEST_DIR="${D}" install
 }
 
-FILES_${PN} = "/opt/${PN}"
-FILES_${PN}-dbg += "/opt/${PN}/.debug"
+FILES:${PN} = "/opt/${PN}"
+FILES:${PN}-dbg += "/opt/${PN}/.debug"
 
-RDEPENDS_${PN}_ccimx6 = "libopenvg-imx"
+RDEPENDS:${PN}:ccimx6 = "libopenvg-imx"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 

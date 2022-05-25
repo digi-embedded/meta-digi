@@ -1,6 +1,6 @@
 # Copyright (C) 2013-2022 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
     file://mount_digiparts.sh \
@@ -8,7 +8,7 @@ SRC_URI += " \
     file://blacklist.conf \
 "
 
-do_install_append() {
+do_install:append() {
 
 	install -d ${D}/mnt
 	install -d ${D}/mnt/linux
@@ -43,8 +43,8 @@ do_install_append() {
 	fi
 }
 
-FILES_${PN}_append = " ${sysconfdir}/modprobe.d"
-FILES_${PN}_append += " /mnt"
+FILES:${PN}:append = " ${sysconfdir}/modprobe.d"
+FILES:${PN}:append += " /mnt"
 
 # BT_TTY is machine specific (defined in machine config file)
 PACKAGE_ARCH = "${MACHINE_ARCH}"

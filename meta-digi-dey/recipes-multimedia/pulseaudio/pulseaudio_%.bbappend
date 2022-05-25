@@ -1,6 +1,6 @@
 # Copyright (C) 2019-2022 Digi International
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 # Configuration files for SGTL500 sound card
 CFG_SGTL5000 = " \
@@ -21,12 +21,12 @@ CFG_HDMI = " \
     file://hdmi/90-pulseaudio-hdmi.rules \
 "
 SOUND_CARD ?= "max98089"
-SOUND_CARD_ccimx6 ?= "sgtl5000"
+SOUND_CARD:ccimx6 ?= "sgtl5000"
 
 AUDIO_HDMI ?= ""
-AUDIO_HDMI_ccimx6 = "yes"
+AUDIO_HDMI:ccimx6 = "yes"
 
-SRC_URI_append = " \
+SRC_URI:append = " \
     file://0001-Fix-pulseaudio-mutex-issue-when-do-pause-in-gstreame.patch \
     file://0002-Revert-bluetooth-Fix-crash-when-disabling-Bluetooth-.patch \
     ${@oe.utils.conditional('SOUND_CARD', 'sgtl5000', '${CFG_SGTL5000}', '', d)} \
@@ -36,32 +36,32 @@ SRC_URI_append = " \
     file://pulseaudio-system.service \
 "
 
-SRC_URI_append_ccimx6ulsbc = " \
+SRC_URI:append:ccimx6ulsbc = " \
     file://0001-pulseaudio-keep-headphones-volume-in-platforms-witho.patch \
 "
 
-SRC_URI_append_ccmp15 = " \
+SRC_URI:append:ccmp15 = " \
     file://0001-pulseaudio-keep-headphones-volume-in-platforms-witho.patch \
 "
 
 # This default setting should be added on all i.MX SoC,
 # For now, the setting for mx6(including mx6ul & mx6sll)/mx7 has been upstreamed
-SRC_URI_append_mx8 = " \
+SRC_URI:append:mx8-nxp-bsp = " \
     file://daemon.conf \
     file://default.pa \
 "
 
 # Enable allow-autospawn-for-root as default
-PACKAGECONFIG_append = " autospawn-for-root"
+PACKAGECONFIG:append = " autospawn-for-root"
 
-EXTRA_OECONF_append_ccimx6 = " --disable-memfd"
+EXTRA_OECONF:append:ccimx6 = " --disable-memfd"
 
-FILES_${PN}-server_append = " ${systemd_unitdir}/* ${sysconfdir}/pulseaudio-init"
+FILES:${PN}-server:append = " ${systemd_unitdir}/* ${sysconfdir}/pulseaudio-init"
 
-SYSTEMD_SERVICE_${PN}-server = "pulseaudio-system.service"
+SYSTEMD_SERVICE:${PN}-server = "pulseaudio-system.service"
 SYSTEMD_PACKAGES = "${PN}-server"
 
-do_install_append() {
+do_install:append() {
 	install -d ${D}${datadir}/pulseaudio/alsa-mixer/profile-sets
 	install -m 0644 ${WORKDIR}/${SOUND_CARD}/dey-audio-*.conf ${D}${datadir}/pulseaudio/alsa-mixer/profile-sets
 
@@ -88,4 +88,4 @@ do_install_append() {
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 # The card-detect binary is only necessary for the HDMI hotplug to work on the ccimx6sbc/ccimx6qpsbc
-RDEPENDS_${PN}_append_ccimx6 = " card-detect"
+RDEPENDS:${PN}:append:ccimx6 = " card-detect"

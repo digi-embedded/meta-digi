@@ -8,15 +8,15 @@ LICENSE = "GPLv2 & LGPLv2 & LGPLv2.1"
 SECTION = "multimedia"
 
 DEPENDS = "imx-codec imx-parser libdrm gstreamer1.0 gstreamer1.0-plugins-base gstreamer1.0-plugins-bad"
-DEPENDS_append_mx6 = " imx-lib"
-DEPENDS_append_mx7 = " imx-lib"
-DEPENDS_append_mx8ulp = " imx-lib"
-DEPENDS_append_imxvpu = " imx-vpuwrap"
+DEPENDS:append:mx6 = " imx-lib"
+DEPENDS:append:mx7 = " imx-lib"
+DEPENDS:append:mx8ulp = " imx-lib"
+DEPENDS:append:imxvpu = " imx-vpuwrap"
 
 # For backwards compatibility
-RREPLACES_${PN} = "gst1.0-fsl-plugin"
-RPROVIDES_${PN} = "gst1.0-fsl-plugin"
-RCONFLICTS_${PN} = "gst1.0-fsl-plugin"
+RREPLACES:${PN} = "gst1.0-fsl-plugin"
+RPROVIDES:${PN} = "gst1.0-fsl-plugin"
+RCONFLICTS:${PN} = "gst1.0-fsl-plugin"
 
 LIC_FILES_CHKSUM = "file://COPYING-LGPL-2;md5=5f30f0716dfdd0d91eb439ebec522ec2 \
                     file://COPYING-LGPL-2.1;md5=fbc093901857fcd118f065f900982c24"
@@ -50,11 +50,11 @@ PACKAGES =+ "${PN}-gplay ${PN}-libgplaycore ${PN}-libgstfsl ${PN}-grecorder ${PN
 
 # Add codec list that the beep plugin run-time depended
 BEEP_RDEPENDS = "imx-codec-aac imx-codec-mp3 imx-codec-oggvorbis"
-RDEPENDS_${PN} += "imx-parser ${BEEP_RDEPENDS} gstreamer1.0-plugins-good-id3demux "
-RDEPENDS_${PN}_append_mx8qm = " imx-dsp"
-RDEPENDS_${PN}_append_mx8qxp = " imx-dsp"
-RDEPENDS_${PN}_append_mx8mp = " imx-dsp"
-RDEPENDS_${PN}_append_mx8ulp = " imx-dsp"
+RDEPENDS:${PN} += "imx-parser ${BEEP_RDEPENDS} gstreamer1.0-plugins-good-id3demux "
+RDEPENDS:${PN}:append:mx8qm = " imx-dsp"
+RDEPENDS:${PN}:append:mx8qxp = " imx-dsp"
+RDEPENDS:${PN}:append:mx8mp = " imx-dsp"
+RDEPENDS:${PN}:append:mx8ulp = " imx-dsp"
 
 PACKAGECONFIG ?= ""
 
@@ -67,16 +67,16 @@ MSDEPENDS = "imx-msparser imx-mscodec"
 PACKAGECONFIG[wma10dec] += ",,${MSDEPENDS},${MSDEPENDS}"
 PACKAGECONFIG[wma8enc] += ",,${MSDEPENDS},${MSDEPENDS}"
 
-FILES_${PN} = "${libdir}/gstreamer-1.0/*.so ${datadir}"
+FILES:${PN} = "${libdir}/gstreamer-1.0/*.so ${datadir}"
 
-FILES_${PN}-dbg += "${libdir}/gstreamer-1.0/.debug"
-FILES_${PN}-dev += "${libdir}/gstreamer-1.0/*.la ${libdir}/pkgconfig/*.pc"
-FILES_${PN}-staticdev += "${libdir}/gstreamer-1.0/*.a"
-FILES_${PN}-gplay = "${bindir}/gplay-1.0"
-FILES_${PN}-libgplaycore = "${libdir}/libgplaycore-1.0${SOLIBS}"
-FILES_${PN}-libgstfsl = "${libdir}/libgstfsl-1.0${SOLIBS}"
-FILES_${PN}-grecorder = "${bindir}/grecorder-1.0"
-FILES_${PN}-librecorder-engine = "${libdir}/librecorder_engine-1.0${SOLIBS}"
-FILES_${PN}-libplayengine = "${libdir}/libplayengine-1.0${SOLIBS}"
+FILES:${PN}-dbg += "${libdir}/gstreamer-1.0/.debug"
+FILES:${PN}-dev += "${libdir}/gstreamer-1.0/*.la ${libdir}/pkgconfig/*.pc"
+FILES:${PN}-staticdev += "${libdir}/gstreamer-1.0/*.a"
+FILES:${PN}-gplay = "${bindir}/gplay-1.0"
+FILES:${PN}-libgplaycore = "${libdir}/libgplaycore-1.0${SOLIBS}"
+FILES:${PN}-libgstfsl = "${libdir}/libgstfsl-1.0${SOLIBS}"
+FILES:${PN}-grecorder = "${bindir}/grecorder-1.0"
+FILES:${PN}-librecorder-engine = "${libdir}/librecorder_engine-1.0${SOLIBS}"
+FILES:${PN}-libplayengine = "${libdir}/libplayengine-1.0${SOLIBS}"
 
 COMPATIBLE_MACHINE = "(mx6|mx7|mx8)"

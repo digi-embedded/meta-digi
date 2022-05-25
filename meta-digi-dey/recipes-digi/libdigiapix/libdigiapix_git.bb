@@ -40,6 +40,6 @@ do_install() {
 }
 
 USERADD_PACKAGES = "${PN}"
-GROUPADD_PARAM_${PN} = "-r digiapix"
+GROUPADD_PARAM:${PN} = "-r digiapix"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

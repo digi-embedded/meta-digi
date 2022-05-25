@@ -13,9 +13,9 @@ SRC_URI = "${ATF_SRC};branch=${SRCBRANCH} \
 "
 SRCREV = "5782363f92a2fdf926784449270433cf3ddf44bd"
 
-SRC_URI_append_ccimx8mn = " file://0001-imx8mn-Define-UART1-as-console-for-boot-stage.patch \
+SRC_URI:append:ccimx8mn = " file://0001-imx8mn-Define-UART1-as-console-for-boot-stage.patch \
                             file://0002-imx8mn-Disable-M7-debug-console.patch"
-SRC_URI_append_ccimx8mm = " file://0001-imx8mm-Define-UART1-as-console-for-boot-stage.patch \
+SRC_URI:append:ccimx8mm = " file://0001-imx8mm-Define-UART1-as-console-for-boot-stage.patch \
                             file://0002-imx8mm-Disable-M4-debug-console.patch"
 
 S = "${WORKDIR}/git"
@@ -25,22 +25,22 @@ inherit deploy
 BOOT_TOOLS = "imx-boot-tools"
 
 PLATFORM        ?= "INVALID"
-PLATFORM_mx8qm   = "imx8qm"
-PLATFORM_mx8x    = "imx8qx"
-PLATFORM_mx8mq   = "imx8mq"
-PLATFORM_mx8mm  = "imx8mm"
-PLATFORM_mx8mn  = "imx8mn"
-PLATFORM_mx8mnul = "imx8mn"
-PLATFORM_mx8mp  = "imx8mp"
-PLATFORM_mx8mpul = "imx8mp"
-PLATFORM_mx8dx   = "imx8dx"
-PLATFORM_mx8dxl  = "imx8dxl"
-PLATFORM_mx8ulp  = "imx8ulp"
+PLATFORM:mx8qm-nxp-bsp   = "imx8qm"
+PLATFORM:mx8x-nxp-bsp    = "imx8qx"
+PLATFORM:mx8mq-nxp-bsp   = "imx8mq"
+PLATFORM:mx8mm-nxp-bsp  = "imx8mm"
+PLATFORM:mx8mn-nxp-bsp  = "imx8mn"
+PLATFORM:mx8mnul-nxp-bsp = "imx8mn"
+PLATFORM:mx8mp-nxp-bsp  = "imx8mp"
+PLATFORM:mx8mpul-nxp-bsp = "imx8mp"
+PLATFORM:mx8dx-nxp-bsp   = "imx8dx"
+PLATFORM:mx8dxl-nxp-bsp  = "imx8dxl"
+PLATFORM:mx8ulp-nxp-bsp  = "imx8ulp"
 
 # Clear LDFLAGS to avoid the option -Wl recognize issue
 # Clear CFLAGS to avoid coherent_arm out of OCRAM size limitation (64KB) - i.MX 8MQ only
 CLEAR_FLAGS ?= "LDFLAGS"
-CLEAR_FLAGS_mx8mq = "LDFLAGS CFLAGS"
+CLEAR_FLAGS:mx8mq-nxp-bsp = "LDFLAGS CFLAGS"
 
 EXTRA_OEMAKE += " \
     CROSS_COMPILE="${TARGET_PREFIX}" \
@@ -70,4 +70,4 @@ do_deploy() {
 addtask deploy after do_compile
 
 PACKAGE_ARCH = "${MACHINE_SOCARCH}"
-COMPATIBLE_MACHINE = "(mx8)"
+COMPATIBLE_MACHINE = "(mx8-nxp-bsp)"

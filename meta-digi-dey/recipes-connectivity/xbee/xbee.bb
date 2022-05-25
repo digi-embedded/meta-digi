@@ -27,17 +27,17 @@ do_install() {
 }
 
 PACKAGES =+ "${PN}-init"
-FILES_${PN}-init = " \
+FILES:${PN}-init = " \
     ${sysconfdir}/xbee-init \
     ${sysconfdir}/init.d/xbee-init \
     ${systemd_unitdir}/system/xbee-init.service \
 "
 INITSCRIPT_PACKAGES += "${PN}-init"
-INITSCRIPT_NAME_${PN}-init = "xbee-init"
-INITSCRIPT_PARAMS_${PN}-init = "start 19 2 3 4 5 . stop 21 0 1 6 ."
+INITSCRIPT_NAME:${PN}-init = "xbee-init"
+INITSCRIPT_PARAMS:${PN}-init = "start 19 2 3 4 5 . stop 21 0 1 6 ."
 
 SYSTEMD_PACKAGES = "${PN}-init"
-SYSTEMD_SERVICE_${PN}-init = "xbee-init.service"
+SYSTEMD_SERVICE:${PN}-init = "xbee-init.service"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx8x|ccimx8m)"

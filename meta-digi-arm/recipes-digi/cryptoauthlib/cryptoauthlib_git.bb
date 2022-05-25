@@ -23,19 +23,19 @@ SRC_URI = " \
 S = "${WORKDIR}/git"
 
 I2C_BUS = ""
-I2C_BUS_ccimx6qpsbc = "1"
-I2C_BUS_ccimx6ul = "0"
-I2C_BUS_ccimx8x = "0"
-I2C_BUS_ccimx8m = "0"
+I2C_BUS:ccimx6qpsbc = "1"
+I2C_BUS:ccimx6ul = "0"
+I2C_BUS:ccimx8x = "0"
+I2C_BUS:ccimx8m = "0"
 
 I2C_SPEED ?= "400000"
-I2C_SPEED_ccimx6qpsbc = "100000"
+I2C_SPEED:ccimx6qpsbc = "100000"
 
 EXTRA_OECMAKE += "-DATCA_HAL_I2C_BUS=${I2C_BUS} -DATCA_HAL_I2C_SPEED=${I2C_SPEED} -DBUILD_TESTS=on"
 
 inherit cmake
 
-do_install_append() {
+do_install:append() {
 	# Rename the folder containing the header files to be more package-specific
 	mv ${D}${includedir}/lib ${D}${includedir}/cryptoauthlib
 
@@ -46,11 +46,11 @@ do_install_append() {
 
 PACKAGES =+ "${PN}-test"
 
-FILES_${PN}-test = "${bindir}/cryptoauth_test"
+FILES:${PN}-test = "${bindir}/cryptoauth_test"
 
-RDEPENDS_${PN} = "libp11"
-RDEPENDS_${PN}-test = "${PN}"
-RRECOMMENDS_${PN} = "${PN}-test"
+RDEPENDS:${PN} = "libp11"
+RDEPENDS:${PN}-test = "${PN}"
+RRECOMMENDS:${PN} = "${PN}-test"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul|ccimx8x|ccimx8m)"

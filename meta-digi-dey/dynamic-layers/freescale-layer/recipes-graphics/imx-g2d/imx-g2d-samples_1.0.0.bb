@@ -18,4 +18,4 @@ do_install() {
     oe_runmake install DESTDIR=${D} PREFIX=${exec_prefix}
 }
 
-FILES_${PN} += "/opt"
+FILES:${PN} += "/opt"

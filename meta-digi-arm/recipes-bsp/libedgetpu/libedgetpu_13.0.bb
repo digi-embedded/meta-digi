@@ -9,7 +9,7 @@ SRC_URI[sha256sum] = "b23b2c5a227d7f0e65dcc91585028d27c12e764f8ce4c4db3f114be4a4
 
 S = "${WORKDIR}/edgetpu_runtime"
 
-RDEPENDS_${PN} = "libusb1"
+RDEPENDS:${PN} = "libusb1"
 
 # The library files in direct correspond to max frequency, those in throttled correspond to reduced frequency.
 LIBEDGETPU_TYPE = "direct"
@@ -30,8 +30,8 @@ do_install() {
     install -m 755 ${S}/libedgetpu/edgetpu.h ${D}/${includedir}/edgetpu.h
 }
 
-FILES_${PN} += "${libdir}/libedgetpu.so \
+FILES:${PN} += "${libdir}/libedgetpu.so \
                 ${includedir}/edgetpu.h \
 "
 
-INSANE_SKIP_${PN} += "already-stripped"
+INSANE_SKIP:${PN} += "already-stripped"

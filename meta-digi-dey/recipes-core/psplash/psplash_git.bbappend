@@ -1,6 +1,6 @@
 # Copyright (C) 2016 Digi International
 
-FILESEXTRAPATHS_prepend_dey := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend:dey := "${THISDIR}/files:"
 
 SRC_URI += " \
     file://0001-colors-modify-psplash-colors-to-match-Digi-scheme.patch \

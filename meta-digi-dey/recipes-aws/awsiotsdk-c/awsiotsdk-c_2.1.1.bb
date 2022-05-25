@@ -67,7 +67,7 @@ do_install() {
 
 PACKAGES =+ "${PN}-cert"
 
-FILES_${PN}-cert = "${sysconfdir}/ssl/certs/"
+FILES:${PN}-cert = "${sysconfdir}/ssl/certs/"
 
-ALLOW_EMPTY_${PN} = "1"
+ALLOW_EMPTY:${PN} = "1"
 

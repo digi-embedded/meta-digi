@@ -10,8 +10,8 @@ QUALCOMM_WIFI_DRIVER ?= "proprietary"
 
 # Selects whether to apply the "Deep Sleep + Internal Clock" workaround
 BT_INTCLOCK_WORKAROUND ?= "0"
-BT_INTCLOCK_WORKAROUND_ccimx6ul = "1"
-BT_INTCLOCK_WORKAROUND_ccimx6 = "1"
+BT_INTCLOCK_WORKAROUND:ccimx6ul = "1"
+BT_INTCLOCK_WORKAROUND:ccimx6 = "1"
 
 # Bluetooth 5.0 firmware files
 FW_QUALCOMM_BT_5 = " \
@@ -58,7 +58,7 @@ FW_QCA6574_WIFI_COMMUNITY = " \
 "
 
 FW_QUALCOMM_WIFI ?= "${FW_QCA65X4_SDIO_PROPRIETARY}"
-FW_QUALCOMM_WIFI_ccimx8x = "${@oe.utils.conditional('QUALCOMM_WIFI_DRIVER', 'community', '${FW_QCA6574_WIFI_COMMUNITY}', '${FW_QCA65X4_PCIE_PROPRIETARY}', d)}"
+FW_QUALCOMM_WIFI:ccimx8x = "${@oe.utils.conditional('QUALCOMM_WIFI_DRIVER', 'community', '${FW_QCA6574_WIFI_COMMUNITY}', '${FW_QCA65X4_PCIE_PROPRIETARY}', d)}"
 
 SRC_URI = " \
     ${FW_QUALCOMM_BT} \
@@ -117,13 +117,13 @@ do_install() {
 }
 
 QCA_MODEL ?= "qca6564"
-QCA_MODEL_ccimx8x = "qca6574"
+QCA_MODEL:ccimx8x = "qca6574"
 
 # Do not create empty debug and development packages (PN-dbg PN-dev PN-staticdev)
 PACKAGES = "${PN}-${QCA_MODEL}-bt ${PN}-${QCA_MODEL}-wifi"
 
-FILES_${PN}-${QCA_MODEL}-bt = "/lib/firmware/qca"
-FILES_${PN}-${QCA_MODEL}-wifi = "/lib/firmware"
+FILES:${PN}-${QCA_MODEL}-bt = "/lib/firmware/qca"
+FILES:${PN}-${QCA_MODEL}-wifi = "/lib/firmware"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x|ccimx8m)"

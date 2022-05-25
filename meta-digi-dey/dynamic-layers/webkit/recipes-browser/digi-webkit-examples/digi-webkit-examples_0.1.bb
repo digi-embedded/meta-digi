@@ -14,7 +14,7 @@ S = "${WORKDIR}/${PN}-${PV}"
 
 require digi-webkit-examples.inc
 
-RDEPENDS_${PN} = " \
+RDEPENDS:${PN} = " \
     cog \
     video-examples \
     webglsamples \

@@ -5,7 +5,7 @@ HOMEPAGE = "https://coral.ai/software/#pycoral-api"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${S}/pycoral-1.0.1.dist-info/LICENSE;md5=d8927f3331d2b3e321b7dd1925166d25"
 
-PYTHON_PACKAGE = "pycoral-1.0.1-cp38-cp38-linux_aarch64.whl"
+PYTHON_PACKAGE = "pycoral-1.0.1-cp38-cp38-linux:aarch64.whl"
 
 SRC_URI = "git://github.com/google-coral/pycoral.git;protocol=https"
 SRCREV = "d4b9f572fa3baef9d854483a171e02a6b3f9dbd0"
@@ -16,7 +16,7 @@ SRC_URI[python-wheel.sha256sum] = "894468447192fbcf946157db0f3b6424ece6d70bcec12
 
 DEPENDS = "python3 python3-pip-native python3-wheel-native curl-native ca-certificates-native"
 
-RDEPENDS_${PN} = "${PYTHON_PN} \
+RDEPENDS:${PN} = "${PYTHON_PN} \
                   ${PYTHON_PN}-numpy \
                   ${PYTHON_PN}-pycairo \
                   ${PYTHON_PN}-pygobject \
@@ -57,12 +57,12 @@ do_install() {
         ${WORKDIR}/${BP}/pycoral-*.whl
 }
 
-FILES_${PN} += "\
+FILES:${PN} += "\
     ${libdir}/${PYTHON_DIR}/site-packages/* \
     /opt/pycoral/* \
 "
 
-INSANE_SKIP_${PN} += "already-stripped"
+INSANE_SKIP:${PN} += "already-stripped"
 
 COMPATIBLE_MACHINE = "(-)"
-COMPATIBLE_MACHINE_aarch64 = "(.*)"
+COMPATIBLE_MACHINE:aarch64 = "(.*)"

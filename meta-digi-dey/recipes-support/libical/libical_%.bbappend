@@ -6,6 +6,6 @@
 # Only 'libicudata' could weight up to 25MB:
 #
 #   25M  /usr/lib/libicudata.so.57.1
-PACKAGECONFIG_remove_ccimx6ul = "icu"
+PACKAGECONFIG:remove:ccimx6ul = "icu"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

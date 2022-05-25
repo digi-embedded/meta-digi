@@ -27,11 +27,11 @@ do_install() {
 
 PACKAGES =+ "${PN}-cert"
 
-FILES_${PN}-cert = "${sysconfdir}/ssl/certs/Digi_Int-ca-cert-public.crt"
+FILES:${PN}-cert = "${sysconfdir}/ssl/certs/Digi_Int-ca-cert-public.crt"
 
-CONFFILES_${PN} += "${sysconfdir}/cc.conf"
+CONFFILES:${PN} += "${sysconfdir}/cc.conf"
 
-RDEPENDS_${PN} = "${PN}-cert"
+RDEPENDS:${PN} = "${PN}-cert"
 
 # Disable extra compilation checks from SECURITY_CFLAGS to avoid build errors
-lcl_maybe_fortify_pn-cloudconnector = ""
+lcl_maybe_fortify:pn-cloudconnector = ""

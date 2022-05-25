@@ -1,16 +1,16 @@
 # Copyright (C) 2013-2021 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
     file://sysctl.conf \
 "
 
-do_install_append() {
+do_install:append() {
 	install -m 0644 ${WORKDIR}/sysctl.conf ${D}${sysconfdir}/
 }
 
-pkg_postinst_ontarget_${PN}() {
+pkg_postinst_ontarget:${PN}() {
 	get_emmc_block_device() {
 		for emmc_number in $(seq 0 9); do
 			if [ -b "/dev/mmcblk${emmc_number}" ] &&
@@ -56,4 +56,4 @@ pkg_postinst_ontarget_${PN}() {
 
 inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}
 
-CONFFILES_${PN} += "${sysconfdir}/sysctl.conf"
+CONFFILES:${PN} += "${sysconfdir}/sysctl.conf"

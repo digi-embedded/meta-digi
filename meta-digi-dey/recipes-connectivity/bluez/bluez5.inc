@@ -8,9 +8,9 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=12f884d2ae1ff87c09e5b7ccc2c4ca7e \
                     file://src/main.c;beginline=1;endline=24;md5=9bc54b93cd7e17bf03f52513f39f926e"
 DEPENDS = "udev libusb dbus-glib glib-2.0 libcheck readline"
 PROVIDES += "bluez-hcidump"
-RPROVIDES_${PN} += "bluez-hcidump"
+RPROVIDES:${PN} += "bluez-hcidump"
 
-RCONFLICTS_${PN} = "bluez4"
+RCONFLICTS:${PN} = "bluez4"
 
 PACKAGECONFIG ??= "obex-profiles"
 PACKAGECONFIG[obex-profiles] = "--enable-obex,--disable-obex,libical"
@@ -48,7 +48,7 @@ NOINST_TOOLS = " \
     ${@bb.utils.contains('PACKAGECONFIG', 'experimental', '${NOINST_TOOLS_EXPERIMENTAL}', '', d)} \
 "
 
-do_install_append() {
+do_install:append() {
 	install -d ${D}${INIT_D_DIR}
 	install -m 0755 ${WORKDIR}/init ${D}${INIT_D_DIR}/bluetooth
 
@@ -77,23 +77,23 @@ do_install_append() {
         sed -i -e '1s,#!.*python.*,#!${bindir}/python3,' ${D}${libdir}/bluez/test/*
 }
 
-ALLOW_EMPTY_libasound-module-bluez = "1"
+ALLOW_EMPTY:libasound-module-bluez = "1"
 PACKAGES =+ "libasound-module-bluez ${PN}-testtools ${PN}-obex ${PN}-noinst-tools"
 
-FILES_libasound-module-bluez = "${libdir}/alsa-lib/lib*.so ${datadir}/alsa"
-FILES_${PN} += "${libdir}/bluetooth/plugins/*.so ${systemd_unitdir}/ ${datadir}/dbus-1"
-FILES_${PN}-dev += "\
+FILES:libasound-module-bluez = "${libdir}/alsa-lib/lib*.so ${datadir}/alsa"
+FILES:${PN} += "${libdir}/bluetooth/plugins/*.so ${systemd_unitdir}/ ${datadir}/dbus-1"
+FILES:${PN}-dev += "\
   ${libdir}/bluetooth/plugins/*.la \
   ${libdir}/alsa-lib/*.la \
 "
 
-FILES_${PN}-obex = "${libexecdir}/bluetooth/obexd \
+FILES:${PN}-obex = "${libexecdir}/bluetooth/obexd \
                     ${exec_prefix}/lib/systemd/user/obex.service \
                     ${datadir}/dbus-1/services/org.bluez.obex.service \
                    "
-SYSTEMD_SERVICE_${PN}-obex = "obex.service"
+SYSTEMD_SERVICE:${PN}-obex = "obex.service"
 
-FILES_${PN}-testtools = "${libdir}/bluez/test/*"
+FILES:${PN}-testtools = "${libdir}/bluez/test/*"
 
 def get_noinst_tools_paths (d, bb, tools):
     s = list()
@@ -103,13 +103,13 @@ def get_noinst_tools_paths (d, bb, tools):
         s.append("%s/%s" % (bindir, f))
     return "\n".join(s)
 
-FILES_${PN}-noinst-tools = "${@get_noinst_tools_paths(d, bb, d.getVar('NOINST_TOOLS', True))}"
+FILES:${PN}-noinst-tools = "${@get_noinst_tools_paths(d, bb, d.getVar('NOINST_TOOLS', True))}"
 
-RDEPENDS_${PN}-testtools += "python3-core python3-dbus python3-pygobject"
+RDEPENDS:${PN}-testtools += "python3-core python3-dbus python3-pygobject"
 
-SYSTEMD_SERVICE_${PN} = "bluetooth.service"
+SYSTEMD_SERVICE:${PN} = "bluetooth.service"
 INITSCRIPT_PACKAGES = "${PN}"
-INITSCRIPT_NAME_${PN} = "bluetooth"
+INITSCRIPT_NAME:${PN} = "bluetooth"
 
 EXCLUDE_FROM_WORLD = "1"
 

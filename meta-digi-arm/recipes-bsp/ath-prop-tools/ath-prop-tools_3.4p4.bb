@@ -4,7 +4,7 @@ SUMMARY = "Atheros' proprietary tools"
 LICENSE = "Proprietary"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/Proprietary;md5=0557f9d92cf58f2ccdd50f62f8ac0b28"
 
-RDEPENDS_${PN} = "libnl libnl-genl libnl-nf libnl-route"
+RDEPENDS:${PN} = "libnl libnl-genl libnl-nf libnl-route"
 
 inherit bin_package
 
@@ -12,7 +12,7 @@ SRC_URI = " \
     file://athtestcmd \
 "
 
-INSANE_SKIP_${PN} = "already-stripped"
+INSANE_SKIP:${PN} = "already-stripped"
 
 do_install() {
 	install -d ${D}${sbindir}

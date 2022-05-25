@@ -29,7 +29,7 @@ VIRTUAL-RUNTIME_passwd_manager ?= "shadow"
 # Set virtual runtimes depending on X11 feature
 VIRTUAL-RUNTIME_touchscreen ?= "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '', 'tslib-calibrate tslib-tests', d)}"
 
-RDEPENDS_${PN} = "\
+RDEPENDS:${PN} = "\
     awsiotsdk-c \
     base-files \
     base-passwd \
@@ -66,7 +66,7 @@ RDEPENDS_${PN} = "\
     ${MACHINE_EXTRA_RDEPENDS} \
 "
 
-RRECOMMENDS_${PN} = "\
+RRECOMMENDS:${PN} = "\
     ${VIRTUAL-RUNTIME_base-utils-syslog} \
     ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS} \
     ${MACHINE_EXTRA_RRECOMMENDS} \

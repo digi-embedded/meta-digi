@@ -2,8 +2,8 @@
 include conf/machine/include/digi-defaults.inc
 
 XSERVER_DRIVER = "xf86-video-fbdev"
-XSERVER_DRIVER_imxgpu2d = "xf86-video-imx-vivante"
-XSERVER_DRIVER_append_mx8 = " xf86-video-modesetting"
+XSERVER_DRIVER:imxgpu2d = "xf86-video-imx-vivante"
+XSERVER_DRIVER:append:mx8-generic-bsp = " xf86-video-modesetting"
 XSERVER = "xserver-xorg \
            xf86-input-evdev \
            ${XSERVER_DRIVER}"
@@ -45,13 +45,13 @@ MACHINE_SOCARCH_SUFFIX_mx8mm  = "-mx8mm"
 MACHINE_SOCARCH_SUFFIX_mx8mp  = "-mx8mp"
 
 MACHINE_ARCH_FILTER = "virtual/kernel"
-MACHINE_SOCARCH_FILTER_append_imxvpu = " \
+MACHINE_SOCARCH_FILTER:append:imxvpu = " \
     imx-codec \
     imx-vpuwrap \
     libimxvpuapi \
     virtual/imxvpu \
 "
-MACHINE_SOCARCH_FILTER_append_imxgpu = " \
+MACHINE_SOCARCH_FILTER:append:imxgpu = " \
     virtual/egl \
     virtual/mesa \
     virtual/libopenvg \
@@ -61,29 +61,29 @@ MACHINE_SOCARCH_FILTER_append_imxgpu = " \
     libgal-imx \
     pango \
 "
-MACHINE_SOCARCH_FILTER_append_imxgpu2d = " \
+MACHINE_SOCARCH_FILTER:append:imxgpu2d = " \
     virtual/libg2d \
 "
-MACHINE_SOCARCH_FILTER_append_imxgpu3d = " \
+MACHINE_SOCARCH_FILTER:append:imxgpu3d = " \
     virtual/libgl \
     virtual/libgles1 \
     virtual/libgles2 \
 "
-MACHINE_SOCARCH_FILTER_append_mx6q = " \
+MACHINE_SOCARCH_FILTER:append:mx6q = " \
     virtual/opencl-icd \
     opencl-headers \
 "
-MACHINE_SOCARCH_FILTER_append_mx8 = " \
+MACHINE_SOCARCH_FILTER:append:mx8 = " \
     virtual/opencl-icd \
     opencl-headers \
 "
-MACHINE_SOCARCH_FILTER_append_mx8qm = " \
+MACHINE_SOCARCH_FILTER:append:mx8qm = " \
     virtual/libopenvx \
 "
 
 INHERIT += "fsl-dynamic-packagearch"
 
-SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS_append = " \
+SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS:append = " \
     libimxvpuapi->virtual/imxvpu \
     imx-vpuwrap->virtual/imxvpu \
     imx-codec->virtual/imxvpu \
@@ -136,8 +136,8 @@ MACHINEOVERRIDES =. "imx:"
 MACHINEOVERRIDES =. "use-nxp-bsp:"
 
 # U-Boot 2017.X requires a specific dtc version.
-PREFERRED_VERSION_dtc-native_ccimx6 ?= "1.4.5"
-PREFERRED_VERSION_nativesdk-dtc_ccimx6 ?= "1.4.5"
+PREFERRED_VERSION_dtc-native:ccimx6 ?= "1.4.5"
+PREFERRED_VERSION_nativesdk-dtc:ccimx6 ?= "1.4.5"
 
 DEY_BUILD_PLATFORM = "NXP"
 

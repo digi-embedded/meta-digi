@@ -9,7 +9,7 @@ SRC_URI = " \
     file://bluetooth-init.service \
 "
 
-SRC_URI_append_ccimx6sbc = " \
+SRC_URI:append:ccimx6sbc = " \
     file://bluetooth-init_atheros \
 "
 
@@ -25,11 +25,11 @@ do_install() {
 	install -m 0644 ${WORKDIR}/bluetooth-init.service ${D}${systemd_unitdir}/system/bluetooth-init.service
 }
 
-do_install_append_ccimx6sbc() {
+do_install:append:ccimx6sbc() {
 	install -m 0755 ${WORKDIR}/bluetooth-init_atheros ${D}${sysconfdir}/bluetooth-init_atheros
 }
 
-pkg_postinst_ontarget_${PN}_ccimx6sbc() {
+pkg_postinst_ontarget:${PN}:ccimx6sbc() {
 	# Only execute the script on wireless ccimx6 platforms
 	if [ -e "/proc/device-tree/bluetooth/mac-address" ]; then
 		for id in $(find /sys/devices -name modalias -print0 | xargs -0 sort -u -z | grep sdio); do
@@ -44,16 +44,16 @@ pkg_postinst_ontarget_${PN}_ccimx6sbc() {
 	fi
 }
 
-FILES_${PN} = " ${sysconfdir}/bluetooth-init* \
+FILES:${PN} = " ${sysconfdir}/bluetooth-init* \
                 ${sysconfdir}/init.d/bluetooth-init \
                 ${systemd_unitdir}/system/bluetooth-init.service \
 "
 
 INITSCRIPT_PACKAGES += "${PN}"
-INITSCRIPT_NAME_${PN} = "bluetooth-init"
-INITSCRIPT_PARAMS_${PN} = "start 19 2 3 4 5 . stop 21 0 1 6 ."
+INITSCRIPT_NAME:${PN} = "bluetooth-init"
+INITSCRIPT_PARAMS:${PN} = "start 19 2 3 4 5 . stop 21 0 1 6 ."
 
-SYSTEMD_SERVICE_${PN} = "bluetooth-init.service"
+SYSTEMD_SERVICE:${PN} = "bluetooth-init.service"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x|ccimx8mn|ccimx8mm)"

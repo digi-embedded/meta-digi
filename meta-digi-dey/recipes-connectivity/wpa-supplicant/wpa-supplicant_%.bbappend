@@ -1,6 +1,6 @@
 # Copyright (C) 2013-2022 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 PACKAGECONFIG ?= "openssl"
 
@@ -32,24 +32,24 @@ MURATA_COMMON_PATCHES = " \
     file://murata/0019-wpa-supplicant-defconfig-Set-to-Cypress-default-configuration.patch;apply=yes \
 "
 
-SRC_URI_append_ccimx6sbc = " file://wpa_supplicant_p2p.conf_atheros"
-SRC_URI_append_ccmp1 = " ${MURATA_COMMON_PATCHES}"
-SRC_URI_append_ccimx8mp = " ${MURATA_COMMON_PATCHES}"
+SRC_URI:append:ccimx6sbc = " file://wpa_supplicant_p2p.conf_atheros"
+SRC_URI:append:ccmp1 = " ${MURATA_COMMON_PATCHES}"
+SRC_URI:append:ccimx8mp = " ${MURATA_COMMON_PATCHES}"
 
-do_install_append() {
+do_install:append() {
 	install -m 600 ${WORKDIR}/wpa_supplicant_p2p.conf ${D}${sysconfdir}/wpa_supplicant_p2p.conf
 	sed -i -e "s,##WLAN_P2P_DEVICE_NAME##,${WLAN_P2P_DEVICE_NAME},g" \
 	       ${D}${sysconfdir}/wpa_supplicant_p2p.conf
 }
 
-do_install_append_ccimx6sbc() {
+do_install:append:ccimx6sbc() {
 	# Install atheros variant of the p2p .conf file
 	install -m 600 ${WORKDIR}/wpa_supplicant_p2p.conf_atheros ${D}${sysconfdir}/wpa_supplicant_p2p.conf_atheros
 	sed -i -e "s,##WLAN_P2P_DEVICE_NAME##,${WLAN_P2P_DEVICE_NAME},g" \
 	       ${D}${sysconfdir}/wpa_supplicant_p2p.conf_atheros
 }
 
-pkg_postinst_ontarget_${PN}_ccimx6sbc() {
+pkg_postinst_ontarget:${PN}:ccimx6sbc() {
 	# Only execute the script on wireless ccimx6 platforms
 	if [ -e "/proc/device-tree/wireless/mac-address" ]; then
 		for id in $(find /sys/devices -name modalias -print0 | xargs -0 sort -u -z | grep sdio); do

@@ -7,6 +7,6 @@ LICENSE = "MPL-2.0"
 
 PYPI_PACKAGE = "digi-xbee"
 
-RDEPENDS_${PN} = "python3-pyserial"
+RDEPENDS:${PN} = "python3-pyserial"
 
 inherit pypi setuptools3

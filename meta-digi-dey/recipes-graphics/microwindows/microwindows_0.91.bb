@@ -11,7 +11,7 @@ SRC_URI = " \
     file://0001-defconfig.patch;striplevel=2 \
 "
 
-SRC_URI_append_aarch64 = " file://0002-Arch.rules-remove-mstructure-size-boundary-8-flag.patch; "
+SRC_URI:append:aarch64 = " file://0002-Arch.rules-remove-mstructure-size-boundary-8-flag.patch; "
 
 SRC_URI[md5sum] = "901e912cf3975f6460a9bb4325557645"
 SRC_URI[sha256sum] = "c0a8473842fc757ff4c225f82b83d98bba5da0dca0cf843cfc7792064a393435"
@@ -32,4 +32,4 @@ do_install() {
 	oe_runmake install
 }
 
-RDEPENDS_${PN}-dev = ""
+RDEPENDS:${PN}-dev = ""

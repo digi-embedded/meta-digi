@@ -7,7 +7,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
 # Include WPE WebKit, launcher (cog) and examples
-RDEPENDS_${PN} += " \
+RDEPENDS:${PN} += " \
     cog \
     digi-webkit-examples \
     wpewebkit \

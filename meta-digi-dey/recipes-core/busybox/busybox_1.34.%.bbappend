@@ -1,6 +1,6 @@
 # Copyright (C) 2013-2022 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI += "file://standby \
             file://standby-actions \
@@ -18,7 +18,7 @@ SRC_URI += "file://standby \
                                                             ", "", d)} \
            "
 
-SRC_URI_append_ccimx6ul = " file://index.html \
+SRC_URI:append:ccimx6ul = " file://index.html \
                             file://digi-logo.png \
                           "
 
@@ -26,35 +26,35 @@ HAS_SYSTEMD = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false
 HAS_MCA = "${@bb.utils.contains('MACHINE_FEATURES', 'mca', 'true', 'false', d)}"
 
 # hwclock bootscript init parameters
-INITSCRIPT_PARAMS_${PN}-hwclock = "start 20 S . stop 20 0 6 ."
+INITSCRIPT_PARAMS:${PN}-hwclock = "start 20 S . stop 20 0 6 ."
 
-FILES_${PN}_append = " ${systemd_unitdir}/system-sleep/"
+FILES:${PN}:append = " ${systemd_unitdir}/system-sleep/"
 
 # HTTPD package
-FILES_${PN}-httpd_append = " ${systemd_unitdir}/system/busybox-httpd.service"
+FILES:${PN}-httpd:append = " ${systemd_unitdir}/system/busybox-httpd.service"
 SYSTEMD_PACKAGES += "${PN}-httpd"
-SYSTEMD_SERVICE_${PN}-httpd = "busybox-httpd.service"
+SYSTEMD_SERVICE:${PN}-httpd = "busybox-httpd.service"
 
 # NTPD package
 PACKAGES =+ "${PN}-ntpd"
-FILES_${PN}-ntpd = "${sysconfdir}/init.d/busybox-ntpd"
+FILES:${PN}-ntpd = "${sysconfdir}/init.d/busybox-ntpd"
 INITSCRIPT_PACKAGES =+ "${PN}-ntpd"
-INITSCRIPT_NAME_${PN}-ntpd = "busybox-ntpd"
+INITSCRIPT_NAME:${PN}-ntpd = "busybox-ntpd"
 
 # ACPID package
 PACKAGES =+ "${PN}-acpid"
-FILES_${PN}-acpid = " ${sysconfdir}/init.d/busybox-acpid \
+FILES:${PN}-acpid = " ${sysconfdir}/init.d/busybox-acpid \
                        ${sysconfdir}/acpi/acpid.map \
                        ${sysconfdir}/acpi/pswitch-standby \
                        ${sysconfdir}/acpi/pswitch-poweroff \
 "
 INITSCRIPT_PACKAGES =+ "${PN}-acpid"
-INITSCRIPT_NAME_${PN}-acpid = "busybox-acpid"
+INITSCRIPT_NAME:${PN}-acpid = "busybox-acpid"
 
 # Start busybox-syslog at a very early state
-INITSCRIPT_PARAMS_${PN}-syslog = "defaults 02"
+INITSCRIPT_PARAMS:${PN}-syslog = "defaults 02"
 
-do_install_append() {
+do_install:append() {
 	if grep "CONFIG_NTPD=y" ${WORKDIR}/defconfig; then
 		install -m 0755 ${WORKDIR}/busybox-ntpd ${D}${sysconfdir}/init.d/
 	fi
@@ -103,7 +103,7 @@ do_install_append() {
 	fi
 }
 
-do_install_append_ccimx6ul() {
+do_install:append:ccimx6ul() {
 	install -d ${D}/srv/www
 	if grep "CONFIG_HTTPD=y" ${WORKDIR}/defconfig; then
 		install -m 0644 ${WORKDIR}/index.html ${D}/srv/www/

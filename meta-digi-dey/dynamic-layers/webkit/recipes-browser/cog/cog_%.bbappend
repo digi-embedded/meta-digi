@@ -1,8 +1,8 @@
 # Copyright 2020-2022 Digi International Inc.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
-SRC_URI_append = " \
+SRC_URI:append = " \
     file://0001-cog-platform-fdo-always-use-fullscreen-mode.patch \
 "
 
@@ -14,4 +14,4 @@ PACKAGECONFIG += "wl"
 
 # drm PACKAGECONFIG pulls in libgbm dependency, which isn't available
 # on the i.MX6
-PACKAGECONFIG_remove_ccimx6 = "drm"
+PACKAGECONFIG:remove:ccimx6 = "drm"

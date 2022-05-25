@@ -9,11 +9,11 @@ SRC_URI = " \
 "
 SRCREV = "87ddd80953835eb29027d1d5a12044a08e809e40" 
 
-PLATFORM_mx8ulp = "IMX8ULP"
+PLATFORM:mx8ulp-nxp-bsp = "IMX8ULP"
 
-do_install_append () {
+do_install:append () {
     # Remove .go file for Android
     find ${D}/ -name *.go -exec rm {} \;
 }
 
-COMPATIBLE_MACHINE = "(mx6|mx7|mx8ulp)"
+COMPATIBLE_MACHINE = "(mx6-nxp-bsp|mx7-nxp-bsp|mx8ulp-nxp-bsp)"

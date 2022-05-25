@@ -1,6 +1,6 @@
 # Copyright (C) 2017 Digi International Inc.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRCREV = "5ec928ddf62b0ad936efacf2b2d8fb87cca112ac"
 PV = "1.5+git${SRCPV}"
@@ -16,4 +16,4 @@ SRC_URI = " \
 
 # tcf-agent falls back to '/bin/sh' if 'bash' is not available, so don't
 # depend on bash at runtime.
-RDEPENDS_${PN}_remove = "bash"
+RDEPENDS:${PN}:remove = "bash"

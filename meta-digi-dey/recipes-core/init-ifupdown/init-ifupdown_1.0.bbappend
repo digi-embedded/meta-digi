@@ -1,6 +1,6 @@
 # Copyright (C) 2013-2021 Digi International Inc.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BP}:"
 
 INITSCRIPT_NAME = "networking"
 INITSCRIPT_PARAMS = "start 03 2 3 4 5 . stop 80 0 6 1 ."
@@ -13,7 +13,7 @@ WIFI_VIRTWLANS_FILES = " \
     file://virtwlans \
 "
 
-SRC_URI_append = " \
+SRC_URI:append = " \
     file://ifupdown.service \
     file://interfaces.br0.example \
     file://interfaces.p2p \
@@ -22,17 +22,17 @@ SRC_URI_append = " \
     ${@oe.utils.conditional('HAS_WIFI_VIRTWLANS', 'true', '${WIFI_VIRTWLANS_FILES}', '', d)} \
 "
 
-SRC_URI_append_ccimx6sbc = " \
+SRC_URI:append:ccimx6sbc = " \
     file://interfaces.wlan1.atheros.static \
     file://interfaces.wlan1.atheros.dhcp \
     file://interfaces.br0.atheros.example \
 "
 
-SYSTEMD_SERVICE_${PN} = "ifupdown.service"
+SYSTEMD_SERVICE:${PN} = "ifupdown.service"
 
 WPA_DRIVER ?= "nl80211"
 
-do_install_append() {
+do_install:append() {
 	# Install 'ifupdown' scripts
 	install -m 0755 ${WORKDIR}/p2plink ${D}${sysconfdir}/network/if-up.d/
 	install -m 0755 ${WORKDIR}/resolv ${D}${sysconfdir}/network/if-up.d/

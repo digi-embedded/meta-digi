@@ -11,10 +11,10 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 DEPENDS = "awsiotsdk-c confuse"
 
 AWS_USER_LED ?= ""
-AWS_USER_LED_ccimx6ulstarter ?= "75"
-AWS_USER_LED_ccimx6ulsbc ?= "488"
-AWS_USER_LED_ccimx6sbc ?= "34"
-AWS_USER_LED_ccimx6qpsbc ?= "34"
+AWS_USER_LED:ccimx6ulstarter ?= "75"
+AWS_USER_LED:ccimx6ulsbc ?= "488"
+AWS_USER_LED:ccimx6sbc ?= "34"
+AWS_USER_LED:ccimx6qpsbc ?= "34"
 
 S = "${WORKDIR}/git/awsiot-sample"
 
@@ -38,6 +38,6 @@ do_install() {
 	oe_runmake DESTDIR=${D} install
 }
 
-RRECOMMENDS_${PN} += "awsiotsdk-c-cert"
+RRECOMMENDS:${PN} += "awsiotsdk-c-cert"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

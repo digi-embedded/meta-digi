@@ -1,6 +1,6 @@
 # Copyright (C) 2021, Digi International Inc.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 # Chose a between a default hard-coded config file (for read-only rootfs)
 # or a dynamically generated one (with a postinst script)
@@ -18,12 +18,12 @@ SRC_URI += " \
     file://0003-tools-env-add-support-to-set-dynamic-location-of-env.patch \
 "
 
-do_install_append() {
+do_install:append() {
 	install -d ${D}${sysconfdir}
 	install -m 0644 ${WORKDIR}/${FW_CONFIG_FILE} ${D}${sysconfdir}/fw_env.config
 }
 
-pkg_postinst_ontarget_${PN}() {
+pkg_postinst_ontarget:${PN}() {
 	CONFIG_FILE="/etc/fw_env.config"
 	MMCDEV="$(sed -ne 's,.*root=/dev/mmcblk\([0-9]\)p.*,\1,g;T;p' /proc/cmdline)"
 	if [ -n "${MMCDEV}" ]; then

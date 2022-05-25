@@ -14,7 +14,7 @@ MACHINE_GSTREAMER_1_0_PKGS = " \
     gstreamer1.0-plugins-good-meta \
 "
 # Minimal set of gstreamer elements to play a local WEBM video
-MACHINE_GSTREAMER_1_0_PKGS_ccimx6ul = " \
+MACHINE_GSTREAMER_1_0_PKGS:ccimx6ul = " \
     gstreamer1.0-plugins-base-alsa \
     gstreamer1.0-plugins-base-audioconvert \
     gstreamer1.0-plugins-base-audioresample \
@@ -32,14 +32,14 @@ MACHINE_GSTREAMER_1_0_PKGS_ccimx6ul = " \
 "
 
 MACHINE_GSTREAMER_1_0_EXTRA_INSTALL ?= ""
-MACHINE_GSTREAMER_1_0_EXTRA_INSTALL_imxgpu ?= " \
+MACHINE_GSTREAMER_1_0_EXTRA_INSTALL:imxgpu ?= " \
     gstreamer1.0-plugins-bad-meta \
     gstreamer1.0-plugins-ugly-meta \
     gstreamer1.0-rtsp-server-meta \
     gstreamer1.0-libav \
 "
 
-RDEPENDS_${PN} = " \
+RDEPENDS:${PN} = " \
     ${MACHINE_GSTREAMER_1_0_PKGS} \
     ${MACHINE_GSTREAMER_1_0_EXTRA_INSTALL} \
     ${MACHINE_GSTREAMER_1_0_PLUGIN} \

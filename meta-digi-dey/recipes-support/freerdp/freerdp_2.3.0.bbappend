@@ -2,7 +2,7 @@
 
 # In sysvinit builds, cups pulls in procps as a dependency, which causes
 # conflicts when building the SDK, so remove it
-PACKAGECONFIG_remove = "${@bb.utils.contains('DISTRO_FEATURES', 'sysvinit', 'cups', '', d)}"
+PACKAGECONFIG:remove = "${@bb.utils.contains('DISTRO_FEATURES', 'sysvinit', 'cups', '', d)}"
 
 # cups pulls in libusb1 as a dependency, but libusb1 is also needed implicitly
 # by a different freerdp component. Removing cups from PACKAGECONFIG will

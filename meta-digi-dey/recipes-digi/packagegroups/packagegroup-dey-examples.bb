@@ -7,7 +7,7 @@ DEPENDS = "virtual/kernel"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
-RDEPENDS_${PN} = "\
+RDEPENDS:${PN} = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "alsa", "dey-examples-alsa", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
@@ -22,7 +22,7 @@ RDEPENDS_${PN} = "\
 	dey-examples-digiapix \
 	dey-examples-rtc \
 "
-RDEPENDS_${PN}_append_ccimx6 = "\
+RDEPENDS:${PN}:append:ccimx6 = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \
 	dey-examples-v4l2 \
 "

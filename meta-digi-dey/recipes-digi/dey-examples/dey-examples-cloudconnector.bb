@@ -17,4 +17,4 @@ do_install() {
 	oe_runmake DESTDIR=${D} install
 }
 
-RDEPENDS_${PN} = "cloudconnector-cert"
+RDEPENDS:${PN} = "cloudconnector-cert"

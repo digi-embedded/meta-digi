@@ -21,5 +21,5 @@ inherit dey-image
 
 IMAGE_ROOTFS_SIZE ?= "8192"
 
-IMAGE_FSTYPES_remove = "ext4"
-IMAGE_FSTYPES_append = " ext2"
+IMAGE_FSTYPES:remove = "ext4"
+IMAGE_FSTYPES:append = " ext2"

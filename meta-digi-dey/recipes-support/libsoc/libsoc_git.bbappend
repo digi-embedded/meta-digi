@@ -1,6 +1,6 @@
 # Copyright (C) 2017 Digi International Inc.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 LIBSOC_URI_STASH = "${DIGI_MTK_GIT}/dey/libsoc.git;protocol=ssh"
 LIBSOC_URI_GITHUB = "git://github.com/jackmitch/libsoc.git;protocol=https"

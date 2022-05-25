@@ -70,8 +70,8 @@ do_install() {
 # Do not create empty debug and development packages (PN-dbg PN-dev PN-staticdev)
 PACKAGES = "${PN}-ar3k ${PN}-ath6kl"
 
-FILES_${PN}-ar3k = "/lib/firmware/ar3k"
-FILES_${PN}-ath6kl = "/lib/firmware/ath6k"
+FILES:${PN}-ar3k = "/lib/firmware/ar3k"
+FILES:${PN}-ath6kl = "/lib/firmware/ath6k"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx6sbc)"

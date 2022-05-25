@@ -6,7 +6,7 @@ SUMMARY = "Wireless packagegroup for DEY image"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
-RDEPENDS_${PN} = "\
+RDEPENDS:${PN} = "\
     hostapd \
     iw \
     wireless-regdb-static \
@@ -15,4 +15,4 @@ RDEPENDS_${PN} = "\
     wpa-supplicant-passphrase \
 "
 
-RDEPENDS_${PN}_append_ccimx6sbc = " ath-prop-tools"
+RDEPENDS:${PN}:append:ccimx6sbc = " ath-prop-tools"

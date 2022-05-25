@@ -8,7 +8,7 @@ SRC_URI = "git://github.com/google-coral/project-bodypix.git;protocol=https"
 
 S = "${WORKDIR}/git"
 
-RDEPENDS_${PN} = "python3-pycoral \
+RDEPENDS:${PN} = "python3-pycoral \
                   python3-svgwrite \
                   python3-scipy \
                   libusb1 \
@@ -30,7 +30,7 @@ do_install() {
     install -m 0555 ${S}/posenet_lib/aarch64/posenet_decoder.so ${D}/opt/libedgetpu/bodypix/posenet_lib/aarch64
 }
 
-FILES_${PN} += "/opt/libedgetpu/bodypix/* \
+FILES:${PN} += "/opt/libedgetpu/bodypix/* \
 "
 
-INSANE_SKIP_${PN} += "already-stripped"
+INSANE_SKIP:${PN} += "already-stripped"

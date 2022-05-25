@@ -5,7 +5,7 @@ HOMEPAGE = "https://www.tensorflow.org/lite/"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${S}/tflite_runtime-2.5.0.dist-info/METADATA;md5=8c4b9e107a64b0121980a8705094014b"
 
-PYTHON_PACKAGE = "tflite_runtime-2.5.0-cp38-cp38-linux_aarch64.whl"
+PYTHON_PACKAGE = "tflite_runtime-2.5.0-cp38-cp38-linux:aarch64.whl"
 
 SRC_URI = "https://github.com/google-coral/pycoral/releases/download/v1.0.1/${PYTHON_PACKAGE};downloadfilename=${PYTHON_PACKAGE};subdir=${BP}"
 SRC_URI[md5sum] = "9c47617e1fa0bdca673a78b8b6688d64"
@@ -13,7 +13,7 @@ SRC_URI[sha256sum] = "b87a4c152be05d3585521a1d5418f7645a4fb82965772489b983e93aae
 
 DEPENDS = "python3 python3-pip-native python3-wheel-native"
 
-RDEPENDS_${PN} = "${PYTHON_PN} \
+RDEPENDS:${PN} = "${PYTHON_PN} \
                   ${PYTHON_PN}-numpy \
 "
 
@@ -36,14 +36,14 @@ do_install() {
         ${WORKDIR}/${BP}/tflite_runtime-*.whl
 }
 
-FILES_${PN} += "\
+FILES:${PN} += "\
     ${libdir}/${PYTHON_DIR}/site-packages/* \
 "
 
-INSANE_SKIP_${PN} += "already-stripped"
+INSANE_SKIP:${PN} += "already-stripped"
 
 # This package provides the same python files as NXP's tensorflow-lite
-RCONFLICTS_${PN} = "tensorflow-lite"
+RCONFLICTS:${PN} = "tensorflow-lite"
 
 COMPATIBLE_MACHINE = "(-)"
-COMPATIBLE_MACHINE_aarch64 = "(.*)"
+COMPATIBLE_MACHINE:aarch64 = "(.*)"

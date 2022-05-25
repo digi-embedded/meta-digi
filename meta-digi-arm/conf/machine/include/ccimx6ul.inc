@@ -17,13 +17,13 @@ STORAGE_MEDIA = "mtd"
 
 # Wireless external module
 WIRELESS_MODULE ?= ""
-WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
+WIRELESS_MODULE:append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
 HAS_WIFI_VIRTWLANS = "true"
 
 # Firmware
 MACHINE_FIRMWARE ?= "firmware-imx-sdma-imx6q"
-MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6564-bt', '', d)}"
-MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6564-wifi', '', d)}"
+MACHINE_FIRMWARE:append = " ${@oe.utils.conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6564-bt', '', d)}"
+MACHINE_FIRMWARE:append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6564-wifi', '', d)}"
 
 MACHINE_EXTRA_RDEPENDS += " \
     imx-kobs \
@@ -35,10 +35,10 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     ${WIRELESS_MODULE} \
     ${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
 "
-MACHINE_EXTRA_RRECOMMENDS_remove_use-mainline-bsp = "${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)}"
+MACHINE_EXTRA_RRECOMMENDS:remove:use-mainline-bsp = "${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)}"
 
 MACHINE_FEATURES += "wifi bluetooth cryptochip mca"
-MACHINE_FEATURES_remove_use-mainline-bsp = "wifi"
+MACHINE_FEATURES:remove:use-mainline-bsp = "wifi"
 
 # mkfs.ubifs parameters for boot partition (the one holding kernel and device tree files)
 # Max LEB count (-c 255) calculated for a partition of up to 32 MiB considering 128 KiB erase-block size.

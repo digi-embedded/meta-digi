@@ -1,6 +1,6 @@
 # Copyright (C) 2015-2022 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:${THISDIR}/${BP}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:${THISDIR}/${BP}:"
 
 SRC_URI += " \
     file://bluetooth.service-add-customizations.patch \
@@ -17,16 +17,16 @@ QCA65XX_COMMON_PATCHES = " \
     file://0007-hciattach-Add-verbosity-option.patch \
 "
 
-SRC_URI_append_ccimx6ul = " ${QCA65XX_COMMON_PATCHES}"
-SRC_URI_append_ccimx6 = " ${QCA65XX_COMMON_PATCHES}"
-SRC_URI_append_ccimx8x = " ${QCA65XX_COMMON_PATCHES}"
-SRC_URI_append_ccimx8m = " ${QCA65XX_COMMON_PATCHES}"
+SRC_URI:append:ccimx6ul = " ${QCA65XX_COMMON_PATCHES}"
+SRC_URI:append:ccimx6 = " ${QCA65XX_COMMON_PATCHES}"
+SRC_URI:append:ccimx8x = " ${QCA65XX_COMMON_PATCHES}"
+SRC_URI:append:ccimx8m = " ${QCA65XX_COMMON_PATCHES}"
 
-SRC_URI_append_ccimx6sbc = " \
+SRC_URI:append:ccimx6sbc = " \
     file://main.conf_atheros \
 "
 
-do_install_append() {
+do_install:append() {
 	install -m 0644 ${WORKDIR}/main.conf ${D}${sysconfdir}/bluetooth/
 	sed -i -e "s,##BT_DEVICE_NAME##,${BT_DEVICE_NAME},g" \
 		${D}${sysconfdir}/bluetooth/main.conf
@@ -42,13 +42,13 @@ do_install_append() {
 	sed -i -e '/#include/{s,src/shared/,,g}' ${D}${includedir}/bluetooth-internal/att.h
 }
 
-do_install_append_ccimx6sbc() {
+do_install:append:ccimx6sbc() {
 	install -m 0644 ${WORKDIR}/main.conf_atheros ${D}${sysconfdir}/bluetooth/
 	sed -i -e "s,##BT_DEVICE_NAME##,${BT_DEVICE_NAME},g" \
 		${D}${sysconfdir}/bluetooth/main.conf_atheros
 }
 
-pkg_postinst_ontarget_${PN}_ccimx6sbc() {
+pkg_postinst_ontarget:${PN}:ccimx6sbc() {
 	# Only execute the script on wireless ccimx6 platforms
 	if [ -e "/proc/device-tree/bluetooth/mac-address" ]; then
 		for id in $(find /sys/devices -name modalias -print0 | xargs -0 sort -u -z | grep sdio); do
@@ -63,11 +63,11 @@ pkg_postinst_ontarget_${PN}_ccimx6sbc() {
 	fi
 }
 
-PACKAGECONFIG_append = " health-profiles \
+PACKAGECONFIG:append = " health-profiles \
     mesh \
     btpclient \
 "
 
-FILES_${PN} += " ${sysconfdir}/bluetooth/main.conf*"
+FILES:${PN} += " ${sysconfdir}/bluetooth/main.conf*"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

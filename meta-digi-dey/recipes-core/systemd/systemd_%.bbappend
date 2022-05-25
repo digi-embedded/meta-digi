@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
     file://0001-sysv-generator-reduce-message-level-for-packages-tha.patch \
@@ -6,9 +6,9 @@ SRC_URI += " \
 "
 
 # Remove systemd-networkd from our images, since we already use NetworkManager
-PACKAGECONFIG_remove_dey = "networkd"
+PACKAGECONFIG:remove:dey = "networkd"
 
-do_install_append () {
+do_install:append () {
     # Disable the assignment of the fixed network interface name
     install -d ${D}${sysconfdir}/systemd/network
     ln -s /dev/null ${D}${sysconfdir}/systemd/network/99-default.link

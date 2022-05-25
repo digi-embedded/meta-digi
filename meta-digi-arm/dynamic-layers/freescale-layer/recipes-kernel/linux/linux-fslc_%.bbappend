@@ -1,6 +1,6 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
-SRC_URI_append_ccimx6ul_use-mainline-bsp = " \
+SRC_URI:append:ccimx6ul:use-mainline-bsp = " \
     file://0001-ARM-Add-support-for-the-ConnectCore-6UL-System-On-Mo.patch \
     file://0002-mach-imx-pm-imx6-Add-hooks-for-board-specific-implem.patch \
     file://0003-imx6ul-Add-MCA-core-I2C-driver-support.patch \
@@ -14,7 +14,7 @@ SRC_URI_append_ccimx6ul_use-mainline-bsp = " \
     file://0011-imx6ul-Add-MCA-power-key-support-for-ConnectCore-6UL.patch \
 "
 
-SRC_URI_append_ccimx6ulsbc_use-mainline-bsp = " \
+SRC_URI:append:ccimx6ulsbc:use-mainline-bsp = " \
     file://0001-ccimx6ulsbcpro-Add-IOEXP-core-I2C-support.patch \
     file://0002-ccimx6ulsbcpro-Add-IOEXP-GPIO-support.patch \
     file://0003-ccimx6ulsbcpro-Add-IOEXP-ADC-support.patch \

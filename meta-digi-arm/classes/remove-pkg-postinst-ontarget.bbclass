@@ -1,2 +1,2 @@
-pkg_postinst_ontarget_${PN}() {
+pkg_postinst_ontarget:${PN}() {
 }

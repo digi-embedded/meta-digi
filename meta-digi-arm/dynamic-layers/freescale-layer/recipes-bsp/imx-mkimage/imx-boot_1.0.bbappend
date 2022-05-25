@@ -4,27 +4,27 @@
 require imx-mkimage_git.inc
 
 IMX_M4_DEMOS      = ""
-IMX_M4_DEMOS_mx8  = "imx-m4-demos:do_deploy"
-IMX_M4_DEMOS_mx8m = ""
+IMX_M4_DEMOS:mx8-nxp-bsp  = "imx-m4-demos:do_deploy"
+IMX_M4_DEMOS:mx8m-nxp-bsp = ""
 
 M4_DEFAULT_IMAGE ?= "m4_image.bin"
-M4_DEFAULT_IMAGE_mx8qxp = "imx8qx_m4_TCM_power_mode_switch.bin"
-M4_DEFAULT_IMAGE_mx8dxl = "imx8dxl_m4_TCM_power_mode_switch.bin"
-M4_DEFAULT_IMAGE_mx8dx = "imx8qx_m4_TCM_power_mode_switch.bin"
+M4_DEFAULT_IMAGE:mx8qxp-nxp-bsp = "imx8qx_m4_TCM_power_mode_switch.bin"
+M4_DEFAULT_IMAGE:mx8dxl-nxp-bsp = "imx8dxl_m4_TCM_power_mode_switch.bin"
+M4_DEFAULT_IMAGE:mx8dx-nxp-bsp = "imx8qx_m4_TCM_power_mode_switch.bin"
 
 # Setting for i.MX 8ULP
-IMX_M4_DEMOS_mx8ulp = "imx-m33-demos:do_deploy"
-M4_DEFAULT_IMAGE_mx8ulp = "imx8ulp_m33_TCM_rpmsg_lite_str_echo_rtos.bin"
-ATF_MACHINE_NAME_mx8ulp = "bl31-imx8ulp.bin"
-IMX_EXTRA_FIRMWARE_mx8ulp = "firmware-upower firmware-sentinel"
-SECO_FIRMWARE_NAME_mx8ulp = "mx8ulpa0-ahab-container.img"
-SOC_TARGET_mx8ulp = "iMX8ULP"
-SOC_FAMILY_mx8ulp = "mx8ulp"
+IMX_M4_DEMOS:mx8ulp-nxp-bsp = "imx-m33-demos:do_deploy"
+M4_DEFAULT_IMAGE:mx8ulp-nxp-bsp = "imx8ulp_m33_TCM_rpmsg_lite_str_echo_rtos.bin"
+ATF_MACHINE_NAME:mx8ulp-nxp-bsp = "bl31-imx8ulp.bin"
+IMX_EXTRA_FIRMWARE:mx8ulp-nxp-bsp = "firmware-upower firmware-sentinel"
+SECO_FIRMWARE_NAME:mx8ulp-nxp-bsp = "mx8ulpa0-ahab-container.img"
+SOC_TARGET:mx8ulp-nxp-bsp = "iMX8ULP"
+SOC_FAMILY:mx8ulp-nxp-bsp = "mx8ulp"
 
 
 do_compile[depends] += "${IMX_M4_DEMOS}"
 
-do_compile_prepend() {
+do_compile:prepend() {
     case ${SOC_FAMILY} in
     mx8)
         cp ${DEPLOY_DIR_IMAGE}/imx8qm_m4_TCM_power_mode_switch_m40.bin \
@@ -55,7 +55,7 @@ compile_mx8ulp() {
     cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/upower.bin          ${BOOT_STAGING}/upower.bin
 }
 
-do_deploy_append() {
+do_deploy:append() {
     case ${SOC_FAMILY} in
     mx8)
         install -m 0644 ${BOOT_STAGING}/m4_image.bin         ${DEPLOYDIR}/${BOOT_TOOLS}
@@ -92,29 +92,29 @@ deploy_mx8ulp() {
 inherit boot-artifacts
 require dynamic-layers/freescale-layer/recipes-bsp/imx-seco/ccimx8x-seco-fw.inc
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-SRC_URI_append_ccimx8m = " file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch"
+SRC_URI:append:ccimx8m = " file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch"
 
-IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware imx-seco"
+IMX_EXTRA_FIRMWARE:ccimx8x = "digi-sc-firmware imx-seco"
 
-IMX_BOOT_SOC_TARGET_mx8mm = "iMX8MM"
-IMX_BOOT_SOC_TARGET_mx8mn = "iMX8MN"
-IMX_BOOT_SOC_TARGET_mx8mp = "iMX8MP"
-IMX_BOOT_SOC_TARGET_mx8x = "iMX8QX"
+IMX_BOOT_SOC_TARGET:mx8mm-nxp-bsp = "iMX8MM"
+IMX_BOOT_SOC_TARGET:mx8mn-nxp-bsp = "iMX8MN"
+IMX_BOOT_SOC_TARGET:mx8mp-nxp-bsp = "iMX8MP"
+IMX_BOOT_SOC_TARGET:mx8x-nxp-bsp = "iMX8QX"
 
-DEPENDS_append_ccimx8x = " coreutils-native"
-DEPENDS_append_mx8 += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
+DEPENDS:append:ccimx8x = " coreutils-native"
+DEPENDS:append:mx8-nxp-bsp += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
-IMX_M4_DEMOS_mx8mm   = "imx-m4-demos:do_deploy"
+IMX_M4_DEMOS:mx8mm-nxp-bsp   = "imx-m4-demos:do_deploy"
 
-M4_DEFAULT_IMAGE_mx8mm = "imx8mm_m4_TCM_hello_world.bin"
+M4_DEFAULT_IMAGE:mx8mm-nxp-bsp = "imx8mm_m4_TCM_hello_world.bin"
 
 IMX_M7_DEMOS        = ""
-IMX_M7_DEMOS_mx8mn  = "imx-m7-demos:do_deploy"
+IMX_M7_DEMOS:mx8mn-nxp-bsp  = "imx-m7-demos:do_deploy"
 
 M7_DEFAULT_IMAGE ?= "m7_image.bin"
-M7_DEFAULT_IMAGE_mx8mn = "imx8mn_m7_TCM_hello_world.bin"
+M7_DEFAULT_IMAGE:mx8mn-nxp-bsp = "imx8mn_m7_TCM_hello_world.bin"
 
 do_compile[depends] += " \
     ${IMX_M7_DEMOS} \
@@ -131,10 +131,10 @@ do_populate_lic[depends] += " \
 	firmware-imx:do_populate_lic \
 "
 
-IMXBOOT_TARGETS_ccimx8x = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_flexspi', \
+IMXBOOT_TARGETS:ccimx8x = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_flexspi', \
                                                 'flash flash_regression_linux_m4', d)}"
 
-IMXBOOT_TARGETS_ccimx8m = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_evk_flexspi', 'flash_spl_uboot', d)}"
+IMXBOOT_TARGETS:ccimx8m = "${@bb.utils.contains('UBOOT_CONFIG', 'fspi', 'flash_evk_flexspi', 'flash_spl_uboot', d)}"
 
 compile_mx8x() {
 	bbnote 8QX boot binary build
@@ -234,7 +234,7 @@ do_compile () {
 }
 
 # ConnectCore 8M Nano and 8M Mini do not have different binaries
-UBOOT_RAM_COMBINATIONS_ccimx8m = ""
+UBOOT_RAM_COMBINATIONS:ccimx8m = ""
 
 do_install () {
 	install -d ${D}/boot
@@ -253,7 +253,7 @@ do_install () {
 	fi
 }
 
-deploy_mx8m_append() {
+deploy_mx8m:append() {
 	if [ -e ${BOOT_STAGING}/m7_image.bin ] ; then
 		cp ${BOOT_STAGING}/m7_image.bin                      ${DEPLOYDIR}/${BOOT_TOOLS}
 	fi
@@ -313,7 +313,7 @@ do_deploy () {
 
 }
 
-do_deploy_append () {
+do_deploy:append () {
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"

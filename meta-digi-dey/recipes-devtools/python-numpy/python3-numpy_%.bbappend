@@ -2,7 +2,7 @@
 
 # Re-add the base RDEPENDS to class-target since they are being overwritten in the
 # original recipe
-RDEPENDS_${PN}_class-target_append = " \
+RDEPENDS:${PN}:class-target:append = " \
                   ${PYTHON_PN}-unittest \
                   ${PYTHON_PN}-difflib \
                   ${PYTHON_PN}-pprint \

@@ -1,3 +1,3 @@
 SRCREV_opencv = "5423d53ae0d116ee5bbe52f8b5503f0cd8586998"
-PACKAGECONFIG_OPENCL_mx8mnul = ""
-PACKAGECONFIG_OPENCL_mx8mpul = ""
+PACKAGECONFIG_OPENCL:mx8mnul-nxp-bsp = ""
+PACKAGECONFIG_OPENCL:mx8mpul-nxp-bsp = ""

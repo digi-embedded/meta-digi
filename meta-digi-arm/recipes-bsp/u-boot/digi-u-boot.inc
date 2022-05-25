@@ -26,7 +26,7 @@ SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
 "
 
-SRC_URI_append = " \
+SRC_URI:append = " \
     file://boot.txt \
     file://install_linux_fw_sd.txt \
     file://install_linux_fw_usb.txt \
@@ -37,7 +37,7 @@ BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
 
 LOCALVERSION ?= ""
 
-EXTRA_OEMAKE_append = " KCFLAGS=-fgnu89-inline"
+EXTRA_OEMAKE:append = " KCFLAGS=-fgnu89-inline"
 
 UBOOT_EXTRA_CONF ?= ""
 
@@ -128,7 +128,7 @@ def tf_bootscript_sedfilter(d):
     tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
     return "s,\(^[[:blank:]]*\)true.*,\\1setenv boot_initrd true\\n\\1setenv initrd_file %s-${MACHINE}.cpio.gz.u-boot.tf,g" % tf_initramfs if tf_initramfs else ""
 
-do_deploy_append() {
+do_deploy:append() {
 	# Remove canonical U-Boot symlinks for ${UBOOT_CONFIG} currently in the form:
 	#    u-boot-<platform>.<ext>-<type>
 	#    u-boot-<type>
@@ -206,7 +206,7 @@ do_deploy_append() {
 
 BOOT_TOOLS = "imx-boot-tools"
 
-do_deploy_append_ccimx8x() {
+do_deploy:append:ccimx8x() {
 	# Move all U-Boot artifacts to the imx-boot-tools folder
 	# U-Boot images are not bootable on the i.MX8X
 	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
@@ -214,7 +214,7 @@ do_deploy_append_ccimx8x() {
 	mv ${DEPLOYDIR}/${UBOOT_SYMLINK}-* ${DEPLOYDIR}/${BOOT_TOOLS}/
 }
 
-do_deploy_append_ccimx8m() {
+do_deploy:append:ccimx8m() {
 	# Deploy u-boot-nodtb.bin and ccimx8m[m|n]-dvk.dtb, to be packaged in boot binary by imx-boot
 	if [ -n "${UBOOT_CONFIG}" ]
 	then

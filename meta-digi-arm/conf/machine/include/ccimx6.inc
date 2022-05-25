@@ -23,8 +23,8 @@ WIRELESS_MODULE ?= ""
 
 # Firmware
 MACHINE_FIRMWARE ?= "firmware-imx-sdma-imx6q"
-MACHINE_FIRMWARE_append_mx6q = " firmware-imx-vpu-imx6q"
-MACHINE_FIRMWARE_append_mx6dl = " firmware-imx-vpu-imx6d"
+MACHINE_FIRMWARE:append:mx6q = " firmware-imx-vpu-imx6q"
+MACHINE_FIRMWARE:append:mx6dl = " firmware-imx-vpu-imx6d"
 
 MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
@@ -45,4 +45,4 @@ TRUSTFENCE_SIGN_MODE = "HAB"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend
 # Adding pam is required for SELinux functionality
-DISTRO_FEATURES_append = " wayland pam"
+DISTRO_FEATURES:append = " wayland pam"

@@ -7,13 +7,13 @@ CONFIGURATION_DIRECTORY = "config"
 
 LICENSE = "Apache-2.0 | BSD-2-Clause | BSD-3-Clause | MIT | PD | Proprietary"
 
-SRC_URI_arm = " \
+SRC_URI:arm = " \
     http:///not/exist/greengrass-linux-armv7l-${PV}.tar.gz;name=arm \
     file://greengrass.service \
     file://greengrass-init \
 "
 
-SRC_URI_aarch64 = " \
+SRC_URI:aarch64 = " \
     http:///not/exist/greengrass-linux-aarch64-${PV}.tar.gz;name=aarch64 \
     file://greengrass.service \
     file://greengrass-init \
@@ -83,7 +83,7 @@ do_install() {
 	sed -i -e "/useSystemd/{s,\[yes|no],${GG_USESYSTEMD},g}" ${D}/${BPN}/config/config.json
 }
 
-pkg_postinst_ontarget_${PN}() {
+pkg_postinst_ontarget:${PN}() {
 	# Enable protection for hardlinks and symlinks
 	if ! grep -qs 'protected_.*links' $D${sysconfdir}/sysctl.conf; then
 		cat >> $D${sysconfdir}/sysctl.conf <<-_EOF_
@@ -117,18 +117,18 @@ pkg_postinst_ontarget_${PN}() {
 	fi
 }
 
-FILES_${PN} = "/${BPN} ${sysconfdir} ${systemd_unitdir}"
+FILES:${PN} = "/${BPN} ${sysconfdir} ${systemd_unitdir}"
 
-CONFFILES_${PN} += "/${BPN}/config/config.json"
+CONFFILES:${PN} += "/${BPN}/config/config.json"
 
 INITSCRIPT_NAME = "greengrass"
 INITSCRIPT_PARAMS = "defaults 80 20"
 
-SYSTEMD_SERVICE_${PN} = "greengrass.service"
+SYSTEMD_SERVICE:${PN} = "greengrass.service"
 
 USERADD_PACKAGES = "${PN}"
-GROUPADD_PARAM_${PN} = "-r ggc_group"
-USERADD_PARAM_${PN} = "-r -M -N -g ggc_group -s /bin/false ggc_user"
+GROUPADD_PARAM:${PN} = "-r ggc_group"
+USERADD_PARAM:${PN} = "-r -M -N -g ggc_group -s /bin/false ggc_user"
 
 #
 # Disable failing QA checks:
@@ -136,6 +136,6 @@ USERADD_PARAM_${PN} = "-r -M -N -g ggc_group -s /bin/false ggc_user"
 #   Binary was already stripped
 #   No GNU_HASH in the elf binary
 #
-INSANE_SKIP_${PN} += "already-stripped ldflags file-rdeps"
+INSANE_SKIP:${PN} += "already-stripped ldflags file-rdeps"
 
-RDEPENDS_${PN} += "ca-certificates python-argparse python-json python-numbers sqlite3"
+RDEPENDS:${PN} += "ca-certificates python-argparse python-json python-numbers sqlite3"

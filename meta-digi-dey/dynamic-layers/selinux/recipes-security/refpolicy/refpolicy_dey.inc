@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 DEY_POLICY_PATCHES = " \
     file://0001-Apply-rules-for-DEY-prebuilt-images.patch \

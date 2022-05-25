@@ -46,7 +46,7 @@ VIDEO_NAME_UPPERCASE = "Big Buck Bunny"
 
 # All packages involved in the webkit examples install their files in the
 # webserver directory
-FILES_${PN} = "/${WEBSERVER_ROOT}/*"
+FILES:${PN} = "/${WEBSERVER_ROOT}/*"
 
 # Don't generate dbg or dev packages
 PACKAGES = "${PN}"

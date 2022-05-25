@@ -1,8 +1,8 @@
 # Copyright (C) 2013-2019 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
-do_install_append() {
+do_install:append() {
     if ! test -z "${PAMLIB}" ; then
         # Access through Pluggable Authentication Modules (PAM)
         echo "pam_service_name=vsftpd" >> ${D}${sysconfdir}/vsftpd.conf

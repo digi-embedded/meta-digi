@@ -26,13 +26,13 @@ STORAGE_MEDIA = "mmc"
 
 # Wireless external module
 WIRELESS_MODULE ?= ""
-WIRELESS_MODULE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
+WIRELESS_MODULE:append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
 HAS_WIFI_VIRTWLANS = "true"
 
 # Firmware
 MACHINE_FIRMWARE ?= "firmware-imx-sdma-imx7d firmware-imx-easrc-imx8mn"
-MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6564-bt', '', d)}"
-MACHINE_FIRMWARE_append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6564-wifi', '', d)}"
+MACHINE_FIRMWARE:append = " ${@oe.utils.conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6564-bt', '', d)}"
+MACHINE_FIRMWARE:append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6564-wifi', '', d)}"
 
 MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
@@ -59,5 +59,5 @@ TRUSTFENCE_SIGN_MODE = "HAB"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend
 # Vulkan is necessary for wayland to build
-DISTRO_FEATURES_append = " wayland vulkan systemd pam"
+DISTRO_FEATURES:append = " wayland vulkan systemd pam"
 DISTRO_FEATURES_BACKFILL_CONSIDERED = "sysvinit"

@@ -15,10 +15,10 @@ do_install() {
 # Do not create debug/devel packages
 PACKAGES = "${PN}"
 
-FILES_${PN} = "/"
+FILES:${PN} = "/"
 
 # Runtime packages used in 'trustfence-initramfs-init'
-RDEPENDS_${PN} = " \
+RDEPENDS:${PN} = " \
     libubootenv-bin \
     cryptsetup \
     trustfence-tool \

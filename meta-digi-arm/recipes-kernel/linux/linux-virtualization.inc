@@ -1,7 +1,7 @@
 # Copyright (C) 2019 Digi International
 
 # Apply kernel configuration required for Docker
-do_configure_prepend() {
+do_configure:prepend() {
 	mkdir -p ${B}
 
 	kernel_conf_variable NAMESPACES y

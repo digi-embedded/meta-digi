@@ -1,6 +1,6 @@
 # Copyright (C) 2019-2021 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI += " \
     file://digi_background.png \
@@ -9,14 +9,14 @@ SRC_URI += " \
 
 # Remove duplicate entries for the ccimx6 platform
 # and uncomment with an individual append
-INI_UNCOMMENT_ASSIGNMENTS_remove_ccimx6 = "use-g2d=1"
+INI_UNCOMMENT_ASSIGNMENTS:remove:ccimx6 = "use-g2d=1"
 
-INI_UNCOMMENT_ASSIGNMENTS_append_mx8ulp = " \
+INI_UNCOMMENT_ASSIGNMENTS:append:mx8ulp-nxp-bsp = " \
     use-g2d=1 \
 "
 
 WATCHDOG_SEC = "40"
-WATCHDOG_SEC_mx8ulp = "240"
+WATCHDOG_SEC:mx8ulp-nxp-bsp = "240"
 
 update_file() {
     if ! grep -q "$1" $3; then
@@ -25,11 +25,11 @@ update_file() {
     sed -i -e "s,$1,$2," $3
 }
 
-do_install_append_ccimx6() {
+do_install:append:ccimx6() {
     uncomment "use-g2d=1" ${D}${sysconfdir}/xdg/weston/weston.ini
 }
 
-do_install_append() {
+do_install:append() {
     install -Dm0755 ${WORKDIR}/profile ${D}${sysconfdir}/profile.d/weston.sh
 
     # Add weston.log back, used by NXP for testing
@@ -49,4 +49,4 @@ do_install_append() {
     install ${WORKDIR}/digi_background.png ${D}${datadir}/weston
 }
 
-FILES_${PN} += "${datadir}/weston/digi_background.png"
+FILES:${PN} += "${datadir}/weston/digi_background.png"

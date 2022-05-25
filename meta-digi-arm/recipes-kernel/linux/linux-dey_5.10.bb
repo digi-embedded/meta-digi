@@ -11,7 +11,7 @@ inherit kernel
 inherit ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'fsl-kernel-localversion', '', d)}
 
 SRCBRANCH = "v5.10/nxp/master"
-SRCBRANCH_stm32mpcommon = "v5.10/stm/master"
+SRCBRANCH:stm32mpcommon = "v5.10/stm/master"
 
 require ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'STM', 'recipes-kernel/linux/linux-stm32mp.inc', '', d)}
 # Don't create custom folder for kernel artifacts
@@ -24,12 +24,12 @@ require ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'recipes-kernel/linux/li
 # Use custom provided 'defconfig' if variable KERNEL_DEFCONFIG is cleared
 SRC_URI +="${@oe.utils.conditional('KERNEL_DEFCONFIG', '', 'file://defconfig', '', d)}"
 
-FILES_${KERNEL_PACKAGE_NAME}-image += "/boot/config-${KERNEL_VERSION}"
+FILES:${KERNEL_PACKAGE_NAME}-image += "/boot/config-${KERNEL_VERSION}"
 
 # Don't include kernels in standard images
-RDEPENDS_${KERNEL_PACKAGE_NAME}-base = ""
+RDEPENDS:${KERNEL_PACKAGE_NAME}-base = ""
 
-do_install_append_stm32mpcommon() {
+do_install:append:stm32mpcommon() {
     if ${@bb.utils.contains('MACHINE_FEATURES','gpu','true','false',d)}; then
         # append evbug tool to blacklist
         echo "blacklist evbug" >> ${D}/${sysconfdir}/modprobe.d/blacklist.conf
@@ -39,6 +39,6 @@ do_install_append_stm32mpcommon() {
 # -------------------------------------------------------------
 # Kernel Args
 #
-KERNEL_EXTRA_ARGS_stm32mpcommon += "LOADADDR=${ST_KERNEL_LOADADDR}"
+KERNEL_EXTRA_ARGS:stm32mpcommon += "LOADADDR=${ST_KERNEL_LOADADDR}"
 
 COMPATIBLE_MACHINE = "(ccimx8mp|ccmp15-dvk)"

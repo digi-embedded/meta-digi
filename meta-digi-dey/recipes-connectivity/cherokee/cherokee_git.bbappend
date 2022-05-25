@@ -1,6 +1,6 @@
 # Copyright (C) 2013-2018 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
     file://cherokee.conf \
@@ -9,7 +9,7 @@ SRC_URI += " \
     file://index.html \
 "
 
-do_install_append() {
+do_install:append() {
 	install -d ${D}${sysconfdir}/cherokee/ssl ${D}/srv/www
 	install -m 0644 ${WORKDIR}/cherokee.conf ${D}${sysconfdir}/cherokee/
 	install -m 0644 ${WORKDIR}/cherokee.pem ${D}${sysconfdir}/cherokee/ssl/
@@ -17,4 +17,4 @@ do_install_append() {
 	install -m 0644 ${WORKDIR}/digi-logo.png ${D}/srv/www/
 }
 
-FILES_${PN} += "/srv/www"
+FILES:${PN} += "/srv/www"

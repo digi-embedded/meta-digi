@@ -13,7 +13,7 @@ DEPENDS = "openssl byacc flex"
 # error.
 # Explicitly add openssl-native for the SDK build to correctly link to the
 # openssl libraries in the native dependencies folder.
-DEPENDS_append_class-nativesdk = " byacc-native openssl-native"
+DEPENDS:append:class-nativesdk = " byacc-native openssl-native"
 
 SRC_URI = " \
     ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', '${DIGI_PKG_SRC}/cst-${PV}.tgz', '', d)} \
@@ -56,7 +56,7 @@ do_install() {
 	install -m 0755 ca/v3_usr.cnf ${D}${bindir}/v3_usr.cnf
 }
 
-INSANE_SKIP_${PN} += "already-stripped"
+INSANE_SKIP:${PN} += "already-stripped"
 
-FILES_${PN} = "${bindir}"
+FILES:${PN} = "${bindir}"
 BBCLASSEXTEND = "native nativesdk"

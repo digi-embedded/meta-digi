@@ -12,7 +12,7 @@ S = "${WORKDIR}/git"
 
 inherit gobject-introspection
 
-RDEPENDS_${PN} = "python3-pycoral \
+RDEPENDS:${PN} = "python3-pycoral \
                   gstreamer1.0-plugins-base \
 "
 
@@ -31,5 +31,5 @@ do_install() {
     install -m 0555 ${S}/gstreamer/* ${D}/opt/libedgetpu/camera/gstreamer/
 }
 
-FILES_${PN} += "/opt/libedgetpu/camera/* \
+FILES:${PN} += "/opt/libedgetpu/camera/* \
 "

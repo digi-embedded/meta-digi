@@ -1,5 +1,5 @@
 
-RDEPENDS_${PN}_remove = "qtquick1-dev \
+RDEPENDS:${PN}:remove = "qtquick1-dev \
     qtquick1-mkspecs \
     qtquick1-plugins \
     qtquick1-qmlplugins \
@@ -12,6 +12,6 @@ RDEPENDS_${PN}_remove = "qtquick1-dev \
     qt3d-qmlplugins \
 "
 
-RDEPENDS_${PN}_append_imxgpu = " \
+RDEPENDS:${PN}:append:imxgpu = " \
     qtdeclarative-tools \
 "

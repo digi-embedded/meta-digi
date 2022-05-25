@@ -36,13 +36,13 @@ DEPENDS = "virtual/kernel"
 
 # Selects whether the interface is SDIO or PCI
 QUALCOMM_WIFI_INTERFACE ?= "sdio"
-QUALCOMM_WIFI_INTERFACE_ccimx8x = "pci"
+QUALCOMM_WIFI_INTERFACE:ccimx8x = "pci"
 
 WLAN_CONFIG_INI = "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , \
                                            'QCA6574AU.LE.2.2.1_Rome_SDIO_qcacld-3.0.ini', \
                                            'QCA6574AU.LE.2.2.1_Rome_PCIe_qcacld-3.0.ini', d)}"
 
-SRC_URI_append = " \
+SRC_URI:append = " \
     file://81-qcom-wifi.rules \
     file://qualcomm.sh \
 "
@@ -51,7 +51,7 @@ FILES_SDIO = " \
     file://modprobe-qualcomm.conf \
 "
 
-SRC_URI_append = "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${FILES_SDIO}', '', d)}"
+SRC_URI:append = "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${FILES_SDIO}', '', d)}"
 
 S = "${WORKDIR}/git"
 
@@ -78,11 +78,11 @@ EXTRA_OEMAKE += "BUILD_DEBUG_VERSION=n"
 # Flag to define the maximum vdevs interfaces
 EXTRA_OEMAKE += "CONFIG_WLAN_MAX_VDEVS=4"
 
-do_compile_prepend() {
+do_compile:prepend() {
 	export BUILD_VER=${PV}
 }
 
-do_install_append() {
+do_install:append() {
 	if [ "${QUALCOMM_WIFI_INTERFACE}" = "sdio" ]; then
 		install -d ${D}${sysconfdir}/modprobe.d
 		install -m 0644 ${WORKDIR}/modprobe-qualcomm.conf ${D}${sysconfdir}/modprobe.d/qualcomm.conf
@@ -106,12 +106,12 @@ do_install_append() {
 	install -m 0644 ${WORKDIR}/81-qcom-wifi.rules ${D}${sysconfdir}/udev/rules.d/
 }
 
-do_install_append_ccimx6ul() {
+do_install:append:ccimx6ul() {
 	# Set MCS value to MCS0-7
 	sed -i -e "s/gVhtTxMCS=2/gVhtTxMCS=0/g" ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
 }
 
-FILES_${PN} += " \
+FILES:${PN} += " \
     ${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${sysconfdir}/modprobe.d/qualcomm.conf', '', d)} \
     ${sysconfdir}/udev/ \
     ${base_libdir}/firmware/wlan/qcom_cfg.ini \

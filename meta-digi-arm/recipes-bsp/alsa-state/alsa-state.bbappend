@@ -1,8 +1,8 @@
 # Copyright (C) 2013-2022 Digi International.
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
-SRC_URI_append_ccimx6 = " \
+SRC_URI:append:ccimx6 = " \
     file://asound.inline_play.state \
     file://asound.inline.state \
     file://asound.micro_play.state \
@@ -10,11 +10,11 @@ SRC_URI_append_ccimx6 = " \
     file://asound.play.state \
 "
 
-SRC_URI_append_ccimx6ul = " file://asound.state"
-SRC_URI_append_ccimx8x = " file://asound.state"
-SRC_URI_append_ccimx8m = " file://asound.state"
-SRC_URI_append_ccmp15 = " file://asound.state"
+SRC_URI:append:ccimx6ul = " file://asound.state"
+SRC_URI:append:ccimx8x = " file://asound.state"
+SRC_URI:append:ccimx8m = " file://asound.state"
+SRC_URI:append:ccmp15 = " file://asound.state"
 
-do_install_append_ccimx6() {
+do_install:append:ccimx6() {
 	ln -sf asound.micro_play.state ${D}${localstatedir}/lib/alsa/asound.state
 }

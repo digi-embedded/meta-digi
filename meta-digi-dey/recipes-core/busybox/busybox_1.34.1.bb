@@ -4,9 +4,9 @@ require recipes-core/busybox/busybox.inc
 # hardknott with a few minor differences. Re-use most of the files from poky
 # to avoid duplicity, while giving priority to our version of the files so that we can
 # replace the hardknott versions with their respective honister ones.
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BP}:"
-FILESEXTRAPATHS_append := ":${COREBASE}/meta/recipes-core/busybox/${PN}"
-FILESEXTRAPATHS_append := ":${COREBASE}/meta/recipes-core/busybox/files"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BP}:"
+FILESEXTRAPATHS:append := ":${COREBASE}/meta/recipes-core/busybox/${PN}"
+FILESEXTRAPATHS:append := ":${COREBASE}/meta/recipes-core/busybox/files"
 
 SRC_URI = "https://busybox.net/downloads/busybox-${PV}.tar.bz2;name=tarball \
            file://busybox-udhcpc-no_deconfig.patch \
@@ -57,6 +57,6 @@ SRC_URI = "https://busybox.net/downloads/busybox-${PV}.tar.bz2;name=tarball \
            file://0001-sysctl-ignore-EIO-of-stable_secret-below-proc-sys-ne.patch \
            file://0001-mktemp-add-tmpdir-option.patch \
            "
-SRC_URI_append_libc-musl = " file://musl.cfg "
+SRC_URI:append:libc-musl = " file://musl.cfg "
 
 SRC_URI[tarball.sha256sum] = "415fbd89e5344c96acf449d94a6f956dbed62e18e835fc83e064db33a34bd549"

@@ -22,7 +22,7 @@ inherit systemd update-rc.d
 
 INITSCRIPT_NAME = "auto-serial-console"
 INITSCRIPT_PARAMS = "start 99 5 ."
-SYSTEMD_SERVICE_${PN} = "auto-getty.service"
+SYSTEMD_SERVICE:${PN} = "auto-getty.service"
 
 do_install () {
 	install -m 0755 -d ${D}${sysconfdir}/default

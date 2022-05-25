@@ -18,7 +18,7 @@ do_image_boot_vfat[depends] += " \
     ${@TRUSTFENCE_BOOTIMAGE_DEPENDS(d)} \
 "
 
-IMAGE_CMD_boot.vfat() {
+IMAGE_CMD:boot.vfat() {
 	BOOTIMG_FILES="$(readlink -e ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin)"
 	BOOTIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
 	if [ -n "${KERNEL_DEVICETREE}" ]; then
@@ -81,7 +81,7 @@ do_image_boot_ubifs[depends] += " \
     ${@TRUSTFENCE_BOOTIMAGE_DEPENDS(d)} \
 "
 
-IMAGE_CMD_boot.ubifs() {
+IMAGE_CMD:boot.ubifs() {
 	BOOTIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
 	if [ -n "${KERNEL_DEVICETREE}" ]; then
 		for DTB in ${KERNEL_DEVICETREE}; do
@@ -131,7 +131,7 @@ do_image_recovery_vfat[depends] +=  " \
     ${RECOVERY_INITRAMFS_IMAGE}:do_image_complete \
 "
 
-IMAGE_CMD_recovery.vfat() {
+IMAGE_CMD:recovery.vfat() {
 	# Use 'boot.vfat' image as base
 	cp --remove-destination ${IMGDEPLOYDIR}/${IMAGE_NAME}.boot.vfat ${IMGDEPLOYDIR}/${IMAGE_NAME}.recovery.vfat
 
@@ -142,7 +142,7 @@ IMAGE_CMD_recovery.vfat() {
 # Remove the default ".rootfs." suffix for 'recovery.vfat' images
 do_image_recovery_vfat[imgsuffix] = "."
 
-IMAGE_TYPEDEP_recovery.vfat = "boot.vfat"
+IMAGE_TYPEDEP:recovery.vfat = "boot.vfat"
 
 do_image_recovery_ubifs[depends] += " \
     mtd-utils-native:do_populate_sysroot \
@@ -151,7 +151,7 @@ do_image_recovery_ubifs[depends] += " \
     ${RECOVERY_INITRAMFS_IMAGE}:do_image_complete \
 "
 
-IMAGE_CMD_recovery.ubifs() {
+IMAGE_CMD:recovery.ubifs() {
 	RECOVERYIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
 	if [ -n "${KERNEL_DEVICETREE}" ]; then
 		for DTB in ${KERNEL_DEVICETREE}; do
@@ -214,7 +214,7 @@ trustence_sign_cpio() {
 	fi
 }
 CONVERSIONTYPES += "tf"
-CONVERSION_CMD_tf = "trustence_sign_cpio ${IMAGE_NAME}.rootfs.${type}"
+CONVERSION_CMD:tf = "trustence_sign_cpio ${IMAGE_NAME}.rootfs.${type}"
 CONVERSION_DEPENDS_tf = "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 IMAGE_TYPES += "cpio.gz.u-boot.tf"
 
@@ -285,7 +285,7 @@ do_image_sdcard[depends] = " \
 # |              |                      |                                |
 # 0            4MiB             4MiB + BOOT_SPACE                   SDIMG_SIZE
 #
-IMAGE_CMD_sdcard() {
+IMAGE_CMD:sdcard() {
 	# Align boot partition and calculate total sdcard image size
 	BOOT_SPACE_ALIGNED="$(expr \( \( ${BOARD_BOOTIMAGE_PARTITION_SIZE} + ${IMAGE_ROOTFS_ALIGNMENT} - 1 \) / ${IMAGE_ROOTFS_ALIGNMENT} \) \* ${IMAGE_ROOTFS_ALIGNMENT})"
 	SDIMG_SIZE="$(expr ${IMAGE_ROOTFS_ALIGNMENT} + ${BOOT_SPACE_ALIGNED} + $ROOTFS_SIZE)"
@@ -324,5 +324,5 @@ IMAGE_CMD_sdcard() {
 }
 
 # The sdcard image requires the boot and rootfs images to be built before
-IMAGE_TYPEDEP_sdcard = "${SDIMG_BOOTFS_TYPE} ${SDIMG_ROOTFS_TYPE}.gz"
+IMAGE_TYPEDEP:sdcard = "${SDIMG_BOOTFS_TYPE} ${SDIMG_ROOTFS_TYPE}.gz"
 

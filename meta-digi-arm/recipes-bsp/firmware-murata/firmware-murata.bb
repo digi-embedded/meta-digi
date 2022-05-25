@@ -54,16 +54,16 @@ do_install () {
 
 PACKAGES =+ "${PN}-mfgtest"
 
-FILES_${PN} = " \
+FILES:${PN} = " \
     ${base_libdir}/firmware \
 "
 
-FILES_${PN}-mfgtest = " \
+FILES:${PN}-mfgtest = " \
     ${sbindir} \
 "
 
-INSANE_SKIP_${PN} += "build-deps"
-INSANE_SKIP_${PN} += "file-rdeps"
+INSANE_SKIP:${PN} += "build-deps"
+INSANE_SKIP:${PN} += "file-rdeps"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx8mp|ccmp1)"

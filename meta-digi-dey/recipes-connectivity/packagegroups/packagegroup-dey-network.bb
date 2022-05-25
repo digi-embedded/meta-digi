@@ -26,7 +26,7 @@ CELLULAR_PKGS = "\
     ppp \
 "
 
-RDEPENDS_${PN} = "\
+RDEPENDS:${PN} = "\
 	iproute2 \
 	batctl \
 	${@bb.utils.contains('DISTRO_FEATURES', 'cellular', '${CELLULAR_PKGS}', '', d)} \

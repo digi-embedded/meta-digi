@@ -7,12 +7,12 @@ LICENSE = "MIT"
 
 inherit packagegroup
 
-RDEPENDS_${PN}_append = " \
+RDEPENDS:${PN}:append = " \
     qtserialport \
 "
 
 # Install the following apps on SoC with GPU
-RDEPENDS_${PN}_append_imxgpu = " \
+RDEPENDS:${PN}:append:imxgpu = " \
     qtbase-examples \
     qtdeclarative-examples \
     quitindicators \

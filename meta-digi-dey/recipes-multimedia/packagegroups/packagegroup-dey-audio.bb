@@ -14,7 +14,7 @@ ALSA_UTILS_PKGS = " \
     alsa-utils-speakertest \
 "
 
-RDEPENDS_${PN} = "\
+RDEPENDS:${PN} = "\
     libasound \
     alsa-state \
     alsa-states \
@@ -23,4 +23,4 @@ RDEPENDS_${PN} = "\
        bb.utils.contains('DISTRO_FEATURES', 'pulseaudio', 'pulseaudio-server pulseaudio-misc', '', d), '', d)} \
 "
 
-RDEPENDS_${PN}_append_ccimx6 = " card-detect"
+RDEPENDS:${PN}:append:ccimx6 = " card-detect"
