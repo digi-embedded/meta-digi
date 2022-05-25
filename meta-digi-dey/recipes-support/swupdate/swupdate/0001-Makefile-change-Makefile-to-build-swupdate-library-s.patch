@@ -1,35 +1,34 @@
 From: Mike Engel <Mike.Engel@digi.com>
 Date: Mon, 28 Jun 2021 18:45:20 +0200
-Subject: [PATCH 1/2] Makefile: change Makefile to build swupdate library
+Subject: [PATCH] Makefile: change Makefile to build swupdate library
  statically
 
 Signed-off-by: Mike Engel <Mike.Engel@digi.com>
 ---
- Makefile                    | 5 +++--
+ Makefile                    | 4 +++-
  ipc-static/Makefile         | 6 ++++++
  ipc-static/network_ipc-if.c | 1 +
  ipc-static/network_ipc.c    | 1 +
  ipc-static/progress_ipc.c   | 1 +
- 5 files changed, 12 insertions(+), 2 deletions(-)
+ 5 files changed, 12 insertions(+), 1 deletion(-)
  create mode 100644 ipc-static/Makefile
  create mode 120000 ipc-static/network_ipc-if.c
  create mode 120000 ipc-static/network_ipc.c
  create mode 120000 ipc-static/progress_ipc.c
 
 diff --git a/Makefile b/Makefile
-index aa7d556..f905efa 100644
+index bf534e110ac3..8b704798501f 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -363,7 +363,7 @@ include $(srctree)/Makefile.flags
- # Defaults to vmlinux, but the arch makefile usually adds further targets
+@@ -364,6 +364,7 @@ include $(srctree)/Makefile.flags
  
- objs-y		:= core handlers
--libs-y		:= corelib mongoose parser suricatta bootloader fs
-+libs-y		:= corelib ipc-static mongoose parser suricatta bootloader fs
+ objs-y		:= core handlers bootloader
+ libs-y		:= corelib mongoose parser suricatta fs
++libs-y		+= ipc-static
  bindings-y	:= bindings
  tools-y		:= tools
  
-@@ -437,7 +437,7 @@ quiet_cmd_shared = LD      $@
+@@ -437,7 +438,7 @@ quiet_cmd_shared = LD      $@
        "-shared -Wl,-soname,$@" \
        "$(KBUILD_CFLAGS) $(CFLAGS_swupdate)" \
        "$(LDFLAGS) $(EXTRA_LDFLAGS) $(LDFLAGS_swupdate) -L$(objtree)" \
@@ -38,7 +37,7 @@ index aa7d556..f905efa 100644
  	  "" \
  	  "$(LDLIBS)"
  
-@@ -481,6 +481,7 @@ install: all
+@@ -480,6 +481,7 @@ install: all
  	install -m 0644 $(srctree)/include/progress_ipc.h ${DESTDIR}/${INCLUDEDIR}
  	install -m 0755 $(objtree)/${swupdate-ipc-lib} ${DESTDIR}/${LIBDIR}
  	ln -sfr ${DESTDIR}/${LIBDIR}/${swupdate-ipc-lib} ${DESTDIR}/${LIBDIR}/libswupdate.so
@@ -48,7 +47,7 @@ index aa7d556..f905efa 100644
  		install -m 0755 ${lua_swupdate} $(DESTDIR)/${LIBDIR}/lua/$(LUAVER); \
 diff --git a/ipc-static/Makefile b/ipc-static/Makefile
 new file mode 100644
-index 0000000..99cce6c
+index 000000000000..99cce6cc75da
 --- /dev/null
 +++ b/ipc-static/Makefile
 @@ -0,0 +1,6 @@
@@ -60,7 +59,7 @@ index 0000000..99cce6c
 +EXTRA_CFLAGS += -fPIC
 diff --git a/ipc-static/network_ipc-if.c b/ipc-static/network_ipc-if.c
 new file mode 120000
-index 0000000..37894e2
+index 000000000000..37894e2f8207
 --- /dev/null
 +++ b/ipc-static/network_ipc-if.c
 @@ -0,0 +1 @@
@@ -68,7 +67,7 @@ index 0000000..37894e2
 \ No newline at end of file
 diff --git a/ipc-static/network_ipc.c b/ipc-static/network_ipc.c
 new file mode 120000
-index 0000000..0640077
+index 000000000000..0640077ec0fc
 --- /dev/null
 +++ b/ipc-static/network_ipc.c
 @@ -0,0 +1 @@
@@ -76,11 +75,9 @@ index 0000000..0640077
 \ No newline at end of file
 diff --git a/ipc-static/progress_ipc.c b/ipc-static/progress_ipc.c
 new file mode 120000
-index 0000000..7c6622c
+index 000000000000..7c6622ce0a30
 --- /dev/null
 +++ b/ipc-static/progress_ipc.c
 @@ -0,0 +1 @@
 +../ipc/progress_ipc.c
 \ No newline at end of file
--- 
-
