@@ -17,10 +17,10 @@ https://jira.digi.com/browse/DEL-3399
  1 file changed, 1 insertion(+)
 
 diff --git a/libs/v4l2_core/gstimxv4l2.c b/libs/v4l2_core/gstimxv4l2.c
-index 52f43794a71d..633f267df4b8 100755
+index 257a60422e76..58cdcdad3ffd 100755
 --- a/libs/v4l2_core/gstimxv4l2.c
 +++ b/libs/v4l2_core/gstimxv4l2.c
-@@ -208,6 +208,7 @@ static guint g_camera_format_PXP[] = {
+@@ -212,6 +212,7 @@ static guint g_camera_format_PXP[] = {
  
  static IMXV4l2DeviceMap g_device_maps[] = {
    {"/dev/video0", FALSE, "/dev/fb0"},
