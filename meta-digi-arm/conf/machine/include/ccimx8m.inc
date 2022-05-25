@@ -3,7 +3,7 @@
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore 8M family of SOMs.
 
 include conf/machine/include/imx-digi-base.inc
-include conf/machine/include/arm/arch-arm64.inc
+require conf/machine/include/arm/armv8a/tune-cortexa53.inc
 
 # Platform u-boot settings
 UBOOT_PREFIX = "imx-boot"

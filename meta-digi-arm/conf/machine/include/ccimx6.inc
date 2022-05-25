@@ -6,7 +6,7 @@ DIGI_FAMILY = "ccimx6"
 MACHINEOVERRIDES =. "mx6:mx6dl:mx6q:${DIGI_FAMILY}:"
 
 include conf/machine/include/imx-digi-base.inc
-include conf/machine/include/tune-cortexa9.inc
+include conf/machine/include/arm/armv7a/tune-cortexa9.inc
 
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"

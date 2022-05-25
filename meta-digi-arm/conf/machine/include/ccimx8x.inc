@@ -6,7 +6,7 @@ DIGI_FAMILY = "ccimx8x"
 MACHINEOVERRIDES =. "mx8:mx8x:mx8qxp:${DIGI_FAMILY}:"
 
 include conf/machine/include/imx-digi-base.inc
-include conf/machine/include/arm/arch-arm64.inc
+include conf/machine/include/arm/armv8a/tune-cortexa35.inc
 
 # Platform u-boot settings
 UBOOT_PREFIX = "imx-boot"
