@@ -15,12 +15,10 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  create mode 100644 src/sysfs_cpu.h
 
 diff --git a/src/Makefile b/src/Makefile
-index 1b368dc..b22fd52 100644
+index b686394d03fc..e32ac5634794 100644
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -107,14 +107,14 @@ all:		$(BIN) $(SBIN) $(USRBIN)
- #	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
- #%.o: %.c
+@@ -109,10 +109,10 @@ all:		$(BIN) $(SBIN) $(USRBIN)
  #	$(CC) $(CFLAGS) $(CPPFLAGS) -c $^ -o $@
  
  init:		LDLIBS += $(INITLIBS) $(STATIC)
@@ -33,11 +31,7 @@ index 1b368dc..b22fd52 100644
  
  last:		LDLIBS += $(STATIC)
  last:		last.o
- 
- logsave:	LDLIBS += $(STATIC)
-@@ -137,11 +137,11 @@ sulogin:	sulogin.o consoles.o
- 
- wall:		LDLIBS += $(STATIC)
+@@ -139,7 +139,7 @@ wall:		LDLIBS += $(STATIC)
  wall:		dowall.o wall.o
  
  shutdown:	LDLIBS += $(STATIC)
@@ -46,15 +40,11 @@ index 1b368dc..b22fd52 100644
  
  bootlogd:	LDLIBS += -lutil $(STATIC)
  bootlogd:	bootlogd.o
-
- readbootlog:	LDLIBS += $(STATIC)
 diff --git a/src/halt.c b/src/halt.c
-index a469147..f51d0cb 100644
+index a46914749f20..f51d0cb3e76a 100644
 --- a/src/halt.c
 +++ b/src/halt.c
-@@ -56,10 +56,11 @@
- #include <signal.h>
- #include <stdio.h>
+@@ -58,6 +58,7 @@
  #include <getopt.h>
  #include "reboot.h"
  #include "runlevellog.h"
@@ -62,11 +52,7 @@ index a469147..f51d0cb 100644
  
  char *Version = "@(#)halt  2.86  31-Jul-2004 miquels@cistron.nl";
  char *progname;
- 
- #define KERNEL_MONITOR	1 /* If halt() puts you into the kernel monitor. */
-@@ -253,17 +254,22 @@ int main(int argc, char **argv)
- 	if (chdir("/")) {
- 		fprintf(stderr, "%s: chdir(/): %m\n", progname);
+@@ -255,13 +256,18 @@ int main(int argc, char **argv)
  		exit(1);
  	}
  
@@ -92,15 +78,11 @@ index a469147..f51d0cb 100644
  	}
  
  	/*
- 	 *	Record the fact that we're going down
- 	 */
 diff --git a/src/init.c b/src/init.c
-index 78ae760..432f0e5 100644
+index 86142824b2f9..65bd3d52f75d 100644
 --- a/src/init.c
 +++ b/src/init.c
-@@ -93,10 +93,11 @@ extern char **environ;
- #include "initreq.h"
- #include "paths.h"
+@@ -95,6 +95,7 @@ extern char **environ;
  #include "reboot.h"
  #include "runlevellog.h"
  #include "set.h"
@@ -108,11 +90,7 @@ index 78ae760..432f0e5 100644
  
  #ifndef SIGPWR
  #  define SIGPWR SIGUSR2
- #endif
- 
-@@ -3016,10 +3017,14 @@ int telinit(char *progname, int argc, char **argv)
- 		if (!strchr("0123456789SsQqAaBbCcUu", argv[optind][0]))
- 			usage(progname);
+@@ -3016,6 +3017,10 @@ int telinit(char *progname, int argc, char **argv)
  		request.cmd = INIT_CMD_RUNLVL;
  		request.runlevel  = argv[optind][0];
  		request.sleeptime = sleep_time;
@@ -123,15 +101,11 @@ index 78ae760..432f0e5 100644
  	}
  
  	/* Change to the root directory. */
- 	if (0 != chdir("/"))
- 		initlog(L_VB, "unable to chdir to /: %s",
 diff --git a/src/shutdown.c b/src/shutdown.c
-index c49795f..48e65d1 100644
+index 7730e5334ef1..9bf06f3235fe 100644
 --- a/src/shutdown.c
 +++ b/src/shutdown.c
-@@ -344,10 +344,13 @@ void fastdown()
- 		else
- 			script = REBOOTSCRIPT2;
+@@ -347,6 +347,9 @@ void fastdown()
  	}
  #endif
  
@@ -141,11 +115,9 @@ index c49795f..48e65d1 100644
  	/* First close all files. */
  	for(i = 0; i < 3; i++)
  		if (!isatty(i)) {
- 			close(i);
- 			open("/dev/null", O_RDWR);
 diff --git a/src/sysfs_cpu.c b/src/sysfs_cpu.c
 new file mode 100644
-index 0000000..fe14ff7
+index 000000000000..fe14ff71c382
 --- /dev/null
 +++ b/src/sysfs_cpu.c
 @@ -0,0 +1,63 @@
@@ -214,7 +186,7 @@ index 0000000..fe14ff7
 +}
 diff --git a/src/sysfs_cpu.h b/src/sysfs_cpu.h
 new file mode 100644
-index 0000000..7728d52
+index 000000000000..7728d52fe4d9
 --- /dev/null
 +++ b/src/sysfs_cpu.h
 @@ -0,0 +1,24 @@

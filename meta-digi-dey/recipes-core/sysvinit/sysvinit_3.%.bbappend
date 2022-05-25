@@ -1,6 +1,6 @@
-# Copyright (C) 2013-2014 Digi International.
+# Copyright (C) 2013-2022 Digi International.
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/${BP}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI:append:ccimx6 = " file://0001-sysvinit-disable-all-cpus-but-cpu0-for-halt-reboot.patch"
 
