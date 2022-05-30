@@ -5,6 +5,11 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}:"
 # Without libgcc, swupdate generates an error signal when terminating
 RDEPENDS_${PN} += "libgcc"
 
+SRC_URI += " \
+    file://0001-Makefile-change-Makefile-to-build-swupdate-library-s.patch \
+    file://0002-config-add-on-the-fly-build-configuration-variable.patch \
+"
+
 do_configure_append() {
 	# If Trustfence is enabled, enable the signing support in the
 	# '.config' file.
