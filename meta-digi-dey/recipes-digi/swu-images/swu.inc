@@ -20,7 +20,7 @@ DESCRIPTION = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) ==
 BOOTFS_EXT ?= ".boot.vfat"
 BOOTFS_EXT_ccimx6ul ?= ".boot.ubifs"
 ROOTFS_EXT ?= ".ext4.gz"
-ROOTFS_EXT_ccimx6ul ?= ".ubifs"
+ROOTFS_EXT_ccimx6ul ?= '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", ".squashfs", ".ubifs", d)}'
 
 BOOT_DEV_NAME ?= "/dev/mmcblk0p1"
 BOOT_DEV_NAME_ccimx6ul ?= "linux"
