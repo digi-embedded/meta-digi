@@ -19,7 +19,7 @@ DEY_BUILD_PLATFORM = "STM"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.ubifs"
-ROOTFS_EXT ?= ".ubifs"
+ROOTFS_EXT ?= '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", ".squashfs", ".ubifs", d)}'
 
 BOOT_DEV_NAME ?= "linux"
 ROOTFS_DEV_NAME ?= "rootfs"
