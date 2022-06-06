@@ -251,7 +251,7 @@ BOARD_BOOTIMAGE_PARTITION_SIZE ??= "65536"
 # SD card image name
 SDIMG = "${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.sdcard"
 
-BOOTLOADER_SEEK ?= "1"
+BOOTLOADER_SEEK_USERDATA ?= "1"
 
 SDIMG_BOOTLOADER ?= "${DEPLOY_DIR_IMAGE}/${UBOOT_SYMLINK}"
 SDIMG_BOOTFS_TYPE ?= "boot.vfat"
@@ -319,7 +319,7 @@ IMAGE_CMD:sdcard() {
 	gzip -d -k ${SDIMG_ROOTFS}.gz
 
 	# Burn bootloader, boot and rootfs partitions
-	dd if=${SDIMG_BOOT} of=${SDIMG} conv=notrunc,fsync seek=${BOOTLOADER_SEEK} bs=1K
+	dd if=${SDIMG_BOOT} of=${SDIMG} conv=notrunc,fsync seek=${BOOTLOADER_SEEK_USERDATA} bs=1K
 	dd if=${SDIMG_BOOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024)
 	dd if=${SDIMG_ROOTFS} of=${SDIMG} conv=notrunc,fsync seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024 + ${BOOT_SPACE_ALIGNED} \* 1024)
 
