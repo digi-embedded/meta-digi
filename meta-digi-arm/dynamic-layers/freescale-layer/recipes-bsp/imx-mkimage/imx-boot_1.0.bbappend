@@ -349,6 +349,15 @@ do_deploy:append () {
 							trustfence-sign-uboot.sh ${DEPLOYDIR}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target} ${DEPLOYDIR}/${UBOOT_PREFIX}-encrypted-${MACHINE}-${rev}-${ramc}.bin-${target}
 							unset ENABLE_ENCRYPTION
 						fi
+						if [ "${SWUPDATE_UBOOTIMG}" = "true" ]; then
+							if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+								ln -sf ${UBOOT_PREFIX}-encrypted-${MACHINE}-${rev}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
+							elif [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+								ln -sf ${UBOOT_PREFIX}-signed-${MACHINE}-${rev}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
+							else
+								ln -sf ${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
+							fi
+						fi
 					done
 				done
 			done

@@ -1,0 +1,77 @@
+software =
+{
+    version = "##SW_VERSION##";
+    description = "##DESCRIPTION##";
+
+    mmc = {
+        platform: {
+            images: (
+                {
+                    filename = "##BOOTIMG_NAME##";
+                    device = "##BOOT_DEV##";
+                    type = "raw";
+                    sha256 = "$swupdate_get_sha256(##BOOTIMG_NAME##)";
+                    installed-directly = true;
+                },
+                {
+                    filename = "##ROOTIMG_NAME##";
+                    device = "##ROOTFS_DEV##";
+                    type = "raw";
+                    sha256 = "$swupdate_get_sha256(##ROOTIMG_NAME##)";
+                    compressed = "zlib";
+                    installed-directly = true;
+                }
+            );
+            files: (
+                {
+                    filename = "##UBOOTIMG_NAME##";
+                    path = "##UBOOT_IMAGE_PATH##";
+                    sha256 = "$swupdate_get_sha256(##UBOOTIMG_NAME##)";
+                }
+            );
+            scripts: (
+                {
+                    filename = "##SWUPDATE_UBOOT_SCRIPT##";
+                    type = "preinstall";
+                    data = "##UBOOTIMG_NAME## ##UBOOTIMG_ENC## ##UBOOTIMG_OFFSET##;
+                    sha256 = "$swupdate_get_sha256(##SWUPDATE_UBOOT_SCRIPT##)";
+                }
+            );
+        };
+    };
+    mtd = {
+        platform: {
+            images: (
+                {
+                    filename = "##BOOTIMG_NAME##";
+                    volume = "##BOOT_DEV##";
+                    type = "ubivol";
+                    sha256 = "$swupdate_get_sha256(##BOOTIMG_NAME##)";
+                    installed-directly = true;
+                },
+                {
+                    filename = "##ROOTIMG_NAME##";
+                    volume = "##ROOTFS_DEV##";
+                    type = "ubivol";
+                    sha256 = "$swupdate_get_sha256(##ROOTIMG_NAME##)";
+                    installed-directly = true;
+                }
+            );
+            files: (
+                {
+                    filename = "##UBOOTIMG_NAME##";
+                    path = "##UBOOT_IMAGE_PATH##";
+                    sha256 = "$swupdate_get_sha256(##UBOOTIMG_NAME##)";
+                }
+            );
+            scripts: (
+                {
+                    filename = "##SWUPDATE_UBOOT_SCRIPT##";
+                    type = "postinstall";
+                    data = "##UBOOTIMG_NAME## ##UBOOTIMG_ENC##";
+                    sha256 = "$swupdate_get_sha256(##SWUPDATE_UBOOT_SCRIPT##)";
+                }
+            );
+        };
+    };
+}

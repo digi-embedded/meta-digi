@@ -16,6 +16,8 @@ do_configure:append() {
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 		echo "CONFIG_SIGNED_IMAGES=y" >> ${B}/.config
 	fi
+	# add U-Booot handler to use uboot: type
+	echo "CONFIG_BOOTLOADERHANDLER=y" >> ${B}/.config
 	cml1_do_configure
 }
 

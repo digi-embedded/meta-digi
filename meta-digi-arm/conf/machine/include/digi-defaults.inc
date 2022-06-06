@@ -85,3 +85,6 @@ DEY_SELINUX_POLICY ?= "1"
 # U-Boot scripts to include in 'linux' partition
 # (use the '+=' operator, since other layers may append scripts to this list)
 BOOT_SCRIPTS += "boot.scr:boot.scr"
+
+# This can be used to enable U-Boot update through swupdate
+SWUPDATE_UBOOTIMG ?= "false"
