@@ -18,11 +18,13 @@ SRC_URI = " \
     git://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/wlan/qca-wifi-host-cmn.git;protocol=https;branch=${QCA_WIFI_HOST_CMN_SRCBRANCH};destsuffix=qca-wifi-host-cmn;name=qca-wifi-host \
     git://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/wlan/fw-api.git;protocol=https;branch=${FW_API_SRCBRANCH};destsuffix=fw-api;name=fw-api \
     git://git.codelinaro.org/clo/le/qcom-opensource/mdm-init.git;protocol=https;branch=${MDM_INIT_SRCBRANCH};destsuffix=mdm-init;name=mdm-init \
-    file://0001-qcacld-3.0-fix-build-issues.patch \
+    file://0001-qcacld-3.0-disable-warnings-as-errors.patch \
     file://0002-qcacld-3.0-support-ROME-SDIO-build.patch \
     file://0003-qcacld-3.0-cfg-try-to-get-MACs-from-device-tree-entr.patch \
-    file://0001-qca-wifi-host-cmn-fix-buid-issue-for-Rome-SDIO-interface.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
-    file://0002-qca-wifi-host-cmn-fix-build-issue-enabling-debug-for-.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
+    file://0004-qcacld-3.0-Add-proper-check-to-include-qcom-iommu-ut.patch \
+    file://0001-qca-wifi-host-cmn-fix-buid-issue-for-Rome-SDIO-inter.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
+    file://0002-qca-wifi-host-cmn-fix-build-issue-enabling-debug-for.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
+    file://0003-qca-wifi-host-cmn-fix-panic_notifier_list-undeclared.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
 "
 
 # Tag 'CHSS.LNX_FSL.5.0-01200-QCA6574AUARMSDIOHZ' in all repos

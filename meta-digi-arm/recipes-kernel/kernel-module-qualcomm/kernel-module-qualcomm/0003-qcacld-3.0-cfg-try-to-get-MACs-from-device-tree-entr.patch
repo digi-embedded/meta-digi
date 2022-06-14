@@ -26,12 +26,10 @@ Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
  4 files changed, 74 insertions(+)
 
 diff --git a/core/hdd/inc/wlan_hdd_cfg.h b/core/hdd/inc/wlan_hdd_cfg.h
-index 36aa010db9..1527aaf87e 100644
+index 36aa010db916..1527aaf87e12 100644
 --- a/core/hdd/inc/wlan_hdd_cfg.h
 +++ b/core/hdd/inc/wlan_hdd_cfg.h
-@@ -276,10 +276,11 @@ struct hdd_config {
-  *
-  * Return: CSR WMM mode
+@@ -278,6 +278,7 @@ struct hdd_config {
   */
  eCsrRoamWmmUserModeType hdd_to_csr_wmm_mode(uint8_t mode);
  
@@ -39,15 +37,11 @@ index 36aa010db9..1527aaf87e 100644
  QDF_STATUS hdd_update_mac_config(struct hdd_context *hdd_ctx);
  QDF_STATUS hdd_set_sme_config(struct hdd_context *hdd_ctx);
  QDF_STATUS hdd_set_policy_mgr_user_cfg(struct hdd_context *hdd_ctx);
- QDF_STATUS hdd_set_sme_chan_list(struct hdd_context *hdd_ctx);
- bool hdd_update_config_cfg(struct hdd_context *hdd_ctx);
 diff --git a/core/hdd/inc/wlan_hdd_misc.h b/core/hdd/inc/wlan_hdd_misc.h
-index b105df1b3a..6d9bf450ef 100644
+index b105df1b3a98..6d9bf450efe1 100644
 --- a/core/hdd/inc/wlan_hdd_misc.h
 +++ b/core/hdd/inc/wlan_hdd_misc.h
-@@ -42,11 +42,13 @@
- #endif
- 
+@@ -44,9 +44,11 @@
  #ifdef MSM_PLATFORM
  #define WLAN_INI_FILE              "wlan/qca_cld/" PREFIX "WCNSS_qcom_cfg.ini"
  #define WLAN_MAC_FILE              "wlan/qca_cld/" PREFIX "wlan_mac.bin"
@@ -60,12 +54,10 @@ index b105df1b3a..6d9bf450ef 100644
  
  #endif /* WLAN_HDD_MISC_H */
 diff --git a/core/hdd/src/wlan_hdd_cfg.c b/core/hdd/src/wlan_hdd_cfg.c
-index b12e42c74c..c921a93642 100644
+index b12e42c74c69..c921a9364242 100644
 --- a/core/hdd/src/wlan_hdd_cfg.c
 +++ b/core/hdd/src/wlan_hdd_cfg.c
-@@ -197,10 +197,75 @@ int hdd_firmware_request_nowarn(const struct firmware **fw,
- {
- 	return request_firmware(fw, name, device);
+@@ -199,6 +199,71 @@ int hdd_firmware_request_nowarn(const struct firmware **fw,
  }
  #endif
  
@@ -137,15 +129,11 @@ index b12e42c74c..c921a93642 100644
  /**
   * hdd_update_mac_config() - update MAC address from cfg file
   * @hdd_ctx: the pointer to hdd context
-  *
-  * It overwrites the MAC address if config file exist.
 diff --git a/core/hdd/src/wlan_hdd_main.c b/core/hdd/src/wlan_hdd_main.c
-index 0043de21f1..03138b61ce 100644
+index 0043de21f10a..03138b61ce5d 100644
 --- a/core/hdd/src/wlan_hdd_main.c
 +++ b/core/hdd/src/wlan_hdd_main.c
-@@ -13588,10 +13588,16 @@ static int hdd_initialize_mac_address(struct hdd_context *hdd_ctx)
- 	} else if (hdd_ctx->config->mac_provision) {
- 		hdd_err("getting MAC address from platform driver failed");
+@@ -13590,6 +13590,12 @@ static int hdd_initialize_mac_address(struct hdd_context *hdd_ctx)
  		return ret;
  	}
  
@@ -158,5 +146,3 @@ index 0043de21f1..03138b61ce 100644
  	status = hdd_update_mac_config(hdd_ctx);
  	if (QDF_IS_STATUS_SUCCESS(status)) {
  		hdd_info("using MAC address from wlan_mac.bin");
- 		return 0;
- 	}

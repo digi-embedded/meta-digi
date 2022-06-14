@@ -1,4 +1,3 @@
-From fb4a4f20a55f945a2134e0abea897070c4f8f77f Mon Sep 17 00:00:00 2001
 From: Xueqiang Gong <quic_gongx@quicinc.com>
 Date: Fri, 1 Apr 2022 15:52:16 +0800
 Subject: [PATCH] qca-wifi-host-cmn: fix buid issue for Rome SDIO interface
@@ -16,7 +15,7 @@ Signed-off-by: Xueqiang Gong <quic_gongx@quicinc.com>
  7 files changed, 15 insertions(+), 6 deletions(-)
 
 diff --git a/hif/src/dispatcher/multibus.c b/hif/src/dispatcher/multibus.c
-index 06e70f0..f9b2b6b 100644
+index 06e70f01d39c..f9b2b6bb3ea8 100644
 --- a/hif/src/dispatcher/multibus.c
 +++ b/hif/src/dispatcher/multibus.c
 @@ -34,6 +34,11 @@
@@ -32,7 +31,7 @@ index 06e70f0..f9b2b6b 100644
   * hif_initialize_default_ops() - initializes default operations values
   *
 diff --git a/hif/src/hif_main.c b/hif/src/hif_main.c
-index b5140cc..a6b4d43 100644
+index b5140cc1e58e..a6b4d438ab77 100644
 --- a/hif/src/hif_main.c
 +++ b/hif/src/hif_main.c
 @@ -972,7 +972,11 @@ void hif_close(struct hif_opaque_softc *hif_ctx)
@@ -48,7 +47,7 @@ index b5140cc..a6b4d43 100644
  
  	hif_bus_close(scn);
 diff --git a/hif/src/sdio/hif_sdio_dev.h b/hif/src/sdio/hif_sdio_dev.h
-index 7ee6582..544a57e 100644
+index 7ee6582e6aa8..544a57e4381a 100644
 --- a/hif/src/sdio/hif_sdio_dev.h
 +++ b/hif/src/sdio/hif_sdio_dev.h
 @@ -157,7 +157,7 @@ QDF_STATUS hif_enable_func(struct hif_softc *ol_sc, struct hif_sdio_dev *device,
@@ -61,7 +60,7 @@ index 7ee6582..544a57e 100644
  			struct hif_sdio_dev *device);
  #endif /* HIF_SDIO_DEV_H_ */
 diff --git a/hif/src/sdio/if_sdio.h b/hif/src/sdio/if_sdio.h
-index a71e61e..c5ad71b 100644
+index a71e61ecb325..c5ad71b0c062 100644
 --- a/hif/src/sdio/if_sdio.h
 +++ b/hif/src/sdio/if_sdio.h
 @@ -67,7 +67,7 @@ static inline void athdiag_procfs_remove(void)
@@ -74,7 +73,7 @@ index a71e61e..c5ad71b 100644
  int ath_sdio_probe(void *context, void *hif_handle);
  void ath_sdio_remove(void *context, void *hif_handle);
 diff --git a/hif/src/sdio/native_sdio/include/hif_internal.h b/hif/src/sdio/native_sdio/include/hif_internal.h
-index 41001c8..e5c7df0 100644
+index 41001c848ae9..e5c7df088241 100644
 --- a/hif/src/sdio/native_sdio/include/hif_internal.h
 +++ b/hif/src/sdio/native_sdio/include/hif_internal.h
 @@ -419,8 +419,8 @@ void hif_sdio_quirk_write_cccr(struct hif_softc *ol_sc, struct sdio_func *func);
@@ -89,7 +88,7 @@ index 41001c8..e5c7df0 100644
  				 struct sdio_func *func,
  				 bool reset);
 diff --git a/hif/src/sdio/native_sdio/src/hif.c b/hif/src/sdio/native_sdio/src/hif.c
-index 9ca2e21..d52eee2 100644
+index 9ca2e21ca724..d52eee248a3e 100644
 --- a/hif/src/sdio/native_sdio/src/hif.c
 +++ b/hif/src/sdio/native_sdio/src/hif.c
 @@ -348,7 +348,7 @@ QDF_STATUS hif_sdio_probe(struct hif_softc *ol_sc,
@@ -102,7 +101,7 @@ index 9ca2e21..d52eee2 100644
  			scn->ramdump_size);
  	} else {
 diff --git a/hif/src/sdio/transfer/mailbox.h b/hif/src/sdio/transfer/mailbox.h
-index 3e59132..36f3e98 100644
+index 3e5913215241..36f3e9860ac6 100644
 --- a/hif/src/sdio/transfer/mailbox.h
 +++ b/hif/src/sdio/transfer/mailbox.h
 @@ -20,7 +20,7 @@
@@ -114,6 +113,3 @@ index 3e59132..36f3e98 100644
  
  #include "a_debug.h"
  #include "hif_sdio_dev.h"
--- 
-2.7.4
-
