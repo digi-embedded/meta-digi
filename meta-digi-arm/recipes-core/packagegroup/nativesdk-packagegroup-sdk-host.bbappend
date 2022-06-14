@@ -7,6 +7,5 @@ TRUSTFENCE_SDK_TOOLS ?= "\
 "
 
 RDEPENDS_${PN} += " \
-    ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', \
-                    oe.utils.conditional('TRUSTFENCE_SIGN_MODE', 'AHAB', '${TRUSTFENCE_SDK_TOOLS} nativesdk-imx-mkimage', '${TRUSTFENCE_SDK_TOOLS}', d), '', d)} \
+    ${@oe.utils.conditional('TRUSTFENCE_SIGN_MODE', 'AHAB', '${TRUSTFENCE_SDK_TOOLS} nativesdk-imx-mkimage', '${TRUSTFENCE_SDK_TOOLS}', d)} \
 "

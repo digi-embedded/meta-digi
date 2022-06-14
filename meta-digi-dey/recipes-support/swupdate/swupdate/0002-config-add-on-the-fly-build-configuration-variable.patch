@@ -1,0 +1,48 @@
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Wed, 23 Jun 2021 15:11:12 +0200
+Subject: [PATCH 2/2] config: add on the fly build configuration variable
+
+This commit adds on the fly configuration to the swupdate
+build system to correct an issue when using sw-description
+files that support different images and installation locations.
+
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
+---
+ Kconfig               | 7 +++++++
+ core/network_thread.c | 4 +++-
+ 2 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/Kconfig b/Kconfig
+index 3862285..525c157 100644
+--- a/Kconfig
++++ b/Kconfig
+@@ -241,6 +241,13 @@ config FEATURE_SYSLOG
+ 	#  This option is auto-selected when you select any applet which may
+ 	#  send its output to syslog. You do not need to select it manually.
+ 
++config DIGI_ON_THE_FLY
++	string "Add Digi on the fly support"
++	default n
++	#help
++	# This option is used in on the fly support to skip selection
++	# verification.
++
+ endmenu
+ 
+ menu 'Build Options'
+diff --git a/core/network_thread.c b/core/network_thread.c
+index b21d983..3edda1e 100644
+--- a/core/network_thread.c
++++ b/core/network_thread.c
+@@ -97,7 +97,9 @@ static bool is_selection_allowed(const char *software_set, char *running_mode,
+ 		}
+ 		free(swset);
+ 	}
+-
++#ifdef CONFIG_DIGI_ON_THE_FLY
++	allowed = true;
++#endif
+ 	if (allowed) {
+ 		INFO("Accepted selection %s,%s", software_set, running_mode);
+ 	}else
+-- 

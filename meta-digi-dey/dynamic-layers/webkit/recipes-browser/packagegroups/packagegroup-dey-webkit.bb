@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020, Digi International Inc.
+# Copyright (C) 2020-2022, Digi International Inc.
 #
 SUMMARY = "WebKit packagegroup for DEY image"
 
@@ -12,3 +12,6 @@ RDEPENDS_${PN} += " \
     digi-webkit-examples \
     wpewebkit \
 "
+
+RDEPENDS_${PN}_remove_mx8 = " digi-webkit-examples"
+RDEPENDS_${PN}_append_mx8 = " connectcore-demo-example"

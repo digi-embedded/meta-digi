@@ -21,6 +21,7 @@ BBLAYERS ?= " \
   ##DIGIBASE##/meta-webkit \
   ##DIGIBASE##/meta-imx/meta-ml \
   ##DIGIBASE##/meta-selinux \
+  ##DIGIBASE##/meta-timesys \
   ##DIGIBASE##/meta-digi/meta-digi-arm \
   ##DIGIBASE##/meta-digi/meta-digi-dey \
   "
