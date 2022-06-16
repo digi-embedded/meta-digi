@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
 LOCALVERSION = "-dey"
 SRCBRANCH = "v5.4/dey-3.2/maint"
-SRCREV = "248cd6b2bfbee3f3a21175c0c516ab6fa1289318"
+SRCREV = "${AUTOREV}"
 
 # Select internal or Github Linux repo
 DIGI_LOG_REPO = "linux-2.6.git"
@@ -15,6 +15,6 @@ LINUX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , \
 					oe.utils.conditional('DIGI_GIT', '${DIGI_LOG_GIT}', '${DIGI_GIT}/${DIGI_LOG_REPO}', '${DIGI_GIT}/${DIGI_MTK_REPO};protocol=ssh', d), \
 					'${DIGI_GITHUB_GIT}/${GITHUB_REPO};protocol=https', d)}"
 
-SRC_URI = "${LINUX_GIT_URI};nobranch=1"
+SRC_URI = "${LINUX_GIT_URI};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git"
