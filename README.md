@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 3.2
-## Release 3.2-r2
+## Release 3.2-r3
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -99,10 +99,22 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 # Downloads
 
-* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/3.2/r2/images/
-* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/3.2/r2/sdk/
+* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/3.2/r3/images/
+* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/3.2/r3/sdk/
 
 # Release Changelog
+
+## 3.2-r3
+
+* Update Qualcomm BDF files to pass EN 300 328 V2.2.2 blocking test
+* Update Qualcomm firmware to release r00006.3.470144.2a
+* Update SCU FW recipe to v1.7.1.2, which fixes an initialization issue of some eMMC chips
+* Refresh support of Cloud Connector with latest improvements from Remote Manager
+* Update OpenSSL to v1.1.1n
+* Update Dnsmasq to v2.84
+* End-to-end solution demo
+* Improved TrustFence support
+* Other minor fixes
 
 ## 3.2-r2
 
