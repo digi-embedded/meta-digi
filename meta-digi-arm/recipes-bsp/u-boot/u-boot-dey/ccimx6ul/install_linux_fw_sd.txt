@@ -9,11 +9,11 @@ BASEFILENAME=0
 
 # Determine U-Boot file to program basing on module variant
 if test -n "${module_variant}"; then
-	if test "${module_variant}" = "0x02" || test "${module_variant}" = "0x03" || test "${module_variant}" = "0x06" || test "${module_variant}" = "0x0a"; then
+	if test "${module_variant}" = "0x02" || test "${module_variant}" = "0x03" || test "${module_variant}" = "0x06" || test "${module_variant}" = "0x09"; then
 		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##.imx;
 	elif test "${module_variant}" = "0x04" || test "${module_variant}" = "0x05" || test "${module_variant}" = "0x07"; then
 		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx;
-	elif test "${module_variant}" = "0x08" || test "${module_variant}" = "0x09"; then
+	elif test "${module_variant}" = "0x08" || test "${module_variant}" = "0x0a"; then
 		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##512MB.imx
 	fi
 fi
