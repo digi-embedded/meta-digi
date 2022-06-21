@@ -112,7 +112,7 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 	# Determine U-Boot file to program basing on SOM's variant
 	if [ -n "$module_variant" ] || [ "$module_variant" = "0x00" ]; then
 		if [ "$module_variant" = "0x08" ] || \
-		   [ "$module_variant" = "0x09" ]; then
+		   [ "$module_variant" = "0x0a" ]; then
 			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##512MB.imx"
 		elif [ "$module_variant" = "0x04" ] || \
 		     [ "$module_variant" = "0x05" ] || \
