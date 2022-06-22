@@ -22,6 +22,8 @@ SRC_URI = " \
     file://0002-qcacld-3.0-support-ROME-SDIO-build.patch \
     file://0003-qcacld-3.0-cfg-try-to-get-MACs-from-device-tree-entr.patch \
     file://0004-qcacld-3.0-Add-proper-check-to-include-qcom-iommu-ut.patch \
+    file://0005-qcacld-3.0-module-parameter-to-enable-p2p-support.patch \
+    file://0006-qcacld-3.0-use-cfg80211_register_netdevice.patch \
     file://0001-qca-wifi-host-cmn-fix-buid-issue-for-Rome-SDIO-inter.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
     file://0002-qca-wifi-host-cmn-fix-build-issue-enabling-debug-for.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
     file://0003-qca-wifi-host-cmn-fix-panic_notifier_list-undeclared.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
