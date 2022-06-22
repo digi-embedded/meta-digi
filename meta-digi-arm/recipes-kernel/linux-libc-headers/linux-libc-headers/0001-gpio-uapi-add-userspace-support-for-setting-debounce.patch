@@ -10,18 +10,19 @@ gpiolib.
 https://jira.digi.com/browse/DEL-6425
 
 Signed-off-by: Hector Bujanda <hector.bujanda@digi.com>
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
  include/uapi/linux/gpio.h | 12 ++++++++++++
  1 file changed, 12 insertions(+)
 
 diff --git a/include/uapi/linux/gpio.h b/include/uapi/linux/gpio.h
-index 4ebfe0ac6c5b..95569071f11b 100644
+index eaaea3d8e6b4..638f6dfb6e76 100644
 --- a/include/uapi/linux/gpio.h
 +++ b/include/uapi/linux/gpio.h
-@@ -53,6 +53,17 @@ struct gpioline_info {
- 	char consumer[32];
+@@ -336,6 +336,17 @@ struct gpioline_info {
+ 	char consumer[GPIO_MAX_NAME_SIZE];
  };
-
+ 
 +/**
 + * struct gpioline_debounce - GPIO line debounce
 + * @line_offset: the local offset on this GPIO device, fill this in when
@@ -35,11 +36,12 @@ index 4ebfe0ac6c5b..95569071f11b 100644
 +
  /* Maximum number of requested handles */
  #define GPIOHANDLES_MAX 64
-
-@@ -154,5 +165,6 @@ struct gpioevent_data {
- #define GPIO_GET_LINEINFO_IOCTL _IOWR(0xB4, 0x02, struct gpioline_info)
- #define GPIO_GET_LINEHANDLE_IOCTL _IOWR(0xB4, 0x03, struct gpiohandle_request)
- #define GPIO_GET_LINEEVENT_IOCTL _IOWR(0xB4, 0x04, struct gpioevent_request)
-+#define GPIO_SET_DEBOUNCE_IOCTL _IOW(0xB4, 0x05, struct gpioline_debounce)
-
- #endif /* _UAPI_GPIO_H_ */
+ 
+@@ -501,6 +512,7 @@ struct gpioevent_data {
+  */
+ #define GPIO_GET_CHIPINFO_IOCTL _IOR(0xB4, 0x01, struct gpiochip_info)
+ #define GPIO_GET_LINEINFO_UNWATCH_IOCTL _IOWR(0xB4, 0x0C, __u32)
++#define GPIO_SET_DEBOUNCE_IOCTL _IOW(0xB4, 0xA0, struct gpioline_debounce)
+ 
+ /*
+  * v2 ioctl()s
