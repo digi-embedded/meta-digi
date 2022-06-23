@@ -35,7 +35,7 @@ index b94eb5ad1a5b..cdef3e206931 100644
  
  		case 2:
 diff --git a/tools/hciattach_rome.c b/tools/hciattach_rome.c
-index ee67bb068c09..854cfff707aa 100644
+index 39f7e77c4bd5..03727d7935da 100644
 --- a/tools/hciattach_rome.c
 +++ b/tools/hciattach_rome.c
 @@ -45,6 +45,7 @@
@@ -60,7 +60,7 @@ index ee67bb068c09..854cfff707aa 100644
      unsigned char data_buf[PRINT_BUF_SIZE]={0,};
      unsigned char *nvm_byte_ptr;
 -    unsigned char bdaddr[6];
-     unsigned short pcm_value, ibs_value;
+     int pcm_value, ibs_value;
  
      fprintf(stderr, "File Open (%s)\n", file_path);
 @@ -1008,12 +1008,15 @@ int rome_get_tlv_file(char *file_path)

@@ -86,7 +86,7 @@ index cdef3e206931..f5ee540c58f3 100644
  			usage();
  			exit(1);
 diff --git a/tools/hciattach_rome.c b/tools/hciattach_rome.c
-index 854cfff707aa..40983fc087c0 100644
+index 03727d7935da..9f8e946235be 100644
 --- a/tools/hciattach_rome.c
 +++ b/tools/hciattach_rome.c
 @@ -139,7 +139,7 @@ unsigned char userial_to_tcio_baud(unsigned char cfg_baud, unsigned int *baud)
@@ -453,7 +453,7 @@ index 854cfff707aa..40983fc087c0 100644
          c = fgetc (file);
 @@ -924,7 +923,7 @@ int rome_get_tlv_file(char *file_path, unsigned char * bdaddr)
      unsigned char *nvm_byte_ptr;
-     unsigned short pcm_value, ibs_value;
+     int pcm_value, ibs_value;
  
 -    fprintf(stderr, "File Open (%s)\n", file_path);
 +    hciprintf(stderr, "File Open (%s)\n", file_path);

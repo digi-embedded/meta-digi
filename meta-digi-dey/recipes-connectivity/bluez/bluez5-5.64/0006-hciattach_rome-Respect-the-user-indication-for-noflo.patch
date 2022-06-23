@@ -44,7 +44,7 @@ index 96ff9e38cfda..4370a87ca3af 100644
  int bcm43xx_init(int fd, int def_speed, int speed, struct termios *ti,
  		const char *bdaddr);
 diff --git a/tools/hciattach_rome.c b/tools/hciattach_rome.c
-index 59bdc16e4e8f..ee67bb068c09 100644
+index 61db275078d3..39f7e77c4bd5 100644
 --- a/tools/hciattach_rome.c
 +++ b/tools/hciattach_rome.c
 @@ -1565,7 +1565,8 @@ static void flow_control(int fd, int opt)

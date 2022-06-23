@@ -244,7 +244,7 @@ index 26c0d542434d..96ff9e38cfda 100644
  		const char *bdaddr);
 diff --git a/tools/hciattach_rome.c b/tools/hciattach_rome.c
 new file mode 100644
-index 000000000000..59bdc16e4e8f
+index 000000000000..61db275078d3
 --- /dev/null
 +++ b/tools/hciattach_rome.c
 @@ -0,0 +1,1941 @@
@@ -1172,7 +1172,7 @@ index 000000000000..59bdc16e4e8f
 +    unsigned char data_buf[PRINT_BUF_SIZE]={0,};
 +    unsigned char *nvm_byte_ptr;
 +    unsigned char bdaddr[6];
-+    unsigned short pcm_value, ibs_value;
++    int pcm_value, ibs_value;
 +
 +    fprintf(stderr, "File Open (%s)\n", file_path);
 +    pFile = fopen ( file_path , "r" );
