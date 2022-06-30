@@ -1,0 +1,41 @@
+#!/bin/sh
+
+weston_args=$*
+
+if [ -z "$WESTON_USER" ]; then
+    WESTON_USER=weston
+fi
+if [ "$USER" != "$WESTON_USER" ]; then
+    weston_args_user="-u $WESTON_USER"
+fi
+
+
+# for associated service: pulseaudio
+if [ ! -d "/var/run/pulse" ]; then
+    su  -c "mkdir -p /var/run/pulse"
+    su -c "chown -R weston.weston /var/run/pulse"
+fi
+
+## Module support
+start_application_dir=/usr/share/weston-start-at-startup
+start_local_application_dir=/usr/local/weston-start-at-startup
+
+systemctl --user restart pulseaudio
+
+if [ "$USER" == "$WESTON_USER" ]; then
+    # Load and run application at startup
+    if [ -d "$start_application_dir" ]; then
+        for m in "$start_application_dir"/*; do
+            echo "($m)"
+            (sleep 5 && $m)&
+        done
+    fi
+    if [ -d "$start_local_application_dir" ]; then
+        for m in "$start_local_application_dir"/*; do
+            echo "($m)"
+            (sleep 5  && $m)&
+        done
+    fi
+fi
+exec /usr/bin/weston-launch $weston_args_user -- $weston_args
+
