@@ -35,6 +35,8 @@ IMAGE_FEATURES += " \
 # it with video/camera
 IMAGE_FEATURES:append:ccimx6ulsbc = " dey-gstreamer"
 
+IMAGE_FEATURES:append:ccmp15 = " ${@bb.utils.contains('DISTRO_FEATURES', 'gstreamer', 'dey-gstreamer', '', d)}"
+
 # Remove some features to reduce the rootfs size to fit in the internal storage.
 IMAGE_FEATURES:remove:ccimx6ul = "package-management"
 
