@@ -1,4 +1,5 @@
-# Copyright (C) 2017-2020 Digi International
+# Copyright (C) 2017-2022 Digi International
+
 SUMMARY = "NXP Code signing Tool for the High Assurance Boot library"
 DESCRIPTION = "Provides software code signing support designed for use with \
 i.MX processors that integrate the HAB library in the internal boot ROM."
@@ -6,14 +7,7 @@ HOMEPAGE = "https://www.nxp.com/webapp/Download?colCode=IMX_CST_TOOL"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://LICENSE.bsd3;md5=1fbcd66ae51447aa94da10cbf6271530"
 
-DEPENDS = "byacc flex"
-
-# Explicitly add byacc-native as a dependency when building the package for the
-# SDK, otherwise, it won't get installed in the sysroot, causing a compilation
-# error.
-# Explicitly add openssl-native for the SDK build to correctly link to the
-# openssl libraries in the native dependencies folder.
-DEPENDS:append:class-nativesdk = " byacc-native"
+DEPENDS = "byacc-native flex-native"
 
 SRC_URI = " \
     ${DIGI_PKG_SRC}/cst-${PV}.tgz;name=cst \
@@ -57,4 +51,3 @@ do_install() {
 }
 
 FILES:${PN} = "${bindir}"
-BBCLASSEXTEND = "native nativesdk"
