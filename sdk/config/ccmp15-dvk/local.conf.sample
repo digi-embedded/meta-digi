@@ -291,6 +291,3 @@ PRSERV_HOST = "localhost:0"
 # Some packages are covered by STM EULA
 #
 #ACCEPT_EULA_ccmp15-dvk = "1"
-
-# Enable STM specific features
-DEY_BUILD_PLAFORM = "STM"
