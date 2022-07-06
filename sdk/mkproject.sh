@@ -98,7 +98,7 @@ do_license() {
 		local SOC_VENDOR="STM"
 		MKP_LICENSE_FILES=" \
 			${MKP_LICENSE_FILES} \
-			${MKP_SCRIPTPATH}/sources/meta-st-stm32/EULA \
+			${MKP_SCRIPTPATH}/sources/meta-st-stm32mp/conf/eula/ST_EULA_SLA \
 		"
 	else
 		local SOC_VENDOR="NXP"
@@ -117,7 +117,7 @@ do_license() {
 		|                                                                               |
 		|      * Digi's end user license agreement                                      |
 		|      * Digi's third party and open source license notice                      |
-		|      * ${SOC_VENDOR} Semiconductors' software license agreement                             |
+		|      * ${SOC_VENDOR} Semiconductors' software license agreement                         |
 		|                                                                               |
 		|  To have the right to use those binaries in your images you need to read and  |
 		|  accept the licenses.                                                         |
@@ -155,8 +155,8 @@ do_mkproject() {
 			sed -i -e "/^MACHINE_VARIANT =/cMACHINE_VARIANT = \"${MKP_VARIANT}\"" \
 				${MKP_PROJECTPATH}/conf/local.conf
 		fi
-		# At this point the user has accepted all the licenses, so enable the FSL EULA
-		sed -i -e "s,^#ACCEPT_FSL_EULA,ACCEPT_FSL_EULA,g" ${MKP_PROJECTPATH}/conf/local.conf
+		# At this point the user has accepted all the licenses, so enable the vendor EULA
+		sed -i -e "s,^#\(ACCEPT.*EULA\),\1,g" ${MKP_PROJECTPATH}/conf/local.conf
 		# Create dey-setup-environment script
 		printf "${MKP_SETUP_ENVIRONMENT}" "${MKP_SCRIPTPATH}" > ${MKP_PROJECTPATH}/dey-setup-environment
 		chmod +x ${MKP_PROJECTPATH}/dey-setup-environment
