@@ -24,11 +24,6 @@ require ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'recipes-kernel/linux/li
 # Use custom provided 'defconfig' if variable KERNEL_DEFCONFIG is cleared
 SRC_URI +="${@oe.utils.conditional('KERNEL_DEFCONFIG', '', 'file://defconfig', '', d)}"
 
-FILES:${KERNEL_PACKAGE_NAME}-image += "/boot/config-${KERNEL_VERSION}"
-
-# Don't include kernels in standard images
-RDEPENDS:${KERNEL_PACKAGE_NAME}-base = ""
-
 do_install:append:stm32mpcommon() {
     if ${@bb.utils.contains('MACHINE_FEATURES','gpu','true','false',d)}; then
         # append evbug tool to blacklist

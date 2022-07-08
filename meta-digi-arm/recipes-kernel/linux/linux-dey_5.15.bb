@@ -24,11 +24,6 @@ require ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'recipes-kernel/linux/li
 # Use custom provided 'defconfig' if variable KERNEL_DEFCONFIG is cleared
 SRC_URI +="${@oe.utils.conditional('KERNEL_DEFCONFIG', '', 'file://defconfig', '', d)}"
 
-FILES:${KERNEL_PACKAGE_NAME}-image += "/boot/config-${KERNEL_VERSION}"
-
-# Don't include kernels in standard images
-RDEPENDS:${KERNEL_PACKAGE_NAME}-base = ""
-
 # Apply configuration fragments
 do_configure:append() {
 	# Only accept fragments ending in .cfg. If the fragments contain

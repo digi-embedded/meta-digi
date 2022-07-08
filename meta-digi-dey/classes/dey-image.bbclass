@@ -63,3 +63,6 @@ DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-too
 
 # Remove kernel-module-imx-gpu-viv from all images
 BAD_RECOMMENDATIONS += "kernel-module-imx-gpu-viv"
+
+# Do not include kernel in rootfs images
+PACKAGE_EXCLUDE = "kernel-image-*"
