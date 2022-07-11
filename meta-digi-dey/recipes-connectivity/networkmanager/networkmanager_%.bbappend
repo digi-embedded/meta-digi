@@ -28,9 +28,9 @@ PACKAGECONFIG:remove:dey = "consolekit"
 
 # Adjust other compile time options to save space
 PACKAGECONFIG:remove:dey = "netconfig nss"
-PACKAGECONFIG:append = " gnutls modemmanager ppp"
+PACKAGECONFIG:append = " gnutls modemmanager ppp concheck"
 
-EXTRA_OECONF:append = " --disable-introspection --enable-concheck"
+EXTRA_OECONF:append = " --disable-introspection"
 
 #
 # NetworkManager only accepts IP addresses in CIDR format
