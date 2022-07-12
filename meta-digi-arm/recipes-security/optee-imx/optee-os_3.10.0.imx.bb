@@ -9,6 +9,8 @@ SRC_URI = "${OPTEE_OS_SRC};branch=${SRCBRANCH}"
 SRCBRANCH = "lf-5.10.y_1.0.0"
 SRCREV = "87956c343f6a1a24dfe57e7d5c77dfc10b45148c"
 
+SRC_URI_append_ccimx8m = " file://0001-TEE-639-drivers-caam-skip-JR-init-of-CFG_JR_HAB_INDE.patch"
+
 # tee-init_load_addr.txt has been remove in lates optee-os version.
 # to keep backward compatibility with existing optee-os recipe.
 do_compile_append () {

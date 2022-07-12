@@ -1,0 +1,48 @@
+From: Franck LENORMAND <franck.lenormand@nxp.com>
+Date: Sun, 13 Jun 2021 14:38:01 +0200
+Subject: [PATCH 3/3] TEE-639 plat: imx8m: Do not release JR0 to NS if HAB is
+ using it
+
+In case JR0 is used by the HAB for secure boot, it can be used later
+for authenticating kernel or other binaries.
+
+We are checking if the HAB is using the JR by the DID set.
+
+Signed-off-by: Franck LENORMAND <franck.lenormand@nxp.com>
+(cherry picked from commit a83a7c65ea4e7b41d5c8fb129bac9caa89053d5e)
+Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
+---
+ plat/imx/imx8m/imx8m_caam.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/plat/imx/imx8m/imx8m_caam.c b/plat/imx/imx8m/imx8m_caam.c
+index 478005e2e..73122aba8 100644
+--- a/plat/imx/imx8m/imx8m_caam.c
++++ b/plat/imx/imx8m/imx8m_caam.c
+@@ -7,10 +7,12 @@
+ #include <lib/mmio.h>
+ 
+ #include <imx8m_caam.h>
++#include <common/debug.h>
+ 
+ void imx8m_caam_init(void)
+ {
+ 	uint32_t sm_cmd;
++	uint32_t hab_jr0_did = 0x8011;
+ 
+ 	/* Dealloc part 0 and 2 with current DID */
+ 	sm_cmd = (0 << SMC_PART_SHIFT | SMC_CMD_DEALLOC_PART);
+@@ -20,7 +22,12 @@ void imx8m_caam_init(void)
+ 	mmio_write_32(SM_CMD, sm_cmd);
+ 
+ 	/* config CAAM JRaMID set MID to Cortex A */
+-	mmio_write_32(CAAM_JR0MID, CAAM_NS_MID);
++	if (mmio_read_32(CAAM_JR0MID) == hab_jr0_did) {
++		NOTICE("Do not release JR0 to NS as it can be used by HAB");
++	} else {
++		mmio_write_32(CAAM_JR0MID, CAAM_NS_MID);
++	}
++
+ 	mmio_write_32(CAAM_JR1MID, CAAM_NS_MID);
+ 	mmio_write_32(CAAM_JR2MID, CAAM_NS_MID);
+ 
