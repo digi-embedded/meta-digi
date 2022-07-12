@@ -19,18 +19,12 @@ SRC_URI += " \
     file://p2pbridge \
 "
 
-# 'polkit' depends on 'consolekit', and this requires 'x11' distro feature. So
-# disable those compile time options to be able to build for framebuffer
-# based images.
-DEPENDS:remove = "polkit"
-EXTRA_OECONF += "--enable-polkit=disabled"
-PACKAGECONFIG:remove:dey = "consolekit"
-
-# Adjust other compile time options to save space
-PACKAGECONFIG:remove:dey = "netconfig nss"
+#
+# Adjust compile time options:
+#   * consolekit depends on X11. Disable to allow building framebuffer images.
+#
+PACKAGECONFIG:remove:dey = "consolekit nss"
 PACKAGECONFIG:append = " gnutls modemmanager ppp concheck"
-
-EXTRA_OECONF:append = " --disable-introspection"
 
 #
 # NetworkManager only accepts IP addresses in CIDR format
