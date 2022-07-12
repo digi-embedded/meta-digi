@@ -1,4 +1,4 @@
-# Copyright (C) 2018, 2019, Digi International Inc.
+# Copyright (C) 2018-2022, Digi International Inc.
 
 SUMMARY = "AWS IoT Greengrass core"
 HOMEPAGE = "https://aws.amazon.com/greengrass/"
@@ -138,4 +138,4 @@ USERADD_PARAM:${PN} = "-r -M -N -g ggc_group -s /bin/false ggc_user"
 #
 INSANE_SKIP:${PN} += "already-stripped ldflags file-rdeps"
 
-RDEPENDS:${PN} += "ca-certificates python-argparse python-json python-numbers sqlite3"
+RDEPENDS:${PN} += "ca-certificates python3-core sqlite3"
