@@ -17,6 +17,7 @@ SRC_URI_append_ccimx8mn = " file://0001-imx8mn-Define-UART1-as-console-for-boot-
                             file://0002-imx8mn-Disable-M7-debug-console.patch"
 SRC_URI_append_ccimx8mm = " file://0001-imx8mm-Define-UART1-as-console-for-boot-stage.patch \
                             file://0002-imx8mm-Disable-M4-debug-console.patch"
+SRC_URI_append_ccimx8m = " file://0003-TEE-639-plat-imx8m-Do-not-release-JR0-to-NS-if-HAB-i.patch"
 
 S = "${WORKDIR}/git"
 

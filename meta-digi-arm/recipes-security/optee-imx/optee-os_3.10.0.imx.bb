@@ -6,6 +6,8 @@ DEPENDS_append = " python3-pycryptodomex-native"
 SRCBRANCH = "imx_5.4.70_2.3.0"
 SRCREV = "a991c90475bb1c715651e5fe27f7f32cbe61aef9"
 
+SRC_URI_append_ccimx8m = " file://0001-TEE-639-drivers-caam-skip-JR-init-of-CFG_JR_HAB_INDE.patch"
+
 # tee-init_load_addr.txt has been remove in lates optee-os version.
 # to keep backward compatibility with existing optee-os recipe.
 do_compile_append () {
