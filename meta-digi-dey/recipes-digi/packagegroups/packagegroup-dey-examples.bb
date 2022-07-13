@@ -21,6 +21,7 @@ RDEPENDS:${PN} = "\
 	dey-examples-cloudconnector \
 	dey-examples-digiapix \
 	dey-examples-rtc \
+	connectcore-demo-example \
 "
 RDEPENDS:${PN}:append:ccimx6 = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \

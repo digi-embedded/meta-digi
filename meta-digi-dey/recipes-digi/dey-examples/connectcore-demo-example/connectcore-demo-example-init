@@ -1,0 +1,50 @@
+#!/bin/sh
+#===============================================================================
+#
+#  Copyright (C) 2022 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Initialize the ConnectCore demo example
+#
+#===============================================================================
+
+# Source function library
+. /etc/init.d/functions
+
+readonly DEMOSERVER_BINARY="/srv/www/demoserver.py"
+readonly STOP_TIMEOUT="5"
+
+stop_process() {
+	# try to stop gracefully
+	killproc "${1}" >/dev/null 2>&1
+	for i in $(seq ${STOP_TIMEOUT}); do
+		pid=$(pidofproc "${1}") || break
+		if [ "${i}" -eq ${STOP_TIMEOUT} ]; then
+			kill -KILL "${pid}" >/dev/null 2>&1
+		fi
+		sleep 1
+	done
+}
+
+case "$1" in
+	start)
+		${DEMOSERVER_BINARY} > /dev/null 2>&1 &
+		;;
+	stop)
+		stop_process "${DEMOSERVER_BINARY}"
+		;;
+	restart)
+		$0 stop
+		sleep 1
+		$0 start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+		;;
+esac
