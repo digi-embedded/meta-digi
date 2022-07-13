@@ -1,4 +1,4 @@
-# Copyright (C) 2020 Digi International.
+# Copyright (C) 2020-2022 Digi International.
 
 SUMMARY = "A collection of WebGL samples"
 DESCRIPTION = "This repo contains several examples of the WebGL JavaScript API, which allows web browsers to render 2D and 3D graphics with direct access to the system's GPU."
@@ -11,9 +11,41 @@ SRCBRANCH = "master"
 
 SRC_URI = "${WEBGL_SAMPLES_SRC};branch=${SRCBRANCH}"
 SRCREV = "dc4428bdc6ef2177f71d9e7bab164c43f9e29302"
+
 S = "${WORKDIR}/git"
 
-require digi-webkit-examples.inc
+WEBSERVER_ROOT = "srv/www"
+
+# List of samples we want accesible via the landing page
+WEBGL_SAMPLES = " \
+    aquarium \
+    blob \
+    dynamic-cubemap \
+    electricflower \
+    field \
+    multiple-views \
+    spacerocks \
+    toon-shading \
+"
+# Folders containing elements required by the samples we've selected
+WEBGL_SAMPLE_DEPS = " \
+    colorpicker \
+    css \
+    fishtank \
+    fonts \
+    gradient-editor \
+    images \
+    jquery-ui-1.8.2.custom \
+    js \
+    lots-o-objects \
+    shared \
+    tdl \
+"
+# List of all folders that need to be installed
+WEBGL_REQUIRED = " \
+    ${WEBGL_SAMPLES} \
+    ${WEBGL_SAMPLE_DEPS} \
+"
 
 # The package contains static webpages, no need to configure or compile
 do_configure[noexec] = "1"
@@ -32,3 +64,10 @@ do_install() {
 		     -exec install -Dm 644 "{}" "${D}/${WEBSERVER_ROOT}/{}" \;
 	done
 }
+
+# All packages involved in the webkit examples install their files in the
+# webserver directory
+FILES:${PN} = "/${WEBSERVER_ROOT}/*"
+
+# Don't generate dbg or dev packages
+PACKAGES = "${PN}"

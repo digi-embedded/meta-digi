@@ -1,4 +1,4 @@
-# Copyright (C) 2020 Digi International.
+# Copyright (C) 2020-2022 Digi International.
 
 SUMMARY = "Short videos to demonstrate video playback on the WPE WebKit"
 DESCRIPTION = "This package contains fragments of the short film 'Big Buck Bunny', which are used to demonstrate how WebKit makes use of hardware acceleration for video decoding"
@@ -13,7 +13,15 @@ SRC_URI[sha256sum] = "97389f33d98c52d4311117366f0aa8dc78d00f51a787697af349de4668
 
 S = "${WORKDIR}/${PN}-${PV}"
 
-require digi-webkit-examples.inc
+WEBSERVER_ROOT = "srv/www"
+
+# List of video sample formats
+VIDEO_FORMATS = " \
+    mov \
+    webm \
+"
+# Name of the video sample
+VIDEO_NAME = "big_buck_bunny"
 
 # The package contains video files, no need to configure or compile
 do_configure[noexec] = "1"
@@ -26,3 +34,10 @@ do_install() {
 		install -m 644 ${S}/${VIDEO_NAME}.${format} ${D}/${WEBSERVER_ROOT}/videos
 	done
 }
+
+# All packages involved in the webkit examples install their files in the
+# webserver directory
+FILES:${PN} = "/${WEBSERVER_ROOT}/*"
+
+# Don't generate dbg or dev packages
+PACKAGES = "${PN}"
