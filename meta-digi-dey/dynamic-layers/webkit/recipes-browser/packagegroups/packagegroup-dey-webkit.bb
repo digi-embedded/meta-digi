@@ -9,5 +9,6 @@ inherit packagegroup
 # Include WPE WebKit, launcher (cog) and examples
 RDEPENDS:${PN} += " \
     cog \
+    connectcore-demo-example-webkit \
     wpewebkit \
 "
