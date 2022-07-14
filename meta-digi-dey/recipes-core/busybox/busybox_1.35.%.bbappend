@@ -18,10 +18,6 @@ SRC_URI += "file://standby \
                                                             ", "", d)} \
            "
 
-SRC_URI:append:ccimx6ul = " file://index.html \
-                            file://digi-logo.png \
-                          "
-
 HAS_SYSTEMD = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}"
 HAS_MCA = "${@bb.utils.contains('MACHINE_FEATURES', 'mca', 'true', 'false', d)}"
 
@@ -100,15 +96,6 @@ do_install:append() {
 	if ${HAS_MCA}; then
 		install -m 0755 ${WORKDIR}/poweroff_safe ${D}${base_bindir}/poweroff_safe
 		install -m 0755 ${WORKDIR}/reboot_safe ${D}${base_bindir}/reboot_safe
-	fi
-}
-
-do_install:append:ccimx6ul() {
-	install -d ${D}/srv/www
-	if grep "CONFIG_HTTPD=y" ${WORKDIR}/defconfig; then
-		install -m 0644 ${WORKDIR}/index.html ${D}/srv/www/
-		install -m 0644 ${WORKDIR}/digi-logo.png ${D}/srv/www/
-
 	fi
 }
 
