@@ -33,6 +33,7 @@ RDEPENDS:${PN} = "\
     awsiotsdk-c \
     base-files \
     base-passwd \
+    connectcore-demo-example \
     cloudconnector \
     cryptodev-module \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'firmwared', '',d)} \
