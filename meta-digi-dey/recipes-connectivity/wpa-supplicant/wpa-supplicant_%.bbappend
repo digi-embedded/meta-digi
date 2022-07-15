@@ -34,6 +34,10 @@ MURATA_COMMON_PATCHES = " \
     file://murata/0018-wpa_supplicant-Support-WPA_KEY_MGMT_FT-for-eapol-off.patch \
     file://murata/0019-wpa_supplicant-suppress-deauth-for-PMKSA-caching-dis.patch \
     file://murata/0020-Fix-to-check-Invalid-GTK-IE-length-in-M3-at-STA.patch \
+    file://murata/0021-SAE-Fix-for-PMK-expiration-issue-through-supplicant.patch \
+    file://murata/0022-SAE-Fix-for-PMK-expiration-issue-through-supplicant.patch;apply=no \
+    file://murata/0023-SAE-Drop-PMKSA-cache-after-receiving-specific-deauth.patch \
+    file://murata/0024-Deauthenticate-STA-only-if-PMK-expired.patch \
 "
 
 SRC_URI:append:ccimx6sbc = " file://wpa_supplicant_p2p.conf_atheros"
