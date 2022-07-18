@@ -27,6 +27,7 @@ SRC_URI = " \
     file://0001-qca-wifi-host-cmn-fix-buid-issue-for-Rome-SDIO-inter.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
     file://0002-qca-wifi-host-cmn-fix-build-issue-enabling-debug-for.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
     file://0003-qca-wifi-host-cmn-fix-panic_notifier_list-undeclared.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
+    file://0004-qca-wifi-host-cmn-fix-sdio-error-on-unload-driver.patch;patchdir=${WORKDIR}/qca-wifi-host-cmn; \
 "
 
 # Tag 'CHSS.LNX_FSL.5.0-01200-QCA6574AUARMSDIOHZ' in all repos

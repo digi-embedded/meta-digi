@@ -1,0 +1,29 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Mon, 18 Jul 2022 09:41:51 +0200
+Subject: [PATCH] sdio: fix sdio error on unload driver
+
+macro TARGET_DUMP_FOR_NON_QC_PLATFORM does not exist, and that code does not
+apply for our platform, so remove that to avoid unload driver error.
+
+https://onedigi.atlassian.net/browse/DEL-7986
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ hif/src/sdio/native_sdio/src/hif.c | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/hif/src/sdio/native_sdio/src/hif.c b/hif/src/sdio/native_sdio/src/hif.c
+index d52eee248a3e..d4804070f500 100644
+--- a/hif/src/sdio/native_sdio/src/hif.c
++++ b/hif/src/sdio/native_sdio/src/hif.c
+@@ -893,10 +893,6 @@ static A_STATUS hif_sdio_remove(void *context, void *hif_handle)
+ 
+ 	athdiag_procfs_remove();
+ 
+-#ifndef TARGET_DUMP_FOR_NON_QC_PLATFORM
+-	iounmap(scn->ramdump_base);
+-#endif
+-
+ 	HIF_EXIT();
+ 
+ 	return 0;
