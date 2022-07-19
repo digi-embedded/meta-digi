@@ -1,4 +1,3 @@
-From 7f9365919153c9ba17bfeb48049df2ee5a77b047 Mon Sep 17 00:00:00 2001
 From: Pierre-Yves MORDRET <pierre-yves.mordret@st.som>
 Date: Mon, 23 May 2022 14:27:13 +0200
 Subject: [PATCH] Remove useless code from new Fragment Shader
@@ -11,18 +10,20 @@ state, we simply remove the code.
 Change-Id: I37880d5fcb8487c77e084b289db8d2fb945c21ab
 Signed-off-by: Pierre-Yves MORDRET <pierre-yves.mordret@st.som>
 ---
- libweston/renderer-gl/fragment.glsl | 93 ++---------------------------
- libweston/renderer-gl/gl-shaders.c  |  5 --
- 2 files changed, 5 insertions(+), 93 deletions(-)
+ libweston/renderer-gl/fragment.glsl | 110 ++--------------------------
+ libweston/renderer-gl/gl-shaders.c  |   4 -
+ 2 files changed, 5 insertions(+), 109 deletions(-)
 
 diff --git a/libweston/renderer-gl/fragment.glsl b/libweston/renderer-gl/fragment.glsl
-index 63a20cd6..f735ab3a 100644
+index cfadb88..f735ab3 100644
 --- a/libweston/renderer-gl/fragment.glsl
 +++ b/libweston/renderer-gl/fragment.glsl
-@@ -42,30 +42,17 @@
+@@ -40,37 +40,21 @@
+ #define SHADER_VARIANT_Y_XUXV   5
+ #define SHADER_VARIANT_XYUV     6
  #define SHADER_VARIANT_SOLID    7
  #define SHADER_VARIANT_EXTERNAL 8
- 
+
 -/* enum gl_shader_color_curve */
 -#define SHADER_COLOR_CURVE_IDENTITY 0
 -#define SHADER_COLOR_CURVE_LUT_3x1D 1
@@ -30,7 +31,7 @@ index 63a20cd6..f735ab3a 100644
  #if DEF_VARIANT == SHADER_VARIANT_EXTERNAL
  #extension GL_OES_EGL_image_external : require
  #endif
- 
+
 -#ifdef GL_FRAGMENT_PRECISION_HIGH
 -#define HIGHPRECISION highp
 -#else
@@ -39,7 +40,7 @@ index 63a20cd6..f735ab3a 100644
 -
 -precision HIGHPRECISION float;
 +precision mediump float;
- 
+
  /*
   * These undeclared identifiers will be #defined by a runtime generated code
   * snippet.
@@ -48,30 +49,45 @@ index 63a20cd6..f735ab3a 100644
 -compile_const bool c_input_is_premult = DEF_INPUT_IS_PREMULT;
 -compile_const bool c_green_tint = DEF_GREEN_TINT;
 -compile_const int c_color_pre_curve = DEF_COLOR_PRE_CURVE;
- 
+-
+-compile_const bool c_need_color_pipeline =
+-	c_color_pre_curve != SHADER_COLOR_CURVE_IDENTITY;
+
  vec4
  yuva2rgba(vec4 yuva)
-@@ -91,6 +78,7 @@ yuva2rgba(vec4 yuva)
+ {
+ 	vec4 color_out;
+@@ -92,10 +76,11 @@ yuva2rgba(vec4 yuva)
+ 	 */
+ 	color_out.r = Y                   + 1.59602678 * sv;
  	color_out.g = Y - 0.39176229 * su - 0.81296764 * sv;
  	color_out.b = Y + 2.01723214 * su;
- 
+
 +	color_out.rgb *= yuva.w;
  	color_out.a = yuva.w;
- 
+
  	return color_out;
-@@ -107,8 +95,6 @@ uniform sampler2D tex1;
+ }
+
+@@ -108,12 +93,10 @@ uniform sampler2D tex;
+ varying vec2 v_texcoord;
+ uniform sampler2D tex1;
  uniform sampler2D tex2;
  uniform float alpha;
  uniform vec4 unicolor;
 -uniform HIGHPRECISION sampler2D color_pre_curve_lut_2d;
 -uniform HIGHPRECISION vec2 color_pre_curve_lut_scale_offset;
- 
+
  vec4
  sample_input_texture()
-@@ -154,85 +140,16 @@ sample_input_texture()
+ {
+ 	vec4 yuva = vec4(0.0, 0.0, 0.0, 1.0);
+@@ -155,101 +138,18 @@ sample_input_texture()
+ 	}
+
  	return yuva2rgba(yuva);
  }
- 
+
 -/*
 - * Texture coordinates go from 0.0 to 1.0 corresponding to texture edges.
 - * When we do LUT look-ups with linear filtering, the correct range to sample
@@ -120,9 +136,6 @@ index 63a20cd6..f735ab3a 100644
 -vec4
 -color_pipeline(vec4 color)
 -{
--	/* View alpha (opacity) */
--	color.a *= alpha;
--
 -	color.rgb = color_pre_curve(color.rgb);
 -
 -	return color;
@@ -132,36 +145,55 @@ index 63a20cd6..f735ab3a 100644
  main()
  {
  	vec4 color;
- 
+
 -	/* Electrical (non-linear) RGBA values, may be premult or not */
 +	/* Electrical (non-linear) RGBA values, pre-multiplied */
  	color = sample_input_texture();
- 
--	/* Ensure straight alpha */
--	if (c_input_is_premult) {
--		if (color.a == 0.0)
--			color.rgb = vec3(0, 0, 0);
--		else
--			color.rgb *= 1.0 / color.a;
+
+-	if (c_need_color_pipeline) {
+-		/* Ensure straight alpha */
+-		if (c_input_is_premult) {
+-			if (color.a == 0.0)
+-				color.rgb = vec3(0, 0, 0);
+-			else
+-				color.rgb *= 1.0 / color.a;
+-		}
+-
+-		color = color_pipeline(color);
+-
+-		/* View alpha (opacity) */
+-		color.a *= alpha;
+-
+-		/* pre-multiply for blending */
+-		color.rgb *= color.a;
+-	} else {
+-		/* Fast path for disabled color management */
+-
+-		if (c_input_is_premult) {
+-			/* View alpha (opacity) */
+-			color *= alpha;
+-		} else {
+-			/* View alpha (opacity) */
+-			color.a *= alpha;
+-			/* pre-multiply for blending */
+-			color.rgb *= color.a;
+-		}
 -	}
--
--	color = color_pipeline(color);
--
--	/* pre-multiply for blending */
--	color.rgb *= color.a;
 -
 -	if (c_green_tint)
 -		color = vec4(0.0, 0.3, 0.0, 0.2) + color * 0.8;
 +	/* View alpha (opacity) */
 +	color *= alpha;
- 
+
  	gl_FragColor = color;
  }
 diff --git a/libweston/renderer-gl/gl-shaders.c b/libweston/renderer-gl/gl-shaders.c
-index 97f288c0..c8e3d297 100644
+index 97f288c..65a4fc2 100644
 --- a/libweston/renderer-gl/gl-shaders.c
 +++ b/libweston/renderer-gl/gl-shaders.c
-@@ -263,11 +263,6 @@ gl_shader_create(struct gl_renderer *gr,
+@@ -261,14 +261,10 @@ gl_shader_create(struct gl_renderer *gr,
+ 	shader->tex_uniforms[1] = glGetUniformLocation(shader->program, "tex1");
+ 	shader->tex_uniforms[2] = glGetUniformLocation(shader->program, "tex2");
  	shader->alpha_uniform = glGetUniformLocation(shader->program, "alpha");
  	shader->color_uniform = glGetUniformLocation(shader->program,
  						     "unicolor");
@@ -169,10 +201,7 @@ index 97f288c0..c8e3d297 100644
 -		glGetUniformLocation(shader->program, "color_pre_curve_lut_2d");
 -	shader->color_pre_curve_lut_scale_offset_uniform =
 -		glGetUniformLocation(shader->program, "color_pre_curve_lut_scale_offset");
--
- 	free(conf);
- 
- 	wl_list_insert(&gr->shader_list, &shader->link);
--- 
-2.17.1
 
+ 	free(conf);
+
+ 	wl_list_insert(&gr->shader_list, &shader->link);
