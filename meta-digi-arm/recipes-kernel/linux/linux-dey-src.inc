@@ -1,7 +1,7 @@
 # Copyright (C) 2018-2022 Digi International
 
 LOCALVERSION = "-dey"
-SRCREV = "${AUTOREV}"
+SRCREV = "5ed8aa9a3de7fe71d715b1faecba557cddd72c5d"
 
 # Select internal or Github Linux repo
 DIGI_LOG_REPO = "linux-2.6.git"
@@ -11,8 +11,8 @@ LINUX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , \
 					oe.utils.conditional('DIGI_GIT', '${DIGI_LOG_GIT}', '${DIGI_GIT}/${DIGI_LOG_REPO}', '${DIGI_GIT}/${DIGI_MTK_REPO};protocol=ssh', d), \
 					'${DIGI_GITHUB_GIT}/${GITHUB_REPO};protocol=https', d)}"
 
-SRC_URI = "${LINUX_GIT_URI};branch=${SRCBRANCH}"
-SRC_URI_stmp32mpcommon = "${LINUX_GIT_URI};branch=${SRCBRANCH}"
+SRC_URI = "${LINUX_GIT_URI};nobranch=1"
+SRC_URI_stmp32mpcommon = "${LINUX_GIT_URI};nobranch=1"
 
 # A user can provide his own kernel 'defconfig' file by:
 # - setting the variable KERNEL_DEFCONFIG to a custom kernel configuration file
