@@ -15,6 +15,7 @@ BBLAYERS ?= " \
   ##DIGIBASE##/meta-openembedded/meta-webserver \
   ##DIGIBASE##/meta-qt5 \
   ##DIGIBASE##/meta-swupdate \
+  ##DIGIBASE##/meta-webkit \
   ##DIGIBASE##/meta-timesys \
   ##DIGIBASE##/meta-st-stm32mp \
   ##DIGIBASE##/meta-digi/meta-digi-arm \
