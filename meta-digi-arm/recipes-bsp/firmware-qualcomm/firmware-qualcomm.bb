@@ -69,6 +69,7 @@ SRC_URI = " \
     ${FW_QUALCOMM_BT} \
     ${FW_QUALCOMM_WIFI} \
     ${@oe.utils.vartrue('QUALCOMM_FW_CCX_TAGS', '${FW_QUALCOMM_CCX}', '', d)} \
+    file://nvm-tag33.bin \
 "
 
 S = "${WORKDIR}"
@@ -128,6 +129,13 @@ do_install() {
 		# Enable Internal Clock in the bluetooth firmware
 		awk 'BEGIN{printf "%c%c", 0x01, 0x00}' | dd of="${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin" bs=1 seek=93 count=2 conv=notrunc,fsync
 	fi
+
+	# Insert TAG33 for CVE-2019-9506 and update file length
+	cat nvm-tag33.bin >> "${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin"
+	# Calculate the new firmware file size
+	length="$(expr $(stat -L -c %s ${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin) - 4)"
+	/bin/echo -ne "\x$(printf '%02x' $(expr $length % 256))" | dd of=${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin bs=1 seek=1 count=1 conv=notrunc,fsync
+	/bin/echo -ne "\x$(printf '%02x' $(expr $length / 256))" | dd of=${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin bs=1 seek=2 count=1 conv=notrunc,fsync
 }
 
 QCA_MODEL ?= "qca6564"
