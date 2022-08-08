@@ -1,0 +1,37 @@
+#
+# U-Boot bootscript for altbootcmd (dual boot fallback after retries)
+#
+
+# After an upgrade, active_system has changed. U-Boot tries to boot this system
+# for a number of tries. If the limit is reached, altbootcmd is run instead.
+# This is the script that it will run. It has to:
+#  * switch back to previous system
+#  * reset the firmware update flag
+#  * run the regular boot command
+
+if test "${dualboot}" = "yes" && test "${upgrade_available}" = "1"; then
+	echo "## Update failed; Rolling back to previous version."
+	if test "${active_system}" = "linux_a"; then
+		setenv active_system linux_b
+		part number mmc ${mmcbootdev} linux_b linux_b_index
+		setexpr mmcpart ${linux_b_index}
+		# Save the partition index on variable rootfs_b_index
+		part number mmc ${mmcbootdev} rootfs_b rootfs_b_index
+		# Save the rootfs_b UUID into mmcroot_b
+		part uuid mmc ${mmcbootdev}:${rootfs_b_index} mmcroot_b
+		setenv mmcroot PARTUUID=${mmcroot_b}
+	else
+		setenv active_system linux_a
+		part number mmc ${mmcbootdev} linux_a linux_a_index
+		setexpr mmcpart ${linux_a_index}
+		# Save the partition index on variable rootfs_a_index
+		part number mmc ${mmcbootdev} rootfs_a rootfs_a_index
+		# Save the rootfs_a UUID into mmcroot_a
+		part uuid mmc ${mmcbootdev}:${rootfs_a_index} mmcroot_a
+		setenv mmcroot PARTUUID=${mmcroot_a}
+	fi
+	setenv upgrade_available
+	setenv bootcount 0
+	saveenv
+fi
+run bootcmd

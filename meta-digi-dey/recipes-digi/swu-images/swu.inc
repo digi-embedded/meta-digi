@@ -10,7 +10,9 @@ SRC_URI = " \
     file://sw-description-uboot \
     file://swupdate_uboot_nand.sh \
     file://swupdate_uboot_mmc.sh \
+    ${@oe.utils.vartrue('DUALBOOT_ENABLED', 'file://sw-description-dualboot', '', d)} \
 "
+
 inherit swupdate
 
 IMAGE_DEPENDS = "${@get_baseimg_pn(d)}"
@@ -50,7 +52,8 @@ def get_baseimg_pn(d):
     file_name = d.getVar('PN', True)
     return file_name[:file_name.find("-swu")]
 
-do_unpack[postfuncs] += "fill_description"
+# Call regular substitution or dualboot substitution
+do_unpack[postfuncs] += "${@oe.utils.vartrue('DUALBOOT_ENABLED', 'fill_description_dualboot', 'fill_description', d)}"
 
 fill_description() {
 	if [ "${SWUPDATE_UBOOTIMG}" = "true" ]; then

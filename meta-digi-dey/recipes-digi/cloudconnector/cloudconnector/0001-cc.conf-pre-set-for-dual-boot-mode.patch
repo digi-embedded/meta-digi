@@ -1,0 +1,48 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Thu, 8 Jul 2021 09:43:50 +0200
+Subject: [PATCH] cc.conf: pre-set for dual boot mode
+
+- Change default firmware download path to external media
+  '/home/root/'.
+- Remove '/mnt/update' virtual directory.
+- Enable dual boot mode.
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+---
+ app/cfg_files/cc.conf | 9 ++-------
+ 1 file changed, 2 insertions(+), 7 deletions(-)
+
+diff --git a/app/cfg_files/cc.conf b/app/cfg_files/cc.conf
+index 7018efb..bff9332 100644
+--- a/app/cfg_files/cc.conf
++++ b/app/cfg_files/cc.conf
+@@ -99,27 +99,22 @@ virtual-dirs
+     vdir {
+         name = "tmp"
+         path = "/tmp"
+     }
+ 
+-    vdir {
+-        name = "update"
+-        path = "/mnt/update"
+-    }
+-
+     vdir {
+         name = "media"
+         path = "/run/media"
+     }
+ }
+ 
+ # Firmware Download Path: Absolute path to download the firmware packages from
+ # the cloud. It must be an existing directory.
+-firmware_download_path = /mnt/update
++firmware_download_path = /home/root
+ 
+ # Enable dualboot support
+-dualboot = false
++dualboot = true
+ 
+ # Enables on the fly firmware update support
+ on_the_fly = false
+ 
+ #===============================================================================

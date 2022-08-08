@@ -1,0 +1,107 @@
+software =
+{
+    version = "##SW_VERSION##";
+
+    mmc = {
+        primary: {
+            images: (
+                {
+                    filename = "##BOOTIMG_NAME##";
+                    device = "##BOOT_DEV_A##";
+                    type = "raw";
+                    sha256 = "@##BOOTIMG_NAME##";
+                    installed-directly = true;
+                },
+                {
+                    filename = "##ROOTIMG_NAME##";
+                    device = "##ROOTFS_DEV_A##";
+                    type = "raw";
+                    sha256 = "@##ROOTIMG_NAME##";
+                    compressed = "zlib";
+                    installed-directly = true;
+                }
+            );
+            uboot: (
+                {
+                    name = "upgrade_available";
+                    value = "1";
+                }
+            );
+        }
+        secondary: {
+            images: (
+                {
+                    filename = "##BOOTIMG_NAME##";
+                    device = "##BOOT_DEV_B##";
+                    type = "raw";
+                    sha256 = "@##BOOTIMG_NAME##";
+                    installed-directly = true;
+                },
+                {
+                    filename = "##ROOTIMG_NAME##";
+                    device = "##ROOTFS_DEV_B##";
+                    type = "raw";
+                    sha256 = "@##ROOTIMG_NAME##";
+                    compressed = "zlib";
+                    installed-directly = true;
+                }
+            );
+            uboot: (
+                {
+                    name = "upgrade_available";
+                    value = "1";
+                }
+            );
+        }
+    };
+    mtd = {
+        primary: {
+            images: (
+                {
+                    filename = "##BOOTIMG_NAME##";
+                    volume = "##BOOT_DEV_A##";
+                    type = "ubivol";
+                    sha256 = "@##BOOTIMG_NAME##";
+                    installed-directly = true;
+                },
+                {
+                    filename = "##ROOTIMG_NAME##";
+                    volume = "##ROOTFS_DEV_A##";
+                    type = "ubivol";
+                    sha256 = "@##ROOTIMG_NAME##";
+                    installed-directly = true;
+                }
+            );
+            uboot: (
+                {
+                    name = "upgrade_available";
+                    value = "1";
+                }
+            );
+        }
+        secondary: {
+            images: (
+                {
+                    filename = "##BOOTIMG_NAME##";
+                    volume = "##BOOT_DEV_B##";
+                    type = "ubivol";
+                    sha256 = "@##BOOTIMG_NAME##";
+                    installed-directly = true;
+                },
+                {
+                    filename = "##ROOTIMG_NAME##";
+                    volume = "##ROOTFS_DEV_B##";
+                    type = "ubivol";
+                    sha256 = "@##ROOTIMG_NAME##";
+                    installed-directly = true;
+                }
+            );
+            uboot: (
+                {
+                    name = "upgrade_available";
+                    value = "1";
+                }
+            );
+        }
+    };
+}

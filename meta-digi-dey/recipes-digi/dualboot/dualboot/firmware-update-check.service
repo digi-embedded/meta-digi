@@ -1,0 +1,12 @@
+[Unit]
+Description=Verify if fw update was successful
+After=default.target
+
+[Service]
+Type=simple
+RemainAfterExit=no
+ExecStart=/etc/dualboot-init start
+TimeoutStartSec=0
+
+[Install]
+WantedBy=default.target

@@ -19,6 +19,7 @@ SRC_URI = " \
     ${CC_GIT_URI};branch=${SRCBRANCH} \
     file://cloud-connector-init \
     file://cloud-connector.service \
+    ${@oe.utils.vartrue('DUALBOOT_ENABLED', 'file://0001-cc.conf-pre-set-for-dual-boot-mode.patch', '', d)} \
 "
 
 S = "${WORKDIR}/git"
