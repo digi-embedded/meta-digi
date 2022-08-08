@@ -24,6 +24,15 @@ require ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'recipes-kernel/linux/li
 # Use custom provided 'defconfig' if variable KERNEL_DEFCONFIG is cleared
 SRC_URI +="${@oe.utils.conditional('KERNEL_DEFCONFIG', '', 'file://defconfig', '', d)}"
 
+# This is needed because kernel_localversion (in fsl-kernel-localversion.bbclass)
+# creates a basic ${B}/.config file and because that file exists, kernel_do_configure
+# (in kernel.bbclass) does not apply our defconfig.
+do_configure:prepend:imx-nxp-bsp() {
+	if [ -f "${WORKDIR}/defconfig" ] && [ -f "${B}/.config" ]; then
+		cat "${WORKDIR}/defconfig" >> "${B}/.config"
+	fi
+}
+
 # Apply configuration fragments
 do_configure:append() {
 	# Only accept fragments ending in .cfg. If the fragments contain
