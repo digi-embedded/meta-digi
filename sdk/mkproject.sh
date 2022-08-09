@@ -104,7 +104,7 @@ do_license() {
 		local SOC_VENDOR="NXP"
 		MKP_LICENSE_FILES=" \
 			${MKP_LICENSE_FILES} \
-			${MKP_SCRIPTPATH}/sources/meta-imx/EULA.txt \
+			${MKP_SCRIPTPATH}/sources/meta-freescale/EULA \
 		"
 	fi
 	[ -z "${MKP_PAGER+x}" ] && MKP_PAGER="| more"
