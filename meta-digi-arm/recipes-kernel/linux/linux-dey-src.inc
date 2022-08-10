@@ -1,7 +1,6 @@
 # Copyright (C) 2018-2022 Digi International
 
 LOCALVERSION = "-dey"
-SRCREV = "${AUTOREV}"
 
 # Select internal or Github Linux repo
 LINUX_URI_STASH = "${DIGI_MTK_GIT}/linux/linux.git;protocol=ssh"

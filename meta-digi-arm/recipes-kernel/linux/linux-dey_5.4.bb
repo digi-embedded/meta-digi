@@ -10,6 +10,8 @@ inherit kernel
 inherit ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'fsl-kernel-localversion', '', d)}
 
 SRCBRANCH = "v5.4.70/master"
+SRCREV = "${AUTOREV}"
+
 require recipes-kernel/linux/linux-dey-src.inc
 require ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'linux-virtualization.inc', '', d)}
 require recipes-kernel/linux/linux-trustfence.inc
