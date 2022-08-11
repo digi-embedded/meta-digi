@@ -103,6 +103,7 @@ purge_sstate() {
 		packagegroup-dey-audio \
 		packagegroup-dey-bluetooth \
 		packagegroup-dey-core \
+		packagegroup-dey-crank \
 		packagegroup-dey-debug \
 		packagegroup-dey-examples \
 		packagegroup-dey-gstreamer \
