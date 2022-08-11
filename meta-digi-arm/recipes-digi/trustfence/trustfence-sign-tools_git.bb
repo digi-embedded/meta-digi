@@ -13,12 +13,9 @@ SRCREV = "${AUTOREV}"
 S = "${WORKDIR}"
 
 # Select internal or Github U-Boot repo
-DIGI_LOG_REPO = "u-boot-denx.git"
-DIGI_MTK_REPO = "uboot/u-boot-denx.git"
-GITHUB_REPO = "u-boot.git"
-UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , \
-					oe.utils.conditional('DIGI_GIT', '${DIGI_LOG_GIT}', '${DIGI_GIT}/${DIGI_LOG_REPO}', '${DIGI_GIT}/${DIGI_MTK_REPO};protocol=ssh', d), \
-					'${DIGI_GITHUB_GIT}/${GITHUB_REPO};protocol=https', d)}"
+UBOOT_URI_STASH = "${DIGI_MTK_GIT}/uboot/u-boot-denx.git;protocol=ssh"
+UBOOT_URI_GITHUB = "${DIGI_GITHUB_GIT}/u-boot.git;protocol=https"
+UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${UBOOT_URI_STASH}', '${UBOOT_URI_GITHUB}', d)}"
 
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
