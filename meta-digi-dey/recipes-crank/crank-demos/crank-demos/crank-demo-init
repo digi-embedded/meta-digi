@@ -1,0 +1,106 @@
+#!/bin/sh
+#===============================================================================
+#
+#  Copyright (C) 2022 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Initialize Crank demo
+#
+#===============================================================================
+
+readonly DEMO="##CRANK_DEMO_PATH##"
+readonly DEMO_OPTS="##CRANK_DEMO_OPTIONS##"
+readonly DEMO_ENV="##CRANK_DEMO_ENV##"
+readonly SB_LAUNCHER="sb-launcher"
+readonly SB_LAUNCHER_SCRIPT="/usr/bin/${SB_LAUNCHER}"
+readonly CRANK_DEMO="crank-demo"
+readonly PID_FILE="/run/${CRANK_DEMO}.pid"
+
+[ -f "/etc/profile.d/tslib.sh" ] && . /etc/profile.d/tslib.sh
+
+log() {
+	if type "systemd-cat" >/dev/null 2>/dev/null; then
+		systemd-cat -p "${1}" -t "${CRANK_DEMO}" printf "%s" "${2}"
+	fi
+	logger -p "${1}" -t "${CRANK_DEMO}" "${2}"
+}
+
+get_crank_demo_pid() {
+	local pids="$(pidof -o $$ "${SB_LAUNCHER}" 2>/dev/null)"
+
+	[ -n "${pids}" ] || return 1
+	for pid in ${pids}; do
+		local cmd_line=$(xargs -0 < /proc/${pid}/cmdline)
+		local app="${cmd_line##* }"
+		[ "${app}" = "${DEMO}" ] && { echo "${pid}"; return 0; }
+	done
+
+	return 1
+}
+
+check_is_running() {
+	local pid
+
+	if [ -f "${PID_FILE}" ]; then
+		pid="$(cat ${PID_FILE})"
+	else
+		pid="$(get_crank_demo_pid)"
+		echo "${pid}" > ${PID_FILE}
+	fi
+
+	if [ "${pid}" ]; then
+		kill -0 "${pid}" >/dev/null 2>&1 && return 0
+	fi
+
+	return 1
+}
+
+stop() {
+	check_is_running || { rm -f "${PID_FILE}"; return; }
+
+	local pid="$(cat ${PID_FILE})"
+	kill -TERM "${pid}" >/dev/null 2>&1
+
+	local STOP_TIMEOUT="5"
+	for i in $(seq ${STOP_TIMEOUT}); do
+		check_is_running || { rm -f "${PID_FILE}"; log info "stopped"; break; }
+		if [ "${i}" -eq ${STOP_TIMEOUT} ]; then
+			log warning "stop: ${CRANK_DEMO} did not stop gracefully"
+			kill -KILL "${pid}" >/dev/null 2>&1
+		fi
+		sleep 1
+	done
+}
+
+start() {
+	check_is_running && { log warning "start: ${CRANK_DEMO} ALREADY running"; exit 0; }
+
+	env ${DEMO_ENV} ${SB_LAUNCHER_SCRIPT} ${DEMO_OPTS} ${DEMO} >/dev/null 2>&1 &
+	if [ $? -eq 0 ]; then
+		echo $! > ${PID_FILE}
+		log info "started"
+	fi
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		sleep 1
+		start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+		;;
+esac

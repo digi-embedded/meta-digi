@@ -36,6 +36,12 @@ do_install:append() {
 		       >> ${D}${sysconfdir}/udev/rules.d/localextra.rules
 	fi
 
+	# Mouse symlink
+	printf "%s\n%s\n" \
+	       "# Symlink to the mouse" \
+	       "SUBSYSTEM==\"input\", KERNEL==\"event[0-9]*\", ENV{ID_INPUT_MOUSE}==\"1\", SYMLINK+=\"input/mouse0\"" \
+	       >> ${D}${sysconfdir}/udev/rules.d/localextra.rules
+
 	install -d ${D}${sysconfdir}/modprobe.d
 	if ${@bb.utils.contains('MACHINE_FEATURES','gpu','false','true',d)}; then
 		# evbug debug tool

@@ -1,0 +1,15 @@
+[Unit]
+Description=Crank Software demo
+Documentation=https://www.cranksoftware.com/
+
+# Make sure we are started after graphic service is available
+After=weston@root.service
+
+[Service]
+Type=forking
+PIDFile=/run/crank-demo.pid
+ExecStart=/etc/crank-demo start
+ExecStop=/etc/crank-demo stop
+
+[Install]
+WantedBy=multi-user.target
