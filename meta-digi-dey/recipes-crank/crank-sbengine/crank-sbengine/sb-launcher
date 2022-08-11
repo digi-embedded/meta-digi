@@ -1,0 +1,5 @@
+#!/bin/sh
+
+ENGINE="/usr/share/crank/sbengine"
+
+exec env LD_LIBRARY_PATH="${ENGINE}/lib" SB_PLUGINS="${ENGINE}/plugins" ${ENGINE}/bin/sbengine "$@"
