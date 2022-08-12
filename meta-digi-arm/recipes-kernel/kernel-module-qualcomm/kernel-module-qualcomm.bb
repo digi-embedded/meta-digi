@@ -50,7 +50,6 @@ WLAN_CONFIG_INI = "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , \
 
 SRC_URI:append = " \
     file://81-qcom-wifi.rules \
-    file://qualcomm.sh \
 "
 
 FILES_SDIO = " \
@@ -104,9 +103,6 @@ do_install:append() {
 	sed -i -e "/^#Channel Bonding/a gChannelBondingMode24GHz=1" ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
 	# Disable 802.11d support
 	sed -i -e "s/g11dSupportEnabled=1/g11dSupportEnabled=0/g" ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
-
-	install -d ${D}${sysconfdir}/udev/scripts
-	install -m 0755 ${WORKDIR}/qualcomm.sh ${D}${sysconfdir}/udev/scripts/
 
 	install -d ${D}${sysconfdir}/udev/rules.d
 	install -m 0644 ${WORKDIR}/81-qcom-wifi.rules ${D}${sysconfdir}/udev/rules.d/
