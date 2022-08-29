@@ -13,12 +13,12 @@ Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
  3 files changed, 132 insertions(+), 128 deletions(-)
 
 diff --git a/lib/bluetooth.h b/lib/bluetooth.h
-index 0fcf412c6c6b..b15702bdcb4c 100644
+index af5fbcfbc3df..609eee3f0356 100644
 --- a/lib/bluetooth.h
 +++ b/lib/bluetooth.h
-@@ -171,6 +171,9 @@ enum {
- 	BT_CLOSED
- };
+@@ -207,6 +207,9 @@ enum {
+ 
+ #define BT_ISO_BASE		20
  
 +extern int verbose_on;
 +#define hciprintf(fd, arg...) if (verbose_on) { fprintf(fd, ##arg);} else { do {} while (0);}

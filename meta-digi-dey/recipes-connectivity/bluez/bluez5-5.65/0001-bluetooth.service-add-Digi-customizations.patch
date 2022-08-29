@@ -12,10 +12,10 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/bluetooth.service.in b/src/bluetooth.service.in
-index 4d39ad49d5bf..495ce39f133b 100644
+index beb98ce0c887..16abe9b08881 100644
 --- a/src/bluetooth.service.in
 +++ b/src/bluetooth.service.in
-@@ -32,5 +32,5 @@ NoNewPrivileges=true
+@@ -34,5 +34,5 @@ NoNewPrivileges=true
  RestrictRealtime=true
  
  [Install]

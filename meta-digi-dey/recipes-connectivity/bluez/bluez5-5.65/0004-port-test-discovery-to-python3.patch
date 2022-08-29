@@ -5,11 +5,11 @@ Subject: [PATCH] port test-discovery to python3
 Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
 ---
- test/test-discovery | 16 +++++++++-------
- 1 file changed, 9 insertions(+), 7 deletions(-)
+ test/test-discovery | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
 
 diff --git a/test/test-discovery b/test/test-discovery
-index eccc7c7e31f0..9aeace414ada 100755
+index 54fc51403a8a..9aeace414ada 100755
 --- a/test/test-discovery
 +++ b/test/test-discovery
 @@ -1,4 +1,4 @@
@@ -18,12 +18,9 @@ index eccc7c7e31f0..9aeace414ada 100755
  # SPDX-License-Identifier: LGPL-2.1-or-later
  
  from __future__ import absolute_import, print_function, unicode_literals
-@@ -19,9 +19,9 @@ def print_compact(address, properties):
- 	name = ""
- 	address = "<unknown>"
+@@ -21,7 +21,7 @@ def print_compact(address, properties):
  
--	for key, value in properties.iteritems():
-+	for key, value in properties.items():
+ 	for key, value in properties.items():
  		if type(value) is dbus.String:
 -			value = unicode(value).encode('ascii', 'replace')
 +			value = str(value)
@@ -65,13 +62,4 @@ index eccc7c7e31f0..9aeace414ada 100755
 +		devices[path] = dict(list(devices[path].items()) + list(changed.items()))
  	else:
  		devices[path] = changed
- 
-@@ -153,7 +155,7 @@ if __name__ == '__main__':
- 	om = dbus.Interface(bus.get_object("org.bluez", "/"),
- 				"org.freedesktop.DBus.ObjectManager")
- 	objects = om.GetManagedObjects()
--	for path, interfaces in objects.iteritems():
-+	for path, interfaces in objects.items():
- 		if "org.bluez.Device1" in interfaces:
- 			devices[path] = interfaces["org.bluez.Device1"]
  
