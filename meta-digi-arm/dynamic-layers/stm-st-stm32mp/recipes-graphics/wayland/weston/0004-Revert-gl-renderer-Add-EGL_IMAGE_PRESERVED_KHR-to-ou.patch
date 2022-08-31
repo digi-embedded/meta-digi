@@ -1,7 +1,6 @@
-From 45a8c37e9dbff9207d58846df048406bf54ce30b Mon Sep 17 00:00:00 2001
 From: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
 Date: Fri, 6 May 2022 11:41:10 +0200
-Subject: [PATCH 4/4] Revert gl-renderer: Add EGL_IMAGE_PRESERVED_KHR to our
+Subject: [PATCH] Revert gl-renderer: Add EGL_IMAGE_PRESERVED_KHR to our
  attributes
 
 Signed-off-by: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
@@ -10,7 +9,7 @@ Signed-off-by: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
  1 file changed, 3 insertions(+), 7 deletions(-)
 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 2f7941f..2ab707c 100644
+index 2f7941f942eb..2ab707c5650d 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -2152,7 +2152,7 @@ gl_renderer_attach_egl(struct weston_surface *es, struct weston_buffer *buffer,
@@ -51,6 +50,3 @@ index 2f7941f..2ab707c 100644
  
  	if (attributes->modifier[0] != DRM_FORMAT_MOD_INVALID) {
  		if (!gr->has_dmabuf_import_modifiers)
--- 
-2.25.1
-
