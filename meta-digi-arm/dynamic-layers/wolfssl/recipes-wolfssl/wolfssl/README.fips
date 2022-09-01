@@ -1,0 +1,139 @@
+Digi Embedded Yocto FIPS-certified WolfSSL support
+==================================================
+
+WolfSSL is a lightweight SSL/TLS library written in C and targeted for
+embedded and resource-constrained environments.
+
+WolfSSL is powered by the wolfCrypt library. A version of the wolfCrypt
+library has been FIPS 140-2 validated, with FIPS 140-3 validation currently
+in progress.
+
+For more information, visit:
+https://www.wolfssl.com/license/fips/
+
+DEY support
+-----------
+Digi Embedded Yocto (DEY) supports building the FIPS validated version of
+WolfSSL. The source package is usually provided under a commercial license
+agreement by WolfSSL. DEY provides the recipes and configurations to build
+the recipe into your final image.
+
+Instructions
+------------
+These instructions assume that DEY is properly installed and a project
+has already been created. For more info on those tasks, see the online
+documentation on the Digi Embedded Documentation portal:
+
+https://www.digi.com/resources/documentation/digidocs/embedded/index.html
+
+1. Add 'meta-wolfssl' layer to the project.
+
+  # cd <project-dir>
+  # bitbake-layers add-layer <DEY-installdir>/sources/meta-wolfssl
+
+2. Configure the project for building wolfssl FIPS bundle (1st build).
+
+  DEY added support for building the library from a password-protected
+  7z-compressed package, but any other package format supported by Yocto may
+  be used.
+
+  The build is controlled by variables configured in the project's
+  configuration file (<project-dir>/conf/local.conf).
+
+    * PREFERRED_VERSION_wolfssl: the version of the wolfssl recipe to build
+    * WOLFSSL_FIPS_PKG_PATH: absolute local path to the package
+    * WOLFSSL_FIPS_PKG_PASSWORD: package's unpack password (only for 7z compression)
+    * WOLFSSL_FIPS_CORE_HASH: in-core integrity hash (not available until
+      after a first run)
+
+  An example follows:
+
+    PREFERRED_VERSION_wolfssl = "5.4.0-fips"
+    WOLFSSL_FIPS_PKG_PATH = "/PATH/TO/wolfssl-5.4.0-commercial-fips-linuxv5.7z"
+    WOLFSSL_FIPS_PKG_PASSWORD = "xxxx"
+    #WOLFSSL_FIPS_CORE_HASH = ""
+
+  Note: Leave the variable WOLFSSL_FIPS_CORE_HASH commented. The `wolfcrypttest`
+  application provides the WolfSSL FIPS integrity hash value after the first run.
+
+3. Add the wolfCrypt test programs to the image.
+
+  In the project's configuration file:
+
+  IMAGE_INSTALL:append = " wolfssl wolfcrypttest wolfcryptbenchmark"
+
+4. Build and program the images in the device.
+
+  If you need more information on this topic, refer to the DEY online
+  documentation (link above).
+
+5. Compute the WolfSSL FIPS integrity hash.
+
+  In the device, run the `wolfcrypttest` test application. At this point,
+  it is expected that the application fails because the library has not been
+  built with the integrity hash.
+
+    root:~# wolfcrypttest
+    ------------------------------------------------------------------------------
+    wolfSSL version 5.4.0
+    ------------------------------------------------------------------------------
+    error    test passed!
+    MEMORY   test passed!
+    base64   test passed!
+    base16   test passed!
+    asn      test passed!
+    in my Fips callback, ok = 0, err = -203
+    message = In Core Integrity check FIPS error
+    hash = 9490AAFD1786A11115256841AA71F9B5313BAA244ACF1A07DD8BB8A893CBC5BC
+    In core integrity hash check failure, copy above hash
+    into verifyCore[] in fips_test.c and rebuild
+    RANDOM   test failed!
+    error = -7000
+    Exiting main with return code: -1
+
+6. Reconfigure the project and build the images again (2nd build).
+
+  Feed the FIPS integrity hash back into the build process with the
+  WOLFSSL_FIPS_CORE_HASH variable.
+
+  For example, the final configuration would be:
+
+    PREFERRED_VERSION_wolfssl = "5.4.0-fips"
+    WOLFSSL_FIPS_PKG_PATH = "/PATH/TO/wolfssl-5.4.0-commercial-fips-linuxv5.7z"
+    WOLFSSL_FIPS_PKG_PASSWORD = "xxxx"
+    WOLFSSL_FIPS_CORE_HASH = "9490AAFD1786A11115256841AA71F9B5313BAA244ACF1A07DD8BB8A893CBC5BC"
+
+    IMAGE_INSTALL:append = " wolfssl wolfcrypttest wolfcryptbenchmark"
+
+  Make sure you get rid of the old build objects and rebuild the images:
+
+    # bitbake -c cleansstate wolfssl wolfcrypttest wolfcryptbenchmark
+    # bitbake -c cleanall <image-recipe>
+
+7. Build and program the images in the device again.
+
+  Now the test application should complete just fine:
+
+    root:~# wolfcrypttest
+    ------------------------------------------------------------------------------
+    wolfSSL version 5.4.0
+    ------------------------------------------------------------------------------
+    error    test passed!
+    MEMORY   test passed!
+    base64   test passed!
+    base16   test passed!
+    asn      test passed!
+    RANDOM   test passed!
+    MD5      test passed!
+    SHA      test passed!
+    SHA-224  test passed!
+    ...
+    PKCS7authenveloped  test passed!
+    prime    test passed!
+    logging  test passed!
+    time test passed!
+    mutex    test passed!
+    memcb    test passed!
+    crypto callback test passed!
+    Test complete
+    Exiting main with return code: 0
