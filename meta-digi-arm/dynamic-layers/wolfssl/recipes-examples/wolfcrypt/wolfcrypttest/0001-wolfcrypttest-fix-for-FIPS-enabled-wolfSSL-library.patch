@@ -1,0 +1,31 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Thu, 1 Sep 2022 18:58:13 +0200
+Subject: [PATCH] wolfcrypttest: fix for FIPS enabled wolfSSL library
+
+FIPS does not support MD5
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ test.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/test.c b/test.c
+index 8ad937a8bacb..00d8ba0d2503 100644
+--- a/test.c
++++ b/test.c
+@@ -18370,9 +18370,15 @@ WOLFSSL_TEST_SUBROUTINE int openssl_test(void)
+     c.inLen  = XSTRLEN(c.input);
+     c.outLen = WC_MD5_DIGEST_SIZE;
+ 
++#if defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION > 2)
++    /* Expect failure with MD5 + HMAC when using FIPS 140-3. */
++    if (HMAC(EVP_md5(), "JefeJefeJefeJefe", 16, (byte*)c.input, (int)c.inLen,
++            hash, 0) != NULL)
++#else
+     if (HMAC(EVP_md5(), "JefeJefeJefeJefe", 16, (byte*)c.input, (int)c.inLen,
+             hash, 0) == NULL ||
+         XMEMCMP(hash, c.output, WC_MD5_DIGEST_SIZE) != 0)
++#endif
+     {
+         return -8612;
+     }
