@@ -77,7 +77,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
 DEFAULT_IMAGE_NAME ??= "dey-image-qt"
 
 # List of graphical images names (for install scripts)
-GRAPHICAL_IMAGES ?= "dey-image-qt dey-image-webkit"
+GRAPHICAL_IMAGES ?= "dey-image-crank dey-image-qt dey-image-webkit"
 
 # Include DEY SELinux policy modifications by default
 DEY_SELINUX_POLICY ?= "1"
