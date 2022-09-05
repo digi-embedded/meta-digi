@@ -280,7 +280,7 @@ else
 	# Update Recovery
 	part_update "${RECOVERY_NAME}" "${INSTALL_RECOVERY_FILENAME}" 15000
 	# Update Rootfs
-	part_update "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}" 90000
+	part_update "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}" 120000
 fi
 
 if [ "${SINGLEMTDSYS}" != true ] && [ "${DUALBOOT}" != true ]; then
