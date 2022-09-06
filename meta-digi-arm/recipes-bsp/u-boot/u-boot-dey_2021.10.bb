@@ -4,8 +4,9 @@ require digi-u-boot.inc
 LIC_FILES_CHKSUM = "file://Licenses/README;md5=5a7450c57ffe5ae63fd732446b988025"
 
 DEPENDS += "flex-native bison-native"
+DEPENDS += "python3-setuptools-native"
 
-SRCBRANCH = "v2021.04/master"
+SRCBRANCH = "v2021.10/master"
 SRCREV = "${AUTOREV}"
 
-COMPATIBLE_MACHINE = "(ccimx8mp)"
+COMPATIBLE_MACHINE = "(ccmp1)"

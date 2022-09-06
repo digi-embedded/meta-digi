@@ -199,6 +199,7 @@ do_deploy:append() {
 }
 
 BOOT_TOOLS = "imx-boot-tools"
+BOOT_TOOLS:ccmp1 = "u-boot"
 
 do_deploy:append:ccimx8x() {
 	# Move all U-Boot artifacts to the imx-boot-tools folder
@@ -227,4 +228,11 @@ do_deploy:append:ccimx8m() {
 		done
 		unset  i
 	fi
+}
+
+do_deploy:append:ccmp1() {
+	# Deploy u-boot-nodtb.bin and ccmp1x-dvk.dtb, to be packaged in fip binary by tf-a
+	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
+	install -m 0777 ${B}/${config}/arch/arm/dts/${UBOOT_DTB_NAME} ${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-ccmp15-dvk-${FIP_UBOOT_CONFIG}.dtb
+	install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin
 }
