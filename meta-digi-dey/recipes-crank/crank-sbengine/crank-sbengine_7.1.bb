@@ -87,5 +87,10 @@ RDEPENDS:${PN}:append:ccimx6 = " \
     mtdev \
     tslib \
 "
+RDEPENDS:${PN}:append:ccmp15 = " \
+    libegl-gcnano \
+    libgles2-gcnano \
+    wayland \
+"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
