@@ -1,12 +1,10 @@
-# Copyright (C) 2017-2021 Digi International Inc.
+# Copyright (C) 2017-2022 Digi International Inc.
 
 SUMMARY = "Digi APIX library"
 DESCRIPTION = "C library to access and manage your ConnectCore platform interfaces in an easy manner"
 SECTION = "libs"
 LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
-
-DEPENDS = "libsoc libsocketcan libgpiod"
 
 SRCBRANCH ?= "master"
 SRCREV = "${AUTOREV}"
@@ -25,10 +23,18 @@ SRC_URI = " \
 
 S = "${WORKDIR}/git"
 
-inherit pkgconfig useradd
+inherit pkgconfig useradd python3native
+
+DEPENDS = "libsoc libsocketcan libgpiod ${PYTHON_PN}-native ${PYTHON_PN}-setuptools-native ${PYTHON_PN}-pip-native"
+
+EXTRA_OEMAKE += "PYTHON_BIN=${PYTHON}"
+
+do_compile:append() {
+	oe_runmake python-bindings
+}
 
 do_install() {
-	oe_runmake 'DESTDIR=${D}' install
+	oe_runmake 'DESTDIR=${D}' install install-python-bindings
 
 	# Install udev rules for digiapix
 	install -d ${D}${sysconfdir}/udev/rules.d ${D}${sysconfdir}/udev/scripts
@@ -38,6 +44,10 @@ do_install() {
 	# Install board config file
 	install -m 0644 ${WORKDIR}/libdigiapix.conf ${D}${sysconfdir}/
 }
+
+PACKAGES += "${PN}-${PYTHON_PN}"
+FILES:${PN}-${PYTHON_PN} = "${PYTHON_SITEPACKAGES_DIR}"
+RDEPENDS:${PN}-${PYTHON_PN} = "${PN} ${PYTHON_PN}-core ${PYTHON_PN}-ctypes"
 
 USERADD_PACKAGES = "${PN}"
 GROUPADD_PARAM:${PN} = "-r digiapix"
