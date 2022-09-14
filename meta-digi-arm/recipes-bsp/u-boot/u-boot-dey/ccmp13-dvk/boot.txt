@@ -1,0 +1,81 @@
+#
+# U-Boot bootscript for NAND images created by Yocto.
+#
+
+# As the first step in the boot script, check if we are using DualBoot and
+# if an upgrade is available. This requires the script to change some variables
+# and save them, while the rest of the script changes variables only temporarily
+# without saving them.
+
+# Dual boot update verification
+if test "${dualboot}" = "yes"; then
+	if test "${upgrade_available}" = "1"; then
+		echo "Update detected; Booting new system in ${active_system} (try ${bootcount})"
+	else
+		if test "${active_system}" = "linux_a"; then
+			echo "Booting from system A"
+			setenv mtdbootpart ${active_system}
+			setenv mtdrootfspart ${rootfsvol_a}
+			setenv rootfsvol ${rootfsvol_a}
+		else
+			echo "Booting from system B"
+			setenv mtdbootpart ${active_system}
+			setenv mtdrootfspart ${rootfsvol_b}
+			setenv rootfsvol ${rootfsvol_b}
+		fi
+	fi
+else
+	if test "${mtdbootpart}" = "recovery"; then
+		setenv boot_initrd true
+		setenv initrd_file uramdisk-recovery.img
+	else
+		true
+	fi
+fi
+
+
+# Back up environment variables
+setenv ORIG_extra_bootargs ${extra_bootargs}
+
+#
+# Set device tree filename depending on the board ID (if defined)
+#
+if test -n "${board_id}"; then
+	setenv fdt_file imx6ul-ccimx6ulsbc-id${board_id}.dtb
+else
+	#
+	# Set device tree filename depending on the hardware variant
+	#
+	if test "${module_variant}" = "0x02"; then
+		setenv fdt_file imx6ul-ccimx6ulsbc-wb.dtb
+	elif test "${module_variant}" = "0x03"; then
+		setenv fdt_file imx6ul-ccimx6ulsbc.dtb
+	elif test "${module_variant}" = "0x04"; then
+		setenv fdt_file imx6ul-ccimx6ulsbc-wb.dtb
+	elif test "${module_variant}" = "0x05"; then
+		setenv fdt_file imx6ul-ccimx6ulsbc.dtb
+	elif test "${module_variant}" = "0x06"; then
+		setenv fdt_file imx6ul-ccimx6ulsbc-wb.dtb
+	elif test "${module_variant}" = "0x07"; then
+		setenv fdt_file imx6ul-ccimx6ulsbc-wb.dtb
+	elif test "${module_variant}" = "0x08"; then
+		setenv fdt_file imx6ul-ccimx6ulsbc-wb.dtb
+	elif test "${module_variant}" = "0x09"; then
+		setenv fdt_file imx6ul-ccimx6ulsbc-wb.dtb
+	elif test "${module_variant}" = "0x0a"; then
+		setenv fdt_file imx6ul-ccimx6ulsbc.dtb
+	else
+		setenv fdt_file imx6ul-ccimx6ulsbc-wb.dtb
+	fi
+fi
+
+setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
+dboot linux nand ${mtdbootpart}
+
+
+
+# We only get here in case of an error on the dboot command.
+
+# Undo changes to environment variables
+setenv extra_bootargs ${ORIG_extra_bootargs}
+setenv ORIG_extra_bootargs
