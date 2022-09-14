@@ -39,7 +39,7 @@ SRC_URI:append:ccimx6ulsbc = " \
     file://0001-pulseaudio-keep-headphones-volume-in-platforms-witho.patch \
 "
 
-SRC_URI:append:ccmp15 = " \
+SRC_URI:append:ccmp1 = " \
     file://0001-pulseaudio-keep-headphones-volume-in-platforms-witho.patch \
 "
 

@@ -47,4 +47,4 @@ do_configure:append() {
 
 KERNEL_EXTRA_ARGS:stm32mpcommon += "LOADADDR=${ST_KERNEL_LOADADDR}"
 
-COMPATIBLE_MACHINE = "(ccimx6ul|ccmp15-dvk)"
+COMPATIBLE_MACHINE = "(ccimx6ul|ccmp1)"

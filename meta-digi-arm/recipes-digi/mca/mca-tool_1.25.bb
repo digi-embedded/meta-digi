@@ -22,4 +22,4 @@ inherit bin_package
 
 INSANE_SKIP:${PN} = "already-stripped"
 
-COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8x|ccimx8m|ccmp15)"
+COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8x|ccimx8m|ccmp1)"
