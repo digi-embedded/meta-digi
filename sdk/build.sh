@@ -184,6 +184,7 @@ done<<-_EOF_
 	ccimx6ulsom          DONTBUILDVARIANTS   dey-image-mft-module-min
 	ccimx6ulrftest       DONTBUILDVARIANTS   dey-image-mft-module-rf
 	ccmp15-dvk           DONTBUILDVARIANTS   dey-image-qt,dey-image-aws,dey-image-crank
+	ccmp13-dvk           DONTBUILDVARIANTS   core-image-base
 _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"

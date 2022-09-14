@@ -33,6 +33,7 @@ AVAILABLE_PLATFORMS=" \
 		     ccimx6ulsbc \
 		     ccimx6ulstarter \
 		     ccmp15-dvk \
+		     ccmp13-dvk \
 "
 
 MANIFEST_URL="https://github.com/digi-embedded/dey-manifest.git"
@@ -150,6 +151,7 @@ done<<-_EOF_
 	ccimx6ulsbc          dey-image-qt
 	ccimx6ulstarter      core-image-base
 	ccmp15-dvk           dey-image-qt
+	ccmp13-dvk           core-image-base
 _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
