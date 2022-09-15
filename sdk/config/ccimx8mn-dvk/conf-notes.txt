@@ -9,10 +9,3 @@ Digi Embedded Yocto provides the following image recipes:
 
     By default the image is XWayland-based so it provides a full Weston
     desktop environment.
-
-  * dey-image-aws: console-only image supporting Amazon Web Services IoT
-
-    This image includes the AWS Greengrass Core and an AWS IoT platform
-    example application. For more information on AWS support in Digi
-    Embedded Yocto see the online documentation.
-

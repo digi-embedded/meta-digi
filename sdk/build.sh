@@ -172,18 +172,18 @@ while read _pl _var _tgt; do
 	eval "${_pl//-/_}_var=\"${_var//,/ }\""
 	eval "${_pl//-/_}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
-	ccimx8mm-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-aws,dey-image-crank
-	ccimx8mn-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-aws,dey-image-crank
-	ccimx8mp-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-aws,dey-image-crank
-	ccimx8x-sbc-pro      DONTBUILDVARIANTS   dey-image-qt,dey-image-aws,dey-image-crank
-	ccimx8x-sbc-express  DONTBUILDVARIANTS   dey-image-qt,dey-image-aws
-	ccimx6qpsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-aws,dey-image-crank
-	ccimx6sbc            DONTBUILDVARIANTS   dey-image-qt,dey-image-aws,dey-image-crank
-	ccimx6ulsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-aws,dey-image-crank
-	ccimx6ulstarter      DONTBUILDVARIANTS   core-image-base,dey-image-aws
+	ccimx8mm-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
+	ccimx8mn-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
+	ccimx8mp-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
+	ccimx8x-sbc-pro      DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
+	ccimx8x-sbc-express  DONTBUILDVARIANTS   dey-image-qt
+	ccimx6qpsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
+	ccimx6sbc            DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
+	ccimx6ulsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
+	ccimx6ulstarter      DONTBUILDVARIANTS   core-image-base
 	ccimx6ulsom          DONTBUILDVARIANTS   dey-image-mft-module-min
 	ccimx6ulrftest       DONTBUILDVARIANTS   dey-image-mft-module-rf
-	ccmp15-dvk           DONTBUILDVARIANTS   dey-image-qt,dey-image-aws,dey-image-crank
+	ccmp15-dvk           DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
 	ccmp13-dvk           DONTBUILDVARIANTS   core-image-base
 _EOF_
 
