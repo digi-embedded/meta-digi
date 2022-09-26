@@ -13,6 +13,9 @@ IMAGE_FEATURES += " \
     ${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'dey-wireless', '', d)} \
 "
 
+# Remove graphical packages for non-graphical platforms
+IMAGE_FEATURES:remove = "${@oe.utils.conditional('IS_HEADLESS', 'true', ' splash ', '', d)}"
+
 CORE_IMAGE_BASE_INSTALL += "dey-examples-digiapix"
 
 # SDK features (for toolchains generated from an image with populate_sdk)
