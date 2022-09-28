@@ -13,17 +13,14 @@
 #
 #===============================================================================
 
-# Source function library
-. /etc/init.d/functions
-
 readonly DEMOSERVER_BINARY="/srv/www/demoserver.py"
 readonly STOP_TIMEOUT="5"
 
 stop_process() {
 	# try to stop gracefully
-	killproc "${1}" >/dev/null 2>&1
+	pkill -f "${1}" >/dev/null 2>&1
 	for i in $(seq ${STOP_TIMEOUT}); do
-		pid=$(pidofproc "${1}") || break
+		pid=$(pgrep -f "${1}") || break
 		if [ "${i}" -eq ${STOP_TIMEOUT} ]; then
 			kill -KILL "${pid}" >/dev/null 2>&1
 		fi
