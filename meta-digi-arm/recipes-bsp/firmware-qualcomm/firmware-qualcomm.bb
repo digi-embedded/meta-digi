@@ -35,6 +35,7 @@ FW_QCA65X4_SDIO_PROPRIETARY = " \
     file://qca65X4_sdio_proprietary/qwlan30.bin \
     file://qca65X4_sdio_proprietary/utf30.bin \
 "
+FW_QCA65X4_SDIO_CCX = "file://qca65X4_sdio_proprietary/qwlan30-ccx.bin"
 
 # Firmware files for QCA6574 (Qualcomm proprietary driver)
 FW_QCA65X4_PCIE_PROPRIETARY = " \
@@ -44,6 +45,7 @@ FW_QCA65X4_PCIE_PROPRIETARY = " \
     file://qca65X4_pcie_proprietary/qwlan30.bin \
     file://qca65X4_pcie_proprietary/utf.bin \
 "
+FW_QCA65X4_PCIE_CCX = ""
 
 # Firmware files for QCA6574 (Qualcomm community driver)
 # NOTE: the community file 'board.bin' must be substituted by proprietary
@@ -60,12 +62,23 @@ FW_QCA6574_WIFI_COMMUNITY = " \
 FW_QUALCOMM_WIFI ?= "${FW_QCA65X4_SDIO_PROPRIETARY}"
 FW_QUALCOMM_WIFI:ccimx8x = "${@oe.utils.conditional('QUALCOMM_WIFI_DRIVER', 'community', '${FW_QCA6574_WIFI_COMMUNITY}', '${FW_QCA65X4_PCIE_PROPRIETARY}', d)}"
 
+FW_QUALCOMM_CCX ?= "${FW_QCA65X4_SDIO_CCX}"
+FW_QUALCOMM_CCX:ccimx8x = "${@oe.utils.conditional('QUALCOMM_WIFI_DRIVER', 'community', '', '${FW_QCA65X4_PCIE_CCX}', d)}"
+
 SRC_URI = " \
     ${FW_QUALCOMM_BT} \
     ${FW_QUALCOMM_WIFI} \
+    ${@oe.utils.vartrue('QUALCOMM_FW_CCX_TAGS', '${FW_QUALCOMM_CCX}', '', d)} \
 "
 
 S = "${WORKDIR}"
+
+do_unpack[postfuncs] += "${@oe.utils.vartrue('QUALCOMM_FW_CCX_TAGS', 'copy_ccx_fw', '', d)}"
+copy_ccx_fw() {
+	FW_CCX_FILE="$(echo ${FW_QUALCOMM_CCX} | sed -e 's,file\:\/\/,,g')"
+	FW_NOCCX_FILE="$(echo ${FW_CCX_FILE} | sed -e 's,-ccx,,g')"
+	cp --remove-destination ${WORKDIR}/${FW_CCX_FILE} ${WORKDIR}/${FW_NOCCX_FILE}
+}
 
 do_install() {
 	# BT firmware (remove 'file://' from variable with files list)

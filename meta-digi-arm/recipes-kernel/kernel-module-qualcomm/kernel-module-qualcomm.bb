@@ -25,8 +25,14 @@ SRC_URI:append = " \
     file://81-qcom-wifi.rules \
 "
 
+FILES_SDIO_CCX = " \
+    file://WCNSS_qcom_cfg-ccx.ini \
+    file://0001-add-CCX-tags-support-for-kernel-v5.15.patch \
+"
+
 FILES_SDIO = " \
     file://modprobe-qualcomm.conf \
+    ${@oe.utils.vartrue('QUALCOMM_FW_CCX_TAGS', '${FILES_SDIO_CCX}', '', d)} \
 "
 
 SRC_URI:append = "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${FILES_SDIO}', '', d)}"
@@ -68,6 +74,11 @@ do_install:append() {
 	install -m 0644 ${WORKDIR}/git/firmware_bin/WCNSS_qcom_cfg.ini ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
 	install -d ${D}${sysconfdir}/udev/rules.d
 	install -m 0644 ${WORKDIR}/81-qcom-wifi.rules ${D}${sysconfdir}/udev/rules.d/
+
+	# Overwrite "qcom_cfg.ini" if QUALCOMM_FW_CCX_TAGS is enabled
+	if [ -f "${WORKDIR}/WCNSS_qcom_cfg-ccx.ini" ]; then
+		cp --remove-destination ${WORKDIR}/WCNSS_qcom_cfg-ccx.ini ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
+	fi
 }
 
 do_install:append:ccimx6ul() {

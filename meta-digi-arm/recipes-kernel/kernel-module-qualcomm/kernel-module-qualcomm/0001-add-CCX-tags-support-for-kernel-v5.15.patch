@@ -1,0 +1,1681 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Thu, 25 Aug 2022 10:15:31 +0200
+Subject: [PATCH] add CCX tags support for kernel v5.15
+
+https://onedigi.atlassian.net/browse/DEL-8038
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ CORE/HDD/inc/CcxTagDefs.h           | 396 +++++++++++++
+ CORE/HDD/inc/wlan_hdd_ccx_tag.h     |  19 +
+ CORE/HDD/src/wlan_hdd_ccx_tag.c     | 833 ++++++++++++++++++++++++++++
+ CORE/HDD/src/wlan_hdd_main.c        |  20 +
+ CORE/MAC/inc/aniGlobal.h            |   4 +
+ CORE/MAC/inc/qwlan_version.h        |   3 +-
+ CORE/MAC/src/include/sirParams.h    |   6 +
+ CORE/SERVICES/COMMON/wmi_tlv_defs.h |  19 +-
+ CORE/SERVICES/COMMON/wmi_unified.h  |  75 ++-
+ CORE/SERVICES/WMA/wma.c             |  80 +++
+ CORE/SERVICES/WMI/wmi_unified.c     |   3 +
+ Kbuild                              |   2 +
+ 12 files changed, 1456 insertions(+), 4 deletions(-)
+ create mode 100644 CORE/HDD/inc/CcxTagDefs.h
+ create mode 100644 CORE/HDD/inc/wlan_hdd_ccx_tag.h
+ create mode 100644 CORE/HDD/src/wlan_hdd_ccx_tag.c
+
+diff --git a/CORE/HDD/inc/CcxTagDefs.h b/CORE/HDD/inc/CcxTagDefs.h
+new file mode 100644
+index 000000000000..b0b337c4ec47
+--- /dev/null
++++ b/CORE/HDD/inc/CcxTagDefs.h
+@@ -0,0 +1,396 @@
++/****************************************************************/
++/*                                                              */
++/* Copyright 2018 Digi International, Inc. All Rights Reserved. */
++/*                                                              */
++/****************************************************************/
++
++#ifndef CCX_TAG_DEFS_H_
++#define CCX_TAG_DEFS_H_
++
++#include <linux/types.h>
++
++/* Fixed Netlink Communication Fields */
++#define CCX_TAG_FAMILY_NAME ("CCX_TAG")
++
++/* Netlink Attributes */
++typedef enum CcxTagAttrTypeTag
++{
++    /* Reserved position of 0, enforced by the Netlink protocol.  Unused by both API and driver.*/
++    CCX_TAG_ATTR_UNUSED,
++
++    /* Identifier of command that initiated a response.  API to Driver and Driver to API.*/
++    CCX_TAG_ATTR_CMD,
++
++    /* Identifier of command instance to pair responses to original commands.  API to Driver and Driver to API.*/
++    CCX_TAG_ATTR_SEQUENCE,
++
++    /* Identifier of response to command.  Driver to API.*/
++    CCX_TAG_ATTR_RSP,
++
++    /* Protocol version of API.  API to Driver.*/
++    CCX_TAG_ATTR_API_VERSION,
++
++    /* Protocol version of driver. Driver to API.*/
++    CCX_TAG_ATTR_DRIVER_VERSION,
++
++    /* Packet command and payload data. API to Driver.*/
++    CCX_TAG_ATTR_TAG_COMMAND,
++
++    /* Packet transmission operational state and results. Driver to API.*/
++    CCX_TAG_ATTR_TAG_STATUS,
++
++    /* Indicates the total number of attribute types.*/
++    CCX_TAG_ATTR_COUNT,
++
++    /* Indicates no attribute type is specified.*/
++    CCX_TAG_ATTR_UNDEFINED,
++
++    /* Indicates the attribute type specified is not valid.*/
++    CCX_TAG_ATTR_INVALID
++
++}CcxTagAttrType;
++
++/* Netlink Commands */
++typedef enum CcxTagCmdTypeTag
++{
++    /* Push the API version to the driver and pull the driver          */
++    /* version to the API.  This also performs a reset of the driver.  */
++    /* Must be first valid entry to ensure command can always be used, */
++    /* regardless of protocol version.                                 */
++    /*                                                                 */
++    /* Input Attributes:                                               */
++    /* CCX_TAG_ATTR_API_VERSION                                        */
++    /*                                                                 */
++    /* Output Attributes:                                              */
++    /* CCX_TAG_ATTR_CMD_ECHO                                           */
++    /* CCX_TAG_ATTR_OP_STATE                                           */
++    /* CCX_TAG_ATTR_OP_ERROR                                           */
++    /* CCX_TAG_ATTR_DRIVER_VERSION                                     */
++    /*                                                                 */
++    CCX_TAG_CMD_CHECK_VERSION,
++
++    /* Reset the current state within the driver. */
++    /*                                            */
++    /* Input Attributes:                          */
++    /* None                                       */
++    /*                                            */
++    /* Output Attributes:                         */
++    /* CCX_TAG_ATTR_CMD_ECHO                      */
++    /* CCX_TAG_ATTR_OP_STATE                      */
++    /* CCX_TAG_ATTR_OP_ERROR                      */
++    /*                                            */
++    CCX_TAG_CMD_RESET,
++
++    /* Send a CCX Tag packet out over the air. */
++    /*                                         */
++    /* Input Attributes:                       */
++    /* CCX_TAG_ATTR_PACKET                     */
++    /*                                         */
++    /* Output Attributes:                      */
++    /* CCX_TAG_ATTR_CMD_ECHO                   */
++    /* CCX_TAG_ATTR_OP_STATE                   */
++    /* CCX_TAG_ATTR_OP_ERROR                   */
++    /*                                         */
++    CCX_TAG_CMD_TRANSMIT,
++
++    /* Obtain the current state within the driver. */
++    /*                                             */
++    /* Input Attributes:                           */
++    /* None                                        */
++    /*                                             */
++    /* Output Attributes:                          */
++    /* CCX_TAG_ATTR_CMD_ECHO                       */
++    /* CCX_TAG_ATTR_OP_STATE                       */
++    /* CCX_TAG_ATTR_OP_ERROR                       */
++    /* CCX_TAG_ATTR_ATTEMPT_COUNT                  */
++    /* CCX_TAG_ATTR_FAILURE_COUNT                  */
++    /*                                             */
++    CCX_TAG_CMD_STATUS,
++
++    /* Indicates the total number of commands. */
++    CCX_TAG_CMD_COUNT,
++
++    /* Indicates a placeholder command for unset variables. */
++    CCX_TAG_CMD_UNDEFINED,
++
++    /* Indicates a placeholder command for the invalid range. */
++    CCX_TAG_CMD_INVALID,
++
++}CcxTagCmdType;
++
++/* Netlink Responses */
++typedef enum CcxTagDriverResponseTypeTag
++{
++    /* The driver operation ran to completion without errors. */
++    CCX_TAG_DRVR_RSP_OK,
++
++    /* The driver failed to parse the Netlink message received. */
++    CCX_TAG_DRVR_RSP_ERR_NL_PARSE,
++
++    /* The driver version conflicts with the API version received. */
++    CCX_TAG_DRVR_RSP_ERR_TAG_VERSION,
++
++    /* The driver detected an incorrect size for the control data */
++    /* block within the transmit message received.                   */
++    CCX_TAG_DRVR_RSP_ERR_CTRL_SIZE,
++
++    /* The driver detected an incorrect size for the packet data */
++    /* block within the transmit message received.                  */
++    CCX_TAG_DRVR_RSP_ERR_PACKET_SIZE,
++
++    /* The driver detected an incorrect offset for either the channel */
++    /* or fragment byte offset within the transmit message received.  */
++    CCX_TAG_DRVR_RSP_ERR_OFFSET_OVERRUN,
++
++    /* The driver could not process the command received because */
++    /* another operation is already in progress.                 */
++    CCX_TAG_DRVR_RSP_ERR_OP_IN_PROG,
++
++    /* The driver encountered an error during the */
++    /* downstream handling of the command.        */
++    CCX_TAG_DRVR_RSP_ERR_OP_FAILED,
++
++    /* Shortcut to total. */
++    CCX_TAG_DRVR_RSP_COUNT,
++
++    /* Placeholder for uninitialized variable. */
++    CCX_TAG_DRVR_RSP_UNDEFINED,
++
++    /* Placeholder for invalid enumeration in variable. */
++    CCX_TAG_DRVR_RSP_INVALID
++}CcxTagDriverResponseType;
++
++/* Driver State Machine States */
++typedef enum CcxTagDriverOpStateTag
++{
++    /* The driver has not yet processed a command. */
++    CCX_TAG_DRVR_OP_IDLE,
++
++    /* The driver is currently processing a command. */
++    CCX_TAG_DRVR_OP_IN_PROG,
++
++    /* The driver has finished processing a command, */
++    /* and the operation completed successfully.     */
++    CCX_TAG_DRVR_OP_COMPLETE,
++
++    /* The driver has encountered an unrecoverable error. */
++    CCX_TAG_DRVR_OP_UNRECOVERABLE,
++
++    /* Shortcut to total. */
++    CCX_TAG_DRVR_OP_STATE_COUNT,
++
++    /* Placeholder for uninitialized variable. */
++    CCX_TAG_DRVR_OP_STATE_UNDEFINED,
++
++    /* Placeholder for invalid enumeration in variable. */
++    CCX_TAG_DRVR_OP_STATE_INVALID
++}CcxTagDriverOpState;
++
++/* Wireless Module Firmware Result Codes. */
++typedef enum CcxTagFirmwareStatusTag
++{
++    /* The CCX Tag command was properly processed, */
++    /* though transmit failures may have happened.       */
++    CCX_TAG_FW_STATUS_OK,
++
++    /* Generic error. The transmit failed to */
++    /* complete for an unknown reason.       */
++    CCX_TAG_FW_STATUS_ERROR = -1,
++
++    /* Firmware was unable to allocate memory for the transmission. */
++    CCX_TAG_FW_STATUS_MEM = 2,
++
++    /* No free descriptors were available for the transmission. */
++    CCX_TAG_FW_STATUS_NO_DESC = 4,
++
++    /* An invalid parameter was found in the WMI command. */
++    CCX_TAG_FW_STATUS_INVPRM = 14,
++
++    /* The transmit operation was cancelled due to a */
++    /* higher priority operation in the module.      */
++    CCX_TAG_FW_STATUS_CANCEL = 16,
++
++    /* There was a hardware failure detected during the transmission. */
++    CCX_TAG_FW_STATUS_HWFAIL = 23
++
++}CcxTagFirmwareStatus;
++
++/* *** CCX Tag Attribute Format - Packet Attribute ***
++ *
++ * ControlDataTag
++ *     - First segment of CCX Tag message
++ *     - Length of control data specified in first 16 bits
++ *
++ * MPDU Header
++ *  - Starts immediately after the control data,
++ *    without additional padding
++ *  - Length specified in control data
++ *
++ * Content Header
++ *  - Starts immediately after the MPDU header,
++ *    without additional padding
++ *  - Length specified in control data
++ *
++ * Content Payload
++ *  - Starts immediately after the content header,
++ *    without additional padding
++ *  - Length specified in control data
++ *
++ * Unspecified
++ *  - MPDU footer, added by firmware
++ */
++
++
++typedef struct CcxTagControlDataTag
++{
++    /* The size of the packed control data header in the IPC message. */
++    uint8_t ControlDataSize;
++
++    /* This identifies the version of the IPC message format. */
++    uint8_t ControlDataVersion;
++
++    /* This specifies the packet area to insert the current burst        */
++    /* during transmission, in octets from the start of the MPDU header. */
++    /* RawByteBuffer[Offset] |= Fragment                                 */
++    uint16_t FragmentOffsetOctets;
++
++    /* This specifies the packet area to insert the active channel       */
++    /* during transmission, in octets from the start of the MPDU header. */
++    /* RawByteBuffer[Offset] |= Channel                                  */
++    uint16_t ChannelOffsetOctets;
++
++    /* The size of the packed MPDU header in the IPC message. */
++    uint16_t MpduHeaderSize;
++
++    /* The size of the packed CCX Tag content header in the IPC message. */
++    uint16_t ContentHeaderSize;
++
++    /* The size of the packed CCX Tag content payload in the IPC message. */
++    uint16_t ContentPayloadSize;
++}CcxTagControlData;
++
++#define CCX_TAG_CHANNEL_OFFSET (35)
++#define CCX_TAG_FRAGMENT_OFFSET (22)
++
++typedef enum CcxTagVersionTag
++{
++    CCX_TAG_VERSION = 1
++}CcxTagVersion;
++
++typedef enum CcxTagMacLengthTag
++{
++    CCX_TAG_MAC_LENGTH = 6
++}CcxTagMacLength;
++
++typedef uint8_t CcxTagMacAddress[CCX_TAG_MAC_LENGTH];
++
++#define CCX_TAG_MC_DST_ADDR ("01:40:96:00:00:03")
++
++#define CCX_TAG_UNUSED_ADDR ("00:00:00:00:00:00")
++
++typedef struct CcxTagMpduHeaderTag
++{
++    uint8_t FCS1;
++    uint8_t FCS2;
++    uint16_t Duration;
++    CcxTagMacAddress MAC1;
++    CcxTagMacAddress MAC2;
++    CcxTagMacAddress MAC3;
++    uint16_t SequenceControl;
++    CcxTagMacAddress MAC4;
++}CcxTagMpduHeader;
++
++/* Fixed CCX Tag MPDU Header Fields */
++#define CCX_TAG_FCS1_FIELD (0x08)
++#define CCX_TAG_FCS2_FIELD (0x03)
++#define CCX_TAG_DURATION_FIELD (0x00)
++
++typedef struct CcxTagContentHeaderTag
++{
++    union
++    {
++        uint8_t Word;
++        struct
++        {
++            uint8_t ContentVersion : 4;
++            uint8_t ContentPad : 4;
++        }Bits;
++    }ContentInfo;
++    uint8_t TransmitPower;
++    uint8_t TransmitChannel;
++    uint8_t RegulatoryClass;
++    uint8_t BurstLength;
++}CcxTagContentHeader;
++
++/* Fixed CCX Tag Content Fields */
++#define CCX_TAG_CONTENT_VERSION (0x0)
++#define CCX_TAG_DEFAULT_TX_POWER (0x0)
++#define CCX_TAG_DEFAULT_REG_CLASS (0x0)
++#define CCX_TAG_DEFAULT_BURST_LENGTH (3)
++
++/* This structure is used internally within the wireless driver. */
++typedef struct CcxTagWmiHeaderTag
++{
++    /* This specifies the packet area to insert the current burst       */
++    /* during transmission, in bytes from the start of the MPDU header. */
++    uint16_t FragmentOffsetOctets;
++
++    /* This specifies the packet area to insert the active channel      */
++    /* during transmission, in bytes from the start of the MPDU header. */
++    uint16_t ChannelOffsetOctets;
++
++    CcxTagMpduHeader MpduHeader;
++
++    CcxTagContentHeader ContentHeader;
++
++    uint16_t ContentPayloadLength;
++}CcxTagWmiHeader;
++
++/* This type defines common sizes used within the API and driver. */
++typedef enum CcxTagDimensionTag
++{
++    CCX_TAG_MPDU_HEADER_SIZE = 30,
++
++    CCX_TAG_CONTENT_MAX_SIZE = 2312,
++
++    CCX_TAG_CONTENT_HEADER_SIZE = 5,
++
++    CCX_TAG_CONTENT_PAYLOAD_MAX_SIZE = (CCX_TAG_CONTENT_MAX_SIZE - CCX_TAG_CONTENT_HEADER_SIZE),
++
++    CCX_TAG_PACKET_MIN_SIZE = (CCX_TAG_MPDU_HEADER_SIZE + CCX_TAG_CONTENT_HEADER_SIZE),
++
++    CCX_TAG_PACKET_MAX_SIZE = (CCX_TAG_MPDU_HEADER_SIZE + CCX_TAG_CONTENT_HEADER_SIZE + CCX_TAG_CONTENT_PAYLOAD_MAX_SIZE),
++
++    CCX_TAG_CONTROL_DATA_SIZE = sizeof(CcxTagControlData),
++
++    CCX_TAG_IPC_MSG_MIN_SIZE = (CCX_TAG_PACKET_MIN_SIZE + CCX_TAG_CONTROL_DATA_SIZE),
++
++    CCX_TAG_IPC_MSG_MAX_SIZE = (CCX_TAG_PACKET_MAX_SIZE + CCX_TAG_CONTROL_DATA_SIZE)
++}CcxTagDimension;
++
++typedef struct CcxTagStatusDataTag
++{
++    /* The size of the packed status data header in the IPC message. */
++    uint8_t StatusDataSize;
++
++    /* This identifies the version of the IPC message format. */
++    uint8_t StatusDataVersion;
++
++    /* This specifies the current state of the driver. */
++    CcxTagDriverOpState DriverOpState;
++
++    /* This specifies the result of transmission, if the driver op */
++    /* state shows that a transmission has completed.              */
++    CcxTagFirmwareStatus FirmwareStatus;
++
++    /* The size of the packed CCX Tag content header in the IPC message. */
++    uint16_t AttemptCount;
++
++    /* The size of the packed CCX Tag content payload in the IPC message. */
++    uint16_t FailureCount;
++}CcxTagStatusData;
++
++/* Fixed CCX Tag Status Fields */
++#define CCX_TAG_STATUS_VERSION (0x0)
++
++#endif /* CCX_TAG_DEFS_H_ */
+diff --git a/CORE/HDD/inc/wlan_hdd_ccx_tag.h b/CORE/HDD/inc/wlan_hdd_ccx_tag.h
+new file mode 100644
+index 000000000000..edc29332a2c0
+--- /dev/null
++++ b/CORE/HDD/inc/wlan_hdd_ccx_tag.h
+@@ -0,0 +1,19 @@
++/****************************************************************/
++/*                                                              */
++/* Copyright 2018 Digi International, Inc. All Rights Reserved. */
++/*                                                              */
++/****************************************************************/
++
++#ifdef FEATURE_CCX_TAG_SUPPORT
++
++#ifndef __WLAN_HDD_CCX_TAG_H__
++#define __WLAN_HDD_CCX_TAG_H__
++
++int ccx_tag_activate_service(void *pAdapter);
++
++int ccx_tag_deactivate_service(void);
++
++#endif /* __WLAN_HDD_CCX_TAG_H__ */
++
++#endif /* FEATURE_CCX_TAG_SUPPORT */
++
+diff --git a/CORE/HDD/src/wlan_hdd_ccx_tag.c b/CORE/HDD/src/wlan_hdd_ccx_tag.c
+new file mode 100644
+index 000000000000..03697601bcb0
+--- /dev/null
++++ b/CORE/HDD/src/wlan_hdd_ccx_tag.c
+@@ -0,0 +1,833 @@
++/****************************************************************/
++/*                                                              */
++/* Copyright 2018 Digi International, Inc. All Rights Reserved. */
++/*                                                              */
++/****************************************************************/
++
++#ifdef FEATURE_CCX_TAG_SUPPORT
++
++#include <linux/types.h>
++#include <linux/version.h>
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/mutex.h>
++#include <linux/wireless.h>
++#include <wlan_hdd_includes.h>
++#include <net/arp.h>
++#include <net/genetlink.h>
++#include "qwlan_version.h"
++#include "vos_utils.h"
++#include "wma.h"
++#include "sirParams.h"
++#include "wmi_unified_api.h"
++
++#include "CcxTagDefs.h"
++
++static struct hdd_context_s *pHddCtx;
++
++static uint32_t HDD_CCX_TAG_DRVR_VERSION = 1;
++static uint32_t hdd_ccx_tag_api_version = 0;
++static struct mutex hdd_ccx_tag_mutex;
++static CcxTagDriverOpState hdd_ccx_tag_drvr_op_state = CCX_TAG_DRVR_OP_IDLE;
++static CcxTagFirmwareStatus hdd_ccx_tag_fw_status = CCX_TAG_FW_STATUS_ERROR;
++static uint16_t hdd_ccx_tag_fw_attempts = 0;
++static uint16_t hdd_ccx_tag_fw_failures = 0;
++static int hdd_ccx_tag_fw_msgs_outstanding = 0;
++
++/* handlers */
++static int ccx_tag_check_version_cmd_handler(struct sk_buff *skb, struct genl_info *info);
++static int ccx_tag_reset_cmd_handler(struct sk_buff *skb, struct genl_info *info);
++static int ccx_tag_transmit_cmd_handler(struct sk_buff *skb, struct genl_info *info);
++static int ccx_tag_status_cmd_handler(struct sk_buff *skb, struct genl_info *info);
++
++/* attribute policy */
++static struct nla_policy ccx_tag_genl_policy[CCX_TAG_ATTR_COUNT] =
++{
++	/* Reserved position of 0. */
++	[CCX_TAG_ATTR_UNUSED] = { .type = NLA_STRING },
++
++	/* Identifier of command that initiated a response.  API to Driver and Driver to API. */
++	[CCX_TAG_ATTR_CMD] = { .type = NLA_BINARY, .len = sizeof(uint16_t) },
++
++	/* Identifier of command instance to pair responses to original commands.  API to Driver and Driver to API. */
++	[CCX_TAG_ATTR_SEQUENCE] = { .type = NLA_BINARY, .len = sizeof(uint16_t) },
++
++	/* Protocol version of API.  API to Driver. */
++	[CCX_TAG_ATTR_API_VERSION] = { .type = NLA_BINARY, .len = sizeof(uint32_t) },
++
++	/* Protocol version of driver. Driver to API. */
++	[CCX_TAG_ATTR_DRIVER_VERSION] = { .type = NLA_BINARY, .len = sizeof(uint32_t) },
++
++	/* Packet data. API to Driver. */
++	[CCX_TAG_ATTR_TAG_COMMAND] = { .type = NLA_BINARY, .len = CCX_TAG_IPC_MSG_MAX_SIZE },
++
++	/* Current operational error code, when in the error operational state. Driver to API. */
++	[CCX_TAG_ATTR_TAG_STATUS] = { .type = NLA_BINARY, .len = sizeof(CcxTagDriverResponseType) },
++};
++
++/* operation definition */
++static struct genl_ops ccx_tag_gnl_ops_table[CCX_TAG_CMD_COUNT] =
++{
++	{
++		.cmd = CCX_TAG_CMD_CHECK_VERSION,
++		.flags = 0,
++		.doit = ccx_tag_check_version_cmd_handler,
++		.dumpit = NULL,
++	},
++	{
++		.cmd = CCX_TAG_CMD_RESET,
++		.flags = 0,
++		.doit = ccx_tag_reset_cmd_handler,
++		.dumpit = NULL,
++	},
++	{
++		.cmd = CCX_TAG_CMD_TRANSMIT,
++		.flags = 0,
++		.doit = ccx_tag_transmit_cmd_handler,
++		.dumpit = NULL,
++	},
++	{
++		.cmd = CCX_TAG_CMD_STATUS,
++		.flags = 0,
++		.doit = ccx_tag_status_cmd_handler,
++		.dumpit = NULL,
++	}
++};
++
++/* family definition */
++static struct genl_family ccx_tag_gnl_family =
++{
++      .hdrsize = 0,
++      .name = "CCX_TAG",
++      .version = 1,
++      .policy = ccx_tag_genl_policy,
++      .maxattr = CCX_TAG_ATTR_COUNT,
++      .ops	= ccx_tag_gnl_ops_table,
++      .n_ops	= ARRAY_SIZE(ccx_tag_gnl_ops_table),
++};
++
++
++void RawBlockDisplay(uint8_t const * data, uint16_t length)
++{
++	uint16_t byte = 0;
++
++	if (length > 128)
++	{
++		length = 128;
++	}
++
++	while (byte < length)
++	{
++		if (byte % 10 == 0)
++		{
++			printk(KERN_DEBUG "%3u: ", byte);
++		}
++		printk(KERN_CONT "0x%02X ", data[byte]);
++		byte++;
++		if (byte % 10 == 0)
++		{
++			printk(KERN_CONT "\n");
++		}
++	}
++
++	if (byte % 10 != 0)
++	{
++		printk(KERN_CONT "\n");
++	}
++}
++
++static void SendAttrData(uint16_t cmd_type, uint16_t seq_num,
++						 uint16_t rsp_type, CcxTagAttrType attr_type,
++						 uint8_t const * msg_buf, uint16_t msg_len,
++						 struct genl_info *info)
++{
++	int flags = 0;
++	int ret = 0;
++	int status = 0;
++	int has_attr = 0;
++
++	/* Allocate a message buffer. */
++	struct sk_buff * skb = NULL;
++    struct nlmsghdr * nlh = NULL;
++
++	if ((attr_type > CCX_TAG_ATTR_UNUSED)
++			&& (attr_type < CCX_TAG_ATTR_COUNT))
++	{
++		if ((!msg_buf) || (msg_len == 0))
++		{
++			/* Error - Invalid attribute parameters. Abandon Send. */
++			goto nla_send_end;
++		}
++		else
++		{
++			has_attr = 1;
++		}
++	}
++
++	/* Allocate the raw netlink socket buffer first. */
++	skb = genlmsg_new(msg_len, GFP_KERNEL);
++	if (!skb)
++	{
++		/* Error - Socket buffer allocation failed. Abandon Send. */
++		goto nla_put_failure;
++	}
++
++	/* Set up the message header first.  Use the same       */
++	/* sequence number to indicate that this is a reply to  */
++	/* the original command message.                        */
++	nlh = genlmsg_put(skb, 0, info->snd_seq,
++			&ccx_tag_gnl_family, flags, cmd_type);
++	if (nlh == NULL)
++	{
++		/* Error - Message header fill failed. Abandon Send. */
++		goto nla_put_failure;
++	}
++
++	/* Add message command echo as an attribute. */
++	ret = nla_put(skb, CCX_TAG_ATTR_CMD, sizeof(cmd_type), &cmd_type);
++	if (ret != 0)
++	{
++		/* Error - Message cmd fill failed. Abandon Send. */
++		goto nla_put_failure;
++	}
++
++	/* Add message sequence as an attribute. */
++	ret = nla_put(skb, CCX_TAG_ATTR_SEQUENCE, sizeof(seq_num), &seq_num);
++	if (ret != 0)
++	{
++		/* Error - Message seq fill failed. Abandon Send. */
++		goto nla_put_failure;
++	}
++
++	/* Add message response as an attribute. */
++	ret = nla_put(skb, CCX_TAG_ATTR_RSP, sizeof(rsp_type), &rsp_type);
++	if (ret != 0)
++	{
++		/* Error - Message rsp fill failed. Abandon Send. */
++		goto nla_put_failure;
++	}
++
++	if (has_attr)
++	{
++		/* Add message data as an attribute. */
++		ret = nla_put(skb, attr_type, msg_len, msg_buf);
++		if (ret != 0)
++		{
++			/* Error - Message data fill failed. Abandon Send. */
++			goto nla_put_failure;
++		}
++	}
++
++	/* Finalize the message. */
++	genlmsg_end(skb, nlh);
++
++	/* Send the message. */
++	ret = genlmsg_unicast(genl_info_net(info), skb, info->snd_portid);
++
++	status = (ret == 0);
++
++	goto nla_send_end;
++
++nla_put_failure:
++
++	if (skb)
++	{
++		nlmsg_free(skb);
++	}
++	status = 0;
++
++nla_send_end:
++
++	return;
++}
++
++static int RecvCcxTagWmaRsp(WMA_HANDLE handle, u_int8_t* data, u_int32_t len)
++{
++	WMI_STA_TAG_PKT_INJ_COMP_EVENTID_param_tlvs *param_buf = NULL;
++    wmi_sta_tag_pkt_inj_comp_fixed_param *wmi_event = NULL;
++
++    param_buf = (WMI_STA_TAG_PKT_INJ_COMP_EVENTID_param_tlvs *)data;
++    if (param_buf)
++    {
++		wmi_event = param_buf->fixed_param;
++		if (wmi_event)
++		{
++		    mutex_lock(&hdd_ccx_tag_mutex);
++			if (hdd_ccx_tag_drvr_op_state == CCX_TAG_DRVR_OP_IN_PROG)
++			{
++				hdd_ccx_tag_drvr_op_state = CCX_TAG_DRVR_OP_COMPLETE;
++				hdd_ccx_tag_fw_status = wmi_event->txStatus;
++				hdd_ccx_tag_fw_attempts = wmi_event->totalTxAttempts;
++				hdd_ccx_tag_fw_failures = wmi_event->totalTxFailures;
++			}
++			else
++			{
++				/* Unexpected callback from firmware.  Report error. */
++				hdd_ccx_tag_drvr_op_state = CCX_TAG_DRVR_OP_IDLE;
++				hdd_ccx_tag_fw_status = CCX_TAG_FW_STATUS_ERROR;
++				hdd_ccx_tag_fw_attempts = 0;
++				hdd_ccx_tag_fw_failures = 0;
++			}
++		    mutex_unlock(&hdd_ccx_tag_mutex);
++		}
++    }
++
++    return VOS_STATUS_SUCCESS;
++}
++
++static VOS_STATUS SendCcxTagWmaCmd(CcxTagWmiHeader const * pHeader, u8 const * pData)
++{
++	VOS_STATUS status = VOS_STATUS_SUCCESS;
++    CcxTagWmiHeader * pCcxTagReqHeader = NULL;
++    tANI_U32 reqLen = 0;
++
++    mutex_lock(&hdd_ccx_tag_mutex);
++
++    if ((NULL == pHeader) || ((pHeader->ContentPayloadLength > 0) && (NULL == pData)))
++    {
++        status = VOS_STATUS_E_INVAL;
++    }
++
++    if (status == VOS_STATUS_SUCCESS)
++    {
++		reqLen = sizeof(CcxTagWmiHeader) + pHeader->ContentPayloadLength;
++
++		pCcxTagReqHeader = vos_mem_malloc(reqLen);
++		if (NULL == pCcxTagReqHeader)
++		{
++			status = VOS_STATUS_E_NOMEM;
++		}
++    }
++
++    if (status == VOS_STATUS_SUCCESS)
++    {
++        u8 * pCcxTagReqPayload = (u8 *)&pCcxTagReqHeader[1];
++        vos_msg_t msg;
++
++		vos_mem_set((u8*)(pCcxTagReqHeader), reqLen, 0);
++
++		/* Now copy over the information to the CCX Tag REQ to WMI message. */
++		vos_mem_copy(pCcxTagReqHeader, pHeader,
++					 sizeof(CcxTagWmiHeader));
++
++		vos_mem_copy(pCcxTagReqPayload, pData,
++					 pHeader->ContentPayloadLength);
++
++		/* Create the message to be passed to HAL. */
++		msg.type = SIR_HAL_CCX_TAG_REQ;
++		msg.bodyptr = pCcxTagReqHeader;
++		msg.bodyval = 0;
++
++		status = vos_mq_post_message(VOS_MQ_ID_WDA, &msg);
++		if (status != VOS_STATUS_SUCCESS)
++		{
++			vos_mem_free(pCcxTagReqHeader);
++		}
++    }
++
++    mutex_unlock(&hdd_ccx_tag_mutex);
++
++    return status;
++}
++
++static void ResetDriver(void)
++{
++	if (hdd_ccx_tag_drvr_op_state != CCX_TAG_DRVR_OP_UNRECOVERABLE)
++	{
++	    mutex_lock(&hdd_ccx_tag_mutex);
++
++	    hdd_ccx_tag_api_version = 0;
++		hdd_ccx_tag_drvr_op_state = CCX_TAG_DRVR_OP_IDLE;
++		hdd_ccx_tag_fw_status = CCX_TAG_FW_STATUS_ERROR;
++		hdd_ccx_tag_fw_attempts = 0;
++		hdd_ccx_tag_fw_failures = 0;
++		hdd_ccx_tag_fw_msgs_outstanding = 0;
++
++	    mutex_unlock(&hdd_ccx_tag_mutex);
++	}
++}
++
++/* This function registers a handler to receive netlink message */
++/* from a userspace application using the CCX Tags API.         */
++int ccx_tag_activate_service(void *pAdapter)
++{
++	int rc;
++	tp_wma_handle wma_handle = NULL;
++	int status = -1;
++	CcxTagDriverOpState op_state = CCX_TAG_DRVR_OP_UNRECOVERABLE;
++
++	pHddCtx = (struct hdd_context_s*) pAdapter;
++
++	mutex_init(&hdd_ccx_tag_mutex);
++
++	/* Register the CCX Tag family with the general netlink service. */
++	rc = genl_register_family(&ccx_tag_gnl_family);
++
++	if (rc == 0)
++	{
++		wma_handle = vos_get_context(VOS_MODULE_ID_WDA, pHddCtx->pvosContext);
++
++		if (wma_handle != NULL)
++		{
++			status = wmi_unified_register_event_handler(
++			   wma_handle->wmi_handle,
++			   WMI_STA_TAG_PKT_INJ_COMP_EVENTID,
++			   RecvCcxTagWmaRsp);
++			if (status == 0)
++			{
++				ResetDriver();
++				op_state = CCX_TAG_DRVR_OP_IDLE;
++			}
++		}
++	}
++
++	hdd_ccx_tag_drvr_op_state = op_state;
++
++	return rc;
++}
++
++int ccx_tag_deactivate_service(void)
++{
++	int rc;
++	tp_wma_handle wma_handle = NULL;
++	int status;
++	CcxTagDriverOpState op_state = CCX_TAG_DRVR_OP_UNRECOVERABLE;
++
++	/* Deregister the CCX Tag family from the general netlink service. */
++	rc = genl_unregister_family(&ccx_tag_gnl_family);
++
++	if (rc == 0)
++	{
++		wma_handle = vos_get_context(VOS_MODULE_ID_WDA, pHddCtx->pvosContext);
++
++		if (wma_handle != NULL)
++		{
++			status = wmi_unified_unregister_event_handler(
++			   wma_handle->wmi_handle,
++			   WMI_STA_TAG_PKT_INJ_COMP_EVENTID);
++			if (status == 0)
++			{
++				ResetDriver();
++				op_state = CCX_TAG_DRVR_OP_IDLE;
++			}
++		}
++	}
++
++	mutex_destroy(&hdd_ccx_tag_mutex);
++
++	hdd_ccx_tag_drvr_op_state = op_state;
++
++	return rc;
++}
++
++void TagConfigDisplay(CcxTagMpduHeader const * MpduHeaderBuffer, uint16_t MpduHeaderBufferLength,
++					  CcxTagContentHeader const * ContentHeaderBuffer, uint16_t ContentHeaderBufferLength,
++					  uint8_t const * ContentPayloadBlock,
++					  uint16_t ContentPayloadBlockLength)
++{
++	printk(KERN_DEBUG "CCX Tag Header: \n");
++	RawBlockDisplay((uint8_t const *)MpduHeaderBuffer, MpduHeaderBufferLength);
++
++	printk(KERN_DEBUG "CCX Tag Content: \n");
++	RawBlockDisplay((uint8_t const *)ContentHeaderBuffer, ContentHeaderBufferLength);
++
++	if (ContentPayloadBlockLength > 0)
++	{
++		printk(KERN_DEBUG "CCX Tag Data: \n");
++		RawBlockDisplay(ContentPayloadBlock, ContentPayloadBlockLength);
++	}
++}
++
++/* Parse an attribute from the command.                */
++/* The expected length is for each attribute is known, */
++/* so simply fail if it doesn't match the actual.      */
++static int ccx_tag_parse_attr(struct nlattr ** attrs, CcxTagAttrType type,
++							  void * attr_buf, uint16_t attr_len)
++{
++	int parse_status = 0;
++
++	if (attrs && (type < CCX_TAG_ATTR_COUNT) && (attr_len > 0))
++	{
++		struct nlattr * attr = attrs[type];
++		if (attr != NULL)
++		{
++			uint32_t payload_len = attr->nla_len - NLA_HDRLEN;
++			if (payload_len == (uint32_t)attr_len)
++			{
++				if (attr_buf != NULL)
++				{
++					uint8_t const * data_buf = (uint8_t const *)attr;
++					memcpy(attr_buf, &data_buf[NLA_HDRLEN], attr_len);
++					parse_status = 1;
++				}
++			}
++		}
++	}
++
++	return parse_status;
++}
++
++int ccx_tag_parse_transmit_attr(struct nlattr ** attrs,
++		 	 	 	 	 	 	CcxTagAttrType type,
++								CcxTagControlData * ctrl_data,
++ 								CcxTagMpduHeader * mpdu_hdr,
++								CcxTagContentHeader * cont_hdr,
++								uint8_t const ** cont_data,
++								uint16_t * cont_len)
++{
++	int parse_status = 0;
++	uint8_t const * payload_data = NULL;
++	uint32_t payload_len = 0;
++
++	if (attrs && (type == CCX_TAG_ATTR_TAG_COMMAND))
++	{
++		struct nlattr * attr = attrs[type];
++		if (attr != NULL)
++		{
++			uint32_t lower_lim = (uint32_t)CCX_TAG_IPC_MSG_MIN_SIZE;
++			uint32_t upper_lim = (uint32_t)CCX_TAG_IPC_MSG_MAX_SIZE;
++
++			payload_len = attr->nla_len - NLA_HDRLEN;
++			if ((payload_len >= lower_lim) && (payload_len <= upper_lim))
++			{
++				uint8_t const * data_buf = (uint8_t const *)attr;
++				payload_data = &data_buf[NLA_HDRLEN];
++			}
++		}
++	}
++
++	if ((payload_data != NULL)
++			&& (payload_len >= (CCX_TAG_CONTROL_DATA_SIZE + CCX_TAG_PACKET_MIN_SIZE)))
++	{
++		if ((ctrl_data != NULL) && (mpdu_hdr != NULL) && (cont_hdr != NULL)
++				&& (cont_data != NULL) && (cont_len != NULL))
++		{
++			size_t tmp_len = sizeof(CcxTagControlData);
++			memcpy(ctrl_data, payload_data, tmp_len);
++			payload_data = &payload_data[tmp_len];
++			payload_len -= tmp_len;
++
++			tmp_len = sizeof(CcxTagMpduHeader);
++			memcpy(mpdu_hdr, payload_data, tmp_len);
++			payload_data = &payload_data[tmp_len];
++			payload_len -= tmp_len;
++
++			tmp_len = sizeof(CcxTagContentHeader);
++			memcpy(cont_hdr, payload_data, tmp_len);
++			payload_data = &payload_data[tmp_len];
++			payload_len -= tmp_len;
++
++			*cont_len = payload_len;
++			if (payload_len > 0)
++			{
++				*cont_data = payload_data;
++			}
++
++			if (1)
++			{
++				printk(KERN_DEBUG "Kernel Cfg - Frag: %u Chan: %u \n",
++						ctrl_data->FragmentOffsetOctets, ctrl_data->ChannelOffsetOctets);
++
++				TagConfigDisplay(mpdu_hdr, ctrl_data->MpduHeaderSize,
++								 cont_hdr, ctrl_data->ContentHeaderSize,
++								 *cont_data, ctrl_data->ContentPayloadSize);
++			}
++
++			parse_status = 1;
++		}
++	}
++
++	return parse_status;
++}
++
++/*
++ * Callback functions invoked by Generic Netlink service for all netlink
++ * messages (from user space).
++ */
++
++static int ccx_tag_check_version_cmd_handler(struct sk_buff *skb, struct genl_info *info)
++{
++	CcxTagDriverResponseType rsp_err = CCX_TAG_DRVR_RSP_OK;
++
++	uint16_t cmd_buf = CCX_TAG_CMD_INVALID;
++	uint16_t seq_buf = 0;
++	uint16_t rsp_buf = CCX_TAG_DRVR_RSP_INVALID;
++	uint32_t version_buf = 0;
++
++	/* Process the message for a valid command. */
++	if (!info)
++	{
++		rsp_err = CCX_TAG_DRVR_RSP_ERR_NL_PARSE;
++	}
++	else
++	{
++	    int parse_ok = ccx_tag_parse_attr(info->attrs,
++				CCX_TAG_ATTR_CMD, &cmd_buf, sizeof(cmd_buf));
++
++		if (parse_ok)
++		{
++			parse_ok = ccx_tag_parse_attr(info->attrs,
++					CCX_TAG_ATTR_SEQUENCE, &seq_buf, sizeof(seq_buf));
++		}
++
++		if (parse_ok)
++		{
++			parse_ok = ccx_tag_parse_attr(info->attrs,
++					CCX_TAG_ATTR_API_VERSION, &version_buf, sizeof(version_buf));
++		}
++
++		if (!parse_ok)
++		{
++			rsp_err = CCX_TAG_DRVR_RSP_ERR_NL_PARSE;
++		}
++	}
++
++	/* Process the contents of the message, if valid. */
++	if (rsp_err == CCX_TAG_DRVR_RSP_OK)
++	{
++		hdd_ccx_tag_api_version = version_buf;
++
++		ResetDriver();
++	}
++
++	/* Reply with the driver version, regardless of parse results. */
++	rsp_buf = (uint16_t)rsp_err;
++	SendAttrData(cmd_buf, seq_buf, rsp_buf,
++				 CCX_TAG_ATTR_DRIVER_VERSION,
++				 (uint8_t *)&HDD_CCX_TAG_DRVR_VERSION,
++				 sizeof(HDD_CCX_TAG_DRVR_VERSION), info);
++
++	return 0;
++}
++
++static int ccx_tag_reset_cmd_handler(struct sk_buff *skb, struct genl_info *info)
++{
++	CcxTagDriverResponseType rsp_err = CCX_TAG_DRVR_RSP_OK;
++
++	uint16_t cmd_buf = CCX_TAG_CMD_INVALID;
++	uint16_t seq_buf = 0;
++	uint16_t rsp_buf = CCX_TAG_DRVR_RSP_INVALID;
++
++	if (!info)
++	{
++		rsp_err = CCX_TAG_DRVR_RSP_ERR_NL_PARSE;
++	}
++	else
++	{
++		int parse_ok = ccx_tag_parse_attr(info->attrs,
++				CCX_TAG_ATTR_CMD, &cmd_buf, sizeof(cmd_buf));
++
++		if (parse_ok)
++		{
++			parse_ok = ccx_tag_parse_attr(info->attrs,
++					CCX_TAG_ATTR_SEQUENCE, &seq_buf, sizeof(seq_buf));
++		}
++
++		if (!parse_ok)
++		{
++			rsp_err = CCX_TAG_DRVR_RSP_ERR_NL_PARSE;
++		}
++	}
++
++	/* Process the contents of the message, if valid. */
++	if (rsp_err == CCX_TAG_DRVR_RSP_OK)
++	{
++		ResetDriver();
++	}
++
++	/* Reply with the driver version, regardless of parse results. */
++	rsp_buf = (uint16_t)rsp_err;
++	SendAttrData(cmd_buf, seq_buf, rsp_buf,
++				 CCX_TAG_ATTR_UNDEFINED, NULL, 0,
++				 info);
++
++	return 0;
++}
++
++static int ccx_tag_transmit_cmd_handler(struct sk_buff *skb, struct genl_info *info)
++{
++	CcxTagDriverResponseType rsp_err = CCX_TAG_DRVR_RSP_OK;
++
++	uint16_t cmd_buf = CCX_TAG_CMD_INVALID;
++	uint16_t seq_buf = 0;
++	uint16_t rsp_buf = CCX_TAG_DRVR_RSP_INVALID;
++	CcxTagControlData ctrl_data;
++	CcxTagMpduHeader mpdu_hdr;
++	CcxTagContentHeader cont_hdr;
++	uint8_t const * cont_data;
++	uint16_t cont_len = 0;
++
++	/* Netlink Message Completeness Validation */
++	if (!info)
++	{
++		rsp_err = CCX_TAG_DRVR_RSP_ERR_NL_PARSE;
++	}
++	else
++	{
++		int parse_ok = ccx_tag_parse_attr(info->attrs,
++				CCX_TAG_ATTR_CMD, &cmd_buf, sizeof(cmd_buf));
++
++		if (parse_ok)
++		{
++			parse_ok = ccx_tag_parse_attr(info->attrs,
++				CCX_TAG_ATTR_SEQUENCE, &seq_buf, sizeof(seq_buf));
++		}
++
++		if (parse_ok)
++		{
++			parse_ok = ccx_tag_parse_transmit_attr(
++				info->attrs, CCX_TAG_ATTR_TAG_COMMAND,
++				&ctrl_data, &mpdu_hdr, &cont_hdr, &cont_data, &cont_len);
++		}
++
++		if (!parse_ok)
++		{
++			rsp_err = CCX_TAG_DRVR_RSP_ERR_NL_PARSE;
++		}
++	}
++
++	/* Netlink Message Detailed Content Validation */
++	if (rsp_err == CCX_TAG_DRVR_RSP_OK)
++	{
++		if (ctrl_data.ControlDataVersion != CCX_TAG_VERSION)
++		{
++			rsp_err = CCX_TAG_DRVR_RSP_ERR_TAG_VERSION;
++		}
++		else if (ctrl_data.ControlDataSize != sizeof(CcxTagControlData))
++		{
++			rsp_err = CCX_TAG_DRVR_RSP_ERR_CTRL_SIZE;
++		}
++		else if (ctrl_data.ContentPayloadSize != cont_len)
++		{
++			rsp_err = CCX_TAG_DRVR_RSP_ERR_PACKET_SIZE;
++		}
++		else
++		{
++			uint16_t packet_size = ctrl_data.MpduHeaderSize
++									+ ctrl_data.ContentHeaderSize
++									+ ctrl_data.ContentPayloadSize;
++			if ((ctrl_data.FragmentOffsetOctets >= packet_size)
++				|| (ctrl_data.ChannelOffsetOctets >= packet_size))
++			{
++				rsp_err = CCX_TAG_DRVR_RSP_ERR_OFFSET_OVERRUN;
++			}
++
++		}
++	}
++
++	/* Internal Driver State Validation */
++	if (rsp_err == CCX_TAG_DRVR_RSP_OK)
++	{
++	    mutex_lock(&hdd_ccx_tag_mutex);
++
++	    if ((hdd_ccx_tag_drvr_op_state >= CCX_TAG_DRVR_OP_STATE_COUNT)
++				|| (hdd_ccx_tag_drvr_op_state == CCX_TAG_DRVR_OP_UNRECOVERABLE))
++		{
++			rsp_err = CCX_TAG_DRVR_RSP_ERR_OP_FAILED;
++		}
++		else if (hdd_ccx_tag_drvr_op_state == CCX_TAG_DRVR_OP_IN_PROG)
++		{
++			rsp_err = CCX_TAG_DRVR_RSP_ERR_OP_IN_PROG;
++		}
++
++	    mutex_unlock(&hdd_ccx_tag_mutex);
++	}
++
++	/* Firmware Command Issuance */
++	if (rsp_err == CCX_TAG_DRVR_RSP_OK)
++	{
++		CcxTagWmiHeader wmi_hdr;
++		VOS_STATUS status = VOS_STATUS_SUCCESS;
++
++		wmi_hdr.ChannelOffsetOctets = ctrl_data.ChannelOffsetOctets;
++		wmi_hdr.FragmentOffsetOctets = ctrl_data.FragmentOffsetOctets;
++		wmi_hdr.ContentPayloadLength = ctrl_data.ContentPayloadSize;
++
++		memcpy(&wmi_hdr.MpduHeader, &mpdu_hdr, sizeof(wmi_hdr.MpduHeader));
++		memcpy(&wmi_hdr.ContentHeader, &cont_hdr, sizeof(wmi_hdr.ContentHeader));
++
++		status = SendCcxTagWmaCmd(&wmi_hdr, cont_data);
++
++		if (status == VOS_STATUS_SUCCESS)
++		{
++		    mutex_lock(&hdd_ccx_tag_mutex);
++			hdd_ccx_tag_drvr_op_state = CCX_TAG_DRVR_OP_IN_PROG;
++			hdd_ccx_tag_fw_msgs_outstanding++;
++		    mutex_unlock(&hdd_ccx_tag_mutex);
++		}
++		else
++		{
++			rsp_err = CCX_TAG_DRVR_RSP_ERR_OP_FAILED;
++		}
++	}
++
++	/* Reply with the driver version, regardless of parse results. */
++	rsp_buf = (uint16_t)rsp_err;
++	SendAttrData(cmd_buf, seq_buf, rsp_buf,
++				 CCX_TAG_ATTR_UNDEFINED, NULL, 0,
++				 info);
++
++	return 0;
++}
++
++static int ccx_tag_status_cmd_handler(struct sk_buff *skb, struct genl_info *info)
++{
++	CcxTagDriverResponseType rsp_err = CCX_TAG_DRVR_RSP_OK;
++
++	uint16_t cmd_buf = CCX_TAG_CMD_INVALID;
++	uint16_t seq_buf = 0;
++	uint16_t rsp_buf = CCX_TAG_DRVR_RSP_INVALID;
++	CcxTagStatusData status;
++
++	if (!info)
++	{
++		rsp_err = CCX_TAG_DRVR_RSP_ERR_NL_PARSE;
++	}
++	else
++	{
++		int parse_ok = ccx_tag_parse_attr(info->attrs,
++				CCX_TAG_ATTR_CMD, &cmd_buf, sizeof(cmd_buf));
++
++		if (parse_ok)
++		{
++			parse_ok = ccx_tag_parse_attr(info->attrs,
++					CCX_TAG_ATTR_SEQUENCE, &seq_buf, sizeof(seq_buf));
++		}
++
++		if (!parse_ok)
++		{
++			rsp_err = CCX_TAG_DRVR_RSP_ERR_NL_PARSE;
++		}
++	}
++
++	/* Firmware Response Collection */
++	if (rsp_err == CCX_TAG_DRVR_RSP_OK)
++	{
++	    mutex_lock(&hdd_ccx_tag_mutex);
++		status.DriverOpState = hdd_ccx_tag_drvr_op_state;
++	    mutex_unlock(&hdd_ccx_tag_mutex);
++
++		status.FirmwareStatus = hdd_ccx_tag_fw_status;
++		status.AttemptCount = hdd_ccx_tag_fw_attempts;
++		status.FailureCount = hdd_ccx_tag_fw_failures;
++	}
++	else
++	{
++		status.DriverOpState = CCX_TAG_DRVR_OP_STATE_UNDEFINED;
++		status.FirmwareStatus = CCX_TAG_FW_STATUS_ERROR;
++		status.AttemptCount = 0;
++		status.FailureCount = 0;
++	}
++
++	status.StatusDataSize = sizeof(status);
++	status.StatusDataVersion = CCX_TAG_STATUS_VERSION;
++
++	rsp_buf = (uint16_t)rsp_err;
++	SendAttrData(cmd_buf, seq_buf, rsp_buf,
++				 CCX_TAG_ATTR_TAG_STATUS, (uint8_t *)&status, sizeof(status),
++				 info);
++
++	return 0;
++}
++
++#endif
+diff --git a/CORE/HDD/src/wlan_hdd_main.c b/CORE/HDD/src/wlan_hdd_main.c
+index 05600538cda5..4d21d850a22e 100644
+--- a/CORE/HDD/src/wlan_hdd_main.c
++++ b/CORE/HDD/src/wlan_hdd_main.c
+@@ -71,6 +71,9 @@
+ #include <wlan_nlink_srv.h>
+ #include <wlan_hdd_cfg.h>
+ #include <wlan_ptt_sock_svc.h>
++#ifdef FEATURE_CCX_TAG_SUPPORT
++#include <wlan_hdd_ccx_tag.h>
++#endif
+ #include <dbglog_host.h>
+ #include <wlan_logging_sock_svc.h>
+ #include <wlan_hdd_wowl.h>
+@@ -15509,6 +15512,13 @@ int _readwrite_file(const char *filename, char *rbuf,
+ 			break;
+ 		}
+ 
++#ifdef FEATURE_CCX_TAG_SUPPORT
++   // Clean up the CCX Tag Netlink bridge
++   if (ccx_tag_deactivate_service() != 0)
++   {
++	   hddLog(LOGE, FL("Cannot deallocate CCX Tag resource"));
++   }
++#endif
+ 		if (wbuf) {
+ 			ret = vfs_write(
+ 				filp, wbuf, length, &filp->f_pos);
+@@ -17610,6 +17620,16 @@ int hdd_wlan_startup(struct device *dev, v_VOID_t *hif_sc)
+       goto err_ptt_sock_activate_svc;
+    }
+ 
++#ifdef FEATURE_CCX_TAG_SUPPORT
++   //Initialize the CCX Tag service
++   if (ccx_tag_activate_service(pHddCtx) != 0)
++   {
++      hddLog(VOS_TRACE_LEVEL_FATAL,
++             "%s: ccx_tag_activate_service failed", __func__);
++      goto err_ptt_sock_activate_svc;
++   }
++#endif
++
+    //Initialize the CNSS-DIAG service
+    if (cnss_diag_activate_service() < 0)
+    {
+diff --git a/CORE/MAC/inc/aniGlobal.h b/CORE/MAC/inc/aniGlobal.h
+index cf78093490f5..2f1677fa5168 100644
+--- a/CORE/MAC/inc/aniGlobal.h
++++ b/CORE/MAC/inc/aniGlobal.h
+@@ -74,6 +74,10 @@
+ #include "oemDataInternal.h"
+ #endif
+ 
++#ifdef FEATURE_CCX_TAG_SUPPORT
++#include "CcxTagDefs.h"
++#endif
++
+ #if defined WLAN_FEATURE_VOWIFI
+ #include "smeRrmInternal.h"
+ #include "rrmGlobal.h"
+diff --git a/CORE/MAC/inc/qwlan_version.h b/CORE/MAC/inc/qwlan_version.h
+index 5d5ee0c2124f..ec245797b79b 100644
+--- a/CORE/MAC/inc/qwlan_version.h
++++ b/CORE/MAC/inc/qwlan_version.h
+@@ -44,8 +44,7 @@ BRIEF DESCRIPTION:
+ #define QWLAN_VERSION_EXTRA            "X"
+ #define QWLAN_VERSION_BUILD            213
+ 
+-#define QWLAN_VERSIONSTR               "4.0.11.213X"
+-
++#define QWLAN_VERSIONSTR               "4.0.11.295X"
+ 
+ #define AR6320_REV1_VERSION             0x5000000
+ #define AR6320_REV1_1_VERSION           0x5000001
+diff --git a/CORE/MAC/src/include/sirParams.h b/CORE/MAC/src/include/sirParams.h
+index 67eb0eab64c4..97d2194d31c4 100644
+--- a/CORE/MAC/src/include/sirParams.h
++++ b/CORE/MAC/src/include/sirParams.h
+@@ -823,6 +823,12 @@ struct sir_mgmt_msg {
+ #define SIR_HAL_THERM_THROT_SET_CONF_CMD    (SIR_HAL_ITC_MSG_TYPES_BEGIN + 383)
+ #define SIR_HAL_THERM_MGMT_CMD              (SIR_HAL_ITC_MSG_TYPES_BEGIN + 384)
+ #define SIR_HAL_SET_HPCS_PULSE_PARMAS       (SIR_HAL_ITC_MSG_TYPES_BEGIN + 387)
++
++#ifdef FEATURE_CCX_TAG_SUPPORT
++#define SIR_HAL_CCX_TAG_REQ        			(SIR_HAL_ITC_MSG_TYPES_BEGIN + 390)
++#define SIR_HAL_CCX_TAG_RSP       			(SIR_HAL_ITC_MSG_TYPES_BEGIN + 391)
++#endif
++
+ #define SIR_HAL_MSG_TYPES_END               (SIR_HAL_MSG_TYPES_BEGIN + 0x1FF)
+ 
+ // CFG message types
+diff --git a/CORE/SERVICES/COMMON/wmi_tlv_defs.h b/CORE/SERVICES/COMMON/wmi_tlv_defs.h
+index 3215790ac023..fb4ee7298086 100644
+--- a/CORE/SERVICES/COMMON/wmi_tlv_defs.h
++++ b/CORE/SERVICES/COMMON/wmi_tlv_defs.h
+@@ -958,6 +958,11 @@ typedef enum {
+     WMITLV_TAG_STRUC_wmi_request_wlm_stats_cmd_fixed_param,
+     WMITLV_TAG_STRUC_wmi_wlm_stats_event_fixed_param,
+     WMITLV_TAG_STRUC_wmi_wlm_link_stats,
++	//Cisco tag packet injection - note that below enumerations should have
++    //the same tag value as from firmware. Any change causes firmware to
++    //reject the WMI command
++	WMITLV_TAG_STRUC_wmi_sta_tag_pkt_injection_cmd_fixed_param = 0x2a3,
++	WMITLV_TAG_STRUC_wmi_sta_tag_pkt_injection_event_fixed_param = 0x2a4,
+ } WMITLV_TAG_ID;
+ 
+ /*
+@@ -1349,6 +1354,7 @@ typedef enum {
+     OP(WMI_PEER_UNMAP_RESPONSE_CMDID) \
+     OP(WMI_ROAM_BSS_LOAD_CONFIG_CMDID) \
+     OP(WMI_VDEV_GET_MWS_COEX_INFO_CMDID) \
++    OP(WMI_STA_TAG_PKT_INJ_CMDID) \
+     OP(WMI_REQUEST_WLM_STATS_CMDID) \
+     /* add new CMD_LIST elements above this line */
+ 
+@@ -1568,10 +1574,10 @@ typedef enum {
+     OP(WMI_VDEV_GET_MWS_COEX_TDM_STATE_EVENTID) \
+     OP(WMI_VDEV_GET_MWS_COEX_IDRX_STATE_EVENTID) \
+     OP(WMI_VDEV_GET_MWS_COEX_ANTENNA_SHARING_STATE_EVENTID) \
++    OP(WMI_STA_TAG_PKT_INJ_COMP_EVENTID) \
+     OP(WMI_WLM_STATS_EVENTID) \
+     /* add new EVT_LIST elements above this line */
+ 
+-
+ /* TLV definitions of WMI commands */
+ 
+ /* Init Cmd */
+@@ -5238,6 +5244,17 @@ WMITLV_CREATE_PARAM_STRUC(WMI_MOTION_DET_BASE_LINE_HOST_EVENTID);
+   WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_STRUC_wmi_esp_estimate_event_fixed_param, wmi_esp_estimate_event_fixed_param, fixed_param, WMITLV_SIZE_FIX)
+ WMITLV_CREATE_PARAM_STRUC(WMI_ESP_ESTIMATE_EVENTID);
+ 
++/* Cisco Tag Packet Injection Command WMI_STA_TAG_PKT_INJ_CMDID = 0x3C001 */
++#define WMITLV_TABLE_WMI_STA_TAG_PKT_INJ_CMDID(id,op,buf,len) \
++		WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_STRUC_wmi_sta_tag_pkt_injection_cmd_fixed_param, wmi_sta_tag_pkt_injection_cmd_fixed_param, fixed_param, WMITLV_SIZE_FIX) \
++		WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_BYTE, A_UINT8, buffer, WMITLV_SIZE_VAR)
++WMITLV_CREATE_PARAM_STRUC(WMI_STA_TAG_PKT_INJ_CMDID);
++
++/* Cisco Tag Packet Injection completion event, WMI_STA_TAG_PKT_INJ_COMP_EVENTID = 0x3C002*/
++#define WMITLV_TABLE_WMI_STA_TAG_PKT_INJ_COMP_EVENTID(id,op,buf,len) \
++		WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_STRUC_wmi_sta_tag_pkt_injection_event_fixed_param, wmi_sta_tag_pkt_inj_comp_fixed_param, fixed_param, WMITLV_SIZE_FIX)
++WMITLV_CREATE_PARAM_STRUC(WMI_STA_TAG_PKT_INJ_COMP_EVENTID);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/CORE/SERVICES/COMMON/wmi_unified.h b/CORE/SERVICES/COMMON/wmi_unified.h
+index 2332e8711a9d..a8070b2d7cc9 100644
+--- a/CORE/SERVICES/COMMON/wmi_unified.h
++++ b/CORE/SERVICES/COMMON/wmi_unified.h
+@@ -250,13 +250,14 @@ typedef enum {
+     WMI_GRP_MONITOR,             /* 0x39 */
+     WMI_GRP_REGULATORY,          /* 0x3a */
+     WMI_GRP_HW_DATA_FILTER,      /* 0x3b */
+-    WMI_GRP_WLM,                 /* 0x3c WLAN Latency Manager */
++	WMI_GRP_USER_DEF = 0x3C,
+     WMI_GRP_11K_OFFLOAD,         /* 0x3d */
+     WMI_GRP_TWT,                 /* 0x3e TWT (Target Wake Time) for STA and AP */
+     WMI_GRP_MOTION_DET,          /* 0x3f */
+     WMI_GRP_SPATIAL_REUSE,       /* 0x40 */
+     WMI_GRP_ESP,                 /* 0x41 Estimate Service Parameters (802.11mc) */
+     WMI_GRP_HPCS_PULSE,          /* 0x42 High Precision Clock Synchronization */
++    WMI_GRP_WLM,                 /* 0x3c WLAN Latency Manager */
+ } WMI_GRP_ID;
+ 
+ #define WMI_CMD_GRP_START_ID(grp_id) (((grp_id) << 12) | 0x1)
+@@ -1195,6 +1196,10 @@ typedef enum {
+ 
+     /** WMI commands related to High Precision Clock Synchronization feature **/
+     WMI_HPCS_PULSE_START_CMDID = WMI_CMD_GRP_START_ID(WMI_GRP_HPCS_PULSE),
++
++#ifdef FEATURE_CCX_TAG_SUPPORT
++	WMI_STA_TAG_PKT_INJ_CMDID = WMI_CMD_GRP_START_ID(WMI_GRP_USER_DEF),
++#endif /* FEATURE_CCX_TAG_SUPPORT */
+ } WMI_CMD_ID;
+ 
+ typedef enum {
+@@ -1789,6 +1794,9 @@ typedef enum {
+ 
+     /** WMI events related to Estimation of Service Parameters (802.11mc) */
+     WMI_ESP_ESTIMATE_EVENTID = WMI_EVT_GRP_START_ID(WMI_GRP_ESP),
++#ifdef FEATURE_CCX_TAG_SUPPORT
++	WMI_STA_TAG_PKT_INJ_COMP_EVENTID = WMI_EVT_GRP_START_ID(WMI_GRP_USER_DEF) + 1,
++#endif /* FEATURE_CCX_TAG_SUPPORT */
+ } WMI_EVT_ID;
+ 
+ /* defines for OEM message sub-types */
+@@ -21904,6 +21912,71 @@ typedef struct {
+     A_UINT32 is_tdm_running;
+ } wmi_vdev_get_mws_coex_dpwb_state_fixed_param;
+ 
++#ifdef FEATURE_CCX_TAG_SUPPORT
++/*WMI_STA_TAG_PKT_INJ_CMDID fixed parameters*/
++typedef struct
++{
++	/* TLV tag and len; tag equals WMITLV_TAG_STRUC_wmi_sta_tag_pkt_injection_cmd_fixed_param */
++	A_UINT32 tlv_header;
++
++	/* Offset of channel field in the frame to be injected */
++	A_UINT8 channel_offset;
++
++	/* Offset of fragment count field in the frame to be injected (should be 22) */
++	A_UINT8 fragment_offset;
++
++	/*padding to 4-byte boundary*/	
++	A_UINT8 pad[2];
++
++	/* This should be same as the frame length including 802.11 header, for firmware buffer allocation */
++	A_UINT32 frame_length;
++
++	/**
++		This structure will be followed by TLV for data buffer.
++		It includes 802.11 header with 4-address format.
++		Tag for data buffer = WMITLV_TAG_ARRAY_BYTE
++		Length for data buffer = depends on the frame to be injected,
++			but rounded to next 32-bit boundary
++		A_UINT8 buffer[];
++	*/
++}wmi_sta_tag_pkt_injection_cmd_fixed_param;
++
++/* Error Codes used in Tx Status field in event from firmware: */
++/* Command was properly processed, Tx failures may have happened. */
++#define PKT_INJ_TX_STATUS_OK 0
++/* Generic error. The transmit failed to complete for an unknown reason. */
++#define PKT_INJ_TX_STATUS_ERROR -1
++/* Unable to allocate memory for the transmit. */
++#define PKT_INJ_TX_STATUS_MEM 2
++/* No free descriptors available. */
++#define PKT_INJ_TX_STATUS_NODESC 4
++/* Invalid parameter in the WMI command. */
++#define PKT_INJ_TX_STATUS_INVPRM 14
++/* The transmit operation was cancelled due to a higher priority operation. */
++#define PKT_INJ_TX_STATUS_CANCEL 16
++/* Hardware failure. */
++#define PKT_INJ_TX_STATUS_HWFAIL 23
++
++/* WMI_STA_TAG_PKT_INJ_COMP_EVENTID fixed parameters*/
++
++#endif /* FEATURE_CCX_TAG_SUPPORT */
++
++typedef struct
++{
++	/** TLV tag and len; tag equals	WMITLV_TAG_STRUC_wmi_sta_tag_pkt_injection_completion */
++	A_UINT32 tlv_header;
++
++	/* Total number of transmit attempts by firmware */
++	A_UINT32 totalTxAttempts;
++
++	/* Total number of transmit failures observed by firmware */
++	A_UINT32 totalTxFailures;
++
++	/* Overall transmit status, see PKT_INJ_TX_STATUS_XXX */
++	A_INT32 txStatus;
++}wmi_sta_tag_pkt_inj_comp_fixed_param;
++/* ADD NEW DEFS HERE */
++
+ typedef struct {
+     A_UINT32 tlv_header;  /* TLV tag and len; tag equals WMITLV_TAG_STRUC_wmi_vdev_get_mws_coex_tdm_state_fixed_param */
+     A_UINT32 vdev_id;
+diff --git a/CORE/SERVICES/WMA/wma.c b/CORE/SERVICES/WMA/wma.c
+index be13660667c7..337ae97be0a1 100644
+--- a/CORE/SERVICES/WMA/wma.c
++++ b/CORE/SERVICES/WMA/wma.c
+@@ -30227,6 +30227,77 @@ VOS_STATUS wma_ProcessAddPeriodicTxPtrnInd(WMA_HANDLE handle,
+ 	return VOS_STATUS_SUCCESS;
+ }
+ 
++#ifdef FEATURE_CCX_TAG_SUPPORT
++static void wma_ccx_tag_req(tp_wma_handle wma_handle,
++				CcxTagWmiHeader * ccxTagReqHeader)
++{
++	if ((ccxTagReqHeader != NULL)
++			&& (wma_handle != NULL)
++			&& (wma_handle->wmi_handle != NULL))
++	{
++
++		uint8_t * ccxTagReqPayload = (uint8_t *)&ccxTagReqHeader[1];
++		uint32_t packet_size = sizeof(ccxTagReqHeader->MpduHeader)
++									+ sizeof(ccxTagReqHeader->ContentHeader)
++									+ ccxTagReqHeader->ContentPayloadLength;
++		uint32_t packet_size_aligned = roundup(packet_size, sizeof(A_UINT32));
++		uint32_t len = sizeof(wmi_sta_tag_pkt_injection_cmd_fixed_param) +
++								WMI_TLV_HDR_SIZE + packet_size_aligned;
++
++		wmi_buf_t wmi_buf = wmi_buf_alloc(wma_handle->wmi_handle, len);
++		if (wmi_buf != NULL)
++		{
++			int ret = 0;
++			u_int8_t * buf_ptr = (u_int8_t *)wmi_buf_data(wmi_buf);
++			wmi_sta_tag_pkt_injection_cmd_fixed_param * cmd =
++					(wmi_sta_tag_pkt_injection_cmd_fixed_param *)buf_ptr;
++
++			/*memset the contents to 0*/
++			memset(buf_ptr, 0, len);
++
++			/*Filling the packet injection fixed parameter structure*/
++			WMITLV_SET_HDR(&cmd->tlv_header,
++						   WMITLV_TAG_STRUC_wmi_sta_tag_pkt_injection_cmd_fixed_param,
++						   WMITLV_GET_STRUCT_TLVLEN(wmi_sta_tag_pkt_injection_cmd_fixed_param));
++
++			/* Set the offset per the configured values. */
++			cmd->channel_offset  = (A_UINT8)ccxTagReqHeader->ChannelOffsetOctets;
++			cmd->fragment_offset = (A_UINT8)ccxTagReqHeader->FragmentOffsetOctets;
++			cmd->frame_length = packet_size;
++
++			/*Move pointer to end of fixed parameters*/
++			buf_ptr += sizeof(wmi_sta_tag_pkt_injection_cmd_fixed_param);
++
++			/*Set TLV Header for the packet*/
++			WMITLV_SET_HDR(buf_ptr, WMITLV_TAG_ARRAY_BYTE, packet_size_aligned);
++			buf_ptr += WMI_TLV_HDR_SIZE;
++
++			/*Copy the data packet segments after TLV Header*/
++			vos_mem_copy(buf_ptr, &ccxTagReqHeader->MpduHeader,
++						 sizeof(ccxTagReqHeader->MpduHeader));
++			buf_ptr +=  sizeof(ccxTagReqHeader->MpduHeader);
++
++			vos_mem_copy(buf_ptr, &ccxTagReqHeader->ContentHeader,
++						 sizeof(ccxTagReqHeader->ContentHeader));
++			buf_ptr +=  sizeof(ccxTagReqHeader->ContentHeader);
++
++			vos_mem_copy(buf_ptr, ccxTagReqPayload, ccxTagReqHeader->ContentPayloadLength);
++			buf_ptr +=  ccxTagReqHeader->ContentPayloadLength;
++
++			/*Send the WMI command payload to firmware*/
++			ret = wmi_unified_cmd_send(wma_handle->wmi_handle,
++									   wmi_buf, len,
++									   WMI_STA_TAG_PKT_INJ_CMDID);
++
++			if (ret != EOK)
++			{
++				wmi_buf_free(wmi_buf);
++			}
++		}
++	}
++}
++#endif /* FEATURE_CCX_TAG_SUPPORT */
++
+ /*
+  * FUNCTION: wma_ProcessDelPeriodicTxPtrnInd
+  * WMI command sent to firmware to del patterns
+@@ -35469,6 +35540,15 @@ VOS_STATUS wma_mc_process_msg(v_VOID_t *vos_context, vos_msg_t *msg)
+ 					(u_int32_t *)msg->bodyptr);
+ 			vos_mem_free(msg->bodyptr);
+ 			break;
++
++#ifdef FEATURE_CCX_TAG_SUPPORT
++		case SIR_HAL_CCX_TAG_REQ:
++			wma_ccx_tag_req(wma_handle,
++					(CcxTagWmiHeader *)msg->bodyptr);
++			vos_mem_free(msg->bodyptr);
++			break;
++#endif /* FEATURE_CCX_TAG_SUPPORT */
++
+ 		case WDA_GET_FW_STATUS_REQ:
+ 			wma_send_echo_request(wma_handle);
+ 			break;
+diff --git a/CORE/SERVICES/WMI/wmi_unified.c b/CORE/SERVICES/WMI/wmi_unified.c
+index f25b7966e22e..40c2ceb4234b 100644
+--- a/CORE/SERVICES/WMI/wmi_unified.c
++++ b/CORE/SERVICES/WMI/wmi_unified.c
+@@ -811,6 +811,9 @@ static u_int8_t* get_wmi_cmd_string(WMI_CMD_ID wmi_command)
+ 		CASE_RETURN_STRING(WMI_ROAM_BSS_LOAD_CONFIG_CMDID);
+ 		CASE_RETURN_STRING(WMI_VDEV_GET_MWS_COEX_INFO_CMDID);
+ 		CASE_RETURN_STRING(WMI_REQUEST_WLM_STATS_CMDID);
++#ifdef FEATURE_CCX_TAG_SUPPORT
++		CASE_RETURN_STRING(WMI_STA_TAG_PKT_INJ_CMDID);
++#endif
+ 	}
+ 	return "Invalid WMI cmd";
+ }
+diff --git a/Kbuild b/Kbuild
+index fdad10c753a3..1ff42e6dedd4 100644
+--- a/Kbuild
++++ b/Kbuild
+@@ -447,6 +447,7 @@ HDD_INC := 	-I$(WLAN_ROOT)/$(HDD_INC_DIR) \
+ 		-I$(WLAN_ROOT)/$(HDD_SRC_DIR)
+ 
+ HDD_OBJS := 	$(HDD_SRC_DIR)/wlan_hdd_assoc.o \
++		$(HDD_SRC_DIR)/wlan_hdd_ccx_tag.o \
+ 		$(HDD_SRC_DIR)/wlan_hdd_cfg.o \
+ 		$(HDD_SRC_DIR)/wlan_hdd_debugfs.o \
+ 		$(HDD_SRC_DIR)/wlan_hdd_dev_pwr.o \
+@@ -1053,6 +1054,7 @@ CDEFINES :=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DFEATURE_WLAN_WAPI \
+ 		-DWLAN_FEATURE_11W \
+ 		-DFEATURE_OEM_DATA_SUPPORT\
++		-DFEATURE_CCX_TAG_SUPPORT \
+ 		-DSOFTAP_CHANNEL_RANGE \
+ 		-DWLAN_AP_STA_CONCURRENCY \
+ 		-DFEATURE_WLAN_SCAN_PNO \
