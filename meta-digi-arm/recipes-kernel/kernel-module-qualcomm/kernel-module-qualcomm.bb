@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2021 Digi International.
+# Copyright (C) 2016-2022 Digi International.
 
 SUMMARY = "Qualcomm's wireless driver for qca65xx"
 DESCRIPTION = "qcacld-2.0 module"
@@ -19,9 +19,9 @@ SRC_URI = " \
 
 # Selects whether the interface is SDIO or PCI
 QUALCOMM_WIFI_INTERFACE ?= "sdio"
-QUALCOMM_WIFI_INTERFACE_ccimx8x = "pci"
+QUALCOMM_WIFI_INTERFACE:ccimx8x = "pci"
 
-SRC_URI_append = " \
+SRC_URI:append = " \
     file://81-qcom-wifi.rules \
     file://qualcomm.sh \
 "
@@ -30,11 +30,13 @@ FILES_SDIO = " \
     file://modprobe-qualcomm.conf \
 "
 
-SRC_URI_append = "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${FILES_SDIO}', '', d)}"
+SRC_URI:append = "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${FILES_SDIO}', '', d)}"
 
 S = "${WORKDIR}/git"
 
 inherit module
+
+DEPENDS = "virtual/kernel"
 
 EXTRA_OEMAKE += "CONFIG_LINUX_QCMBR=y WLAN_OPEN_SOURCE=1"
 # Explicity state it is not a QC platform, if not the driver will try to remap
@@ -50,17 +52,13 @@ EXTRA_OEMAKE += "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${
 FLAGS_PCI = "CONFIG_ROME_IF=pci CONFIG_HIF_PCI=1 CONFIG_ATH_PCIE_ACCESS_DEBUG=1 CONFIG_ATH_PCIE_MAX_PERF=1"
 EXTRA_OEMAKE += "${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'pci' , '${FLAGS_PCI}', '', d)}"
 # Flags required for QCA6574
-EXTRA_OEMAKE_append_ccimx8x = " CONFIG_ARCH_MSM=n CONFIG_ARCH_QCOM=n CONFIG_ATH_11AC_TXCOMPACT=1"
+EXTRA_OEMAKE:append:ccimx8x = " CONFIG_ARCH_MSM=n CONFIG_ARCH_QCOM=n CONFIG_ATH_11AC_TXCOMPACT=1"
 
-do_compile_prepend() {
+do_compile:prepend() {
 	export BUILD_VER=${PV}
 }
 
-do_install_prepend_ccimx6ul() {
-    sed -i -e "s/gVhtTxMCS=2/gVhtTxMCS=0/g" ${WORKDIR}/git/firmware_bin/WCNSS_qcom_cfg.ini
-}
-
-do_install_append() {
+do_install:append() {
 	if [ "${QUALCOMM_WIFI_INTERFACE}" = "sdio" ]; then
 		install -d ${D}${sysconfdir}/modprobe.d
 		install -m 0644 ${WORKDIR}/modprobe-qualcomm.conf ${D}${sysconfdir}/modprobe.d/qualcomm.conf
@@ -75,8 +73,12 @@ do_install_append() {
 	install -m 0644 ${WORKDIR}/81-qcom-wifi.rules ${D}${sysconfdir}/udev/rules.d/
 }
 
-FILES_${PN} += " \
-    ${sysconfdir}/modprobe.d/qualcomm.conf \
+do_install:append:ccimx6ul() {
+	sed -i -e "s/gVhtTxMCS=2/gVhtTxMCS=0/g" ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
+}
+
+FILES:${PN} += " \
+    ${@oe.utils.conditional('QUALCOMM_WIFI_INTERFACE', 'sdio' , '${sysconfdir}/modprobe.d/qualcomm.conf', '', d)} \
     ${sysconfdir}/udev/ \
     ${base_libdir}/firmware/wlan/cfg.dat \
     ${base_libdir}/firmware/wlan/qcom_cfg.ini \
