@@ -1,4 +1,4 @@
 # Load Qualcomm wireless module (sdio)
-SUBSYSTEM=="sdio", ACTION=="add", ENV{MODALIAS}=="sdio:c00v0271d050A", RUN="/sbin/modprobe wlan"
+SUBSYSTEM=="sdio", ACTION=="add", ENV{MODALIAS}=="sdio:c00v0271d050A", RUN="/etc/udev/scripts/qualcomm.sh"
 # Load Qualcomm wireless module (pci)
-SUBSYSTEM=="pci", ACTION=="add", ENV{MODALIAS}=="pci:v0000168Cd0000003Esv*sd*bc*sc*i*", RUN="/sbin/modprobe wlan"
+SUBSYSTEM=="pci", ACTION=="add", ENV{MODALIAS}=="pci:v0000168Cd0000003Esv*sd*bc*sc*i*", RUN="/etc/udev/scripts/qualcomm.sh"
