@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2022 Digi International.
+# Copyright (C) 2016-2021 Digi International.
 
 SUMMARY = "Qualcomm firmware files for Digi's platforms."
 SECTION = "base"
@@ -10,8 +10,8 @@ QUALCOMM_WIFI_DRIVER ?= "proprietary"
 
 # Selects whether to apply the "Deep Sleep + Internal Clock" workaround
 BT_INTCLOCK_WORKAROUND ?= "0"
-BT_INTCLOCK_WORKAROUND:ccimx6ul = "1"
-BT_INTCLOCK_WORKAROUND:ccimx6 = "1"
+BT_INTCLOCK_WORKAROUND_ccimx6ul = "1"
+BT_INTCLOCK_WORKAROUND_ccimx6 = "1"
 
 # Bluetooth 5.0 firmware files
 FW_QUALCOMM_BT_5 = " \
@@ -38,10 +38,10 @@ FW_QCA65X4_SDIO_PROPRIETARY = " \
 
 # Firmware files for QCA6574 (Qualcomm proprietary driver)
 FW_QCA65X4_PCIE_PROPRIETARY = " \
-    file://fakeboar_US.bin \
+    file://bdwlan30_US.bin \
     file://LICENCE.atheros_firmware \
-    file://qca65X4_pcie_proprietary/otp.bin \
-    file://qca65X4_pcie_proprietary/athwlan.bin \
+    file://qca65X4_pcie_proprietary/otp30.bin \
+    file://qca65X4_pcie_proprietary/qwlan30.bin \
     file://qca65X4_pcie_proprietary/utf.bin \
 "
 
@@ -58,7 +58,7 @@ FW_QCA6574_WIFI_COMMUNITY = " \
 "
 
 FW_QUALCOMM_WIFI ?= "${FW_QCA65X4_SDIO_PROPRIETARY}"
-FW_QUALCOMM_WIFI:ccimx8x = "${@oe.utils.conditional('QUALCOMM_WIFI_DRIVER', 'community', '${FW_QCA6574_WIFI_COMMUNITY}', '${FW_QCA65X4_PCIE_PROPRIETARY}', d)}"
+FW_QUALCOMM_WIFI_ccimx8x = "${@oe.utils.conditional('QUALCOMM_WIFI_DRIVER', 'community', '${FW_QCA6574_WIFI_COMMUNITY}', '${FW_QCA65X4_PCIE_PROPRIETARY}', d)}"
 
 SRC_URI = " \
     ${FW_QUALCOMM_BT} \
@@ -97,11 +97,12 @@ do_install() {
 		ln -s /proc/device-tree/wireless/mac-address3 ${D}${WIFI_FW_PATH}/wlan/wlan_mac3
 
 		# Create symbolic links to the proper FW files depending on the country region
+		ln -s bdwlan30_US.bin ${D}${WIFI_FW_PATH}/bdwlan30.bin
+		ln -s bdwlan30_US.bin ${D}${WIFI_FW_PATH}/utfbd30.bin
+
 		if [ "${FW_QUALCOMM_WIFI}" = "${FW_QCA65X4_PCIE_PROPRIETARY}" ]; then
-			ln -s fakeboar_US.bin ${D}${WIFI_FW_PATH}/fakeboar.bin
-		else
-			ln -s bdwlan30_US.bin ${D}${WIFI_FW_PATH}/bdwlan30.bin
-			ln -s bdwlan30_US.bin ${D}${WIFI_FW_PATH}/utfbd30.bin
+			ln -s qwlan30.bin ${D}${WIFI_FW_PATH}/athwlan.bin
+			ln -s otp30.bin ${D}${WIFI_FW_PATH}/athsetup.bin
 		fi
 	fi
 
@@ -117,13 +118,13 @@ do_install() {
 }
 
 QCA_MODEL ?= "qca6564"
-QCA_MODEL:ccimx8x = "qca6574"
+QCA_MODEL_ccimx8x = "qca6574"
 
 # Do not create empty debug and development packages (PN-dbg PN-dev PN-staticdev)
 PACKAGES = "${PN}-${QCA_MODEL}-bt ${PN}-${QCA_MODEL}-wifi"
 
-FILES:${PN}-${QCA_MODEL}-bt = "/lib/firmware/qca"
-FILES:${PN}-${QCA_MODEL}-wifi = "/lib/firmware"
+FILES_${PN}-${QCA_MODEL}-bt = "/lib/firmware/qca"
+FILES_${PN}-${QCA_MODEL}-wifi = "/lib/firmware"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x|ccimx8m)"
