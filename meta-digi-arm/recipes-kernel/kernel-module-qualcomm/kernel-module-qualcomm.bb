@@ -23,7 +23,6 @@ QUALCOMM_WIFI_INTERFACE:ccimx8x = "pci"
 
 SRC_URI:append = " \
     file://81-qcom-wifi.rules \
-    file://qualcomm.sh \
 "
 
 FILES_SDIO = " \
@@ -67,8 +66,6 @@ do_install:append() {
 	install -d ${D}${base_libdir}/firmware/wlan/
 	install -m 0644 ${WORKDIR}/git/firmware_bin/WCNSS_cfg.dat ${D}${base_libdir}/firmware/wlan/cfg.dat
 	install -m 0644 ${WORKDIR}/git/firmware_bin/WCNSS_qcom_cfg.ini ${D}${base_libdir}/firmware/wlan/qcom_cfg.ini
-	install -d ${D}${sysconfdir}/udev/scripts
-	install -m 0755 ${WORKDIR}/qualcomm.sh ${D}${sysconfdir}/udev/scripts/
 	install -d ${D}${sysconfdir}/udev/rules.d
 	install -m 0644 ${WORKDIR}/81-qcom-wifi.rules ${D}${sysconfdir}/udev/rules.d/
 }
