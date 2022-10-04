@@ -15,6 +15,7 @@
 
 readonly DEMOSERVER_BINARY="/srv/www/demoserver.py"
 readonly STOP_TIMEOUT="5"
+readonly PULSEAUDIO_START_COMMAND="pulseaudio --start"
 
 stop_process() {
 	# try to stop gracefully
@@ -30,6 +31,7 @@ stop_process() {
 
 case "$1" in
 	start)
+		pkill -0 "pulseaudio" >/dev/null 2>&1 || ${PULSEAUDIO_START_COMMAND}
 		${DEMOSERVER_BINARY} > /dev/null 2>&1 &
 		;;
 	stop)
