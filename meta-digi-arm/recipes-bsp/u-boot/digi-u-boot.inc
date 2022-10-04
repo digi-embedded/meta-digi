@@ -20,7 +20,7 @@ UBOOT_URI_GITHUB = "${DIGI_GITHUB_GIT}/u-boot.git;protocol=https"
 UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${UBOOT_URI_STASH}', '${UBOOT_URI_GITHUB}', d)}"
 
 SRC_URI = " \
-    ${UBOOT_GIT_URI};nobranch=1 \
+    ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
     file://boot.txt \
     file://install_linux_fw_sd.txt \
     file://install_linux_fw_usb.txt \
