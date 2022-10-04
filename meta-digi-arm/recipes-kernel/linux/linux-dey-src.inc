@@ -7,7 +7,7 @@ LINUX_URI_STASH = "${DIGI_MTK_GIT}/linux/linux.git;protocol=ssh"
 LINUX_URI_GITHUB = "${DIGI_GITHUB_GIT}/linux.git;protocol=https"
 LINUX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${LINUX_URI_STASH}', '${LINUX_URI_GITHUB}', d)}"
 
-SRC_URI = "${LINUX_GIT_URI};branch=${SRCBRANCH}"
+SRC_URI = "${LINUX_GIT_URI};nobranch=1"
 
 # A user can provide his own kernel 'defconfig' file by:
 # - setting the variable KERNEL_DEFCONFIG to a custom kernel configuration file
