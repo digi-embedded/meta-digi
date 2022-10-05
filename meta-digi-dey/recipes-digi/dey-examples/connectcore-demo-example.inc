@@ -20,6 +20,7 @@ RDEPENDS:${PN} = " \
     python3-logging \
     python3-netserver \
     busybox-httpd \
+    mpg123 \
 "
 
 S = "${WORKDIR}/connectcore-demo-example"
