@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2017 Digi International.
+# Copyright (C) 2012-2022 Digi International.
 #
 SUMMARY = "Audio packagegroup for DEY image"
 
@@ -19,8 +19,7 @@ RDEPENDS:${PN} = "\
     alsa-state \
     alsa-states \
     ${ALSA_UTILS_PKGS} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', \
-       bb.utils.contains('DISTRO_FEATURES', 'pulseaudio', 'pulseaudio-server pulseaudio-misc', '', d), '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'pulseaudio', 'pulseaudio-server pulseaudio-misc', '', d)} \
 "
 
 RDEPENDS:${PN}:append:ccimx6 = " card-detect"
