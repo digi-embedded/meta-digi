@@ -40,6 +40,7 @@ SRC_URI:append:ccimx6ulsbc = " \
 "
 
 SRC_URI:append:ccmp1 = " \
+    file://daemon.conf \
     file://0001-pulseaudio-keep-headphones-volume-in-platforms-witho.patch \
 "
 
@@ -73,6 +74,11 @@ do_install:append() {
 	install -d ${D}${systemd_unitdir}/system
 	install -m 0644 ${WORKDIR}/pulseaudio-system.service ${D}/${systemd_unitdir}/system
 
+	# Remove pid file entry for non-graphical backend
+	if [ "${IS_HEADLESS}" = "true" ]; then
+		sed -i -e "/PIDFile/d" ${D}/${systemd_unitdir}/system/pulseaudio-system.service
+	fi
+
 	# Configuration files for HDMI sound card
 	if [ "${AUDIO_HDMI}" = "yes" ]; then
 		install -d ${D}${sysconfdir}/udev/scripts
@@ -82,6 +88,13 @@ do_install:append() {
 	fi
 
 	sed -i -e '/load-module module-suspend-on-idle/{s,$, timeout=0,g}' ${D}${sysconfdir}/pulse/default.pa
+}
+
+# Pulse audio configuration files installation
+do_install:append:ccmp1() {
+	if [ -e "${WORKDIR}/daemon.conf" ]; then
+		install -m 0644 ${WORKDIR}/daemon.conf ${D}/${sysconfdir}/pulse/daemon.conf
+	fi
 }
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
