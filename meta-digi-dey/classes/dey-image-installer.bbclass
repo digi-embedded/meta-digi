@@ -65,4 +65,12 @@ _EOF_
 	fi
 }
 
+generate_installer_zip:append:ccimx8m () {
+	INSTALLER_FILELIST=${META_DIGI_SCRIPTS}/install_usb_driver.sh
+}
+
+generate_installer_zip:append:ccmp1 () {
+	INSTALLER_FILELIST=${META_DIGI_SCRIPTS}/install_usb_driver.sh
+}
+
 IMAGE_POSTPROCESS_COMMAND += "generate_installer_zip; "
