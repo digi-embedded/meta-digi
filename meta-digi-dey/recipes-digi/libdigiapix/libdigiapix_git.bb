@@ -25,7 +25,15 @@ S = "${WORKDIR}/git"
 
 inherit pkgconfig useradd python3native
 
-DEPENDS = "libsoc libsocketcan libgpiod ${PYTHON_PN}-native ${PYTHON_PN}-setuptools-native ${PYTHON_PN}-pip-native"
+DEPENDS = " \
+    libsoc \
+    libsocketcan \
+    libgpiod \
+    bluez5 \
+    ${PYTHON_PN}-native \
+    ${PYTHON_PN}-setuptools-native \
+    ${PYTHON_PN}-pip-native \
+"
 
 EXTRA_OEMAKE += "PYTHON_BIN=${PYTHON}"
 
