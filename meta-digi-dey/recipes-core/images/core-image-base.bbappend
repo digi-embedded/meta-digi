@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016 Digi International.
+# Copyright (C) 2016-2022 Digi International.
 #
 
 IMAGE_FEATURES += " \
@@ -17,6 +17,11 @@ IMAGE_FEATURES += " \
 IMAGE_FEATURES:remove = "${@oe.utils.conditional('IS_HEADLESS', 'true', ' splash ', '', d)}"
 
 CORE_IMAGE_BASE_INSTALL += "dey-examples-digiapix"
+
+# The connectcore demo was removed from 'packagegroup-dey-core' for the
+# 6UL (because of rootfs space limits). Add it here, to install it in the
+# non-graphical core-image-base.
+CORE_IMAGE_BASE_INSTALL:append:ccimx6ul = " connectcore-demo-example"
 
 # SDK features (for toolchains generated from an image with populate_sdk)
 SDKIMAGE_FEATURES ?= "dev-pkgs dbg-pkgs staticdev-pkgs"

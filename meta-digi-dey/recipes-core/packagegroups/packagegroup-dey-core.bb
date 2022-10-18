@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2017 Digi International.
+# Copyright (C) 2012-2022 Digi International.
 #
 SUMMARY = "Core packagegroup for DEY image"
 
@@ -66,6 +66,10 @@ RDEPENDS:${PN} = "\
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS} \
     ${MACHINE_EXTRA_RDEPENDS} \
 "
+
+# The rootfs in the CC6UL is not big enough for graphic images (QT) and the
+# connectcore demo, so we restrict the demo only for the 'core-image-base'
+RDEPENDS:${PN}:remove:ccimx6ul = "connectcore-demo-example"
 
 RRECOMMENDS:${PN} = "\
     ${VIRTUAL-RUNTIME_base-utils-syslog} \
