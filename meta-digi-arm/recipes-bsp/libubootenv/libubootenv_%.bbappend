@@ -11,6 +11,8 @@ FW_CONFIG_FILE = "${@bb.utils.contains('STORAGE_MEDIA', 'mtd', \
 			'${STORAGE_MEDIA}/fw_env.config', \
 			 d)}"
 
+FW_CONFIG_FILE:ccmp1 = "ubi/fw_env.config"
+
 SRC_URI += " \
     file://${FW_CONFIG_FILE} \
     file://0001-Implement-support-for-environment-encryption-by-CAAM.patch \
@@ -23,6 +25,9 @@ do_install:append() {
 	install -m 0644 ${WORKDIR}/${FW_CONFIG_FILE} ${D}${sysconfdir}/fw_env.config
 }
 
+UBOOT_ENV_PARTITION = "environment"
+UBOOT_ENV_PARTITION:ccmp1 = "UBI"
+
 pkg_postinst_ontarget:${PN}() {
 	CONFIG_FILE="/etc/fw_env.config"
 	MMCDEV="$(sed -ne 's,.*root=/dev/mmcblk\([0-9]\)p.*,\1,g;T;p' /proc/cmdline)"
@@ -31,12 +36,12 @@ pkg_postinst_ontarget:${PN}() {
 	fi
 
 	PARTTABLE="/proc/mtd"
-	MTDINDEX="$(sed -ne "s/\(^mtd[0-9]\+\):.*\<environment\>.*/\1/g;T;p" ${PARTTABLE} 2>/dev/null)"
+	MTDINDEX="$(sed -ne "s/\(^mtd[0-9]\+\):.*\<${UBOOT_ENV_PARTITION}\>.*/\1/g;T;p" ${PARTTABLE} 2>/dev/null)"
 	if [ -n "${MTDINDEX}" ]; then
 		# Initialize variables for fixed offset values
 		# (backwards compatible with old U-Boot)
 		ENV_OFFSET="${UBOOT_ENV_OFFSET}"
-		ENV_REDUND_OFFSET="${UBOOT_ENV_SIZE}"
+		ENV_REDUND_OFFSET="${UBOOT_ENV_REDUND_OFFSET}"
 		ENV_SIZE="${UBOOT_ENV_SIZE}"
 		ERASEBLOCK=""
 		NBLOCKS=""
