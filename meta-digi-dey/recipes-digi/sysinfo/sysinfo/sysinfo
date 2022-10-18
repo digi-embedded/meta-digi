@@ -293,10 +293,15 @@ if [ -z "${UBOOT_VERSION}" ]; then
 	UBOOT_VERSION="$(strings ${UBOOT_PARTITION} | grep -m 1 dub | cut -d' ' -f2)"
 fi
 MACHINE="$(cat /proc/device-tree/compatible | tr '\0' '\t' | cut -f 1)"
+if grep -qs 'DVK' /proc/device-tree/model; then
+	BOARD_TYPE="DVK"
+else
+	BOARD_TYPE="SBC"
+fi
 BOARD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant | tr -d '\0')"
 BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn | tr -d '\0')"
 BOARD_VERSION="$(cat /proc/device-tree/digi,carrierboard,version | tr -d '\0')"
-BOARD_ID="$(cat /proc/device-tree/digi,carrierboard,id | tr -d '\0')"
+[ -e "/proc/device-tree/digi,carrierboard,id" ] && BOARD_ID="$(cat /proc/device-tree/digi,carrierboard,id | tr -d '\0')"
 [ -e "/proc/device-tree/cpus/rev" ] && SOC_REV="$(cat /proc/device-tree/cpus/rev | tr -d '\0')"
 
 if grep -qs '\<digi,ccimx6ul\>' /proc/device-tree/compatible; then
@@ -329,11 +334,14 @@ REPORT_PATH="/tmp/sysinfo-${DEY_VERSION}-${BOARD_SN}-${DATE}"
 	echo ""
 
 	echo "||*Component*||*Version*"
-	if [ -n "$SOC_REV" ]; then
-		echo "|| DUT | SN-${BOARD_SN}, ${MACHINE} ${BOARD_VARIANT} SBCv${BOARD_VERSION} board_ID=${BOARD_ID} SOC_REV=${SOC_REV}."
-	else
-		echo "|| DUT | SN-${BOARD_SN}, ${MACHINE} ${BOARD_VARIANT} SBCv${BOARD_VERSION} board_ID=${BOARD_ID}."
+	DUT_HEADER="SN-${BOARD_SN}, ${MACHINE} ${BOARD_VARIANT} ${BOARD_TYPE}v${BOARD_VERSION}"
+	if [ -n "${BOARD_ID}" ]; then
+		DUT_HEADER="${DUT_HEADER} board_ID=${BOARD_ID}"
 	fi
+	if [ -n "${SOC_REV}" ]; then
+		DUT_HEADER="${DUT_HEADER} SOC_REV=${SOC_REV}"
+	fi
+	echo "|| DUT | ${DUT_HEADER}"
 	echo "|| U-Boot | ${UBOOT_VERSION}"
 	echo "|| Firmware | ${DISTRO}-${DEY_VERSION}-$(cat /etc/version)"
 	echo "|| Kernel | $(uname -a)"
