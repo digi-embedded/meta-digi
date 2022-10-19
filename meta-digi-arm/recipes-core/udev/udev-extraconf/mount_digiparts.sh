@@ -56,8 +56,6 @@ else
 	fi
 fi
 
-SINGLEMTDSYS="$(fw_printenv -n singlemtdsys 2>/dev/null)"
-
 # Create mount point if needed
 MOUNTPOINT="/mnt/${PARTNAME}"
 [ -d "${MOUNTPOINT}" ] || mkdir -p ${MOUNTPOINT}
@@ -93,7 +91,7 @@ elif [ "${SUBSYSTEM}" = "mtd" ]; then
 		logger -t udev "ERROR: Could not mount '${PARTNAME}' partition, volume not found"
 		rmdir --ignore-fail-on-non-empty ${MOUNTPOINT}
 	fi
-elif [ "${SUBSYSTEM}" = "ubi" ] && [ "${SINGLEMTDSYS}" = "yes" ]; then
+elif [ "${SUBSYSTEM}" = "ubi" ]; then
 	# In the case of a 'system' partition with many UBI volumes, the device
 	# is always /dev/ubi0
 	# Mount the volume.

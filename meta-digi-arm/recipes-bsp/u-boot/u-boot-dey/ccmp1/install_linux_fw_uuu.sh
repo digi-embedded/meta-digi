@@ -58,14 +58,6 @@ part_update()
 	echo "====================================================================================="
 	echo "\033[0m"
 
-	# When in Multi-MTD mode, pass -e to update command to force the erase
-	# of the MTD partition before programming. This is usually done by
-	# 'update' command except when a UBI volume is already found.
-	# On the install script, the MTD partition table may have changed, so
-	# we'd better clean the partition.
-	if [ "${SINGLEMTDSYS}" != true ]; then
-		ERASE="-e"
-	fi
 	uuu fb: download -f "${2}"
 	uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${fastboot_bytes} ${ERASE}
 }
@@ -95,12 +87,6 @@ uuu fb: ucmd setenv stdout serial,fastboot
 dualboot=$(getenv "dualboot")
 if [ "${dualboot}" = "yes" ]; then
 	DUALBOOT=true;
-fi
-
-# Check if singlemtdsys variable is active
-singlemtdsys=$(getenv "singlemtdsys")
-if [ "${singlemtdsys}" = "yes" ]; then
-	SINGLEMTDSYS=true;
 fi
 
 echo ""
@@ -238,7 +224,6 @@ part_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000
 uuu fb: ucmd setenv bootcmd "
 	env default -a;
 	setenv dualboot \${dualboot};
-	setenv singlemtdsys \${singlemtdsys};
 	saveenv;
 	echo \"\";
 	echo \"\";
@@ -260,10 +245,8 @@ uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 # Create partition table
 uuu "fb[-t 10000]:" ucmd run partition_nand_linux
 
-if [ "${SINGLEMTDSYS}" = true ]; then
-	uuu "fb[-t 30000]:" ucmd nand erase.part system
-	uuu "fb[-t 10000]:" ucmd run ubivolscript
-fi
+uuu "fb[-t 30000]:" ucmd nand erase.part system
+uuu "fb[-t 10000]:" ucmd run ubivolscript
 
 if [ "${DUALBOOT}" = true ]; then
 	# Update Linux A
@@ -283,7 +266,7 @@ else
 	part_update "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}" 90000
 fi
 
-if [ "${SINGLEMTDSYS}" != true ] && [ "${DUALBOOT}" != true ]; then
+if [ "${DUALBOOT}" != true ]; then
 	# Erase the 'Update' partition
 	uuu "fb[-t 20000]:" ucmd nand erase.part update
 fi
