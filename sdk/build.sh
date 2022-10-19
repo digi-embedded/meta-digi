@@ -165,7 +165,7 @@ done<<-_EOF_
 	ccimx8x-sbc-express  dey-image-qt
 	ccimx6qpsbc          dey-image-qt,dey-image-crank
 	ccimx6sbc            dey-image-qt,dey-image-crank
-	ccimx6ulsbc          dey-image-qt,dey-image-crank
+	ccimx6ulsbc          core-image-base,dey-image-qt,dey-image-crank
 	ccimx6ulstarter      core-image-base
 	ccimx6ulsom          dey-image-mft-module-min
 	ccimx6ulrftest       dey-image-mft-module-rf
