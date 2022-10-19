@@ -154,37 +154,25 @@ if [ -n "${DY_MACHINES_LAYER}" ]; then
 fi
 
 # Per-platform data
-while read _pl _var _tgt; do
-	# DY_BUILD_VARIANTS comes from Jenkins environment:
-	#   'false':     don't build variants (only the default)
-	#   <empty>:     build all the variants supported by the platform
-	#   'var1 var2': build the ones specified in the variable
-	if [ -n "${DY_BUILD_VARIANTS}" ]; then
-		if echo "${DY_BUILD_VARIANTS}" | grep -qs "false"; then
-			_var="DONTBUILDVARIANTS"
-		else
-			_var="${DY_BUILD_VARIANTS}"
-		fi
-	fi
+while read _pl _tgt; do
 	[ -n "${DY_TARGET}" ] && _tgt="${DY_TARGET}" || true
 	# Dashes are not allowed in variables so let's substitute them on
 	# the fly with underscores.
-	eval "${_pl//-/_}_var=\"${_var//,/ }\""
 	eval "${_pl//-/_}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
-	ccimx8mm-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
-	ccimx8mn-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
-	ccimx8mp-dvk         DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
-	ccimx8x-sbc-pro      DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
-	ccimx8x-sbc-express  DONTBUILDVARIANTS   dey-image-qt
-	ccimx6qpsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
-	ccimx6sbc            DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
-	ccimx6ulsbc          DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
-	ccimx6ulstarter      DONTBUILDVARIANTS   core-image-base
-	ccimx6ulsom          DONTBUILDVARIANTS   dey-image-mft-module-min
-	ccimx6ulrftest       DONTBUILDVARIANTS   dey-image-mft-module-rf
-	ccmp15-dvk           DONTBUILDVARIANTS   dey-image-qt,dey-image-crank
-	ccmp13-dvk           DONTBUILDVARIANTS   core-image-base
+	ccimx8mm-dvk         dey-image-qt,dey-image-crank
+	ccimx8mn-dvk         dey-image-qt,dey-image-crank
+	ccimx8mp-dvk         dey-image-qt,dey-image-crank
+	ccimx8x-sbc-pro      dey-image-qt,dey-image-crank
+	ccimx8x-sbc-express  dey-image-qt
+	ccimx6qpsbc          dey-image-qt,dey-image-crank
+	ccimx6sbc            dey-image-qt,dey-image-crank
+	ccimx6ulsbc          dey-image-qt,dey-image-crank
+	ccimx6ulstarter      core-image-base
+	ccimx6ulsom          dey-image-mft-module-min
+	ccimx6ulrftest       dey-image-mft-module-rf
+	ccmp15-dvk           dey-image-qt,dey-image-crank
+	ccmp13-dvk           core-image-base
 _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
@@ -232,71 +220,62 @@ rm -rf ${YOCTO_IMGS_DIR} ${YOCTO_PROJ_DIR}
 
 # Create projects and build
 for platform in ${DY_PLATFORMS}; do
-	# The variables <platform>_var|tgt got their dashes converted to
+	# The variable <platform>_tgt got its dashes converted to
 	# underscores, so we must convert also the ones in ${platform}.
-	eval platform_variants=\"\${${platform//-/_}_var}\"
 	eval platform_targets=\"\${${platform//-/_}_tgt}\"
-	for variant in ${platform_variants}; do
-		_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}"
-		_this_img_dir="${YOCTO_IMGS_DIR}/${platform}"
-		if [ "${variant}" != "DONTBUILDVARIANTS" ]; then
-			_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}_${variant}"
-			_this_img_dir="${YOCTO_IMGS_DIR}/${platform}_${variant}"
-			_this_var_arg="-v ${variant}"
-			[ "${variant}" = "-" ] && _this_var_arg="-v \\"
-		fi
-		mkdir -p ${_this_img_dir} ${_this_prj_dir}
-		if pushd ${_this_prj_dir}; then
-			# Configure and build the project in a sub-shell to avoid
-			# mixing environments between different platform's projects
-			(
-				export TEMPLATECONF="${TEMPLATECONF:+${TEMPLATECONF}/${platform}}"
-				MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p ${platform} ${MACHINES_LAYER} ${_this_var_arg} <<< "y"
-				# Set a common DL_DIR and SSTATE_DIR for all platforms
-				sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_DOWNLOAD_DIR}\"" \
-					-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
-					conf/local.conf
-				# Set the DISTRO and remove 'meta-digi-dey' layer if distro is not DEY based
-				sed -i -e "/^DISTRO ?=/cDISTRO ?= \"${DY_DISTRO}\"" conf/local.conf
-				if ! echo "${DY_DISTRO}" | grep -qs "dey"; then
-					sed -i -e '/meta-digi-dey/d' conf/bblayers.conf
-				fi
-				if [ "${DY_USE_MIRROR}" = "true" ]; then
-					sed -i -e "s,^#DIGI_INTERNAL_GIT,DIGI_INTERNAL_GIT,g" conf/local.conf
-					printf "${DIGI_PREMIRROR_CFG}" >> conf/local.conf
-				fi
-				if [ "${DY_RM_WORK}" = "true" ]; then
-					printf "${RM_WORK_CFG}" >> conf/local.conf
-				fi
-				printf "${ZIP_INSTALLER_CFG}" >> conf/local.conf
-				# Append extra configuration macros if provided from build environment
-				if [ -n "${DY_EXTRA_LOCAL_CONF}" ]; then
-					printf "%s\n" "${DY_EXTRA_LOCAL_CONF}" >> conf/local.conf
-				fi
-				# Add build timestamp
-				if [ -n "${BUILD_TIMESTAMP}" ]; then
-					printf "${BUILD_TIMESTAMP}" >> conf/local.conf
-				fi
-				# Check if it is a manufacturing job and, if the mfg layer is not there, add it
-				if [ "${DY_MFG_IMAGE}" = "true" ] && ! grep -qs "meta-digi-mfg" conf/bblayers.conf; then
-					sed -i -e "/meta-digi-dey/a\  ${YOCTO_INST_DIR}/sources/meta-digi-mfg \\\\" conf/bblayers.conf
-				fi
-				printf "\n[INFO] Show customized local.conf.\n"
-				cat conf/local.conf
+	_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}"
+	_this_img_dir="${YOCTO_IMGS_DIR}/${platform}"
+	mkdir -p ${_this_img_dir} ${_this_prj_dir}
+	if pushd ${_this_prj_dir}; then
+		# Configure and build the project in a sub-shell to avoid
+		# mixing environments between different platform's projects
+		(
+			export TEMPLATECONF="${TEMPLATECONF:+${TEMPLATECONF}/${platform}}"
+			MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p ${platform} ${MACHINES_LAYER} <<< "y"
+			# Set a common DL_DIR and SSTATE_DIR for all platforms
+			sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_DOWNLOAD_DIR}\"" \
+				-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
+				conf/local.conf
+			# Set the DISTRO and remove 'meta-digi-dey' layer if distro is not DEY based
+			sed -i -e "/^DISTRO ?=/cDISTRO ?= \"${DY_DISTRO}\"" conf/local.conf
+			if ! echo "${DY_DISTRO}" | grep -qs "dey"; then
+				sed -i -e '/meta-digi-dey/d' conf/bblayers.conf
+			fi
+			if [ "${DY_USE_MIRROR}" = "true" ]; then
+				sed -i -e "s,^#DIGI_INTERNAL_GIT,DIGI_INTERNAL_GIT,g" conf/local.conf
+				printf "${DIGI_PREMIRROR_CFG}" >> conf/local.conf
+			fi
+			if [ "${DY_RM_WORK}" = "true" ]; then
+				printf "${RM_WORK_CFG}" >> conf/local.conf
+			fi
+			printf "${ZIP_INSTALLER_CFG}" >> conf/local.conf
+			# Append extra configuration macros if provided from build environment
+			if [ -n "${DY_EXTRA_LOCAL_CONF}" ]; then
+				printf "%s\n" "${DY_EXTRA_LOCAL_CONF}" >> conf/local.conf
+			fi
+			# Add build timestamp
+			if [ -n "${BUILD_TIMESTAMP}" ]; then
+				printf "${BUILD_TIMESTAMP}" >> conf/local.conf
+			fi
+			# Check if it is a manufacturing job and, if the mfg layer is not there, add it
+			if [ "${DY_MFG_IMAGE}" = "true" ] && ! grep -qs "meta-digi-mfg" conf/bblayers.conf; then
+				sed -i -e "/meta-digi-dey/a\  ${YOCTO_INST_DIR}/sources/meta-digi-mfg \\\\" conf/bblayers.conf
+			fi
+			printf "\n[INFO] Show customized local.conf.\n"
+			cat conf/local.conf
 
-				for target in ${platform_targets}; do
-					printf "\n[INFO] Building the ${target} target.\n"
-					time bitbake ${target} $(swu_recipe_name ${target})
-					# Build the toolchain for DEY images
-					if [ "${DY_BUILD_TCHAIN}" = "true" ] && echo "${target}" | grep -qs '^\(core\|dey\)-image-[^-]\+$'; then
-						printf "\n[INFO] Building the toolchain for ${target}.\n"
-						time bitbake -c populate_sdk ${target}
-					fi
-				done
-				purge_sstate
-			)
-			copy_images ${_this_img_dir}
-			popd
-		fi
-	done
+			for target in ${platform_targets}; do
+				printf "\n[INFO] Building the ${target} target.\n"
+				time bitbake ${target} $(swu_recipe_name ${target})
+				# Build the toolchain for DEY images
+				if [ "${DY_BUILD_TCHAIN}" = "true" ] && echo "${target}" | grep -qs '^\(core\|dey\)-image-[^-]\+$'; then
+					printf "\n[INFO] Building the toolchain for ${target}.\n"
+					time bitbake -c populate_sdk ${target}
+				fi
+			done
+			purge_sstate
+		)
+		copy_images ${_this_img_dir}
+		popd
+	fi
 done
