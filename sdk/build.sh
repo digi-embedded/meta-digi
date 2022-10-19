@@ -27,9 +27,6 @@
 
 set -e
 
-SCRIPTNAME="$(basename ${0})"
-SCRIPTPATH="$(cd $(dirname ${0}) && pwd)"
-
 MANIFEST_URL="ssh://git@stash.digi.com/dey/digi-yocto-sdk-manifest.git"
 
 DIGI_PREMIRROR_CFG="
@@ -58,7 +55,7 @@ REPRODUCIBLE_TIMESTAMP_ROOTFS = \"${SOURCE_DATE_EPOCH}\"
 REPO="$(which repo)"
 
 error() {
-	printf "${1}"
+	printf "%s" "${1}"
 	exit 1
 }
 
@@ -72,12 +69,12 @@ copy_images() {
 	# For 'daily' builds just copy the firmware images (the buildserver
 	# cannot afford such amount of disk space)
 	if [ "${DY_BUILD_RELEASE}" = "true" ]; then
-		cp -r tmp/deploy/* ${1}/
+		cp -r tmp/deploy/* "${1}"/
 	else
-		cp -r tmp/deploy/images ${1}/
+		cp -r tmp/deploy/images "${1}"/
 		if [ "${DY_BUILD_TCHAIN}" = "true" ]; then
 			if [ -d tmp/deploy/sdk ]; then
-				cp -r tmp/deploy/sdk ${1}/
+				cp -r tmp/deploy/sdk "${1}"/
 			fi
 		fi
 	fi
@@ -88,9 +85,9 @@ copy_images() {
 	#    files.
 	#  - Remove 'README_-_DO_NOT_DELETE_FILES_IN_THIS_DIRECTORY.txt' files
 	#  - Create MD5SUMS file
-	find ${1} -type l -delete
-	find ${1} -type f -name 'README_-_DO_NOT_DELETE*' -delete
-	find ${1} -type f -not -name MD5SUMS -print0 | xargs -r -0 md5sum | sed -e "s,${1}/,,g" | sort -k2,2 > ${1}/MD5SUMS
+	find "${1}" -type l -delete
+	find "${1}" -type f -name 'README_-_DO_NOT_DELETE*' -delete
+	find "${1}" -type f -not -name MD5SUMS -print0 | xargs -r -0 md5sum | sed -e "s,${1}/,,g" | sort -k2,2 > "${1}"/MD5SUMS
 }
 
 #
@@ -115,7 +112,7 @@ purge_sstate() {
 		packagegroup-dey-webkit \
 		packagegroup-dey-wireless \
 	"
-	bitbake -k -c cleansstate ${PURGE_PKGS} >/dev/null 2>&1 || true
+	bitbake -k -c cleansstate "${PURGE_PKGS}" >/dev/null 2>&1 || true
 }
 
 #
@@ -124,8 +121,8 @@ purge_sstate() {
 #  $1: image recipe
 #
 swu_recipe_name() {
-	if [ -n "$(find ${YOCTO_INST_DIR}/sources/meta-digi -type f -name "${1}-swu.bb")" ]; then
-		printf "${1}-swu"
+	if [ -n "$(find "${YOCTO_INST_DIR}"/sources/meta-digi -type f -name "${1}-swu.bb")" ]; then
+		printf "%s-swu" "${1}"
 	fi
 }
 
@@ -145,7 +142,7 @@ swu_recipe_name() {
 [ -z "${DY_BUILD_TCHAIN}" ] && [ "${DY_BUILD_RELEASE}" = "true" ] && DY_BUILD_TCHAIN="true"
 
 # If DY_MFG_IMAGE is unset, set it depending on the job name
-if [ -z "${DY_MFG_IMAGE}" ] && echo ${JOB_NAME} | grep -qs 'dey.*mfg'; then
+if [ -z "${DY_MFG_IMAGE}" ] && echo "${JOB_NAME}" | grep -qs 'dey.*mfg'; then
 	DY_MFG_IMAGE="true"
 fi
 
@@ -154,7 +151,8 @@ if [ -n "${DY_MACHINES_LAYER}" ]; then
 fi
 
 # Per-platform data
-while read _pl _tgt; do
+while read -r _pl _tgt; do
+	# shellcheck disable=SC2015
 	[ -n "${DY_TARGET}" ] && _tgt="${DY_TARGET}" || true
 	# Dashes are not allowed in variables so let's substitute them on
 	# the fly with underscores.
@@ -176,7 +174,7 @@ done<<-_EOF_
 _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
-YOCTO_INST_DIR="${WORKSPACE}/digi-yocto-sdk.$(echo ${DY_REVISION} | tr '/' '_')"
+YOCTO_INST_DIR="${WORKSPACE}/digi-yocto-sdk.$(echo "${DY_REVISION}" | tr '/' '_')"
 YOCTO_DOWNLOAD_DIR="${DY_DOWNLOADS:-${WORKSPACE}}/downloads"
 YOCTO_PROJ_DIR="${WORKSPACE}/projects"
 
@@ -184,27 +182,31 @@ YOCTO_PROJ_DIR="${WORKSPACE}/projects"
 if [ -z "${CPUS}" ]; then
 	CPUS="$(grep -c processor /proc/cpuinfo)"
 fi
-[ ${CPUS} -gt 1 ] && MAKE_JOBS="-j${CPUS}"
+[ "${CPUS}" -gt 1 ] && MAKE_JOBS="-j${CPUS}"
 
-printf "\n[INFO] Build Yocto \"${DY_REVISION}\" for \"${DY_PLATFORMS}\" (cpus=${CPUS})\n\n"
+printf "\n[INFO] Build Yocto \"%s\" for \"%s\" (cpus=%s)\n\n" "${DY_REVISION}" "${DY_PLATFORMS}" "${CPUS}"
 
 # Install/Update Digi's Yocto SDK
-mkdir -p ${YOCTO_INST_DIR}
-if pushd ${YOCTO_INST_DIR}; then
+mkdir -p "${YOCTO_INST_DIR}"
+if pushd "${YOCTO_INST_DIR}"; then
 	# Use git ls-remote to check the revision type
 	if [ "${DY_REVISION}" != "master" ]; then
 		if git ls-remote --tags --exit-code "${MANIFEST_URL}" "${DY_REVISION}"; then
-			printf "[INFO] Using tag \"${DY_REVISION}\"\n"
+			printf "[INFO] Using tag \"%s\"\n" "${DY_REVISION}"
 			repo_revision="-b refs/tags/${DY_REVISION}"
 		elif git ls-remote --heads --exit-code "${MANIFEST_URL}" "${DY_REVISION}"; then
-			printf "[INFO] Using branch \"${DY_REVISION}\"\n"
+			printf "[INFO] Using branch \"%s\"\n" "${DY_REVISION}"
 			repo_revision="-b ${DY_REVISION}"
 		else
 			error "Revision \"${DY_REVISION}\" not found"
 		fi
 	fi
+	# shellcheck disable=SC2086
 	yes "" 2>/dev/null | ${REPO} init --depth=1 --no-repo-verify -u ${MANIFEST_URL} ${repo_revision}
-	${REPO} forall -p -c 'git remote prune $(git remote)'
+	${REPO} --no-pager forall -j4 -p -c 'git clean -fdx'
+	# shellcheck disable=SC2016
+	${REPO} --no-pager forall -j4 -p -c 'git remote prune $(git remote)' || true
+	# shellcheck disable=SC2086
 	time ${REPO} sync -d ${MAKE_JOBS}
 	popd
 fi
@@ -212,26 +214,27 @@ fi
 # Clean downloads directory
 if [ "${DY_RM_DOWNLOADS}" = "true" ]; then
 	printf "\n[INFO] Removing the downloads folder.\n"
-	rm -rf ${YOCTO_DOWNLOAD_DIR}
+	rm -rf "${YOCTO_DOWNLOAD_DIR}"
 fi
 
 # Clean images and projects folders
-rm -rf ${YOCTO_IMGS_DIR} ${YOCTO_PROJ_DIR}
+rm -rf "${YOCTO_IMGS_DIR}" "${YOCTO_PROJ_DIR}"
 
 # Create projects and build
 for platform in ${DY_PLATFORMS}; do
 	# The variable <platform>_tgt got its dashes converted to
 	# underscores, so we must convert also the ones in ${platform}.
-	eval platform_targets=\"\${${platform//-/_}_tgt}\"
+	eval "platform_targets=\"\${${platform//-/_}_tgt}\""
 	_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}"
 	_this_img_dir="${YOCTO_IMGS_DIR}/${platform}"
-	mkdir -p ${_this_img_dir} ${_this_prj_dir}
-	if pushd ${_this_prj_dir}; then
+	mkdir -p "${_this_img_dir}" "${_this_prj_dir}"
+	if pushd "${_this_prj_dir}"; then
 		# Configure and build the project in a sub-shell to avoid
 		# mixing environments between different platform's projects
 		(
 			export TEMPLATECONF="${TEMPLATECONF:+${TEMPLATECONF}/${platform}}"
-			MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p ${platform} ${MACHINES_LAYER} <<< "y"
+			# shellcheck disable=SC1091,SC2086
+			MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p "${platform}" ${MACHINES_LAYER} <<< "y"
 			# Set a common DL_DIR and SSTATE_DIR for all platforms
 			sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_DOWNLOAD_DIR}\"" \
 				-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
@@ -243,19 +246,19 @@ for platform in ${DY_PLATFORMS}; do
 			fi
 			if [ "${DY_USE_MIRROR}" = "true" ]; then
 				sed -i -e "s,^#DIGI_INTERNAL_GIT,DIGI_INTERNAL_GIT,g" conf/local.conf
-				printf "${DIGI_PREMIRROR_CFG}" >> conf/local.conf
+				printf "%s" "${DIGI_PREMIRROR_CFG}" >> conf/local.conf
 			fi
 			if [ "${DY_RM_WORK}" = "true" ]; then
-				printf "${RM_WORK_CFG}" >> conf/local.conf
+				printf "%s" "${RM_WORK_CFG}" >> conf/local.conf
 			fi
-			printf "${ZIP_INSTALLER_CFG}" >> conf/local.conf
+			printf "%s" "${ZIP_INSTALLER_CFG}" >> conf/local.conf
 			# Append extra configuration macros if provided from build environment
 			if [ -n "${DY_EXTRA_LOCAL_CONF}" ]; then
 				printf "%s\n" "${DY_EXTRA_LOCAL_CONF}" >> conf/local.conf
 			fi
 			# Add build timestamp
 			if [ -n "${BUILD_TIMESTAMP}" ]; then
-				printf "${BUILD_TIMESTAMP}" >> conf/local.conf
+				printf "%s" "${BUILD_TIMESTAMP}" >> conf/local.conf
 			fi
 			# Check if it is a manufacturing job and, if the mfg layer is not there, add it
 			if [ "${DY_MFG_IMAGE}" = "true" ] && ! grep -qs "meta-digi-mfg" conf/bblayers.conf; then
@@ -264,18 +267,19 @@ for platform in ${DY_PLATFORMS}; do
 			printf "\n[INFO] Show customized local.conf.\n"
 			cat conf/local.conf
 
-			for target in ${platform_targets}; do
-				printf "\n[INFO] Building the ${target} target.\n"
-				time bitbake ${target} $(swu_recipe_name ${target})
+			for target in ${platform_targets:?}; do
+				printf "\n[INFO] Building the %s target.\n" "${target}"
+				# shellcheck disable=SC2046
+				time bitbake "${target}" $(swu_recipe_name "${target}")
 				# Build the toolchain for DEY images
 				if [ "${DY_BUILD_TCHAIN}" = "true" ] && echo "${target}" | grep -qs '^\(core\|dey\)-image-[^-]\+$'; then
-					printf "\n[INFO] Building the toolchain for ${target}.\n"
-					time bitbake -c populate_sdk ${target}
+					printf "\n[INFO] Building the toolchain for %s.\n" "${target}"
+					time bitbake -c populate_sdk "${target}"
 				fi
 			done
 			purge_sstate
 		)
-		copy_images ${_this_img_dir}
+		copy_images "${_this_img_dir}"
 		popd
 	fi
 done
