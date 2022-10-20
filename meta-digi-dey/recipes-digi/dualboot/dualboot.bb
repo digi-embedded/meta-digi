@@ -1,4 +1,4 @@
-# Copyright (C) 2021 Digi International Inc.
+# Copyright (C) 2021-2022 Digi International Inc.
 
 SUMMARY = "Digi Embedded Yocto Dual boot support"
 SECTION = "base"
@@ -14,7 +14,7 @@ DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'virtual/kernel open
 
 SRC_URI = " \
     file://dualboot-init \
-    file://firmware-update-dual.sh \
+    file://update-firmware \
     file://firmware-update-check.service \
     file://on-the-fly-swap-partition.sh \
 "
@@ -29,7 +29,7 @@ do_install() {
 	ln -sf /etc/dualboot-init ${D}${sysconfdir}/init.d/dualboot-init
 
 	install -d ${D}${bindir}
-	install -m 0755 ${WORKDIR}/firmware-update-dual.sh ${D}${bindir}
+	install -m 0755 ${WORKDIR}/update-firmware ${D}${bindir}
 	install -m 0755 ${WORKDIR}/on-the-fly-swap-partition.sh ${D}${bindir}
 
 	install -d ${D}${systemd_unitdir}/system/
@@ -64,7 +64,7 @@ do_install() {
 FILES:${PN} += " \
     ${sysconfdir}/dualboot-init \
     ${sysconfdir}/init.d/dualboot-init \
-    ${bindir}/firmware-update-dual.sh \
+    ${bindir}/update-firmware \
     ${bindir}/on-the-fly-swap-partition.sh \
     ${systemd_unitdir}/system/firmware-update-check.service \
     ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', '${sysconfdir}/ssl/certs/key.pub', '', d)} \
