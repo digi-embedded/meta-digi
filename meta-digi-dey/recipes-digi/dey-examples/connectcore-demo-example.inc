@@ -14,13 +14,15 @@ SRC_URI += " \
 "
 
 RDEPENDS:${PN} = " \
+    busybox-httpd \
+    libdigiapix-python3 \
+    mpg123 \
+    python3-connectcore-ble \
     python3-core \
     python3-httplib2 \
     python3-json \
     python3-logging \
     python3-netserver \
-    busybox-httpd \
-    mpg123 \
 "
 
 S = "${WORKDIR}/connectcore-demo-example"
