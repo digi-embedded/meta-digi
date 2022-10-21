@@ -19,7 +19,6 @@ SRC_URI = " \
     ${CC_GIT_URI};branch=${SRCBRANCH} \
     file://cloud-connector-init \
     file://cloud-connector.service \
-    ${@oe.utils.vartrue('DUALBOOT_ENABLED', 'file://0001-cc.conf-pre-set-for-dual-boot-mode.patch', '', d)} \
 "
 
 S = "${WORKDIR}/git"
@@ -33,6 +32,10 @@ do_install() {
 		# Install systemd unit files
 		install -d ${D}${systemd_unitdir}/system
 		install -m 0644 ${WORKDIR}/cloud-connector.service ${D}${systemd_unitdir}/system/
+	fi
+
+	if ${@oe.utils.vartrue('DUALBOOT_ENABLED', 'true', 'false', d)}; then
+		sed -i "/firmware_download_path = \/mnt\/update/c\firmware_download_path = \/home\/root" ${D}${sysconfdir}/cc.conf
 	fi
 
 	install -d ${D}${sysconfdir}/init.d/
