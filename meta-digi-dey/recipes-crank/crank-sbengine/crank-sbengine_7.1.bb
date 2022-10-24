@@ -42,6 +42,7 @@ do_install () {
 	# Copy the engine
 	install -d -m 0755 ${D}${datadir}/crank/sbengine
 	cp -drf ${S}/${SBENGINE_NAME}/* ${D}${datadir}/crank/sbengine
+	chmod a+rx ${D}${datadir}/crank/sbengine/*
 }
 
 FILES:${PN} = " \

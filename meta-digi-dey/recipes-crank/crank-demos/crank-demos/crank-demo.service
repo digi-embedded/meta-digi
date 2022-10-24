@@ -3,7 +3,7 @@ Description=Crank Software demo
 Documentation=https://www.cranksoftware.com/
 
 # Make sure we are started after graphic service is available
-After=weston@root.service
+After=##WESTON_SERVICE##
 
 [Service]
 Type=forking

@@ -15,12 +15,20 @@ SRC_URI = " \
 SRC_URI[md5sum] = "e7cfbe9590041c0d9bf8c64ab69ee57d"
 SRC_URI[sha256sum] = "2aa767f51183a5e96bacf5e4b03345524d29c30f7338b1a55e5a1080252bfd4a"
 
+WESTON_SERVICE ?= "weston@root.service"
+WESTON_SERVICE:ccmp15 ?= "weston-launch.service"
+
 CRANK_DEMOS_TARBALL_PATH ?= ""
-CRANK_DEMO_PATH ?= "${datadir}/crank/apps/Thermostat/Thermostat.gapp"
+CRANK_DEMO_DISPLAY ?= "wayland-0"
+CRANK_DEMO_DISPLAY:ccmp15 ?= "wayland-1"
+CRANK_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\${DEMO_DISPLAY}"
+CRANK_DEMO_ENV:ccimx6ul ?= ""
+CRANK_DEMO_ENV:ccmp15 ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/1000 WAYLAND_DISPLAY=\${DEMO_DISPLAY}"
 CRANK_DEMO_OPTIONS ?= ""
 CRANK_DEMO_OPTIONS:ccimx6ul ?= "-odev-input,mouse=/dev/input/mouse0 -oscreen_mgr,swcursor"
-CRANK_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=wayland-0"
-CRANK_DEMO_ENV:ccimx6ul ?= ""
+CRANK_DEMO_PATH ?= "${datadir}/crank/apps/Thermostat/Thermostat.gapp"
+CRANK_DEMO_USER ?= "root"
+CRANK_DEMO_USER:ccmp15 ?= "weston"
 
 # The tarball is only available for downloading after registration, so provide
 # a PREMIRROR to a local directory that can be configured in the project's
@@ -64,6 +72,8 @@ do_install () {
 		# Install systemd unit files
 		install -d ${D}${systemd_unitdir}/system
 		install -m 0644 ${WORKDIR}/crank-demo.service ${D}${systemd_unitdir}/system/
+		sed -i -e "s@##WESTON_SERVICE##@${WESTON_SERVICE}@g" \
+		      "${D}${systemd_unitdir}/system/crank-demo.service"
 	fi
 
 	# Install wrapper bootscript to launch Crank demo on boot
@@ -72,6 +82,8 @@ do_install () {
 	sed -i -e "s@##CRANK_DEMO_PATH##@${CRANK_DEMO_PATH}@g" \
 	       -e "s@##CRANK_DEMO_OPTIONS##@${CRANK_DEMO_OPTIONS}@g" \
 	       -e "s@##CRANK_DEMO_ENV##@${CRANK_DEMO_ENV}@g" \
+	       -e "s@##CRANK_DEMO_USER##@${CRANK_DEMO_USER}@g" \
+	       -e "s@##CRANK_DEMO_DISPLAY##@${CRANK_DEMO_DISPLAY}@g" \
 	       "${D}${sysconfdir}/crank-demo"
 	ln -sf ${sysconfdir}/crank-demo ${D}${sysconfdir}/init.d/crank-demo
 }
