@@ -56,7 +56,17 @@ PACKAGECONFIG:append = " autospawn-for-root"
 
 EXTRA_OECONF:append:ccimx6 = " --disable-memfd"
 
-FILES:${PN}-server:append = " ${systemd_unitdir}/* ${sysconfdir}/pulseaudio-init"
+FILES:${PN}-server:append = " \
+    ${systemd_unitdir}/* \
+    ${sysconfdir}/pulseaudio-init \
+    ${sysconfdir}/init.d/pulseaudio-init \
+"
+
+inherit update-rc.d
+
+INITSCRIPT_PACKAGES += "${PN}-server"
+INITSCRIPT_NAME = "pulseaudio-init"
+INITSCRIPT_PARAMS = "start 19 2 3 4 5 . stop 21 0 1 6 ."
 
 SYSTEMD_SERVICE:${PN}-server = "pulseaudio-system.service"
 SYSTEMD_PACKAGES = "${PN}-server"
@@ -68,9 +78,11 @@ do_install:append() {
 	install -d ${D}${base_libdir}/udev/rules.d
 	install -m 0644 ${WORKDIR}/${SOUND_CARD}/90-pulseaudio.rules ${D}${base_libdir}/udev/rules.d
 
-	install -d ${D}${sysconfdir}
-	install -m 0755 ${WORKDIR}/pulseaudio-init ${D}/${sysconfdir}
-
+	# INITSCRIPT
+	install -d ${D}${sysconfdir}/init.d/
+	install -m 0755 ${WORKDIR}/pulseaudio-init ${D}${sysconfdir}/pulseaudio-init
+	ln -sf /etc/pulseaudio-init ${D}${sysconfdir}/init.d/pulseaudio-init
+	# SYSTEMD
 	install -d ${D}${systemd_unitdir}/system
 	install -m 0644 ${WORKDIR}/pulseaudio-system.service ${D}/${systemd_unitdir}/system
 
