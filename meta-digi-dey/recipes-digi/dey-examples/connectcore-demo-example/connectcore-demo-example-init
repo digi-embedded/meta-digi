@@ -17,6 +17,8 @@ readonly DEMOSERVER_BINARY="/srv/www/demoserver.py"
 readonly STOP_TIMEOUT="5"
 readonly PULSEAUDIO_START_COMMAND="pulseaudio --start"
 
+[ -z "${XDG_RUNTIME_DIR}" ] && export XDG_RUNTIME_DIR=/run/user/$UID
+
 stop_process() {
 	# try to stop gracefully
 	pkill -f "${1}" >/dev/null 2>&1
