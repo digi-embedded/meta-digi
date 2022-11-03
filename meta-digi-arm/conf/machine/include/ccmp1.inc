@@ -6,6 +6,8 @@ include conf/machine/include/st-machine-common-stm32mp.inc
 include conf/machine/include/arm/armv7a/tune-cortexa7.inc
 include conf/machine/include/digi-defaults.inc
 
+DIGI_FAMILY = "ccmp1"
+
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "bin"
