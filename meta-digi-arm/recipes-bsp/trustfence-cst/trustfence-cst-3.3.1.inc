@@ -9,9 +9,11 @@ LIC_FILES_CHKSUM = "file://LICENSE.bsd3;md5=1fbcd66ae51447aa94da10cbf6271530"
 
 DEPENDS = "byacc-native flex-native"
 
+OPENSSL1_VERSION = "1.1.1s"
+
 SRC_URI = " \
     ${DIGI_PKG_SRC}/cst-${PV}.tgz;name=cst \
-    https://www.openssl.org/source/openssl-1.1.1q.tar.gz;name=openssl \
+    https://www.openssl.org/source/openssl-${OPENSSL1_VERSION}.tar.gz;name=openssl \
     file://0001-gen_auth_encrypted_data-reuse-existing-DEK-file.patch \
     file://0002-hab4_pki_tree.sh-automate-script.patch \
     file://0003-openssl_helper-use-dev-urandom-as-seed-source.patch \
@@ -22,15 +24,15 @@ SRC_URI = " \
 
 SRC_URI[cst.md5sum] = "27ba9c8bc0b8a7f14d23185775c53794"
 SRC_URI[cst.sha256sum] = "8b7e44e3e126f814f5caf8a634646fe64021405302ca59ff02f5c8f3b9a5abb9"
-SRC_URI[openssl.md5sum] = "c685d239b6a6e1bd78be45624c092f51"
-SRC_URI[openssl.sha256sum] = "d7939ce614029cdff0b6c20f0e2e5703158a489a72b2507b8bd51bf8c8fd10ca"
+SRC_URI[openssl.md5sum] = "077f69d357758c7d6ef686f813e16f30"
+SRC_URI[openssl.sha256sum] = "c5ac01e760ee6ff0dab61d6b2bbd30146724d063eb322180c6f18a6f74e4b6aa"
 
 S = "${WORKDIR}/cst-${PV}"
 
 do_compile() {
 	cd code/cst
-	oe_runmake OPENSSL_PATH=${WORKDIR}/openssl-1.1.1q OSTYPE=linux64 openssl
-	oe_runmake OPENSSL_PATH=${WORKDIR}/openssl-1.1.1q OSTYPE=linux64 rel_bin
+	oe_runmake OPENSSL_PATH=${WORKDIR}/openssl-${OPENSSL1_VERSION} OSTYPE=linux64 openssl
+	oe_runmake OPENSSL_PATH=${WORKDIR}/openssl-${OPENSSL1_VERSION} OSTYPE=linux64 rel_bin
 }
 
 do_install() {
