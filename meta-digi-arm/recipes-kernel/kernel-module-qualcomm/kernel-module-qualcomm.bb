@@ -9,12 +9,12 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca
 PV = "v4.0.11.213X"
 
 SRCBRANCH = "qca65X4/master"
-SRCREV = "333e820a6ba3f13b0e4017aeda0e7ed00cea4c2f"
+SRCREV = "${AUTOREV}"
 
 QCOM_GIT_URI = "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_MTK_GIT}/linux/qcacld-2.0.git;protocol=ssh', '${DIGI_GITHUB_GIT}/qcacld-2.0.git;protocol=https', d)}"
 
 SRC_URI = " \
-    ${QCOM_GIT_URI};nobranch=1 \
+    ${QCOM_GIT_URI};branch=${SRCBRANCH} \
 "
 
 # Selects whether the interface is SDIO or PCI

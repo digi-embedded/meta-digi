@@ -8,14 +8,14 @@ LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
 
 SRCBRANCH ?= "master"
-SRCREV = "01791cd74482bbe9cb7b8e2815aeb1871e004445"
+SRCREV = "${AUTOREV}"
 
 CONNECTCORE_BLE_URI_STASH = "${DIGI_MTK_GIT}/python/connectcore-ble-python.git;protocol=ssh"
 CONNECTCORE_BLE_URI_GITHUB = "${DIGI_GITHUB_GIT}/connectcore-ble-python.git;protocol=https"
 CONNECTCORE_BLE_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${CONNECTCORE_BLE_URI_STASH}', '${CONNECTCORE_BLE_URI_GITHUB}', d)}"
 
 SRC_URI = " \
-    ${CONNECTCORE_BLE_URI};nobranch=1 \
+    ${CONNECTCORE_BLE_URI};branch=${SRCBRANCH} \
 "
 
 S = "${WORKDIR}/git"
