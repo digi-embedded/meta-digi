@@ -34,7 +34,21 @@ def get_bootable_artifacts(d):
     soc_revisions = d.getVar('SOC_REVISIONS', True) or ""
     uboot_prefix = d.getVar('UBOOT_PREFIX', True) or ""
     uboot_suffix = d.getVar('UBOOT_SUFFIX', True) or ""
+    atf_types = d.getVar('TF_A_CONFIG', True) or ""
+    fip_type = d.getVar('FIP_UBOOT_CONFIG', True) or ""
+    atf_boot_modes = ['nand', 'usb']
     artifacts = []
+
+    # For platforms with a FIP artifact, ignore u-boot artifacts
+    if fip_type != "":
+        machine = d.getVar('MACHINE', True) or ""
+        # Add ATF artifacts
+        for t in atf_types.split(" "):
+            if t in atf_boot_modes:
+                artifacts.append("arm-trusted-firmware/tf-a-%s-%s.stm32" % (machine, t))
+        # Add FIP artifact
+        artifacts.append("fip/fip-%s-%s.bin" % (machine, fip_type))
+        return " ".join(artifacts)
 
     # For platforms without RAM_CONFIGS, build the artifacts from UBOOT_CONFIG
     if ram_configs == "":
