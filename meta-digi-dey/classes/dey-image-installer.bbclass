@@ -25,6 +25,10 @@ FSTYPES_WHITELIST:ccmp1 = " \
     ubifs \
 "
 
+HAS_USB_DRIVER = "false"
+HAS_USB_DRIVER:ccimx8m = "true"
+HAS_USB_DRIVER:ccmp1 = "true"
+
 generate_installer_zip () {
 	# Get list of files to pack
 	INSTALLER_FILELIST="${DEPLOY_DIR_IMAGE}/install_linux_fw_sd.scr \
@@ -33,6 +37,11 @@ generate_installer_zip () {
 	if readlink -e "${DEPLOY_DIR_IMAGE}/install_linux_fw_uuu.sh"; then
 		INSTALLER_FILELIST="${INSTALLER_FILELIST} ${DEPLOY_DIR_IMAGE}/install_linux_fw_uuu.sh"
 	fi
+	# Get USB driver installation script
+	if ${HAS_USB_DRIVER}; then
+		INSTALLER_FILELIST="${INSTALLER_FILELIST} ${META_DIGI_SCRIPTS}/install_usb_driver.sh"
+	fi
+
 	# Decompress the ext4.gz image, if any
 	if readlink -e "${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.ext4.gz" >/dev/null; then
 		gzip -d -k -f ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.ext4.gz
@@ -69,14 +78,6 @@ _EOF_
 	if [ -n "${IMAGE_LINK_NAME}" ] && [ -e "${IMGDEPLOYDIR}/${IMAGE_NAME}.installer.zip" ]; then
 		ln -sf ${IMAGE_NAME}.installer.zip ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.installer.zip
 	fi
-}
-
-generate_installer_zip:append:ccimx8m () {
-	INSTALLER_FILELIST=${META_DIGI_SCRIPTS}/install_usb_driver.sh
-}
-
-generate_installer_zip:append:ccmp1 () {
-	INSTALLER_FILELIST=${META_DIGI_SCRIPTS}/install_usb_driver.sh
 }
 
 IMAGE_POSTPROCESS_COMMAND += "generate_installer_zip; "
