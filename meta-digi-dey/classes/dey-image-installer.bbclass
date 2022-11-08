@@ -1,7 +1,7 @@
 #
 # Generate DEY installer ZIP package
 #
-# Copyright 2017, Digi International Inc.
+# Copyright 2017-2022, Digi International Inc.
 #
 inherit boot-artifacts
 
@@ -16,6 +16,12 @@ FSTYPES_WHITELIST = " \
     ext4 \
     recovery.ubifs \
     recovery.vfat \
+    ubifs \
+"
+
+FSTYPES_WHITELIST:ccmp1 = " \
+    boot.ubifs \
+    recovery.ubifs \
     ubifs \
 "
 
