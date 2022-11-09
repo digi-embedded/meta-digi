@@ -35,6 +35,7 @@ else
 		# We are booting from the SD card.
 		setenv mmcroot /dev/mmcblk${mmcbootdev}p2
 	fi
+	setenv rootfsvol rootfs
 fi
 
 # Back up environment variables
