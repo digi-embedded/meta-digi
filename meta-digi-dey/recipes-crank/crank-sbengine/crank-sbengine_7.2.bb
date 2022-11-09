@@ -15,8 +15,8 @@ SRC_URI = " \
     http:///not/exist/crank-sbengine-${PV}.tar.gz \
     file://sb-launcher \
 "
-SRC_URI[md5sum] = "0e2206a02b12814006074634fdd785a8"
-SRC_URI[sha256sum] = "d124692c16072237c31fcbf5615d94681ae62f1774bfff2c4af6d6952b4c7bee"
+SRC_URI[md5sum] = "6faacbb61d4bd9e565ef71c91f20c6ec"
+SRC_URI[sha256sum] = "79c9162c401dd6282321361d51f15ccef1608da7cde9030c2b72b9573e826056"
 
 CRANK_ENGINE_TARBALL_PATH ?= ""
 
