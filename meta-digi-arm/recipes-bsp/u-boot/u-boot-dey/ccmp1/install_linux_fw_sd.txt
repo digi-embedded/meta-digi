@@ -7,41 +7,9 @@
 install_abort=0
 BASEFILENAME=0
 
-# Determine U-Boot file to program basing on module variant
-if test -n "${module_variant}"; then
-	if test "${module_variant}" = "0x02" || test "${module_variant}" = "0x03" || test "${module_variant}" = "0x06" || test "${module_variant}" = "0x0a"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##.imx;
-	elif test "${module_variant}" = "0x04" || test "${module_variant}" = "0x05" || test "${module_variant}" = "0x07"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx;
-	elif test "${module_variant}" = "0x08" || test "${module_variant}" = "0x09"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##512MB.imx
-	fi
-fi
-
-# Use 'test -n ...' because 'test -z ...' does not work well on old versions of
-# u-boot when the checked value is empty.
-if test -n "${INSTALL_UBOOT_FILENAME}"; then
-	true;
-else
-	echo "";
-	echo "[ERROR] Cannot determine U-Boot file for this module!";
-	echo "";
-	echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 6UL variant:";
-	echo "   - For a SOM with 1GB DDR3, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx";
-	echo "   - For a SOM with 512MB DDR3, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##512MB.imx";
-	echo "   - For a SOM with 256MB DDR3, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##.imx";
-	echo "";
-	echo "2. Run the install script again.";
-	echo "";
-	echo "Aborted";
-	echo "";
-	exit;
-fi;
-
-setenv INSTALL_MMCDEV 0
+setenv INSTALL_ATF_FILENAME tf-a-##MACHINE##-nand.stm32
+setenv INSTALL_FIP_FILENAME fip-##MACHINE##-optee.bin
+setenv INSTALL_MMCDEV 1
 
 if test -z "${image-name}"; then
 	setenv image-name ##DEFAULT_IMAGE_NAME##
@@ -60,7 +28,7 @@ setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.ubifs
 setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.ubifs
 
 # Check for presence of firmware files on the SD card
-for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do
+for install_f in ${INSTALL_ATF_FILENAME} ${INSTALL_FIP_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do
 	if test ! -e mmc ${INSTALL_MMCDEV} ${install_f}; then
 		echo "ERROR: Could not find file ${install_f}";
 		install_abort=1;
@@ -80,7 +48,10 @@ echo " on the partitions of the NAND."
 echo ""
 echo "   PARTITION   FILENAME"
 echo "   ---------   --------"
-echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
+echo "   fsbl1       ${INSTALL_ATF_FILENAME}"
+echo "   fsbl2       ${INSTALL_ATF_FILENAME}"
+echo "   fip-a       ${INSTALL_FIP_FILENAME}"
+echo "   fip-b       ${INSTALL_FIP_FILENAME}"
 if test "${dualboot}" = "yes"; then
 	echo "   linux_a     ${INSTALL_LINUX_FILENAME}"
 	echo "   linux_b     ${INSTALL_LINUX_FILENAME}"
@@ -108,41 +79,60 @@ setenv forced_update 1
 # the first reset.
 setenv bootdelay 0
 
-# Update U-Boot
+# Update ATF and FIP images
 echo ""
 echo ""
-echo ">> Installing U-Boot boot loader image ${INSTALL_UBOOT_FILENAME} (target will reset)"
+echo ">> Installing ATF boot loader image ${INSTALL_ATF_FILENAME}"
 echo ""
 echo ""
-update uboot mmc ${INSTALL_MMCDEV} ${INSTALL_UBOOT_FILENAME}
+update fsbl1 mmc ${INSTALL_MMCDEV} ${INSTALL_ATF_FILENAME}
 if test $? -eq 1; then
-	# Use old-style update with source file system argument
-	update uboot mmc ${INSTALL_MMCDEV} fat ${INSTALL_UBOOT_FILENAME}
-	if test $? -eq 1; then
-		echo "[ERROR] Failed to update U-Boot boot loader!";
-		echo "";
-		echo "Aborted.";
-		exit;
-	fi
+	echo "[ERROR] Failed to update fsbl1!";
+	echo "";
+	echo "Aborted.";
+	exit;
+fi
+update fsbl2 mmc ${INSTALL_MMCDEV} ${INSTALL_ATF_FILENAME}
+if test $? -eq 1; then
+	echo "[ERROR] Failed to update fsbl2!";
+	echo "";
+	echo "Aborted.";
+	exit;
+fi
+echo ""
+echo ""
+echo ">> Installing FIP boot loader image ${INSTALL_FIP_FILENAME} (target will reset)"
+echo ""
+echo ""
+update fip-a mmc ${INSTALL_MMCDEV} ${INSTALL_FIP_FILENAME}
+if test $? -eq 1; then
+	echo "[ERROR] Failed to update fip-a!";
+	echo "";
+	echo "Aborted.";
+	exit;
+fi
+update fip-b mmc ${INSTALL_MMCDEV} ${INSTALL_FIP_FILENAME}
+if test $? -eq 1; then
+	echo "[ERROR] Failed to update fip-b!";
+	echo "";
+	echo "Aborted.";
+	exit;
 fi
 
 # Set 'bootcmd' to the second part of the script that will
 #  - Reset environment to defaults
 #  - Restore 'dualboot' if previously set
-#  - Run 'partition_nand_linux' script to re-partition the NAND if needed
-#  - Save the environment
+#  - Run 'ubivolscript' script to re-partition the UBI partition and save the
+#    environment
 #  - If Dual Boot
 #     - Update the system partitions: linux_a, linux_b, rootfs_a, rootfs_b
 #  - If Normal Boot:
 #     - Update the system partitions: linux, recovery, rootfs
-#     - Erase the 'update' partition
 #     - Configure recovery to wipe 'update' partition
 #     - Run 'recovery' and let the system boot after
 setenv bootcmd "
 	env default -a;
 	setenv dualboot ${dualboot};
-	run partition_nand_linux;
-	saveenv;
 	run ubivolscript;
 	if test \"\$\{dualboot\}\" = yes; then
 		echo \"\";
@@ -233,8 +223,8 @@ setenv bootcmd "
 		echo \"\";
 		setenv boot_recovery yes;
 		setenv recovery_command wipe_update;
+		saveenv;
 	fi;
-	saveenv;
 	echo \"\";
 	echo \"\";
 	echo \">> Firmware installation complete.\";

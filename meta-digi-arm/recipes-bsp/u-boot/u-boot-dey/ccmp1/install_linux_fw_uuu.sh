@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2020-2021 by Digi International Inc.
+#  Copyright (C) 2022 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -32,13 +32,15 @@ show_usage()
 	echo "Usage: $0 [options]"
 	echo ""
 	echo "  Options:"
+	echo "   -a <atf-filename>      Arm-trusted-firmware filename."
+	echo "                          Auto-determined by variant if not provided."
+	echo "   -f <fip-filename>      FIP filename."
+	echo "                          Auto-determined by variant if not provided."
 	echo "   -h                     Show this help."
 	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
 	echo "                          'dey-image-webkit', 'core-image-base'..."
 	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
-	echo "   -u <u-boot-filename>   U-Boot filename."
-	echo "                          Auto-determined by variant if not provided."
 	exit 2
 }
 
@@ -59,7 +61,7 @@ part_update()
 	echo "\033[0m"
 
 	uuu fb: download -f "${2}"
-	uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${fastboot_bytes} ${ERASE}
+	uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${filesize} ${ERASE}
 }
 
 clear
@@ -68,15 +70,17 @@ echo "#           Linux firmware install through USB OTG         #"
 echo "############################################################"
 
 # Command line admits the following parameters:
-# -u <u-boot-filename>
+# -a <atf-filename>
+# -f <fip-filename>
 # -i <image-name>
-while getopts 'hi:nu:' c
+while getopts 'a:f:hi:n' c
 do
 	case $c in
+	a) INSTALL_ATF_FILENAME=${OPTARG} ;;
+	f) INSTALL_FIP_FILENAME=${OPTARG} ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
 	n) NOWAIT=true ;;
-	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
 	esac
 done
 
@@ -89,54 +93,21 @@ if [ "${dualboot}" = "yes" ]; then
 	DUALBOOT=true;
 fi
 
+# remove redirect
+uuu fb: ucmd setenv stdout serial
+
 echo ""
 echo "Determining image files to use..."
 
-# Determine U-Boot filename if not provided
-if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
-	module_variant=$(getenv "module_variant")
-	# Determine U-Boot file to program basing on SOM's variant
-	if [ -n "$module_variant" ] || [ "$module_variant" = "0x00" ]; then
-		if [ "$module_variant" = "0x08" ] || \
-		   [ "$module_variant" = "0x09" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##512MB.imx"
-		elif [ "$module_variant" = "0x04" ] || \
-		     [ "$module_variant" = "0x05" ] || \
-		     [ "$module_variant" = "0x07" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##1GB.imx"
-		else
-			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##.imx"
-		fi
-	fi
-
-	# U-Boot when the checked value is empty.
-	if [ -n "${INSTALL_UBOOT_FILENAME}" ]; then
-		true
-	else
-		# remove redirect
-		uuu fb: ucmd setenv stdout serial
-
-		echo ""
-		echo "[ERROR] Cannot determine U-Boot file for this module!"
-		echo ""
-		echo "1. Add U-boot file name, depending on your ConnectCore 6UL variant, to script command line:"
-		echo "   - For a SOM with 1GB DDR3, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##MACHINE##1GB.imx"
-		echo "   - For a SOM with 512MB DDR3, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##MACHINE##512MB.imx"
-		echo "   - For a SOM with 256MB DDR3, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##MACHINE##.imx"
-		echo ""
-		echo "2. Run the install script again."
-		echo ""
-		echo "Aborted"
-		echo ""
-		exit
-	fi
+# Determine ATF file to program
+if [ -z "${INSTALL_ATF_FILENAME}" ]; then
+	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-nand.stm32"
 fi
 
-# remove redirect
-uuu fb: ucmd setenv stdout serial
+# Determine FIP file to program
+if [ -z "${INSTALL_FIP_FILENAME}" ]; then
+	INSTALL_FIP_FILENAME="fip-##MACHINE##-optee.bin"
+fi
 
 # Determine linux, recovery, and rootfs image filenames to update
 if [ -z "${IMAGE_NAME}" ]; then
@@ -156,7 +127,7 @@ INSTALL_RECOVERY_FILENAME="${BASEFILENAME}-##MACHINE##.recovery.ubifs"
 INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.ubifs"
 
 # Verify existance of files before starting the update
-FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}"
+FILES="${INSTALL_ATF_FILENAME} ${INSTALL_FIP_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}"
 for f in ${FILES}; do
 	if [ ! -f ${f} ]; then
 		echo "\033[31m[ERROR] Could not find file '${f}'\033[0m"
@@ -182,7 +153,10 @@ if [ "${NOWAIT}" != true ]; then
 	printf "\n"
 	printf "   PARTITION\tFILENAME\n"
 	printf "   ---------\t--------\n"
-	printf "   bootloader\t${INSTALL_UBOOT_FILENAME}\n"
+	printf "   fsbl1\t${INSTALL_ATF_FILENAME}\n"
+	printf "   fsbl2\t${INSTALL_ATF_FILENAME}\n"
+	printf "   fip-a\t${INSTALL_FIP_FILENAME}\n"
+	printf "   fip-b\t${INSTALL_FIP_FILENAME}\n"
 	if [ "${DUALBOOT}" = true ]; then
 		printf "   ${LINUX_NAME}_a\t${INSTALL_LINUX_FILENAME}\n"
 		printf "   ${LINUX_NAME}_b\t${INSTALL_LINUX_FILENAME}\n"
@@ -211,19 +185,25 @@ uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 # Skip user confirmation for U-Boot update
 uuu fb: ucmd setenv forced_update 1
 
-# Update U-Boot
-part_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000
+# Update ATF
+part_update "fsbl1" "${INSTALL_ATF_FILENAME}" 5000
+part_update "fsbl2" "${INSTALL_ATF_FILENAME}" 5000
+
+# Update FIP
+part_update "fip-a" "${INSTALL_FIP_FILENAME}" 5000
+part_update "fip-b" "${INSTALL_FIP_FILENAME}" 5000
+
 
 # Set 'bootcmd' for the second part of the script that will
 #  - Reset environment to defaults
+#  - Keep the 'dualboot' status
 #  - Save the environment
-#  - Update the 'linux' partition
-#  - Update the 'recovery' partition
-#  - Update the 'rootfs' partition
-#  - Erase the 'update' partition
+#  - Update the 'linux' partition(s)
+#  - Update the 'rootfs' partition(s)
 uuu fb: ucmd setenv bootcmd "
 	env default -a;
 	setenv dualboot \${dualboot};
+	saveenv;
 	saveenv;
 	echo \"\";
 	echo \"\";
@@ -237,16 +217,13 @@ uuu fb: ucmd saveenv
 uuu fb: acmd reset
 
 # Wait for the target to reset
-sleep 3
+sleep 8
 
 # Set fastboot buffer address to $loadaddr
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 
-# Create partition table
-uuu "fb[-t 10000]:" ucmd run partition_nand_linux
-
-uuu "fb[-t 30000]:" ucmd nand erase.part system
-uuu "fb[-t 10000]:" ucmd run ubivolscript
+# Create UBI volumes
+uuu "fb[-t 20000]:" ucmd run ubivolscript
 
 if [ "${DUALBOOT}" = true ]; then
 	# Update Linux A
@@ -264,19 +241,12 @@ else
 	part_update "${RECOVERY_NAME}" "${INSTALL_RECOVERY_FILENAME}" 15000
 	# Update Rootfs
 	part_update "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}" 90000
-fi
-
-if [ "${DUALBOOT}" != true ]; then
-	# Erase the 'Update' partition
-	uuu "fb[-t 20000]:" ucmd nand erase.part update
-fi
-
-if [ "${DUALBOOT}" != true ]; then
-	# Configure u-boot to boot into recovery mode
+	# Configure u-boot to boot into recovery mode and format the
+	# 'update' partition
 	uuu fb: ucmd setenv boot_recovery yes
 	uuu fb: ucmd setenv recovery_command wipe_update
+	uuu fb: ucmd saveenv
 fi
-uuu fb: ucmd saveenv
 
 # Reset the target
 uuu fb: acmd reset
