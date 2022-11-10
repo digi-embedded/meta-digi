@@ -77,7 +77,7 @@ echo ""
 echo "   PARTITION   FILENAME"
 echo "   ---------   --------"
 echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
-if test \"\$\{dualboot\}\" = yes; then
+if test "${dualboot}" = "yes"; then
 	echo "   linux_a     ${INSTALL_LINUX_FILENAME}"
 	echo "   linux_b     ${INSTALL_LINUX_FILENAME}"
 	echo "   rootfs_a    ${INSTALL_ROOTFS_FILENAME}"
