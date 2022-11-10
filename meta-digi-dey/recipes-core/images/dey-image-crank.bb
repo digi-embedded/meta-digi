@@ -8,3 +8,6 @@ GRAPHICAL_CORE = "crank"
 
 # Remove X11 image features
 IMAGE_FEATURES:remove:ccimx6ul = "x11-base x11-sato"
+
+# Reduce the rootfs size to fit in the internal storage
+IMAGE_FEATURES:remove:ccmp15 = "dey-gstreamer package-management"
