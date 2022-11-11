@@ -7,6 +7,9 @@ SRC_URI += " \
     file://81-spi-spidev.rules \
     file://blacklist.conf \
 "
+SRC_URI:append:ccmp1 = " \
+    file://99-ext-rtc-wakeup.rules \
+"
 
 do_install:append() {
 
@@ -47,6 +50,10 @@ do_install:append() {
 		# evbug debug tool
 		install -m 0644 ${WORKDIR}/blacklist.conf ${D}${sysconfdir}/modprobe.d
 	fi
+}
+
+do_install:append:ccmp1() {
+	install -m 0644 ${WORKDIR}/99-ext-rtc-wakup.rules ${D}${sysconfdir}/udev/rules.d/
 }
 
 FILES:${PN}:append = " ${sysconfdir}/modprobe.d"

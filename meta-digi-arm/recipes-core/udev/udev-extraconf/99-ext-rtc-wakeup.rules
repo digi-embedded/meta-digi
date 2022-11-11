@@ -1,0 +1,3 @@
+# Enable external RTC as a wakeup source
+SUBSYSTEM=="platform", KERNEL=="5c009000.i2c", ACTION=="add", ATTRS{power/wakeup}=="disabled", RUN+="/bin/sh -c 'echo enabled > /sys/devices/platform/soc/5c009000.i2c/power/wakeup'"
+SUBSYSTEM=="platform", KERNEL=="40013000.i2c", ACTION=="add", ATTRS{power/wakeup}=="disabled", RUN+="/bin/sh -c 'echo enabled > /sys/devices/platform/soc/40013000.i2c/power/wakeup'"
