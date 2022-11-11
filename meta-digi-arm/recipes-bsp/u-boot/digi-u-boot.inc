@@ -28,6 +28,8 @@ SRC_URI = " \
     ${@oe.utils.conditional('UBOOT_HAS_FASTBOOT', 'true', 'file://install_linux_fw_uuu.sh', '', d)} \
 "
 
+BUILD_UBOOT_SCRIPTS ?= "true"
+
 BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
 
 LOCALVERSION ?= ""
@@ -123,46 +125,7 @@ def tf_bootscript_sedfilter(d):
     tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
     return "s,\(^[[:blank:]]*\)true.*,\\1setenv boot_initrd true\\n\\1setenv initrd_file %s-${MACHINE}.cpio.gz.u-boot.tf,g" % tf_initramfs if tf_initramfs else ""
 
-do_deploy:append() {
-	# Remove canonical U-Boot symlinks for ${UBOOT_CONFIG} currently in the form:
-	#    u-boot-<platform>.<ext>-<type>
-	#    u-boot-<type>
-	# and add a more suitable symlink in the form:
-	#    u-boot-<platform>-<config>.<ext>
-	if [ -n "${UBOOT_CONFIG}" ]
-	then
-		for config in ${UBOOT_MACHINE}; do
-			i=$(expr $i + 1);
-			for type in ${UBOOT_CONFIG}; do
-				j=$(expr $j + 1);
-				if [ $j -eq $i ]
-				then
-					cd ${DEPLOYDIR}
-					rm -r ${UBOOT_BINARY}-${type}
-					ln -sf u-boot-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-${type}.${UBOOT_SUFFIX}
-					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
-						install ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
-						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
-
-						install ${B}/${config}/u-boot-dtb-signed-${type}.${UBOOT_SUFFIX} u-boot-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-						ln -sf u-boot-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-signed-${type}.${UBOOT_SUFFIX}
-
-						install ${B}/${config}/u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX} u-boot-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-						ln -sf u-boot-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX}
-
-						if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]
-						then
-							install ${B}/${config}/u-boot-dtb-encrypted-${type}.${UBOOT_SUFFIX} u-boot-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-							ln -sf u-boot-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-encrypted-${type}.${UBOOT_SUFFIX}
-						fi
-					fi
-				fi
-			done
-			unset  j
-		done
-		unset  i
-	fi
-
+build_uboot_scripts() {
 	# DEY firmware install scripts
 	sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_sd.txt ${WORKDIR}/install_linux_fw_usb.txt
 	sed -i -e 's,##MACHINE##,${MACHINE},g' ${WORKDIR}/install_linux_fw_sd.txt  ${WORKDIR}/install_linux_fw_usb.txt
@@ -205,6 +168,51 @@ do_deploy:append() {
 		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/altboot.scr"
 	fi
 	rm -f ${TMP_BOOTSCR}
+}
+
+do_deploy:append() {
+	# Remove canonical U-Boot symlinks for ${UBOOT_CONFIG} currently in the form:
+	#    u-boot-<platform>.<ext>-<type>
+	#    u-boot-<type>
+	# and add a more suitable symlink in the form:
+	#    u-boot-<platform>-<config>.<ext>
+	if [ -n "${UBOOT_CONFIG}" ]
+	then
+		for config in ${UBOOT_MACHINE}; do
+			i=$(expr $i + 1);
+			for type in ${UBOOT_CONFIG}; do
+				j=$(expr $j + 1);
+				if [ $j -eq $i ]
+				then
+					cd ${DEPLOYDIR}
+					rm -r ${UBOOT_BINARY}-${type}
+					ln -sf u-boot-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-${type}.${UBOOT_SUFFIX}
+					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
+						install ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
+						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
+
+						install ${B}/${config}/u-boot-dtb-signed-${type}.${UBOOT_SUFFIX} u-boot-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+						ln -sf u-boot-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-signed-${type}.${UBOOT_SUFFIX}
+
+						install ${B}/${config}/u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX} u-boot-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+						ln -sf u-boot-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX}
+
+						if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]
+						then
+							install ${B}/${config}/u-boot-dtb-encrypted-${type}.${UBOOT_SUFFIX} u-boot-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+							ln -sf u-boot-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-encrypted-${type}.${UBOOT_SUFFIX}
+						fi
+					fi
+				fi
+			done
+			unset  j
+		done
+		unset  i
+	fi
+
+	if [ "${BUILD_UBOOT_SCRIPTS}" = "true" ]; then
+		build_uboot_scripts
+	fi
 }
 
 BOOT_TOOLS = "imx-boot-tools"
