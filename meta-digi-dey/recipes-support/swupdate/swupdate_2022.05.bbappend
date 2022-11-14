@@ -8,6 +8,7 @@ RDEPENDS:${PN} += "libgcc"
 SRC_URI += " \
     file://0001-Makefile-change-Makefile-to-build-swupdate-library-s.patch \
     file://0002-config-add-on-the-fly-build-configuration-variable.patch \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'file://systemd.cfg', '', d)} \
 "
 
 do_configure:append() {
