@@ -73,7 +73,7 @@ FILES:${PN} += " \
 INITSCRIPT_NAME = "dualboot-init"
 INITSCRIPT_PARAMS = "start 19 2 3 4 5 . stop 21 0 1 6 ."
 
-SYSTEMD_SERVICE = "firmware-update-check.service"
+SYSTEMD_SERVICE:${PN} = "firmware-update-check.service"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
