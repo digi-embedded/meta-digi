@@ -25,3 +25,6 @@ ROOTFS_ENC_DEV = "${ROOTFS_DEV_NAME}"
 ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
 
 UBOOT_DEV_NAME ?= "/dev/mtd"
+
+# Add dualboot support
+DUALBOOT_ENABLED ?= "true"
