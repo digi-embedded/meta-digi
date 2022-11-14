@@ -62,10 +62,11 @@ if [ -z "${UPDATE_FILE}" ]; then
 	exit
 fi
 
-PARTTABLE="/proc/mtd"
-MTDINDEX="$(sed -ne "s/\(^mtd[0-9]\+\):.*\<environment\>.*/\1/g;T;p" ${PARTTABLE} 2>/dev/null)"
+# Check if the rootfs is ubifs to determine if it is a nand or emmc device
+PARTTABLE="/proc/mounts"
+NANDROOTFS="$(sed -ne "s/\(rootfs\).*\<ubifs\>.*/\1/g;T;p" ${PARTTABLE} 2>/dev/null)"
 
-if [ -z "${MTDINDEX}" ]; then
+if [ -z "${NANDROOTFS}" ]; then
 	# Get Boot partition device and index.
 	BOOT_PART="$(fw_printenv -n mmcpart 2>/dev/null)"
 	BOOT_DEV="$(fw_printenv -n mmcbootdev 2>/dev/null)"
