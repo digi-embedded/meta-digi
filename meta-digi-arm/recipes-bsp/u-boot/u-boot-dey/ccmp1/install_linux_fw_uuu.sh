@@ -27,6 +27,12 @@ getenv()
 	uuu -v fb: ucmd printenv "${1}" | sed -ne "s,^${1}=,,g;T;p"
 }
 
+check_cmd()
+{
+	uuu -v fb: acmd ${1} > /dev/null 2> /dev/null
+	uuu -v fb: ucmd echo retval=\$? | sed  -ne "s,^retval=,,g;T;p"
+}
+
 show_usage()
 {
 	echo "Usage: $0 [options]"
@@ -91,6 +97,13 @@ uuu fb: ucmd setenv stdout serial,fastboot
 dualboot=$(getenv "dualboot")
 if [ "${dualboot}" = "yes" ]; then
 	DUALBOOT=true;
+fi
+
+# Check if uboot_config volume exists (U-Boot env)
+uuu "fb[-t 15000]:" ucmd ubi part UBI
+check=$(check_cmd "ubi check uboot_config")
+if [ "${check}" = "1" ]; then
+	RUNVOLS=true
 fi
 
 # remove redirect
@@ -193,6 +206,11 @@ part_update "fsbl2" "${INSTALL_ATF_FILENAME}" 5000
 part_update "fip-a" "${INSTALL_FIP_FILENAME}" 5000
 part_update "fip-b" "${INSTALL_FIP_FILENAME}" 5000
 
+# Environment volume does not exist and needs to be created
+if [ "${RUNVOLS}" = true ]; then
+	# Create UBI volumes
+	uuu "fb[-t 45000]:" ucmd run ubivolscript
+fi
 
 # Set 'bootcmd' for the second part of the script that will
 #  - Reset environment to defaults
@@ -223,7 +241,7 @@ sleep 8
 uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 
 # Create UBI volumes
-uuu "fb[-t 20000]:" ucmd run ubivolscript
+uuu "fb[-t 45000]:" ucmd run ubivolscript
 
 if [ "${DUALBOOT}" = true ]; then
 	# Update Linux A

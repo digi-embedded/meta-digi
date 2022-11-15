@@ -119,6 +119,14 @@ if test $? -eq 1; then
 	exit;
 fi
 
+# Check if uboot_config volume exists (U-Boot env)
+ubi part UBI
+ubi check uboot_config
+if test $? -eq 1; then
+	# Create volumes layout (including U-Boot env)
+	run ubivolscript;
+fi
+
 # Set 'bootcmd' to the second part of the script that will
 #  - Reset environment to defaults
 #  - Restore 'dualboot' if previously set
