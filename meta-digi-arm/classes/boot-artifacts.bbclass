@@ -36,7 +36,7 @@ def get_bootable_artifacts(d):
     uboot_suffix = d.getVar('UBOOT_SUFFIX', True) or ""
     atf_types = d.getVar('TF_A_CONFIG', True) or ""
     fip_type = d.getVar('FIP_UBOOT_CONFIG', True) or ""
-    atf_boot_modes = ['nand', 'usb']
+    atf_boot_modes = ['nand']
     artifacts = []
 
     # For platforms with a FIP artifact, ignore u-boot artifacts
