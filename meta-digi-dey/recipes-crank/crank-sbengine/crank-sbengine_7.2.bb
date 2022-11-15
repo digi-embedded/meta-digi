@@ -2,8 +2,7 @@
 
 SUMMARY = "Crank Storyboard Engine"
 HOMEPAGE = "https://www.cranksoftware.com/"
-LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://EULA.pdf;md5=fcb6aca5219f44fea1c073405a378250"
+LICENSE = "CLOSED"
 
 SBENGINE_NAME:ccimx6ul = "linux-imx6yocto-armle-swrender-obj"
 SBENGINE_NAME:ccimx6 = "linux-imx6yocto-armle-opengles_2.0-obj"
@@ -15,7 +14,6 @@ SRC_URI = " \
     http:///not/exist/crank-sbengine-${PV}.tar.gz \
     file://sb-launcher \
 "
-SRC_URI[md5sum] = "6faacbb61d4bd9e565ef71c91f20c6ec"
 SRC_URI[sha256sum] = "79c9162c401dd6282321361d51f15ccef1608da7cde9030c2b72b9573e826056"
 
 CRANK_ENGINE_TARBALL_PATH ?= ""
@@ -28,6 +26,9 @@ python() {
     if crank_engine_tarball_path:
         premirrors = d.getVar('PREMIRRORS', True)
         d.setVar('PREMIRRORS', "http:///not/exist/crank-sbengine-.* %s \\n %s" % (crank_engine_tarball_path, premirrors))
+    crank_engine_tarball_sha256 = d.getVar('CRANK_ENGINE_TARBALL_SHA256', True)
+    if crank_engine_tarball_sha256:
+        d.setVarFlag("SRC_URI", "sha256sum", crank_engine_tarball_sha256)
 }
 
 # Disable tasks not needed for the binary package

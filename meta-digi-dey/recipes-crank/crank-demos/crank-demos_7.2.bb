@@ -2,8 +2,7 @@
 
 SUMMARY = "Crank Demo"
 HOMEPAGE = "https://www.cranksoftware.com/"
-LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://EULA.pdf;md5=fcb6aca5219f44fea1c073405a378250"
+LICENSE = "CLOSED"
 
 DEPENDS = "crank-sbengine"
 
@@ -12,7 +11,6 @@ SRC_URI = " \
     file://crank-demo.service \
     file://crank-demo-init \
 "
-SRC_URI[md5sum] = "0fd30c14973806a130a0103fc1be6126"
 SRC_URI[sha256sum] = "90a7fc258cdaa5f9afcf57224da8bbc5a330b957db88335f555369123a1432ab"
 
 WESTON_SERVICE ?= "weston@root.service"
@@ -38,6 +36,9 @@ python() {
     if crank_demos_tarball_path:
         premirrors = d.getVar('PREMIRRORS', True)
         d.setVar('PREMIRRORS', "http:///not/exist/crank-demos-.* %s \\n %s" % (crank_demos_tarball_path, premirrors))
+    crank_demos_tarball_sha256 = d.getVar('CRANK_DEMOS_TARBALL_SHA256', True)
+    if crank_demos_tarball_sha256:
+        d.setVarFlag("SRC_URI", "sha256sum", crank_demos_tarball_sha256)
 }
 
 inherit systemd update-rc.d
