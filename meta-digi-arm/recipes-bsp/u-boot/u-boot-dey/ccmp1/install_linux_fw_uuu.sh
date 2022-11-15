@@ -249,16 +249,16 @@ if [ "${DUALBOOT}" = true ]; then
 	# Update Linux B
 	part_update "${LINUX_NAME}_b" "${INSTALL_LINUX_FILENAME}" 15000
 	# Update Rootfs A
-	part_update "${ROOTFS_NAME}_a" "${INSTALL_ROOTFS_FILENAME}" 90000
+	part_update "${ROOTFS_NAME}_a" "${INSTALL_ROOTFS_FILENAME}" 120000
 	# Update Rootfs B
-	part_update "${ROOTFS_NAME}_b" "${INSTALL_ROOTFS_FILENAME}" 90000
+	part_update "${ROOTFS_NAME}_b" "${INSTALL_ROOTFS_FILENAME}" 120000
 else
 	# Update Linux
 	part_update "${LINUX_NAME}" "${INSTALL_LINUX_FILENAME}" 15000
 	# Update Recovery
 	part_update "${RECOVERY_NAME}" "${INSTALL_RECOVERY_FILENAME}" 15000
 	# Update Rootfs
-	part_update "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}" 90000
+	part_update "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}" 120000
 	# Configure u-boot to boot into recovery mode and format the
 	# 'update' partition
 	uuu fb: ucmd setenv boot_recovery yes
