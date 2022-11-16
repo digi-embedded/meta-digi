@@ -53,7 +53,7 @@ do_install:append() {
 }
 
 do_install:append:ccmp1() {
-	install -m 0644 ${WORKDIR}/99-ext-rtc-wakup.rules ${D}${sysconfdir}/udev/rules.d/
+	install -m 0644 ${WORKDIR}/99-ext-rtc-wakeup.rules ${D}${sysconfdir}/udev/rules.d/
 }
 
 FILES:${PN}:append = " ${sysconfdir}/modprobe.d"
