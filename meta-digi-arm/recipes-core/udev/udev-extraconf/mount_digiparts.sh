@@ -26,10 +26,23 @@ elif [ "${SUBSYSTEM}" = "ubi" ]; then
 	PARTNAME="$(cat /sys/${DEVPATH}/name)"
 fi
 
+MOUNT_FOLDER=${PARTNAME}
 MOUNT_PARAMS="-o silent"
 # Mount 'linux' partition as read-only
-if [ "${PARTNAME}" = "linux" ]; then
+if [ "${PARTNAME}" = "linux" ] || [ "${PARTNAME}" = "linux_a" ] || [ "${PARTNAME}" = "linux_b" ]; then
+	MOUNT_FOLDER="linux"
 	MOUNT_PARAMS="${MOUNT_PARAMS} -o ro"
+fi
+
+DUALBOOT_MODE="$(fw_printenv -n dualboot 2>/dev/null)"
+if [ "${DUALBOOT_MODE}" = "yes" ]; then
+	if [ "${PARTNAME}" = "linux_a" ] || [ "${PARTNAME}" = "linux_b" ]; then
+		ACTIVE_SYSTEM="$(fw_printenv -n active_system 2>/dev/null)"
+		if [ "${ACTIVE_SYSTEM}" != "${PARTNAME}" ]; then
+			logger "Skip mount partition '${PARTNAME}', because it is not the active system"
+			exit 0
+		fi
+	fi
 fi
 
 if [ "x$BASE_INIT" = "x$INIT_SYSTEMD" ];then
@@ -57,7 +70,7 @@ else
 fi
 
 # Create mount point if needed
-MOUNTPOINT="/mnt/${PARTNAME}"
+MOUNTPOINT="/mnt/${MOUNT_FOLDER}"
 [ -d "${MOUNTPOINT}" ] || mkdir -p ${MOUNTPOINT}
 
 if [ "${SUBSYSTEM}" = "block" ]; then
