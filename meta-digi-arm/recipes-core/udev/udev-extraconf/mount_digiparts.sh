@@ -95,7 +95,7 @@ elif [ "${SUBSYSTEM}" = "ubi" ]; then
 	# In the case of a 'system' partition with many UBI volumes, the device
 	# is always /dev/ubi0
 	# Mount the volume.
-	if ! mount -t ubifs ubi0:${PARTNAME} ${MOUNT_PARAMS} ${MOUNTPOINT}; then
+	if ! ${MOUNT} -t ubifs ${DEVNAME} ${MOUNT_PARAMS} ${MOUNTPOINT}; then
 		logger -t udev "ERROR: Could not mount '${PARTNAME}' volume"
 		rmdir --ignore-fail-on-non-empty ${MOUNTPOINT}
 	fi
