@@ -15,7 +15,12 @@
 #
 #===============================================================================
 
-SCRIPTNAME="$(basename $(readlink -f ${0}))"
+
+if [ "$(fw_printenv -n dualboot 2>/dev/null)" != "yes" ]; then
+	exec update-firmware.recovery "$@"
+fi
+
+SCRIPTNAME="$(basename "$(readlink -f "${0}")")"
 VERBOSE=""
 PUBLIC_KEY="/etc/ssl/certs/key.pub"
 ACTIVE_SYSTEM="$(fw_printenv -n active_system 2>/dev/null)"
@@ -63,14 +68,9 @@ if [ -z "${UPDATE_FILE}" ]; then
 fi
 
 # Check if the rootfs is ubifs to determine if it is a nand or emmc device
-PARTTABLE="/proc/mounts"
-NANDROOTFS="$(sed -ne "s/\(rootfs\).*\<ubifs\>.*/\1/g;T;p" ${PARTTABLE} 2>/dev/null)"
+NANDROOTFS="$(sed -ne "s/\(rootfs\).*\<ubifs\>.*/\1/g;T;p" /proc/mounts 2>/dev/null)"
 
 if [ -z "${NANDROOTFS}" ]; then
-	# Get Boot partition device and index.
-	BOOT_PART="$(fw_printenv -n mmcpart 2>/dev/null)"
-	BOOT_DEV="$(fw_printenv -n mmcbootdev 2>/dev/null)"
-
 	# Get current partition information so we can
 	# determine where to flash the images.
 	if [ "${ACTIVE_SYSTEM}" = "linux_a" ]; then
@@ -85,12 +85,22 @@ if [ -z "${NANDROOTFS}" ]; then
 		IMAGE_SET="mmc,primary"
 	fi
 
-	# get boot partition index
-	MMC_PART="$(ls -l /dev/disk/by-partlabel/ | grep -i ${KERNELBOOT} | awk '{print $11}' | sed -e 's/[../mmcblkp]//g' -e 's/^.//')"
+	# get boot and rootfs partition index
+	MMC_PART="$(realpath /dev/disk/by-partlabel/${KERNELBOOT} | grep -o '[[:digit:]]\+$')"
 
 	# search rootfs UUID
-	MMCROOT_PART="$(ls -l /dev/disk/by-partlabel/ | grep -i ${ROOTFS} | awk '{print $11}' | sed -e 's/[../mmcblkp]//g' -e 's/^.//')"
-	PART_UUID="$(ls -l /dev/disk/by-partuuid/ | grep -i mmcblk${BOOT_DEV}p${MMCROOT_PART} | awk '{print $9}')"
+	MMCROOT_DEV="$(realpath /dev/disk/by-partlabel/${ROOTFS})"
+	for uuid in /dev/disk/by-partuuid/*; do
+		if [ "$(realpath "${uuid}")" = "${MMCROOT_DEV}" ]; then
+			PART_UUID="$(basename "${uuid}")"
+			break
+		fi
+	done
+
+	if [ -z "${MMC_PART}" ] || [ -z "${PART_UUID}" ]; then
+		echo "[ERROR] detecting partitions to update."
+		exit
+	fi
 
 	echo ""
 	echo "Updating '${IMAGE_SET}' image set from '${UPDATE_FILE}'..."
@@ -99,8 +109,8 @@ if [ -z "${NANDROOTFS}" ]; then
 	# Execute the update.
 	swupdate ${VERBOSE} -i "${UPDATE_FILE}" -e "${IMAGE_SET}"
 	if [ "$?" = "0" ]; then
-		fw_setenv mmcroot PARTUUID=${PART_UUID}
-		fw_setenv mmcpart ${MMC_PART}
+		fw_setenv mmcroot "PARTUUID=${PART_UUID}"
+		fw_setenv mmcpart "${MMC_PART}"
 		fw_setenv active_system ${KERNELBOOT}
 		fw_setenv bootcount 0
 		echo "Firmware update finished; Rebooting system."
@@ -126,9 +136,6 @@ else
 	echo ""
 	echo "Updating '${IMAGE_SET}' image set from '${UPDATE_FILE}'..."
 	echo ""
-
-	# Umount the partition before the update.
-	umount /mnt/${KERNELBOOT}
 
 	# Execute the update.
 	if [ -f "${PUBLIC_KEY}" ]; then

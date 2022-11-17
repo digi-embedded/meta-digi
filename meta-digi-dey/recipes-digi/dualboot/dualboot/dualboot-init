@@ -14,37 +14,37 @@
 #===============================================================================
 
 dualboot_init () {
-	if [ "$(fw_printenv -n dualboot 2>/dev/null)" = "yes" ]; then
-		echo -n "Starting dualboot check: "
-		ACTIVE_SYSTEM="$(fw_printenv -n active_system 2>/dev/null)"
-		if [ -z "${ACTIVE_SYSTEM}" ]; then
-			if grep -qs environment /proc/mtd; then
-				MTD_BOOT_PART="$(fw_printenv -n mtdbootpart 2>/dev/null)"
-				fw_setenv active_system "${MTD_BOOT_PART}"
-			else
-				BOOT_PART="$(fw_printenv -n mmcpart 2>/dev/null)"
-				BOOT_DEV="$(fw_printenv -n mmcbootdev 2>/dev/null)"
-				CURRENT_PART="$(sed -ne 's,PARTNAME=,,g;T;p' /sys/class/block/mmcblk"${BOOT_DEV}"p"${BOOT_PART}"/uevent)"
-				fw_setenv active_system "${CURRENT_PART}"
-			fi
+	ACTIVE_SYSTEM="$(fw_printenv -n active_system 2>/dev/null)"
+	if [ -z "${ACTIVE_SYSTEM}" ]; then
+		if grep -qs environment /proc/mtd; then
+			MTD_BOOT_PART="$(fw_printenv -n mtdbootpart 2>/dev/null)"
+			fw_setenv active_system "${MTD_BOOT_PART}"
+		else
+			BOOT_PART="$(fw_printenv -n mmcpart 2>/dev/null)"
+			BOOT_DEV="$(fw_printenv -n mmcbootdev 2>/dev/null)"
+			CURRENT_PART="$(sed -ne 's,PARTNAME=,,g;T;p' /sys/class/block/mmcblk"${BOOT_DEV}"p"${BOOT_PART}"/uevent)"
+			fw_setenv active_system "${CURRENT_PART}"
 		fi
+	fi
 
-		ISUPGRADING="$(fw_printenv -n upgrade_available 2>/dev/null)"
+	ISUPGRADING="$(fw_printenv -n upgrade_available 2>/dev/null)"
 
-		if [ "$ISUPGRADING" = "1" ]; then
-			BOOTCOUNT="$(fw_printenv -n bootcount 2>/dev/null)"
-			if [ "${BOOTCOUNT}" -lt 3 ]; then
-				fw_setenv upgrade_available
-				fw_setenv bootcount 0
-			fi
+	if [ "$ISUPGRADING" = "1" ]; then
+		BOOTCOUNT="$(fw_printenv -n bootcount 2>/dev/null)"
+		if [ "${BOOTCOUNT}" -lt 3 ]; then
+			fw_setenv upgrade_available
+			fw_setenv bootcount 0
 		fi
-		echo "done."
 	fi
 }
 
 case "$1" in
 	start)
-		dualboot_init
+		if [ "$(fw_printenv -n dualboot 2>/dev/null)" = "yes" ]; then
+			echo -n "Starting dualboot check: "
+			dualboot_init
+			echo "done."
+		fi
 		;;
 	stop)
 		;;
