@@ -17,6 +17,12 @@
 BASE_INIT="$(readlink -f "@base_sbindir@/init")"
 INIT_SYSTEMD="@systemd_unitdir@/systemd"
 
+# Partitions are mounted:
+#   * For multi-MTD systems, when an MTD subsystem event is received.
+#   * For single-MTD systems, when a UBI subsystem event is received.
+# So, do nothing for UBI subsystem events in multi-MTD systems.
+[ "${SUBSYSTEM}" = "ubi" ] && [ -c /dev/ubi1 ] && exit 0
+
 if [ "${SUBSYSTEM}" = "block" ]; then
 	PARTNAME="${ID_PART_ENTRY_NAME}"
 elif [ "${SUBSYSTEM}" = "mtd" ]; then
@@ -50,8 +56,7 @@ if [ "x$BASE_INIT" = "x$INIT_SYSTEMD" ];then
 	MOUNT="/usr/bin/systemd-mount"
 	MOUNT_PARAMS="${MOUNT_PARAMS} --no-block"
 
-	if [ -x "$MOUNT" ];
-	then
+	if [ -x "$MOUNT" ]; then
 		logger "Using systemd-mount to finish mount"
 	else
 		logger "Linux init is using systemd, so please install systemd-mount to finish mount"
@@ -106,8 +111,6 @@ elif [ "${SUBSYSTEM}" = "mtd" ]; then
 		rmdir --ignore-fail-on-non-empty ${MOUNTPOINT}
 	fi
 elif [ "${SUBSYSTEM}" = "ubi" ]; then
-	# In the case of a 'system' partition with many UBI volumes, the device
-	# is always /dev/ubi0
 	# Mount the volume.
 	if ! ${MOUNT} -t ubifs ${DEVNAME} ${MOUNT_PARAMS} ${MOUNTPOINT}; then
 		logger -t udev "ERROR: Could not mount '${PARTNAME}' volume"
