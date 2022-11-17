@@ -87,8 +87,8 @@
 	"\n"
 
 /* Check if application was called as update-firmware or encrypt-partitions */
-#define IS_UPDATEFW(cmd)	(!strcmp(cmd, CMD_UPDATEFW))
-#define IS_ENCRYPT(cmd)		(!strcmp(cmd, CMD_ENCRYPT))
+#define IS_UPDATEFW(cmd)	(cmd[0] == 'u')
+#define IS_ENCRYPT(cmd)		(cmd[0] == 'e')
 
 /* Actual command name */
 static char *cmd_name;
