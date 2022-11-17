@@ -21,11 +21,11 @@ UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${UBOOT_UR
 
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
+    file://altboot.txt \
     file://boot.txt \
     file://install_linux_fw_sd.txt \
     file://install_linux_fw_usb.txt \
     ${@oe.utils.conditional('UBOOT_HAS_FASTBOOT', 'true', 'file://install_linux_fw_uuu.sh', '', d)} \
-    ${@oe.utils.vartrue('DUALBOOT_ENABLED', 'file://altboot.txt', '', d)} \
 "
 
 BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
@@ -186,9 +186,7 @@ do_deploy:append() {
 	mkimage -T script -n bootscript -C none -d ${TMP_BOOTSCR} ${DEPLOYDIR}/boot.scr
 
 	# Alternate boot script for dualboot
-	if [ "${DUALBOOT_ENABLED}" = "true" ]; then
-		mkimage -T script -n "Alternate bootscript" -C none -d ${WORKDIR}/altboot.txt ${DEPLOYDIR}/altboot.scr
-	fi
+	mkimage -T script -n "Alternate bootscript" -C none -d ${WORKDIR}/altboot.txt ${DEPLOYDIR}/altboot.scr
 
 	# Sign the scripts
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
@@ -201,12 +199,10 @@ do_deploy:append() {
 		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
 		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
 
-		if [ "${DUALBOOT_ENABLED}" = "true" ]; then
-			# Sign boot script
-			TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/altboot-signed.XXXXXX)"
-			trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/altboot.scr" "${TMP_SIGNED_BOOTSCR}"
-			mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/altboot.scr"
-		fi
+		# Sign altboot script
+		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/altboot-signed.XXXXXX)"
+		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/altboot.scr" "${TMP_SIGNED_BOOTSCR}"
+		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/altboot.scr"
 	fi
 	rm -f ${TMP_BOOTSCR}
 }

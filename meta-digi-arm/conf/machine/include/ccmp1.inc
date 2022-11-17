@@ -26,9 +26,6 @@ ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS'
 
 UBOOT_DEV_NAME ?= "/dev/mtd"
 
-# Add dualboot support
-DUALBOOT_ENABLED ?= "true"
-
 # Extra udev rules
 MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
 
