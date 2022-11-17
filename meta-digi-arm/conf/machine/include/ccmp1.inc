@@ -28,3 +28,6 @@ UBOOT_DEV_NAME ?= "/dev/mtd"
 
 # Add dualboot support
 DUALBOOT_ENABLED ?= "true"
+
+# Extra udev rules
+MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
