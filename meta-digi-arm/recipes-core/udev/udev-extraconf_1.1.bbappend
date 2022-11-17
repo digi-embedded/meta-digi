@@ -13,10 +13,12 @@ SRC_URI:append:ccmp1 = " \
 
 do_install:append() {
 
-	install -d ${D}/mnt
-	install -d ${D}/mnt/linux
-	install -d ${D}/mnt/update
-	install -d ${D}/mnt/data
+	if [ -n "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', '1', '', d)}" ]; then
+		install -d ${D}/mnt
+		install -d ${D}/mnt/linux
+		install -d ${D}/mnt/update
+		install -d ${D}/mnt/data
+	fi
 
 	install -m 0755 ${WORKDIR}/mount_digiparts.sh ${D}${sysconfdir}/udev/scripts/
         sed -i -e 's|@base_sbindir@|${base_sbindir}|g' ${D}${sysconfdir}/udev/scripts/mount_digiparts.sh
@@ -56,8 +58,10 @@ do_install:append:ccmp1() {
 	install -m 0644 ${WORKDIR}/99-ext-rtc-wakeup.rules ${D}${sysconfdir}/udev/rules.d/
 }
 
-FILES:${PN}:append = " ${sysconfdir}/modprobe.d"
-FILES:${PN}:append = " /mnt"
+FILES:${PN}:append = " \
+    ${sysconfdir}/modprobe.d \
+    ${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', ' /mnt', '', d)} \
+"
 
 # BT_TTY is machine specific (defined in machine config file)
 PACKAGE_ARCH = "${MACHINE_ARCH}"
