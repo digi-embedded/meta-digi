@@ -43,6 +43,10 @@ do_install() {
 	ln -sf /etc/cloud-connector ${D}${sysconfdir}/init.d/cloud-connector
 }
 
+do_install:append:ccimx6ul() {
+	sed -i "/url = \"edp12.devicecloud.com\"/c\url = \"remotemanager.digi.com\"" ${D}${sysconfdir}/cc.conf
+}
+
 do_install:append:ccmp1() {
 	sed -i "/client_cert_path = \"\/etc\/ssl\/certs\/drm_cert.pem\"/c\client_cert_path = \"\/mnt\/data\/drm_cert.pem\"" ${D}${sysconfdir}/cc.conf
 }
