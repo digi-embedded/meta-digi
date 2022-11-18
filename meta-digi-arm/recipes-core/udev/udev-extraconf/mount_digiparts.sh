@@ -86,6 +86,7 @@ elif [ "${SUBSYSTEM}" = "mtd" ]; then
 		mtd_att="$(cat ${ubidev}/mtd_num)"
 		if [ "${mtd_att}" = "${MTD_NUM}" ]; then
 			dev_number="$(echo ${ubidev} | sed -ne 's,.*ubi\([0-9]\+\),\1,g;T;p')"
+			break
 		fi
 	done
 
@@ -96,7 +97,7 @@ elif [ "${SUBSYSTEM}" = "mtd" ]; then
 	# Check if volume exists.
 	if ubinfo /dev/ubi${dev_number} -N ${PARTNAME} >/dev/null 2>&1; then
 		# Mount the volume.
-		if ! mount -t ubifs ubi${dev_number}:${PARTNAME} ${MOUNT_PARAMS} ${MOUNTPOINT}; then
+		if ! ${MOUNT} -t ubifs ubi${dev_number}:${PARTNAME} ${MOUNT_PARAMS} ${MOUNTPOINT}; then
 			logger -t udev "ERROR: Could not mount '${PARTNAME}' partition"
 			rmdir --ignore-fail-on-non-empty ${MOUNTPOINT}
 		fi
