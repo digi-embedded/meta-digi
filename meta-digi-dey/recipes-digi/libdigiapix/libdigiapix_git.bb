@@ -6,7 +6,7 @@ SECTION = "libs"
 LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
 
-SRCBRANCH ?= "master"
+SRCBRANCH ?= "dey-4.0/maint"
 SRCREV = "${AUTOREV}"
 
 LIBDIGIAPIX_URI_STASH = "${DIGI_MTK_GIT}/dey/libdigiapix.git;protocol=ssh"

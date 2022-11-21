@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171d
 DEPENDS = "trustfence-cst coreutils util-linux"
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN_MODE', 'AHAB', 'imx-mkimage', '', d)}"
 
-SRCBRANCH = "v2020.04/master"
+SRCBRANCH = "v2020.04/maint"
 SRCREV = "${AUTOREV}"
 
 S = "${WORKDIR}"

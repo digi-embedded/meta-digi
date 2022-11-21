@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 DEPENDS = "confuse libdigiapix openssl recovery-utils swupdate zlib json-c"
 
-SRCBRANCH = "master"
+SRCBRANCH = "dey-4.0/maint"
 SRCREV = "${AUTOREV}"
 
 CC_STASH = "gitsm://git@stash.digi.com/cc/cc_dey.git;protocol=ssh"

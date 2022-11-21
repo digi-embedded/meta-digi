@@ -10,8 +10,8 @@ DEPENDS += "${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'lzop-native', 
 inherit kernel
 inherit ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'fsl-kernel-localversion', '', d)}
 
-SRCBRANCH = "v5.15.52/nxp/master"
-SRCBRANCH:stm32mpcommon = "v5.15.24/stm/master"
+SRCBRANCH = "v5.15/nxp/dey-4.0/maint"
+SRCBRANCH:stm32mpcommon = "v5.15/stm/dey-4.0/maint"
 SRCREV = "${AUTOREV}"
 SRCREV:stm32mpcommon = "${AUTOREV}"
 
