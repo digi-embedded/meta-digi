@@ -15,10 +15,18 @@ The current release has been verified and tested with the following
 OS versions:
 
 * Ubuntu 18.04
+* Ubuntu 22.04
 
 # Supported Platforms
 
 Software for the following hardware platforms is in production support:
+
+## ConnectCore MP15
+* ConnectCore MP15 System-on-Module (SOM)
+  * [CC-WST-DW69-NM](https://www.digi.com/products/models/cc-wst-dw69-nm)
+  * [CC-ST-DW69-ZM](https://www.digi.com/products/models/cc-st-dw69-zm)
+* ConnectCore MP15 DVK
+  * [CC-WMP157-KIT](https://www.digi.com/products/models/cc-wmp157-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/ccmp15/yocto-gs_index))
 
 ## ConnectCore 6UL
 * ConnectCore 6UL System-on-Module (SOM)
@@ -56,7 +64,18 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 ## 4.0-r1
 
-* Release based on [Yocto 4.0 (Kirkstone)](https://www.yoctoproject.org/software-overview/downloads)
+* Release based on [Yocto 4.0 (Kirkstone)](https://www.yoctoproject.org/software-overview/downloads) including:
+  * New toolchain based on GLIBC-2.35
+  * Updated bluez5 to v5.65
+  * Updated busybox to v1.32.0
+  * Updated NetworkManager to v1.36.2
+  * Updated gstreamer1.0 to v1.20.3
+  * Updated busybox to v1.35.0
+  * Updated OpenSSL to v3.0.7
+  * Package upgrades and security fixes
+* Added support for ConnectCore MP15 platform
+* Updated kernel version to v5.15.52 for i.MX6UL platforms
+
 
 # Known Issues and Limitations
 
@@ -82,6 +101,15 @@ updated list can be found on the online documentation.
   * For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
     devices (ConnectCore 6UL, ConnectCore 6 Plus, and ConnectCore 8M Nano) fail
     to join autonomous groups.
+
+## ConnectCore MP15
+
+* ConnectCore MP15 System-on-Module (SOM)
+  * Power management:
+    * Audio interface does not work after suspend.
+
+  * The following features are not yet supported:
+    * TrustFence
 
 ## ConnectCore 6UL
 
