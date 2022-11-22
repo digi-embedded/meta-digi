@@ -34,3 +34,9 @@ BAD_RECOMMENDATIONS += " \
 "
 
 export IMAGE_BASENAME = "dey-image-recovery-initramfs"
+
+initramfs_cleanup() {
+	# Delete SWUPDATE postinst script
+	rm -f ${IMAGE_ROOTFS}${sysconfdir}/rpm-postinsts/*swupdate*
+}
+ROOTFS_POSTPROCESS_COMMAND += "initramfs_cleanup; "

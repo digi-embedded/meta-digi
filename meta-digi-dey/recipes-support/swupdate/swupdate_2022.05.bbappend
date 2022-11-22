@@ -28,3 +28,9 @@ do_install:append() {
 	install -d ${D}${bindir}/
 	install -m 0755 tools/swupdate-progress ${D}${bindir}/progress
 }
+
+pkg_postinst_ontarget:${PN}() {
+	if ${@bb.utils.contains('DISTRO_FEATURES','systemd','false','true',d)}; then
+		[ "$(fw_printenv -n dualboot 2>/dev/null)" = "no" ] && update-rc.d -f swupdate remove
+	fi
+}
