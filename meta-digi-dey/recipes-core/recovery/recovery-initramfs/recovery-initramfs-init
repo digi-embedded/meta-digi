@@ -506,7 +506,6 @@ mount -t tmpfs tmpfs /tmp
 echo > /dev/mdev.seq
 echo > /dev/mdev.log
 mdev -d
-mdev -s
 
 # Give some time for the devices to settle down so mdev can mount all of them
 sleep 2
