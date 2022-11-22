@@ -31,3 +31,9 @@ DUALBOOT_ENABLED ?= "true"
 
 # Extra udev rules
 MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
+
+# Image FS types
+IMAGE_FSTYPES:remove = "ext4 tar.xz"
+
+# List of supported boot devices
+BOOTDEVICE_LABELS ?= "sdcard"
