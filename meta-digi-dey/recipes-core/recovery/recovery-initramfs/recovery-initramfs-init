@@ -563,6 +563,9 @@ for arg in ${COMMAND}; do
 		update_package=*)
 			update_package_bool=true;
 			eval "${arg}";;
+		swu_image_set=*)
+			update_image_set_bool=true;
+			eval "${arg}";;
 		encrypt_partitions=*)
 			eval "${arg}";
 			DEFAULT_ENC_PARTS="no";
@@ -595,9 +598,9 @@ done
 
 # Select update package image
 if [ "$(is_nand)" = "yes" ]; then
-	SWUPDATE_IMAGE_SET="mtd,single"
+	SWUPDATE_IMAGE_SET="${swu_image_set:-mtd,single}"
 else
-	SWUPDATE_IMAGE_SET="mmc,single"
+	SWUPDATE_IMAGE_SET="${swu_image_set:-mmc,single}"
 fi
 
 # On eMMC, if the 'update' partition is encrypted, we need to mount it manually
