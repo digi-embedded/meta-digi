@@ -14,4 +14,4 @@ PYPI_PACKAGE = "digi-xbee"
 
 inherit pypi setuptools3
 
-RDEPENDS:${PN} = "python3-pyserial"
+RDEPENDS:${PN} = "python3-asyncio python3-pyserial"
