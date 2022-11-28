@@ -95,5 +95,5 @@ do_install:append:stm32mpcommon() {
 SYSTEMD_SERVICE:${PN}:remove = "weston.service weston.socket"
 SYSTEMD_SERVICE:${PN} += "weston-launch.service weston-checkgpu.service"
 #inherit useradd
-USERADD_PARAM:${PN} = "--home /home/weston --shell /bin/sh --user-group -G video,input,tty,audio,weston-launch,dialout weston"
+USERADD_PARAM:${PN} = "--home /home/weston --shell /bin/sh --user-group -G video,input,tty,audio,weston-launch,dialout,disk weston"
 GROUPADD_PARAM:${PN} = "-r weston-launch; -r wayland"
