@@ -107,6 +107,11 @@ updated list can be found on the online documentation.
 * ConnectCore MP15 System-on-Module (SOM)
   * Power management:
     * Audio interface does not work after suspend.
+  * UART:
+    * RS-485 mode is currently not supported.
+  * Wireless
+    * P2P on the ConnectCore MP15 doesn't currently work in concurrency with
+      other modes (station or SoftAP).
 
   * The following features are not yet supported:
     * TrustFence
