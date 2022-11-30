@@ -25,7 +25,6 @@ set -e
 AVAILABLE_PLATFORMS=" \
 		     ccimx8mm-dvk \
 		     ccimx8mn-dvk \
-		     ccimx8mp-dvk \
 		     ccimx8x-sbc-pro \
 		     ccimx8x-sbc-express \
 		     ccimx6qpsbc \
@@ -143,7 +142,6 @@ while read _pl _tgt; do
 done<<-_EOF_
 	ccimx8mm-dvk         dey-image-qt
 	ccimx8mn-dvk         dey-image-qt
-	ccimx8mp-dvk         dey-image-qt
 	ccimx8x-sbc-pro      dey-image-qt
 	ccimx8x-sbc-express  dey-image-qt
 	ccimx6qpsbc          dey-image-qt

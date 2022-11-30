@@ -160,7 +160,6 @@ while read -r _pl _tgt; do
 done<<-_EOF_
 	ccimx8mm-dvk         dey-image-qt,dey-image-crank
 	ccimx8mn-dvk         dey-image-qt,dey-image-crank
-	ccimx8mp-dvk         dey-image-qt,dey-image-crank
 	ccimx8x-sbc-pro      dey-image-qt,dey-image-crank
 	ccimx8x-sbc-express  dey-image-qt
 	ccimx6qpsbc          dey-image-qt,dey-image-crank

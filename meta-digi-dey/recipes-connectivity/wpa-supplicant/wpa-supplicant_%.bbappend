@@ -42,7 +42,6 @@ MURATA_COMMON_PATCHES = " \
 
 SRC_URI:append:ccimx6sbc = " file://wpa_supplicant_p2p.conf_atheros"
 SRC_URI:append:ccmp1 = " ${MURATA_COMMON_PATCHES}"
-SRC_URI:append:ccimx8mp = " ${MURATA_COMMON_PATCHES}"
 
 do_install:append() {
 	install -m 600 ${WORKDIR}/wpa_supplicant_p2p.conf ${D}${sysconfdir}/wpa_supplicant_p2p.conf
