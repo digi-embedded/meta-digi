@@ -36,7 +36,7 @@ RDEPENDS:${PN} = "\
     connectcore-demo-example \
     cloudconnector \
     cryptodev-module \
-    ${@oe.utils.vartrue('DUALBOOT_ENABLED', 'dualboot', 'recovery-utils', d)} \
+    dualboot \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'firmwared', '',d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '', bb.utils.contains("MACHINE_FEATURES", "rtc", "${VIRTUAL-RUNTIME_base-utils-hwclock}", "", d), d)} \
@@ -52,6 +52,7 @@ RDEPENDS:${PN} = "\
     networkmanager-nmcli \
     os-release \
     ${@bb.utils.contains('MACHINE_FEATURES', 'pci', 'pciutils', '',d)} \
+    recovery-utils \
     sysinfo \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'system-monitor', '',d)} \
     usbutils \

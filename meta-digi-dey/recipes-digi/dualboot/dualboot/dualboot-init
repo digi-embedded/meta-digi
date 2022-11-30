@@ -22,7 +22,7 @@ dualboot_init () {
 		else
 			BOOT_PART="$(fw_printenv -n mmcpart 2>/dev/null)"
 			BOOT_DEV="$(fw_printenv -n mmcbootdev 2>/dev/null)"
-			CURRENT_PART="$(ls -l /dev/disk/by-partlabel/ | grep -i mmcblk${BOOT_DEV}p${BOOT_PART} | awk '{print $9}')"
+			CURRENT_PART="$(sed -ne 's,PARTNAME=,,g;T;p' /sys/class/block/mmcblk"${BOOT_DEV}"p"${BOOT_PART}"/uevent)"
 			fw_setenv active_system "${CURRENT_PART}"
 		fi
 	fi
@@ -40,9 +40,11 @@ dualboot_init () {
 
 case "$1" in
 	start)
-		echo -n "Starting dualboot check: "
-		dualboot_init
-		echo "done."
+		if [ "$(fw_printenv -n dualboot 2>/dev/null)" = "yes" ]; then
+			echo -n "Starting dualboot check: "
+			dualboot_init
+			echo "done."
+		fi
 		;;
 	stop)
 		;;

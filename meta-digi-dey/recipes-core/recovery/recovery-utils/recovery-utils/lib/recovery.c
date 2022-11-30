@@ -660,6 +660,41 @@ err:
 }
 
 /*
+ * Function:    update_image_set_firmware
+ * Description: configure recovery commands to update the firmware of a swu
+ * 		image set
+ */
+int update_image_set_firmware(const char *swu_path, const char *swu_image_set)
+{
+	char *cmd = NULL;
+	int ret = update_firmware(swu_path);
+
+	if (ret)
+		return ret;
+
+	/* Verify input parameter */
+	if (!swu_image_set) {
+		fprintf(stderr, "Error: NULL 'swu_image_set'\n");
+		goto err;
+	}
+
+	cmd = calloc(1, strlen("swu_image_set=") + strlen(swu_image_set) + 1);
+	if (!cmd) {
+		fprintf(stderr, "Error: calloc 'swu_image_set'\n");
+		goto err;
+	}
+
+	sprintf(cmd, "swu_image_set=%s", swu_image_set);
+
+	ret = append_recovery_command(cmd);
+
+	free(cmd);
+
+err:
+	return ret ? -1 : 0;
+}
+
+/*
  * Function:    reboot_recovery
  * Description: reboot into recovery mode
  */

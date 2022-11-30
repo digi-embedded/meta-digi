@@ -4,7 +4,57 @@ software =
     description = "##DESCRIPTION##";
 
     mmc = {
-        platform: {
+        primary: {
+            images: (
+                {
+                    filename = "##BOOTIMG_NAME##";
+                    device = "##BOOT_DEV_A##";
+                    type = "raw";
+                    sha256 = "$swupdate_get_sha256(##BOOTIMG_NAME##)";
+                    installed-directly = true;
+                },
+                {
+                    filename = "##ROOTIMG_NAME##";
+                    device = "##ROOTFS_DEV_A##";
+                    type = "raw";
+                    sha256 = "$swupdate_get_sha256(##ROOTIMG_NAME##)";
+                    compressed = "zlib";
+                    installed-directly = true;
+                }
+            );
+            uboot: (
+                {
+                    name = "upgrade_available";
+                    value = "1";
+                }
+            );
+        }
+        secondary: {
+            images: (
+                {
+                    filename = "##BOOTIMG_NAME##";
+                    device = "##BOOT_DEV_B##";
+                    type = "raw";
+                    sha256 = "$swupdate_get_sha256(##BOOTIMG_NAME##)";
+                    installed-directly = true;
+                },
+                {
+                    filename = "##ROOTIMG_NAME##";
+                    device = "##ROOTFS_DEV_B##";
+                    type = "raw";
+                    sha256 = "$swupdate_get_sha256(##ROOTIMG_NAME##)";
+                    compressed = "zlib";
+                    installed-directly = true;
+                }
+            );
+            uboot: (
+                {
+                    name = "upgrade_available";
+                    value = "1";
+                }
+            );
+        }
+        single: {
             images: (
                 {
                     filename = "##BOOTIMG_NAME##";
@@ -22,10 +72,61 @@ software =
                     installed-directly = true;
                 }
             );
-        };
-    };
+        }
+        platform = {
+            ref = "#./single";
+        }
+    }
     mtd = {
-        platform: {
+        primary: {
+            images: (
+                {
+                    filename = "##BOOTIMG_NAME##";
+                    volume = "##BOOT_DEV_A##";
+                    type = "ubivol";
+                    sha256 = "$swupdate_get_sha256(##BOOTIMG_NAME##)";
+                    installed-directly = true;
+                },
+                {
+                    filename = "##ROOTIMG_NAME##";
+                    volume = "##ROOTFS_DEV_A##";
+                    type = "ubivol";
+                    sha256 = "$swupdate_get_sha256(##ROOTIMG_NAME##)";
+                    installed-directly = true;
+                }
+            );
+            uboot: (
+                {
+                    name = "upgrade_available";
+                    value = "1";
+                }
+            );
+        }
+        secondary: {
+            images: (
+                {
+                    filename = "##BOOTIMG_NAME##";
+                    volume = "##BOOT_DEV_B##";
+                    type = "ubivol";
+                    sha256 = "$swupdate_get_sha256(##BOOTIMG_NAME##)";
+                    installed-directly = true;
+                },
+                {
+                    filename = "##ROOTIMG_NAME##";
+                    volume = "##ROOTFS_DEV_B##";
+                    type = "ubivol";
+                    sha256 = "$swupdate_get_sha256(##ROOTIMG_NAME##)";
+                    installed-directly = true;
+                }
+            );
+            uboot: (
+                {
+                    name = "upgrade_available";
+                    value = "1";
+                }
+            );
+        }
+        single: {
             images: (
                 {
                     filename = "##BOOTIMG_NAME##";
@@ -42,6 +143,9 @@ software =
                     installed-directly = true;
                 }
             );
-        };
+        }
+        platform = {
+            ref = "#./single";
+        }
     };
 }

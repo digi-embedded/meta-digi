@@ -44,10 +44,10 @@ MACHINEOVERRIDES_EXTENDER:mx6q:use-nxp-bsp   = "imx-generic-bsp:imx-nxp-bsp:imxf
 MACHINEOVERRIDES_EXTENDER:mx6dl:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxfbdev:imxpxp:imxipu:imxvpu:imxgpu:imxgpu2d:imxgpu3d:imxepdc:mx6-generic-bsp:mx6-nxp-bsp:mx6dl-generic-bsp:mx6dl-nxp-bsp"
 MACHINEOVERRIDES_EXTENDER:mx6ul:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxfbdev:imxpxp:mx6-generic-bsp:mx6-nxp-bsp:mx6ul-generic-bsp:mx6ul-nxp-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8mm:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxvpu:imxgpu:imxgpu2d:imxgpu3d:mx8-generic-bsp:mx8-nxp-bsp:mx8m-generic-bsp:mx8m-nxp-bsp:mx8mm-generic-bsp:mx8mm-nxp-bsp"
-MACHINEOVERRIDES_EXTENDER:mx8mn:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxgpu:imxgpu3d:mx8-generic-bsp:mx8-nxp-bsp:mx8m-generic-bsp:mx8m-nxp-bsp:mx8mn-generic-bsp:mx8mn-nxp-bsp"
-MACHINEOVERRIDES_EXTENDER:mx8mp:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxvpu:imxgpu:imxgpu2d:imxgpu3d:mx8-generic-bsp:mx8-nxp-bsp:mx8m-generic-bsp:mx8m-nxp-bsp:mx8mp-generic-bsp:mx8mp-nxp-bsp"
-MACHINEOVERRIDES_EXTENDER:mx8qxp:use-nxp-bsp = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxdpu:imxgpu:imxgpu2d:imxgpu3d:mx8-generic-bsp:mx8-nxp-bsp:mx8x-generic-bsp:mx8x-nxp-bsp:mx8qxp-generic-bsp:mx8qxp-nxp-bsp"
-MACHINEOVERRIDES_EXTENDER:mx8dx:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxdpu:imxgpu:imxgpu2d:imxgpu3d:mx8-generic-bsp:mx8-nxp-bsp:mx8x-generic-bsp:mx8x-nxp-bsp:mx8dx-generic-bsp:mx8dx-nxp-bsp"
+MACHINEOVERRIDES_EXTENDER:mx8mn:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxgpu:imxgpu3d:imxvulkan:mx8-generic-bsp:mx8-nxp-bsp:mx8m-generic-bsp:mx8m-nxp-bsp:mx8mn-generic-bsp:mx8mn-nxp-bsp"
+MACHINEOVERRIDES_EXTENDER:mx8mp:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxvpu:imxgpu:imxgpu2d:imxgpu3d:imxvulkan:mx8-generic-bsp:mx8-nxp-bsp:mx8m-generic-bsp:mx8m-nxp-bsp:mx8mp-generic-bsp:mx8mp-nxp-bsp"
+MACHINEOVERRIDES_EXTENDER:mx8qxp:use-nxp-bsp = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxdpu:imxgpu:imxgpu2d:imxgpu3d:imxvulkan:mx8-generic-bsp:mx8-nxp-bsp:mx8x-generic-bsp:mx8x-nxp-bsp:mx8qxp-generic-bsp:mx8qxp-nxp-bsp"
+MACHINEOVERRIDES_EXTENDER:mx8dx:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxdpu:imxgpu:imxgpu2d:imxgpu3d:imxvulkan:mx8-generic-bsp:mx8-nxp-bsp:mx8x-generic-bsp:mx8x-nxp-bsp:mx8dx-generic-bsp:mx8dx-nxp-bsp"
 
 #######
 ### Mainline BSP specific overrides
@@ -75,6 +75,8 @@ MACHINEOVERRIDES_EXTENDER_FILTER_OUT = " \
     mx7 \
     mx7d \
     mx7ulp \
+    \
+    vf \
     \
     mx8 \
     mx8m \
@@ -115,6 +117,11 @@ MACHINE_SOCARCH_FILTER:append:imxvpu = " \
     imx-vpuwrap \
     libimxvpuapi \
     virtual/imxvpu \
+"
+MACHINE_SOCARCH_FILTER:append:imxvulkan = " \
+    vulkan-headers \
+    vulkan-loader \
+    vulkan-tools \
 "
 MACHINE_SOCARCH_FILTER:append:imxgpu = " \
     virtual/egl \
@@ -211,31 +218,37 @@ PREFERRED_PROVIDER_virtual/egl:imxgpu        ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libgl:imxgpu3d    ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libgles1:imxgpu3d ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libgles2:imxgpu3d ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/libgles3:imxgpu3d ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libg2d            ?= "imx-gpu-g2d"
 PREFERRED_PROVIDER_virtual/libg2d:imxdpu     ?= "imx-dpu-g2d"
 PREFERRED_PROVIDER_opencl-clhpp:imxgpu       ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_opencl-headers:imxgpu     ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_opencl-icd-loader:imxgpu  ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/opencl-icd:imxgpu ?= "imx-gpu-viv"
 
-PREFERRED_VERSION_weston:imx-nxp-bsp      ??= "10.0.0.imx"
+PREFERRED_VERSION_weston:imx-nxp-bsp      ??= "10.0.1.imx"
 PREFERRED_VERSION_weston:imx-mainline-bsp   = ""
 
-PREFERRED_VERSION_wayland-protocols:mx6-nxp-bsp ?= "1.25.imx"
-PREFERRED_VERSION_wayland-protocols:mx7-nxp-bsp ?= "1.25.imx"
-PREFERRED_VERSION_wayland-protocols:mx8-nxp-bsp ?= "1.25.imx"
+PREFERRED_VERSION_wayland-protocols:mx6-nxp-bsp ??= "1.25.imx"
+PREFERRED_VERSION_wayland-protocols:mx7-nxp-bsp ??= "1.25.imx"
+PREFERRED_VERSION_wayland-protocols:mx8-nxp-bsp ??= "1.25.imx"
 
 # Use i.MX libdrm Version
-PREFERRED_VERSION_libdrm:mx6-nxp-bsp ?= "2.4.109.imx"
-PREFERRED_VERSION_libdrm:mx7-nxp-bsp ?= "2.4.109.imx"
-PREFERRED_VERSION_libdrm:mx8-nxp-bsp ?= "2.4.109.imx"
+PREFERRED_VERSION_libdrm:mx6-nxp-bsp ??= "2.4.109.imx"
+PREFERRED_VERSION_libdrm:mx7-nxp-bsp ??= "2.4.109.imx"
+PREFERRED_VERSION_libdrm:mx8-nxp-bsp ??= "2.4.109.imx"
+
+PREFERRED_VERSION_vulkan-headers:imxvulkan ??= "1.2.182.0"
+PREFERRED_VERSION_vulkan-loader:imxvulkan  ??= "1.2.182.0"
+PREFERRED_VERSION_vulkan-tools:imxvulkan   ??= "1.2.182.0"
 
 # Use i.MX optee Version
-PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ?= "3.15.0.imx"
-PREFERRED_VERSION_optee-client:mx8-nxp-bsp ?= "3.15.0.imx"
-PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ?= "3.15.0.imx"
+PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "3.17.0.imx"
+PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "3.17.0.imx"
+PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.17.0.imx"
 
 #Use i.MX opencv Version for mx8
-PREFERRED_VERSION_opencv:mx8-nxp-bsp ?= "4.5.2.imx"
+PREFERRED_VERSION_opencv:mx8-nxp-bsp ??= "4.6.0.imx"
 
 EXTRA_IMAGEDEPENDS = "u-boot"
 

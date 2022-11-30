@@ -34,10 +34,6 @@ do_install() {
 		install -m 0644 ${WORKDIR}/cloud-connector.service ${D}${systemd_unitdir}/system/
 	fi
 
-	if ${@oe.utils.vartrue('DUALBOOT_ENABLED', 'true', 'false', d)}; then
-		sed -i "/firmware_download_path = \/mnt\/update/c\firmware_download_path = \/home\/root" ${D}${sysconfdir}/cc.conf
-	fi
-
 	install -d ${D}${sysconfdir}/init.d/
 	install -m 755 ${WORKDIR}/cloud-connector-init ${D}${sysconfdir}/cloud-connector
 	ln -sf /etc/cloud-connector ${D}${sysconfdir}/init.d/cloud-connector
@@ -49,6 +45,13 @@ do_install:append:ccimx6ul() {
 
 do_install:append:ccmp1() {
 	sed -i "/client_cert_path = \"\/etc\/ssl\/certs\/drm_cert.pem\"/c\client_cert_path = \"\/mnt\/data\/drm_cert.pem\"" ${D}${sysconfdir}/cc.conf
+}
+
+pkg_postinst_ontarget:${PN}() {
+	# If dualboot is enabled, change the CloudConnector download path on the first boot
+	if [ "$(fw_printenv -n dualboot 2>/dev/null)" = "yes" ]; then
+		sed -i "/firmware_download_path = \/mnt\/update/c\firmware_download_path = \/home\/root" /etc/cc.conf
+	fi
 }
 
 INITSCRIPT_NAME = "cloud-connector"

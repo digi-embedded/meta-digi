@@ -31,6 +31,17 @@
 int update_firmware(const char *swu_path);
 
 /*
+ * Configure recovery commands to update the firmware of a swu image_set.
+ *
+ * Params:
+ *   'swu_path' (input)  Path to the update package
+ *   'swu_image_set' (input)  Name of the image set to update
+ *
+ * Return: 0 on sucess, -1 on failure
+ */
+int update_image_set_firmware(const char *swu_path, const char *swu_image_set);
+
+/*
  * Reboot into recovery mode.
  *
  * Params:

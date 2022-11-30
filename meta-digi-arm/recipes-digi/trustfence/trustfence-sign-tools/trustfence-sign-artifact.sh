@@ -126,11 +126,17 @@ if [ -z "${CONFIG_RAM_START}" ]; then
 fi
 
 # Get DEK key
-if [ -n "${CONFIG_DEK_PATH}" ] && [ "${PLATFORM}" != "ccimx8mn" ] && [ "${PLATFORM}" != "ccimx8mm" ]; then
+if [ -n "${CONFIG_DEK_PATH}" ]; then
 	if [ ! -f "${CONFIG_DEK_PATH}" ]; then
-		echo "DEK not found. Generating random 256 bit DEK."
-		[ -d $(dirname ${CONFIG_DEK_PATH}) ] || mkdir -p $(dirname ${CONFIG_DEK_PATH})
-		dd if=/dev/urandom of="${CONFIG_DEK_PATH}" bs=32 count=1 >/dev/null 2>&1
+		if [ "${PLATFORM}" = "ccimx8mn" ] || [ "${PLATFORM}" = "ccimx8mm" ]; then
+			echo "DEK not found. Generating random 128 bit DEK."
+			[ -d $(dirname ${CONFIG_DEK_PATH}) ] || mkdir -p $(dirname ${CONFIG_DEK_PATH})
+			dd if=/dev/urandom of="${CONFIG_DEK_PATH}" bs=16 count=1 >/dev/null 2>&1
+		else
+			echo "DEK not found. Generating random 256 bit DEK."
+			[ -d $(dirname ${CONFIG_DEK_PATH}) ] || mkdir -p $(dirname ${CONFIG_DEK_PATH})
+			dd if=/dev/urandom of="${CONFIG_DEK_PATH}" bs=32 count=1 >/dev/null 2>&1
+		fi
 	fi
 	dek_size="$((8 * $(stat -L -c %s ${CONFIG_DEK_PATH})))"
 	if [ "${dek_size}" != "128" ] && [ "${dek_size}" != "192" ] && [ "${dek_size}" != "256" ]; then

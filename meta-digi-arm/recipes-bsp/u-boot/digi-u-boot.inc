@@ -21,12 +21,14 @@ UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${UBOOT_UR
 
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
+    file://altboot.txt \
     file://boot.txt \
     file://install_linux_fw_sd.txt \
     file://install_linux_fw_usb.txt \
     ${@oe.utils.conditional('UBOOT_HAS_FASTBOOT', 'true', 'file://install_linux_fw_uuu.sh', '', d)} \
-    ${@oe.utils.vartrue('DUALBOOT_ENABLED', 'file://altboot.txt', '', d)} \
 "
+
+BUILD_UBOOT_SCRIPTS ?= "true"
 
 BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
 
@@ -123,6 +125,51 @@ def tf_bootscript_sedfilter(d):
     tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
     return "s,\(^[[:blank:]]*\)true.*,\\1setenv boot_initrd true\\n\\1setenv initrd_file %s-${MACHINE}.cpio.gz.u-boot.tf,g" % tf_initramfs if tf_initramfs else ""
 
+build_uboot_scripts() {
+	# DEY firmware install scripts
+	sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_sd.txt ${WORKDIR}/install_linux_fw_usb.txt
+	sed -i -e 's,##MACHINE##,${MACHINE},g' ${WORKDIR}/install_linux_fw_sd.txt  ${WORKDIR}/install_linux_fw_usb.txt
+	sed -i -e 's,##GRAPHICAL_IMAGES##,${GRAPHICAL_IMAGES},g' ${WORKDIR}/install_linux_fw_sd.txt  ${WORKDIR}/install_linux_fw_usb.txt
+	sed -i -e 's,##DEFAULT_IMAGE_NAME##,${DEFAULT_IMAGE_NAME},g' ${WORKDIR}/install_linux_fw_sd.txt  ${WORKDIR}/install_linux_fw_usb.txt
+	mkimage -T script -n "DEY firmware install script" -C none -d ${WORKDIR}/install_linux_fw_sd.txt ${DEPLOYDIR}/install_linux_fw_sd.scr
+	mkimage -T script -n "DEY firmware install script" -C none -d ${WORKDIR}/install_linux_fw_usb.txt ${DEPLOYDIR}/install_linux_fw_usb.scr
+
+	if [ "${@oe.utils.conditional('UBOOT_HAS_FASTBOOT', 'true', 'true', '', d)}" = "true" ]; then
+		# DEY firmware install uuu script
+		sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_uuu.sh
+		sed -i -e 's,##MACHINE##,${MACHINE},g' ${WORKDIR}/install_linux_fw_uuu.sh
+		sed -i -e 's,##GRAPHICAL_IMAGES##,${GRAPHICAL_IMAGES},g' ${WORKDIR}/install_linux_fw_uuu.sh
+		sed -i -e 's,##DEFAULT_IMAGE_NAME##,${DEFAULT_IMAGE_NAME},g' ${WORKDIR}/install_linux_fw_uuu.sh
+		install -m 775 ${WORKDIR}/install_linux_fw_uuu.sh ${DEPLOYDIR}/
+	fi
+
+	# Boot script for DEY images (reconfigure on-the-fly if TRUSTFENCE is enabled)
+	TMP_BOOTSCR="$(mktemp ${WORKDIR}/bootscr.XXXXXX)"
+	sed -e "${TF_BOOTSCRIPT_SEDFILTER}" ${WORKDIR}/boot.txt > ${TMP_BOOTSCR}
+	mkimage -T script -n bootscript -C none -d ${TMP_BOOTSCR} ${DEPLOYDIR}/boot.scr
+
+	# Alternate boot script for dualboot
+	mkimage -T script -n "Alternate bootscript" -C none -d ${WORKDIR}/altboot.txt ${DEPLOYDIR}/altboot.scr
+
+	# Sign the scripts
+	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
+		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
+
+		# Sign boot script
+		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
+		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
+		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
+
+		# Sign altboot script
+		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/altboot-signed.XXXXXX)"
+		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/altboot.scr" "${TMP_SIGNED_BOOTSCR}"
+		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/altboot.scr"
+	fi
+	rm -f ${TMP_BOOTSCR}
+}
+
 do_deploy:append() {
 	# Remove canonical U-Boot symlinks for ${UBOOT_CONFIG} currently in the form:
 	#    u-boot-<platform>.<ext>-<type>
@@ -163,52 +210,9 @@ do_deploy:append() {
 		unset  i
 	fi
 
-	# DEY firmware install scripts
-	sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_sd.txt ${WORKDIR}/install_linux_fw_usb.txt
-	sed -i -e 's,##MACHINE##,${MACHINE},g' ${WORKDIR}/install_linux_fw_sd.txt  ${WORKDIR}/install_linux_fw_usb.txt
-	sed -i -e 's,##GRAPHICAL_IMAGES##,${GRAPHICAL_IMAGES},g' ${WORKDIR}/install_linux_fw_sd.txt  ${WORKDIR}/install_linux_fw_usb.txt
-	sed -i -e 's,##DEFAULT_IMAGE_NAME##,${DEFAULT_IMAGE_NAME},g' ${WORKDIR}/install_linux_fw_sd.txt  ${WORKDIR}/install_linux_fw_usb.txt
-	mkimage -T script -n "DEY firmware install script" -C none -d ${WORKDIR}/install_linux_fw_sd.txt ${DEPLOYDIR}/install_linux_fw_sd.scr
-	mkimage -T script -n "DEY firmware install script" -C none -d ${WORKDIR}/install_linux_fw_usb.txt ${DEPLOYDIR}/install_linux_fw_usb.scr
-
-	if [ "${@oe.utils.conditional('UBOOT_HAS_FASTBOOT', 'true', 'true', '', d)}" = "true" ]; then
-		# DEY firmware install uuu script
-		sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_uuu.sh
-		sed -i -e 's,##MACHINE##,${MACHINE},g' ${WORKDIR}/install_linux_fw_uuu.sh
-		sed -i -e 's,##GRAPHICAL_IMAGES##,${GRAPHICAL_IMAGES},g' ${WORKDIR}/install_linux_fw_uuu.sh
-		sed -i -e 's,##DEFAULT_IMAGE_NAME##,${DEFAULT_IMAGE_NAME},g' ${WORKDIR}/install_linux_fw_uuu.sh
-		install -m 775 ${WORKDIR}/install_linux_fw_uuu.sh ${DEPLOYDIR}/
+	if [ "${BUILD_UBOOT_SCRIPTS}" = "true" ]; then
+		build_uboot_scripts
 	fi
-
-	# Boot script for DEY images (reconfigure on-the-fly if TRUSTFENCE is enabled)
-	TMP_BOOTSCR="$(mktemp ${WORKDIR}/bootscr.XXXXXX)"
-	sed -e "${TF_BOOTSCRIPT_SEDFILTER}" ${WORKDIR}/boot.txt > ${TMP_BOOTSCR}
-	mkimage -T script -n bootscript -C none -d ${TMP_BOOTSCR} ${DEPLOYDIR}/boot.scr
-
-	# Alternate boot script for dualboot
-	if [ "${DUALBOOT_ENABLED}" = "true" ]; then
-		mkimage -T script -n "Alternate bootscript" -C none -d ${WORKDIR}/altboot.txt ${DEPLOYDIR}/altboot.scr
-	fi
-
-	# Sign the scripts
-	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
-		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
-		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
-		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
-
-		# Sign boot script
-		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
-		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
-		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
-
-		if [ "${DUALBOOT_ENABLED}" = "true" ]; then
-			# Sign boot script
-			TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/altboot-signed.XXXXXX)"
-			trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/altboot.scr" "${TMP_SIGNED_BOOTSCR}"
-			mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/altboot.scr"
-		fi
-	fi
-	rm -f ${TMP_BOOTSCR}
 }
 
 BOOT_TOOLS = "imx-boot-tools"

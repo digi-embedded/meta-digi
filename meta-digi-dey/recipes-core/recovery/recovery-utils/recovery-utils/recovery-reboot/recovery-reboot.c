@@ -42,6 +42,7 @@
 	"\n" \
 	"Usage: %s [options] [<SWU-package-path>]\n\n" \
 	"  -u              --update-firmware          Perform firmware update\n" \
+	"  -i <image>      --image-set=<image>        Use the specified image-set from sw-description (only together with -u).\n" \
 	"  -e <partitions> --encrypt=<partitions>     Encrypt the list of provided partitions.\n" \
 	"  -d <partitions> --unencrypt=<partitions>   Un-encrypt the list of provided partitions.\n" \
 	"  -k [<key>]      --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
@@ -61,11 +62,12 @@
 	"Version: %s\n" \
 	"\n" \
 	"Usage: %s [options] <SWU-package-path>\n\n" \
-	"  -k [<key>] --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
-	"                                        Empty to generate a random key.\n" \
-	"  -T <N>     --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
-	"  -f         --force                    Force (un)encryption and key change operations.\n" \
-	"             --help                     Print help and exit\n" \
+	"  -i <image>  --image-set=<image>        Use the specified image-set from sw-description.\n" \
+	"  -k [<key>]  --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
+	"                                         Empty to generate a random key.\n" \
+	"  -T <N>      --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
+	"  -f          --force                    Force (un)encryption and key change operations.\n" \
+	"              --help                     Print help and exit\n" \
 	"\n" \
 	"<SWU-package-path>    Absolute path to the firmware update package\n" \
 	"\n"
@@ -95,6 +97,7 @@ static char *cmd_name;
 
 /* Command line options */
 static char *swu_package;
+static char *swu_image_set = NULL;
 static char *key = NULL;
 static char *to_encrypt = NULL;
 static char *to_unencrypt = NULL;
@@ -130,9 +133,10 @@ static void usage_and_exit(int exitval)
 static void parse_options(int argc, char *argv[])
 {
 	static int opt_index, opt;
-	static const char *short_options = "uk::wT:e:d:f";
+	static const char *short_options = "ui:k::wT:e:d:f";
 	static const struct option long_options[] = {
 		{"update-firmware", no_argument, NULL, 'u'},
+		{"image_set", required_argument, NULL, 'i'},
 		{"encryption-key", optional_argument, NULL, 'k'},
 		{"wipe-update-partition", no_argument, NULL, 'w'},
 		{"reboot-timeout", required_argument, NULL, 'T'},
@@ -157,6 +161,9 @@ static void parse_options(int argc, char *argv[])
 		switch (opt) {
 		case 'u':
 			update_fw = 1;
+			break;
+		case 'i':
+			swu_image_set = optarg;
 			break;
 		case 'w':
 			wipe_update = 1;
@@ -246,11 +253,18 @@ int main(int argc, char *argv[])
 
 	if (swu_package) {
 		/* Configure recovery commands to update the firmware */
-		ret = update_firmware(swu_package);
-		if (ret) {
-			printf("Error: update_firmware\n");
-			goto out;
+		if (!swu_image_set) {
+			ret = update_firmware(swu_package);
+			if (ret)
+				printf("Error: update_firmware\n");
+		} else {
+			ret = update_image_set_firmware(swu_package,
+							swu_image_set);
+			if (ret)
+				printf("Error: update_image_set_firmware\n");
 		}
+		if (ret)
+			goto out;
 		need_reboot++;
 	}
 

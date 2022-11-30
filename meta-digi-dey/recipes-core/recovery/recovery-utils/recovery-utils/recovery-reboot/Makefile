@@ -40,7 +40,7 @@ all: $(PROGRAM)
 install: $(PROGRAM)
 	install -d $(DESTDIR)/usr/bin
 	install -m 0755 $(PROGRAM) $(DESTDIR)/usr/bin/
-	ln -sf $(PROGRAM) $(DESTDIR)/usr/bin/update-firmware
+	ln -sf $(PROGRAM) $(DESTDIR)/usr/bin/update-firmware.recovery
 	ln -sf $(PROGRAM) $(DESTDIR)/usr/bin/encrypt-partitions
 
 .PHONY: clean
