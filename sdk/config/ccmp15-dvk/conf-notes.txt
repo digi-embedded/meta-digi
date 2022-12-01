@@ -2,13 +2,8 @@ Digi Embedded Yocto provides the following image recipes:
 
   * dey-image-qt: graphical QT image
 
-    By default the image is X11-based so it provides a full SATO theme
+    By default the image is Wayland-based so it provides a full Weston
     desktop environment.
-
-    To compile the image for the framebuffer (instead of X11) add the
-    following line to the project's conf/local.conf:
-
-    DISTRO_FEATURES_remove = "x11"
 
   * core-image-base: a console-only image
 
