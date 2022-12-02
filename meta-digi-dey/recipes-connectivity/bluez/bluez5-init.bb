@@ -13,7 +13,7 @@ SRC_URI:append:ccimx6sbc = " \
     file://bluetooth-init_atheros \
 "
 
-inherit update-rc.d
+inherit update-rc.d systemd
 
 do_install() {
 	# INITSCRIPT
