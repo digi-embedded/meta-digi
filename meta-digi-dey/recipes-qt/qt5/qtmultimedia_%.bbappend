@@ -1,4 +1,6 @@
-# Copyright (C) 2015-2019 Digi International
+# Copyright (C) 2015-2022 Digi International
+
+include nobranch.inc
 
 PACKAGECONFIG_append = " gstreamer"
 

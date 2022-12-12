@@ -2,7 +2,9 @@
 # Copyright (C) 2016 O.S. Systems Software LTDA.
 # Copyright (C) 2016 Freescale Semiconductor
 # Copyright 2017-2018 NXP
-# Copyright (C) 2015-2018, Digi International Inc.
+# Copyright (C) 2015-2022, Digi International Inc.
+
+include nobranch.inc
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 

@@ -1,3 +1,7 @@
+# Copyright (C) 2022 Digi International
+
+include nobranch.inc
+
 PACKAGECONFIG_append_class-target = " examples"
 
 PARALLEL_MAKEINST = ""

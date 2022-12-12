@@ -1,3 +1,7 @@
+# Copyright (C) 2022 Digi International
+
+include nobranch.inc
+
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 SRC_URI_append_mx6sl = " file://0001-hardwareintegration-Do-not-include-shm-emulation-ser.patch \

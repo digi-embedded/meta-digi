@@ -1,3 +1,7 @@
+# Copyright (C) 2022 Digi International
+
+include nobranch.inc
+
 PACKAGECONFIG += "examples"
 
 do_install_append() {
