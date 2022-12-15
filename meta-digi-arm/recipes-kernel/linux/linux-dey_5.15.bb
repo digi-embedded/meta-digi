@@ -11,7 +11,7 @@ inherit kernel
 inherit ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'fsl-kernel-localversion', '', d)}
 
 SRCBRANCH = "v5.15.71/nxp/master"
-SRCBRANCH:stm32mpcommon = "v5.15.24/stm/master"
+SRCBRANCH:stm32mpcommon = "v5.15.67/stm/master"
 SRCREV = "${AUTOREV}"
 SRCREV:stm32mpcommon = "${AUTOREV}"
 
