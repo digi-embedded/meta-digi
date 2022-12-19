@@ -10,7 +10,7 @@ DEPENDS += "${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'lzop-native', 
 inherit kernel
 inherit ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'fsl-kernel-localversion', '', d)}
 
-SRCBRANCH = "v5.15.52/nxp/master"
+SRCBRANCH = "v5.15.71/nxp/master"
 SRCBRANCH:stm32mpcommon = "v5.15.24/stm/master"
 SRCREV = "${AUTOREV}"
 SRCREV:stm32mpcommon = "${AUTOREV}"
@@ -45,6 +45,9 @@ do_configure:append() {
 	fi
 }
 
+# Create base DTB suitable for overlays
+KERNEL_DTC_FLAGS += "-@"
+
 KERNEL_EXTRA_ARGS:stm32mpcommon += "LOADADDR=${ST_KERNEL_LOADADDR}"
 
-COMPATIBLE_MACHINE = "(ccimx6ul|ccmp1)"
+COMPATIBLE_MACHINE = "(ccimx6ul|ccimx93|ccmp1)"
