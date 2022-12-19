@@ -12,10 +12,10 @@ Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
-index f63b9fcad..8c9aa4de1 100644
+index 8702d5160a45..8ffeed204e90 100644
 --- a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
 +++ b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
-@@ -58,7 +58,7 @@ static const struct imx_rdc_cfg rdc[] = {
+@@ -108,7 +108,7 @@ static const struct imx_rdc_cfg rdc[] = {
  	RDC_MDAn(RDC_MDA_M4, DID1),
  
  	/* peripherals domain permission */

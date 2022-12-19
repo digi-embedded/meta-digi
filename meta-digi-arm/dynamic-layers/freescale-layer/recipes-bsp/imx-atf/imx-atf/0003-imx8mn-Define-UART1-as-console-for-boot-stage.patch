@@ -12,10 +12,10 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
-index 71f3758c3..19be3e91c 100644
+index c87748a1888a..2dd3ab409e97 100644
 --- a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
 +++ b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
-@@ -51,7 +51,7 @@ static const struct imx_rdc_cfg rdc[] = {
+@@ -106,7 +106,7 @@ static const struct imx_rdc_cfg rdc[] = {
  
  	/* peripherals domain permission */
  	RDC_PDAPn(RDC_PDAP_UART4, D1R | D1W),
@@ -25,10 +25,10 @@ index 71f3758c3..19be3e91c 100644
  
  	/* memory region */
 diff --git a/plat/imx/imx8m/imx8mn/platform.mk b/plat/imx/imx8m/imx8mn/platform.mk
-index 22846f289..fb5bef02d 100644
+index 8da9b298cfba..90c8bd0bab6b 100644
 --- a/plat/imx/imx8m/imx8mn/platform.mk
 +++ b/plat/imx/imx8m/imx8mn/platform.mk
-@@ -62,7 +62,7 @@ $(eval $(call add_define,BL32_BASE))
+@@ -63,7 +63,7 @@ $(eval $(call add_define,BL32_BASE))
  BL32_SIZE		?=	0x2000000
  $(eval $(call add_define,BL32_SIZE))
  
@@ -36,4 +36,4 @@ index 22846f289..fb5bef02d 100644
 +IMX_BOOT_UART_BASE	?=	0x30860000
  $(eval $(call add_define,IMX_BOOT_UART_BASE))
  
- ifeq (${SPD},trusty)
+ $(eval $(call add_define,IMX8M_DDR4_DVFS))

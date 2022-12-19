@@ -13,10 +13,10 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
-index 19be3e91c..c7c504788 100644
+index 2dd3ab409e97..0ad3bd9edf83 100644
 --- a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
 +++ b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
-@@ -50,7 +50,7 @@ static const struct imx_rdc_cfg rdc[] = {
+@@ -105,7 +105,7 @@ static const struct imx_rdc_cfg rdc[] = {
  	RDC_MDAn(RDC_MDA_M7, DID1),
  
  	/* peripherals domain permission */
