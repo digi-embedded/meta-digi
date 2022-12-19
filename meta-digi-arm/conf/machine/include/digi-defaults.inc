@@ -25,6 +25,9 @@ HAVE_WIFI       = "${@bb.utils.contains('MACHINE_FEATURES', 'wifi', '1', '', d)}
 HAVE_BT         = "${@bb.utils.contains('MACHINE_FEATURES', 'bluetooth', '1', '', d)}"
 HAVE_GUI        = "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '1', '', d)}"
 
+# Default value for WiFi virtual wlans
+HAS_WIFI_VIRTWLANS ?= "false"
+
 #
 # Ethernet, Wi-Fi, and Bluetooth configuration used in recipes
 #
