@@ -48,6 +48,7 @@ MACHINEOVERRIDES_EXTENDER:mx8mn:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxd
 MACHINEOVERRIDES_EXTENDER:mx8mp:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxvpu:imxgpu:imxgpu2d:imxgpu3d:imxvulkan:mx8-generic-bsp:mx8-nxp-bsp:mx8m-generic-bsp:mx8m-nxp-bsp:mx8mp-generic-bsp:mx8mp-nxp-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8qxp:use-nxp-bsp = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxdpu:imxgpu:imxgpu2d:imxgpu3d:imxvulkan:mx8-generic-bsp:mx8-nxp-bsp:mx8x-generic-bsp:mx8x-nxp-bsp:mx8qxp-generic-bsp:mx8qxp-nxp-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8dx:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxdpu:imxgpu:imxgpu2d:imxgpu3d:imxvulkan:mx8-generic-bsp:mx8-nxp-bsp:mx8x-generic-bsp:mx8x-nxp-bsp:mx8dx-generic-bsp:mx8dx-nxp-bsp"
+MACHINEOVERRIDES_EXTENDER:mx93:use-nxp-bsp   = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxpxp:mx9-generic-bsp:mx9-nxp-bsp:mx93-generic-bsp:mx93-nxp-bsp"
 
 #######
 ### Mainline BSP specific overrides
@@ -88,6 +89,7 @@ MACHINEOVERRIDES_EXTENDER_FILTER_OUT = " \
     mx8qxp \
     mx8dx \
     mx8dxl \
+    mx93 \
 "
 
 MACHINEOVERRIDES_FILTERED_OUT_QA_ERROR = "%s overrides cannot be used and need conversion to use the new BSP-specific overrides. Check 'meta-freescale/scripts/convert-bsp-specific-overrides'."
@@ -102,6 +104,7 @@ MACHINE_SOCARCH_SUFFIX:mx8mn-nxp-bsp  = "-mx8mn"
 MACHINE_SOCARCH_SUFFIX:mx8mp-nxp-bsp  = "-mx8mp"
 MACHINE_SOCARCH_SUFFIX:mx8qxp-nxp-bsp = "-mx8"
 MACHINE_SOCARCH_SUFFIX:mx8dx-nxp-bsp  = "-mx8"
+MACHINE_SOCARCH_SUFFIX:mx93-nxp-bsp = "-mx93"
 
 # For Mainline we use a single SoC suffix as we don't have different build options
 MACHINE_SOCARCH_SUFFIX:imx-mainline-bsp = "-imx"
