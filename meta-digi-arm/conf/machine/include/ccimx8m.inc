@@ -11,7 +11,7 @@ UBOOT_SUFFIX = "bin"
 UBOOT_HAS_FASTBOOT = "true"
 
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
-EXTRA_IMAGEDEPENDS = "imx-boot"
+EXTRA_IMAGEDEPENDS += "imx-boot"
 BOOTLOADER_IMAGE_RECIPE = "imx-boot"
 BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"

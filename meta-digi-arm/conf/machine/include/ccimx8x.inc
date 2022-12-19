@@ -14,7 +14,7 @@ UBOOT_SUFFIX = "bin"
 UBOOT_HAS_FASTBOOT = "true"
 
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
-EXTRA_IMAGEDEPENDS = "imx-boot"
+EXTRA_IMAGEDEPENDS += "imx-boot"
 BOOTLOADER_IMAGE_RECIPE = "imx-boot"
 # BOOTLOADER_SEEK_USERDATA is 33 for step A of the silicon and 32 for step B
 BOOTLOADER_SEEK_USERDATA = "32"
