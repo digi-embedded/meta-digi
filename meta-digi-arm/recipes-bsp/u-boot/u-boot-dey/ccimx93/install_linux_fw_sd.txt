@@ -1,0 +1,234 @@
+#
+# U-Boot script for installing Linux images created by Yocto from the SD
+# card into the eMMC
+#
+
+# Reset temp variables
+install_abort=0
+BASEFILENAME=0
+
+setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##.bin;
+setenv INSTALL_MMCDEV 1
+
+if test -z "${image-name}"; then
+	setenv image-name ##DEFAULT_IMAGE_NAME##
+fi
+GRAPHICAL_IMAGES="##GRAPHICAL_IMAGES##"
+for g in ${GRAPHICAL_IMAGES}; do
+	if test "${image-name}" = "${g}"; then
+		BASEFILENAME="${image-name}-##GRAPHICAL_BACKEND##"
+	fi
+done
+if test "${BASEFILENAME}" = "0"; then
+	BASEFILENAME="${image-name}"
+fi
+setenv INSTALL_LINUX_FILENAME ${BASEFILENAME}-##MACHINE##.boot.vfat
+setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.vfat
+setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.ext4
+
+# Check for presence of firmware files on the SD card
+for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do
+	if test ! -e mmc ${INSTALL_MMCDEV} ${install_f}; then
+		echo "ERROR: Could not find file ${install_f}";
+		install_abort=1;
+	fi;
+done
+if test "${install_abort}" = "1"; then
+	echo "Aborted.";
+	exit;
+fi
+
+echo "############################################################"
+echo "#           Linux firmware install from micro SD           #"
+echo "############################################################"
+echo ""
+echo " This process will erase your eMMC and will install the following files"
+echo " on the partitions of the eMMC."
+echo ""
+echo "   PARTITION   FILENAME"
+echo "   ---------   --------"
+echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
+if test "${dualboot}" = "yes"; then
+	echo "   linux_a     ${INSTALL_LINUX_FILENAME}"
+	echo "   linux_b     ${INSTALL_LINUX_FILENAME}"
+	echo "   rootfs_a    ${INSTALL_ROOTFS_FILENAME}"
+	echo "   rootfs_b    ${INSTALL_ROOTFS_FILENAME}"
+else
+	echo "   linux       ${INSTALL_LINUX_FILENAME}"
+	echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
+	echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
+fi
+echo ""
+echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
+echo " to continue."
+
+sleep 10
+if test $? -eq 1; then
+	echo "Aborted by user.";
+	exit;
+fi
+
+# Skip user confirmation for U-Boot update
+setenv forced_update 1
+
+# Set bootdelay to zero so that firmware update is run immediately after
+# the first reset.
+setenv bootdelay 0
+
+# Set target MMC device index to eMMC
+setenv mmcdev 0
+
+# Update U-Boot
+echo ""
+echo ""
+echo ">> Installing U-Boot boot loader image ${INSTALL_UBOOT_FILENAME} (target will reset)"
+echo ""
+echo ""
+update uboot mmc ${INSTALL_MMCDEV} ${INSTALL_UBOOT_FILENAME}
+if test $? -eq 1; then
+	# Use old-style update with source file system argument
+	update uboot mmc ${INSTALL_MMCDEV} fat ${INSTALL_UBOOT_FILENAME}
+	if test $? -eq 1; then
+		echo "[ERROR] Failed to update U-Boot boot loader!";
+		echo "";
+		echo "Aborted.";
+		exit;
+	fi
+fi
+
+# Set 'bootcmd' to the second part of the script that will
+#  - Reset environment to defaults
+#  - Restore 'dualboot' if previously set
+#  - Save the environment
+#  - Force on-the-fly updates to avoid possible verification errors
+#  - Partition the eMMC user data area for Linux
+#  - If Dual Boot
+#     - Update the system partitions: linux_a, linux_b, rootfs_a, rootfs_b
+#  - If Normal Boot:
+#     - Update the system partitions: linux, recovery, rootfs
+#     - Erase the 'update' partition
+#     - Configure recovery to wipe 'update' partition
+#     - Run 'recovery' and let the system boot after
+setenv bootcmd "
+	env default -a;
+	setenv dualboot ${dualboot};
+	saveenv;
+	setenv otf-update yes;
+	echo \"\";
+	echo \"\";
+	echo \">> Creating Linux partition table on the eMMC\";
+	echo \"\";
+	echo \"\";
+	run partition_mmc_linux;
+	if test \$? -eq 1; then
+		echo \"[ERROR] Failed to create Linux partition table!\";
+		echo \"\";
+		echo \"Aborted.\";
+		exit;
+	fi;
+	if test \"\$\{dualboot\}\" = yes; then
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_a\";
+		echo \"\";
+		echo \"\";
+		update linux_a mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update linux_a!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_b\";
+		echo \"\";
+		echo \"\";
+		update linux_b mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update linux_b!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_a\";
+		echo \"\";
+		echo \"\";
+		update rootfs_a mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update rootfs_a partition!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_b\";
+		echo \"\";
+		echo \"\";
+		update rootfs_b mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update rootfs_b partition!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+	else
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux\";
+		echo \"\";
+		echo \"\";
+		update linux mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update linux!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_RECOVERY_FILENAME} on recovery\";
+		echo \"\";
+		echo \"\";
+		update recovery mmc ${INSTALL_MMCDEV} ${INSTALL_RECOVERY_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update recovery partition!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		echo \"\";
+		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs\";
+		echo \"\";
+		echo \"\";
+		update rootfs mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
+		if test \$? -eq 1; then
+			echo \"[ERROR] Failed to update rootfs partition!\";
+			echo \"\";
+			echo \"Aborted.\";
+			exit;
+		fi;
+		echo \"\";
+		setenv boot_recovery yes;
+		setenv recovery_command wipe_update;
+	fi;
+	setenv otf-update;
+	saveenv;
+	echo \"\";
+	echo \"\";
+	echo \">> Firmware installation complete.\";
+	if test \"\$\{dualboot\}\" != yes; then
+		echo \"Rebooting into recovery mode for final deployment.\";
+	fi;
+	echo \"\";
+	echo \"\";
+	sleep 1;
+	reset;
+"
+
+saveenv
+reset
