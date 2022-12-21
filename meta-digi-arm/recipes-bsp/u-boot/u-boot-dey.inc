@@ -32,91 +32,21 @@ BUILD_UBOOT_SCRIPTS ?= "true"
 
 BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
 
-LOCALVERSION ?= ""
-
-EXTRA_OEMAKE:append = " KCFLAGS=-fgnu89-inline"
-
-UBOOT_EXTRA_CONF ?= ""
-
-# Use default initial env name so userspace tools work as expected
-UBOOT_INITIAL_ENV = "u-boot-initial-env"
+# Disable u-boot environment artifacts
+UBOOT_INITIAL_ENV = ""
 
 python __anonymous() {
     if (d.getVar("TRUSTFENCE_DEK_PATH", True) not in ["0", None]) and (d.getVar("TRUSTFENCE_SIGN", True) != "1"):
         bb.fatal("Only signed U-Boot images can be encrypted. Generate signed images (TRUSTFENCE_SIGN = \"1\") or remove encryption (TRUSTFENCE_DEK_PATH = \"0\")")
 }
 
-do_compile () {
-	if [ "${@bb.utils.filter('DISTRO_FEATURES', 'ld-is-gold', d)}" ]; then
-		sed -i 's/$(CROSS_COMPILE)ld$/$(CROSS_COMPILE)ld.bfd/g' ${S}/config.mk
-	fi
-
-	unset LDFLAGS
-	unset CFLAGS
-	unset CPPFLAGS
-
-	if [ ! -e ${B}/.scmversion -a ! -e ${S}/.scmversion ]
-	then
-		echo ${UBOOT_LOCALVERSION} > ${B}/.scmversion
-		echo ${UBOOT_LOCALVERSION} > ${S}/.scmversion
-	fi
-
-	if [ -n "${UBOOT_CONFIG}" ]
-	then
-		unset i j k
-		for config in ${UBOOT_MACHINE}; do
-			i=$(expr $i + 1);
-			for type in ${UBOOT_CONFIG}; do
-				j=$(expr $j + 1);
-				if [ $j -eq $i ]
-				then
-					oe_runmake -C ${S} O=${B}/${config} ${config}
-					# Reconfigure U-Boot with Digi UBOOT_EXTRA_CONF
-					for var in ${UBOOT_EXTRA_CONF}; do
-						echo "${var}" >> ${B}/${config}/.config
-					done
-					oe_runmake -C ${S} O=${B}/${config} oldconfig
-
-					oe_runmake -C ${S} O=${B}/${config} ${UBOOT_MAKE_TARGET}
-					for binary in ${UBOOT_BINARIES}; do
-						k=$(expr $k + 1);
-						if [ $k -eq $i ]; then
-							cp ${B}/${config}/${binary} ${B}/${config}/u-boot-${type}.${UBOOT_SUFFIX}
-						fi
-					done
-
-					# Generate the uboot-initial-env
-					if [ -n "${UBOOT_INITIAL_ENV}" ]; then
-						oe_runmake -C ${S} O=${B}/${config} u-boot-initial-env
-						cp ${B}/${config}/u-boot-initial-env ${B}/${config}/u-boot-initial-env-${type}
-					fi
-
-					unset k
-
-					# Secure boot artifacts
-					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]
-					then
-						cp ${B}/${config}/u-boot-dtb-signed.imx ${B}/${config}/u-boot-dtb-signed-${type}.${UBOOT_SUFFIX}
-						cp ${B}/${config}/u-boot-dtb-usb-signed.imx ${B}/${config}/u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX}
-						if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]
-						then
-							cp ${B}/${config}/u-boot-dtb-encrypted.imx ${B}/${config}/u-boot-dtb-encrypted-${type}.${UBOOT_SUFFIX}
-						fi
-					fi
-				fi
-			done
-			unset  j
-		done
-		unset  i
-	else
-		oe_runmake -C ${S} O=${B} ${UBOOT_MACHINE}
-		oe_runmake -C ${S} O=${B} ${UBOOT_MAKE_TARGET}
-
-		# Generate the uboot-initial-env
-		if [ -n "${UBOOT_INITIAL_ENV}" ]; then
-			oe_runmake -C ${S} O=${B} u-boot-initial-env
-		fi
-	fi
+do_configure[prefuncs] += "${@oe.utils.ifelse(d.getVar('UBOOT_TF_CONF'), 'trustfence_config', '')}"
+python trustfence_config() {
+    config_path = d.expand('${WORKDIR}/uboot-trustfence.cfg')
+    with open(config_path, 'w') as f:
+        for cfg in d.getVar('UBOOT_TF_CONF').split():
+            f.write('%s\n' % cfg)
+    d.appendVar('SRC_URI', ' file://%s' % config_path)
 }
 
 TF_BOOTSCRIPT_SEDFILTER = "${@tf_bootscript_sedfilter(d)}"
@@ -186,21 +116,21 @@ do_deploy:append() {
 				then
 					cd ${DEPLOYDIR}
 					rm -r ${UBOOT_BINARY}-${type}
-					ln -sf u-boot-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-${type}.${UBOOT_SUFFIX}
+					ln -sf ${UBOOT_BINARYNAME}-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-${type}.${UBOOT_SUFFIX}
 					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
 						install ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
 						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
 
-						install ${B}/${config}/u-boot-dtb-signed-${type}.${UBOOT_SUFFIX} u-boot-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-						ln -sf u-boot-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-signed-${type}.${UBOOT_SUFFIX}
+						install ${B}/${config}/${UBOOT_BINARYNAME}-dtb-signed.imx ${UBOOT_BINARYNAME}-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+						ln -sf ${UBOOT_BINARYNAME}-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-dtb-signed-${type}.${UBOOT_SUFFIX}
 
-						install ${B}/${config}/u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX} u-boot-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-						ln -sf u-boot-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-usb-signed-${type}.${UBOOT_SUFFIX}
+						install ${B}/${config}/${UBOOT_BINARYNAME}-dtb-usb-signed.imx ${UBOOT_BINARYNAME}-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+						ln -sf ${UBOOT_BINARYNAME}-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-dtb-usb-signed-${type}.${UBOOT_SUFFIX}
 
 						if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]
 						then
-							install ${B}/${config}/u-boot-dtb-encrypted-${type}.${UBOOT_SUFFIX} u-boot-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-							ln -sf u-boot-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} u-boot-dtb-encrypted-${type}.${UBOOT_SUFFIX}
+							install ${B}/${config}/${UBOOT_BINARYNAME}-dtb-encrypted.imx ${UBOOT_BINARYNAME}-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+							ln -sf ${UBOOT_BINARYNAME}-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-dtb-encrypted-${type}.${UBOOT_SUFFIX}
 						fi
 					fi
 				fi
