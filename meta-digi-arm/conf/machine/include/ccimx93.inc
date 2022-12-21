@@ -12,7 +12,6 @@ require conf/machine/include/arm/armv8-2a/tune-cortexa55.inc
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "bin"
-UBOOT_HAS_FASTBOOT = "true"
 
 EXTRA_IMAGEDEPENDS += "imx-boot"
 BOOTLOADER_IMAGE_RECIPE = "imx-boot"

@@ -11,7 +11,6 @@ include conf/machine/include/arm/armv7a/tune-cortexa7.inc
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"
-UBOOT_HAS_FASTBOOT = "true"
 
 STORAGE_MEDIA = "mtd"
 

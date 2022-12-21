@@ -19,13 +19,17 @@ UBOOT_URI_STASH = "${DIGI_MTK_GIT}/uboot/u-boot-denx.git;protocol=ssh"
 UBOOT_URI_GITHUB = "${DIGI_GITHUB_GIT}/u-boot.git;protocol=https"
 UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${UBOOT_URI_STASH}', '${UBOOT_URI_GITHUB}', d)}"
 
+INSTALL_FW_UBOOT_SCRIPTS = " \
+    file://install_linux_fw_sd.txt \
+    file://install_linux_fw_usb.txt \
+    file://install_linux_fw_uuu.sh \
+"
+
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
     file://altboot.txt \
     file://boot.txt \
-    file://install_linux_fw_sd.txt \
-    file://install_linux_fw_usb.txt \
-    ${@oe.utils.conditional('UBOOT_HAS_FASTBOOT', 'true', 'file://install_linux_fw_uuu.sh', '', d)} \
+    ${INSTALL_FW_UBOOT_SCRIPTS} \
 "
 
 BUILD_UBOOT_SCRIPTS ?= "true"
@@ -56,27 +60,27 @@ def tf_bootscript_sedfilter(d):
     return "s,\(^[[:blank:]]*\)true.*,\\1setenv boot_initrd true\\n\\1setenv initrd_file %s-${MACHINE}.cpio.gz.u-boot.tf,g" % tf_initramfs if tf_initramfs else ""
 
 build_uboot_scripts() {
-	# DEY firmware install scripts
-	sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_sd.txt ${WORKDIR}/install_linux_fw_usb.txt
-	sed -i -e 's,##MACHINE##,${MACHINE},g' ${WORKDIR}/install_linux_fw_sd.txt  ${WORKDIR}/install_linux_fw_usb.txt
-	sed -i -e 's,##GRAPHICAL_IMAGES##,${GRAPHICAL_IMAGES},g' ${WORKDIR}/install_linux_fw_sd.txt  ${WORKDIR}/install_linux_fw_usb.txt
-	sed -i -e 's,##DEFAULT_IMAGE_NAME##,${DEFAULT_IMAGE_NAME},g' ${WORKDIR}/install_linux_fw_sd.txt  ${WORKDIR}/install_linux_fw_usb.txt
-	mkimage -T script -n "DEY firmware install script" -C none -d ${WORKDIR}/install_linux_fw_sd.txt ${DEPLOYDIR}/install_linux_fw_sd.scr
-	mkimage -T script -n "DEY firmware install script" -C none -d ${WORKDIR}/install_linux_fw_usb.txt ${DEPLOYDIR}/install_linux_fw_usb.scr
-
-	if [ "${@oe.utils.conditional('UBOOT_HAS_FASTBOOT', 'true', 'true', '', d)}" = "true" ]; then
-		# DEY firmware install uuu script
-		sed -i -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' ${WORKDIR}/install_linux_fw_uuu.sh
-		sed -i -e 's,##MACHINE##,${MACHINE},g' ${WORKDIR}/install_linux_fw_uuu.sh
-		sed -i -e 's,##GRAPHICAL_IMAGES##,${GRAPHICAL_IMAGES},g' ${WORKDIR}/install_linux_fw_uuu.sh
-		sed -i -e 's,##DEFAULT_IMAGE_NAME##,${DEFAULT_IMAGE_NAME},g' ${WORKDIR}/install_linux_fw_uuu.sh
-		install -m 775 ${WORKDIR}/install_linux_fw_uuu.sh ${DEPLOYDIR}/
-	fi
+	for f in $(echo ${INSTALL_FW_UBOOT_SCRIPTS} | sed -e 's,file\:\/\/,,g'); do
+		f_ext="${f##*.}"
+		TMP_INSTALL_SCR="$(mktemp ${WORKDIR}/${f}.XXXXXX)"
+		sed -e 's,##GRAPHICAL_BACKEND##,${GRAPHICAL_BACKEND},g' \
+			-e 's,##MACHINE##,${MACHINE},g' \
+			-e 's,##GRAPHICAL_IMAGES##,${GRAPHICAL_IMAGES},g' \
+			-e 's,##DEFAULT_IMAGE_NAME##,${DEFAULT_IMAGE_NAME},g' \
+			${WORKDIR}/${f} > ${TMP_INSTALL_SCR}
+		if [ "${f_ext}" = "txt" ]; then
+			mkimage -T script -n "DEY firmware install script" -C none -d ${TMP_INSTALL_SCR} ${DEPLOYDIR}/${f%.*}.scr
+		else
+			install -m 775 ${TMP_INSTALL_SCR} ${DEPLOYDIR}/${f}
+		fi
+		rm -f ${TMP_INSTALL_SCR}
+	done
 
 	# Boot script for DEY images (reconfigure on-the-fly if TRUSTFENCE is enabled)
 	TMP_BOOTSCR="$(mktemp ${WORKDIR}/bootscr.XXXXXX)"
 	sed -e "${TF_BOOTSCRIPT_SEDFILTER}" ${WORKDIR}/boot.txt > ${TMP_BOOTSCR}
 	mkimage -T script -n bootscript -C none -d ${TMP_BOOTSCR} ${DEPLOYDIR}/boot.scr
+	rm -f ${TMP_BOOTSCR}
 
 	# Alternate boot script for dualboot
 	mkimage -T script -n "Alternate bootscript" -C none -d ${WORKDIR}/altboot.txt ${DEPLOYDIR}/altboot.scr
@@ -97,7 +101,6 @@ build_uboot_scripts() {
 		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/altboot.scr" "${TMP_SIGNED_BOOTSCR}"
 		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/altboot.scr"
 	fi
-	rm -f ${TMP_BOOTSCR}
 }
 
 do_deploy:append() {
