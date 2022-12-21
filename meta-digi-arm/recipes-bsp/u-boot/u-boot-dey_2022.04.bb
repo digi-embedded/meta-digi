@@ -8,4 +8,4 @@ DEPENDS += "flex-native bison-native"
 SRCBRANCH = "v2022.04/master"
 SRCREV = "${AUTOREV}"
 
-DEFAULT_PREFERENCE = "-1"
+COMPATIBLE_MACHINE = "(ccimx93)"
