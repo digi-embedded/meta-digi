@@ -27,7 +27,8 @@ if [ "${1}" == "pre" ]; then
 		done
 
 		echo ${RESUME_IFACES} > /tmp/suspend_wlan_ifaces
-		grep -qs '^wlan' /proc/modules && rmmod wlan
+		[ -e /sys/module/ath6kl_sdio ] && rmmod ath6kl_sdio ath6kl_core && echo "301" > /tmp/suspend_wlan_device_id
+		[ -e /sys/module/wlan ] && rmmod wlan && echo "50A" > /tmp/suspend_wlan_device_id
 	fi
 
 	# Suspend bluetooth interface
@@ -36,11 +37,24 @@ if [ "${1}" == "pre" ]; then
 		systemctl stop bluetooth
 		systemctl stop bluetooth-init
 	fi
+
+	# Configure Power LED for blinking in standby
+	if [ -d "/sys/class/leds/power:green" ]; then
+		# Configure LED for blinking
+		echo timer > /sys/class/leds/power\:green/trigger
+		# Turn LED on at max brightness
+		echo 19 > /sys/class/leds/power\:green/brightness
+		# Configure blinking timings
+		echo 100 > /sys/class/leds/power\:green/delay_on
+		echo 1000 > /sys/class/leds/power\:green/delay_off
+	fi
 elif [ "${1}" == "post" ]; then
 	# Resume wireless interfaces
 	if [ -d "/proc/device-tree/wireless" ]; then
 		# Trigger wireless module loading event, and wait until the interface exists
-		udevadm trigger --action=add --attr-match="modalias=sdio:c00v0271d050A"
+		udevadm trigger --action=add --attr-match="modalias=pci:v0000168Cd0000003Esv*sd*bc*sc*i*"
+		udevadm trigger --action=add --attr-match="modalias=sdio:c00v0271d0$(cat /tmp/suspend_wlan_device_id)"
+		rm -rf /tmp/suspend_wlan_driver
 		timeout 5 sh -c "while [ ! -d /sys/class/net/wlan0 ]; do sleep .2; done" 2>/dev/null
 
 		# Bring up the interfaces that were brought down on suspend
@@ -60,5 +74,13 @@ elif [ "${1}" == "post" ]; then
 			systemctl start bluetooth
 			rm -f /tmp/up_bt_on_resume
 		fi
+	fi
+
+	# Configure Power LED solid on after resume
+	if [ -d "/sys/class/leds/power:green" ]; then
+		# Reset LED settings by writing 0 to brigtness descriptor
+		echo 0 > /sys/class/leds/power\:green/brightness
+		# Turn LED on at max brightness
+		echo 19 > /sys/class/leds/power\:green/brightness
 	fi
 fi
