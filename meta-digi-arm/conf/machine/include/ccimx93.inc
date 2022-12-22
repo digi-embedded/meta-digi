@@ -10,11 +10,14 @@ require conf/machine/include/imx-digi-base.inc
 require conf/machine/include/arm/armv8-2a/tune-cortexa55.inc
 
 # Platform u-boot settings
-UBOOT_PREFIX = "u-boot"
+UBOOT_PREFIX = "imx-boot"
 UBOOT_SUFFIX = "bin"
 
+# The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS += "imx-boot"
 BOOTLOADER_IMAGE_RECIPE = "imx-boot"
+BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
+SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 
 DDR_FIRMWARE_NAME = " \
     lpddr4_dmem_1d_v202201.bin \
