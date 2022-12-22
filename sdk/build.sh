@@ -170,6 +170,7 @@ done<<-_EOF_
 	ccimx6ulrftest       dey-image-mft-module-rf
 	ccmp15-dvk           dey-image-qt,dey-image-crank
 	ccmp13-dvk           core-image-base
+	ccimx93-dvk          core-image-base
 _EOF_
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
