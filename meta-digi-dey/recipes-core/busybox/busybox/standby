@@ -76,6 +76,8 @@ resume_interfaces() {
 
 	# Resume NetworkManager after suspend
 	${NM_DAEMON} start
+
+	exit_critical_section
 }
 
 enter_critical_section() {
@@ -110,9 +112,7 @@ if [ -f "${syspower}" ]; then
 	printf "mem" > ${syspower}
 
 	# Post-resume actions
-	resume_interfaces
-
-	exit_critical_section
+	resume_interfaces &
 else
 	printf "\n[ERROR] File ${syspower} not found\n\n"
 fi
