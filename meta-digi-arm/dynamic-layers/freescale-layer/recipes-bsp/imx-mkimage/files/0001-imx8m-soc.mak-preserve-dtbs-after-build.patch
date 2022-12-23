@@ -16,28 +16,29 @@ Remove the file removal to avoid this.
 
 Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
  iMX8M/soc.mak | 3 +--
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
-index 4bfdc37..b6595bc 100644
+index 0a69b7167c5c..4a0cd4e59360 100644
 --- a/iMX8M/soc.mak
 +++ b/iMX8M/soc.mak
-@@ -149,7 +149,7 @@ u-boot.itb: $(dtb)
+@@ -154,7 +154,7 @@ u-boot.itb: $(dtb)
  	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb)
- 	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtb) > u-boot.its
- 	./mkimage_uboot -E -p 0x3000 -f u-boot.its u-boot.itb
+ 	BL32=$(TEE) DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ../$(SOC_DIR)/mkimage_fit_atf.sh $(dtb) > u-boot.its
+ 	mkimage -E -p 0x3000 -f u-boot.its u-boot.itb
 -	@rm -f u-boot.its $(dtb)
 +	@rm -f u-boot.its
  
  dtb_ddr3l = valddr3l.dtb
  $(dtb_ddr3l):
-@@ -283,7 +283,6 @@ print_fit_hab: u-boot-nodtb.bin bl31.bin $(dtb)
+@@ -322,7 +322,6 @@ print_fit_hab: u-boot-nodtb.bin bl31.bin $(dtb)
  	./$(PAD_IMAGE) bl31.bin
  	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb)
- 	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ./print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtb)
+ 	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ../$(SOC_DIR)/print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtb)
 -	@rm -f $(dtb)
  
  print_fit_hab_ddr4: u-boot-nodtb.bin bl31.bin $(dtb_ddr4_evk)
- 	./$(PAD_IMAGE) tee.bin
+ 	./$(PAD_IMAGE) $(TEE)

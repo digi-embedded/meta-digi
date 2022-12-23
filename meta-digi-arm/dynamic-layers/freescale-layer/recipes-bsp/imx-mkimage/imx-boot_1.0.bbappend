@@ -1,5 +1,11 @@
 # Copyright (C) 2022 Digi International
 
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+
+SRC_URI:append = " \
+    file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch \
+"
+
 SOC_FAMILY:mx9-nxp-bsp = "mx93"
 
 # Do not tag imx-boot
