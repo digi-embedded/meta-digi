@@ -40,6 +40,9 @@ SPL_BINARY = "spl/u-boot-spl.bin"
 # Set ATF platform name
 ATF_PLATFORM = "imx93"
 
+# TrustFence
+TRUSTFENCE_SIGN_MODE = "AHAB"
+
 IMXBOOT_TARGETS = "flash_singleboot"
 
 IMX_BOOT_SOC_TARGET = "iMX9"
