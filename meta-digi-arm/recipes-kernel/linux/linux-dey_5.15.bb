@@ -50,4 +50,4 @@ KERNEL_DTC_FLAGS += "-@"
 
 KERNEL_EXTRA_ARGS:stm32mpcommon += "LOADADDR=${ST_KERNEL_LOADADDR}"
 
-COMPATIBLE_MACHINE = "(ccimx6ul|ccimx93|ccmp1)"
+COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx93|ccmp1)"
