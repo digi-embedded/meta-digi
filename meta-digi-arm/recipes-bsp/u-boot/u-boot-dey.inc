@@ -185,7 +185,7 @@ do_deploy:append:ccimx8m() {
 do_deploy:append:ccmp1() {
 	# Deploy u-boot-nodtb.bin and ccmp1x-dvk.dtb, to be packaged in fip binary by tf-a
 	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
-	install -m 0777 ${B}/${config}/arch/arm/dts/${UBOOT_DTB_NAME} ${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${FIP_UBOOT_HEADER}-${FIP_UBOOT_CONFIG}.dtb
+	install -m 0777 ${B}/${config}/arch/arm/dts/${UBOOT_DTB_NAME} ${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${FIP_UBOOT_HEADER}.dtb
 
 	install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin
 }
