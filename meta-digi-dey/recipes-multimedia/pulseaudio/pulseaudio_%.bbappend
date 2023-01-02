@@ -51,6 +51,11 @@ SRC_URI:append:mx8-nxp-bsp = " \
     file://default.pa \
 "
 
+SRC_URI:append:mx9-nxp-bsp = " \
+    file://daemon.conf \
+    file://default.pa \
+"
+
 # Enable allow-autospawn-for-root as default
 PACKAGECONFIG:append = " autospawn-for-root"
 
