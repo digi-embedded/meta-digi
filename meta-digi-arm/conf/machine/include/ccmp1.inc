@@ -11,6 +11,8 @@ DIGI_FAMILY = "ccmp1"
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "bin"
+# Set U-Boot FIP settings
+FIP_UBOOT_DTB = "u-boot"
 
 STORAGE_MEDIA = "mtd"
 
