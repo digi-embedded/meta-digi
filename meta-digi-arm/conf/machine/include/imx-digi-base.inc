@@ -13,6 +13,13 @@ include conf/machine/include/digi-defaults.inc
 IMX_DEFAULT_BSP ?= "nxp"
 MACHINEOVERRIDES =. "use-${IMX_DEFAULT_BSP}-bsp:"
 
+# Allow setting the UART used during the boot by ATF.
+# FIXME: We should return INVALID here but currently only i.MX8M has support to override the UART
+# base address in source code.
+SOC_ATF_BOOT_UART_BASE         = ""
+SOC_ATF_BOOT_UART_BASE:ccimx8m = "0x30860000"
+ATF_BOOT_UART_BASE            ?= "${SOC_ATF_BOOT_UART_BASE}"
+
 XSERVER_DRIVER = "xf86-video-fbdev"
 XSERVER_DRIVER:imxgpu2d = "xf86-video-imx-vivante"
 XSERVER_DRIVER:append:mx8-generic-bsp = " xf86-video-modesetting"
