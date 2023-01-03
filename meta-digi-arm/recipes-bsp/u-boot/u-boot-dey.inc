@@ -13,6 +13,7 @@ DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-too
 PROVIDES += "u-boot"
 
 S = "${WORKDIR}/git"
+B = "${WORKDIR}/build"
 
 # Select internal or Github U-Boot repo
 UBOOT_URI_STASH = "${DIGI_MTK_GIT}/uboot/u-boot-denx.git;protocol=ssh"
