@@ -61,7 +61,7 @@ do_install:append() {
     sed -i 's,@DATADIR@,${datadir},g' ${D}${bindir}/weston-start
     # /etc/default/weston
     install -d ${D}${sysconfdir}/default
-    echo "WESTON_USER=weston" > ${D}${sysconfdir}/default/weston
+    echo "WESTON_USER=root" > ${D}${sysconfdir}/default/weston
 
     # check GPU
     install -d ${D}/home/root/
