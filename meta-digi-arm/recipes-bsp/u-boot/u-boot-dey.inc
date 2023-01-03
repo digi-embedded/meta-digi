@@ -37,6 +37,9 @@ BUILD_UBOOT_SCRIPTS ?= "true"
 
 BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
 
+LOCALVERSION ?= ""
+inherit ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'fsl-u-boot-localversion', '', d)}
+
 # Disable u-boot environment artifacts
 UBOOT_INITIAL_ENV = ""
 
