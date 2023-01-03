@@ -41,8 +41,12 @@ deploy_mx93() {
 }
 
 do_deploy:append() {
-	# DEY install scripts use by default INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##.bin"
-	ln -sf ${BOOT_CONFIG_MACHINE}-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${BOOT_NAME}-${MACHINE}.bin
+	# The boot-artifacts.bbclass expects "imx-boot-<UBOOT_CONFIG>.bin" symlinks, so add them.
+	if [ -n "${UBOOT_CONFIG}" ]; then
+		for type in ${UBOOT_CONFIG}; do
+			ln -sf ${BOOT_NAME}-${MACHINE}-${type}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${BOOT_NAME}-${type}.bin
+		done
+	fi
 }
 
 COMPATIBLE_MACHINE = "(mx8-generic-bsp|mx9-generic-bsp)"
