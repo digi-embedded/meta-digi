@@ -31,6 +31,6 @@ do_install:append() {
 
 pkg_postinst_ontarget:${PN}() {
 	if ${@bb.utils.contains('DISTRO_FEATURES','systemd','false','true',d)}; then
-		[ "$(fw_printenv -n dualboot 2>/dev/null)" = "no" ] && update-rc.d -f swupdate remove
+		[ "$(fw_printenv -n dualboot 2>/dev/null)" != "yes" ] && update-rc.d -f swupdate remove
 	fi
 }
