@@ -61,6 +61,9 @@ DISTRO_FEATURES:append = " systemd"
 VIRTUAL-RUNTIME_init_manager ?= "systemd"
 DISTRO_FEATURES_BACKFILL_CONSIDERED = "sysvinit"
 
+# Adding 'wayland' along with 'x11' enables the xwayland backend
+DISTRO_FEATURES:append = " wayland pam"
+
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"
 ROOTFS_EXT ?= ".ext4.gz"

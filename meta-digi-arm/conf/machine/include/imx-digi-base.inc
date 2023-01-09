@@ -236,6 +236,7 @@ PREFERRED_PROVIDER_opencl-clhpp:imxgpu       ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_opencl-headers:imxgpu     ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_opencl-icd-loader:imxgpu  ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/opencl-icd:imxgpu ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/libg2d:mx93-nxp-bsp ?= "imx-pxp-g2d"
 
 PREFERRED_VERSION_weston:imx-nxp-bsp      ??= "10.0.1.imx"
 PREFERRED_VERSION_weston:imx-mainline-bsp   = ""
@@ -243,20 +244,25 @@ PREFERRED_VERSION_weston:imx-mainline-bsp   = ""
 PREFERRED_VERSION_wayland-protocols:mx6-nxp-bsp ??= "1.25.imx"
 PREFERRED_VERSION_wayland-protocols:mx7-nxp-bsp ??= "1.25.imx"
 PREFERRED_VERSION_wayland-protocols:mx8-nxp-bsp ??= "1.25.imx"
+PREFERRED_VERSION_wayland-protocols:mx9-nxp-bsp ??= "1.25.imx"
 
 # Use i.MX libdrm Version
 PREFERRED_VERSION_libdrm:mx6-nxp-bsp ??= "2.4.109.imx"
 PREFERRED_VERSION_libdrm:mx7-nxp-bsp ??= "2.4.109.imx"
 PREFERRED_VERSION_libdrm:mx8-nxp-bsp ??= "2.4.109.imx"
+PREFERRED_VERSION_libdrm:mx9-nxp-bsp ??= "2.4.109.imx"
 
 PREFERRED_VERSION_vulkan-headers:imxvulkan ??= "1.2.182.0"
 PREFERRED_VERSION_vulkan-loader:imxvulkan  ??= "1.2.182.0"
 PREFERRED_VERSION_vulkan-tools:imxvulkan   ??= "1.2.182.0"
 
 # Use i.MX optee Version
-PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "3.17.0.imx"
-PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "3.17.0.imx"
-PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.17.0.imx"
+PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "3.19.0.imx"
 
 #Use i.MX opencv Version for mx8
 PREFERRED_VERSION_opencv:mx8-nxp-bsp ??= "4.6.0.imx"
