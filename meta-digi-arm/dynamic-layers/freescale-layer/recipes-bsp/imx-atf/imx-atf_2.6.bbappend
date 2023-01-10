@@ -10,9 +10,6 @@ SRC_URI:append = " \
     file://0005-ccimx93-use-UART6-for-the-default-console.patch \
 "
 
-# Release "lf-5.15.71-2.2.0"
-SRCREV = "3c1583ba0a5d11e5116332e91065cb3740153a46"
-
 BOOT_TOOLS = "imx-boot-tools"
 
 do_deploy:append() {

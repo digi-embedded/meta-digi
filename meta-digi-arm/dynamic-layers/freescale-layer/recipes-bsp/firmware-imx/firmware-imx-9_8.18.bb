@@ -2,7 +2,7 @@
 SUMMARY = "Freescale i.MX firmware for i.MX 9 family"
 DESCRIPTION = "Freescale i.MX firmware for i.MX 9 family"
 
-require firmware-imx-${PV}.inc
+require recipes-bsp/firmware-imx/firmware-imx-${PV}.inc
 
 inherit deploy
 
