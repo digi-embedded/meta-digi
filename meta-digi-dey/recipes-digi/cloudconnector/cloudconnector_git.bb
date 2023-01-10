@@ -54,6 +54,8 @@ pkg_postinst_ontarget:${PN}() {
 	fi
 }
 
+inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}
+
 INITSCRIPT_NAME = "cloud-connector"
 SYSTEMD_SERVICE:${PN} = "cloud-connector.service"
 
