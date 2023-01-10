@@ -8,7 +8,7 @@ install_abort=0
 BASEFILENAME=0
 
 setenv INSTALL_ATF_FILENAME tf-a-##MACHINE##-nand.stm32
-setenv INSTALL_FIP_FILENAME fip-##MACHINE##-optee.bin
+setenv INSTALL_FIP_FILENAME fip-##MACHINE##.bin
 setenv INSTALL_USBDEV 0
 
 if test -z "${image-name}"; then
