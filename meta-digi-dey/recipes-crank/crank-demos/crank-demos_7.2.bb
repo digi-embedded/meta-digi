@@ -73,7 +73,7 @@ do_install () {
 		# Install systemd unit files
 		install -d ${D}${systemd_unitdir}/system
 		install -m 0644 ${WORKDIR}/crank-demo.service ${D}${systemd_unitdir}/system/
-		sed -i -e "s@##WESTON_SERVICE##@${WESTON_SERVICE}@g" \
+		sed -i -e "s,##WESTON_SERVICE##,${WESTON_SERVICE},g" \
 		      "${D}${systemd_unitdir}/system/crank-demo.service"
 	fi
 
