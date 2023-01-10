@@ -1,4 +1,5 @@
 PACKAGECONFIG:remove:mx6sl-nxp-bsp = "wayland-egl"
+PACKAGECONFIG:remove:mx8mm-nxp-bsp = "wayland-vulkan-server-buffer"
 PACKAGECONFIG:remove:mx9-nxp-bsp = "xcomposite-egl xcomposite-glx"
 
 do_install:append() {
