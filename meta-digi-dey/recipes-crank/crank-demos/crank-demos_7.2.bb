@@ -21,12 +21,9 @@ CRANK_DEMO_DISPLAY ?= "wayland-0"
 CRANK_DEMO_DISPLAY:ccmp15 ?= "wayland-1"
 CRANK_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\${DEMO_DISPLAY}"
 CRANK_DEMO_ENV:ccimx6ul ?= ""
-CRANK_DEMO_ENV:ccmp15 ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/1000 WAYLAND_DISPLAY=\${DEMO_DISPLAY}"
 CRANK_DEMO_OPTIONS ?= "-orender_mgr,multisample=0"
 CRANK_DEMO_OPTIONS:ccimx6ul ?= "-orender_mgr,multisample=0 -odev-input,mouse=/dev/input/mouse0 -oscreen_mgr,swcursor"
 CRANK_DEMO_PATH ?= "${datadir}/crank/apps/OpenGL_WideScreen/1280x720.gapp"
-CRANK_DEMO_USER ?= "root"
-CRANK_DEMO_USER:ccmp15 ?= "weston"
 
 # The tarball is only available for downloading after registration, so provide
 # a PREMIRROR to a local directory that can be configured in the project's
@@ -83,7 +80,6 @@ do_install () {
 	sed -i -e "s@##CRANK_DEMO_PATH##@${CRANK_DEMO_PATH}@g" \
 	       -e "s@##CRANK_DEMO_OPTIONS##@${CRANK_DEMO_OPTIONS}@g" \
 	       -e "s@##CRANK_DEMO_ENV##@${CRANK_DEMO_ENV}@g" \
-	       -e "s@##CRANK_DEMO_USER##@${CRANK_DEMO_USER}@g" \
 	       -e "s@##CRANK_DEMO_DISPLAY##@${CRANK_DEMO_DISPLAY}@g" \
 	       "${D}${sysconfdir}/crank-demo"
 	ln -sf ${sysconfdir}/crank-demo ${D}${sysconfdir}/init.d/crank-demo

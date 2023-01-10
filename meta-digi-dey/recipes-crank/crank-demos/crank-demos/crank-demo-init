@@ -17,7 +17,6 @@ readonly DEMO="##CRANK_DEMO_PATH##"
 readonly DEMO_DISPLAY="##CRANK_DEMO_DISPLAY##"
 readonly DEMO_OPTS="##CRANK_DEMO_OPTIONS##"
 readonly DEMO_ENV="##CRANK_DEMO_ENV##"
-readonly DEMO_USER="##CRANK_DEMO_USER##"
 readonly SB_LAUNCHER="sb-launcher"
 readonly SB_LAUNCHER_SCRIPT="/usr/bin/${SB_LAUNCHER}"
 readonly CRANK_DEMO="crank-demo"
@@ -61,7 +60,7 @@ check_is_running() {
 
 wait_for_wayland() {
 	local count=20
-	local wayland_socket="/run/user/$(id -u ${DEMO_USER})/${DEMO_DISPLAY}"
+	local wayland_socket="/run/user/0/${DEMO_DISPLAY}"
 
 	[ -S "${wayland_socket}" -o ! -d "/usr/share/wayland/" ] && return 0
 	while [ ! -S "${wayland_socket}" ]; do
@@ -95,7 +94,7 @@ start() {
 	check_is_running && { log warning "start: ${CRANK_DEMO} ALREADY running"; exit 0; }
 
 	wait_for_wayland
-	env ${DEMO_ENV} ${SB_LAUNCHER_SCRIPT} ${DEMO_USER} ${DEMO_OPTS} ${DEMO} >/dev/null 2>&1 &
+	env ${DEMO_ENV} ${SB_LAUNCHER_SCRIPT} ${DEMO_OPTS} ${DEMO} >/dev/null 2>&1 &
 	if [ $? -eq 0 ]; then
 		echo $! > ${PID_FILE}
 		log info "$(cat ${PID_FILE})"
