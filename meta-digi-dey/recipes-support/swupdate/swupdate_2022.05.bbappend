@@ -34,3 +34,5 @@ pkg_postinst_ontarget:${PN}() {
 		[ "$(fw_printenv -n dualboot 2>/dev/null)" != "yes" ] && update-rc.d -f swupdate remove
 	fi
 }
+
+inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}
