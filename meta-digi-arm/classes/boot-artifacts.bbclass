@@ -39,7 +39,7 @@ def get_bootable_artifacts(d):
     artifacts = []
 
     # For platforms with a FIP artifact, ignore u-boot artifacts
-    if d.getVar('FIP_UBOOT_DTB') != "":
+    if d.getVar('FIP_UBOOT_DTB'):
         machine = d.getVar('MACHINE', True) or ""
         # Add ATF artifacts
         for t in atf_types.split(" "):
