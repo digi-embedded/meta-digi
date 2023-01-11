@@ -204,10 +204,10 @@ MACHINE_GSTREAMER_1_0_PLUGIN:mx8dx-nxp-bsp  ?= "imx-gst1.0-plugin imx-gst1.0-plu
 
 # In 'meta-freescale' these gstreamer preferred versions are restricted to 'mx8-nxp-bsp'
 # but in DEY we use them also in the 6UL, so relax the override to 'imx-nxp-base'
-PREFERRED_VERSION_gstreamer1.0:imx-nxp-bsp              ??= "1.20.0.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-base:imx-nxp-bsp ??= "1.20.0.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-good:imx-nxp-bsp ??= "1.20.0.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-bad:imx-nxp-bsp  ??= "1.20.0.imx"
+PREFERRED_VERSION_gstreamer1.0:imx-nxp-bsp              ??= "1.20.3.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-base:imx-nxp-bsp ??= "1.20.3.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-good:imx-nxp-bsp ??= "1.20.3.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-bad:imx-nxp-bsp  ??= "1.20.3.imx"
 PREFERRED_VERSION_ffmpeg:imx-nxp-bsp                    ??= "4.4.1"
 
 # Determines if the SoC has support for Vivante kernel driver
