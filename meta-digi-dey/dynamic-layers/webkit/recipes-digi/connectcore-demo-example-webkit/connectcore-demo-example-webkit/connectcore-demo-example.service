@@ -1,6 +1,7 @@
 [Unit]
 Description=Initialization of the ConnectCore demo example
-After=weston@root.service busybox-httpd.service
+After=weston.service busybox-httpd.service
+Requires=weston.service
 
 [Service]
 Type=forking
