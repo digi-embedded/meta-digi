@@ -2,7 +2,4 @@
 
 ENGINE="/usr/share/crank/sbengine"
 
-USER=$1
-shift
-
-exec su -l "${USER}" -c "env LD_LIBRARY_PATH=${ENGINE}/lib SB_PLUGINS=${ENGINE}/plugins ${ENGINE}/bin/sbengine $*"
+exec "env LD_LIBRARY_PATH=${ENGINE}/lib SB_PLUGINS=${ENGINE}/plugins ${ENGINE}/bin/sbengine $*"
