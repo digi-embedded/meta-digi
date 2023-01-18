@@ -4,6 +4,7 @@ Documentation=https://www.cranksoftware.com/
 
 # Make sure we are started after graphic service is available
 After=##WESTON_SERVICE##
+Requires=##WESTON_SERVICE##
 
 [Service]
 Type=forking

@@ -13,7 +13,7 @@ SRC_URI = " \
 "
 SRC_URI[sha256sum] = "90a7fc258cdaa5f9afcf57224da8bbc5a330b957db88335f555369123a1432ab"
 
-WESTON_SERVICE ?= "weston@root.service"
+WESTON_SERVICE ?= "weston.service"
 WESTON_SERVICE:ccmp15 ?= "weston-launch.service"
 
 CRANK_DEMOS_TARBALL_PATH ?= ""

@@ -58,21 +58,6 @@ check_is_running() {
 	return 1
 }
 
-wait_for_wayland() {
-	local count=20
-	local wayland_socket="/run/user/0/${DEMO_DISPLAY}"
-
-	[ -S "${wayland_socket}" -o ! -d "/usr/share/wayland/" ] && return 0
-	while [ ! -S "${wayland_socket}" ]; do
-		sleep 1
-		count=$((count-1))
-		if [ "${count}" = 0 ]; then
-			return 1
-		fi
-	done
-	return 0
-}
-
 stop() {
 	check_is_running || return
 
@@ -93,7 +78,6 @@ stop() {
 start() {
 	check_is_running && { log warning "start: ${CRANK_DEMO} ALREADY running"; exit 0; }
 
-	wait_for_wayland
 	env ${DEMO_ENV} ${SB_LAUNCHER_SCRIPT} ${DEMO_OPTS} ${DEMO} >/dev/null 2>&1 &
 	if [ $? -eq 0 ]; then
 		echo $! > ${PID_FILE}
