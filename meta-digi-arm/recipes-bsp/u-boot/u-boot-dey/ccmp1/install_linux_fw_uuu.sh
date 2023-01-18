@@ -121,7 +121,7 @@ fi
 
 # Determine FIP file to program
 if [ -z "${INSTALL_FIP_FILENAME}" ]; then
-	INSTALL_FIP_FILENAME="fip-##MACHINE##.bin"
+	INSTALL_FIP_FILENAME="fip-##MACHINE##-optee.bin"
 fi
 
 # Determine linux, recovery, and rootfs image filenames to update
