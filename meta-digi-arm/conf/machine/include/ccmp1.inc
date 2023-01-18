@@ -28,7 +28,6 @@ ROOTFS_DEV_NAME ?= "rootfs"
 ROOTFS_ENC_DEV = "${ROOTFS_DEV_NAME}"
 ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
 
-UBOOT_DEV_NAME ?= "/dev/mtd"
 # U-Boot environment offset (within partition)
 UBOOT_ENV_OFFSET ?= "0x0"
 UBOOT_ENV_REDUND_OFFSET ?= "0x0"

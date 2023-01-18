@@ -55,4 +55,3 @@ ROOTFS_DEV_NAME ?= "/dev/mmcblk0p3"
 ROOTFS_ENC_DEV = "/dev/mapper/cryptrootfs"
 ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
 
-UBOOT_DEV_NAME ?= "/dev/mmcblk0boot0"
