@@ -51,7 +51,6 @@ fi
 
 # Back up environment variables
 setenv ORIG_overlays ${overlays}
-setenv ORIG_extra_bootargs ${extra_bootargs}
 
 #
 # Determine overlays to apply depending on the hardware capabilities
@@ -70,7 +69,6 @@ if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
 	setenv overlays _ov_som_wifi_ccimx93.dtbo,${overlays}
 fi
 
-setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
 dboot linux mmc ${mmcbootdev}:${mmcpart}
 
 #
@@ -80,5 +78,3 @@ dboot linux mmc ${mmcbootdev}:${mmcpart}
 #
 setenv overlays ${ORIG_overlays}
 setenv ORIG_overlays
-setenv extra_bootargs ${ORIG_extra_bootargs}
-setenv ORIG_extra_bootargs

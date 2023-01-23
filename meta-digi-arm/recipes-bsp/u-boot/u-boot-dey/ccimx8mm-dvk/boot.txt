@@ -81,7 +81,7 @@ if test -n "${module_ram}"; then
 	fi
 fi
 
-setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
+setenv extra_bootargs fbcon=logo-pos:center fbcon=logo-count:1 ${extra_bootargs}
 dboot linux mmc ${mmcbootdev}:${mmcpart}
 
 
