@@ -30,7 +30,6 @@ VIRTUAL-RUNTIME_passwd_manager ?= "shadow"
 VIRTUAL-RUNTIME_touchscreen ?= "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '', 'tslib-calibrate tslib-tests', d)}"
 
 RDEPENDS:${PN} = "\
-    awsiotsdk-c \
     base-files \
     base-passwd \
     connectcore-demo-example \

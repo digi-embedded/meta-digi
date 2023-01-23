@@ -16,7 +16,6 @@ RDEPENDS:${PN} = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "cryptochip", "dey-examples-cryptochip", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "mca", "dey-examples-adc-cmp \
 							 dey-examples-tamper", "", d)} \
-	awsiotsdk-demo \
 	dey-examples-caamblob \
 	dey-examples-cloudconnector \
 	dey-examples-digiapix \
