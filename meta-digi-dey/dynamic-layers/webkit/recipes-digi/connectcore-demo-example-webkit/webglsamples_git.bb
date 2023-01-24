@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2022 Digi International.
+# Copyright (C) 2020-2023 Digi International.
 
 SUMMARY = "A collection of WebGL samples"
 DESCRIPTION = "This repo contains several examples of the WebGL JavaScript API, which allows web browsers to render 2D and 3D graphics with direct access to the system's GPU."
@@ -63,6 +63,8 @@ do_install() {
 		find ${sample} -path *source_assets* -prune -false -o -type f \
 		     -exec install -Dm 644 "{}" "${D}/${WEBSERVER_ROOT}/{}" \;
 	done
+	# Disable the aquarium options by default
+	sed -i 's/enabled: true/enabled: false/g' ${D}/${WEBSERVER_ROOT}/aquarium/aquarium-common.js
 }
 
 # All packages involved in the webkit examples install their files in the
