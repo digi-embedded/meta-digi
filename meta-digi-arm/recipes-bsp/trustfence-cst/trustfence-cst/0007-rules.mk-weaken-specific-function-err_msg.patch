@@ -1,0 +1,33 @@
+From fe51b132c7c07de5a63c3dfc5a16bc9fc7816f7e Mon Sep 17 00:00:00 2001
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Mon, 30 Jan 2023 10:38:22 +0100
+Subject: [PATCH] rules.mk: weaken specific function err_msg()
+
+A bug in binutils 2.38 objcopy '--weaken' produces malformed
+binaries.
+For the cst, it looks like it's enough to weaken function err_msg()
+which is otherwise redefined.
+Change the global '--weaken' flag with '--weaken-symbol err_msg'
+to have the build process generate a valid 'cst' binary.
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+
+https://onedigi.atlassian.net/browse/DEL-8332
+https://onedigi.atlassian.net/browse/DEL-8033
+---
+ code/cst/code/build/make/rules.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/code/cst/code/build/make/rules.mk b/code/cst/code/build/make/rules.mk
+index 1c0842bd070e..032e18bc5134 100755
+--- a/code/cst/code/build/make/rules.mk
++++ b/code/cst/code/build/make/rules.mk
+@@ -27,7 +27,7 @@ LFLAGS  := -t
+ 	$(AR) $(ARFLAGS) $@ $^
+ ifneq ($(OSTYPE),mingw32)
+ ifneq ($(OSTYPE),osx)
+-	$(OBJCOPY) --weaken $@
++	$(OBJCOPY) --weaken-symbol err_msg $@
+ endif
+ endif
+ 
