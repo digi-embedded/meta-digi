@@ -33,6 +33,9 @@ do_install() {
     install -d ${D}/srv/www
     cp -r ${WORKDIR}/git/connectcore-demo-example/* ${D}/srv/www/
 
+    # Remove unused images
+    find ${D}/srv/www/static/images/ -type f -name '*_board.png' -not -name '${MACHINE}_board.png' -delete
+
     if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
         # Install systemd unit files
         install -d ${D}${systemd_unitdir}/system
