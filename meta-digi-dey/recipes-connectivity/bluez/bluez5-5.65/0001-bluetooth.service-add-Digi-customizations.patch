@@ -1,20 +1,36 @@
-From: Gabriel Valcazar <gabriel.valcazar@digi.com>
-Date: Thu, 7 Feb 2019 13:15:43 +0100
+From: David Escalona <david.escalona@digi.com>
+Date: Mon, 30 Jan 2023 13:29:52 +0100
 Subject: [PATCH] bluetooth.service: add Digi customizations
 
 These changes include:
 
 * Having the bluetooth stack start automatically on boot.
+* Remove the battery plugin at startup. Starting at Bluez 5.48, the battery characteristic
+  was moved to the DBUS org.bluez.Battery1 interface. This causes the device to try to read
+  information from iOS devices after establishing a connection, triggering a reverse pairing
+  request. This scenario causes random disconnects in iOS devices unless a trust agent is
+  registered in the host to take care of the pairing. Removing the battery plugin at startup
+  fixes the issue.
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Signed-off-by: David Escalona <david.escalona@digi.com>
 ---
- src/bluetooth.service.in | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ src/bluetooth.service.in | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/bluetooth.service.in b/src/bluetooth.service.in
-index beb98ce0c887..16abe9b08881 100644
+index beb98ce0c..29048dfe2 100644
 --- a/src/bluetooth.service.in
 +++ b/src/bluetooth.service.in
+@@ -6,7 +6,7 @@ ConditionPathIsDirectory=/sys/class/bluetooth
+ [Service]
+ Type=dbus
+ BusName=org.bluez
+-ExecStart=@pkglibexecdir@/bluetoothd
++ExecStart=@pkglibexecdir@/bluetoothd -P battery
+ NotifyAccess=main
+ #WatchdogSec=10
+ #Restart=on-failure
 @@ -34,5 +34,5 @@ NoNewPrivileges=true
  RestrictRealtime=true
  
