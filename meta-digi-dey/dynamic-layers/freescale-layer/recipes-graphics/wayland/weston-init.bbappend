@@ -34,9 +34,6 @@ do_install:append() {
 do_install:append() {
     install -Dm0755 ${WORKDIR}/profile ${D}${sysconfdir}/profile.d/weston.sh
     install -Dm0644 ${WORKDIR}/digi_background.png ${D}${datadir}/weston/digi_background.png
-
-    update_file "Before=graphical.target" "Before=multi-user.target" ${D}${systemd_system_unitdir}/weston.service
-    update_file "WantedBy=graphical.target" "WantedBy=multi-user.target" ${D}${systemd_system_unitdir}/weston.service
 }
 
 FILES:${PN} += "${datadir}/weston/digi_background.png"

@@ -21,7 +21,7 @@ IMAGE_FEATURES += " \
     eclipse-debug \
     package-management \
     ssh-server-dropbear \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', '', \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston', \
        bb.utils.contains('DISTRO_FEATURES',     'x11', 'x11-base x11-sato', \
                                                        '', d), d)} \
     ${@bb.utils.contains('MACHINE_FEATURES', 'accel-video', 'dey-gstreamer', '', d)} \
@@ -60,7 +60,6 @@ BAD_RECOMMENDATIONS += "eudev-hwdb"
 export IMAGE_BASENAME = "dey-image-${GRAPHICAL_CORE}-${GRAPHICAL_BACKEND}"
 
 CORE_IMAGE_EXTRA_INSTALL += " \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston-init weston-examples gtk+3-demo', '', d)} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland xterm', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland', '', d)} \
     dey-examples-digiapix \
 "
