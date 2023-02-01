@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Digi International Inc.
+# Copyright (C) 2021-2023 Digi International Inc.
 
 SUMMARY = "Digi Embedded Yocto Dual boot support"
 SECTION = "base"
@@ -22,6 +22,9 @@ SRC_URI = " \
 S = "${WORKDIR}"
 
 inherit systemd update-rc.d
+
+do_configure[noexec] = "1"
+do_compile[noexec] = "1"
 
 do_install() {
 	install -d ${D}${sysconfdir}/init.d/
@@ -75,10 +78,4 @@ INITSCRIPT_PARAMS = "start 19 2 3 4 5 . stop 21 0 1 6 ."
 
 SYSTEMD_SERVICE:${PN} = "firmware-update-check.service"
 
-PACKAGE_ARCH = "${MACHINE_ARCH}"
-
-# Add swupdate into the rootfs for dual boot support
-RDEPENDS_${PN}-init = " \
-    swupdate \
-    trustfence-tool \
-"
+RDEPENDS:${PN} += "swupdate"
