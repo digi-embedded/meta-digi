@@ -13,7 +13,7 @@ BBLAYERS ?= " \
   ##DIGIBASE##/meta-openembedded/meta-python \
   ##DIGIBASE##/meta-openembedded/meta-networking \
   ##DIGIBASE##/meta-openembedded/meta-webserver \
-  ##DIGIBASE##/meta-qt5 \
+  ##DIGIBASE##/meta-qt6 \
   ##DIGIBASE##/meta-swupdate \
   ##DIGIBASE##/meta-freescale \
   ##DIGIBASE##/meta-fsl-demos \
