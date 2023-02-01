@@ -32,10 +32,25 @@ stop_process() {
 	done
 }
 
+export_environment_variables() {
+	export DISPLAY=:0.0
+	export XDG_RUNTIME_DIR=/run/user/0
+	export WAYLAND_DISPLAY=wayland-0
+	export COG_PLATFORM_WL_VIEW_FULLSCREEN=1
+	# FULLSCREEN variable will have preference over other geometry variables.
+	if [ -f "/sys/class/graphics/fb0/virtual_size" ]; then
+		COG_PLATFORM_WL_VIEW_WIDTH="$(cut -d',' -f1 /sys/class/graphics/fb0/virtual_size)"
+		COG_PLATFORM_WL_VIEW_HEIGHT="$(cut -d',' -f2 /sys/class/graphics/fb0/virtual_size)"
+		[ -n "${COG_PLATFORM_WL_VIEW_WIDTH}" ] && export COG_PLATFORM_WL_VIEW_WIDTH
+		[ -n "${COG_PLATFORM_WL_VIEW_HEIGHT}" ] && export COG_PLATFORM_WL_VIEW_HEIGHT
+	fi
+}
+
 case "$1" in
 	start)
 		${DEMOSERVER_BINARY} > /dev/null 2>&1 &
-		DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=wayland-0 ${COG_BINARY} \
+		export_environment_variables
+		${COG_BINARY} \
 			--allow-file-access-from-file-urls=true \
 			--allow-universal-access-from-file-urls=false \
 			--enable-offline-web-application-cache=false \
