@@ -1,10 +1,9 @@
-# Copyright 2020-2022 Digi International Inc.
+# Copyright 2020-2023 Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI:append = " \
-    file://0001-cog-platform-fdo-always-use-fullscreen-mode.patch \
-    file://0002-wl-Fix-wrong-wl_shm-for-cursor.patch \
+    file://0001-wl-Fix-wrong-wl_shm-for-cursor.patch \
 "
 
 EXTRA_OECMAKE += "-DCOG_HOME_URI=http://127.0.0.1/"
