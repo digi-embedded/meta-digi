@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Digi International.
+# Copyright (C) 2022, 2023 Digi International.
 
 require dey-examples-src.inc
 
@@ -12,6 +12,14 @@ SRC_URI += " \
     file://connectcore-demo-example-init \
     file://connectcore-demo-example.service \
 "
+
+WESTON_SERVICE ?= "weston.service"
+WESTON_SERVICE:ccmp15 ?= "weston-launch.service"
+
+CC_DEMO_DISPLAY ?= "wayland-0"
+CC_DEMO_DISPLAY:ccmp15 ?= "wayland-1"
+CC_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\${DEMO_DISPLAY}"
+CC_DEMO_ENV:ccimx6ul ?= ""
 
 RDEPENDS:${PN} = " \
     busybox-httpd \
@@ -30,22 +38,28 @@ S = "${WORKDIR}/connectcore-demo-example"
 inherit systemd update-rc.d
 
 do_install() {
-    install -d ${D}/srv/www
-    cp -r ${WORKDIR}/git/connectcore-demo-example/* ${D}/srv/www/
+	install -d ${D}/srv/www
+	cp -r ${WORKDIR}/git/connectcore-demo-example/* ${D}/srv/www/
 
-    # Remove unused images
-    find ${D}/srv/www/static/images/ -type f -name '*_board.png' -not -name '${MACHINE}_board.png' -delete
+	# Remove unused images
+	find ${D}/srv/www/static/images/ -type f -name '*_board.png' -not -name '${MACHINE}_board.png' -delete
 
-    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
-        # Install systemd unit files
-        install -d ${D}${systemd_unitdir}/system
-        install -m 0644 ${WORKDIR}/connectcore-demo-example.service ${D}${systemd_unitdir}/system/
-    fi
+	# Install systemd service
+	if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
+		# Install systemd unit files
+		install -d ${D}${systemd_unitdir}/system
+		install -m 0644 ${WORKDIR}/connectcore-demo-example.service ${D}${systemd_unitdir}/system/
+		sed -i -e "s,##WESTON_SERVICE##,${WESTON_SERVICE},g" \
+		      "${D}${systemd_unitdir}/system/connectcore-demo-example.service"
+	fi
 
-    # connectcore-demo-example-init
-    install -d ${D}${sysconfdir}/init.d/
-    install -m 755 ${WORKDIR}/connectcore-demo-example-init ${D}${sysconfdir}/connectcore-demo-example
-    ln -sf /etc/connectcore-demo-example ${D}${sysconfdir}/init.d/connectcore-demo-example
+	# Install connectcore-demo-example-init
+	install -d ${D}${sysconfdir}/init.d/
+	install -m 755 ${WORKDIR}/connectcore-demo-example-init ${D}${sysconfdir}/connectcore-demo-example
+	sed -i -e "s@##CC_DEMO_ENV##@${CC_DEMO_ENV}@g" \
+	       -e "s@##CC_DEMO_DISPLAY##@${CC_DEMO_DISPLAY}@g" \
+	       "${D}${sysconfdir}/connectcore-demo-example"
+	ln -sf ${sysconfdir}/connectcore-demo-example ${D}${sysconfdir}/init.d/connectcore-demo-example
 }
 
 FILES:${PN} += " \
