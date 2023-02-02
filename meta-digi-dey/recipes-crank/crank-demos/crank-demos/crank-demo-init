@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2022 by Digi International Inc.
+#  Copyright (C) 2022, 2023 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -58,6 +58,20 @@ check_is_running() {
 	return 1
 }
 
+wait_for_wayland() {
+	local count=20
+	local wayland_socket="/run/user/0/${DEMO_DISPLAY}"
+
+	while [ ! -S "${wayland_socket}" ]; do
+		sleep 1
+		count=$((count-1))
+		if [ "${count}" = 0 ]; then
+			return 1
+		fi
+	done
+	return 0
+}
+
 stop() {
 	check_is_running || return
 
@@ -78,6 +92,7 @@ stop() {
 start() {
 	check_is_running && { log warning "start: ${CRANK_DEMO} ALREADY running"; exit 0; }
 
+	[ -d "/usr/share/wayland" ] && wait_for_wayland
 	env ${DEMO_ENV} ${SB_LAUNCHER_SCRIPT} ${DEMO_OPTS} ${DEMO} >/dev/null 2>&1 &
 	if [ $? -eq 0 ]; then
 		echo $! > ${PID_FILE}
