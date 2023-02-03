@@ -9,19 +9,11 @@ LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6"
 
 SRC_URI += " \
-    file://connectcore-demo-example-init \
-    file://connectcore-demo-example.service \
+    file://connectcore-demo-server-init \
+    file://connectcore-demo-server.service \
 "
 
-WESTON_SERVICE ?= "weston.service"
-WESTON_SERVICE:ccmp15 ?= "weston-launch.service"
-
-CC_DEMO_DISPLAY ?= "wayland-0"
-CC_DEMO_DISPLAY:ccmp15 ?= "wayland-1"
-CC_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\${DEMO_DISPLAY}"
-CC_DEMO_ENV:ccimx6ul ?= ""
-
-RDEPENDS:${PN} = " \
+RDEPENDS:${PN}-server = " \
     busybox-httpd \
     libdigiapix-python3 \
     mpg123 \
@@ -48,30 +40,54 @@ do_install() {
 	if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
 		# Install systemd unit files
 		install -d ${D}${systemd_unitdir}/system
-		install -m 0644 ${WORKDIR}/connectcore-demo-example.service ${D}${systemd_unitdir}/system/
-		sed -i -e "s,##WESTON_SERVICE##,${WESTON_SERVICE},g" \
-		      "${D}${systemd_unitdir}/system/connectcore-demo-example.service"
+		install -m 0644 ${WORKDIR}/connectcore-demo-server.service ${D}${systemd_unitdir}/system/
 	fi
 
-	# Install connectcore-demo-example-init
+	# Install connectcore-demo-server-init
 	install -d ${D}${sysconfdir}/init.d/
-	install -m 755 ${WORKDIR}/connectcore-demo-example-init ${D}${sysconfdir}/connectcore-demo-example
-	sed -i -e "s@##CC_DEMO_ENV##@${CC_DEMO_ENV}@g" \
-	       -e "s@##CC_DEMO_DISPLAY##@${CC_DEMO_DISPLAY}@g" \
-	       "${D}${sysconfdir}/connectcore-demo-example"
-	ln -sf ${sysconfdir}/connectcore-demo-example ${D}${sysconfdir}/init.d/connectcore-demo-example
+	install -m 755 ${WORKDIR}/connectcore-demo-server-init ${D}${sysconfdir}/connectcore-demo-server
+	ln -sf ${sysconfdir}/connectcore-demo-server ${D}${sysconfdir}/init.d/connectcore-demo-server
 }
+
+PACKAGES =+ "${PN}-server ${PN}-multimedia"
 
 FILES:${PN} += " \
     /srv/www/* \
-    ${systemd_unitdir}/system/connectcore-demo-example.service \
-    ${sysconfdir}/connectcore-demo-example \
-    ${sysconfdir}/init.d/connectcore-demo-example \
 "
 
-INITSCRIPT_NAME = "connectcore-demo-example"
-INITSCRIPT_PARAMS = "start 19 2 3 4 5 . stop 21 0 1 6 ."
+FILES:${PN}-multimedia += " \
+    /srv/www/multimedia* \
+    /srv/www/static/images/aquarium.jpg \
+    /srv/www/static/images/big_buck_bunny.jpg \
+    /srv/www/static/images/blob.jpg \
+    /srv/www/static/images/cpu.png \
+    /srv/www/static/images/electricflower.jpg \
+    /srv/www/static/images/multiple-views.jpg \
+    /srv/www/static/images/ram.png \
+    /srv/www/static/images/spacerocks.jpg \
+    /srv/www/static/images/toon-shading.jpg \
+    /srv/www/static/js/multimedia.js \
+"
 
-SYSTEMD_SERVICE:${PN} = "connectcore-demo-example.service"
+FILES:${PN}-server = " \
+    /srv/www/demoserver.py \
+    ${systemd_unitdir}/system/connectcore-demo-server.service \
+    ${sysconfdir}/connectcore-demo-server \
+    ${sysconfdir}/init.d/connectcore-demo-server \
+"
+
+RDEPENDS:${PN} = "${PN}-server"
+RDEPENDS:${PN}-multimedia = " \
+    ${PN} \
+    video-examples \
+    webglsamples \
+"
+
+INITSCRIPT_PACKAGES = "${PN}-server"
+INITSCRIPT_NAME:${PN}-server = "connectcore-demo-server"
+INITSCRIPT_PARAMS:${PN}-server = "start 19 2 3 4 5 . stop 21 0 1 6 ."
+
+SYSTEMD_PACKAGES = "${PN}-server"
+SYSTEMD_SERVICE:${PN}-server = "connectcore-demo-server.service"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

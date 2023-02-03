@@ -19,7 +19,6 @@
 readonly DEMO_DISPLAY="##CC_DEMO_DISPLAY##"
 readonly DEMO_ENV="##CC_DEMO_ENV##"
 readonly COG_BINARY="/usr/bin/cog"
-readonly DEMOSERVER_BINARY="/srv/www/demoserver.py"
 readonly STOP_TIMEOUT="5"
 
 wait_for_wayland() {
@@ -48,15 +47,8 @@ stop_process() {
 	done
 }
 
-stop() {
-	stop_process "${COG_BINARY}"
-	stop_process "${DEMOSERVER_BINARY}"
-}
-
 start() {
 	local COG_ENV="${DEMO_ENV}"
-
-	${DEMOSERVER_BINARY} > /dev/null 2>&1 &
 
 	if [ -d "/usr/share/wayland" ]; then
 		wait_for_wayland
@@ -84,7 +76,7 @@ case "$1" in
 		start
 		;;
 	stop)
-		stop
+		stop_process "${COG_BINARY}"
 		;;
 	restart)
 		$0 stop

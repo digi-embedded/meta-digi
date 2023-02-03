@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020, Digi International Inc.
+# Copyright (C) 2013-2023, Digi International Inc.
 
 SUMMARY = "DEY examples packagegroup"
 
@@ -20,7 +20,7 @@ RDEPENDS:${PN} = "\
 	dey-examples-cloudconnector \
 	dey-examples-digiapix \
 	dey-examples-rtc \
-	connectcore-demo-example \
+	connectcore-demo-example-multimedia \
 "
 RDEPENDS:${PN}:append:ccimx6 = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \
