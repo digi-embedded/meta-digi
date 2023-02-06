@@ -47,13 +47,15 @@ do_install() {
 		KEY_INDEX_1=$(expr ${KEY_INDEX} + 1)
 
 		# Find the certificate to use.
-		if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
-			CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/IMG${KEY_INDEX_1}*crt.pem)"
-		elif [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
-			CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK${KEY_INDEX_1}*_ca_crt.pem)"
-		else
-			bberror "Unkown TRUSTFENCE_SIGN_MODE value"
-			exit 1
+		if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+			if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
+				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/IMG${KEY_INDEX_1}*crt.pem)"
+			elif [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
+				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK${KEY_INDEX_1}*_ca_crt.pem)"
+			else
+				bberror "Unkown TRUSTFENCE_SIGN_MODE value"
+				exit 1
+			fi
 		fi
 
 		# Extract the public key from the certificate.

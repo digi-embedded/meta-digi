@@ -22,7 +22,9 @@ TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 TRUSTFENCE_SIGN ?= "1"
 TRUSTFENCE_SIGN_KEYS_PATH ?= "default"
 TRUSTFENCE_DEK_PATH ?= "default"
+TRUSTFENCE_DEK_PATH:ccmp1 ?= "0"
 TRUSTFENCE_ENCRYPT_ENVIRONMENT ?= "1"
+TRUSTFENCE_ENCRYPT_ENVIRONMENT:ccmp1 ?= "0"
 TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 
 # Partition encryption configuration
@@ -52,8 +54,9 @@ python () {
     if (d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") == "default"):
         d.setVar("TRUSTFENCE_SIGN_KEYS_PATH", d.getVar("TOPDIR") + "/trustfence");
 
-    if (d.getVar("TRUSTFENCE_DEK_PATH") == "default"):
-        d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/dek.bin");
+    if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
+        if (d.getVar("TRUSTFENCE_DEK_PATH") == "default"):
+            d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/dek.bin");
 
     if (d.getVar("TRUSTFENCE_SIGN") == "1"):
         d.appendVar("UBOOT_TF_CONF", "CONFIG_SIGN_IMAGE=y CONFIG_AUTH_ARTIFACTS=y ")
@@ -65,12 +68,14 @@ python () {
             d.appendVar("UBOOT_TF_CONF", "CONFIG_UNLOCK_SRK_REVOKE=y ")
         if d.getVar("TRUSTFENCE_KEY_INDEX"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_KEY_INDEX=%s " % d.getVar("TRUSTFENCE_KEY_INDEX"))
-        if (d.getVar("TRUSTFENCE_DEK_PATH") not in [None, "0"]):
-            d.appendVar("UBOOT_TF_CONF", 'CONFIG_DEK_PATH="%s" ' % d.getVar("TRUSTFENCE_DEK_PATH"))
-        if d.getVar("TRUSTFENCE_SIGN_MODE"):
-            d.appendVar("UBOOT_TF_CONF", 'CONFIG_SIGN_MODE="%s" ' % d.getVar("TRUSTFENCE_SIGN_MODE"))
+        if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
+            if (d.getVar("TRUSTFENCE_DEK_PATH") not in [None, "0"]):
+                d.appendVar("UBOOT_TF_CONF", 'CONFIG_DEK_PATH="%s" ' % d.getVar("TRUSTFENCE_DEK_PATH"))
+            if d.getVar("TRUSTFENCE_SIGN_MODE"):
+                d.appendVar("UBOOT_TF_CONF", 'CONFIG_SIGN_MODE="%s" ' % d.getVar("TRUSTFENCE_SIGN_MODE"))
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT") == "1"):
-        d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y ")
+        if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
+            d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y ")
 
     # Provide sane default values for SWUPDATE class in case Trustfence is enabled
     if (d.getVar("TRUSTFENCE_SIGN") == "1"):
@@ -87,12 +92,13 @@ python () {
         key_index_1 = key_index + 1
 
         # Set the private key template, it will be expanded later in 'swu' recipes once keys are generated.
-        if (d.getVar("TRUSTFENCE_SIGN_MODE", "") == "AHAB"):
-            d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", keys_path + "/keys/SRK" + str(key_index_1) + "*key.pem")
-            d.setVar("CONFIG_SIGN_MODE", "AHAB")
-        else:
-            d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", keys_path + "/keys/IMG" + str(key_index_1) + "*key.pem")
-            d.setVar("CONFIG_SIGN_MODE", "HAB")
+        if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
+            if (d.getVar("TRUSTFENCE_SIGN_MODE", "") == "AHAB"):
+                d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", keys_path + "/keys/SRK" + str(key_index_1) + "*key.pem")
+                d.setVar("CONFIG_SIGN_MODE", "AHAB")
+            else:
+                d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", keys_path + "/keys/IMG" + str(key_index_1) + "*key.pem")
+                d.setVar("CONFIG_SIGN_MODE", "HAB")
 
         # Set the key password.
         d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")

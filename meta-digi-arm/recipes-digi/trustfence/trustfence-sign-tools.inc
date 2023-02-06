@@ -27,25 +27,28 @@ do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 
 do_install() {
-	install -d ${D}${bindir}/csf_templates
-	if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
-		install -m 0755 sign_ahab ${D}${bindir}/csf_templates/
-		install -m 0755 encrypt_ahab ${D}${bindir}/csf_templates/
-	elif [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
-		install -m 0755 sign_hab ${D}${bindir}/csf_templates/
-		install -m 0755 encrypt_hab ${D}${bindir}/csf_templates/
-	else
-		bberror "Unkown TRUSTFENCE_SIGN_MODE value"
-		exit 1
-	fi
-	install -m 0755 trustfence-sign-artifact.sh ${D}${bindir}/
-	install -m 0755 git/scripts/csf_templates/* ${D}${bindir}/csf_templates
+	if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+		install -d ${D}${bindir}/csf_templates
+		if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
+			install -m 0755 sign_ahab ${D}${bindir}/csf_templates/
+			install -m 0755 encrypt_ahab ${D}${bindir}/csf_templates/
+		elif [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
+			install -m 0755 sign_hab ${D}${bindir}/csf_templates/
+			install -m 0755 encrypt_hab ${D}${bindir}/csf_templates/
+		else
+			bberror "Unkown TRUSTFENCE_SIGN_MODE value"
+			exit 1
+		fi
 
-	# Select U-Boot sign script depending on U-Boot including an SPL image
-	if [ -n "${SPL_BINARY}" ]; then
-		install -m 0755 git/scripts/sign_spl_fit.sh ${D}${bindir}/trustfence-sign-uboot.sh
-	else
-		install -m 0755 git/scripts/sign.sh ${D}${bindir}/trustfence-sign-uboot.sh
+		install -m 0755 git/scripts/csf_templates/* ${D}${bindir}/csf_templates
+		install -m 0755 trustfence-sign-artifact.sh ${D}${bindir}/
+
+		# Select U-Boot sign script depending on U-Boot including an SPL image
+		if [ -n "${SPL_BINARY}" ]; then
+			install -m 0755 git/scripts/sign_spl_fit.sh ${D}${bindir}/trustfence-sign-uboot.sh
+		else
+			install -m 0755 git/scripts/sign.sh ${D}${bindir}/trustfence-sign-uboot.sh
+		fi
 	fi
 }
 
