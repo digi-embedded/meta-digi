@@ -5,7 +5,6 @@
 IMAGE_FEATURES += " \
     dey-network \
     eclipse-debug \
-    package-management \
     ssh-server-dropbear \
     ${@bb.utils.contains('MACHINE_FEATURES', 'accel-video', 'dey-gstreamer', '', d)} \
     ${@bb.utils.contains('MACHINE_FEATURES', 'alsa', 'dey-audio', '', d)} \
