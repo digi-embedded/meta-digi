@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016-2020 Digi International.
+# Copyright (C) 2016-2023 Digi International.
 #
 DESCRIPTION = "DEY image with graphical libraries"
 LICENSE = "MIT"
@@ -19,7 +19,6 @@ IMAGE_FEATURES += " \
     dey-network \
     dey-${GRAPHICAL_CORE} \
     eclipse-debug \
-    package-management \
     ssh-server-dropbear \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston', \
        bb.utils.contains('DISTRO_FEATURES',     'x11', 'x11-base x11-sato', \
@@ -36,9 +35,6 @@ IMAGE_FEATURES += " \
 IMAGE_FEATURES:append:ccimx6ulsbc = " dey-gstreamer"
 
 IMAGE_FEATURES:append:ccmp15 = " ${@bb.utils.contains('DISTRO_FEATURES', 'gstreamer', 'dey-gstreamer', '', d)}"
-
-# Remove some features to reduce the rootfs size to fit in the internal storage.
-IMAGE_FEATURES:remove:ccimx6ul = "package-management"
 
 # SDK features (for toolchains generated from an image with populate_sdk)
 SDKIMAGE_FEATURES ?= "dev-pkgs dbg-pkgs staticdev-pkgs"
