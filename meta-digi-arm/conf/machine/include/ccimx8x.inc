@@ -52,6 +52,10 @@ MACHINE_FIRMWARE ?= "firmware-imx-vpu-imx8 firmware-imx-sdma-imx7d"
 MACHINE_FIRMWARE:append = " ${@oe.utils.conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6574-bt', '', d)}"
 MACHINE_FIRMWARE:append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6574-wifi', '', d)}"
 
+# For the ccimx8x, we generate images for both the B0 and the C0 revisions of
+# the i.MX8X silicon, so deploy both versions of the firmware.
+SECO_FIRMWARE_NAME:ccimx8x = "mx8qx*0-ahab-container.img"
+
 MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
     e2fsprogs-resize2fs \
