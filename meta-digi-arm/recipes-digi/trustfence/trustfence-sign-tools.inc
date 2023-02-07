@@ -16,7 +16,7 @@ UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${UBOOT_UR
 
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
-    file://trustfence-sign-artifact.sh;name=artifact-sign-script \
+    file://trustfence-sign-artifact-nxp.sh \
     file://sign_hab;name=artifact-hab-sign \
     file://encrypt_hab;name=artifact-hab-encrypt \
     file://sign_ahab;name=artifact-ahab-sign \
@@ -41,7 +41,7 @@ do_install() {
 		fi
 
 		install -m 0755 git/scripts/csf_templates/* ${D}${bindir}/csf_templates
-		install -m 0755 trustfence-sign-artifact.sh ${D}${bindir}/
+		install -m 0755 trustfence-sign-artifact-nxp.sh ${D}${bindir}/trustfence-sign-artifact.sh
 
 		# Select U-Boot sign script depending on U-Boot including an SPL image
 		if [ -n "${SPL_BINARY}" ]; then
