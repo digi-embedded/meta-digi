@@ -43,4 +43,6 @@ RDEPENDS:${PN} = " \
     ${MACHINE_GSTREAMER_1_0_PKGS} \
     ${MACHINE_GSTREAMER_1_0_EXTRA_INSTALL} \
     ${MACHINE_GSTREAMER_1_0_PLUGIN} \
+    ${@bb.utils.contains("MACHINE_GSTREAMER_1_0_PLUGIN", "imx-gst1.0-plugin", "imx-gst1.0-plugin-gplay", "", d)} \
+    ${@bb.utils.contains("MACHINE_GSTREAMER_1_0_PLUGIN", "imx-gst1.0-plugin", "imx-gst1.0-plugin-grecorder", "", d)} \
 "
