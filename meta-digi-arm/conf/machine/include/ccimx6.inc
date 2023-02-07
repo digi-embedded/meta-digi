@@ -37,7 +37,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     ${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
 "
 
-MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth pci"
+MACHINE_FEATURES += "accel-graphics wifi bluetooth pci"
 
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "HAB"

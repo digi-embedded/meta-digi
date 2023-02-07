@@ -20,21 +20,14 @@ IMAGE_FEATURES += " \
     dey-${GRAPHICAL_CORE} \
     eclipse-debug \
     ssh-server-dropbear \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'gstreamer', 'dey-gstreamer', '', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston', \
        bb.utils.contains('DISTRO_FEATURES',     'x11', 'x11-base x11-sato', \
                                                        '', d), d)} \
-    ${@bb.utils.contains('MACHINE_FEATURES', 'accel-video', 'dey-gstreamer', '', d)} \
     ${@bb.utils.contains('MACHINE_FEATURES', 'alsa', 'dey-audio', '', d)} \
     ${@bb.utils.contains('MACHINE_FEATURES', 'bluetooth', 'dey-bluetooth', '', d)} \
     ${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'dey-wireless', '', d)} \
 "
-
-# Separately add 'dey-gstreamer' to ccimx6ulsbc platform.
-# This platform does not have 'accel-video' but we want gstreamer for using
-# it with video/camera
-IMAGE_FEATURES:append:ccimx6ulsbc = " dey-gstreamer"
-
-IMAGE_FEATURES:append:ccmp15 = " ${@bb.utils.contains('DISTRO_FEATURES', 'gstreamer', 'dey-gstreamer', '', d)}"
 
 # SDK features (for toolchains generated from an image with populate_sdk)
 SDKIMAGE_FEATURES ?= "dev-pkgs dbg-pkgs staticdev-pkgs"

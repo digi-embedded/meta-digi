@@ -68,7 +68,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     ${WIRELESS_MODULE} \
 "
 
-MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip pci mca"
+MACHINE_FEATURES += "accel-graphics wifi bluetooth cryptochip pci mca"
 
 # AARCH64 doesn't support self-extracting zImage
 KERNEL_IMAGETYPE = "Image.gz"
