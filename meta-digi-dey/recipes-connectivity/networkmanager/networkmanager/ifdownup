@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright 2019, Digi International Inc.
+# Copyright 2019-2023, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -26,6 +26,16 @@ log() {
 	fi
 }
 
-log info "device-connectivity-change detected on interface ${DEVICE_IP_IFACE}"
-nmcli device disconnect "${DEVICE_IP_IFACE}"
-nmcli connection up "${CONNECTION_ID}"
+# $1 = file, $2 = section, $3 = parameter
+get_cfg_param() {
+	sed -nr "/^\[${2}\]/ { :l /^${3}[ ]*=/ { s/[^=]*=[ ]*//; p; q;}; n; b l;}" "${1}" | tr '[:upper:]' '[:lower:]'
+}
+
+ifdownup=$(get_cfg_param /etc/NetworkManager/NetworkManager.conf digi-recovery ifdownup)
+[ -z "${ifdownup}" ] && ifdownup="false"
+
+if [ "${ifdownup}" = "true" ] || [ "${ifdownup}" = "yes" ]; then
+	log info "device-connectivity-change detected on interface ${DEVICE_IP_IFACE}"
+	nmcli device disconnect "${DEVICE_IP_IFACE}"
+	nmcli connection up "${CONNECTION_ID}"
+fi
