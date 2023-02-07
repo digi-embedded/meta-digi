@@ -197,6 +197,7 @@ MACHINE_GSTREAMER_1_0_PLUGIN:mx6dl-nxp-bsp  ?= "imx-gst1.0-plugin"
 MACHINE_GSTREAMER_1_0_PLUGIN:mx6q-nxp-bsp   ?= "imx-gst1.0-plugin"
 MACHINE_GSTREAMER_1_0_PLUGIN:mx6ul-nxp-bsp  ?= "imx-gst1.0-plugin"
 MACHINE_GSTREAMER_1_0_PLUGIN:mx8-nxp-bsp    ?= "imx-gst1.0-plugin"
+MACHINE_GSTREAMER_1_0_PLUGIN:mx9-nxp-bsp    ?= "imx-gst1.0-plugin"
 
 # In 'meta-freescale' these gstreamer preferred versions are restricted to 'mx8-nxp-bsp'
 # but in DEY we use them also in the 6UL, so relax the override to 'imx-nxp-base'
