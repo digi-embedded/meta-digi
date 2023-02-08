@@ -31,13 +31,13 @@ MACHINE_GSTREAMER_1_0_PKGS:ccimx6ul = " \
     gstreamer1.0-plugins-good-jpeg \
 "
 
-MACHINE_GSTREAMER_1_0_EXTRA_INSTALL ?= ""
-MACHINE_GSTREAMER_1_0_EXTRA_INSTALL:imxgpu ?= " \
+MACHINE_GSTREAMER_1_0_EXTRA_INSTALL ?= " \
     gstreamer1.0-plugins-bad-meta \
     gstreamer1.0-plugins-ugly-meta \
     gstreamer1.0-rtsp-server-meta \
     gstreamer1.0-libav \
 "
+MACHINE_GSTREAMER_1_0_EXTRA_INSTALL:ccimx6ul ?= ""
 
 RDEPENDS:${PN} = " \
     ${MACHINE_GSTREAMER_1_0_PKGS} \
