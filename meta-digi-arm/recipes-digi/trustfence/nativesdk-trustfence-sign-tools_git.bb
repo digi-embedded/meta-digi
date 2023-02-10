@@ -2,3 +2,5 @@
 
 require trustfence-sign-tools.inc
 inherit nativesdk
+
+RDEPENDS:${PN} = "nativesdk-trustfence-cst"
