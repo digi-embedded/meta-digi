@@ -20,7 +20,7 @@ trustfence_sign() {
 		fi
 
 		TMP_KERNEL_IMAGE_SIGNED="$(mktemp ${KERNEL_IMAGE}-signed.XXXXXX)"
-		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -l "${KERNEL_IMAGE}" "${TMP_KERNEL_IMAGE_SIGNED}"
+		trustfence-sign-artifact.sh -p "${DIGI_SOM}" -l "${KERNEL_IMAGE}" "${TMP_KERNEL_IMAGE_SIGNED}"
 
 		if [ "${type}" = "Image.gz" ]; then
 			# Compress the signed Image and restore the original filename
@@ -41,9 +41,9 @@ trustfence_sign() {
 
 		TMP_DTB_IMAGE_SIGNED="$(mktemp ${DTB_IMAGE}-signed.XXXXXX)"
 		if [ "${DTB_EXT}" = "dtbo" ]; then
-			trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -o "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
+			trustfence-sign-artifact.sh -p "${DIGI_SOM}" -o "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
 		else
-			trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -d "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
+			trustfence-sign-artifact.sh -p "${DIGI_SOM}" -d "${DTB_IMAGE}" "${TMP_DTB_IMAGE_SIGNED}"
 		fi
 		mv "${TMP_DTB_IMAGE_SIGNED}" "${DTB_IMAGE}"
 	done

@@ -2,8 +2,9 @@
 #@NAME: ConnectCore for i.MX6UL.
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore 6UL.
 
+DIGI_SOM = "ccimx6ul"
 DIGI_FAMILY = "ccimx6ul"
-MACHINEOVERRIDES =. "mx6:mx6ul:${DIGI_FAMILY}:"
+MACHINEOVERRIDES =. "mx6:mx6ul:${DIGI_FAMILY}:${DIGI_SOM}:"
 
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/arm/armv7a/tune-cortexa7.inc

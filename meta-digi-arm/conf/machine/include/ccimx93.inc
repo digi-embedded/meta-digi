@@ -3,8 +3,6 @@
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore 93 family of SOMs
 
 DIGI_FAMILY = "ccimx93"
-MACHINEOVERRIDES =. "${DIGI_FAMILY}:"
-MACHINEOVERRIDES =. "mx93:"
 
 require conf/machine/include/imx-digi-base.inc
 require conf/machine/include/arm/armv8-2a/tune-cortexa55.inc

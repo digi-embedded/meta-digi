@@ -67,9 +67,9 @@ do_install:append() {
 	sed -i -e 's,@SBINDIR@,${sbindir},g' -e 's,@SYSCONFDIR@,${sysconfdir},g' ${D}${systemd_unitdir}/system/hostapd@.service
 
 	# Read-only rootfs: actions that substitute postinst script
-	# - append the ${DIGI_FAMILY} string to SSID
+	# - append the ${DIGI_SOM} string to SSID
 	if [ -n "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', '1', '', d)}" ]; then
-		sed -i -e "s,##MAC##,${DIGI_FAMILY},g" ${D}${sysconfdir}/hostapd_*.conf
+		sed -i -e "s,##MAC##,${DIGI_SOM},g" ${D}${sysconfdir}/hostapd_*.conf
 	fi
 }
 

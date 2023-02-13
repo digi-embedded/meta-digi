@@ -16,7 +16,7 @@ SRC_URI[sha256sum] = "36a02b956c288dad6ce6ecb2b13a4e6fb2983fd5c39cab5028ae9a7daf
 
 S = "${WORKDIR}/${PN}-${PV}"
 
-SC_FIRMWARE_NAME ?= "mx8x-${DIGI_FAMILY}-scfw-tcm.bin"
+SC_FIRMWARE_NAME ?= "mx8x-${DIGI_SOM}-scfw-tcm.bin"
 symlink_name = "scfw_tcm.bin"
 
 SYSROOT_DIRS += "/boot"

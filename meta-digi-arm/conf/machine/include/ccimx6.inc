@@ -3,7 +3,7 @@
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore 6 module.
 
 DIGI_FAMILY = "ccimx6"
-MACHINEOVERRIDES =. "mx6:mx6dl:mx6q:${DIGI_FAMILY}:"
+MACHINEOVERRIDES =. "mx6:mx6dl:mx6q:${DIGI_FAMILY}:${DIGI_SOM}:"
 
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/arm/armv7a/tune-cortexa9.inc

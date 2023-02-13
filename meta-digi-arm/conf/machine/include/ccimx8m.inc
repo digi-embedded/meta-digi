@@ -5,6 +5,8 @@
 include conf/machine/include/imx-digi-base.inc
 require conf/machine/include/arm/armv8a/tune-cortexa53.inc
 
+DIGI_FAMILY = "ccimx8m"
+
 # Platform u-boot settings
 UBOOT_PREFIX = "imx-boot"
 UBOOT_SUFFIX = "bin"
