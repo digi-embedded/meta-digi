@@ -85,7 +85,7 @@ RDEPENDS:${PN}-multimedia = " \
 
 INITSCRIPT_PACKAGES = "${PN}-server"
 INITSCRIPT_NAME:${PN}-server = "connectcore-demo-server"
-INITSCRIPT_PARAMS:${PN}-server = "start 19 2 3 4 5 . stop 21 0 1 6 ."
+INITSCRIPT_PARAMS:${PN}-server = "start 20 2 3 4 5 . stop 21 0 1 6 ."
 
 SYSTEMD_PACKAGES = "${PN}-server"
 SYSTEMD_SERVICE:${PN}-server = "connectcore-demo-server.service"
