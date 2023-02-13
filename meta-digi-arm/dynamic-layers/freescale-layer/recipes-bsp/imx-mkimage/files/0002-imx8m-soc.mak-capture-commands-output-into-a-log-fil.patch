@@ -1,0 +1,45 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Thu, 9 Feb 2023 11:15:54 +0100
+Subject: [PATCH] imx8m: soc.mak: capture commands output into a log file
+
+This is later used to get the needed information for the signing of the
+boot artifacts.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ iMX8M/soc.mak | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
+index 4a0cd4e59360..6b3a01f2b790 100644
+--- a/iMX8M/soc.mak
++++ b/iMX8M/soc.mak
+@@ -1,5 +1,6 @@
+ MKIMG = mkimage_imx8
+ OUTIMG = flash.bin
++MKIMAGE_LOG = "mkimage-$(firstword $(MAKECMDGOALS)).log"
+ 
+ CC ?= gcc
+ CFLAGS ?= -O2 -Wall -std=c99 -static
+@@ -274,7 +275,7 @@ endif
+ 
+ 
+ flash_evk_no_hdmi: $(MKIMG) u-boot-spl-ddr.bin u-boot.itb
+-	./mkimage_imx8 -version $(VERSION) -fit -loader u-boot-spl-ddr.bin $(SPL_LOAD_ADDR) -second_loader u-boot.itb 0x40200000 0x60000 -out $(OUTIMG)
++	./mkimage_imx8 -version $(VERSION) -fit -loader u-boot-spl-ddr.bin $(SPL_LOAD_ADDR) -second_loader u-boot.itb 0x40200000 0x60000 -out $(OUTIMG) 2>&1 | tee $(MKIMAGE_LOG)
+ 
+ flash_evk_no_hdmi_dual_bootloader: $(MKIMG) u-boot-spl-ddr.bin u-boot.itb
+ 	./mkimage_imx8 -version $(VERSION) -fit -loader u-boot-spl-ddr.bin $(SPL_LOAD_ADDR) -out $(OUTIMG)
+@@ -318,10 +319,10 @@ flash_dp_spl_uboot: flash_dp_evk
+ flash_spl_uboot: flash_evk_no_hdmi
+ 
+ print_fit_hab: u-boot-nodtb.bin bl31.bin $(dtb)
+-	./$(PAD_IMAGE) $(TEE)
++	./$(PAD_IMAGE) $(TEE) 2>&1 | tee $(MKIMAGE_LOG)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb)
+-	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ../$(SOC_DIR)/print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtb)
++	{ echo $@; TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ../$(SOC_DIR)/print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtb) 2>&1; } | tee -a $(MKIMAGE_LOG)
+ 
+ print_fit_hab_ddr4: u-boot-nodtb.bin bl31.bin $(dtb_ddr4_evk)
+ 	./$(PAD_IMAGE) $(TEE)
