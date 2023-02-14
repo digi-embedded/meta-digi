@@ -38,6 +38,10 @@ UBOOT_ENV_SIZE ?= "0x20000"
 # available space in the environment partition)
 UBOOT_ENV_RANGE ?= ""
 
+MACHINE_EXTRA_RDEPENDS += " \
+    mtd-utils-ubifs \
+"
+
 # Extra udev rules
 MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
 
