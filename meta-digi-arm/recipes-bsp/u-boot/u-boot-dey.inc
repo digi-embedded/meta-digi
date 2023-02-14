@@ -63,6 +63,16 @@ def tf_bootscript_sedfilter(d):
     tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE') or ""
     return "s,\(^[[:blank:]]*\)true.*,\\1setenv boot_initrd true\\n\\1setenv initrd_file %s-${MACHINE}.cpio.gz.u-boot.tf,g" % tf_initramfs if tf_initramfs else ""
 
+SIGN_UBOOT ?= ""
+SIGN_UBOOT:ccimx6 = "sign_uboot"
+SIGN_UBOOT:ccimx6ul = "sign_uboot"
+
+do_deploy[postfuncs] += " \
+    adapt_uboot_filenames \
+    ${@oe.utils.ifelse('BUILD_UBOOT_SCRIPTS', 'build_uboot_scripts', '')} \
+    ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', '${SIGN_UBOOT}', '', d)} \
+"
+
 build_uboot_scripts() {
 	for f in $(echo ${INSTALL_FW_UBOOT_SCRIPTS} | sed -e 's,file\:\/\/,,g'); do
 		f_ext="${f##*.}"
@@ -107,7 +117,7 @@ build_uboot_scripts() {
 	fi
 }
 
-do_deploy:append() {
+adapt_uboot_filenames() {
 	# Remove canonical U-Boot symlinks for ${UBOOT_CONFIG} currently in the form:
 	#    u-boot-<platform>.<ext>-<type>
 	#    u-boot-<type>
@@ -124,7 +134,26 @@ do_deploy:append() {
 					cd ${DEPLOYDIR}
 					rm -r ${UBOOT_BINARY}-${type}
 					ln -sf ${UBOOT_BINARYNAME}-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-${type}.${UBOOT_SUFFIX}
-					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
+				fi
+			done
+			unset  j
+		done
+		unset  i
+	fi
+}
+
+sign_uboot() {
+	# This function only applies to CC6, CC6Plus and CC6UL
+	if [ -n "${UBOOT_CONFIG}" ]
+	then
+		for config in ${UBOOT_MACHINE}; do
+			i=$(expr $i + 1);
+			for type in ${UBOOT_CONFIG}; do
+				j=$(expr $j + 1);
+				if [ $j -eq $i ]
+				then
+					cd ${DEPLOYDIR}
+					if [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
 						install ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
 						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
 
@@ -145,10 +174,6 @@ do_deploy:append() {
 			unset  j
 		done
 		unset  i
-	fi
-
-	if [ "${BUILD_UBOOT_SCRIPTS}" = "true" ]; then
-		build_uboot_scripts
 	fi
 }
 
