@@ -3,7 +3,7 @@
 #
 #  build.sh
 #
-#  Copyright (C) 2013-2022 by Digi International Inc.
+#  Copyright (C) 2013-2023 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -22,6 +22,9 @@
 #     DY_RM_WORK:        Remove the package working folders to save disk space.
 #     DY_TARGET:         Target image (the default is 'dey-image-qt')
 #     DY_USE_MIRROR:     Use internal Digi mirror to download packages
+#     DY_CVE_REPORT:     Generate Vigiles CVE report
+#     DY_VIGILES_DIR:    Path to Vigiles configuration files on the build server
+#     DY_USE_CVE_LAYER:  Apply meta-digi-security layer with CVE fixes
 #
 #===============================================================================
 
@@ -40,6 +43,13 @@ RM_WORK_CFG="
 INHERIT += \"rm_work\"
 # Exclude rm_work for some key packages (for debugging purposes)
 RM_WORK_EXCLUDE += \"dey-image-qt dey-image-webkit linux-dey qtbase u-boot-dey\"
+"
+
+VIGILES_CFG="
+VIGILES_KEY_FILE = \"${DY_VIGILES_DIR}/linuxlink_key.json\"
+VIGILES_DASHBOARD_CONFIG = \"##VIGILES_CONF_PATH##\"
+VIGILES_SUBFOLDER_NAME = \"${DY_REVISION}\"
+INHERIT += \"vigiles\"
 "
 
 ZIP_INSTALLER_CFG="
@@ -149,6 +159,11 @@ fi
 if [ -n "${DY_MACHINES_LAYER}" ]; then
 	MACHINES_LAYER="-m ${DY_MACHINES_LAYER}"
 fi
+
+[ -z "${DY_CVE_REPORT}" ] && DY_CVE_REPORT="false"
+[ -z "${DY_USE_CVE_LAYER}" ] && DY_USE_CVE_LAYER="false"
+
+[ "${DY_CVE_REPORT}" = "true" ] && [ -z "${DY_VIGILES_DIR}" ] && error "DY_VIGILES_DIR not specified"
 
 # Per-platform data
 while read -r _pl _tgt; do
@@ -264,6 +279,18 @@ for platform in ${DY_PLATFORMS}; do
 			if [ "${DY_MFG_IMAGE}" = "true" ] && ! grep -qs "meta-digi-mfg" conf/bblayers.conf; then
 				sed -i -e "/meta-digi-dey/a\  ${YOCTO_INST_DIR}/sources/meta-digi-mfg \\\\" conf/bblayers.conf
 			fi
+			# If we want to generate a CVE report, update conf/local.conf
+			if [ "${DY_CVE_REPORT}" = "true" ]; then
+				# Build Vigiles config path using platform and patch status
+				status="non-patched"
+				[ "${DY_USE_CVE_LAYER}" = "true" ] && status="patched"
+				VIGILES_CONF_PATH="${DY_VIGILES_DIR}/configs/${platform}_${status}_config"
+				# Return error if config file doesn't exist
+				if [ ! -f "${VIGILES_CONF_PATH}" ] && error "Cannot find Vigiles config file ${VIGILES_CONF_PATH}"
+				printf "%s" "${VIGILES_CFG}" | sed -e "s,##VIGILES_CONF_PATH##,${VIGILES_CONF_PATH},g" >> conf/local.conf
+			fi
+			# Apply CVE layer if needed
+			[ "${DY_USE_CVE_LAYER}" = "true" ] && bitbake-layers add-layer ${YOCTO_INST_DIR}/sources/meta-digi-security
 			printf "\n[INFO] Show customized local.conf.\n"
 			cat conf/local.conf
 
