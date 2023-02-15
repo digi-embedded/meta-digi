@@ -179,7 +179,7 @@ if pushd ${YOCTO_INST_DIR}; then
 			error "Revision \"${DY_REVISION}\" not found"
 		fi
 	fi
-	yes "" 2>/dev/null | ${REPO} init --depth=1 --no-repo-verify -u ${MANIFEST_URL} ${repo_revision}
+	yes "" 2>/dev/null | ${REPO} init --no-repo-verify -u ${MANIFEST_URL} ${repo_revision}
 	${REPO} forall -p -c 'git remote prune $(git remote)'
 	time ${REPO} sync -d ${MAKE_JOBS}
 	popd
