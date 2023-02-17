@@ -1,4 +1,4 @@
-# Copyright (C) 2022, Digi International Inc.
+# Copyright (C) 2022-2023, Digi International Inc.
 
 SUMMARY = "Bluetooth init scripts"
 LICENSE = "GPL-2.0-only"
@@ -58,5 +58,8 @@ SYSTEMD_SERVICE:${PN} = "bluetooth-init.service"
 # 'bluetooth-init' script uses '/etc/init.d/functions'
 RDEPENDS:${PN} = "initscripts-functions"
 
+# IW61x Bluetooth support requires the WiFi FW support
+RDEPENDS:${PN}:append:ccimx93 = " firmware-nxp-wifi-nxpiw612"
+
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x|ccimx8mn|ccimx8mm)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x|ccimx8mn|ccimx8mm|ccimx93)"
