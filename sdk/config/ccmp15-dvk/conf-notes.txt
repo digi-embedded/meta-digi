@@ -1,5 +1,10 @@
 Digi Embedded Yocto provides the following image recipes:
 
+  * dey-image-webkit: graphical WebKit image
+
+    By default the image is Wayland-based so it provides a full Weston
+    desktop environment.
+
   * dey-image-qt: graphical QT image
 
     By default the image is Wayland-based so it provides a full Weston
