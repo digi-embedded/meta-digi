@@ -41,6 +41,7 @@ DEFAULTTUNE:mx6-generic-bsp    ?= "cortexa9thf-neon"
 DEFAULTTUNE:mx6ul-generic-bsp  ?= "cortexa7thf-neon"
 DEFAULTTUNE:mx8m-generic-bsp   ?= "cortexa53-crypto"
 DEFAULTTUNE:mx8x-generic-bsp   ?= "cortexa35-crypto"
+DEFAULTTUNE:mx93-generic-bsp   ?= "cortexa55"
 
 INHERIT += "machine-overrides-extender"
 
@@ -68,6 +69,7 @@ MACHINEOVERRIDES_EXTENDER:mx8mn:use-mainline-bsp  = "imx-generic-bsp:imx-mainlin
 MACHINEOVERRIDES_EXTENDER:mx8mp:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:mx8-generic-bsp:mx8-mainline-bsp:mx8m-generic-bsp:mx8m-mainline-bsp:mx8mp-generic-bsp:mx8mp-mainline-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8qxp:use-mainline-bsp = "imx-generic-bsp:imx-mainline-bsp:mx8-generic-bsp:mx8-mainline-bsp:mx8x-generic-bsp:mx8x-mainline-bsp:mx8qxp-generic-bsp:mx8qxp-mainline-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8dx:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:mx8-generic-bsp:mx8-mainline-bsp:mx8x-generic-bsp:mx8x-mainline-bsp:mx8dx-generic-bsp:mx8dx-mainline-bsp"
+MACHINEOVERRIDES_EXTENDER:mx93:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:imxdrm:imxpxp:mx9-generic-bsp:mx9-mainline-bsp:mx93-generic-bsp:mx93-mainline-bsp"
 
 MACHINEOVERRIDES_EXTENDER_FILTER_OUT = " \
     mx6 \
@@ -186,7 +188,13 @@ IMX_EXTRA_FIRMWARE                  ?= ""
 IMX_EXTRA_FIRMWARE:mx8-generic-bsp   = "firmware-imx-8 imx-sc-firmware imx-seco"
 IMX_EXTRA_FIRMWARE:mx8m-generic-bsp  = "firmware-imx-8m"
 IMX_EXTRA_FIRMWARE:mx8x-generic-bsp  = "imx-sc-firmware imx-seco"
-IMX_EXTRA_FIRMWARE:mx9-nxp-bsp       = "firmware-imx-9 firmware-sentinel"
+IMX_EXTRA_FIRMWARE:mx93-generic-bsp  = "firmware-imx-9 firmware-sentinel"
+
+# Extra audio support
+IMX_ALSA_EXTRA = ""
+IMX_ALSA_EXTRA:imx-nxp-bsp = "imx-alsa-plugins"
+MACHINE_EXTRA_RRECOMMENDS:append:mx6-nxp-bsp = " ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', '${IMX_ALSA_EXTRA}', '', d)}"
+MACHINE_EXTRA_RRECOMMENDS:append:mx8-nxp-bsp = " ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', '${IMX_ALSA_EXTRA}', '', d)}"
 
 # Extra udev rules
 MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf udev-rules-imx"
@@ -229,11 +237,11 @@ PREFERRED_PROVIDER_virtual/libgles2:imxgpu3d ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libgles3:imxgpu3d ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libg2d            ?= "imx-gpu-g2d"
 PREFERRED_PROVIDER_virtual/libg2d:imxdpu     ?= "imx-dpu-g2d"
+PREFERRED_PROVIDER_virtual/libg2d:mx93-nxp-bsp ?= "imx-pxp-g2d"
 PREFERRED_PROVIDER_opencl-clhpp:imxgpu       ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_opencl-headers:imxgpu     ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_opencl-icd-loader:imxgpu  ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/opencl-icd:imxgpu ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/libg2d:mx93-nxp-bsp ?= "imx-pxp-g2d"
 
 PREFERRED_VERSION_weston:imx-nxp-bsp      ??= "10.0.1.imx"
 PREFERRED_VERSION_weston:imx-mainline-bsp   = ""
@@ -254,19 +262,21 @@ PREFERRED_VERSION_vulkan-loader:imxvulkan  ??= "1.2.182.0"
 PREFERRED_VERSION_vulkan-tools:imxvulkan   ??= "1.2.182.0"
 
 # Use i.MX optee Version
-PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "3.19.0.imx"
 PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "3.19.0.imx"
 PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "3.19.0.imx"
 PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.19.0.imx"
 PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "3.19.0.imx"
 
-#Use i.MX opencv Version for mx8
+# Use i.MX opencv Version
 PREFERRED_VERSION_opencv:mx8-nxp-bsp ??= "4.6.0.imx"
+PREFERRED_VERSION_opencv:mx9-nxp-bsp ??= "4.6.0.imx"
 
 EXTRA_IMAGEDEPENDS += "u-boot"
 
-KERNEL_IMAGETYPE ?= "zImage"
+KERNEL_IMAGETYPE = "zImage"
+KERNEL_IMAGETYPE:aarch64 = "Image.gz"
 
 MACHINE_FEATURES = "usbgadget usbhost vfat alsa touchscreen"
 

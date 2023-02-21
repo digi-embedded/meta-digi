@@ -53,9 +53,6 @@ MACHINE_EXTRA_RRECOMMENDS += " \
 
 MACHINE_FEATURES += "accel-graphics wifi bluetooth cryptochip mca optee"
 
-# AARCH64 doesn't support self-extracting zImage
-KERNEL_IMAGETYPE = "Image.gz"
-
 VIRTUAL-RUNTIME_init_manager ?= "systemd"
 VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 

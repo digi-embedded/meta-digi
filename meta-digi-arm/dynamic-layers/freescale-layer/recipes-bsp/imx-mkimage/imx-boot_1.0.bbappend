@@ -9,8 +9,6 @@ SRC_URI:append = " \
 
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
-SOC_FAMILY:mx9-nxp-bsp = "mx93"
-
 # Do not tag imx-boot
 UUU_BOOTLOADER = ""
 UUU_BOOTLOADER_TAGGED = ""
@@ -22,37 +20,9 @@ compile_mx8m:append:ccimx8m() {
 	fi
 }
 
-compile_mx93() {
-	bbnote "i.MX 93 boot binary build"
-	for ddr_firmware in ${DDR_FIRMWARE_NAME}; do
-		bbnote "Copy ddr_firmware: ${ddr_firmware} from ${DEPLOY_DIR_IMAGE} -> ${BOOT_STAGING}"
-		cp ${DEPLOY_DIR_IMAGE}/${ddr_firmware} ${BOOT_STAGING}
-	done
-
-	cp ${DEPLOY_DIR_IMAGE}/${SECO_FIRMWARE_NAME} ${BOOT_STAGING}/
-	cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${ATF_MACHINE_NAME} ${BOOT_STAGING}/bl31.bin
-	cp ${DEPLOY_DIR_IMAGE}/${UBOOT_NAME} ${BOOT_STAGING}/u-boot.bin
-	if [ -e ${DEPLOY_DIR_IMAGE}/u-boot-spl.bin-${MACHINE}-${UBOOT_CONFIG} ] ; then
-		cp ${DEPLOY_DIR_IMAGE}/u-boot-spl.bin-${MACHINE}-${UBOOT_CONFIG} ${BOOT_STAGING}/u-boot-spl.bin
-	fi
-}
-
 do_compile:append:ccimx8m() {
 	bbnote "building ${IMX_BOOT_SOC_TARGET} - print_fit_hab"
 	make SOC=${IMX_BOOT_SOC_TARGET} dtbs=${UBOOT_DTB_NAME} print_fit_hab
-}
-
-deploy_mx93() {
-	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
-	for ddr_firmware in ${DDR_FIRMWARE_NAME}; do
-		install -m 0644 ${DEPLOY_DIR_IMAGE}/${ddr_firmware} ${DEPLOYDIR}/${BOOT_TOOLS}
-	done
-
-	install -m 0644 ${BOOT_STAGING}/${SECO_FIRMWARE_NAME} ${DEPLOYDIR}/${BOOT_TOOLS}
-	install -m 0755 ${S}/${TOOLS_NAME} ${DEPLOYDIR}/${BOOT_TOOLS}
-	if [ -e ${DEPLOY_DIR_IMAGE}/u-boot-spl.bin-${MACHINE}-${UBOOT_CONFIG} ]; then
-		install -m 0644 ${DEPLOY_DIR_IMAGE}/u-boot-spl.bin-${MACHINE}-${UBOOT_CONFIG} ${DEPLOYDIR}/${BOOT_TOOLS}
-	fi
 }
 
 do_deploy:append() {
@@ -93,5 +63,3 @@ trustfence_sign_imxboot() {
 }
 trustfence_sign_imxboot[dirs] = "${DEPLOYDIR}"
 trustfence_sign_imxboot[vardeps] += "TRUSTFENCE_SIGN_KEYS_PATH TRUSTFENCE_KEY_INDEX TRUSTFENCE_DEK_PATH TRUSTFENCE_SIGN_MODE TRUSTFENCE_SRK_REVOKE_MASK TRUSTFENCE_UNLOCK_KEY_REVOCATION"
-
-COMPATIBLE_MACHINE = "(mx8-generic-bsp|mx9-generic-bsp)"

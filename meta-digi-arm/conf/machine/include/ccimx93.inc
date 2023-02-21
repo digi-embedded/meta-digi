@@ -33,7 +33,6 @@ STORAGE_MEDIA = "mmc"
 
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx93_defconfig"
-KERNEL_IMAGETYPE = "Image.gz"
 
 SPL_BINARY = "spl/u-boot-spl.bin"
 

@@ -32,9 +32,7 @@ MACHINE_EXTRA_RDEPENDS += " \
 MACHINE_EXTRA_RRECOMMENDS += " \
     ${MACHINE_FIRMWARE} \
     ${WIRELESS_MODULE} \
-    ${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
 "
-MACHINE_EXTRA_RRECOMMENDS:remove:use-mainline-bsp = "${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)}"
 
 MACHINE_FEATURES += "wifi bluetooth cryptochip mca"
 MACHINE_FEATURES:remove:use-mainline-bsp = "wifi"

@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Digi International
+# Copyright (C) 2022,2023 Digi International
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -18,5 +18,3 @@ do_deploy:append() {
 		install -m 0644 ${S}/build-optee/${ATF_PLATFORM}/release/bl31.bin ${DEPLOYDIR}/${BOOT_TOOLS}/bl31-${ATF_PLATFORM}.bin-optee
 	fi
 }
-
-COMPATIBLE_MACHINE = "(mx8-generic-bsp|mx9-generic-bsp)"
