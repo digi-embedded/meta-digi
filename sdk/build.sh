@@ -286,7 +286,7 @@ for platform in ${DY_PLATFORMS}; do
 				[ "${DY_USE_CVE_LAYER}" = "true" ] && status="patched"
 				VIGILES_CONF_PATH="${DY_VIGILES_DIR}/configs/${platform}_${status}_config"
 				# Return error if config file doesn't exist
-				if [ ! -f "${VIGILES_CONF_PATH}" ] && error "Cannot find Vigiles config file ${VIGILES_CONF_PATH}"
+				[ ! -f "${VIGILES_CONF_PATH}" ] && error "Cannot find Vigiles config file ${VIGILES_CONF_PATH}"
 				printf "%s" "${VIGILES_CFG}" | sed -e "s,##VIGILES_CONF_PATH##,${VIGILES_CONF_PATH},g" >> conf/local.conf
 			fi
 			# Apply CVE layer if needed
