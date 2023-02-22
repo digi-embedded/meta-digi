@@ -39,6 +39,10 @@ SPL_BINARY = "spl/u-boot-spl.bin"
 # Set ATF platform name
 ATF_PLATFORM = "imx93"
 
+MACHINE_EXTRA_RDEPENDS += " \
+    xbee-init \
+"
+
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "AHAB"
 

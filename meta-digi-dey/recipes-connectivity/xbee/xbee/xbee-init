@@ -4,35 +4,37 @@
 XBEE_RESET_N_GPIO="##XBEE_RESET_N_GPIO##"
 XBEE_SLEEP_RQ_GPIO="##XBEE_SLEEP_RQ_GPIO##"
 
-xbee_init() {
-	# Set low XBEE_SLEEP_RQ
-	gpioset ${3} ${4}=0
-
+# 1=chip name
+# 2=gpio offset
+xbee_reset() {
 	# Power cycle XBEE_RESET_N
-	gpioset ${1} ${2}=0
-	gpioset ${1} ${2}=1
+	gpioset "${1}" "${2}"=0
+	gpioset "${1}" "${2}"=1
+}
+
+# 1=chip name
+# 2=gpio offset
+xbee_no_sleep() {
+	# Set low XBEE_SLEEP_RQ
+	gpioset "${1}" "${2}"=0
 }
 
 xbee_iterate_list() {
-	i=0
+	for SLEEP in $(echo ${XBEE_SLEEP_RQ_GPIO} | sed "s/,/ /g"); do
+		# Do not quote command expansion (function expects two parameters)
+		xbee_no_sleep $(echo "${SLEEP}" | sed "s/@/ /g")
+	done
+
 	for RESET in $(echo ${XBEE_RESET_N_GPIO} | sed "s/,/ /g"); do
-		j=0
-		for SLEEP in $(echo ${XBEE_SLEEP_RQ_GPIO} | sed "s/,/ /g"); do
-			if [ "${i}" = "${j}" ]; then
-				if [ "${1}" = "start" ]; then
-					xbee_init $(echo ${RESET} | sed "s/@/ /g") $(echo ${SLEEP} | sed "s/@/ /g")
-				fi
-			fi
-			j="$((j + 1))"
-		done
-		i="$((i + 1))"
+		# Do not quote command expansion (function expects two parameters)
+		xbee_reset $(echo "${RESET}" | sed "s/@/ /g")
 	done
 }
 
 case "$1" in
 	start)
 		echo -n "Starting XBee hardware: "
-		xbee_iterate_list start
+		xbee_iterate_list
 		echo "done."
 		;;
 	stop)
