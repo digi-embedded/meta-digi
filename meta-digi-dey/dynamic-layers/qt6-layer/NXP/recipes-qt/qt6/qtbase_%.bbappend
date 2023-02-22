@@ -67,4 +67,8 @@ do_install:append () {
     install -m 0755 ${WORKDIR}/qt6-${IMX_BACKEND}.sh ${D}${sysconfdir}/profile.d/qt6.sh
 }
 
+do_install:append:ccimx93() {
+    echo "export QMLSCENE_DEVICE=softwarecontext" >> ${D}${sysconfdir}/profile.d/qt6.sh
+}
+
 FILES:${PN} += "${sysconfdir}/profile.d/qt5.sh"

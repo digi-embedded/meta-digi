@@ -17,6 +17,11 @@ RDEPENDS:${PN}:append:imxgpu = " \
     cinematicexperience-rhi-tools \
 "
 
+RDEPENDS:${PN}:append:ccimx93 = " \
+    cinematicexperience-rhi \
+    cinematicexperience-rhi-tools \
+"
+
 RDEPENDS:${PN}:append:imxgpu3d = " \
     qt3d-examples \
 "

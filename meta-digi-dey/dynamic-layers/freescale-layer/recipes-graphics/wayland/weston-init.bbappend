@@ -36,4 +36,9 @@ do_install:append() {
     install -Dm0644 ${WORKDIR}/digi_background.png ${D}${datadir}/weston/digi_background.png
 }
 
+do_install:append:ccimx93() {
+    install -d ${D}${sysconfdir}/default/
+    echo "QMLSCENE_DEVICE=softwarecontext" >> ${D}${sysconfdir}/default/weston
+}
+
 FILES:${PN} += "${datadir}/weston/digi_background.png"
