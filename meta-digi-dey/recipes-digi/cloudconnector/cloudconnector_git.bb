@@ -73,5 +73,8 @@ CONFFILES:${PN} += "${sysconfdir}/cc.conf"
 
 RDEPENDS:${PN} = "${PN}-cert"
 
+# 'cloud-connector-init' script uses '/etc/init.d/functions'
+RDEPENDS:${PN} += "initscripts-functions"
+
 # Disable extra compilation checks from SECURITY_CFLAGS to avoid build errors
 lcl_maybe_fortify:pn-cloudconnector = ""

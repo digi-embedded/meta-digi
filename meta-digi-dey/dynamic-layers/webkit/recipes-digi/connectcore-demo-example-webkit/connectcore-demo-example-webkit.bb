@@ -42,7 +42,10 @@ FILES:${PN}:append = " \
     ${sysconfdir}/init.d/connectcore-demo-example \
 "
 
-RDEPENDS:${PN} += " cog"
+RDEPENDS:${PN} += "cog"
+
+# 'connectcore-demo-example-init' script uses '/etc/init.d/functions'
+RDEPENDS:${PN} += "initscripts-functions"
 
 INITSCRIPT_PACKAGES += "${PN}"
 INITSCRIPT_NAME:${PN} = "connectcore-demo-example"
