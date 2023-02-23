@@ -8,6 +8,9 @@ MACHINEOVERRIDES =. "mx6:mx6ul:${DIGI_FAMILY}:"
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/arm/armv7a/tune-cortexa7.inc
 
+# Override default init manager from distro config
+INIT_MANAGER ?= "sysvinit"
+
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"

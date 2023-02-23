@@ -20,14 +20,18 @@ VIRTUAL-RUNTIME_base-utils-acpid ?= "busybox-acpid"
 VIRTUAL-RUNTIME_base-utils-hwclock ?= "busybox-hwclock"
 VIRTUAL-RUNTIME_base-utils-syslog ?= "busybox-syslog"
 VIRTUAL-RUNTIME_dev_manager ?= "udev"
-VIRTUAL-RUNTIME_init_manager ?= "sysvinit"
-VIRTUAL-RUNTIME_initscripts ?= "initscripts"
 VIRTUAL-RUNTIME_keymaps ?= "keymaps"
-VIRTUAL-RUNTIME_login_manager ?= ""
 VIRTUAL-RUNTIME_passwd_manager ?= "shadow"
 
 # Set virtual runtimes depending on X11 feature
 VIRTUAL-RUNTIME_touchscreen ?= "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '', 'tslib-calibrate tslib-tests', d)}"
+
+SYSVINIT_SCRIPTS = " \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'rtc', '${VIRTUAL-RUNTIME_base-utils-hwclock}', '', d)} \
+    modutils-initscripts \
+    ${VIRTUAL-RUNTIME_base-utils-acpid} \
+    ${VIRTUAL-RUNTIME_initscripts} \
+"
 
 RDEPENDS:${PN} = "\
     base-files \
@@ -38,14 +42,12 @@ RDEPENDS:${PN} = "\
     dualboot \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'firmwared', '',d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '', bb.utils.contains("MACHINE_FEATURES", "rtc", "${VIRTUAL-RUNTIME_base-utils-hwclock}", "", d), d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "touchscreen", "${VIRTUAL-RUNTIME_touchscreen}", "",d)} \
     init-ifupdown \
     libdigiapix \
     libgpiod \
     libgpiod-tools \
     libubootenv-bin \
-    modutils-initscripts \
     netbase \
     networkmanager \
     networkmanager-nmcli \
@@ -56,10 +58,9 @@ RDEPENDS:${PN} = "\
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'system-monitor', '',d)} \
     usbutils \
     ${VIRTUAL-RUNTIME_base-utils} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '', '${VIRTUAL-RUNTIME_base-utils-acpid}', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'sysvinit', '${SYSVINIT_SCRIPTS}', '', d)} \
     ${VIRTUAL-RUNTIME_dev_manager} \
     ${VIRTUAL-RUNTIME_init_manager} \
-    ${VIRTUAL-RUNTIME_initscripts} \
     ${VIRTUAL-RUNTIME_login_manager} \
     ${VIRTUAL-RUNTIME_passwd_manager} \
     ${VIRTUAL-RUNTIME_update-alternatives} \

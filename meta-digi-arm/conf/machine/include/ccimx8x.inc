@@ -70,16 +70,12 @@ MACHINE_EXTRA_RRECOMMENDS += " \
 
 MACHINE_FEATURES += "accel-graphics wifi bluetooth cryptochip pci mca"
 
-VIRTUAL-RUNTIME_init_manager ?= "systemd"
-VIRTUAL-RUNTIME_initscripts ?= "initscripts"
-
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "AHAB"
 
 # Adding 'wayland' along with 'x11' enables the xwayland backend
 # Vulkan is necessary for wayland to build
 DISTRO_FEATURES:append = " wayland vulkan systemd pam"
-DISTRO_FEATURES_BACKFILL_CONSIDERED = "sysvinit"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"
