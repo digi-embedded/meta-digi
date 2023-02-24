@@ -25,9 +25,11 @@ RDEPENDS:${PN}:append:imxgpu = " \
     qt5nmapcarousedemo \
     qt5nmapper \
     cinematicexperience-rhi \
+    cinematicexperience-rhi-tools \
 "
 
 RDEPENDS:${PN}:append:ccmp15 = " \
     qt5everywheredemo \
     cinematicexperience-rhi \
+    cinematicexperience-rhi-tools \
 "
