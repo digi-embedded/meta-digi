@@ -34,6 +34,8 @@ do_install:append() {
 do_install:append() {
     install -Dm0755 ${WORKDIR}/profile ${D}${sysconfdir}/profile.d/weston.sh
     install -Dm0644 ${WORKDIR}/digi_background.png ${D}${datadir}/weston/digi_background.png
+
+    printf "\n[launcher]\nicon=${datadir}/weston/terminal.png\npath=${bindir}/weston-terminal\n" >> ${D}${sysconfdir}/xdg/weston/weston.ini
 }
 
 do_install:append:ccimx93() {
