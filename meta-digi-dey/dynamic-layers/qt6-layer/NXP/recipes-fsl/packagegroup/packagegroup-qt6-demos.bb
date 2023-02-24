@@ -14,6 +14,7 @@ RDEPENDS:${PN}:append = " \
 
 RDEPENDS:${PN}:append:imxgpu = " \
     cinematicexperience-rhi \
+    cinematicexperience-rhi-tools \
 "
 
 RDEPENDS:${PN}:append:imxgpu3d = " \
