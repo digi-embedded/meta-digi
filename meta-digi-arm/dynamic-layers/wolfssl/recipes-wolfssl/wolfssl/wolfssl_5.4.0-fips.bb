@@ -27,7 +27,7 @@ python() {
     # variable.
     wolfssl_fips_local_path = d.getVar('WOLFSSL_FIPS_PKG_PATH')
     if wolfssl_fips_local_path:
-        premirrors = d.getVar('PREMIRRORS', True)
+        premirrors = d.getVar('PREMIRRORS')
         d.setVar('PREMIRRORS', "http:///not/exist/${WOLFSSL_FIPS_PKG_NAME}.7z file://%s \\n %s" % (wolfssl_fips_local_path, premirrors))
 
     # Yocto does not support unpacking password protected packages, so configure the

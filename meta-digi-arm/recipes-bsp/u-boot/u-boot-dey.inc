@@ -44,7 +44,7 @@ inherit ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'fsl-u-boot-localve
 UBOOT_INITIAL_ENV = ""
 
 python __anonymous() {
-    if (d.getVar("TRUSTFENCE_DEK_PATH", True) not in ["0", None]) and (d.getVar("TRUSTFENCE_SIGN", True) != "1"):
+    if (d.getVar("TRUSTFENCE_DEK_PATH") not in ["0", None]) and (d.getVar("TRUSTFENCE_SIGN") != "1"):
         bb.fatal("Only signed U-Boot images can be encrypted. Generate signed images (TRUSTFENCE_SIGN = \"1\") or remove encryption (TRUSTFENCE_DEK_PATH = \"0\")")
 }
 
@@ -60,7 +60,7 @@ python trustfence_config() {
 TF_BOOTSCRIPT_SEDFILTER = "${@tf_bootscript_sedfilter(d)}"
 
 def tf_bootscript_sedfilter(d):
-    tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
+    tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE') or ""
     return "s,\(^[[:blank:]]*\)true.*,\\1setenv boot_initrd true\\n\\1setenv initrd_file %s-${MACHINE}.cpio.gz.u-boot.tf,g" % tf_initramfs if tf_initramfs else ""
 
 build_uboot_scripts() {

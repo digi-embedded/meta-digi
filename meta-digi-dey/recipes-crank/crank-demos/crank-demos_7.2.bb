@@ -29,11 +29,11 @@ CRANK_DEMO_PATH ?= "${datadir}/crank/apps/OpenGL_WideScreen/1280x720.gapp"
 # a PREMIRROR to a local directory that can be configured in the project's
 # local.conf file using CRANK_DEMOS_TARBALL_PATH variable.
 python() {
-    crank_demos_tarball_path = d.getVar('CRANK_DEMOS_TARBALL_PATH', True)
+    crank_demos_tarball_path = d.getVar('CRANK_DEMOS_TARBALL_PATH')
     if crank_demos_tarball_path:
-        premirrors = d.getVar('PREMIRRORS', True)
+        premirrors = d.getVar('PREMIRRORS')
         d.setVar('PREMIRRORS', "http:///not/exist/crank-demos-.* %s \\n %s" % (crank_demos_tarball_path, premirrors))
-    crank_demos_tarball_sha256 = d.getVar('CRANK_DEMOS_TARBALL_SHA256', True)
+    crank_demos_tarball_sha256 = d.getVar('CRANK_DEMOS_TARBALL_SHA256')
     if crank_demos_tarball_sha256:
         d.setVarFlag("SRC_URI", "sha256sum", crank_demos_tarball_sha256)
 }

@@ -58,7 +58,7 @@ ROOTFS_EXT ?= '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", ".squa
 BOOT_DEV_NAME ?= "linux"
 ROOTFS_DEV_NAME ?= "rootfs"
 ROOTFS_ENC_DEV = "${ROOTFS_DEV_NAME}"
-ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
+ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS') == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
 
 # U-Boot environment offset (within partition)
 UBOOT_ENV_OFFSET ?= "0x0"
