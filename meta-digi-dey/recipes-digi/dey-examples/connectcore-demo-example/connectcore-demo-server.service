@@ -1,0 +1,11 @@
+[Unit]
+Description=Initialization of ConnectCore demo server
+After=busybox-httpd.service
+
+[Service]
+Type=forking
+ExecStart=/etc/connectcore-demo-server start
+ExecStop=/etc/connectcore-demo-server stop
+
+[Install]
+WantedBy=multi-user.target

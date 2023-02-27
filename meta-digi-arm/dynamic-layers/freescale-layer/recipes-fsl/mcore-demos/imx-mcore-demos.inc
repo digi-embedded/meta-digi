@@ -7,7 +7,7 @@ LICENSE = "Proprietary"
 
 inherit deploy fsl-eula2-unpack2
 
-SOC        ?= "INVALID"
+SOC                ?= "INVALID"
 SOC:mx7ulp-nxp-bsp  = "imx7ulp"
 SOC:mx8dxl-nxp-bsp  = "imx8dxl"
 SOC:mx8mm-nxp-bsp   = "imx8mm"
@@ -18,7 +18,9 @@ SOC:mx8mpul-nxp-bsp = "imx8mp"
 SOC:mx8mq-nxp-bsp   = "imx8mq"
 SOC:mx8qm-nxp-bsp   = "imx8qm"
 SOC:mx8qxp-nxp-bsp  = "imx8qx"
+SOC:mx8dx-nxp-bsp   = "imx8qx"
 SOC:mx8ulp-nxp-bsp  = "imx8ulp"
+SOC:mx93-nxp-bsp    = "imx93"
 
 MCORE_TYPE  ?= "m4"
 MCORE_TYPE:mx8mn-nxp-bsp  = "m7"
@@ -26,6 +28,7 @@ MCORE_TYPE:mx8mnul-nxp-bsp = "m7"
 MCORE_TYPE:mx8mp-nxp-bsp  = "m7"
 MCORE_TYPE:mx8mpul-nxp-bsp  = "m7"
 MCORE_TYPE:mx8ulp-nxp-bsp  = "m33"
+MCORE_TYPE:mx93-nxp-bsp  = "m33"
 
 IMX_PACKAGE_NAME = "${SOC}-${MCORE_TYPE}-demo-${PV}"
 SRC_URI:append = ";name=${SOC}"

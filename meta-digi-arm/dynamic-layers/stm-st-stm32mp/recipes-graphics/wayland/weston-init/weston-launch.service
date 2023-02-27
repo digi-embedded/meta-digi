@@ -30,11 +30,11 @@ ConditionPathExists=/dev/tty0
 # Requires systemd-notify.so Weston plugin.
 #Type=notify
 EnvironmentFile=-/etc/default/weston
-Environment="XDG_RUNTIME_DIR=/home/weston"
-Environment="WESTON_USER=weston"
+Environment="XDG_RUNTIME_DIR=/home/root"
+Environment="WESTON_USER=root"
 Environment="WL_EGL_GBM_FENCE=0"
 #ExecStart=/usr/bin/weston-launch -- --modules=systemd-notify.so --log=/home/weston/weston.log $OPTARGS
-ExecStart=/usr/bin/weston-start --modules=systemd-notify.so --log=/home/weston/weston.log $OPTARGS
+ExecStart=/usr/bin/weston-start --modules=systemd-notify.so --log=/home/root/weston.log $OPTARGS
 ExecStop=/usr/bin/killall weston-launch
 
 # Optional watchdog setup
@@ -42,11 +42,11 @@ ExecStop=/usr/bin/killall weston-launch
 #WatchdogSec=20
 
 # The user to run Weston as.
-User=weston
-Group=weston
+User=root
+Group=root
 
 # Make sure the working directory is the users home directory
-WorkingDirectory=/home/weston
+WorkingDirectory=/home/root
 
 # Set up a full user session for the user, required by Weston.
 PAMName=weston-autologin

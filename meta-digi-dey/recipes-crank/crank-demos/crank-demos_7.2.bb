@@ -13,7 +13,7 @@ SRC_URI = " \
 "
 SRC_URI[sha256sum] = "90a7fc258cdaa5f9afcf57224da8bbc5a330b957db88335f555369123a1432ab"
 
-WESTON_SERVICE ?= "weston@root.service"
+WESTON_SERVICE ?= "weston.service"
 WESTON_SERVICE:ccmp15 ?= "weston-launch.service"
 
 CRANK_DEMOS_TARBALL_PATH ?= ""
@@ -21,22 +21,19 @@ CRANK_DEMO_DISPLAY ?= "wayland-0"
 CRANK_DEMO_DISPLAY:ccmp15 ?= "wayland-1"
 CRANK_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\${DEMO_DISPLAY}"
 CRANK_DEMO_ENV:ccimx6ul ?= ""
-CRANK_DEMO_ENV:ccmp15 ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/1000 WAYLAND_DISPLAY=\${DEMO_DISPLAY}"
 CRANK_DEMO_OPTIONS ?= "-orender_mgr,multisample=0"
 CRANK_DEMO_OPTIONS:ccimx6ul ?= "-orender_mgr,multisample=0 -odev-input,mouse=/dev/input/mouse0 -oscreen_mgr,swcursor"
 CRANK_DEMO_PATH ?= "${datadir}/crank/apps/OpenGL_WideScreen/1280x720.gapp"
-CRANK_DEMO_USER ?= "root"
-CRANK_DEMO_USER:ccmp15 ?= "weston"
 
 # The tarball is only available for downloading after registration, so provide
 # a PREMIRROR to a local directory that can be configured in the project's
 # local.conf file using CRANK_DEMOS_TARBALL_PATH variable.
 python() {
-    crank_demos_tarball_path = d.getVar('CRANK_DEMOS_TARBALL_PATH', True)
+    crank_demos_tarball_path = d.getVar('CRANK_DEMOS_TARBALL_PATH')
     if crank_demos_tarball_path:
-        premirrors = d.getVar('PREMIRRORS', True)
+        premirrors = d.getVar('PREMIRRORS')
         d.setVar('PREMIRRORS', "http:///not/exist/crank-demos-.* %s \\n %s" % (crank_demos_tarball_path, premirrors))
-    crank_demos_tarball_sha256 = d.getVar('CRANK_DEMOS_TARBALL_SHA256', True)
+    crank_demos_tarball_sha256 = d.getVar('CRANK_DEMOS_TARBALL_SHA256')
     if crank_demos_tarball_sha256:
         d.setVarFlag("SRC_URI", "sha256sum", crank_demos_tarball_sha256)
 }
@@ -73,7 +70,7 @@ do_install () {
 		# Install systemd unit files
 		install -d ${D}${systemd_unitdir}/system
 		install -m 0644 ${WORKDIR}/crank-demo.service ${D}${systemd_unitdir}/system/
-		sed -i -e "s@##WESTON_SERVICE##@${WESTON_SERVICE}@g" \
+		sed -i -e "s,##WESTON_SERVICE##,${WESTON_SERVICE},g" \
 		      "${D}${systemd_unitdir}/system/crank-demo.service"
 	fi
 
@@ -83,7 +80,6 @@ do_install () {
 	sed -i -e "s@##CRANK_DEMO_PATH##@${CRANK_DEMO_PATH}@g" \
 	       -e "s@##CRANK_DEMO_OPTIONS##@${CRANK_DEMO_OPTIONS}@g" \
 	       -e "s@##CRANK_DEMO_ENV##@${CRANK_DEMO_ENV}@g" \
-	       -e "s@##CRANK_DEMO_USER##@${CRANK_DEMO_USER}@g" \
 	       -e "s@##CRANK_DEMO_DISPLAY##@${CRANK_DEMO_DISPLAY}@g" \
 	       "${D}${sysconfdir}/crank-demo"
 	ln -sf ${sysconfdir}/crank-demo ${D}${sysconfdir}/init.d/crank-demo

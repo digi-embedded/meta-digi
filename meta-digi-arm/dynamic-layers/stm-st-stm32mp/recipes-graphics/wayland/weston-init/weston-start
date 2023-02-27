@@ -3,7 +3,7 @@
 weston_args=$*
 
 if [ -z "$WESTON_USER" ]; then
-    WESTON_USER=weston
+    WESTON_USER=root
 fi
 if [ "$USER" != "$WESTON_USER" ]; then
     weston_args_user="-u $WESTON_USER"

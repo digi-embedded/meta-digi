@@ -16,7 +16,7 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 # ccimx8x       5.4               2020.04 (packaged in imx-boot)
 # ccimx8mn      5.4               2020.04 (packaged in imx-boot)
 # ccimx8mm      5.4               2020.04 (packaged in imx-boot)
-# ccimx8mp      5.10              2021.04 (packaged in imx-boot)
+# ccimx93       5.15              2022.04 (packaged in imx-boot)
 # ccmp15        5.15              2021.10
 # ccmp13        5.15              2021.10
 #
@@ -25,6 +25,9 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 HAVE_WIFI       = "${@bb.utils.contains('MACHINE_FEATURES', 'wifi', '1', '', d)}"
 HAVE_BT         = "${@bb.utils.contains('MACHINE_FEATURES', 'bluetooth', '1', '', d)}"
 HAVE_GUI        = "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '1', '', d)}"
+
+# Default value for WiFi virtual wlans
+HAS_WIFI_VIRTWLANS ?= "false"
 
 #
 # Ethernet, Wi-Fi, and Bluetooth configuration used in recipes
@@ -59,10 +62,6 @@ USE_VT ?= "0"
 # Add the machine variant to the valid machine override
 MACHINE_VARIANT ?= ""
 MACHINEOVERRIDES .= "${@['', ':${MACHINE_VARIANT}']['${MACHINE_VARIANT}' != '']}"
-
-# U-Boot symlink
-UBOOT_SYMLINK ?= "${UBOOT_PREFIX}-${MACHINE}.${UBOOT_SUFFIX}"
-BOOTABLE_ARTIFACTS ?= ""
 
 # Extra RDEPENDS
 MACHINE_EXTRA_RDEPENDS += " \

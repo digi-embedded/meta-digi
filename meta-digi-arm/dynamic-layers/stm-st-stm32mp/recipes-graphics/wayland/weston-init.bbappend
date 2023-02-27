@@ -35,6 +35,7 @@ do_install:append() {
     install -m 0644 ${WORKDIR}/weston.ini ${D}${sysconfdir}/xdg/weston
 
     install -m 0644 ${WORKDIR}/digi_background.png ${D}${datadir}/weston/backgrounds/digi_background.png
+    printf "\n[launcher]\nicon=${datadir}/weston/terminal.png\npath=${bindir}/weston-terminal\n" >> ${D}${sysconfdir}/xdg/weston/weston.ini
 
     install -d ${D}${systemd_system_unitdir} ${D}${sbindir}
 
@@ -61,7 +62,7 @@ do_install:append() {
     sed -i 's,@DATADIR@,${datadir},g' ${D}${bindir}/weston-start
     # /etc/default/weston
     install -d ${D}${sysconfdir}/default
-    echo "WESTON_USER=weston" > ${D}${sysconfdir}/default/weston
+    echo "WESTON_USER=root" > ${D}${sysconfdir}/default/weston
 
     # check GPU
     install -d ${D}/home/root/

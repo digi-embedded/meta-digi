@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2022 by Digi International Inc.
+#  Copyright (C) 2022, 2023 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -16,9 +16,24 @@
 # Source function library
 . /etc/init.d/functions
 
+readonly DEMO_DISPLAY="##CC_DEMO_DISPLAY##"
+readonly DEMO_ENV="##CC_DEMO_ENV##"
 readonly COG_BINARY="/usr/bin/cog"
-readonly DEMOSERVER_BINARY="/srv/www/demoserver.py"
 readonly STOP_TIMEOUT="5"
+
+wait_for_wayland() {
+	local count=20
+	local wayland_socket="/run/user/0/${DEMO_DISPLAY}"
+
+	while [ ! -S "${wayland_socket}" ]; do
+		sleep 1
+		count=$((count-1))
+		if [ "${count}" = 0 ]; then
+			return 1
+		fi
+	done
+	return 0
+}
 
 stop_process() {
 	# try to stop gracefully
@@ -32,20 +47,36 @@ stop_process() {
 	done
 }
 
-case "$1" in
-	start)
-		${DEMOSERVER_BINARY} > /dev/null 2>&1 &
-		DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=wayland-0 ${COG_BINARY} \
+start() {
+	local COG_ENV="${DEMO_ENV}"
+
+	if [ -d "/usr/share/wayland" ]; then
+		wait_for_wayland
+		COG_ENV="${COG_ENV} COG_PLATFORM_WL_VIEW_FULLSCREEN=1"
+		# FULLSCREEN variable will have preference over other geometry variables.
+		if [ -f "/sys/class/graphics/fb0/virtual_size" ]; then
+			width="$(cut -d',' -f1 /sys/class/graphics/fb0/virtual_size)"
+			heigth="$(cut -d',' -f2 /sys/class/graphics/fb0/virtual_size)"
+			[ -n "${width}" ] && COG_ENV="${COG_ENV} COG_PLATFORM_WL_VIEW_WIDTH=${width}"
+			[ -n "${heigth}" ] && COG_ENV="${COG_ENV} COG_PLATFORM_WL_VIEW_HEIGHT=${heigth}"
+		fi
+	fi
+
+	env ${COG_ENV} ${COG_BINARY} \
 			--allow-file-access-from-file-urls=true \
 			--allow-universal-access-from-file-urls=false \
 			--enable-offline-web-application-cache=false \
 			--enable-page-cache=false \
 			--allow-modal-dialogs=true \
 			/srv/www/index.html > /dev/null 2>&1 &
+}
+
+case "$1" in
+	start)
+		start
 		;;
 	stop)
 		stop_process "${COG_BINARY}"
-		stop_process "${DEMOSERVER_BINARY}"
 		;;
 	restart)
 		$0 stop

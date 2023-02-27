@@ -1,4 +1,4 @@
-# Copyright (C) 2022, Digi International Inc.
+# Copyright (C) 2022, 2023, Digi International Inc.
 
 require dey-image-graphical.inc
 
@@ -10,4 +10,4 @@ GRAPHICAL_CORE = "crank"
 IMAGE_FEATURES:remove:ccimx6ul = "x11-base x11-sato"
 
 # Reduce the rootfs size to fit in the internal storage
-IMAGE_FEATURES:remove:ccmp15 = "dey-gstreamer package-management"
+IMAGE_FEATURES:remove:ccmp15 = "dey-gstreamer"

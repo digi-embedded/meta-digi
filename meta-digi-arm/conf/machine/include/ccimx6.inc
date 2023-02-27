@@ -11,7 +11,6 @@ include conf/machine/include/arm/armv7a/tune-cortexa9.inc
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"
-UBOOT_HAS_FASTBOOT = "true"
 
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm/configs/ccimx6sbc_defconfig"
@@ -35,10 +34,9 @@ MACHINE_EXTRA_RDEPENDS += " \
 MACHINE_EXTRA_RRECOMMENDS += " \
     ${MACHINE_FIRMWARE} \
     ${WIRELESS_MODULE} \
-    ${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
 "
 
-MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth pci"
+MACHINE_FEATURES += "accel-graphics wifi bluetooth pci"
 
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "HAB"
@@ -54,6 +52,5 @@ ROOTFS_EXT ?= ".ext4.gz"
 BOOT_DEV_NAME ?= "/dev/mmcblk0p1"
 ROOTFS_DEV_NAME ?= "/dev/mmcblk0p3"
 ROOTFS_ENC_DEV = "/dev/mapper/cryptrootfs"
-ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
+ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS') == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
 
-UBOOT_DEV_NAME ?= "/dev/mmcblk0boot0"

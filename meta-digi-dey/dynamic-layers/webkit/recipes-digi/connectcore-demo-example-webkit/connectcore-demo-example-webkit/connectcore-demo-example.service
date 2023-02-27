@@ -1,6 +1,10 @@
 [Unit]
 Description=Initialization of the ConnectCore demo example
-After=weston@root.service busybox-httpd.service
+After=connectcore-demo-server
+
+# Make sure we are started after graphic service is available
+After=##WESTON_SERVICE##
+Requires=##WESTON_SERVICE##
 
 [Service]
 Type=forking

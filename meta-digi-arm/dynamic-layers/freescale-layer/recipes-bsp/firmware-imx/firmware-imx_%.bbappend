@@ -1,4 +1,4 @@
-# Copyright (C) 2022, Digi International Inc.
+# Copyright (C) 2023, Digi International Inc.
 
 do_install:append() {
 	# meta-freescale deletes the SDMA firmware provided by the firmware-imx package,

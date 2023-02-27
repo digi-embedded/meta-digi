@@ -3,8 +3,6 @@
 #
 # Copyright 2017-2022, Digi International Inc.
 #
-inherit boot-artifacts
-
 DEPENDS += "zip-native"
 
 #

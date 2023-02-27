@@ -6,7 +6,7 @@ inherit image_types
 BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
 
 def TRUSTFENCE_BOOTIMAGE_DEPENDS(d):
-    tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE',True) or ""
+    tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE') or ""
     return "%s:do_image_complete" % tf_initramfs if tf_initramfs else ""
 
 do_image_boot_vfat[depends] += " \

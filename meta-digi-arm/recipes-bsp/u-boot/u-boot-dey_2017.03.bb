@@ -1,6 +1,6 @@
 # Copyright (C) 2018-2021 Digi International
 
-require digi-u-boot.inc
+require u-boot-dey.inc
 
 SRCBRANCH = "v2017.03/master"
 SRCREV = "${AUTOREV}"

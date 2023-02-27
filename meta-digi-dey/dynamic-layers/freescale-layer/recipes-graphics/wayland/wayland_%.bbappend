@@ -1,16 +1,4 @@
-# Copyright (C) 2020-2022, Digi International Inc.
-
-FILES:${PN}:class-nativesdk = "${bindir}/* ${sbindir}/* ${libexecdir}/* ${libdir}/lib*${SOLIBS} \
-            ${sysconfdir} ${sharedstatedir} ${localstatedir} \
-            ${base_bindir}/* ${base_sbindir}/* \
-            ${base_libdir}/*${SOLIBS} \
-            ${base_prefix}/lib/udev ${prefix}/lib/udev \
-            ${base_libdir}/udev ${libdir}/udev \
-            ${datadir}/${BPN} ${libdir}/${BPN}/* \
-            ${datadir}/pixmaps ${datadir}/applications \
-            ${datadir}/idl ${datadir}/omf ${datadir}/sounds \
-            ${libdir}/bonobo/servers"
-FILES:${PN}-dev:remove:class-nativesdk = "${bindir} ${datadir}/wayland"
+# Copyright (C) 2020-2023, Digi International Inc.
 
 FILES_SOLIBSDEV = " \
     ${base_libdir}/lib*${SOLIBSDEV} \

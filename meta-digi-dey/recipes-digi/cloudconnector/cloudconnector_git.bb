@@ -5,7 +5,7 @@ SECTION = "libs"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
 
-DEPENDS = "confuse libdigiapix openssl recovery-utils swupdate zlib json-c"
+DEPENDS = "libconfuse libdigiapix openssl recovery-utils swupdate zlib json-c"
 
 SRCBRANCH = "dey-4.0/maint"
 SRCREV = "${AUTOREV}"
@@ -54,6 +54,8 @@ pkg_postinst_ontarget:${PN}() {
 	fi
 }
 
+inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}
+
 INITSCRIPT_NAME = "cloud-connector"
 SYSTEMD_SERVICE:${PN} = "cloud-connector.service"
 
@@ -70,6 +72,9 @@ FILES:${PN}-cert = "${sysconfdir}/ssl/certs/Digi_Int-ca-cert-public.crt"
 CONFFILES:${PN} += "${sysconfdir}/cc.conf"
 
 RDEPENDS:${PN} = "${PN}-cert"
+
+# 'cloud-connector-init' script uses '/etc/init.d/functions'
+RDEPENDS:${PN} += "initscripts-functions"
 
 # Disable extra compilation checks from SECURITY_CFLAGS to avoid build errors
 lcl_maybe_fortify:pn-cloudconnector = ""

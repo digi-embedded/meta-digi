@@ -8,16 +8,21 @@ require conf/machine/include/arm/armv8a/tune-cortexa53.inc
 # Platform u-boot settings
 UBOOT_PREFIX = "imx-boot"
 UBOOT_SUFFIX = "bin"
-UBOOT_HAS_FASTBOOT = "true"
 
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
-EXTRA_IMAGEDEPENDS = "imx-boot"
+EXTRA_IMAGEDEPENDS += "imx-boot"
 BOOTLOADER_IMAGE_RECIPE = "imx-boot"
 BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 
-# Set LPDDR4 FIRMWARE
-DDR_FIRMWARE_NAME = "lpddr4_pmu_train_1d_imem.bin lpddr4_pmu_train_1d_dmem.bin lpddr4_pmu_train_2d_imem.bin lpddr4_pmu_train_2d_dmem.bin"
+# LPDDR4 firmware
+DDR_FIRMWARE_NAME = " \
+    lpddr4_pmu_train_1d_imem.bin \
+    lpddr4_pmu_train_1d_dmem.bin \
+    lpddr4_pmu_train_2d_imem.bin \
+    lpddr4_pmu_train_2d_dmem.bin \
+"
+IMXBOOT_TARGETS = "flash_evk"
 
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx8_defconfig"
@@ -46,13 +51,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     ${WIRELESS_MODULE} \
 "
 
-MACHINE_FEATURES += "accel-graphics accel-video wifi bluetooth cryptochip mca optee"
-
-# AARCH64 doesn't support self-extracting zImage
-KERNEL_IMAGETYPE = "Image.gz"
-
-VIRTUAL-RUNTIME_init_manager ?= "systemd"
-VIRTUAL-RUNTIME_initscripts ?= "initscripts"
+MACHINE_FEATURES += "accel-graphics wifi bluetooth cryptochip mca optee"
 
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "HAB"
@@ -60,7 +59,6 @@ TRUSTFENCE_SIGN_MODE = "HAB"
 # Adding 'wayland' along with 'x11' enables the xwayland backend
 # Vulkan is necessary for wayland to build
 DISTRO_FEATURES:append = " wayland vulkan systemd pam"
-DISTRO_FEATURES_BACKFILL_CONSIDERED = "sysvinit"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"
@@ -69,6 +67,5 @@ ROOTFS_EXT ?= ".ext4.gz"
 BOOT_DEV_NAME ?= "/dev/mmcblk0p1"
 ROOTFS_DEV_NAME ?= "/dev/mmcblk0p3"
 ROOTFS_ENC_DEV = "/dev/mapper/cryptrootfs"
-ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
+ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS') == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
 
-UBOOT_DEV_NAME ?= "/dev/mmcblk0boot0"

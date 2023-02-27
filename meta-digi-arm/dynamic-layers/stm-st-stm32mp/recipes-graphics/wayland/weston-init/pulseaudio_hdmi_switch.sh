@@ -29,11 +29,7 @@ do
 done
 EOF
 chmod +x /tmp/pulse_temp_switch.sh
-if [ "$USER" == "weston" ]; then
-    script -qc "/tmp/pulse_temp_switch.sh"
-else
-    script -qc "su -l weston -c /tmp/pulse_temp_switch.sh"
-fi
+script -qc "/tmp/pulse_temp_switch.sh"
 
 rm -f /tmp/pulse_temp_switch.sh
 

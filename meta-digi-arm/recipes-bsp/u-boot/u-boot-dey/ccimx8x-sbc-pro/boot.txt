@@ -98,7 +98,7 @@ if test "${board_version}" -le "3"; then
 	setenv overlays _ov_board_v1-v3_ccimx8x-sbc-pro.dtbo,${overlays}
 fi
 
-setenv extra_bootargs fbcon=logo-pos:center ${extra_bootargs}
+setenv extra_bootargs fbcon=logo-pos:center fbcon=logo-count:1 ${extra_bootargs}
 dboot linux mmc ${mmcbootdev}:${mmcpart}
 
 

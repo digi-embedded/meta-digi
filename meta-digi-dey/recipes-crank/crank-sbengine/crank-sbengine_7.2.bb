@@ -22,11 +22,11 @@ CRANK_ENGINE_TARBALL_PATH ?= ""
 # a PREMIRROR to a local directory that can be configured in the project's
 # local.conf file using CRANK_ENGINE_TARBALL_PATH variable.
 python() {
-    crank_engine_tarball_path = d.getVar('CRANK_ENGINE_TARBALL_PATH', True)
+    crank_engine_tarball_path = d.getVar('CRANK_ENGINE_TARBALL_PATH')
     if crank_engine_tarball_path:
-        premirrors = d.getVar('PREMIRRORS', True)
+        premirrors = d.getVar('PREMIRRORS')
         d.setVar('PREMIRRORS', "http:///not/exist/crank-sbengine-.* %s \\n %s" % (crank_engine_tarball_path, premirrors))
-    crank_engine_tarball_sha256 = d.getVar('CRANK_ENGINE_TARBALL_SHA256', True)
+    crank_engine_tarball_sha256 = d.getVar('CRANK_ENGINE_TARBALL_SHA256')
     if crank_engine_tarball_sha256:
         d.setVarFlag("SRC_URI", "sha256sum", crank_engine_tarball_sha256)
 }

@@ -13,6 +13,13 @@ include conf/machine/include/digi-defaults.inc
 IMX_DEFAULT_BSP ?= "nxp"
 MACHINEOVERRIDES =. "use-${IMX_DEFAULT_BSP}-bsp:"
 
+# Allow setting the UART used during the boot by ATF.
+# FIXME: We should return INVALID here but currently only i.MX8M has support to override the UART
+# base address in source code.
+SOC_ATF_BOOT_UART_BASE         = ""
+SOC_ATF_BOOT_UART_BASE:ccimx8m = "0x30860000"
+ATF_BOOT_UART_BASE            ?= "${SOC_ATF_BOOT_UART_BASE}"
+
 XSERVER_DRIVER = "xf86-video-fbdev"
 XSERVER_DRIVER:imxgpu2d = "xf86-video-imx-vivante"
 XSERVER_DRIVER:append:mx8-generic-bsp = " xf86-video-modesetting"
@@ -34,6 +41,7 @@ DEFAULTTUNE:mx6-generic-bsp    ?= "cortexa9thf-neon"
 DEFAULTTUNE:mx6ul-generic-bsp  ?= "cortexa7thf-neon"
 DEFAULTTUNE:mx8m-generic-bsp   ?= "cortexa53-crypto"
 DEFAULTTUNE:mx8x-generic-bsp   ?= "cortexa35-crypto"
+DEFAULTTUNE:mx93-generic-bsp   ?= "cortexa55"
 
 INHERIT += "machine-overrides-extender"
 
@@ -48,6 +56,7 @@ MACHINEOVERRIDES_EXTENDER:mx8mn:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxd
 MACHINEOVERRIDES_EXTENDER:mx8mp:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxvpu:imxgpu:imxgpu2d:imxgpu3d:imxvulkan:mx8-generic-bsp:mx8-nxp-bsp:mx8m-generic-bsp:mx8m-nxp-bsp:mx8mp-generic-bsp:mx8mp-nxp-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8qxp:use-nxp-bsp = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxdpu:imxgpu:imxgpu2d:imxgpu3d:imxvulkan:mx8-generic-bsp:mx8-nxp-bsp:mx8x-generic-bsp:mx8x-nxp-bsp:mx8qxp-generic-bsp:mx8qxp-nxp-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8dx:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxdpu:imxgpu:imxgpu2d:imxgpu3d:imxvulkan:mx8-generic-bsp:mx8-nxp-bsp:mx8x-generic-bsp:mx8x-nxp-bsp:mx8dx-generic-bsp:mx8dx-nxp-bsp"
+MACHINEOVERRIDES_EXTENDER:mx93:use-nxp-bsp   = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxpxp:mx9-generic-bsp:mx9-nxp-bsp:mx93-generic-bsp:mx93-nxp-bsp"
 
 #######
 ### Mainline BSP specific overrides
@@ -60,6 +69,7 @@ MACHINEOVERRIDES_EXTENDER:mx8mn:use-mainline-bsp  = "imx-generic-bsp:imx-mainlin
 MACHINEOVERRIDES_EXTENDER:mx8mp:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:mx8-generic-bsp:mx8-mainline-bsp:mx8m-generic-bsp:mx8m-mainline-bsp:mx8mp-generic-bsp:mx8mp-mainline-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8qxp:use-mainline-bsp = "imx-generic-bsp:imx-mainline-bsp:mx8-generic-bsp:mx8-mainline-bsp:mx8x-generic-bsp:mx8x-mainline-bsp:mx8qxp-generic-bsp:mx8qxp-mainline-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8dx:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:mx8-generic-bsp:mx8-mainline-bsp:mx8x-generic-bsp:mx8x-mainline-bsp:mx8dx-generic-bsp:mx8dx-mainline-bsp"
+MACHINEOVERRIDES_EXTENDER:mx93:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:imxdrm:imxpxp:mx9-generic-bsp:mx9-mainline-bsp:mx93-generic-bsp:mx93-mainline-bsp"
 
 MACHINEOVERRIDES_EXTENDER_FILTER_OUT = " \
     mx6 \
@@ -88,6 +98,7 @@ MACHINEOVERRIDES_EXTENDER_FILTER_OUT = " \
     mx8qxp \
     mx8dx \
     mx8dxl \
+    mx93 \
 "
 
 MACHINEOVERRIDES_FILTERED_OUT_QA_ERROR = "%s overrides cannot be used and need conversion to use the new BSP-specific overrides. Check 'meta-freescale/scripts/convert-bsp-specific-overrides'."
@@ -102,6 +113,7 @@ MACHINE_SOCARCH_SUFFIX:mx8mn-nxp-bsp  = "-mx8mn"
 MACHINE_SOCARCH_SUFFIX:mx8mp-nxp-bsp  = "-mx8mp"
 MACHINE_SOCARCH_SUFFIX:mx8qxp-nxp-bsp = "-mx8"
 MACHINE_SOCARCH_SUFFIX:mx8dx-nxp-bsp  = "-mx8"
+MACHINE_SOCARCH_SUFFIX:mx93-nxp-bsp = "-mx93"
 
 # For Mainline we use a single SoC suffix as we don't have different build options
 MACHINE_SOCARCH_SUFFIX:imx-mainline-bsp = "-imx"
@@ -125,11 +137,15 @@ MACHINE_SOCARCH_FILTER:append:imxvulkan = " \
 "
 MACHINE_SOCARCH_FILTER:append:imxgpu = " \
     virtual/egl \
-    virtual/mesa \
     virtual/libopenvg \
+    virtual/mesa \
+    virtual/opencl-icd \
     libdrm \
     cairo \
     libgal-imx \
+    opencl-icd-loader \
+    opencl-clhpp \
+    opencl-headers \
     opencv \
     pango \
 "
@@ -153,16 +169,6 @@ MACHINE_SOCARCH_FILTER:append:imx-mainline-bsp = " \
     pango \
     qtbase \
 "
-MACHINE_SOCARCH_FILTER:append:mx6q-nxp-bsp = " \
-    opencl-icd-loader \
-    opencl-clhpp \
-    opencl-headers \
-"
-MACHINE_SOCARCH_FILTER:append:mx8-nxp-bsp = " \
-    opencl-icd-loader \
-    opencl-clhpp \
-    opencl-headers \
-"
 MACHINE_SOCARCH_FILTER:append:mx8qm-nxp-bsp = " \
     virtual/libopenvx \
 "
@@ -177,26 +183,36 @@ SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS:append = " \
     imx-test->virtual/imxvpu \
 "
 
+# Firmware used for boot.
+IMX_EXTRA_FIRMWARE                  ?= ""
+IMX_EXTRA_FIRMWARE:mx8-generic-bsp   = "firmware-imx-8 imx-sc-firmware imx-seco"
+IMX_EXTRA_FIRMWARE:mx8m-generic-bsp  = "firmware-imx-8m"
+IMX_EXTRA_FIRMWARE:mx8x-generic-bsp  = "imx-sc-firmware imx-seco"
+IMX_EXTRA_FIRMWARE:mx93-generic-bsp  = "firmware-imx-9 firmware-sentinel"
+
+# Extra audio support
+IMX_ALSA_EXTRA = ""
+IMX_ALSA_EXTRA:imx-nxp-bsp = "imx-alsa-plugins"
+MACHINE_EXTRA_RRECOMMENDS:append:mx6-nxp-bsp = " ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', '${IMX_ALSA_EXTRA}', '', d)}"
+MACHINE_EXTRA_RRECOMMENDS:append:mx8-nxp-bsp = " ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', '${IMX_ALSA_EXTRA}', '', d)}"
+
 # Extra udev rules
 MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf udev-rules-imx"
 
 # GStreamer 1.0 plugins
 MACHINE_GSTREAMER_1_0_PLUGIN                ?= ""
-MACHINE_GSTREAMER_1_0_PLUGIN:mx6dl-nxp-bsp  ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
-MACHINE_GSTREAMER_1_0_PLUGIN:mx6q-nxp-bsp   ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
-MACHINE_GSTREAMER_1_0_PLUGIN:mx6ul-nxp-bsp  ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
-MACHINE_GSTREAMER_1_0_PLUGIN:mx8mm-nxp-bsp  ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
-MACHINE_GSTREAMER_1_0_PLUGIN:mx8mn-nxp-bsp  ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
-MACHINE_GSTREAMER_1_0_PLUGIN:mx8mp-nxp-bsp  ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
-MACHINE_GSTREAMER_1_0_PLUGIN:mx8qxp-nxp-bsp ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
-MACHINE_GSTREAMER_1_0_PLUGIN:mx8dx-nxp-bsp  ?= "imx-gst1.0-plugin imx-gst1.0-plugin-gplay imx-gst1.0-plugin-grecorder"
+MACHINE_GSTREAMER_1_0_PLUGIN:mx6dl-nxp-bsp  ?= "imx-gst1.0-plugin"
+MACHINE_GSTREAMER_1_0_PLUGIN:mx6q-nxp-bsp   ?= "imx-gst1.0-plugin"
+MACHINE_GSTREAMER_1_0_PLUGIN:mx6ul-nxp-bsp  ?= "imx-gst1.0-plugin"
+MACHINE_GSTREAMER_1_0_PLUGIN:mx8-nxp-bsp    ?= "imx-gst1.0-plugin"
+MACHINE_GSTREAMER_1_0_PLUGIN:mx9-nxp-bsp    ?= "imx-gst1.0-plugin"
 
 # In 'meta-freescale' these gstreamer preferred versions are restricted to 'mx8-nxp-bsp'
 # but in DEY we use them also in the 6UL, so relax the override to 'imx-nxp-base'
-PREFERRED_VERSION_gstreamer1.0:imx-nxp-bsp              ??= "1.20.0.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-base:imx-nxp-bsp ??= "1.20.0.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-good:imx-nxp-bsp ??= "1.20.0.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-bad:imx-nxp-bsp  ??= "1.20.0.imx"
+PREFERRED_VERSION_gstreamer1.0:imx-nxp-bsp              ??= "1.20.3.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-base:imx-nxp-bsp ??= "1.20.3.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-good:imx-nxp-bsp ??= "1.20.3.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-bad:imx-nxp-bsp  ??= "1.20.3.imx"
 PREFERRED_VERSION_ffmpeg:imx-nxp-bsp                    ??= "4.4.1"
 
 # Determines if the SoC has support for Vivante kernel driver
@@ -221,6 +237,7 @@ PREFERRED_PROVIDER_virtual/libgles2:imxgpu3d ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libgles3:imxgpu3d ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libg2d            ?= "imx-gpu-g2d"
 PREFERRED_PROVIDER_virtual/libg2d:imxdpu     ?= "imx-dpu-g2d"
+PREFERRED_PROVIDER_virtual/libg2d:mx93-nxp-bsp ?= "imx-pxp-g2d"
 PREFERRED_PROVIDER_opencl-clhpp:imxgpu       ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_opencl-headers:imxgpu     ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_opencl-icd-loader:imxgpu  ?= "imx-gpu-viv"
@@ -232,29 +249,39 @@ PREFERRED_VERSION_weston:imx-mainline-bsp   = ""
 PREFERRED_VERSION_wayland-protocols:mx6-nxp-bsp ??= "1.25.imx"
 PREFERRED_VERSION_wayland-protocols:mx7-nxp-bsp ??= "1.25.imx"
 PREFERRED_VERSION_wayland-protocols:mx8-nxp-bsp ??= "1.25.imx"
+PREFERRED_VERSION_wayland-protocols:mx9-nxp-bsp ??= "1.25.imx"
 
 # Use i.MX libdrm Version
 PREFERRED_VERSION_libdrm:mx6-nxp-bsp ??= "2.4.109.imx"
 PREFERRED_VERSION_libdrm:mx7-nxp-bsp ??= "2.4.109.imx"
 PREFERRED_VERSION_libdrm:mx8-nxp-bsp ??= "2.4.109.imx"
+PREFERRED_VERSION_libdrm:mx9-nxp-bsp ??= "2.4.109.imx"
 
 PREFERRED_VERSION_vulkan-headers:imxvulkan ??= "1.2.182.0"
 PREFERRED_VERSION_vulkan-loader:imxvulkan  ??= "1.2.182.0"
 PREFERRED_VERSION_vulkan-tools:imxvulkan   ??= "1.2.182.0"
 
 # Use i.MX optee Version
-PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "3.17.0.imx"
-PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "3.17.0.imx"
-PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.17.0.imx"
+PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "3.19.0.imx"
 
-#Use i.MX opencv Version for mx8
+# Use i.MX opencv Version
 PREFERRED_VERSION_opencv:mx8-nxp-bsp ??= "4.6.0.imx"
+PREFERRED_VERSION_opencv:mx9-nxp-bsp ??= "4.6.0.imx"
 
-EXTRA_IMAGEDEPENDS = "u-boot"
+EXTRA_IMAGEDEPENDS += "u-boot"
 
-KERNEL_IMAGETYPE ?= "zImage"
+KERNEL_IMAGETYPE = "zImage"
+KERNEL_IMAGETYPE:aarch64 = "Image.gz"
 
 MACHINE_FEATURES = "usbgadget usbhost vfat alsa touchscreen"
+
+# Add a generic gstreamer distro feature for all IMX platforms
+DISTRO_FEATURES:append =  " gstreamer"
 
 # U-Boot 2017.X requires a specific dtc version.
 PREFERRED_VERSION_dtc-native:ccimx6 ?= "1.4.5"

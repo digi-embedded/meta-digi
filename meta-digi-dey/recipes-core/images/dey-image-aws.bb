@@ -1,4 +1,4 @@
-# Copyright (C) 2017, Digi International Inc.
+# Copyright (C) 2017-2023, Digi International Inc.
 
 DESCRIPTION = "DEY image including Amazon Web Services packages"
 LICENSE = "MIT"
@@ -16,7 +16,6 @@ IMAGE_INSTALL = " \
 
 IMAGE_FEATURES += " \
     dey-network \
-    package-management \
     ssh-server-dropbear \
     ${@bb.utils.contains('MACHINE_FEATURES', 'bluetooth', 'dey-bluetooth', '', d)} \
     ${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'dey-wireless', '', d)} \

@@ -3,7 +3,7 @@
 #
 #  build-github.sh
 #
-#  Copyright (C) 2015-2022 by Digi International Inc.
+#  Copyright (C) 2015-2023 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -25,7 +25,6 @@ set -e
 AVAILABLE_PLATFORMS=" \
 		     ccimx8mm-dvk \
 		     ccimx8mn-dvk \
-		     ccimx8mp-dvk \
 		     ccimx8x-sbc-pro \
 		     ccimx8x-sbc-express \
 		     ccimx6qpsbc \
@@ -143,14 +142,13 @@ while read _pl _tgt; do
 done<<-_EOF_
 	ccimx8mm-dvk         dey-image-qt
 	ccimx8mn-dvk         dey-image-qt
-	ccimx8mp-dvk         dey-image-qt
 	ccimx8x-sbc-pro      dey-image-qt
 	ccimx8x-sbc-express  dey-image-qt
 	ccimx6qpsbc          dey-image-qt
 	ccimx6sbc            dey-image-qt
 	ccimx6ulsbc          dey-image-qt
 	ccimx6ulstarter      core-image-base
-	ccmp15-dvk           dey-image-qt
+	ccmp15-dvk           dey-image-webkit
 	ccmp13-dvk           core-image-base
 _EOF_
 
@@ -181,7 +179,7 @@ if pushd ${YOCTO_INST_DIR}; then
 			error "Revision \"${DY_REVISION}\" not found"
 		fi
 	fi
-	yes "" 2>/dev/null | ${REPO} init --depth=1 --no-repo-verify -u ${MANIFEST_URL} ${repo_revision}
+	yes "" 2>/dev/null | ${REPO} init --no-repo-verify -u ${MANIFEST_URL} ${repo_revision}
 	${REPO} forall -p -c 'git remote prune $(git remote)'
 	time ${REPO} sync -d ${MAKE_JOBS}
 	popd

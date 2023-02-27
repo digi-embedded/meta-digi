@@ -8,10 +8,12 @@ MACHINEOVERRIDES =. "mx6:mx6ul:${DIGI_FAMILY}:"
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/arm/armv7a/tune-cortexa7.inc
 
+# Override default init manager from distro config
+INIT_MANAGER ?= "sysvinit"
+
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"
-UBOOT_HAS_FASTBOOT = "true"
 
 STORAGE_MEDIA = "mtd"
 
@@ -33,9 +35,7 @@ MACHINE_EXTRA_RDEPENDS += " \
 MACHINE_EXTRA_RRECOMMENDS += " \
     ${MACHINE_FIRMWARE} \
     ${WIRELESS_MODULE} \
-    ${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)} \
 "
-MACHINE_EXTRA_RRECOMMENDS:remove:use-mainline-bsp = "${@bb.utils.contains('COMBINED_FEATURES', 'alsa', 'imx-alsa-plugins', '', d)}"
 
 MACHINE_FEATURES += "wifi bluetooth cryptochip mca"
 MACHINE_FEATURES:remove:use-mainline-bsp = "wifi"
@@ -58,9 +58,8 @@ ROOTFS_EXT ?= '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", ".squa
 BOOT_DEV_NAME ?= "linux"
 ROOTFS_DEV_NAME ?= "rootfs"
 ROOTFS_ENC_DEV = "${ROOTFS_DEV_NAME}"
-ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
+ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS') == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
 
-UBOOT_DEV_NAME ?= "/dev/mtd"
 # U-Boot environment offset (within partition)
 UBOOT_ENV_OFFSET ?= "0x0"
 UBOOT_ENV_REDUND_OFFSET ?= "${UBOOT_ENV_SIZE}"

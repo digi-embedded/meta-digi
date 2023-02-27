@@ -20,11 +20,11 @@ IMG_NAME = "${IMAGE_DEPENDS}"
 
 SWUPDATE_IMAGES = " \
     ${IMG_NAME} \
-    ${@oe.utils.ifelse(d.getVar('SWUPDATE_UBOOTIMG', True) == 'true', '${UBOOT_PREFIX}', '')} \
+    ${@oe.utils.ifelse(d.getVar('SWUPDATE_UBOOTIMG') == 'true', '${UBOOT_PREFIX}', '')} \
 "
 
 SOFTWARE_VERSION ?= "0.0.1"
-DESCRIPTION = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS', True) == '1', 'Encrypted rootfs ${IMG_NAME} update', '${IMG_NAME} update')}"
+DESCRIPTION = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS') == '1', 'Encrypted rootfs ${IMG_NAME} update', '${IMG_NAME} update')}"
 
 UBOOT_EXT ?= ".${UBOOT_SUFFIX}"
 
@@ -33,22 +33,22 @@ UBOOTIMG_OFFSET ?= "${BOOTLOADER_SEEK_BOOT}"
 SWUPDATE_STORAGE_MEDIA = "${@oe.utils.conditional('STORAGE_MEDIA', 'mmc', 'swupdate_uboot_mmc.sh', 'swupdate_uboot_nand.sh', d)}"
 
 python () {
-    img_fstypes = d.getVar('BOOTFS_EXT', True) + " " + d.getVar('ROOTFS_EXT', True)
-    d.setVarFlag("SWUPDATE_IMAGES_FSTYPES", d.getVar('IMG_NAME', True), img_fstypes)
-    if (d.getVar('SWUPDATE_UBOOTIMG', True) == "true"):
-        uboot_fstypes = d.getVar('UBOOT_EXT', True)
-        d.setVarFlag("SWUPDATE_IMAGES_FSTYPES", d.getVar('UBOOT_PREFIX', True), uboot_fstypes)
+    img_fstypes = d.getVar('BOOTFS_EXT') + " " + d.getVar('ROOTFS_EXT')
+    d.setVarFlag("SWUPDATE_IMAGES_FSTYPES", d.getVar('IMG_NAME'), img_fstypes)
+    if (d.getVar('SWUPDATE_UBOOTIMG') == "true"):
+        uboot_fstypes = d.getVar('UBOOT_EXT')
+        d.setVarFlag("SWUPDATE_IMAGES_FSTYPES", d.getVar('UBOOT_PREFIX'), uboot_fstypes)
 }
 
 python do_swuimage:prepend() {
     import glob
 
-    if (d.getVar('TRUSTFENCE_SIGN', True) == "1"):
-        d.setVar('SWUPDATE_PRIVATE_KEY', glob.glob(d.getVar('SWUPDATE_PRIVATE_KEY_TEMPLATE', True))[0])
+    if (d.getVar('TRUSTFENCE_SIGN') == "1"):
+        d.setVar('SWUPDATE_PRIVATE_KEY', glob.glob(d.getVar('SWUPDATE_PRIVATE_KEY_TEMPLATE'))[0])
 }
 
 def get_baseimg_pn(d):
-    file_name = d.getVar('PN', True)
+    file_name = d.getVar('PN')
     return file_name[:file_name.find("-swu")]
 
 

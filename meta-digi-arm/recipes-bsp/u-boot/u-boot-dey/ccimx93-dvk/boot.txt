@@ -1,0 +1,86 @@
+#
+# U-Boot bootscript for EMMC/SD images created by Yocto.
+#
+
+# As the first step in the boot script, check if we are using DualBoot and
+# if an upgrade is available. This requires the script to change some variables
+# and save them, while the rest of the script changes variables only temporarily
+# without saving them.
+
+# Dual boot update verification
+if test "${dualboot}" = "yes"; then
+	if test "${upgrade_available}" = "1"; then
+		echo "Update detected; Booting new system in ${active_system} (try ${bootcount})"
+	else
+		if test "${active_system}" = "linux_a"; then
+			echo "Booting from system A"
+			part number mmc ${mmcbootdev} linux_a pi
+			setenv mmcpart ${pi}
+			# Save the partition index on variable rootfs_a_index
+			part number mmc ${mmcbootdev} rootfs_a rootfs_a_index
+			# Save the rootfs_a UUID into mmcroot_a
+			part uuid mmc ${mmcbootdev}:${rootfs_a_index} mmcroot_a
+			setenv mmcroot PARTUUID=${mmcroot_a}
+		else
+			echo "Booting from system B"
+			part number mmc ${mmcbootdev} linux_b pi
+			setenv mmcpart ${pi}
+			# Save the partition index on variable rootfs_b_index
+			part number mmc ${mmcbootdev} rootfs_b rootfs_b_index
+			# Save the rootfs_b UUID into mmcroot_b
+			part uuid mmc ${mmcbootdev}:${rootfs_b_index} mmcroot_b
+			setenv mmcroot PARTUUID=${mmcroot_b}
+		fi
+	fi
+else
+	# Get the UUID of the configured boot partition.
+	part uuid mmc ${mmcbootdev}:${mmcpart} bootpart
+	# Check the boot source.
+	if test "${bootpart}" = "${part1_uuid}"; then
+		# We are booting from the eMMC using 'linux'.
+		true
+	elif test "${bootpart}" = "${part2_uuid}"; then
+		# We are booting from the eMMC using 'recovery'.
+		setenv boot_initrd true
+		setenv initrd_file uramdisk-recovery.img
+	else
+		# We are booting from the SD card.
+		setenv mmcroot /dev/mmcblk${mmcbootdev}p2
+	fi
+fi
+
+# Back up environment variables
+setenv ORIG_overlays ${overlays}
+
+#
+# Determine overlays to apply depending on the hardware capabilities
+# described by the HWID, SOM version, and carrier board version.
+#
+setexpr module_has_mca ${hwid_2} \& 10000
+setexpr module_has_mca ${module_has_mca} / 10000
+setexpr module_has_wifi ${hwid_2} \& 20000
+setexpr module_has_wifi ${module_has_wifi} / 20000
+setexpr module_has_bt ${hwid_2} \& 40000
+setexpr module_has_bt ${module_has_bt} / 40000
+
+if test "${module_has_bt}" = "1" && test -z "${disable_bt}"; then
+	setenv overlays _ov_som_bt_ccimx93.dtbo,${overlays}
+fi
+
+if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
+	setenv overlays _ov_som_wifi_ccimx93.dtbo,${overlays}
+fi
+
+if test "${module_has_mca}" = "1" && test -z "${disable_mca}"; then
+	setenv overlays _ov_som_mca_ccimx93.dtbo,${overlays}
+fi
+
+dboot linux mmc ${mmcbootdev}:${mmcpart}
+
+#
+# Undo changes to environment variables
+#
+# (we only get here in case of an error on the dboot command)
+#
+setenv overlays ${ORIG_overlays}
+setenv ORIG_overlays

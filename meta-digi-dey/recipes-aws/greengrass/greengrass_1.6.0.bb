@@ -72,7 +72,7 @@ LIC_FILES_CHKSUM = " \
 # Bitbake does not support spaces in filenames, but GG License does have spaces,
 # so workaround the problem by renaming the file before using it.
 GG_LIC_FILENAME = "Greengrass AWS SW License (IoT additional) vr6.txt"
-GG_LIC_FILENAME_NOSPACES = "${@d.getVar('GG_LIC_FILENAME', True).replace(' ','_')}"
+GG_LIC_FILENAME_NOSPACES = "${@d.getVar('GG_LIC_FILENAME').replace(' ','_')}"
 LIC_FILES_CHKSUM += "file://ggc/core/LICENSE/${GG_LIC_FILENAME_NOSPACES};md5=7df5bf535d02b2f83c260250fe330b6c"
 
 SRC_URI[arm.md5sum] = "93ae820af2bf2527bafdb34598d174ed"

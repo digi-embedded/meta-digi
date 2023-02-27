@@ -7,4 +7,4 @@ DESCRIPTION = "DEY image with WebKit browser engine support"
 
 GRAPHICAL_CORE = "webkit"
 
-COMPATIBLE_MACHINE = "(ccimx8x|ccimx8m|ccimx6$|ccmp15)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx8m|ccimx8x|ccimx93|ccmp15)"

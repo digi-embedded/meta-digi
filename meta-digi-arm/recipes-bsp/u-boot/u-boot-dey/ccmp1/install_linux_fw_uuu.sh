@@ -47,6 +47,7 @@ show_usage()
 	echo "                          'dey-image-webkit', 'core-image-base'..."
 	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
+	echo "   -d                     Install firmware on dualboot partitions (system A and system B)."
 	exit 2
 }
 
@@ -79,10 +80,11 @@ echo "############################################################"
 # -a <atf-filename>
 # -f <fip-filename>
 # -i <image-name>
-while getopts 'a:f:hi:n' c
+while getopts 'a:df:hi:n' c
 do
 	case $c in
 	a) INSTALL_ATF_FILENAME=${OPTARG} ;;
+	d) INSTALL_DUALBOOT=true ;;
 	f) INSTALL_FIP_FILENAME=${OPTARG} ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
@@ -169,12 +171,18 @@ if [ "${NOWAIT}" != true ]; then
 	printf "   fsbl1\t${INSTALL_ATF_FILENAME}\n"
 	printf "   fsbl2\t${INSTALL_ATF_FILENAME}\n"
 	printf "   fip-a\t${INSTALL_FIP_FILENAME}\n"
-	printf "   fip-b\t${INSTALL_FIP_FILENAME}\n"
+	if [ "${INSTALL_DUALBOOT}" = true ]; then
+		printf "   fip-b\t${INSTALL_FIP_FILENAME}\n"
+	fi
 	if [ "${DUALBOOT}" = true ]; then
 		printf "   ${LINUX_NAME}_a\t${INSTALL_LINUX_FILENAME}\n"
-		printf "   ${LINUX_NAME}_b\t${INSTALL_LINUX_FILENAME}\n"
+		if [ "${INSTALL_DUALBOOT}" = true ]; then
+			printf "   ${LINUX_NAME}_b\t${INSTALL_LINUX_FILENAME}\n"
+		fi
 		printf "   ${ROOTFS_NAME}_a\t${INSTALL_ROOTFS_FILENAME}\n"
-		printf "   ${ROOTFS_NAME}_b\t${INSTALL_ROOTFS_FILENAME}\n"
+		if [ "${INSTALL_DUALBOOT}" = true ]; then
+			printf "   ${ROOTFS_NAME}_b\t${INSTALL_ROOTFS_FILENAME}\n"
+		fi
 	else
 		printf "   ${LINUX_NAME}\t${INSTALL_LINUX_FILENAME}\n"
 		printf "   ${RECOVERY_NAME}\t${INSTALL_RECOVERY_FILENAME}\n"
@@ -204,7 +212,9 @@ part_update "fsbl2" "${INSTALL_ATF_FILENAME}" 5000
 
 # Update FIP
 part_update "fip-a" "${INSTALL_FIP_FILENAME}" 5000
-part_update "fip-b" "${INSTALL_FIP_FILENAME}" 5000
+if [ "${INSTALL_DUALBOOT}" = true ]; then
+	part_update "fip-b" "${INSTALL_FIP_FILENAME}" 5000
+fi
 
 # Environment volume does not exist and needs to be created
 if [ "${RUNVOLS}" = true ]; then
@@ -247,11 +257,15 @@ if [ "${DUALBOOT}" = true ]; then
 	# Update Linux A
 	part_update "${LINUX_NAME}_a" "${INSTALL_LINUX_FILENAME}" 15000
 	# Update Linux B
-	part_update "${LINUX_NAME}_b" "${INSTALL_LINUX_FILENAME}" 15000
+	if [ "${INSTALL_DUALBOOT}" = true ]; then
+		part_update "${LINUX_NAME}_b" "${INSTALL_LINUX_FILENAME}" 15000
+	fi
 	# Update Rootfs A
 	part_update "${ROOTFS_NAME}_a" "${INSTALL_ROOTFS_FILENAME}" 120000
 	# Update Rootfs B
-	part_update "${ROOTFS_NAME}_b" "${INSTALL_ROOTFS_FILENAME}" 120000
+	if [ "${INSTALL_DUALBOOT}" = true ]; then
+		part_update "${ROOTFS_NAME}_b" "${INSTALL_ROOTFS_FILENAME}" 120000
+	fi
 else
 	# Update Linux
 	part_update "${LINUX_NAME}" "${INSTALL_LINUX_FILENAME}" 15000

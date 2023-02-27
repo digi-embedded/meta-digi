@@ -32,6 +32,8 @@ FILES:${PN}-init = " \
     ${sysconfdir}/init.d/xbee-init \
     ${systemd_unitdir}/system/xbee-init.service \
 "
+ALLOW_EMPTY:${PN} = "1"
+
 INITSCRIPT_PACKAGES += "${PN}-init"
 INITSCRIPT_NAME:${PN}-init = "xbee-init"
 INITSCRIPT_PARAMS:${PN}-init = "start 19 2 3 4 5 . stop 21 0 1 6 ."
@@ -40,4 +42,4 @@ SYSTEMD_PACKAGES = "${PN}-init"
 SYSTEMD_SERVICE:${PN}-init = "xbee-init.service"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx8x|ccimx8m)"
+COMPATIBLE_MACHINE = "(ccimx8x|ccimx8m|ccimx93)"

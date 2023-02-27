@@ -70,7 +70,7 @@ def get_log_level(d):
     levels = ['error', 'warn', 'info', 'debug', 'trace']
     log_flags = ""
 
-    log_level = d.getVar('AWS_IOT_LOGGING_LEVEL', True)
+    log_level = d.getVar('AWS_IOT_LOGGING_LEVEL')
     if log_level == 'none':
         return ""
     if log_level not in levels:

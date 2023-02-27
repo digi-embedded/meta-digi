@@ -25,9 +25,9 @@ GG_TARBALL_LOCAL_PATH ?= ""
 # a PREMIRROR to a local directory that can be configured in the project's
 # local.conf file using GG_TARBALL_LOCAL_PATH variable.
 python() {
-    gg_tarball_local_path = d.getVar('GG_TARBALL_LOCAL_PATH', True)
+    gg_tarball_local_path = d.getVar('GG_TARBALL_LOCAL_PATH')
     if gg_tarball_local_path:
-        premirrors = d.getVar('PREMIRRORS', True)
+        premirrors = d.getVar('PREMIRRORS')
         d.setVar('PREMIRRORS', "http:///not/exist/greengrass.* file://%s \\n %s" % (gg_tarball_local_path, premirrors))
 }
 

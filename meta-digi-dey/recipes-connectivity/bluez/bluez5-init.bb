@@ -13,7 +13,7 @@ SRC_URI:append:ccimx6sbc = " \
     file://bluetooth-init_atheros \
 "
 
-inherit update-rc.d
+inherit update-rc.d systemd
 
 do_install() {
 	# INITSCRIPT
@@ -54,6 +54,9 @@ INITSCRIPT_NAME:${PN} = "bluetooth-init"
 INITSCRIPT_PARAMS:${PN} = "start 19 2 3 4 5 . stop 21 0 1 6 ."
 
 SYSTEMD_SERVICE:${PN} = "bluetooth-init.service"
+
+# 'bluetooth-init' script uses '/etc/init.d/functions'
+RDEPENDS:${PN} = "initscripts-functions"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x|ccimx8mn|ccimx8mm)"
