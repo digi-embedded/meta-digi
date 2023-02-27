@@ -46,6 +46,7 @@ RM_WORK_EXCLUDE += \"dey-image-qt dey-image-webkit linux-dey qtbase u-boot-dey\"
 "
 
 VIGILES_CFG="
+unset do_vigiles_check[noexec]
 VIGILES_KEY_FILE = \"${DY_VIGILES_DIR}/linuxlink_key.json\"
 VIGILES_DASHBOARD_CONFIG = \"##VIGILES_CONF_PATH##\"
 VIGILES_SUBFOLDER_NAME = \"${DY_REVISION}\"
