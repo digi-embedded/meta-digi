@@ -1,0 +1,54 @@
+From a5ae9fcc3baa099a86ecd2739caadf624258a49d Mon Sep 17 00:00:00 2001
+From: Carter Chen <carter.chen@infineon.com>
+Date: Mon, 28 Nov 2022 21:39:48 -0600
+Subject: [PATCH 47/49] Fix ROAMOFFLOAD raises portValid too early
+
+1.) while WPA_DRIVER_FLAGS_ROAM_OFFLOAD flag is set,
+and if the cipher_mgmt is 8021x related,
+the portValid is set while get wpa_supplicant_event_assoc.
+
+portValid will make the state_machine of SUPP_PAE jumps AUTHENTICATING to AUTHENTICATED.
+
+2.) while WPA_DRIVER_FLAGS_ROAM_OFFLOAD flag is set,
+the PMKCacheLifeTime and pmksa_cache_reauth timer are set while recevied
+assoc response.
+
+3.) if the PMKCacheLifeTime is set to a small value for disable PMK
+cache. the pmksa_cache_reauth will expire right away,
+for example, while doing 4-way handshake, the timer has expired.
+
+in case the timer of pmksa_cache_reauth has expired,
+if the state of SUPP_PAE is AUTHENTICATED,
+eapol_sm_txStart will be called and restart the Radius handshake.
+
+Solution: ROAM_OFFLOAD and cipher_mgmt is FT related, such as, FT_1X or
+FT_PSK. then raise portValid.
+
+Fixes: SWLINUX-3041
+
+Signed-off-by: Carter Chen <carter.chen@infineon.com>
+---
+ wpa_supplicant/events.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/wpa_supplicant/events.c b/wpa_supplicant/events.c
+index 975110b57..b42f758ce 100644
+--- a/wpa_supplicant/events.c
++++ b/wpa_supplicant/events.c
+@@ -3425,9 +3425,10 @@ static void wpa_supplicant_event_assoc(struct wpa_supplicant *wpa_s,
+ 		wpa_supplicant_set_state(wpa_s, WPA_COMPLETED);
+ 		eapol_sm_notify_portValid(wpa_s->eapol, true);
+ 		eapol_sm_notify_eap_success(wpa_s->eapol, true);
+-	} else if (((wpa_s->drv_flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X) ||
+-			(wpa_s->drv_flags2 & WPA_DRIVER_FLAGS_ROAM_OFFLOAD)) &&
+-		   wpa_key_mgmt_wpa_ieee8021x(wpa_s->key_mgmt)) {
++	} else if (((wpa_s->drv_flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X) &&
++		     wpa_key_mgmt_wpa_ieee8021x(wpa_s->key_mgmt)) ||
++		   ((wpa_s->drv_flags2 & WPA_DRIVER_FLAGS_ROAM_OFFLOAD) &&
++		     wpa_key_mgmt_ft(wpa_s->key_mgmt))) {
+ 		/*
+ 		 * The driver will take care of RSN 4-way handshake, so we need
+ 		 * to allow EAPOL supplicant to complete its work without
+-- 
+2.17.1
+

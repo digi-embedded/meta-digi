@@ -1,0 +1,68 @@
+From 65ed1eadc11b838a4ba223648bfd3d87bf492319 Mon Sep 17 00:00:00 2001
+From: Ian Lin <ian.lin@infineon.com>
+Date: Mon, 18 Jul 2022 00:49:49 -0500
+Subject: [PATCH 32/49] non-upstream: SAE: disconnect after PMKSA cache expire
+
+If the dot11RSNAConfigPMKLifetime is set, skip the flow of postponing
+the expiration in b0f457b6 and run disconnect flow.
+
+Signed-off-by: Ian Lin <ian.lin@infineon.com>
+---
+ src/rsn_supp/pmksa_cache.c | 3 ++-
+ src/rsn_supp/wpa.c         | 5 ++++-
+ src/rsn_supp/wpa_i.h       | 1 +
+ 3 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/src/rsn_supp/pmksa_cache.c b/src/rsn_supp/pmksa_cache.c
+index 0cd515982..8d517b5d4 100644
+--- a/src/rsn_supp/pmksa_cache.c
++++ b/src/rsn_supp/pmksa_cache.c
+@@ -65,7 +65,8 @@ static void pmksa_cache_expire(void *eloop_ctx, void *timeout_ctx)
+ 	os_get_reltime(&now);
+ 	while (entry && entry->expiration <= now.sec) {
+ 		if (wpa_key_mgmt_sae(entry->akmp) &&
+-		    pmksa->is_current_cb(entry, pmksa->ctx)) {
++			pmksa->is_current_cb(entry, pmksa->ctx) &&
++			!pmksa->sm->dot11RSNAConfigPMKLifetime_UserDef) {
+ 			/* Do not expire the currently used PMKSA entry for SAE
+ 			 * since there is no convenient mechanism for
+ 			 * reauthenticating during an association with SAE. The
+diff --git a/src/rsn_supp/wpa.c b/src/rsn_supp/wpa.c
+index 1f6401ef3..3eaa759f6 100644
+--- a/src/rsn_supp/wpa.c
++++ b/src/rsn_supp/wpa.c
+@@ -2940,6 +2940,7 @@ struct wpa_sm * wpa_sm_init(struct wpa_sm_ctx *ctx)
+ 	sm->ctx = ctx;
+ 
+ 	sm->dot11RSNAConfigPMKLifetime = 43200;
++	sm->dot11RSNAConfigPMKLifetime_UserDef = false;
+ 	sm->dot11RSNAConfigPMKReauthThreshold = 70;
+ 	sm->dot11RSNAConfigSATimeout = 60;
+ 
+@@ -3317,8 +3318,10 @@ int wpa_sm_set_param(struct wpa_sm *sm, enum wpa_sm_conf_params param,
+ 
+ 	switch (param) {
+ 	case RSNA_PMK_LIFETIME:
+-		if (value > 0)
++		if (value > 0) {
+ 			sm->dot11RSNAConfigPMKLifetime = value;
++			sm->dot11RSNAConfigPMKLifetime_UserDef = true;
++		}
+ 		else
+ 			ret = -1;
+ 		break;
+diff --git a/src/rsn_supp/wpa_i.h b/src/rsn_supp/wpa_i.h
+index 3989c9ab3..f3843d7d4 100644
+--- a/src/rsn_supp/wpa_i.h
++++ b/src/rsn_supp/wpa_i.h
+@@ -90,6 +90,7 @@ struct wpa_sm {
+ 	u8 bssid[ETH_ALEN];
+ 
+ 	unsigned int dot11RSNAConfigPMKLifetime;
++	bool dot11RSNAConfigPMKLifetime_UserDef;
+ 	unsigned int dot11RSNAConfigPMKReauthThreshold;
+ 	unsigned int dot11RSNAConfigSATimeout;
+ 
+-- 
+2.17.1
+

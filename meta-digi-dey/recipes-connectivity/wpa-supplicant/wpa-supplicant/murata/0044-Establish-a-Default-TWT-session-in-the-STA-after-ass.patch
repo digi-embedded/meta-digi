@@ -1,0 +1,216 @@
+From 045ff0dc8aaa1297096c7a941045c74bf1a0e7f3 Mon Sep 17 00:00:00 2001
+From: Ramanathan Ramakrishnan <rmrk@cypress.com>
+Date: Thu, 27 Oct 2022 06:00:28 -0500
+Subject: [PATCH 44/49] Establish a Default TWT session in the STA after
+ associating with the AP
+
+Add a new wpa_supplicant conf param "twt_def_algo" to set the Default/Auto
+TWT profile. Allowed Values are 0-disable, 1-idle profile, 2-active profile
+TWT session
+
+
+Signed-off-by: Ramanathan Ramakrishnan <rmrk@cypress.com>
+Signed-off-by: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
+---
+ wpa_supplicant/config.c           |  3 ++
+ wpa_supplicant/config.h           | 11 ++++
+ wpa_supplicant/events.c           |  6 +++
+ wpa_supplicant/twt.c              | 85 +++++++++++++++++++++++++++++++
+ wpa_supplicant/wpa_supplicant.c   |  6 +++
+ wpa_supplicant/wpa_supplicant_i.h |  2 +
+ 6 files changed, 113 insertions(+)
+
+diff --git a/wpa_supplicant/config.c b/wpa_supplicant/config.c
+index 737e46be5..afb36c816 100644
+--- a/wpa_supplicant/config.c
++++ b/wpa_supplicant/config.c
+@@ -5094,6 +5094,9 @@ static const struct global_parse_data global_fields[] = {
+ 	{ INT_RANGE(eapol_version, 1, 2), 0 },
+ #endif /* CONFIG_MACSEC */
+ 	{ INT(ap_scan), 0 },
++#ifdef CONFIG_TWT_OFFLOAD_IFX
++	{ INT_RANGE(twt_def_algo, 0 , 2), 0 },
++#endif /* CONFIG_TWT_OFFLOAD_IFX */
+ 	{ FUNC(bgscan), CFG_CHANGED_BGSCAN },
+ #ifdef CONFIG_MESH
+ 	{ INT(user_mpm), 0 },
+diff --git a/wpa_supplicant/config.h b/wpa_supplicant/config.h
+index d22ef05fb..d824d9ad5 100644
+--- a/wpa_supplicant/config.h
++++ b/wpa_supplicant/config.h
+@@ -487,6 +487,17 @@ struct wpa_config {
+ 	 */
+ 	int ap_scan;
+ 
++#ifdef CONFIG_TWT_OFFLOAD_IFX
++	/**
++	 * twt_def_algo - Default (Auto) TWT profile
++	 *
++	 * This provides the value of the default TWT profile to be setup
++	 * Values for this or 0-disable, 1-idle profile, 2-active profile TWT
++	 * session
++	 */
++	int twt_def_algo;
++#endif /* CONFIG_TWT_OFFLOAD_IFX */
++
+ 	/**
+ 	 * bgscan - Background scan and roaming parameters or %NULL if none
+ 	 *
+diff --git a/wpa_supplicant/events.c b/wpa_supplicant/events.c
+index bfd49ee43..7fcd057b3 100644
+--- a/wpa_supplicant/events.c
++++ b/wpa_supplicant/events.c
+@@ -3568,6 +3568,12 @@ static void wpa_supplicant_event_disassoc(struct wpa_supplicant *wpa_s,
+ 			" reason=%d%s",
+ 			MAC2STR(bssid), reason_code,
+ 			locally_generated ? " locally_generated=1" : "");
++#ifdef CONFIG_TWT_OFFLOAD_IFX
++		if (locally_generated &&
++		    wpas_twt_offload_deinit_default_session(wpa_s))
++			wpa_msg(wpa_s, MSG_ERROR,
++				"Failed to cleanup all the TWT sessions including Default session");
++#endif
+ 	}
+ }
+ 
+diff --git a/wpa_supplicant/twt.c b/wpa_supplicant/twt.c
+index b1727603f..ff75b7ed3 100644
+--- a/wpa_supplicant/twt.c
++++ b/wpa_supplicant/twt.c
+@@ -9,10 +9,17 @@
+ #include "includes.h"
+ 
+ #include "utils/common.h"
++#include "config.h"
+ #include "wpa_supplicant_i.h"
+ #include "driver_i.h"
++#include "scan.h"
+ 
+ #ifdef CONFIG_TWT_OFFLOAD_IFX
++#define TWT_NONE 0
++#define TWT_IDLE 1
++#define TWT_ACTIVE 2
++#define TWT_TEARDOWN_ALL 128
++
+ /**
+  * wpas_twt_offload_send_setup - Send TWT Setup frame to our AP
+  * @wpa_s: Pointer to wpa_supplicant
+@@ -183,6 +190,84 @@ fail:
+ 	return ret;
+ }
+ 
++int wpas_twt_offload_init_default_session(struct wpa_supplicant *wpa_s)
++{
++	int exponent = 10, mantissa = 8192, setup_cmd = 2, flow_id = 0, ret = 0;
++	unsigned long long twt = 0, twt_offset = 0;
++	bool requestor = true, trigger = true, implicit = true, flow_type = true,
++	     protection = false;
++	u8 dtok = 1, min_twt = 255, twt_channel = 0,
++	   control = BIT(4); /* Control field (IEEE P802.11ax/D8.0 Figure
++                              * 9-687): B4 = TWT Information Frame Disabled */
++
++	if (wpa_s->conf->twt_def_algo == TWT_NONE) {
++		wpa_printf(MSG_DEBUG, "TWT offload: Default TWT is disabled");
++		goto exit;
++	}
++
++	wpa_printf(MSG_DEBUG, "TWT offload: Init Default TWT, profile %d, freq %d",
++		   wpa_s->conf->twt_def_algo, wpa_s->assoc_freq);
++
++	if (wpa_s->conf->twt_def_algo == TWT_IDLE) {
++		/* TWT profile for Idle traffic */
++		if (IS_2P4GHZ(wpa_s->assoc_freq)) {
++			/*
++			 * 2G Band
++			 * SP=2ms and SI=614.4ms
++			 */
++			min_twt = 8;
++			mantissa = 600;
++			exponent = 10;
++		} else { /*
++			  * 5G or 6G Band
++			  * SP=512us and SI=614.4ms
++			  */
++			min_twt = 2;
++			mantissa = 600;
++			exponent = 10;
++		}
++	} else if (wpa_s->conf->twt_def_algo == TWT_ACTIVE) {
++		/*
++		 * TWT profile for Active traffic
++		 * 2G, 5G and 6G Bands
++		 * SP=8ms and SI=50ms
++		 */
++		min_twt = 31;
++		mantissa = 50000;
++		exponent = 0;
++	} else {
++		wpa_printf(MSG_ERROR, "TWT offload: Invalid Default TWT profile");
++		ret = -1;
++		goto exit;
++	}
++
++	ret = wpas_twt_offload_send_setup(wpa_s, dtok, exponent, mantissa,
++					  min_twt, setup_cmd, twt, twt_offset,
++					  requestor, trigger, implicit, flow_type,
++					  flow_id, protection, twt_channel,
++					  control);
++exit:
++	return ret;
++}
++
++int wpas_twt_offload_deinit_default_session(struct wpa_supplicant *wpa_s)
++{
++	int flags = TWT_TEARDOWN_ALL, ret = 0;
++
++	if (wpa_s->conf->twt_def_algo == TWT_NONE) {
++		goto exit;
++	}
++
++	/* Clear all TWT sessions created by STA including default */
++	wpa_printf(MSG_DEBUG,
++		   "TWT offload: De-init Default TWT, profile %d, freq %d",
++		   wpa_s->conf->twt_def_algo, wpa_s->assoc_freq);
++
++	ret = wpas_twt_offload_send_teardown(wpa_s, flags);
++exit:
++	return ret;
++}
++
+ #else
+ 
+ /**
+diff --git a/wpa_supplicant/wpa_supplicant.c b/wpa_supplicant/wpa_supplicant.c
+index f238dadcf..d3d4fbc5d 100644
+--- a/wpa_supplicant/wpa_supplicant.c
++++ b/wpa_supplicant/wpa_supplicant.c
+@@ -1001,7 +1001,13 @@ void wpa_supplicant_set_state(struct wpa_supplicant *wpa_s,
+ 			ssid ? ssid->id : -1,
+ 			ssid && ssid->id_str ? ssid->id_str : "",
+ 			fils_hlp_sent ? " FILS_HLP_SENT" : "");
++
+ #endif /* CONFIG_CTRL_IFACE || !CONFIG_NO_STDOUT_DEBUG */
++#ifdef CONFIG_TWT_OFFLOAD_IFX
++		if (wpas_twt_offload_init_default_session(wpa_s))
++			wpa_msg(wpa_s, MSG_ERROR,
++				"Failed to esablish a TWT session by default after Connection");
++#endif /* CONFIG_TWT_OFFLOAD_IFX */
+ 		wpas_clear_temp_disabled(wpa_s, ssid, 1);
+ 		wpa_s->consecutive_conn_failures = 0;
+ 		wpa_s->new_connection = 0;
+diff --git a/wpa_supplicant/wpa_supplicant_i.h b/wpa_supplicant/wpa_supplicant_i.h
+index a4fca4b3a..28eff55ed 100644
+--- a/wpa_supplicant/wpa_supplicant_i.h
++++ b/wpa_supplicant/wpa_supplicant_i.h
+@@ -1650,6 +1650,8 @@ int wpas_twt_offload_send_setup(struct wpa_supplicant *wpa_s, u8 dtok, int expon
+ 				bool implicit, bool flow_type, u8 flow_id,
+ 				bool protection, u8 twt_channel, u8 control);
+ int wpas_twt_offload_send_teardown(struct wpa_supplicant *wpa_s, u8 flags);
++int wpas_twt_offload_init_default_session(struct wpa_supplicant *wpa_s);
++int wpas_twt_offload_deinit_default_session(struct wpa_supplicant *wpa_s);
+ #else
+ int wpas_twt_send_setup(struct wpa_supplicant *wpa_s, u8 dtok, int exponent,
+ 			int mantissa, u8 min_twt, int setup_cmd, u64 twt,
+-- 
+2.17.1
+

@@ -1,6 +1,7 @@
+From ec86cadea38b22595003865c62b5321d55831d9e Mon Sep 17 00:00:00 2001
 From: Kurt Lee <kurt.lee@cypress.com>
 Date: Thu, 24 Feb 2022 03:57:22 -0600
-Subject: [PATCH] SAE: Drop PMKSA cache after receiving specific deauth
+Subject: [PATCH 20/49] SAE: Drop PMKSA cache after receiving specific deauth
 
 As a STA mode, when receiving deauth frame with reason code
 WLAN_REASON_PREV_AUTH_NOT_VALID, it should drop its PMKSA cache.
@@ -12,12 +13,10 @@ diff --git a/wpa_supplicant/events.c b/wpa_supplicant/events.c
 index fe8dbd91d..bfd49ee43 100644
 --- a/wpa_supplicant/events.c
 +++ b/wpa_supplicant/events.c
-@@ -4157,10 +4157,29 @@ static void wpas_event_disconnect(struct wpa_supplicant *wpa_s, const u8 *addr,
- 			return;
- 		}
+@@ -4159,6 +4159,25 @@ static void wpas_event_disconnect(struct wpa_supplicant *wpa_s, const u8 *addr,
  	}
  #endif /* CONFIG_P2P */
-
+ 
 +#ifdef CONFIG_SAE
 +	if (reason_code == WLAN_REASON_PREV_AUTH_NOT_VALID) {
 +		const u8 *bssid = wpa_s->bssid;
@@ -40,3 +39,6 @@ index fe8dbd91d..bfd49ee43 100644
  	wpa_supplicant_event_disassoc_finish(wpa_s, reason_code,
  					     locally_generated);
  }
+-- 
+2.17.1
+

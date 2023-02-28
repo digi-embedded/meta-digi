@@ -1,0 +1,37 @@
+From 28c5794ff336f3ec29be79197198071be9add4ac Mon Sep 17 00:00:00 2001
+From: Suresh Sanaboina <suresh.sanaboina@infineon.com>
+Date: Tue, 1 Feb 2022 13:02:07 +0000
+Subject: [PATCH 14/49] [CVE_2019_9501] Fix to check Invalid GTK IE length in
+ M3 at STA
+
+---
+ src/rsn_supp/wpa.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/rsn_supp/wpa.c b/src/rsn_supp/wpa.c
+index 0a2f87787..92ab7d561 100644
+--- a/src/rsn_supp/wpa.c
++++ b/src/rsn_supp/wpa.c
+@@ -1661,6 +1661,7 @@ static void wpa_supplicant_process_3_of_4(struct wpa_sm *sm,
+ {
+ 	u16 key_info, keylen;
+ 	struct wpa_eapol_ie_parse ie;
++	struct wpa_gtk_data gd; /* Used for checking gtk length*/
+ 
+ 	wpa_sm_set_state(sm, WPA_4WAY_HANDSHAKE);
+ 	wpa_dbg(sm->ctx->msg_ctx, MSG_DEBUG, "WPA: RX message 3 of 4-Way "
+@@ -1763,6 +1764,11 @@ static void wpa_supplicant_process_3_of_4(struct wpa_sm *sm,
+ 	    wpa_supplicant_install_ptk(sm, key, KEY_FLAG_RX))
+ 		goto failed;
+ 
++	/* Checking gtk_len before sending msg 4/4. If it is greater than
++	 * 32 bytes drop it. No GTK to be set EAPOL WPA KEY */
++	if (ie.gtk && (ie.gtk_len < 2 || ie.gtk_len - 2 > sizeof(gd.gtk)))
++		goto failed;
++
+ 	if (wpa_supplicant_send_4_of_4(sm, sm->bssid, key, ver, key_info,
+ 				       &sm->ptk) < 0) {
+ 		goto failed;
+-- 
+2.17.1
+

@@ -1,0 +1,31 @@
+From e2fb675883cf00992ce51e91a3e2055c898ae3e6 Mon Sep 17 00:00:00 2001
+From: "Shankar Amar (CSTIPL CSS ICW SW WFS 1)" <amar.shankar@infineon.com>
+Date: Mon, 20 Jun 2022 05:57:46 +0000
+Subject: [PATCH 27/49] Fix dpp config parameter setting
+
+---
+ src/common/dpp.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/src/common/dpp.c b/src/common/dpp.c
+index ac6eae4c8..6e6e4248c 100644
+--- a/src/common/dpp.c
++++ b/src/common/dpp.c
+@@ -1029,10 +1029,11 @@ static int dpp_configuration_parse_helper(struct dpp_authentication *auth,
+ 		pos += 6;
+ 		end = os_strchr(pos, ' ');
+ 		conf->ssid_len = end ? (size_t) (end - pos) : os_strlen(pos);
+-		conf->ssid_len /= 2;
+-		if (conf->ssid_len > sizeof(conf->ssid) ||
+-		    hexstr2bin(pos, conf->ssid, conf->ssid_len) < 0)
++		/* Remove check for ssid in hex as we are supplying
++		 * string format in dpp_auth_init */
++		if (conf->ssid_len > sizeof(conf->ssid))
+ 			goto fail;
++		os_memcpy(conf->ssid, pos, conf->ssid_len);
+ 	} else {
+ #ifdef CONFIG_TESTING_OPTIONS
+ 		/* use a default SSID for legacy testing reasons */
+-- 
+2.17.1
+

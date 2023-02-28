@@ -1,6 +1,8 @@
+From 578eb72569a03cdd608cf384911d46eb372c583e Mon Sep 17 00:00:00 2001
 From: Chung-Hsien Hsu <stanley.hsu@cypress.com>
 Date: Tue, 29 Oct 2019 16:05:49 +0800
-Subject: [PATCH] wpa_supplicant: Add PMKSA cache for 802.1X 4-way handshake
+Subject: [PATCH 04/49] wpa_supplicant: Add PMKSA cache for 802.1X 4-way
+ handshake
 
 Add PMKSA cache and set PMK to the driver for 802.1X 4-way handshake
 offload.
@@ -11,7 +13,7 @@ Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
  1 file changed, 36 insertions(+), 23 deletions(-)
 
 diff --git a/wpa_supplicant/wpas_glue.c b/wpa_supplicant/wpas_glue.c
-index 17fc05bcbdab..0cffe52fa9be 100644
+index 17fc05bcb..0cffe52fa 100644
 --- a/wpa_supplicant/wpas_glue.c
 +++ b/wpa_supplicant/wpas_glue.c
 @@ -12,6 +12,7 @@
@@ -100,3 +102,6 @@ index 17fc05bcbdab..0cffe52fa9be 100644
  	}
  
  	wpa_hexdump_key(MSG_DEBUG, "RSN: Configure PMK for driver-based 4-way "
+-- 
+2.17.1
+

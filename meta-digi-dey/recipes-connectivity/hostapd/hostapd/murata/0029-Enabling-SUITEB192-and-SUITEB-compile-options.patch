@@ -1,0 +1,29 @@
+From 7d621a129690b061afd61e8bd21d9b816f09d8ac Mon Sep 17 00:00:00 2001
+From: Carter Chen <carter.chen@infineon.com>
+Date: Mon, 4 Jul 2022 02:19:48 -0500
+Subject: [PATCH 29/49] Enabling SUITEB192 and SUITEB compile options
+
+Enabling the compile options for SUITEB and SUITEB-192 related
+configurations and wpa_cli commands.
+
+Fixes: SWLINUX-2712
+
+Signed-off-by: Carter Chen <carter.chen@infineon.com>
+---
+ wpa_supplicant/defconfig_base | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/wpa_supplicant/defconfig_base b/wpa_supplicant/defconfig_base
+index d4be24c34..f290ae673 100644
+--- a/wpa_supplicant/defconfig_base
++++ b/wpa_supplicant/defconfig_base
+@@ -638,3 +638,6 @@ CONFIG_DPP=y
+ # connect to this hostapd. These options allow, for example, to drop a
+ # certain percentage of probe requests or auth/(re)assoc frames.
+ CONFIG_TESTING_OPTIONS=y
++
++CONFIG_SUITEB192=y
++CONFIG_SUITEB=y
+-- 
+2.17.1
+

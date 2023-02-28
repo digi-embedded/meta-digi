@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2021 Digi International.
+# Copyright (C) 2016-2023 Digi International.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -7,6 +7,47 @@ SRC_URI:append = " \
     file://hostapd@.service \
     ${@oe.utils.conditional('HAS_WIFI_VIRTWLANS', 'true', 'file://hostapd_wlan1.conf', '', d)} \
 "
+
+# Patch series from Murata release
+MURATA_COMMON_PATCHES = " \
+	file://murata/0003-nl80211-Report-connection-authorized-in-EVENT_ASSOC.patch \
+	file://murata/0005-OpenSSL-Fix-build-with-OpenSSL-1.0.1.patch \
+	file://murata/0006-nl80211-Check-SAE-authentication-offload-support.patch \
+	file://murata/0007-SAE-Pass-SAE-password-on-connect-for-SAE-authenticat.murata.patch \
+	file://murata/0008-nl80211-Support-4-way-handshake-offload-for-WPA-WPA2.patch \
+	file://murata/0009-AP-Support-4-way-handshake-offload-for-WPA-WPA2-PSK.patch \
+	file://murata/0010-nl80211-Support-SAE-authentication-offload-in-AP-mod.patch \
+	file://murata/0011-SAE-Support-SAE-authentication-offload-in-AP-mode.patch \
+	file://murata/0013-non-upstream-defconfig_base-Add-Infineon-default-con.patch \
+	file://murata/0014-CVE_2019_9501-Fix-to-check-Invalid-GTK-IE-length-in-.patch \
+	file://murata/0015-Add-CONFIG_WPA3_SAE_AUTH_EARLY_SET-flags-and-codes.murata.patch \
+	file://murata/0016-SAE-Set-the-right-WPA-Versions-for-FT-SAE-key-manage.patch \
+	file://murata/0017-wpa_supplicant-Support-WPA_KEY_MGMT_FT-for-eapol-off.murata.patch \
+	file://murata/0018-wpa_supplicant-suppress-deauth-for-PMKSA-caching-dis.murata.patch \
+	file://murata/0019-Fix-for-PMK-expiration-issue-through-supplicant.murata.patch \
+	file://murata/0021-Avoid-deauthenticating-STA-if-the-reason-for-freeing.patch \
+	file://murata/0022-wpa_supplicant-support-bgscan.patch \
+	file://murata/0023-non-upstream-wl-cmd-create-interface-to-support-driv.murata.patch \
+	file://murata/0024-non-upstream-wl-cmd-create-wl_do_cmd-as-an-entry-doi.patch \
+	file://murata/0025-non-upstream-wl-cmd-create-ops-table-to-do-wl-comman.patch \
+	file://murata/0026-non-upstream-wl-cmd-add-more-compile-flag.murata.patch \
+	file://murata/0027-Fix-dpp-config-parameter-setting.patch \
+	file://murata/0028-DPP-Resolving-failure-of-dpp-configurator-exchange-f.patch \
+	file://murata/0029-Enabling-SUITEB192-and-SUITEB-compile-options.patch \
+	file://murata/0030-DPP-Enabling-CLI_EDIT-option-for-enrollee-plus-respo.patch \
+	file://murata/0032-non-upstream-SAE-disconnect-after-PMKSA-cache-expire.patch \
+	file://murata/0034-wpa_supplicant-Set-PMKSA-to-driver-while-key-mgmt-is.patch \
+	file://murata/0035-nl80211-Set-NL80211_SCAN_FLAG_COLOCATED_6GHZ-in-scan.murata.patch \
+	file://murata/0037-Enabling-OWE-in-wpa_supplicant.patch \
+	file://murata/0039-FT-Sync-nl80211-ext-feature-index.patch \
+	file://murata/0040-nl80211-Introduce-a-vendor-header-for-vendor-NL-ifac.patch \
+	file://murata/0041-add-support-to-offload-TWT-setup-request-handling-to.murata.patch \
+	file://murata/0042-add-support-to-offload-TWT-Teardown-request-handling.murata.patch \
+	file://murata/0043-Add-support-to-configure-TWT-of-a-session-using-offs.murata.patch \
+	file://murata/0048-Fix-associating-failed-when-PMK-lifetime-is-set-to-1.patch \
+"
+
+SRC_URI:append:ccmp1 = " ${MURATA_COMMON_PATCHES}"
 
 SYSTEMD_SERVICE:${PN}:append = " hostapd@.service"
 

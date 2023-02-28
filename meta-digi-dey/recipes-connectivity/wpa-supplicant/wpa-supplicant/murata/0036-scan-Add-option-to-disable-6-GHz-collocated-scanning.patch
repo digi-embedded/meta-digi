@@ -1,0 +1,92 @@
+From d2aff0911008db10d28424ca5b8d67f852a5bf89 Mon Sep 17 00:00:00 2001
+From: Ilan Peer <ilan.peer@intel.com>
+Date: Sun, 24 Apr 2022 12:57:53 +0300
+Subject: [PATCH 36/49] scan: Add option to disable 6 GHz collocated scanning
+
+Add a parameter (non_coloc_6ghz=1) to the manual scan command to disable
+6 GHz collocated scanning.
+
+This option can be used to disable 6 GHz collocated scan logic. Note
+that due to limitations on Probe Request frame transmissions on the 6
+GHz band mandated in IEEE Std 802.11ax-2021 it is very likely that
+non-PSC channels would be scanned passively and this can take a
+significant amount of time.
+
+Signed-off-by: Ilan Peer <ilan.peer@intel.com>
+---
+ wpa_supplicant/ctrl_iface.c       | 7 +++++++
+ wpa_supplicant/scan.c             | 6 ++++++
+ wpa_supplicant/wpa_supplicant_i.h | 1 +
+ 3 files changed, 14 insertions(+)
+
+diff --git a/wpa_supplicant/ctrl_iface.c b/wpa_supplicant/ctrl_iface.c
+index 86dcb9d84..1d4c8bcc2 100644
+--- a/wpa_supplicant/ctrl_iface.c
++++ b/wpa_supplicant/ctrl_iface.c
+@@ -8843,6 +8843,7 @@ static void wpas_ctrl_scan(struct wpa_supplicant *wpa_s, char *params,
+ 	unsigned int manual_scan_only_new = 0;
+ 	unsigned int scan_only = 0;
+ 	unsigned int scan_id_count = 0;
++	unsigned int manual_non_coloc_6ghz = 0;
+ 	int scan_id[MAX_SCAN_ID];
+ 	void (*scan_res_handler)(struct wpa_supplicant *wpa_s,
+ 				 struct wpa_scan_results *scan_res);
+@@ -8920,6 +8921,10 @@ static void wpas_ctrl_scan(struct wpa_supplicant *wpa_s, char *params,
+ 				os_strstr(params, "wildcard_ssid=1") != NULL;
+ 		}
+ 
++		pos = os_strstr(params, "non_coloc_6ghz=");
++		if (pos)
++			manual_non_coloc_6ghz = !!atoi(pos + 15);
++
+ 		pos = params;
+ 		while (pos && *pos != '\0') {
+ 			if (os_strncmp(pos, "ssid ", 5) == 0) {
+@@ -8989,6 +8994,7 @@ static void wpas_ctrl_scan(struct wpa_supplicant *wpa_s, char *params,
+ 		wpa_s->manual_scan_use_id = manual_scan_use_id;
+ 		wpa_s->manual_scan_only_new = manual_scan_only_new;
+ 		wpa_s->scan_id_count = scan_id_count;
++		wpa_s->manual_non_coloc_6ghz = manual_non_coloc_6ghz;
+ 		os_memcpy(wpa_s->scan_id, scan_id, scan_id_count * sizeof(int));
+ 		wpa_s->scan_res_handler = scan_res_handler;
+ 		os_free(wpa_s->manual_scan_freqs);
+@@ -9012,6 +9018,7 @@ static void wpas_ctrl_scan(struct wpa_supplicant *wpa_s, char *params,
+ 		wpa_s->manual_scan_use_id = manual_scan_use_id;
+ 		wpa_s->manual_scan_only_new = manual_scan_only_new;
+ 		wpa_s->scan_id_count = scan_id_count;
++		wpa_s->manual_non_coloc_6ghz = manual_non_coloc_6ghz;
+ 		os_memcpy(wpa_s->scan_id, scan_id, scan_id_count * sizeof(int));
+ 		wpa_s->scan_res_handler = scan_res_handler;
+ 		os_free(wpa_s->manual_scan_freqs);
+diff --git a/wpa_supplicant/scan.c b/wpa_supplicant/scan.c
+index 3999162be..01a995e99 100644
+--- a/wpa_supplicant/scan.c
++++ b/wpa_supplicant/scan.c
+@@ -1328,6 +1328,12 @@ ssid_list_set:
+ 		}
+ 	}
+ 
++	if (wpa_s->last_scan_req == MANUAL_SCAN_REQ &&
++	    wpa_s->manual_non_coloc_6ghz) {
++		wpa_dbg(wpa_s, MSG_DEBUG, "Collocated 6 GHz logic is disabled");
++		params.non_coloc_6ghz = 1;
++	}
++
+ 	scan_params = &params;
+ 
+ scan:
+diff --git a/wpa_supplicant/wpa_supplicant_i.h b/wpa_supplicant/wpa_supplicant_i.h
+index 8bb8672fb..b671b54e7 100644
+--- a/wpa_supplicant/wpa_supplicant_i.h
++++ b/wpa_supplicant/wpa_supplicant_i.h
+@@ -883,6 +883,7 @@ struct wpa_supplicant {
+ 	unsigned int own_scan_requested:1;
+ 	unsigned int own_scan_running:1;
+ 	unsigned int clear_driver_scan_cache:1;
++	unsigned int manual_non_coloc_6ghz:1;
+ 	unsigned int manual_scan_id;
+ 	int scan_interval; /* time in sec between scans to find suitable AP */
+ 	int normal_scans; /* normal scans run before sched_scan */
+-- 
+2.17.1
+

@@ -1,0 +1,30 @@
+From 32ee9150ccf3f6c242ba2809aab9b9e115a9d1b5 Mon Sep 17 00:00:00 2001
+From: Darren Li <hsil@cypress.com>
+Date: Fri, 26 Nov 2021 02:09:03 -0600
+Subject: [PATCH 16/49] SAE: Set the right WPA Versions for FT-SAE key
+ management
+
+Set the right WPA Versions for FT-SAE key management
+
+Signed-off-by: Darren Li Darren.Li@infineon.com
+---
+ src/drivers/driver_nl80211.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
+index b6afc6e7a..341c753b3 100644
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -6208,7 +6208,8 @@ static int nl80211_connect_common(struct wpa_driver_nl80211_data *drv,
+ 		if (params->wpa_proto & WPA_PROTO_WPA)
+ 			ver |= NL80211_WPA_VERSION_1;
+ 		if (params->wpa_proto & WPA_PROTO_RSN) {
+-			if (params->key_mgmt_suite == WPA_KEY_MGMT_SAE)
++			if (params->key_mgmt_suite == WPA_KEY_MGMT_SAE ||
++				params->key_mgmt_suite == WPA_KEY_MGMT_FT_SAE)
+ 				ver |= NL80211_WPA_VERSION_3;
+ 			else
+ 				ver |= NL80211_WPA_VERSION_2;
+-- 
+2.17.1
+

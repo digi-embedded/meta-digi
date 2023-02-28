@@ -1,0 +1,74 @@
+From 6fa06f214ba1cfc4e80dc7413874175146b9c2a5 Mon Sep 17 00:00:00 2001
+From: Chien-Chia Chen <carella.chen@infineon.com>
+Date: Tue, 23 Nov 2021 21:29:08 -0600
+Subject: [PATCH 17/49] wpa_supplicant: Support WPA_KEY_MGMT_FT for eapol
+ offloading and driver base roaming
+
+Add WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_PSK / WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X /
+WPA_DRIVER_FLAGS_ROAM_OFFLOAD for IEEE80211R support
+
+Signed-off-by: Chien-Chia Chen<carella.chen@infineon.com>
+---
+ src/drivers/driver.h              | 2 ++
+ src/drivers/driver_nl80211.c      | 3 ++-
+ src/drivers/driver_nl80211_capa.c | 4 ++++
+ src/drivers/nl80211_copy.h        | 1 +
+ 4 files changed, 9 insertions(+), 1 deletions(-)
+
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 45260e8c5..fb3f8b4a8 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -2071,6 +2071,8 @@ struct wpa_driver_capa {
+ #define WPA_DRIVER_FLAGS2_4WAY_HANDSHAKE_AP_PSK	0x0000000000000400ULL
+ /** Driver supports SAE authentication offload in AP mode */
+ #define WPA_DRIVER_FLAGS2_SAE_OFFLOAD_AP	0x0000000000000800ULL
++/** Driver supports FT / OKC fast roaming */
++#define WPA_DRIVER_FLAGS_ROAM_OFFLOAD		0x0000000000001000ULL
+ 	u64 flags2;
+ 
+ #define FULL_AP_CLIENT_STATE_SUPP(drv_flags) \
+diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
+index 341c753b3..964486c11 100644
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -3301,7 +3301,8 @@ static int wpa_driver_nl80211_set_key(struct i802_bss *bss,
+ #endif /* CONFIG_DRIVER_NL80211_QCA */
+ 
+ 	if (key_flag & KEY_FLAG_PMK) {
+-		if (drv->capa.flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X)
++		if ((drv->capa.flags & WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X) ||
++			(drv->capa.flags2 & WPA_DRIVER_FLAGS_ROAM_OFFLOAD))
+ 			return nl80211_set_pmk(drv, key, key_len, addr);
+ 		/* The driver does not have any offload mechanism for PMK, so
+ 		 * there is no need to configure this key. */
+diff --git a/src/drivers/driver_nl80211_capa.c b/src/drivers/driver_nl80211_capa.c
+index ae6029a92..d5cdafa9f 100644
+--- a/src/drivers/driver_nl80211_capa.c
++++ b/src/drivers/driver_nl80211_capa.c
+@@ -606,6 +606,10 @@ static void wiphy_info_ext_feature_flags(struct wiphy_info_data *info,
+ 			      NL80211_EXT_FEATURE_SAE_OFFLOAD_AP))
+ 		capa->flags2 |= WPA_DRIVER_FLAGS2_SAE_OFFLOAD_AP;
+ 
++	if (ext_feature_isset(ext_features, len,
++			      NL80211_EXT_FEATURE_ROAM_OFFLOAD))
++		capa->flags2 |= WPA_DRIVER_FLAGS_ROAM_OFFLOAD;
++
+ 	if (ext_feature_isset(ext_features, len,
+ 			      NL80211_EXT_FEATURE_MFP_OPTIONAL))
+ 		capa->flags |= WPA_DRIVER_FLAGS_MFP_OPTIONAL;
+diff --git a/src/drivers/nl80211_copy.h b/src/drivers/nl80211_copy.h
+index f962c06e9..a3e889b35 100644
+--- a/src/drivers/nl80211_copy.h
++++ b/src/drivers/nl80211_copy.h
+@@ -6010,6 +6010,7 @@ enum nl80211_ext_feature_index {
+ 	NL80211_EXT_FEATURE_SAE_OFFLOAD_AP,
+ 	NL80211_EXT_FEATURE_FILS_DISCOVERY,
+ 	NL80211_EXT_FEATURE_UNSOL_BCAST_PROBE_RESP,
++	NL80211_EXT_FEATURE_ROAM_OFFLOAD,
+ 	NL80211_EXT_FEATURE_BEACON_RATE_HE,
+ 	NL80211_EXT_FEATURE_SECURE_LTF,
+ 	NL80211_EXT_FEATURE_SECURE_RTT,
+-- 
+2.17.1
+

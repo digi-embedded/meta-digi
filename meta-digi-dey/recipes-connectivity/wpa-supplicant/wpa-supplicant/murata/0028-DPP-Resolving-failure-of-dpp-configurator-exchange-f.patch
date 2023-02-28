@@ -1,0 +1,35 @@
+From b19b6f1165800106ccd941b6042ea804bfa95d5f Mon Sep 17 00:00:00 2001
+From: "Shankar Amar (CSTIPL CSS ICW SW WFS 1)" <amar.shankar@infineon.com>
+Date: Thu, 30 Jun 2022 08:01:45 +0000
+Subject: [PATCH 28/49] DPP: Resolving failure of dpp configurator exchange for
+ configurator plus initiator in AP role with fmac
+
+---
+ hostapd/defconfig_base | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/hostapd/defconfig_base b/hostapd/defconfig_base
+index 4e4f0f784..16e8c645a 100644
+--- a/hostapd/defconfig_base
++++ b/hostapd/defconfig_base
+@@ -307,7 +307,7 @@ CONFIG_TLS_ADD_DL=y
+ # Interworking (IEEE 802.11u)
+ # This can be used to enable functionality to improve interworking with
+ # external networks.
+-#CONFIG_INTERWORKING=y
++CONFIG_INTERWORKING=y
+ 
+ # Hotspot 2.0
+ #CONFIG_HS20=y
+@@ -370,7 +370,7 @@ CONFIG_TESTING_OPTIONS=y
+ 
+ # Include internal line edit mode in hostapd_cli. This can be used to provide
+ # limited command line editing and history support.
+-#CONFIG_WPA_CLI_EDIT=y
++CONFIG_WPA_CLI_EDIT=y
+ 
+ # Opportunistic Wireless Encryption (OWE)
+ # Experimental implementation of draft-harkins-owe-07.txt
+-- 
+2.17.1
+

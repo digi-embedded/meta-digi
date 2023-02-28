@@ -1,0 +1,26 @@
+From 621de92cbd36719e3febe385411a65ccfa646344 Mon Sep 17 00:00:00 2001
+From: "Shankar Amar (CSTIPL CSS ICW SW WFS 1)" <amar.shankar@infineon.com>
+Date: Fri, 22 Jul 2022 07:52:30 +0000
+Subject: [PATCH 30/49] DPP: Enabling CLI_EDIT option for enrollee plus
+ responder in STA role with fmac
+
+---
+ wpa_supplicant/defconfig_base | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/wpa_supplicant/defconfig_base b/wpa_supplicant/defconfig_base
+index f290ae673..611a23e3e 100644
+--- a/wpa_supplicant/defconfig_base
++++ b/wpa_supplicant/defconfig_base
+@@ -228,7 +228,7 @@ CONFIG_CTRL_IFACE=y
+ 
+ # Include internal line edit mode in wpa_cli. This can be used as a replacement
+ # for GNU Readline to provide limited command line editing and history support.
+-#CONFIG_WPA_CLI_EDIT=y
++CONFIG_WPA_CLI_EDIT=y
+ 
+ # Remove debugging code that is printing out debug message to stdout.
+ # This can be used to reduce the size of the wpa_supplicant considerably
+-- 
+2.17.1
+

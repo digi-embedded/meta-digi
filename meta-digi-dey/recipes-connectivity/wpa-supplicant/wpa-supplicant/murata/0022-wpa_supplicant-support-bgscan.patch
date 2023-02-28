@@ -1,0 +1,32 @@
+From cfa528ffe320ac638ca72e87751f76444669c48e Mon Sep 17 00:00:00 2001
+From: Ian Lin <ian.lin@infineon.com>
+Date: Fri, 20 May 2022 03:00:37 -0500
+Subject: [PATCH 22/49] wpa_supplicant: support bgscan
+
+Modify defconfig_base to support bgscan feature
+
+Signed-off-by: Ian Lin <ian.lin@infineon.com>
+---
+ wpa_supplicant/defconfig_base | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/wpa_supplicant/defconfig_base b/wpa_supplicant/defconfig_base
+index 99c74853d..4f71b50ff 100644
+--- a/wpa_supplicant/defconfig_base
++++ b/wpa_supplicant/defconfig_base
+@@ -601,10 +601,10 @@ CONFIG_P2P=y
+ # operations for roaming within an ESS (same SSID). See the bgscan parameter in
+ # the wpa_supplicant.conf file for more details.
+ # Periodic background scans based on signal strength
+-#CONFIG_BGSCAN_SIMPLE=y
++CONFIG_BGSCAN_SIMPLE=y
+ # Learn channels used by the network and try to avoid bgscans on other
+ # channels (experimental)
+-#CONFIG_BGSCAN_LEARN=y
++CONFIG_BGSCAN_LEARN=y
+ 
+ # Opportunistic Wireless Encryption (OWE)
+ # Experimental implementation of draft-harkins-owe-07.txt
+-- 
+2.17.1
+
