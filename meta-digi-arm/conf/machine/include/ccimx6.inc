@@ -20,21 +20,13 @@ STORAGE_MEDIA = "mmc"
 # Wireless external module
 WIRELESS_MODULE ?= ""
 
-# Firmware
-MACHINE_FIRMWARE ?= "firmware-imx-sdma-imx6q"
-MACHINE_FIRMWARE:append:mx6q = " firmware-imx-vpu-imx6q"
-MACHINE_FIRMWARE:append:mx6dl = " firmware-imx-vpu-imx6d"
-
 MACHINE_EXTRA_RDEPENDS += " \
     e2fsprogs-mke2fs \
     e2fsprogs-resize2fs \
     parted \
 "
 
-MACHINE_EXTRA_RRECOMMENDS += " \
-    ${MACHINE_FIRMWARE} \
-    ${WIRELESS_MODULE} \
-"
+MACHINE_EXTRA_RRECOMMENDS += "${WIRELESS_MODULE}"
 
 MACHINE_FEATURES += "accel-graphics wifi bluetooth pci"
 
