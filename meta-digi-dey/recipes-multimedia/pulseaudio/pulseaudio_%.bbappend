@@ -56,8 +56,8 @@ SRC_URI:append:mx9-nxp-bsp = " \
     file://default.pa \
 "
 
-# Enable allow-autospawn-for-root as default
-PACKAGECONFIG:append = " autospawn-for-root"
+# Disable allow-autospawn-for-root as default
+PACKAGECONFIG:remove = "autospawn-for-root"
 
 EXTRA_OECONF:append:ccimx6 = " --disable-memfd"
 
@@ -105,6 +105,8 @@ do_install:append() {
 	fi
 
 	sed -i -e '/load-module module-suspend-on-idle/{s,$, timeout=0,g}' ${D}${sysconfdir}/pulse/default.pa
+	sed -i -e '/load-module module-suspend-on-idle/{s,$, timeout=0,g}' ${D}${sysconfdir}/pulse/system.pa
+	sed -i -e '/load-module module-native-protocol-unix/{/ auth-anonymous=true/! s/$/ auth-anonymous=true/g}' ${D}${sysconfdir}/pulse/system.pa
 }
 
 # Pulse audio configuration files installation
