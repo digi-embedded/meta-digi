@@ -51,9 +51,7 @@ echo "   ---------   --------"
 echo "   fsbl1       ${INSTALL_ATF_FILENAME}"
 echo "   fsbl2       ${INSTALL_ATF_FILENAME}"
 echo "   fip-a       ${INSTALL_FIP_FILENAME}"
-if test "${install_dualboot}" = "yes"; then
-	echo "   fip-b       ${INSTALL_FIP_FILENAME}"
-fi
+echo "   fip-b       ${INSTALL_FIP_FILENAME}"
 if test "${dualboot}" = "yes"; then
 	echo "   linux_a     ${INSTALL_LINUX_FILENAME}"
 	if test "${install_dualboot}" = "yes"; then
@@ -117,14 +115,12 @@ if test $? -eq 1; then
 	echo "Aborted.";
 	exit;
 fi
-if test "${install_dualboot}" = "yes"; then
-	update fip-b mmc ${INSTALL_MMCDEV} ${INSTALL_FIP_FILENAME}
-	if test $? -eq 1; then
-		echo "[ERROR] Failed to update fip-b!";
-		echo "";
-		echo "Aborted.";
-		exit;
-	fi
+update fip-b mmc ${INSTALL_MMCDEV} ${INSTALL_FIP_FILENAME}
+if test $? -eq 1; then
+	echo "[ERROR] Failed to update fip-b!";
+	echo "";
+	echo "Aborted.";
+	exit;
 fi
 
 # Check if uboot_config volume exists (U-Boot env)
