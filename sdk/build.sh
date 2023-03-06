@@ -174,9 +174,9 @@ while read -r _pl _tgt; do
 	# the fly with underscores.
 	eval "${_pl//-/_}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
-	ccimx8mm-dvk         dey-image-qt,dey-image-crank
-	ccimx8mn-dvk         dey-image-qt,dey-image-crank
-	ccimx8x-sbc-pro      dey-image-qt,dey-image-crank
+	ccimx8mm-dvk         dey-image-qt,dey-image-crank,dey-image-webkit
+	ccimx8mn-dvk         dey-image-qt,dey-image-crank,dey-image-webkit
+	ccimx8x-sbc-pro      dey-image-qt,dey-image-crank,dey-image-webkit
 	ccimx8x-sbc-express  dey-image-qt
 	ccimx6qpsbc          dey-image-qt,dey-image-crank
 	ccimx6sbc            dey-image-qt,dey-image-crank
