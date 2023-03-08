@@ -47,9 +47,15 @@ python () {
         d.appendVar("UBOOT_TF_CONF", "CONFIG_CONSOLE_DISABLE=y ")
         if d.getVar("TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE"):
             passphrase_hash = hashlib.sha256(d.getVar("TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE").encode()).hexdigest()
-            d.appendVar("UBOOT_TF_CONF", 'CONFIG_CONSOLE_ENABLE_PASSPHRASE=y CONFIG_CONSOLE_ENABLE_PASSPHRASE_KEY="%s" ' % passphrase_hash)
+            if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
+                d.appendVar("UBOOT_TF_CONF", 'CONFIG_CONSOLE_ENABLE_PASSPHRASE=y CONFIG_CONSOLE_ENABLE_PASSPHRASE_KEY="%s" ' % passphrase_hash)
+            elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
+                d.appendVar("UBOOT_TF_CONF", 'CONFIG_AUTOBOOT_KEYED=y CONFIG_AUTOBOOT_ENCRYPTION=y CONFIG_AUTOBOOT_STOP_STR_ENABLE=y CONFIG_AUTOBOOT_STOP_STR_SHA256="%s" ' % passphrase_hash)
         elif d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"):
-            d.appendVar("UBOOT_TF_CONF", "CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NR=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"))
+            if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
+                d.appendVar("UBOOT_TF_CONF", "CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NR=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"))
+            elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
+                d.appendVar("UBOOT_TF_CONF", "CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NAME=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_NAME"))
 
     # Secure boot configuration
     if (d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") == "default"):

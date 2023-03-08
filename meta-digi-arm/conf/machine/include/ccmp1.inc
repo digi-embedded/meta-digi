@@ -47,3 +47,9 @@ IMAGE_FSTYPES:remove = "ext4 tar.xz"
 
 # List of supported boot devices
 BOOTDEVICE_LABELS ?= "sdcard"
+
+# Default secure console configuration
+TRUSTFENCE_CONSOLE_DISABLE ?= "0"
+
+# Alternatively, uncommment to enable the console autoboot stop passphrase
+# TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE = ""
