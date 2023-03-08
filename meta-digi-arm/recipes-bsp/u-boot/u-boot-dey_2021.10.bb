@@ -7,6 +7,6 @@ DEPENDS += "flex-native bison-native"
 DEPENDS += "python3-setuptools-native"
 
 SRCBRANCH = "v2021.10/maint"
-SRCREV = "440a00b589c920721dff76376bbfa56255139426"
+SRCREV = "${AUTOREV}"
 
 COMPATIBLE_MACHINE = "(ccmp1)"
