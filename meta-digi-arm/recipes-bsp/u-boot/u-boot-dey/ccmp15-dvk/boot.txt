@@ -59,7 +59,7 @@ if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
 fi
 
 # Apply DVKv1 overlay if the board_version is 1
-if test "${board_version}" -eq "1"; then
+if test -z "${board_version}" || test "${board_version}" -eq "1"; then
 	setenv overlays _ov_board_v1_ccmp15-dvk.dtbo,${overlays}
 fi
 
