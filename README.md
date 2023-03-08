@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 4.0
-## Release 4.0-r1
+## Release 4.0-r2
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -21,12 +21,37 @@ OS versions:
 
 Software for the following hardware platforms is in production support:
 
+## ConnectCore MP13
+* ConnectCore MP13 System-on-Module (SOM)
+  * [CC-WST-DX58-NK](https://www.digi.com/products/models/cc-wst-dx58-nk)
+  * [CC-ST-DX58-ZK](https://www.digi.com/products/models/cc-st-dx58-zk)
+* ConnectCore MP13 DVK
+  * [CC-WMP133-KIT](https://www.digi.com/products/models/cc-wmp133-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/ccmp13/yocto-gs_index))
+
 ## ConnectCore MP15
 * ConnectCore MP15 System-on-Module (SOM)
   * [CC-WST-DW69-NM](https://www.digi.com/products/models/cc-wst-dw69-nm)
   * [CC-ST-DW69-ZM](https://www.digi.com/products/models/cc-st-dw69-zm)
 * ConnectCore MP15 DVK
   * [CC-WMP157-KIT](https://www.digi.com/products/models/cc-wmp157-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/ccmp15/yocto-gs_index))
+
+## ConnectCore 8M Mini
+* ConnectCore 8M Mini System-on-Module (SOM)
+  * [CC-WMX-ET8D-NN](https://www.digi.com/products/models/cc-wmx-et8d-nn)
+  * [CC-WMX-ET7D-NN](https://www.digi.com/products/models/cc-wmx-et7d-nn)
+  * [CC-MX-ET8D-ZN](https://www.digi.com/products/models/cc-mx-et8d-zn)
+  * [CC-MX-ET7D-ZN](https://www.digi.com/products/models/cc-mx-et7d-zn)
+* ConnectCore 8M Mini Development Kit
+  * [CC-WMX8MM-KIT](https://www.digi.com/products/models/cc-wmx8mm-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc8mmini/yocto-gs_index))
+
+## ConnectCore 8M Nano
+* ConnectCore 8M Nano System-on-Module (SOM)
+  * [CC-WMX-FS7D-NN](https://www.digi.com/products/models/cc-wmx-fs7d-nn)
+  * [CC-WMX-FR6D-NN](https://www.digi.com/products/models/cc-wmx-fr6d-nn)
+  * [CC-MX-FS7D-ZN](https://www.digi.com/products/models/cc-mx-fs7d-zn)
+  * [CC-MX-FR6D-ZN](https://www.digi.com/products/models/cc-mx-fr6d-zn)
+* ConnectCore 8M Nano Development Kit
+  * [CC-WMX8MN-KIT](https://www.digi.com/products/models/cc-wmx8mn-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc8mnano/yocto-gs_index))
 
 ## ConnectCore 6UL
 * ConnectCore 6UL System-on-Module (SOM)
@@ -57,10 +82,31 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 # Downloads
 
-* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/4.0/r1/images/
-* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/4.0/r1/sdk/
+* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/4.0/r2/images/
+* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/4.0/r2/sdk/
 
 # Release Changelog
+
+## 4.0-r2
+
+* Added webkit support
+* ST-based platforms
+  * Added support to ConnectCore MP13
+  * Updated BSP
+    * Updated Trusted Firmware ARM
+    * Updated OP-TEE
+    * Updated U-Boot v2021.10
+    * Updated Linux kernel v5.15.67 (based on tag 'v5.15-stm32mp-r2' by ST)
+    * Updated Wifi driver (based on 'v5.15.58-2023_0222' release from Cypress)
+    * Updated Wifi firmware to 'imx-kirkstone-fafnir_r1.0' release from Murata
+* NXP-based platforms
+  * Added support to ConnectCore 8M Mini
+  * Added support to ConnectCore 8M Nano
+  * Updated BSP
+    * Updated U-Boot v2020.04
+    * Updated Linux kernel v5.15.71 (based on tag 'lf-5.15.71-2.2.0' by NXP)
+  * Updated MCA firmware for ConnectCore 6UL to v1.22.
+  * Added Qt 6.3.2 support for ConnectCore 8M platforms
 
 ## 4.0-r1
 
@@ -102,15 +148,11 @@ updated list can be found on the online documentation.
     devices (ConnectCore 6UL, ConnectCore 6 Plus, and ConnectCore 8M Nano) fail
     to join autonomous groups.
 
-## ConnectCore MP15
+## ConnectCore MP15/MP13
 
-* ConnectCore MP15 System-on-Module (SOM)
-  * Power management:
-    * Audio interface does not work after suspend.
-  * UART:
-    * RS-485 mode is currently not supported.
+* ConnectCore MP1 System-on-Module (SOM)
   * Wireless
-    * P2P on the ConnectCore MP15 doesn't currently work in concurrency with
+    * P2P on the ConnectCore MP1 doesn't currently work in concurrency with
       other modes (station or SoftAP).
 
   * The following features are not yet supported:
