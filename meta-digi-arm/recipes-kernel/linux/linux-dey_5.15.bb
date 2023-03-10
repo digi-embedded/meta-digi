@@ -12,8 +12,8 @@ inherit ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'fsl-kernel-localve
 
 SRCBRANCH = "v5.15/nxp/dey-4.0/maint"
 SRCBRANCH:stm32mpcommon = "v5.15/stm/dey-4.0/maint"
-SRCREV = "${AUTOREV}"
-SRCREV:stm32mpcommon = "${AUTOREV}"
+SRCREV = "f764cd6f8295f04df1252e848f14f7f6e472b333"
+SRCREV:stm32mpcommon = "fd7fb9f34b6fa340a9da97616a1f0898a839abbb"
 
 require ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'STM', 'recipes-kernel/linux/linux-stm32mp.inc', '', d)}
 # Don't create custom folder for kernel artifacts

@@ -8,10 +8,10 @@ TFA_URI_GITHUB = "${DIGI_GITHUB_GIT}/arm-trusted-firmware.git;protocol=https"
 TFA_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${TFA_URI_STASH}', '${TFA_URI_GITHUB}', d)}"
 
 SRCBRANCH = "v2.6/stm32mp/maint"
-SRCREV = "${AUTOREV}"
+SRCREV = "56756557afc91a8d7c382a5e2a17d3bb6ecf6b54"
 
 SRC_URI = " \
-    ${TFA_GIT_URI};branch=${SRCBRANCH} \
+    ${TFA_GIT_URI};nobranch=1 \
 "
 
 TF_A_CONFIG[nand]   = "${DEVICE_BOARD_ENABLE:NAND},STM32MP_RAW_NAND=1 ${@'STM32MP_FORCE_MTD_START_OFFSET=${TF_A_MTD_START_OFFSET_NAND}' if ${TF_A_MTD_START_OFFSET_NAND} else ''} STM32MP_USB_PROGRAMMER=1"
