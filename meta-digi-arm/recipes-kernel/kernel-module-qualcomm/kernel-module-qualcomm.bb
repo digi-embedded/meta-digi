@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2022 Digi International.
+# Copyright (C) 2016-2023 Digi International.
 
 SUMMARY = "Qualcomm's wireless driver for qca65xx"
 DESCRIPTION = "qcacld-2.0 module"
@@ -32,6 +32,7 @@ FILES_SDIO_CCX = " \
 
 FILES_SDIO = " \
     file://modprobe-qualcomm.conf \
+    file://qualcomm.sh \
     ${@oe.utils.vartrue('QUALCOMM_FW_CCX_TAGS', '${FILES_SDIO_CCX}', '', d)} \
 "
 
@@ -63,10 +64,17 @@ do_compile:prepend() {
 	export BUILD_VER=${PV}
 }
 
+
+MMC_NODE ?= "30b40000.mmc"
+MMC_NODE:ccimx6ul = "2190000.mmc"
+
 do_install:append() {
 	if [ "${QUALCOMM_WIFI_INTERFACE}" = "sdio" ]; then
 		install -d ${D}${sysconfdir}/modprobe.d
 		install -m 0644 ${WORKDIR}/modprobe-qualcomm.conf ${D}${sysconfdir}/modprobe.d/qualcomm.conf
+		install -d ${D}${sysconfdir}/udev/scripts
+		install -m 0755 ${WORKDIR}/qualcomm.sh ${D}${sysconfdir}/udev/scripts/
+		sed -i -e "s/##NODE##/${MMC_NODE}/g" ${D}${sysconfdir}/udev/scripts/qualcomm.sh
 	fi
 
 	install -d ${D}${base_libdir}/firmware/wlan/
