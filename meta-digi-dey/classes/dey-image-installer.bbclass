@@ -61,7 +61,7 @@ ${DISTRO_NAME} ${DISTRO_VERSION} kit installer
 ----------------------------------------
 
 _EOF_
-	md5sum ${INSTALLER_FILELIST} | sed -e "s,${DEPLOY_DIR_IMAGE}/,,g;s,${IMGDEPLOYDIR}/,,g;s,${META_DIGI_SCRIPTS}/,,g" >> ${IMGDEPLOYDIR}/README.txt
+	md5sum ${INSTALLER_FILELIST} | sed -e "s,${DEPLOY_DIR_IMAGE}.*/,,g;s,${IMGDEPLOYDIR}/,,g;s,${META_DIGI_SCRIPTS}/,,g" >> ${IMGDEPLOYDIR}/README.txt
 
 	# Pack the files and remove the temporary readme file
 	zip -j ${IMGDEPLOYDIR}/${IMAGE_NAME}.installer.zip ${INSTALLER_FILELIST} ${IMGDEPLOYDIR}/README.txt
