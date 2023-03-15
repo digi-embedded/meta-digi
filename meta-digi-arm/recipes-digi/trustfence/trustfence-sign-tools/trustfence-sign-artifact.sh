@@ -152,6 +152,18 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	DEK_BLOB_OFFSET="0x100"
 fi
 
+# Function to generate a PKI tree (with lock dir protection)
+GENPKI_LOCK_DIR="${CONFIG_SIGN_KEYS_PATH}/.genpki.lock"
+gen_pki_tree() {
+	if mkdir -p ${GENPKI_LOCK_DIR}; then
+		trustfence-gen-pki.sh ${CONFIG_SIGN_KEYS_PATH}
+		rm -rf ${GENPKI_LOCK_DIR}
+	else
+		echo "Could not get lock to generate PKI tree"
+		exit 1
+	fi
+}
+
 # Default values
 [ -z "${CONFIG_KEY_INDEX}" ] && CONFIG_KEY_INDEX="0"
 CONFIG_KEY_INDEX_1="$((CONFIG_KEY_INDEX + 1))"
@@ -170,7 +182,7 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 		echo "Using existing PKI tree"
 	elif [ "${n_commas}" -eq 0 ] || [ ! -f "${CERT_CSF}" ] || [ ! -f "${CERT_IMG}" ]; then
 		# Generate PKI
-		trustfence-gen-pki.sh "${CONFIG_SIGN_KEYS_PATH}"
+		gen_pki_tree
 
 		SRK_KEYS="$(echo ${CONFIG_SIGN_KEYS_PATH}/crts/SRK*crt.pem | sed s/\ /\,/g)"
 		CERT_CSF="$(echo ${CONFIG_SIGN_KEYS_PATH}/crts/CSF${CONFIG_KEY_INDEX_1}*crt.pem)"
@@ -185,7 +197,7 @@ elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 		echo "Using existing PKI tree"
 	elif [ "${n_commas}" -eq 0 ] && [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 		# Generate PKI
-		trustfence-gen-pki.sh "${CONFIG_SIGN_KEYS_PATH}"
+		gen_pki_tree
 
 		SRK_KEYS="$(echo ${CONFIG_SIGN_KEYS_PATH}/crts/SRK*crt.pem | sed s/\ /\,/g)"
 	else

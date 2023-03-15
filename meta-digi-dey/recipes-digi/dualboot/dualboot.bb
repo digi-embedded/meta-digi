@@ -5,12 +5,7 @@ SECTION = "base"
 LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6"
 
-
-# When building a TrustFence enabled rootfs, we need the TrustFence PKI tree to
-# be already generated in order to copy the public key. Forcing a dependency with
-# 'virtual/kernel' ensures that the keys are already generated as they are needed to sign the
-# kernel artifacts.
-DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'virtual/kernel openssl-native', '', d)}"
+DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'openssl-native trustfence-cst-native', '', d)}"
 
 SRC_URI = " \
     file://dualboot-init \
@@ -41,6 +36,8 @@ do_install() {
 	# If Trustfence is enabled, copy the public key that is going to be used into the
 	# initramfs '/etc/ssl/certs' folder in order to verify swupdate packages.
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+		# Check and generate a PKI tree if there isn't one
+		check_gen_pki_tree
 		# Retrieve the key index to use.
 		KEY_INDEX="0"
 		if [ -n "${TRUSTFENCE_KEY_INDEX}" ]; then
