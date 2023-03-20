@@ -1,7 +1,8 @@
+From 6fa06f214ba1cfc4e80dc7413874175146b9c2a5 Mon Sep 17 00:00:00 2001
 From: Chien-Chia Chen <carella.chen@infineon.com>
 Date: Tue, 23 Nov 2021 21:29:08 -0600
-Subject: [PATCH] wpa_supplicant: Support WPA_KEY_MGMT_FT for eapol offloading
- and driver base roaming
+Subject: [PATCH 17/49] wpa_supplicant: Support WPA_KEY_MGMT_FT for eapol
+ offloading and driver base roaming
 
 Add WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_PSK / WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X /
 WPA_DRIVER_FLAGS_ROAM_OFFLOAD for IEEE80211R support
@@ -18,7 +19,7 @@ Signed-off-by: Chien-Chia Chen<carella.chen@infineon.com>
  7 files changed, 19 insertions(+), 5 deletions(-)
 
 diff --git a/src/drivers/driver.h b/src/drivers/driver.h
-index 45260e8c5e30..fb3f8b4a866c 100644
+index 45260e8c5..fb3f8b4a8 100644
 --- a/src/drivers/driver.h
 +++ b/src/drivers/driver.h
 @@ -2071,6 +2071,8 @@ struct wpa_driver_capa {
@@ -31,7 +32,7 @@ index 45260e8c5e30..fb3f8b4a866c 100644
  
  #define FULL_AP_CLIENT_STATE_SUPP(drv_flags) \
 diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
-index 341c753b3e83..964486c11c1b 100644
+index 341c753b3..964486c11 100644
 --- a/src/drivers/driver_nl80211.c
 +++ b/src/drivers/driver_nl80211.c
 @@ -3301,7 +3301,8 @@ static int wpa_driver_nl80211_set_key(struct i802_bss *bss,
@@ -45,7 +46,7 @@ index 341c753b3e83..964486c11c1b 100644
  		/* The driver does not have any offload mechanism for PMK, so
  		 * there is no need to configure this key. */
 diff --git a/src/drivers/driver_nl80211_capa.c b/src/drivers/driver_nl80211_capa.c
-index ae6029a922b8..d5cdafa9f061 100644
+index ae6029a92..d5cdafa9f 100644
 --- a/src/drivers/driver_nl80211_capa.c
 +++ b/src/drivers/driver_nl80211_capa.c
 @@ -606,6 +606,10 @@ static void wiphy_info_ext_feature_flags(struct wiphy_info_data *info,
@@ -60,7 +61,7 @@ index ae6029a922b8..d5cdafa9f061 100644
  			      NL80211_EXT_FEATURE_MFP_OPTIONAL))
  		capa->flags |= WPA_DRIVER_FLAGS_MFP_OPTIONAL;
 diff --git a/src/drivers/nl80211_copy.h b/src/drivers/nl80211_copy.h
-index f962c06e9818..a3e889b35b36 100644
+index f962c06e9..a3e889b35 100644
 --- a/src/drivers/nl80211_copy.h
 +++ b/src/drivers/nl80211_copy.h
 @@ -6010,6 +6010,7 @@ enum nl80211_ext_feature_index {
@@ -72,7 +73,7 @@ index f962c06e9818..a3e889b35b36 100644
  	NL80211_EXT_FEATURE_SECURE_LTF,
  	NL80211_EXT_FEATURE_SECURE_RTT,
 diff --git a/wpa_supplicant/events.c b/wpa_supplicant/events.c
-index f55e1846e205..fe8dbd91d50a 100644
+index f55e1846e..fe8dbd91d 100644
 --- a/wpa_supplicant/events.c
 +++ b/wpa_supplicant/events.c
 @@ -3425,7 +3425,8 @@ static void wpa_supplicant_event_assoc(struct wpa_supplicant *wpa_s,
@@ -86,7 +87,7 @@ index f55e1846e205..fe8dbd91d50a 100644
  		/*
  		 * The driver will take care of RSN 4-way handshake, so we need
 diff --git a/wpa_supplicant/wpa_supplicant.c b/wpa_supplicant/wpa_supplicant.c
-index f00dd57da3c1..f238dadcf27f 100644
+index f00dd57da..f238dadcf 100644
 --- a/wpa_supplicant/wpa_supplicant.c
 +++ b/wpa_supplicant/wpa_supplicant.c
 @@ -1543,7 +1543,10 @@ int wpa_supplicant_set_suites(struct wpa_supplicant *wpa_s,
@@ -102,7 +103,7 @@ index f00dd57da3c1..f238dadcf27f 100644
  #endif /* CONFIG_IEEE80211R */
  	wpa_dbg(wpa_s, MSG_DEBUG,
 diff --git a/wpa_supplicant/wpas_glue.c b/wpa_supplicant/wpas_glue.c
-index 0cffe52fa9be..816a884a8179 100644
+index 0cffe52fa..816a884a8 100644
 --- a/wpa_supplicant/wpas_glue.c
 +++ b/wpa_supplicant/wpas_glue.c
 @@ -311,7 +311,8 @@ static void wpa_supplicant_eapol_cb(struct eapol_sm *eapol,
@@ -125,3 +126,6 @@ index 0cffe52fa9be..816a884a8179 100644
  		pmk_len = sm->pmk_len;
  		os_memcpy(pmk, sm->pmk, pmk_len);
  	} else {
+-- 
+2.17.1
+

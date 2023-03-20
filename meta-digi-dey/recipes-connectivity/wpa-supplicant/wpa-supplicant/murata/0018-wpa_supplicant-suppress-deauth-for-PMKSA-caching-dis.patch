@@ -1,6 +1,8 @@
+From 9af850cef2007cabe1bbffad3ef1d2b13396832d Mon Sep 17 00:00:00 2001
 From: Darren Li <hsil@cypress.com>
 Date: Tue, 22 Feb 2022 00:34:47 -0600
-Subject: [PATCH] wpa_supplicant: suppress deauth for PMKSA caching disabled
+Subject: [PATCH 18/49] wpa_supplicant: suppress deauth for PMKSA caching
+ disabled
 
 wpa_supplicant: Need a command/parameter suppress deauth for PMKSA caching disabled
 
@@ -12,14 +14,14 @@ Signed-off-by: Darren Li <Darren.Li@infineon.com>
  wpa_supplicant/config.c      | 1 +
  wpa_supplicant/config_file.c | 1 +
  wpa_supplicant/config_ssid.h | 7 +++++++
- wpa_supplicant/wpas_glue.c   | 1 +
- 7 files changed, 16 insertions(+), 1 deletion(-)
+ wpa_supplicant/wpas_glue.c   | 2 ++
+ 7 files changed, 17 insertions(+), 1 deletion(-)
 
 diff --git a/src/rsn_supp/wpa.c b/src/rsn_supp/wpa.c
-index 0a2f87787504..a9f1fb916a8d 100644
+index 92ab7d561..1f6401ef3 100644
 --- a/src/rsn_supp/wpa.c
 +++ b/src/rsn_supp/wpa.c
-@@ -2898,7 +2898,9 @@ static void wpa_sm_pmksa_free_cb(struct rsn_pmksa_cache_entry *entry,
+@@ -2904,7 +2904,9 @@ static void wpa_sm_pmksa_free_cb(struct rsn_pmksa_cache_entry *entry,
  	if (deauth) {
  		sm->pmk_len = 0;
  		os_memset(sm->pmk, 0, sizeof(sm->pmk));
@@ -30,7 +32,7 @@ index 0a2f87787504..a9f1fb916a8d 100644
  	}
  }
  
-@@ -3234,6 +3236,7 @@ void wpa_sm_set_config(struct wpa_sm *sm, struct rsn_supp_config *config)
+@@ -3240,6 +3242,7 @@ void wpa_sm_set_config(struct wpa_sm *sm, struct rsn_supp_config *config)
  		}
  #endif /* CONFIG_FILS */
  		sm->beacon_prot = config->beacon_prot;
@@ -39,7 +41,7 @@ index 0a2f87787504..a9f1fb916a8d 100644
  		sm->network_ctx = NULL;
  		sm->allowed_pairwise_cipher = 0;
 diff --git a/src/rsn_supp/wpa.h b/src/rsn_supp/wpa.h
-index 41daaae2cf72..2cd1826e43e1 100644
+index 41daaae2c..2cd1826e4 100644
 --- a/src/rsn_supp/wpa.h
 +++ b/src/rsn_supp/wpa.h
 @@ -136,6 +136,7 @@ struct rsn_supp_config {
@@ -51,7 +53,7 @@ index 41daaae2cf72..2cd1826e43e1 100644
  
  #ifndef CONFIG_NO_WPA
 diff --git a/src/rsn_supp/wpa_i.h b/src/rsn_supp/wpa_i.h
-index 6cdce321da3b..3989c9ab3dc2 100644
+index 6cdce321d..3989c9ab3 100644
 --- a/src/rsn_supp/wpa_i.h
 +++ b/src/rsn_supp/wpa_i.h
 @@ -216,6 +216,7 @@ struct wpa_sm {
@@ -63,7 +65,7 @@ index 6cdce321da3b..3989c9ab3dc2 100644
  
  
 diff --git a/wpa_supplicant/config.c b/wpa_supplicant/config.c
-index bf062b0792b7..737e46be50f2 100644
+index bf062b079..737e46be5 100644
 --- a/wpa_supplicant/config.c
 +++ b/wpa_supplicant/config.c
 @@ -2639,6 +2639,7 @@ static const struct parse_data ssid_fields[] = {
@@ -75,7 +77,7 @@ index bf062b0792b7..737e46be50f2 100644
  
  #undef OFFSET
 diff --git a/wpa_supplicant/config_file.c b/wpa_supplicant/config_file.c
-index 6db5010db3a7..fe383564d5db 100644
+index 6db5010db..fe383564d 100644
 --- a/wpa_supplicant/config_file.c
 +++ b/wpa_supplicant/config_file.c
 @@ -844,6 +844,7 @@ static void wpa_config_write_network(FILE *f, struct wpa_ssid *ssid)
@@ -87,7 +89,7 @@ index 6db5010db3a7..fe383564d5db 100644
  	INT_DEF(disable_ht, DEFAULT_DISABLE_HT);
  	INT_DEF(disable_ht40, DEFAULT_DISABLE_HT40);
 diff --git a/wpa_supplicant/config_ssid.h b/wpa_supplicant/config_ssid.h
-index 724534dd0123..ad0bd2b80749 100644
+index 724534dd0..ad0bd2b80 100644
 --- a/wpa_supplicant/config_ssid.h
 +++ b/wpa_supplicant/config_ssid.h
 @@ -1177,6 +1177,13 @@ struct wpa_ssid {
@@ -105,14 +107,18 @@ index 724534dd0123..ad0bd2b80749 100644
  
  #endif /* CONFIG_SSID_H */
 diff --git a/wpa_supplicant/wpas_glue.c b/wpa_supplicant/wpas_glue.c
-index 816a884a8179..afdcf43194c4 100644
+index 816a884a8..88cbc8fbe 100644
 --- a/wpa_supplicant/wpas_glue.c
 +++ b/wpa_supplicant/wpas_glue.c
-@@ -1504,6 +1504,7 @@ void wpa_supplicant_rsn_supp_set_config(struct wpa_supplicant *wpa_s,
+@@ -1504,6 +1504,8 @@ void wpa_supplicant_rsn_supp_set_config(struct wpa_supplicant *wpa_s,
  		conf.force_kdk_derivation = wpa_s->conf->force_kdk_derivation;
  #endif /* CONFIG_TESTING_OPTIONS */
  #endif /* CONFIG_PASN */
++		conf.beacon_prot = ssid->beacon_prot;
 +		conf.suppress_deauth_no_pmksa = ssid->suppress_deauth_no_pmksa;
  	}
  	wpa_sm_set_config(wpa_s->wpa, ssid ? &conf : NULL);
  }
+-- 
+2.17.1
+

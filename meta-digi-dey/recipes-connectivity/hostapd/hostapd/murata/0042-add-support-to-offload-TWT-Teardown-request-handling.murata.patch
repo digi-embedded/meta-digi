@@ -1,0 +1,194 @@
+From 9a87c940340e1c665ce7172e7df147d53d1daabe Mon Sep 17 00:00:00 2001
+From: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
+Date: Mon, 11 Jul 2022 11:16:50 +0530
+Subject: [PATCH 42/49] add support to offload TWT Teardown request handling to
+ the Firmware
+
+With "TWT_TEARDOWN" control sock cmd interface currently available in the
+wpa_supplicant,it is currently possible to generate the TWT Teardown Action
+frame with the desired TWT session params like Negotiation Type, Flow ID,
+Bcast TWT ID, etc, without informing the TWT state machine in the Firmware.
+
+Now introduce a new TWT Offload code path and then when the TWT Teardown is
+triggered either through the "$ wpa_cli twt_teardown" or directly though
+the control sock cmd "TWT_TEARDOWN", construct a Vendor nl80211 cmd of type
+"TWT" and pass it to the driver if it supports this new vendor cmd.
+The driver then could inform the TWT module in the firmware through the
+corresponding IOVAR to initiate a TWT Teardown request while updating the
+TWT negotiation handshake state machine as needed.
+
+
+Signed-off-by: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
+Signed-off-by: Ian Lin <ian.lin@infineon.com>
+---
+ src/common/ifx_vendor.h           |  8 ++++
+ src/drivers/driver.h              | 14 +++++++
+ src/drivers/driver_nl80211.c      | 70 +++++++++++++++++++++++++++++++
+ 3 files changed, 92 insertions(+)
+
+diff --git a/src/common/ifx_vendor.h b/src/common/ifx_vendor.h
+index a94694c93..2e251c367 100644
+--- a/src/common/ifx_vendor.h
++++ b/src/common/ifx_vendor.h
+@@ -127,12 +127,17 @@ enum ifx_vendor_attr_twt {
+  * @IFX_TWT_OPER_SETUP: Setup a TWT session. Required parameters are
+  *	obtained through the nested attrs under IFX_VENDOR_ATTR_TWT_PARAMS.
+  *
++ * @IFX_TWT_OPER_TEARDOWN: Teardown the already negotiated TWT session.
++ *	Required parameters are obtained through the nested attrs under
++ *	IFX_VENDOR_ATTR_TWT_PARAMS.
++ *
+  * @IFX_TWT_OPER_MAX: This acts as a the tail of the list.
+  *      Make sure it located at the end of the list.
+  */
+ enum ifx_twt_oper {
+ 	IFX_TWT_OPER_UNSPEC,
+ 	IFX_TWT_OPER_SETUP,
++	IFX_TWT_OPER_TEARDOWN,
+ 	IFX_TWT_OPER_MAX
+ };
+ 
+@@ -202,6 +207,8 @@ enum ifx_twt_oper {
+  * @IFX_VENDOR_ATTR_TWT_PARAM_MIN_WAKE_DURATION_UNIT: Nominal Minimum TWT Wake Duration
+  *	Unit. 0 represents unit in "256 usecs" and 1 represents unit in "TUs".
+  *
++ * @IFX_VENDOR_ATTR_TWT_PARAM_TEARDOWN_ALL_TWT: Teardown all negotiated TWT sessions.
++ *
+  * @IFX_VENDOR_ATTR_TWT_PARAM_MAX: This acts as a the tail of the list.
+  *      Make sure it located at the end of the list.
+  */
+@@ -224,6 +231,7 @@ enum ifx_vendor_attr_twt_param {
+ 	IFX_VENDOR_ATTR_TWT_PARAM_CHANNEL,
+ 	IFX_VENDOR_ATTR_TWT_PARAM_TWT_INFO_FRAME_DISABLED,
+ 	IFX_VENDOR_ATTR_TWT_PARAM_MIN_WAKE_DURATION_UNIT,
++	IFX_VENDOR_ATTR_TWT_PARAM_TEARDOWN_ALL_TWT,
+ 	IFX_VENDOR_ATTR_TWT_PARAM_MAX
+ };
+ 
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index af4d0a5d0..4d810aaa8 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -2544,6 +2544,13 @@ struct drv_setup_twt_params {
+ 	u8 twt_info_frame_disabled;
+ 	u8 min_twt_unit;	/* true - in TUs, false - in 256us */
+ };
++
++struct drv_teardown_twt_params {
++	u8 negotiation_type;
++	u8 flow_id;
++	u8 bcast_twt_id;
++	u8 teardown_all_twt;
++};
+ #endif /* CONFIG_TWT_OFFLOAD_IFX */
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+@@ -4666,8 +4673,15 @@ struct wpa_driver_ops {
+ 	 * @params: Setup TWT params
+ 	 */
+ 	int (*setup_twt)(void *priv, struct drv_setup_twt_params *params);
++
++	/**
++	 * teardown_twt - Teardown the already negotiated TWT session
++	 * @params: Teardown TWT params
++	 */
++	int (*teardown_twt)(void *priv, struct drv_teardown_twt_params *params); 
+ #endif /* CONFIG_TWT_OFFLOAD_IFX */
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
++
+ };
+ 
+ /**
+diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
+index fd6fe91a1..8f8f7e2cd 100644
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -12399,6 +12399,75 @@ fail:
+ 	nlmsg_free(msg);
+ 	return ret;
+ }
++
++static int wpa_driver_nl80211_teardown_twt(void *priv, struct drv_teardown_twt_params *params)
++{
++	struct i802_bss *bss = priv;
++	struct wpa_driver_nl80211_data *drv = bss->drv;
++	struct nl_msg *msg = NULL;
++	struct nlattr *data, *twt_param_attrs;
++	int ret = -1;
++
++	if (!drv->ifx_twt_offload)
++		goto fail;
++
++	if (!(msg = nl80211_drv_msg(drv, 0, NL80211_CMD_VENDOR)) ||
++	    nla_put_u32(msg, NL80211_ATTR_VENDOR_ID, OUI_IFX) ||
++	    nla_put_u32(msg, NL80211_ATTR_VENDOR_SUBCMD, IFX_VENDOR_SCMD_TWT))
++		goto fail;
++
++	data = nla_nest_start(msg, NL80211_ATTR_VENDOR_DATA);
++	if (!data)
++		goto fail;
++
++	if (nla_put_u8(msg, IFX_VENDOR_ATTR_TWT_OPER, IFX_TWT_OPER_TEARDOWN))
++		goto fail;
++
++	twt_param_attrs = nla_nest_start(msg, IFX_VENDOR_ATTR_TWT_PARAMS);
++	if (!twt_param_attrs)
++		goto fail;
++
++	if (nla_put_u8(msg, IFX_VENDOR_ATTR_TWT_PARAM_NEGO_TYPE,
++		       params->negotiation_type))
++		goto fail;
++
++	if (params->teardown_all_twt) {
++	    if (nla_put_u8(msg, IFX_VENDOR_ATTR_TWT_PARAM_TEARDOWN_ALL_TWT,
++			   params->teardown_all_twt))
++		goto fail;
++	} else if (params->flow_id &&
++		   nla_put_u8(msg, IFX_VENDOR_ATTR_TWT_PARAM_FLOW_ID,
++			      params->flow_id)) {
++		goto fail;
++	} else if (params->bcast_twt_id &&
++		   nla_put_u8(msg, IFX_VENDOR_ATTR_TWT_PARAM_BCAST_TWT_ID,
++			      params->bcast_twt_id)) {
++		goto fail;
++	}
++
++	nla_nest_end(msg, twt_param_attrs);
++	nla_nest_end(msg, data);
++
++	wpa_printf(MSG_DEBUG,
++		   "nl80211: TWT Teardown: Neg Type: %d teardown_all_twt: %d "
++		   "flow_id: %d bcast_twt_id: %d",
++		   params->negotiation_type, params->teardown_all_twt,
++		   params->flow_id, params->bcast_twt_id);
++
++	ret = send_and_recv_msgs(drv, msg, NULL, NULL, NULL, NULL);
++	if (ret) {
++		wpa_printf(MSG_DEBUG,
++			   "nl80211: TWT Teardown: Failed to invoke driver "
++			   "TWT teardown function: %s",
++			   strerror(-ret));
++	}
++
++	return ret;
++fail:
++	nl80211_nlmsg_clear(msg);
++	nlmsg_free(msg);
++	return ret;
++}
+ #endif /* CONFIG_TWT_OFFLOAD_IFX */
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+@@ -12549,6 +12618,7 @@ const struct wpa_driver_ops wpa_driver_nl80211_ops = {
+ #ifdef CONFIG_DRIVER_NL80211_IFX
+ #ifdef CONFIG_TWT_OFFLOAD_IFX
+ 	.setup_twt = wpa_driver_nl80211_setup_twt,
++	.teardown_twt = wpa_driver_nl80211_teardown_twt,
+ #endif /* CONFIG_TWT_OFFLOAD_IFX */
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ };
+ 
+ 
+-- 
+2.17.1
+

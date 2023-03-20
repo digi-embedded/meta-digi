@@ -1,0 +1,34 @@
+From 7076f7634cc9d7a88f009c448ada307841b42a2a Mon Sep 17 00:00:00 2001
+From: JasonHuang <Jason.Huang2@infineon.com>
+Date: Sun, 30 Oct 2022 21:58:34 -0500
+Subject: [PATCH 39/49] FT: Sync nl80211 ext feature index
+
+The backports-5.15.58 has been used. Supplicant should sync the
+nl80211_ext_feature_index with backports to avoid unexpected fail.
+
+Signed-off-by: JasonHuang <Jason.Huang2@infineon.com>
+---
+ src/drivers/nl80211_copy.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/drivers/nl80211_copy.h b/src/drivers/nl80211_copy.h
+index a3e889b35..db5b1503d 100644
+--- a/src/drivers/nl80211_copy.h
++++ b/src/drivers/nl80211_copy.h
+@@ -6010,11 +6010,12 @@ enum nl80211_ext_feature_index {
+ 	NL80211_EXT_FEATURE_SAE_OFFLOAD_AP,
+ 	NL80211_EXT_FEATURE_FILS_DISCOVERY,
+ 	NL80211_EXT_FEATURE_UNSOL_BCAST_PROBE_RESP,
+-	NL80211_EXT_FEATURE_ROAM_OFFLOAD,
+ 	NL80211_EXT_FEATURE_BEACON_RATE_HE,
+ 	NL80211_EXT_FEATURE_SECURE_LTF,
+ 	NL80211_EXT_FEATURE_SECURE_RTT,
+ 	NL80211_EXT_FEATURE_PROT_RANGE_NEGO_AND_MEASURE,
++	NL80211_EXT_FEATURE_BSS_COLOR,
++	NL80211_EXT_FEATURE_ROAM_OFFLOAD,
+ 
+ 	/* add new features before the definition below */
+ 	NUM_NL80211_EXT_FEATURES,
+-- 
+2.17.1
+

@@ -4,7 +4,7 @@ After=dbus.service
 
 [Service]
 Type=forking
-PIDFile=/run/pulse.pid
+PIDFile=/run/pulse/pid
 ExecStart=/etc/pulseaudio-init
 ExecStop=kill -HUP $MAINPID
 

@@ -1,0 +1,30 @@
+From 4a920e2446cff3f215614d63798e675bb5e25549 Mon Sep 17 00:00:00 2001
+From: Carter Chen <carter.chen@infineon.com>
+Date: Wed, 19 Oct 2022 03:29:39 -0500
+Subject: [PATCH 37/49] Enabling OWE in wpa_supplicant
+
+Enabling the compile options for OWE.
+
+Fixes: SWLINUX-2956
+
+Signed-off-by: Carter Chen <carter.chen@infineon.com>
+---
+ wpa_supplicant/defconfig_base | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/wpa_supplicant/defconfig_base b/wpa_supplicant/defconfig_base
+index 611a23e3e..1c83967ae 100644
+--- a/wpa_supplicant/defconfig_base
++++ b/wpa_supplicant/defconfig_base
+@@ -610,7 +610,7 @@ CONFIG_BGSCAN_LEARN=y
+ 
+ # Opportunistic Wireless Encryption (OWE)
+ # Experimental implementation of draft-harkins-owe-07.txt
+-#CONFIG_OWE=y
++CONFIG_OWE=y
+ 
+ # Device Provisioning Protocol (DPP)
+ CONFIG_DPP=y
+-- 
+2.17.1
+

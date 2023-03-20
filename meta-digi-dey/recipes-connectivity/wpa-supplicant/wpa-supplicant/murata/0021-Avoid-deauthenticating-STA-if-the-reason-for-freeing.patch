@@ -1,0 +1,188 @@
+From ed487600a81fa99688201a50176072555c90e690 Mon Sep 17 00:00:00 2001
+From: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
+Date: Mon, 25 Apr 2022 18:35:14 +0530
+Subject: [PATCH 21/49] Avoid deauthenticating STA if the reason for freeing
+ PMK entry isn't expiry
+
+The PMK cache entry for a STA in the SoftAP managed by wpa_supplicant
+can be freed in multiple scenarios like when a new PMK is created after
+reconnection or when the the PMK Life time is expired, etc.
+
+So avoid sending Deauth to the STA when freeing the PMK cache entry for a
+specific STA in the SoftAP when attempting to replace it with a new PMK
+cache entry derived as part of STA reconnection. Doing this lets the STA
+reconnect to the SoftAP successfully after tearing down the connection
+because of configured PMK Life time getting expired in the STA. And send
+Deauth to STA only when the reason for freeing PMK cache entry is that the
+configured PMK Life time got expired in the SoftAP.
+
+The PMKSA free reasons PMK_FREE, PMK_REPLACE and PMK_EXPIRE are introduced
+for SoftAP to be consistent with the PMKSA reasons defined for STA mode in
+src/rsn_supp/pmksa_cache.h
+
+
+
+---
+ src/ap/pmksa_cache_auth.c | 22 +++++++++++++---------
+ src/ap/pmksa_cache_auth.h | 12 ++++++++++--
+ src/ap/wpa_auth.c         | 15 ++++++++++++---
+ 3 files changed, 35 insertions(+), 14 deletions(-)
+
+diff --git a/src/ap/pmksa_cache_auth.c b/src/ap/pmksa_cache_auth.c
+index b67b8522e..5084dfa13 100644
+--- a/src/ap/pmksa_cache_auth.c
++++ b/src/ap/pmksa_cache_auth.c
+@@ -28,7 +28,8 @@ struct rsn_pmksa_cache {
+ 	struct rsn_pmksa_cache_entry *pmksa;
+ 	int pmksa_count;
+ 
+-	void (*free_cb)(struct rsn_pmksa_cache_entry *entry, void *ctx);
++	void (*free_cb)(struct rsn_pmksa_cache_entry *entry, void *ctx,
++			enum pmksa_free_reason reason);
+ 	void *ctx;
+ };
+ 
+@@ -49,13 +50,14 @@ static void _pmksa_cache_free_entry(struct rsn_pmksa_cache_entry *entry)
+ 
+ 
+ void pmksa_cache_free_entry(struct rsn_pmksa_cache *pmksa,
+-			    struct rsn_pmksa_cache_entry *entry)
++			    struct rsn_pmksa_cache_entry *entry,
++			    enum pmksa_free_reason reason)
+ {
+ 	struct rsn_pmksa_cache_entry *pos, *prev;
+ 	unsigned int hash;
+ 
+ 	pmksa->pmksa_count--;
+-	pmksa->free_cb(entry, pmksa->ctx);
++	pmksa->free_cb(entry, pmksa->ctx, reason);
+ 
+ 	/* unlink from hash list */
+ 	hash = PMKID_HASH(entry->pmkid);
+@@ -101,7 +103,7 @@ void pmksa_cache_auth_flush(struct rsn_pmksa_cache *pmksa)
+ 	while (pmksa->pmksa) {
+ 		wpa_printf(MSG_DEBUG, "RSN: Flush PMKSA cache entry for "
+ 			   MACSTR, MAC2STR(pmksa->pmksa->spa));
+-		pmksa_cache_free_entry(pmksa, pmksa->pmksa);
++		pmksa_cache_free_entry(pmksa, pmksa->pmksa, PMKSA_FREE);
+ 	}
+ }
+ 
+@@ -113,9 +115,10 @@ static void pmksa_cache_expire(void *eloop_ctx, void *timeout_ctx)
+ 
+ 	os_get_reltime(&now);
+ 	while (pmksa->pmksa && pmksa->pmksa->expiration <= now.sec) {
++		struct rsn_pmksa_cache_entry *entry = pmksa->pmksa;
+ 		wpa_printf(MSG_DEBUG, "RSN: expired PMKSA cache entry for "
+ 			   MACSTR, MAC2STR(pmksa->pmksa->spa));
+-		pmksa_cache_free_entry(pmksa, pmksa->pmksa);
++		pmksa_cache_free_entry(pmksa, entry, PMKSA_EXPIRE);
+ 	}
+ 
+ 	pmksa_cache_set_expiration(pmksa);
+@@ -374,14 +377,14 @@ int pmksa_cache_auth_add_entry(struct rsn_pmksa_cache *pmksa,
+ 	 */
+ 	pos = pmksa_cache_auth_get(pmksa, entry->spa, NULL);
+ 	if (pos)
+-		pmksa_cache_free_entry(pmksa, pos);
++		pmksa_cache_free_entry(pmksa, pos, PMKSA_REPLACE);
+ 
+ 	if (pmksa->pmksa_count >= pmksa_cache_max_entries && pmksa->pmksa) {
+ 		/* Remove the oldest entry to make room for the new entry */
+ 		wpa_printf(MSG_DEBUG, "RSN: removed the oldest PMKSA cache "
+ 			   "entry (for " MACSTR ") to make room for new one",
+ 			   MAC2STR(pmksa->pmksa->spa));
+-		pmksa_cache_free_entry(pmksa, pmksa->pmksa);
++		pmksa_cache_free_entry(pmksa, pmksa->pmksa, PMKSA_FREE);
+ 	}
+ 
+ 	pmksa_cache_link_entry(pmksa, entry);
+@@ -539,7 +542,8 @@ struct rsn_pmksa_cache_entry * pmksa_cache_get_okc(
+  */
+ struct rsn_pmksa_cache *
+ pmksa_cache_auth_init(void (*free_cb)(struct rsn_pmksa_cache_entry *entry,
+-				      void *ctx), void *ctx)
++				      void *ctx, enum pmksa_free_reason reason),
++		      void *ctx)
+ {
+ 	struct rsn_pmksa_cache *pmksa;
+ 
+@@ -613,7 +617,7 @@ int pmksa_cache_auth_radius_das_disconnect(struct rsn_pmksa_cache *pmksa,
+ 			found++;
+ 			prev = entry;
+ 			entry = entry->next;
+-			pmksa_cache_free_entry(pmksa, prev);
++			pmksa_cache_free_entry(pmksa, prev, PMKSA_FREE);
+ 			continue;
+ 		}
+ 		entry = entry->next;
+diff --git a/src/ap/pmksa_cache_auth.h b/src/ap/pmksa_cache_auth.h
+index 2ef217435..ed532dd2e 100644
+--- a/src/ap/pmksa_cache_auth.h
++++ b/src/ap/pmksa_cache_auth.h
+@@ -37,9 +37,16 @@ struct rsn_pmksa_cache_entry {
+ struct rsn_pmksa_cache;
+ struct radius_das_attrs;
+ 
++enum pmksa_free_reason {
++	PMKSA_FREE,
++	PMKSA_REPLACE,
++	PMKSA_EXPIRE,
++};
++
+ struct rsn_pmksa_cache *
+ pmksa_cache_auth_init(void (*free_cb)(struct rsn_pmksa_cache_entry *entry,
+-				      void *ctx), void *ctx);
++				      void *ctx, enum pmksa_free_reason reason),
++		      void *ctx);
+ void pmksa_cache_auth_deinit(struct rsn_pmksa_cache *pmksa);
+ struct rsn_pmksa_cache_entry *
+ pmksa_cache_auth_get(struct rsn_pmksa_cache *pmksa,
+@@ -68,7 +75,8 @@ void pmksa_cache_to_eapol_data(struct hostapd_data *hapd,
+ 			       struct rsn_pmksa_cache_entry *entry,
+ 			       struct eapol_state_machine *eapol);
+ void pmksa_cache_free_entry(struct rsn_pmksa_cache *pmksa,
+-			    struct rsn_pmksa_cache_entry *entry);
++			    struct rsn_pmksa_cache_entry *entry,
++			    enum pmksa_free_reason reason);
+ int pmksa_cache_auth_radius_das_disconnect(struct rsn_pmksa_cache *pmksa,
+ 					   struct radius_das_attrs *attr);
+ int pmksa_cache_auth_list(struct rsn_pmksa_cache *pmksa, char *buf, size_t len);
+diff --git a/src/ap/wpa_auth.c b/src/ap/wpa_auth.c
+index e92ea4302..9917c13e8 100644
+--- a/src/ap/wpa_auth.c
++++ b/src/ap/wpa_auth.c
+@@ -387,10 +387,19 @@ static int wpa_auth_pmksa_clear_cb(struct wpa_state_machine *sm, void *ctx)
+ 
+ 
+ static void wpa_auth_pmksa_free_cb(struct rsn_pmksa_cache_entry *entry,
+-				   void *ctx)
++				   void *ctx, enum pmksa_free_reason reason)
+ {
+ 	struct wpa_authenticator *wpa_auth = ctx;
+-	wpa_sta_disconnect(wpa_auth, entry->spa, WLAN_REASON_PREV_AUTH_NOT_VALID);
++
++	if (reason == PMKSA_EXPIRE) {
++		/*
++		 * Once when the PMK cache entry for a STA expires in the SoftAP,
++		 * send a deauth to the STA from the SoftAP to make the STA reconnect
++		 * to the network and derive a new PMK.
++		 */
++		wpa_sta_disconnect(wpa_auth, entry->spa, WLAN_REASON_PREV_AUTH_NOT_VALID);
++	}
++
+ 	wpa_auth_for_each_sta(wpa_auth, wpa_auth_pmksa_clear_cb, entry);
+ }
+ 
+@@ -4894,7 +4903,7 @@ void wpa_auth_pmksa_remove(struct wpa_authenticator *wpa_auth,
+ 	if (pmksa) {
+ 		wpa_printf(MSG_DEBUG, "WPA: Remove PMKSA cache entry for "
+ 			   MACSTR " based on request", MAC2STR(sta_addr));
+-		pmksa_cache_free_entry(wpa_auth->pmksa, pmksa);
++		pmksa_cache_free_entry(wpa_auth->pmksa, pmksa, PMKSA_FREE);
+ 	}
+ }
+ 
+-- 
+2.17.1
+

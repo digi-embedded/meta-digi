@@ -1,6 +1,7 @@
+From 234dbe729a1041d93efc51b8467ac063b74b2c81 Mon Sep 17 00:00:00 2001
 From: Kurt Lee <kurt.lee@cypress.com>
 Date: Mon, 18 May 2020 08:36:59 -0500
-Subject: [PATCH] DPP: Do more condition test for AKM type DPP offload.
+Subject: [PATCH 12/49] DPP: Do more condition test for AKM type DPP offload.
 
 If supplicant recieves eapol frame with driver declared
 WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_PSK, supplicant will check AKM type
@@ -13,7 +14,7 @@ Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/wpa_supplicant/wpa_supplicant.c b/wpa_supplicant/wpa_supplicant.c
-index a0fb73f43ab3..f00dd57da3c1 100644
+index a0fb73f43..f00dd57da 100644
 --- a/wpa_supplicant/wpa_supplicant.c
 +++ b/wpa_supplicant/wpa_supplicant.c
 @@ -5140,7 +5140,8 @@ void wpa_supplicant_rx_eapol(void *ctx, const u8 *src_addr,
@@ -26,3 +27,6 @@ index a0fb73f43ab3..f00dd57da3c1 100644
  		wpa_sm_rx_eapol(wpa_s->wpa, src_addr, buf, len);
  	else if (wpa_key_mgmt_wpa_ieee8021x(wpa_s->key_mgmt)) {
  		/*
+-- 
+2.17.1
+

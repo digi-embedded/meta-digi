@@ -1,0 +1,64 @@
+From a6028c58032672f86c9fe87ba3abbd31c79166e3 Mon Sep 17 00:00:00 2001
+From: Kurt Lee <kurt.lee@infineon.com>
+Date: Wed, 25 May 2022 19:12:47 -0500
+Subject: [PATCH 26/49] non-upstream: wl-cmd: add more compile flag
+
+add more CONFIG_DRIVER_BRCM_WL to separeta this feature
+
+Signed-off-by: Ian Lin <ian.lin@infineon.com>
+Signed-off-by: Kurt Lee <kurt.lee@infineon.com>
+---
+ src/drivers/driver.h     | 3 +++
+ wpa_supplicant/wpa_cli.c | 8 +++++++-
+ 2 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 3d48f6f07..2745b8340 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -3861,7 +3861,10 @@ struct wpa_driver_ops {
+ 	 */
+ 	int (*driver_cmd)(void *priv, char *cmd, char *buf, size_t buf_len);
+ #endif /* ANDROID */
++
++#ifdef CONFIG_DRIVER_BRCM_WL
+ 	int (*wl_cmd)(void *priv, char *cmd, char *buf, size_t buf_len);
++#endif /* CONFIG_DRIVER_BRCM_WL */
+ 
+ 	/**
+ 	 * vendor_cmd - Execute vendor specific command
+diff --git a/wpa_supplicant/wpa_cli.c b/wpa_supplicant/wpa_cli.c
+index d3c70d3e5..0f68d8d8a 100644
+--- a/wpa_supplicant/wpa_cli.c
++++ b/wpa_supplicant/wpa_cli.c
+@@ -2908,10 +2908,15 @@ static int wpa_cli_cmd_driver(struct wpa_ctrl *ctrl, int argc, char *argv[])
+ 	return wpa_cli_cmd(ctrl, "DRIVER", 1, argc, argv);
+ }
+ #endif /* ANDROID */
++
++
++#ifdef CONFIG_DRIVER_BRCM_WL
+ static int wpa_cli_cmd_wl(struct wpa_ctrl *ctrl, int argc, char *argv[])
+ {
+ 	return wpa_cli_cmd(ctrl, "WL", 1, argc, argv);
+ }
++#endif /* CONFIG_DRIVER_BRCM_WL */
++
+ 
+ static int wpa_cli_cmd_vendor(struct wpa_ctrl *ctrl, int argc, char *argv[])
+ {
+@@ -3856,9 +3861,10 @@ static const struct wpa_cli_cmd wpa_cli_commands[] = {
+ 	{ "driver", wpa_cli_cmd_driver, NULL, cli_cmd_flag_none,
+ 	  "<command> = driver private commands" },
+ #endif /* ANDROID */
++#ifdef CONFIG_DRIVER_BRCM_WL
+ 	{ "wl", wpa_cli_cmd_wl, NULL, cli_cmd_flag_none,
+ 	  "<command> = brcm wl commands" },
+-
++#endif /* CONFIG_DRIVER_BRCM_WL */
+ 	{ "radio_work", wpa_cli_cmd_radio_work, NULL, cli_cmd_flag_none,
+ 	  "= radio_work <show/add/done>" },
+ 	{ "vendor", wpa_cli_cmd_vendor, NULL, cli_cmd_flag_none,
+-- 
+2.17.1
+

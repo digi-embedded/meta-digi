@@ -1,0 +1,136 @@
+From ea5cd91f744dc3c5ebf8e5b8cf1746bec41c1d19 Mon Sep 17 00:00:00 2001
+From: Kurt Lee <kurt.lee@infineon.com>
+Date: Tue, 26 Apr 2022 03:02:12 -0500
+Subject: [PATCH 24/49] non-upstream: wl-cmd: create wl_do_cmd as an entry
+ doing wl commands
+
+Create wl_do_cmd as an entry doing wl commands
+
+Signed-off-by: Ian Lin <ian.lin@infineon.com>
+Signed-off-by: Kurt Lee <kurt.lee@infineon.com>
+---
+ src/drivers/driver_brcm_wlu.c | 44 +++++++++++++++++++++++++++++++++++
+ src/drivers/driver_brcm_wlu.h |  2 +-
+ src/drivers/driver_nl80211.c  | 37 +++--------------------------
+ 3 files changed, 48 insertions(+), 35 deletions(-)
+
+diff --git a/src/drivers/driver_brcm_wlu.c b/src/drivers/driver_brcm_wlu.c
+index f2264ebcc..4fc03e446 100644
+--- a/src/drivers/driver_brcm_wlu.c
++++ b/src/drivers/driver_brcm_wlu.c
+@@ -287,3 +287,47 @@ exit:
+ 	return ret;
+ }
+ 
++
++int wl_do_cmd(char *cmd, char *smbuf, u32 *msglen, bool *set, bool *is_get_int)
++{
++	int ret = -1;
++	char *pos;
++
++	pos = os_strstr(cmd, "5g_rate");
++	if (pos) {
++		os_memcpy(smbuf, cmd, strlen("5g_rate")); //Keep last byte as 0x00
++		*is_get_int = true;
++		*msglen += strlen("5g_rate");
++
++		if (os_strncasecmp(cmd, "5g_rate ", 8) == 0) {
++			*set = true;
++			cmd += strlen("5g_rate ");
++			*msglen += 1;
++
++			ret = wl_rate_set(cmd, smbuf, msglen);
++			if (ret != 0)
++				goto exit;
++		}
++	}
++
++	pos = os_strstr(cmd, "2g_rate");
++	if (pos) {
++		os_memcpy(smbuf, cmd, strlen("2g_rate")); //Keep last byte as 0x00
++		*is_get_int = true;
++		*msglen += strlen("2g_rate");
++
++		if (os_strncasecmp(cmd, "2g_rate ", 8) == 0) {
++			*set = true;
++			cmd += strlen("2g_rate ");
++			*msglen += 1;
++
++			ret = wl_rate_set(cmd, smbuf, msglen);
++			if (ret != 0)
++				goto exit;
++		}
++	}
++
++exit:
++	return ret;
++}
++
+diff --git a/src/drivers/driver_brcm_wlu.h b/src/drivers/driver_brcm_wlu.h
+index 67832dc6a..7fc9118fc 100644
+--- a/src/drivers/driver_brcm_wlu.h
++++ b/src/drivers/driver_brcm_wlu.h
+@@ -9,4 +9,4 @@
+ /* Format a ratespec for output of any of the wl_rate() iovars */
+ char* wl_rate_print(char *rate_buf, size_t buf_len, u32 rspec);
+ 
+-int wl_rate_set(char *cmd, char *set_buf, u32 *set_buf_len);
++int wl_do_cmd(char *cmd, char *smbuf, u32 *msglen, bool *set, bool *is_get_int);
+diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
+index 8b04f9dc9..a6b9c860d 100644
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -10160,7 +10160,6 @@ int nl80211_wl_command(void *priv, char *cmd, char *buf, size_t buf_len)
+ 	struct nl_msg *msg;
+ 	int ret = -1;
+ 	struct bcm_nlmsg_hdr *nlioc;
+-	char *pos;
+ 	char smbuf[WLC_IOCTL_SMLEN * 2] = {0x00};
+ 	char outbuf[WLC_IOCTL_MEDLEN] = {0x00};
+ 	u32 msglen = 0;
+@@ -10173,39 +10172,9 @@ int nl80211_wl_command(void *priv, char *cmd, char *buf, size_t buf_len)
+ 	if (!msg)
+ 		return -ENOMEM;
+ 
+-	pos = os_strstr(cmd, "5g_rate");
+-	if (pos) {
+-		os_memcpy(smbuf, cmd, strlen("5g_rate")); //Keep last byte as 0x00
+-		is_get_int = true;
+-		msglen += strlen("5g_rate");
+-
+-		if (os_strncasecmp(cmd, "5g_rate ", 8) == 0) {
+-			set = true;
+-			cmd += strlen("5g_rate ");
+-			msglen += 1;
+-
+-			ret = wl_rate_set(cmd, smbuf, &msglen);
+-			if (ret != 0)
+-				goto exit;
+-		}
+-	}
+-
+-	pos = os_strstr(cmd, "2g_rate");
+-	if (pos) {
+-		os_memcpy(smbuf, cmd, strlen("2g_rate")); //Keep last byte as 0x00
+-		is_get_int = true;
+-		msglen += strlen("2g_rate");
+-
+-		if (os_strncasecmp(cmd, "2g_rate ", 8) == 0) {
+-			set = true;
+-			cmd += strlen("2g_rate ");
+-			msglen += 1;
+-
+-			ret = wl_rate_set(cmd, smbuf, &msglen);
+-			if (ret != 0)
+-				goto exit;
+-		}
+-	}
++	ret = wl_do_cmd(cmd, smbuf, &msglen, &set, &is_get_int);
++	if (ret != 0)
++		goto exit;
+ 
+ 	/* nlmsg_alloc() can only allocate default_pagesize packet, cap
+ 	 * any buffer send down to 1536 bytes
+-- 
+2.17.1
+

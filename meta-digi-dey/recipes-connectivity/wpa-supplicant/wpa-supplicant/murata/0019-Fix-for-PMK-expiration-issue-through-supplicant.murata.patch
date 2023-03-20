@@ -1,0 +1,121 @@
+From 5604eb8aaf8382376e6511850e70b66c6e2a22b8 Mon Sep 17 00:00:00 2001
+From: Kurt Lee <kurt.lee@cypress.com>
+Date: Sun, 13 Feb 2022 21:34:09 -0600
+Subject: [PATCH 19/49] Fix for PMK expiration issue through supplicant
+
+Description : Sending Deauth from AP once PMK timeout occurs, So that
+STA will initiate the Auth process.
+Changes : 1) Added support to get the dot11RSNAConfigPMKLifetime conf
+element in wpa_authenticator structure to pass to the lower API's
+2) Sending deauth from the wpa_auth_pmksa_free_cb once PMK time out
+occurs.
+Tested: Confirmed once PMK timeout occurs AP is sending deauth and STA
+starting AUTH frame.
+---
+ src/ap/ap_config.h    | 2 ++
+ src/ap/ieee802_11.c   | 1 +
+ src/ap/wpa_auth.c     | 9 ++++++++-
+ src/ap/wpa_auth.h     | 1 +
+ src/ap/wpa_auth_i.h   | 1 +
+ wpa_supplicant/ap.c   | 2 ++
+ 6 files changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/src/ap/ap_config.h b/src/ap/ap_config.h
+index 49cd3168a..a82ca1853 100644
+--- a/src/ap/ap_config.h
++++ b/src/ap/ap_config.h
+@@ -898,6 +898,8 @@ struct hostapd_bss_config {
+ 	u8 ext_capa[EXT_CAPA_MAX_LEN];
+ 
+ 	u8 rnr;
++
++	unsigned int dot11RSNAConfigPMKLifetime;
+ };
+ 
+ /**
+diff --git a/src/ap/ieee802_11.c b/src/ap/ieee802_11.c
+index 3b735c09f..c4f7d00cc 100644
+--- a/src/ap/ieee802_11.c
++++ b/src/ap/ieee802_11.c
+@@ -980,6 +980,7 @@ void sae_accept_sta(struct hostapd_data *hapd, struct sta_info *sta)
+ 	crypto_bignum_deinit(sta->sae->peer_commit_scalar_accepted, 0);
+ 	sta->sae->peer_commit_scalar_accepted = sta->sae->peer_commit_scalar;
+ 	sta->sae->peer_commit_scalar = NULL;
++	wpa_auth_set_pmk_life_time(hapd->wpa_auth,hapd->conf->dot11RSNAConfigPMKLifetime);
+ 	wpa_auth_pmksa_add_sae(hapd->wpa_auth, sta->addr,
+ 			       sta->sae->pmk, sta->sae->pmkid);
+ #ifndef CONFIG_WPA3_SAE_AUTH_EARLY_SET
+diff --git a/src/ap/wpa_auth.c b/src/ap/wpa_auth.c
+index 4b506c1db..e92ea4302 100644
+--- a/src/ap/wpa_auth.c
++++ b/src/ap/wpa_auth.c
+@@ -390,6 +390,7 @@ static void wpa_auth_pmksa_free_cb(struct rsn_pmksa_cache_entry *entry,
+ 				   void *ctx)
+ {
+ 	struct wpa_authenticator *wpa_auth = ctx;
++	wpa_sta_disconnect(wpa_auth, entry->spa, WLAN_REASON_PREV_AUTH_NOT_VALID);
+ 	wpa_auth_for_each_sta(wpa_auth, wpa_auth_pmksa_clear_cb, entry);
+ }
+ 
+@@ -4835,6 +4836,12 @@ int wpa_auth_pmksa_add_preauth(struct wpa_authenticator *wpa_auth,
+ }
+ 
+ 
++void wpa_auth_set_pmk_life_time(struct wpa_authenticator *wpa_auth, unsigned int pmk_life_time)
++{
++        wpa_auth->pmk_life_time = pmk_life_time;
++}
++
++
+ int wpa_auth_pmksa_add_sae(struct wpa_authenticator *wpa_auth, const u8 *addr,
+ 			   const u8 *pmk, const u8 *pmkid)
+ {
+@@ -4844,7 +4851,7 @@ int wpa_auth_pmksa_add_sae(struct wpa_authenticator *wpa_auth, const u8 *addr,
+ 	wpa_hexdump_key(MSG_DEBUG, "RSN: Cache PMK from SAE", pmk, PMK_LEN);
+ 	if (pmksa_cache_auth_add(wpa_auth->pmksa, pmk, PMK_LEN, pmkid,
+ 				 NULL, 0,
+-				 wpa_auth->addr, addr, 0, NULL,
++				 wpa_auth->addr, addr, wpa_auth->pmk_life_time, NULL,
+ 				 WPA_KEY_MGMT_SAE))
+ 		return 0;
+ 
+diff --git a/src/ap/wpa_auth.h b/src/ap/wpa_auth.h
+index ff36cfe95..fb456f07c 100644
+--- a/src/ap/wpa_auth.h
++++ b/src/ap/wpa_auth.h
+@@ -426,6 +426,7 @@ int wpa_auth_pmksa_add_preauth(struct wpa_authenticator *wpa_auth,
+ 			       struct eapol_state_machine *eapol);
+ int wpa_auth_pmksa_add_sae(struct wpa_authenticator *wpa_auth, const u8 *addr,
+ 			   const u8 *pmk, const u8 *pmkid);
++void wpa_auth_set_pmk_life_time(struct wpa_authenticator *wpa_auth, unsigned int pmk_life_time);
+ void wpa_auth_add_sae_pmkid(struct wpa_state_machine *sm, const u8 *pmkid);
+ int wpa_auth_pmksa_add2(struct wpa_authenticator *wpa_auth, const u8 *addr,
+ 			const u8 *pmk, size_t pmk_len, const u8 *pmkid,
+diff --git a/src/ap/wpa_auth_i.h b/src/ap/wpa_auth_i.h
+index a6dc1a591..f46bdabdd 100644
+--- a/src/ap/wpa_auth_i.h
++++ b/src/ap/wpa_auth_i.h
+@@ -237,6 +237,7 @@ struct wpa_authenticator {
+ #ifdef CONFIG_P2P
+ 	struct bitfield *ip_pool;
+ #endif /* CONFIG_P2P */
++	unsigned int pmk_life_time;
+ };
+ 
+ 
+diff --git a/wpa_supplicant/ap.c b/wpa_supplicant/ap.c
+index 6a0a69e68..cade9512b 100644
+--- a/wpa_supplicant/ap.c
++++ b/wpa_supplicant/ap.c
+@@ -605,6 +605,8 @@ static int wpa_supplicant_conf_ap(struct wpa_supplicant *wpa_s,
+ 		bss->sae_pwe = ssid->sae_pwe;
+ 	else
+ 		bss->sae_pwe = wpa_s->conf->sae_pwe;
++
++	bss->dot11RSNAConfigPMKLifetime = wpa_s->conf->dot11RSNAConfigPMKLifetime;
+ #endif /* CONFIG_SAE */
+ 
+ 	if (wpa_s->conf->go_interworking) {
+-- 
+2.17.1
+

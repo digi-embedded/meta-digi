@@ -1,0 +1,61 @@
+From 897917008b37a16985d0f1ae9d768c6450741574 Mon Sep 17 00:00:00 2001
+From: Owen Huang <Owen.Huang@infineon.com>
+Date: Wed, 30 Nov 2022 01:35:58 -0600
+Subject: [PATCH 48/49] Fix associating failed when PMK lifetime is set to 1
+
+In WPA3 11.1 STAUT server certificate validation test
+* set dot11RSNAConfigPMKLifetime to 1
+* set suppress_deauth_no_pmksa to 1
+
+pmksa_cache_reauth and pmksa_cache_expire will expired right sway after
+receiving the EAP success, and EAPOL start framce will be send to AP.
+This scenario will cause the 4-way handshake failed.
+
+But wpa suulicant do not deauthenticate when PMKSA expired.
+That means PMK's lifetime is infinite.
+So there's not necessary to reauth with radius server to get the new PMK.
+
+Solution: use the same parameter to decide whether register timer to reauth.
+
+Fixed: SWLINUX-2883
+Signed-off-by: Owen Huang <Owen.Huang@infineon.com>
+---
+ src/rsn_supp/pmksa_cache.c | 22 ++++++++++++++--------
+ 1 file changed, 14 insertions(+), 8 deletions(-)
+
+diff --git a/src/rsn_supp/pmksa_cache.c b/src/rsn_supp/pmksa_cache.c
+index 8d517b5d4..658390deb 100644
+--- a/src/rsn_supp/pmksa_cache.c
++++ b/src/rsn_supp/pmksa_cache.c
+@@ -138,14 +138,20 @@ static void pmksa_cache_set_expiration(struct rsn_pmksa_cache *pmksa)
+ 	}
+ 	eloop_register_timeout(sec + 1, 0, pmksa_cache_expire, pmksa, NULL);
+ 
+-	entry = pmksa->sm->cur_pmksa ? pmksa->sm->cur_pmksa :
+-		pmksa_cache_get(pmksa, pmksa->sm->bssid, NULL, NULL, 0);
+-	if (entry && !wpa_key_mgmt_sae(entry->akmp)) {
+-		sec = pmksa->pmksa->reauth_time - now.sec;
+-		if (sec < 0)
+-			sec = 0;
+-		eloop_register_timeout(sec, 0, pmksa_cache_reauth, pmksa,
+-				       NULL);
++	/* If wpa suulicant do not deauthenticate when PMKSA expired.
++	 * Means PMK's lifetime is infinite. So there's not necessary
++	 * to reauth with radius server to get the new PMK.
++	 */
++	if (!pmksa->sm->suppress_deauth_no_pmksa) {
++		entry = pmksa->sm->cur_pmksa ? pmksa->sm->cur_pmksa :
++			pmksa_cache_get(pmksa, pmksa->sm->bssid, NULL, NULL, 0);
++		if (entry && !wpa_key_mgmt_sae(entry->akmp)) {
++			sec = pmksa->pmksa->reauth_time - now.sec;
++			if (sec < 0)
++				sec = 0;
++			eloop_register_timeout(sec, 0, pmksa_cache_reauth, pmksa,
++						NULL);
++		}
+ 	}
+ }
+ 
+-- 
+2.17.1
+

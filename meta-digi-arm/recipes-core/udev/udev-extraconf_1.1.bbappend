@@ -52,6 +52,9 @@ do_install:append() {
 		# evbug debug tool
 		install -m 0644 ${WORKDIR}/blacklist.conf ${D}${sysconfdir}/modprobe.d
 	fi
+
+	# Fix mount.sh to force to find files in /tmp as symlink
+	sed -i -e 's|find /tmp|find -L /tmp|g' ${D}${sysconfdir}/udev/scripts/mount.sh
 }
 
 do_install:append:ccmp1() {

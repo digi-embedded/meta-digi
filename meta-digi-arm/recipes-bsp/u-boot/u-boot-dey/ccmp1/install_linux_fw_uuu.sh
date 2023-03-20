@@ -171,9 +171,7 @@ if [ "${NOWAIT}" != true ]; then
 	printf "   fsbl1\t${INSTALL_ATF_FILENAME}\n"
 	printf "   fsbl2\t${INSTALL_ATF_FILENAME}\n"
 	printf "   fip-a\t${INSTALL_FIP_FILENAME}\n"
-	if [ "${INSTALL_DUALBOOT}" = true ]; then
-		printf "   fip-b\t${INSTALL_FIP_FILENAME}\n"
-	fi
+	printf "   fip-b\t${INSTALL_FIP_FILENAME}\n"
 	if [ "${DUALBOOT}" = true ]; then
 		printf "   ${LINUX_NAME}_a\t${INSTALL_LINUX_FILENAME}\n"
 		if [ "${INSTALL_DUALBOOT}" = true ]; then
@@ -212,9 +210,7 @@ part_update "fsbl2" "${INSTALL_ATF_FILENAME}" 5000
 
 # Update FIP
 part_update "fip-a" "${INSTALL_FIP_FILENAME}" 5000
-if [ "${INSTALL_DUALBOOT}" = true ]; then
-	part_update "fip-b" "${INSTALL_FIP_FILENAME}" 5000
-fi
+part_update "fip-b" "${INSTALL_FIP_FILENAME}" 5000
 
 # Environment volume does not exist and needs to be created
 if [ "${RUNVOLS}" = true ]; then

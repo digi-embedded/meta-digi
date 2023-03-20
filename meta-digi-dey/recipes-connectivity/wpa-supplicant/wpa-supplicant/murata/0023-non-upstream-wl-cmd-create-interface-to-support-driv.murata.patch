@@ -1,0 +1,867 @@
+From 1cfe2ac93a1b50a6fd2f6d0022ece6e0f2a91259 Mon Sep 17 00:00:00 2001
+From: Kurt Lee <kurt.lee@cypress.com>
+Date: Sun, 10 Apr 2022 22:10:51 -0500
+Subject: [PATCH 23/49] non-upstream: wl-cmd: create interface to support
+ driver priv command
+
+1. Create "wl" command interface to set/get driver information
+2. Create files and compile flag to separate this feature
+3. Support 2g_rate/5g_rate command
+
+Signed-off-by: Ian Lin <ian.lin@infineon.com>
+Signed-off-by: Kurt Lee <kurt.lee@infineon.com>
+---
+ hostapd/defconfig_base            |   2 +
+ src/ap/ap_drv_ops.h               |  10 ++
+ src/common/brcm_wl_ioctl.h        |  10 ++
+ src/common/brcm_wl_ioctl_defs.h   |  15 ++
+ src/common/brcm_wl_rspec.h        | 104 +++++++++++
+ src/drivers/driver.h              |   1 +
+ src/drivers/driver_brcm_nl80211.h |  26 +++
+ src/drivers/driver_brcm_wlu.c     | 289 ++++++++++++++++++++++++++++++
+ src/drivers/driver_brcm_wlu.h     |  12 ++
+ src/drivers/driver_nl80211.c      | 149 +++++++++++++++
+ src/drivers/drivers.mak           |   5 +
+ wpa_supplicant/ctrl_iface.c       |  22 +++
+ wpa_supplicant/defconfig_base     |   2 +
+ wpa_supplicant/driver_i.h         |  10 ++
+ wpa_supplicant/wpa_cli.c          |   8 +-
+ 15 files changed, 664 insertions(+), 1 deletion(-)
+ create mode 100644 src/common/brcm_wl_ioctl.h
+ create mode 100644 src/common/brcm_wl_ioctl_defs.h
+ create mode 100644 src/common/brcm_wl_rspec.h
+ create mode 100644 src/drivers/driver_brcm_nl80211.h
+ create mode 100644 src/drivers/driver_brcm_wlu.c
+ create mode 100644 src/drivers/driver_brcm_wlu.h
+
+diff --git a/hostapd/defconfig_base b/hostapd/defconfig_base
+index dafcf0f6c..4e4f0f784 100644
+--- a/hostapd/defconfig_base
++++ b/hostapd/defconfig_base
+@@ -21,6 +21,8 @@ CONFIG_DRIVER_NL80211=y
+ # QCA vendor extensions to nl80211
+ #CONFIG_DRIVER_NL80211_QCA=y
+ 
++CONFIG_DRIVER_BRCM_WL=y
++
+ # driver_nl80211.c requires libnl. If you are compiling it yourself
+ # you may need to point hostapd to your version of libnl.
+ #
+diff --git a/src/ap/ap_drv_ops.h b/src/ap/ap_drv_ops.h
+index 61c8f64eb..5bf092c46 100644
+--- a/src/ap/ap_drv_ops.h
++++ b/src/ap/ap_drv_ops.h
+@@ -403,6 +403,16 @@ static inline int hostapd_drv_driver_cmd(struct hostapd_data *hapd,
+ }
+ #endif /* ANDROID */
+ 
++#ifdef CONFIG_DRIVER_BRCM_WL
++static inline int hostapd_drv_wl_cmd(struct hostapd_data *hapd,
++					 char *cmd, char *buf, size_t buf_len)
++{
++	if (!hapd->driver->wl_cmd)
++		return -1;
++	return hapd->driver->wl_cmd(hapd->drv_priv, cmd, buf, buf_len);
++}
++#endif /* CONFIG_DRIVER_BRCM_WL */
++
+ #ifdef CONFIG_TESTING_OPTIONS
+ static inline int
+ hostapd_drv_register_frame(struct hostapd_data *hapd, u16 type,
+diff --git a/src/common/brcm_wl_ioctl.h b/src/common/brcm_wl_ioctl.h
+new file mode 100644
+index 000000000..768b78616
+--- /dev/null
++++ b/src/common/brcm_wl_ioctl.h
+@@ -0,0 +1,10 @@
++/*
++ * Broadcom Corporation OUI and vendor specific assignments
++ * Copyright (c) 2020, Broadcom Corporation.
++ *
++ * This software may be distributed under the terms of the BSD license.
++ * See README for more details.
++ */
++
++#include "common/brcm_wl_ioctl_defs.h"
++#include "common/brcm_wl_rspec.h"
+diff --git a/src/common/brcm_wl_ioctl_defs.h b/src/common/brcm_wl_ioctl_defs.h
+new file mode 100644
+index 000000000..1834be6fa
+--- /dev/null
++++ b/src/common/brcm_wl_ioctl_defs.h
+@@ -0,0 +1,15 @@
++/*
++ * Broadcom Corporation OUI and vendor specific assignments
++ * Copyright (c) 2020, Broadcom Corporation.
++ *
++ * This software may be distributed under the terms of the BSD license.
++ * See README for more details.
++ */
++
++#define WLC_IOCTL_SMLEN			256	/* "small" length ioctl buffer required */
++#define WLC_IOCTL_MEDLEN		1896	/* "med" length ioctl buffer required */
++
++/* common ioctl definitions */
++#define WLC_GET_VAR				262	/* get value of named variable */
++#define WLC_SET_VAR				263	/* set named variable to value */
++
+diff --git a/src/common/brcm_wl_rspec.h b/src/common/brcm_wl_rspec.h
+new file mode 100644
+index 000000000..d10e82597
+--- /dev/null
++++ b/src/common/brcm_wl_rspec.h
+@@ -0,0 +1,104 @@
++/*
++ * Broadcom Corporation OUI and vendor specific assignments
++ * Copyright (c) 2020, Broadcom Corporation.
++ *
++ * This software may be distributed under the terms of the BSD license.
++ * See README for more details.
++ */
++
++/* Rate spec. definitions */
++#define WL_RSPEC_RATE_MASK	0x000000FF	/**< Legacy rate or MCS or MCS + NSS */
++#define WL_RSPEC_TXEXP_MASK	0x00000300	/**< Tx chain expansion beyond Nsts */
++#define WL_RSPEC_TXEXP_SHIFT	8
++#define WL_RSPEC_HE_GI_MASK	0x00000C00	/* HE GI indices */
++#define WL_RSPEC_HE_GI_SHIFT	10
++#define WL_RSPEC_BW_MASK	0x00070000	/**< Band width */
++#define WL_RSPEC_BW_SHIFT	16
++#define WL_RSPEC_ER_MASK	0x0000C000	/**< Range extension mask */
++#define WL_RSPEC_ER_SHIFT	14
++#define WL_RSPEC_ER_ENAB_MASK	0x00008000	/**< Range extension enable */
++#define WL_RSPEC_ER_ENAB_SHIFT	15
++#define WL_RSPEC_ER_TONE_MASK	0x00004000	/**< Range extension tone config */
++#define WL_RSPEC_ER_TONE_SHIFT	14
++
++#define WL_RSPEC_DCM		0x00080000	/**< Dual Carrier Modulation */
++#define WL_RSPEC_DCM_SHIFT	19
++#define WL_RSPEC_STBC		0x00100000	/**< STBC expansion, Nsts = 2 * Nss */
++#define WL_RSPEC_TXBF		0x00200000
++#define WL_RSPEC_LDPC		0x00400000
++#define WL_RSPEC_SGI		0x00800000
++#define WL_RSPEC_SHORT_PREAMBLE	0x00800000	/**< DSSS short preable - Encoding 0 */
++#define WL_RSPEC_ENCODING_MASK	0x03000000	/**< Encoding of RSPEC_RATE field */
++#define WL_RSPEC_ENCODING_SHIFT 24
++
++#define WL_RSPEC_OVERRIDE_RATE	0x40000000	/**< override rate only */
++#define WL_RSPEC_OVERRIDE_MODE	0x80000000	/**< override both rate & mode */
++
++/* ======== RSPEC_HE_GI|RSPEC_SGI fields for HE ======== */
++
++/* GI for HE */
++#define RSPEC_HE_LTF_GI(rspec)  (((rspec) & WL_RSPEC_HE_GI_MASK) >> WL_RSPEC_HE_GI_SHIFT)
++#define WL_RSPEC_HE_1x_LTF_GI_0_8us	(0x0)
++#define WL_RSPEC_HE_2x_LTF_GI_0_8us	(0x1)
++#define WL_RSPEC_HE_2x_LTF_GI_1_6us	(0x2)
++#define WL_RSPEC_HE_4x_LTF_GI_3_2us	(0x3)
++#define RSPEC_ISHEGI(rspec)	(RSPEC_HE_LTF_GI(rspec) > WL_RSPEC_HE_1x_LTF_GI_0_8us)
++#define HE_GI_TO_RSPEC(gi)	(((gi) << WL_RSPEC_HE_GI_SHIFT) & WL_RSPEC_HE_GI_MASK)
++
++/* RSPEC Macros for extracting and using HE-ER and DCM */
++#define RSPEC_HE_DCM(rspec)		(((rspec) & WL_RSPEC_DCM) >> WL_RSPEC_DCM_SHIFT)
++#define RSPEC_HE_ER(rspec)		(((rspec) & WL_RSPEC_ER_MASK) >> WL_RSPEC_ER_SHIFT)
++#define RSPEC_HE_ER_ENAB(rspec)		(((rspec) & WL_RSPEC_ER_ENAB_MASK) >> \
++					WL_RSPEC_ER_ENAB_SHIFT)
++#define RSPEC_HE_ER_TONE(rspec)		(((rspec) & WL_RSPEC_ER_TONE_MASK) >> \
++					WL_RSPEC_ER_TONE_SHIFT)
++/* ======== RSPEC_RATE field ======== */
++
++/* Encoding 0 - legacy rate */
++/* DSSS, CCK, and OFDM rates in [500kbps] units */
++#define WL_RSPEC_LEGACY_RATE_MASK	0x0000007F
++#define WLC_RATE_1M	2
++#define WLC_RATE_2M	4
++#define WLC_RATE_5M5	11
++#define WLC_RATE_11M	22
++#define WLC_RATE_6M	12
++#define WLC_RATE_9M	18
++#define WLC_RATE_12M	24
++#define WLC_RATE_18M	36
++#define WLC_RATE_24M	48
++#define WLC_RATE_36M	72
++#define WLC_RATE_48M	96
++#define WLC_RATE_54M	108
++
++/* Encoding 1 - HT MCS */
++#define WL_RSPEC_HT_MCS_MASK		0x0000007F	/**< HT MCS value mask in rspec */
++
++/* Encoding 2 - VHT MCS + NSS */
++#define WL_RSPEC_VHT_MCS_MASK		0x0000000F	/**< VHT MCS value mask in rspec */
++#define WL_RSPEC_VHT_NSS_MASK		0x000000F0	/**< VHT Nss value mask in rspec */
++#define WL_RSPEC_VHT_NSS_SHIFT		4		/**< VHT Nss value shift in rspec */
++
++/* Encoding 3 - HE MCS + NSS */
++#define WL_RSPEC_HE_MCS_MASK		0x0000000F	/**< HE MCS value mask in rspec */
++#define WL_RSPEC_HE_NSS_MASK		0x000000F0	/**< HE Nss value mask in rspec */
++#define WL_RSPEC_HE_NSS_SHIFT		4		/**< HE Nss value shift in rpsec */
++
++/* ======== RSPEC_BW field ======== */
++
++#define WL_RSPEC_BW_UNSPECIFIED	0
++#define WL_RSPEC_BW_20MHZ	0x00010000
++#define WL_RSPEC_BW_40MHZ	0x00020000
++#define WL_RSPEC_BW_80MHZ	0x00030000
++#define WL_RSPEC_BW_160MHZ	0x00040000
++#define WL_RSPEC_BW_10MHZ	0x00050000
++#define WL_RSPEC_BW_5MHZ	0x00060000
++#define WL_RSPEC_BW_2P5MHZ      0x00070000
++
++/* ======== RSPEC_ENCODING field ======== */
++
++#define WL_RSPEC_ENCODE_RATE		0x00000000	/**< Legacy rate is stored in RSPEC_RATE */
++#define WL_RSPEC_ENCODE_HT		0x01000000	/**< HT MCS is stored in RSPEC_RATE */
++#define WL_RSPEC_ENCODE_VHT		0x02000000	/**< VHT MCS and NSS are stored in RSPEC_RATE */
++#define WL_RSPEC_ENCODE_HE		0x03000000	/**< HE MCS and NSS are stored in RSPEC_RATE */
++#define WL_RSPEC_HE_NSS_UNSPECIFIED	0xF
++
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index fb3f8b4a8..3d48f6f07 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -3861,6 +3861,7 @@ struct wpa_driver_ops {
+ 	 */
+ 	int (*driver_cmd)(void *priv, char *cmd, char *buf, size_t buf_len);
+ #endif /* ANDROID */
++	int (*wl_cmd)(void *priv, char *cmd, char *buf, size_t buf_len);
+ 
+ 	/**
+ 	 * vendor_cmd - Execute vendor specific command
+diff --git a/src/drivers/driver_brcm_nl80211.h b/src/drivers/driver_brcm_nl80211.h
+new file mode 100644
+index 000000000..40a84d125
+--- /dev/null
++++ b/src/drivers/driver_brcm_nl80211.h
+@@ -0,0 +1,26 @@
++/*
++ * Broadcom Corporation OUI and vendor specific assignments
++ * Copyright (c) 2020, Broadcom Corporation.
++ *
++ * This software may be distributed under the terms of the BSD license.
++ * See README for more details.
++ */
++
++struct bcm_nlmsg_hdr {
++	uint cmd;	/* common ioctl definition */
++	int len;	/* expected return buffer length */
++	uint offset;	/* user buffer offset */
++	uint set;	/* get or set request optional */
++	uint magic;	/* magic number for verification */
++};
++
++enum bcmnl_attrs {
++	BCM_NLATTR_UNSPEC,
++
++	BCM_NLATTR_LEN,
++	BCM_NLATTR_DATA,
++
++	__BCM_NLATTR_AFTER_LAST,
++	BCM_NLATTR_MAX = __BCM_NLATTR_AFTER_LAST - 1
++};
++
+diff --git a/src/drivers/driver_brcm_wlu.c b/src/drivers/driver_brcm_wlu.c
+new file mode 100644
+index 000000000..f2264ebcc
+--- /dev/null
++++ b/src/drivers/driver_brcm_wlu.c
+@@ -0,0 +1,289 @@
++/*
++ * Broadcom Corporation OUI and vendor specific assignments
++ * Copyright (c) 2020, Broadcom Corporation.
++ *
++ * This software may be distributed under the terms of the BSD license.
++ * See README for more details.
++ */
++
++#include "includes.h"
++#include "common.h"
++#include "common/brcm_vendor.h"
++#include "common/brcm_wl_ioctl.h"
++#include "common/wpa_common.h"
++
++/*
++ * Format a ratespec for output of any of the wl_rate() iovars
++ */
++char*
++wl_rate_print(char *rate_buf, size_t buf_len, u32 rspec)
++{
++	uint encode, rate, txexp, bw_val;
++	const char* stbc;
++	const char* ldpc;
++	const char* bw;
++	const char* dcm;
++	const char* er;
++	u8 valid_encding = false;
++
++	encode = (rspec & WL_RSPEC_ENCODING_MASK);
++	rate = (rspec & WL_RSPEC_RATE_MASK);
++	txexp = (rspec & WL_RSPEC_TXEXP_MASK) >> WL_RSPEC_TXEXP_SHIFT;
++	bw_val = (rspec & WL_RSPEC_BW_MASK);
++	stbc  = ((rspec & WL_RSPEC_STBC) != 0) ? " stbc" : "";
++	ldpc  = ((rspec & WL_RSPEC_LDPC) != 0) ? " ldpc" : "";
++	dcm   = ((rspec & WL_RSPEC_DCM)  != 0) ? " dcm"  : "";
++
++	if (RSPEC_HE_ER_ENAB(rspec) != 0) {
++		er = RSPEC_HE_ER_TONE(rspec) ? " er 106" : " er 242";
++	} else {
++		er = "";
++	}
++
++	if (bw_val == WL_RSPEC_BW_UNSPECIFIED) {
++		bw = "auto";
++	} else if (bw_val == WL_RSPEC_BW_20MHZ) {
++		bw = "20";
++	} else if (bw_val == WL_RSPEC_BW_40MHZ) {
++		bw = "40";
++	} else if (bw_val == WL_RSPEC_BW_80MHZ) {
++		bw = "80";
++	} else if (bw_val == WL_RSPEC_BW_160MHZ) {
++		bw = "160";
++	} else if (bw_val == WL_RSPEC_BW_10MHZ) {
++		bw = "10";
++	} else if (bw_val == WL_RSPEC_BW_5MHZ) {
++		bw = "5";
++	} else if (bw_val == WL_RSPEC_BW_2P5MHZ) {
++		bw = "2.5";
++	} else {
++		bw = "???";
++	}
++
++	if ((rspec & ~WL_RSPEC_TXEXP_MASK) == 0) { /* Ignore TxExpansion for NULL rspec check */
++		valid_encding = true;
++		os_snprintf(rate_buf, buf_len, "auto");
++	} else if (encode == WL_RSPEC_ENCODE_HE) {
++		const char* gi_ltf[] = {" 1xLTF GI 0.8us", " 2xLTF GI 0.8us",
++					" 2xLTF GI 1.6us", " 4xLTF GI 3.2us"};
++		u8 gi_int = RSPEC_HE_LTF_GI(rspec);
++		uint mcs = (rspec & WL_RSPEC_HE_MCS_MASK);
++		uint Nss = (rspec & WL_RSPEC_HE_NSS_MASK) >> WL_RSPEC_HE_NSS_SHIFT;
++
++		valid_encding = true;
++
++		os_snprintf(rate_buf, buf_len, "he mcs %d Nss %d Tx Exp %d BW %s%s%s%s%s%s",
++			    mcs, Nss, txexp, bw, stbc, ldpc, gi_ltf[gi_int], dcm, er);
++
++	} else {
++		const char* sgi;
++		sgi = ((rspec & WL_RSPEC_SGI)  != 0) ? " sgi"  : "";
++		if (encode == WL_RSPEC_ENCODE_RATE) {
++
++			valid_encding = true;
++
++			os_snprintf(rate_buf, buf_len, "rate %d%s Mbps Tx Exp %d",
++				    rate/2, (rate % 2)?".5":"", txexp);
++		} else if (encode == WL_RSPEC_ENCODE_HT) {
++
++			valid_encding = true;
++
++			os_snprintf(rate_buf, buf_len, "ht mcs %d Tx Exp %d BW %s%s%s%s",
++				    rate, txexp, bw, stbc, ldpc, sgi);
++		} else if (encode == WL_RSPEC_ENCODE_VHT) {
++			uint mcs = (rspec & WL_RSPEC_VHT_MCS_MASK);
++			uint Nss = (rspec & WL_RSPEC_VHT_NSS_MASK) >> WL_RSPEC_VHT_NSS_SHIFT;
++
++			valid_encding = true;
++
++			os_snprintf(rate_buf, buf_len, "vht mcs %d Nss %d Tx Exp %d BW %s%s%s%s",
++				    mcs, Nss, txexp, bw, stbc, ldpc, sgi);
++		}
++	}
++
++	if (!valid_encding) {
++		os_snprintf(rate_buf, buf_len, "<unknown encoding for ratespec 0x%08X>", rspec);
++	}
++
++	return rate_buf;
++}
++
++
++/* parse the -v/--vht or -c argument for the wl_rate() command.
++ * return FALSE if the arg does not look like MxS or cMsS, where M and S are single digits
++ * return TRUE if the arg does look like MxS or cMsS, setting mcsp to M, and nssp to S
++ */
++//static int
++int
++wl_parse_he_vht_spec(const char* cp, int* mcsp, int* nssp)
++{
++	char *startp, *endp;
++	char c;
++	int mcs, nss;
++	char sx;
++
++	if (cp == NULL || cp[0] == '\0') {
++		return false;
++	}
++
++	if (cp[0] == 'c') {
++		startp = (char*)cp + 1;
++		sx = 's';
++	}
++	else {
++		startp = (char*)cp;
++		sx = 'x';
++	}
++
++	mcs = (int)strtol(startp, &endp, 10);
++	/* verify MCS 0-11, and next char is 's' or 'x' */
++	/* HE MCS is 0-11, VHT MCS 0-9 and prop MCS 10-11 */
++	if (mcs < 0 || mcs > 11 || endp[0] != sx) {
++		return false;
++	}
++
++	/* grab the char after the 'x'/'s' and convert to value */
++	c = endp[1];
++	nss = 0;
++	if (isdigit((int)c)) {
++		nss = c - '0';
++	}
++
++	/* consume trailing space after digit */
++	cp = &endp[2];
++	while (isspace((int)(*cp))) {
++		cp++;
++	}
++
++	/* check for trailing garbage after digit */
++	if (cp[0] != '\0') {
++		return false;
++	}
++
++	if (nss < 1 || nss > 8) {
++		return false;
++	}
++
++	*mcsp = mcs;
++	*nssp = nss;
++
++	return true;
++}
++
++
++int wl_rate_set(char *cmd, char *set_buf, u32 *set_buf_len)
++{
++	int ret = -1;
++	char *pos;
++	//bool legacy_set = false, ht_set = false, vht_set = false, he_set = false;
++	bool he_set = false;
++	int rate, mcs, Nss, tx_exp, bw;
++	bool stbc, ldpc, sgi, dcm, er;
++	u8 hegi;
++
++	u32 rspec = 0;
++	int val_int = 0;
++	char *endp;
++
++	/* set default values */
++	rate = 0;
++	mcs = 0;
++	Nss = 0;
++	tx_exp = 0;
++	stbc = false;
++	ldpc = false;
++	sgi = false;
++	hegi = 0xFF;
++	bw = 0;
++	dcm = false;
++	er = false;
++
++	pos = os_strstr(cmd, "-r ");
++	if (pos) {
++		pos += 3;
++		rate = atoi(pos) * 2;
++		rspec = WL_RSPEC_ENCODE_RATE;   /* 11abg */
++		rspec |= rate;
++	}
++
++	/* Option: -e or --he */
++	pos = os_strstr(cmd, "-e ");
++	if (pos) {
++		char var_str[10];
++		pos += 3;
++		endp = os_strchr(pos, ' ');
++		if (endp == NULL)
++			endp = os_strchr(pos, '\0');
++		os_memcpy(var_str, pos, endp - pos);
++		var_str[endp - pos] = '\0';
++
++		val_int  = (int)strtol(var_str, &endp, 10);
++		if (*endp == '\0') {
++			mcs = val_int;
++			he_set = true;
++		} else if (wl_parse_he_vht_spec(var_str, &mcs, &Nss)) {
++			he_set = true;
++		} else {
++			wpa_printf(MSG_DEBUG, "%s: could not parse \"%s\""
++				   "as a value for %s option",
++				   "5g_rate", pos, "-e");
++			goto exit;
++		}
++
++		if (he_set) {
++			rspec = WL_RSPEC_ENCODE_HE;	/* 11ax HE */
++			if (Nss == 0) {
++				Nss = WL_RSPEC_HE_NSS_UNSPECIFIED;
++			}
++			rspec |= (Nss << WL_RSPEC_HE_NSS_SHIFT) | mcs;
++		}
++	}
++
++
++	pos = os_strstr(cmd, "-i ");
++	if (pos) {
++		if (!he_set) {
++			wpa_printf(MSG_DEBUG, ":use -i option only in he ");
++			goto exit;
++		}
++
++		pos += 3;
++		val_int = (int)strtol(pos, &endp, 10);
++		if (*endp == '\0') {
++			if (val_int < 4)
++			{
++				hegi = val_int;
++			}
++			else {
++				wpa_printf(MSG_DEBUG, "%s: could not parse "
++					   "\"%s\" as a value for %s option",
++					   "5g_rate", pos, "-i");
++				goto exit;
++			}
++		}
++	}
++
++	/* Option: -l or --ldpc */
++	pos = os_strstr(cmd, "-l");
++	if (pos) {
++		ldpc = true;
++	}
++
++	/* set the other rspec fields */
++	rspec |= (tx_exp << WL_RSPEC_TXEXP_SHIFT);
++	rspec |= bw;
++	rspec |= (stbc ? WL_RSPEC_STBC : 0);
++	rspec |= (ldpc ? WL_RSPEC_LDPC : 0);
++	rspec |= (sgi  ? WL_RSPEC_SGI  : 0);
++	rspec |= ((hegi != 0xFF) ? HE_GI_TO_RSPEC(hegi) : 0);
++	rspec |= (dcm << WL_RSPEC_DCM_SHIFT);
++	rspec |= (er << WL_RSPEC_ER_SHIFT);
++
++	os_memcpy(set_buf + *set_buf_len, (char *)&rspec, sizeof(rspec));
++	*set_buf_len += sizeof(rspec);
++
++	ret = 0;
++exit:
++	return ret;
++}
++
+diff --git a/src/drivers/driver_brcm_wlu.h b/src/drivers/driver_brcm_wlu.h
+new file mode 100644
+index 000000000..67832dc6a
+--- /dev/null
++++ b/src/drivers/driver_brcm_wlu.h
+@@ -0,0 +1,12 @@
++/*
++ * Broadcom Corporation OUI and vendor specific assignments
++ * Copyright (c) 2020, Broadcom Corporation.
++ *
++ * This software may be distributed under the terms of the BSD license.
++ * See README for more details.
++ */
++
++/* Format a ratespec for output of any of the wl_rate() iovars */
++char* wl_rate_print(char *rate_buf, size_t buf_len, u32 rspec);
++
++int wl_rate_set(char *cmd, char *set_buf, u32 *set_buf_len);
+diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
+index 964486c11..8b04f9dc9 100644
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -28,6 +28,11 @@
+ #include "common/qca-vendor.h"
+ #include "common/qca-vendor-attr.h"
+ #include "common/brcm_vendor.h"
++#ifdef CONFIG_DRIVER_BRCM_WL
++#include "common/brcm_wl_ioctl.h"
++#include "driver_brcm_wlu.h"
++#include "drivers/driver_brcm_nl80211.h"
++#endif /* CONFIG_DRIVER_BRCM_WL */
+ #include "common/ieee802_11_defs.h"
+ #include "common/ieee802_11_common.h"
+ #include "common/wpa_common.h"
+@@ -10121,6 +10126,147 @@ static bool is_cmd_with_nested_attrs(unsigned int vendor_id,
+ }
+ 
+ 
++#ifdef CONFIG_DRIVER_BRCM_WL
++static int nl80211_wl_reply_handler(struct nl_msg *msg, void *arg)
++{
++	struct nlattr *tb_msg[NL80211_ATTR_MAX + 1];
++	struct nlattr *bcmnl[BCM_NLATTR_MAX + 1];
++	struct genlmsghdr *gnlh = nlmsg_data(nlmsg_hdr(msg));
++	char *buf = arg;
++	int ret = 0;
++
++	wpa_printf(MSG_INFO, "nl80211: wl command reply handler");
++
++	nla_parse(tb_msg, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0),
++		  genlmsg_attrlen(gnlh, 0), NULL);
++
++	if (tb_msg[NL80211_ATTR_VENDOR_DATA]) {
++		wpa_printf(MSG_INFO, "nl80211: Vendor Data Found");
++		ret = nla_parse_nested(bcmnl, BCM_NLATTR_MAX,
++				       tb_msg[NL80211_ATTR_VENDOR_DATA], NULL);
++		if (ret != 0)
++			return NL_SKIP;
++		os_memcpy(buf, nla_data(bcmnl[BCM_NLATTR_DATA]), nla_get_u16(bcmnl[BCM_NLATTR_LEN]));
++	}
++
++	return NL_SKIP;
++}
++
++
++int nl80211_wl_command(void *priv, char *cmd, char *buf, size_t buf_len)
++{
++	struct i802_bss *bss = priv;
++	struct wpa_driver_nl80211_data *drv = bss->drv;
++	struct nl_msg *msg;
++	int ret = -1;
++	struct bcm_nlmsg_hdr *nlioc;
++	char *pos;
++	char smbuf[WLC_IOCTL_SMLEN * 2] = {0x00};
++	char outbuf[WLC_IOCTL_MEDLEN] = {0x00};
++	u32 msglen = 0;
++	bool set = false;
++
++	bool is_get_int = false;
++	u32 output_val = 0x00;
++
++	msg = nlmsg_alloc();
++	if (!msg)
++		return -ENOMEM;
++
++	pos = os_strstr(cmd, "5g_rate");
++	if (pos) {
++		os_memcpy(smbuf, cmd, strlen("5g_rate")); //Keep last byte as 0x00
++		is_get_int = true;
++		msglen += strlen("5g_rate");
++
++		if (os_strncasecmp(cmd, "5g_rate ", 8) == 0) {
++			set = true;
++			cmd += strlen("5g_rate ");
++			msglen += 1;
++
++			ret = wl_rate_set(cmd, smbuf, &msglen);
++			if (ret != 0)
++				goto exit;
++		}
++	}
++
++	pos = os_strstr(cmd, "2g_rate");
++	if (pos) {
++		os_memcpy(smbuf, cmd, strlen("2g_rate")); //Keep last byte as 0x00
++		is_get_int = true;
++		msglen += strlen("2g_rate");
++
++		if (os_strncasecmp(cmd, "2g_rate ", 8) == 0) {
++			set = true;
++			cmd += strlen("2g_rate ");
++			msglen += 1;
++
++			ret = wl_rate_set(cmd, smbuf, &msglen);
++			if (ret != 0)
++				goto exit;
++		}
++	}
++
++	/* nlmsg_alloc() can only allocate default_pagesize packet, cap
++	 * any buffer send down to 1536 bytes
++	 * DO NOT switch to nlmsg_alloc_size because Android doesn't support it
++	 */
++	if (msglen > 0x600)
++		msglen = 0x600;
++	if (set)
++		msglen += sizeof(struct bcm_nlmsg_hdr);
++	else
++		msglen = WLC_IOCTL_SMLEN;
++	nlioc = malloc(msglen);
++	if (nlioc == NULL) {
++		nlmsg_free(msg);
++		return -ENOMEM;
++	}
++	if (set)
++		nlioc->cmd = WLC_SET_VAR;
++	else
++		nlioc->cmd = WLC_GET_VAR;
++	nlioc->len = msglen - sizeof(struct bcm_nlmsg_hdr);
++	nlioc->offset = sizeof(struct bcm_nlmsg_hdr);
++	nlioc->set = set;
++	nlioc->magic = 0;
++	os_memcpy(((void *)nlioc) + nlioc->offset, smbuf, msglen - nlioc->offset);
++
++	nl80211_cmd(drv, msg, 0, NL80211_CMD_VENDOR);
++	if (nl80211_set_iface_id(msg, bss) < 0) {
++		goto nla_put_failure;
++	}
++
++	NLA_PUT_U32(msg, NL80211_ATTR_VENDOR_ID, OUI_BRCM);
++	NLA_PUT_U32(msg, NL80211_ATTR_VENDOR_SUBCMD, BRCM_VENDOR_SCMD_PRIV_STR);
++	NLA_PUT(msg, NL80211_ATTR_VENDOR_DATA, msglen, nlioc);
++
++	ret = send_and_recv_msgs(drv, msg, nl80211_wl_reply_handler, outbuf, NULL, NULL);
++	msg = NULL;
++	if (ret) {
++		wpa_printf(MSG_ERROR, "nl80211: vendor cmd  failed: "
++		"ret=%d (%s)", ret, strerror(-ret));
++		ret = 0;
++	}
++
++	wpa_printf(MSG_DEBUG, "nl80211: vendor cmd sent successfully ");
++
++	if (set == false && is_get_int == true) {
++		os_memcpy(&output_val, outbuf, sizeof(output_val));
++		wl_rate_print(buf, buf_len, output_val);
++		ret = buf_len;
++	}
++
++nla_put_failure:
++exit:
++
++	nlmsg_free(msg);
++
++	return ret;
++}
++#endif /* CONFIG_DRIVER_BRCM_WL */
++
++
+ static int nl80211_vendor_cmd(void *priv, unsigned int vendor_id,
+ 			      unsigned int subcmd, const u8 *data,
+ 			      size_t data_len, enum nested_attr nested_attr,
+@@ -12263,6 +12409,9 @@ const struct wpa_driver_ops wpa_driver_nl80211_ops = {
+ 	.driver_cmd = wpa_driver_nl80211_driver_cmd,
+ #endif /* !ANDROID_LIB_STUB */
+ #endif /* ANDROID */
++#ifdef CONFIG_DRIVER_BRCM_WL
++	.wl_cmd = nl80211_wl_command,
++#endif /* CONFIG_DRIVER_BRCM_WL */
+ 	.vendor_cmd = nl80211_vendor_cmd,
+ 	.set_qos_map = nl80211_set_qos_map,
+ 	.get_wowlan = nl80211_get_wowlan,
+diff --git a/src/drivers/drivers.mak b/src/drivers/drivers.mak
+index a03d4a034..a986fa379 100644
+--- a/src/drivers/drivers.mak
++++ b/src/drivers/drivers.mak
+@@ -30,6 +30,11 @@ ifdef CONFIG_DRIVER_NL80211_BRCM
+ DRV_CFLAGS += -DCONFIG_DRIVER_NL80211_BRCM
+ endif
+ 
++ifdef CONFIG_DRIVER_BRCM_WL
++DRV_CFLAGS += -DCONFIG_DRIVER_BRCM_WL
++DRV_OBJS += ../src/drivers/driver_brcm_wlu.o
++endif
++
+ ifdef CONFIG_DRIVER_MACSEC_QCA
+ DRV_CFLAGS += -DCONFIG_DRIVER_MACSEC_QCA
+ DRV_OBJS += ../src/drivers/driver_macsec_qca.o
+diff --git a/wpa_supplicant/ctrl_iface.c b/wpa_supplicant/ctrl_iface.c
+index bcd67fca3..86dcb9d84 100644
+--- a/wpa_supplicant/ctrl_iface.c
++++ b/wpa_supplicant/ctrl_iface.c
+@@ -8296,6 +8296,23 @@ static int wpa_supplicant_driver_cmd(struct wpa_supplicant *wpa_s, char *cmd,
+ #endif /* ANDROID */
+ 
+ 
++#ifdef CONFIG_DRIVER_BRCM_WL
++static int wpa_supplicant_wl_cmd(struct wpa_supplicant *wpa_s, char *cmd,
++				     char *buf, size_t buflen)
++{
++	int ret;
++
++	ret = wpa_drv_wl_cmd(wpa_s, cmd, buf, buflen);
++	if (ret == 0) {
++		ret = os_snprintf(buf, buflen, "%s\n", "OK");
++		if (os_snprintf_error(buflen, ret))
++			ret = -1;
++	}
++	return ret;
++}
++#endif /* CONFIG_DRIVER_BRCM_WL */
++
++
+ static int wpa_supplicant_vendor_cmd(struct wpa_supplicant *wpa_s, char *cmd,
+ 				     char *buf, size_t buflen)
+ {
+@@ -12095,6 +12112,11 @@ char * wpa_supplicant_ctrl_iface_process(struct wpa_supplicant *wpa_s,
+ 		reply_len = wpa_supplicant_driver_cmd(wpa_s, buf + 7, reply,
+ 						      reply_size);
+ #endif /* ANDROID */
++#ifdef CONFIG_DRIVER_BRCM_WL
++	} else if (os_strncmp(buf, "WL ", 3) == 0) {
++		reply_len = wpa_supplicant_wl_cmd(wpa_s, buf + 3, reply,
++						      reply_size);
++#endif /* CONFIG_DRIVER_BRCM_WL */
+ 	} else if (os_strncmp(buf, "VENDOR ", 7) == 0) {
+ 		reply_len = wpa_supplicant_vendor_cmd(wpa_s, buf + 7, reply,
+ 						      reply_size);
+diff --git a/wpa_supplicant/defconfig_base b/wpa_supplicant/defconfig_base
+index 4f71b50ff..d4be24c34 100644
+--- a/wpa_supplicant/defconfig_base
++++ b/wpa_supplicant/defconfig_base
+@@ -34,6 +34,8 @@ CONFIG_DRIVER_NL80211=y
+ # QCA vendor extensions to nl80211
+ #CONFIG_DRIVER_NL80211_QCA=y
+ 
++CONFIG_DRIVER_BRCM_WL=y
++
+ # driver_nl80211.c requires libnl. If you are compiling it yourself
+ # you may need to point hostapd to your version of libnl.
+ #
+diff --git a/wpa_supplicant/driver_i.h b/wpa_supplicant/driver_i.h
+index 237f4e085..c7ba94ebd 100644
+--- a/wpa_supplicant/driver_i.h
++++ b/wpa_supplicant/driver_i.h
+@@ -609,6 +609,16 @@ static inline int wpa_drv_driver_cmd(struct wpa_supplicant *wpa_s,
+ }
+ #endif /* ANDROID */
+ 
++#ifdef CONFIG_DRIVER_BRCM_WL
++static inline int wpa_drv_wl_cmd(struct wpa_supplicant *wpa_s,
++				     char *cmd, char *buf, size_t buf_len)
++{
++	if (!wpa_s->driver->wl_cmd)
++		return -1;
++	return wpa_s->driver->wl_cmd(wpa_s->drv_priv, cmd, buf, buf_len);
++}
++#endif /* CONFIG_DRIVER_BRCM_WL */
++
+ static inline void wpa_drv_set_rekey_info(struct wpa_supplicant *wpa_s,
+ 					  const u8 *kek, size_t kek_len,
+ 					  const u8 *kck, size_t kck_len,
+diff --git a/wpa_supplicant/wpa_cli.c b/wpa_supplicant/wpa_cli.c
+index 033589f76..d3c70d3e5 100644
+--- a/wpa_supplicant/wpa_cli.c
++++ b/wpa_supplicant/wpa_cli.c
+@@ -2908,7 +2908,10 @@ static int wpa_cli_cmd_driver(struct wpa_ctrl *ctrl, int argc, char *argv[])
+ 	return wpa_cli_cmd(ctrl, "DRIVER", 1, argc, argv);
+ }
+ #endif /* ANDROID */
+-
++static int wpa_cli_cmd_wl(struct wpa_ctrl *ctrl, int argc, char *argv[])
++{
++	return wpa_cli_cmd(ctrl, "WL", 1, argc, argv);
++}
+ 
+ static int wpa_cli_cmd_vendor(struct wpa_ctrl *ctrl, int argc, char *argv[])
+ {
+@@ -3853,6 +3856,9 @@ static const struct wpa_cli_cmd wpa_cli_commands[] = {
+ 	{ "driver", wpa_cli_cmd_driver, NULL, cli_cmd_flag_none,
+ 	  "<command> = driver private commands" },
+ #endif /* ANDROID */
++	{ "wl", wpa_cli_cmd_wl, NULL, cli_cmd_flag_none,
++	  "<command> = brcm wl commands" },
++
+ 	{ "radio_work", wpa_cli_cmd_radio_work, NULL, cli_cmd_flag_none,
+ 	  "= radio_work <show/add/done>" },
+ 	{ "vendor", wpa_cli_cmd_vendor, NULL, cli_cmd_flag_none,
+-- 
+2.17.1
+

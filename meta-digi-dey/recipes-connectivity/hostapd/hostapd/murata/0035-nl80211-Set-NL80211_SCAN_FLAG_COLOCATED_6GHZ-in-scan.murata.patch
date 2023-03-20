@@ -1,0 +1,69 @@
+From 2173b4648a59f7ab499b7974189f2ba025b6a25e Mon Sep 17 00:00:00 2001
+From: Tova Mussai <tova.mussai@intel.com>
+Date: Sun, 24 Apr 2022 12:57:52 +0300
+Subject: [PATCH 35/49] nl80211: Set NL80211_SCAN_FLAG_COLOCATED_6GHZ in scan
+
+Set NL80211_SCAN_FLAG_COLOCATED_6GHZ in the scan parameters to enable
+scanning for co-located APs discovered based on neighbor reports from
+the 2.4/5 GHz bands when not scanning passively. Do so only when
+collocated scanning is not disabled by higher layer logic.
+
+Signed-off-by: Tova Mussai <tova.mussai@intel.com>
+Signed-off-by: Andrei Otcheretianski <andrei.otcheretianski@intel.com>
+Signed-off-by: Ilan Peer <ilan.peer@intel.com>
+Signed-off-by: Avraham Stern <avraham.stern@intel.com>
+---
+ src/drivers/driver.h              | 10 ++++++++++
+ src/drivers/driver_nl80211_scan.c | 15 +++++++++++++++
+ 2 files changed, 25 insertions(+)
+
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 2745b8340..d778b1eaa 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -651,6 +651,16 @@ struct wpa_driver_scan_params {
+ 	 */
+ 	unsigned int p2p_include_6ghz:1;
+ 
++	/**
++	 * non_coloc_6ghz - Force scanning of non-PSC 6 GHz channels
++	 *
++	 * If this is set, the driver should scan non-PSC channels from the
++	 * scan request even if neighbor reports from 2.4/5 GHz APs did not
++	 * report a co-located AP on these channels. The default is to scan
++	 * non-PSC channels only if a co-located AP was reported on the channel.
++	 */
++	unsigned int non_coloc_6ghz:1;
++
+ 	/*
+ 	 * NOTE: Whenever adding new parameters here, please make sure
+ 	 * wpa_scan_clone_params() and wpa_scan_free_params() get updated with
+diff --git a/src/drivers/driver_nl80211_scan.c b/src/drivers/driver_nl80211_scan.c
+index 131608480..1cd15469a 100644
+--- a/src/drivers/driver_nl80211_scan.c
++++ b/src/drivers/driver_nl80211_scan.c
+@@ -203,6 +203,21 @@ nl80211_scan_common(struct i802_bss *bss, u8 cmd,
+ 				goto fail;
+ 		}
+ 		nla_nest_end(msg, ssids);
++
++		/*
++		 * If allowed, scan for 6 GHz APs that are reported by other
++		 * APs. Note that if the flag is not set and 6 GHz channels are
++		 * to be scanned, it is highly likely that non-PSC channels
++		 * would be scanned passively (due to the Probe Request frame
++		 * transmission restrictions mandated in IEEE Std 802.11ax-2021,
++		 * 26.17.2.3 (Scanning in the 6 GHz band). Passive scanning of
++		 * all non-PSC channels would take a significant amount of time.
++		 */
++		if (!params->non_coloc_6ghz) {
++			wpa_printf(MSG_DEBUG,
++				   "nl80211: Scan co-located APs on 6 GHz");
++			scan_flags |= NL80211_SCAN_FLAG_COLOCATED_6GHZ;
++		}
+ 	} else {
+ 		wpa_printf(MSG_DEBUG, "nl80211: Passive scan requested");
+ 	}
+-- 
+2.17.1
+

@@ -22,8 +22,7 @@ WIRELESS_MODULE ?= ""
 WIRELESS_MODULE:append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
 HAS_WIFI_VIRTWLANS = "true"
 
-# Firmware
-MACHINE_FIRMWARE ?= "firmware-imx-sdma-imx6q"
+# Machine firmware
 MACHINE_FIRMWARE:append = " ${@oe.utils.conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6564-bt', '', d)}"
 MACHINE_FIRMWARE:append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-qualcomm-qca6564-wifi', '', d)}"
 
@@ -32,10 +31,7 @@ MACHINE_EXTRA_RDEPENDS += " \
     mtd-utils-ubifs \
 "
 
-MACHINE_EXTRA_RRECOMMENDS += " \
-    ${MACHINE_FIRMWARE} \
-    ${WIRELESS_MODULE} \
-"
+MACHINE_EXTRA_RRECOMMENDS += "${WIRELESS_MODULE}"
 
 MACHINE_FEATURES += "wifi bluetooth cryptochip mca"
 MACHINE_FEATURES:remove:use-mainline-bsp = "wifi"

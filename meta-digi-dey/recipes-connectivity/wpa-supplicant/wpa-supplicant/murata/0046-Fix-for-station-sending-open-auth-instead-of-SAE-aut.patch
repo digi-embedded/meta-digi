@@ -1,0 +1,25 @@
+From ed256e852f6ff9c45974128cba4d2f0fbbdece2f Mon Sep 17 00:00:00 2001
+From: Ramesh Rangavittal <ramesh.rangavittal@infineon.com>
+Date: Mon, 21 Nov 2022 11:21:59 -0600
+Subject: [PATCH 46/49] Fix for station sending open auth instead of SAE auth
+
+---
+ wpa_supplicant/events.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/wpa_supplicant/events.c b/wpa_supplicant/events.c
+index 7fcd057b3..975110b57 100644
+--- a/wpa_supplicant/events.c
++++ b/wpa_supplicant/events.c
+@@ -4166,7 +4166,7 @@ static void wpas_event_disconnect(struct wpa_supplicant *wpa_s, const u8 *addr,
+ #endif /* CONFIG_P2P */
+ 
+ #ifdef CONFIG_SAE
+-	if (reason_code == WLAN_REASON_PREV_AUTH_NOT_VALID) {
++	if (reason_code <= WLAN_REASON_PREV_AUTH_NOT_VALID) {
+ 		const u8 *bssid = wpa_s->bssid;
+ 
+ 		if (is_zero_ether_addr(bssid))
+-- 
+2.17.1
+

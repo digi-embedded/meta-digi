@@ -40,6 +40,9 @@ SPL_BINARY = "spl/u-boot-spl.bin"
 ATF_PLATFORM = "imx93"
 
 MACHINE_EXTRA_RDEPENDS += " \
+    e2fsprogs-mke2fs \
+    e2fsprogs-resize2fs \
+    parted \
     xbee-init \
 "
 

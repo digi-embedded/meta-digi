@@ -58,6 +58,11 @@ if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
 	setenv overlays _ov_som_wifi_ccmp15.dtbo,${overlays}
 fi
 
+# Apply DVKv1 overlay if the board_version is 1
+if test -z "${board_version}" || test "${board_version}" -eq "1"; then
+	setenv overlays _ov_board_v1_ccmp15-dvk.dtbo,${overlays}
+fi
+
 dboot linux nand ${mtdbootpart}
 
 

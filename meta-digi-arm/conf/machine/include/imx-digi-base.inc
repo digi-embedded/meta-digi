@@ -190,6 +190,18 @@ IMX_EXTRA_FIRMWARE:mx8m-generic-bsp  = "firmware-imx-8m"
 IMX_EXTRA_FIRMWARE:mx8x-generic-bsp  = "imx-sc-firmware imx-seco"
 IMX_EXTRA_FIRMWARE:mx93-generic-bsp  = "firmware-imx-9 firmware-sentinel"
 
+# Firmware
+MACHINE_FIRMWARE ?= ""
+MACHINE_FIRMWARE:append:mx6-generic-bsp      = " firmware-imx-sdma-imx6q"
+MACHINE_FIRMWARE:append:mx6q-generic-bsp     = " firmware-imx-vpu-imx6q"
+MACHINE_FIRMWARE:append:mx6dl-generic-bsp    = " firmware-imx-vpu-imx6d firmware-imx-epdc"
+MACHINE_FIRMWARE:append:mx8mm-generic-bsp    = " firmware-imx-sdma-imx7d"
+MACHINE_FIRMWARE:append:mx8mn-generic-bsp    = " firmware-imx-sdma-imx7d firmware-imx-easrc-imx8mn"
+MACHINE_FIRMWARE:append:mx8qxp-generic-bsp   = " firmware-imx-sdma-imx7d firmware-imx-vpu-imx8"
+MACHINE_FIRMWARE:append:mx8dx-generic-bsp    = " firmware-imx-sdma-imx7d firmware-imx-vpu-imx8"
+
+MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE}"
+
 # Extra audio support
 IMX_ALSA_EXTRA = ""
 IMX_ALSA_EXTRA:imx-nxp-bsp = "imx-alsa-plugins"

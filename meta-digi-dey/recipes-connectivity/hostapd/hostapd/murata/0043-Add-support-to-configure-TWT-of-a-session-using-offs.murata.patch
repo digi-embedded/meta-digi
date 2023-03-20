@@ -1,0 +1,76 @@
+From e03937fecb74cf50d70721ea2a0b14fa5e12153a Mon Sep 17 00:00:00 2001
+From: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
+Date: Mon, 11 Jul 2022 11:17:04 +0530
+Subject: [PATCH 43/49] Add support to configure TWT of a session using offset
+ in microseconds
+
+Introduce a new cmd line argument "twt_offset=<u64>" in the existing list
+of arguments supported in "$ wpa_cli twt_setup <args>" cmd to set the TWT
+in terms of offset from the current remote TSF.
+
+Example: To set a Target Wake Time of 102.4ms from the current remote TSF
+
+$ wpa_cli twt_setup setup_cmd=0 min_twt=80 mantissa=38400 exponent=3 \
+	twt_offset=102400 trigger=0 implicit=1 flow_type=0 flow_id=5 \
+	control=0
+
+
+Signed-off-by: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
+Signed-off-by: Ian Lin <ian.lin@infineon.com>
+---
+ src/common/ifx_vendor.h           | 3 +++
+ src/drivers/driver.h              | 1 +
+ src/drivers/driver_nl80211.c      | 4 ++++
+ 3 files changed, 8 insertions(+)
+
+diff --git a/src/common/ifx_vendor.h b/src/common/ifx_vendor.h
+index 2e251c367..aa8e83bc7 100644
+--- a/src/common/ifx_vendor.h
++++ b/src/common/ifx_vendor.h
+@@ -175,6 +175,8 @@ enum ifx_twt_oper {
+  *
+  * @IFX_VENDOR_ATTR_TWT_PARAM_WAKE_TIME: Target Wake Time.
+  *
++ * @IFX_VENDOR_ATTR_TWT_PARAM_WAKE_TIME_OFFSET: Target Wake Time Offset.
++ *
+  * @IFX_VENDOR_ATTR_TWT_PARAM_MIN_WAKE_DURATION: Nominal Minimum TWT Wake Duration.
+  *
+  * @IFX_VENDOR_ATTR_TWT_PARAM_WAKE_INTVL_EXPONENT: TWT Wake Interval Exponent.
+@@ -218,6 +220,7 @@ enum ifx_vendor_attr_twt_param {
+ 	IFX_VENDOR_ATTR_TWT_PARAM_SETUP_CMD_TYPE,
+ 	IFX_VENDOR_ATTR_TWT_PARAM_DIALOG_TOKEN,
+ 	IFX_VENDOR_ATTR_TWT_PARAM_WAKE_TIME,
++	IFX_VENDOR_ATTR_TWT_PARAM_WAKE_TIME_OFFSET,
+ 	IFX_VENDOR_ATTR_TWT_PARAM_MIN_WAKE_DURATION,
+ 	IFX_VENDOR_ATTR_TWT_PARAM_WAKE_INTVL_EXPONENT,
+ 	IFX_VENDOR_ATTR_TWT_PARAM_WAKE_INTVL_MANTISSA,
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 4d810aaa8..23f599bef 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -2527,6 +2527,7 @@ struct drv_acs_params {
+ struct drv_setup_twt_params {
+ 	u8 dtok;
+ 	u64 twt;
++	u64 twt_offset;
+ 	u8 min_twt;
+ 	u8 exponent;
+ 	u16 mantissa;
+diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
+index 8f8f7e2cd..3d98e5943 100644
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -12328,6 +12328,10 @@ static int wpa_driver_nl80211_setup_twt(void *priv, struct drv_setup_twt_params
+ 	     nla_put_u64(msg, IFX_VENDOR_ATTR_TWT_PARAM_WAKE_TIME,
+ 			 params->twt)) ||
+ 
++	    (params->twt_offset &&
++	     nla_put_u64(msg, IFX_VENDOR_ATTR_TWT_PARAM_WAKE_TIME_OFFSET,
++			 params->twt_offset)) ||
++
+ 	    nla_put_u8(msg, IFX_VENDOR_ATTR_TWT_PARAM_MIN_WAKE_DURATION,
+ 		       params->min_twt) ||
+ 
+-- 
+2.17.1
+

@@ -1,0 +1,31 @@
+From a6028c58032672f86c9fe87ba3abbd31c79166e3 Mon Sep 17 00:00:00 2001
+From: Kurt Lee <kurt.lee@infineon.com>
+Date: Wed, 25 May 2022 19:12:47 -0500
+Subject: [PATCH 26/49] non-upstream: wl-cmd: add more compile flag
+
+add more CONFIG_DRIVER_BRCM_WL to separeta this feature
+
+Signed-off-by: Ian Lin <ian.lin@infineon.com>
+Signed-off-by: Kurt Lee <kurt.lee@infineon.com>
+---
+ src/drivers/driver.h     | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 3d48f6f07..2745b8340 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -3861,7 +3861,10 @@ struct wpa_driver_ops {
+ 	 */
+ 	int (*driver_cmd)(void *priv, char *cmd, char *buf, size_t buf_len);
+ #endif /* ANDROID */
++
++#ifdef CONFIG_DRIVER_BRCM_WL
+ 	int (*wl_cmd)(void *priv, char *cmd, char *buf, size_t buf_len);
++#endif /* CONFIG_DRIVER_BRCM_WL */
+ 
+ 	/**
+ 	 * vendor_cmd - Execute vendor specific command
+-- 
+2.17.1
+
