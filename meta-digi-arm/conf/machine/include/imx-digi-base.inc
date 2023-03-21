@@ -208,9 +208,6 @@ IMX_ALSA_EXTRA:imx-nxp-bsp = "imx-alsa-plugins"
 MACHINE_EXTRA_RRECOMMENDS:append:mx6-nxp-bsp = " ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', '${IMX_ALSA_EXTRA}', '', d)}"
 MACHINE_EXTRA_RRECOMMENDS:append:mx8-nxp-bsp = " ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', '${IMX_ALSA_EXTRA}', '', d)}"
 
-# Extra udev rules
-MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf udev-rules-imx"
-
 # GStreamer 1.0 plugins
 MACHINE_GSTREAMER_1_0_PLUGIN                ?= ""
 MACHINE_GSTREAMER_1_0_PLUGIN:mx6dl-nxp-bsp  ?= "imx-gst1.0-plugin"
@@ -291,6 +288,9 @@ KERNEL_IMAGETYPE = "zImage"
 KERNEL_IMAGETYPE:aarch64 = "Image.gz"
 
 MACHINE_FEATURES = "usbgadget usbhost vfat alsa touchscreen"
+
+# IMX specific udev extra rules added when device manager is systemd/udev
+UDEV_EXTRA_RULES:append = " udev-rules-imx"
 
 # Add a generic gstreamer distro feature for all IMX platforms
 DISTRO_FEATURES:append =  " gstreamer"

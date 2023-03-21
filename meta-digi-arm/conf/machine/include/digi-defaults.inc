@@ -72,6 +72,10 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     ${@bb.utils.contains("MACHINE_FEATURES", "cryptochip", "cryptoauthlib", "", d)} \
 "
 
+# Extra rules when device manager is systemd or udev
+UDEV_EXTRA_RULES = "udev-extraconf"
+MACHINE_EXTRA_RRECOMMENDS += "${@bb.utils.contains_any('VIRTUAL-RUNTIME_dev_manager', 'systemd udev', '${UDEV_EXTRA_RULES}', '', d)}"
+
 # Default image name (for install scripts)
 DEFAULT_IMAGE_NAME ??= "dey-image-qt"
 

@@ -42,9 +42,6 @@ MACHINE_EXTRA_RDEPENDS += " \
     mtd-utils-ubifs \
 "
 
-# Extra udev rules
-MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
-
 # Image FS types
 IMAGE_FSTYPES:remove = "ext4 tar.xz"
 
