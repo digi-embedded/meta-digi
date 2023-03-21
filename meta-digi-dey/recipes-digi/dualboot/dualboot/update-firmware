@@ -26,6 +26,7 @@ PUBLIC_KEY="/etc/ssl/certs/key.pub"
 ACTIVE_SYSTEM="$(fw_printenv -n active_system 2>/dev/null)"
 SHOW_ACTIVE_SYSTEM=0
 SCRIPT_MODE=0
+SWAP_ACTIVE_SYSTEM=0
 REBOOT=1
 UPDATE_FILE=""
 ALT_BOOT=""
@@ -42,6 +43,8 @@ Usage: ${SCRIPTNAME} [OPTIONS] </your-path/your-filename>.swu
 
   -a          --active                   Show currently active system
               --no-reboot                Do not reboot after update
+              --swap-active-system       Swap active system block.
+                                         This option reboots the system, unless '--no-reboot' is specified.
   -v          --verbose                  Enable verbosity
   -h          --help                     Print help and exit
 
@@ -59,12 +62,13 @@ show_active_system() {
 	fi
 }
 
+# $1: message to show
 reboot_system() {
 	if [ ${REBOOT} -eq 1 ]; then
-		echo "Firmware update finished. Rebooting the system."
+		echo "${1}. Rebooting the system."
 		reboot -f
 	else
-		echo "Firmware update finished. Reboot the system to use the new version."
+		echo "${1}. Reboot the system to use the new version."
 	fi
 }
 
@@ -153,7 +157,7 @@ update_device() {
 		if ! swap_active_system; then
 			exit 1
 		fi
-		reboot_system
+		reboot_system "Firmware update finished"
 	else
 		echo "[ERROR] $? There was an error performing the update"
 	fi
@@ -164,6 +168,8 @@ while :; do
 		-a|--active) SHOW_ACTIVE_SYSTEM=1
 		;;
 		--no-reboot) REBOOT=0
+		;;
+		--swap-active-system) SWAP_ACTIVE_SYSTEM=1
 		;;
 		-s) SCRIPT_MODE=1
 		;;
@@ -190,6 +196,15 @@ if [ "${ACTIVE_SYSTEM}" = "linux_a" ]; then
 else
 	ALT_BOOT="linux_a"
 	ALT_ROOTFS="rootfs_a"
+fi
+
+# Swap active system.
+if [ ${SWAP_ACTIVE_SYSTEM} -eq 1 ]; then
+	if ! swap_active_system; then
+		exit 1
+	fi
+	reboot_system "Swapped active system to $(echo ${ALT_BOOT} | cut -d'_' -f2 | tr [:lower:] [:upper:])"
+	exit
 fi
 
 # Check update file parameter.
