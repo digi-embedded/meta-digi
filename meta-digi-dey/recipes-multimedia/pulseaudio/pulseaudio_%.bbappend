@@ -91,11 +91,6 @@ do_install:append() {
 	install -d ${D}${systemd_unitdir}/system
 	install -m 0644 ${WORKDIR}/pulseaudio-system.service ${D}/${systemd_unitdir}/system
 
-	# Remove pid file entry for non-graphical backend
-	if [ "${IS_HEADLESS}" = "true" ]; then
-		sed -i -e "/PIDFile/d" ${D}/${systemd_unitdir}/system/pulseaudio-system.service
-	fi
-
 	# Configuration files for HDMI sound card
 	if [ "${AUDIO_HDMI}" = "yes" ]; then
 		install -d ${D}${sysconfdir}/udev/scripts
