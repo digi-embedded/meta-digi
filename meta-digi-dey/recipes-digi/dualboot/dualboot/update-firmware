@@ -24,6 +24,7 @@ SCRIPTNAME="$(basename "$(readlink -f "${0}")")"
 VERBOSE=""
 PUBLIC_KEY="/etc/ssl/certs/key.pub"
 ACTIVE_SYSTEM="$(fw_printenv -n active_system 2>/dev/null)"
+REBOOT=1
 
 ## Local functions
 usage() {
@@ -32,6 +33,7 @@ usage() {
 Usage: ${SCRIPTNAME} [OPTIONS] </your-path/your-filename>.swu
 
   -a          --active                   Show currently active system
+              --no-reboot                Do not reboot after update
   -v          --verbose                  Enable verbosity
   -h          --help                     Print help and exit
 
@@ -46,9 +48,20 @@ show_active_system() {
 	fi
 }
 
+reboot_system() {
+	if [ ${REBOOT} -eq 1 ]; then
+		echo "Firmware update finished. Rebooting the system."
+		reboot -f
+	else
+		echo "Firmware update finished. Reboot the system to use the new version."
+	fi
+}
+
 while :; do
 	case $1 in
 		-a|--active) show_active_system;exit
+		;;
+		--no-reboot) REBOOT=0
 		;;
 		-v|--verbose) VERBOSE="-v"
 		;;
@@ -98,7 +111,7 @@ if [ -z "${NANDROOTFS}" ]; then
 	done
 
 	if [ -z "${MMC_PART}" ] || [ -z "${PART_UUID}" ]; then
-		echo "[ERROR] detecting partitions to update."
+		echo "[ERROR] Detecting partitions to update."
 		exit
 	fi
 
@@ -113,8 +126,7 @@ if [ -z "${NANDROOTFS}" ]; then
 		fw_setenv mmcpart "${MMC_PART}"
 		fw_setenv active_system ${KERNELBOOT}
 		fw_setenv bootcount 0
-		echo "Firmware update finished; Rebooting system."
-		reboot -f
+		reboot_system
 	else
 		echo "[ERROR] $? There was an error performing the update"
 	fi
@@ -149,8 +161,7 @@ else
 		fw_setenv rootfsvol ${ROOTFS}
 		fw_setenv active_system ${KERNELBOOT}
 		fw_setenv bootcount 0
-		echo "Firmware update finished; Rebooting system."
-		reboot -f
+		reboot_system
 	else
 		echo "[ERROR] $? There was an error performing the update"
 	fi
