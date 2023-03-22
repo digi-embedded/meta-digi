@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2019, Digi International Inc.
+# Copyright (C) 2017-2023, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -41,12 +41,20 @@ ETH0_STATIC_CIDR = "${@ipaddr_to_cidr('eth0', d)}"
 ETH1_STATIC_CIDR = "${@ipaddr_to_cidr('eth1', d)}"
 WLAN0_STATIC_CIDR = "${@ipaddr_to_cidr('wlan0', d)}"
 
+UNMANAGED_DEVICES = "interface-name:p2p*;interface-name:wlan1"
+UNMANAGED_DEVICES:ccimx93 = "interface-name:p2p-wfd0-0;interface-name:wfd0;interface-name:uap0"
+
 inherit update-rc.d
 
 do_install:append() {
 	install -d ${D}${sysconfdir}/init.d ${D}${sysconfdir}/NetworkManager
 	install -m 0644 ${WORKDIR}/NetworkManager.conf ${D}${sysconfdir}/NetworkManager/
 	install -m 0755 ${WORKDIR}/networkmanager-init ${D}${sysconfdir}/init.d/networkmanager
+
+	#
+	# Customize NetworkManager
+	#
+	sed -i -e "s,##UNMANAGED_DEVICES##,${UNMANAGED_DEVICES},g" ${D}${sysconfdir}/NetworkManager/NetworkManager.conf
 
 	#
 	# Connections config files
