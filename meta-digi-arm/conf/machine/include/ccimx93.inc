@@ -62,8 +62,8 @@ BT_TTY ?= "ttyLP0"
 # Add additional firmware
 MACHINE_FIRMWARE:append = " ethos-u-firmware"
 
-# Adding 'wayland' along with 'x11' enables the xwayland backend
-DISTRO_FEATURES:append = " wayland pam"
+# Per-machine DISTRO_FEATURES customization
+MACHINE_DISTRO_FEATURES_REMOVE = "vulkan"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"

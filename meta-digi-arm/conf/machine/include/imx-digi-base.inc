@@ -292,9 +292,6 @@ MACHINE_FEATURES = "usbgadget usbhost vfat alsa touchscreen"
 # IMX specific udev extra rules added when device manager is systemd/udev
 UDEV_EXTRA_RULES:append = " udev-rules-imx"
 
-# Add a generic gstreamer distro feature for all IMX platforms
-DISTRO_FEATURES:append =  " gstreamer"
-
 # U-Boot 2017.X requires a specific dtc version.
 PREFERRED_VERSION_dtc-native:ccimx6 ?= "1.4.5"
 PREFERRED_VERSION_nativesdk-dtc:ccimx6 ?= "1.4.5"

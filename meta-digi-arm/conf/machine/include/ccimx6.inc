@@ -33,9 +33,8 @@ MACHINE_FEATURES += "accel-graphics wifi bluetooth pci"
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "HAB"
 
-# Adding 'wayland' along with 'x11' enables the xwayland backend
-# Adding pam is required for SELinux functionality
-DISTRO_FEATURES:append = " wayland pam"
+# Per-machine DISTRO_FEATURES customization
+MACHINE_DISTRO_FEATURES_REMOVE = "vulkan"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"

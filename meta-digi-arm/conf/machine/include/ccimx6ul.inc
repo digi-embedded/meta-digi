@@ -47,6 +47,9 @@ MKUBIFS_ARGS ?= "-m 2048 -e 126976 -c 8191"
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "HAB"
 
+# Per-machine DISTRO_FEATURES customization
+MACHINE_DISTRO_FEATURES_REMOVE = "vulkan wayland"
+
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.ubifs"
 ROOTFS_EXT ?= '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", ".squashfs", ".ubifs", d)}'
