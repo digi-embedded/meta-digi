@@ -23,7 +23,7 @@ fi
 SCRIPTNAME="$(basename "$(readlink -f "${0}")")"
 VERBOSE=""
 PUBLIC_KEY="/etc/ssl/certs/key.pub"
-ACTIVE_SYSTEM="$(fw_printenv -n active_system 2>/dev/null)"
+ACTIVE_SYSTEM=""
 SHOW_ACTIVE_SYSTEM=0
 SCRIPT_MODE=0
 SWAP_ACTIVE_SYSTEM=0
@@ -51,14 +51,40 @@ Usage: ${SCRIPTNAME} [OPTIONS] </your-path/your-filename>.swu
 EOF
 }
 
-show_active_system() {
-	local act_sys="$(echo ${ACTIVE_SYSTEM} | cut -d'_' -f2)"
+get_active_system() {
+	if [ -z "${NANDROOTFS}" ]; then
+		local MMCROOT_DEV
 
+		MMCROOT_DEV="$(stat -c%D /)"
+
+		for label in /dev/disk/by-partlabel/*; do
+			if [ "$(stat -c"%02t%02T" $(realpath ${label}))" = "${MMCROOT_DEV}" ]; then
+				ACTIVE_SYSTEM="$(basename ${label})"
+				break
+			fi
+		done
+	else
+		ACTIVE_SYSTEM="$(sed -ne 's,^\([^[:blank:]]\+\)[[:blank:]]\+/[[:blank:]]\+ubifs.*,\1,g;T;p' /proc/mounts 2>/dev/null)"
+	fi
+
+	if [ -z "${ACTIVE_SYSTEM}" ]; then
+		echo "[ERROR] Unable to get active system."
+		return 1
+	fi
+
+	ACTIVE_SYSTEM="$(echo ${ACTIVE_SYSTEM} | cut -d_ -f2)"
+
+	return 0
+}
+
+show_active_system() {
 	if [ ${SCRIPT_MODE} -eq 0 ]; then
-		act_sys="$(echo ${act_sys} | tr [:lower:] [:upper:])"
+		local act_sys
+
+		act_sys="$(echo ${ACTIVE_SYSTEM} | tr [:lower:] [:upper:])"
 		echo "Active system is ${act_sys}"
 	else
-		echo "${act_sys}"
+		echo "${ACTIVE_SYSTEM}"
 	fi
 }
 
@@ -112,7 +138,7 @@ update_emmc() {
 
 	# Get current partition information so we can
 	# determine where to flash the images.
-	[ "${ACTIVE_SYSTEM}" = "linux_a" ] && IMAGE_SET="mmc,secondary"
+	[ "${ACTIVE_SYSTEM}" = "a" ] && IMAGE_SET="mmc,secondary"
 
 	echo ""
 	echo "Updating '${IMAGE_SET}' image set from '${UPDATE_FILE}'..."
@@ -127,7 +153,7 @@ update_nand() {
 
 	# Get current partition information so we can
 	# determine where to flash the images.
-	[ "${ACTIVE_SYSTEM}" = "linux_a" ] && IMAGE_SET="mtd,secondary"
+	[ "${ACTIVE_SYSTEM}" = "a" ] && IMAGE_SET="mtd,secondary"
 
 	echo ""
 	echo "Updating '${IMAGE_SET}' image set from '${UPDATE_FILE}'..."
@@ -184,13 +210,15 @@ while :; do
 	shift
 done
 
+get_active_system || exit
+
 # Show active system.
 if [ ${SHOW_ACTIVE_SYSTEM} -eq 1 ]; then
 	show_active_system
 	exit
 fi
 
-if [ "${ACTIVE_SYSTEM}" = "linux_a" ]; then
+if [ "${ACTIVE_SYSTEM}" = "a" ]; then
 	ALT_BOOT="linux_b"
 	ALT_ROOTFS="rootfs_b"
 else
