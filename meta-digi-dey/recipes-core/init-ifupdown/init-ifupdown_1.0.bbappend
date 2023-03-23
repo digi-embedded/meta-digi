@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2021 Digi International Inc.
+# Copyright (C) 2013-2023 Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BP}:"
 
@@ -83,17 +83,23 @@ install_virtwlans() {
 	ln -s ../if-pre-up.d/virtwlans ${D}${sysconfdir}/network/if-post-down.d/virtwlans
 }
 
+install_virtwlans:ccimx93() {
+	# Skip
+	:
+}
+
 WLAN1_POST_UP_ACTION = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemctl start hostapd@wlan1.service', '/etc/init.d/hostapd start', d)}"
 WLAN1_PRE_DOWN_ACTION = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemctl stop hostapd@wlan1.service', '/etc/init.d/hostapd stop', d)}"
 
+WLAN1_POST_UP_ACTION:ccimx93 = "systemctl start hostapd@uap0.service"
+WLAN1_PRE_DOWN_ACTION:ccimx93 = "systemctl stop hostapd@uap0.service"
+
 install_wlan1() {
-	if [ -n "${HAVE_WIFI}" ]; then
-		cat ${WORKDIR}/interfaces.wlan1.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
-		if [ "${MACHINE}" = "ccimx6sbc" ]; then
-			cat ${WORKDIR}/interfaces.wlan1.atheros.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
-		fi
-		[ -n "${WLAN1_AUTO}" ] && sed -i -e 's/^#auto wlan1/auto wlan1/g' ${D}${sysconfdir}/network/interfaces
+	cat ${WORKDIR}/interfaces.wlan1.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
+	if [ "${MACHINE}" = "ccimx6sbc" ]; then
+		cat ${WORKDIR}/interfaces.wlan1.atheros.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
 	fi
+	[ -n "${WLAN1_AUTO}" ] && sed -i -e 's/^#auto wlan1/auto wlan1/g' ${D}${sysconfdir}/network/interfaces
 
 	# Remove config entries if corresponding variable is not defined
 	[ -z "${WLAN1_STATIC_DNS}" ] && sed -i -e "/##WLAN1_STATIC_DNS##/d" ${D}${sysconfdir}/network/interfaces

@@ -1,0 +1,8 @@
+
+## Example bridge between eth0 and uap0 (NXP IW612)
+#auto br0
+#iface br0 inet static
+#	bridge_ports eth0 uap0
+#	address 192.168.42.50
+#	netmask 255.255.255.0
+#	pre-up [ -d /proc/device-tree/wireless ]
