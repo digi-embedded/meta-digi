@@ -1,4 +1,4 @@
-# Copyright (C) 2021, Digi International Inc.
+# Copyright (C) 2021-2023 Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -18,6 +18,7 @@ SRC_URI += " \
     file://0001-Implement-support-for-environment-encryption-by-CAAM.patch \
     file://0002-Implement-U-Boot-environment-access-functions.patch \
     file://0003-tools-env-add-support-to-set-dynamic-location-of-env.patch \
+    file://0004-fall-back-to-read-HWID-from-nvmem-device-if-not-avai.patch \
 "
 
 do_install:append() {

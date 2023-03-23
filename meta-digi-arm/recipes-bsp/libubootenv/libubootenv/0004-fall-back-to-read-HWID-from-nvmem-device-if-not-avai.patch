@@ -1,0 +1,105 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Mon, 3 Apr 2023 18:21:07 +0200
+Subject: [PATCH] fall back to read HWID from nvmem device if not available on
+ DT
+
+Old U-Boot versions don't populate the HWID on the device tree. This may
+be used as a key modifier for TrustFence encryption and, if not available
+on the DT, newer firmware may be unable to unencrypt the U-Boot
+environment.
+
+This patch implements a fall-back function to query the HWID directly from
+the nvmem device node if it cannot locate it at the DT.
+This is only implemented for ccimx6 family, which may be in the case of
+having an old U-Boot.
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+
+https://onedigi.atlassian.net/browse/DEL-8444
+---
+ src/uboot_env.c | 54 +++++++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 52 insertions(+), 2 deletions(-)
+
+diff --git a/src/uboot_env.c b/src/uboot_env.c
+index 539e22f9a8ac..86f9b9ebfec2 100644
+--- a/src/uboot_env.c
++++ b/src/uboot_env.c
+@@ -945,6 +945,32 @@ static int is_env_encrypted(void)
+ 	return access(dt_prop, F_OK) != -1;
+ }
+
++/* Function that checks if machine is compatible (on the DT) */
++static bool machine_is_compatible(char *machine)
++{
++	int fd, nchars, len = 0;
++	int ret = false;
++	char str[256];
++	char *p = str;
++
++	fd = open("/proc/device-tree/compatible", O_RDONLY);
++	if (fd < 0)
++		return false;
++
++	nchars = read(fd, str, 255);
++	while (len < nchars) {
++		if (!strcmp(p, machine)) {
++			ret = true;
++			break;
++		}
++		len += strlen(p) + 1;
++		p += strlen(p) + 1;
++	}
++
++	close(fd);
++	return ret;
++}
++
+ #define MAX_HWID_WORDS		4
+ static int env_caam_get_keymod(unsigned char output[16])
+ {
+@@ -953,12 +979,11 @@ static int env_caam_get_keymod(unsigned char output[16])
+ 	int fd;
+ 	uint32_t ocotp_hwid[MAX_HWID_WORDS];
+ 	char dt_prop[32];
++	char buf[sizeof(uint32_t)];
+
+ 	for (i = 0; i < MAX_HWID_WORDS; i++) {
+ 		sprintf(dt_prop, "/proc/device-tree/digi,hwid_%d", i);
+ 		if (access(dt_prop, F_OK) != -1) {
+-			char buf[sizeof(uint32_t)];
+-
+ 			fd = open(dt_prop, O_RDONLY);
+ 			if (fd < 0)
+ 				return fd;
+@@ -969,6 +994,31 @@ static int env_caam_get_keymod(unsigned char output[16])
+ 			}
+ 			ocotp_hwid[i] = ntohl(*(uint32_t *)buf);
+ 			close(fd);
++		} else if (machine_is_compatible("digi,ccimx6ul") ||
++			   machine_is_compatible("digi,ccimx6")) {
++			/*
++			 * If HWID not available on the DT (old U-Boot version),
++			 * fall back to read it directly from the nvmem device.
++			 */
++			int hwid_offset = 136;	/* (Bank * 8 + Word) * 4 */
++
++			/* HWID for CC6 family only has two words */
++			if (i == 2)
++				break;
++
++			fd = open("/sys/bus/nvmem/devices/imx-ocotp0/nvmem",
++				  O_RDONLY);
++			if (fd < 0)
++				return fd;
++			len = lseek(fd, hwid_offset + i * 4, SEEK_SET);
++
++			len = read(fd, buf, sizeof(unsigned int));
++			if (len < 0) {
++				close(fd);
++				return -1;
++			}
++			ocotp_hwid[i] = *(unsigned int *)buf;
++			close(fd);
+ 		} else {
+ 			break;
+ 		}
