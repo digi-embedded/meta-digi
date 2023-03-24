@@ -53,6 +53,16 @@ fi
 
 if [ "x$BASE_INIT" = "x$INIT_SYSTEMD" ];then
 	# systemd as init uses systemd-mount to mount block devices
+
+	# Verify if unit is already launched, if so just restart it.
+	if systemctl | grep -q "mnt-${PARTNAME}.mount"; then
+		if ! systemctl restart "mnt-${PARTNAME}.mount"; then
+			logger -t udev "ERROR: Could not mount '${DEVNAME}'"
+			exit 1
+		fi
+		exit 0
+	fi
+
 	MOUNT="/usr/bin/systemd-mount"
 	MOUNT_PARAMS="${MOUNT_PARAMS} --no-block"
 
