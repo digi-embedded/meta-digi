@@ -31,7 +31,7 @@ ALT_BOOT=""
 ALT_ROOTFS=""
 
 # Check if the rootfs is ubifs to determine if it is a nand or emmc device
-NANDROOTFS="$(sed -ne "s/\(rootfs\).*\<ubifs\>.*/\1/g;T;p" /proc/mounts 2>/dev/null)"
+NANDROOTFS="$(grep -qs '[[:blank:]]\+/[[:blank:]]\+ubifs.*' /proc/mounts 2>/dev/null && echo 1)"
 
 ## Local functions
 usage() {
