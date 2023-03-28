@@ -25,6 +25,7 @@ VERBOSE=""
 PUBLIC_KEY="/etc/ssl/certs/key.pub"
 ACTIVE_SYSTEM="$(fw_printenv -n active_system 2>/dev/null)"
 SHOW_ACTIVE_SYSTEM=0
+SCRIPT_MODE=0
 REBOOT=1
 UPDATE_FILE=""
 ALT_BOOT=""
@@ -48,7 +49,14 @@ EOF
 }
 
 show_active_system() {
-	echo "Active system is $(echo ${ACTIVE_SYSTEM} | cut -d'_' -f2 | tr [:lower:] [:upper:])"
+	local act_sys="$(echo ${ACTIVE_SYSTEM} | cut -d'_' -f2)"
+
+	if [ ${SCRIPT_MODE} -eq 0 ]; then
+		act_sys="$(echo ${act_sys} | tr [:lower:] [:upper:])"
+		echo "Active system is ${act_sys}"
+	else
+		echo "${act_sys}"
+	fi
 }
 
 reboot_system() {
@@ -156,6 +164,8 @@ while :; do
 		-a|--active) SHOW_ACTIVE_SYSTEM=1
 		;;
 		--no-reboot) REBOOT=0
+		;;
+		-s) SCRIPT_MODE=1
 		;;
 		-v|--verbose) VERBOSE="-v"
 		;;
