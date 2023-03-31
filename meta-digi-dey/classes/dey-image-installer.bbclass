@@ -25,6 +25,7 @@ FSTYPES_WHITELIST:ccmp1 = " \
 
 HAS_USB_DRIVER = "false"
 HAS_USB_DRIVER:ccimx8m = "true"
+HAS_USB_DRIVER:ccimx93 = "true"
 HAS_USB_DRIVER:ccmp1 = "true"
 
 generate_installer_zip () {
