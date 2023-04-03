@@ -40,7 +40,7 @@ SRC_URI_remove = "file://0001-Prepend-PKG_CONFIG_SYSROOT_DIR-to-pkg-config-outpu
 
 EXTRA_OECONF_remove = "WAYLAND_PROTOCOLS_SYSROOT_DIR=${RECIPE_SYSROOT}"
 
-GST1.0-PLUGINS-BAD_SRC ?= "gitsm://source.codeaurora.org/external/imx/gst-plugins-bad.git;protocol=https"
+GST1.0-PLUGINS-BAD_SRC ?= "gitsm://github.com/nxp-imx/gst-plugins-bad.git;protocol=https"
 SRCBRANCH = "MM_04.05.02_1911_L4.14.98"
 
 SRC_URI = " \

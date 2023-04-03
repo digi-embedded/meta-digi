@@ -17,7 +17,7 @@ RDEPENDS_${PN}_append_mx8 = " kernel-module-vivante"
 LIC_FILES_CHKSUM = "file://COPYING-MIT;md5=b5e9d9f5c02ea831ab3ecf802bb7c4f3"
 
 SRCBRANCH = "imx_exa_viv6_g2d"
-XF86_VIDEO_IMX_VIVANTE_SRC ?= "git://source.codeaurora.org/external/imx/xf86-video-imx-vivante.git;protocol=https"
+XF86_VIDEO_IMX_VIVANTE_SRC ?= "git://github.com/nxp-imx/xf86-video-imx-vivante.git;protocol=https"
 SRC_URI  = "${XF86_VIDEO_IMX_VIVANTE_SRC};branch=${SRCBRANCH}"
 SRC_URI += "file://rc.autohdmi"
 

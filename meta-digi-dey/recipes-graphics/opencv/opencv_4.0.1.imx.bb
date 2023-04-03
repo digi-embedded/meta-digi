@@ -39,7 +39,7 @@ IPP_FILENAME = "${@ipp_filename(d)}"
 IPP_MD5 = "${@ipp_md5sum(d)}"
 
 SRCREV_FORMAT = "opencv_contrib_ipp_boostdesc_vgg_extra"
-OPENCV_SRC ?= "git://source.codeaurora.org/external/imx/opencv-imx.git;protocol=https"
+OPENCV_SRC ?= "git://github.com/nxp-imx/opencv-imx.git;protocol=https"
 SRCBRANCH = "4.0.1_imx"
 SRC_URI = "${OPENCV_SRC};branch=${SRCBRANCH};name=opencv \
     git://github.com/opencv/opencv_contrib.git;destsuffix=contrib;name=contrib \
