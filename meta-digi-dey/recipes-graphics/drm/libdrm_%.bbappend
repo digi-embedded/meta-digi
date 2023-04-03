@@ -1,6 +1,6 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-IMX_LIBDRM_SRC ?= "git://source.codeaurora.org/external/imx/libdrm-imx.git;protocol=https"
+IMX_LIBDRM_SRC ?= "git://github.com/nxp-imx/libdrm-imx.git;protocol=https"
 IMX_LIBDRM_BRANCH = "libdrm-imx-2.4.84"
 SRC_URI_remove     = "http://dri.freedesktop.org/libdrm/${BP}.tar.bz2"
 SRC_URI_remove_mx8 = "file://drm-update-arm.patch"

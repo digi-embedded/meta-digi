@@ -6,7 +6,7 @@
 require recipes-graphics/xorg-driver/xf86-video-imxfb-vivante.inc
 
 SRCBRANCH = "imx_exa_viv6_g2d"
-XF86_VIDEO_IMX_VIVANTE_SRC ?= "git://source.codeaurora.org/external/imx/xf86-video-imx-vivante.git;protocol=https"
+XF86_VIDEO_IMX_VIVANTE_SRC ?= "git://github.com/nxp-imx/xf86-video-imx-vivante.git;protocol=https"
 SRC_URI  = "${XF86_VIDEO_IMX_VIVANTE_SRC};branch=${SRCBRANCH}"
 SRC_URI += "file://rc.autohdmi"
 SRCREV = "946e8603ed9a52f36d305405dbb2ab8ff90943d0"

@@ -26,7 +26,7 @@ PACKAGECONFIG[gio-unix-2.0] = ""
 # Disable introspection to fix [GstGL-1.0.gir] Error
 EXTRA_OECONF_append = " --disable-introspection --disable-opengl --enable-wayland"
 
-GST1.0-PLUGINS-BASE_SRC ?= "gitsm://source.codeaurora.org/external/imx/gst-plugins-base.git;protocol=https"
+GST1.0-PLUGINS-BASE_SRC ?= "gitsm://github.com/nxp-imx/gst-plugins-base.git;protocol=https"
 SRCBRANCH = "MM_04.04.00_1805_L4.9.88_MX8QXP_BETA2"
 
 SRC_URI = " \

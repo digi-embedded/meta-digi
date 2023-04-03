@@ -1,4 +1,4 @@
-WAYLAND_PROTOCOLS_SRC ?= "git://source.codeaurora.org/external/imx/wayland-protocols-imx.git;protocol=https"
+WAYLAND_PROTOCOLS_SRC ?= "git://github.com/nxp-imx/wayland-protocols-imx.git;protocol=https"
 SRCBRANCH = "master"
 SRC_URI = "${WAYLAND_PROTOCOLS_SRC};branch=${SRCBRANCH} "
 SRCREV = "d5ded4ddaf68b161fec23d75204d2153232c3a47"

@@ -9,7 +9,7 @@ inherit pkgconfig deploy
 
 PV = "1.4.1+git${SRCPV}"
 
-ATF_SRC ?= "git://source.codeaurora.org/external/imx/imx-atf.git;protocol=https"
+ATF_SRC ?= "git://github.com/nxp-imx/imx-atf.git;protocol=https"
 SRCBRANCH = "imx_4.9.88_imx8qxp_beta2"
 
 SRC_URI = "${ATF_SRC};branch=${SRCBRANCH}"
