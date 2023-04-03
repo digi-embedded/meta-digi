@@ -19,16 +19,21 @@ log() {
 	printf "<3>iw612-bluetooth: %s\n" "${1}" >/dev/kmsg
 }
 
+set_btaddr() {
+	bt_addr=$(echo $(fw_printenv -n btaddr) | awk -F ":" '{ for(i=NF;i>=1;i--) printf "0x%s ", $i }')
+	hcitool -i ${HCI_IFACE} cmd 0x3f 0x0022 0xfe 0x06 ${bt_addr}
+}
+
 bluetooth_start() {
 	if ! [ -e "/proc/device-tree/bluetooth/mac-address" ]; then
 		log "[ERROR] Bluetooth mac-address not found"
 		return
 	fi
 
-	BTADDR=$(hexdump -ve '1/1 "%02X" ":"' /proc/device-tree/bluetooth/mac-address 2>/dev/null | sed 's/:$//g')
-	hciattach -t5 /dev/ttyBt any 115200 flow nosleep "${BTADDR}" && \
+	hciattach -t5 /dev/ttyBt any 115200 flow nosleep && \
 	hciconfig ${HCI_IFACE} up && \
 	sleep 0.2 && \
+	set_btaddr && \
 	hcitool -i ${HCI_IFACE} cmd 0x3f 0x0009 0xc0 0xc6 0x2d 0x00 && \
 	sleep 0.2 && \
 	killall hciattach && \
