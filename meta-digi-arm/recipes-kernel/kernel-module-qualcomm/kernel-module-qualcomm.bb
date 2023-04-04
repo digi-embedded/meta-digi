@@ -5,13 +5,12 @@ DESCRIPTION = "qcacld-2.0 module.bbclass mechanism."
 LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
 
-CAF_MIRROR = "git://codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/qcacld-2.0"
 PV = "v4.2.79.63"
 SRCBRANCH = "caf-wlan/QCA6564_LE_1.0.3_LA.4.2.2.3"
 SRCREV = "b0ae2aa45bbba54600b537e90cb1aca34f2d1a13"
 
 SRC_URI = " \
-    ${CAF_MIRROR};destsuffix=${PV};branch=${SRCBRANCH} \
+    ${DIGI_GITHUB_GIT}/qcacld-2.0.git;destsuffix=${PV};branch=${SRCBRANCH} \
     file://81-sdio-qcom.rules \
     file://modprobe-qualcomm.conf \
     file://qualcomm.sh \
