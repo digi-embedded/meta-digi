@@ -1,34 +1,36 @@
-From: Isaac Hermida <isaac.hermida@digi.com>
-Date: Thu, 25 Aug 2022 10:15:31 +0200
+From: Hector Bujanda <hector.bujanda@digi.com>
+Date: Tue, 11 Apr 2023 12:47:24 +0200
 Subject: [PATCH] add CCX tags support for kernel v5.15
 
 https://onedigi.atlassian.net/browse/DEL-8038
 
 Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+Signed-off-by: Hector Bujanda <hector.bujanda@digi.com>
 ---
- CORE/HDD/inc/CcxTagDefs.h           | 396 +++++++++++++
+ CORE/HDD/inc/CcxTagDefs.h           | 424 ++++++++++++++
  CORE/HDD/inc/wlan_hdd_ccx_tag.h     |  19 +
- CORE/HDD/src/wlan_hdd_ccx_tag.c     | 833 ++++++++++++++++++++++++++++
+ CORE/HDD/src/wlan_hdd_ccx_tag.c     | 880 ++++++++++++++++++++++++++++
  CORE/HDD/src/wlan_hdd_main.c        |  20 +
  CORE/MAC/inc/aniGlobal.h            |   4 +
  CORE/MAC/inc/qwlan_version.h        |   3 +-
  CORE/MAC/src/include/sirParams.h    |   6 +
  CORE/SERVICES/COMMON/wmi_tlv_defs.h |  19 +-
  CORE/SERVICES/COMMON/wmi_unified.h  |  75 ++-
- CORE/SERVICES/WMA/wma.c             |  80 +++
+ CORE/SERVICES/WMA/wma.c             |  82 +++
  CORE/SERVICES/WMI/wmi_unified.c     |   3 +
  Kbuild                              |   2 +
- 12 files changed, 1456 insertions(+), 4 deletions(-)
+ 12 files changed, 1533 insertions(+), 4 deletions(-)
  create mode 100644 CORE/HDD/inc/CcxTagDefs.h
  create mode 100644 CORE/HDD/inc/wlan_hdd_ccx_tag.h
  create mode 100644 CORE/HDD/src/wlan_hdd_ccx_tag.c
 
 diff --git a/CORE/HDD/inc/CcxTagDefs.h b/CORE/HDD/inc/CcxTagDefs.h
 new file mode 100644
-index 000000000000..b0b337c4ec47
+index 000000000..5d70261e1
 --- /dev/null
 +++ b/CORE/HDD/inc/CcxTagDefs.h
-@@ -0,0 +1,396 @@
+@@ -0,0 +1,424 @@
 +/****************************************************************/
 +/*                                                              */
 +/* Copyright 2018 Digi International, Inc. All Rights Reserved. */
@@ -42,6 +44,11 @@ index 000000000000..b0b337c4ec47
 +
 +/* Fixed Netlink Communication Fields */
 +#define CCX_TAG_FAMILY_NAME ("CCX_TAG")
++
++typedef enum CcxTagVersionTag
++{
++    CCX_TAG_VERSION = 1
++}CcxTagVersion;
 +
 +/* Netlink Attributes */
 +typedef enum CcxTagAttrTypeTag
@@ -270,8 +277,6 @@ index 000000000000..b0b337c4ec47
 + * Unspecified
 + *  - MPDU footer, added by firmware
 + */
-+
-+
 +typedef struct CcxTagControlDataTag
 +{
 +    /* The size of the packed control data header in the IPC message. */
@@ -290,23 +295,30 @@ index 000000000000..b0b337c4ec47
 +    /* RawByteBuffer[Offset] |= Channel                                  */
 +    uint16_t ChannelOffsetOctets;
 +
++    /* The size of the MPDU header section in the IPC message. */
++    uint16_t MpduHeaderBlockSize;
++
 +    /* The size of the packed MPDU header in the IPC message. */
 +    uint16_t MpduHeaderSize;
++
++    /* The size of the CCX Tag content header section in the IPC message. */
++    uint16_t ContentHeaderBlockSize;
 +
 +    /* The size of the packed CCX Tag content header in the IPC message. */
 +    uint16_t ContentHeaderSize;
 +
++    /* The size of the CCX Tag content payload block in the IPC message. */
++    uint16_t ContentPayloadBlockSize;
++
 +    /* The size of the packed CCX Tag content payload in the IPC message. */
 +    uint16_t ContentPayloadSize;
++
++    /* This field is unused. */
++    uint16_t Pad;
 +}CcxTagControlData;
 +
-+#define CCX_TAG_CHANNEL_OFFSET (35)
++#define CCX_TAG_CHANNEL_OFFSET (32)
 +#define CCX_TAG_FRAGMENT_OFFSET (22)
-+
-+typedef enum CcxTagVersionTag
-+{
-+    CCX_TAG_VERSION = 1
-+}CcxTagVersion;
 +
 +typedef enum CcxTagMacLengthTag
 +{
@@ -382,11 +394,29 @@ index 000000000000..b0b337c4ec47
 +{
 +    CCX_TAG_MPDU_HEADER_SIZE = 30,
 +
-+    CCX_TAG_CONTENT_MAX_SIZE = 2312,
++    CCX_TAG_MPDU_HEADER_PAD_SIZE = 2,
++
++	CCX_TAG_MPDU_HEADER_BLOCK_SIZE = (CCX_TAG_MPDU_HEADER_SIZE + CCX_TAG_MPDU_HEADER_PAD_SIZE),
++
++	// The CCX specification calls for a content section (header and payload)
++	// of up to 2312 bytes.  This is unachievable due to memory constraints
++	// in the driver at the bus/transport layer.
++    CCX_TAG_CONTENT_THEORETICAL_MAX_SIZE = 2312,
++
++	// This implementation uses a max content length of 460 bytes.
++    CCX_TAG_CONTENT_MAX_SIZE = 460,
 +
 +    CCX_TAG_CONTENT_HEADER_SIZE = 5,
 +
++    CCX_TAG_CONTENT_HEADER_PAD_SIZE = 3,
++
++	CCX_TAG_CONTENT_HEADER_BLOCK_SIZE = (CCX_TAG_CONTENT_HEADER_SIZE + CCX_TAG_CONTENT_HEADER_PAD_SIZE),
++
 +    CCX_TAG_CONTENT_PAYLOAD_MAX_SIZE = (CCX_TAG_CONTENT_MAX_SIZE - CCX_TAG_CONTENT_HEADER_SIZE),
++
++	CCX_TAG_CONTENT_PAYLOAD_MAX_PAD_SIZE = 1,
++
++	CCX_TAG_CONTENT_PAYLOAD_MAX_BLOCK_SIZE = (CCX_TAG_CONTENT_PAYLOAD_MAX_SIZE + CCX_TAG_CONTENT_PAYLOAD_MAX_PAD_SIZE),
 +
 +    CCX_TAG_PACKET_MIN_SIZE = (CCX_TAG_MPDU_HEADER_SIZE + CCX_TAG_CONTENT_HEADER_SIZE),
 +
@@ -394,9 +424,9 @@ index 000000000000..b0b337c4ec47
 +
 +    CCX_TAG_CONTROL_DATA_SIZE = sizeof(CcxTagControlData),
 +
-+    CCX_TAG_IPC_MSG_MIN_SIZE = (CCX_TAG_PACKET_MIN_SIZE + CCX_TAG_CONTROL_DATA_SIZE),
++    CCX_TAG_IPC_MSG_MIN_SIZE = (CCX_TAG_CONTROL_DATA_SIZE + CCX_TAG_MPDU_HEADER_BLOCK_SIZE + CCX_TAG_CONTENT_HEADER_BLOCK_SIZE),
 +
-+    CCX_TAG_IPC_MSG_MAX_SIZE = (CCX_TAG_PACKET_MAX_SIZE + CCX_TAG_CONTROL_DATA_SIZE)
++    CCX_TAG_IPC_MSG_MAX_SIZE = (CCX_TAG_IPC_MSG_MIN_SIZE + CCX_TAG_CONTENT_PAYLOAD_MAX_BLOCK_SIZE)
 +}CcxTagDimension;
 +
 +typedef struct CcxTagStatusDataTag
@@ -427,7 +457,7 @@ index 000000000000..b0b337c4ec47
 +#endif /* CCX_TAG_DEFS_H_ */
 diff --git a/CORE/HDD/inc/wlan_hdd_ccx_tag.h b/CORE/HDD/inc/wlan_hdd_ccx_tag.h
 new file mode 100644
-index 000000000000..edc29332a2c0
+index 000000000..edc29332a
 --- /dev/null
 +++ b/CORE/HDD/inc/wlan_hdd_ccx_tag.h
 @@ -0,0 +1,19 @@
@@ -452,10 +482,10 @@ index 000000000000..edc29332a2c0
 +
 diff --git a/CORE/HDD/src/wlan_hdd_ccx_tag.c b/CORE/HDD/src/wlan_hdd_ccx_tag.c
 new file mode 100644
-index 000000000000..03697601bcb0
+index 000000000..cbcb7294b
 --- /dev/null
 +++ b/CORE/HDD/src/wlan_hdd_ccx_tag.c
-@@ -0,0 +1,833 @@
+@@ -0,0 +1,880 @@
 +/****************************************************************/
 +/*                                                              */
 +/* Copyright 2018 Digi International, Inc. All Rights Reserved. */
@@ -481,6 +511,8 @@ index 000000000000..03697601bcb0
 +
 +#include "CcxTagDefs.h"
 +
++#define CCX_TAG_DEBUG 1
++
 +static struct hdd_context_s *pHddCtx;
 +
 +static uint32_t HDD_CCX_TAG_DRVR_VERSION = 1;
@@ -499,7 +531,7 @@ index 000000000000..03697601bcb0
 +static int ccx_tag_status_cmd_handler(struct sk_buff *skb, struct genl_info *info);
 +
 +/* attribute policy */
-+static struct nla_policy ccx_tag_genl_policy[CCX_TAG_ATTR_COUNT] =
++static struct nla_policy const ccx_tag_genl_policy[CCX_TAG_ATTR_COUNT] =
 +{
 +	/* Reserved position of 0. */
 +	[CCX_TAG_ATTR_UNUSED] = { .type = NLA_STRING },
@@ -524,29 +556,33 @@ index 000000000000..03697601bcb0
 +};
 +
 +/* operation definition */
-+static struct genl_ops ccx_tag_gnl_ops_table[CCX_TAG_CMD_COUNT] =
++static struct genl_ops const ccx_tag_gnl_ops_table[CCX_TAG_CMD_COUNT] =
 +{
 +	{
 +		.cmd = CCX_TAG_CMD_CHECK_VERSION,
 +		.flags = 0,
++		.policy = ccx_tag_genl_policy,
 +		.doit = ccx_tag_check_version_cmd_handler,
 +		.dumpit = NULL,
 +	},
 +	{
 +		.cmd = CCX_TAG_CMD_RESET,
 +		.flags = 0,
++		.policy = ccx_tag_genl_policy,
 +		.doit = ccx_tag_reset_cmd_handler,
 +		.dumpit = NULL,
 +	},
 +	{
 +		.cmd = CCX_TAG_CMD_TRANSMIT,
 +		.flags = 0,
++		.policy = ccx_tag_genl_policy,
 +		.doit = ccx_tag_transmit_cmd_handler,
 +		.dumpit = NULL,
 +	},
 +	{
 +		.cmd = CCX_TAG_CMD_STATUS,
 +		.flags = 0,
++		.policy = ccx_tag_genl_policy,
 +		.doit = ccx_tag_status_cmd_handler,
 +		.dumpit = NULL,
 +	}
@@ -564,8 +600,9 @@ index 000000000000..03697601bcb0
 +      .n_ops	= ARRAY_SIZE(ccx_tag_gnl_ops_table),
 +};
 +
++#if CCX_TAG_DEBUG
 +
-+void RawBlockDisplay(uint8_t const * data, uint16_t length)
++void static RawBlockDisplay(uint8_t const * data, uint16_t length)
 +{
 +	uint16_t byte = 0;
 +
@@ -594,6 +631,28 @@ index 000000000000..03697601bcb0
 +	}
 +}
 +
++void static TagConfigDisplay(CcxTagMpduHeader const * MpduHeaderBuffer,
++							 uint16_t MpduHeaderBufferLength,
++							 CcxTagContentHeader const * ContentHeaderBuffer,
++							 uint16_t ContentHeaderBufferLength,
++							 uint8_t const * ContentPayloadBlock,
++							 uint16_t ContentPayloadBlockLength)
++{
++	printk(KERN_DEBUG "CCX Tag Header: \n");
++	RawBlockDisplay((uint8_t const *)MpduHeaderBuffer, MpduHeaderBufferLength);
++
++	printk(KERN_DEBUG "CCX Tag Content: \n");
++	RawBlockDisplay((uint8_t const *)ContentHeaderBuffer, ContentHeaderBufferLength);
++
++	if (ContentPayloadBlockLength > 0)
++	{
++		printk(KERN_DEBUG "CCX Tag Data: \n");
++		RawBlockDisplay(ContentPayloadBlock, ContentPayloadBlockLength);
++	}
++}
++
++#endif
++
 +static void SendAttrData(uint16_t cmd_type, uint16_t seq_num,
 +						 uint16_t rsp_type, CcxTagAttrType attr_type,
 +						 uint8_t const * msg_buf, uint16_t msg_len,
@@ -601,7 +660,6 @@ index 000000000000..03697601bcb0
 +{
 +	int flags = 0;
 +	int ret = 0;
-+	int status = 0;
 +	int has_attr = 0;
 +
 +	/* Allocate a message buffer. */
@@ -627,7 +685,7 @@ index 000000000000..03697601bcb0
 +	if (!skb)
 +	{
 +		/* Error - Socket buffer allocation failed. Abandon Send. */
-+		goto nla_put_failure;
++		goto nla_send_end;
 +	}
 +
 +	/* Set up the message header first.  Use the same       */
@@ -682,8 +740,6 @@ index 000000000000..03697601bcb0
 +	/* Send the message. */
 +	ret = genlmsg_unicast(genl_info_net(info), skb, info->snd_portid);
 +
-+	status = (ret == 0);
-+
 +	goto nla_send_end;
 +
 +nla_put_failure:
@@ -692,7 +748,6 @@ index 000000000000..03697601bcb0
 +	{
 +		nlmsg_free(skb);
 +	}
-+	status = 0;
 +
 +nla_send_end:
 +
@@ -721,7 +776,7 @@ index 000000000000..03697601bcb0
 +			else
 +			{
 +				/* Unexpected callback from firmware.  Report error. */
-+				hdd_ccx_tag_drvr_op_state = CCX_TAG_DRVR_OP_IDLE;
++				hdd_ccx_tag_drvr_op_state = CCX_TAG_DRVR_OP_STATE_UNDEFINED;
 +				hdd_ccx_tag_fw_status = CCX_TAG_FW_STATUS_ERROR;
 +				hdd_ccx_tag_fw_attempts = 0;
 +				hdd_ccx_tag_fw_failures = 0;
@@ -738,8 +793,6 @@ index 000000000000..03697601bcb0
 +	VOS_STATUS status = VOS_STATUS_SUCCESS;
 +    CcxTagWmiHeader * pCcxTagReqHeader = NULL;
 +    tANI_U32 reqLen = 0;
-+
-+    mutex_lock(&hdd_ccx_tag_mutex);
 +
 +    if ((NULL == pHeader) || ((pHeader->ContentPayloadLength > 0) && (NULL == pData)))
 +    {
@@ -762,6 +815,8 @@ index 000000000000..03697601bcb0
 +        u8 * pCcxTagReqPayload = (u8 *)&pCcxTagReqHeader[1];
 +        vos_msg_t msg;
 +
++        mutex_lock(&hdd_ccx_tag_mutex);
++
 +		vos_mem_set((u8*)(pCcxTagReqHeader), reqLen, 0);
 +
 +		/* Now copy over the information to the CCX Tag REQ to WMI message. */
@@ -781,9 +836,9 @@ index 000000000000..03697601bcb0
 +		{
 +			vos_mem_free(pCcxTagReqHeader);
 +		}
-+    }
 +
-+    mutex_unlock(&hdd_ccx_tag_mutex);
++	    mutex_unlock(&hdd_ccx_tag_mutex);
++    }
 +
 +    return status;
 +}
@@ -828,9 +883,9 @@ index 000000000000..03697601bcb0
 +		if (wma_handle != NULL)
 +		{
 +			status = wmi_unified_register_event_handler(
-+			   wma_handle->wmi_handle,
-+			   WMI_STA_TAG_PKT_INJ_COMP_EVENTID,
-+			   RecvCcxTagWmaRsp);
++				wma_handle->wmi_handle,
++				WMI_STA_TAG_PKT_INJ_COMP_EVENTID,
++				RecvCcxTagWmaRsp);
 +			if (status == 0)
 +			{
 +				ResetDriver();
@@ -878,24 +933,6 @@ index 000000000000..03697601bcb0
 +	return rc;
 +}
 +
-+void TagConfigDisplay(CcxTagMpduHeader const * MpduHeaderBuffer, uint16_t MpduHeaderBufferLength,
-+					  CcxTagContentHeader const * ContentHeaderBuffer, uint16_t ContentHeaderBufferLength,
-+					  uint8_t const * ContentPayloadBlock,
-+					  uint16_t ContentPayloadBlockLength)
-+{
-+	printk(KERN_DEBUG "CCX Tag Header: \n");
-+	RawBlockDisplay((uint8_t const *)MpduHeaderBuffer, MpduHeaderBufferLength);
-+
-+	printk(KERN_DEBUG "CCX Tag Content: \n");
-+	RawBlockDisplay((uint8_t const *)ContentHeaderBuffer, ContentHeaderBufferLength);
-+
-+	if (ContentPayloadBlockLength > 0)
-+	{
-+		printk(KERN_DEBUG "CCX Tag Data: \n");
-+		RawBlockDisplay(ContentPayloadBlock, ContentPayloadBlockLength);
-+	}
-+}
-+
 +/* Parse an attribute from the command.                */
 +/* The expected length is for each attribute is known, */
 +/* so simply fail if it doesn't match the actual.      */
@@ -934,7 +971,7 @@ index 000000000000..03697601bcb0
 +								uint16_t * cont_len)
 +{
 +	int parse_status = 0;
-+	uint8_t const * payload_data = NULL;
++	uint8_t const * payload_data = NULL; /* Payload for whole IPC Message. */
 +	uint32_t payload_len = 0;
 +
 +	if (attrs && (type == CCX_TAG_ATTR_TAG_COMMAND))
@@ -954,44 +991,84 @@ index 000000000000..03697601bcb0
 +		}
 +	}
 +
-+	if ((payload_data != NULL)
-+			&& (payload_len >= (CCX_TAG_CONTROL_DATA_SIZE + CCX_TAG_PACKET_MIN_SIZE)))
++	if ((payload_data != NULL) && (ctrl_data != NULL)
++			&& (mpdu_hdr != NULL) && (cont_hdr != NULL)
++			&& (cont_data != NULL) && (cont_len != NULL))
 +	{
-+		if ((ctrl_data != NULL) && (mpdu_hdr != NULL) && (cont_hdr != NULL)
-+				&& (cont_data != NULL) && (cont_len != NULL))
++		size_t tmp_len = 0;
++
++		parse_status = 1;
++
++		/* Length is always the first byte. */
++		tmp_len = *payload_data;
++		if ((tmp_len == sizeof(*ctrl_data))
++				&& (payload_len >= sizeof(*ctrl_data)))
 +		{
-+			size_t tmp_len = sizeof(CcxTagControlData);
 +			memcpy(ctrl_data, payload_data, tmp_len);
 +			payload_data = &payload_data[tmp_len];
 +			payload_len -= tmp_len;
++		}
++		else
++		{
++			parse_status = 0;
++		}
 +
-+			tmp_len = sizeof(CcxTagMpduHeader);
-+			memcpy(mpdu_hdr, payload_data, tmp_len);
-+			payload_data = &payload_data[tmp_len];
-+			payload_len -= tmp_len;
++		if ((parse_status)
++				&& (ctrl_data->MpduHeaderSize <= ctrl_data->MpduHeaderBlockSize)
++				&& (ctrl_data->MpduHeaderSize >= sizeof(*mpdu_hdr))
++				&& (ctrl_data->MpduHeaderBlockSize <= payload_len))
++		{
 +
-+			tmp_len = sizeof(CcxTagContentHeader);
-+			memcpy(cont_hdr, payload_data, tmp_len);
-+			payload_data = &payload_data[tmp_len];
-+			payload_len -= tmp_len;
++			memcpy(mpdu_hdr, payload_data, sizeof(*mpdu_hdr));
++			payload_data = &payload_data[ctrl_data->MpduHeaderBlockSize];
++			payload_len -= ctrl_data->MpduHeaderBlockSize;
++		}
++		else
++		{
++			parse_status = 0;
++		}
 +
-+			*cont_len = payload_len;
-+			if (payload_len > 0)
++		if ((parse_status)
++				&& (ctrl_data->ContentHeaderSize <= ctrl_data->ContentHeaderBlockSize)
++				&& (ctrl_data->ContentHeaderSize >= sizeof(*cont_hdr))
++				&& (ctrl_data->ContentHeaderBlockSize <= payload_len))
++		{
++
++			memcpy(cont_hdr, payload_data, sizeof(*cont_hdr));
++			payload_data = &payload_data[ctrl_data->ContentHeaderBlockSize];
++			payload_len -= ctrl_data->ContentHeaderBlockSize;
++		}
++		else
++		{
++			parse_status = 0;
++		}
++
++		if ((parse_status)
++				&& (ctrl_data->ContentPayloadSize <= ctrl_data->ContentPayloadBlockSize)
++				&& (ctrl_data->ContentPayloadBlockSize <= payload_len))
++		{
++			*cont_len = ctrl_data->ContentPayloadSize;
++			if (ctrl_data->ContentPayloadSize > 0)
 +			{
 +				*cont_data = payload_data;
 +			}
-+
-+			if (1)
++			else
 +			{
-+				printk(KERN_DEBUG "Kernel Cfg - Frag: %u Chan: %u \n",
-+						ctrl_data->FragmentOffsetOctets, ctrl_data->ChannelOffsetOctets);
-+
-+				TagConfigDisplay(mpdu_hdr, ctrl_data->MpduHeaderSize,
-+								 cont_hdr, ctrl_data->ContentHeaderSize,
-+								 *cont_data, ctrl_data->ContentPayloadSize);
++				*cont_data = NULL;
 +			}
 +
-+			parse_status = 1;
++#if CCX_TAG_DEBUG
++			printk(KERN_DEBUG "Kernel Cfg - Frag: %u Chan: %u \n",
++			       ctrl_data->FragmentOffsetOctets, ctrl_data->ChannelOffsetOctets);
++
++			TagConfigDisplay(mpdu_hdr, ctrl_data->MpduHeaderSize,
++							 cont_hdr, ctrl_data->ContentHeaderSize,
++							 *cont_data, ctrl_data->ContentPayloadSize);
++#endif
++		}
++		else
++		{
++			parse_status = 0;
 +		}
 +	}
 +
@@ -1169,7 +1246,6 @@ index 000000000000..03697601bcb0
 +			{
 +				rsp_err = CCX_TAG_DRVR_RSP_ERR_OFFSET_OVERRUN;
 +			}
-+
 +		}
 +	}
 +
@@ -1262,12 +1338,13 @@ index 000000000000..03697601bcb0
 +	if (rsp_err == CCX_TAG_DRVR_RSP_OK)
 +	{
 +	    mutex_lock(&hdd_ccx_tag_mutex);
-+		status.DriverOpState = hdd_ccx_tag_drvr_op_state;
-+	    mutex_unlock(&hdd_ccx_tag_mutex);
 +
++	    status.DriverOpState = hdd_ccx_tag_drvr_op_state;
 +		status.FirmwareStatus = hdd_ccx_tag_fw_status;
 +		status.AttemptCount = hdd_ccx_tag_fw_attempts;
 +		status.FailureCount = hdd_ccx_tag_fw_failures;
++
++	    mutex_unlock(&hdd_ccx_tag_mutex);
 +	}
 +	else
 +	{
@@ -1290,7 +1367,7 @@ index 000000000000..03697601bcb0
 +
 +#endif
 diff --git a/CORE/HDD/src/wlan_hdd_main.c b/CORE/HDD/src/wlan_hdd_main.c
-index 05600538cda5..4d21d850a22e 100644
+index 05600538c..4d21d850a 100644
 --- a/CORE/HDD/src/wlan_hdd_main.c
 +++ b/CORE/HDD/src/wlan_hdd_main.c
 @@ -71,6 +71,9 @@
@@ -1335,7 +1412,7 @@ index 05600538cda5..4d21d850a22e 100644
     if (cnss_diag_activate_service() < 0)
     {
 diff --git a/CORE/MAC/inc/aniGlobal.h b/CORE/MAC/inc/aniGlobal.h
-index cf78093490f5..2f1677fa5168 100644
+index cf7809349..2f1677fa5 100644
 --- a/CORE/MAC/inc/aniGlobal.h
 +++ b/CORE/MAC/inc/aniGlobal.h
 @@ -74,6 +74,10 @@
@@ -1350,7 +1427,7 @@ index cf78093490f5..2f1677fa5168 100644
  #include "smeRrmInternal.h"
  #include "rrmGlobal.h"
 diff --git a/CORE/MAC/inc/qwlan_version.h b/CORE/MAC/inc/qwlan_version.h
-index 5d5ee0c2124f..ec245797b79b 100644
+index 5d5ee0c21..ec245797b 100644
 --- a/CORE/MAC/inc/qwlan_version.h
 +++ b/CORE/MAC/inc/qwlan_version.h
 @@ -44,8 +44,7 @@ BRIEF DESCRIPTION:
@@ -1364,7 +1441,7 @@ index 5d5ee0c2124f..ec245797b79b 100644
  #define AR6320_REV1_VERSION             0x5000000
  #define AR6320_REV1_1_VERSION           0x5000001
 diff --git a/CORE/MAC/src/include/sirParams.h b/CORE/MAC/src/include/sirParams.h
-index 67eb0eab64c4..97d2194d31c4 100644
+index 67eb0eab6..97d2194d3 100644
 --- a/CORE/MAC/src/include/sirParams.h
 +++ b/CORE/MAC/src/include/sirParams.h
 @@ -823,6 +823,12 @@ struct sir_mgmt_msg {
@@ -1381,7 +1458,7 @@ index 67eb0eab64c4..97d2194d31c4 100644
  
  // CFG message types
 diff --git a/CORE/SERVICES/COMMON/wmi_tlv_defs.h b/CORE/SERVICES/COMMON/wmi_tlv_defs.h
-index 3215790ac023..fb4ee7298086 100644
+index 3215790ac..fb4ee7298 100644
 --- a/CORE/SERVICES/COMMON/wmi_tlv_defs.h
 +++ b/CORE/SERVICES/COMMON/wmi_tlv_defs.h
 @@ -958,6 +958,11 @@ typedef enum {
@@ -1435,7 +1512,7 @@ index 3215790ac023..fb4ee7298086 100644
  }
  #endif
 diff --git a/CORE/SERVICES/COMMON/wmi_unified.h b/CORE/SERVICES/COMMON/wmi_unified.h
-index 2332e8711a9d..a8070b2d7cc9 100644
+index 2332e8711..a8070b2d7 100644
 --- a/CORE/SERVICES/COMMON/wmi_unified.h
 +++ b/CORE/SERVICES/COMMON/wmi_unified.h
 @@ -250,13 +250,14 @@ typedef enum {
@@ -1548,10 +1625,10 @@ index 2332e8711a9d..a8070b2d7cc9 100644
      A_UINT32 tlv_header;  /* TLV tag and len; tag equals WMITLV_TAG_STRUC_wmi_vdev_get_mws_coex_tdm_state_fixed_param */
      A_UINT32 vdev_id;
 diff --git a/CORE/SERVICES/WMA/wma.c b/CORE/SERVICES/WMA/wma.c
-index be13660667c7..337ae97be0a1 100644
+index be1366066..052673f63 100644
 --- a/CORE/SERVICES/WMA/wma.c
 +++ b/CORE/SERVICES/WMA/wma.c
-@@ -30227,6 +30227,77 @@ VOS_STATUS wma_ProcessAddPeriodicTxPtrnInd(WMA_HANDLE handle,
+@@ -30227,6 +30227,79 @@ VOS_STATUS wma_ProcessAddPeriodicTxPtrnInd(WMA_HANDLE handle,
  	return VOS_STATUS_SUCCESS;
  }
  
@@ -1565,14 +1642,16 @@ index be13660667c7..337ae97be0a1 100644
 +	{
 +
 +		uint8_t * ccxTagReqPayload = (uint8_t *)&ccxTagReqHeader[1];
-+		uint32_t packet_size = sizeof(ccxTagReqHeader->MpduHeader)
-+									+ sizeof(ccxTagReqHeader->ContentHeader)
++		uint32_t packet_size = CCX_TAG_MPDU_HEADER_SIZE
++									+ CCX_TAG_CONTENT_HEADER_SIZE
 +									+ ccxTagReqHeader->ContentPayloadLength;
 +		uint32_t packet_size_aligned = roundup(packet_size, sizeof(A_UINT32));
 +		uint32_t len = sizeof(wmi_sta_tag_pkt_injection_cmd_fixed_param) +
 +								WMI_TLV_HDR_SIZE + packet_size_aligned;
++		wmi_buf_t wmi_buf = NULL;
 +
-+		wmi_buf_t wmi_buf = wmi_buf_alloc(wma_handle->wmi_handle, len);
++		wmi_buf = wmi_buf_alloc(wma_handle->wmi_handle, len);
++
 +		if (wmi_buf != NULL)
 +		{
 +			int ret = 0;
@@ -1602,12 +1681,12 @@ index be13660667c7..337ae97be0a1 100644
 +
 +			/*Copy the data packet segments after TLV Header*/
 +			vos_mem_copy(buf_ptr, &ccxTagReqHeader->MpduHeader,
-+						 sizeof(ccxTagReqHeader->MpduHeader));
-+			buf_ptr +=  sizeof(ccxTagReqHeader->MpduHeader);
++						 CCX_TAG_MPDU_HEADER_SIZE);
++			buf_ptr += CCX_TAG_MPDU_HEADER_SIZE;
 +
 +			vos_mem_copy(buf_ptr, &ccxTagReqHeader->ContentHeader,
-+						 sizeof(ccxTagReqHeader->ContentHeader));
-+			buf_ptr +=  sizeof(ccxTagReqHeader->ContentHeader);
++						 CCX_TAG_CONTENT_HEADER_SIZE);
++			buf_ptr += CCX_TAG_CONTENT_HEADER_SIZE;
 +
 +			vos_mem_copy(buf_ptr, ccxTagReqPayload, ccxTagReqHeader->ContentPayloadLength);
 +			buf_ptr +=  ccxTagReqHeader->ContentPayloadLength;
@@ -1629,7 +1708,7 @@ index be13660667c7..337ae97be0a1 100644
  /*
   * FUNCTION: wma_ProcessDelPeriodicTxPtrnInd
   * WMI command sent to firmware to del patterns
-@@ -35469,6 +35540,15 @@ VOS_STATUS wma_mc_process_msg(v_VOID_t *vos_context, vos_msg_t *msg)
+@@ -35469,6 +35542,15 @@ VOS_STATUS wma_mc_process_msg(v_VOID_t *vos_context, vos_msg_t *msg)
  					(u_int32_t *)msg->bodyptr);
  			vos_mem_free(msg->bodyptr);
  			break;
@@ -1646,7 +1725,7 @@ index be13660667c7..337ae97be0a1 100644
  			wma_send_echo_request(wma_handle);
  			break;
 diff --git a/CORE/SERVICES/WMI/wmi_unified.c b/CORE/SERVICES/WMI/wmi_unified.c
-index f25b7966e22e..40c2ceb4234b 100644
+index f25b7966e..40c2ceb42 100644
 --- a/CORE/SERVICES/WMI/wmi_unified.c
 +++ b/CORE/SERVICES/WMI/wmi_unified.c
 @@ -811,6 +811,9 @@ static u_int8_t* get_wmi_cmd_string(WMI_CMD_ID wmi_command)
@@ -1660,7 +1739,7 @@ index f25b7966e22e..40c2ceb4234b 100644
  	return "Invalid WMI cmd";
  }
 diff --git a/Kbuild b/Kbuild
-index fdad10c753a3..1ff42e6dedd4 100644
+index fdad10c75..1ff42e6de 100644
 --- a/Kbuild
 +++ b/Kbuild
 @@ -447,6 +447,7 @@ HDD_INC := 	-I$(WLAN_ROOT)/$(HDD_INC_DIR) \
@@ -1679,3 +1758,5 @@ index fdad10c753a3..1ff42e6dedd4 100644
  		-DSOFTAP_CHANNEL_RANGE \
  		-DWLAN_AP_STA_CONCURRENCY \
  		-DFEATURE_WLAN_SCAN_PNO \
+
+
