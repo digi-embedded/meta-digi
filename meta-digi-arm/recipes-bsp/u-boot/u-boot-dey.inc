@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2022 Digi International
+# Copyright (C) 2018-2023 Digi International
 
 require recipes-bsp/u-boot/u-boot.inc
 
@@ -38,7 +38,7 @@ BUILD_UBOOT_SCRIPTS ?= "true"
 BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
 
 LOCALVERSION ?= ""
-inherit ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'fsl-u-boot-localversion', '', d)}
+inherit ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'fsl-u-boot-localversion', '', d)}
 
 # Disable u-boot environment artifacts
 UBOOT_INITIAL_ENV = ""

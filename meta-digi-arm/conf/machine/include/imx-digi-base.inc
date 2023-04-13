@@ -299,4 +299,4 @@ UDEV_EXTRA_RULES:append = " udev-rules-imx"
 PREFERRED_VERSION_dtc-native:ccimx6 ?= "1.4.5"
 PREFERRED_VERSION_nativesdk-dtc:ccimx6 ?= "1.4.5"
 
-DEY_BUILD_PLATFORM = "NXP"
+DEY_SOC_VENDOR = "NXP"

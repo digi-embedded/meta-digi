@@ -12,5 +12,5 @@ IMX_TRUSTFENCE_SDK_TOOLS ?= " \
 "
 
 RDEPENDS:${PN} += " \
-    ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', '${IMX_OPTEE_SDK_RDEPENDS} ${IMX_TRUSTFENCE_SDK_TOOLS}', '', d)} \
+    ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', '${IMX_OPTEE_SDK_RDEPENDS} ${IMX_TRUSTFENCE_SDK_TOOLS}', '', d)} \
 "

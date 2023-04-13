@@ -17,7 +17,7 @@ FIP_UBOOT_DTB = "u-boot"
 STORAGE_MEDIA = "mtd"
 
 # Enable STM specific features
-DEY_BUILD_PLATFORM = "STM"
+DEY_SOC_VENDOR = "STM"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.ubifs"
