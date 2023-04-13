@@ -59,6 +59,17 @@ python () {
             d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/dek.bin");
 
     if (d.getVar("TRUSTFENCE_SIGN") == "1"):
+        # Set STM-specific variables for signing images
+        if (d.getVar("DEY_SOC_VENDOR") == "STM"):
+            d.setVar("TF_A_SIGN_ENABLE", "1")
+            d.setVar("FIP_SIGN_ENABLE", "1")
+            d.setVar("FIP_SIGN_KEY_EXTERNAL", "1")
+            if (d.getVar("DIGI_SOM") == "ccmp15" ):
+                d.setVar("FIP_SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey00.pem");
+            elif (d.getVar("DIGI_SOM") == "ccmp13" ):
+                d.setVar("FIP_SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey0%s.pem" % d.getVar("TRUSTFENCE_KEY_INDEX"));
+            d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/key_pass.txt")
+
         d.appendVar("UBOOT_TF_CONF", "CONFIG_SIGN_IMAGE=y CONFIG_AUTH_ARTIFACTS=y ")
         if (d.getVar("TRUSTFENCE_READ_ONLY_ROOTFS") == "1"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_AUTHENTICATE_SQUASHFS_ROOTFS=y ")
