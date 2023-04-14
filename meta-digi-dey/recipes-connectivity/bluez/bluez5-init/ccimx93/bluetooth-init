@@ -45,14 +45,22 @@ bluetooth_start() {
 		return
 	fi
 
-	hciattach -t5 /dev/ttyBt any 115200 flow nosleep && \
-	hciconfig ${HCI_IFACE} up && \
-	sleep 0.2 && \
-	set_btaddr && \
-	hcitool -i ${HCI_IFACE} cmd 0x3f 0x0009 0xc0 0xc6 0x2d 0x00 && \
-	sleep 0.2 && \
-	killall hciattach && \
-	sleep 0.2 && \
+	# If there is a hciattach process running, just do nothing
+	pidof hciattach > /dev/null && log "Bluetooth already activated" && return
+
+	# If port speed is 3M, assume that FW has been modified to run at that speed
+	if [ "$(stty -F /dev/ttyBt speed)" != "3000000" ]; then
+		hciattach -t5 /dev/ttyBt any 115200 flow nosleep && \
+		hciconfig ${HCI_IFACE} up && \
+		sleep 0.2 && \
+		set_btaddr && \
+		# Change rate to 3M using a custom vendor command
+		hcitool -i ${HCI_IFACE} cmd 0x3f 0x0009 0xc0 0xc6 0x2d 0x00 && \
+		sleep 0.2 && \
+		killall hciattach && \
+		sleep 0.2
+	fi
+
 	hciattach -t5 /dev/ttyBt any -s 3000000 3000000 flow && \
 	hciconfig ${HCI_IFACE} up && \
 	sleep 0.2 && \
@@ -65,12 +73,10 @@ bluetooth_start() {
 
 bluetooth_stop() {
 	if [ -e "/sys/class/bluetooth/${HCI_IFACE}" ]; then
-		# hci reset command
-		hcitool -i ${HCI_IFACE} cmd 0x03 0x0003
-		sleep 0.2
-		# set baudrate to 115200
-		hcitool -i ${HCI_IFACE} cmd 0x3f 0x0009 0x00 0xc2 0x01 0x00
-		killall hciattach
+		killall hciattach > /dev/null
+		sleep 1
+		# send a raw hci reset to set the chip in a good state
+		echo -e -n \\x01\\x03\\x0c\\x00 > /dev/ttyBt
 	fi
 }
 
