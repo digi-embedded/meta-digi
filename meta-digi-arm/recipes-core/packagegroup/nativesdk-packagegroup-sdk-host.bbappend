@@ -1,4 +1,9 @@
-# Copyright (C) 2016-2022 Digi International.
+# Copyright (C) 2016-2023 Digi International.
+
+IMX_OPTEE_SDK_RDEPENDS ?= " \
+    nativesdk-python3-cryptography \
+    nativesdk-python3-pyelftools \
+"
 
 IMX_TRUSTFENCE_SDK_TOOLS ?= " \
     nativesdk-trustfence-sign-tools \
@@ -7,5 +12,5 @@ IMX_TRUSTFENCE_SDK_TOOLS ?= " \
 "
 
 RDEPENDS:${PN} += " \
-    ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', '${IMX_TRUSTFENCE_SDK_TOOLS}', '', d)} \
+    ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', '${IMX_OPTEE_SDK_RDEPENDS} ${IMX_TRUSTFENCE_SDK_TOOLS}', '', d)} \
 "
