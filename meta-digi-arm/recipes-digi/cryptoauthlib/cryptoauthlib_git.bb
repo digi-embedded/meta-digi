@@ -7,10 +7,10 @@ LIC_FILES_CHKSUM = "file://license.txt;md5=84f2905dc39d2f8cdffb00af6f9e6d4e"
 
 SRCREV = "a0007d2f6c42fddab5dca1575e0f404788829ddc"
 
-GIT_URI ?= "git://github.com/MicrochipTech/cryptoauthlib.git;protocol=https"
+GIT_URI ?= "git://github.com/digi-embedded/cryptoauthlib.git;protocol=https;nobranch=1"
 
 SRC_URI = " \
-    ${GIT_URI};nobranch=1 \
+    ${GIT_URI} \
     file://0001-lib-add-parameters-to-be-able-to-modify-default-I2C-.patch \
     file://0002-lib-apply-library-version-number-to-CMake-VERSION-pr.patch \
     file://0003-pkcs11-rename-template-configuration-file-to-its-int.patch \
