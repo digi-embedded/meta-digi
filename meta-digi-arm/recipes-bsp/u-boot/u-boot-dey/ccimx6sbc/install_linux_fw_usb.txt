@@ -90,9 +90,13 @@ echo "   ---------   --------"
 echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
 if test "${dualboot}" = "yes"; then
 	echo "   linux_a     ${INSTALL_LINUX_FILENAME}"
-	echo "   linux_b     ${INSTALL_LINUX_FILENAME}"
+	if test "${install_dualboot}" = "yes"; then
+		echo "   linux_b     ${INSTALL_LINUX_FILENAME}"
+	fi
 	echo "   rootfs_a    ${INSTALL_ROOTFS_FILENAME}"
-	echo "   rootfs_b    ${INSTALL_ROOTFS_FILENAME}"
+	if test "${install_dualboot}" = "yes"; then
+		echo "   rootfs_b    ${INSTALL_ROOTFS_FILENAME}"
+	fi
 else
 	echo "   linux       ${INSTALL_LINUX_FILENAME}"
 	echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
@@ -148,6 +152,7 @@ fi
 setenv bootcmd "
 	env default -a;
 	setenv dualboot ${dualboot};
+	setenv install_dualboot ${install_dualboot};
 	saveenv;
 	echo \"\";
 	echo \"\";
@@ -175,17 +180,19 @@ setenv bootcmd "
 			echo \"Aborted.\";
 			exit;
 		fi;
-		echo \"\";
-		echo \"\";
-		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_b\";
-		echo \"\";
-		echo \"\";
-		update linux_b usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
-		if test \$? -eq 1; then
-			echo \"[ERROR] Failed to update linux_b!\";
+		if test \"\$\{install_dualboot\}\" = yes; then
 			echo \"\";
-			echo \"Aborted.\";
-			exit;
+			echo \"\";
+			echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_b\";
+			echo \"\";
+			echo \"\";
+			update linux_b usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
+			if test \$? -eq 1; then
+				echo \"[ERROR] Failed to update linux_b!\";
+				echo \"\";
+				echo \"Aborted.\";
+				exit;
+			fi;
 		fi;
 		usb reset;
 		echo \"\";
@@ -200,17 +207,19 @@ setenv bootcmd "
 			echo \"Aborted.\";
 			exit;
 		fi;
-		echo \"\";
-		echo \"\";
-		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_b\";
-		echo \"\";
-		echo \"\";
-		update rootfs_b usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME};
-		if test \$? -eq 1; then
-			echo \"[ERROR] Failed to update rootfs_b partition!\";
+		if test \"\$\{install_dualboot\}\" = yes; then
 			echo \"\";
-			echo \"Aborted.\";
-			exit;
+			echo \"\";
+			echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_b\";
+			echo \"\";
+			echo \"\";
+			update rootfs_b usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME};
+			if test \$? -eq 1; then
+				echo \"[ERROR] Failed to update rootfs_b partition!\";
+				echo \"\";
+				echo \"Aborted.\";
+				exit;
+			fi;
 		fi;
 	else
 		echo \"\";
