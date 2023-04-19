@@ -296,7 +296,4 @@ UDEV_EXTRA_RULES:append = " udev-rules-imx"
 PREFERRED_VERSION_dtc-native:ccimx6 ?= "1.4.5"
 PREFERRED_VERSION_nativesdk-dtc:ccimx6 ?= "1.4.5"
 
-# Dummy value to prevent errors when Vigiles is enabled
-MULTIUBI_BUILD ?= "dummy"
-
 DEY_BUILD_PLATFORM = "NXP"
