@@ -57,11 +57,22 @@ do_install() {
 				bberror "Unkown TRUSTFENCE_SIGN_MODE value"
 				exit 1
 			fi
+			# Extract the public key from the certificate.
+			install -d ${D}${sysconfdir}/ssl/certs
+			openssl x509 -pubkey -noout -in "${CERT_IMG}" > ${D}${sysconfdir}/ssl/certs/key.pub
+		elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+			# Copy the public key to the rootfs
+			if [ "${DIGI_SOM}" = "ccmp15" ]; then
+				PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey00.pem"
+			elif [ "${DIGI_SOM}" = "ccmp13" ]; then
+				PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey0${KEY_INDEX}.pem"
+			else
+				bberror "Unknown DIGI_SOM"
+				exit 1
+			fi
+			install -d ${D}${sysconfdir}/ssl/certs
+			cp ${PUBLIC_KEY} ${D}${sysconfdir}/ssl/certs/key.pub
 		fi
-
-		# Extract the public key from the certificate.
-		install -d ${D}${sysconfdir}/ssl/certs
-		openssl x509 -pubkey -noout -in "${CERT_IMG}" > ${D}${sysconfdir}/ssl/certs/key.pub
 	fi
 }
 
