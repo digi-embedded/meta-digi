@@ -16,6 +16,33 @@ SRC_URI = " \
 
 TF_A_CONFIG[nand]   = "${DEVICE_BOARD_ENABLE:NAND},STM32MP_RAW_NAND=1 ${@'STM32MP_FORCE_MTD_START_OFFSET=${TF_A_MTD_START_OFFSET_NAND}' if ${TF_A_MTD_START_OFFSET_NAND} else ''} STM32MP_USB_PROGRAMMER=1"
 
+DEPENDS += " \
+    ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native trustfence-genpki-native', '', d)} \
+"
+
+# This dependency is required so that the PKI generation completes before
+# proceeding with set_fip_sign_key() where we extract the password that
+# is later used on the do_deploy of the fip-utils-stm32mp.bbclass.
+do_install[depends] = " \
+    trustfence-sign-tools-native:do_populate_sysroot \
+    openssl-native:do_populate_sysroot \
+"
+
+# Obtain password to use in FIP generation
+# Get password from file using the given key index
+do_deploy[prefuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'set_fip_sign_key', '', d)}"
+python set_fip_sign_key() {
+    passfile = d.getVar('TRUSTFENCE_PASSWORD_FILE')
+    if (os.path.isfile(passfile)):
+        with open(passfile, "r") as file:
+            p = file.read().split()
+            i = int(d.getVar('TRUSTFENCE_KEY_INDEX'))
+            if (i > 7):
+                i = 0
+            if (p):
+                d.setVar('FIP_SIGN_KEY_PASS', p[i])
+}
+
 # Sign TF-A image
 do_deploy[postfuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'tfa_sign', '', d)}"
 tfa_sign() {
