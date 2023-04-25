@@ -207,7 +207,14 @@ trustence_sign_cpio() {
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
 
 		# Sign/encrypt the ramdisk
-		trustfence-sign-artifact.sh -p "${DIGI_SOM}" -i "${1}" "${1}.tf"
+		if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+			trustfence-sign-artifact.sh -p "${DIGI_SOM}" -i "${1}" "${1}.tf"
+		elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+			# TODO: sign the ramdisk for ST platforms
+
+			# (fall-back) Copy the image with no changes
+			cp "${1}" "${1}.tf"
+		fi
 	else
 		# Copy the image with no changes
 		cp "${1}" "${1}.tf"

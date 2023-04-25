@@ -5,6 +5,9 @@ DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-too
 do_deploy[postfuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence_sign', '', d)}"
 
 trustfence_sign() {
+	# TODO: signing of artifacts for STM-based platforms
+	[ "${DEY_SOC_VENDOR}" = "STM" ] && return
+
 	# Set environment variables for trustfence configuration
 	export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 	[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"

@@ -99,8 +99,8 @@ build_uboot_scripts() {
 	# Alternate boot script for dualboot
 	mkimage -T script -n "Alternate bootscript" -C none -d ${WORKDIR}/altboot.txt ${DEPLOYDIR}/altboot.scr
 
-	# Sign the scripts
-	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+	# Sign the scripts (TODO signing of artifacts for STM-based platforms)
+	if [ [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${DEY_SOC_VENDOR}" != "STM" ] ]; then
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
