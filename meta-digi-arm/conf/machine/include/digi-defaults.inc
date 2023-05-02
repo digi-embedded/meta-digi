@@ -66,6 +66,7 @@ MACHINEOVERRIDES .= "${@['', ':${MACHINE_VARIANT}']['${MACHINE_VARIANT}' != '']}
 # Extra RDEPENDS
 MACHINE_EXTRA_RDEPENDS += " \
     ${@bb.utils.contains("MACHINE_FEATURES", "mca", "mca-tool", "", d)} \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'optee', '${OPTEE_PKGS}', '', d)} \
 "
 # Extra RRECOMMENDS
 MACHINE_EXTRA_RRECOMMENDS += " \
