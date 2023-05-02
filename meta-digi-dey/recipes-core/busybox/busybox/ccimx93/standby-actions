@@ -16,7 +16,7 @@
 #
 #===============================================================================
 
-SUSPEND_WLAN_IFACES="/tmp/suspend_wlan_ifaces"
+RESUME_ACTIONS="/tmp/resume_actions"
 
 actions_needed() {
 	[ -d "/proc/device-tree/wireless" ] && [ ! -e "/sys/firmware/devicetree/base/soc@0/bus@42800000/mmc@428b0000/keep-power-in-suspend" ]
@@ -27,32 +27,32 @@ if [ "${1}" = "pre" ]; then
 	systemctl stop NetworkManager
 
 	if actions_needed; then
-		rm -f "${SUSPEND_WLAN_IFACES}"
+		rm -f "${RESUME_ACTIONS}"
 		for iface in mlan0 uap0 wfd0; do
 			if grep -qs ${iface} /var/run/ifstate; then
-				ifdown ${iface} && echo ${iface} >> "${SUSPEND_WLAN_IFACES}"
+				ifdown ${iface} && echo "ifup ${iface}" >> "${RESUME_ACTIONS}"
 			fi
 		done
 
 		rmmod moal
 		rmmod mlan
 
-		systemctl stop bluetooth
-		systemctl stop bluetooth-init
-		stty -F /dev/ttyBt 115200
+		if systemctl is-active bluetooth-init; then
+			# 
+			# bluetooth service relies on bluetooth-init service, so stop/start it unconditionally
+			echo "systemctl start bluetooth-init" >> "${RESUME_ACTIONS}"
+			echo "systemctl start bluetooth" >> "${RESUME_ACTIONS}"
+			systemctl stop bluetooth-init
+			systemctl stop bluetooth
+			stty -F /dev/ttyBt 115200
+		fi
 	fi
 elif [ "${1}" = "post" ]; then
 	if actions_needed; then
 		/etc/udev/scripts/load_iw612.sh
 		sleep 0.5
-
-		while read -r iface; do
-			ifup "${iface}"
-		done < "${SUSPEND_WLAN_IFACES}"
-		rm -f "${SUSPEND_WLAN_IFACES}"
-
-		systemctl start bluetooth-init
-		systemctl start bluetooth
+		sh "${RESUME_ACTIONS}"
+		rm -f "${RESUME_ACTIONS}"
 	fi
 
 	# Resume NetworkManager after suspend
