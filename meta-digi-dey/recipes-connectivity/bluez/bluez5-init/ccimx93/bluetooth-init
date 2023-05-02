@@ -24,21 +24,6 @@ set_btaddr() {
 	hcitool -i ${HCI_IFACE} cmd 0x3f 0x0022 0xfe 0x06 ${bt_addr}
 }
 
-le_fix() {
-	hcitool -i ${HCI_IFACE} cmd 0x03 0x0003
-	sleep 0.2
-	hcitool -i ${HCI_IFACE} cmd 0x03 0x0001 ff ff ff ff ff ff 3f ff
-	sleep 0.2
-	hcitool -i ${HCI_IFACE} cmd 0x08 0x0001 ff ff 7f 00 00 00 00 00
-	sleep 0.2
-	hcitool -i ${HCI_IFACE} cmd 0x08 0x000B 01 10 00 10 00 00 00
-	sleep 0.2
-	hcitool -i ${HCI_IFACE} cmd 0x08 0x000C 01 01
-	sleep 0.2
-	hcitool -i ${HCI_IFACE} cmd 0x08 0x000C 00 00
-	sleep 0.2
-}
-
 bluetooth_start() {
 	if ! [ -e "/proc/device-tree/bluetooth/mac-address" ]; then
 		log "[ERROR] Bluetooth mac-address not found"
@@ -62,9 +47,6 @@ bluetooth_start() {
 	fi
 
 	hciattach -t5 /dev/ttyBt any -s 3000000 3000000 flow && \
-	hciconfig ${HCI_IFACE} up && \
-	sleep 0.2 && \
-	le_fix && \
 	log "Bluetooth activated" && return
 
 	log "[ERROR] Cannot initialize Bluetooth"
