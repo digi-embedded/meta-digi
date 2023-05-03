@@ -127,25 +127,3 @@ python () {
     else:
         d.setVar("TRUSTFENCE_INITRAMFS_IMAGE", "");
 }
-
-# Function to generate a PKI tree (with lock dir protection)
-GENPKI_LOCK_DIR = "${TRUSTFENCE_SIGN_KEYS_PATH}/.genpki.lock"
-gen_pki_tree() {
-	if mkdir -p ${GENPKI_LOCK_DIR}; then
-		trustfence-gen-pki.sh ${TRUSTFENCE_SIGN_KEYS_PATH}
-		rm -rf ${GENPKI_LOCK_DIR}
-	else
-		bbfatal "Could not get lock to generate PKI tree"
-	fi
-}
-
-# Function that generates a PKI tree if there isn't one
-check_gen_pki_tree() {
-	SRK_KEYS="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK*crt.pem | sed s/\ /\,/g)"
-	n_commas="$(echo ${SRK_KEYS} | grep -o "," | wc -l)"
-	if [ "${n_commas}" -eq 0 ]; then
-		gen_pki_tree
-	elif [ "${n_commas}" -ne 3 ]; then
-		bbfatal "Inconsistent PKI tree"
-	fi
-}

@@ -40,8 +40,6 @@ do_install() {
 	# If Trustfence is enabled, copy the public key that is going to be used into the
 	# initramfs '/etc/ssl/certs' folder in order to verify swupdate packages.
 	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
-		# Check and generate a PKI tree if there isn't one
-		check_gen_pki_tree
 		# Retrieve the key index to use.
 		KEY_INDEX="0"
 		if [ -n "${TRUSTFENCE_KEY_INDEX}" ]; then
