@@ -19,6 +19,7 @@ auto_ds=1 \
 host_mlme=1 \
 drv_mode=${DRIVER_MODE} \
 drvdbg=${DRIVER_DEBUG} \
+sta_name=wlan \
 fw_name=nxp/sduart_nw61x_v1.bin.se\
 "
 

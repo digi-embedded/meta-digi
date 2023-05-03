@@ -28,7 +28,7 @@ if [ "${1}" = "pre" ]; then
 
 	if actions_needed; then
 		rm -f "${RESUME_ACTIONS}"
-		for iface in mlan0 uap0 wfd0; do
+		for iface in wlan0 uap0 wfd0; do
 			if grep -qs ${iface} /var/run/ifstate; then
 				ifdown ${iface} && echo "ifup ${iface}" >> "${RESUME_ACTIONS}"
 			fi
