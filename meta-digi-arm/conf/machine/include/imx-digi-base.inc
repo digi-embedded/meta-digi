@@ -279,7 +279,7 @@ PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.19.0.imx"
 PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "3.19.0.imx"
 
 # Optee runtime packages to install
-OPTEE_PKGS:use-nxp-bsp ??= "optee-client optee-os"
+OPTEE_PKGS ??= "optee-client optee-os"
 
 # Use i.MX opencv Version
 PREFERRED_VERSION_opencv:mx8-nxp-bsp ??= "4.6.0.imx"
