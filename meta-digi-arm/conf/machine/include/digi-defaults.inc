@@ -89,3 +89,6 @@ BOOT_SCRIPTS += "boot.scr:boot.scr altboot.scr:altboot.scr"
 
 # This can be used to enable U-Boot update through swupdate
 SWUPDATE_UBOOTIMG ?= "false"
+
+# Cloud Connector package to install
+CLOUDCONNECTOR_PKG ?= "cloudconnector"
