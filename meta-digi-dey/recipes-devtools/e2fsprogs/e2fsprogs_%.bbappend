@@ -34,3 +34,6 @@ pkg_postinst_ontarget:${PN}-mke2fs() {
 		fi
 	fi
 }
+
+REMOVE_POSTINST_RPN = "${PN}-mke2fs"
+inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}
