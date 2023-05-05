@@ -24,9 +24,10 @@
 
 #define TARGET_GET_TIME		"get_time"
 
-void get_time_cb(char const *const target, ccapi_transport_t const transport,
-		ccapi_buffer_info_t const *const req_buf_info,
-		ccapi_buffer_info_t *const resp_buf_info);
+ccapi_receive_error_t get_time_cb(char const *const target,
+				ccapi_transport_t const transport,
+				ccapi_buffer_info_t const *const req_buf_info,
+				ccapi_buffer_info_t *const resp_buf_info);
 void get_time_status_cb(char const *const target,
 		ccapi_transport_t const transport,
 		ccapi_buffer_info_t *const resp_buf_info,

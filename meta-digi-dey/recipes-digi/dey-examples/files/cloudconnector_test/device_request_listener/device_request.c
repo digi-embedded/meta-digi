@@ -39,10 +39,10 @@
  * Logs information about the received request and executes the corresponding
  * command.
  */
-void get_time_cb(char const *const target,
-		ccapi_transport_t const transport,
-		ccapi_buffer_info_t const *const req_buf_info,
-		ccapi_buffer_info_t *const resp_buf_info)
+ccapi_receive_error_t get_time_cb(char const *const target,
+				ccapi_transport_t const transport,
+				ccapi_buffer_info_t const *const req_buf_info,
+				ccapi_buffer_info_t *const resp_buf_info)
 {
 	time_t t = time(NULL);
 	char *time_str = ctime(&t);
@@ -54,12 +54,12 @@ void get_time_cb(char const *const target,
 	resp_buf_info->buffer = calloc(resp_buf_info->length + 1, sizeof(char));
 	if (resp_buf_info->buffer == NULL) {
 		log_error("%s: resp_buf_info calloc error", __func__);
-		return;
+		return CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY;
 	}
 
 	resp_buf_info->length = sprintf(resp_buf_info->buffer, "Time: %s", time_str);
 
-	return;
+	return CCAPI_RECEIVE_ERROR_NONE;
 }
 
 /*
