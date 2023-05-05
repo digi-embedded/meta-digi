@@ -45,7 +45,6 @@ static void graceful_shutdown(void)
 
 	running = 0;
 	stop_cloud_connection();
-	wait_for_ccimp_threads();
 }
 
 static void add_sigkill_signal(void)

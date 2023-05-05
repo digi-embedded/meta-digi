@@ -36,7 +36,6 @@ static void sigint_handler(int signum)
 static void graceful_shutdown(void)
 {
 	stop_cloud_connection();
-	wait_for_ccimp_threads();
 }
 
 static void add_sigkill_signal(void)
