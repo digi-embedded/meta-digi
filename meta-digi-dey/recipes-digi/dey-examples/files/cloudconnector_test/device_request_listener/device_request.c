@@ -24,8 +24,6 @@
 
 #include "device_request.h"
 
-#define MAX_RESPONSE_SIZE	256
-
 #if !(defined UNUSED_ARGUMENT)
 #define UNUSED_ARGUMENT(a)	(void)(a)
 #endif
@@ -33,40 +31,44 @@
 /*
  * get_time_cb() - Data callback for 'get_time' device requests
  *
- * @target:					Target ID of the device request (get_time).
- * @transport:				Communication transport used by the device request.
- * @request_buffer_info:	Buffer containing the device request.
- * @response_buffer_info:	Buffer to store the answer of the request.
+ * @target:		Target ID of the device request (get_time).
+ * @transport:		Communication transport used by the device request.
+ * @req_buf_info:	Buffer containing the device request.
+ * @resp_buf_info:	Buffer to store the answer of the request.
  *
  * Logs information about the received request and executes the corresponding
  * command.
  */
 void get_time_cb(char const *const target,
 		ccapi_transport_t const transport,
-		ccapi_buffer_info_t const *const request_buffer_info,
-		ccapi_buffer_info_t *const response_buffer_info)
+		ccapi_buffer_info_t const *const req_buf_info,
+		ccapi_buffer_info_t *const resp_buf_info)
 {
-	UNUSED_ARGUMENT(request_buffer_info);
-	log_debug("get_time_cb(): target='%s' - transport='%d'", target, transport);
+	time_t t = time(NULL);
+	char *time_str = ctime(&t);
 
-	response_buffer_info->buffer = malloc(sizeof(char) * MAX_RESPONSE_SIZE + 1);
-	if (response_buffer_info->buffer == NULL) {
-		log_error("%s\n", "get_time_cb(): response_buffer_info malloc error");
+	UNUSED_ARGUMENT(req_buf_info);
+	log_debug("%s: target='%s' - transport='%d'", __func__, target, transport);
+
+	resp_buf_info->length = snprintf(NULL, 0, "Time: %s", time_str);
+	resp_buf_info->buffer = calloc(resp_buf_info->length + 1, sizeof(char));
+	if (resp_buf_info->buffer == NULL) {
+		log_error("%s: resp_buf_info calloc error", __func__);
 		return;
 	}
 
-	time_t t = time(NULL);
-	response_buffer_info->length = snprintf(response_buffer_info->buffer,
-			MAX_RESPONSE_SIZE, "Time: %s", ctime(&t));
+	resp_buf_info->length = sprintf(resp_buf_info->buffer, "Time: %s", time_str);
+
+	return;
 }
 
 /*
  * get_time_status_cb() - Status callback for 'get_time' device requests
  *
- * @target:					Target ID of the device request (get_time)
- * @transport:				Communication transport used by the device request.
- * @response_buffer_info:	Buffer containing the response data.
- * @receive_error:			The error status of the receive process.
+ * @target:		Target ID of the device request (get_time)
+ * @transport:		Communication transport used by the device request.
+ * @resp_buf_info:	Buffer containing the response data.
+ * @receive_error:	The error status of the receive process.
  *
  * This callback is executed when the response process has finished. It doesn't
  * matter if everything worked or there was an error during the process.
@@ -75,14 +77,13 @@ void get_time_cb(char const *const target,
  */
 void get_time_status_cb(char const *const target,
 			ccapi_transport_t const transport,
-			ccapi_buffer_info_t *const response_buffer_info,
+			ccapi_buffer_info_t *const resp_buf_info,
 			ccapi_receive_error_t receive_error)
 {
-	log_debug(
-			"get_time_status_cb(): target='%s' - transport='%d' - error='%d'",
-			target, transport, receive_error);
+	log_debug("%s: target='%s' - transport='%d' - error='%d'",
+		  __func__, target, transport, receive_error);
 
 	/* Free the response buffer */
-	if (response_buffer_info != NULL)
-		free(response_buffer_info->buffer);
+	if (resp_buf_info != NULL)
+		free(resp_buf_info->buffer);
 }

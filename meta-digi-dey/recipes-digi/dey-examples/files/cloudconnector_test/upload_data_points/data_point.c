@@ -37,7 +37,7 @@ static int get_incremental(void)
 	else
 		incremental++;
 
-	log_debug("Incremental = %d\n", incremental);
+	log_debug("Incremental = %d", incremental);
 
 	return incremental;
 }
@@ -75,14 +75,31 @@ static ccapi_timestamp_t *get_timestamp(void)
 	return timestamp;
 }
 
+/*
+ * free_timestamp() - Free given timestamp structure
+ *
+ * @timestamp:	The timestamp structure to release.
+ */
+static void free_timestamp(ccapi_timestamp_t *timestamp)
+{
+	if (timestamp == NULL)
+		return;
+
+	if (timestamp->iso8601 != NULL) {
+		free((char *) timestamp->iso8601);
+		timestamp->iso8601 = NULL;
+	}
+	free(timestamp);
+	timestamp = NULL;
+}
+
 ccapi_dp_error_t init_data_stream(ccapi_dp_collection_handle_t *dp_collection)
 {
 	ccapi_dp_collection_handle_t collection;
-	ccapi_dp_error_t dp_error;
+	ccapi_dp_error_t dp_error = ccapi_dp_create_collection(&collection);
 
-	dp_error = ccapi_dp_create_collection(&collection);
 	if (dp_error != CCAPI_DP_ERROR_NONE) {
-		log_error("ccapi_dp_create_collection() error %d\n", dp_error);
+		log_error("%s: error %d", __func__, dp_error);
 		return dp_error;
 	} else {
 		*dp_collection = collection;
@@ -91,9 +108,9 @@ ccapi_dp_error_t init_data_stream(ccapi_dp_collection_handle_t *dp_collection)
 	dp_error = ccapi_dp_add_data_stream_to_collection_extra(collection,
 			STREAM_NAME, "int32 ts_iso", "counts", NULL);
 	if (dp_error != CCAPI_DP_ERROR_NONE) {
-		log_error("ccapi_dp_add_data_stream_to_collection_extra() error %d\n",
-				dp_error);
-		free(collection);
+		log_error("%s: error %d", __func__, dp_error);
+		ccapi_dp_destroy_collection(collection);
+		*dp_collection = NULL;
 	}
 
 	return dp_error;
@@ -101,23 +118,14 @@ ccapi_dp_error_t init_data_stream(ccapi_dp_collection_handle_t *dp_collection)
 
 ccapi_dp_error_t add_data_point(ccapi_dp_collection_handle_t dp_collection)
 {
-	ccapi_dp_error_t dp_error;
-
 	ccapi_timestamp_t *timestamp = get_timestamp();
+	ccapi_dp_error_t dp_error = ccapi_dp_add(dp_collection, STREAM_NAME,
+					       get_incremental(), timestamp);
 
-	dp_error = ccapi_dp_add(dp_collection, STREAM_NAME, get_incremental(), timestamp);
-	if (dp_error != CCAPI_DP_ERROR_NONE) {
-		log_error("ccapi_dp_add() failed with error: %d\n", dp_error);
-	}
+	if (dp_error != CCAPI_DP_ERROR_NONE)
+		log_error("%s: failed with error: %d", __func__, dp_error);
 
-	if (timestamp != NULL) {
-		if (timestamp->iso8601 != NULL) {
-			free((char *) timestamp->iso8601);
-			timestamp->iso8601 = NULL;
-		}
-		free(timestamp);
-		timestamp = NULL;
-	}
+	free_timestamp(timestamp);
 
 	return dp_error;
 }
@@ -126,18 +134,17 @@ ccapi_dp_error_t send_data_stream(ccapi_dp_collection_handle_t dp_collection)
 {
 	ccapi_dp_error_t dp_error;
 
-	log_debug("%s", "Sending Data Stream with new incremental value\n");
+	log_debug("%s", "Sending Data Stream with new incremental value");
 
 	dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
-	if (dp_error != CCAPI_DP_ERROR_NONE) {
-		log_error("ccapi_dp_send_collection() error %d\n", dp_error);
-	}
+	if (dp_error != CCAPI_DP_ERROR_NONE)
+		log_error("%s: error %d", __func__, dp_error);
 
 	return dp_error;
 }
 
 ccapi_dp_error_t destroy_data_stream(ccapi_dp_collection_handle_t dp_collection)
 {
-	log_debug("%s", "Destroying Data Stream\n");
+	log_debug("%s", "Destroying Data Stream");
 	return ccapi_dp_destroy_collection(dp_collection);
 }
