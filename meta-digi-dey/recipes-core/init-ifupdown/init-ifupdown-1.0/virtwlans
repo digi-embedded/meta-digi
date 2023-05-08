@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2017-2019, Digi International Inc.
+# Copyright (c) 2017-2023, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -17,7 +17,7 @@
 
 [ "$IFACE" = "wlan1" ] || exit 0
 
-if [ "$MODE" = "start" ]; then
+check_virtual_wlan_macs() {
 	# Check for default MAC addresses
 	if [ -s "/proc/device-tree/wireless/mac-address1" ] &&
 	   [ -s "/proc/device-tree/wireless/mac-address2" ] &&
@@ -25,6 +25,13 @@ if [ "$MODE" = "start" ]; then
 	   :
 	else
 		echo "[WARN] Using default MAC addresses for virtual interfaces, please program them referring to the Digi U-Boot Documentation"
+	fi
+}
+
+if [ "$MODE" = "start" ]; then
+	# On ccmp1, there are not virtual wireless MACs, so skip the verification.
+	if ! grep -qs '\<digi,ccmp1\>' /proc/device-tree/compatible; then
+		check_virtual_wlan_macs
 	fi
 
 	if [ ! -d "/sys/class/net/wlan1" ]; then
