@@ -3,4 +3,6 @@
 require trustfence-sign-tools.inc
 inherit nativesdk
 
-RDEPENDS:${PN} = "nativesdk-trustfence-cst"
+RDEPENDS:${PN} = " \
+    ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'nativesdk-trustfence-cst', '', d)} \
+"

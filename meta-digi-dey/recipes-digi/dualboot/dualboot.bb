@@ -5,7 +5,10 @@ SECTION = "base"
 LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6"
 
-DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'openssl-native trustfence-cst-native', '', d)}"
+SOC_SIGN_DEPENDS = " \
+    ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'trustfence-cst-native', '', d)} \
+"
+DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'openssl-native ${SOC_SIGN_DEPENDS}', '', d)}"
 
 SRC_URI = " \
     file://dualboot-init \
