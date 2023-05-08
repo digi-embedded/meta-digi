@@ -5,7 +5,7 @@ HOMEPAGE = "https://www.tensorflow.org/lite/"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${S}/tflite_runtime-2.5.0.dist-info/METADATA;md5=8c4b9e107a64b0121980a8705094014b"
 
-PYTHON_PACKAGE = "tflite_runtime-2.5.0-cp38-cp38-linux:aarch64.whl"
+PYTHON_PACKAGE = "tflite_runtime-2.5.0-cp38-cp38-linux_aarch64.whl"
 
 SRC_URI = "https://github.com/google-coral/pycoral/releases/download/v1.0.1/${PYTHON_PACKAGE};downloadfilename=${PYTHON_PACKAGE};subdir=${BP}"
 SRC_URI[md5sum] = "9c47617e1fa0bdca673a78b8b6688d64"
