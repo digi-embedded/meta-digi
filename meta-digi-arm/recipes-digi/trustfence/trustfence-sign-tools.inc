@@ -17,6 +17,7 @@ UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${UBOOT_UR
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
     file://trustfence-sign-artifact-nxp.sh \
+    file://trustfence-sign-artifact-stm.sh \
     file://sign_hab;name=artifact-hab-sign \
     file://encrypt_hab;name=artifact-hab-encrypt \
     file://sign_ahab;name=artifact-ahab-sign \
@@ -49,6 +50,9 @@ do_install() {
 		else
 			install -m 0755 git/scripts/sign.sh ${D}${bindir}/trustfence-sign-uboot.sh
 		fi
+	elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+		install -d ${D}${bindir}
+		install -m 0755 trustfence-sign-artifact-stm.sh ${D}${bindir}/trustfence-sign-artifact.sh
 	fi
 }
 
