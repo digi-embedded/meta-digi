@@ -58,11 +58,16 @@ python () {
     if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
         if (d.getVar("TRUSTFENCE_DEK_PATH") == "default"):
             d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/dek.bin");
+    elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
+        # Enable authentication capabilities on TF-A independently
+        # of whether the images are going to be signed by DEY or externally
+        d.setVar("TF_A_SIGN_ENABLE", "1")
+        if (d.getVar("TRUSTFENCE_SIGN") == "0"):
+            d.setVar("FIP_SIGN_ENABLE", "0")
 
     if (d.getVar("TRUSTFENCE_SIGN") == "1"):
         # Set STM-specific variables for signing images
         if (d.getVar("DEY_SOC_VENDOR") == "STM"):
-            d.setVar("TF_A_SIGN_ENABLE", "1")
             d.setVar("FIP_SIGN_ENABLE", "1")
             d.setVar("FIP_SIGN_KEY_EXTERNAL", "1")
             if (d.getVar("DIGI_SOM") == "ccmp15" ):
