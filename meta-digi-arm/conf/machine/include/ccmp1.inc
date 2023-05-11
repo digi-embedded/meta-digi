@@ -17,7 +17,7 @@ FIP_UBOOT_DTB = "u-boot"
 STORAGE_MEDIA = "mtd"
 
 # Enable STM specific features
-DEY_BUILD_PLATFORM = "STM"
+DEY_SOC_VENDOR = "STM"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.ubifs"
@@ -42,11 +42,14 @@ MACHINE_EXTRA_RDEPENDS += " \
     mtd-utils-ubifs \
 "
 
-# Extra udev rules
-MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf"
-
 # Image FS types
 IMAGE_FSTYPES:remove = "ext4 tar.xz"
 
 # List of supported boot devices
 BOOTDEVICE_LABELS ?= "sdcard"
+
+# Default secure console configuration
+TRUSTFENCE_CONSOLE_DISABLE ?= "0"
+
+# Alternatively, uncommment to enable the console autoboot stop passphrase
+# TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE = ""

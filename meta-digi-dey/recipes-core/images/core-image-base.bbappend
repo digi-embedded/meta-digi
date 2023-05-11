@@ -27,6 +27,3 @@ SDKIMAGE_FEATURES ?= "dev-pkgs dbg-pkgs staticdev-pkgs"
 
 # Add our dey-image tweaks to the final image (like /etc/build info)
 inherit dey-image
-
-# Do not install udev-cache
-BAD_RECOMMENDATIONS += "udev-cache"

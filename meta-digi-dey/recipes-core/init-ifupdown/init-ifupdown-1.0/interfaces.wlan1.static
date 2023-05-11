@@ -1,5 +1,5 @@
 
-# Wi-Fi AP interface (Qualcomm QCA65x4)
+# Wi-Fi AP interface
 #auto wlan1
 iface wlan1 inet static
         address ##WLAN1_STATIC_IP##

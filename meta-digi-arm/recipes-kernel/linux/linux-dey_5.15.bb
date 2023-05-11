@@ -1,21 +1,21 @@
-# Copyright (C) 2022 Digi International
+# Copyright (C) 2022,2023 Digi International
 
 SUMMARY = "Linux kernel for Digi boards"
 LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 
 # CONFIG_KERNEL_LZO in defconfig
-DEPENDS += "${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'lzop-native', '', d)}"
+DEPENDS += "${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'lzop-native', '', d)}"
 
 inherit kernel
-inherit ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'fsl-kernel-localversion', '', d)}
+inherit ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'fsl-kernel-localversion', '', d)}
 
 SRCBRANCH = "v5.15/nxp/dey-4.0/maint"
 SRCBRANCH:stm32mpcommon = "v5.15/stm/dey-4.0/maint"
 SRCREV = "${AUTOREV}"
 SRCREV:stm32mpcommon = "${AUTOREV}"
 
-require ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'STM', 'recipes-kernel/linux/linux-stm32mp.inc', '', d)}
+require ${@oe.utils.conditional('DEY_SOC_VENDOR', 'STM', 'recipes-kernel/linux/linux-stm32mp.inc', '', d)}
 # Don't create custom folder for kernel artifacts
 do_deploy[sstate-outputdirs] = "${DEPLOY_DIR_IMAGE}"
 

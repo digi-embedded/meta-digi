@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2020-2021 by Digi International Inc.
+#  Copyright (C) 2020-2023 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -39,6 +39,7 @@ show_usage()
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
 	echo "   -u <u-boot-filename>   U-Boot filename."
 	echo "                          Auto-determined by variant if not provided."
+	echo "   -d                     Install firmware on dualboot partitions (system A and system B)."
 	exit 2
 }
 
@@ -78,9 +79,10 @@ echo "############################################################"
 # Command line admits the following parameters:
 # -u <u-boot-filename>
 # -i <image-name>
-while getopts 'hi:nu:' c
+while getopts 'dhi:nu:' c
 do
 	case $c in
+	d) INSTALL_DUALBOOT=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
 	n) NOWAIT=true ;;
@@ -199,9 +201,13 @@ if [ "${NOWAIT}" != true ]; then
 	printf "   bootloader\t${INSTALL_UBOOT_FILENAME}\n"
 	if [ "${DUALBOOT}" = true ]; then
 		printf "   ${LINUX_NAME}_a\t${INSTALL_LINUX_FILENAME}\n"
-		printf "   ${LINUX_NAME}_b\t${INSTALL_LINUX_FILENAME}\n"
+		if [ "${INSTALL_DUALBOOT}" = true ]; then
+			printf "   ${LINUX_NAME}_b\t${INSTALL_LINUX_FILENAME}\n"
+		fi
 		printf "   ${ROOTFS_NAME}_a\t${INSTALL_ROOTFS_FILENAME}\n"
-		printf "   ${ROOTFS_NAME}_b\t${INSTALL_ROOTFS_FILENAME}\n"
+		if [ "${INSTALL_DUALBOOT}" = true ]; then
+			printf "   ${ROOTFS_NAME}_b\t${INSTALL_ROOTFS_FILENAME}\n"
+		fi
 	else
 		printf "   ${LINUX_NAME}\t${INSTALL_LINUX_FILENAME}\n"
 		printf "   ${RECOVERY_NAME}\t${INSTALL_RECOVERY_FILENAME}\n"
@@ -269,11 +275,15 @@ if [ "${DUALBOOT}" = true ]; then
 	# Update Linux A
 	part_update "${LINUX_NAME}_a" "${INSTALL_LINUX_FILENAME}" 15000
 	# Update Linux B
-	part_update "${LINUX_NAME}_b" "${INSTALL_LINUX_FILENAME}" 15000
+	if [ "${INSTALL_DUALBOOT}" = true ]; then
+		part_update "${LINUX_NAME}_b" "${INSTALL_LINUX_FILENAME}" 15000
+	fi
 	# Update Rootfs A
 	part_update "${ROOTFS_NAME}_a" "${INSTALL_ROOTFS_FILENAME}" 90000
 	# Update Rootfs B
-	part_update "${ROOTFS_NAME}_b" "${INSTALL_ROOTFS_FILENAME}" 90000
+	if [ "${INSTALL_DUALBOOT}" = true ]; then
+		part_update "${ROOTFS_NAME}_b" "${INSTALL_ROOTFS_FILENAME}" 90000
+	fi
 else
 	# Update Linux
 	part_update "${LINUX_NAME}" "${INSTALL_LINUX_FILENAME}" 15000

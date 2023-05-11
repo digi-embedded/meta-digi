@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Digi International Inc.
+ * Copyright (c) 2017-2023 Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -13,8 +13,8 @@
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  *
- * Digi International Inc. 11001 Bren Road East, Minnetonka, MN 55343
- * =======================================================================
+ * Digi International Inc., 9350 Excelsior Blvd., Suite 700, Hopkins, MN 55343
+ * ===========================================================================
  */
 
 #ifndef DEVICE_REQUEST_H_
@@ -24,12 +24,13 @@
 
 #define TARGET_GET_TIME		"get_time"
 
-void get_time_cb(char const *const target, ccapi_transport_t const transport,
-		ccapi_buffer_info_t const *const request_buffer_info,
-		ccapi_buffer_info_t *const response_buffer_info);
+ccapi_receive_error_t get_time_cb(char const *const target,
+				ccapi_transport_t const transport,
+				ccapi_buffer_info_t const *const req_buf_info,
+				ccapi_buffer_info_t *const resp_buf_info);
 void get_time_status_cb(char const *const target,
 		ccapi_transport_t const transport,
-		ccapi_buffer_info_t *const response_buffer_info,
+		ccapi_buffer_info_t *const resp_buf_info,
 		ccapi_receive_error_t receive_error);
 
 #endif /* DEVICE_REQUEST_H_ */

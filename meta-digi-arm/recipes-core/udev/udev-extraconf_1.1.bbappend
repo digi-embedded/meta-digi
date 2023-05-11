@@ -9,6 +9,7 @@ SRC_URI += " \
 "
 SRC_URI:append:ccmp1 = " \
     file://99-ext-rtc-wakeup.rules \
+    file://00-disable-sd.rules \
 "
 
 do_install:append() {
@@ -59,6 +60,9 @@ do_install:append() {
 
 do_install:append:ccmp1() {
 	install -m 0644 ${WORKDIR}/99-ext-rtc-wakeup.rules ${D}${sysconfdir}/udev/rules.d/
+	# Disables all SD device but keeps on mounting other external memory devices like USB.
+	# This is currently needed for the CCMP1 platform as a workaround to fix a boot issue.
+	install -m 0644 ${WORKDIR}/00-disable-sd.rules ${D}${sysconfdir}/udev/rules.d/
 }
 
 FILES:${PN}:append = " \

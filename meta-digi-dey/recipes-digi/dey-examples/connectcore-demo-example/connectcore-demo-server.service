@@ -1,6 +1,6 @@
 [Unit]
 Description=Initialization of ConnectCore demo server
-After=busybox-httpd.service
+After=busybox-httpd.service bluetooth.service
 
 [Service]
 Type=forking

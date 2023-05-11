@@ -37,7 +37,7 @@ RDEPENDS:${PN} = "\
     base-files \
     base-passwd \
     connectcore-demo-example \
-    cloudconnector \
+    ${CLOUDCONNECTOR_PKG} \
     dualboot \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'firmwared', '',d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \

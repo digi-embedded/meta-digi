@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2022 Digi International
+# Copyright (C) 2018-2023 Digi International
 
 require recipes-bsp/u-boot/u-boot.inc
 
@@ -38,7 +38,7 @@ BUILD_UBOOT_SCRIPTS ?= "true"
 BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
 
 LOCALVERSION ?= ""
-inherit ${@oe.utils.conditional('DEY_BUILD_PLATFORM', 'NXP', 'fsl-u-boot-localversion', '', d)}
+inherit ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'fsl-u-boot-localversion', '', d)}
 
 # Disable u-boot environment artifacts
 UBOOT_INITIAL_ENV = ""
@@ -62,6 +62,16 @@ TF_BOOTSCRIPT_SEDFILTER = "${@tf_bootscript_sedfilter(d)}"
 def tf_bootscript_sedfilter(d):
     tf_initramfs = d.getVar('TRUSTFENCE_INITRAMFS_IMAGE') or ""
     return "s,\(^[[:blank:]]*\)true.*,\\1setenv boot_initrd true\\n\\1setenv initrd_file %s-${MACHINE}.cpio.gz.u-boot.tf,g" % tf_initramfs if tf_initramfs else ""
+
+SIGN_UBOOT ?= ""
+SIGN_UBOOT:ccimx6 = "sign_uboot"
+SIGN_UBOOT:ccimx6ul = "sign_uboot"
+
+do_deploy[postfuncs] += " \
+    adapt_uboot_filenames \
+    ${@oe.utils.ifelse('BUILD_UBOOT_SCRIPTS', 'build_uboot_scripts', '')} \
+    ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', '${SIGN_UBOOT}', '', d)} \
+"
 
 build_uboot_scripts() {
 	for f in $(echo ${INSTALL_FW_UBOOT_SCRIPTS} | sed -e 's,file\:\/\/,,g'); do
@@ -89,25 +99,25 @@ build_uboot_scripts() {
 	# Alternate boot script for dualboot
 	mkimage -T script -n "Alternate bootscript" -C none -d ${WORKDIR}/altboot.txt ${DEPLOYDIR}/altboot.scr
 
-	# Sign the scripts
-	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+	# Sign the scripts (TODO signing of artifacts for STM-based platforms)
+	if [ [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${DEY_SOC_VENDOR}" != "STM" ] ]; then
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
 
 		# Sign boot script
 		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
-		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
+		trustfence-sign-artifact.sh -p "${DIGI_SOM}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
 		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
 
 		# Sign altboot script
 		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/altboot-signed.XXXXXX)"
-		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -b "${DEPLOYDIR}/altboot.scr" "${TMP_SIGNED_BOOTSCR}"
+		trustfence-sign-artifact.sh -p "${DIGI_SOM}" -b "${DEPLOYDIR}/altboot.scr" "${TMP_SIGNED_BOOTSCR}"
 		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/altboot.scr"
 	fi
 }
 
-do_deploy:append() {
+adapt_uboot_filenames() {
 	# Remove canonical U-Boot symlinks for ${UBOOT_CONFIG} currently in the form:
 	#    u-boot-<platform>.<ext>-<type>
 	#    u-boot-<type>
@@ -124,7 +134,26 @@ do_deploy:append() {
 					cd ${DEPLOYDIR}
 					rm -r ${UBOOT_BINARY}-${type}
 					ln -sf ${UBOOT_BINARYNAME}-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-${type}.${UBOOT_SUFFIX}
-					if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
+				fi
+			done
+			unset  j
+		done
+		unset  i
+	fi
+}
+
+sign_uboot() {
+	# This function only applies to CC6, CC6Plus and CC6UL
+	if [ -n "${UBOOT_CONFIG}" ]
+	then
+		for config in ${UBOOT_MACHINE}; do
+			i=$(expr $i + 1);
+			for type in ${UBOOT_CONFIG}; do
+				j=$(expr $j + 1);
+				if [ $j -eq $i ]
+				then
+					cd ${DEPLOYDIR}
+					if [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
 						install ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
 						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
 
@@ -145,10 +174,6 @@ do_deploy:append() {
 			unset  j
 		done
 		unset  i
-	fi
-
-	if [ "${BUILD_UBOOT_SCRIPTS}" = "true" ]; then
-		build_uboot_scripts
 	fi
 }
 

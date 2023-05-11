@@ -5,6 +5,8 @@
 include conf/machine/include/imx-digi-base.inc
 require conf/machine/include/arm/armv8a/tune-cortexa53.inc
 
+DIGI_FAMILY = "ccimx8m"
+
 # Platform u-boot settings
 UBOOT_PREFIX = "imx-boot"
 UBOOT_SUFFIX = "bin"
@@ -51,10 +53,6 @@ MACHINE_FEATURES += "accel-graphics wifi bluetooth cryptochip mca optee"
 
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "HAB"
-
-# Adding 'wayland' along with 'x11' enables the xwayland backend
-# Vulkan is necessary for wayland to build
-DISTRO_FEATURES:append = " wayland vulkan systemd pam"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"

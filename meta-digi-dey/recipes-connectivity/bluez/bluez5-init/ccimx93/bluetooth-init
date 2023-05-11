@@ -1,0 +1,81 @@
+#!/bin/sh
+#===============================================================================
+#
+#  Copyright (C) 2023 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Initialize bluetooth hardware
+#
+#===============================================================================
+
+HCI_IFACE="hci0"
+
+log() {
+	printf "<3>iw612-bluetooth: %s\n" "${1}" >/dev/kmsg
+}
+
+set_btaddr() {
+	bt_addr=$(echo $(fw_printenv -n btaddr) | awk -F ":" '{ for(i=NF;i>=1;i--) printf "0x%s ", $i }')
+	hcitool -i ${HCI_IFACE} cmd 0x3f 0x0022 0xfe 0x06 ${bt_addr}
+}
+
+bluetooth_start() {
+	if ! [ -e "/proc/device-tree/bluetooth/mac-address" ]; then
+		log "[ERROR] Bluetooth mac-address not found"
+		return
+	fi
+
+	# If there is a hciattach process running, just do nothing
+	pidof hciattach > /dev/null && log "Bluetooth already activated" && return
+
+	# If port speed is 3M, assume that FW has been modified to run at that speed
+	if [ "$(stty -F /dev/ttyBt speed)" != "3000000" ]; then
+		hciattach -t5 /dev/ttyBt any 115200 flow nosleep && \
+		hciconfig ${HCI_IFACE} up && \
+		sleep 0.2 && \
+		set_btaddr && \
+		# Change rate to 3M using a custom vendor command
+		hcitool -i ${HCI_IFACE} cmd 0x3f 0x0009 0xc0 0xc6 0x2d 0x00 && \
+		sleep 0.2 && \
+		killall hciattach && \
+		sleep 0.2
+	fi
+
+	hciattach -t5 /dev/ttyBt any -s 3000000 3000000 flow && \
+	log "Bluetooth activated" && return
+
+	log "[ERROR] Cannot initialize Bluetooth"
+	return 1
+}
+
+bluetooth_stop() {
+	if [ -e "/sys/class/bluetooth/${HCI_IFACE}" ]; then
+		killall hciattach > /dev/null
+		sleep 1
+		# send a raw hci reset to set the chip in a good state
+		echo -e -n \\x01\\x03\\x0c\\x00 > /dev/ttyBt
+	fi
+}
+
+case "$1" in
+	start)
+		bluetooth_start
+		;;
+	stop)
+		bluetooth_stop
+		;;
+	restart)
+		$0 stop
+		sleep 1
+		$0 start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+		;;
+esac

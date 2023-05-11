@@ -3,7 +3,7 @@
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore 6 module.
 
 DIGI_FAMILY = "ccimx6"
-MACHINEOVERRIDES =. "mx6:mx6dl:mx6q:${DIGI_FAMILY}:"
+MACHINEOVERRIDES =. "mx6:mx6dl:mx6q:${DIGI_FAMILY}:${DIGI_SOM}:"
 
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/arm/armv7a/tune-cortexa9.inc
@@ -33,9 +33,8 @@ MACHINE_FEATURES += "accel-graphics wifi bluetooth pci"
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "HAB"
 
-# Adding 'wayland' along with 'x11' enables the xwayland backend
-# Adding pam is required for SELinux functionality
-DISTRO_FEATURES:append = " wayland pam"
+# Per-machine DISTRO_FEATURES customization
+MACHINE_DISTRO_FEATURES_REMOVE = "vulkan"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"

@@ -207,7 +207,14 @@ trustence_sign_cpio() {
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
 
 		# Sign/encrypt the ramdisk
-		trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -i "${1}" "${1}.tf"
+		if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+			trustfence-sign-artifact.sh -p "${DIGI_SOM}" -i "${1}" "${1}.tf"
+		elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+			# TODO: sign the ramdisk for ST platforms
+
+			# (fall-back) Copy the image with no changes
+			cp "${1}" "${1}.tf"
+		fi
 	else
 		# Copy the image with no changes
 		cp "${1}" "${1}.tf"
@@ -231,7 +238,7 @@ rootfs_sign() {
         ROOTFS_IMAGE="${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.squashfs"
         TMP_ROOTFS_IMAGE_SIGNED="$(mktemp ${ROOTFS_IMAGE}-signed.XXXXXX)"
         # Sign rootfs read-only image
-        trustfence-sign-artifact.sh -p "${DIGI_FAMILY}" -r "${ROOTFS_IMAGE}" "${TMP_ROOTFS_IMAGE_SIGNED}"
+        trustfence-sign-artifact.sh -p "${DIGI_SOM}" -r "${ROOTFS_IMAGE}" "${TMP_ROOTFS_IMAGE_SIGNED}"
         mv "${TMP_ROOTFS_IMAGE_SIGNED}" "${ROOTFS_IMAGE}"
 }
 

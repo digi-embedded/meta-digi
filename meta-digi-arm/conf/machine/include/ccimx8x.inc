@@ -2,8 +2,9 @@
 #@NAME: ConnectCore 8X module.
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore 8X module.
 
+DIGI_SOM = "ccimx8x"
 DIGI_FAMILY = "ccimx8x"
-MACHINEOVERRIDES =. "mx8:mx8x:mx8qxp:${DIGI_FAMILY}:"
+MACHINEOVERRIDES =. "mx8:mx8x:mx8qxp:${DIGI_FAMILY}:${DIGI_SOM}:"
 
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/arm/armv8a/tune-cortexa35.inc
@@ -68,10 +69,6 @@ MACHINE_FEATURES += "accel-graphics wifi bluetooth cryptochip pci mca"
 
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "AHAB"
-
-# Adding 'wayland' along with 'x11' enables the xwayland backend
-# Vulkan is necessary for wayland to build
-DISTRO_FEATURES:append = " wayland vulkan systemd pam"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"

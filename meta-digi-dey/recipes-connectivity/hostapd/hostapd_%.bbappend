@@ -8,6 +8,10 @@ SRC_URI:append = " \
     ${@oe.utils.conditional('HAS_WIFI_VIRTWLANS', 'true', 'file://hostapd_wlan1.conf', '', d)} \
 "
 
+SRC_URI:append:ccimx93 = " \
+    file://hostapd_uap0.conf \
+"
+
 # Patch series from Murata release
 MURATA_COMMON_PATCHES = " \
 	file://murata/0003-nl80211-Report-connection-authorized-in-EVENT_ASSOC.patch \
@@ -53,23 +57,33 @@ SYSTEMD_SERVICE:${PN}:append = " hostapd@.service"
 
 do_install:append() {
 	# Remove the default hostapd.conf
-	rm -f ${WORKDIR}/hostapd.conf
-	# Install custom hostapd_IFACE.conf file
-	install -m 0644 ${WORKDIR}/hostapd_wlan0.conf ${D}${sysconfdir}
+	rm -f ${D}${sysconfdir}/hostapd.conf
+
+	# Install custom hostapd_IFACE.conf files
+	add_hostapd_files
+
 	# Install interface-specific systemd service
 	install -m 0644 ${WORKDIR}/hostapd@.service ${D}${systemd_unitdir}/system/
 	sed -i -e 's,@SBINDIR@,${sbindir},g' -e 's,@SYSCONFDIR@,${sysconfdir},g' ${D}${systemd_unitdir}/system/hostapd@.service
+
+	# Read-only rootfs: actions that substitute postinst script
+	# - append the ${DIGI_SOM} string to SSID
+	if [ -n "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', '1', '', d)}" ]; then
+		sed -i -e "s,##MAC##,${DIGI_SOM},g" ${D}${sysconfdir}/hostapd_*.conf
+	fi
+}
+
+add_hostapd_files() {
+	install -m 0644 ${WORKDIR}/hostapd_wlan0.conf ${D}${sysconfdir}
 
 	if ${HAS_WIFI_VIRTWLANS}; then
 		# Install custom hostapd_IFACE.conf file
 		install -m 0644 ${WORKDIR}/hostapd_wlan1.conf ${D}${sysconfdir}
 	fi
+}
 
-	# Read-only rootfs: actions that substitute postinst script
-	# - append the ${DIGI_FAMILY} string to SSID
-	if [ -n "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', '1', '', d)}" ]; then
-		sed -i -e "s,##MAC##,${DIGI_FAMILY},g" ${D}${sysconfdir}/hostapd_wlan?.conf
-	fi
+add_hostapd_files:ccimx93() {
+	install -m 0644 ${WORKDIR}/hostapd_uap0.conf ${D}${sysconfdir}
 }
 
 pkg_postinst_ontarget:${PN}() {
@@ -84,7 +98,7 @@ pkg_postinst_ontarget:${PN}() {
 	# Get the last two bytes of the wlan0 MAC address
 	MAC="$(dd conv=swab if=/proc/device-tree/wireless/mac-address 2>/dev/null | hexdump | head -n 1 | cut -d ' ' -f 4)"
 
-	find "${sysconfdir}" -type f -name 'hostapd_wlan?.conf' -exec \
+	find "${sysconfdir}" -type f -name 'hostapd_*.conf' -exec \
 		sed -i -e "s,##MAC##,${MAC},g" {} \;
 
 	# Do not autostart hostapd daemon, it will conflict with wpa-supplicant.

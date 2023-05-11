@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 4.0
-## Release 4.0-r2
+## Release 4.0-r3
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.

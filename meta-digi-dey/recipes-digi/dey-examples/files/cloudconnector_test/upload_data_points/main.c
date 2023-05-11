@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Digi International Inc.
+ * Copyright (c) 2017-2023 Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -13,9 +13,10 @@
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  *
- * Digi International Inc. 11001 Bren Road East, Minnetonka, MN 55343
- * =======================================================================
+ * Digi International Inc., 9350 Excelsior Blvd., Suite 700, Hopkins, MN 55343
+ * ===========================================================================
  */
+
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -31,20 +32,19 @@ static ccapi_dp_collection_handle_t dp_collection;
 
 static void sigint_handler(int signum)
 {
-	log_debug("sigint_handler(): received signal %d to close Cloud connection.\n", signum);
+	log_debug("%s: received signal %d to close Cloud connection.",
+		  __func__, signum);
 
 	exit(0);
 }
 
 static void graceful_shutdown(void)
 {
-	if (running == 1) {
+	if (running == 1)
 		destroy_data_stream(dp_collection);
-	}
 
 	running = 0;
 	stop_cloud_connection();
-	wait_for_ccimp_threads();
 }
 
 static void add_sigkill_signal(void)
@@ -75,19 +75,19 @@ int main(void)
 
 	init_error = init_cloud_connection(NULL);
 	if (init_error != CC_INIT_ERROR_NONE) {
-		log_error("Cannot initialize cloud connection, error %d\n", init_error);
+		log_error("Cannot initialize cloud connection, error %d", init_error);
 		return EXIT_FAILURE;
 	}
 
 	start_error = start_cloud_connection();
 	if (start_error != CC_START_ERROR_NONE) {
-		log_error("Cannot start cloud connection, error %d\n", start_error);
+		log_error("Cannot start cloud connection, error %d", start_error);
 		return EXIT_FAILURE;
 	}
 
 	dp_error = init_data_stream(&dp_collection);
 	if (dp_error != CCAPI_DP_ERROR_NONE) {
-		log_error("Cannot initialize data stream, error %d\n", start_error);
+		log_error("Cannot initialize data stream, error %d", start_error);
 		return EXIT_FAILURE;
 	}
 
@@ -99,7 +99,7 @@ int main(void)
 			dp_error = add_data_point(dp_collection);
 
 			if (dp_error != CCAPI_DP_ERROR_NONE) {
-				log_error("Cannot add data point, error %d\n", start_error);
+				log_error("Cannot add data point, error %d", start_error);
 				i--;
 			}
 
@@ -109,7 +109,7 @@ int main(void)
 		/* Send the block of collected data points */
 		dp_error = send_data_stream(dp_collection);
 		if (dp_error != CCAPI_DP_ERROR_NONE)
-			log_error("Cannot send data stream, error %d\n", start_error);
+			log_error("Cannot send data stream, error %d", start_error);
 	}
 
 	return EXIT_SUCCESS;

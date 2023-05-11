@@ -28,7 +28,7 @@ MKP_NONE="\033[0m"
 MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/meta-digi/sdk/config"
 
 # Blacklist platforms (not officially supported in a DEY release)
-MKP_BLACKLIST_PLATFORMS="ccimx6qpsbc ccimx6sbc ccimx8x-sbc-express ccimx8x-sbc-pro ccimx93-dvk"
+MKP_BLACKLIST_PLATFORMS="ccimx6qpsbc ccimx6sbc ccimx8x-sbc-express ccimx8x-sbc-pro"
 
 MKP_SETUP_ENVIRONMENT='#!/bin/bash
 
@@ -151,10 +151,6 @@ do_mkproject() {
 		# Customize project
 		chmod 644 ${MKP_PROJECTPATH}/conf/bblayers.conf ${MKP_PROJECTPATH}/conf/local.conf
 		sed -i -e "s,##DIGIBASE##,${MKP_SCRIPTPATH}/sources,g" ${MKP_PROJECTPATH}/conf/bblayers.conf
-		if [ -n "${MKP_VARIANT+x}" ]; then
-			sed -i -e "/^MACHINE_VARIANT =/cMACHINE_VARIANT = \"${MKP_VARIANT}\"" \
-				${MKP_PROJECTPATH}/conf/local.conf
-		fi
 		# At this point the user has accepted all the licenses, so enable the vendor EULA
 		sed -i -e "s,^#\(ACCEPT.*EULA\),\1,g" ${MKP_PROJECTPATH}/conf/local.conf
 		# Create dey-setup-environment script
@@ -178,11 +174,10 @@ fi
 # The script needs to be sourced (not executed) so make sure to
 # initialize OPTIND variable for getopts.
 OPTIND=1
-while getopts "lp:v:m:" c; do
+while getopts "lp:m:" c; do
 	case "${c}" in
 		l) MKP_LIST_PLATFORMS="y";;
 		p) MKP_PLATFORM="${OPTARG}";;
-		v) MKP_VARIANT="${OPTARG}";;
 		m) MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/${OPTARG}/sdk/config";;
 	esac
 done
@@ -219,5 +214,4 @@ unset MKP_AVAILABLE_PLATFORMS \
       MKP_RED \
       MKP_SCRIPTNAME \
       MKP_SCRIPTPATH \
-      MKP_SETUP_ENVIRONMENT \
-      MKP_VARIANT
+      MKP_SETUP_ENVIRONMENT

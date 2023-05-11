@@ -3,7 +3,7 @@
 #
 #  update-firmware
 #
-#  Copyright (C) 2021-2022 by Digi International Inc.
+#  Copyright (C) 2021-2023 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -11,7 +11,7 @@
 #  the Free Software Foundation.
 #
 #
-#  !Description: Dual boot firmware update script
+#  !Description: Firmware update script
 #
 #===============================================================================
 
@@ -23,7 +23,17 @@ fi
 SCRIPTNAME="$(basename "$(readlink -f "${0}")")"
 VERBOSE=""
 PUBLIC_KEY="/etc/ssl/certs/key.pub"
-ACTIVE_SYSTEM="$(fw_printenv -n active_system 2>/dev/null)"
+ACTIVE_SYSTEM=""
+SHOW_ACTIVE_SYSTEM=0
+SCRIPT_MODE=0
+SWAP_ACTIVE_SYSTEM=0
+REBOOT=1
+UPDATE_FILE=""
+ALT_BOOT=""
+ALT_ROOTFS=""
+
+# Check if the rootfs is ubifs to determine if it is a nand or emmc device
+NANDROOTFS="$(grep -qs '[[:blank:]]\+/[[:blank:]]\+ubifs.*' /proc/mounts 2>/dev/null && echo 1)"
 
 ## Local functions
 usage() {
@@ -31,24 +41,163 @@ usage() {
 
 Usage: ${SCRIPTNAME} [OPTIONS] </your-path/your-filename>.swu
 
-    -a               Show currently active system
-    -v               Enable verbosity
-    -h               Show this help
+  -a          --active                   Show currently active system
+              --no-reboot                Do not reboot after update
+              --swap-active-system       Swap active system block.
+                                         This option reboots the system, unless '--no-reboot' is specified.
+  -v          --verbose                  Enable verbosity
+  -h          --help                     Print help and exit
 
 EOF
 }
 
-show_active_system() {
-	if [ "${ACTIVE_SYSTEM}" = "linux_a" ]; then
-		echo "Active system is A"
+get_active_system() {
+	if [ -z "${NANDROOTFS}" ]; then
+		local MMCROOT_DEV
+
+		MMCROOT_DEV="$(stat -c%D /)"
+
+		for label in /dev/disk/by-partlabel/*; do
+			if [ "$(stat -c"%02t%02T" $(realpath ${label}))" = "${MMCROOT_DEV}" ]; then
+				ACTIVE_SYSTEM="$(basename ${label})"
+				break
+			fi
+		done
 	else
-		echo "Active system is B"
+		ACTIVE_SYSTEM="$(sed -ne 's,^\([^[:blank:]]\+\)[[:blank:]]\+/[[:blank:]]\+ubifs.*,\1,g;T;p' /proc/mounts 2>/dev/null)"
+	fi
+
+	if [ -z "${ACTIVE_SYSTEM}" ]; then
+		echo "[ERROR] Unable to get active system."
+		return 1
+	fi
+
+	ACTIVE_SYSTEM="$(echo ${ACTIVE_SYSTEM} | cut -d_ -f2)"
+
+	return 0
+}
+
+show_active_system() {
+	if [ ${SCRIPT_MODE} -eq 0 ]; then
+		local act_sys
+
+		act_sys="$(echo ${ACTIVE_SYSTEM} | tr [:lower:] [:upper:])"
+		echo "Active system is ${act_sys}"
+	else
+		echo "${ACTIVE_SYSTEM}"
+	fi
+}
+
+# $1: message to show
+reboot_system() {
+	if [ ${REBOOT} -eq 1 ]; then
+		echo "${1}. Rebooting the system."
+		reboot -f
+	else
+		echo "${1}. Reboot the system to use the new version."
+	fi
+}
+
+swap_active_system() {
+	if [ -z "${NANDROOTFS}" ]; then
+		local PART_UUID=""
+
+		# Get boot and rootfs partition index
+		local MMC_PART="$(realpath /dev/disk/by-partlabel/${ALT_BOOT} | grep -o '[[:digit:]]\+$')"
+
+		# Search rootfs UUID
+		local MMCROOT_DEV="$(realpath /dev/disk/by-partlabel/${ALT_ROOTFS})"
+		for uuid in /dev/disk/by-partuuid/*; do
+			if [ "$(realpath "${uuid}")" = "${MMCROOT_DEV}" ]; then
+				PART_UUID="$(basename "${uuid}")"
+				break
+			fi
+		done
+
+		if [ -z "${MMC_PART}" ] || [ -z "${PART_UUID}" ]; then
+			echo "[ERROR] Unable to detect partitions."
+			return 1
+		fi
+
+		fw_setenv mmcroot "PARTUUID=${PART_UUID}"
+		fw_setenv mmcpart "${MMC_PART}"
+	else
+		fw_setenv mtdbootpart ${ALT_BOOT}
+		fw_setenv mtdrootfspart ${ALT_ROOTFS}
+		fw_setenv rootfsvol ${ALT_ROOTFS}
+	fi
+
+	fw_setenv active_system ${ALT_BOOT}
+	fw_setenv bootcount 0
+
+	return 0
+}
+
+update_emmc() {
+	local IMAGE_SET="mmc,primary"
+
+	# Get current partition information so we can
+	# determine where to flash the images.
+	[ "${ACTIVE_SYSTEM}" = "a" ] && IMAGE_SET="mmc,secondary"
+
+	echo ""
+	echo "Updating '${IMAGE_SET}' image set from '${UPDATE_FILE}'..."
+	echo ""
+
+	# Execute the update.
+	swupdate ${VERBOSE} -i "${UPDATE_FILE}" -e "${IMAGE_SET}"
+}
+
+update_nand() {
+	local IMAGE_SET="mtd,primary"
+
+	# Get current partition information so we can
+	# determine where to flash the images.
+	[ "${ACTIVE_SYSTEM}" = "a" ] && IMAGE_SET="mtd,secondary"
+
+	echo ""
+	echo "Updating '${IMAGE_SET}' image set from '${UPDATE_FILE}'..."
+	echo ""
+
+	# Execute the update.
+	if [ -f "${PUBLIC_KEY}" ]; then
+		swupdate ${VERBOSE} -i "${UPDATE_FILE}" -e "${IMAGE_SET}" -k "${PUBLIC_KEY}"
+	else
+		swupdate ${VERBOSE} -i "${UPDATE_FILE}" -e "${IMAGE_SET}"
+	fi
+}
+
+update_device() {
+	local ret
+
+	show_active_system
+	echo "Updating system on $(echo ${ALT_BOOT} | cut -d'_' -f2 | tr [:lower:] [:upper:])"
+
+	if [ -z "${NANDROOTFS}" ]; then
+		update_emmc
+	else
+		update_nand
+	fi
+
+	if [ "$?" = "0" ]; then
+		if ! swap_active_system; then
+			exit 1
+		fi
+		reboot_system "Firmware update finished"
+	else
+		echo "[ERROR] $? There was an error performing the update"
 	fi
 }
 
 while :; do
 	case $1 in
-		-a|--active) show_active_system;exit
+		-a|--active) SHOW_ACTIVE_SYSTEM=1
+		;;
+		--no-reboot) REBOOT=0
+		;;
+		--swap-active-system) SWAP_ACTIVE_SYSTEM=1
+		;;
+		-s) SCRIPT_MODE=1
 		;;
 		-v|--verbose) VERBOSE="-v"
 		;;
@@ -61,97 +210,38 @@ while :; do
 	shift
 done
 
+get_active_system || exit
+
+# Show active system.
+if [ ${SHOW_ACTIVE_SYSTEM} -eq 1 ]; then
+	show_active_system
+	exit
+fi
+
+if [ "${ACTIVE_SYSTEM}" = "a" ]; then
+	ALT_BOOT="linux_b"
+	ALT_ROOTFS="rootfs_b"
+else
+	ALT_BOOT="linux_a"
+	ALT_ROOTFS="rootfs_a"
+fi
+
+# Swap active system.
+if [ ${SWAP_ACTIVE_SYSTEM} -eq 1 ]; then
+	if ! swap_active_system; then
+		exit 1
+	fi
+	reboot_system "Swapped active system to $(echo ${ALT_BOOT} | cut -d'_' -f2 | tr [:lower:] [:upper:])"
+	exit
+fi
+
 # Check update file parameter.
 if [ -z "${UPDATE_FILE}" ]; then
 	echo "[ERROR] Update file not specified"
 	exit
+elif [ ! -f "${UPDATE_FILE}" ]; then
+	echo "[ERROR] Update file '${UPDATE_FILE}' does not exist"
+	exit
 fi
 
-# Check if the rootfs is ubifs to determine if it is a nand or emmc device
-NANDROOTFS="$(sed -ne "s/\(rootfs\).*\<ubifs\>.*/\1/g;T;p" /proc/mounts 2>/dev/null)"
-
-if [ -z "${NANDROOTFS}" ]; then
-	# Get current partition information so we can
-	# determine where to flash the images.
-	if [ "${ACTIVE_SYSTEM}" = "linux_a" ]; then
-		echo "Current system is A; Updating system on B"
-		KERNELBOOT="linux_b"
-		ROOTFS="rootfs_b"
-		IMAGE_SET="mmc,secondary"
-	else
-		echo "Current system is B; Updating system on A"
-		KERNELBOOT="linux_a"
-		ROOTFS="rootfs_a"
-		IMAGE_SET="mmc,primary"
-	fi
-
-	# get boot and rootfs partition index
-	MMC_PART="$(realpath /dev/disk/by-partlabel/${KERNELBOOT} | grep -o '[[:digit:]]\+$')"
-
-	# search rootfs UUID
-	MMCROOT_DEV="$(realpath /dev/disk/by-partlabel/${ROOTFS})"
-	for uuid in /dev/disk/by-partuuid/*; do
-		if [ "$(realpath "${uuid}")" = "${MMCROOT_DEV}" ]; then
-			PART_UUID="$(basename "${uuid}")"
-			break
-		fi
-	done
-
-	if [ -z "${MMC_PART}" ] || [ -z "${PART_UUID}" ]; then
-		echo "[ERROR] detecting partitions to update."
-		exit
-	fi
-
-	echo ""
-	echo "Updating '${IMAGE_SET}' image set from '${UPDATE_FILE}'..."
-	echo ""
-
-	# Execute the update.
-	swupdate ${VERBOSE} -i "${UPDATE_FILE}" -e "${IMAGE_SET}"
-	if [ "$?" = "0" ]; then
-		fw_setenv mmcroot "PARTUUID=${PART_UUID}"
-		fw_setenv mmcpart "${MMC_PART}"
-		fw_setenv active_system ${KERNELBOOT}
-		fw_setenv bootcount 0
-		echo "Firmware update finished; Rebooting system."
-		reboot -f
-	else
-		echo "[ERROR] $? There was an error performing the update"
-	fi
-else
-	# Get current partition information so we can
-	# determine where to flash the images.
-	if [ "${ACTIVE_SYSTEM}" = "linux_a" ]; then
-		echo "Current system is A; Updating system on B"
-		KERNELBOOT="linux_b"
-		ROOTFS="rootfs_b"
-		IMAGE_SET="mtd,secondary"
-	else
-		echo "Current system is B; Updating system on A"
-		KERNELBOOT="linux_a"
-		ROOTFS="rootfs_a"
-		IMAGE_SET="mtd,primary"
-	fi
-
-	echo ""
-	echo "Updating '${IMAGE_SET}' image set from '${UPDATE_FILE}'..."
-	echo ""
-
-	# Execute the update.
-	if [ -f "${PUBLIC_KEY}" ]; then
-		swupdate ${VERBOSE} -i "${UPDATE_FILE}" -e "${IMAGE_SET}" -k "${PUBLIC_KEY}"
-	else
-		swupdate ${VERBOSE} -i "${UPDATE_FILE}" -e "${IMAGE_SET}"
-	fi
-	if [ "$?" = "0" ]; then
-		fw_setenv mtdbootpart ${KERNELBOOT}
-		fw_setenv mtdrootfspart ${ROOTFS}
-		fw_setenv rootfsvol ${ROOTFS}
-		fw_setenv active_system ${KERNELBOOT}
-		fw_setenv bootcount 0
-		echo "Firmware update finished; Rebooting system."
-		reboot -f
-	else
-		echo "[ERROR] $? There was an error performing the update"
-	fi
-fi
+update_device

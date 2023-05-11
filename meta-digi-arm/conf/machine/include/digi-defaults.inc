@@ -50,8 +50,8 @@ WLAN1_STATIC_NETMASK ?= "255.255.255.0"
 P2P0_STATIC_IP       ?= "192.168.45.30"
 P2P0_STATIC_NETMASK  ?= "255.255.255.0"
 WLAN_P2P_INTERFACE   ?= "p2p0"
-WLAN_P2P_DEVICE_NAME ??= "${DIGI_FAMILY}-p2p"
-BT_DEVICE_NAME       ??= "${DIGI_FAMILY}"
+WLAN_P2P_DEVICE_NAME ??= "${DIGI_SOM}-p2p"
+BT_DEVICE_NAME       ??= "${DIGI_SOM}"
 
 # Digi BSP default settings
 IMAGE_CLASSES = "image_types_digi"
@@ -59,18 +59,20 @@ IMAGE_CLASSES = "image_types_digi"
 # Do not enable console on VT (see sysvinit-inittab recipe)
 USE_VT ?= "0"
 
-# Add the machine variant to the valid machine override
-MACHINE_VARIANT ?= ""
-MACHINEOVERRIDES .= "${@['', ':${MACHINE_VARIANT}']['${MACHINE_VARIANT}' != '']}"
-
 # Extra RDEPENDS
+OPTEE_PKGS ??= ""
 MACHINE_EXTRA_RDEPENDS += " \
     ${@bb.utils.contains("MACHINE_FEATURES", "mca", "mca-tool", "", d)} \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'optee', '${OPTEE_PKGS}', '', d)} \
 "
 # Extra RRECOMMENDS
 MACHINE_EXTRA_RRECOMMENDS += " \
     ${@bb.utils.contains("MACHINE_FEATURES", "cryptochip", "cryptoauthlib", "", d)} \
 "
+
+# Extra rules when device manager is systemd or udev
+UDEV_EXTRA_RULES = "udev-extraconf"
+MACHINE_EXTRA_RRECOMMENDS += "${@bb.utils.contains_any('VIRTUAL-RUNTIME_dev_manager', 'systemd udev', '${UDEV_EXTRA_RULES}', '', d)}"
 
 # Default image name (for install scripts)
 DEFAULT_IMAGE_NAME ??= "dey-image-qt"
@@ -87,3 +89,6 @@ BOOT_SCRIPTS += "boot.scr:boot.scr altboot.scr:altboot.scr"
 
 # This can be used to enable U-Boot update through swupdate
 SWUPDATE_UBOOTIMG ?= "false"
+
+# Cloud Connector package to install
+CLOUDCONNECTOR_PKG ?= "cloudconnector"

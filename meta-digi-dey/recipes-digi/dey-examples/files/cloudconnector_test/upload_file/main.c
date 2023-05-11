@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Digi International Inc.
+ * Copyright (c) 2017-2023 Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -13,9 +13,10 @@
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  *
- * Digi International Inc. 11001 Bren Road East, Minnetonka, MN 55343
- * =======================================================================
+ * Digi International Inc., 9350 Excelsior Blvd., Suite 700, Hopkins, MN 55343
+ * ===========================================================================
  */
+
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -28,7 +29,8 @@
 
 static void sigint_handler(int signum)
 {
-	log_debug("sigint_handler(): received signal %d to close Cloud connection.\n", signum);
+	log_debug("%s: received signal %d to close Cloud connection.",
+		  __func__, signum);
 
 	exit(0);
 }
@@ -36,7 +38,6 @@ static void sigint_handler(int signum)
 static void graceful_shutdown(void)
 {
 	stop_cloud_connection();
-	wait_for_ccimp_threads();
 }
 
 static void add_sigkill_signal(void)
@@ -67,19 +68,19 @@ int main(int argc, char *argv[])
 
 	init_error = init_cloud_connection(NULL);
 	if (init_error != CC_INIT_ERROR_NONE) {
-		log_error("Cannot initialize cloud connection, error %d\n", init_error);
+		log_error("Cannot initialize cloud connection, error %d", init_error);
 		return EXIT_FAILURE;
 	}
 
 	start_error = start_cloud_connection();
 	if (start_error != CC_START_ERROR_NONE) {
-		log_error("Cannot start cloud connection, error %d\n", start_error);
+		log_error("Cannot start cloud connection, error %d", start_error);
 		return EXIT_FAILURE;
 	}
 
 	send_error = ccapi_dp_binary_send_file(CCAPI_TRANSPORT_TCP, UPLOAD_FILE, STREAM_NAME);
 	if (send_error != CCAPI_DP_B_ERROR_NONE) {
-		log_error("ccapi_dp_binary_send_file() failed, error %d\n", send_error);
+		log_error("%s failed, error %d", __func__, send_error);
 		return EXIT_FAILURE;
 	}
 

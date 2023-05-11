@@ -208,9 +208,6 @@ IMX_ALSA_EXTRA:imx-nxp-bsp = "imx-alsa-plugins"
 MACHINE_EXTRA_RRECOMMENDS:append:mx6-nxp-bsp = " ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', '${IMX_ALSA_EXTRA}', '', d)}"
 MACHINE_EXTRA_RRECOMMENDS:append:mx8-nxp-bsp = " ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', '${IMX_ALSA_EXTRA}', '', d)}"
 
-# Extra udev rules
-MACHINE_EXTRA_RRECOMMENDS += "udev-extraconf udev-rules-imx"
-
 # GStreamer 1.0 plugins
 MACHINE_GSTREAMER_1_0_PLUGIN                ?= ""
 MACHINE_GSTREAMER_1_0_PLUGIN:mx6dl-nxp-bsp  ?= "imx-gst1.0-plugin"
@@ -281,6 +278,9 @@ PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "3.19.0.imx"
 PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.19.0.imx"
 PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "3.19.0.imx"
 
+# Optee runtime packages to install
+OPTEE_PKGS ??= "optee-client optee-os"
+
 # Use i.MX opencv Version
 PREFERRED_VERSION_opencv:mx8-nxp-bsp ??= "4.6.0.imx"
 PREFERRED_VERSION_opencv:mx9-nxp-bsp ??= "4.6.0.imx"
@@ -292,11 +292,11 @@ KERNEL_IMAGETYPE:aarch64 = "Image.gz"
 
 MACHINE_FEATURES = "usbgadget usbhost vfat alsa touchscreen"
 
-# Add a generic gstreamer distro feature for all IMX platforms
-DISTRO_FEATURES:append =  " gstreamer"
+# IMX specific udev extra rules added when device manager is systemd/udev
+UDEV_EXTRA_RULES:append = " udev-rules-imx"
 
 # U-Boot 2017.X requires a specific dtc version.
 PREFERRED_VERSION_dtc-native:ccimx6 ?= "1.4.5"
 PREFERRED_VERSION_nativesdk-dtc:ccimx6 ?= "1.4.5"
 
-DEY_BUILD_PLATFORM = "NXP"
+DEY_SOC_VENDOR = "NXP"

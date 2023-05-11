@@ -1,0 +1,2 @@
+# Disable all SD devices
+SUBSYSTEMS=="mmc", ATTRS{type}=="SD", RUN:="/bin/true"

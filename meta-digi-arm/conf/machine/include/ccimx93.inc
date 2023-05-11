@@ -3,8 +3,6 @@
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore 93 family of SOMs
 
 DIGI_FAMILY = "ccimx93"
-MACHINEOVERRIDES =. "${DIGI_FAMILY}:"
-MACHINEOVERRIDES =. "mx93:"
 
 require conf/machine/include/imx-digi-base.inc
 require conf/machine/include/arm/armv8-2a/tune-cortexa55.inc
@@ -30,6 +28,7 @@ MACHINE_FEATURES += "pci wifi bluetooth"
 MACHINE_FEATURES:append:use-nxp-bsp = " optee jailhouse"
 
 STORAGE_MEDIA = "mmc"
+WLAN_P2P_INTERFACE = "wfd0"
 
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx93_defconfig"
@@ -62,8 +61,8 @@ BT_TTY ?= "ttyLP0"
 # Add additional firmware
 MACHINE_FIRMWARE:append = " ethos-u-firmware"
 
-# Adding 'wayland' along with 'x11' enables the xwayland backend
-DISTRO_FEATURES:append = " wayland pam"
+# Per-machine DISTRO_FEATURES customization
+MACHINE_DISTRO_FEATURES_REMOVE = "vulkan"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"

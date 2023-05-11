@@ -2,8 +2,9 @@
 #@NAME: ConnectCore for i.MX6UL.
 #@DESCRIPTION: Machine configuration for Digi's ConnectCore 6UL.
 
+DIGI_SOM = "ccimx6ul"
 DIGI_FAMILY = "ccimx6ul"
-MACHINEOVERRIDES =. "mx6:mx6ul:${DIGI_FAMILY}:"
+MACHINEOVERRIDES =. "mx6:mx6ul:${DIGI_FAMILY}:${DIGI_SOM}:"
 
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/arm/armv7a/tune-cortexa7.inc
@@ -46,6 +47,9 @@ MKUBIFS_ARGS ?= "-m 2048 -e 126976 -c 8191"
 
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "HAB"
+
+# Per-machine DISTRO_FEATURES customization
+MACHINE_DISTRO_FEATURES_REMOVE = "vulkan wayland"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.ubifs"
