@@ -7,7 +7,7 @@ LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
 
 SRCBRANCH ?= "dey-4.0/maint"
-SRCREV = "6091d98850b35f591417bc28fe31af1c385179c6"
+SRCREV = "${AUTOREV}"
 
 LIBDIGIAPIX_URI_STASH = "${DIGI_MTK_GIT}/dey/libdigiapix.git;protocol=ssh"
 LIBDIGIAPIX_URI_GITHUB = "${DIGI_GITHUB_GIT}/libdigiapix.git;protocol=https"
@@ -15,7 +15,7 @@ LIBDIGIAPIX_URI_GITHUB = "${DIGI_GITHUB_GIT}/libdigiapix.git;protocol=https"
 LIBDIGIAPIX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${LIBDIGIAPIX_URI_STASH}', '${LIBDIGIAPIX_URI_GITHUB}', d)}"
 
 SRC_URI = " \
-    ${LIBDIGIAPIX_GIT_URI};nobranch=1 \
+    ${LIBDIGIAPIX_GIT_URI};branch=${SRCBRANCH} \
     file://99-digiapix.rules \
     file://libdigiapix.conf \
     file://digiapix.sh \
