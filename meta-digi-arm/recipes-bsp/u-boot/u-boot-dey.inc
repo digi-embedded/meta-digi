@@ -27,7 +27,7 @@ INSTALL_FW_UBOOT_SCRIPTS = " \
 "
 
 SRC_URI = " \
-    ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
+    ${UBOOT_GIT_URI};nobranch=1 \
     file://altboot.txt \
     file://boot.txt \
     ${INSTALL_FW_UBOOT_SCRIPTS} \
