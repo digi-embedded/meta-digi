@@ -67,3 +67,8 @@ MACHINE_DISTRO_FEATURES_REMOVE = "vulkan"
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"
 ROOTFS_EXT ?= ".ext4.gz"
+
+BOOT_DEV_NAME ?= "/dev/mmcblk0p1"
+ROOTFS_DEV_NAME ?= "/dev/mmcblk0p3"
+ROOTFS_ENC_DEV = "/dev/mapper/cryptrootfs"
+ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS') == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
