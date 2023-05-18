@@ -231,15 +231,15 @@ IMAGE_TYPES += "cpio.gz.u-boot.tf"
 do_image_squashfs[postfuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'rootfs_sign', '', d)}"
 
 rootfs_sign() {
-        # Set environment variables for trustfence configuration
-        export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
-        [ -n "${CONFIG_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
+	# Set environment variables for trustfence configuration
+	export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+	[ -n "${CONFIG_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 
-        ROOTFS_IMAGE="${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.squashfs"
-        TMP_ROOTFS_IMAGE_SIGNED="$(mktemp ${ROOTFS_IMAGE}-signed.XXXXXX)"
-        # Sign rootfs read-only image
-        trustfence-sign-artifact.sh -p "${DIGI_SOM}" -r "${ROOTFS_IMAGE}" "${TMP_ROOTFS_IMAGE_SIGNED}"
-        mv "${TMP_ROOTFS_IMAGE_SIGNED}" "${ROOTFS_IMAGE}"
+	ROOTFS_IMAGE="${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.squashfs"
+	TMP_ROOTFS_IMAGE_SIGNED="$(mktemp ${ROOTFS_IMAGE}-signed.XXXXXX)"
+	# Sign rootfs read-only image
+	trustfence-sign-artifact.sh -p "${DIGI_SOM}" -r "${ROOTFS_IMAGE}" "${TMP_ROOTFS_IMAGE_SIGNED}"
+	mv "${TMP_ROOTFS_IMAGE_SIGNED}" "${ROOTFS_IMAGE}"
 }
 
 rootfs_sign[dirs] = "${DEPLOY_DIR_IMAGE}"
