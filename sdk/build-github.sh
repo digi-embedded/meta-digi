@@ -22,19 +22,6 @@
 
 set -e
 
-AVAILABLE_PLATFORMS=" \
-		     ccimx8mm-dvk \
-		     ccimx8mn-dvk \
-		     ccimx8x-sbc-pro \
-		     ccimx8x-sbc-express \
-		     ccimx6qpsbc \
-		     ccimx6sbc \
-		     ccimx6ulsbc \
-		     ccimx6ulstarter \
-		     ccmp15-dvk \
-		     ccmp13-dvk \
-"
-
 MANIFEST_URL="https://github.com/digi-embedded/dey-manifest.git"
 
 RM_WORK_CFG="
@@ -53,14 +40,10 @@ SOURCE_DATE_EPOCH = \"${SOURCE_DATE_EPOCH}\"
 REPRODUCIBLE_TIMESTAMP_ROOTFS = \"${SOURCE_DATE_EPOCH}\"
 "
 
-BACKEND_REMOVAL_CFG="
-DISTRO_FEATURES_remove = \"x11 wayland vulkan\"
-"
-
 REPO="$(which repo)"
 
 error() {
-	printf "${1}"
+	printf "%s" "${1}"
 	exit 1
 }
 
@@ -73,10 +56,10 @@ copy_images() {
 	# Copy individual packages only for 'release' builds, not for 'daily'.
 	# For 'daily' builds just copy the firmware images (the buildserver
 	# cannot afford such amount of disk space)
-	if echo ${JOB_NAME} | grep -qs 'dey.*release'; then
-		cp -r tmp/deploy/* ${1}/
+	if echo "${JOB_NAME}" | grep -qs 'dey.*release'; then
+		cp -r tmp/deploy/* "${1}"/
 	else
-		cp -r tmp/deploy/images ${1}/
+		cp -r tmp/deploy/images "${1}"/
 	fi
 
 	# Images directory post-processing
@@ -85,9 +68,9 @@ copy_images() {
 	#    files.
 	#  - Remove 'README_-_DO_NOT_DELETE_FILES_IN_THIS_DIRECTORY.txt' files
 	#  - Create MD5SUMS file
-	find ${1} -type l -delete
-	find ${1} -type f -name 'README_-_DO_NOT_DELETE*' -delete
-	find ${1} -type f -not -name MD5SUMS -print0 | xargs -r -0 md5sum | sed -e "s,${1}/,,g" | sort -k2,2 > ${1}/MD5SUMS
+	find "${1}" -type l -delete
+	find "${1}" -type f -name 'README_-_DO_NOT_DELETE*' -delete
+	find "${1}" -type f -not -name MD5SUMS -print0 | xargs -r -0 md5sum | sed -e "s,${1}/,,g" | sort -k2,2 > "${1}"/MD5SUMS
 }
 
 #
@@ -112,7 +95,7 @@ purge_sstate() {
 		packagegroup-dey-webkit \
 		packagegroup-dey-wireless \
 	"
-	bitbake -k -c cleansstate ${PURGE_PKGS} >/dev/null 2>&1 || true
+	bitbake -k -c cleansstate "${PURGE_PKGS}" >/dev/null 2>&1 || true
 }
 
 #
@@ -121,8 +104,8 @@ purge_sstate() {
 #  $1: image recipe
 #
 swu_recipe_name() {
-	if [ -n "$(find ${YOCTO_INST_DIR}/sources/meta-digi -type f -name "${1}-swu.bb")" ]; then
-		printf "${1}-swu"
+	if [ -n "$(find "${YOCTO_INST_DIR}"/sources/meta-digi -type f -name "${1}-swu.bb")" ]; then
+		printf "%s-swu" "${1}"
 	fi
 }
 
@@ -130,11 +113,10 @@ swu_recipe_name() {
 [ -z "${DY_REVISION}" ] && error "DY_REVISION not specified"
 [ -z "${WORKSPACE}" ] && error "WORKSPACE not specified"
 
-# Set default values if not provided by Jenkins
-[ -z "${DY_PLATFORMS}" ] && DY_PLATFORMS="$(echo ${AVAILABLE_PLATFORMS})"
-
 # Per-platform data
-while read _pl _tgt; do
+while read -r _pl _tgt; do
+	AVAILABLE_PLATFORMS="${AVAILABLE_PLATFORMS:+${AVAILABLE_PLATFORMS} }${_pl}"
+	# shellcheck disable=SC2015
 	[ -n "${DY_TARGET}" ] && _tgt="${DY_TARGET}" || true
 	# Dashes are not allowed in variables so let's substitute them on
 	# the fly with underscores.
@@ -152,72 +134,80 @@ done<<-_EOF_
 	ccmp13-dvk           core-image-base
 _EOF_
 
+# Set default values if not provided by Jenkins
+DY_PLATFORMS="${DY_PLATFORMS:-${AVAILABLE_PLATFORMS}}"
+
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
-YOCTO_INST_DIR="${WORKSPACE}/dey.$(echo ${DY_REVISION} | tr '/' '_')"
+YOCTO_INST_DIR="${WORKSPACE}/dey.$(echo "${DY_REVISION}" | tr '/' '_')"
 YOCTO_PROJ_DIR="${WORKSPACE}/projects"
 
 # If CPUS is unset, set it with the machine cpus
 if [ -z "${CPUS}" ]; then
 	CPUS="$(grep -c processor /proc/cpuinfo)"
 fi
-[ ${CPUS} -gt 1 ] && MAKE_JOBS="-j${CPUS}"
+[ "${CPUS}" -gt 1 ] && MAKE_JOBS="-j${CPUS}"
 
-printf "\n[INFO] Build Yocto \"${DY_REVISION}\" for \"${DY_PLATFORMS}\" (cpus=${CPUS})\n\n"
+printf "\n[INFO] Build Yocto \"%s\" for \"%s\" (cpus=%s)\n\n" "${DY_REVISION}" "${DY_PLATFORMS}" "${CPUS}"
 
 # Install DEY
-rm -rf ${YOCTO_INST_DIR} && mkdir -p ${YOCTO_INST_DIR}
-if pushd ${YOCTO_INST_DIR}; then
+rm -rf "${YOCTO_INST_DIR}" && mkdir -p "${YOCTO_INST_DIR}"
+if pushd "${YOCTO_INST_DIR}"; then
 	# Use git ls-remote to check the revision type
 	if [ "${DY_REVISION}" != "master" ]; then
 		if git ls-remote --tags --exit-code "${MANIFEST_URL}" "${DY_REVISION}"; then
-			printf "[INFO] Using tag \"${DY_REVISION}\"\n"
+			printf "[INFO] Using tag \"%s\"\n" "${DY_REVISION}"
 			repo_revision="-b refs/tags/${DY_REVISION}"
 		elif git ls-remote --heads --exit-code "${MANIFEST_URL}" "${DY_REVISION}"; then
-			printf "[INFO] Using branch \"${DY_REVISION}\"\n"
+			printf "[INFO] Using branch \"%s\"\n" "${DY_REVISION}"
 			repo_revision="-b ${DY_REVISION}"
 		else
 			error "Revision \"${DY_REVISION}\" not found"
 		fi
 	fi
+	# shellcheck disable=SC2086
 	yes "" 2>/dev/null | ${REPO} init --no-repo-verify -u ${MANIFEST_URL} ${repo_revision}
-	${REPO} forall -p -c 'git remote prune $(git remote)'
+	${REPO} --no-pager forall -j4 -p -c 'git clean -fdx'
+	# shellcheck disable=SC2016
+	${REPO} --no-pager forall -j4 -p -c 'git remote prune $(git remote)' || true
+	# shellcheck disable=SC2086
 	time ${REPO} sync -d ${MAKE_JOBS}
 	popd
 fi
 
 # Create projects and build
-rm -rf ${YOCTO_IMGS_DIR} ${YOCTO_PROJ_DIR}
+rm -rf "${YOCTO_IMGS_DIR}" "${YOCTO_PROJ_DIR}"
 for platform in ${DY_PLATFORMS}; do
-	# The variables <platform>_var|tgt got their dashes converted to
+	# The variable <platform>_tgt got its dashes converted to
 	# underscores, so we must convert also the ones in ${platform}.
-	eval platform_targets=\"\${${platform//-/_}_tgt}\"
+	eval "platform_targets=\"\${${platform//-/_}_tgt}\""
+
 	_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}"
 	_this_img_dir="${YOCTO_IMGS_DIR}/${platform}"
-	mkdir -p ${_this_img_dir} ${_this_prj_dir}
-	if pushd ${_this_prj_dir}; then
+	mkdir -p "${_this_img_dir}" "${_this_prj_dir}"
+	if pushd "${_this_prj_dir}"; then
 		# Configure and build the project in a sub-shell to avoid
 		# mixing environments between different platform's projects
 		(
 			export TEMPLATECONF="${TEMPLATECONF:+${TEMPLATECONF}/${platform}}"
-			MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p ${platform} <<< "y"
+			# shellcheck disable=SC1091,SC2086
+			MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p "${platform}" <<< "y"
 			# Set a common DL_DIR and SSTATE_DIR for all platforms
 			sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_PROJ_DIR}/downloads\"" \
 				-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
 				conf/local.conf
-			printf "${RM_WORK_CFG}" >> conf/local.conf
-			printf "${ZIP_INSTALLER_CFG}" >> conf/local.conf
-			printf "${BUILD_TIMESTAMP}" >> conf/local.conf
-			# Remove all desktop backend distro features if building framebuffer images
-			if [ "${DY_FB_IMAGE}" = "true" ]; then
-				printf "${BACKEND_REMOVAL_CFG}" >> conf/local.conf
-			fi
-			for target in ${platform_targets}; do
-				printf "\n[INFO] Building the ${target} target.\n"
-				time bitbake ${target} $(swu_recipe_name ${target})
+			{
+				printf "%s" "${RM_WORK_CFG}"
+				printf "%s" "${ZIP_INSTALLER_CFG}"
+				printf "%s" "${BUILD_TIMESTAMP}"
+			} >> conf/local.conf
+			for target in ${platform_targets:?}; do
+				printf "\n[INFO] Building the %s target.\n" "${target}"
+				# shellcheck disable=SC2046
+				time bitbake "${target}" $(swu_recipe_name "${target}")
 			done
 			purge_sstate
 		)
-		copy_images ${_this_img_dir}
+		copy_images "${_this_img_dir}"
 		popd
 	fi
 done
