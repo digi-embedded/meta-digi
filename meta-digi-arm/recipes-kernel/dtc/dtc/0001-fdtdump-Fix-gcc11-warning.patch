@@ -1,0 +1,53 @@
+From: David Gibson <david@gibson.dropbear.id.au>
+Date: Wed, 6 Jan 2021 14:52:26 +1100
+Subject: [PATCH] fdtdump: Fix gcc11 warning
+
+In one place, fdtdump abuses fdt_set_magic(), passing it just a small char
+array instead of the full fdt header it expects.  That's relying on the
+fact that in fact fdt_set_magic() will only actually access the first 4
+bytes of the buffer.
+
+This trips a new warning in GCC 11 - and it's entirely possible it was
+always UB.  So, don't do that.
+
+Signed-off-by: David Gibson <david@gibson.dropbear.id.au>
+(cherry picked from commit ca16a723fa9dde9c5da80dba567f48715000e77c)
+---
+ fdtdump.c       |  2 +-
+ libfdt/libfdt.h | 10 ++++++++++
+ 2 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/fdtdump.c b/fdtdump.c
+index fa3b561..072c0af 100644
+--- a/fdtdump.c
++++ b/fdtdump.c
+@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
+ 		char *p = buf;
+ 		char *endp = buf + len;
+ 
+-		fdt_set_magic(smagic, FDT_MAGIC);
++		fdt32_st(smagic, FDT_MAGIC);
+ 
+ 		/* poor man's memmem */
+ 		while ((endp - p) >= FDT_MAGIC_SIZE) {
+diff --git a/libfdt/libfdt.h b/libfdt/libfdt.h
+index 313c72a..8795f10 100644
+--- a/libfdt/libfdt.h
++++ b/libfdt/libfdt.h
+@@ -153,6 +153,16 @@ static inline void *fdt_offset_ptr_w(void *fdt, int offset, int checklen)
+ 
+ uint32_t fdt_next_tag(const void *fdt, int offset, int *nextoffset);
+ 
++static inline void fdt32_st(void *property, uint32_t value)
++{
++	uint8_t *bp = (uint8_t *)property;
++
++	bp[0] = value >> 24;
++	bp[1] = (value >> 16) & 0xff;
++	bp[2] = (value >> 8) & 0xff;
++	bp[3] = value & 0xff;
++}
++
+ /**********************************************************************/
+ /* Traversal functions                                                */
+ /**********************************************************************/

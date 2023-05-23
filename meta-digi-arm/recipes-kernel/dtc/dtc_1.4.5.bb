@@ -9,6 +9,7 @@ SRCREV = "22a65c5331c22979d416738eb756b9541672e00d"
 
 SRC_URI:append = " \
     file://0001-Remove-redundant-YYLOC-global-declaration.patch \
+    file://0001-fdtdump-Fix-gcc11-warning.patch \
 "
 
 S = "${WORKDIR}/git"
