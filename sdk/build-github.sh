@@ -132,6 +132,7 @@ done<<-_EOF_
 	ccimx6ulstarter      core-image-base
 	ccmp15-dvk           dey-image-webkit
 	ccmp13-dvk           core-image-base
+	ccimx93-dvk          dey-image-qt
 _EOF_
 
 # Set default values if not provided by Jenkins
