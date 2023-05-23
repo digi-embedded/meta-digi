@@ -48,8 +48,9 @@ do_configure:append() {
 # Create base DTB suitable for overlays
 OVERLAYS_DTC_FLAGS = "-@"
 OVERLAYS_DTC_FLAGS:ccimx6ul = ""
+OVERLAYS_DTC_FLAGS:ccimx6 = ""
 KERNEL_DTC_FLAGS = "${OVERLAYS_DTC_FLAGS}"
 
 KERNEL_EXTRA_ARGS:stm32mpcommon += "LOADADDR=${ST_KERNEL_LOADADDR}"
 
-COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx93|ccmp1)"
+COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx93|ccimx6|ccmp1)"
