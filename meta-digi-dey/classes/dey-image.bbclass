@@ -62,8 +62,5 @@ toolchain_create_sdk_dey_version[vardepsexclude] = "DATETIME"
 #
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
-# Remove kernel-module-imx-gpu-viv from all images
-BAD_RECOMMENDATIONS += "kernel-module-imx-gpu-viv"
-
 # Do not include kernel in rootfs images
 PACKAGE_EXCLUDE = "kernel-image-*"
