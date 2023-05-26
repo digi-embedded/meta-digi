@@ -24,7 +24,6 @@ TRUSTFENCE_SIGN_KEYS_PATH ?= "default"
 TRUSTFENCE_DEK_PATH ?= "default"
 TRUSTFENCE_DEK_PATH:ccmp1 ?= "0"
 TRUSTFENCE_ENCRYPT_ENVIRONMENT ?= "1"
-TRUSTFENCE_ENCRYPT_ENVIRONMENT:ccmp1 ?= "0"
 TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 TRUSTFENCE_KEY_INDEX ?= "0"
 
@@ -100,6 +99,8 @@ python () {
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT") == "1"):
         if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y ")
+        elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
+            d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES_CCMP1=y ")
 
     # Provide sane default values for SWUPDATE class in case Trustfence is enabled
     if (d.getVar("TRUSTFENCE_SIGN") == "1"):
