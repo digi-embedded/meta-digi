@@ -55,7 +55,7 @@ python () {
             if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
                 d.appendVar("UBOOT_TF_CONF", "CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NR=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"))
             elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
-                d.appendVar("UBOOT_TF_CONF", "CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NAME=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_NAME"))
+                d.appendVar("UBOOT_TF_CONF", 'CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NAME="%s" ' % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_NAME"))
 
     # Secure boot configuration
     if (d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") == "default"):

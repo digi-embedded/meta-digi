@@ -63,6 +63,8 @@ tfa_sign() {
 					TF_A_FILENAME="${tfa_basename}-${dt}-${config}.${TF_A_SUFFIX}"
 					if [ -f "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}" ]; then
 						trustfence-sign-artifact.sh -p "${DIGI_SOM}" -t "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}" "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}_signed"
+						# the generated artifact lacks 'w' permission which prevents deletion by the build system
+						chmod u+w "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}_signed"
 					fi
 				esac
 			done # for file_type in ${tfa_file_type}

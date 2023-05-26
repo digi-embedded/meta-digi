@@ -17,13 +17,13 @@ Signed-off-by: Mike Engel <Mike.Engel@digi.com>
  create mode 120000 ipc-static/progress_ipc.c
 
 diff --git a/Makefile b/Makefile
-index bf534e110ac3..8b704798501f 100644
+index 09d03a3..080b834 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -364,6 +364,7 @@ include $(srctree)/Makefile.flags
  
- objs-y		:= core handlers bootloader
- libs-y		:= corelib mongoose parser suricatta fs
+ objs-y		:= core handlers bootloader suricatta
+ libs-y		:= corelib mongoose parser fs
 +libs-y		+= ipc-static
  bindings-y	:= bindings
  tools-y		:= tools
@@ -47,7 +47,7 @@ index bf534e110ac3..8b704798501f 100644
  		install -m 0755 ${lua_swupdate} $(DESTDIR)/${LIBDIR}/lua/$(LUAVER); \
 diff --git a/ipc-static/Makefile b/ipc-static/Makefile
 new file mode 100644
-index 000000000000..99cce6cc75da
+index 0000000..99cce6c
 --- /dev/null
 +++ b/ipc-static/Makefile
 @@ -0,0 +1,6 @@
@@ -59,7 +59,7 @@ index 000000000000..99cce6cc75da
 +EXTRA_CFLAGS += -fPIC
 diff --git a/ipc-static/network_ipc-if.c b/ipc-static/network_ipc-if.c
 new file mode 120000
-index 000000000000..37894e2f8207
+index 0000000..37894e2
 --- /dev/null
 +++ b/ipc-static/network_ipc-if.c
 @@ -0,0 +1 @@
@@ -67,7 +67,7 @@ index 000000000000..37894e2f8207
 \ No newline at end of file
 diff --git a/ipc-static/network_ipc.c b/ipc-static/network_ipc.c
 new file mode 120000
-index 000000000000..0640077ec0fc
+index 0000000..0640077
 --- /dev/null
 +++ b/ipc-static/network_ipc.c
 @@ -0,0 +1 @@
@@ -75,7 +75,7 @@ index 000000000000..0640077ec0fc
 \ No newline at end of file
 diff --git a/ipc-static/progress_ipc.c b/ipc-static/progress_ipc.c
 new file mode 120000
-index 000000000000..7c6622ce0a30
+index 0000000..7c6622c
 --- /dev/null
 +++ b/ipc-static/progress_ipc.c
 @@ -0,0 +1 @@

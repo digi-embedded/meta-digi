@@ -21,18 +21,24 @@ OS versions:
 
 Software for the following hardware platforms is in production support:
 
+## ConnectCore 93
+* ConnectCore 93 System-on-Module (SOM)
+  * [CC-WMX-YC7D-KN](https://www.digi.com/products/models/cc-wmx-yc7d-kn)
+* ConnectCore 93 Development Kit (DVK)
+  * [CC-WMX93-KIT](https://www.digi.com/products/models/cc-wmx93-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc93/yocto-gs_index))
+
 ## ConnectCore MP13
 * ConnectCore MP13 System-on-Module (SOM)
   * [CC-WST-DX58-NK](https://www.digi.com/products/models/cc-wst-dx58-nk)
   * [CC-ST-DX58-ZK](https://www.digi.com/products/models/cc-st-dx58-zk)
-* ConnectCore MP13 DVK
+* ConnectCore MP13 Development Kit (DVK)
   * [CC-WMP133-KIT](https://www.digi.com/products/models/cc-wmp133-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/ccmp13/yocto-gs_index))
 
 ## ConnectCore MP15
 * ConnectCore MP15 System-on-Module (SOM)
   * [CC-WST-DW69-NM](https://www.digi.com/products/models/cc-wst-dw69-nm)
   * [CC-ST-DW69-ZM](https://www.digi.com/products/models/cc-st-dw69-zm)
-* ConnectCore MP15 DVK
+* ConnectCore MP15 Development Kit (DVK)
   * [CC-WMP157-KIT](https://www.digi.com/products/models/cc-wmp157-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/ccmp15/yocto-gs_index))
 
 ## ConnectCore 8M Mini
@@ -41,7 +47,7 @@ Software for the following hardware platforms is in production support:
   * [CC-WMX-ET7D-NN](https://www.digi.com/products/models/cc-wmx-et7d-nn)
   * [CC-MX-ET8D-ZN](https://www.digi.com/products/models/cc-mx-et8d-zn)
   * [CC-MX-ET7D-ZN](https://www.digi.com/products/models/cc-mx-et7d-zn)
-* ConnectCore 8M Mini Development Kit
+* ConnectCore 8M Mini Development Kit (DVK)
   * [CC-WMX8MM-KIT](https://www.digi.com/products/models/cc-wmx8mm-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc8mmini/yocto-gs_index))
 
 ## ConnectCore 8M Nano
@@ -50,7 +56,7 @@ Software for the following hardware platforms is in production support:
   * [CC-WMX-FR6D-NN](https://www.digi.com/products/models/cc-wmx-fr6d-nn)
   * [CC-MX-FS7D-ZN](https://www.digi.com/products/models/cc-mx-fs7d-zn)
   * [CC-MX-FR6D-ZN](https://www.digi.com/products/models/cc-mx-fr6d-zn)
-* ConnectCore 8M Nano Development Kit
+* ConnectCore 8M Nano Development Kit (DVK)
   * [CC-WMX8MN-KIT](https://www.digi.com/products/models/cc-wmx8mn-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc8mnano/yocto-gs_index))
 
 ## ConnectCore 6UL
@@ -81,10 +87,30 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 # Downloads
 
-* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/4.0/r2/images/
-* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/4.0/r2/sdk/
+* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/4.0/r3/images/
+* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/4.0/r3/sdk/
 
 # Release Changelog
+
+## 4.0-r3
+
+* ST-based platforms
+  * Added initial TrustFence support
+  * Fixed Ethernet PHY pinctrl resuming from deep sleep
+  * Adjust CAN bus parent clock to achieve more accurate baudrates
+  * Add DT overlay for Bluetooth raw test mode
+  * Adjust NAND lines speed settings
+  * Add specific kernel driver for Marvell Ethernet PHY on DVK
+  * Fix race condition on bringup of LAN87xx Ethernet PHY
+  * Disable auto-mount of microSD card to avoid race condition on kernel boot
+* NXP-based platforms
+  * Added support to ConnectCore 93
+    * U-Boot v2022.04 (based on tag 'lf-5.15.71-2.2.0' by NXP)
+    * Linux kernel v5.15.71 (based on tag 'lf-5.15.71-2.2.0' by NXP)
+    * QT6 6.3.2
+  * Fix PMIC regulators suspend state on ConnectCore 8M Nano
+  * Fix clock initialization issue on LAN8710/20 PHY on ConnectCore 6UL
+* General bug fixing and improvements
 
 ## 4.0-r2
 
@@ -153,9 +179,8 @@ updated list can be found on the online documentation.
   * Wireless
     * P2P on the ConnectCore MP1 doesn't currently work in concurrency with
       other modes (station or SoftAP).
-
-  * The following features are not yet supported:
-    * TrustFence
+    * Connecting to a 802.11r network throws an unexpected error with the latest
+      CYW4373E wireless firmware.
 
 ## ConnectCore 6UL
 
