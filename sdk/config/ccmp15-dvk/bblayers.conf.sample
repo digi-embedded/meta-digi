@@ -18,6 +18,7 @@ BBLAYERS ?= " \
   ##DIGIBASE##/meta-webkit \
   ##DIGIBASE##/meta-timesys \
   ##DIGIBASE##/meta-st-stm32mp \
+  ##DIGIBASE##/meta-st-stm32mpu-ai \
   ##DIGIBASE##/meta-digi/meta-digi-arm \
   ##DIGIBASE##/meta-digi/meta-digi-dey \
   "
