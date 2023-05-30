@@ -11,7 +11,9 @@ FW_CONFIG_FILE = "${@bb.utils.contains('STORAGE_MEDIA', 'mtd', \
 			'${STORAGE_MEDIA}/fw_env.config', \
 			 d)}"
 
-FW_CONFIG_FILE:ccmp1 = "ubi/fw_env.config"
+FW_CONFIG_FILE:ccmp1 = "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', \
+				'ubi/fw_env.config_default', \
+				'ubi/fw_env.config', d)}"
 
 SRC_URI += " \
     file://${FW_CONFIG_FILE} \
