@@ -38,7 +38,7 @@ MACHINE_DISTRO_FEATURES_REMOVE = "vulkan"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"
-ROOTFS_EXT ?= ".ext4.gz"
+ROOTFS_EXT ?= '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", ".squashfs", ".ext4.gz", d)}'
 
 BOOT_DEV_NAME ?= "/dev/mmcblk0p1"
 ROOTFS_DEV_NAME ?= "/dev/mmcblk0p3"
