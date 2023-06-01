@@ -1,0 +1,8 @@
+		{
+                    filename = "##IMG_NAME##";
+                    device = "##DEV##";
+                    type = "raw";
+                    sha256 = "$swupdate_get_sha256(##IMG_NAME##)";
+                    compressed = "zlib";
+                    installed-directly = true;
+		}
