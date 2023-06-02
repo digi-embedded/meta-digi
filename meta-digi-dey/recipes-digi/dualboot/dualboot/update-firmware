@@ -32,8 +32,11 @@ UPDATE_FILE=""
 ALT_BOOT=""
 ALT_ROOTFS=""
 
-# Check if the rootfs is ubifs to determine if it is a nand or emmc device
-NANDROOTFS="$(grep -qs '[[:blank:]]\+/[[:blank:]]\+ubifs.*' /proc/mounts 2>/dev/null && echo 1)"
+# Check in the command line if root=PARTUUID to determine if the system is nand or emmc
+# eMMC ==> root=PARTUUID
+# NAND ==> root=ubiX:rootfs_X
+# NAND (squashsf) ==> root=/dev/ubiblock0_X
+EMMCROOTFS="$(grep -qs 'root=PARTUUID.*' /proc/cmdline 2>/dev/null && echo 1)"
 
 ## Local functions
 usage() {
@@ -52,7 +55,23 @@ EOF
 }
 
 get_active_system() {
-	if [ -z "${NANDROOTFS}" ]; then
+	if [ -z "${EMMCROOTFS}" ]; then
+		# For a read-only filesystem this will be /dev/ubiblock0_X
+		# For an ubifs filesystem this will be ubiX:rootfs_X
+		ACTIVE_SYSTEM="$(sed -e 's/^.*root=\([^ ]*\) .*$/\1/' /proc/cmdline 2>/dev/null)"
+		if ! echo "${ACTIVE_SYSTEM}" | grep -qs rootfs; then
+			# From /dev/ubiblock0_X to /dev/ubi0_X
+			ACTIVE_SYSTEM="/dev/ubi${ACTIVE_SYSTEM#/dev/ubiblock}"
+			#Volume ID:   5 (on ubi0)
+			#Type:        dynamic
+			#Alignment:   1
+			#Size:        1817 LEBs (230715392 bytes, 220.0 MiB)
+			#State:       OK
+			#Name:        rootfs_b
+			#Character device major/minor: 242:6
+			ACTIVE_SYSTEM="$(ubinfo "${ACTIVE_SYSTEM}" | sed -ne '/^Name/s,.* \([^[:blank:]]\+\)$,\1,g;T;p')"
+		fi
+	else
 		local MMCROOT_DEV
 
 		MMCROOT_DEV="$(stat -c%D /)"
@@ -63,8 +82,6 @@ get_active_system() {
 				break
 			fi
 		done
-	else
-		ACTIVE_SYSTEM="$(sed -ne 's,^\([^[:blank:]]\+\)[[:blank:]]\+/[[:blank:]]\+ubifs.*,\1,g;T;p' /proc/mounts 2>/dev/null)"
 	fi
 
 	if [ -z "${ACTIVE_SYSTEM}" ]; then
@@ -99,7 +116,11 @@ reboot_system() {
 }
 
 swap_active_system() {
-	if [ -z "${NANDROOTFS}" ]; then
+	if [ -z "${EMMCROOTFS}" ]; then
+		fw_setenv mtdbootpart ${ALT_BOOT}
+		fw_setenv mtdrootfspart ${ALT_ROOTFS}
+		fw_setenv rootfsvol ${ALT_ROOTFS}
+	else
 		local PART_UUID=""
 
 		# Get boot and rootfs partition index
@@ -121,10 +142,7 @@ swap_active_system() {
 
 		fw_setenv mmcroot "PARTUUID=${PART_UUID}"
 		fw_setenv mmcpart "${MMC_PART}"
-	else
-		fw_setenv mtdbootpart ${ALT_BOOT}
-		fw_setenv mtdrootfspart ${ALT_ROOTFS}
-		fw_setenv rootfsvol ${ALT_ROOTFS}
+
 	fi
 
 	fw_setenv active_system ${ALT_BOOT}
@@ -173,7 +191,7 @@ update_device() {
 	show_active_system
 	echo "Updating system on $(echo ${ALT_BOOT} | cut -d'_' -f2 | tr [:lower:] [:upper:])"
 
-	if [ -z "${NANDROOTFS}" ]; then
+	if [ -n "${EMMCROOTFS}" ]; then
 		update_emmc
 	else
 		update_nand
