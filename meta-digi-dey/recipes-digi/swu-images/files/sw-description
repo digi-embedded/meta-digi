@@ -26,6 +26,10 @@ software =
                 {
                     name = "upgrade_available";
                     value = "1";
+                },
+                {
+                    name = "rootfstype"
+                    value = "##ROOTFS_TYPE##"
                 }
             );
         }
@@ -51,6 +55,10 @@ software =
                 {
                     name = "upgrade_available";
                     value = "1";
+                },
+                {
+                    name = "rootfstype"
+                    value = "##ROOTFS_TYPE##"
                 }
             );
         }
@@ -99,6 +107,10 @@ software =
                 {
                     name = "upgrade_available";
                     value = "1";
+                },
+                {
+                    name = "rootfstype"
+                    value = "##ROOTFS_TYPE##"
                 }
             );
         }
@@ -123,6 +135,10 @@ software =
                 {
                     name = "upgrade_available";
                     value = "1";
+                },
+                {
+                    name = "rootfstype"
+                    value = "##ROOTFS_TYPE##"
                 }
             );
         }

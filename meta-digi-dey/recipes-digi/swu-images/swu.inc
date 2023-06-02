@@ -58,6 +58,7 @@ BOOT_DEV_NAME_B ?= "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', '/dev/mmcblk0p2
 ROOTFS_DEV_NAME_A ?= "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', '/dev/mmcblk0p3', 'rootfs_a', d)}"
 ROOTFS_DEV_NAME_B ?= "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', '/dev/mmcblk0p4', 'rootfs_b', d)}"
 
+ROOTFS_TYPE = "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', 'squashfs', '', d)}"
 do_unpack[postfuncs] += "fill_description"
 
 fill_description() {
@@ -84,4 +85,9 @@ fill_description() {
 	sed -i -e "s,##BOOT_DEV_B##,${BOOT_DEV_NAME_B},g" "${WORKDIR}/sw-description"
 	sed -i -e "s,##ROOTFS_DEV_A##,${ROOTFS_DEV_NAME_A},g" "${WORKDIR}/sw-description"
 	sed -i -e "s,##ROOTFS_DEV_B##,${ROOTFS_DEV_NAME_B},g" "${WORKDIR}/sw-description"
+	if [ -n "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', '1', '', d)}" ]; then
+		sed -i '/compressed/d' "${WORKDIR}/sw-description"
+	fi
+	sed -i -e "s,##ROOTFS_TYPE##,${ROOTFS_TYPE},g" "${WORKDIR}/sw-description"
+
 }
