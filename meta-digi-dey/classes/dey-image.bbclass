@@ -57,6 +57,15 @@ fakeroot toolchain_create_sdk_dey_version() {
 }
 toolchain_create_sdk_dey_version[vardepsexclude] = "DATETIME"
 
+create_sw_versions_file() {
+	local swversionsfile="${IMAGE_ROOTFS}${sysconfdir}/sw-versions"
+
+	rm -f $swversionsfile
+	touch $swversionsfile
+	echo 'firmware ${DEY_FIRMWARE_VERSION}' >> $swversionsfile
+}
+ROOTFS_POSTPROCESS_COMMAND:append = " create_sw_versions_file;"
+
 #
 # Add dependency for read-only signed rootfs
 #
