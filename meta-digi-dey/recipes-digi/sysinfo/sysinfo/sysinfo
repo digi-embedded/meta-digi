@@ -3,7 +3,7 @@
 #
 #  sysinfo
 #
-#  Copyright (C) 2016-2020 by Digi International Inc.
+#  Copyright (C) 2016-2023 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -25,6 +25,15 @@ make_report(){
 	echo "--------------------------------------"
 	echo ""
 	uptime
+	printf "\n\n"
+
+	echo "--------------------------------------"
+	echo "-                                    -"
+	echo "-         Firmware version           -"
+	echo "-                                    -"
+	echo "--------------------------------------"
+	echo ""
+	sed -n 's/^firmware \(.*\)/\1/p' < /etc/sw-versions
 	printf "\n\n"
 
 	echo "--------------------------------------"
@@ -343,7 +352,8 @@ REPORT_PATH="/tmp/sysinfo-${DEY_VERSION}-${BOARD_SN}-${DATE}"
 	fi
 	echo "|| DUT | ${DUT_HEADER}"
 	echo "|| U-Boot | ${UBOOT_VERSION}"
-	echo "|| Firmware | ${DISTRO}-${DEY_VERSION}-$(cat /etc/version)"
+	echo "|| Firmware version | $(sed -n 's/^firmware \(.*\)/\1/p' < /etc/sw-versions)"
+	echo "|| DEY version | ${DISTRO}-${DEY_VERSION}-$(cat /etc/version)"
 	echo "|| Kernel | $(uname -a)"
 	echo "|| meta-digi | $(sed -ne '/^meta-digi-dey/s,.*= \(.*\)$,\1,g;T;p' /etc/build)"
 	[ -n "${MCA_VERSION}" ] && echo "|| MCA | ${MCA_VERSION}"
