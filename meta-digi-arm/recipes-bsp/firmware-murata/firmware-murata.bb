@@ -11,6 +11,7 @@ SRC_URI = " \
     git://github.com/murata-wireless/cyw-bt-patch;protocol=http;branch=kirkstone-fafnir;destsuffix=cyw-bt-patch;name=cyw-bt-patch \
     git://github.com/murata-wireless/cyw-fmac-utils-imx32;protocol=http;branch=fafnir;destsuffix=cyw-fmac-utils-imx32;name=cyw-fmac-utils-imx32 \
     git://github.com/murata-wireless/cyw-fmac-utils-imx64;protocol=http;branch=fafnir;destsuffix=cyw-fmac-utils-imx64;name=cyw-fmac-utils-imx64 \
+    file://cyfmac4373-sdio_US.clm_blob \
 "
 
 SRCREV_cyw-fmac-fw="1f83e807b8187508c811a7d91a353a768fef2d37"
@@ -38,7 +39,7 @@ do_install () {
 	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
 	# For Murata 2AE (LBEE5PK2AE-564)
 	install -m 444 ${S}/cyw-fmac-fw/cyfmac4373-sdio.2AE.bin ${D}${base_libdir}/firmware/cypress/cyfmac4373-sdio.bin
-	install -m 444 ${S}/cyw-fmac-fw/cyfmac4373-sdio.2AE.clm_blob ${D}${base_libdir}/firmware/cypress/cyfmac4373-sdio.clm_blob
+	install -m 444 cyfmac4373-sdio_US.clm_blob ${D}${base_libdir}/firmware/cypress/cyfmac4373-sdio_US.clm_blob
 
 	# Install NVRAM files (*.txt)
 	# For Murata 2AE (LBEE5PK2AE-564)
