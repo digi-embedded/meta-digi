@@ -71,4 +71,4 @@ do_install:append:ccimx93() {
     echo "export QMLSCENE_DEVICE=softwarecontext" >> ${D}${sysconfdir}/profile.d/qt6.sh
 }
 
-FILES:${PN} += "${sysconfdir}/profile.d/qt5.sh"
+FILES:${PN} += "${sysconfdir}/profile.d/qt6.sh"
