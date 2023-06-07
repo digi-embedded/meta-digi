@@ -278,6 +278,11 @@ PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "3.19.0.imx"
 PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.19.0.imx"
 PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "3.19.0.imx"
 
+# Machine learning backports from NXP's lf-6.1.1_1.0.0 release
+PREFERRED_VERSION_tensorflow-lite:ccimx93 = "2.10.0"
+PREFERRED_VERSION_tensorflow-lite-host-tools:ccimx93 = "2.10.0"
+PREFERRED_VERSION_tensorflow-lite-host-tools-native:ccimx93 = "2.10.0"
+
 # Optee runtime packages to install
 OPTEE_PKGS ??= "optee-client optee-os"
 
