@@ -78,7 +78,7 @@ else
 		# Busybox mount. Clear default params
 		MOUNT_PARAMS=""
 		# Mount 'linux' partition as read-only
-		if [ "${PARTNAME}" = "linux" ]; then
+		if [ "${PARTNAME}" = "linux" ] || [ "${PARTNAME}" = "linux_a" ] || [ "${PARTNAME}" = "linux_b" ]; then
 			MOUNT_PARAMS="${MOUNT_PARAMS} -r"
 		fi
 	fi
