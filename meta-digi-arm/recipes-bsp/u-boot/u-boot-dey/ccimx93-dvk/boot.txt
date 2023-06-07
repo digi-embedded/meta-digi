@@ -75,6 +75,17 @@ if test "${module_has_mca}" = "1" && test -z "${disable_mca}"; then
 	setenv overlays _ov_som_mca_ccimx93.dtbo,${overlays}
 fi
 
+if test "${cpu_type}" = "imx9352" || \
+   test "${cpu_type}" = "imx9351" || \
+   test "${cpu_type}" = "imx9322" || \
+   test "${cpu_type}" = "imx9321"; then
+	module_has_npu="1"
+fi
+
+if test "${module_has_npu}" = "1" && test -z "${disable_npu}"; then
+	setenv overlays _ov_som_npu_ccimx93.dtbo,${overlays}
+fi
+
 dboot linux mmc ${mmcbootdev}:${mmcpart}
 
 #
