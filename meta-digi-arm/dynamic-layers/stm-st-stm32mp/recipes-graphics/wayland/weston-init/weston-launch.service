@@ -33,8 +33,8 @@ EnvironmentFile=-/etc/default/weston
 Environment="XDG_RUNTIME_DIR=/home/root"
 Environment="WESTON_USER=root"
 Environment="WL_EGL_GBM_FENCE=0"
-#ExecStart=/usr/bin/weston-launch -- --modules=systemd-notify.so --log=/home/weston/weston.log $OPTARGS
-ExecStart=/usr/bin/weston-start --modules=systemd-notify.so --log=/home/root/weston.log $OPTARGS
+#ExecStart=/usr/bin/weston-launch -- --modules=systemd-notify.so --log=/tmp/weston.log $OPTARGS
+ExecStart=/usr/bin/weston-start --modules=systemd-notify.so --log=/tmp/weston.log $OPTARGS
 ExecStop=/usr/bin/killall weston-launch
 
 # Optional watchdog setup
