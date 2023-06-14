@@ -15,6 +15,8 @@ CC_GITHUB = "gitsm://github.com/digi-embedded/cc_dey.git;protocol=https"
 
 CC_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${CC_STASH}', '${CC_GITHUB}', d)}"
 
+CC_DEVICE_TYPE ?= "${MACHINE}"
+
 SRC_URI = " \
     ${CC_GIT_URI};branch=${SRCBRANCH} \
     file://cloud-connector-init \
@@ -37,6 +39,11 @@ do_install() {
 	install -d ${D}${sysconfdir}/init.d/
 	install -m 755 ${WORKDIR}/cloud-connector-init ${D}${sysconfdir}/cloud-connector
 	ln -sf /etc/cloud-connector ${D}${sysconfdir}/init.d/cloud-connector
+
+	# Set the device type. Its maximum length is 255 characters
+	[ -z "${CC_DEVICE_TYPE}" ] && device_type="${MACHINE}" || device_type="${CC_DEVICE_TYPE}"
+	device_type="$(echo "${device_type}" | cut -c1-255)"
+	sed -i "/device_type = .*/c\device_type = \"${device_type}\"" ${D}${sysconfdir}/cc.conf
 }
 
 do_install:append:ccimx6ul() {
