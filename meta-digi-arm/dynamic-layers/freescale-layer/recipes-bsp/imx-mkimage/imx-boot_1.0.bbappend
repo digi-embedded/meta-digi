@@ -7,6 +7,10 @@ SRC_URI:append = " \
     file://0002-imx8m-soc.mak-capture-commands-output-into-a-log-fil.patch \
 "
 
+# Use NXP's lf-6.1.1_1.0.0 release for ccimx93
+SRCBRANCH:ccimx93 = "lf-6.1.1_1.0.0"
+SRCREV:ccimx93 = "d489494622585a47b4be88988595b0e4f9598f39"
+
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 # Do not tag imx-boot
