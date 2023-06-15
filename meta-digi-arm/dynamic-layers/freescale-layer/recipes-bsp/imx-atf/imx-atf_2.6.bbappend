@@ -10,6 +10,10 @@ SRC_URI:append = " \
     file://0005-ccimx93-use-UART6-for-the-default-console.patch \
 "
 
+# Use NXP's lf-6.1.1_1.0.0 release for ccimx93
+SRCREV:ccimx93 = "616a4588f333522d50a55bedd2b9a90a51474a75"
+SRC_URI:remove:ccimx93 = "file://0001-Makefile-Suppress-array-bounds-error.patch"
+
 BOOT_TOOLS = "imx-boot-tools"
 
 do_deploy:append() {
