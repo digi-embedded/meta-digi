@@ -58,7 +58,7 @@ Usage: ${SCRIPT_NAME} [OPTIONS] input-unsigned-image output-signed-image
     -l               sign/encrypt Linux image
     -r               sign read-only rootfs image
 
-Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn, ccimx8mm
+Supported platforms: ccimx6, ccimx6qp, ccimx6ul, ccimx8x, ccimx8mn, ccimx8mm
 
 EOF
 }
@@ -81,7 +81,7 @@ fi
 [ -d "${CONFIG_SIGN_KEYS_PATH}" ] || mkdir "${CONFIG_SIGN_KEYS_PATH}"
 
 # Get RAM_START address
-if [ "${PLATFORM}" = "ccimx6" ]; then
+if [ "${PLATFORM}" = "ccimx6" ] || [ "${PLATFORM}" = "ccimx6qp" ]; then
 	CONFIG_FDT_LOADADDR="0x18000000"
 	CONFIG_RAMDISK_LOADADDR="0x19000000"
 	CONFIG_KERNEL_LOADADDR="0x12000000"
