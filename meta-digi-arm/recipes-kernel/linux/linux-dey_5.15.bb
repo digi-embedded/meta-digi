@@ -7,4 +7,4 @@ SRCBRANCH:stm32mpcommon = "v5.15.67/stm/master"
 SRCREV = "${AUTOREV}"
 SRCREV:stm32mpcommon = "${AUTOREV}"
 
-COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx93|ccimx6|ccmp1)"
+COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx6|ccmp1)"
