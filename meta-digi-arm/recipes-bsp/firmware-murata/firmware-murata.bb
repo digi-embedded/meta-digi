@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://${S}/cyw-bt-patch/LICENCE.cypress;md5=cbc5f665d04f741
 SRC_URI = " \
     git://github.com/murata-wireless/cyw-fmac-fw;protocol=http;branch=fafnir;destsuffix=cyw-fmac-fw;name=cyw-fmac-fw \
     git://github.com/murata-wireless/cyw-fmac-nvram;protocol=http;branch=fafnir;destsuffix=cyw-fmac-nvram;name=cyw-fmac-nvram \
-    git://github.com/murata-wireless/cyw-bt-patch;protocol=http;branch=kirkstone-fafnir;destsuffix=cyw-bt-patch;name=cyw-bt-patch \
+    git://github.com/murata-wireless/cyw-bt-patch;protocol=http;branch=master;destsuffix=cyw-bt-patch;name=cyw-bt-patch \
     git://github.com/murata-wireless/cyw-fmac-utils-imx32;protocol=http;branch=fafnir;destsuffix=cyw-fmac-utils-imx32;name=cyw-fmac-utils-imx32 \
     git://github.com/murata-wireless/cyw-fmac-utils-imx64;protocol=http;branch=fafnir;destsuffix=cyw-fmac-utils-imx64;name=cyw-fmac-utils-imx64 \
     file://cyfmac4373-sdio_US.clm_blob \
@@ -16,7 +16,7 @@ SRC_URI = " \
 
 SRCREV_cyw-fmac-fw="1f83e807b8187508c811a7d91a353a768fef2d37"
 SRCREV_cyw-fmac-nvram="303acf1b04441f62fbc48d278a70a099fabacb4a"
-SRCREV_cyw-bt-patch="32af98f8bc8a8e123b4c428af0035d74e85ae4bb"
+SRCREV_cyw-bt-patch="9d24c254dae92af99ddfd661a4ea30af69190038"
 SRCREV_cyw-fmac-utils-imx32="e248804b6ba386fedcd462ddd9394f42f73a17af"
 SRCREV_cyw-fmac-utils-imx64="1bc78d68f9609290b2f6578516011c57691f7815"
 
@@ -34,7 +34,7 @@ do_install () {
 
 	# Install Bluetooth patch *.HCD file
 	# For Murata 2AE (LBEE5PK2AE-564)
-	install -m 444 ${S}/cyw-bt-patch/BCM4373A0.2AE.hcd ${D}${base_libdir}/firmware/brcm/BCM4373A0.hcd
+	install -m 444 ${S}/cyw-bt-patch/BCM4373A0_001.001.025.0103.0155.FCC.CE.2AE.hcd ${D}${base_libdir}/firmware/brcm/BCM4373A0_FCC.CE.hcd
 
 	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
 	# For Murata 2AE (LBEE5PK2AE-564)
