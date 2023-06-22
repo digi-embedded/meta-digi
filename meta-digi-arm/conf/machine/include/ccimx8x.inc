@@ -70,6 +70,13 @@ MACHINE_FEATURES += "accel-graphics wifi bluetooth cryptochip pci mca"
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "AHAB"
 
+IMXBOOT_TARGETS = "flash"
+
+IMX_BOOT_SOC_TARGET = "iMX8QX"
+IMX_BOOT_SEEK = "32"
+
+IMX_EXTRA_FIRMWARE:mx8x-generic-bsp  = "digi-sc-firmware imx-seco"
+
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"
 ROOTFS_EXT ?= '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", ".squashfs", ".ext4.gz", d)}'
