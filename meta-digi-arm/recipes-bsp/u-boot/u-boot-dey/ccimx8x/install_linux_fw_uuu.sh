@@ -93,7 +93,7 @@ fi
 echo ""
 echo "Determining image files to use..."
 
-# Determine U-Boot file to program basing on SOM's SOC type (linked to bus width)
+# Determine U-Boot file to program basing on SOM's SOC revision
 if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 	# Since SOMs with the B0 SOC might have an older U-Boot that doesn't export the
 	# SOC revision to the environment, use B0 by default
@@ -102,59 +102,7 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		soc_rev="B0"
 	fi
 
-	bus_width="32bit"
-	soc_type=$(getenv "soc_type")
-	if [ "$soc_type" = "imx8dx"  ]; then
-		bus_width="16bit"
-	fi
-
-	module_ram=$(getenv "module_ram")
-	if [ -z "${module_ram}" ]; then
-		module_variant=$(getenv "module_variant")
-		# Determine U-Boot file to program basing on SOM's variant
-		if [ -n "$module_variant" ] || [ "$module_variant" = "0x00" ]; then
-			if [ "$module_variant" = "0x01" ] || \
-			   [ "$module_variant" = "0x04" ] || \
-			   [ "$module_variant" = "0x05" ]; then
-				module_ram="1GB"
-			elif [ "$module_variant" = "0x06" ] || \
-			     [ "$module_variant" = "0x09" ]; then
-				module_ram="512MB"
-			else
-				module_ram="2GB"
-			fi
-			INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##-${soc_rev}-${module_ram}_${bus_width}.bin"
-		fi
-	else
-		INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##-${soc_rev}-${module_ram}_${bus_width}.bin"
-	fi
-
-	# U-Boot when the checked value is empty.
-	if [ -n "${INSTALL_UBOOT_FILENAME}" ]; then
-		true
-	else
-		# remove redirect
-		uuu fb: ucmd setenv stdout serial
-
-		echo ""
-		echo "[ERROR] Cannot determine U-Boot file for this module!"
-		echo ""
-		echo "1. Add U-boot file name, depending on your ConnectCore 8X variant, to script command line:"
-		echo "   - For a QuadXPlus CPU with 1GB LPDDR4, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin"
-		echo "   - For a QuadXPlus CPU with 2GB LPDDR4, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin"
-		echo "   - For a DualX CPU with 1GB LPDDR4, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin"
-		echo "   - For a DualX CPU with 512MB LPDDR4, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-512MB_16bit.bin"
-		echo ""
-		echo "2. Run the install script again."
-		echo ""
-		echo "Aborted"
-		echo ""
-		exit
-	fi
+	INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##-${soc_rev}.bin"
 fi
 
 # remove redirect
