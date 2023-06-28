@@ -64,7 +64,7 @@ MACHINE_FEATURES += "accel-graphics wifi bluetooth cryptochip pci mca"
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "AHAB"
 
-IMXBOOT_TARGETS = "flash"
+IMXBOOT_TARGETS = "flash_spl"
 
 IMX_BOOT_SOC_TARGET = "iMX8QX"
 IMX_BOOT_SEEK = "32"
