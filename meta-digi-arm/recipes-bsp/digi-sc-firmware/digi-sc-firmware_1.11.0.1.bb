@@ -1,6 +1,6 @@
 # Copyright (C) 2016 Freescale Semiconductor
 # Copyright 2017-2018 NXP
-# Copyright (C) 2018-2021 Digi International.
+# Copyright (C) 2018-2023 Digi International.
 
 DESCRIPTION = "i.MX System Controller Firmware, customized for Digi platforms"
 LICENSE = "Proprietary"
@@ -11,8 +11,8 @@ inherit pkgconfig deploy
 
 SRC_URI = "${DIGI_PKG_SRC}/${BPN}-${PV}.tar.gz"
 
-SRC_URI[md5sum] = "0d20c7bb41d53bb8c2688b259c7ddfd4"
-SRC_URI[sha256sum] = "36a02b956c288dad6ce6ecb2b13a4e6fb2983fd5c39cab5028ae9a7dafe4a4c9"
+SRC_URI[md5sum] = "010415833c96c19e3f7210854374408c"
+SRC_URI[sha256sum] = "33ef40c46d062d2e509bbc45164335d3a2f06eb7548747fe5fc7add5aa4c15ac"
 
 S = "${WORKDIR}/${PN}-${PV}"
 
@@ -23,22 +23,19 @@ SYSROOT_DIRS += "/boot"
 
 do_install () {
     install -d ${D}/boot
-    for ramc in ${RAM_CONFIGS}; do
-        install -m 0644 ${S}/${SC_FIRMWARE_NAME}-${ramc} ${D}/boot/
-    done
+    install -m 0644 ${S}/${SC_FIRMWARE_NAME} ${D}/boot/
+
 }
 
 BOOT_TOOLS = "imx-boot-tools"
 
 do_deploy () {
     install -d ${DEPLOYDIR}/${BOOT_TOOLS}
-    for ramc in ${RAM_CONFIGS}; do
-        install -m 0644 ${S}/${SC_FIRMWARE_NAME}-${ramc} ${DEPLOYDIR}/${BOOT_TOOLS}/
-        cd ${DEPLOYDIR}/${BOOT_TOOLS}/
-        rm -f ${symlink_name}-${ramc}
-        ln -sf ${SC_FIRMWARE_NAME}-${ramc} ${symlink_name}-${ramc}
-        cd -
-    done
+    install -m 0644 ${S}/${SC_FIRMWARE_NAME} ${DEPLOYDIR}/${BOOT_TOOLS}/
+    cd ${DEPLOYDIR}/${BOOT_TOOLS}/
+    rm -f ${symlink_name}
+    ln -sf ${SC_FIRMWARE_NAME} ${symlink_name}
+    cd -
 }
 
 addtask deploy after do_install

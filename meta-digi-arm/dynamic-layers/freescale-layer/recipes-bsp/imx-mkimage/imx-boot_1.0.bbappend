@@ -21,9 +21,7 @@ compile_mx8x() {
     bbnote 8QX boot binary build
     cp ${DEPLOY_DIR_IMAGE}/${SECO_FIRMWARE_NAME}             ${BOOT_STAGING}
     cp ${DEPLOY_DIR_IMAGE}/${ATF_MACHINE_NAME}               ${BOOT_STAGING}/bl31.bin
-    for ramc in ${RAM_CONFIGS}; do
-        cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${SC_FIRMWARE_NAME}-${ramc} ${BOOT_STAGING}/
-    done
+    cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${SC_FIRMWARE_NAME} ${BOOT_STAGING}/
     for type in ${UBOOT_CONFIG}; do
         cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/u-boot-${type}.bin          ${BOOT_STAGING}/
     done
@@ -48,31 +46,23 @@ do_compile:ccimx8x () {
 	fi
 	# mkimage for i.MX8
 	for type in ${UBOOT_CONFIG}; do
-		RAM_SIZE="$(echo ${type} | sed -e 's,.*[a-z]\+\([0-9]\+[M|G]B\)$,\1,g')"
-		for ramc in ${RAM_CONFIGS}; do
-			if echo "${ramc}" | grep -qs "${RAM_SIZE}"; then
-				# Match U-Boot memory size and and SCFW memory configuration
-				cd ${BOOT_STAGING}
-				ln -sf u-boot-${type}.bin u-boot.bin
-				ln -sf ${SC_FIRMWARE_NAME}-${ramc} scfw_tcm.bin
-				cd -
-				for target in ${IMXBOOT_TARGETS}; do
-					for rev in ${SOC_REVISIONS}; do
-						bbnote "building ${IMX_BOOT_SOC_TARGET} - ${ramc} - REV=${rev} ${target}"
-						make SOC=${IMX_BOOT_SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target} > ${S}/mkimage-${target}.log 2>&1
-						if [ -e "${BOOT_STAGING}/flash.bin" ]; then
-							cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target}
-						fi
-						SCFWBUILT="yes"
-					done
-				done
-				rm ${BOOT_STAGING}/scfw_tcm.bin
-				rm ${BOOT_STAGING}/u-boot.bin
-				# Remove u-boot-atf.bin and u-boot-hash.bin so they get generated with the next iteration's U-Boot
-				rm ${BOOT_STAGING}/u-boot-atf.bin
-				rm ${BOOT_STAGING}/u-boot-hash.bin
-			fi
+		cd ${BOOT_STAGING}
+		ln -sf u-boot-${type}.bin u-boot.bin
+		cd -
+		for target in ${IMXBOOT_TARGETS}; do
+			for rev in ${SOC_REVISIONS}; do
+				bbnote "building ${IMX_BOOT_SOC_TARGET} - ${type} - REV=${rev} ${target}"
+				make SOC=${IMX_BOOT_SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target} > ${S}/mkimage-${target}.log 2>&1
+				if [ -e "${BOOT_STAGING}/flash.bin" ]; then
+					cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${rev}-${ramc}.bin-${target}
+				fi
+				SCFWBUILT="yes"
+			done
 		done
+		rm ${BOOT_STAGING}/u-boot.bin
+		# Remove u-boot-atf.bin and u-boot-hash.bin so they get generated with the next iteration's U-Boot
+		rm ${BOOT_STAGING}/u-boot-atf.bin
+		rm ${BOOT_STAGING}/u-boot-hash.bin
 	done
 
 	# Check that SCFW was built at least once
