@@ -116,6 +116,16 @@ reboot_system() {
 }
 
 swap_active_system() {
+	# Sanity check: Some firmware updates might request not to swap
+	#               active bank after the update.
+	local SWAP_BANK=$(fw_printenv -n swap_bank)
+	if [ "${SWAP_BANK}" = "false" ]; then
+		echo "[WARNING] Active system swap cancelled by update process."
+		# Reset variable and return without swapping.
+		fw_setenv swap_bank
+		return 0
+	fi
+
 	if [ -z "${EMMCROOTFS}" ]; then
 		fw_setenv mtdbootpart ${ALT_BOOT}
 		fw_setenv mtdrootfspart ${ALT_ROOTFS}

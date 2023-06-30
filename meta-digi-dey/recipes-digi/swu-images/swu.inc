@@ -7,15 +7,17 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171d
 
 SRC_URI = " \
     file://sw-description-images_template \
+    file://sw-description-files_template \
     file://sw-description-uboot \
     file://swupdate_uboot_nand.sh \
     file://swupdate_uboot_mmc.sh \
     file://image_template_mmc \
     file://image_template_nand \
     file://update_images.sh \
+    file://update_files.sh \
 "
 
-inherit swupdate
+inherit swupdate swupdate-files-common
 
 IMAGE_DEPENDS = "${@get_baseimg_pn(d)}"
 
@@ -31,7 +33,7 @@ SWUPDATE_STORAGE_TYPE = "${@oe.utils.conditional('STORAGE_MEDIA', 'mmc', 'mmc', 
 INHIBIT_SWUPDATE_ADD_SRC_URI = "true"
 
 SWUPDATE_IMAGES = " \
-    ${IMG_NAME} \
+    ${@oe.utils.ifelse(d.getVar('SWUPDATE_IS_FILES_UPDATE') == 'true', '${SWUPDATE_FILES_TARGZ_FILE_NAME}', '${IMG_NAME}')} \
     ${@oe.utils.ifelse(d.getVar('SWUPDATE_UBOOTIMG') == 'true', '${UBOOT_PREFIX}', '')} \
     ${@oe.utils.ifelse(d.getVar('SWUPDATE_UBOOTIMG') == 'true', '${SWUPDATE_UBOOT_SCRIPT}', '')} \
 "
@@ -73,7 +75,7 @@ ROOTFS_TYPE = "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', 'squas
 IMAGE_TEMPLATE_FILE = "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', '${WORKDIR}/image_template_mmc', '${WORKDIR}/image_template_nand', d)}"
 
 # Update script.
-SWUPDATE_SCRIPT ?= "${WORKDIR}/update_images.sh"
+SWUPDATE_SCRIPT ?= "${@oe.utils.vartrue('SWUPDATE_IS_FILES_UPDATE', '${WORKDIR}/update_files.sh', '${WORKDIR}/update_images.sh', d)}"
 SWUPDATE_SCRIPT_NAME = "${@os.path.basename(d.getVar('SWUPDATE_SCRIPT'))}"
 SWUPDATE_IMAGES += " ${SWUPDATE_SCRIPT_NAME}"
 
@@ -91,6 +93,8 @@ fill_description() {
 		sed -i -e "s,##UBOOTIMG_NAME##,${UBOOT_PREFIX}-${MACHINE}${UBOOT_EXT},g" "${WORKDIR}/sw-description"
 		sed -i -e "s,##SWUPDATE_UBOOT_SCRIPT##,${SWUPDATE_UBOOT_SCRIPT},g" "${WORKDIR}/sw-description"
 		sed -i -e "s,##UBOOTIMG_OFFSET##,${UBOOTIMG_OFFSET},g" "${WORKDIR}/sw-description"
+	elif [ "${SWUPDATE_IS_FILES_UPDATE}" = "true" ]; then
+		cp ${WORKDIR}/sw-description-files_template ${WORKDIR}/sw-description
 	else
 		cp ${WORKDIR}/sw-description-images_template ${WORKDIR}/sw-description
 	fi
@@ -98,6 +102,10 @@ fill_description() {
 	# Copy update script.
 	if [ -f "${SWUPDATE_SCRIPT}" ]; then
 		cp "${SWUPDATE_SCRIPT}" "${DEPLOY_DIR_IMAGE}"
+	fi
+
+	if [ "${SWUPDATE_IS_FILES_UPDATE}" = "true" ]; then
+		return 0
 	fi
 
 	# Build image names.
