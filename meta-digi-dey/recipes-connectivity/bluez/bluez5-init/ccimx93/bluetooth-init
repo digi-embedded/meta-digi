@@ -47,6 +47,8 @@ bluetooth_start() {
 	fi
 
 	hciattach -t5 /dev/ttyBt any -s 3000000 3000000 flow && \
+	hciconfig ${HCI_IFACE} up && \
+	sleep 0.2 && \
 	log "Bluetooth activated" && return
 
 	log "[ERROR] Cannot initialize Bluetooth"
