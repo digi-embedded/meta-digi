@@ -6,12 +6,13 @@ LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6"
 
 SRC_URI = " \
-    file://sw-description_template \
+    file://sw-description-images_template \
     file://sw-description-uboot \
     file://swupdate_uboot_nand.sh \
     file://swupdate_uboot_mmc.sh \
     file://image_template_mmc \
     file://image_template_nand \
+    file://update_images.sh \
 "
 
 inherit swupdate
@@ -71,6 +72,11 @@ ROOTFS_TYPE = "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', 'squas
 # Image template based on storage type.
 IMAGE_TEMPLATE_FILE = "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', '${WORKDIR}/image_template_mmc', '${WORKDIR}/image_template_nand', d)}"
 
+# Update script.
+SWUPDATE_SCRIPT ?= "${WORKDIR}/update_images.sh"
+SWUPDATE_SCRIPT_NAME = "${@os.path.basename(d.getVar('SWUPDATE_SCRIPT'))}"
+SWUPDATE_IMAGES += " ${SWUPDATE_SCRIPT_NAME}"
+
 do_unpack[postfuncs] += "fill_description"
 
 fill_description() {
@@ -86,7 +92,12 @@ fill_description() {
 		sed -i -e "s,##SWUPDATE_UBOOT_SCRIPT##,${SWUPDATE_UBOOT_SCRIPT},g" "${WORKDIR}/sw-description"
 		sed -i -e "s,##UBOOTIMG_OFFSET##,${UBOOTIMG_OFFSET},g" "${WORKDIR}/sw-description"
 	else
-		cp ${WORKDIR}/sw-description_template ${WORKDIR}/sw-description
+		cp ${WORKDIR}/sw-description-images_template ${WORKDIR}/sw-description
+	fi
+
+	# Copy update script.
+	if [ -f "${SWUPDATE_SCRIPT}" ]; then
+		cp "${SWUPDATE_SCRIPT}" "${DEPLOY_DIR_IMAGE}"
 	fi
 
 	# Build image names.

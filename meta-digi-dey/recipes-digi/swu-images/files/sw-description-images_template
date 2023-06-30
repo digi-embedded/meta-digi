@@ -8,6 +8,12 @@ software =
             images: (
                 ##IMAGES_PRIMARY##
             );
+            scripts: (
+                {
+                    filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    type = "shellscript";
+                }
+            );
             uboot: (
                 {
                     name = "upgrade_available";
@@ -23,6 +29,12 @@ software =
             images: (
                 ##IMAGES_SECONDARY##
             );
+            scripts: (
+                {
+                    filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    type = "shellscript";
+                }
+            );
             uboot: (
                 {
                     name = "upgrade_available";
@@ -37,6 +49,12 @@ software =
         single: {
             images: (
                 ##IMAGES_SINGLE##
+            );
+            scripts: (
+                {
+                    filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    type = "shellscript";
+                }
             );
             uboot: (
                 {
