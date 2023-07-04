@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2022 Digi International.
+# Copyright (C) 2016-2023 Digi International.
 
 SUMMARY = "Qualcomm firmware files for Digi's platforms."
 SECTION = "base"
@@ -109,10 +109,6 @@ do_install() {
 		ln -s /proc/device-tree/wireless/mac-address1 ${D}${WIFI_FW_PATH}/wlan/wlan_mac1
 		ln -s /proc/device-tree/wireless/mac-address2 ${D}${WIFI_FW_PATH}/wlan/wlan_mac2
 		ln -s /proc/device-tree/wireless/mac-address3 ${D}${WIFI_FW_PATH}/wlan/wlan_mac3
-
-		# Create symbolic links to the proper FW files depending on the country region
-		ln -s bdwlan30_US.bin ${D}${WIFI_FW_PATH}/bdwlan30.bin
-		ln -s bdwlan30_US.bin ${D}${WIFI_FW_PATH}/utfbd30.bin
 
 		if [ "${FW_QUALCOMM_WIFI}" = "${FW_QCA65X4_PCIE_PROPRIETARY}" ]; then
 			ln -s qwlan30.bin ${D}${WIFI_FW_PATH}/athwlan.bin
