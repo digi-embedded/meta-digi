@@ -2,14 +2,15 @@
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-SRC_URI:append = " \
+SRC_URI:append:ccimx8m = " \
     file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch \
     file://0002-imx8m-soc.mak-capture-commands-output-into-a-log-fil.patch \
 "
 
-# Use NXP's lf-6.1.1_1.0.0 release for ccimx93
-SRCBRANCH:ccimx93 = "lf-6.1.1_1.0.0"
-SRCREV:ccimx93 = "d489494622585a47b4be88988595b0e4f9598f39"
+# Use NXP's lf-6.1.22-2.0.0 release for ccimx93
+SRC_URI:ccimx93 = "git://github.com/nxp-imx/imx-mkimage.git;protocol=https;branch=${SRCBRANCH}"
+SRCBRANCH:ccimx93 = "lf-6.1.22_2.0.0"
+SRCREV:ccimx93 = "5cfd218012e080fb907d9cc301fbb4ece9bc17a9"
 
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
