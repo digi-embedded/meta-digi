@@ -3,13 +3,13 @@ SUMMARY = "NXP i.MX Sentinel firmware"
 DESCRIPTION = "Firmware for i.MX Sentinel Security Controller"
 SECTION = "base"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=ea25d099982d035af85d193c88a1b479"
+LIC_FILES_CHKSUM = "file://COPYING;md5=63a38e9f392d8813d6f1f4d0d6fbe657"
 
 inherit fsl-eula-unpack use-imx-security-controller-firmware deploy
 
 SRC_URI = "${FSL_MIRROR}/${BP}.bin;fsl-eula=true"
-SRC_URI[md5sum] = "0fbbb50a5786c6784585977fb1fae273"
-SRC_URI[sha256sum] = "adc9c7698d0c42a5c73b770c6fd307f6bf66ee5d19b3cd59fdf3dee86846717c"
+SRC_URI[md5sum] = "a92e272d665a3b3bb9281253d5eca69f"
+SRC_URI[sha256sum] = "be862b62c849510cce08ec24c1ddf53d826458e326e5a7f09c4b35092d6f9950"
 
 do_compile[noexec] = "1"
 
