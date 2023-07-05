@@ -231,10 +231,8 @@ format_ubi_volume() {
 	psplash_message "Formatting '${1}' partition..."
 	psplash_progress "0"
 
-	# Read the singlemtdsys variable.
-	read_uboot_var singlemtdsys singlemtdsys
-
-	if [ "${singlemtdsys}" = "yes" ]; then
+	# If /dev/ubi1 exists is a system with multiple MTD partitions
+	if [ ! -c "/dev/ubi1" ]; then
 		# Find the volume number associated to the volume name
 		for d in /dev/ubi0_*; do
 			volname="$(ubinfo ${d} | grep ^Name | awk '{print $(2)}')"
