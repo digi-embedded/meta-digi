@@ -46,7 +46,11 @@ do_install() {
 
 		# Select U-Boot sign script depending on U-Boot including an SPL image
 		if [ -n "${SPL_BINARY}" ]; then
-			install -m 0755 git/scripts/sign_spl_fit.sh ${D}${bindir}/trustfence-sign-uboot.sh
+			if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
+				install -m 0755 git/scripts/sign_spl_ahab.sh ${D}${bindir}/trustfence-sign-uboot.sh
+			else
+				install -m 0755 git/scripts/sign_spl_fit.sh ${D}${bindir}/trustfence-sign-uboot.sh
+			fi
 		else
 			install -m 0755 git/scripts/sign.sh ${D}${bindir}/trustfence-sign-uboot.sh
 		fi
