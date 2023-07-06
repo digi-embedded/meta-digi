@@ -40,11 +40,13 @@ do_compile:ccimx8x () {
 	for target in ${IMXBOOT_TARGETS}; do
 		for rev in ${SOC_REVISIONS}; do
 			bbnote "building ${IMX_BOOT_SOC_TARGET} - REV=${rev} ${target}"
-			make SOC=${IMX_BOOT_SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target} > ${S}/mkimage-${target}.log 2>&1
+			make SOC=${IMX_BOOT_SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target} > ${S}/mkimage-${rev}-${target}.log 2>&1
 			if [ -e "${BOOT_STAGING}/flash.bin" ]; then
 				cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${rev}.bin-${target}
 			fi
 			SCFWBUILT="yes"
+			# Remove u-boot-atf-container.img so it gets generated in the next iteration
+			rm ${BOOT_STAGING}/u-boot-atf-container.img
 		done
 	done
 
@@ -94,7 +96,7 @@ do_deploy:ccimx8x () {
 	# copy makefile (soc.mak) for reference
 	install -m 0644 ${BOOT_STAGING}/soc.mak ${DEPLOYDIR}/${BOOT_TOOLS}
 	# copy the generated boot image to deploy path
-	for bin in ${BOOTABLE_ARTIFACTS}; do
+	for rev in ${SOC_REVISIONS}; do
 		IMAGE_IMXBOOT_TARGET=""
 		for target in ${IMXBOOT_TARGETS}; do
 			# Use first "target" as IMAGE_IMXBOOT_TARGET
@@ -102,15 +104,15 @@ do_deploy:ccimx8x () {
 				IMAGE_IMXBOOT_TARGET="$target"
 				echo "Set boot target as $IMAGE_IMXBOOT_TARGET"
 			fi
-			install -m 0644 ${S}/${bin}-${target} ${DEPLOYDIR}
+			install -m 0644 ${S}/${UBOOT_PREFIX}-${MACHINE}-${rev}.bin-${target} ${DEPLOYDIR}
 			# copy make log for reference
-			install -m 0644 ${S}/mkimage-${target}.log ${DEPLOYDIR}/${BOOT_TOOLS}
+			install -m 0644 ${S}/mkimage-${rev}-${target}.log ${DEPLOYDIR}/${BOOT_TOOLS}
 		done
 		cd ${DEPLOYDIR}
-		ln -sf ${bin}-${IMAGE_IMXBOOT_TARGET} ${bin}
+		ln -sf ${UBOOT_PREFIX}-${MACHINE}-${rev}.bin-${IMAGE_IMXBOOT_TARGET} ${UBOOT_PREFIX}-${MACHINE}-${rev}.bin
 		# Link to default bootable U-Boot filename. It gets overwritten
 		# on every loop so the only last RAM_CONFIG will survive.
-		ln -sf ${bin}-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
+		ln -sf ${UBOOT_PREFIX}-${MACHINE}-${rev}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
 		cd -
 	done
 }
@@ -134,5 +136,25 @@ trustfence_sign_imxboot() {
 		fi
 	done
 }
+
+trustfence_sign_imxboot:ccimx8x() {
+	TF_SIGN_ENV="CONFIG_SIGN_KEYS_PATH=${TRUSTFENCE_SIGN_KEYS_PATH}"
+	[ -n "${TRUSTFENCE_KEY_INDEX}" ] && TF_SIGN_ENV="$TF_SIGN_ENV CONFIG_KEY_INDEX=${TRUSTFENCE_KEY_INDEX}"
+	[ -n "${TRUSTFENCE_SIGN_MODE}" ] && TF_SIGN_ENV="$TF_SIGN_ENV CONFIG_SIGN_MODE=${TRUSTFENCE_SIGN_MODE}"
+	[ -n "${TRUSTFENCE_SRK_REVOKE_MASK}" ] && TF_SIGN_ENV="$TF_SIGN_ENV SRK_REVOKE_MASK=${TRUSTFENCE_SRK_REVOKE_MASK}"
+
+	# Sign/encrypt boot image
+	for target in ${IMXBOOT_TARGETS}; do
+		for rev in ${SOC_REVISIONS}; do
+			TF_SIGN_ENV="$TF_SIGN_ENV CONFIG_MKIMAGE_LOG_PATH=${DEPLOYDIR}/${BOOT_TOOLS}/mkimage-${rev}-${target}.log"
+			env $TF_SIGN_ENV trustfence-sign-uboot.sh ${BOOT_NAME}-${MACHINE}-${rev}.bin-${target} ${BOOT_NAME}-signed-${MACHINE}-${rev}.bin-${target}
+			if [ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+				TF_ENC_ENV="CONFIG_DEK_PATH=${TRUSTFENCE_DEK_PATH} ENABLE_ENCRYPTION=y"
+				env $TF_SIGN_ENV $TF_ENC_ENV trustfence-sign-uboot.sh ${BOOT_NAME}-${MACHINE}-${rev}.bin-${target} ${BOOT_NAME}-encrypted-${MACHINE}-${rev}.bin-${target}
+			fi
+		done
+	done
+}
+
 trustfence_sign_imxboot[dirs] = "${DEPLOYDIR}"
 trustfence_sign_imxboot[vardeps] += "TRUSTFENCE_SIGN_KEYS_PATH TRUSTFENCE_KEY_INDEX TRUSTFENCE_DEK_PATH TRUSTFENCE_SIGN_MODE TRUSTFENCE_SRK_REVOKE_MASK TRUSTFENCE_UNLOCK_KEY_REVOCATION"
