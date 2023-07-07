@@ -14,6 +14,8 @@
 # Load commmon variables.
 inherit dey-swupdate-common
 
+DEPENDS += "${@oe.utils.ifelse(d.getVar('SWUPDATE_IS_RDIFF_UPDATE') == 'true', 'librsync-native', '')}"
+
 #######################################
 ###### SWU Update based on files ######
 #######################################
@@ -60,3 +62,26 @@ create_swupdate_targz_file() {
 	gzip "${targzfile%.*}"
 }
 ROOTFS_POSTPROCESS_COMMAND:append = "${@oe.utils.conditional('SWUPDATE_IS_FILES_UPDATE', 'true', ' create_swupdate_targz_file;', '', d)}"
+
+#######################################
+###### SWU Update based on RDIFF ######
+#######################################
+
+create_swupdate_rdiff_file() {
+	local signature_file="${DEPLOY_DIR_IMAGE}/swupdate_rootfs_rdiff.sig"
+	local rootfs_rdiff_file="${DEPLOY_DIR_IMAGE}/${SWUPDATE_RDIFF_ROOTFS_DELTA_FILE_NAME}"
+	local rootfs_file="${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.squashfs"
+
+	# Clean previous versions of the files.
+	rm -f "${signature_file}" "${rootfs_rdiff_file}"
+
+	# Create signature file.
+	rdiff signature "${SWUPDATE_RDIFF_ROOTFS_SOURCE_FILE}" "${signature_file}"
+
+	# Create the delta file.
+	rdiff delta "${signature_file}" "${rootfs_file}" "${rootfs_rdiff_file}"
+
+	# Clean intermediates.
+	rm -f "${signature_file}"
+}
+IMAGE_POSTPROCESS_COMMAND:append = "${@oe.utils.conditional('SWUPDATE_IS_RDIFF_UPDATE', 'true', ' create_swupdate_rdiff_file;', '', d)}"

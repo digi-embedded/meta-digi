@@ -49,6 +49,26 @@ def update_based_on_files(d):
 SWUPDATE_IS_FILES_UPDATE = "${@update_based_on_files(d)}"
 
 #######################################
+###### SWU Update based on RDIFF ######
+#######################################
+
+# Variable used to generate the 'rootfs' RDIFF file. Do not modify.
+SWUPDATE_RDIFF_ROOTFS_DELTA_FILE_NAME = "swupdate-rootfs.rdiff"
+
+# Initialize variable to provide the base file from which to generate the 'rootfs' RDIFF file.
+SWUPDATE_RDIFF_ROOTFS_SOURCE_FILE ?= ""
+
+# Rdiff image template based on storage type.
+SWUPDATE_RDIFF_IMAGE_TEMPLATE_FILE = "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', 'image_template_rdiff_mmc', 'image_template_rdiff_nand', d)}"
+
+# Checks whether SWU update is based on RDIFF or not.
+def update_based_on_rdiff(d):
+    return str("read-only-rootfs" in d.getVar('IMAGE_FEATURES') and d.getVar('SWUPDATE_IS_FILES_UPDATE') != "true" and d.getVar('SWUPDATE_RDIFF_ROOTFS_SOURCE_FILE') != "").lower()
+
+# Variable that determines if SWU update is based on RDIFF or not.
+SWUPDATE_IS_RDIFF_UPDATE = "${@update_based_on_rdiff(d)}"
+
+#######################################
 ##### SWU Update based on images ######
 #######################################
 
@@ -57,7 +77,7 @@ SWUPDATE_IMAGES_IMAGE_TEMPLATE_FILE = "${@bb.utils.contains('STORAGE_MEDIA', 'mm
 
 # Checks whether SWU update is based on images or not.
 def update_based_on_images(d):
-    return str(d.getVar('SWUPDATE_IS_FILES_UPDATE') != "true").lower()
+    return str(d.getVar('SWUPDATE_IS_FILES_UPDATE') != "true" and d.getVar('SWUPDATE_IS_RDIFF_UPDATE') != "true").lower()
 
 # Variable that determines if SWU update is based on images or not.
 SWUPDATE_IS_IMAGES_UPDATE = "${@update_based_on_images(d)}"
@@ -77,8 +97,16 @@ UBOOTIMG_OFFSET ?= "${BOOTLOADER_SEEK_BOOT}"
 ########## SWU Update Script ##########
 #######################################
 
+# Retrieve the correct update script name based on the SWU update type.
+def get_update_script_name(d):
+    if d.getVar('SWUPDATE_IS_FILES_UPDATE') == "true":
+        return "update_files.sh"
+    if d.getVar('SWUPDATE_IS_RDIFF_UPDATE') == "true":
+        return "update_rdiff.sh"
+    return "update_images.sh"
+
 # Initialize variable that configures the update script to use.
-SWUPDATE_SCRIPT ?= "${@oe.utils.vartrue('SWUPDATE_IS_FILES_UPDATE', 'update_files.sh', 'update_images.sh', d)}"
+SWUPDATE_SCRIPT ?= "${@get_update_script_name(d)}"
 
 # Name of the update script to include in the SWU package.
 SWUPDATE_SCRIPT_NAME = "${@os.path.basename(d.getVar('SWUPDATE_SCRIPT'))}"
