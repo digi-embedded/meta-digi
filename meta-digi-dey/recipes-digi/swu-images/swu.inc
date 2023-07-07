@@ -141,3 +141,4 @@ fill_description() {
 	# Clean dir.
 	rm -f images_temp.txt
 }
+fill_description[dirs] = "${DEPLOY_DIR_IMAGE} ${WORKDIR}"
