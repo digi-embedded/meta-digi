@@ -12,7 +12,11 @@
 #
 
 # Load commmon variables.
-inherit swupdate-files-common
+inherit dey-swupdate-common
+
+#######################################
+###### SWU Update based on files ######
+#######################################
 
 create_swupdate_targz_file() {
 	local targzfile="${DEPLOY_DIR_IMAGE}/${SWUPDATE_FILES_TARGZ_FILE_NAME}"
@@ -28,7 +32,7 @@ create_swupdate_targz_file() {
 			# File is not correctly compressed, exit with error.
 			echo "[ERROR] File ${SWUPDATE_FILES_TARGZ_FILE} is not a valid 'tar.gz' file. Aborting..."
 			exit 1
-		fi	
+		fi
 		gunzip "${targzfile}"
 		# Add the 'sw-versions' file.
 		tar -C "${IMAGE_ROOTFS}" -uf "${targzfile%.*}" etc/sw-versions

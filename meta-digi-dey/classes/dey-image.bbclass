@@ -74,5 +74,5 @@ DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-too
 # Do not include kernel in rootfs images
 PACKAGE_EXCLUDE = "kernel-image-*"
 
-# Create 'tar.gz' file for SWUpdate files update mechanism.
-inherit swupdate-files
+# Add required methods to generate the correct SWU update package.
+inherit dey-swupdate

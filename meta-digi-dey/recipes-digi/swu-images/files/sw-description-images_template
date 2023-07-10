@@ -1,7 +1,7 @@
 software =
 {
     version = "@@DEY_FIRMWARE_VERSION@@";
-    description = "@@DESCRIPTION@@";
+    description = "@@SWUPDATE_DESCRIPTION@@";
 
     @@SWUPDATE_STORAGE_TYPE@@ = {
         primary: {
@@ -21,7 +21,7 @@ software =
                 },
                 {
                     name = "rootfstype"
-                    value = "@@ROOTFS_TYPE@@"
+                    value = "@@SWUPDATE_ROOTFS_TYPE@@"
                 }
             );
         }
@@ -42,7 +42,7 @@ software =
                 },
                 {
                     name = "rootfstype"
-                    value = "@@ROOTFS_TYPE@@"
+                    value = "@@SWUPDATE_ROOTFS_TYPE@@"
                 }
             );
         }
@@ -59,7 +59,7 @@ software =
             uboot: (
                 {
                     name = "rootfstype"
-                    value = "@@ROOTFS_TYPE@@"
+                    value = "@@SWUPDATE_ROOTFS_TYPE@@"
                 }
             );
         }
