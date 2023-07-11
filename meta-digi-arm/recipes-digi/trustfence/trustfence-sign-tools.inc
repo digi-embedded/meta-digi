@@ -18,6 +18,7 @@ SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
     file://trustfence-sign-artifact-nxp.sh \
     file://trustfence-sign-artifact-stm.sh \
+    file://trustfence-gen-pki-stm.sh \
     file://sign_hab;name=artifact-hab-sign \
     file://encrypt_hab;name=artifact-hab-encrypt \
     file://sign_ahab;name=artifact-ahab-sign \
@@ -57,6 +58,7 @@ do_install() {
 	elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
 		install -d ${D}${bindir}
 		install -m 0755 trustfence-sign-artifact-stm.sh ${D}${bindir}/trustfence-sign-artifact.sh
+		install -m 0755 trustfence-gen-pki-stm.sh ${D}${bindir}/trustfence-gen-pki.sh
 	fi
 }
 

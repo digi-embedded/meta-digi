@@ -36,6 +36,39 @@ TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-onl
 
 IMAGE_FEATURES += "dey-trustfence"
 
+# Function to generate a PKI tree (with lock dir protection)
+GENPKI_LOCK_DIR = "${TRUSTFENCE_SIGN_KEYS_PATH}/.genpki.lock"
+gen_pki_tree() {
+	if mkdir -p ${GENPKI_LOCK_DIR}; then
+		if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+			trustfence-gen-pki.sh ${TRUSTFENCE_SIGN_KEYS_PATH}
+		elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+			export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+			trustfence-gen-pki.sh -p ${DIGI_SOM}
+		fi
+		rm -rf ${GENPKI_LOCK_DIR}
+	else
+		bbfatal "Could not get lock to generate PKI tree"
+	fi
+}
+
+# Function that generates a PKI tree if there isn't one
+check_gen_pki_tree() {
+	if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+		SRK_KEYS="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK*crt.pem | sed s/\ /\,/g)"
+		n_commas="$(echo ${SRK_KEYS} | grep -o "," | wc -l)"
+		if [ "${n_commas}" -eq 0 ]; then
+			gen_pki_tree
+		elif [ "${n_commas}" -ne 3 ]; then
+			bbfatal "Inconsistent PKI tree"
+		fi
+	elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+		# The script that generates the PKI tree already checks if
+		# there isn't one, so there's nothing to do here but calling it.
+		gen_pki_tree
+	fi
+}
+
 python () {
     import binascii
     import hashlib

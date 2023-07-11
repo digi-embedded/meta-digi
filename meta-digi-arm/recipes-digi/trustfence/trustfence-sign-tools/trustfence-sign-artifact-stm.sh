@@ -47,59 +47,36 @@ Usage: ${SCRIPT_NAME} <OPTIONS> [<input-unsigned-image> <output-signed-image>]
 
 Supported platforms: ${SUPPORTED_PLATFORMS}
 
-When called without filename parameters, it generates random keys if they
-do not exist.
-
 EOF
 }
+
+if [ "${#}" != "2" ]; then
+	usage
+	exit 1
+fi
 
 if [ -z "${CONFIG_SIGN_KEYS_PATH}" ]; then
 	echo "Undefined CONFIG_SIGN_KEYS_PATH";
 	exit 1
 fi
-[ -d "${CONFIG_SIGN_KEYS_PATH}" ] || mkdir "${CONFIG_SIGN_KEYS_PATH}"
 
 # Default values
 [ -z "${CONFIG_KEY_INDEX}" ] && CONFIG_KEY_INDEX="0"
 KEY_PASS_FILE="${CONFIG_SIGN_KEYS_PATH}/keys/key_pass.txt"
 
 # Generate random keys if they don't exist
-if [ "${PLATFORM}" = "ccmp15" ]; then
-	PUBLIC_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/publicKey00.pem"
-	PRIVATE_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/privateKey00.pem"
-	if [ ! -f "${PRIVATE_KEY}" ] && [ ! -f "${PUBLIC_KEY}" ] && [ ! -f "${KEY_PASS_FILE}" ]; then
-		install -d "${CONFIG_SIGN_KEYS_PATH}/keys/"
-		# Random password
-		password="$(openssl rand -base64 32)"
-		echo "Generating random key"
-		STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/keys/" -pwd ${password} -n 1
-		echo "${password}" > "${KEY_PASS_FILE}"
-	fi
-elif [ "${PLATFORM}" = "ccmp13" ]; then
-	N_PUBK="$(ls -l ${CONFIG_SIGN_KEYS_PATH}/keys/publicKey0* 2>/dev/null | wc -l)"
-	N_PRVK="$(ls -l ${CONFIG_SIGN_KEYS_PATH}/keys/privateKey0* 2>/dev/null | wc -l)"
-	PUBLIC_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/publicKey0*.pem"
-	PRIVATE_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/privateKey0${CONFIG_KEY_INDEX}.pem"
-	if [ "${N_PUBK}" != "8" ] && [ "${N_PRVK}" != 8 ] && [ ! -f "${KEY_PASS_FILE}" ]; then
-		install -d "${CONFIG_SIGN_KEYS_PATH}/keys/"
-		# 8 random passwords (separated by whitespaces)
-		passwords="$(openssl rand -base64 32)"
-		for i in $(seq 1 7); do
-			passwords="${passwords} $(openssl rand -base64 32)"
-		done
-		echo "Generating random keys"
-		STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/keys/" -pwd ${passwords} -n 8
-		echo "${passwords}" > "${KEY_PASS_FILE}"
-	fi
-else
-	echo "Undefined platform"
+if ! trustfence-gen-pki.sh -p ${PLATFORM}; then
 	exit 1
 fi
 
-if [ "${#}" = "0" ]; then
-	exit 0
-elif [ "${#}" != "2" ]; then
-	usage
+if [ "${PLATFORM}" = "ccmp15" ]; then
+	PUBLIC_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/publicKey00.pem"
+	PRIVATE_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/privateKey00.pem"
+elif [ "${PLATFORM}" = "ccmp13" ]; then
+	PUBLIC_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/publicKey0*.pem"
+	PRIVATE_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/privateKey0${CONFIG_KEY_INDEX}.pem"
+else
+	echo "Undefined platform"
 	exit 1
 fi
 
