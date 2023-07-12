@@ -14,14 +14,34 @@
 #===============================================================================
 
 HCI_IFACE="hci0"
+MODULE_NAME="btnxpuart"
 
 log() {
-	printf "<3>iw612-bluetooth: %s\n" "${1}" >/dev/kmsg
+	printf "<3>iw61x-bluetooth: %s\n" "${1}" >/dev/kmsg
+}
+
+# The power of the IW61x chip is managed by the WiFi DT entry.
+#  If WiFi is disabled, is needed to manage the power manually.
+is_not_wifi() {
+	! [ -e "/proc/device-tree/wireless/mac-address" ]
+}
+
+power() {
+	is_not_wifi && gpioset 1 7="${1}"
 }
 
 set_btaddr() {
-	bt_addr=$(echo $(fw_printenv -n btaddr) | awk -F ":" '{ for(i=NF;i>=1;i--) printf "0x%s ", $i }')
+	hciconfig ${HCI_IFACE} up
+	sleep 0.2
+	bt_addr=$(echo "$(fw_printenv -n btaddr)" | awk -F ":" '{ for(i=NF;i>=1;i--) printf "0x%s ", $i }')
 	hcitool -i ${HCI_IFACE} cmd 0x3f 0x0022 0xfe 0x06 ${bt_addr}
+	hciconfig ${HCI_IFACE} down
+	sleep 0.2
+	hciconfig ${HCI_IFACE} up
+}
+
+is_kernel_module_loaded() {
+	lsmod | grep -qs -w "^${MODULE_NAME}"
 }
 
 bluetooth_start() {
@@ -30,38 +50,21 @@ bluetooth_start() {
 		return
 	fi
 
-	# If there is a hciattach process running, just do nothing
-	pidof hciattach > /dev/null && log "Bluetooth already activated" && return
+	# If module is already loaded, skip
+	is_kernel_module_loaded && log "[ERROR] kernel module already present, skipping" && return 1
 
-	# If port speed is 3M, assume that FW has been modified to run at that speed
-	if [ "$(stty -F /dev/ttyBt speed)" != "3000000" ]; then
-		hciattach -t5 /dev/ttyBt any 115200 flow nosleep && \
-		hciconfig ${HCI_IFACE} up && \
-		sleep 0.2 && \
-		set_btaddr && \
-		# Change rate to 3M using a custom vendor command
-		hcitool -i ${HCI_IFACE} cmd 0x3f 0x0009 0xc0 0xc6 0x2d 0x00 && \
-		sleep 0.2 && \
-		killall hciattach && \
-		sleep 0.2
-	fi
-
-	hciattach -t5 /dev/ttyBt any -s 3000000 3000000 flow && \
-	hciconfig ${HCI_IFACE} up && \
-	sleep 0.2 && \
-	log "Bluetooth activated" && return
-
-	log "[ERROR] Cannot initialize Bluetooth"
-	return 1
+	power 0 && sleep 0.2 && power 1
+	# Load manually the kernel module
+	modprobe "${MODULE_NAME}"
+	# Reconfigure the HCI interface with the expected MAC address
+	is_kernel_module_loaded && set_btaddr && log "Bluetooth activated" && return 0
+	log "[ERROR] Cannot initialize Bluetooth correctly" && return 1
 }
 
 bluetooth_stop() {
-	if [ -e "/sys/class/bluetooth/${HCI_IFACE}" ]; then
-		killall hciattach > /dev/null
-		sleep 1
-		# send a raw hci reset to set the chip in a good state
-		echo -e -n \\x01\\x03\\x0c\\x00 > /dev/ttyBt
-	fi
+	# Remove the kernel module
+	rmmod "${MODULE_NAME}"
+	power 0
 }
 
 case "$1" in
@@ -73,7 +76,6 @@ case "$1" in
 		;;
 	restart)
 		$0 stop
-		sleep 1
 		$0 start
 		;;
 	*)
