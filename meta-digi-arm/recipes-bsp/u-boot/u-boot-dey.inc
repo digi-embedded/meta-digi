@@ -69,7 +69,7 @@ SIGN_UBOOT:ccimx6ul = "sign_uboot"
 
 do_deploy[postfuncs] += " \
     adapt_uboot_filenames \
-    ${@oe.utils.ifelse('BUILD_UBOOT_SCRIPTS', 'build_uboot_scripts', '')} \
+    ${@oe.utils.ifelse(d.getVar('BUILD_UBOOT_SCRIPTS') == 'true', 'build_uboot_scripts', '')} \
     ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', '${SIGN_UBOOT}', '', d)} \
 "
 
