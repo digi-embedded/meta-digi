@@ -3,7 +3,7 @@
 #
 #  mount_bootparts.sh
 #
-#  Copyright (C) 2014-2022 by Digi International Inc.
+#  Copyright (C) 2014-2023 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -15,6 +15,7 @@
 #===============================================================================
 
 BASE_INIT="$(readlink -f "@base_sbindir@/init")"
+BASE_INIT_ORIG="$(readlink -f "@base_sbindir@/init.orig")"
 INIT_SYSTEMD="@systemd_unitdir@/systemd"
 
 # Partitions are mounted:
@@ -39,6 +40,13 @@ if [ "${PARTNAME}" = "linux" ] || [ "${PARTNAME}" = "linux_a" ] || [ "${PARTNAME
 	MOUNT_FOLDER="linux"
 	MOUNT_PARAMS="${MOUNT_PARAMS} -o ro"
 fi
+MOUNTPOINT="/mnt/${MOUNT_FOLDER}"
+
+# Skip if partition is already mounted. For example R/O systems with the '/etc' overlay enabled mount the 'data' partition in very early stages.
+if grep -qs "${MOUNTPOINT}" /proc/mounts;
+	logger "Partition '${PARTNAME}' is already mounted, skipping..."
+	exit 0
+fi
 
 DUALBOOT_MODE="$(fw_printenv -n dualboot 2>/dev/null)"
 if [ "${DUALBOOT_MODE}" = "yes" ]; then
@@ -51,7 +59,9 @@ if [ "${DUALBOOT_MODE}" = "yes" ]; then
 	fi
 fi
 
-if [ "x$BASE_INIT" = "x$INIT_SYSTEMD" ];then
+# R/O systems using 'systemd' and '/etc' overlayfs do not link '/sbin/init' to 'systemd'. In these cases
+# 'init' is renamed to 'init.orig' and that is the linked file, so check this case too.
+if [ "x$BASE_INIT" = "x$INIT_SYSTEMD" ] || [ "x$BASE_INIT_ORIG" = "x$INIT_SYSTEMD" ]; then
 	# systemd as init uses systemd-mount to mount block devices
 
 	# Verify if unit is already launched, if so just restart it.
@@ -85,7 +95,6 @@ else
 fi
 
 # Create mount point if needed
-MOUNTPOINT="/mnt/${MOUNT_FOLDER}"
 [ -d "${MOUNTPOINT}" ] || mkdir -p ${MOUNTPOINT}
 
 if [ "${SUBSYSTEM}" = "block" ]; then
