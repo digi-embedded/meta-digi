@@ -1,16 +1,15 @@
 #
-# U-Boot bootscript for altbootcmd (dual boot fallback after retries)
+# U-Boot bootscript for altbootcmd (boot fallback after N failed boot retries)
 #
 
-# After an upgrade, active_system has changed. U-Boot tries to boot this system
-# for a number of tries. If the limit is reached, altbootcmd is run instead.
-# This is the script that it will run. It has to:
-#  * switch back to previous system
-#  * reset the firmware update flag
-#  * run the regular boot command
+# U-Boot tries to boot the active system for a number of tries. If the limit
+# is reached, altbootcmd is run instead. This is the script that it will run.
+# It has to:
+#  * switch active partitions bank in case of dual boot systems
+#  * reset the 'bootcount' number
+#  * reboot the system
 
-if test "${dualboot}" = "yes" && test "${upgrade_available}" = "1"; then
-	echo "## Update failed; Rolling back to previous version."
+if test "${dualboot}" = "yes"; then
 	if test "${active_system}" = "linux_a"; then
 		setenv active_system linux_b
 		setenv mtdbootpart ${active_system}
@@ -20,8 +19,8 @@ if test "${dualboot}" = "yes" && test "${upgrade_available}" = "1"; then
 		setenv mtdbootpart ${active_system}
 		setenv rootfsvol ${rootfsvol_a}
 	fi
-	setenv upgrade_available
-	setenv bootcount 0
 	saveenv
+	echo "## System boot failed; Switching active partitions bank to ${active_system}..."
 fi
-run bootcmd
+bootcount reset
+reset

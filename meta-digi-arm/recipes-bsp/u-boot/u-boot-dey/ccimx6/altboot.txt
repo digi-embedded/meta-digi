@@ -10,7 +10,6 @@
 #  * run the regular boot command
 
 if test "${dualboot}" = "yes" && test "${upgrade_available}" = "1"; then
-	echo "## Update failed; Rolling back to previous version."
 	if test "${active_system}" = "linux_a"; then
 		setenv active_system linux_b
 		part number mmc ${mmcbootdev} linux_b linux_b_index
@@ -33,5 +32,6 @@ if test "${dualboot}" = "yes" && test "${upgrade_available}" = "1"; then
 	setenv upgrade_available
 	setenv bootcount 0
 	saveenv
+	echo "## System boot failed; Switching active partitions bank to ${active_system}..."
 fi
 run bootcmd
