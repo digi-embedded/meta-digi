@@ -1,0 +1,12 @@
+[Unit]
+Description=Reset bootcount value
+After=default.target
+
+[Service]
+Type=simple
+RemainAfterExit=no
+ExecStart=/etc/bootcount-init start
+TimeoutStartSec=0
+
+[Install]
+WantedBy=default.target
