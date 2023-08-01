@@ -43,7 +43,7 @@ fi
 MOUNTPOINT="/mnt/${MOUNT_FOLDER}"
 
 # Skip if partition is already mounted. For example R/O systems with the '/etc' overlay enabled mount the 'data' partition in very early stages.
-if grep -qs "${MOUNTPOINT}" /proc/mounts;
+if grep -qs "${MOUNTPOINT}" /proc/mounts; then
 	logger "Partition '${PARTNAME}' is already mounted, skipping..."
 	exit 0
 fi
