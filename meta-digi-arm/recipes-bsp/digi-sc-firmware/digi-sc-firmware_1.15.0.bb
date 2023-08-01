@@ -4,7 +4,7 @@
 
 DESCRIPTION = "i.MX System Controller Firmware, customized for Digi platforms"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=03bcadc8dc0a788f66ca9e2b89f56c6f"
+LIC_FILES_CHKSUM = "file://COPYING;md5=ea25d099982d035af85d193c88a1b479"
 SECTION = "BSP"
 
 inherit pkgconfig deploy
