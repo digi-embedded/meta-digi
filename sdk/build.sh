@@ -25,6 +25,7 @@
 #     DY_CVE_REPORT:     Generate Vigiles CVE report
 #     DY_VIGILES_DIR:    Path to Vigiles configuration files on the build server
 #     DY_USE_CVE_LAYER:  Apply meta-digi-security layer with CVE fixes
+#     DY_MANIFEST:       Use specific manifest file (none by default)
 #
 #===============================================================================
 
@@ -218,7 +219,7 @@ if pushd "${YOCTO_INST_DIR}"; then
 		fi
 	fi
 	# shellcheck disable=SC2086
-	yes "" 2>/dev/null | ${REPO} init --depth=1 --no-repo-verify -u ${MANIFEST_URL} ${repo_revision}
+	yes "" 2>/dev/null | ${REPO} init --depth=1 --no-repo-verify -u ${MANIFEST_URL} ${repo_revision} ${DY_MANIFEST:+-m ${DY_MANIFEST}}
 	${REPO} --no-pager forall -j4 -p -c 'git clean -fdx'
 	# shellcheck disable=SC2016
 	${REPO} --no-pager forall -j4 -p -c 'git remote prune $(git remote)' || true
