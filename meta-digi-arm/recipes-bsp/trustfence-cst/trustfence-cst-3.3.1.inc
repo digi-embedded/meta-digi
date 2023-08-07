@@ -21,6 +21,7 @@ SRC_URI = " \
     file://0005-ahab_pki_tree.sh-automate-script.patch \
     file://0006-ahab_pki_tree.sh-use-a-random-password-for-the-defau.patch \
     file://0007-rules.mk-weaken-specific-function-err_msg.patch \
+    file://0008-pki_tree.sh-extract-public-keys-from-certificates.patch \
 "
 
 SRC_URI[cst.md5sum] = "27ba9c8bc0b8a7f14d23185775c53794"

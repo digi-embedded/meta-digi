@@ -69,6 +69,39 @@ check_gen_pki_tree() {
 	fi
 }
 
+copy_public_key() {
+	if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+		KEY_INDEX="$(expr $TRUSTFENCE_KEY_INDEX + 1)"
+		PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/crts/key${KEY_INDEX}.pub"
+		# The new hab/ahab_pki_tree.sh script extracts the public keys after the PKI
+		# generation and leaves them in the crts/ folder. However, the PKI tree may
+		# already exist, the PKI generation script not called, and then the public
+		# keys may not be available. This is a fall-back to generate at least the
+		# selected public key.
+		if [ ! -f "${PUBLIC_KEY}" ]; then
+			if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
+				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/IMG${KEY_INDEX}*crt.pem)"
+			elif [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
+				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK${KEY_INDEX}*_ca_crt.pem)"
+			else
+				bberror "Unknown TRUSTFENCE_SIGN_MODE value"
+				exit 1
+			fi
+			# Extract the public key from the certificate.
+			openssl x509 -pubkey -noout -in "${CERT_IMG}" > "${PUBLIC_KEY}"
+		fi
+	elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+		PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey0${TRUSTFENCE_KEY_INDEX}.pem"
+	else
+		echo "ERROR: Cannot determine the public key"
+		exit 1
+	fi
+	# Copy the public key to the rootfs
+	install -d ${D}${sysconfdir}/ssl/certs
+	cp -f "${PUBLIC_KEY}" "${IMAGE_ROOTFS}${sysconfdir}/ssl/certs/key.pub"
+}
+ROOTFS_POSTINSTALL_COMMAND:append = " copy_public_key;"
+
 python () {
     import binascii
     import hashlib
