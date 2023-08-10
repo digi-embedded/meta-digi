@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2022 Digi International.
+# Copyright (C) 2012-2023 Digi International.
 #
 SUMMARY = "Core packagegroup for DEY image"
 
@@ -36,6 +36,7 @@ SYSVINIT_SCRIPTS = " \
 RDEPENDS:${PN} = "\
     base-files \
     base-passwd \
+    bootcount \
     connectcore-demo-example \
     ${CLOUDCONNECTOR_PKG} \
     dualboot \
