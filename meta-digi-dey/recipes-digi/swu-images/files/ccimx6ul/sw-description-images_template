@@ -16,10 +16,6 @@ software =
             );
             uboot: (
                 {
-                    name = "upgrade_available";
-                    value = "1";
-                },
-                {
                     name = "rootfstype"
                     value = "@@SWUPDATE_ROOTFS_TYPE@@"
                 }
@@ -36,10 +32,6 @@ software =
                 }
             );
             uboot: (
-                {
-                    name = "upgrade_available";
-                    value = "1";
-                },
                 {
                     name = "rootfstype"
                     value = "@@SWUPDATE_ROOTFS_TYPE@@"

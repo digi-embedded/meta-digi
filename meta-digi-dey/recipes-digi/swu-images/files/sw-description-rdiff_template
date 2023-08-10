@@ -19,7 +19,7 @@ software =
             uboot: (
                 {
                     name = "upgrade_available";
-                    value = "1";
+                    value = "@@UPGRADE_AVAILABLE@@";
                 }
             );
         }
@@ -38,7 +38,7 @@ software =
             uboot: (
                 {
                     name = "upgrade_available";
-                    value = "1";
+                    value = "@@UPGRADE_AVAILABLE@@";
                 }
             );
         }

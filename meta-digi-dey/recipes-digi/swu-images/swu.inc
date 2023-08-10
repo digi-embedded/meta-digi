@@ -67,6 +67,10 @@ python do_swuimage:prepend() {
         shutil.copyfile(updatescript, os.path.join(imgdeploydir, os.path.basename(updatescript)))
 }
 
+# Upgrade available.
+UPGRADE_AVAILABLE = ""
+UPGRADE_AVAILABLE:ccimx6 = "1"
+
 # Create and fill 'sw-description' file.
 fill_description() {
 	if [ "${SWUPDATE_UBOOTIMG}" = "true" ]; then
