@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2022 Digi International.
+# Copyright (C) 2015-2023 Digi International.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:${THISDIR}/${BP}:"
 
@@ -8,6 +8,7 @@ SRC_URI += " \
     file://0002-hcitool-do-not-show-unsupported-refresh-option.patch \
     file://0003-hcitool-increase-the-shown-connection-limit-to-20.patch \
     file://0004-port-test-discovery-to-python3.patch \
+    file://0009-bdaddr-support-setting-MAC-address-for-NXP-iw612.patch \
 "
 
 QCA65XX_COMMON_PATCHES = " \
