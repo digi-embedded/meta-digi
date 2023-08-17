@@ -7,8 +7,12 @@
 # and save them, while the rest of the script changes variables only temporarily
 # without saving them.
 
-# Dual boot update verification
-if test "${dualboot}" = "yes"; then
+# Pre step: check if we boot from uSD.
+if test "${mmcbootdev}" = "1"; then
+	# We are booting from the SD card.
+	setenv mmcroot /dev/mmcblk${mmcbootdev}p2
+elif test "${dualboot}" = "yes"; then
+	# Dual boot update verification
 	if test "${upgrade_available}" = "1"; then
 		echo "Update detected; Booting new system in ${active_system} (try ${bootcount})"
 	else
@@ -43,9 +47,6 @@ else
 		# We are booting from the eMMC using 'recovery'.
 		setenv boot_initrd true
 		setenv initrd_file uramdisk-recovery.img
-	else
-		# We are booting from the SD card.
-		setenv mmcroot /dev/mmcblk${mmcbootdev}p2
 	fi
 fi
 
