@@ -1,6 +1,6 @@
 software =
 {
-    version = "##SW_VERSION##";
+    version = "##FW_VERSION##";
     description = "##DESCRIPTION##";
 
     mmc = {

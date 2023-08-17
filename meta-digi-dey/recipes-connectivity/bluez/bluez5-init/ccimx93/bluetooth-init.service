@@ -5,7 +5,8 @@ Before=bluetooth.service
 After=systemd-modules-load.service
 
 [Service]
-Type=forking
+Type=oneshot
+RemainAfterExit=yes
 ExecStart=/etc/bluetooth-init start
 ExecStop=/etc/bluetooth-init stop
 

@@ -1,0 +1,36 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Wed, 16 Aug 2023 12:03:21 +0200
+Subject: [PATCH] bdaddr: support setting MAC address for NXP iw612
+
+It uses same command sequence than ericsson's, so reuse
+ericsson_store_in_flash function.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ tools/bdaddr.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/tools/bdaddr.c b/tools/bdaddr.c
+index bc0478d461b2..ab73211ceb09 100644
+--- a/tools/bdaddr.c
++++ b/tools/bdaddr.c
+@@ -290,6 +290,11 @@ static int st_write_bd_addr(int dd, bdaddr_t *bdaddr)
+ 	return ericsson_store_in_flash(dd, 0xfe, 6, (uint8_t *) bdaddr);
+ }
+ 
++static int nxp_write_bd_addr(int dd, bdaddr_t *bdaddr)
++{
++	return ericsson_store_in_flash(dd, 0xfe, 6, (uint8_t *) bdaddr);
++}
++
+ static struct {
+ 	uint16_t compid;
+ 	int (*write_bd_addr)(int dd, bdaddr_t *bdaddr);
+@@ -300,6 +305,7 @@ static struct {
+ 	{ 13,		ti_write_bd_addr,	NULL			},
+ 	{ 15,		bcm_write_bd_addr,	generic_reset_device	},
+ 	{ 18,		zeevo_write_bd_addr,	NULL			},
++	{ 37,		nxp_write_bd_addr,	generic_reset_device	},
+ 	{ 48,		st_write_bd_addr,	generic_reset_device	},
+ 	{ 57,		ericsson_write_bd_addr,	generic_reset_device	},
+ 	{ 72,		mrvl_write_bd_addr,	generic_reset_device	},

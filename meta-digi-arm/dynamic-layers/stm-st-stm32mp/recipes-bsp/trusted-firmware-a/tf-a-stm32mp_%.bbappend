@@ -14,10 +14,11 @@ SRC_URI = " \
     ${TFA_GIT_URI};branch=${SRCBRANCH} \
 "
 
+TF_A_CONFIG = "${DEY_TF_A_CONFIG}"
 TF_A_CONFIG[nand]   = "${DEVICE_BOARD_ENABLE:NAND},STM32MP_RAW_NAND=1 ${@'STM32MP_FORCE_MTD_START_OFFSET=${TF_A_MTD_START_OFFSET_NAND}' if ${TF_A_MTD_START_OFFSET_NAND} else ''} STM32MP_USB_PROGRAMMER=1"
 
 DEPENDS += " \
-    ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native trustfence-genpki-native', '', d)} \
+    ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)} \
 "
 
 # This dependency is required so that the PKI generation completes before
@@ -27,6 +28,15 @@ do_install[depends] = " \
     trustfence-sign-tools-native:do_populate_sysroot \
     openssl-native:do_populate_sysroot \
 "
+
+# Generate PKI tree if it doesn't exist.
+# This is an append to do_compile because in this recipe, the do_deploy
+# task comes right after do_compile, and the keys must be ready before that.
+do_compile:append() {
+	if ${@oe.utils.conditional('TRUSTFENCE_SIGN','1','true','false',d)}; then
+		check_gen_pki_tree
+	fi
+}
 
 # Obtain password to use in FIP generation
 # Get password from file using the given key index

@@ -15,7 +15,6 @@
 #
 #  Parameters set by Jenkins:
 #     DY_BUILD_TCHAIN:   Build toolchains for DEY images
-#     DY_BUILD_VARIANTS: Build all platform variants
 #     DY_DISTRO:         Distribution name (the default is 'dey')
 #     DY_PLATFORMS:      Platforms to build
 #     DY_REVISION:       Revision of the manifest repository (for 'repo init')
@@ -158,10 +157,6 @@ if [ -z "${DY_MFG_IMAGE}" ] && echo "${JOB_NAME}" | grep -qs 'dey.*mfg'; then
 	DY_MFG_IMAGE="true"
 fi
 
-if [ -n "${DY_MACHINES_LAYER}" ]; then
-	MACHINES_LAYER="-m ${DY_MACHINES_LAYER}"
-fi
-
 [ -z "${DY_CVE_REPORT}" ] && DY_CVE_REPORT="false"
 [ -z "${DY_USE_CVE_LAYER}" ] && DY_USE_CVE_LAYER="false"
 
@@ -251,7 +246,7 @@ for platform in ${DY_PLATFORMS}; do
 		(
 			export TEMPLATECONF="${TEMPLATECONF:+${TEMPLATECONF}/${platform}}"
 			# shellcheck disable=SC1091,SC2086
-			MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p "${platform}" ${MACHINES_LAYER} <<< "y"
+			MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p "${platform}" ${DY_MACHINES_LAYER:+-m ${DY_MACHINES_LAYER}} <<< "y"
 			# Set a common DL_DIR and SSTATE_DIR for all platforms
 			sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_DOWNLOAD_DIR}\"" \
 				-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \

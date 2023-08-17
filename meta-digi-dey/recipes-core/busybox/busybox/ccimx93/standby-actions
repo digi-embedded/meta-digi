@@ -38,13 +38,11 @@ if [ "${1}" = "pre" ]; then
 		rmmod mlan
 
 		if systemctl is-active bluetooth-init; then
-			# 
 			# bluetooth service relies on bluetooth-init service, so stop/start it unconditionally
 			echo "systemctl start bluetooth-init" >> "${RESUME_ACTIONS}"
 			echo "systemctl start bluetooth" >> "${RESUME_ACTIONS}"
 			systemctl stop bluetooth-init
 			systemctl stop bluetooth
-			stty -F /dev/ttyBt 115200
 		fi
 	fi
 elif [ "${1}" = "post" ]; then

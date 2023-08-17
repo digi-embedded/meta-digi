@@ -1,0 +1,2814 @@
+From 89b035959578fe0d7714748487dad875bc018ef5 Mon Sep 17 00:00:00 2001
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Fri, 26 May 2023 11:21:43 +0200
+Subject: [PATCH] Implement support for environment encryption for CCMP1
+
+This commit implements environment encryption/decryption of the
+u-boot environment in Linux using cryp controller on the CCMP1
+platform.
+
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
+---
+ src/CMakeLists.txt              |   4 +
+ src/ta_ccmp1_aes.h              |  84 +++
+ src/tee.h                       | 417 ++++++++++++++
+ src/tee_bench.h                 |  77 +++
+ src/tee_client_api.c            | 958 ++++++++++++++++++++++++++++++++
+ src/tee_client_api.h            | 555 ++++++++++++++++++
+ src/tee_client_api_extensions.h |  57 ++
+ src/teec_benchmark.h            |  37 ++
+ src/teec_trace.c                | 141 +++++
+ src/teec_trace.h                | 148 +++++
+ src/uboot_env.c                 | 181 +++++-
+ 11 files changed, 2655 insertions(+), 4 deletions(-)
+ create mode 100644 src/ta_ccmp1_aes.h
+ create mode 100644 src/tee.h
+ create mode 100644 src/tee_bench.h
+ create mode 100644 src/tee_client_api.c
+ create mode 100644 src/tee_client_api.h
+ create mode 100644 src/tee_client_api_extensions.h
+ create mode 100644 src/teec_benchmark.h
+ create mode 100644 src/teec_trace.c
+ create mode 100644 src/teec_trace.h
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index d7e38a1..15dad7a 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,6 +1,10 @@
+ cmake_minimum_required (VERSION 2.6)
+ # Sources and private headers
+ SET(libubootenv_SOURCES
++  teec_trace.c
++  teec_trace.h
++  tee_client_api.c
++  tee_client_api.h
+   md5.c
+   md5.h
+   uboot_env.c
+diff --git a/src/ta_ccmp1_aes.h b/src/ta_ccmp1_aes.h
+new file mode 100644
+index 0000000..9110cda
+--- /dev/null
++++ b/src/ta_ccmp1_aes.h
+@@ -0,0 +1,84 @@
++/*
++ * Copyright 2023 Digi International Inc
++ *
++ * SPDX-License-Identifier:    GPL-2.0+
++ */
++
++#ifndef __TA_CCMP1_AES_H__
++#define __TA_CCMP1_AES_H__
++
++/*
++ * AES is a stream cipher which works a block at a time, with each block
++ * in this case being AES_BLOCK_LENGTH bytes.
++ */
++
++enum {
++	AES_STATECOLS	= 4,	/* columns in the state & expanded key */
++	AES128_KEYCOLS	= 4,	/* columns in a key for aes128 */
++	AES192_KEYCOLS	= 6,	/* columns in a key for aes128 */
++	AES256_KEYCOLS	= 8,	/* columns in a key for aes128 */
++	AES128_ROUNDS	= 10,	/* rounds in encryption for aes128 */
++	AES192_ROUNDS	= 12,	/* rounds in encryption for aes192 */
++	AES256_ROUNDS	= 14,	/* rounds in encryption for aes256 */
++	AES128_KEY_LENGTH	= 128 / 8,
++	AES192_KEY_LENGTH	= 192 / 8,
++	AES256_KEY_LENGTH	= 256 / 8,
++	AES128_EXPAND_KEY_LENGTH = 4 * AES_STATECOLS * (AES128_ROUNDS + 1),
++	AES192_EXPAND_KEY_LENGTH = 4 * AES_STATECOLS * (AES192_ROUNDS + 1),
++	AES256_EXPAND_KEY_LENGTH = 4 * AES_STATECOLS * (AES256_ROUNDS + 1),
++	AES_BLOCK_LENGTH	= 128 / 8,
++};
++
++struct aes_ctx {
++	TEEC_Context ctx;
++	TEEC_Session sess;
++};
++
++/* The function IDs implemented in the associated TA */
++
++/*
++ * TA_AES_CMD_SET_KEY - Allocate resources for the AES ciphering
++ * param[0] (value) Algorithmus
++ * param[1] (value) Key size
++ * param[2] (value) encryption mode (encrypt/decrypt)
++ * param[3] unused
++ */
++#define TA_AES_CMD_PREPARE		0
++
++/*
++ * TA_AES_CMD_SET_KEY - Allocate resources for the AES ciphering
++ * param[0] (memref) key data, size shall equal key length
++ * param[1] unused
++ * param[2] unused
++ * param[3] unused
++ */
++#define TA_AES_CMD_SET_KEY		1
++
++/*
++ * TA_AES_CMD_SET_IV - reset IV
++ * param[0] (memref) initial vector, size shall equal block length
++ * param[1] unused
++ * param[2] unused
++ * param[3] unused
++ */
++#define TA_AES_CMD_SET_IV		2
++
++/*
++ * TA_AES_CMD_CIPHER - Cipher input buffer into output buffer
++ * param[0] (memref) input buffer
++ * param[1] (memref) output buffer (shall be bigger than input buffer)
++ * param[2] unused
++ * param[3] unused
++ */
++#define TA_AES_CMD_CIPHER	3
++
++#define TA_AES_MODE_ENCODE	1
++#define TA_AES_MODE_DECODE	0
++
++#define TA_AES_ALGO_CTR		2
++
++/* UUID of the TA */
++#define TA_STM32MP_CRYP_UUID { 0xc2fad363, 0x5d9f, 0x4fc4, \
++                { 0xa4, 0x17, 0x55, 0x58, 0x41, 0xe0, 0x57, 0x45 } }
++
++#endif /* __TA_CCMP1_AES_H__ */
+\ No newline at end of file
+diff --git a/src/tee.h b/src/tee.h
+new file mode 100644
+index 0000000..f883ebc
+--- /dev/null
++++ b/src/tee.h
+@@ -0,0 +1,417 @@
++/*
++ * Copyright (c) 2015-2016, Linaro Limited
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright notice,
++ * this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above copyright notice,
++ * this list of conditions and the following disclaimer in the documentation
++ * and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#ifndef __TEE_H
++#define __TEE_H
++
++#include <linux/ioctl.h>
++#include <linux/types.h>
++
++/*
++ * This file describes the API provided by a TEE driver to user space.
++ *
++ * Each TEE driver defines a TEE specific protocol which is used for the
++ * data passed back and forth using TEE_IOC_CMD.
++ */
++
++/* Helpers to make the ioctl defines */
++#define TEE_IOC_MAGIC	0xa4
++#define TEE_IOC_BASE	0
++
++/* Flags relating to shared memory */
++#define TEE_IOCTL_SHM_MAPPED	0x1	/* memory mapped in normal world */
++#define TEE_IOCTL_SHM_DMA_BUF	0x2	/* dma-buf handle on shared memory */
++
++#define TEE_MAX_ARG_SIZE	1024
++
++#define TEE_GEN_CAP_GP		(1 << 0)/* GlobalPlatform compliant TEE */
++#define TEE_GEN_CAP_PRIVILEGED	(1 << 1)/* Privileged device (for supplicant) */
++#define TEE_GEN_CAP_REG_MEM	(1 << 2)/* Supports registering shared memory */
++#define TEE_GEN_CAP_MEMREF_NULL	(1 << 3) /* Support NULL MemRef */
++
++#define TEE_MEMREF_NULL		((__u64)-1) /* NULL MemRef Buffer */
++
++/*
++ * TEE Implementation ID
++ */
++#define TEE_IMPL_ID_OPTEE	1
++#define TEE_IMPL_ID_AMDTEE	2
++
++/*
++ * OP-TEE specific capabilities
++ */
++#define TEE_OPTEE_CAP_TZ	(1 << 0)
++
++/**
++ * struct tee_ioctl_version_data - TEE version
++ * @impl_id:	[out] TEE implementation id
++ * @impl_caps:	[out] Implementation specific capabilities
++ * @gen_caps:	[out] Generic capabilities, defined by TEE_GEN_CAPS_* above
++ *
++ * Identifies the TEE implementation, @impl_id is one of TEE_IMPL_ID_* above.
++ * @impl_caps is implementation specific, for example TEE_OPTEE_CAP_*
++ * is valid when @impl_id == TEE_IMPL_ID_OPTEE.
++ */
++struct tee_ioctl_version_data {
++	__u32 impl_id;
++	__u32 impl_caps;
++	__u32 gen_caps;
++};
++
++/**
++ * TEE_IOC_VERSION - query version of TEE
++ *
++ * Takes a tee_ioctl_version_data struct and returns with the TEE version
++ * data filled in.
++ */
++#define TEE_IOC_VERSION		_IOR(TEE_IOC_MAGIC, TEE_IOC_BASE + 0, \
++				     struct tee_ioctl_version_data)
++
++/**
++ * struct tee_ioctl_shm_alloc_data - Shared memory allocate argument
++ * @size:	[in/out] Size of shared memory to allocate
++ * @flags:	[in/out] Flags to/from allocation.
++ * @id:		[out] Identifier of the shared memory
++ *
++ * The flags field should currently be zero as input. Updated by the call
++ * with actual flags as defined by TEE_IOCTL_SHM_* above.
++ * This structure is used as argument for TEE_IOC_SHM_ALLOC below.
++ */
++struct tee_ioctl_shm_alloc_data {
++	__u64 size;
++	__u32 flags;
++	__s32 id;
++};
++
++/**
++ * TEE_IOC_SHM_ALLOC - allocate shared memory
++ *
++ * Allocates shared memory between the user space process and secure OS.
++ *
++ * Returns a file descriptor on success or < 0 on failure
++ *
++ * The returned file descriptor is used to map the shared memory into user
++ * space. The shared memory is freed when the descriptor is closed and the
++ * memory is unmapped.
++ */
++#define TEE_IOC_SHM_ALLOC	_IOWR(TEE_IOC_MAGIC, TEE_IOC_BASE + 1, \
++				     struct tee_ioctl_shm_alloc_data)
++
++/**
++ * struct tee_ioctl_shm_register_fd_data - Shared memory registering argument
++ * @fd:		[in] file descriptor identifying the shared memory
++ * @size:	[out] Size of shared memory to allocate
++ * @flags:	[in] Flags to/from allocation.
++ * @id:		[out] Identifier of the shared memory
++ *
++ * The flags field should currently be zero as input. Updated by the call
++ * with actual flags as defined by TEE_IOCTL_SHM_* above.
++ * This structure is used as argument for TEE_IOC_SHM_ALLOC below.
++ */
++struct tee_ioctl_shm_register_fd_data {
++	__s64 fd;
++	__u64 size;
++	__u32 flags;
++	__s32 id;
++} __aligned(8);
++
++/*
++ * Attributes for struct tee_ioctl_param, selects field in the union
++ */
++#define TEE_IOCTL_PARAM_ATTR_TYPE_NONE		0	/* parameter not used */
++
++/*
++ * These defines value parameters (struct tee_ioctl_param_value)
++ */
++#define TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INPUT	1
++#define TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT	2
++#define TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INOUT	3	/* input and output */
++
++/*
++ * These defines shared memory reference parameters (struct
++ * tee_ioctl_param_memref)
++ */
++#define TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT	5
++#define TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT	6
++#define TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INOUT	7	/* input and output */
++
++/*
++ * Mask for the type part of the attribute, leaves room for more types
++ */
++#define TEE_IOCTL_PARAM_ATTR_TYPE_MASK		0xff
++
++/* Meta parameter carrying extra information about the message. */
++#define TEE_IOCTL_PARAM_ATTR_META		0x100
++
++/* Mask of all known attr bits */
++#define TEE_IOCTL_PARAM_ATTR_MASK \
++	(TEE_IOCTL_PARAM_ATTR_TYPE_MASK | TEE_IOCTL_PARAM_ATTR_META)
++
++/*
++ * Matches TEEC_LOGIN_* in GP TEE Client API
++ * Are only defined for GP compliant TEEs
++ */
++#define TEE_IOCTL_LOGIN_PUBLIC			0
++#define TEE_IOCTL_LOGIN_USER			1
++#define TEE_IOCTL_LOGIN_GROUP			2
++#define TEE_IOCTL_LOGIN_APPLICATION		4
++#define TEE_IOCTL_LOGIN_USER_APPLICATION	5
++#define TEE_IOCTL_LOGIN_GROUP_APPLICATION	6
++
++/**
++ * struct tee_ioctl_param - parameter
++ * @attr: attributes
++ * @a: if a memref, offset into the shared memory object, else a value parameter
++ * @b: if a memref, size of the buffer, else a value parameter
++ * @c: if a memref, shared memory identifier, else a value parameter
++ *
++ * @attr & TEE_PARAM_ATTR_TYPE_MASK indicates if memref or value is used in
++ * the union. TEE_PARAM_ATTR_TYPE_VALUE_* indicates value and
++ * TEE_PARAM_ATTR_TYPE_MEMREF_* indicates memref. TEE_PARAM_ATTR_TYPE_NONE
++ * indicates that none of the members are used.
++ *
++ * Shared memory is allocated with TEE_IOC_SHM_ALLOC which returns an
++ * identifier representing the shared memory object. A memref can reference
++ * a part of a shared memory by specifying an offset (@a) and size (@b) of
++ * the object. To supply the entire shared memory object set the offset
++ * (@a) to 0 and size (@b) to the previously returned size of the object.
++ */
++struct tee_ioctl_param {
++	__u64 attr;
++	__u64 a;
++	__u64 b;
++	__u64 c;
++};
++
++#define TEE_IOCTL_UUID_LEN		16
++
++/**
++ * struct tee_ioctl_open_session_arg - Open session argument
++ * @uuid:	[in] UUID of the Trusted Application
++ * @clnt_uuid:	[in] UUID of client
++ * @clnt_login:	[in] Login class of client, TEE_IOCTL_LOGIN_* above
++ * @cancel_id:	[in] Cancellation id, a unique value to identify this request
++ * @session:	[out] Session id
++ * @ret:	[out] return value
++ * @ret_origin	[out] origin of the return value
++ * @num_params	[in] number of parameters following this struct
++ */
++struct tee_ioctl_open_session_arg {
++	__u8 uuid[TEE_IOCTL_UUID_LEN];
++	__u8 clnt_uuid[TEE_IOCTL_UUID_LEN];
++	__u32 clnt_login;
++	__u32 cancel_id;
++	__u32 session;
++	__u32 ret;
++	__u32 ret_origin;
++	__u32 num_params;
++	/* num_params tells the actual number of element in params */
++	struct tee_ioctl_param params[];
++};
++
++/**
++ * TEE_IOC_OPEN_SESSION - opens a session to a Trusted Application
++ *
++ * Takes a struct tee_ioctl_buf_data which contains a struct
++ * tee_ioctl_open_session_arg followed by any array of struct
++ * tee_ioctl_param
++ */
++#define TEE_IOC_OPEN_SESSION	_IOR(TEE_IOC_MAGIC, TEE_IOC_BASE + 2, \
++				     struct tee_ioctl_buf_data)
++
++/**
++ * struct tee_ioctl_invoke_func_arg - Invokes a function in a Trusted
++ * Application
++ * @func:	[in] Trusted Application function, specific to the TA
++ * @session:	[in] Session id
++ * @cancel_id:	[in] Cancellation id, a unique value to identify this request
++ * @ret:	[out] return value
++ * @ret_origin	[out] origin of the return value
++ * @num_params	[in] number of parameters following this struct
++ */
++struct tee_ioctl_invoke_arg {
++	__u32 func;
++	__u32 session;
++	__u32 cancel_id;
++	__u32 ret;
++	__u32 ret_origin;
++	__u32 num_params;
++	/* num_params tells the actual number of element in params */
++	struct tee_ioctl_param params[];
++};
++
++/**
++ * TEE_IOC_INVOKE - Invokes a function in a Trusted Application
++ *
++ * Takes a struct tee_ioctl_buf_data which contains a struct
++ * tee_invoke_func_arg followed by any array of struct tee_param
++ */
++#define TEE_IOC_INVOKE		_IOR(TEE_IOC_MAGIC, TEE_IOC_BASE + 3, \
++				     struct tee_ioctl_buf_data)
++
++/**
++ * struct tee_ioctl_cancel_arg - Cancels an open session or invoke ioctl
++ * @cancel_id:	[in] Cancellation id, a unique value to identify this request
++ * @session:	[in] Session id, if the session is opened, else set to 0
++ */
++struct tee_ioctl_cancel_arg {
++	__u32 cancel_id;
++	__u32 session;
++};
++
++/**
++ * TEE_IOC_CANCEL - Cancels an open session or invoke
++ */
++#define TEE_IOC_CANCEL		_IOR(TEE_IOC_MAGIC, TEE_IOC_BASE + 4, \
++				     struct tee_ioctl_cancel_arg)
++
++/**
++ * struct tee_ioctl_close_session_arg - Closes an open session
++ * @session:	[in] Session id
++ */
++struct tee_ioctl_close_session_arg {
++	__u32 session;
++};
++
++/**
++ * TEE_IOC_CLOSE_SESSION - Closes a session
++ */
++#define TEE_IOC_CLOSE_SESSION	_IOR(TEE_IOC_MAGIC, TEE_IOC_BASE + 5, \
++				     struct tee_ioctl_close_session_arg)
++
++/**
++ * struct tee_iocl_supp_recv_arg - Receive a request for a supplicant function
++ * @func:	[in] supplicant function
++ * @num_params	[in/out] number of parameters following this struct
++ *
++ * @num_params is the number of params that tee-supplicant has room to
++ * receive when input, @num_params is the number of actual params
++ * tee-supplicant receives when output.
++ */
++struct tee_iocl_supp_recv_arg {
++	__u32 func;
++	__u32 num_params;
++	/* num_params tells the actual number of element in params */
++	struct tee_ioctl_param params[];
++};
++
++/**
++ * TEE_IOC_SUPPL_RECV - Receive a request for a supplicant function
++ *
++ * Takes a struct tee_ioctl_buf_data which contains a struct
++ * tee_iocl_supp_recv_arg followed by any array of struct tee_param
++ */
++#define TEE_IOC_SUPPL_RECV	_IOR(TEE_IOC_MAGIC, TEE_IOC_BASE + 6, \
++				     struct tee_ioctl_buf_data)
++
++/**
++ * struct tee_iocl_supp_send_arg - Send a response to a received request
++ * @ret:	[out] return value
++ * @num_params	[in] number of parameters following this struct
++ */
++struct tee_iocl_supp_send_arg {
++	__u32 ret;
++	__u32 num_params;
++	/* num_params tells the actual number of element in params */
++	struct tee_ioctl_param params[];
++};
++
++/**
++ * TEE_IOC_SUPPL_SEND - Receive a request for a supplicant function
++ *
++ * Takes a struct tee_ioctl_buf_data which contains a struct
++ * tee_iocl_supp_send_arg followed by any array of struct tee_param
++ */
++#define TEE_IOC_SUPPL_SEND	_IOR(TEE_IOC_MAGIC, TEE_IOC_BASE + 7, \
++				     struct tee_ioctl_buf_data)
++
++/**
++ * struct tee_ioctl_shm_register_data - Shared memory register argument
++ * @addr:      [in] Start address of shared memory to register
++ * @length:    [in/out] Length of shared memory to register
++ * @flags:     [in/out] Flags to/from registration.
++ * @id:                [out] Identifier of the shared memory
++ *
++ * The flags field should currently be zero as input. Updated by the call
++ * with actual flags as defined by TEE_IOCTL_SHM_* above.
++ * This structure is used as argument for TEE_IOC_SHM_REGISTER below.
++ */
++struct tee_ioctl_shm_register_data {
++	__u64 addr;
++	__u64 length;
++	__u32 flags;
++	__s32 id;
++};
++
++/**
++ * TEE_IOC_SHM_REGISTER_FD - register a shared memory from a file descriptor
++ *
++ * Returns a file descriptor on success or < 0 on failure
++ *
++ * The returned file descriptor refers to the shared memory object in kernel
++ * land. The shared memory is freed when the descriptor is closed.
++ */
++#define TEE_IOC_SHM_REGISTER_FD	_IOWR(TEE_IOC_MAGIC, TEE_IOC_BASE + 8, \
++				     struct tee_ioctl_shm_register_fd_data)
++
++/**
++ * struct tee_ioctl_buf_data - Variable sized buffer
++ * @buf_ptr:	[in] A __user pointer to a buffer
++ * @buf_len:	[in] Length of the buffer above
++ *
++ * Used as argument for TEE_IOC_OPEN_SESSION, TEE_IOC_INVOKE,
++ * TEE_IOC_SUPPL_RECV, and TEE_IOC_SUPPL_SEND below.
++ */
++struct tee_ioctl_buf_data {
++	__u64 buf_ptr;
++	__u64 buf_len;
++};
++
++/**
++ * TEE_IOC_SHM_REGISTER - Register shared memory argument
++ *
++ * Registers shared memory between the user space process and secure OS.
++ *
++ * Returns a file descriptor on success or < 0 on failure
++ *
++ * The shared memory is unregisterred when the descriptor is closed.
++ */
++#define TEE_IOC_SHM_REGISTER   _IOWR(TEE_IOC_MAGIC, TEE_IOC_BASE + 9, \
++				     struct tee_ioctl_shm_register_data)
++/*
++ * Five syscalls are used when communicating with the TEE driver.
++ * open(): opens the device associated with the driver
++ * ioctl(): as described above operating on the file descriptor from open()
++ * close(): two cases
++ *   - closes the device file descriptor
++ *   - closes a file descriptor connected to allocated shared memory
++ * mmap(): maps shared memory into user space using information from struct
++ *	   tee_ioctl_shm_alloc_data
++ * munmap(): unmaps previously shared memory
++ */
++
++#endif /*__TEE_H*/
+diff --git a/src/tee_bench.h b/src/tee_bench.h
+new file mode 100644
+index 0000000..600407f
+--- /dev/null
++++ b/src/tee_bench.h
+@@ -0,0 +1,77 @@
++/*
++ * Copyright (c) 2017, Linaro Limited
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright notice,
++ * this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above copyright notice,
++ * this list of conditions and the following disclaimer in the documentation
++ * and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#ifndef TEE_BENCH_H
++#define TEE_BENCH_H
++
++#include <inttypes.h>
++
++#define PTA_BENCHMARK_UUID \
++		{ 0x0b9a63b0, 0xb4c6, 0x4c85, \
++			{ 0xa2, 0x84, 0xa2, 0x28, 0xef, 0x54, 0x7b, 0x4e } }
++
++#define BENCHMARK_CMD(id)	(0xFA190000 | ((id) & 0xFFFF))
++#define BENCHMARK_CMD_REGISTER_MEMREF	BENCHMARK_CMD(1)
++#define BENCHMARK_CMD_GET_MEMREF		BENCHMARK_CMD(2)
++#define BENCHMARK_CMD_UNREGISTER		BENCHMARK_CMD(3)
++
++/*
++ * Cycle count divider is enabled (in PMCR),
++ * CCNT value is incremented every 64th clock cycle
++ */
++#define TEE_BENCH_DIVIDER		64
++/* max amount of timestamps per buffer */
++#define TEE_BENCH_MAX_STAMPS	32
++#define TEE_BENCH_MAX_MASK		(TEE_BENCH_MAX_STAMPS - 1)
++
++/* OP-TEE susbsystems ids */
++#define TEE_BENCH_CLIENT	0x10000000
++#define TEE_BENCH_KMOD		0x20000000
++#define TEE_BENCH_CORE		0x30000000
++#define TEE_BENCH_UTEE		0x40000000
++#define TEE_BENCH_DUMB_TA	0xF0000001
++
++/* storing timestamp */
++struct tee_time_st {
++	uint64_t cnt;	/* stores value from CNTPCT register */
++	uint64_t addr;	/* stores value from program counter register */
++	uint64_t src;	/* OP-TEE subsystem id */
++};
++
++/* per-cpu circular buffer for timestamps */
++struct tee_ts_cpu_buf {
++	uint64_t head;
++	uint64_t tail;
++	struct tee_time_st stamps[TEE_BENCH_MAX_STAMPS];
++};
++
++/* memory layout for shared memory, where timestamps will be stored */
++struct tee_ts_global {
++	uint64_t cores;
++	struct tee_ts_cpu_buf cpu_buf[];
++};
++#endif /* TEE_BENCH_H */
+diff --git a/src/tee_client_api.c b/src/tee_client_api.c
+new file mode 100644
+index 0000000..2b07d30
+--- /dev/null
++++ b/src/tee_client_api.c
+@@ -0,0 +1,958 @@
++/*
++ * Copyright (c) 2015-2016, Linaro Limited
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright notice,
++ * this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above copyright notice,
++ * this list of conditions and the following disclaimer in the documentation
++ * and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include <errno.h>
++#include <fcntl.h>
++#include <limits.h>
++#include <pthread.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/ioctl.h>
++#include <sys/mman.h>
++#include <sys/stat.h>
++#include <sys/types.h>
++#include <tee_client_api_extensions.h>
++#include <tee_client_api.h>
++#include <teec_trace.h>
++#include <unistd.h>
++
++#ifndef __aligned
++#define __aligned(x) __attribute__((__aligned__(x)))
++#endif
++#include <tee.h>
++
++#include "teec_benchmark.h"
++
++#define MIN(x, y) (((x) < (y)) ? (x) : (y))
++
++/* How many device sequence numbers will be tried before giving up */
++#define TEEC_MAX_DEV_SEQ	10
++
++/* Helpers to access memref parts of a struct tee_ioctl_param */
++#define MEMREF_SHM_ID(p)	((p)->c)
++#define MEMREF_SHM_OFFS(p)	((p)->a)
++#define MEMREF_SIZE(p)		((p)->b)
++
++/*
++ * Internal flags of TEEC_SharedMemory::internal.flags
++ */
++#define SHM_FLAG_BUFFER_ALLOCED		(1u << 0)
++#define SHM_FLAG_SHADOW_BUFFER_ALLOCED	(1u << 1)
++
++static pthread_mutex_t teec_mutex = PTHREAD_MUTEX_INITIALIZER;
++
++static void teec_mutex_lock(pthread_mutex_t *mu)
++{
++	pthread_mutex_lock(mu);
++}
++
++static void teec_mutex_unlock(pthread_mutex_t *mu)
++{
++	pthread_mutex_unlock(mu);
++}
++
++static void *teec_paged_aligned_alloc(size_t sz)
++{
++	void *p = NULL;
++
++	if (!posix_memalign(&p, sysconf(_SC_PAGESIZE), sz))
++		return p;
++
++	return NULL;
++}
++
++static int teec_open_dev(const char *devname, const char *capabilities,
++			 uint32_t *gen_caps)
++{
++	int fd = 0;
++	struct tee_ioctl_version_data vers;
++
++	memset(&vers, 0, sizeof(vers));
++
++	fd = open(devname, O_RDWR);
++	if (fd < 0)
++		return -1;
++
++	if (ioctl(fd, TEE_IOC_VERSION, &vers)) {
++		EMSG("TEE_IOC_VERSION failed");
++		goto err;
++	}
++
++	/* We can only handle GP TEEs */
++	if (!(vers.gen_caps & TEE_GEN_CAP_GP))
++		goto err;
++
++	if (capabilities) {
++		if (strcmp(capabilities, "optee-tz") == 0) {
++			if (vers.impl_id != TEE_IMPL_ID_OPTEE)
++				goto err;
++			if (!(vers.impl_caps & TEE_OPTEE_CAP_TZ))
++				goto err;
++		} else {
++			/* Unrecognized capability requested */
++			goto err;
++		}
++	}
++
++	*gen_caps = vers.gen_caps;
++	return fd;
++err:
++	close(fd);
++	return -1;
++}
++
++static int teec_shm_alloc(int fd, size_t size, int *id)
++{
++	int shm_fd = 0;
++	struct tee_ioctl_shm_alloc_data data;
++
++	memset(&data, 0, sizeof(data));
++
++	data.size = size;
++	shm_fd = ioctl(fd, TEE_IOC_SHM_ALLOC, &data);
++	if (shm_fd < 0)
++		return -1;
++	*id = data.id;
++	return shm_fd;
++}
++
++static int teec_shm_register(int fd, void *buf, size_t size, int *id)
++{
++	int shm_fd = 0;
++	struct tee_ioctl_shm_register_data data;
++
++	memset(&data, 0, sizeof(data));
++
++	data.addr = (uintptr_t)buf;
++	data.length = size;
++	shm_fd = ioctl(fd, TEE_IOC_SHM_REGISTER, &data);
++	if (shm_fd < 0)
++		return -1;
++	*id = data.id;
++	return shm_fd;
++}
++
++TEEC_Result TEEC_InitializeContext(const char *name, TEEC_Context *ctx)
++{
++	char devname[PATH_MAX] = { 0 };
++	int fd = 0;
++	size_t n = 0;
++
++	if (!ctx)
++		return TEEC_ERROR_BAD_PARAMETERS;
++
++	for (n = 0; n < TEEC_MAX_DEV_SEQ; n++) {
++		uint32_t gen_caps = 0;
++
++		snprintf(devname, sizeof(devname), "/dev/tee%zu", n);
++		fd = teec_open_dev(devname, name, &gen_caps);
++		if (fd >= 0) {
++			ctx->fd = fd;
++			ctx->reg_mem = gen_caps & TEE_GEN_CAP_REG_MEM;
++			ctx->memref_null = gen_caps & TEE_GEN_CAP_MEMREF_NULL;
++			return TEEC_SUCCESS;
++		}
++	}
++
++	return TEEC_ERROR_ITEM_NOT_FOUND;
++}
++
++void TEEC_FinalizeContext(TEEC_Context *ctx)
++{
++	if (ctx)
++		close(ctx->fd);
++}
++
++
++static TEEC_Result teec_pre_process_tmpref(TEEC_Context *ctx,
++			uint32_t param_type, TEEC_TempMemoryReference *tmpref,
++			struct tee_ioctl_param *param,
++			TEEC_SharedMemory *shm)
++{
++	TEEC_Result res = TEEC_ERROR_GENERIC;
++
++	switch (param_type) {
++	case TEEC_MEMREF_TEMP_INPUT:
++		param->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT;
++		shm->flags = TEEC_MEM_INPUT;
++		break;
++	case TEEC_MEMREF_TEMP_OUTPUT:
++		param->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT;
++		shm->flags = TEEC_MEM_OUTPUT;
++		break;
++	case TEEC_MEMREF_TEMP_INOUT:
++		param->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INOUT;
++		shm->flags = TEEC_MEM_INPUT | TEEC_MEM_OUTPUT;
++		break;
++	default:
++		return TEEC_ERROR_BAD_PARAMETERS;
++	}
++	shm->size = tmpref->size;
++
++	if (!tmpref->buffer) {
++		if (tmpref->size)
++			return TEEC_ERROR_BAD_PARAMETERS;
++
++		if (ctx->memref_null) {
++			/* Null pointer, indicate no shared memory attached */
++			MEMREF_SHM_ID(param) = TEE_MEMREF_NULL;
++			shm->id = -1;
++		} else {
++			res = TEEC_AllocateSharedMemory(ctx, shm);
++			if (res != TEEC_SUCCESS)
++				return res;
++			MEMREF_SHM_ID(param) = shm->id;
++		}
++	} else {
++		shm->buffer = tmpref->buffer;
++		res = TEEC_RegisterSharedMemory(ctx, shm);
++		if (res != TEEC_SUCCESS)
++			return res;
++
++		if (shm->shadow_buffer)
++			memcpy(shm->shadow_buffer, tmpref->buffer,
++			       tmpref->size);
++
++		MEMREF_SHM_ID(param) = shm->id;
++	}
++
++	MEMREF_SIZE(param) = tmpref->size;
++
++	return TEEC_SUCCESS;
++}
++
++static TEEC_Result teec_pre_process_whole(
++			TEEC_RegisteredMemoryReference *memref,
++			struct tee_ioctl_param *param)
++{
++	const uint32_t inout = TEEC_MEM_INPUT | TEEC_MEM_OUTPUT;
++	uint32_t flags = memref->parent->flags & inout;
++	TEEC_SharedMemory *shm = NULL;
++
++	if (flags == inout)
++		param->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INOUT;
++	else if (flags & TEEC_MEM_INPUT)
++		param->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT;
++	else if (flags & TEEC_MEM_OUTPUT)
++		param->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT;
++	else
++		return TEEC_ERROR_BAD_PARAMETERS;
++
++	shm = memref->parent;
++	/*
++	 * We're using a shadow buffer in this reference, copy the real buffer
++	 * into the shadow buffer if needed. We'll copy it back once we've
++	 * returned from the call to secure world.
++	 */
++	if (shm->shadow_buffer && (flags & TEEC_MEM_INPUT))
++		memcpy(shm->shadow_buffer, shm->buffer, shm->size);
++
++	MEMREF_SHM_ID(param) = shm->id;
++	MEMREF_SIZE(param) = shm->size;
++
++	return TEEC_SUCCESS;
++}
++
++static TEEC_Result teec_pre_process_partial(uint32_t param_type,
++			TEEC_RegisteredMemoryReference *memref,
++			struct tee_ioctl_param *param)
++{
++	uint32_t req_shm_flags = 0;
++	TEEC_SharedMemory *shm = NULL;
++
++	switch (param_type) {
++	case TEEC_MEMREF_PARTIAL_INPUT:
++		req_shm_flags = TEEC_MEM_INPUT;
++		param->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT;
++		break;
++	case TEEC_MEMREF_PARTIAL_OUTPUT:
++		req_shm_flags = TEEC_MEM_OUTPUT;
++		param->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT;
++		break;
++	case TEEC_MEMREF_PARTIAL_INOUT:
++		req_shm_flags = TEEC_MEM_OUTPUT | TEEC_MEM_INPUT;
++		param->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INOUT;
++		break;
++	default:
++		return TEEC_ERROR_BAD_PARAMETERS;
++	}
++
++	shm = memref->parent;
++
++	if ((shm->flags & req_shm_flags) != req_shm_flags)
++		return TEEC_ERROR_BAD_PARAMETERS;
++
++	if ((memref->offset + memref->size < memref->offset) ||
++	    (memref->offset + memref->size > shm->size))
++		return TEEC_ERROR_BAD_PARAMETERS;
++
++	/*
++	 * We're using a shadow buffer in this reference, copy the real buffer
++	 * into the shadow buffer if needed. We'll copy it back once we've
++	 * returned from the call to secure world.
++	 */
++	if (shm->shadow_buffer && param_type != TEEC_MEMREF_PARTIAL_OUTPUT)
++		memcpy((char *)shm->shadow_buffer + memref->offset,
++		       (char *)shm->buffer + memref->offset, memref->size);
++
++	MEMREF_SHM_ID(param) = shm->id;
++	MEMREF_SHM_OFFS(param) = memref->offset;
++	MEMREF_SIZE(param) = memref->size;
++
++	return TEEC_SUCCESS;
++}
++
++static TEEC_Result teec_pre_process_operation(TEEC_Context *ctx,
++			TEEC_Operation *operation,
++			struct tee_ioctl_param *params,
++			TEEC_SharedMemory *shms)
++{
++	TEEC_Result res = TEEC_ERROR_GENERIC;
++	size_t n = 0;
++
++	memset(shms, 0, sizeof(TEEC_SharedMemory) *
++			TEEC_CONFIG_PAYLOAD_REF_COUNT);
++
++	for (n = 0; n < TEEC_CONFIG_PAYLOAD_REF_COUNT; n++)
++		shms[n].id = -1;
++
++	if (!operation) {
++		memset(params, 0, sizeof(struct tee_ioctl_param) *
++				  TEEC_CONFIG_PAYLOAD_REF_COUNT);
++		return TEEC_SUCCESS;
++	}
++
++	for (n = 0; n < TEEC_CONFIG_PAYLOAD_REF_COUNT; n++) {
++		uint32_t param_type = 0;
++
++		param_type = TEEC_PARAM_TYPE_GET(operation->paramTypes, n);
++		switch (param_type) {
++		case TEEC_NONE:
++			params[n].attr = param_type;
++			break;
++		case TEEC_VALUE_INPUT:
++		case TEEC_VALUE_OUTPUT:
++		case TEEC_VALUE_INOUT:
++			params[n].attr = param_type;
++			params[n].a = operation->params[n].value.a;
++			params[n].b = operation->params[n].value.b;
++			break;
++		case TEEC_MEMREF_TEMP_INPUT:
++		case TEEC_MEMREF_TEMP_OUTPUT:
++		case TEEC_MEMREF_TEMP_INOUT:
++			res = teec_pre_process_tmpref(ctx, param_type,
++				&operation->params[n].tmpref, params + n,
++				shms + n);
++			if (res != TEEC_SUCCESS)
++				return res;
++			break;
++		case TEEC_MEMREF_WHOLE:
++			res = teec_pre_process_whole(
++					&operation->params[n].memref,
++					params + n);
++			if (res != TEEC_SUCCESS)
++				return res;
++			break;
++		case TEEC_MEMREF_PARTIAL_INPUT:
++		case TEEC_MEMREF_PARTIAL_OUTPUT:
++		case TEEC_MEMREF_PARTIAL_INOUT:
++			res = teec_pre_process_partial(param_type,
++				&operation->params[n].memref, params + n);
++			if (res != TEEC_SUCCESS)
++				return res;
++			break;
++		default:
++			return TEEC_ERROR_BAD_PARAMETERS;
++		}
++	}
++
++	return TEEC_SUCCESS;
++}
++
++static void teec_post_process_tmpref(uint32_t param_type,
++			TEEC_TempMemoryReference *tmpref,
++			struct tee_ioctl_param *param,
++			TEEC_SharedMemory *shm)
++{
++	if (param_type != TEEC_MEMREF_TEMP_INPUT) {
++		if (tmpref->buffer && shm->shadow_buffer)
++			memcpy(tmpref->buffer, shm->shadow_buffer,
++			       MIN(MEMREF_SIZE(param), tmpref->size));
++
++		tmpref->size = MEMREF_SIZE(param);
++	}
++}
++
++static void teec_post_process_whole(TEEC_RegisteredMemoryReference *memref,
++			struct tee_ioctl_param *param)
++{
++	TEEC_SharedMemory *shm = memref->parent;
++
++	if (shm->flags & TEEC_MEM_OUTPUT) {
++
++		/*
++		 * We're using a shadow buffer in this reference, copy back
++		 * the shadow buffer into the real buffer now that we've
++		 * returned from secure world.
++		 */
++		if (shm->shadow_buffer && MEMREF_SIZE(param) <= shm->size)
++			memcpy(shm->buffer, shm->shadow_buffer,
++			       MEMREF_SIZE(param));
++
++		memref->size = MEMREF_SIZE(param);
++	}
++}
++
++static void teec_post_process_partial(uint32_t param_type,
++			TEEC_RegisteredMemoryReference *memref,
++			struct tee_ioctl_param *param)
++{
++	if (param_type != TEEC_MEMREF_PARTIAL_INPUT) {
++		TEEC_SharedMemory *shm = memref->parent;
++
++		/*
++		 * We're using a shadow buffer in this reference, copy back
++		 * the shadow buffer into the real buffer now that we've
++		 * returned from secure world.
++		 */
++		if (shm->shadow_buffer && MEMREF_SIZE(param) <= memref->size)
++			memcpy((char *)shm->buffer + memref->offset,
++			       (char *)shm->shadow_buffer + memref->offset,
++			       MEMREF_SIZE(param));
++
++		memref->size = MEMREF_SIZE(param);
++	}
++}
++
++static void teec_post_process_operation(TEEC_Operation *operation,
++			struct tee_ioctl_param *params,
++			TEEC_SharedMemory *shms)
++{
++	size_t n = 0;
++
++	if (!operation)
++		return;
++
++	for (n = 0; n < TEEC_CONFIG_PAYLOAD_REF_COUNT; n++) {
++		uint32_t param_type = 0;
++
++		param_type = TEEC_PARAM_TYPE_GET(operation->paramTypes, n);
++		switch (param_type) {
++		case TEEC_VALUE_INPUT:
++			break;
++		case TEEC_VALUE_OUTPUT:
++		case TEEC_VALUE_INOUT:
++			operation->params[n].value.a = params[n].a;
++			operation->params[n].value.b = params[n].b;
++			break;
++		case TEEC_MEMREF_TEMP_INPUT:
++		case TEEC_MEMREF_TEMP_OUTPUT:
++		case TEEC_MEMREF_TEMP_INOUT:
++			teec_post_process_tmpref(param_type,
++				&operation->params[n].tmpref, params + n,
++				shms + n);
++			break;
++		case TEEC_MEMREF_WHOLE:
++			teec_post_process_whole(&operation->params[n].memref,
++						params + n);
++			break;
++		case TEEC_MEMREF_PARTIAL_INPUT:
++		case TEEC_MEMREF_PARTIAL_OUTPUT:
++		case TEEC_MEMREF_PARTIAL_INOUT:
++			teec_post_process_partial(param_type,
++				&operation->params[n].memref, params + n);
++		default:
++			break;
++		}
++	}
++}
++
++static void teec_free_temp_refs(TEEC_Operation *operation,
++			TEEC_SharedMemory *shms)
++{
++	size_t n = 0;
++
++	if (!operation)
++		return;
++
++	for (n = 0; n < TEEC_CONFIG_PAYLOAD_REF_COUNT; n++) {
++		switch (TEEC_PARAM_TYPE_GET(operation->paramTypes, n)) {
++		case TEEC_MEMREF_TEMP_INPUT:
++		case TEEC_MEMREF_TEMP_OUTPUT:
++		case TEEC_MEMREF_TEMP_INOUT:
++			TEEC_ReleaseSharedMemory(shms + n);
++			break;
++		default:
++			break;
++		}
++	}
++}
++
++static TEEC_Result ioctl_errno_to_res(int err)
++{
++	switch (err) {
++	case ENOMEM:
++		return TEEC_ERROR_OUT_OF_MEMORY;
++	case EINVAL:
++		return TEEC_ERROR_BAD_PARAMETERS;
++	default:
++		return TEEC_ERROR_GENERIC;
++	}
++}
++
++static void uuid_to_octets(uint8_t d[TEE_IOCTL_UUID_LEN], const TEEC_UUID *s)
++{
++	d[0] = s->timeLow >> 24;
++	d[1] = s->timeLow >> 16;
++	d[2] = s->timeLow >> 8;
++	d[3] = s->timeLow;
++	d[4] = s->timeMid >> 8;
++	d[5] = s->timeMid;
++	d[6] = s->timeHiAndVersion >> 8;
++	d[7] = s->timeHiAndVersion;
++	memcpy(d + 8, s->clockSeqAndNode, sizeof(s->clockSeqAndNode));
++}
++
++static void setup_client_data(struct tee_ioctl_open_session_arg *arg,
++			      uint32_t connection_method,
++			      const void *connection_data)
++{
++	arg->clnt_login = connection_method;
++
++	switch (connection_method) {
++	case TEE_IOCTL_LOGIN_PUBLIC:
++		/* No connection data to pass */
++		break;
++	case TEE_IOCTL_LOGIN_USER:
++		/* Kernel auto-fills UID and forms client UUID */
++		break;
++	case TEE_IOCTL_LOGIN_GROUP:
++		/*
++		 * Connection data for group login is uint32_t and rest of
++		 * clnt_uuid is set as zero.
++		 *
++		 * Kernel verifies group membership and then forms client UUID.
++		 */
++		memcpy(arg->clnt_uuid, connection_data, sizeof(gid_t));
++		break;
++	case TEE_IOCTL_LOGIN_APPLICATION:
++		/*
++		 * Kernel auto-fills application identifier and forms client
++		 * UUID.
++		 */
++		break;
++	case TEE_IOCTL_LOGIN_USER_APPLICATION:
++		/*
++		 * Kernel auto-fills application identifier, UID and forms
++		 * client UUID.
++		 */
++		break;
++	case TEE_IOCTL_LOGIN_GROUP_APPLICATION:
++		/*
++		 * Connection data for group login is uint32_t rest of
++		 * clnt_uuid is set as zero.
++		 *
++		 * Kernel verifies group membership, auto-fills application
++		 * identifier and then forms client UUID.
++		 */
++		memcpy(arg->clnt_uuid, connection_data, sizeof(gid_t));
++		break;
++	default:
++		/*
++		 * Unknown login method, don't pass any connection data as we
++		 * don't know size.
++		 */
++		break;
++	}
++}
++
++TEEC_Result TEEC_OpenSession(TEEC_Context *ctx, TEEC_Session *session,
++			const TEEC_UUID *destination,
++			uint32_t connection_method, const void *connection_data,
++			TEEC_Operation *operation, uint32_t *ret_origin)
++{
++	struct tee_ioctl_open_session_arg *arg = NULL;
++	struct tee_ioctl_param *params = NULL;
++	TEEC_Result res = TEEC_ERROR_GENERIC;
++	uint32_t eorig = 0;
++	int rc = 0;
++	const size_t arg_size = sizeof(struct tee_ioctl_open_session_arg) +
++				TEEC_CONFIG_PAYLOAD_REF_COUNT *
++					sizeof(struct tee_ioctl_param);
++	union {
++		struct tee_ioctl_open_session_arg arg;
++		uint8_t data[arg_size];
++	} buf;
++	struct tee_ioctl_buf_data buf_data;
++	TEEC_SharedMemory shm[TEEC_CONFIG_PAYLOAD_REF_COUNT];
++
++	memset(&buf, 0, sizeof(buf));
++	memset(&shm, 0, sizeof(shm));
++	memset(&buf_data, 0, sizeof(buf_data));
++
++	if (!ctx || !session) {
++		eorig = TEEC_ORIGIN_API;
++		res = TEEC_ERROR_BAD_PARAMETERS;
++		goto out;
++	}
++
++	buf_data.buf_ptr = (uintptr_t)&buf;
++	buf_data.buf_len = sizeof(buf);
++
++	arg = &buf.arg;
++	arg->num_params = TEEC_CONFIG_PAYLOAD_REF_COUNT;
++	params = (struct tee_ioctl_param *)(arg + 1);
++
++	uuid_to_octets(arg->uuid, destination);
++
++	setup_client_data(arg, connection_method, connection_data);
++
++	res = teec_pre_process_operation(ctx, operation, params, shm);
++	if (res != TEEC_SUCCESS) {
++		eorig = TEEC_ORIGIN_API;
++		goto out_free_temp_refs;
++	}
++
++	rc = ioctl(ctx->fd, TEE_IOC_OPEN_SESSION, &buf_data);
++	if (rc) {
++		EMSG("TEE_IOC_OPEN_SESSION failed");
++		eorig = TEEC_ORIGIN_COMMS;
++		res = ioctl_errno_to_res(errno);
++		goto out_free_temp_refs;
++	}
++	res = arg->ret;
++	eorig = arg->ret_origin;
++	if (res == TEEC_SUCCESS) {
++		session->ctx = ctx;
++		session->session_id = arg->session;
++	}
++	teec_post_process_operation(operation, params, shm);
++
++out_free_temp_refs:
++	teec_free_temp_refs(operation, shm);
++out:
++	if (ret_origin)
++		*ret_origin = eorig;
++	return res;
++}
++
++void TEEC_CloseSession(TEEC_Session *session)
++{
++	struct tee_ioctl_close_session_arg arg;
++
++	memset(&arg, 0, sizeof(arg));
++
++	if (!session)
++		return;
++
++	arg.session = session->session_id;
++	if (ioctl(session->ctx->fd, TEE_IOC_CLOSE_SESSION, &arg))
++		EMSG("Failed to close session 0x%x", session->session_id);
++}
++
++TEEC_Result TEEC_InvokeCommand(TEEC_Session *session, uint32_t cmd_id,
++			TEEC_Operation *operation, uint32_t *error_origin)
++{
++	struct tee_ioctl_invoke_arg *arg = NULL;
++	struct tee_ioctl_param *params = NULL;
++	TEEC_Result res = TEEC_ERROR_GENERIC;
++	uint32_t eorig = 0;
++	int rc = 0;
++	const size_t arg_size = sizeof(struct tee_ioctl_invoke_arg) +
++				TEEC_CONFIG_PAYLOAD_REF_COUNT *
++					sizeof(struct tee_ioctl_param);
++	union {
++		struct tee_ioctl_invoke_arg arg;
++		uint8_t data[arg_size];
++	} buf;
++	struct tee_ioctl_buf_data buf_data;
++	TEEC_SharedMemory shm[TEEC_CONFIG_PAYLOAD_REF_COUNT];
++
++	memset(&buf, 0, sizeof(buf));
++	memset(&buf_data, 0, sizeof(buf_data));
++	memset(&shm, 0, sizeof(shm));
++
++	if (!session) {
++		eorig = TEEC_ORIGIN_API;
++		res = TEEC_ERROR_BAD_PARAMETERS;
++		goto out;
++	}
++
++	bm_timestamp();
++
++	buf_data.buf_ptr = (uintptr_t)&buf;
++	buf_data.buf_len = sizeof(buf);
++
++	arg = &buf.arg;
++	arg->num_params = TEEC_CONFIG_PAYLOAD_REF_COUNT;
++	params = (struct tee_ioctl_param *)(arg + 1);
++
++	arg->session = session->session_id;
++	arg->func = cmd_id;
++
++	if (operation) {
++		teec_mutex_lock(&teec_mutex);
++		operation->session = session;
++		teec_mutex_unlock(&teec_mutex);
++	}
++
++	res = teec_pre_process_operation(session->ctx, operation, params, shm);
++	if (res != TEEC_SUCCESS) {
++		eorig = TEEC_ORIGIN_API;
++		goto out_free_temp_refs;
++	}
++
++	rc = ioctl(session->ctx->fd, TEE_IOC_INVOKE, &buf_data);
++	if (rc) {
++		EMSG("TEE_IOC_INVOKE failed");
++		eorig = TEEC_ORIGIN_COMMS;
++		res = ioctl_errno_to_res(errno);
++		goto out_free_temp_refs;
++	}
++
++	res = arg->ret;
++	eorig = arg->ret_origin;
++	teec_post_process_operation(operation, params, shm);
++
++	bm_timestamp();
++
++out_free_temp_refs:
++	teec_free_temp_refs(operation, shm);
++out:
++	if (error_origin)
++		*error_origin = eorig;
++	return res;
++}
++
++void TEEC_RequestCancellation(TEEC_Operation *operation)
++{
++	TEEC_Session *session = NULL;
++	struct tee_ioctl_cancel_arg arg;
++
++	memset(&arg, 0, sizeof(arg));
++
++	if (!operation)
++		return;
++
++	teec_mutex_lock(&teec_mutex);
++	session = operation->session;
++	teec_mutex_unlock(&teec_mutex);
++
++	if (!session)
++		return;
++
++	arg.session = session->session_id;
++	arg.cancel_id = 0;
++
++	if (ioctl(session->ctx->fd, TEE_IOC_CANCEL, &arg))
++		EMSG("TEE_IOC_CANCEL: %s", strerror(errno));
++}
++
++TEEC_Result TEEC_RegisterSharedMemory(TEEC_Context *ctx, TEEC_SharedMemory *shm)
++{
++	TEEC_Result res = TEEC_SUCCESS;
++	int fd = 0;
++	size_t s = 0;
++
++	if (!ctx || !shm)
++		return TEEC_ERROR_BAD_PARAMETERS;
++
++	if (!shm->flags || (shm->flags & ~(TEEC_MEM_INPUT | TEEC_MEM_OUTPUT)))
++		return TEEC_ERROR_BAD_PARAMETERS;
++
++	if (!shm->buffer)
++		return TEEC_ERROR_BAD_PARAMETERS;
++
++	s = shm->size;
++	if (!s)
++		s = 8;
++	if (ctx->reg_mem) {
++		fd = teec_shm_register(ctx->fd, shm->buffer, s, &shm->id);
++		if (fd >= 0) {
++			shm->registered_fd = fd;
++			shm->shadow_buffer = NULL;
++			shm->internal.flags = 0;
++			goto out;
++		}
++
++		/*
++		 * If we're here TEE_IOC_SHM_REGISTER failed, probably
++		 * because some read-only memory was supplied and the Linux
++		 * kernel doesn't like that at the moment.
++		 *
++		 * The error could also have some other origin. In any case
++		 * we're not making matters worse by trying to allocate and
++		 * register a shadow buffer before giving up.
++		 */
++		shm->shadow_buffer = teec_paged_aligned_alloc(s);
++		if (!shm->shadow_buffer)
++			return TEEC_ERROR_OUT_OF_MEMORY;
++		fd = teec_shm_register(ctx->fd, shm->shadow_buffer, s,
++				       &shm->id);
++		if (fd >= 0) {
++			shm->registered_fd = fd;
++			shm->internal.flags = SHM_FLAG_SHADOW_BUFFER_ALLOCED;
++			goto out;
++		}
++
++		if (errno == ENOMEM)
++			res = TEEC_ERROR_OUT_OF_MEMORY;
++		else
++			res = TEEC_ERROR_GENERIC;
++		free(shm->shadow_buffer);
++		shm->shadow_buffer = NULL;
++		return res;
++	} else {
++		fd = teec_shm_alloc(ctx->fd, s, &shm->id);
++		if (fd < 0)
++			return TEEC_ERROR_OUT_OF_MEMORY;
++
++		shm->shadow_buffer = mmap(NULL, s, PROT_READ | PROT_WRITE,
++					  MAP_SHARED, fd, 0);
++		close(fd);
++		if (shm->shadow_buffer == (void *)MAP_FAILED) {
++			shm->id = -1;
++			return TEEC_ERROR_OUT_OF_MEMORY;
++		}
++		shm->registered_fd = -1;
++		shm->internal.flags = 0;
++	}
++
++out:
++	shm->alloced_size = s;
++	return TEEC_SUCCESS;
++}
++
++TEEC_Result TEEC_RegisterSharedMemoryFileDescriptor(TEEC_Context *ctx,
++						    TEEC_SharedMemory *shm,
++						    int fd)
++{
++	int rfd = 0;
++	struct tee_ioctl_shm_register_fd_data data;
++
++	memset(&data, 0, sizeof(data));
++
++	if (!ctx || !shm || fd < 0)
++		return TEEC_ERROR_BAD_PARAMETERS;
++
++	if (!shm->flags || (shm->flags & ~(TEEC_MEM_INPUT | TEEC_MEM_OUTPUT)))
++		return TEEC_ERROR_BAD_PARAMETERS;
++
++	data.fd = fd;
++	rfd = ioctl(ctx->fd, TEE_IOC_SHM_REGISTER_FD, &data);
++	if (rfd < 0)
++		return TEEC_ERROR_BAD_PARAMETERS;
++
++	shm->buffer = NULL;
++	shm->shadow_buffer = NULL;
++	shm->registered_fd = rfd;
++	shm->id = data.id;
++	shm->size = data.size;
++	return TEEC_SUCCESS;
++}
++
++TEEC_Result TEEC_AllocateSharedMemory(TEEC_Context *ctx, TEEC_SharedMemory *shm)
++{
++	int fd = 0;
++	size_t s = 0;
++
++	if (!ctx || !shm)
++		return TEEC_ERROR_BAD_PARAMETERS;
++
++	if (!shm->flags || (shm->flags & ~(TEEC_MEM_INPUT | TEEC_MEM_OUTPUT)))
++		return TEEC_ERROR_BAD_PARAMETERS;
++
++	s = shm->size;
++	if (!s)
++		s = 8;
++
++	if (ctx->reg_mem) {
++		shm->buffer = teec_paged_aligned_alloc(s);
++		if (!shm->buffer)
++			return TEEC_ERROR_OUT_OF_MEMORY;
++
++		fd = teec_shm_register(ctx->fd, shm->buffer, s, &shm->id);
++		if (fd < 0) {
++			free(shm->buffer);
++			shm->buffer = NULL;
++			return TEEC_ERROR_OUT_OF_MEMORY;
++		}
++		shm->registered_fd = fd;
++	} else {
++		fd = teec_shm_alloc(ctx->fd, s, &shm->id);
++		if (fd < 0)
++			return TEEC_ERROR_OUT_OF_MEMORY;
++
++		shm->buffer = mmap(NULL, s, PROT_READ | PROT_WRITE,
++				   MAP_SHARED, fd, 0);
++		close(fd);
++		if (shm->buffer == (void *)MAP_FAILED) {
++			shm->id = -1;
++			return TEEC_ERROR_OUT_OF_MEMORY;
++		}
++		shm->registered_fd = -1;
++	}
++
++	shm->shadow_buffer = NULL;
++	shm->alloced_size = s;
++	shm->internal.flags = SHM_FLAG_BUFFER_ALLOCED;
++	return TEEC_SUCCESS;
++}
++
++void TEEC_ReleaseSharedMemory(TEEC_SharedMemory *shm)
++{
++	if (!shm || shm->id == -1)
++		return;
++
++	if (shm->shadow_buffer) {
++		if (shm->registered_fd >= 0) {
++			if (shm->internal.flags &
++			    SHM_FLAG_SHADOW_BUFFER_ALLOCED)
++				free(shm->shadow_buffer);
++			close(shm->registered_fd);
++		} else {
++			munmap(shm->shadow_buffer, shm->alloced_size);
++		}
++	} else if (shm->buffer) {
++		if (shm->registered_fd >= 0) {
++			if (shm->internal.flags & SHM_FLAG_BUFFER_ALLOCED)
++				free(shm->buffer);
++			close(shm->registered_fd);
++		} else {
++			munmap(shm->buffer, shm->alloced_size);
++		}
++	} else if (shm->registered_fd >= 0) {
++		close(shm->registered_fd);
++	}
++
++	shm->id = -1;
++	shm->shadow_buffer = NULL;
++	shm->buffer = NULL;
++	shm->registered_fd = -1;
++	shm->internal.flags = 0;
++}
+diff --git a/src/tee_client_api.h b/src/tee_client_api.h
+new file mode 100644
+index 0000000..1693998
+--- /dev/null
++++ b/src/tee_client_api.h
+@@ -0,0 +1,555 @@
++/*
++ * Copyright (c) 2014, STMicroelectronics International N.V.
++ * All rights reserved.
++ * Copyright (c) 2015, Linaro Limited
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright notice,
++ * this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above copyright notice,
++ * this list of conditions and the following disclaimer in the documentation
++ * and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ */
++#ifndef TEE_CLIENT_API_H
++#define TEE_CLIENT_API_H
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#include <stdint.h>
++#include <stddef.h>
++#include <stdbool.h>
++#include <limits.h>
++
++/*
++ * Defines the number of available memory references in an open session or
++ * invoke command operation payload.
++ */
++#define TEEC_CONFIG_PAYLOAD_REF_COUNT 4
++
++/**
++ * Defines the maximum size of a single shared memory block, in bytes, of both
++ * API allocated and API registered memory. There is no good value to put here
++ * (limits depend on specific config used), so this define does not provide any
++ * restriction in this implementation.
++ */
++#define TEEC_CONFIG_SHAREDMEM_MAX_SIZE ULONG_MAX
++
++/**
++ * Flag constants indicating the type of parameters encoded inside the
++ * operation payload (TEEC_Operation), Type is uint32_t.
++ *
++ * TEEC_NONE                   The Parameter is not used
++ *
++ * TEEC_VALUE_INPUT            The Parameter is a TEEC_Value tagged as input.
++ *
++ * TEEC_VALUE_OUTPUT           The Parameter is a TEEC_Value tagged as output.
++ *
++ * TEEC_VALUE_INOUT            The Parameter is a TEEC_Value tagged as both as
++ *                             input and output, i.e., for which both the
++ *                             behaviors of TEEC_VALUE_INPUT and
++ *                             TEEC_VALUE_OUTPUT apply.
++ *
++ * TEEC_MEMREF_TEMP_INPUT      The Parameter is a TEEC_TempMemoryReference
++ *                             describing a region of memory which needs to be
++ *                             temporarily registered for the duration of the
++ *                             Operation and is tagged as input.
++ *
++ * TEEC_MEMREF_TEMP_OUTPUT     Same as TEEC_MEMREF_TEMP_INPUT, but the Memory
++ *                             Reference is tagged as output. The
++ *                             Implementation may update the size field to
++ *                             reflect the required output size in some use
++ *                             cases.
++ *
++ * TEEC_MEMREF_TEMP_INOUT      A Temporary Memory Reference tagged as both
++ *                             input and output, i.e., for which both the
++ *                             behaviors of TEEC_MEMREF_TEMP_INPUT and
++ *                             TEEC_MEMREF_TEMP_OUTPUT apply.
++ *
++ * TEEC_MEMREF_WHOLE           The Parameter is a Registered Memory Reference
++ *                             that refers to the entirety of its parent Shared
++ *                             Memory block. The parameter structure is a
++ *                             TEEC_MemoryReference. In this structure, the
++ *                             Implementation MUST read only the parent field
++ *                             and MAY update the size field when the operation
++ *                             completes.
++ *
++ * TEEC_MEMREF_PARTIAL_INPUT   A Registered Memory Reference structure that
++ *                             refers to a partial region of its parent Shared
++ *                             Memory block and is tagged as input.
++ *
++ * TEEC_MEMREF_PARTIAL_OUTPUT  Registered Memory Reference structure that
++ *                             refers to a partial region of its parent Shared
++ *                             Memory block and is tagged as output.
++ *
++ * TEEC_MEMREF_PARTIAL_INOUT   The Registered Memory Reference structure that
++ *                             refers to a partial region of its parent Shared
++ *                             Memory block and is tagged as both input and
++ *                             output, i.e., for which both the behaviors of
++ *                             TEEC_MEMREF_PARTIAL_INPUT and
++ *                             TEEC_MEMREF_PARTIAL_OUTPUT apply.
++ */
++#define TEEC_NONE                   0x00000000
++#define TEEC_VALUE_INPUT            0x00000001
++#define TEEC_VALUE_OUTPUT           0x00000002
++#define TEEC_VALUE_INOUT            0x00000003
++#define TEEC_MEMREF_TEMP_INPUT      0x00000005
++#define TEEC_MEMREF_TEMP_OUTPUT     0x00000006
++#define TEEC_MEMREF_TEMP_INOUT      0x00000007
++#define TEEC_MEMREF_WHOLE           0x0000000C
++#define TEEC_MEMREF_PARTIAL_INPUT   0x0000000D
++#define TEEC_MEMREF_PARTIAL_OUTPUT  0x0000000E
++#define TEEC_MEMREF_PARTIAL_INOUT   0x0000000F
++
++/**
++ * Flag constants indicating the data transfer direction of memory in
++ * TEEC_Parameter. TEEC_MEM_INPUT signifies data transfer direction from the
++ * client application to the TEE. TEEC_MEM_OUTPUT signifies data transfer
++ * direction from the TEE to the client application. Type is uint32_t.
++ *
++ * TEEC_MEM_INPUT   The Shared Memory can carry data from the client
++ *                  application to the Trusted Application.
++ * TEEC_MEM_OUTPUT  The Shared Memory can carry data from the Trusted
++ *                  Application to the client application.
++ */
++#define TEEC_MEM_INPUT   0x00000001
++#define TEEC_MEM_OUTPUT  0x00000002
++
++/**
++ * Return values. Type is TEEC_Result
++ *
++ * TEEC_SUCCESS                 The operation was successful.
++ * TEEC_ERROR_GENERIC           Non-specific cause.
++ * TEEC_ERROR_ACCESS_DENIED     Access privileges are not sufficient.
++ * TEEC_ERROR_CANCEL            The operation was canceled.
++ * TEEC_ERROR_ACCESS_CONFLICT   Concurrent accesses caused conflict.
++ * TEEC_ERROR_EXCESS_DATA       Too much data for the requested operation was
++ *                              passed.
++ * TEEC_ERROR_BAD_FORMAT        Input data was of invalid format.
++ * TEEC_ERROR_BAD_PARAMETERS    Input parameters were invalid.
++ * TEEC_ERROR_BAD_STATE         Operation is not valid in the current state.
++ * TEEC_ERROR_ITEM_NOT_FOUND    The requested data item is not found.
++ * TEEC_ERROR_NOT_IMPLEMENTED   The requested operation should exist but is not
++ *                              yet implemented.
++ * TEEC_ERROR_NOT_SUPPORTED     The requested operation is valid but is not
++ *                              supported in this implementation.
++ * TEEC_ERROR_NO_DATA           Expected data was missing.
++ * TEEC_ERROR_OUT_OF_MEMORY     System ran out of resources.
++ * TEEC_ERROR_BUSY              The system is busy working on something else.
++ * TEEC_ERROR_COMMUNICATION     Communication with a remote party failed.
++ * TEEC_ERROR_SECURITY          A security fault was detected.
++ * TEEC_ERROR_SHORT_BUFFER      The supplied buffer is too short for the
++ *                              generated output.
++ * TEEC_ERROR_TARGET_DEAD       Trusted Application has panicked
++ *                              during the operation.
++ */
++
++/**
++ *  Standard defined error codes.
++ */
++#define TEEC_SUCCESS                       0x00000000
++#define TEEC_ERROR_STORAGE_NOT_AVAILABLE   0xF0100003
++#define TEEC_ERROR_GENERIC                 0xFFFF0000
++#define TEEC_ERROR_ACCESS_DENIED           0xFFFF0001
++#define TEEC_ERROR_CANCEL                  0xFFFF0002
++#define TEEC_ERROR_ACCESS_CONFLICT         0xFFFF0003
++#define TEEC_ERROR_EXCESS_DATA             0xFFFF0004
++#define TEEC_ERROR_BAD_FORMAT              0xFFFF0005
++#define TEEC_ERROR_BAD_PARAMETERS          0xFFFF0006
++#define TEEC_ERROR_BAD_STATE               0xFFFF0007
++#define TEEC_ERROR_ITEM_NOT_FOUND          0xFFFF0008
++#define TEEC_ERROR_NOT_IMPLEMENTED         0xFFFF0009
++#define TEEC_ERROR_NOT_SUPPORTED           0xFFFF000A
++#define TEEC_ERROR_NO_DATA                 0xFFFF000B
++#define TEEC_ERROR_OUT_OF_MEMORY           0xFFFF000C
++#define TEEC_ERROR_BUSY                    0xFFFF000D
++#define TEEC_ERROR_COMMUNICATION           0xFFFF000E
++#define TEEC_ERROR_SECURITY                0xFFFF000F
++#define TEEC_ERROR_SHORT_BUFFER            0xFFFF0010
++#define TEEC_ERROR_EXTERNAL_CANCEL         0xFFFF0011
++#define TEEC_ERROR_TARGET_DEAD             0xFFFF3024
++#define TEEC_ERROR_STORAGE_NO_SPACE        0xFFFF3041
++
++/**
++ * Function error origins, of type TEEC_ErrorOrigin. These indicate where in
++ * the software stack a particular return value originates from.
++ *
++ * TEEC_ORIGIN_API          The error originated within the TEE Client API
++ *                          implementation.
++ * TEEC_ORIGIN_COMMS        The error originated within the underlying
++ *                          communications stack linking the rich OS with
++ *                          the TEE.
++ * TEEC_ORIGIN_TEE          The error originated within the common TEE code.
++ * TEEC_ORIGIN_TRUSTED_APP  The error originated within the Trusted Application
++ *                          code.
++ */
++#define TEEC_ORIGIN_API          0x00000001
++#define TEEC_ORIGIN_COMMS        0x00000002
++#define TEEC_ORIGIN_TEE          0x00000003
++#define TEEC_ORIGIN_TRUSTED_APP  0x00000004
++
++/**
++ * Session login methods, for use in TEEC_OpenSession() as parameter
++ * connectionMethod. Type is uint32_t.
++ *
++ * TEEC_LOGIN_PUBLIC    	 No login data is provided.
++ * TEEC_LOGIN_USER         	Login data about the user running the Client
++ *                         	Application process is provided.
++ * TEEC_LOGIN_GROUP        	Login data about the group running the Client
++ *                         	Application process is provided.
++ * TEEC_LOGIN_APPLICATION  	Login data about the running Client Application
++ *                         	itself is provided.
++ * TEEC_LOGIN_USER_APPLICATION  Login data about the user and the running
++ *                          	Client Application itself is provided.
++ * TEEC_LOGIN_GROUP_APPLICATION Login data about the group and the running
++ *                          	Client Application itself is provided.
++ */
++#define TEEC_LOGIN_PUBLIC       0x00000000
++#define TEEC_LOGIN_USER         0x00000001
++#define TEEC_LOGIN_GROUP        0x00000002
++#define TEEC_LOGIN_APPLICATION  0x00000004
++#define TEEC_LOGIN_USER_APPLICATION  0x00000005
++#define TEEC_LOGIN_GROUP_APPLICATION  0x00000006
++
++/**
++ * Encode the paramTypes according to the supplied types.
++ *
++ * @param p0 The first param type.
++ * @param p1 The second param type.
++ * @param p2 The third param type.
++ * @param p3 The fourth param type.
++ */
++#define TEEC_PARAM_TYPES(p0, p1, p2, p3) \
++	((p0) | ((p1) << 4) | ((p2) << 8) | ((p3) << 12))
++
++/**
++ * Get the i_th param type from the paramType.
++ *
++ * @param p The paramType.
++ * @param i The i-th parameter to get the type for.
++ */
++#define TEEC_PARAM_TYPE_GET(p, i) (((p) >> (i * 4)) & 0xF)
++
++typedef uint32_t TEEC_Result;
++
++/**
++ * struct TEEC_Context - Represents a connection between a client application
++ * and a TEE.
++ */
++typedef struct {
++	/* Implementation defined */
++	int fd;
++	bool reg_mem;
++	bool memref_null;
++} TEEC_Context;
++
++/**
++ * This type contains a Universally Unique Resource Identifier (UUID) type as
++ * defined in RFC4122. These UUID values are used to identify Trusted
++ * Applications.
++ */
++typedef struct {
++	uint32_t timeLow;
++	uint16_t timeMid;
++	uint16_t timeHiAndVersion;
++	uint8_t clockSeqAndNode[8];
++} TEEC_UUID;
++
++/**
++ * struct TEEC_SharedMemory - Memory to transfer data between a client
++ * application and trusted code.
++ *
++ * @param buffer      The memory buffer which is to be, or has been, shared
++ *                    with the TEE.
++ * @param size        The size, in bytes, of the memory buffer.
++ * @param flags       Bit-vector which holds properties of buffer.
++ *                    The bit-vector can contain either or both of the
++ *                    TEEC_MEM_INPUT and TEEC_MEM_OUTPUT flags.
++ *
++ * A shared memory block is a region of memory allocated in the context of the
++ * client application memory space that can be used to transfer data between
++ * that client application and a trusted application. The user of this struct
++ * is responsible to populate the buffer pointer.
++ */
++typedef struct {
++	void *buffer;
++	size_t size;
++	uint32_t flags;
++	/*
++	 * Implementation-Defined
++	 */
++	int id;
++	size_t alloced_size;
++	void *shadow_buffer;
++	int registered_fd;
++	union {
++		bool dummy;
++		uint8_t flags;
++	} internal;
++} TEEC_SharedMemory;
++
++/**
++ * struct TEEC_TempMemoryReference - Temporary memory to transfer data between
++ * a client application and trusted code, only used for the duration of the
++ * operation.
++ *
++ * @param buffer  The memory buffer which is to be, or has been shared with
++ *                the TEE.
++ * @param size    The size, in bytes, of the memory buffer.
++ *
++ * A memory buffer that is registered temporarily for the duration of the
++ * operation to be called.
++ */
++typedef struct {
++	void *buffer;
++	size_t size;
++} TEEC_TempMemoryReference;
++
++/**
++ * struct TEEC_RegisteredMemoryReference - use a pre-registered or
++ * pre-allocated shared memory block of memory to transfer data between
++ * a client application and trusted code.
++ *
++ * @param parent  Points to a shared memory structure. The memory reference
++ *                may utilize the whole shared memory or only a part of it.
++ *                Must not be NULL
++ *
++ * @param size    The size, in bytes, of the memory buffer.
++ *
++ * @param offset  The offset, in bytes, of the referenced memory region from
++ *                the start of the shared memory block.
++ *
++ */
++typedef struct {
++	TEEC_SharedMemory *parent;
++	size_t size;
++	size_t offset;
++} TEEC_RegisteredMemoryReference;
++
++/**
++ * struct TEEC_Value - Small raw data container
++ *
++ * Instead of allocating a shared memory buffer this structure can be used
++ * to pass small raw data between a client application and trusted code.
++ *
++ * @param a  The first integer value.
++ *
++ * @param b  The second value.
++ */
++typedef struct {
++	uint32_t a;
++	uint32_t b;
++} TEEC_Value;
++
++/**
++ * union TEEC_Parameter - Memory container to be used when passing data between
++ *                        client application and trusted code.
++ *
++ * Either the client uses a shared memory reference, parts of it or a small raw
++ * data container.
++ *
++ * @param tmpref  A temporary memory reference only valid for the duration
++ *                of the operation.
++ *
++ * @param memref  The entire shared memory or parts of it.
++ *
++ * @param value   The small raw data container to use
++ */
++typedef union {
++	TEEC_TempMemoryReference tmpref;
++	TEEC_RegisteredMemoryReference memref;
++	TEEC_Value value;
++} TEEC_Parameter;
++
++/**
++ * struct TEEC_Session - Represents a connection between a client application
++ * and a trusted application.
++ */
++typedef struct {
++	/* Implementation defined */
++	TEEC_Context *ctx;
++	uint32_t session_id;
++} TEEC_Session;
++
++/**
++ * struct TEEC_Operation - Holds information and memory references used in
++ * TEEC_InvokeCommand().
++ *
++ * @param   started     Client must initialize to zero if it needs to cancel
++ *                      an operation about to be performed.
++ * @param   paramTypes  Type of data passed. Use TEEC_PARAM_TYPES macro to
++ *                      create the correct flags.
++ *                      0 means TEEC_NONE is passed for all params.
++ * @param   params      Array of parameters of type TEEC_Parameter.
++ * @param   session     Internal pointer to the last session used by
++ *                      TEEC_InvokeCommand with this operation.
++ *
++ */
++typedef struct {
++	uint32_t started;
++	uint32_t paramTypes;
++	TEEC_Parameter params[TEEC_CONFIG_PAYLOAD_REF_COUNT];
++	/* Implementation-Defined */
++	TEEC_Session *session;
++} TEEC_Operation;
++
++/**
++ * TEEC_InitializeContext() - Initializes a context holding connection
++ * information on the specific TEE, designated by the name string.
++
++ * @param name    A zero-terminated string identifying the TEE to connect to.
++ *                If name is set to NULL, the default TEE is connected to. NULL
++ *                is the only supported value in this version of the API
++ *                implementation.
++ *
++ * @param context The context structure which is to be initialized.
++ *
++ * @return TEEC_SUCCESS  The initialization was successful.
++ * @return TEEC_Result   Something failed.
++ */
++TEEC_Result TEEC_InitializeContext(const char *name, TEEC_Context *context);
++
++/**
++ * TEEC_FinalizeContext() - Destroys a context holding connection information
++ * on the specific TEE.
++ *
++ * This function destroys an initialized TEE context, closing the connection
++ * between the client application and the TEE. This function must only be
++ * called when all sessions related to this TEE context have been closed and
++ * all shared memory blocks have been released.
++ *
++ * @param context       The context to be destroyed.
++ */
++void TEEC_FinalizeContext(TEEC_Context *context);
++
++/**
++ * TEEC_OpenSession() - Opens a new session with the specified trusted
++ *                      application.
++ *
++ * @param context            The initialized TEE context structure in which
++ *                           scope to open the session.
++ * @param session            The session to initialize.
++ * @param destination        A structure identifying the trusted application
++ *                           with which to open a session.
++ *
++ * @param connectionMethod   The connection method to use.
++ * @param connectionData     Any data necessary to connect with the chosen
++ *                           connection method. Not supported, should be set to
++ *                           NULL.
++ * @param operation          An operation structure to use in the session. May
++ *                           be set to NULL to signify no operation structure
++ *                           needed.
++ *
++ * @param returnOrigin       A parameter which will hold the error origin if
++ *                           this function returns any value other than
++ *                           TEEC_SUCCESS.
++ *
++ * @return TEEC_SUCCESS      OpenSession successfully opened a new session.
++ * @return TEEC_Result       Something failed.
++ *
++ */
++TEEC_Result TEEC_OpenSession(TEEC_Context *context,
++			     TEEC_Session *session,
++			     const TEEC_UUID *destination,
++			     uint32_t connectionMethod,
++			     const void *connectionData,
++			     TEEC_Operation *operation,
++			     uint32_t *returnOrigin);
++
++/**
++ * TEEC_CloseSession() - Closes the session which has been opened with the
++ * specific trusted application.
++ *
++ * @param session The opened session to close.
++ */
++void TEEC_CloseSession(TEEC_Session *session);
++
++/**
++ * TEEC_InvokeCommand() - Executes a command in the specified trusted
++ * application.
++ *
++ * @param session        A handle to an open connection to the trusted
++ *                       application.
++ * @param commandID      Identifier of the command in the trusted application
++ *                       to invoke.
++ * @param operation      An operation structure to use in the invoke command.
++ *                       May be set to NULL to signify no operation structure
++ *                       needed.
++ * @param returnOrigin   A parameter which will hold the error origin if this
++ *                       function returns any value other than TEEC_SUCCESS.
++ *
++ * @return TEEC_SUCCESS  OpenSession successfully opened a new session.
++ * @return TEEC_Result   Something failed.
++ */
++TEEC_Result TEEC_InvokeCommand(TEEC_Session *session,
++			       uint32_t commandID,
++			       TEEC_Operation *operation,
++			       uint32_t *returnOrigin);
++
++/**
++ * TEEC_RegisterSharedMemory() - Register a block of existing memory as a
++ * shared block within the scope of the specified context.
++ *
++ * @param context    The initialized TEE context structure in which scope to
++ *                   open the session.
++ * @param sharedMem  pointer to the shared memory structure to register.
++ *
++ * @return TEEC_SUCCESS              The registration was successful.
++ * @return TEEC_ERROR_OUT_OF_MEMORY  Memory exhaustion.
++ * @return TEEC_Result               Something failed.
++ */
++TEEC_Result TEEC_RegisterSharedMemory(TEEC_Context *context,
++				      TEEC_SharedMemory *sharedMem);
++
++/**
++ * TEEC_AllocateSharedMemory() - Allocate shared memory for TEE.
++ *
++ * @param context     The initialized TEE context structure in which scope to
++ *                    open the session.
++ * @param sharedMem   Pointer to the allocated shared memory.
++ *
++ * @return TEEC_SUCCESS              The registration was successful.
++ * @return TEEC_ERROR_OUT_OF_MEMORY  Memory exhaustion.
++ * @return TEEC_Result               Something failed.
++ */
++TEEC_Result TEEC_AllocateSharedMemory(TEEC_Context *context,
++				      TEEC_SharedMemory *sharedMem);
++
++/**
++ * TEEC_ReleaseSharedMemory() - Free or deregister the shared memory.
++ *
++ * @param sharedMem  Pointer to the shared memory to be freed.
++ */
++void TEEC_ReleaseSharedMemory(TEEC_SharedMemory *sharedMemory);
++
++/**
++ * TEEC_RequestCancellation() - Request the cancellation of a pending open
++ *                              session or command invocation.
++ *
++ * @param operation Pointer to an operation previously passed to open session
++ *                  or invoke.
++ */
++void TEEC_RequestCancellation(TEEC_Operation *operation);
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif
+diff --git a/src/tee_client_api_extensions.h b/src/tee_client_api_extensions.h
+new file mode 100644
+index 0000000..85298aa
+--- /dev/null
++++ b/src/tee_client_api_extensions.h
+@@ -0,0 +1,57 @@
++/*
++ * Copyright (c) 2016, Linaro Limited
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright notice,
++ * this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above copyright notice,
++ * this list of conditions and the following disclaimer in the documentation
++ * and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ */
++#ifndef TEE_CLIENT_API_EXTENSIONS_H
++#define TEE_CLIENT_API_EXTENSIONS_H
++
++#include <tee_client_api.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++/**
++ * TEEC_RegisterMemoryFileDescriptor() - Register a block of existing memory as
++ * a shared block within the scope of the specified context.
++ *
++ * @param context    The initialized TEE context structure in which scope to
++ *                   open the session.
++ * @param sharedMem  pointer to the shared memory structure to register.
++ * @param fd         file descriptor of the target memory.
++ *
++ * @return TEEC_SUCCESS              The registration was successful.
++ * @return TEEC_ERROR_OUT_OF_MEMORY  Memory exhaustion.
++ * @return TEEC_Result               Something failed.
++ */
++TEEC_Result TEEC_RegisterSharedMemoryFileDescriptor(TEEC_Context *context,
++						    TEEC_SharedMemory *sharedMem,
++						    int fd);
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif /* TEE_CLIENT_API_EXTENSIONS_H */
+diff --git a/src/teec_benchmark.h b/src/teec_benchmark.h
+new file mode 100644
+index 0000000..17d99ac
+--- /dev/null
++++ b/src/teec_benchmark.h
+@@ -0,0 +1,37 @@
++/*
++ * Copyright (c) 2017, Linaro Limited
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright notice,
++ * this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above copyright notice,
++ * this list of conditions and the following disclaimer in the documentation
++ * and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#ifndef __TEEC_BENCHMARK_H
++#define __TEEC_BENCHMARK_H
++
++#ifdef CFG_TEE_BENCHMARK
++void bm_timestamp(void);
++#else
++static inline void bm_timestamp(void) {}
++#endif
++
++#endif /* __TEEC_BENCHMARK_H */
+diff --git a/src/teec_trace.c b/src/teec_trace.c
+new file mode 100644
+index 0000000..7194c8c
+--- /dev/null
++++ b/src/teec_trace.c
+@@ -0,0 +1,141 @@
++/*
++ * Copyright (c) 2014, STMicroelectronics International N.V.
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright notice,
++ * this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above copyright notice,
++ * this list of conditions and the following disclaimer in the documentation
++ * and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ */
++#include <stdio.h>
++#include <stdarg.h>
++#include <stdint.h>
++#include <ctype.h>
++#include <pthread.h>
++
++#include <unistd.h>
++#include <sys/syscall.h>
++#include <sys/types.h>
++
++#include "teec_trace.h"
++
++#define MIN(x, y) (((x) < (y)) ? (x) : (y))
++
++/*
++ * The length of the prefix is 37, for example it looks like this:
++ * P = Prefix
++ * M = Message
++ * F = Function name
++ * L = Line number
++ * PPPP: MMMMM [FFFFFFFFFFFFFFF : LLLLL]
++ */
++#define MAX_PRINT_SIZE 256
++
++#ifdef TEEC_LOG_FILE
++static void log_to_file(const char *buffer)
++{
++	FILE *log_file = fopen(TEEC_LOG_FILE, "a");
++
++	if (log_file != NULL) {
++		fprintf(log_file, "%s", buffer);
++		fclose(log_file);
++		log_file = NULL;
++	}
++}
++#else
++#define log_to_file(buffer)
++#endif
++
++static const char * const trace_level_strings[] = {
++	"", "ERR", "INF", "DBG", "FLW"
++};
++
++void _dprintf(const char *function, int line, int level, const char *prefix,
++	      const char *fmt, ...)
++{
++	char msg[MAX_PRINT_SIZE];
++	int n = 0;
++	va_list ap;
++
++	if (function) {
++		int thread_id = syscall(SYS_gettid);
++
++		n = snprintf(msg, sizeof(msg), "%s [%d] %s:%s:%d: ",
++			trace_level_strings[level], thread_id, prefix,
++			function, line);
++		if (n < 0)
++			return;
++	}
++
++	if ((size_t)n < sizeof(msg)) {
++		va_start(ap, fmt);
++		n = vsnprintf(msg + n, sizeof(msg) - n, fmt, ap);
++		va_end(ap);
++		if (n < 0)
++			return;
++	}
++
++	fprintf(stdout, "%s", msg);
++	log_to_file(msg);
++}
++
++#if (defined(DEBUGLEVEL_3) || defined(DEBUGLEVEL_true) || defined(DEBUGLEVEL_4))
++void dump_buffer(const char *bname, const uint8_t *buffer, size_t blen)
++{
++	fprintf(stderr, "#### %s\n", bname);
++
++	while (blen > 0) {
++		size_t n = 0;
++
++		for (n = 0; n < 16; n++) {
++			if (n < blen)
++				fprintf(stderr, "%02x ", (int)buffer[n]);
++			else
++				fprintf(stderr, "   ");
++
++			if (n == 7)
++				fprintf(stderr, " ");
++		}
++
++		fprintf(stderr, " |");
++
++		for (n = 0; n < 16; n++) {
++			if (n < blen) {
++				if (isprint(buffer[n]))
++					fprintf(stderr, "%c", (int)buffer[n]);
++				else
++					fprintf(stderr, ".");
++			}
++		}
++
++		fprintf(stderr, "|\n");
++
++		blen -= MIN(blen, 16);
++		buffer += 16;
++	}
++}
++#else
++void dump_buffer(const char *bname, const uint8_t *buffer, size_t blen)
++{
++	(void)bname;
++	(void)buffer;
++	(void)blen;
++}
++#endif
+diff --git a/src/teec_trace.h b/src/teec_trace.h
+new file mode 100644
+index 0000000..b1e37ec
+--- /dev/null
++++ b/src/teec_trace.h
+@@ -0,0 +1,148 @@
++/*
++ * Copyright (c) 2014, STMicroelectronics International N.V.
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright notice,
++ * this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above copyright notice,
++ * this list of conditions and the following disclaimer in the documentation
++ * and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ */
++#ifndef TEEC_TRACE_H
++#define TEEC_TRACE_H
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#include <string.h>
++#include <stdio.h>
++#include <stdint.h>
++#define BINARY_PREFIX "LT"
++
++#ifndef BINARY_PREFIX
++#error "BINARY_PREFIX not defined"
++#endif
++
++/*
++ * Trace levels.
++ *
++ * ERROR is used when some kind of error has happened, this is most likely the
++ * print you will use most of the time when you report some kind of error.
++ *
++ * INFO is used when you want to print some 'normal' text to the user.
++ * This is the default level.
++ *
++ * DEBUG is used to print extra information to enter deeply in the module.
++ *
++ * FLOW is used to print the execution flox, typically the in/out of functions.
++ *
++ * */
++
++#define TRACE_ERROR  1
++#define TRACE_INFO   2
++#define TRACE_DEBUG  3
++#define TRACE_FLOW   4
++
++#if defined(DEBUGLEVEL_0) && !defined(DEBUGLEVEL)
++#define DEBUGLEVEL TRACE_ERROR
++#endif
++
++#if defined(DEBUGLEVEL_1) && !defined(DEBUGLEVEL)
++#define DEBUGLEVEL TRACE_ERROR
++#endif
++
++#if defined(DEBUGLEVEL_2) && !defined(DEBUGLEVEL)
++#define DEBUGLEVEL TRACE_INFO
++#endif
++
++#if defined(DEBUGLEVEL_3) && !defined(DEBUGLEVEL)
++#define DEBUGLEVEL TRACE_DEBUG
++#endif
++
++#if defined(DEBUGLEVEL_4) && !defined(DEBUGLEVEL)
++#define DEBUGLEVEL TRACE_FLOW
++#endif
++
++#ifndef DEBUGLEVEL
++/* Default debug level. */
++#define DEBUGLEVEL TRACE_INFO
++#endif
++
++/*
++ * This define make sure that parameters are checked in the same manner as it
++ * is done in the normal printf function.
++ */
++#define __PRINTFLIKE(__fmt, __varargs) __attribute__\
++	((__format__(__printf__, __fmt, __varargs)))
++
++void _dprintf(const char *function, int line, int level, const char *prefix,
++	      const char *fmt, ...) __PRINTFLIKE(5, 6);
++
++#define dprintf(level, x...) do { \
++		if ((level) <= DEBUGLEVEL) { \
++			_dprintf(__func__, __LINE__, level, \
++				 BINARY_PREFIX, x); \
++		} \
++	} while (0)
++
++#define EMSG(fmt, ...)   dprintf(TRACE_ERROR, fmt "\n", ##__VA_ARGS__)
++#define IMSG(fmt, ...)   dprintf(TRACE_INFO, fmt "\n", ##__VA_ARGS__)
++#define DMSG(fmt, ...)   dprintf(TRACE_DEBUG, fmt "\n", ##__VA_ARGS__)
++#define FMSG(fmt, ...)   dprintf(TRACE_FLOW, fmt "\n", ##__VA_ARGS__)
++
++#define INMSG(fmt, ...)  FMSG("> " fmt, ##__VA_ARGS__)
++#define OUTMSG(fmt, ...) FMSG("< " fmt, ##__VA_ARGS__)
++#define OUTRMSG(r)                              \
++	do {                                            \
++		if (r)                                      \
++			EMSG("Function returns with [%d]", r);  \
++		OUTMSG("r=[%d]", r);                        \
++		return r;                                   \
++	} while (0)
++
++#define dprintf_raw(level, x...) do { \
++		if ((level) <= DEBUGLEVEL) \
++			_dprintf(0, 0, (level), BINARY_PREFIX, x); \
++	} while (0)
++
++#define EMSG_RAW(fmt, ...)   dprintf_raw(TRACE_ERROR, fmt, ##__VA_ARGS__)
++#define IMSG_RAW(fmt, ...)   dprintf_raw(TRACE_INFO, fmt, ##__VA_ARGS__)
++#define DMSG_RAW(fmt, ...)   dprintf_raw(TRACE_DEBUG, fmt, ##__VA_ARGS__)
++#define FMSG_RAW(fmt, ...)   dprintf_raw(TRACE_FLOW, fmt, ##__VA_ARGS__)
++
++/*
++ * This function will hex and ascii dump a buffer.
++ *
++ * Note that this function will only print if debug flag
++ * DEBUGLEVEL is INFO or FLOOD.
++ *
++ * @param bname     Information string describing the buffer.
++ * @param buffer    Pointer to the buffer.
++ * @param blen      Length of the buffer.
++ *
++ * @return void
++ */
++void dump_buffer(const char *bname, const uint8_t *buffer, size_t blen);
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif
+diff --git a/src/uboot_env.c b/src/uboot_env.c
+index 86f9b9e..f9aa985 100644
+--- a/src/uboot_env.c
++++ b/src/uboot_env.c
+@@ -41,6 +41,9 @@
+ #include "md5.h"
+ #include "uboot_private.h"
+ 
++#include <tee_client_api.h>
++#include <ta_ccmp1_aes.h>
++
+ /*
+  * The BLOB includes a random AES-256 key (32 bytes) and a
+  * Message Authentication Code (MAC) (16 bytes)
+@@ -972,7 +975,7 @@ static bool machine_is_compatible(char *machine)
+ }
+ 
+ #define MAX_HWID_WORDS		4
+-static int env_caam_get_keymod(unsigned char output[16])
++static int env_encryption_get_keymod(unsigned char output[16])
+ {
+ 	int i;
+ 	int len;
+@@ -993,6 +996,7 @@ static int env_caam_get_keymod(unsigned char output[16])
+ 				return -1;
+ 			}
+ 			ocotp_hwid[i] = ntohl(*(uint32_t *)buf);
++			fprintf(stderr, "HWID_%d %x \n ",i,ocotp_hwid[i]);
+ 			close(fd);
+ 		} else if (machine_is_compatible("digi,ccimx6ul") ||
+ 			   machine_is_compatible("digi,ccimx6")) {
+@@ -1040,7 +1044,7 @@ static int env_caam_crypt(char *data, unsigned int size, const int enc)
+ 	char *buffer;
+ 	unsigned char key_modifier[16];
+ 
+-	ret = env_caam_get_keymod(key_modifier);
++	ret = env_encryption_get_keymod(key_modifier);
+ 	if (ret)
+ 		return ret;
+ 
+@@ -1087,6 +1091,165 @@ free:
+ 	return ret;
+ }
+ 
++void prepare_tee_session(struct aes_ctx *ctx)
++{
++	TEEC_Result ret;
++        uint32_t origin;
++        TEEC_UUID uuid = TA_STM32MP_CRYP_UUID;
++
++	ret = TEEC_InitializeContext(NULL, &ctx->ctx);
++        if (ret != TEEC_SUCCESS)
++                printf("TEEC_InitializeContext failed with code 0x%x", ret);
++
++        /* Open a session with the TA */
++        ret = TEEC_OpenSession(&ctx->ctx, &ctx->sess, &uuid,
++                               TEEC_LOGIN_PUBLIC, NULL, NULL, &origin);
++        if (ret != TEEC_SUCCESS)
++                printf("TEEC_Opensession failed with code 0x%x origin 0x%x",
++                        ret, origin);
++
++}
++
++void terminate_tee_session(struct aes_ctx *ctx)
++{
++	TEEC_CloseSession(&ctx->sess);
++	TEEC_FinalizeContext(&ctx->ctx);
++}
++
++void prepare_aes(struct aes_ctx *ctx, int encode)
++{
++	TEEC_Operation op;
++	uint32_t origin;
++	TEEC_Result res;
++
++	memset(&op, 0, sizeof(op));
++	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT,
++					 TEEC_VALUE_INPUT,
++					 TEEC_VALUE_INPUT,
++					 TEEC_NONE);
++
++	op.params[0].value.a = TA_AES_ALGO_CTR;
++	op.params[1].value.a = AES128_KEY_LENGTH;
++	op.params[2].value.a = encode ? TA_AES_MODE_ENCODE :
++					TA_AES_MODE_DECODE;
++
++	res = TEEC_InvokeCommand(&ctx->sess, TA_AES_CMD_PREPARE,
++				 &op, &origin);
++	if (res != TEEC_SUCCESS)
++		printf("TEEC_InvokeCommand(PREPARE) failed 0x%x origin 0x%x",
++			res, origin);
++}
++
++void set_key(struct aes_ctx *ctx, size_t key_sz)
++{
++	TEEC_Operation op;
++	uint32_t origin;
++	TEEC_Result res;
++
++	memset(&op, 0, sizeof(op));
++	
++	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT,
++					 TEEC_NONE, TEEC_NONE, TEEC_NONE);
++
++	op.params[0].value.a = key_sz;
++
++	res = TEEC_InvokeCommand(&ctx->sess, TA_AES_CMD_SET_KEY,
++				 &op, &origin);
++	if (res != TEEC_SUCCESS)
++		printf("TEEC_InvokeCommand(SET_KEY) failed 0x%x origin 0x%x",
++			res, origin);
++}
++
++void set_iv(struct aes_ctx *ctx, char *iv, size_t iv_sz)
++{
++	TEEC_Operation op;
++	uint32_t origin;
++	TEEC_Result res;
++
++	memset(&op, 0, sizeof(op));
++	op.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_TEMP_INPUT,
++					  TEEC_NONE, TEEC_NONE, TEEC_NONE);
++	op.params[0].tmpref.buffer = iv;
++	op.params[0].tmpref.size = iv_sz;
++
++	res = TEEC_InvokeCommand(&ctx->sess, TA_AES_CMD_SET_IV,
++				 &op, &origin);
++	if (res != TEEC_SUCCESS)
++		printf("TEEC_InvokeCommand(SET_IV) failed 0x%x origin 0x%x",
++			res, origin);
++}
++
++void cipher_buffer(struct aes_ctx *ctx, char *in, char *out, size_t sz)
++{
++	TEEC_Operation op;
++	uint32_t origin;
++	TEEC_Result res;
++
++	memset(&op, 0, sizeof(op));
++	op.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_TEMP_INPUT,
++					 TEEC_MEMREF_TEMP_OUTPUT,
++					 TEEC_NONE, TEEC_NONE);
++	op.params[0].tmpref.buffer = in;
++	op.params[0].tmpref.size = sz;
++	op.params[1].tmpref.buffer = out;
++	op.params[1].tmpref.size = sz;
++
++	res = TEEC_InvokeCommand(&ctx->sess, TA_AES_CMD_CIPHER,
++				 &op, &origin);
++	if (res != TEEC_SUCCESS)
++		printf("TEEC_InvokeCommand(CIPHER) failed 0x%x origin 0x%x",
++			res, origin);
++}
++
++static int env_ccmp1_crypt(char *data, unsigned int size, const int enc)
++{
++	int ret, i;
++	uint32_t origin;
++	struct aes_ctx *aes;
++	char *iv, *ciph;
++	TEEC_UUID uuid = TA_STM32MP_CRYP_UUID;
++	unsigned char key_modifier[16];
++
++	/* Allocate all the buffer */
++	iv = calloc(AES_BLOCK_LENGTH, sizeof(char));
++	ciph = calloc(size+1, sizeof(unsigned int));
++
++	if (!iv || !ciph) {
++		printf("%s: can't allocate memory\n", __func__);
++		ret = -ENOMEM;
++		goto err_free_buffs;
++	}
++
++	/* Get key_modifer for IV */
++	ret = env_encryption_get_keymod(key_modifier);
++	if (ret)
++		return ret;
++
++	memcpy(iv, key_modifier, AES_BLOCK_LENGTH);
++	aes = (struct aes_ctx*)malloc(sizeof(struct aes_ctx));
++	if (aes == NULL) {
++		printf("%s: can't allocate context memory\n", __func__);
++		ret = -ENOMEM;
++	} else {
++		prepare_tee_session(aes);
++
++		prepare_aes(aes, enc);
++		set_key(aes, AES128_KEY_LENGTH);
++		set_iv(aes, iv, AES_BLOCK_LENGTH);
++		memset(ciph, 0, size);
++		cipher_buffer(aes, data, ciph, size);
++		/* copy ciphered data */
++		memcpy(data, ciph, size);
++		free(aes);
++	}
++
++err_free_buffs:
++	free(iv);
++	free(ciph);
++
++	return ret;
++}
++
+ int libuboot_env_store(struct uboot_ctx *ctx)
+ {
+ 	struct var_entry *entry;
+@@ -1163,7 +1326,12 @@ int libuboot_env_store(struct uboot_ctx *ctx)
+ 	}
+ 
+ 	if (ctx->encrypted) {
+-		ret = env_caam_crypt(data, ctx->usable_size, 1);
++		/* Detect the platform */
++		if (machine_is_compatible("digi,ccmp15") ||
++		    machine_is_compatible("digi,ccmp13"))
++			ret = env_ccmp1_crypt(data, ctx->usable_size, 1);
++		else
++			ret = env_caam_crypt(data, ctx->usable_size, 1);
+ 		if (ret) {
+ 			fprintf(stderr,
+ 				"Error: can't encrypt env for flash\n");
+@@ -1237,7 +1405,12 @@ static int libuboot_load(struct uboot_ctx *ctx)
+ 		crc = *(uint32_t *)(buf[i] + offsetcrc);
+ 		dev->crc = crc32(0, (uint8_t *)data, usable_envsize);
+ 		if (ctx->encrypted) {
+-			ret = env_caam_crypt((char *)data, ctx->usable_size, 0);
++			/* Detect the platform */
++			if (machine_is_compatible("digi,ccmp15") ||
++			    machine_is_compatible("digi,ccmp13"))
++				ret = env_ccmp1_crypt((char *)data, ctx->usable_size, 0);
++			else
++				ret = env_caam_crypt((char *)data, ctx->usable_size, 0);
+ 			if (ret) {
+ 				fprintf(stderr, "Error: can't decrypt environment\n");
+ 				return ret;
+-- 
+2.34.1
+

@@ -48,6 +48,9 @@ IMAGE_FSTYPES:remove = "ext4 tar.xz"
 # List of supported boot devices
 BOOTDEVICE_LABELS ?= "sdcard"
 
+# Wic files
+WKS_FILE += "ccmp1.wks.in"
+
 # Default secure console configuration
 TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 

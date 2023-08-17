@@ -1,0 +1,52 @@
+software =
+{
+    version = "@@DEY_FIRMWARE_VERSION@@";
+    description = "@@SWUPDATE_DESCRIPTION@@";
+
+    @@SWUPDATE_STORAGE_TYPE@@ = {
+        primary: {
+            files: (
+                {
+                    filename = "@@SWUPDATE_FILES_TARGZ_FILE_NAME@@";
+                    type = "archive";
+                    compressed = "zlib";
+                    path = "/";
+                }
+            );
+            scripts: (
+                {
+                    filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    type = "shellscript";
+                }
+            );
+            uboot: (
+                {
+                    name = "swap_bank";
+                    value = "false";
+                }
+            );
+        }
+        secondary: {
+            ref = "#./primary";
+        }
+        single: {
+            files: (
+                {
+                    filename = "@@SWUPDATE_FILES_TARGZ_FILE_NAME@@";
+                    type = "archive";
+                    compressed = "zlib";
+                    path = "/system/";
+                }
+            );
+            scripts: (
+                {
+                    filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    type = "shellscript";
+                }
+            );
+        }
+        platform = {
+            ref = "#./single";
+        }
+    };
+}

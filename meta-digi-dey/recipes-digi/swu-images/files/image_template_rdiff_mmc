@@ -1,0 +1,8 @@
+                {
+                    type = "rdiff_image";
+                    filename = "@@SWUPDATE_RDIFF_ROOTFS_DELTA_FILE_NAME@@";
+                    device = "##DEV##";
+                    properties: {
+                        rdiffbase = ["/dev/rdiff_source_rootfs"];
+                    };
+                }

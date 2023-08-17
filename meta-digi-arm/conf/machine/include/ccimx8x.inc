@@ -23,12 +23,6 @@ BOOTLOADER_SEEK_BOOT ?= "0"
 BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 
-# RAM variants
-# This determines the number of different DCD files, and thus the number of
-# different U-Boot binaries required.
-# Last one is the default (the one the symlinks point at)
-RAM_CONFIGS = "512MB_16bit 1GB_16bit 1GB_32bit 2GB_32bit"
-
 # The original variable used by NXP to store the mkimage "REV" parameter,
 # REV_OPTION, has a format of "REV=X0". Since we are interested in building
 # images for multiple revisions and using the revision in the imx-boot filename,
@@ -69,6 +63,13 @@ MACHINE_FEATURES += "accel-graphics wifi bluetooth cryptochip pci mca"
 
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "AHAB"
+
+IMXBOOT_TARGETS = "flash_spl"
+
+IMX_BOOT_SOC_TARGET = "iMX8QX"
+IMX_BOOT_SEEK = "32"
+
+IMX_EXTRA_FIRMWARE:mx8x-generic-bsp  = "digi-sc-firmware imx-seco"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"

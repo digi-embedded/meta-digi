@@ -182,14 +182,6 @@ BOOT_TOOLS:ccmp1 = "u-boot"
 FIP_UBOOT_HEADER = "ccmp15-dvk"
 FIP_UBOOT_HEADER:ccmp13 = "ccmp13-dvk"
 
-do_deploy:append:ccimx8x() {
-	# Move all U-Boot artifacts to the imx-boot-tools folder
-	# U-Boot images are not bootable on the i.MX8X
-	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
-	mv ${DEPLOYDIR}/u-boot* ${DEPLOYDIR}/${BOOT_TOOLS}/
-	mv ${DEPLOYDIR}/${UBOOT_SYMLINK}-* ${DEPLOYDIR}/${BOOT_TOOLS}/
-}
-
 do_deploy:append:ccimx8m() {
 	# Deploy u-boot-nodtb.bin and ccimx8m[m|n]-dvk.dtb, to be packaged in boot binary by imx-boot
 	if [ -n "${UBOOT_CONFIG}" ]

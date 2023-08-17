@@ -69,7 +69,7 @@ MACHINEOVERRIDES_EXTENDER:mx8mn:use-mainline-bsp  = "imx-generic-bsp:imx-mainlin
 MACHINEOVERRIDES_EXTENDER:mx8mp:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:mx8-generic-bsp:mx8-mainline-bsp:mx8m-generic-bsp:mx8m-mainline-bsp:mx8mp-generic-bsp:mx8mp-mainline-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8qxp:use-mainline-bsp = "imx-generic-bsp:imx-mainline-bsp:mx8-generic-bsp:mx8-mainline-bsp:mx8x-generic-bsp:mx8x-mainline-bsp:mx8qxp-generic-bsp:mx8qxp-mainline-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8dx:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:mx8-generic-bsp:mx8-mainline-bsp:mx8x-generic-bsp:mx8x-mainline-bsp:mx8dx-generic-bsp:mx8dx-mainline-bsp"
-MACHINEOVERRIDES_EXTENDER:mx93:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:imxdrm:imxpxp:mx9-generic-bsp:mx9-mainline-bsp:mx93-generic-bsp:mx93-mainline-bsp"
+MACHINEOVERRIDES_EXTENDER:mx93:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:mx9-generic-bsp:mx9-mainline-bsp:mx93-generic-bsp:mx93-mainline-bsp"
 
 MACHINEOVERRIDES_EXTENDER_FILTER_OUT = " \
     mx6 \
@@ -272,11 +272,20 @@ PREFERRED_VERSION_vulkan-tools:imxvulkan   ??= "1.2.182.0"
 
 # Use i.MX optee Version
 PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "3.21.0.imx"
 PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "3.21.0.imx"
 PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "3.21.0.imx"
+
+# Machine learning backports from NXP's lf-6.1.1_1.0.0 release
+PREFERRED_VERSION_deepview-rt:ccimx93 = "2.4.46.1-aarch64"
+PREFERRED_VERSION_ethos-u-vela:ccimx93 = "3.6.0"
+PREFERRED_VERSION_flatbuffers:ccimx93 = "2.0.7"
+PREFERRED_VERSION_flatbuffers-native:ccimx93 = "2.0.7"
+PREFERRED_VERSION_tensorflow-lite:ccimx93 = "2.10.0"
+PREFERRED_VERSION_tensorflow-lite-host-tools:ccimx93 = "2.10.0"
+PREFERRED_VERSION_tensorflow-lite-host-tools-native:ccimx93 = "2.10.0"
 
 # Optee runtime packages to install
 OPTEE_PKGS ??= "optee-client optee-os"
@@ -290,7 +299,7 @@ EXTRA_IMAGEDEPENDS += "u-boot"
 KERNEL_IMAGETYPE = "zImage"
 KERNEL_IMAGETYPE:aarch64 = "Image.gz"
 
-MACHINE_FEATURES = "usbgadget usbhost vfat alsa touchscreen"
+MACHINE_FEATURES = "usbgadget usbhost vfat alsa touchscreen screen"
 
 # IMX specific udev extra rules added when device manager is systemd/udev
 UDEV_EXTRA_RULES:append = " udev-rules-imx"

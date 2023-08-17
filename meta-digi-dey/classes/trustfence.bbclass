@@ -24,7 +24,6 @@ TRUSTFENCE_SIGN_KEYS_PATH ?= "default"
 TRUSTFENCE_DEK_PATH ?= "default"
 TRUSTFENCE_DEK_PATH:ccmp1 ?= "0"
 TRUSTFENCE_ENCRYPT_ENVIRONMENT ?= "1"
-TRUSTFENCE_ENCRYPT_ENVIRONMENT:ccmp1 ?= "0"
 TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 TRUSTFENCE_KEY_INDEX ?= "0"
 
@@ -36,6 +35,39 @@ TRUSTFENCE_ENCRYPT_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-
 TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "1", "0", d)}"
 
 IMAGE_FEATURES += "dey-trustfence"
+
+# Function to generate a PKI tree (with lock dir protection)
+GENPKI_LOCK_DIR = "${TRUSTFENCE_SIGN_KEYS_PATH}/.genpki.lock"
+gen_pki_tree() {
+	if mkdir -p ${GENPKI_LOCK_DIR}; then
+		if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+			trustfence-gen-pki.sh ${TRUSTFENCE_SIGN_KEYS_PATH}
+		elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+			export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+			trustfence-gen-pki.sh -p ${DIGI_SOM}
+		fi
+		rm -rf ${GENPKI_LOCK_DIR}
+	else
+		bbfatal "Could not get lock to generate PKI tree"
+	fi
+}
+
+# Function that generates a PKI tree if there isn't one
+check_gen_pki_tree() {
+	if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+		SRK_KEYS="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK*crt.pem | sed s/\ /\,/g)"
+		n_commas="$(echo ${SRK_KEYS} | grep -o "," | wc -l)"
+		if [ "${n_commas}" -eq 0 ]; then
+			gen_pki_tree
+		elif [ "${n_commas}" -ne 3 ]; then
+			bbfatal "Inconsistent PKI tree"
+		fi
+	elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+		# The script that generates the PKI tree already checks if
+		# there isn't one, so there's nothing to do here but calling it.
+		gen_pki_tree
+	fi
+}
 
 python () {
     import binascii
@@ -100,6 +132,8 @@ python () {
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT") == "1"):
         if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y ")
+        elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
+            d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES_CCMP1=y ")
 
     # Provide sane default values for SWUPDATE class in case Trustfence is enabled
     if (d.getVar("TRUSTFENCE_SIGN") == "1"):
@@ -139,26 +173,4 @@ python () {
         d.setVar("TRUSTFENCE_INITRAMFS_IMAGE", "dey-image-trustfence-initramfs");
     else:
         d.setVar("TRUSTFENCE_INITRAMFS_IMAGE", "");
-}
-
-# Function to generate a PKI tree (with lock dir protection)
-GENPKI_LOCK_DIR = "${TRUSTFENCE_SIGN_KEYS_PATH}/.genpki.lock"
-gen_pki_tree() {
-	if mkdir -p ${GENPKI_LOCK_DIR}; then
-		trustfence-gen-pki.sh ${TRUSTFENCE_SIGN_KEYS_PATH}
-		rm -rf ${GENPKI_LOCK_DIR}
-	else
-		bbfatal "Could not get lock to generate PKI tree"
-	fi
-}
-
-# Function that generates a PKI tree if there isn't one
-check_gen_pki_tree() {
-	SRK_KEYS="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK*crt.pem | sed s/\ /\,/g)"
-	n_commas="$(echo ${SRK_KEYS} | grep -o "," | wc -l)"
-	if [ "${n_commas}" -eq 0 ]; then
-		gen_pki_tree
-	elif [ "${n_commas}" -ne 3 ]; then
-		bbfatal "Inconsistent PKI tree"
-	fi
 }

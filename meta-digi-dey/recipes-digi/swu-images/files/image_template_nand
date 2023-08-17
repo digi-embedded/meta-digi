@@ -1,0 +1,7 @@
+                {
+                    filename = "##IMG_NAME##";
+                    volume = "##DEV##";
+                    type = "ubivol";
+                    sha256 = "$swupdate_get_sha256(##IMG_NAME##)";
+                    installed-directly = true;
+                }

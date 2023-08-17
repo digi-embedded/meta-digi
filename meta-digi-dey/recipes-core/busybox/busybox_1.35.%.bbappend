@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2022 Digi International.
+# Copyright (C) 2013-2023 Digi International.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
@@ -16,6 +16,7 @@ SRC_URI += "file://standby \
             ${@bb.utils.contains("MACHINE_FEATURES", "mca", "file://poweroff_safe \
                                                              file://reboot_safe \
                                                             ", "", d)} \
+            file://0001-hwclock-add-get-set-parameters-option.patch \
            "
 
 HAS_SYSTEMD = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}"

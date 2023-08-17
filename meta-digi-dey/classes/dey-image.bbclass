@@ -57,13 +57,22 @@ fakeroot toolchain_create_sdk_dey_version() {
 }
 toolchain_create_sdk_dey_version[vardepsexclude] = "DATETIME"
 
+create_sw_versions_file() {
+	local swversionsfile="${IMAGE_ROOTFS}${sysconfdir}/sw-versions"
+
+	rm -f $swversionsfile
+	touch $swversionsfile
+	echo 'firmware ${DEY_FIRMWARE_VERSION}' >> $swversionsfile
+}
+ROOTFS_POSTPROCESS_COMMAND:append = " create_sw_versions_file;"
+
 #
 # Add dependency for read-only signed rootfs
 #
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
-# Remove kernel-module-imx-gpu-viv from all images
-BAD_RECOMMENDATIONS += "kernel-module-imx-gpu-viv"
-
 # Do not include kernel in rootfs images
 PACKAGE_EXCLUDE = "kernel-image-*"
+
+# Add required methods to generate the correct SWU update package.
+inherit dey-swupdate
