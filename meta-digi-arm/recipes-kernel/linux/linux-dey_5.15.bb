@@ -2,7 +2,7 @@
 
 require recipes-kernel/linux/linux-dey.inc
 
-SRCBRANCH = "v5.15/nxp/dey-4.0/maint"
+SRCBRANCH = "v5.15/nxp/dey-4.0/maint_cc8x-cc6-beta"
 SRCBRANCH:stm32mpcommon = "v5.15/stm/dey-4.0/maint"
 SRCREV = "${AUTOREV}"
 SRCREV:stm32mpcommon = "${AUTOREV}"
