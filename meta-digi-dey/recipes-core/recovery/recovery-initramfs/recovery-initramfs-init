@@ -169,10 +169,10 @@ quit_with_error() {
 # @return  - "yes" if the system is running in NAND, "no" otherwise
 #------------------------------------------------------------------------------
 is_nand() {
-	if grep -qs "\broot=\(ubi\|mtd\)" /proc/cmdline; then
-		echo "yes"
-	else
+	if grep -qs 'root=PARTUUID.*' /proc/cmdline; then
 		echo "no"
+	else
+		echo "yes"
 	fi
 }
 
