@@ -18,6 +18,10 @@ software =
                 {
                     name = "upgrade_available";
                     value = "1";
+                },
+                {
+                    name = "rootfstype"
+                    value = "@@SWUPDATE_ROOTFS_TYPE@@"
                 }
             );
         }
@@ -35,6 +39,10 @@ software =
                 {
                     name = "upgrade_available";
                     value = "1";
+                },
+                {
+                    name = "rootfstype"
+                    value = "@@SWUPDATE_ROOTFS_TYPE@@"
                 }
             );
         }
@@ -46,6 +54,12 @@ software =
                 {
                     filename = "@@SWUPDATE_SCRIPT_NAME@@";
                     type = "shellscript";
+                }
+            );
+            uboot: (
+                {
+                    name = "rootfstype"
+                    value = "@@SWUPDATE_ROOTFS_TYPE@@"
                 }
             );
         }
