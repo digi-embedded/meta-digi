@@ -1,0 +1,70 @@
+software =
+{
+    version = "@@DEY_FIRMWARE_VERSION@@";
+    description = "@@SWUPDATE_DESCRIPTION@@";
+
+    @@SWUPDATE_STORAGE_TYPE@@ = {
+        primary: {
+            images: (
+                ##IMAGES_PRIMARY##
+            );
+            scripts: (
+                {
+                    filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    type = "shellscript";
+                }
+            );
+            uboot: (
+                {
+                    name = "upgrade_available";
+                    value = "1";
+                },
+                {
+                    name = "rootfstype"
+                    value = "@@SWUPDATE_ROOTFS_TYPE@@"
+                }
+            );
+        }
+        secondary: {
+            images: (
+                ##IMAGES_SECONDARY##
+            );
+            scripts: (
+                {
+                    filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    type = "shellscript";
+                }
+            );
+            uboot: (
+                {
+                    name = "upgrade_available";
+                    value = "1";
+                },
+                {
+                    name = "rootfstype"
+                    value = "@@SWUPDATE_ROOTFS_TYPE@@"
+                }
+            );
+        }
+        single: {
+            images: (
+                ##IMAGES_SINGLE##
+            );
+            scripts: (
+                {
+                    filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    type = "shellscript";
+                }
+            );
+            uboot: (
+                {
+                    name = "rootfstype"
+                    value = "@@SWUPDATE_ROOTFS_TYPE@@"
+                }
+            );
+        }
+        platform = {
+            ref = "#./single";
+        }
+    };
+}
