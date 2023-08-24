@@ -97,10 +97,10 @@ copy_public_key() {
 		exit 1
 	fi
 	# Copy the public key to the rootfs
-	install -d ${D}${sysconfdir}/ssl/certs
+	install -d ${IMAGE_ROOTFS}${sysconfdir}/ssl/certs
 	cp -f "${PUBLIC_KEY}" "${IMAGE_ROOTFS}${sysconfdir}/ssl/certs/key.pub"
 }
-ROOTFS_POSTINSTALL_COMMAND:append = " copy_public_key;"
+ROOTFS_POSTPROCESS_COMMAND:append = " copy_public_key;"
 
 python () {
     import binascii
