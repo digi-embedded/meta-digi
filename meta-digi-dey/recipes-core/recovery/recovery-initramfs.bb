@@ -36,44 +36,6 @@ do_install() {
 	install -m 0755 ${WORKDIR}/automount_mtd.sh ${D}${base_libdir}/mdev/automount_mtd.sh
 	install -m 0755 ${WORKDIR}/automount_ubi.sh ${D}${base_libdir}/mdev/automount_ubi.sh
 	install -m 0644 ${WORKDIR}/mdev.conf ${D}${sysconfdir}
-
-	# If Trustfence is enabled, copy the public key that is going to be used into the
-	# initramfs '/etc/ssl/certs' folder in order to verify swupdate packages.
-	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
-		# Retrieve the key index to use.
-		KEY_INDEX="0"
-		if [ -n "${TRUSTFENCE_KEY_INDEX}" ]; then
-			KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
-		fi
-		KEY_INDEX_1=$(expr ${KEY_INDEX} + 1)
-
-		# Find the certificate to use.
-		if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
-			if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
-				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/IMG${KEY_INDEX_1}*crt.pem)"
-			elif [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
-				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK${KEY_INDEX_1}*_ca_crt.pem)"
-			else
-				bberror "Unkown TRUSTFENCE_SIGN_MODE value"
-				exit 1
-			fi
-			# Extract the public key from the certificate.
-			install -d ${D}${sysconfdir}/ssl/certs
-			openssl x509 -pubkey -noout -in "${CERT_IMG}" > ${D}${sysconfdir}/ssl/certs/key.pub
-		elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
-			# Copy the public key to the rootfs
-			if [ "${DIGI_SOM}" = "ccmp15" ]; then
-				PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey00.pem"
-			elif [ "${DIGI_SOM}" = "ccmp13" ]; then
-				PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey0${KEY_INDEX}.pem"
-			else
-				bberror "Unknown DIGI_SOM"
-				exit 1
-			fi
-			install -d ${D}${sysconfdir}/ssl/certs
-			cp ${PUBLIC_KEY} ${D}${sysconfdir}/ssl/certs/key.pub
-		fi
-	fi
 }
 
 # Do not create debug/devel packages
