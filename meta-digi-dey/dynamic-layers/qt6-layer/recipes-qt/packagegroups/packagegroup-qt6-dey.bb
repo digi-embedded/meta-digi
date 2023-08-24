@@ -36,6 +36,11 @@ QT6_IMAGE_INSTALL:imxpxp = "${@bb.utils.contains('DISTRO_FEATURES', 'x11','${QT6
 QT6_IMAGE_INSTALL:imxgpu3d = " \
     ${QT6_IMAGE_INSTALL_common} \
 "
+
+QT6_IMAGE_INSTALL:ccmp15 = " \
+    ${QT6_IMAGE_INSTALL_common} \
+"
+
 RDEPENDS:${PN} += " \
     ${QT6_IMAGE_INSTALL} \
 "
