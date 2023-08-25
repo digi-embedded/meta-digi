@@ -18,12 +18,6 @@ BASE_INIT="$(readlink -f "@base_sbindir@/init")"
 BASE_INIT_ORIG="$(readlink -f "@base_sbindir@/init.orig")"
 INIT_SYSTEMD="@systemd_unitdir@/systemd"
 
-# Partitions are mounted:
-#   * For multi-MTD systems, when an MTD subsystem event is received.
-#   * For single-MTD systems, when a UBI subsystem event is received.
-# So, do nothing for UBI subsystem events in multi-MTD systems.
-[ "${SUBSYSTEM}" = "ubi" ] && [ -c /dev/ubi1 ] && exit 0
-
 if [ "${SUBSYSTEM}" = "block" ]; then
 	PARTNAME="${ID_PART_ENTRY_NAME}"
 elif [ "${SUBSYSTEM}" = "mtd" ]; then
@@ -31,6 +25,12 @@ elif [ "${SUBSYSTEM}" = "mtd" ]; then
 	PARTNAME="$(grep ${MTDN} /proc/mtd | sed -ne 's,.*"\(.*\)",\1,g;T;p')"
 elif [ "${SUBSYSTEM}" = "ubi" ]; then
 	PARTNAME="$(cat /sys/${DEVPATH}/name)"
+	# Multi-MTD systems only have one UBI volume per MTD partition that is
+	# called the same as the MTD partition. Do nothing for UBI events if the
+	# MTD partition is called the same, as they are already handled by the
+	# "mtd" subsystem rule
+	result="$(grep '\"${PARTNAME}\"$' /proc/mtd)"
+	[ -n "${result}" ] && exit 0
 fi
 
 MOUNT_FOLDER=${PARTNAME}
