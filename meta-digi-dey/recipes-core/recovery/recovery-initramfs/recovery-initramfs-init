@@ -231,21 +231,10 @@ format_ubi_volume() {
 	psplash_message "Formatting '${1}' partition..."
 	psplash_progress "0"
 
-	# If /dev/ubi1 exists is a system with multiple MTD partitions
-	if [ ! -c "/dev/ubi1" ]; then
-		# Find the volume number associated to the volume name
-		for d in /dev/ubi0_*; do
-			volname="$(ubinfo ${d} | grep ^Name | awk '{print $(2)}')"
-			if [ "${volname}" = "${1}" ]; then
-				# Find mountpoint
-				mountpoint="$(mount | grep ubi0:${1} | awk '{print $(3) }')"
-				umount ${mountpoint} 2> /dev/null
-				# Wipe out volume
-				ubiupdatevol ${d} -t
-			fi
-		done
-		psplash_progress "100"
-	else
+	# If the system is a multi-MTD, there must be an MTD partition by the
+	# same name as the UBI volume
+	result="$(grep '\"${1}\"$' /proc/mtd)"
+	if [ -n "${result}" ]; then
 		# Find the MTD partition.
 		local mtd_num="$(sed -ne "s/mtd\([0-9]\+\):.*\<${1}\>.*/\1/g;T;p" /proc/mtd 2>/dev/null)"
 		if [ -z "${mtd_num}" ]; then
@@ -280,6 +269,24 @@ format_ubi_volume() {
 				quit_with_error "Error creating '${1}' UBI volume"
 			fi
 		fi
+	else
+		# Find the volume number associated to the volume name
+		ubidevs="$(ls /dev/ubi* | grep 'ubi[0-9]\+$')"
+		for d in $ubidevs;do
+			for v in "${d}"_*; do
+				volname="$(ubinfo ${v} | grep ^Name | awk '{print $(2)}')"
+				if [ "${volname}" = "${1}" ]; then
+					# Find mountpoint
+					u="$(basename ${d})"
+					mountpoint="$(mount | grep ${u}:${1} | awk '{print $(3) }')"
+					umount ${mountpoint} 2> /dev/null
+					# Wipe out volume
+					ubiupdatevol ${v} -t
+					break 2
+				fi
+			done
+		done
+		psplash_progress "100"
 	fi
 }
 
