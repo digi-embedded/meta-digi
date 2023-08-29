@@ -64,7 +64,7 @@ if [ "${PLATFORM}" = "ccmp15" ]; then
 		# Random password
 		password="$(openssl rand -base64 32)"
 		echo "Generating random key"
-		STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/keys/" -pwd "${password}" -n 1
+		STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/keys/" -pwd ${password} -n 1
 		echo "${password}" > "${KEY_PASS_FILE}"
 	fi
 elif [ "${PLATFORM}" = "ccmp13" ]; then
@@ -76,7 +76,7 @@ elif [ "${PLATFORM}" = "ccmp13" ]; then
 			passwords="${passwords} $(openssl rand -base64 32)"
 		done
 		echo "Generating random keys"
-		STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/keys/" -pwd "${passwords}" -n 8
+		STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/keys/" -pwd ${passwords} -n 8
 		echo "${passwords}" > "${KEY_PASS_FILE}"
 	fi
 else
