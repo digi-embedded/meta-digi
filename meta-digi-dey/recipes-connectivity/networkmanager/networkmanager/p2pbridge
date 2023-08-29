@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright 2019, Digi International Inc.
+# Copyright 2019-2023, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -18,8 +18,10 @@
 #
 
 # This script is specific to create a P2P (BATMAN) bridge, so
-# require the CONNECTION_ID to be "p2p-bridge"
+# requires the CONNECTION_ID to be "p2p-bridge"
 [ "${CONNECTION_ID}" = "p2p-bridge" ] || exit 0
+
+P2P_IFACE="##WLAN_P2P_INTERFACE##"
 
 log() {
 	if type "systemd-cat" >/dev/null 2>/dev/null; then
@@ -32,13 +34,13 @@ log() {
 case "${NM_DISPATCHER_ACTION}" in
 pre-up)
 	# Reset virtual interfaces
-	{ batctl if destroy; ifdown -f p2p0; } >/dev/null 2>&1
+	{ batctl if destroy; ifdown -f "${P2P_IFACE}"; } >/dev/null 2>&1
 
 	# Bring P2P link up
 	log info "bring P2P link UP"
-	ifup p2p0 || { log err "p2p link NOT created"; exit 1; }
-	for P2P_IFNAME in $(basename $(echo /sys/class/net/p2p-p2p0-*)); do
-		echo "${P2P_IFNAME}" | grep -qs 'p2p-p2p0-\*' && continue
+	ifup "${P2P_IFACE}" || { log err "p2p link NOT created"; exit 1; }
+	for P2P_IFNAME in $(basename $(echo /sys/class/net/p2p-"${P2P_IFACE}"-*)); do
+		echo "${P2P_IFNAME}" | grep -qs "p2p-${P2P_IFACE}-\*" && continue
 		ifconfig "${P2P_IFNAME}" 0.0.0.0
 		p2p_iface_found="1"
 		break
@@ -61,7 +63,7 @@ down)
 	batctl if destroy
 
 	log info "bring P2P link DOWN"
-	ifdown -f p2p0 || { log err "unable to bring P2P link DOWN"; exit 1; }
+	ifdown -f "${P2P_IFACE}" || { log err "unable to bring P2P link DOWN"; exit 1; }
 	;;
 *)
 	# Do nothing
