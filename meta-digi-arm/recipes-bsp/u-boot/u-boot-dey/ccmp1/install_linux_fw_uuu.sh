@@ -221,12 +221,14 @@ fi
 # Set 'bootcmd' for the second part of the script that will
 #  - Reset environment to defaults
 #  - Keep the 'dualboot' status
+#  - Reset the bootcount
 #  - Save the environment
 #  - Update the 'linux' partition(s)
 #  - Update the 'rootfs' partition(s)
 uuu fb: ucmd setenv bootcmd "
 	env default -a;
 	setenv dualboot \${dualboot};
+	bootcount reset;
 	saveenv;
 	saveenv;
 	echo \"\";
@@ -277,6 +279,7 @@ else
 fi
 
 # Reset the target
+uuu fb: ucmd bootcount reset
 uuu fb: acmd reset
 
 echo "\033[32m"
