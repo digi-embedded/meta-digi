@@ -35,6 +35,8 @@ for install_f in ${INSTALL_ATF_FILENAME} ${INSTALL_FIP_FILENAME} ${INSTALL_RECOV
 	fi;
 done
 if test "${install_abort}" = "1"; then
+	echo "To install a different image, set variable 'image-name', e.g.:"
+	echo "  => setenv image-name core-image-base"
 	echo "Aborted.";
 	exit;
 fi
