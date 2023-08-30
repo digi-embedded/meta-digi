@@ -56,15 +56,15 @@ fi
 KEY_PASS_FILE="${CONFIG_SIGN_KEYS_PATH}/keys/key_pass.txt"
 
 # Generate random keys if they don't exist
-N_PUBK="$(ls -l "${CONFIG_SIGN_KEYS_PATH}"/keys/publicKey0* 2>/dev/null | wc -l)"
-N_PRVK="$(ls -l "${CONFIG_SIGN_KEYS_PATH}"/keys/privateKey0* 2>/dev/null | wc -l)"
+N_PUBK="$(ls -l "${CONFIG_SIGN_KEYS_PATH}"/keys/publicKey*.pem 2>/dev/null | wc -l)"
+N_PRVK="$(ls -l "${CONFIG_SIGN_KEYS_PATH}"/keys/privateKey*.pem 2>/dev/null | wc -l)"
 if [ "${PLATFORM}" = "ccmp15" ]; then
 	if [ "${N_PUBK}" != "1" ] && [ "${N_PRVK}" != 1 ] && [ ! -f "${KEY_PASS_FILE}" ]; then
 		install -d "${CONFIG_SIGN_KEYS_PATH}/keys/"
 		# Random password
 		password="$(openssl rand -base64 32)"
 		echo "Generating random key"
-		if ! STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/keys/" -pwd ${password} -n 1; then
+		if ! STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/keys/" -pwd ${password}; then
 			echo "[ERROR] Could not generate PKI tree"
 			exit 1
 		fi

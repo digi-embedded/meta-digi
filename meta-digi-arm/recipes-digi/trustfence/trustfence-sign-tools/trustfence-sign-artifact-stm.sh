@@ -70,8 +70,8 @@ if ! trustfence-gen-pki.sh -p ${PLATFORM}; then
 fi
 
 if [ "${PLATFORM}" = "ccmp15" ]; then
-	PUBLIC_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/publicKey00.pem"
-	PRIVATE_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/privateKey00.pem"
+	PUBLIC_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/publicKey.pem"
+	PRIVATE_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/privateKey.pem"
 elif [ "${PLATFORM}" = "ccmp13" ]; then
 	PUBLIC_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/publicKey0*.pem"
 	PRIVATE_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/privateKey0${CONFIG_KEY_INDEX}.pem"

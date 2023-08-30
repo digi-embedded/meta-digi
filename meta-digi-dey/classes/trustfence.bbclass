@@ -91,7 +91,14 @@ copy_public_key() {
 			openssl x509 -pubkey -noout -in "${CERT_IMG}" > "${PUBLIC_KEY}"
 		fi
 	elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
-		PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey0${TRUSTFENCE_KEY_INDEX}.pem"
+		if [ "${DIGI_SOM}" = "ccmp15" ]; then
+			PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey.pem"
+		elif [ "${DIGI_SOM}" = "ccmp13" ]; then
+			PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey0${TRUSTFENCE_KEY_INDEX}.pem"
+		else
+			bberror "Unknown DIGI_SOM"
+			exit 1
+		fi
 	else
 		echo "ERROR: Cannot determine the public key"
 		exit 1
@@ -142,7 +149,7 @@ python () {
             d.setVar("FIP_SIGN_ENABLE", "1")
             d.setVar("FIP_SIGN_KEY_EXTERNAL", "1")
             if (d.getVar("DIGI_SOM") == "ccmp15" ):
-                d.setVar("FIP_SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey00.pem");
+                d.setVar("FIP_SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey.pem");
             elif (d.getVar("DIGI_SOM") == "ccmp13" ):
                 d.setVar("FIP_SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey0%s.pem" % d.getVar("TRUSTFENCE_KEY_INDEX"));
             d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/key_pass.txt")
