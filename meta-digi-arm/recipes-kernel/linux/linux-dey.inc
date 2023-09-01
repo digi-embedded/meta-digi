@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International
+# Copyright (C) 2013-2023 Digi International
 
 SUMMARY = "Linux kernel for Digi boards"
 LICENSE = "GPLv2"
@@ -13,7 +13,9 @@ inherit kernel fsl-kernel-localversion
 LOCALVERSION = "-dey"
 
 # Select internal or Github Linux repo
-LINUX_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${DIGI_GIT}linux-2.6.git', '${DIGI_GITHUB_GIT}/linux.git', d)}"
+LINUX_URI_STASH = "${DIGI_MTK_GIT}/linux/linux.git;protocol=ssh"
+LINUX_URI_GITHUB = "${DIGI_GITHUB_GIT}/linux.git;protocol=https"
+LINUX_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${LINUX_URI_STASH}', '${LINUX_URI_GITHUB}', d)}"
 
 SRC_URI = " \
     ${LINUX_GIT_URI};nobranch=1 \

@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Digi International.
+# Copyright (C) 2013-2023 Digi International.
 
 SUMMARY = "Atheros's wireless driver"
 LICENSE = "ISC"
@@ -10,9 +10,9 @@ SRCREV_external = ""
 SRCREV_internal = "50dafb5890180cf33fdb42919c3e6f591d0cd2ea"
 SRCREV = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRCREV_internal}', '${SRCREV_external}', d)}"
 
-SRC_URI_external = "${DIGI_GITHUB_GIT}/atheros.git;protocol=git;nobranch=1"
-SRC_URI_internal = "${DIGI_GIT}linux-modules/atheros.git;protocol=git;nobranch=1"
-SRC_URI  = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${SRC_URI_internal}', '${SRC_URI_external}', d)}"
+ATHEROS_URI_GITHUB = "${DIGI_GITHUB_GIT}/atheros.git;protocol=https;nobranch=1"
+ATHEROS_URI_STASH = "${DIGI_MTK_GIT}/atheros/atheros.git;protocol=ssh;nobranch=1"
+SRC_URI  = "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${ATHEROS_URI_STASH}', '${ATHEROS_URI_GITHUB}', d)}"
 SRC_URI += " \
     file://atheros-pre-up \
     file://Makefile \
