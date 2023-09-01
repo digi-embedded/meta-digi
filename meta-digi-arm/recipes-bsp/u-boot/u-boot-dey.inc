@@ -28,7 +28,6 @@ INSTALL_FW_UBOOT_SCRIPTS = " \
 
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
-    file://altboot.txt \
     file://boot.txt \
     ${INSTALL_FW_UBOOT_SCRIPTS} \
 "
@@ -96,9 +95,6 @@ build_uboot_scripts() {
 	mkimage -T script -n bootscript -C none -d ${TMP_BOOTSCR} ${DEPLOYDIR}/boot.scr
 	rm -f ${TMP_BOOTSCR}
 
-	# Alternate boot script for dualboot
-	mkimage -T script -n "Alternate bootscript" -C none -d ${WORKDIR}/altboot.txt ${DEPLOYDIR}/altboot.scr
-
 	# Sign the scripts (TODO signing of artifacts for STM-based platforms)
 	if [ "${TRUSTFENCE_SIGN}" = "1" ] && [ "${DEY_SOC_VENDOR}" != "STM" ]; then
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
@@ -109,11 +105,6 @@ build_uboot_scripts() {
 		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
 		trustfence-sign-artifact.sh -p "${DIGI_SOM}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
 		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
-
-		# Sign altboot script
-		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/altboot-signed.XXXXXX)"
-		trustfence-sign-artifact.sh -p "${DIGI_SOM}" -b "${DEPLOYDIR}/altboot.scr" "${TMP_SIGNED_BOOTSCR}"
-		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/altboot.scr"
 	fi
 }
 
