@@ -8,39 +8,27 @@ PACKAGE_ARCH = "${TUNE_PKGARCH}"
 
 inherit packagegroup
 
-# Install Freescale QT demo applications
+RDEPENDS:${PN} = " \
+    ${QT6_IMAGE_INSTALL_APPS} \
+    ${QT6_IMAGE_INSTALL_CINEMATICEXPERIENCE} \
+    ${QT6_IMAGE_INSTALL_EXAMPLES} \
+    ${QT6_IMAGE_INSTALL_FONTS} \
+    ${QT6_IMAGE_INSTALL_QUICK3D} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'x11',     'libxkbcommon', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'qtwayland qtwayland-plugins', '', d)}"
+
 QT6_IMAGE_INSTALL_APPS = ""
 #QT6_IMAGE_INSTALL_APPS:imxgpu3d = "${@bb.utils.contains("MACHINE_GSTREAMER_1_0_PLUGIN", "imx-gst1.0-plugin", "imx-qtapplications", "", d)}"
 
-# Install fonts
-QT6_FONTS = "ttf-dejavu-common ttf-dejavu-sans ttf-dejavu-sans-mono ttf-dejavu-serif "
+QT6_IMAGE_INSTALL_CINEMATICEXPERIENCE         = ""
+QT6_IMAGE_INSTALL_CINEMATICEXPERIENCE:imxgpu  = "cinematicexperience-rhi cinematicexperience-rhi-tools"
+QT6_IMAGE_INSTALL_CINEMATICEXPERIENCE:ccimx93 = "cinematicexperience-rhi cinematicexperience-rhi-tools"
+QT6_IMAGE_INSTALL_CINEMATICEXPERIENCE:ccmp15 = "cinematicexperience-rhi cinematicexperience-rhi-tools"
 
-# Install qtquick3d
-QT6_QTQUICK3D = "qtquick3d qtquick3d-examples"
+QT6_IMAGE_INSTALL_EXAMPLES = "qtbase-examples qtdeclarative-examples"
 
-QT6_IMAGE_INSTALL = ""
-QT6_IMAGE_INSTALL_common = " \
-    packagegroup-qt6-demos \
-    ${QT6_QTQUICK3D} \
-    ${QT6_FONTS} \
-    ${QT6_IMAGE_INSTALL_APPS} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'libxkbcommon', '', d)} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'qtwayland qtwayland-plugins', '', d)}\
-    "
-QT6_IMAGE_INSTALL:imxgpu2d = "${@bb.utils.contains('DISTRO_FEATURES', 'x11','${QT6_IMAGE_INSTALL_common}', \
-    'qtbase qtbase-plugins', d)}"
+QT6_IMAGE_INSTALL_FONTS = "ttf-dejavu-common ttf-dejavu-sans ttf-dejavu-sans-mono ttf-dejavu-serif "
 
-QT6_IMAGE_INSTALL:imxpxp = "${@bb.utils.contains('DISTRO_FEATURES', 'x11','${QT6_IMAGE_INSTALL_common}', \
-    'qtbase qtbase-examples qtbase-plugins', d)}"
-
-QT6_IMAGE_INSTALL:imxgpu3d = " \
-    ${QT6_IMAGE_INSTALL_common} \
-"
-
-QT6_IMAGE_INSTALL:ccmp15 = " \
-    ${QT6_IMAGE_INSTALL_common} \
-"
-
-RDEPENDS:${PN} += " \
-    ${QT6_IMAGE_INSTALL} \
-"
+QT6_IMAGE_INSTALL_QUICK3D = "qtquick3d qtquick3d-dev qtquick3d-examples"
+# Quick3d does not work on systems without a proper GPU
+QT6_IMAGE_INSTALL_QUICK3D:ccimx93 = ""
