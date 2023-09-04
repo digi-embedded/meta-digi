@@ -13,22 +13,25 @@ if test "${mmcbootdev}" = "1"; then
 elif test "${dualboot}" = "yes"; then
 	if test "${active_system}" = "linux_a"; then
 		echo "Booting from system A (try ${bootcount})"
-		part number mmc ${mmcbootdev} linux_a pi
-		setenv mmcpart ${pi}
-		# Save the partition index on variable rootfs_a_index
-		part number mmc ${mmcbootdev} rootfs_a rootfs_a_index
-		# Save the rootfs_a UUID into mmcroot_a
-		part uuid mmc ${mmcbootdev}:${rootfs_a_index} mmcroot_a
-		setenv mmcroot PARTUUID=${mmcroot_a}
+		part number mmc ${mmcbootdev} linux_a tmp_mmcpart
+		part number mmc ${mmcbootdev} rootfs_a tmp_rootfs_index
 	else
 		echo "Booting from system B (try ${bootcount})"
-		part number mmc ${mmcbootdev} linux_b pi
-		setenv mmcpart ${pi}
-		# Save the partition index on variable rootfs_b_index
-		part number mmc ${mmcbootdev} rootfs_b rootfs_b_index
-		# Save the rootfs_b UUID into mmcroot_b
-		part uuid mmc ${mmcbootdev}:${rootfs_b_index} mmcroot_b
-		setenv mmcroot PARTUUID=${mmcroot_b}
+		part number mmc ${mmcbootdev} linux_b tmp_mmcpart
+		part number mmc ${mmcbootdev} rootfs_b tmp_rootfs_index
+	fi
+	part uuid mmc ${mmcbootdev}:${tmp_rootfs_index} tmp_mmcroot
+	if test "${mmcpart}" -ne "${tmp_mmcpart}"; then
+		setexpr mmcpart ${tmp_mmcpart}
+		env_save_needed="1"
+	fi
+	if test "${mmcroot}" != "PARTUUID=${tmp_mmcroot}"; then
+		setenv mmcroot PARTUUID=${tmp_mmcroot}
+		env_save_needed="1"
+	fi
+	if test "${env_save_needed}" = "1"; then
+		env delete tmp_mmcpart tmp_rootfs_index tmp_mmcroot
+		env save
 	fi
 else
 	echo "Booting system (try ${bootcount})"
