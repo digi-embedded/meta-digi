@@ -1,0 +1,14 @@
+[Unit]
+Description=CCCS daemon
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/etc/cccsd start
+ExecStop=/etc/cccsd stop
+PIDFile=/run/cccsd.pid
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+Alias=cloud-connector.service

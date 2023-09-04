@@ -90,5 +90,5 @@ BOOT_SCRIPTS += "boot.scr:boot.scr"
 # This can be used to enable U-Boot update through swupdate
 SWUPDATE_UBOOTIMG ?= "false"
 
-# Cloud Connector package to install
-CLOUDCONNECTOR_PKG ?= "cloudconnector"
+# ConnectCore Cloud Services packages to install
+CCCS_PKGS ?= "cccs-gs-demo"
