@@ -91,4 +91,4 @@ BOOT_SCRIPTS += "boot.scr:boot.scr"
 SWUPDATE_UBOOTIMG ?= "false"
 
 # ConnectCore Cloud Services packages to install
-CCCS_PKGS ?= "cccs-gs-demo"
+CCCS_PKGS ?= "cccs-gs-demo dey-examples-cccs"

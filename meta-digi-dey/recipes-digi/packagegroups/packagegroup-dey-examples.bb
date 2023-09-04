@@ -17,7 +17,7 @@ RDEPENDS:${PN} = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "mca", "dey-examples-adc-cmp \
 							 dey-examples-tamper", "", d)} \
 	dey-examples-caamblob \
-	dey-examples-cloudconnector \
+	dey-examples-cccs \
 	dey-examples-digiapix \
 	dey-examples-rtc \
 	connectcore-demo-example-multimedia \
