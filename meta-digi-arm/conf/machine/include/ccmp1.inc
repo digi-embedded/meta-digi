@@ -64,3 +64,6 @@ TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 
 # Alternatively, uncommment to enable the console autoboot stop passphrase
 # TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE = ""
+
+# Disable the generation of flashlayout files
+do_create_flashlayout_config[noexec] = "1"
