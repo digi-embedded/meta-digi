@@ -46,7 +46,9 @@ MACHINE_EXTRA_RDEPENDS += " \
 IMAGE_FSTYPES:remove = "ext4 tar.xz"
 
 # List of supported boot devices
-BOOTDEVICE_LABELS ?= "sdcard"
+BOOTDEVICE_LABELS ?= "nand-4-256"
+# Supported boot schemes
+BOOTSCHEME_LABELS ?= "optee"
 
 # Wic files
 WKS_FILE += "ccmp1.wks.in"
