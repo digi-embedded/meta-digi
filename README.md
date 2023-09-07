@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 4.0
-## Release 4.0-r3
+## Release 4.0-r4
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -59,6 +59,18 @@ Software for the following hardware platforms is in production support:
 * ConnectCore 8M Nano Development Kit (DVK)
   * [CC-WMX8MN-KIT](https://www.digi.com/products/models/cc-wmx8mn-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc8mnano/yocto-gs_index))
 
+## ConnectCore 8X
+* ConnectCore 8X System-on-Module (SOM)
+  * [CC-WMX-JM8E-NN](https://www.digi.com/products/models/cc-wmx-jm8e-nn)
+  * [CC-MX-JM8D-ZN](https://www.digi.com/products/models/cc-mx-jm8d-zn)
+  * [CC-MX-JM7D-ZN](https://www.digi.com/cc8x)
+  * [CC-WMX-JM7D-NN](https://www.digi.com/products/models/cc-wmx-jm7d-nn)
+  * [CC-MX-JQ6D-ZN](https://www.digi.com/cc8x)
+  * [CC-MX-JQ7D-ZN](https://www.digi.com/cc8x)
+  * [CC-WMX-JQ7D-ZN](https://www.digi.com/cc8x)
+* ConnectCore 8X SBC Pro
+  * [CC-WMX8-PRO](https://www.digi.com/products/embedded-systems/single-board-computers/digi-connectcore-8x-sbc-pro) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc8x/yocto-gs_index))
+
 ## ConnectCore 6UL
 * ConnectCore 6UL System-on-Module (SOM)
   * [CC-WMX-JN7A-NE](https://www.digi.com/products/models/cc-wmx-jn7a-ne)
@@ -74,6 +86,32 @@ Software for the following hardware platforms is in production support:
   * [CC-SBP-WMX-JN58](https://www.digi.com/products/models/cc-sbp-wmx-jn58)
   * [CC-SBP-WMX-JN7A](https://www.digi.com/products/models/cc-sbp-wmx-jn7a)
 
+## ConnectCore 6 Plus
+* ConnectCore 6 Plus System-on-Module (SOM)
+  * [CC-WMX-KK8D-TN](https://www.digi.com/products/models/cc-wmx-kk8d-tn)
+* ConnectCore 6 Plus professional development kit
+  * [CC-WMX6P-KIT](https://www.digi.com/products/models/cc-wmx6p-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc6plus/yocto-gs_index))
+
+## ConnectCore 6
+* ConnectCore 6 System-on-Module (SOM)
+  * [CC-WMX-J97C-TN](https://www.digi.com/products/models/cc-wmx-j97c-tn)
+  * [CC-WMX-L96C-TE](https://www.digi.com/products/models/cc-wmx-l96c-te)
+  * [CC-WMX-L87C-TE](https://www.digi.com/products/models/cc-wmx-l87c-te)
+  * [CC-MX-L76C-Z1](https://www.digi.com/products/models/cc-mx-l76c-z1)
+  * [CC-MX-L86C-Z1](https://www.digi.com/products/models/cc-mx-l86c-z1)
+  * [CC-MX-L96C-Z1](https://www.digi.com/products/models/cc-mx-l96c-z1)
+  * [CC-WMX-L76C-TE](https://www.digi.com/products/models/cc-wmx-l76c-te)
+  * CC-WMX-K87C-FJA
+  * CC-WMX-K77C-TE
+  * CC-WMX-L97D-TN
+  * CC-WMX-J98C-FJA
+  * CC-WMX-J98C-FJA-1
+* ConnectCore 6 Jumpstart Development Kit (SBC with Connectore 6 module)
+  * [CC-WMX6-KIT](https://www.digi.com/products/models/cc-wmx6-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc6/yocto-gs_index))
+  * [CC-SB-WMX-J97C-1](https://www.digi.com/products/models/cc-sb-wmx-j97c-1)
+  * [CC-SB-WMX-L87C-1](https://www.digi.com/products/models/cc-sb-wmx-l87c-1)
+  * [CC-SB-WMX-L76C-1](https://www.digi.com/products/models/cc-sb-wmx-l76c-1)
+
 # Installation
 
 Digi Embedded Yocto is composed of a set of different Yocto layers that work in
@@ -87,10 +125,56 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 # Downloads
 
-* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/4.0/r3/images/
-* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/4.0/r3/sdk/
+* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/4.0/r4/images/
+* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/4.0/r4/sdk/
 
 # Release Changelog
+
+## 4.0-r4
+
+* ST-based platforms
+  * Reworked NAND partition table and disabled UBI Fastmap mechanism.
+  * Updated BSP
+    * Updated Trusted Firmware ARM (based on tag 'v2.6-stm32mp-r2.1' by ST)
+    * Updated OP-TEE (based on tag 'v2.6-stm32mp-r2.1' by ST)
+    * Updated U-Boot v2021.10 (based on tag 'v2.6-stm32mp-r2.1' by ST)
+    * Updated Linux kernel v5.15.118 (based on tag 'v2.6-stm32mp-r2.1' by ST)
+    * Updated Bluetooth firmware to comply with FCC and CE regulations (release 001.001.025 build 0155 from Murata)
+    * Restricted Wi-Fi regulatory domain to US only
+  * Re-enable auto-mount of microSD card on kernel boot
+  * Add sdcard generation support
+* NXP-based platforms
+  * Added support to ConnectCore 6/6 Plus
+    * U-Boot v2017.03
+    * Linux kernel v5.15.71 (based on tag 'lf-5.15.71-2.2.0' by NXP)
+  * Added support to ConnectCore 8X
+    * U-Boot v2020.04
+    * Migrate imx-boot format to use SPL support to use the same binary for all memory variants
+    * Linux kernel v5.15.71 (based on tag 'lf-5.15.71-2.2.0' by NXP)
+  * Updated support to ConnectCore 93
+    * U-Boot v2023.04 (based on tag 'lf-6.1.22-2.0.0' by NXP)
+    * Linux kernel v6.1.22 (based on tag 'lf-6.1.22-2.0.0' by NXP)
+    * Arm Ethos-U65 Neural Processing Unit (NPU) acceleration for machine learning
+  * Updated QT6 to v6.5
+* Improved bootcount support:
+  * Bootcount feature is now always active and not only after a dual boot firmware update. This new configuration applies to all platforms except for CC6 based devices, which will keep the previous behavior.
+  * Bootcount value is now stored in registers with soft reset protection to maintain the value:
+    * CC6 devices: bootcount is still stored in the U-Boot environment.
+    * CC6UL/CC8X/CC8M devices: bootcount is stored in the MCA NVMEM registers.
+    * CCMP1/CC93 devices: bootcount is stored in the DVK RTC NVMEM registers.
+  * Added a bootcount command to U-Boot and Linux to manage the boocount value.
+  * Moved 'altboot' script functionality to 'altbootcmd' in U-Boot and removed all the 'altboot' scripts
+* Improved SWU package support and generation:
+  * Generalized and simplified recipes to generate the SWU packages using a custom class
+  * Added support to create a new SWU package based on files to update only specific parts of the active system
+  * Added support to create a new SWU package based on binary differences to update read-only squashfs rootfs partitions
+* New ConnectCore Cloud Services (CCCS) application design:
+  * Daemon ('cccsd') with general services (cloud connection, files system, system monitor, firmware update, remote command line) and capable of communicate with other applications via CCCS API to send and receive data
+  * CCCS API applications communicating with CCCS daemon to send data points to the cloud and receive data requests from the cloud
+    Default images include:
+    * ConnectCore Cloud Services get started demo ('cccs-gs-demo')
+    * Example applications in 'dey-examples': 'cccs-upload-data-points-example' and 'cccs-data-request-example'
+* General bug fixing and improvements
 
 ## 4.0-r3
 
