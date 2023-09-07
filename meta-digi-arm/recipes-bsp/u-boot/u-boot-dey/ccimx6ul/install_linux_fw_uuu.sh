@@ -171,14 +171,27 @@ INSTALL_LINUX_FILENAME="${BASEFILENAME}-##MACHINE##.boot.ubifs"
 INSTALL_RECOVERY_FILENAME="${BASEFILENAME}-##MACHINE##.recovery.ubifs"
 INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.ubifs"
 
-# Verify existance of files before starting the update
-FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}"
+# Verify existence of files before starting the update
+FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME}"
 for f in ${FILES}; do
 	if [ ! -f ${f} ]; then
 		echo "\033[31m[ERROR] Could not find file '${f}'\033[0m"
 		ABORT=true
 	fi
 done;
+
+# Verify what kind of rootfs is going to be programmed
+if [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; then
+	echo "\033[31m[ERROR] Could not find file '${INSTALL_ROOTFS_FILENAME}'\033[0m"
+	INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.squashfs"
+	echo "\033[32m[INFO] Trying with file '${INSTALL_ROOTFS_FILENAME}'\033[0m"
+	if [ -f "${INSTALL_ROOTFS_FILENAME}" ]; then
+		SQUASHFS=true
+	else
+		echo "\033[31m[ERROR] Could not find file '${INSTALL_ROOTFS_FILENAME}'\033[0m"
+		ABORT=true
+	fi
+fi
 
 [ "${ABORT}" = true ] && exit 1
 
@@ -303,6 +316,12 @@ if [ "${DUALBOOT}" != true ]; then
 	uuu fb: ucmd setenv boot_recovery yes
 	uuu fb: ucmd setenv recovery_command wipe_update
 fi
+
+# Set the rootfstype if squashfs
+if [ "${SQUASHFS}" = true ]; then
+	uuu fb: ucmd setenv rootfstype squashfs
+fi
+
 uuu fb: ucmd saveenv
 
 # Reset the target

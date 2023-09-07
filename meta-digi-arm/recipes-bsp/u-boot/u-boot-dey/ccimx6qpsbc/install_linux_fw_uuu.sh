@@ -164,14 +164,25 @@ if [ -f ${COMPRESSED_ROOTFS_IMAGE} ] && [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; the
 	gzip -d -k -f "${COMPRESSED_ROOTFS_IMAGE}"
 fi
 
-# Verify existance of files before starting the update
-FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}"
+# Verify existence of files before starting the update
+FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME}"
 for f in ${FILES}; do
 	if [ ! -f ${f} ]; then
 		echo "\033[31m[ERROR] Could not find file '${f}'\033[0m"
 		ABORT=true
 	fi
 done;
+
+# Verify what kind of rootfs is going to be programmed
+if [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; then
+	echo "\033[31m[ERROR] Could not find file '${INSTALL_ROOTFS_FILENAME}'\033[0m"
+	INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.squashfs"
+	echo "\033[32m[INFO] Trying with file '${INSTALL_ROOTFS_FILENAME}'\033[0m"
+	if [ ! -f "${INSTALL_ROOTFS_FILENAME}" ]; then
+		echo "\033[31m[ERROR] Could not find file '${INSTALL_ROOTFS_FILENAME}'\033[0m"
+		ABORT=true
+	fi
+fi
 
 [ "${ABORT}" = true ] && exit 1
 
