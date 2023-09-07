@@ -44,6 +44,7 @@ MACHINE_EXTRA_RDEPENDS += " \
 
 # Image FS types
 IMAGE_FSTYPES:remove = "ext4 tar.xz"
+IMAGE_FSTYPES:append = " ${@bb.utils.contains('BOOTDEVICE_LABELS', 'sdcard', 'boot.vfat ext4.gz', '', d)}"
 
 # List of supported boot devices
 BOOTDEVICE_LABELS ?= "nand-4-256"
