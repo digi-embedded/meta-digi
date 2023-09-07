@@ -53,6 +53,11 @@ BOOTSCHEME_LABELS ?= "optee"
 
 # Wic files
 WKS_FILE += "ccmp1.wks.in"
+WKS_FILE_DEPENDS ?= " \
+    virtual/bootloader \
+    virtual/trusted-firmware-a \
+    ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', 'virtual/optee-os', '', d)} \
+"
 
 # Default secure console configuration
 TRUSTFENCE_CONSOLE_DISABLE ?= "0"
