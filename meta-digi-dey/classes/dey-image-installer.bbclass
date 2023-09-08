@@ -15,12 +15,14 @@ FSTYPES_WHITELIST = " \
     recovery.ubifs \
     recovery.vfat \
     ubifs \
+    squashfs \
 "
 
 FSTYPES_WHITELIST:ccmp1 = " \
     boot.ubifs \
     recovery.ubifs \
     ubifs \
+    squashfs \
 "
 
 HAS_USB_DRIVER = "false"
