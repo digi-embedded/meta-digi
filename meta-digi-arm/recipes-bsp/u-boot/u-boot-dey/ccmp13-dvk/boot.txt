@@ -37,9 +37,6 @@ else
 		# We are booting from the NAND using 'recovery'.
 		setenv boot_initrd true
 		setenv initrd_file uramdisk-recovery.img
-	else
-		# We are booting from the SD card.
-		setenv mmcroot /dev/mmcblk${mmcbootdev}p2
 	fi
 	setenv rootfsvol rootfs
 fi
@@ -64,7 +61,11 @@ if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
 	setenv overlays _ov_som_wifi_ccmp13.dtbo,${overlays}
 fi
 
-dboot linux nand ${mtdbootpart}
+if test "${boot_device}" = "mmc"; then
+	dboot linux mmc
+else
+	dboot linux nand ${mtdbootpart}
+fi
 
 
 
