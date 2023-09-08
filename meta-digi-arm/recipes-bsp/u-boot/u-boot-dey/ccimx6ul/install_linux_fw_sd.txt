@@ -67,6 +67,8 @@ for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_R
 	fi;
 done
 if test "${install_abort}" = "1"; then
+	echo "To install a different image, set variable 'image-name', e.g.:"
+	echo "  => setenv image-name core-image-base"
 	echo "Aborted.";
 	exit;
 fi

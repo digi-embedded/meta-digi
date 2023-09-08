@@ -24,7 +24,6 @@ TRUSTFENCE_SIGN_KEYS_PATH ?= "default"
 TRUSTFENCE_DEK_PATH ?= "default"
 TRUSTFENCE_DEK_PATH:ccmp1 ?= "0"
 TRUSTFENCE_ENCRYPT_ENVIRONMENT ?= "1"
-TRUSTFENCE_ENCRYPT_ENVIRONMENT:ccmp1 ?= "0"
 TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 TRUSTFENCE_KEY_INDEX ?= "0"
 
@@ -36,6 +35,79 @@ TRUSTFENCE_ENCRYPT_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-
 TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "1", "0", d)}"
 
 IMAGE_FEATURES += "dey-trustfence"
+
+# Function to generate a PKI tree (with lock dir protection)
+GENPKI_LOCK_DIR = "${TRUSTFENCE_SIGN_KEYS_PATH}/.genpki.lock"
+gen_pki_tree() {
+	if mkdir -p ${GENPKI_LOCK_DIR}; then
+		if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+			trustfence-gen-pki.sh ${TRUSTFENCE_SIGN_KEYS_PATH}
+		elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+			export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+			trustfence-gen-pki.sh -p ${DIGI_SOM}
+		fi
+		rm -rf ${GENPKI_LOCK_DIR}
+	else
+		bbfatal "Could not get lock to generate PKI tree"
+	fi
+}
+
+# Function that generates a PKI tree if there isn't one
+check_gen_pki_tree() {
+	if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+		SRK_KEYS="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK*crt.pem | sed s/\ /\,/g)"
+		n_commas="$(echo ${SRK_KEYS} | grep -o "," | wc -l)"
+		if [ "${n_commas}" -eq 0 ]; then
+			gen_pki_tree
+		elif [ "${n_commas}" -ne 3 ]; then
+			bbfatal "Inconsistent PKI tree"
+		fi
+	elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+		# The script that generates the PKI tree already checks if
+		# there isn't one, so there's nothing to do here but calling it.
+		gen_pki_tree
+	fi
+}
+
+copy_public_key() {
+	if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+		KEY_INDEX="$(expr $TRUSTFENCE_KEY_INDEX + 1)"
+		PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/crts/key${KEY_INDEX}.pub"
+		# The new hab/ahab_pki_tree.sh script extracts the public keys after the PKI
+		# generation and leaves them in the crts/ folder. However, the PKI tree may
+		# already exist, the PKI generation script not called, and then the public
+		# keys may not be available. This is a fall-back to generate at least the
+		# selected public key.
+		if [ ! -f "${PUBLIC_KEY}" ]; then
+			if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
+				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/IMG${KEY_INDEX}*crt.pem)"
+			elif [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
+				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK${KEY_INDEX}*_ca_crt.pem)"
+			else
+				bberror "Unknown TRUSTFENCE_SIGN_MODE value"
+				exit 1
+			fi
+			# Extract the public key from the certificate.
+			openssl x509 -pubkey -noout -in "${CERT_IMG}" > "${PUBLIC_KEY}"
+		fi
+	elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+		if [ "${DIGI_SOM}" = "ccmp15" ]; then
+			PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey.pem"
+		elif [ "${DIGI_SOM}" = "ccmp13" ]; then
+			PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey0${TRUSTFENCE_KEY_INDEX}.pem"
+		else
+			bberror "Unknown DIGI_SOM"
+			exit 1
+		fi
+	else
+		echo "ERROR: Cannot determine the public key"
+		exit 1
+	fi
+	# Copy the public key to the rootfs
+	install -d ${IMAGE_ROOTFS}${sysconfdir}/ssl/certs
+	cp -f "${PUBLIC_KEY}" "${IMAGE_ROOTFS}${sysconfdir}/ssl/certs/key.pub"
+}
+ROOTFS_POSTPROCESS_COMMAND:append = " copy_public_key;"
 
 python () {
     import binascii
@@ -77,7 +149,7 @@ python () {
             d.setVar("FIP_SIGN_ENABLE", "1")
             d.setVar("FIP_SIGN_KEY_EXTERNAL", "1")
             if (d.getVar("DIGI_SOM") == "ccmp15" ):
-                d.setVar("FIP_SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey00.pem");
+                d.setVar("FIP_SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey.pem");
             elif (d.getVar("DIGI_SOM") == "ccmp13" ):
                 d.setVar("FIP_SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey0%s.pem" % d.getVar("TRUSTFENCE_KEY_INDEX"));
             d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/key_pass.txt")
@@ -100,6 +172,8 @@ python () {
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT") == "1"):
         if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y ")
+        elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
+            d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES_CCMP1=y ")
 
     # Provide sane default values for SWUPDATE class in case Trustfence is enabled
     if (d.getVar("TRUSTFENCE_SIGN") == "1"):
@@ -139,26 +213,4 @@ python () {
         d.setVar("TRUSTFENCE_INITRAMFS_IMAGE", "dey-image-trustfence-initramfs");
     else:
         d.setVar("TRUSTFENCE_INITRAMFS_IMAGE", "");
-}
-
-# Function to generate a PKI tree (with lock dir protection)
-GENPKI_LOCK_DIR = "${TRUSTFENCE_SIGN_KEYS_PATH}/.genpki.lock"
-gen_pki_tree() {
-	if mkdir -p ${GENPKI_LOCK_DIR}; then
-		trustfence-gen-pki.sh ${TRUSTFENCE_SIGN_KEYS_PATH}
-		rm -rf ${GENPKI_LOCK_DIR}
-	else
-		bbfatal "Could not get lock to generate PKI tree"
-	fi
-}
-
-# Function that generates a PKI tree if there isn't one
-check_gen_pki_tree() {
-	SRK_KEYS="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK*crt.pem | sed s/\ /\,/g)"
-	n_commas="$(echo ${SRK_KEYS} | grep -o "," | wc -l)"
-	if [ "${n_commas}" -eq 0 ]; then
-		gen_pki_tree
-	elif [ "${n_commas}" -ne 3 ]; then
-		bbfatal "Inconsistent PKI tree"
-	fi
 }

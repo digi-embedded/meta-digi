@@ -85,10 +85,10 @@ DEY_SELINUX_POLICY ?= "1"
 
 # U-Boot scripts to include in 'linux' partition
 # (use the '+=' operator, since other layers may append scripts to this list)
-BOOT_SCRIPTS += "boot.scr:boot.scr altboot.scr:altboot.scr"
+BOOT_SCRIPTS += "boot.scr:boot.scr"
 
 # This can be used to enable U-Boot update through swupdate
 SWUPDATE_UBOOTIMG ?= "false"
 
-# Cloud Connector package to install
-CLOUDCONNECTOR_PKG ?= "cloudconnector"
+# ConnectCore Cloud Services packages to install
+CCCS_PKGS ?= "cccs-gs-demo dey-examples-cccs"

@@ -18,6 +18,7 @@ SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
     file://trustfence-sign-artifact-nxp.sh \
     file://trustfence-sign-artifact-stm.sh \
+    file://trustfence-gen-pki-stm.sh \
     file://sign_hab;name=artifact-hab-sign \
     file://encrypt_hab;name=artifact-hab-encrypt \
     file://sign_ahab;name=artifact-ahab-sign \
@@ -46,13 +47,18 @@ do_install() {
 
 		# Select U-Boot sign script depending on U-Boot including an SPL image
 		if [ -n "${SPL_BINARY}" ]; then
-			install -m 0755 git/scripts/sign_spl_fit.sh ${D}${bindir}/trustfence-sign-uboot.sh
+			if [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
+				install -m 0755 git/scripts/sign_spl_ahab.sh ${D}${bindir}/trustfence-sign-uboot.sh
+			else
+				install -m 0755 git/scripts/sign_spl_fit.sh ${D}${bindir}/trustfence-sign-uboot.sh
+			fi
 		else
 			install -m 0755 git/scripts/sign.sh ${D}${bindir}/trustfence-sign-uboot.sh
 		fi
 	elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
 		install -d ${D}${bindir}
 		install -m 0755 trustfence-sign-artifact-stm.sh ${D}${bindir}/trustfence-sign-artifact.sh
+		install -m 0755 trustfence-gen-pki-stm.sh ${D}${bindir}/trustfence-gen-pki.sh
 	fi
 }
 

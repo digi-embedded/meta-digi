@@ -104,6 +104,7 @@ do_install:append() {
 	install -m 0755 ${WORKDIR}/01dispatcher ${D}${sysconfdir}/NetworkManager/dispatcher.d/
 	install -m 0755 ${WORKDIR}/ifdownup ${D}${sysconfdir}/NetworkManager/dispatcher.d/device-connectivity-change.d/
 	install -m 0755 ${WORKDIR}/p2pbridge ${D}${sysconfdir}/NetworkManager/dispatcher.d/pre-up.d/
+	sed -i -e 's,##WLAN_P2P_INTERFACE##,${WLAN_P2P_INTERFACE},g' ${D}${sysconfdir}/NetworkManager/dispatcher.d/pre-up.d/p2pbridge
 	ln -s ../pre-up.d/p2pbridge ${D}${sysconfdir}/NetworkManager/dispatcher.d/down.d/p2pbridge
 
 	# Disable terminal colors by default

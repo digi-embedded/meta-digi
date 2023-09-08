@@ -28,16 +28,6 @@ dualboot_init () {
 			fw_setenv active_system "${MTD_BOOT_PART}"
 		fi
 	fi
-
-	ISUPGRADING="$(fw_printenv -n upgrade_available 2>/dev/null)"
-
-	if [ "$ISUPGRADING" = "1" ]; then
-		BOOTCOUNT="$(fw_printenv -n bootcount 2>/dev/null)"
-		if [ "${BOOTCOUNT}" -lt 3 ]; then
-			fw_setenv upgrade_available
-			fw_setenv bootcount 0
-		fi
-	fi
 }
 
 case "$1" in

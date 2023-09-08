@@ -11,6 +11,8 @@ include conf/machine/include/arm/armv7a/tune-cortexa9.inc
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"
+BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.${UBOOT_SUFFIX}"
+SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm/configs/ccimx6sbc_defconfig"

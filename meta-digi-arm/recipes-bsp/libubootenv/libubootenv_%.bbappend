@@ -21,6 +21,7 @@ SRC_URI += " \
     file://0002-Implement-U-Boot-environment-access-functions.patch \
     file://0003-tools-env-add-support-to-set-dynamic-location-of-env.patch \
     file://0004-fall-back-to-read-HWID-from-nvmem-device-if-not-avai.patch \
+    file://0005-Implement-support-for-environment-encryption-for-CCM.patch \
 "
 
 do_install:append() {

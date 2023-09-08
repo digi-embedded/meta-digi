@@ -16,7 +16,7 @@
 # Digi-mounted partitions: linux, update, data
 SUBSYSTEM=="block", ENV{ID_PART_ENTRY_NAME}=="linux*|update*|data*", ACTION=="add", RUN+="/etc/udev/scripts/mount_digiparts.sh", GOTO="automount_rules_end"
 SUBSYSTEM=="mtd", ATTRS{name}=="linux*|update*|data*", ACTION=="add", RUN+="/etc/udev/scripts/mount_digiparts.sh", GOTO="automount_rules_end"
-SUBSYSTEM=="ubi", KERNEL=="ubi0*", ATTRS{name}=="linux*|update*|data*", ACTION=="add", RUN+="/etc/udev/scripts/mount_digiparts.sh", GOTO="automount_rules_end"
+SUBSYSTEM=="ubi", KERNEL=="ubi*", ATTRS{name}=="linux*|update*|data*", ACTION=="add", RUN+="/etc/udev/scripts/mount_digiparts.sh", GOTO="automount_rules_end"
 
 # Avoid mounting recovery partition
 SUBSYSTEM=="block", ENV{ID_PART_ENTRY_NAME}=="recovery*", ACTION=="add", GOTO="automount_rules_end"

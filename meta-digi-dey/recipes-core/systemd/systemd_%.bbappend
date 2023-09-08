@@ -20,4 +20,9 @@ do_install:append () {
 SUBSYSTEM=="input", KERNEL=="event[0-9]*", ENV{ID_INPUT_TOUCHSCREEN}=="1", SYMLINK+="input/touchscreen0"
 EOF
     fi
+
+    # Disable virtual terminals
+    if [ "${USE_VT}" = "0" ]; then
+        sed -i -e "/getty@.service/s,enable,disable,g" ${D}${systemd_unitdir}/system-preset/90-systemd.preset
+    fi
 }

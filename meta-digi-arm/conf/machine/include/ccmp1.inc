@@ -44,12 +44,26 @@ MACHINE_EXTRA_RDEPENDS += " \
 
 # Image FS types
 IMAGE_FSTYPES:remove = "ext4 tar.xz"
+IMAGE_FSTYPES:append = " ${@bb.utils.contains('BOOTDEVICE_LABELS', 'sdcard', 'boot.vfat ext4.gz', '', d)}"
 
 # List of supported boot devices
-BOOTDEVICE_LABELS ?= "sdcard"
+BOOTDEVICE_LABELS ?= "nand-4-256"
+# Supported boot schemes
+BOOTSCHEME_LABELS ?= "optee"
+
+# Wic files
+WKS_FILE += "ccmp1.wks.in"
+WKS_FILE_DEPENDS ?= " \
+    virtual/bootloader \
+    virtual/trusted-firmware-a \
+    ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', 'virtual/optee-os', '', d)} \
+"
 
 # Default secure console configuration
 TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 
 # Alternatively, uncommment to enable the console autoboot stop passphrase
 # TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE = ""
+
+# Disable the generation of flashlayout files
+do_create_flashlayout_config[noexec] = "1"

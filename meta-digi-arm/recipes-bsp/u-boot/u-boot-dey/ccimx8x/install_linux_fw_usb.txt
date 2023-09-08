@@ -18,66 +18,7 @@ fi
 # the necessary logic to choose the correct imx-boot file for the target's SOC.
 setenv skip-uboot-check "yes"
 
-# Determine U-Boot file to program basing on SOM's RAM size and SOC type (linked to bus width)
-bus_width="32bit"
-if test -n "${module_ram}" && test -n "${soc_type}"; then
-	if test "${soc_type}" = "imx8dx"; then
-		bus_width="16bit"
-	fi
-	setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-${module_ram}_${bus_width}.bin;
-else
-	# Determine U-Boot file to program basing on SOM's variant
-	if test -n "${module_variant}"; then
-		if test "${module_variant}" = "0x01"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin;
-		elif test "${module_variant}" = "0x02"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin;
-		elif test "${module_variant}" = "0x03"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin;
-		elif test "${module_variant}" = "0x04"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin;
-		elif test "${module_variant}" = "0x05"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin;
-		elif test "${module_variant}" = "0x06"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-512MB_16bit.bin;
-		elif test "${module_variant}" = "0x07"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin;
-		elif test "${module_variant}" = "0x08"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin;
-		elif test "${module_variant}" = "0x09"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-512MB_16bit.bin;
-		elif test "${module_variant}" = "0x0A"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin;
-		elif test "${module_variant}" = "0x0B"; then
-			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin;
-		fi
-	fi
-fi
-
-# Use 'test -n ...' because 'test -z ...' does not work well on old versions of
-# u-boot when the checked value is empty.
-if test -n "${INSTALL_UBOOT_FILENAME}"; then
-	true;
-else
-	echo "";
-	echo "[ERROR] Cannot determine U-Boot file for this module!";
-	echo "";
-	echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 8X variant:";
-	echo "   - For a QuadXPlus CPU with 1GB LPDDR4, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin";
-	echo "   - For a QuadXPlus CPU with 2GB LPDDR4, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin";
-	echo "   - For a DualX CPU with 1GB LPDDR4, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin";
-	echo "   - For a DualX CPU with 512MB LPDDR4, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-512MB_16bit.bin";
-	echo "";
-	echo "2. Run the install script again.";
-	echo "";
-	echo "Aborted";
-	echo "";
-	exit;
-fi;
+setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}.bin;
 
 setenv INSTALL_USBDEV 0
 
@@ -105,6 +46,8 @@ for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_R
 	fi;
 done
 if test "${install_abort}" = "1"; then
+	echo "To install a different image, set variable 'image-name', e.g.:"
+	echo "  => setenv image-name core-image-base"
 	echo "Aborted.";
 	exit;
 fi

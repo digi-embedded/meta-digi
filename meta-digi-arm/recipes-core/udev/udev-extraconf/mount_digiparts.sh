@@ -3,7 +3,7 @@
 #
 #  mount_bootparts.sh
 #
-#  Copyright (C) 2014-2022 by Digi International Inc.
+#  Copyright (C) 2014-2023 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -15,13 +15,8 @@
 #===============================================================================
 
 BASE_INIT="$(readlink -f "@base_sbindir@/init")"
+BASE_INIT_ORIG="$(readlink -f "@base_sbindir@/init.orig")"
 INIT_SYSTEMD="@systemd_unitdir@/systemd"
-
-# Partitions are mounted:
-#   * For multi-MTD systems, when an MTD subsystem event is received.
-#   * For single-MTD systems, when a UBI subsystem event is received.
-# So, do nothing for UBI subsystem events in multi-MTD systems.
-[ "${SUBSYSTEM}" = "ubi" ] && [ -c /dev/ubi1 ] && exit 0
 
 if [ "${SUBSYSTEM}" = "block" ]; then
 	PARTNAME="${ID_PART_ENTRY_NAME}"
@@ -30,6 +25,12 @@ elif [ "${SUBSYSTEM}" = "mtd" ]; then
 	PARTNAME="$(grep ${MTDN} /proc/mtd | sed -ne 's,.*"\(.*\)",\1,g;T;p')"
 elif [ "${SUBSYSTEM}" = "ubi" ]; then
 	PARTNAME="$(cat /sys/${DEVPATH}/name)"
+	# Multi-MTD systems only have one UBI volume per MTD partition that is
+	# called the same as the MTD partition. Do nothing for UBI events if the
+	# MTD partition is called the same, as they are already handled by the
+	# "mtd" subsystem rule
+	result="$(grep '\"${PARTNAME}\"$' /proc/mtd)"
+	[ -n "${result}" ] && exit 0
 fi
 
 MOUNT_FOLDER=${PARTNAME}
@@ -38,6 +39,13 @@ MOUNT_PARAMS="-o silent"
 if [ "${PARTNAME}" = "linux" ] || [ "${PARTNAME}" = "linux_a" ] || [ "${PARTNAME}" = "linux_b" ]; then
 	MOUNT_FOLDER="linux"
 	MOUNT_PARAMS="${MOUNT_PARAMS} -o ro"
+fi
+MOUNTPOINT="/mnt/${MOUNT_FOLDER}"
+
+# Skip if partition is already mounted. For example R/O systems with the '/etc' overlay enabled mount the 'data' partition in very early stages.
+if grep -qs "${MOUNTPOINT}" /proc/mounts; then
+	logger "Partition '${PARTNAME}' is already mounted, skipping..."
+	exit 0
 fi
 
 DUALBOOT_MODE="$(fw_printenv -n dualboot 2>/dev/null)"
@@ -51,7 +59,9 @@ if [ "${DUALBOOT_MODE}" = "yes" ]; then
 	fi
 fi
 
-if [ "x$BASE_INIT" = "x$INIT_SYSTEMD" ];then
+# R/O systems using 'systemd' and '/etc' overlayfs do not link '/sbin/init' to 'systemd'. In these cases
+# 'init' is renamed to 'init.orig' and that is the linked file, so check this case too.
+if [ "x$BASE_INIT" = "x$INIT_SYSTEMD" ] || [ "x$BASE_INIT_ORIG" = "x$INIT_SYSTEMD" ]; then
 	# systemd as init uses systemd-mount to mount block devices
 
 	# Verify if unit is already launched, if so just restart it.
@@ -85,7 +95,6 @@ else
 fi
 
 # Create mount point if needed
-MOUNTPOINT="/mnt/${MOUNT_FOLDER}"
 [ -d "${MOUNTPOINT}" ] || mkdir -p ${MOUNTPOINT}
 
 if [ "${SUBSYSTEM}" = "block" ]; then

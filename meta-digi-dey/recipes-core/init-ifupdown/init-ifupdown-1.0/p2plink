@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright 2019, Digi International Inc.
+# Copyright 2019-2023, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -27,8 +27,8 @@
 #     p2p-network-id <wpa_supplicant_conf P2P network ID>
 #
 
-# Execute only for the p2p0 interface
-[ "${IFACE}" = "p2p0" ] || exit 0
+# Execute only for the P2P interface
+[ "${IFACE}" = "##WLAN_P2P_INTERFACE##" ] || exit 0
 
 log() {
 	if type "systemd-cat" >/dev/null 2>/dev/null; then
@@ -68,8 +68,8 @@ if [ "${MODE}" = "start" ]; then
 		if [ -n "${p2p_link_found}" ]; then
 			# Configure the newly created interface
 			if [ -n "${IF_P2P_LOCAL_ADDRESS}" ]; then
-				for P2P_IFNAME in $(basename $(echo /sys/class/net/p2p-p2p0-*)); do
-					echo "${P2P_IFNAME}" | grep -qs 'p2p-p2p0-\*' && continue
+				for P2P_IFNAME in $(basename $(echo /sys/class/net/p2p-"${IFACE}"-*)); do
+					echo "${P2P_IFNAME}" | grep -qs "p2p-${IFACE}-\*" && continue
 					ifconfig "${P2P_IFNAME}" "${IF_P2P_LOCAL_ADDRESS}" ${IF_P2P_LOCAL_NETMASK:+netmask ${IF_P2P_LOCAL_NETMASK}} up
 					break
 				done

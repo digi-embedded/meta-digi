@@ -2,27 +2,33 @@
 # U-Boot bootscript for NAND/SD images created by Yocto.
 #
 
-# As the first step in the boot script, check if we are using DualBoot and
-# if an upgrade is available. This requires the script to change some variables
-# and save them, while the rest of the script changes variables only temporarily
-# without saving them.
+# As the first step in the boot script, check if we are using DualBoot. This
+# requires the script to change some variables and save them, while the rest
+# of the script changes variables only temporarily without saving them.
 
-# Dual boot update verification
+# Dual boot verification
 if test "${dualboot}" = "yes"; then
-	if test "${upgrade_available}" = "1"; then
-		echo "Update detected; Booting new system in ${active_system} (try ${bootcount})"
+	if test "${active_system}" = "linux_a"; then
+		echo "Booting from system A (try ${bootcount})"
+		setenv tmp_rootfsvol ${rootfsvol_a}
 	else
-		if test "${active_system}" = "linux_a"; then
-			echo "Booting from system A"
-			setenv mtdbootpart ${active_system}
-			setenv rootfsvol ${rootfsvol_a}
-		else
-			echo "Booting from system B"
-			setenv mtdbootpart ${active_system}
-			setenv rootfsvol ${rootfsvol_b}
-		fi
+		echo "Booting from system B (try ${bootcount})"
+		setenv tmp_rootfsvol ${rootfsvol_b}
+	fi
+	if test "${mtdbootpart}" != "${active_system}"; then
+		setenv mtdbootpart ${active_system}
+		env_save_needed="1"
+	fi
+	if test "${rootfsvol}" != "${tmp_rootfsvol}"; then
+		setenv rootfsvol ${tmp_rootfsvol}
+		env_save_needed="1"
+	fi
+	if test "${env_save_needed}" = "1"; then
+		env delete tmp_rootfsvol
+		env save
 	fi
 else
+	echo "Booting system (try ${bootcount})"
 	# Check the boot source.
 	if test "${mtdbootpart}" = "linux"; then
 		# We are booting from the NAND using 'linux'.
@@ -45,6 +51,8 @@ setenv ORIG_overlays ${overlays}
 # Determine overlays to apply depending on the hardware capabilities
 # described by the HWID, SOM version, and carrier board version.
 #
+setexpr module_has_mca ${hwid_2} \& 10000
+setexpr module_has_mca ${module_has_mca} / 10000
 setexpr module_has_wifi ${hwid_2} \& 20000
 setexpr module_has_wifi ${module_has_wifi} / 20000
 setexpr module_has_bt ${hwid_2} \& 40000
@@ -56,6 +64,10 @@ fi
 
 if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
 	setenv overlays _ov_som_wifi_ccmp15.dtbo,${overlays}
+fi
+
+if test "${module_has_mca}" = "1" && test -z "${disable_mca}"; then
+	setenv overlays _ov_som_mca_ccmp15.dtbo,${overlays}
 fi
 
 # Apply DVKv1 overlay if the board_version is 1

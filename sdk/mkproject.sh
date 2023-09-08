@@ -28,7 +28,7 @@ MKP_NONE="\033[0m"
 MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/meta-digi/sdk/config"
 
 # Blacklist platforms (not officially supported in a DEY release)
-MKP_BLACKLIST_PLATFORMS="ccimx6qpsbc ccimx6sbc ccimx8x-sbc-express ccimx8x-sbc-pro"
+MKP_BLACKLIST_PLATFORMS=""
 
 MKP_SETUP_ENVIRONMENT='#!/bin/bash
 

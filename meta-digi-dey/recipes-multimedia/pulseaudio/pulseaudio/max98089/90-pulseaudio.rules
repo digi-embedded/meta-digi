@@ -1,2 +1,3 @@
 # Digi ConnectCore MAX98089 sound card
 ATTRS{id}=="imxmax98088", ENV{PULSE_PROFILE_SET}="dey-audio-max98089.conf"
+ATTRS{id}=="max98088audio", ENV{PULSE_PROFILE_SET}="dey-audio-max98089.conf"

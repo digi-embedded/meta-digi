@@ -14,6 +14,3 @@ SRC_URI = " \
     ${OPTEE_GIT_URI};branch=${SRCBRANCH};name=os \
     file://fonts.tar.gz;subdir=git;name=fonts \
 "
-
-# Enable OTP write support
-EXTRA_OEMAKE += "CFG_STM32_BSEC_WRITE=y"
