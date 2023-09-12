@@ -1,0 +1,45 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Thu, 31 Aug 2023 16:33:13 +0200
+Subject: [PATCH] imx9: soc.mak: capture commands output into a log file
+
+This is later used to get the needed information for the signing of the
+boot artifacts.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ iMX9/soc.mak | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/iMX9/soc.mak b/iMX9/soc.mak
+index 7c4086c153d0..7ec4bb5eaeb4 100644
+--- a/iMX9/soc.mak
++++ b/iMX9/soc.mak
+@@ -1,4 +1,5 @@
+ MKIMG = ../mkimage_imx8
++MKIMAGE_LOG = "mkimage-$(firstword $(MAKECMDGOALS)).log"
+ 
+ CC ?= gcc
+ REV ?= A0
+@@ -71,7 +72,7 @@ u-boot-atf-container.img: bl31.bin u-boot-hash.bin
+ 		fi; \
+ 	else \
+ 		./$(MKIMG) -soc IMX9 -c -ap bl31.bin a35 $(ATF_LOAD_ADDR) -ap u-boot-hash.bin a35 $(UBOOT_LOAD_ADDR) -out u-boot-atf-container.img; \
+-	fi
++	fi | tee $(MKIMAGE_LOG)
+ 
+ .PHONY: clean nightly
+ clean:
+@@ -80,11 +81,11 @@ clean:
+ 	@echo "imx8ulp clean done"
+ 
+ flash_singleboot: $(MKIMG) $(AHAB_IMG) u-boot-spl-ddr.bin u-boot-atf-container.img
+-	./$(MKIMG) -soc IMX9 -append $(AHAB_IMG) -c -ap u-boot-spl-ddr.bin a35 $(SPL_LOAD_ADDR) -out flash.bin
++	./$(MKIMG) -soc IMX9 -append $(AHAB_IMG) -c -ap u-boot-spl-ddr.bin a35 $(SPL_LOAD_ADDR) -out flash.bin | tee -a $(MKIMAGE_LOG)
+ 	cp flash.bin boot-spl-container.img
+ 	@flashbin_size=`wc -c flash.bin | awk '{print $$1}'`; \
+                    pad_cnt=$$(((flashbin_size + 0x400 - 1) / 0x400)); \
+-                   echo "append u-boot-atf-container.img at $$pad_cnt KB"; \
++                   echo "append u-boot-atf-container.img at $$pad_cnt KB" | tee -a $(MKIMAGE_LOG); \
+                    dd if=u-boot-atf-container.img of=flash.bin bs=1K seek=$$pad_cnt;
+ 
+ flash_singleboot_flexspi: $(MKIMG) $(AHAB_IMG) u-boot-spl-ddr.bin u-boot-atf-container.img

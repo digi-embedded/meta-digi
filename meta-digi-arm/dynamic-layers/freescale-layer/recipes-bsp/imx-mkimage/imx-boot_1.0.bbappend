@@ -1,10 +1,14 @@
-# Copyright (C) 2022 Digi International
+# Copyright (C) 2022,2023 Digi International
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 SRC_URI:append:ccimx8m = " \
     file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch \
     file://0002-imx8m-soc.mak-capture-commands-output-into-a-log-fil.patch \
+"
+
+SRC_URI:append:ccimx93 = " \
+    file://0001-imx9-soc.mak-capture-commands-output-into-a-log-file.patch \
 "
 
 # Use NXP's lf-6.1.22-2.0.0 release for ccimx93
@@ -85,6 +89,9 @@ do_deploy:append:ccimx8m() {
 
 do_deploy:append:ccimx93() {
 	generate_symlinks
+	for target in ${IMXBOOT_TARGETS}; do
+		install -m 0644 ${BOOT_STAGING}/mkimage-${target}.log ${DEPLOYDIR}/${BOOT_TOOLS}
+	done
 }
 
 do_deploy:ccimx8x () {
