@@ -10,10 +10,10 @@ Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/code/cst/code/common/src/openssl_helper.c b/code/cst/code/common/src/openssl_helper.c
-index 871cf55..b62c8a8 100755
+index 1e1131b..918c82e 100755
 --- a/code/cst/code/common/src/openssl_helper.c
 +++ b/code/cst/code/common/src/openssl_helper.c
-@@ -414,7 +414,7 @@ void print_version(void)
+@@ -404,7 +404,7 @@ void print_version(void)
  ---------------------------*/
  uint32_t seed_prng(uint32_t bytes)
  {

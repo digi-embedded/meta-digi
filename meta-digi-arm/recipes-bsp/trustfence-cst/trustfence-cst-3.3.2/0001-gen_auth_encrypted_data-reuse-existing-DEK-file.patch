@@ -12,14 +12,14 @@ https://jira.digi.com/browse/DUB-608
 
 Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
 ---
- code/cst/code/back_end/src/adapt_layer_openssl.c | 1 +
+ code/cst/code/back_end-ssl/src/adapt_layer_openssl.c | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/code/cst/code/back_end/src/adapt_layer_openssl.c b/code/cst/code/back_end/src/adapt_layer_openssl.c
-index 38b8bf5..f389e23 100755
---- a/code/cst/code/back_end/src/adapt_layer_openssl.c
-+++ b/code/cst/code/back_end/src/adapt_layer_openssl.c
-@@ -1146,6 +1146,7 @@ int32_t gen_auth_encrypted_data(const char* in_file,
+diff --git a/code/cst/code/back_end-ssl/src/adapt_layer_openssl.c b/code/cst/code/back_end-ssl/src/adapt_layer_openssl.c
+index d8df54e..86e7e4f 100755
+--- a/code/cst/code/back_end-ssl/src/adapt_layer_openssl.c
++++ b/code/cst/code/back_end-ssl/src/adapt_layer_openssl.c
+@@ -1231,6 +1231,7 @@ int32_t gen_auth_encrypted_data(const char* in_file,
          printf("\n");
  #endif
          if (0 == key_init_done) {
