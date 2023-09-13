@@ -11,6 +11,7 @@ software =
                     type = "archive";
                     compressed = "zlib";
                     path = "/";
+                    sha256 = "$swupdate_get_sha256(@@SWUPDATE_FILES_TARGZ_FILE_NAME@@)";
                 }
             );
             scripts: (
@@ -37,6 +38,7 @@ software =
                     type = "archive";
                     compressed = "zlib";
                     path = "/system/";
+                    sha256 = "$swupdate_get_sha256(@@SWUPDATE_FILES_TARGZ_FILE_NAME@@)";
                 }
             );
             scripts: (
