@@ -34,6 +34,15 @@ TRUSTFENCE_ENCRYPT_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-
 # Read-only rootfs
 TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "1", "0", d)}"
 
+#
+# NOTHING TO CUSTOMIZE BELOW THIS LINE
+#
+
+# TrustFence sign artifacts is not supported on all platforms
+TRUSTFENCE_SIGN_ARTIFACTS = "1"
+TRUSTFENCE_SIGN_ARTIFACTS:ccmp1 = "0"
+TRUSTFENCE_SIGN_ARTIFACTS:ccimx93 = "0"
+
 IMAGE_FEATURES += "dey-trustfence"
 
 # Function to generate a PKI tree (with lock dir protection)
@@ -155,6 +164,8 @@ python () {
             d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/key_pass.txt")
 
         d.appendVar("UBOOT_TF_CONF", "CONFIG_SIGN_IMAGE=y ")
+        if (d.getVar("TRUSTFENCE_SIGN_ARTIFACTS") == "1"):
+            d.appendVar("UBOOT_TF_CONF", "CONFIG_AUTH_ARTIFACTS=y ")
         if (d.getVar("TRUSTFENCE_READ_ONLY_ROOTFS") == "1"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_AUTHENTICATE_SQUASHFS_ROOTFS=y ")
         if d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"):
@@ -164,11 +175,14 @@ python () {
         if d.getVar("TRUSTFENCE_KEY_INDEX"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_KEY_INDEX=%s " % d.getVar("TRUSTFENCE_KEY_INDEX"))
         if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
-            d.appendVar("UBOOT_TF_CONF", "CONFIG_AUTH_ARTIFACTS=y ")
             if (d.getVar("TRUSTFENCE_DEK_PATH") not in [None, "0"]):
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_DEK_PATH="%s" ' % d.getVar("TRUSTFENCE_DEK_PATH"))
             if d.getVar("TRUSTFENCE_SIGN_MODE"):
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_SIGN_MODE="%s" ' % d.getVar("TRUSTFENCE_SIGN_MODE"))
+    else:
+        # Disable signing artifacts if TRUSTFENCE_SIGN != 1
+        d.setVar("TRUSTFENCE_SIGN_ARTIFACTS", "0")
+
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT") == "1"):
         if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y ")
