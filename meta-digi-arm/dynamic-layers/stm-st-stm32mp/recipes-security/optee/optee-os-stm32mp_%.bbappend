@@ -8,9 +8,9 @@ OPTEE_URI_GITHUB = "${DIGI_GITHUB_GIT}/optee_os.git;protocol=https"
 OPTEE_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${OPTEE_URI_STASH}', '${OPTEE_URI_GITHUB}', d)}"
 
 SRCBRANCH = "3.16.0/stm/maint"
-SRCREV = "43350dda7553c136e0d6422d0404b577ac675c51"
+SRCREV = "${AUTOREV}"
 
 SRC_URI = " \
-    ${OPTEE_GIT_URI};nobranch=1;name=os \
+    ${OPTEE_GIT_URI};branch=${SRCBRANCH};name=os \
     file://fonts.tar.gz;subdir=git;name=fonts \
 "
