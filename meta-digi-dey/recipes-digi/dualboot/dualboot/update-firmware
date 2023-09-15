@@ -173,7 +173,11 @@ update_emmc() {
 	echo ""
 
 	# Execute the update.
-	swupdate ${VERBOSE} -i "${UPDATE_FILE}" -e "${IMAGE_SET}"
+	if [ -f "${PUBLIC_KEY}" ]; then
+		swupdate ${VERBOSE} -i "${UPDATE_FILE}" -e "${IMAGE_SET}" -k "${PUBLIC_KEY}"
+	else
+		swupdate ${VERBOSE} -i "${UPDATE_FILE}" -e "${IMAGE_SET}"
+	fi
 }
 
 update_nand() {
