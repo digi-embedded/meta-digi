@@ -17,7 +17,7 @@ LINUX_URI_STASH = "${DIGI_MTK_GIT}/linux/linux.git;protocol=ssh"
 LINUX_URI_GITHUB = "${DIGI_GITHUB_GIT}/linux.git;protocol=https"
 LINUX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1', '${LINUX_URI_STASH}', '${LINUX_URI_GITHUB}', d)}"
 SRC_URI = " \
-    ${LINUX_GIT_URI};branch=${SRCBRANCH} \
+    ${LINUX_GIT_URI};nobranch=1 \
     ${@oe.utils.conditional('KERNEL_DEFCONFIG', '', 'file://defconfig', '', d)} \
 "
 S = "${WORKDIR}/git"
