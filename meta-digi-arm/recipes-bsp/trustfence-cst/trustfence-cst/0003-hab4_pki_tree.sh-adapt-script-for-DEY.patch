@@ -1,23 +1,31 @@
 From: Arturo Buzarra <arturo.buzarra@digi.com>
 Date: Wed, 22 Jul 2020 14:37:03 +0200
-Subject: [PATCH] hab4_pki_tree.sh: automate script
+Subject: [PATCH] hab4_pki_tree.sh: adapt script for DEY
 
-This commit introduce a new command line argument to specify the
-CSF path folder and prepare it to automate the build process.
+* support non interactive execution: introduce a new command line
+  argument to specify the CSF path folder and prepare it to automate the
+  build process.
 
+* use a random password for the default PKI generation
+
+* extract public keys from certificates: the public key needs to be
+  available on the rootfs so that signed SWU packages can be authenticated.
+
+Co-Authored-By: Hector Palacios <hector.palacios@digi.com>
+Co-Authored-By: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
 ---
- keys/hab4_pki_tree.sh | 78 ++++++++++++++++++++++++++++---------------
- 1 file changed, 51 insertions(+), 27 deletions(-)
+ keys/hab4_pki_tree.sh | 88 ++++++++++++++++++++++++++++---------------
+ 1 file changed, 58 insertions(+), 30 deletions(-)
 
 diff --git a/keys/hab4_pki_tree.sh b/keys/hab4_pki_tree.sh
-index 944cc66..39ed3bf 100755
+index 944cc66..e76f22f 100755
 --- a/keys/hab4_pki_tree.sh
 +++ b/keys/hab4_pki_tree.sh
 @@ -66,6 +66,8 @@ printf "    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
-
+ 
  stty erase 
-
+ 
 +SCRIPT_BASEDIR="$(cd $(dirname ${0}) && pwd)"
 +
  if [ $# -gt 0 ]; then
@@ -35,13 +43,13 @@ index 944cc66..39ed3bf 100755
 @@ -89,10 +91,18 @@ usage()
      echo
  }
-
+ 
 -max_param=16
 -min_param=12
 +max_param=18
 +min_param=1
  num_param=1
-
+ 
 +# Default values
 +existing_ca="n"
 +use_ecc="n"
@@ -80,7 +88,7 @@ index 944cc66..39ed3bf 100755
 @@ -242,6 +256,16 @@ then
      read duration
  fi
-
+ 
 +# CSF folder structure
 +if [ ! -d "${CSF_PATH}" ]; then
 +    echo "Invalid CSF_PATH: ${CSF_PATH}"
@@ -93,7 +101,7 @@ index 944cc66..39ed3bf 100755
 +
  # Compute validity period
  val_period=$((duration*365))
-
+ 
 @@ -275,9 +299,9 @@ then
  	script_name=$0
  fi
@@ -104,13 +112,13 @@ index 944cc66..39ed3bf 100755
 +keys_dir=${CSF_PATH}/keys/
 +crts_dir=${CSF_PATH}/crts/
 +ca_dir=${CSF_PATH}/ca/
-
+ 
  if [ ! -d "${keys_dir}" ]
  then
 @@ -291,11 +315,11 @@ then
      exit 1 
  fi
-
+ 
 -if [ ! -d "${ca_dir}" ]
 -then
 -    echo ERROR: "Openssl configuration directory ${ca_dir} is missing. Expecting <cst>/ca directory to hold openssl configuration files."
@@ -121,28 +129,42 @@ index 944cc66..39ed3bf 100755
 +#     echo ERROR: "Openssl configuration directory ${ca_dir} is missing. Expecting <cst>/ca directory to hold openssl configuration files."
 +#     exit 1
 +# fi
-
+ 
  # Switch current working directory to keys directory, if needed.
  if [ "${crt_dir}" != "${keys_dir}" ]
-@@ -365,7 +389,7 @@ then
+@@ -318,9 +342,10 @@ fi
+ # Check that the file "key_pass.txt" is present, if not create it with default user/pwd:
+ if [ ! -f key_pass.txt ]
+ then
+-    echo "test" > key_pass.txt
+-    echo "test" >> key_pass.txt
+-    echo "A default file 'key_pass.txt' was created with password = test!"
++    password="$(openssl rand -base64 32)"
++    echo "${password}" > key_pass.txt
++    echo "${password}" >> key_pass.txt
++    echo "A file 'key_pass.txt' was created with a random password!"
+ fi
+ 
+ # The following is required otherwise OpenSSL complains
+@@ -365,7 +390,7 @@ then
                     -x509 -extensions v3_ca \
                     -keyout temp_ca.pem \
                     -out ${ca_cert}.pem \
 -                   -days ${val_period} -config ../ca/openssl.cnf
 +                   -days ${val_period} -config "${SCRIPT_BASEDIR}/openssl.cnf"
-
+ 
      # Generate CA key in PKCS #8 format - both PEM and DER
      openssl pkcs8 -passin file:./key_pass.txt -passout file:./key_pass.txt \
-@@ -382,7 +406,7 @@ then
+@@ -382,7 +407,7 @@ then
      openssl x509 -inform PEM -outform DER -in ${ca_cert}.pem -out ${ca_cert}.der
-
+ 
      # Cleanup
 -    \rm temp_ca.pem
 +    rm temp_ca.pem
  fi
-
-
-@@ -432,10 +456,10 @@ then
+ 
+ 
+@@ -432,10 +457,10 @@ then
                        -in ./temp_srk_req.pem \
                        -cert ${ca_cert}.pem \
                     -keyfile ${ca_key}.pem \
@@ -152,19 +174,19 @@ index 944cc66..39ed3bf 100755
                        -days ${val_period} \
 -                      -config ../ca/openssl.cnf
 +                      -config "${SCRIPT_BASEDIR}/openssl.cnf"
-
+ 
          # Convert SRK Certificate to DER format
          openssl x509 -inform PEM -outform DER \
-@@ -456,7 +480,7 @@ then
+@@ -456,7 +481,7 @@ then
                        -out ${srk_key}.pem
-
+ 
          # Cleanup
 -        \rm ./temp_srk.pem ./temp_srk_req.pem
 +        rm ./temp_srk.pem ./temp_srk_req.pem
          i=$((i+1))
      done
  else
-@@ -505,10 +529,10 @@ do
+@@ -505,10 +530,10 @@ do
                    -in ./temp_srk_req.pem \
                    -cert ${ca_cert}.pem \
                    -keyfile ${ca_key}.pem \
@@ -174,10 +196,10 @@ index 944cc66..39ed3bf 100755
                    -days ${val_period} \
 -                  -config ../ca/openssl.cnf
 +                  -config "${SCRIPT_BASEDIR}/openssl.cnf"
-
+ 
      # Convert SRK Certificate to DER format
      openssl x509 -inform PEM -outform DER \
-@@ -574,10 +598,10 @@ do
+@@ -574,10 +599,10 @@ do
                 -in ./temp_csf_req.pem \
                 -cert ${srk_crt_i} \
                 -keyfile ${srk_key_i} \
@@ -187,19 +209,19 @@ index 944cc66..39ed3bf 100755
                 -days ${val_period} \
 -               -config ../ca/openssl.cnf
 +               -config "${SCRIPT_BASEDIR}/openssl.cnf"
-
+ 
      # Convert CSF Certificate to DER format
      openssl x509 -inform PEM -outform DER \
-@@ -596,7 +620,7 @@ do
+@@ -596,7 +621,7 @@ do
                    -out ${csf_key}.pem
-
+ 
      # Cleanup
 -    \rm ./temp_csf.pem ./temp_csf_req.pem
 +    rm ./temp_csf.pem ./temp_csf_req.pem
-
+ 
      echo
      echo ++++++++++++++++++++++++++++++++++++++++
-@@ -636,10 +660,10 @@ do
+@@ -636,10 +661,10 @@ do
                 -in ./temp_img_req.pem \
                 -cert ${srk_crt_i} \
                 -keyfile ${srk_key_i} \
@@ -209,15 +231,19 @@ index 944cc66..39ed3bf 100755
                 -days ${val_period} \
 -               -config ../ca/openssl.cnf
 +               -config "${SCRIPT_BASEDIR}/openssl.cnf"
-
+ 
      # Convert IMG Certificate to DER format
      openssl x509 -inform PEM -outform DER \
-@@ -658,7 +682,7 @@ do
+@@ -657,8 +682,11 @@ do
+                   -in temp_img.pem \
                    -out ${img_key}.pem
-
+ 
++    # Extract public key from the certificate
++    openssl x509 -pubkey -noout -in "${img_crt}.pem" > ../crts/key${i}.pub
++
      # Cleanup
 -    \rm ./temp_img.pem ./temp_img_req.pem
 +    rm ./temp_img.pem ./temp_img_req.pem
-
+ 
      i=$((i+1))
  done
