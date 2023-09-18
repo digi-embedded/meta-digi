@@ -91,7 +91,7 @@ copy_public_key() {
 			if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
 				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/IMG${KEY_INDEX}*crt.pem)"
 			elif [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
-				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK${KEY_INDEX}*_ca_crt.pem)"
+				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK${KEY_INDEX}*crt.pem)"
 			else
 				bberror "Unknown TRUSTFENCE_SIGN_MODE value"
 				exit 1
