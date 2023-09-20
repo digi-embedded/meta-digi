@@ -1,0 +1,11 @@
+[Unit]
+Description=Restart ConnectCore demo server after suspend if running
+After=suspend.target
+
+[Service]
+Type=simple
+# try-restart: only restart if it is running
+ExecStart=/bin/systemctl --no-block try-restart connectcore-demo-server
+
+[Install]
+WantedBy=suspend.target
