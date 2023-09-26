@@ -72,3 +72,6 @@ TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 
 # Disable the generation of flashlayout files
 do_create_flashlayout_config[noexec] = "1"
+
+# Include boot script into the FIT image
+UBOOT_ENV = "${@bb.utils.contains('TRUSTFENCE_FIT_IMG', '1', 'boot', '', d)}"

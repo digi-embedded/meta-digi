@@ -26,6 +26,7 @@ TRUSTFENCE_DEK_PATH:ccmp1 ?= "0"
 TRUSTFENCE_ENCRYPT_ENVIRONMENT ?= "1"
 TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 TRUSTFENCE_KEY_INDEX ?= "0"
+TRUSTFENCE_FIT_IMG:ccmp1 ?= "1"
 
 # Partition encryption configuration
 TRUSTFENCE_ENCRYPT_PARTITIONS ?= "1"
@@ -44,6 +45,24 @@ TRUSTFENCE_SIGN_ARTIFACTS:ccmp1 = "0"
 TRUSTFENCE_SIGN_ARTIFACTS:ccimx93 = "0"
 
 IMAGE_FEATURES += "dey-trustfence"
+
+# ---------------------------------
+#  Usage of FIT Image signed
+# ---------------------------------
+
+# Enable FIT image build when Trustfence is enabled
+MACHINE_FEATURES += "${@oe.utils.conditional('TRUSTFENCE_FIT_IMG', '1', 'fit', '', d)}"
+# keys name in keydir (eg. "ubootfit.crt", "ubootfit.key")
+TRUSTFENCE_SIGN_KEYNAME ?= ""
+# Set variables required by poky to sign FIT image
+UBOOT_SIGN_KEYNAME ?= "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', '${TRUSTFENCE_SIGN_KEYNAME}', '', d)}"
+UBOOT_MKIMAGE_DTCOPTS ?= "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', '-I dts -O dtb -p 2000', '', d)}"
+# Enable FIT signing support
+UBOOT_SIGN_ENABLE ?= "${TRUSTFENCE_SIGN}"
+# Set path to FIT signing keys
+UBOOT_SIGN_KEYDIR ?= "${TRUSTFENCE_SIGN_KEYS_PATH}"
+# Create keys if not defined
+FIT_GENERATE_KEYS ?= "${@oe.utils.conditional('TRUSTFENCE_SIGN_KEYNAME', '', '1', '', d)}"
 
 # Function to generate a PKI tree (with lock dir protection)
 GENPKI_LOCK_DIR = "${TRUSTFENCE_SIGN_KEYS_PATH}/.genpki.lock"

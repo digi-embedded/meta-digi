@@ -198,6 +198,18 @@ do_deploy:append:ccmp1() {
 	# Deploy u-boot-nodtb.bin and ccmp1x-dvk.dtb, to be packaged in fip binary by tf-a
 	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
 	install -m 0777 ${B}/${config}/arch/arm/dts/${UBOOT_DTB_NAME} ${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${FIP_UBOOT_HEADER}.dtb
-
 	install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin
+
+	# Append signature to u-boot DT
+	if [ "x${UBOOT_SIGN_ENABLE}" = "x1" ] ; then
+		# get name of u-boot devicetree without signature
+		ubootdevicetree="${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-${UBOOT_DTB_NAME}"
+		namewithoutsignature=`echo $ubootdevicetree | sed "s/\.dtb/-without-signature.dtb/g"`
+		namewithsignature=`echo $ubootdevicetree | sed "s/\.dtb/-with-signature.dtb/g"`
+		mv $ubootdevicetree $namewithoutsignature
+		# get name of U-Boot device tree from DEPLOY_DIR
+		nameonkernel="${DEPLOY_DIR_IMAGE}/u-boot-${MACHINE}*.dtb"
+		cp $nameonkernel $namewithsignature
+		cp $nameonkernel $ubootdevicetree
+	fi
 }
