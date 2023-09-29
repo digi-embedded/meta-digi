@@ -1,6 +1,6 @@
 [Unit]
 Description=Initialization of the ConnectCore demo example
-After=connectcore-demo-server
+After=connectcore-demo-server.service
 
 # Make sure we are started after graphic service is available
 After=##WESTON_SERVICE##
