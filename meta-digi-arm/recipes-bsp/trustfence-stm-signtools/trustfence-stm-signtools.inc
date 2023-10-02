@@ -10,18 +10,9 @@ PKGNAME = "trustfence-stm-signtools"
 
 # tarball
 SRC_URI = "${DIGI_PKG_SRC}/${PKGNAME}-${PV}.tar.gz"
-SRC_URI[md5sum] = "5621d99156b75e69eecbae721475463b"
-SRC_URI[sha256sum] = "5c04b16934aa316d2586980f93680e90af1968bcb9b76c18b9cecddbcf5d6a1b"
-
-S = "${WORKDIR}/${PKGNAME}-${PV}"
+SRC_URI[md5sum] = "38ce0cd682350b15e773e725ee842da4"
+SRC_URI[sha256sum] = "cc349bdcaa764d5af25b12ee9e0c143f93dc80d531f42f8a57a735e170cd378b"
 
 inherit bin_package
 
 INSANE_SKIP:${PN} = "already-stripped"
-
-do_install() {
-	install -d ${D}${bindir}
-	install -m 0755 bin/* ${D}${bindir}
-	install -d ${D}${base_libdir}
-	install -m 0644 lib/* ${D}${base_libdir}
-}
