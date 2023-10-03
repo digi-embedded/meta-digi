@@ -14,12 +14,13 @@
 #  !Description: Yocto autobuild script from Jenkins.
 #
 #  Parameters set by Jenkins:
+#     DY_BUILD_RELEASE:  Build for release mode
 #     DY_BUILD_TCHAIN:   Build toolchains for DEY images
 #     DY_DISTRO:         Distribution name (the default is 'dey')
 #     DY_PLATFORMS:      Platforms to build
 #     DY_REVISION:       Revision of the manifest repository (for 'repo init')
 #     DY_RM_WORK:        Remove the package working folders to save disk space.
-#     DY_TARGET:         Target image (the default is 'dey-image-qt')
+#     DY_TARGET:         Target image (the default is platform dependent)
 #     DY_USE_MIRROR:     Use internal Digi mirror to download packages
 #     DY_CVE_REPORT:     Generate Vigiles CVE report
 #     DY_VIGILES_DIR:    Path to Vigiles configuration files on the build server
@@ -138,7 +139,6 @@ swu_recipe_name() {
 }
 
 # Sanity check (Jenkins environment)
-[ -z "${DY_PLATFORMS}" ]      && error "DY_PLATFORMS not specified"
 [ -z "${DY_REVISION}" ]       && error "DY_REVISION not specified"
 [ -z "${DY_RM_WORK}" ]        && error "DY_RM_WORK not specified"
 [ -z "${DY_USE_MIRROR}" ]     && error "DY_USE_MIRROR not specified"
@@ -164,6 +164,7 @@ fi
 
 # Per-platform data
 while read -r _pl _tgt; do
+	AVAILABLE_PLATFORMS="${AVAILABLE_PLATFORMS:+${AVAILABLE_PLATFORMS} }${_pl}"
 	# shellcheck disable=SC2015
 	[ -n "${DY_TARGET}" ] && _tgt="${DY_TARGET}" || true
 	# Dashes are not allowed in variables so let's substitute them on
@@ -184,6 +185,9 @@ done<<-_EOF_
 	ccmp13-dvk           core-image-base
 	ccimx93-dvk          dey-image-qt
 _EOF_
+
+# Set default values if not provided by Jenkins
+DY_PLATFORMS="${DY_PLATFORMS:-${AVAILABLE_PLATFORMS}}"
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
 YOCTO_INST_DIR="${WORKSPACE}/digi-yocto-sdk.$(echo "${DY_REVISION}" | tr '/' '_')"
