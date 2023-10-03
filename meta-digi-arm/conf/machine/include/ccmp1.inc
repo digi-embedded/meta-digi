@@ -51,6 +51,11 @@ BOOTDEVICE_LABELS ?= "nand-4-256"
 # Supported boot schemes
 BOOTSCHEME_LABELS ?= "optee"
 
+# Remove NAND-based ubi/ubifs images added by st-machine-common-stm32mp.inc
+# because image_types_digi.bbclass already builds their own.
+MULTIUBI_BUILD:remove = "nand_4_256"
+IMAGE_FSTYPES:remove = "stmultiubi"
+
 # Wic files
 WKS_FILE += "ccmp1.wks.in"
 WKS_FILE_DEPENDS ?= " \
