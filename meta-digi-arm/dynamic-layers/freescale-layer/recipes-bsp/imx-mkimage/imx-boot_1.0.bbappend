@@ -1,4 +1,4 @@
-# Copyright (C) 2022,2023 Digi International
+# Copyright (C) 2022-2023 Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
@@ -34,30 +34,25 @@ do_compile:append:ccimx8m() {
 	make SOC=${IMX_BOOT_SOC_TARGET} dtbs=${UBOOT_DTB_NAME} print_fit_hab
 }
 
-do_compile:ccimx8x () {
-	compile_${SOC_FAMILY}
+do_compile:ccimx8x() {
+	# Copy TEE binary to SoC target folder to mkimage
 	if ${DEPLOY_OPTEE}; then
-		cp ${DEPLOY_DIR_IMAGE}/tee.bin {BOOT_STAGING}
+		cp ${DEPLOY_DIR_IMAGE}/tee.bin ${BOOT_STAGING}
 	fi
-	# mkimage for i.MX8
-
+	UBOOT_CONFIG_EXTRA="${UBOOT_CONFIG}"
+	UBOOT_NAME_EXTRA="u-boot-${MACHINE}.bin-${UBOOT_CONFIG_EXTRA}"
 	for target in ${IMXBOOT_TARGETS}; do
+		compile_${SOC_FAMILY}
 		for rev in ${SOC_REVISIONS}; do
 			bbnote "building ${IMX_BOOT_SOC_TARGET} - REV=${rev} ${target}"
-			make SOC=${IMX_BOOT_SOC_TARGET} dtbs=${UBOOT_DTB_NAME} REV=${rev} ${target} > ${S}/mkimage-${rev}-${target}.log 2>&1
+			make SOC=${IMX_BOOT_SOC_TARGET} REV=${rev} ${target} > ${S}/mkimage-${rev}-${target}.log 2>&1
 			if [ -e "${BOOT_STAGING}/flash.bin" ]; then
-				cp ${BOOT_STAGING}/flash.bin ${S}/${UBOOT_PREFIX}-${MACHINE}-${rev}.bin-${target}
+				cp ${BOOT_STAGING}/flash.bin ${S}/${BOOT_NAME}-${MACHINE}-${rev}.bin-${target}
 			fi
-			SCFWBUILT="yes"
-			# Remove u-boot-atf-container.img so it gets generated in the next iteration
-			rm ${BOOT_STAGING}/u-boot-atf-container.img
 		done
 	done
-
-	# Check that SCFW was built at least once
-	if [ "${IMX_BOOT_SOC_TARGET}" = "iMX8QX" and "${SCFWBUILT}" != "yes" ]; then
-		bbfatal "SCFW was not built!"
-	fi
+	unset UBOOT_CONFIG_EXTRA
+	unset UBOOT_NAME_EXTRA
 }
 
 do_install:ccimx8x () {
@@ -70,10 +65,11 @@ do_install:ccimx8x () {
 }
 
 generate_symlinks() {
-	# imx-boot recipe in meta-freescale assumes only *one* build configuration
-	# (otherwise variable BOOT_CONFIG_MACHINE would expand to something incorrect)
+	# imx-boot recipe in meta-freescale supports *multiple* build configurations.
+	# We assume here only ONE build configuration for our platforms (otherwise
+	# UBOOT_CONFIG would be incorrectly expanded)
 	for target in ${IMXBOOT_TARGETS}; do
-		mv ${DEPLOYDIR}/${BOOT_CONFIG_MACHINE}-${target} ${DEPLOYDIR}/${BOOT_NAME}-${MACHINE}.bin-${target}
+		mv ${DEPLOYDIR}/${BOOT_NAME}-${MACHINE}-${UBOOT_CONFIG}.bin-${target} ${DEPLOYDIR}/${BOOT_NAME}-${MACHINE}.bin-${target}
 	done
 	ln -sf ${BOOT_NAME}-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${BOOT_NAME}-${MACHINE}.bin
 	ln -sf ${BOOT_NAME}-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${BOOT_NAME}
