@@ -40,6 +40,10 @@ set_btaddr() {
 	hciconfig ${HCI_IFACE} up
 }
 
+set_power_config() {
+	sh -e /lib/firmware/nxp/bt_power_config_US_CA_JP.sh
+}
+
 is_kernel_module_loaded() {
 	lsmod | grep -qs -w "^${MODULE_NAME}"
 }
@@ -56,8 +60,8 @@ bluetooth_start() {
 	power 0 && sleep 0.2 && power 1
 	# Load manually the kernel module
 	modprobe "${MODULE_NAME}"
-	# Reconfigure the HCI interface with the expected MAC address
-	is_kernel_module_loaded && set_btaddr && log "Bluetooth activated" && return 0
+	# Reconfigure the HCI interface with the expected MAC address and power levels
+	is_kernel_module_loaded && set_btaddr && set_power_config && log "Bluetooth activated" && return 0
 	log "[ERROR] Cannot initialize Bluetooth correctly" && return 1
 }
 
