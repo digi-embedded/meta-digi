@@ -27,4 +27,4 @@ RDEPENDS:${PN} = " \
 "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6|ccimx8x|ccimx8m|ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx6|ccimx8m|ccimx8x|ccimx93)"

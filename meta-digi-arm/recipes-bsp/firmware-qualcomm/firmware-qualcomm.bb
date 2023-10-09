@@ -144,4 +144,4 @@ FILES:${PN}-${QCA_MODEL}-bt = "/lib/firmware/qca"
 FILES:${PN}-${QCA_MODEL}-wifi = "/lib/firmware"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x|ccimx8m)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x)"
