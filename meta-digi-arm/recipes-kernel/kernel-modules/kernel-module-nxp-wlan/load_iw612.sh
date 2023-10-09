@@ -20,6 +20,8 @@ host_mlme=1 \
 drv_mode=${DRIVER_MODE} \
 drvdbg=${DRIVER_DEBUG} \
 sta_name=wlan \
+txpwrlimit_cfg=nxp/txpower_US.bin \
+init_hostcmd_cfg=nxp/rutxpower_US.bin \
 fw_name=nxp/sd_w61x_v1.bin.se\
 "
 
