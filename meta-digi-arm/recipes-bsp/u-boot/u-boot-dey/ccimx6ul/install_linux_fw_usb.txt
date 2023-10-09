@@ -60,12 +60,26 @@ setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.ubifs
 setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.ubifs
 
 # Check for presence of firmware files on the USB
-for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME} ${INSTALL_ROOTFS_FILENAME}; do
+for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME}; do
 	if test ! -e usb ${INSTALL_USBDEV} ${install_f}; then
 		echo "ERROR: Could not find file ${install_f}";
 		install_abort=1;
 	fi;
 done
+# Verify what kind of rootfs is going to be programmed
+if test ! -e usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME}; then
+	echo "ERROR: Could not find file ${INSTALL_ROOTFS_FILENAME}";
+	setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.squashfs
+	echo "INFO: Trying with file ${INSTALL_ROOTFS_FILENAME}";
+	if test ! -e usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME}; then
+		echo "ERROR: Could not find file ${INSTALL_ROOTFS_FILENAME}";
+		install_abort=1;
+	else
+		setenv rootfstype squashfs
+	fi
+else
+	setenv rootfstype
+fi
 if test "${install_abort}" = "1"; then
 	echo "To install a different image, set variable 'image-name', e.g.:"
 	echo "  => setenv image-name core-image-base"
@@ -148,6 +162,7 @@ setenv bootcmd "
 	env default -a;
 	setenv singlemtdsys ${singlemtdsys};
 	setenv dualboot ${dualboot};
+	setenv rootfstype ${rootfstype};
 	setenv install_dualboot ${install_dualboot};
 	run partition_nand_linux;
 	saveenv;

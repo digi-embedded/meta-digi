@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Digi International
+# Copyright (C) 2018-2023 Digi International
 
 require u-boot-dey.inc
 

@@ -80,7 +80,7 @@ check_gen_pki_tree() {
 
 copy_public_key() {
 	if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
-		KEY_INDEX="$(expr $TRUSTFENCE_KEY_INDEX + 1)"
+		KEY_INDEX="$(expr ${TRUSTFENCE_KEY_INDEX} + 1)"
 		PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/crts/key${KEY_INDEX}.pub"
 		# The new hab/ahab_pki_tree.sh script extracts the public keys after the PKI
 		# generation and leaves them in the crts/ folder. However, the PKI tree may
