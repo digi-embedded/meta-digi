@@ -20,3 +20,4 @@ FILES:${PN}:append = " \
 "
 
 RDEPENDS:${PN}:remove = "wireless-tools"
+RDEPENDS:${PN}:append = " firmware-murata-nxp"
