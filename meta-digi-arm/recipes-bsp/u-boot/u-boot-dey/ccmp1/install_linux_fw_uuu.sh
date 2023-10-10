@@ -40,6 +40,7 @@ show_usage()
 	echo "  Options:"
 	echo "   -a <atf-filename>      Arm-trusted-firmware filename."
 	echo "                          Auto-determined by variant if not provided."
+	echo "   -d                     Install firmware on dualboot partitions (system A and system B)."
 	echo "   -f <fip-filename>      FIP filename."
 	echo "                          Auto-determined by variant if not provided."
 	echo "   -h                     Show this help."
@@ -47,7 +48,6 @@ show_usage()
 	echo "                          'dey-image-webkit', 'core-image-base'..."
 	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
-	echo "   -d                     Install firmware on dualboot partitions (system A and system B)."
 	exit 2
 }
 
