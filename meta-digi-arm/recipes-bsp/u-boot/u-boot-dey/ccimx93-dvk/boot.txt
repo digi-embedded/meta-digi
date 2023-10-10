@@ -6,17 +6,22 @@
 # requires the script to change some variables and save them, while the rest
 # of the script changes variables only temporarily without saving them.
 
+# Build boot attempt message string
+if test "${bootlimit}" -gt 0 && test "${bootcount}" -gt 0; then
+	bootattempt="(boot attempt ${bootcount}/${bootlimit})"
+fi
+
 # Pre step: check if we boot from uSD.
 if test "${mmcbootdev}" = "1"; then
 	# We are booting from the SD card.
 	setenv mmcroot /dev/mmcblk${mmcbootdev}p2
 elif test "${dualboot}" = "yes"; then
 	if test "${active_system}" = "linux_a"; then
-		echo "Booting from system A (try ${bootcount})"
+		echo "Booting from system A ${bootattempt}"
 		part number mmc ${mmcbootdev} linux_a tmp_mmcpart
 		part number mmc ${mmcbootdev} rootfs_a tmp_rootfs_index
 	else
-		echo "Booting from system B (try ${bootcount})"
+		echo "Booting from system B ${bootattempt}"
 		part number mmc ${mmcbootdev} linux_b tmp_mmcpart
 		part number mmc ${mmcbootdev} rootfs_b tmp_rootfs_index
 	fi
@@ -34,7 +39,7 @@ elif test "${dualboot}" = "yes"; then
 		env save
 	fi
 else
-	echo "Booting system (try ${bootcount})"
+	echo "Booting system ${bootattempt}"
 	# Get the UUID of the configured boot partition.
 	part uuid mmc ${mmcbootdev}:${mmcpart} bootpart
 	# Check the boot source.

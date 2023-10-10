@@ -7,17 +7,22 @@
 # and save them, while the rest of the script changes variables only temporarily
 # without saving them.
 
+# Build boot attempt message string
+if test "${bootlimit}" -gt 0 && test "${bootcount}" -gt 0; then
+	bootattempt="(boot attempt ${bootcount}/${bootlimit})"
+fi
+
 # Dual boot update verification
 if test "${dualboot}" = "yes"; then
 	if test "${upgrade_available}" = "1"; then
-		echo "Update detected; Booting new system in ${active_system} (try ${bootcount})"
+		echo "Update detected; Booting new system in ${active_system} ${bootattempt}"
 	else
 		if test "${active_system}" = "linux_a"; then
-			echo "Booting from system A (try ${bootcount})"
+			echo "Booting from system A"
 			part number mmc ${mmcbootdev} linux_a tmp_mmcpart
 			part number mmc ${mmcbootdev} rootfs_a tmp_rootfs_index
 		else
-			echo "Booting from system B (try ${bootcount})"
+			echo "Booting from system B"
 			part number mmc ${mmcbootdev} linux_b tmp_mmcpart
 			part number mmc ${mmcbootdev} rootfs_b tmp_rootfs_index
 		fi
@@ -49,6 +54,9 @@ else
 	else
 		# We are booting from the SD card.
 		setenv mmcroot /dev/mmcblk${mmcbootdev}p2
+	fi
+	if test "${upgrade_available}" = "1"; then
+		echo "Update detected; Booting new system ${bootattempt}"
 	fi
 fi
 

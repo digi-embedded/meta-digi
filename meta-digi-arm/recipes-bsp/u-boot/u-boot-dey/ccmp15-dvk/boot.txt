@@ -6,13 +6,18 @@
 # requires the script to change some variables and save them, while the rest
 # of the script changes variables only temporarily without saving them.
 
+# Build boot attempt message string
+if test "${bootlimit}" -gt 0 && test "${bootcount}" -gt 0; then
+	bootattempt="(boot attempt ${bootcount}/${bootlimit})"
+fi
+
 # Dual boot verification
 if test "${dualboot}" = "yes"; then
 	if test "${active_system}" = "linux_a"; then
-		echo "Booting from system A (try ${bootcount})"
+		echo "Booting from system A ${bootattempt}"
 		setenv tmp_rootfsvol ${rootfsvol_a}
 	else
-		echo "Booting from system B (try ${bootcount})"
+		echo "Booting from system B ${bootattempt}"
 		setenv tmp_rootfsvol ${rootfsvol_b}
 	fi
 	if test "${mtdbootpart}" != "${active_system}"; then
@@ -28,7 +33,7 @@ if test "${dualboot}" = "yes"; then
 		env save
 	fi
 else
-	echo "Booting system (try ${bootcount})"
+	echo "Booting system ${bootattempt}"
 	# Check the boot source.
 	if test "${mtdbootpart}" = "linux"; then
 		# We are booting from the NAND using 'linux'.
