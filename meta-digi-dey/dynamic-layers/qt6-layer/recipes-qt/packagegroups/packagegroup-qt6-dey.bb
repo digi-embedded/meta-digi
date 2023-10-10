@@ -29,6 +29,6 @@ QT6_IMAGE_INSTALL_EXAMPLES = "qtbase-examples qtdeclarative-examples"
 
 QT6_IMAGE_INSTALL_FONTS = "ttf-dejavu-common ttf-dejavu-sans ttf-dejavu-sans-mono ttf-dejavu-serif "
 
-QT6_IMAGE_INSTALL_QUICK3D = "qtquick3d qtquick3d-dev qtquick3d-examples"
+QT6_IMAGE_INSTALL_QUICK3D = "qtquick3d qtquick3d-examples"
 # Quick3d does not work on systems without a proper GPU
 QT6_IMAGE_INSTALL_QUICK3D:ccimx93 = ""
