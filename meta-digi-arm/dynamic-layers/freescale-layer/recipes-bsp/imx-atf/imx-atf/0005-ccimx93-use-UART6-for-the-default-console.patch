@@ -8,11 +8,11 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/plat/imx/imx93/include/platform_def.h b/plat/imx/imx93/include/platform_def.h
-index 59ce1c267568..c4855d7f5e82 100644
+index 9bbee908fe80..8eba2f6d917a 100644
 --- a/plat/imx/imx93/include/platform_def.h
 +++ b/plat/imx/imx93/include/platform_def.h
-@@ -53,7 +53,7 @@
- #define MAX_MMAP_REGIONS		16
+@@ -61,7 +61,7 @@
+ #define MAX_MMAP_REGIONS		17
  #endif
  
 -#define IMX_LPUART_BASE			0x44380000
