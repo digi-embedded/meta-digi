@@ -52,6 +52,39 @@ python set_fip_sign_key() {
                 d.setVar('FIP_SIGN_KEY_PASS', p[i])
 }
 
+do_deploy:append() {
+	unset i
+	for config in ${TF_A_CONFIG}; do
+		i=$(expr $i + 1)
+		# Initialize devicetree list and tf-a basename
+		dt_config=$(echo ${TF_A_DEVICETREE} | cut -d',' -f${i})
+		tfa_basename=$(echo ${TF_A_BINARIES} | cut -d',' -f${i})
+		for dt in ${dt_config}; do
+			TF_A_FILENAME="${tfa_basename}-${dt}-${config}.${TF_A_SUFFIX}"
+			if [ -f "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}" ]; then
+				cd "${DEPLOYDIR}"
+				# symlink TF-A
+				ln -s "arm-trusted-firmware/${TF_A_FILENAME}" "${DEPLOYDIR}/"
+			fi
+		done
+	done
+
+	unset i
+	for config in ${FIP_CONFIG}; do
+		i="$(expr ${i} + 1)"
+		dt_config="$(echo ${FIP_DEVICETREE} | cut -d',' -f${i})"
+		for dt in ${dt_config}; do
+			FIP_FILENAME="${FIP_BASENAME}-${dt}-${config}.${FIP_SUFFIX}"
+			echo "${FIP_FILENAME}"
+			if [ -f "${DEPLOYDIR}/fip/${FIP_FILENAME}" ]; then
+				cd "${DEPLOYDIR}"
+				# symlink FIP
+				ln -s "fip/${FIP_FILENAME}" "${DEPLOYDIR}/"
+			fi
+		done
+	done
+}
+
 # Sign TF-A image
 do_deploy[postfuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'tfa_sign', '', d)}"
 tfa_sign() {
