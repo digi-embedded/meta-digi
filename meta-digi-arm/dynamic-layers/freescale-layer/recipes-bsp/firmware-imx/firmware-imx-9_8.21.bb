@@ -9,11 +9,11 @@ DESCRIPTION = "Freescale i.MX firmware for i.MX 9 family"
 # require recipes-bsp/firmware-imx/firmware-imx-${PV}.inc
 require recipes-bsp/firmware-imx/firmware-imx-8.18.inc
 
-LIC_FILES_CHKSUM = "file://COPYING;md5=63a38e9f392d8813d6f1f4d0d6fbe657"
-SRC_URI[md5sum] = "25c50f3371450b2324401ee06ff1bf6a"
-SRC_URI[sha256sum] = "f6dc6a5c8fd9b913a15360d3ccd53d188db05a08a8594c518e57622478c72383"
+LIC_FILES_CHKSUM = "file://COPYING;md5=db4762b09b6bda63da103963e6e081de"
+SRC_URI[md5sum] = "48b9e116280d752f1696dc36b08b07da"
+SRC_URI[sha256sum] = "c3447f0f813415ccea9dc2ef12080cb3ac8bbc0c67392a74fc7d59205eb5a672"
 
-inherit deploy
+inherit deploy nopackages
 
 do_install[noexec] = "1"
 
