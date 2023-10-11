@@ -249,6 +249,7 @@ part_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000
 
 # Set 'bootcmd' for the second part of the script that will
 #  - Reset environment to defaults
+#  - Reset the bootcount
 #  - Save the environment
 #  - Update the 'linux' partition
 #  - Update the 'recovery' partition
@@ -257,6 +258,7 @@ part_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000
 uuu fb: ucmd setenv bootcmd "
 	env default -a;
 	setenv dualboot \${dualboot};
+	bootcount reset;
 	setenv singlemtdsys \${singlemtdsys};
 	saveenv;
 	echo \"\";
@@ -324,6 +326,8 @@ fi
 
 uuu fb: ucmd saveenv
 
+# Reset the bootcount
+uuu fb: ucmd bootcount reset
 # Reset the target
 uuu fb: acmd reset
 

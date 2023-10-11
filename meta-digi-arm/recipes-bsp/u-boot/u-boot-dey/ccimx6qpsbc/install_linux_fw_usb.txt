@@ -263,6 +263,7 @@ setenv bootcmd "
 		setenv boot_recovery yes;
 		setenv recovery_command wipe_update;
 	fi;
+	setenv bootcount 0;
 	saveenv;
 	echo \"\";
 	echo \"\";
@@ -276,5 +277,6 @@ setenv bootcmd "
 	reset;
 "
 
+setenv bootcount 0
 saveenv
 reset

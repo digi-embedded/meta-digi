@@ -297,8 +297,9 @@ if [ "${SQUASHFS}" = true ]; then
 	uuu fb: ucmd saveenv
 fi
 
-# Reset the target
+# Reset the bootcount
 uuu fb: ucmd bootcount reset
+# Reset the target
 uuu fb: acmd reset
 
 echo "\033[32m"

@@ -260,8 +260,10 @@ setenv bootcmd "
 	echo \"\";
 	echo \"\";
 	sleep 1;
+	bootcount reset;
 	reset;
 "
 
+bootcount reset
 saveenv
 reset
