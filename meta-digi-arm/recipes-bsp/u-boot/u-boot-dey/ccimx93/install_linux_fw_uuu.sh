@@ -209,6 +209,7 @@ uuu fb: ucmd mmc partconf 0 1 1 1
 
 # Set 'bootcmd' for the second part of the script that will
 #  - Reset environment to defaults
+#  - Reset the bootcount
 #  - Save the environment
 #  - Partition the eMMC user data area for Linux
 #  - Update the 'linux' partition
@@ -217,6 +218,7 @@ uuu fb: ucmd mmc partconf 0 1 1 1
 uuu fb: ucmd setenv bootcmd "
 	env default -a;
 	setenv dualboot \${dualboot};
+	bootcount reset;
 	saveenv;
 	echo \"\";
 	echo \"\";
@@ -286,6 +288,8 @@ if [ "${DUALBOOT}" != true ]; then
 fi
 uuu fb: ucmd saveenv
 
+# Reset the bootcount
+uuu fb: ucmd bootcount reset
 # Reset the target
 uuu fb: acmd reset
 
