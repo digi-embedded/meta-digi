@@ -11,7 +11,7 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/iMX9/soc.mak b/iMX9/soc.mak
-index 7c4086c153d0..7ec4bb5eaeb4 100644
+index 6d4613dd7d92..97e311059df8 100644
 --- a/iMX9/soc.mak
 +++ b/iMX9/soc.mak
 @@ -1,4 +1,5 @@
@@ -20,17 +20,17 @@ index 7c4086c153d0..7ec4bb5eaeb4 100644
  
  CC ?= gcc
  REV ?= A0
-@@ -71,7 +72,7 @@ u-boot-atf-container.img: bl31.bin u-boot-hash.bin
+@@ -98,7 +99,7 @@ u-boot-atf-container.img: bl31.bin u-boot-hash.bin
  		fi; \
  	else \
  		./$(MKIMG) -soc IMX9 -c -ap bl31.bin a35 $(ATF_LOAD_ADDR) -ap u-boot-hash.bin a35 $(UBOOT_LOAD_ADDR) -out u-boot-atf-container.img; \
 -	fi
 +	fi | tee $(MKIMAGE_LOG)
  
- .PHONY: clean nightly
- clean:
-@@ -80,11 +81,11 @@ clean:
- 	@echo "imx8ulp clean done"
+ u-boot-atf-container-spinand.img: bl31.bin u-boot-hash.bin
+ 	if [ -f tee.bin ]; then \
+@@ -125,11 +126,11 @@ clean:
+ 	@echo "imx9 clean done"
  
  flash_singleboot: $(MKIMG) $(AHAB_IMG) u-boot-spl-ddr.bin u-boot-atf-container.img
 -	./$(MKIMG) -soc IMX9 -append $(AHAB_IMG) -c -ap u-boot-spl-ddr.bin a35 $(SPL_LOAD_ADDR) -out flash.bin
@@ -42,4 +42,4 @@ index 7c4086c153d0..7ec4bb5eaeb4 100644
 +                   echo "append u-boot-atf-container.img at $$pad_cnt KB" | tee -a $(MKIMAGE_LOG); \
                     dd if=u-boot-atf-container.img of=flash.bin bs=1K seek=$$pad_cnt;
  
- flash_singleboot_flexspi: $(MKIMG) $(AHAB_IMG) u-boot-spl-ddr.bin u-boot-atf-container.img
+ flash_singleboot_spinand: $(MKIMG) $(AHAB_IMG) u-boot-spl-ddr.bin u-boot-atf-container-spinand.img flash_fw.bin
