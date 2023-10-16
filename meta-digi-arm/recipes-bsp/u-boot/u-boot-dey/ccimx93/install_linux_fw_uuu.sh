@@ -32,7 +32,9 @@ show_usage()
 	echo "Usage: $0 [options]"
 	echo ""
 	echo "  Options:"
+	echo "   -b                     Activate bootcount mechanism (3 boot attempts)."
 	echo "   -d                     Install firmware on dualboot partitions (system A and system B)."
+	echo "                          (Implies -b)."
 	echo "   -h                     Show this help."
 	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
 	echo "                          'dey-image-webkit', 'core-image-base'..."
@@ -70,10 +72,11 @@ echo "############################################################"
 # Command line admits the following parameters:
 # -u <u-boot-filename>
 # -i <image-name>
-while getopts 'dhi:nu:' c
+while getopts 'bdhi:nu:' c
 do
 	case $c in
-	d) INSTALL_DUALBOOT=true ;;
+	b) BOOTCOUNT=true ;;
+	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
 	n) NOWAIT=true ;;
@@ -150,6 +153,11 @@ if [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; then
 	fi
 fi
 
+# Enable bootcount mechanism by setting a bootlimit
+if [ "${BOOTCOUNT}" = true ]; then
+	bootlimit_cmd="setenv bootlimit 3"
+fi
+
 [ "${ABORT}" = true ] && exit 1
 
 # parts names
@@ -210,6 +218,7 @@ uuu fb: ucmd mmc partconf 0 1 1 1
 # Set 'bootcmd' for the second part of the script that will
 #  - Reset environment to defaults
 #  - Reset the bootcount
+#  - Set bootlimit (if required)
 #  - Save the environment
 #  - Partition the eMMC user data area for Linux
 #  - Update the 'linux' partition
@@ -219,6 +228,7 @@ uuu fb: ucmd setenv bootcmd "
 	env default -a;
 	setenv dualboot \${dualboot};
 	bootcount reset;
+	${bootlimit_cmd};
 	saveenv;
 	echo \"\";
 	echo \"\";

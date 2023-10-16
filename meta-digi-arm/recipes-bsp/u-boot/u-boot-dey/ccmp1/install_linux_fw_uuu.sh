@@ -40,7 +40,9 @@ show_usage()
 	echo "  Options:"
 	echo "   -a <atf-filename>      Arm-trusted-firmware filename."
 	echo "                          Auto-determined by variant if not provided."
+	echo "   -b                     Activate bootcount mechanism (3 boot attempts)."
 	echo "   -d                     Install firmware on dualboot partitions (system A and system B)."
+	echo "                          (Implies -b)."
 	echo "   -f <fip-filename>      FIP filename."
 	echo "                          Auto-determined by variant if not provided."
 	echo "   -h                     Show this help."
@@ -80,11 +82,12 @@ echo "############################################################"
 # -a <atf-filename>
 # -f <fip-filename>
 # -i <image-name>
-while getopts 'a:df:hi:n' c
+while getopts 'a:bdf:hi:n' c
 do
 	case $c in
 	a) INSTALL_ATF_FILENAME=${OPTARG} ;;
-	d) INSTALL_DUALBOOT=true ;;
+	b) BOOTCOUNT=true ;;
+	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
 	f) INSTALL_FIP_FILENAME=${OPTARG} ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
@@ -163,6 +166,11 @@ if [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; then
 	fi
 fi
 
+# Enable bootcount mechanism by setting a bootlimit
+if [ "${BOOTCOUNT}" = true ]; then
+	bootlimit_cmd="setenv bootlimit 3"
+fi
+
 [ "${ABORT}" = true ] && exit 1
 
 # parts names
@@ -235,6 +243,7 @@ fi
 #  - Reset environment to defaults
 #  - Keep the 'dualboot' status
 #  - Reset the bootcount
+#  - Set bootlimit (if required)
 #  - Save the environment
 #  - Update the 'linux' partition(s)
 #  - Update the 'rootfs' partition(s)
@@ -242,6 +251,7 @@ uuu fb: ucmd setenv bootcmd "
 	env default -a;
 	setenv dualboot \${dualboot};
 	bootcount reset;
+	${bootlimit_cmd};
 	saveenv;
 	saveenv;
 	echo \"\";
