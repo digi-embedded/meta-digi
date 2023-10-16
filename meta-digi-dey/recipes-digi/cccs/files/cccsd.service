@@ -1,13 +1,17 @@
 [Unit]
 Description=CCCS daemon
 After=network.target
+# Do not limit the number of restarting times
+StartLimitIntervalSec=0
 
 [Service]
 Type=forking
 ExecStart=/etc/cccsd start
 ExecStop=/etc/cccsd stop
 PIDFile=/run/cccsd.pid
+# Restart the service every 30 seconds if it fails
 Restart=on-failure
+RestartSec=30s
 
 [Install]
 WantedBy=multi-user.target
