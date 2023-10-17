@@ -1,6 +1,6 @@
 # Copyright (C) 2022,2023 Digi International.
 
-SUMMARY = "Murata firmware binaries"
+SUMMARY = "Murata Infineon firmware binaries"
 SECTION = "base"
 LICENSE = "CYPRESS-EULA"
 LIC_FILES_CHKSUM = "file://${S}/cyw-bt-patch/LICENCE.cypress;md5=cbc5f665d04f741f1e006d2096236ba7"
@@ -27,7 +27,7 @@ S = "${WORKDIR}"
 DEPENDS = "libnl"
 
 do_install () {
-	bbnote "Installing Murata firmware binaries: "
+	bbnote "Installing Murata Infineon firmware binaries: "
 	install -d ${D}${base_libdir}/firmware/cypress
 	install -d ${D}${base_libdir}/firmware/brcm
 	install -d ${D}${sbindir}
