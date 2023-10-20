@@ -23,6 +23,10 @@ software =
             );
             uboot: (
                 {
+                    name = "upgrade_available";
+                    value = "@@UPGRADE_AVAILABLE@@";
+                },
+                {
                     name = "swap_bank";
                     value = "false";
                 }
@@ -46,6 +50,12 @@ software =
                     filename = "@@SWUPDATE_SCRIPT_NAME@@";
                     sha256 = "$swupdate_get_sha256(@@SWUPDATE_SCRIPT_NAME@@)";
                     type = "shellscript";
+                }
+            );
+            uboot: (
+                {
+                    name = "upgrade_available";
+                    value = "@@UPGRADE_AVAILABLE@@";
                 }
             );
         }
