@@ -90,6 +90,10 @@ if test "${module_has_npu}" = "1" && test -z "${disable_npu}"; then
 	setenv overlays _ov_som_npu_ccimx93.dtbo,${overlays}
 fi
 
+if test "${soc_rev}" = "0x10"; then
+	setenv overlays _ov_som_cpu_a0_ccimx93.dtbo,${overlays}
+fi
+
 dboot linux mmc ${mmcbootdev}:${mmcpart}
 
 #
