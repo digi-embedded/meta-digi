@@ -10,6 +10,11 @@ Digi Embedded Yocto provides the following image recipes:
     By default the image is Wayland-based so it provides a full Weston
     desktop environment.
 
+  * dey-image-lvgl: graphical LVGL image
+
+    By default the image is Wayland-based so it provides a full Weston
+    desktop environment.
+
   * core-image-base: a console-only image
 
     Expansion of native core-image-base by including all the support for the

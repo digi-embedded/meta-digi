@@ -78,7 +78,7 @@ MACHINE_EXTRA_RRECOMMENDS += "${@bb.utils.contains_any('VIRTUAL-RUNTIME_dev_mana
 DEFAULT_IMAGE_NAME ??= "dey-image-qt"
 
 # List of graphical images names (for install scripts)
-GRAPHICAL_IMAGES ?= "dey-image-crank dey-image-qt dey-image-webkit"
+GRAPHICAL_IMAGES ?= "dey-image-crank dey-image-qt dey-image-webkit dey-image-lvgl"
 
 # Include DEY SELinux policy modifications by default
 DEY_SELINUX_POLICY ?= "1"
