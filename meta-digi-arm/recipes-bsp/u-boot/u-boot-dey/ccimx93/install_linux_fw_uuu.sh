@@ -93,16 +93,26 @@ if [ "${dualboot}" = "yes" ]; then
 	DUALBOOT=true;
 fi
 
-# remove redirect
-uuu fb: ucmd setenv stdout serial
-
 echo ""
 echo "Determining image files to use..."
 
-# Determine U-Boot file to program basing on SOM's SOC type (linked to bus width)
+# Determine U-Boot file to program basing on SOM's SOC revision
 if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
-	INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##.bin"
+	soc_rev="$(getenv soc_rev)"
+	if [ -n "${soc_rev}" ]; then
+		[ "${soc_rev}" = "0x10" ] && SOCREV="-A0"
+	else
+		# Fallback to hardware version if soc_rev is empty
+		hwid_2="$(getenv hwid_2)"
+		hwid_2="0x${hwid_2#0x}"
+		som_hv="$(((hwid_2 & 0x78) >> 3))"
+		[ "${som_hv}" -lt "2" ] && SOCREV="-A0"
+	fi
+	INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##${SOCREV}.bin"
 fi
+
+# remove redirect
+uuu fb: ucmd setenv stdout serial
 
 # Determine linux, recovery, and rootfs image filenames to update
 if [ -z "${IMAGE_NAME}" ]; then

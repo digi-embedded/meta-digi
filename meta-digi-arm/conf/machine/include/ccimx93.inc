@@ -17,6 +17,10 @@ BOOTLOADER_IMAGE_RECIPE = "imx-boot"
 BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 
+# Generate images for all SOC revisions (keep the override as otherwise the
+# one in "use-imx-security-controller-firmware.bbclass" takes precedence)
+SECO_FIRMWARE_NAME:ccimx93 = "mx93??-ahab-container.img"
+
 DDR_FIRMWARE_NAME = " \
     lpddr4_dmem_1d_v202201.bin \
     lpddr4_dmem_2d_v202201.bin \
@@ -48,7 +52,7 @@ MACHINE_EXTRA_RDEPENDS += " \
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "AHAB"
 
-IMXBOOT_TARGETS = "flash_singleboot"
+IMXBOOT_TARGETS = "flash_singleboot flash_singleboot_a0"
 
 IMX_BOOT_SOC_TARGET = "iMX9"
 IMX_BOOT_SEEK = "32"
