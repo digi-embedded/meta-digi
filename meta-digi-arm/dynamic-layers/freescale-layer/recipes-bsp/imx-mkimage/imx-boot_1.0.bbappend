@@ -9,6 +9,7 @@ SRC_URI:append:ccimx8m = " \
 
 SRC_URI:append:ccimx93 = " \
     file://0001-imx9-soc.mak-capture-commands-output-into-a-log-file.patch \
+    file://0002-imx9-soc.mak-add-makefile-target-to-build-A0-revisio.patch \
 "
 
 # Use NXP's lf-6.1.36-2.1.0 release for ccimx93
@@ -22,10 +23,22 @@ DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-too
 UUU_BOOTLOADER = ""
 UUU_BOOTLOADER_TAGGED = ""
 
+REV_OPTION:ccimx93 = "REV=A1"
+
 compile_mx8m:append:ccimx8m() {
 	# Create dummy DEK blob to support building with encrypted u-boot
 	if [ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
 		dd if=/dev/zero of=${BOOT_STAGING}/dek_blob_fit_dummy.bin bs=96 count=1 oflag=sync
+	fi
+}
+
+# For SOC revision A0 we need a different ATF binary
+compile_mx93:append:ccimx93() {
+	if [ "$target" = "flash_singleboot_a0" ]; then
+		ATF_MACHINE_NAME_A0="$(echo ${ATF_MACHINE_NAME} | sed -e 's,.bin,-A0.bin,g')"
+		bbnote "Copy ATF binary for SOC revision A0: ${ATF_MACHINE_NAME_A0}"
+		\cp --remove-destination ${DEPLOY_DIR_IMAGE}/${ATF_MACHINE_NAME_A0} ${BOOT_STAGING}/bl31.bin
+		unset ATF_MACHINE_NAME_A0
 	fi
 }
 
@@ -87,6 +100,10 @@ do_deploy:append:ccimx93() {
 	generate_symlinks
 	for target in ${IMXBOOT_TARGETS}; do
 		install -m 0644 ${BOOT_STAGING}/mkimage-${target}.log ${DEPLOYDIR}/${BOOT_TOOLS}
+		# Generate symlink for SOC revision A0
+		if [ "$target" = "flash_singleboot_a0" ]; then
+			ln -sf ${BOOT_NAME}-${MACHINE}.bin-${target} ${DEPLOYDIR}/${BOOT_NAME}-${MACHINE}-A0.bin
+		fi
 	done
 }
 

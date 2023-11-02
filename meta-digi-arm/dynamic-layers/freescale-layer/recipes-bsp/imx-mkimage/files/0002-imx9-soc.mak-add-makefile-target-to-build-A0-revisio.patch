@@ -1,0 +1,28 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Thu, 2 Nov 2023 15:03:13 +0100
+Subject: [PATCH] imx9: soc.mak: add makefile target to build A0 revision
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ iMX9/soc.mak | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/iMX9/soc.mak b/iMX9/soc.mak
+index 97e311059df8..59352f22deb1 100644
+--- a/iMX9/soc.mak
++++ b/iMX9/soc.mak
+@@ -133,6 +133,14 @@ flash_singleboot: $(MKIMG) $(AHAB_IMG) u-boot-spl-ddr.bin u-boot-atf-container.i
+                    echo "append u-boot-atf-container.img at $$pad_cnt KB" | tee -a $(MKIMAGE_LOG); \
+                    dd if=u-boot-atf-container.img of=flash.bin bs=1K seek=$$pad_cnt;
+ 
++flash_singleboot_a0: $(MKIMG) mx93a0-ahab-container.img u-boot-spl-ddr.bin u-boot-atf-container.img
++	./$(MKIMG) -soc IMX9 -append mx93a0-ahab-container.img -c -ap u-boot-spl-ddr.bin a35 $(SPL_LOAD_ADDR) -out flash.bin | tee -a $(MKIMAGE_LOG)
++	cp flash.bin boot-spl-container.img
++	@flashbin_size=`wc -c flash.bin | awk '{print $$1}'`; \
++                   pad_cnt=$$(((flashbin_size + 0x400 - 1) / 0x400)); \
++                   echo "append u-boot-atf-container.img at $$pad_cnt KB" | tee -a $(MKIMAGE_LOG); \
++                   dd if=u-boot-atf-container.img of=flash.bin bs=1K seek=$$pad_cnt;
++
+ flash_singleboot_spinand: $(MKIMG) $(AHAB_IMG) u-boot-spl-ddr.bin u-boot-atf-container-spinand.img flash_fw.bin
+ 	./$(MKIMG) -soc IMX9 -dev nand 4K -append $(AHAB_IMG) -c -ap u-boot-spl-ddr.bin a35 $(SPL_LOAD_ADDR) -out flash.bin
+ 	cp flash.bin boot-spl-container.img
