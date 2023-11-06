@@ -88,10 +88,29 @@ SWUPDATE_IS_IMAGES_UPDATE = "${@update_based_on_images(d)}"
 
 # Determine the correct UBoot update script file to use depending on storage type.
 SWUPDATE_UBOOT_SCRIPT = "${@oe.utils.conditional('STORAGE_MEDIA', 'mmc', 'swupdate_uboot_mmc.sh', 'swupdate_uboot_nand.sh', d)}"
+SWUPDATE_UBOOT_SCRIPT_NAME = "${@os.path.basename(d.getVar('SWUPDATE_UBOOT_SCRIPT'))}"
 
-UBOOT_EXT ?= ".${UBOOT_SUFFIX}"
+SWUPDATE_UBOOT_PREFIX ?= "${UBOOT_PREFIX}"
+SWUPDATE_UBOOT_PREFIX:ccmp1 ?= "fip"
+SWUPDATE_UBOOT_PREFIX_TFA ?= "tf-a"
 
-UBOOTIMG_OFFSET ?= "${BOOTLOADER_SEEK_BOOT}"
+SWUPDATE_UBOOT_EXT ?= ".${UBOOT_SUFFIX}"
+SWUPDATE_UBOOT_EXT_TFA ?= ".stm32"
+
+SWUPDATE_UBOOT_NAME ?= "${SWUPDATE_UBOOT_PREFIX}-${MACHINE}${SWUPDATE_UBOOT_EXT}"
+SWUPDATE_UBOOT_NAME:ccmp1 ?= "${SWUPDATE_UBOOT_PREFIX}-${MACHINE}-optee${SWUPDATE_UBOOT_EXT}"
+SWUPDATE_UBOOT_NAME_TFA ?= "${@oe.utils.conditional('DEY_SOC_VENDOR', 'STM', '${SWUPDATE_UBOOT_PREFIX_TFA}-${MACHINE}-nand${SWUPDATE_UBOOT_EXT_TFA}', '', d)}"
+
+SWUPDATE_UBOOT_OFFSET ?= "0"
+SWUPDATE_UBOOT_OFFSET:ccimx6 ?= "1"
+
+# Retrieve the correct encryption type.
+def get_swupdate_uboot_enc(d):
+    if d.getVar('TRUSTFENCE_DEK_PATH') and d.getVar('TRUSTFENCE_DEK_PATH') != "0" :
+        return "enc"
+    return "normal"
+
+SWUPDATE_UBOOT_ENC ?= "${@get_swupdate_uboot_enc(d)}"
 
 #######################################
 ########## SWU Update Script ##########

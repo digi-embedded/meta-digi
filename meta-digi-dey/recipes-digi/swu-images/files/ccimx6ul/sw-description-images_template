@@ -8,11 +8,13 @@ software =
             images: (
                 ##IMAGES_PRIMARY##
             );
+            ##FILES_UBOOT##
             scripts: (
                 {
                     filename = "@@SWUPDATE_SCRIPT_NAME@@";
                     type = "shellscript";
                 }
+                ##SCRIPT_UBOOT##
             );
             uboot: (
                 {
@@ -25,11 +27,13 @@ software =
             images: (
                 ##IMAGES_SECONDARY##
             );
+            ##FILES_UBOOT##
             scripts: (
                 {
                     filename = "@@SWUPDATE_SCRIPT_NAME@@";
                     type = "shellscript";
                 }
+                ##SCRIPT_UBOOT##
             );
             uboot: (
                 {
@@ -42,11 +46,13 @@ software =
             images: (
                 ##IMAGES_SINGLE##
             );
+            ##FILES_UBOOT##
             scripts: (
                 {
                     filename = "@@SWUPDATE_SCRIPT_NAME@@";
                     type = "shellscript";
                 }
+                ##SCRIPT_UBOOT##
             );
             uboot: (
                 {

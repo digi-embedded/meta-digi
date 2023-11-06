@@ -8,6 +8,7 @@ software =
             images: (
                 ##IMAGES_PRIMARY##
             );
+            ##FILES_UBOOT##
             scripts: (
                 {
                     filename = "@@SWUPDATE_SCRIPT_NAME@@";
@@ -15,6 +16,7 @@ software =
                     data = "$swupdate_get_sha256(@@SWUPDATE_RDIFF_ROOTFS_SOURCE_FILE@@)"
                     sha256 = "$swupdate_get_sha256(@@SWUPDATE_SCRIPT_NAME@@)";
                 }
+                ##SCRIPT_UBOOT##
             );
             uboot: (
                 {
@@ -27,6 +29,7 @@ software =
             images: (
                 ##IMAGES_SECONDARY##
             );
+            ##FILES_UBOOT##
             scripts: (
                 {
                     filename = "@@SWUPDATE_SCRIPT_NAME@@";
@@ -34,6 +37,7 @@ software =
                     data = "$swupdate_get_sha256(@@SWUPDATE_RDIFF_ROOTFS_SOURCE_FILE@@)"
                     sha256 = "$swupdate_get_sha256(@@SWUPDATE_SCRIPT_NAME@@)";
                 }
+                ##SCRIPT_UBOOT##
             );
             uboot: (
                 {

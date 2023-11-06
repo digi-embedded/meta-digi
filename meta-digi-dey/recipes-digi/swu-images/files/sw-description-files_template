@@ -13,6 +13,7 @@ software =
                     path = "/";
                     sha256 = "$swupdate_get_sha256(@@SWUPDATE_FILES_TARGZ_FILE_NAME@@)";
                 }
+                ##FILES_UBOOT##
             );
             scripts: (
                 {
@@ -20,6 +21,7 @@ software =
                     sha256 = "$swupdate_get_sha256(@@SWUPDATE_SCRIPT_NAME@@)";
                     type = "shellscript";
                 }
+                ##SCRIPT_UBOOT##
             );
             uboot: (
                 {
@@ -40,6 +42,7 @@ software =
                     path = "/system/";
                     sha256 = "$swupdate_get_sha256(@@SWUPDATE_FILES_TARGZ_FILE_NAME@@)";
                 }
+                ##FILES_UBOOT##
             );
             scripts: (
                 {
@@ -47,6 +50,7 @@ software =
                     sha256 = "$swupdate_get_sha256(@@SWUPDATE_SCRIPT_NAME@@)";
                     type = "shellscript";
                 }
+                ##SCRIPT_UBOOT##
             );
         }
         platform = {

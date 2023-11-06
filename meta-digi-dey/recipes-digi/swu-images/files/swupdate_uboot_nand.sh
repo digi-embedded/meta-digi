@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2022 by Digi International Inc.
+#  Copyright (C) 2022-2023 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -15,6 +15,7 @@
 
 UBOOT_FILE="$1"
 UBOOT_ENC="$2"
+TFA_FILE="$4"
 
 echo "**** Start U-Boot update process *****"
 
@@ -70,24 +71,60 @@ dump_dek ()
 	return 0
 }
 
+install_fwu ()
+{
+	FLASH_DEV="$1"
+	FW_FILE="$2"
+
+	flash_eraseall ${FLASH_DEV}
+	rc=$?
+	if [ "$rc" -ne 0 ]; then
+		echo "U-Boot: erasing ${FLASH_DEV} failed"
+		exit $rc
+	fi
+	nandwrite -p ${FLASH_DEV} /tmp/${FW_FILE}
+	if [ "$rc" -ne 0 ]; then
+		echo "U-Boot: failed to write firmware to ${FLASH_DEV}"
+		exit $rc
+	fi
+}
+
+COMP_CCMP1=$(cat /proc/device-tree/compatible | grep "\bdigi,ccmp1\b")
+
 if [ "${UBOOT_ENC}" = "enc" ]; then
-	dump_dek
-	rc=$?
-	if [ "$rc" -ne 0 ]; then
-		echo "u-boot: DEK dump failed"
-		exit $rc
+	if [ "${COMP_CCMP1}" = "digi,ccmp1" ]; then
+		# Currently not supported for these platforms
+		echo "*** Encrypted U-boot currently not support for CCMP1 ***" 
+	else
+		dump_dek
+		rc=$?
+		if [ "$rc" -ne 0 ]; then
+			echo "u-boot: DEK dump failed"
+			exit $rc
+		fi
+		cat $UBOOT_FILE $OUTPUT_FILE > /tmp/$ENCRYPTED_UBOOT_DEK
+		rc=$?
+		if [ "$rc" -ne 0 ]; then
+			echo "u-boot: Merging DEK with U-Boot image failed (DEV/FILE = $UBOOT_FILE)"
+			exit $rc
+		fi
+		UBOOT_FILE="${ENCRYPTED_UBOOT_DEK}"
 	fi
-	cat $UBOOT_FILE $OUTPUT_FILE > /tmp/$ENCRYPTED_UBOOT_DEK
-	rc=$?
-	if [ "$rc" -ne 0 ]; then
-		echo "u-boot: Merging DEK with U-Boot image failed (DEV/FILE = $UBOOT_FILE)"
-		exit $rc
-	fi
-	UBOOT_FILE="${ENCRYPTED_UBOOT_DEK}"
 fi
 
-# install U-Boot onto the Nand Flash
-kobs-ng init -x -v /mnt/update/${UBOOT_FILE}
+if [ "${COMP_CCMP1}" = "digi,ccmp1" ]; then
+	# install TF-A onto fsbl1 partition
+	mtd_num="$(sed -ne "/fsbl1/s,^mtd\([0-9]\+\).*,\1,g;T;p" /proc/mtd)"
+	TFA_DEV="/dev/mtd${mtd_num}"
+	install_fwu ${TFA_DEV} ${TFA_FILE}
+	# install U-Boot onto FIP-a partition
+	mtd_num="$(sed -ne "/fip-a/s,^mtd\([0-9]\+\).*,\1,g;T;p" /proc/mtd)"
+	FIP_DEV="/dev/mtd${mtd_num}"
+	install_fwu ${FIP_DEV} ${UBOOT_FILE}
+else
+	# install U-Boot onto the Nand Flash
+	kobs-ng init -x -v /tmp/${UBOOT_FILE}
+fi
 rc=$?
 if [ "$rc" -ne 0 ]; then
 	echo "u-Boot: Updating U-Boot partition failed"
