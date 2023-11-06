@@ -7,15 +7,15 @@ LVGL_CONFIG_USE_DRM = "${@bb.utils.contains('PACKAGECONFIG', 'drm', '1', '0', d)
 LVGL_CONFIG_DRM_CARD ?= "/dev/dri/card0"
 
 LVGL_CONFIG_USE_EVDEV = "${@bb.utils.contains_any('PACKAGECONFIG', 'drm fbdev', '1', '0', d)}"
-LVGL_CONFIG_EVDEV_INPUT ?= "/dev/input/touchscreen"
+LVGL_CONFIG_EVDEV_INPUT ?= "/dev/input/mouse0"
 
 LVGL_CONFIG_USE_FBDEV = "${@bb.utils.contains('PACKAGECONFIG', 'fbdev', '1', '0', d)}"
 
 LVGL_CONFIG_USE_SDL = "${@bb.utils.contains('PACKAGECONFIG', 'sdl', '1', '0', d)}"
 
 LVGL_CONFIG_USE_WAYLAND = "${@bb.utils.contains('PACKAGECONFIG', 'wayland', '1', '0', d)}"
-LVGL_CONFIG_WAYLAND_HOR_RES ?= "480"
-LVGL_CONFIG_WAYLAND_VER_RES ?= "320"
+LVGL_CONFIG_HOR_RES ?= "800"
+LVGL_CONFIG_VER_RES ?= "480"
 
 ALLOW_EMPTY:${PN} = "1"
 
@@ -37,12 +37,10 @@ do_configure:append() {
         -e "s|\(^#  define USE_FBDEV \).*|#  define USE_FBDEV ${LVGL_CONFIG_USE_FBDEV}|g" \
         \
         -e "s|\(^# define USE_SDL \).*|#  define USE_SDL ${LVGL_CONFIG_USE_SDL}|g" \
-        -e "s|\(^#  define USE_SDL_GPU \).*|#  define USE_SDL_GPU 1|g" \
-        -e "s|\(^#  define SDL_DOUBLE_BUFFERED \).*|#  define SDL_DOUBLE_BUFFERED 1|g" \
         \
         -e "s|\(^#  define USE_WAYLAND \).*|#  define USE_WAYLAND ${LVGL_CONFIG_USE_WAYLAND}|g" \
-        -e "s|\(^ *# *define *WAYLAND_HOR_RES *\).*|\1${LVGL_CONFIG_WAYLAND_HOR_RES}|g" \
-        -e "s|\(^ *# *define *WAYLAND_VER_RES *\).*|\1${LVGL_CONFIG_WAYLAND_VER_RES}|g" \
+        -e "s|\(^#define *LV_DRV_DISP_HOR_RES *\).*|\1${LVGL_CONFIG_HOR_RES}|g" \
+        -e "s|\(^#define *LV_DRV_DISP_VER_RES *\).*|\1${LVGL_CONFIG_VER_RES}|g" \
         \
         -i "${S}/lv_drv_conf.h"
 }

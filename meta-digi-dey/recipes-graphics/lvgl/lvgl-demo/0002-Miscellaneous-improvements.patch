@@ -1,0 +1,87 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Wed, 8 Nov 2023 13:25:25 +0100
+Subject: [PATCH] Miscellaneous improvements:
+
+    * Change LV_COLOR_DEPTH from 32 to 16 to fix output on fbdev backend
+    * Increase DISP_BUF_SIZE to 8 MiB to improve performance on fbdev and drm
+      backends
+    * Create common macros for app dimensions
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ lv_conf.h     | 2 +-
+ lv_drv_conf.h | 6 ++++--
+ main.c        | 9 +++++----
+ 3 files changed, 10 insertions(+), 7 deletions(-)
+
+diff --git a/lv_conf.h b/lv_conf.h
+index 3137b1a..3f36997 100644
+--- a/lv_conf.h
++++ b/lv_conf.h
+@@ -30,7 +30,7 @@ extern uint32_t custom_tick_get(void);
+  *====================*/
+ 
+ /*Color depth: 1 (1 byte per pixel), 8 (RGB332), 16 (RGB565), 32 (ARGB8888)*/
+-#define LV_COLOR_DEPTH 32
++#define LV_COLOR_DEPTH 16
+ 
+ /*Swap the 2 bytes of RGB565 color. Useful if the display has an 8-bit interface (e.g. SPI)*/
+ #define LV_COLOR_16_SWAP 0
+diff --git a/lv_drv_conf.h b/lv_drv_conf.h
+index d40e703..554eba9 100644
+--- a/lv_drv_conf.h
++++ b/lv_drv_conf.h
+@@ -32,6 +32,8 @@
+ #define LV_DRV_DISP_INCLUDE         <stdint.h>           /*Dummy include by default*/
+ #define LV_DRV_DISP_CMD_DATA(val)  /*pin_x_set(val)*/    /*Set the command/data pin to 'val'*/
+ #define LV_DRV_DISP_RST(val)       /*pin_x_set(val)*/    /*Set the reset pin to 'val'*/
++#define LV_DRV_DISP_HOR_RES        800
++#define LV_DRV_DISP_VER_RES        480
+ 
+ /*---------
+  *  SPI
+@@ -95,8 +97,8 @@
+ #endif
+ 
+ #if USE_SDL || USE_SDL_GPU
+-#  define SDL_HOR_RES     480
+-#  define SDL_VER_RES     320
++#  define SDL_HOR_RES     LV_DRV_DISP_HOR_RES
++#  define SDL_VER_RES     LV_DRV_DISP_VER_RES
+ 
+ /* Scale window by this factor (useful when simulating small screens) */
+ #  define SDL_ZOOM        1
+diff --git a/main.c b/main.c
+index bb0248a..f3fb69e 100644
+--- a/main.c
++++ b/main.c
+@@ -18,7 +18,8 @@
+ 
+ static void backend_init(void);
+ 
+-#define DISP_BUF_SIZE (128 * 1024)
++/* Originally 128 KiB, increase to 8 MiB to improve performance */
++#define DISP_BUF_SIZE (8 * 1024 * 1024)
+ 
+ int main(void)
+ {
+@@ -45,7 +46,7 @@ static void backend_init(void)
+     lv_wayland_init();
+ 
+     /* Create a display */
+-    lv_disp_t * disp = lv_wayland_create_window(800, 480, "lvgl wayland demo", NULL /*close_cb*/);
++    lv_disp_t * disp = lv_wayland_create_window(LV_DRV_DISP_HOR_RES, LV_DRV_DISP_VER_RES, "lvgl wayland demo", NULL /*close_cb*/);
+ #elif USE_SDL
+     sdl_init();
+ 
+@@ -151,8 +152,8 @@ static void backend_init(void)
+     lv_disp_drv_init(&disp_drv);
+     disp_drv.draw_buf   = &disp_buf;
+     disp_drv.flush_cb   = fbdev_flush;
+-    disp_drv.hor_res    = 800;
+-    disp_drv.ver_res    = 480;
++    disp_drv.hor_res    = LV_DRV_DISP_HOR_RES;
++    disp_drv.ver_res    = LV_DRV_DISP_VER_RES;
+     lv_disp_drv_register(&disp_drv);
+ 
+     evdev_init();
