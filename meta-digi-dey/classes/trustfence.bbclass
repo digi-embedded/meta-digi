@@ -52,17 +52,10 @@ IMAGE_FEATURES += "dey-trustfence"
 
 # Enable FIT image build when Trustfence is enabled
 MACHINE_FEATURES += "${@oe.utils.conditional('TRUSTFENCE_FIT_IMG', '1', 'fit', '', d)}"
-# keys name in keydir (eg. "ubootfit.crt", "ubootfit.key")
-TRUSTFENCE_SIGN_KEYNAME ?= ""
-# Set variables required by poky to sign FIT image
-UBOOT_SIGN_KEYNAME ?= "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', '${TRUSTFENCE_SIGN_KEYNAME}', '', d)}"
-UBOOT_MKIMAGE_DTCOPTS ?= "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', '-I dts -O dtb -p 2000', '', d)}"
-# Enable FIT signing support
-UBOOT_SIGN_ENABLE ?= "${TRUSTFENCE_SIGN}"
-# Set path to FIT signing keys
-UBOOT_SIGN_KEYDIR ?= "${TRUSTFENCE_SIGN_KEYS_PATH}"
-# Create keys if not defined
-FIT_GENERATE_KEYS ?= "${@oe.utils.conditional('TRUSTFENCE_SIGN_KEYNAME', '', '1', '', d)}"
+# key to sign FIT config nodes
+TRUSTFENCE_FIT_CFG_SIGN_KEYNAME ?= "fitcfg"
+# key to sign FIT image nodes
+TRUSTFENCE_FIT_IMG_SIGN_KEYNAME ?= "fitimg"
 
 # Function to generate a PKI tree (with lock dir protection)
 GENPKI_LOCK_DIR = "${TRUSTFENCE_SIGN_KEYS_PATH}/.genpki.lock"
@@ -198,6 +191,21 @@ python () {
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_DEK_PATH="%s" ' % d.getVar("TRUSTFENCE_DEK_PATH"))
             if d.getVar("TRUSTFENCE_SIGN_MODE"):
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_SIGN_MODE="%s" ' % d.getVar("TRUSTFENCE_SIGN_MODE"))
+
+        # FIT-related variables
+        # Create keys if not defined
+        d.setVar("FIT_GENERATE_KEYS", "1")
+        # Sign individual images (prevents running unsigned images in FIT)
+        d.setVar("FIT_SIGN_INDIVIDUAL", "1")
+        # Set variables required by poky to sign FIT image
+        d.setVar("UBOOT_SIGN_KEYNAME", d.getVar("TRUSTFENCE_FIT_CFG_SIGN_KEYNAME"))
+        d.setVar("UBOOT_SIGN_IMG_KEYNAME", d.getVar("TRUSTFENCE_FIT_IMG_SIGN_KEYNAME"))
+        d.setVar("UBOOT_MKIMAGE_DTCOPTS", "-I dts -O dtb -p 2000")
+        # Enable FIT signing support
+        d.setVar("UBOOT_SIGN_ENABLE", d.getVar("TRUSTFENCE_SIGN"))
+        # Set path to FIT signing keys
+        d.setVar("UBOOT_SIGN_KEYDIR", "%s/fit" % d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"))
+
     else:
         # Disable signing artifacts if TRUSTFENCE_SIGN != 1
         d.setVar("TRUSTFENCE_SIGN_ARTIFACTS", "0")
