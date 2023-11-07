@@ -17,6 +17,47 @@
 BASE_INIT="$(readlink -f "@base_sbindir@/init")"
 BASE_INIT_ORIG="$(readlink -f "@base_sbindir@/init.orig")"
 INIT_SYSTEMD="@systemd_unitdir@/systemd"
+EMMCROOTFS="$(grep -qs 'root=PARTUUID.*' /proc/cmdline 2>/dev/null && echo 1)"
+
+get_active_system() {
+	if [ -z "${EMMCROOTFS}" ]; then
+		# For a read-only filesystem this will be /dev/ubiblock0_X
+		# For an ubifs filesystem this will be ubiX:rootfs_X
+		ACTIVE_SYSTEM="$(sed -e 's/^.*root=\([^ ]*\) .*$/\1/' /proc/cmdline 2>/dev/null)"
+		if ! echo "${ACTIVE_SYSTEM}" | grep -qs rootfs; then
+			# From /dev/ubiblock0_X to /dev/ubi0_X
+			ACTIVE_SYSTEM="/dev/ubi${ACTIVE_SYSTEM#/dev/ubiblock}"
+			#Volume ID:   5 (on ubi0)
+			#Type:        dynamic
+			#Alignment:   1
+			#Size:        1817 LEBs (230715392 bytes, 220.0 MiB)
+			#State:       OK
+			#Name:        rootfs_b
+			#Character device major/minor: 242:6
+			ACTIVE_SYSTEM="$(ubinfo "${ACTIVE_SYSTEM}" | sed -ne '/^Name/s,.* \([^[:blank:]]\+\)$,\1,g;T;p')"
+		fi
+	else
+		local MMCROOT_DEV
+
+		MMCROOT_DEV="$(stat -c%D /)"
+
+		for label in /dev/disk/by-partlabel/*; do
+			if [ "$(stat -c"%02t%02T" "$(realpath "${label}")")" = "${MMCROOT_DEV}" ]; then
+				ACTIVE_SYSTEM="$(basename "${label}")"
+				break
+			fi
+		done
+	fi
+
+	if [ -z "${ACTIVE_SYSTEM}" ]; then
+		echo "[ERROR] Unable to get active system."
+		return 1
+	fi
+
+	ACTIVE_SYSTEM="${ACTIVE_SYSTEM##*_}"
+
+	return 0
+}
 
 if [ "${SUBSYSTEM}" = "block" ]; then
 	PARTNAME="${ID_PART_ENTRY_NAME}"
@@ -29,7 +70,7 @@ elif [ "${SUBSYSTEM}" = "ubi" ]; then
 	# called the same as the MTD partition. Do nothing for UBI events if the
 	# MTD partition is called the same, as they are already handled by the
 	# "mtd" subsystem rule
-	result="$(grep '\"${PARTNAME}\"$' /proc/mtd)"
+	result="$(grep \"${PARTNAME}\"$ /proc/mtd)"
 	[ -n "${result}" ] && exit 0
 fi
 
@@ -48,14 +89,14 @@ if grep -qs "${MOUNTPOINT}" /proc/mounts; then
 	exit 0
 fi
 
-DUALBOOT_MODE="$(fw_printenv -n dualboot 2>/dev/null)"
-if [ "${DUALBOOT_MODE}" = "yes" ]; then
-	if [ "${PARTNAME}" = "linux_a" ] || [ "${PARTNAME}" = "linux_b" ]; then
-		ACTIVE_SYSTEM="$(fw_printenv -n active_system 2>/dev/null)"
-		if [ "${ACTIVE_SYSTEM}" != "${PARTNAME}" ]; then
-			logger "Skip mount partition '${PARTNAME}', because it is not the active system"
-			exit 0
-		fi
+# Get from proc/cmdline the active system "a" or "b"
+get_active_system || exit
+
+if [ "${PARTNAME}" = "linux_a" ] || [ "${PARTNAME}" = "linux_b" ]; then
+	PARTINDEX="${PARTNAME#linux_}"
+	if [ "${ACTIVE_SYSTEM}" != "${PARTINDEX}" ]; then
+		logger "Skip mount partition '${PARTNAME}', because it is not the active system"
+		exit 0
 	fi
 fi
 
