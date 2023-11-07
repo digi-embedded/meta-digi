@@ -18,8 +18,8 @@ SUBSYSTEM=="block", ENV{ID_PART_ENTRY_NAME}=="linux*|update*|data*", ACTION=="ad
 SUBSYSTEM=="mtd", ATTRS{name}=="linux*|update*|data*", ACTION=="add", RUN+="/etc/udev/scripts/mount_digiparts.sh", GOTO="automount_rules_end"
 SUBSYSTEM=="ubi", KERNEL=="ubi*", ATTRS{name}=="linux*|update*|data*", ACTION=="add", RUN+="/etc/udev/scripts/mount_digiparts.sh", GOTO="automount_rules_end"
 
-# Avoid mounting recovery partition
-SUBSYSTEM=="block", ENV{ID_PART_ENTRY_NAME}=="recovery*", ACTION=="add", GOTO="automount_rules_end"
+# Avoid mounting recovery partition & alternative rootfs partition
+SUBSYSTEM=="block", ENV{ID_PART_ENTRY_NAME}=="recovery*|rootfs*", ACTION=="add", GOTO="automount_rules_end"
 SUBSYSTEM=="mtd", ATTRS{name}=="recovery*", ACTION=="add", GOTO="automount_rules_end"
 
 # Media automounting
