@@ -77,8 +77,8 @@ get_active_system() {
 		MMCROOT_DEV="$(stat -c%D /)"
 
 		for label in /dev/disk/by-partlabel/*; do
-			if [ "$(stat -c"%02t%02T" $(realpath ${label}))" = "${MMCROOT_DEV}" ]; then
-				ACTIVE_SYSTEM="$(basename ${label})"
+			if [ "$(stat -c"%02t%02T" "$(realpath "${label}")")" = "${MMCROOT_DEV}" ]; then
+				ACTIVE_SYSTEM="$(basename "${label}")"
 				break
 			fi
 		done
@@ -89,7 +89,7 @@ get_active_system() {
 		return 1
 	fi
 
-	ACTIVE_SYSTEM="$(echo ${ACTIVE_SYSTEM} | cut -d_ -f2)"
+	ACTIVE_SYSTEM="${ACTIVE_SYSTEM##*_}"
 
 	return 0
 }
