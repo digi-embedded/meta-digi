@@ -41,6 +41,7 @@ UBOOT_ENV_RANGE ?= ""
 MACHINE_EXTRA_RDEPENDS += " \
     mtd-utils-ubifs \
 "
+MACHINE_EXTRA_RRECOMMENDS:remove = "kernel-imagebootfs"
 
 # Image FS types
 IMAGE_FSTYPES:remove = "ext4 tar.xz"

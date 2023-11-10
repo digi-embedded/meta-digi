@@ -5,7 +5,6 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 
 inherit kernel
 inherit ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'fsl-kernel-localversion', '', d)}
-require ${@oe.utils.conditional('DEY_SOC_VENDOR', 'STM', 'recipes-kernel/linux/linux-stm32mp.inc', '', d)}
 require ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'linux-virtualization.inc', '', d)}
 require ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'recipes-kernel/linux/linux-trustfence.inc', '', d)}
 
@@ -29,8 +28,6 @@ OVERLAYS_DTC_FLAGS = "-@"
 OVERLAYS_DTC_FLAGS:ccimx6ul = ""
 OVERLAYS_DTC_FLAGS:ccimx6 = ""
 KERNEL_DTC_FLAGS = "${OVERLAYS_DTC_FLAGS}"
-
-KERNEL_EXTRA_ARGS:stm32mpcommon += "LOADADDR=${ST_KERNEL_LOADADDR}"
 
 # A user can provide his own kernel 'defconfig' file by:
 # - setting the variable KERNEL_DEFCONFIG to a custom kernel configuration file
