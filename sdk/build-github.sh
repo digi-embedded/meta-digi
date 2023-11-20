@@ -125,7 +125,6 @@ done<<-_EOF_
 	ccimx8mm-dvk         dey-image-qt
 	ccimx8mn-dvk         dey-image-qt
 	ccimx8x-sbc-pro      dey-image-qt
-	ccimx8x-sbc-express  dey-image-qt
 	ccimx6qpsbc          dey-image-qt
 	ccimx6sbc            dey-image-qt
 	ccimx6ulsbc          dey-image-qt
