@@ -62,6 +62,8 @@ do_compile:ccimx8x() {
 			if [ -e "${BOOT_STAGING}/flash.bin" ]; then
 				cp ${BOOT_STAGING}/flash.bin ${S}/${BOOT_NAME}-${MACHINE}-${rev}.bin-${target}
 			fi
+			# Remove u-boot-atf-container.img so it gets generated in the next iteration
+			rm ${BOOT_STAGING}/u-boot-atf-container.img
 		done
 	done
 	unset UBOOT_CONFIG_EXTRA
