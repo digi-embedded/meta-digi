@@ -32,6 +32,9 @@ TARGET_CFLAGS += "-I${STAGING_INCDIR}/libdrm"
 # Change DRM card used for i.MX8-based platforms
 LVGL_CONFIG_DRM_CARD:mx8-generic-bsp = "/dev/dri/card1"
 
+LVGL_CONFIG_HOR_RES ?= "800"
+LVGL_CONFIG_VER_RES ?= "480"
+
 do_configure:prepend() {
 	if [ "${LVGL_CONFIG_USE_DRM}" -eq 1 ] ; then
 		# Add libdrm build dependency
@@ -47,6 +50,12 @@ do_configure:prepend() {
 		# Add wayland build dependencies
 		sed -i '/^target_link_libraries/ s@lvgl::drivers@& wayland-client wayland-cursor xkbcommon@' "${S}/CMakeLists.txt"
 	fi
+
+	# Configure the app's dimensions
+	sed -e "s|\(^#define *LV_DRV_DISP_HOR_RES *\).*|\1${LVGL_CONFIG_HOR_RES}|g" \
+	    -e "s|\(^#define *LV_DRV_DISP_VER_RES *\).*|\1${LVGL_CONFIG_VER_RES}|g" \
+	    \
+	    -i "${S}/lv_drv_conf.h"
 }
 
 do_install:append() {
