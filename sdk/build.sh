@@ -119,6 +119,7 @@ purge_sstate() {
 		packagegroup-dey-debug \
 		packagegroup-dey-examples \
 		packagegroup-dey-gstreamer \
+		packagegroup-dey-lvgl \
 		packagegroup-dey-network \
 		packagegroup-dey-qt \
 		packagegroup-dey-webkit \
@@ -171,19 +172,19 @@ while read -r _pl _tgt; do
 	# the fly with underscores.
 	eval "${_pl//-/_}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
-	ccimx8mm-dvk         dey-image-qt,dey-image-crank,dey-image-webkit
-	ccimx8mn-dvk         dey-image-qt,dey-image-crank,dey-image-webkit
-	ccimx8x-sbc-pro      dey-image-qt,dey-image-crank,dey-image-webkit
+	ccimx8mm-dvk         dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
+	ccimx8mn-dvk         dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
+	ccimx8x-sbc-pro      dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
 	ccimx8x-sbc-express  dey-image-qt
-	ccimx6qpsbc          dey-image-qt,dey-image-crank,dey-image-webkit
-	ccimx6sbc            dey-image-qt,dey-image-crank,dey-image-webkit
-	ccimx6ulsbc          core-image-base,dey-image-qt,dey-image-crank
+	ccimx6qpsbc          dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
+	ccimx6sbc            dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
+	ccimx6ulsbc          core-image-base,dey-image-qt,dey-image-crank,dey-image-lvgl
 	ccimx6ulstarter      core-image-base
 	ccimx6ulsom          dey-image-mft-module-min
 	ccimx6ulrftest       dey-image-mft-module-rf
-	ccmp15-dvk           dey-image-qt,dey-image-crank,dey-image-webkit
+	ccmp15-dvk           dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
 	ccmp13-dvk           core-image-base
-	ccimx93-dvk          dey-image-qt
+	ccimx93-dvk          dey-image-qt,dey-image-lvgl
 _EOF_
 
 # Set default values if not provided by Jenkins

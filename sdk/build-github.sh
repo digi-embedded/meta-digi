@@ -97,6 +97,7 @@ purge_sstate() {
 		packagegroup-dey-debug \
 		packagegroup-dey-examples \
 		packagegroup-dey-gstreamer \
+		packagegroup-dey-lvgl \
 		packagegroup-dey-network \
 		packagegroup-dey-qt \
 		packagegroup-dey-webkit \
