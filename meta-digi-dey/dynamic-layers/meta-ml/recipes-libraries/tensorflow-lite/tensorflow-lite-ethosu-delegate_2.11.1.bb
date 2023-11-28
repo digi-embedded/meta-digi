@@ -8,8 +8,8 @@ DEPENDS = "tensorflow-lite ethos-u-driver-stack"
 require tensorflow-lite-${PV}.inc
 
 TENSORFLOW_LITE_ETHOSU_DELEGATE_SRC ?= "git://github.com/nxp-imx/tflite-ethosu-delegate-imx.git;protocol=https" 
-SRCBRANCH_ethosu = "lf-6.1.1_1.0.0"
-SRCREV_ethosu = "4bd28d3e64d26f4d5b5ee358036b2d06f3322a57"
+SRCBRANCH_ethosu = "lf-6.1.36_2.1.0"
+SRCREV_ethosu = "0f8670a7c25ee2b2022a471ee50d394429ecf716"
 
 SRCREV_FORMAT = "ethosu_tf"
 
@@ -25,7 +25,7 @@ EXTRA_OECMAKE = "-DCMAKE_SYSROOT=${PKG_CONFIG_SYSROOT_DIR}"
 EXTRA_OECMAKE += " \
      -DFETCHCONTENT_FULLY_DISCONNECTED=OFF \
      -DFETCHCONTENT_SOURCE_DIR_TENSORFLOW=${WORKDIR}/tfgit \
-     -DTFLITE_LIB_LOC=${STAGING_DIR_HOST}/usr/lib/libtensorflow-lite.so \
+     -DTFLITE_LIB_LOC=${STAGING_DIR_HOST}${libdir}/libtensorflow-lite.so \
      ${S} \
 "
 

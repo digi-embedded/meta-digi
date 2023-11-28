@@ -1,15 +1,15 @@
-# Copyright 2022 NXP
+# Copyright 2023 NXP
 DESCRIPTION = "The vela tool is used to compile a TensorFlow Lite for \
 Microcontrollers neural network model into an optimised version that \
 can run on an embedded system containing an Arm Ethos-U NPU"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=e3fc50a88d0a364313df4b21ef20c29e"
-DEPENDS = "python3-pip-native python3-wheel-native flatbuffers python3-numpy python3-lxml"
+DEPENDS = "python3-pip-native python3-wheel-native flatbuffers python3-numpy python3-lxml python3-numpy-native"
 
 SRC_URI = "${VELA_SRC};branch=${SRCBRANCH}"
 VELA_SRC ?= "git://github.com/nxp-imx/ethos-u-vela.git;protocol=https"
-SRCBRANCH = "lf-6.1.1_1.0.0"
-SRCREV = "8b138a2e6880e31bd199764db9c5177c46bd5579" 
+SRCBRANCH = "lf-6.1.36_2.1.0"
+SRCREV = "2647a977643907b2cf2249b917549133302aaa8e"
 
 S = "${WORKDIR}/git"
 
@@ -23,6 +23,6 @@ do_compile:prepend() {
     export https_proxy=${https_proxy}
 }
 
-RDEPENDS:${PN} += "flatbuffers python3-numpy python3-lxml"
+RDEPENDS:${PN} += "python3-flatbuffers python3-numpy python3-lxml"
 
 COMPATIBLE_MACHINE = "(mx93-nxp-bsp)"
