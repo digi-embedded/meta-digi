@@ -12,12 +12,22 @@ SRC_URI += " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'file://systemd.cfg', '', d)} \
     ${@bb.utils.contains('STORAGE_MEDIA', 'mtd', 'file://mtd.cfg', '', d)} \
     ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'file://signed_images.cfg', '', d)} \
+    file://swupdate.cfg \
 "
 
 do_install:append() {
 	# Copy the 'progress' binary.
 	install -d ${D}${bindir}/
 	install -m 0755 tools/swupdate-progress ${D}${bindir}/progress
+
+	# Copy config file
+	install -d ${D}${sysconfdir}/
+	install -m 0755 ${WORKDIR}/swupdate.cfg ${D}${sysconfdir}
+
+	# Add public-key-file setting to config file if TrustFence is enabled
+	if ${@oe.utils.conditional('TRUSTFENCE_ENABLED', '1', 'true', 'false', d)}; then
+		sed -i "s,\(^\s*\)#public-key-file,\1public-key-file = \"${sysconfdir}/ssl/certs/key.pub\",g" ${D}${sysconfdir}/swupdate.cfg
+	fi
 }
 
 pkg_postinst_ontarget:${PN}() {

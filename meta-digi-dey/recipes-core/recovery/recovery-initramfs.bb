@@ -14,7 +14,6 @@ DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', \
 
 SRC_URI = " \
     file://recovery-initramfs-init \
-    file://swupdate.cfg \
     file://automount_block.sh \
     file://automount_mtd.sh \
     file://automount_ubi.sh \
@@ -27,7 +26,6 @@ S = "${WORKDIR}"
 do_install() {
 	install -d ${D}${sysconfdir}
 	install -m 0755 ${WORKDIR}/recovery-initramfs-init ${D}/init
-	install -m 0644 ${WORKDIR}/swupdate.cfg ${D}${sysconfdir}
 	if [ "${STORAGE_MEDIA}" = "mmc" ]; then
 		install -m 0755 ${WORKDIR}/mount_cryptrootfs.sh ${D}${sysconfdir}
 	fi
