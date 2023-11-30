@@ -192,19 +192,21 @@ python () {
             if d.getVar("TRUSTFENCE_SIGN_MODE"):
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_SIGN_MODE="%s" ' % d.getVar("TRUSTFENCE_SIGN_MODE"))
 
-        # FIT-related variables
-        # Create keys if not defined
-        d.setVar("FIT_GENERATE_KEYS", "1")
-        # Sign individual images (prevents running unsigned images in FIT)
-        d.setVar("FIT_SIGN_INDIVIDUAL", "1")
-        # Set variables required by poky to sign FIT image
-        d.setVar("UBOOT_SIGN_KEYNAME", d.getVar("TRUSTFENCE_FIT_CFG_SIGN_KEYNAME"))
-        d.setVar("UBOOT_SIGN_IMG_KEYNAME", d.getVar("TRUSTFENCE_FIT_IMG_SIGN_KEYNAME"))
-        d.setVar("UBOOT_MKIMAGE_DTCOPTS", "-I dts -O dtb -p 2000")
-        # Enable FIT signing support
-        d.setVar("UBOOT_SIGN_ENABLE", d.getVar("TRUSTFENCE_SIGN"))
-        # Set path to FIT signing keys
-        d.setVar("UBOOT_SIGN_KEYDIR", "%s/fit" % d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"))
+
+        if (d.getVar("TRUSTFENCE_FIT_IMG") == "1"):
+            # FIT-related variables
+            # Create keys if not defined
+            d.setVar("FIT_GENERATE_KEYS", "1")
+            # Sign individual images (prevents running unsigned images in FIT)
+            d.setVar("FIT_SIGN_INDIVIDUAL", "1")
+            # Set variables required by poky to sign FIT image
+            d.setVar("UBOOT_SIGN_KEYNAME", d.getVar("TRUSTFENCE_FIT_CFG_SIGN_KEYNAME"))
+            d.setVar("UBOOT_SIGN_IMG_KEYNAME", d.getVar("TRUSTFENCE_FIT_IMG_SIGN_KEYNAME"))
+            d.setVar("UBOOT_MKIMAGE_DTCOPTS", "-I dts -O dtb -p 2000")
+            # Enable FIT signing support
+            d.setVar("UBOOT_SIGN_ENABLE", d.getVar("TRUSTFENCE_SIGN"))
+            # Set path to FIT signing keys
+            d.setVar("UBOOT_SIGN_KEYDIR", "%s/fit" % d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"))
 
     else:
         # Disable signing artifacts if TRUSTFENCE_SIGN != 1
