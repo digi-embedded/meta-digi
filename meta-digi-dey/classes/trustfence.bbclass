@@ -9,6 +9,8 @@
 # * Disabled console
 #
 
+TRUSTFENCE_ENABLED = "1"
+
 # Default secure console configuration
 TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 
