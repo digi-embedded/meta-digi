@@ -69,3 +69,7 @@ UBOOT_ENV_SIZE ?= "0x20000"
 # the U-Boot environment can take up (if undefined, it will take up all the
 # available space in the environment partition)
 UBOOT_ENV_RANGE ?= ""
+
+# Partitions to blacklist for swupdate:
+# bootloader, environment, safe
+SWUPDATE_MTD_BLACKLIST = "0 1 2"

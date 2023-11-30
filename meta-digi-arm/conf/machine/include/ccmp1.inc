@@ -76,3 +76,7 @@ do_create_flashlayout_config[noexec] = "1"
 
 # Include boot script into the FIT image
 UBOOT_ENV = "${@bb.utils.contains('TRUSTFENCE_FIT_IMG', '1', 'boot', '', d)}"
+
+# Partitions to blacklist for swupdate:
+# fsbl1, fsbl2, metadata1, metadata2, fip-a, fip-b
+SWUPDATE_MTD_BLACKLIST = "0 1 2 3 4 5"
