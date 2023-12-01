@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2020, Digi International Inc.
+# Copyright (C) 2016-2023, Digi International Inc.
 
 DESCRIPTION = "Recovery initramfs image"
 LICENSE = "MIT"
@@ -13,6 +13,7 @@ PACKAGE_INSTALL = " \
     swupdate \
     trustfence-tool \
     wipe \
+    ${@bb.utils.contains('DEY_SOC_VENDOR', 'NXP', bb.utils.contains('STORAGE_MEDIA', 'mtd', 'imx-kobs', '', d), '', d)} \
 "
 
 # Do not pollute the initrd image with rootfs features
