@@ -120,12 +120,12 @@ echo "Determining image files to use..."
 
 # Determine ATF file to program
 if [ -z "${INSTALL_ATF_FILENAME}" ]; then
-	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-nand.stm32"
+	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-nand##SIGNED_TFA##.stm32"
 fi
 
 # Determine FIP file to program
 if [ -z "${INSTALL_FIP_FILENAME}" ]; then
-	INSTALL_FIP_FILENAME="fip-##MACHINE##-optee.bin"
+	INSTALL_FIP_FILENAME="fip-##MACHINE##-optee##SIGNED##.bin"
 fi
 
 # Determine linux, recovery, and rootfs image filenames to update

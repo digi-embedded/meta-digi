@@ -39,7 +39,10 @@ show_usage()
 	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
 	echo "                          'dey-image-webkit', 'core-image-base'..."
 	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
+	echo "   -k <dek-blob-file>     Update includes dek blob file."
+	echo "                          (requires -t)."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
+	echo "   -t                     Install Trustfence artifacts."
 	echo "   -u <u-boot-filename>   U-Boot filename."
 	echo "                          Auto-determined by variant if not provided."
 	exit 2
@@ -53,6 +56,7 @@ show_usage()
 #   Description:
 #	- downloads image to RAM
 #	- runs 'update' command from RAM
+#	4. dek blob file when updating an encrypted u-boot
 part_update()
 {
 	echo "\033[36m"
@@ -70,7 +74,19 @@ part_update()
 		ERASE="-e"
 	fi
 	uuu fb: download -f "${2}"
-	uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${fastboot_bytes} ${ERASE}
+	if [ "${TRUSTFENCE}" = "true" ] && [ "${1}" = "uboot" ]; then
+		if [ -n "${DEK_BLOB_FILE}" ]; then
+			uuu fb: ucmd setenv uboot_size $filesize
+			uuu fb: ucmd setenv fastboot_buffer $initrd_addr
+			uuu fb: download -f "${4}"
+			uuu fb: ucmd setenv dek_size $filesize
+			uuu "fb[-t ${3}]:" ucmd trustfence update ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
+		else
+			uuu "fb[-t ${3}]:" ucmd trustfence update ram \${fastboot_buffer} \${fastboot_bytes}
+		fi
+	else
+		uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${fastboot_bytes} ${ERASE}
+	fi
 }
 
 clear
@@ -82,14 +98,17 @@ echo "############################################################"
 # -b, -d, -n (booleans)
 # -i <image-name>
 # -u <u-boot-filename>
-while getopts 'bdhi:nu:' c
+# -k <dek-blob-name>
+while getopts 'bdhi:k:ntu:' c
 do
 	case $c in
 	b) BOOTCOUNT=true ;;
 	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
+	k) DEK_BLOB_FILE=${OPTARG} ;;
 	n) NOWAIT=true ;;
+	t) TRUSTFENCE=true ;;
 	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
 	esac
 done
@@ -119,7 +138,7 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 	if [ -n "$module_variant" ]; then
 		if [ "$module_variant" = "0x08" ] || \
 		   [ "$module_variant" = "0x0a" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##512MB.imx"
+			INSTALL_UBOOT_FILENAME="u-boot-##SIGNED##-##MACHINE##512MB.imx"
 		elif [ "$module_variant" = "0x04" ] || \
 		     [ "$module_variant" = "0x05" ] || \
 		     [ "$module_variant" = "0x07" ]; then
@@ -260,7 +279,7 @@ uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 uuu fb: ucmd setenv forced_update 1
 
 # Update U-Boot
-part_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000
+part_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000 "${DEK_BLOB_FILE}"
 
 # Set 'bootcmd' for the second part of the script that will
 #  - Reset environment to defaults

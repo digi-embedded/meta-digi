@@ -39,7 +39,10 @@ show_usage()
 	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
 	echo "                          'dey-image-webkit', 'core-image-base'..."
 	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
+	echo "   -k <dek-blob-file>     Update includes dek blob file."
+	echo "                          (requires -t)."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
+	echo "   -t                     Install Trustfence artifacts."
 	echo "   -u <u-boot-filename>   U-Boot filename."
 	echo "                          Auto-determined by variant if not provided."
 	exit 2
@@ -49,6 +52,7 @@ show_usage()
 #   Params:
 #	1. partition
 #	2. file
+#	3. dek blob file when updating an encrypted bootloader
 part_update()
 {
 	echo "\033[36m"
@@ -57,10 +61,23 @@ part_update()
 	echo "====================================================================================="
 	echo "\033[0m"
 
-	if [ "${1}" = "bootloader" ]; then
-		uuu fb: flash "${1}" "${2}"
+	if [ "${TRUSTFENCE}" = "true" ] && [ "${1}" = "bootloader" ]; then
+		uuu fb: download -f "${2}"
+		if [ -n "${DEK_BLOB_FILE}" ]; then
+			uuu fb: ucmd setenv uboot_size $filesize
+			uuu fb: ucmd setenv fastboot_buffer $initrd_addr
+			uuu fb: download -f "${3}"
+			uuu fb: ucmd setenv dek_size $filesize
+			uuu fb: ucmd trustfence update "${1}" ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
+		else
+			uuu fb: ucmd trustfence update "${1}" ram \${fastboot_buffer} \${fastboot_bytes}
+		fi
 	else
-		uuu fb: flash -raw2sparse "${1}" "${2}"
+		if [ "${1}" = "bootloader" ]; then
+			uuu fb: flash "${1}" "${2}"
+		else
+			uuu fb: flash -raw2sparse "${1}" "${2}"
+		fi
 	fi
 }
 
@@ -73,14 +90,17 @@ echo "############################################################"
 # -b, -d, -n (booleans)
 # -i <image-name>
 # -u <u-boot-filename>
-while getopts 'bdhi:nu:' c
+# -k <dek-blob-name>
+while getopts 'bdhi:k:ntu:' c
 do
 	case $c in
 	b) BOOTCOUNT=true ;;
 	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
+	k) DEK_BLOB_FILE=${OPTARG} ;;
 	n) NOWAIT=true ;;
+	t) TRUSTFENCE=true ;;
 	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
 	esac
 done
@@ -262,7 +282,7 @@ fi
 uuu fb: ucmd setenv forced_update 1
 
 # Update U-Boot
-part_update "bootloader" "${INSTALL_UBOOT_FILENAME}"
+part_update "bootloader" "${INSTALL_UBOOT_FILENAME}" "${DEK_BLOB_FILE}"
 
 # Set MMC to boot from BOOT1 partition
 uuu fb: ucmd mmc partconf 0 1 1 1
