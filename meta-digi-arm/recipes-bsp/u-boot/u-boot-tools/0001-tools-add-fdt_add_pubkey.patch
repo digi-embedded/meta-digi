@@ -1,0 +1,233 @@
+From: Roman Kopytin <Roman.Kopytin@kaspersky.com>
+Date: Wed, 8 Mar 2023 01:13:41 +0000
+Subject: [PATCH] tools: add fdt_add_pubkey
+
+Having to use the -K option to mkimage to populate U-Boot's .dtb with the
+public key while signing the kernel FIT image is often a little
+awkward. In particular, when using a meta-build system such as
+bitbake/Yocto, having the tasks of the kernel and U-Boot recipes
+intertwined, modifying deployed artifacts and rebuilding U-Boot with
+an updated .dtb is quite cumbersome. Also, in some scenarios one may
+wish to build U-Boot complete with the public key(s) embedded in the
+.dtb without the corresponding private keys being present on the same
+build host.
+
+So this adds a simple tool that allows one to disentangle the kernel
+and U-Boot builds, by simply copy-pasting just enough of the mkimage
+code to allow one to add a public key to a .dtb. When using mkimage,
+some of the information is taken from the .its used to build the
+kernel (algorithm and key name), so that of course needs to be
+supplied on the command line.
+
+Signed-off-by: Roman Kopytin <Roman.Kopytin@kaspersky.com>
+Signed-off-by: Ivan Mikhaylov <fr0st61te@gmail.com>
+Signed-off-by: Jan Kiszka <jan.kiszka@siemens.com>
+Cc: Rasmus Villemoes <rasmus.villemoes@prevas.dk>
+
+---
+ tools/.gitignore       |   1 +
+ tools/Makefile         |   3 +
+ tools/fdt_add_pubkey.c | 138 +++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 142 insertions(+)
+ create mode 100644 tools/fdt_add_pubkey.c
+
+diff --git a/tools/.gitignore b/tools/.gitignore
+index a88453f64d..f312b760e4 100644
+--- a/tools/.gitignore
++++ b/tools/.gitignore
+@@ -4,10 +4,11 @@
+ /bmp_logo
+ /common/
+ /dumpimage
+ /easylogo/easylogo
+ /envcrc
++/fdt_add_pubkey
+ /fdtgrep
+ /file2include
+ /fit_check_sign
+ /fit_info
+ /gdb/gdbcont
+diff --git a/tools/Makefile b/tools/Makefile
+index 1763f44cac..ce7a49ff61 100644
+--- a/tools/Makefile
++++ b/tools/Makefile
+@@ -71,10 +71,11 @@ HOSTCFLAGS_xway-swap-bytes.o := -pedantic
+ hostprogs-y += mkenvimage
+ mkenvimage-objs := mkenvimage.o os_support.o lib/crc32.o
+ 
+ hostprogs-y += dumpimage mkimage
+ hostprogs-$(CONFIG_TOOLS_LIBCRYPTO) += fit_info fit_check_sign
++hostprogs-$(CONFIG_TOOLS_LIBCRYPTO) += fdt_add_pubkey
+ 
+ hostprogs-$(CONFIG_CMD_BOOTEFI_SELFTEST) += file2include
+ 
+ FIT_OBJS-y := fit_common.o fit_image.o image-host.o boot/image-fit.o
+ FIT_SIG_OBJS-$(CONFIG_TOOLS_LIBCRYPTO) := image-sig-host.o boot/image-fit-sig.o
+@@ -152,10 +153,11 @@ dumpimage-mkimage-objs := aisimage.o \
+ 
+ dumpimage-objs := $(dumpimage-mkimage-objs) dumpimage.o
+ mkimage-objs   := $(dumpimage-mkimage-objs) mkimage.o
+ fit_info-objs   := $(dumpimage-mkimage-objs) fit_info.o
+ fit_check_sign-objs   := $(dumpimage-mkimage-objs) fit_check_sign.o
++fdt_add_pubkey-objs   := $(dumpimage-mkimage-objs) fdt_add_pubkey.o
+ file2include-objs := file2include.o
+ 
+ ifneq ($(CONFIG_MX23)$(CONFIG_MX28)$(CONFIG_TOOLS_LIBCRYPTO),)
+ # Add CONFIG_MXS into host CFLAGS, so we can check whether or not register
+ # the mxsimage support within tools/mxsimage.c .
+@@ -189,10 +191,11 @@ endif
+ HOSTCFLAGS_fit_image.o += -DMKIMAGE_DTC=\"$(CONFIG_MKIMAGE_DTC_PATH)\"
+ 
+ HOSTLDLIBS_dumpimage := $(HOSTLDLIBS_mkimage)
+ HOSTLDLIBS_fit_info := $(HOSTLDLIBS_mkimage)
+ HOSTLDLIBS_fit_check_sign := $(HOSTLDLIBS_mkimage)
++HOSTLDLIBS_fdt_add_pubkey := $(HOSTLDLIBS_mkimage)
+ 
+ hostprogs-$(CONFIG_EXYNOS5250) += mkexynosspl
+ hostprogs-$(CONFIG_EXYNOS5420) += mkexynosspl
+ HOSTCFLAGS_mkexynosspl.o := -pedantic
+ 
+diff --git a/tools/fdt_add_pubkey.c b/tools/fdt_add_pubkey.c
+new file mode 100644
+index 0000000000..999f5a7e83
+--- /dev/null
++++ b/tools/fdt_add_pubkey.c
+@@ -0,0 +1,138 @@
++// SPDX-License-Identifier: GPL-2.0+
++#include <image.h>
++#include "fit_common.h"
++
++static const char *cmdname;
++
++static const char *algo_name = "sha1,rsa2048"; /* -a <algo> */
++static const char *keydir = "."; /* -k <keydir> */
++static const char *keyname = "key"; /* -n <keyname> */
++static const char *require_keys; /* -r <conf|image> */
++static const char *keydest; /* argv[n] */
++
++static void print_usage(const char *msg)
++{
++	fprintf(stderr, "Error: %s\n", msg);
++	fprintf(stderr, "Usage: %s [-a <algo>] [-k <keydir>] [-n <keyname>] [-r <conf|image>]"
++			" <fdt blob>\n", cmdname);
++	fprintf(stderr, "Help information: %s [-h]\n", cmdname);
++	exit(EXIT_FAILURE);
++}
++
++static void print_help(void)
++{
++	fprintf(stderr, "Options:\n"
++		"\t-a <algo>       Cryptographic algorithm. Optional parameter, default value: sha1,rsa2048\n"
++		"\t-k <keydir>     Directory with public key. Optional parameter, default value: .\n"
++		"\t-n <keyname>    Public key name. Optional parameter, default value: key\n"
++		"\t-r <conf|image> Required: If present this indicates that the key must be verified for the image / configuration to be considered valid.\n"
++		"\t<fdt blob>      FDT blob file for adding of the public key. Required parameter.\n");
++	exit(EXIT_FAILURE);
++}
++
++static void process_args(int argc, char *argv[])
++{
++	int opt;
++
++	while ((opt = getopt(argc, argv, "a:k:n:r:h")) != -1) {
++		switch (opt) {
++		case 'k':
++			keydir = optarg;
++			break;
++		case 'a':
++			algo_name = optarg;
++			break;
++		case 'n':
++			keyname = optarg;
++			break;
++		case 'r':
++			require_keys = optarg;
++			break;
++		case 'h':
++			print_help();
++		default:
++			print_usage("Invalid option");
++		}
++	}
++	/* The last parameter is expected to be the .dtb to add the public key to */
++	if (optind < argc)
++		keydest = argv[optind];
++
++	if (!keydest)
++		print_usage("Missing dtb file to update");
++}
++
++static void reset_info(struct image_sign_info *info)
++{
++	if (!info)
++		fprintf(stderr, "Error: info is NULL in %s\n", __func__);
++
++	memset(info, 0, sizeof(struct image_sign_info));
++
++	info->keydir = keydir;
++	info->keyname = keyname;
++	info->name = algo_name;
++	info->require_keys = require_keys;
++	info->crypto = image_get_crypto_algo(algo_name);
++
++	if (!info->crypto) {
++		fprintf(stderr, "Unsupported signature algorithm '%s'\n",
++			algo_name);
++		exit(EXIT_FAILURE);
++	}
++}
++
++static int add_pubkey(struct image_sign_info *info)
++{
++	int destfd = -1, ret;
++	void *dest_blob = NULL;
++	struct stat dest_sbuf;
++	size_t size_inc = 0;
++
++	if (!info)
++		fprintf(stderr, "Error: info is NULL in %s\n", __func__);
++
++	do {
++		if (destfd >= 0) {
++			munmap(dest_blob, dest_sbuf.st_size);
++			close(destfd);
++
++			fprintf(stderr, ".dtb too small, increasing size by 1024 bytes\n");
++			size_inc = 1024;
++		}
++
++		destfd = mmap_fdt(cmdname, keydest, size_inc, &dest_blob,
++				  &dest_sbuf, false, false);
++		if (destfd < 0)
++			exit(EXIT_FAILURE);
++
++		ret = info->crypto->add_verify_data(info, dest_blob);
++		if (ret == -ENOSPC)
++			continue;
++		else if (ret < 0)
++			break;
++	} while (ret == -ENOSPC);
++
++	return ret;
++}
++
++int main(int argc, char *argv[])
++{
++	struct image_sign_info info;
++	int ret;
++
++	cmdname = argv[0];
++
++	process_args(argc, argv);
++	reset_info(&info);
++	ret = add_pubkey(&info);
++
++	if (ret < 0) {
++		fprintf(stderr, "%s: Cannot add public key to FIT blob: %s\n",
++			cmdname, strerror(ret));
++		exit(EXIT_FAILURE);
++	}
++
++	exit(EXIT_SUCCESS);
++}
++

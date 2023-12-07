@@ -251,15 +251,17 @@ do_deploy:append:ccmp1() {
 	install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin
 
 	# Append signature to u-boot DT
-	if [ "x${UBOOT_SIGN_ENABLE}" = "x1" ] ; then
-		# get name of u-boot devicetree without signature
-		ubootdevicetree=`ls -1 ${DEPLOYDIR}/${BOOT_TOOLS}/*.dtb | head -n 1`
-		namewithoutsignature=`echo $ubootdevicetree | sed "s/\.dtb/-without-signature.dtb/g"`
-		namewithsignature=`echo $ubootdevicetree | sed "s/\.dtb/-with-signature.dtb/g"`
-		mv $ubootdevicetree $namewithoutsignature
-		# get name of U-Boot device tree from DEPLOY_DIR
-		nameonkernel="${DEPLOY_DIR_IMAGE}/u-boot-${MACHINE}*.dtb"
-		cp $nameonkernel $namewithsignature
-		cp $nameonkernel $ubootdevicetree
+	if [ "x${UBOOT_SIGN_ENABLE}" = "x1" ] && [ -n "${UBOOT_DEVICETREE}" ] ; then
+		for devicetree in ${UBOOT_DEVICETREE}; do
+			# get name of u-boot devicetree without signature
+			ubootdevicetree="${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${devicetree}.dtb"
+			namewithoutsignature=`echo $ubootdevicetree | sed "s/\.dtb/-without-signature.dtb/g"`
+			namewithsignature=`echo $ubootdevicetree | sed "s/\.dtb/-with-signature.dtb/g"`
+			mv $ubootdevicetree $namewithoutsignature
+			# get name of U-Boot device tree from DEPLOY_DIR
+			nameonkernel="${DEPLOY_DIR_IMAGE}/${FIP_UBOOT_DTB}-${devicetree}-with-signature.dtb"
+			cp $nameonkernel $namewithsignature
+			cp $nameonkernel $ubootdevicetree
+		done
 	fi
 }

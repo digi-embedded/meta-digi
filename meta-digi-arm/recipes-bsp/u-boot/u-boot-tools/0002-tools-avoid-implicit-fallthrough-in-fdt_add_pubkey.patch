@@ -1,0 +1,48 @@
+From: Heinrich Schuchardt <heinrich.schuchardt@canonical.com>
+Date: Sat, 1 Apr 2023 08:09:34 +0200
+Subject: [PATCH] tools: avoid implicit fallthrough in fdt_add_pubkey
+
+When building with -Wimplicit-fallthrough we get a warning
+
+    tools/fdt_add_pubkey.c:52:25: warning:
+    this statement may fall through [-Wimplicit-fallthrough=]
+       52 |                         print_help();
+          |
+
+Explicitly declare which functions don't return.
+
+Fixes: 30238e99619c ("tools: add fdt_add_pubkey")
+Signed-off-by: Heinrich Schuchardt <heinrich.schuchardt@canonical.com>
+Reviewed-by: Simon Glass <sjg@chromium.org>
+
+---
+ tools/fdt_add_pubkey.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tools/fdt_add_pubkey.c b/tools/fdt_add_pubkey.c
+index 999f5a7e83..5582d7a8ef 100644
+--- a/tools/fdt_add_pubkey.c
++++ b/tools/fdt_add_pubkey.c
+@@ -8,20 +8,20 @@ static const char *algo_name = "sha1,rsa2048"; /* -a <algo> */
+ static const char *keydir = "."; /* -k <keydir> */
+ static const char *keyname = "key"; /* -n <keyname> */
+ static const char *require_keys; /* -r <conf|image> */
+ static const char *keydest; /* argv[n] */
+ 
+-static void print_usage(const char *msg)
++static void __attribute__((__noreturn__)) print_usage(const char *msg)
+ {
+ 	fprintf(stderr, "Error: %s\n", msg);
+ 	fprintf(stderr, "Usage: %s [-a <algo>] [-k <keydir>] [-n <keyname>] [-r <conf|image>]"
+ 			" <fdt blob>\n", cmdname);
+ 	fprintf(stderr, "Help information: %s [-h]\n", cmdname);
+ 	exit(EXIT_FAILURE);
+ }
+ 
+-static void print_help(void)
++static void __attribute__((__noreturn__)) print_help(void)
+ {
+ 	fprintf(stderr, "Options:\n"
+ 		"\t-a <algo>       Cryptographic algorithm. Optional parameter, default value: sha1,rsa2048\n"
+ 		"\t-k <keydir>     Directory with public key. Optional parameter, default value: .\n"
+ 		"\t-n <keyname>    Public key name. Optional parameter, default value: key\n"
