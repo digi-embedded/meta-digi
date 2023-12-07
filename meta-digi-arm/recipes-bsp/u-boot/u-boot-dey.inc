@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2023 Digi International
+# Copyright (C) 2018-2024 Digi International
 
 require recipes-bsp/u-boot/u-boot.inc
 
@@ -188,10 +188,35 @@ sign_uboot() {
 	fi
 }
 
+# -----------------------------------------------------------------------------
+# Append compile to handle specific device tree compilation
+#
+do_compile:append:ccmp1() {
+	if [ -n "${UBOOT_DEVICETREE}" ]; then
+		unset i j
+		for config in ${UBOOT_MACHINE}; do
+			i=$(expr $i + 1);
+			for devicetree in ${UBOOT_DEVICETREE}; do
+				# Cleanup previous build artifact
+				[ -f "${B}/${config}/dts/dt.dtb" ] && rm "${B}/${config}/dts/dt.dtb"
+				# Build target for specific device tree
+				oe_runmake -C ${S} O=${B}/${config} DEVICE_TREE=${devicetree} DEVICE_TREE_EXT=${devicetree}.dtb
+				# Install specific binary
+				for binary in ${UBOOT_BINARIES}; do
+					j=$(expr $j + 1);
+					if [ $j -eq $i ]; then
+						binarysuffix=$(echo ${binary} | cut -d'.' -f2)
+						install -m 644 ${B}/${config}/${binary} ${B}/${config}/u-boot-${devicetree}.${binarysuffix}
+					fi
+				done
+				unset j
+			done
+		done
+	fi
+}
+
 BOOT_TOOLS = "imx-boot-tools"
 BOOT_TOOLS:ccmp1 = "u-boot"
-FIP_UBOOT_HEADER = "ccmp15-dvk"
-FIP_UBOOT_HEADER:ccmp13 = "ccmp13-dvk"
 
 do_deploy:append:ccimx8m() {
 	# Deploy u-boot-nodtb.bin and ccimx8m[m|n]-dvk.dtb, to be packaged in boot binary by imx-boot
@@ -215,15 +240,20 @@ do_deploy:append:ccimx8m() {
 }
 
 do_deploy:append:ccmp1() {
-	# Deploy u-boot-nodtb.bin and ccmp1x-dvk.dtb, to be packaged in fip binary by tf-a
+	# Deploy u-boot-nodtb.bin and ccmp1x-dvk-xxxx.dtb, to be packaged in fip binary by tf-a
 	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
-	install -m 0777 ${B}/${config}/arch/arm/dts/${UBOOT_DTB_NAME} ${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${FIP_UBOOT_HEADER}.dtb
+	if [ -n "${UBOOT_DEVICETREE}" ]; then
+		for devicetree in ${UBOOT_DEVICETREE}; do
+			# Install u-boot dtb
+			install -m 644 ${B}/${config}/arch/arm/dts/${devicetree}.dtb ${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${devicetree}.dtb
+		done
+	fi
 	install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin
 
 	# Append signature to u-boot DT
 	if [ "x${UBOOT_SIGN_ENABLE}" = "x1" ] ; then
 		# get name of u-boot devicetree without signature
-		ubootdevicetree="${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-${UBOOT_DTB_NAME}"
+		ubootdevicetree=`ls -1 ${DEPLOYDIR}/${BOOT_TOOLS}/*.dtb | head -n 1`
 		namewithoutsignature=`echo $ubootdevicetree | sed "s/\.dtb/-without-signature.dtb/g"`
 		namewithsignature=`echo $ubootdevicetree | sed "s/\.dtb/-with-signature.dtb/g"`
 		mv $ubootdevicetree $namewithoutsignature

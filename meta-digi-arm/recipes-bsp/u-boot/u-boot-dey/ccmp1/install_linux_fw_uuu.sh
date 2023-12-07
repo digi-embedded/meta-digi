@@ -112,6 +112,12 @@ if [ "${check}" = "1" ]; then
 	RUNVOLS=true
 fi
 
+# Check module_ram variable exists
+module_ram=$(getenv "module_ram")
+if [ -z "${module_ram}" ]; then
+	module_ram="512MB" # Default variant
+fi
+
 # remove redirect
 uuu fb: ucmd setenv stdout serial
 
@@ -120,12 +126,12 @@ echo "Determining image files to use..."
 
 # Determine ATF file to program
 if [ -z "${INSTALL_ATF_FILENAME}" ]; then
-	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-nand##SIGNED_TFA##.stm32"
+	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-${module_ram}-nand##SIGNED_TFA##.stm32"
 fi
 
 # Determine FIP file to program
 if [ -z "${INSTALL_FIP_FILENAME}" ]; then
-	INSTALL_FIP_FILENAME="fip-##MACHINE##-optee##SIGNED##.bin"
+	INSTALL_FIP_FILENAME="fip-##MACHINE##-${module_ram}-optee##SIGNED##.bin"
 fi
 
 # Determine linux, recovery, and rootfs image filenames to update

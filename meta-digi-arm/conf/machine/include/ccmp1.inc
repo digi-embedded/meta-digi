@@ -62,7 +62,6 @@ MULTIUBI_BUILD:remove = "nand_4_256"
 IMAGE_FSTYPES:remove = "stmultiubi"
 
 # Wic files
-WKS_FILE += "ccmp1.wks.in"
 WKS_FILE_DEPENDS ?= " \
     virtual/bootloader \
     virtual/trusted-firmware-a \
