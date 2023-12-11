@@ -1,4 +1,4 @@
-# Copyright (C) 2023 Digi International.
+# Copyright (C) 2023-2024 Digi International.
 #
 
 #######################################
@@ -90,14 +90,26 @@ SWUPDATE_IS_IMAGES_UPDATE = "${@update_based_on_images(d)}"
 SWUPDATE_UBOOT_SCRIPT = "${@oe.utils.conditional('STORAGE_MEDIA', 'mmc', 'swupdate_uboot_mmc.sh', 'swupdate_uboot_nand.sh', d)}"
 SWUPDATE_UBOOT_SCRIPT_NAME = "${@os.path.basename(d.getVar('SWUPDATE_UBOOT_SCRIPT'))}"
 
-SWUPDATE_UBOOT_PREFIX ?= "${UBOOT_PREFIX}"
-SWUPDATE_UBOOT_PREFIX:ccmp1 ?= "fip"
+# Retrieve the correct U-Boot prefix.
+def get_uboot_prefix(d):
+    prefix = d.getVar('UBOOT_PREFIX')
+    if d.getVar('DEY_SOC_VENDOR') == "NXP" and d.getVar('TRUSTFENCE_SIGN') == "1":
+        if "ccimx6" in d.getVar('MACHINE'):
+            prefix = f"{prefix}-dtb"
+        if d.getVar('TRUSTFENCE_DEK_PATH') and d.getVar('TRUSTFENCE_DEK_PATH') != "0":
+            prefix = f"{prefix}-encrypted"
+        else:
+            prefix = f"{prefix}-signed"
+    return prefix
+
+SWUPDATE_UBOOT_PREFIX ?= "${@get_uboot_prefix(d)}"
 SWUPDATE_UBOOT_PREFIX_TFA ?= "tf-a"
 
 SWUPDATE_UBOOT_EXT ?= ".${UBOOT_SUFFIX}"
 SWUPDATE_UBOOT_EXT_TFA ?= ".stm32"
 
 SWUPDATE_UBOOT_NAME ?= "${SWUPDATE_UBOOT_PREFIX}-${MACHINE}${SWUPDATE_UBOOT_EXT}"
+SWUPDATE_UBOOT_NAME:ccimx6sbc ?= "${SWUPDATE_UBOOT_PREFIX}-ccimx6qsbc${SWUPDATE_UBOOT_EXT}"
 SWUPDATE_UBOOT_NAME:ccmp1 ?= "${SWUPDATE_UBOOT_PREFIX}-${MACHINE}-optee${FIP_SIGN_SUFFIX}${SWUPDATE_UBOOT_EXT}"
 SWUPDATE_UBOOT_NAME_TFA ?= ""
 SWUPDATE_UBOOT_NAME_TFA:ccmp1 ?= "${SWUPDATE_UBOOT_PREFIX_TFA}-${MACHINE}-nand${SWUPDATE_UBOOT_EXT_TFA}${TFA_SIGN_SUFFIX}"
