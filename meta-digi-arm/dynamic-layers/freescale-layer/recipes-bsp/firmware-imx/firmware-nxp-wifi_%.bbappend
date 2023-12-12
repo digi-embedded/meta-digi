@@ -1,9 +1,9 @@
 # Copyright (C) 2023 Digi International.
 
-LIC_FILES_CHKSUM:ccimx93 = "file://LICENSE.txt;md5=db4762b09b6bda63da103963e6e081de"
+LIC_FILES_CHKSUM:ccimx93 = "file://LICENSE.txt;md5=2827219e81f28aba7c6a569f7c437fa7"
 
-SRCBRANCH:ccimx93 = "lf-6.1.36_2.1.0"
-SRCREV:ccimx93 = "1fb80d0266e8044fb7eea695c7678cddcbbc77c5"
+SRCBRANCH:ccimx93 = "lf-6.1.55_2.2.0"
+SRCREV:ccimx93 = "7be5a936ce8677962dd7b41c6c9f41dd14350bec"
 
 do_install:append:ccimx93() {
 	# Install NXP Connectivity IW612 firmware
