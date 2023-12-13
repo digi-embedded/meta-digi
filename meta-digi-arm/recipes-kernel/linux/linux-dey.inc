@@ -46,7 +46,13 @@ do_copy_defconfig () {
 		cp -f ${KERNEL_DEFCONFIG} ${WORKDIR}/defconfig
 	fi
 }
-addtask copy_defconfig after do_patch before do_kernel_localversion
+
+python () {
+    if d.getVar('DEY_SOC_VENDOR') == "STM":
+        bb.build.addtask('copy_defconfig', 'do_configure', 'do_patch', d)
+    elif d.getVar('DEY_SOC_VENDOR') == "NXP":
+        bb.build.addtask('copy_defconfig', 'do_kernel_localversion', 'do_patch', d)
+}
 
 # This is needed because kernel_localversion (in fsl-kernel-localversion.bbclass)
 # creates a basic ${B}/.config file and because that file exists, kernel_do_configure
