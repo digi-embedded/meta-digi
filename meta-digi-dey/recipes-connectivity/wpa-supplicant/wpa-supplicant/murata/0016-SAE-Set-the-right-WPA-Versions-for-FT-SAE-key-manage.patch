@@ -1,7 +1,7 @@
 From 32ee9150ccf3f6c242ba2809aab9b9e115a9d1b5 Mon Sep 17 00:00:00 2001
 From: Darren Li <hsil@cypress.com>
 Date: Fri, 26 Nov 2021 02:09:03 -0600
-Subject: [PATCH 16/49] SAE: Set the right WPA Versions for FT-SAE key
+Subject: [PATCH 16/60] SAE: Set the right WPA Versions for FT-SAE key
  management
 
 Set the right WPA Versions for FT-SAE key management

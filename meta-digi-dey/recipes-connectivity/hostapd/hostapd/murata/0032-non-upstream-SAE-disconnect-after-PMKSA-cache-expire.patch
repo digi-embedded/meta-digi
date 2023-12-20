@@ -1,7 +1,7 @@
 From 65ed1eadc11b838a4ba223648bfd3d87bf492319 Mon Sep 17 00:00:00 2001
 From: Ian Lin <ian.lin@infineon.com>
 Date: Mon, 18 Jul 2022 00:49:49 -0500
-Subject: [PATCH 32/49] non-upstream: SAE: disconnect after PMKSA cache expire
+Subject: [PATCH 32/60] non-upstream: SAE: disconnect after PMKSA cache expire
 
 If the dot11RSNAConfigPMKLifetime is set, skip the flow of postponing
 the expiration in b0f457b6 and run disconnect flow.

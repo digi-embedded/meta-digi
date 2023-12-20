@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2023 Digi International.
+# Copyright (C) 2016-2024 Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -48,7 +48,17 @@ MURATA_COMMON_PATCHES = " \
 	file://murata/0041-add-support-to-offload-TWT-setup-request-handling-to.murata.patch \
 	file://murata/0042-add-support-to-offload-TWT-Teardown-request-handling.murata.patch \
 	file://murata/0043-Add-support-to-configure-TWT-of-a-session-using-offs.murata.patch \
-	file://murata/0048-Fix-associating-failed-when-PMK-lifetime-is-set-to-1.patch \
+	file://murata/0047-Fix-associating-failed-when-PMK-lifetime-is-set-to-1.patch \
+	file://murata/0049-non-upstream-MBO-wpa_cli-mbo-command-by-IFX-vendorID.digi.patch \
+	file://murata/0050-EAP-TLS-Allow-TLSv1.3-support-to-be-enabled-with-bui.digi.patch \
+	file://murata/0052-Disable-4-way-handshake-offload-for-DPP.patch \
+	file://murata/0053-non-upstream-WNM-wpa_cli-wnm_maxilde-command-by-IFX-.digi.patch \
+	file://murata/0054-brcmfmac-sync-content-of-nl80211_copy.h-for-BSS_COLO.patch \
+	file://murata/0055-WPA3-SAE-enable-nl_connect-socket-while-WPA_DRIVER_F.patch \
+	file://murata/0056-OWE-AP-enable-OWE-compile-option-for-hostapd-executi.patch \
+	file://murata/0057-DPP2.0-support-DPP2.0-and-add-pfs-init-flow-on-EVENT.patch \
+	file://murata/0058-non-upstream-Prevent-invalid-akm-key-mgmt-when-MFP-r.patch \
+	file://murata/0059-Reset-authentication-and-encryption-parameters-while.digi.patch \
 "
 
 SRC_URI:append:ccmp1 = " ${MURATA_COMMON_PATCHES}"

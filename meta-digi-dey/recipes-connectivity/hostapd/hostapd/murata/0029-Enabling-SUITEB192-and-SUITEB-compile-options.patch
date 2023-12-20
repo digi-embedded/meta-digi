@@ -1,7 +1,7 @@
 From 7d621a129690b061afd61e8bd21d9b816f09d8ac Mon Sep 17 00:00:00 2001
 From: Carter Chen <carter.chen@infineon.com>
 Date: Mon, 4 Jul 2022 02:19:48 -0500
-Subject: [PATCH 29/49] Enabling SUITEB192 and SUITEB compile options
+Subject: [PATCH 29/60] Enabling SUITEB192 and SUITEB compile options
 
 Enabling the compile options for SUITEB and SUITEB-192 related
 configurations and wpa_cli commands.

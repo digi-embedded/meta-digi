@@ -1,7 +1,7 @@
 From f3695ca19a711fbfcda7233f65af13ac9e8a78f7 Mon Sep 17 00:00:00 2001
 From: root <root@cy-blr-au147.india.cypress.com>
 Date: Tue, 16 Aug 2022 15:00:14 -0400
-Subject: [PATCH 38/49] Add link loss timer on beacon loss
+Subject: [PATCH 38/60] Add link loss timer on beacon loss
 
 ---
  wpa_supplicant/bgscan_learn.c  | 19 +++++++++++++++++++

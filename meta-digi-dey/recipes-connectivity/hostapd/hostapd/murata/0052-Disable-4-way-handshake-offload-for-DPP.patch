@@ -1,0 +1,31 @@
+From e533a201ebe00eb208509117b3b69b3e58f34633 Mon Sep 17 00:00:00 2001
+From: avishad verma <avishad.verma@infineon.com>
+Date: Tue, 7 Mar 2023 04:44:25 -0600
+Subject: [PATCH 52/60] Disable 4-way handshake offload for DPP
+
+H1 combo is using internal supplicant and 4-way handshake is offloaded
+to firmware for softap mode.
+For DPP Softap role external supplicant will be used.
+
+Signed-off-by: avishad verma <avishad.verma@infineon.com>
+---
+ src/ap/wpa_auth_glue.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/ap/wpa_auth_glue.c b/src/ap/wpa_auth_glue.c
+index c8dee2aef..7e3b8384f 100644
+--- a/src/ap/wpa_auth_glue.c
++++ b/src/ap/wpa_auth_glue.c
+@@ -1529,6 +1529,9 @@ int hostapd_setup_wpa(struct hostapd_data *hapd)
+ 		!!(hapd->iface->drv_flags2 & WPA_DRIVER_FLAGS2_PROT_RANGE_NEG);
+ 
+ 	if (!hapd->conf->p2p &&
++#ifdef CONFIG_DPP
++	    (!(hapd->conf->wpa_key_mgmt & WPA_KEY_MGMT_DPP)) &&
++#endif /* CONFIG_DPP */
+ 	    (hapd->iface->drv_flags2 & WPA_DRIVER_FLAGS2_4WAY_HANDSHAKE_AP_PSK))
+ 		_conf.psk_4way_hs_offload = 1;
+ 
+-- 
+2.17.1
+

@@ -1,7 +1,7 @@
 From 045ff0dc8aaa1297096c7a941045c74bf1a0e7f3 Mon Sep 17 00:00:00 2001
 From: Ramanathan Ramakrishnan <rmrk@cypress.com>
 Date: Thu, 27 Oct 2022 06:00:28 -0500
-Subject: [PATCH 44/49] Establish a Default TWT session in the STA after
+Subject: [PATCH 44/60] Establish a Default TWT session in the STA after
  associating with the AP
 
 Add a new wpa_supplicant conf param "twt_def_algo" to set the Default/Auto

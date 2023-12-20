@@ -1,7 +1,7 @@
 From cfa528ffe320ac638ca72e87751f76444669c48e Mon Sep 17 00:00:00 2001
 From: Ian Lin <ian.lin@infineon.com>
 Date: Fri, 20 May 2022 03:00:37 -0500
-Subject: [PATCH 22/49] wpa_supplicant: support bgscan
+Subject: [PATCH 22/60] wpa_supplicant: support bgscan
 
 Modify defconfig_base to support bgscan feature
 

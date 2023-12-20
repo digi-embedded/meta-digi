@@ -1,7 +1,7 @@
 From 62c82984916623e6e00053dcb148de71d24bdaf5 Mon Sep 17 00:00:00 2001
 From: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
 Date: Mon, 11 Jul 2022 11:15:25 +0530
-Subject: [PATCH 40/49] nl80211: Introduce a vendor header for vendor NL iface
+Subject: [PATCH 40/60] nl80211: Introduce a vendor header for vendor NL iface
  to DRV with OUI_IFX
 
 So far, the proprietary configurations are done either through the private

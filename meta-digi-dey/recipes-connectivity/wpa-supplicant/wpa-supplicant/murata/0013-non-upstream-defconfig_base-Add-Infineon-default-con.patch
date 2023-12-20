@@ -1,7 +1,7 @@
 From 69d18183a1df9e72371e33937c91af5b5b79a110 Mon Sep 17 00:00:00 2001
 From: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 Date: Mon, 2 Aug 2021 14:15:06 -0500
-Subject: [PATCH 13/49] non-upstream: defconfig_base: Add Infineon default
+Subject: [PATCH 13/60] non-upstream: defconfig_base: Add Infineon default
  configuration
 
 Add Infineon default configuration files (defconfig_base).

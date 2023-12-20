@@ -1,7 +1,7 @@
-From 4624039b5463b1c36fc34cd5ec517a7473981591 Mon Sep 17 00:00:00 2001
+From 34b6fcfddf0004d57c3cdb6a8179339189ff5cf7 Mon Sep 17 00:00:00 2001
 From: Carter Chen <carter.chen@infineon.com>
 Date: Thu, 8 Dec 2022 02:37:48 -0600
-Subject: [PATCH 49/49] non-upstream: p2p_add_group command unification
+Subject: [PATCH 48/60] non-upstream: p2p_add_group command unification
 
 supporting specify operation group of p2p.
 - wpa_cli p2p_group_add freq=5180/80

@@ -1,7 +1,7 @@
 From 9a87c940340e1c665ce7172e7df147d53d1daabe Mon Sep 17 00:00:00 2001
 From: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
 Date: Mon, 11 Jul 2022 11:16:50 +0530
-Subject: [PATCH 42/49] add support to offload TWT Teardown request handling to
+Subject: [PATCH 42/60] add support to offload TWT Teardown request handling to
  the Firmware
 
 With "TWT_TEARDOWN" control sock cmd interface currently available in the

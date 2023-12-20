@@ -1,7 +1,7 @@
 From 05b1387d4dc2e74a02cf524733d809acc4fd46fb Mon Sep 17 00:00:00 2001
 From: Kurt Lee <kurt.lee@infineon.com>
 Date: Wed, 27 Apr 2022 22:50:25 -0500
-Subject: [PATCH 25/49] non-upstream: wl-cmd: create ops table to do wl
+Subject: [PATCH 25/60] non-upstream: wl-cmd: create ops table to do wl
  commands
 
 Creeate wl_cmds to handle wl commands

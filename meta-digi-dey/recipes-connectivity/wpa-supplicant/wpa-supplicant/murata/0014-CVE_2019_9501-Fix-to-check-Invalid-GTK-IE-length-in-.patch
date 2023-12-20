@@ -1,7 +1,7 @@
 From 28c5794ff336f3ec29be79197198071be9add4ac Mon Sep 17 00:00:00 2001
 From: Suresh Sanaboina <suresh.sanaboina@infineon.com>
 Date: Tue, 1 Feb 2022 13:02:07 +0000
-Subject: [PATCH 14/49] [CVE_2019_9501] Fix to check Invalid GTK IE length in
+Subject: [PATCH 14/60] [CVE_2019_9501] Fix to check Invalid GTK IE length in
  M3 at STA
 
 ---

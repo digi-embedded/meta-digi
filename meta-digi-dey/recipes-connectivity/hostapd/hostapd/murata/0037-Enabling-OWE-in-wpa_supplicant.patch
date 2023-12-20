@@ -1,7 +1,7 @@
 From 4a920e2446cff3f215614d63798e675bb5e25549 Mon Sep 17 00:00:00 2001
 From: Carter Chen <carter.chen@infineon.com>
 Date: Wed, 19 Oct 2022 03:29:39 -0500
-Subject: [PATCH 37/49] Enabling OWE in wpa_supplicant
+Subject: [PATCH 37/60] Enabling OWE in wpa_supplicant
 
 Enabling the compile options for OWE.
 

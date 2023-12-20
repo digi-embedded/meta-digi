@@ -1,7 +1,7 @@
 From 1cfe2ac93a1b50a6fd2f6d0022ece6e0f2a91259 Mon Sep 17 00:00:00 2001
 From: Kurt Lee <kurt.lee@cypress.com>
 Date: Sun, 10 Apr 2022 22:10:51 -0500
-Subject: [PATCH 23/49] non-upstream: wl-cmd: create interface to support
+Subject: [PATCH 23/60] non-upstream: wl-cmd: create interface to support
  driver priv command
 
 1. Create "wl" command interface to set/get driver information

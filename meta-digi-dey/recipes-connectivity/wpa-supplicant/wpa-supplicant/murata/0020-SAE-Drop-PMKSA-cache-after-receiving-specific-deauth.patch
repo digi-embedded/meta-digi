@@ -1,7 +1,7 @@
 From ec86cadea38b22595003865c62b5321d55831d9e Mon Sep 17 00:00:00 2001
 From: Kurt Lee <kurt.lee@cypress.com>
 Date: Thu, 24 Feb 2022 03:57:22 -0600
-Subject: [PATCH 20/49] SAE: Drop PMKSA cache after receiving specific deauth
+Subject: [PATCH 20/60] SAE: Drop PMKSA cache after receiving specific deauth
 
 As a STA mode, when receiving deauth frame with reason code
 WLAN_REASON_PREV_AUTH_NOT_VALID, it should drop its PMKSA cache.

@@ -1,7 +1,7 @@
 From 2f8529ec491389bdb41911edcf084bc643d7c9ee Mon Sep 17 00:00:00 2001
 From: Chung-Hsien Hsu <stanley.hsu@cypress.com>
 Date: Tue, 10 Dec 2019 14:03:57 -0600
-Subject: [PATCH 09/49] AP: Support 4-way handshake offload for WPA/WPA2-PSK
+Subject: [PATCH 09/60] AP: Support 4-way handshake offload for WPA/WPA2-PSK
 
 Add support for WPA/WPA2-PSK 4-way handshake offload in AP mode. In this
 case, the 4-way handshake is handled by driver instead of user space.

@@ -1,0 +1,70 @@
+From 10a78d57f331333da8aba9be83f6cafbb7a6f382 Mon Sep 17 00:00:00 2001
+From: Ian Lin <ian.lin@infineon.com>
+Date: Sun, 22 Oct 2023 21:19:08 -0500
+Subject: [PATCH 59/60] Reset authentication and encryption parameters while
+ handling roam event
+
+While supplicant received NL80211_CMD_ROAM event and run EVENT_ASSOC flow,
+it will not reset sm->pmk in wpa_supplicant_select_config since old and new SSID are the same.
+It causes using wrong pmk when roaming from WPA3 to WPA2.
+So add the flow to only reset sm->pmk while handling roam event.
+
+Signed-off-by: Ian Lin <ian.lin@infineon.com>
+---
+ src/drivers/driver.h               | 6 ++++++
+ src/drivers/driver_nl80211_event.c | 1 +
+ wpa_supplicant/events.c            | 9 +++++++++
+ 3 files changed, 16 insertions(+)
+
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index d75abbd5e..9ebb4b07f 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -5546,6 +5546,12 @@ union wpa_event_data {
+ 		 * fils_pmkid - PMKID used or generated in FILS authentication
+ 		 */
+ 		const u8 *fils_pmkid;
++
++		/**
++		 * roam_indication - Indicate it's a roam event
++		 */
++		bool roam_indication;
++
+ 	} assoc_info;
+ 
+ 	/**
+diff --git a/src/drivers/driver_nl80211_event.c b/src/drivers/driver_nl80211_event.c
+index d3cb8d882..6ff74794c 100644
+--- a/src/drivers/driver_nl80211_event.c
++++ b/src/drivers/driver_nl80211_event.c
+@@ -542,6 +542,7 @@ static void mlme_event_connect(struct wpa_driver_nl80211_data *drv,
+ 					   wpa_ssid_txt(drv->ssid,
+ 							drv->ssid_len));
+ 			}
++			event.assoc_info.roam_indication = 1;
+ 		}
+ 	}
+ 	if (resp_ie) {
+diff --git a/wpa_supplicant/events.c b/wpa_supplicant/events.c
+index 975110b57..9abd197e7 100644
+--- a/wpa_supplicant/events.c
++++ b/wpa_supplicant/events.c
+@@ -3326,6 +3326,15 @@ static void wpa_supplicant_event_assoc(struct wpa_supplicant *wpa_s,
+ 				wpa_s, WLAN_REASON_DEAUTH_LEAVING);
+ 			return;
+ 		}
++
++		if (data && data->assoc_info.roam_indication) {
++			if (wpa_s->current_ssid->psk_set) {
++				wpa_hexdump_key(MSG_MSGDUMP, "reset PMK from config",
++						wpa_s->current_ssid->psk, PMK_LEN);
++				wpa_sm_set_pmk(wpa_s->wpa, wpa_s->current_ssid->psk, PMK_LEN, NULL,
++				       NULL);
++			}
++		}
+ 	}
+ 
+ 	if (!(wpa_s->drv_flags & WPA_DRIVER_FLAGS_SME) &&
+-- 
+2.17.1
+

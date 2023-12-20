@@ -1,7 +1,7 @@
 From b98919427e885679267ac811eb7e02d7209078b4 Mon Sep 17 00:00:00 2001
 From: root <root@cy-blr-au146.india.cypress.com>
 Date: Tue, 26 Jul 2022 17:24:49 -0400
-Subject: [PATCH 33/49] Add support for beacon loss roaming
+Subject: [PATCH 33/60] Add support for beacon loss roaming
 
 ---
  wpa_supplicant/bgscan_learn.c  | 19 ++++++++++++++++++-

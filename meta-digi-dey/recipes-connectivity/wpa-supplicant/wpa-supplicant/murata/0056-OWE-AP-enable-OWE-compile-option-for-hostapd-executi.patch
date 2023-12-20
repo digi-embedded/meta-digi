@@ -1,0 +1,31 @@
+From 8a905fcddca5936ba8873c7f0dacab7188dc6eac Mon Sep 17 00:00:00 2001
+From: Carter Chen <carter.chen@infineon.com>
+Date: Mon, 17 Jul 2023 22:31:46 -0500
+Subject: [PATCH 56/60] OWE AP: enable OWE compile option for hostapd executing
+ OWE
+
+Enabling OWE compile option
+
+Fixes: SWLINUX-3620
+
+Signed-off-by: Carter Chen <carter.chen@infineon.com>
+---
+ hostapd/defconfig_base | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hostapd/defconfig_base b/hostapd/defconfig_base
+index 16e8c645a..571ab6eda 100644
+--- a/hostapd/defconfig_base
++++ b/hostapd/defconfig_base
+@@ -374,7 +374,7 @@ CONFIG_WPA_CLI_EDIT=y
+ 
+ # Opportunistic Wireless Encryption (OWE)
+ # Experimental implementation of draft-harkins-owe-07.txt
+-#CONFIG_OWE=y
++CONFIG_OWE=y
+ 
+ # Airtime policy support
+ #CONFIG_AIRTIME_POLICY=y
+-- 
+2.17.1
+

@@ -1,0 +1,48 @@
+From cfaf2f6273ddd9ac618c61bc2294fb60297100a7 Mon Sep 17 00:00:00 2001
+From: Jouni Malinen <quic_jouni@quicinc.com>
+Date: Wed, 6 Apr 2022 16:13:22 +0300
+Subject: [PATCH 50/60] EAP-TLS: Allow TLSv1.3 support to be enabled with build
+ config
+
+The default behavior in wpa_supplicant is to disable use of TLSv1.3 in
+EAP-TLS unless explicitly enabled in network configuration. The new
+CONFIG_EAP_TLSV1_3=y build parameter can be used to change this to
+enable TLSv1.3 by default (if supported by the TLS library).
+
+Signed-off-by: Jouni Malinen <quic_jouni@quicinc.com>
+---
+ src/eap_peer/eap_tls_common.c | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/src/eap_peer/eap_tls_common.c b/src/eap_peer/eap_tls_common.c
+index c1837db..5fb8945 100644
+--- a/src/eap_peer/eap_tls_common.c
++++ b/src/eap_peer/eap_tls_common.c
+@@ -192,18 +192,20 @@ static int eap_tls_params_from_conf(struct eap_sm *sm,
+ 		 * TLS v1.3 changes, so disable this by default for now. */
+ 		params->flags |= TLS_CONN_DISABLE_TLSv1_3;
+ 	}
++#ifndef EAP_TLSV1_3
+ 	if (data->eap_type == EAP_TYPE_TLS ||
+ 	    data->eap_type == EAP_UNAUTH_TLS_TYPE ||
+ 	    data->eap_type == EAP_WFA_UNAUTH_TLS_TYPE) {
+ 		/* While the current EAP-TLS implementation is more or less
+-		 * complete for TLS v1.3, there has been no interoperability
+-		 * testing with other implementations, so disable for by default
+-		 * for now until there has been chance to confirm that no
+-		 * significant interoperability issues show up with TLS version
+-		 * update.
++		 * complete for TLS v1.3, there has been only minimal
++		 * interoperability testing with other implementations, so
++		 * disable it by default for now until there has been chance to
++		 * confirm that no significant interoperability issues show up
++		 * with TLS version update.
+ 		 */
+ 		params->flags |= TLS_CONN_DISABLE_TLSv1_3;
+ 	}
++#endif /* EAP_TLSV1_3 */
+ 	if (phase2 && sm->use_machine_cred) {
+ 		wpa_printf(MSG_DEBUG, "TLS: using machine config options");
+ 		eap_tls_params_from_conf2m(params, config);
+--
+2.43.0

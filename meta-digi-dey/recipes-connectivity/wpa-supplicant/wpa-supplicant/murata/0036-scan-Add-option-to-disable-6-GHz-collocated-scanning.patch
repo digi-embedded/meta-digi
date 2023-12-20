@@ -1,7 +1,7 @@
 From d2aff0911008db10d28424ca5b8d67f852a5bf89 Mon Sep 17 00:00:00 2001
 From: Ilan Peer <ilan.peer@intel.com>
 Date: Sun, 24 Apr 2022 12:57:53 +0300
-Subject: [PATCH 36/49] scan: Add option to disable 6 GHz collocated scanning
+Subject: [PATCH 36/60] scan: Add option to disable 6 GHz collocated scanning
 
 Add a parameter (non_coloc_6ghz=1) to the manual scan command to disable
 6 GHz collocated scanning.

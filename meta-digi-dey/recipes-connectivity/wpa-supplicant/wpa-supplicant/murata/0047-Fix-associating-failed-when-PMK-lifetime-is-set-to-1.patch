@@ -1,7 +1,7 @@
-From 897917008b37a16985d0f1ae9d768c6450741574 Mon Sep 17 00:00:00 2001
+From e21ce4eefab80c4d2e8ccf3b6d29cef5af6f955b Mon Sep 17 00:00:00 2001
 From: Owen Huang <Owen.Huang@infineon.com>
 Date: Wed, 30 Nov 2022 01:35:58 -0600
-Subject: [PATCH 48/49] Fix associating failed when PMK lifetime is set to 1
+Subject: [PATCH 47/60] Fix associating failed when PMK lifetime is set to 1
 
 In WPA3 11.1 STAUT server certificate validation test
 * set dot11RSNAConfigPMKLifetime to 1

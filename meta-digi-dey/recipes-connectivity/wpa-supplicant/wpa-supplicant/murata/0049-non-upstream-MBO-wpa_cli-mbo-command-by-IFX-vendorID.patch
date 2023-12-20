@@ -1,0 +1,765 @@
+From 67be9ce68d84e2800b481123a0c140e5ad912619 Mon Sep 17 00:00:00 2001
+From: Carter Chen <carter.chen@infineon.com>
+Date: Wed, 14 Dec 2022 01:34:23 -0600
+Subject: [PATCH 49/60] non-upstream: MBO: wpa_cli mbo command by IFX vendorID
+
+Signed-off-by: Carter Chen <carter.chen@infineon.com>
+Signed-off-by: Shelley Yang <shelley.yang@infineon.com>
+---
+ src/common/ifx_vendor.h           |  52 ++++++++
+ src/drivers/driver.h              |  46 +++++++
+ src/drivers/driver_nl80211.c      | 141 ++++++++++++++++++++++
+ src/drivers/driver_nl80211.h      |   1 +
+ src/drivers/driver_nl80211_capa.c |   3 +
+ wpa_supplicant/ctrl_iface.c       | 193 ++++++++++++++++++++++++++++++
+ wpa_supplicant/driver_i.h         |   8 ++
+ wpa_supplicant/mbo.c              | 119 ++++++++++++++++++
+ wpa_supplicant/wpa_cli.c          |  15 +++
+ wpa_supplicant/wpa_supplicant_i.h |   9 ++
+ 10 files changed, 587 insertions(+)
+
+diff --git a/src/common/ifx_vendor.h b/src/common/ifx_vendor.h
+index aa8e83bc7..6cd3b874c 100644
+--- a/src/common/ifx_vendor.h
++++ b/src/common/ifx_vendor.h
+@@ -56,6 +56,8 @@
+  *
+  * @IFX_VENDOR_SCMD_TWT: Vendor subcommand to configure TWT
+  *	Uses attributes defined in enum ifx_vendor_attr_twt.
++ * @IFX_VENDOR_SCMD_MBO: Vendor subcommand to configure MBO
++ *	Uses attribute IFX_VENDOR_ATTR_MBO to configure.
+  *
+  * @IFX_VENDOR_SCMD_MAX: This acts as a the tail of cmds list.
+  *      Make sure it located at the end of the list.
+@@ -74,6 +76,8 @@ enum ifx_nl80211_vendor_subcmds {
+ 	IFX_VENDOR_SCMD_LDPC_CAP	= 12,
+ 	IFX_VENDOR_SCMD_AMSDU		= 13,
+ 	IFX_VENDOR_SCMD_TWT		= 14,
++	/* Reserved 15-17 */
++	IFX_VENDOR_SCMD_MBO		= 18,
+ 	IFX_VENDOR_SCMD_MAX
+ };
+ 
+@@ -96,6 +100,13 @@ enum ifx_vendor_attr {
+ 	IFX_VENDOR_ATTR_MAX		= 11
+ };
+ 
++enum ifx_vendor_attr_mbo {
++	IFX_VENDOR_ATTR_MBO_UNSPEC,
++	IFX_VENDOR_ATTR_MBO_CMD,
++	IFX_VENDOR_ATTR_MBO_PARAMS,
++	IFX_VENDOR_ATTR_MBO_MAX
++};
++
+ /*
+  * enum ifx_vendor_attr_twt - Attributes for the TWT vendor command
+  *
+@@ -260,4 +271,45 @@ enum ifx_twt_oper_setup_cmd_type {
+ 	IFX_TWT_OPER_SETUP_CMD_TYPE_MAX		= 8
+ };
+ 
++enum ifx_mbo_config_cmd_type {
++	IFX_MBO_CONFIG_CMD_TYPE_INVALID		= -1,
++	//align internal definition
++	IFX_MBO_CONFIG_CMD_ADD_CHAN_PREF	= 1,
++	IFX_MBO_CONFIG_CMD_DEL_CHAN_PREF	= 2,
++	IFX_MBO_CONFIG_CMD_LIST_CHAN_PREF	= 3,
++	IFX_MBO_CONFIG_CMD_CELLULAR_DATA_CAP	= 4,
++	IFX_MBO_CONFIG_CMD_DUMP_COUNTER		= 5,
++	IFX_MBO_CONFIG_CMD_CLEAR_COUNTER	= 6,
++	IFX_MBO_CONFIG_CMD_FORCE_ASSOC		= 7,
++	IFX_MBO_CONFIG_CMD_BSSTRANS_REJ		= 8,
++	IFX_MBO_CONFIG_CMD_SEND_NOTIF		= 9,
++	IFX_MBO_CONFIG_CMD_CLR_CHAN_PREF	= 10,
++	IFX_MBO_CONFIG_CMD_NBR_INFO_CACHE	= 11,
++	IFX_MBO_CONFIG_CMD_ANQPO_SUPPORT	= 12,
++	IFX_MBO_CONFIG_CMD_DBG_EVENT_CHECK	= 13,
++	IFX_MBO_CONFIG_CMD_EVENT_MASK		= 14,
++	IFX_MBO_CONFIG_CMD_ASSOC_DISALLOWED	= 15,
++	IFX_MBO_CONFIG_CMD_CELLULAR_DATA_PREF	= 16,
++	IFX_MBO_CONFIG_CMD_TYPE_MAX		= 17
++};
++
++enum ifx_vendor_attr_mbo_param {
++	IFX_VENDOR_ATTR_MBO_PARAM_UNSPEC,
++	IFX_VENDOR_ATTR_MBO_PARAM_OPCLASS,
++	IFX_VENDOR_ATTR_MBO_PARAM_CHAN,
++	IFX_VENDOR_ATTR_MBO_PARAM_PREFERENCE,
++	IFX_VENDOR_ATTR_MBO_PARAM_REASON_CODE,
++	IFX_VENDOR_ATTR_MBO_PARAM_CELL_DATA_CAP,
++	IFX_VENDOR_ATTR_MBO_PARAM_COUNTERS,
++	IFX_VENDOR_ATTR_MBO_PARAM_ENABLE,
++	IFX_VENDOR_ATTR_MBO_PARAM_SUB_ELEM_TYPE,
++	IFX_VENDOR_ATTR_MBO_PARAM_BTQ_TRIG_START_OFFSET,
++	IFX_VENDOR_ATTR_MBO_PARAM_BTQ_TRIG_RSSI_DELTA,
++	IFX_VENDOR_ATTR_MBO_PARAM_ANQP_CELL_SUPP,
++	IFX_VENDOR_ATTR_MBO_PARAM_BIT_MASK,
++	IFX_VENDOR_ATTR_MBO_PARAM_ASSOC_DISALLOWED,
++	IFX_VENDOR_ATTR_MBO_PARAM_CELLULAR_DATA_PREF,
++	IFX_VENDOR_ATTR_MBO_PARAM_MAX
++};
++
+ #endif /* IFX_VENDOR_H */
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 23f599bef..996614ee5 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -2553,6 +2553,51 @@ struct drv_teardown_twt_params {
+ 	u8 teardown_all_twt;
+ };
+ #endif /* CONFIG_TWT_OFFLOAD_IFX */
++
++struct drv_config_mbo_params {
++	u8 cmd;
++	union {
++		struct {
++			u8 op_class;
++			u8 chan;
++			u8 pref_val;
++			u8 reason;
++		} add_chan_pref;
++		struct {
++			u8 op_class;
++			u8 chan;
++		} del_chan_pref;
++		struct {
++			u8 cap;
++		} cell_data_cap;
++		struct {
++			u8 enable;
++		} force_assoc;
++		struct {
++			u8 enable;
++			u8 reason;
++		} bsstrans_reject;
++		struct {
++			u8 type;
++		} send_notif;
++		struct {
++			u8 enable;
++			u8 t_offset;
++			u8 trig_delta;
++		} nbr_info_cache;
++		struct {
++			u8 enable;
++			u8 value;
++		} anqpo_support;
++		struct {
++			u8 disallow;
++			u8 reason;
++		} assoc_disallow;
++		struct {
++			u8 pref_value;
++		} cellular_pref;
++	} u;
++};
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+ struct wpa_bss_trans_info {
+@@ -4681,6 +4726,7 @@ struct wpa_driver_ops {
+ 	 */
+ 	int (*teardown_twt)(void *priv, struct drv_teardown_twt_params *params); 
+ #endif /* CONFIG_TWT_OFFLOAD_IFX */
++	int (*config_mbo)(void *priv, struct drv_config_mbo_params *params);
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+ };
+diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
+index 3d98e5943..506b1e406 100644
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -12473,6 +12473,146 @@ fail:
+ 	return ret;
+ }
+ #endif /* CONFIG_TWT_OFFLOAD_IFX */
++
++static int wpa_driver_nl80211_config_mbo(void *priv, struct drv_config_mbo_params *params)
++{
++	struct i802_bss *bss = priv;
++	struct wpa_driver_nl80211_data *drv = bss->drv;
++	struct nl_msg *msg = NULL;
++	struct nlattr *data, *mbo_param_attrs;
++	int ret = -1;
++
++	if (!drv->ifx_mbo_offload)
++		goto fail;
++
++	if (!(msg = nl80211_drv_msg(drv, 0, NL80211_CMD_VENDOR)) ||
++	    nla_put_u32(msg, NL80211_ATTR_VENDOR_ID, OUI_IFX) ||
++	    nla_put_u32(msg, NL80211_ATTR_VENDOR_SUBCMD, IFX_VENDOR_SCMD_MBO))
++		goto fail;
++
++	data = nla_nest_start(msg, NL80211_ATTR_VENDOR_DATA);
++	if (!data)
++		goto fail;
++
++	if (nla_put_u8(msg, IFX_VENDOR_ATTR_MBO_CMD, params->cmd))
++		goto fail;
++
++	switch (params->cmd) {
++	case IFX_MBO_CONFIG_CMD_ADD_CHAN_PREF:
++		mbo_param_attrs = nla_nest_start(msg, IFX_VENDOR_ATTR_MBO_PARAMS);
++		if (!mbo_param_attrs)
++			goto fail;
++
++		if (nla_put_u8(msg, IFX_VENDOR_ATTR_MBO_PARAM_OPCLASS,
++			params->u.add_chan_pref.op_class) ||
++		nla_put_u8(msg, IFX_VENDOR_ATTR_MBO_PARAM_CHAN,
++			params->u.add_chan_pref.chan) ||
++		nla_put_u8(msg, IFX_VENDOR_ATTR_MBO_PARAM_PREFERENCE,
++			params->u.add_chan_pref.pref_val) ||
++		nla_put_u8(msg, IFX_VENDOR_ATTR_MBO_PARAM_REASON_CODE,
++			params->u.add_chan_pref.reason)) {
++			wpa_printf(MSG_ERROR,
++				"nl80211: MBO config: build IFX_MBO_CONFIG_CMD_ADD_CHAN_PREF msg failed");
++			goto fail;
++		}
++		nla_nest_end(msg, mbo_param_attrs);
++		break;
++	case IFX_MBO_CONFIG_CMD_DEL_CHAN_PREF:
++		mbo_param_attrs = nla_nest_start(msg, IFX_VENDOR_ATTR_MBO_PARAMS);
++		if (!mbo_param_attrs)
++			goto fail;
++
++		if (nla_put_u8(msg, IFX_VENDOR_ATTR_MBO_PARAM_OPCLASS,
++			params->u.del_chan_pref.op_class) ||
++		nla_put_u8(msg, IFX_VENDOR_ATTR_MBO_PARAM_CHAN,
++			params->u.del_chan_pref.chan)) {
++			wpa_printf(MSG_ERROR,
++				"nl80211: MBO config: build IFX_MBO_CONFIG_CMD_DEL_CHAN_PREF msg failed");
++			goto fail;
++		}
++		nla_nest_end(msg, mbo_param_attrs);
++		break;
++	case IFX_MBO_CONFIG_CMD_CELLULAR_DATA_CAP:
++		mbo_param_attrs = nla_nest_start(msg, IFX_VENDOR_ATTR_MBO_PARAMS);
++		if (!mbo_param_attrs)
++			goto fail;
++
++		if (nla_put_u8(msg, IFX_VENDOR_ATTR_MBO_PARAM_CELL_DATA_CAP,
++			params->u.cell_data_cap.cap)) {
++			wpa_printf(MSG_ERROR,
++				"nl80211: MBO config: build IFX_MBO_CONFIG_CMD_CELLULAR_DATA_CAP msg failed");
++			goto fail;
++		}
++		nla_nest_end(msg, mbo_param_attrs);
++		break;
++	case IFX_MBO_CONFIG_CMD_FORCE_ASSOC:
++		mbo_param_attrs = nla_nest_start(msg, IFX_VENDOR_ATTR_MBO_PARAMS);
++		if (!mbo_param_attrs)
++			goto fail;
++
++		if (nla_put_u8(msg, IFX_VENDOR_ATTR_MBO_PARAM_ENABLE,
++			params->u.force_assoc.enable)) {
++			wpa_printf(MSG_ERROR,
++				"nl80211: MBO config: build IFX_MBO_CONFIG_CMD_FORCE_ASSOC msg failed");
++			goto fail;
++		}
++		nla_nest_end(msg, mbo_param_attrs);
++		break;
++	case IFX_MBO_CONFIG_CMD_BSSTRANS_REJ:
++		mbo_param_attrs = nla_nest_start(msg, IFX_VENDOR_ATTR_MBO_PARAMS);
++		if (!mbo_param_attrs)
++			goto fail;
++
++		if (nla_put_u8(msg, IFX_VENDOR_ATTR_MBO_PARAM_ENABLE,
++			params->u.bsstrans_reject.enable) ||
++		nla_put_u8(msg, IFX_VENDOR_ATTR_MBO_PARAM_REASON_CODE,
++			params->u.bsstrans_reject.reason)) {
++			wpa_printf(MSG_ERROR,
++				"nl80211: MBO config: build IFX_MBO_CONFIG_CMD_DEL_CHAN_PREF msg failed");
++			goto fail;
++		}
++		nla_nest_end(msg, mbo_param_attrs);
++		break;
++	case IFX_MBO_CONFIG_CMD_SEND_NOTIF:
++		mbo_param_attrs = nla_nest_start(msg, IFX_VENDOR_ATTR_MBO_PARAMS);
++		if (!mbo_param_attrs)
++			goto fail;
++
++		if (nla_put_u8(msg, IFX_VENDOR_ATTR_MBO_PARAM_SUB_ELEM_TYPE,
++			params->u.send_notif.type)) {
++			wpa_printf(MSG_ERROR,
++				"nl80211: MBO config: build IFX_MBO_CONFIG_CMD_FORCE_ASSOC msg failed");
++			goto fail;
++		}
++		nla_nest_end(msg, mbo_param_attrs);
++		break;
++	case IFX_MBO_CONFIG_CMD_LIST_CHAN_PREF:
++	case IFX_MBO_CONFIG_CMD_DUMP_COUNTER:
++	case IFX_MBO_CONFIG_CMD_CLEAR_COUNTER:
++		wpa_printf(MSG_DEBUG,
++			   "MBO config: cmd %d doesn't need extra attribute",
++			    params->cmd);
++		break;
++	default:
++		break;
++	}
++
++	nla_nest_end(msg, data);
++
++	ret = send_and_recv_msgs(drv, msg, NULL, NULL, NULL, NULL);
++	if (ret) {
++		wpa_printf(MSG_ERROR,
++			   "nl80211: MBO config: Failed to invoke driver "
++			   "MBO config function: %s",
++			   strerror(-ret));
++	}
++
++	return ret;
++fail:
++	nl80211_nlmsg_clear(msg);
++	nlmsg_free(msg);
++	return ret;
++}
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+ const struct wpa_driver_ops wpa_driver_nl80211_ops = {
+@@ -12624,5 +12764,6 @@ const struct wpa_driver_ops wpa_driver_nl80211_ops = {
+ 	.setup_twt = wpa_driver_nl80211_setup_twt,
+ 	.teardown_twt = wpa_driver_nl80211_teardown_twt,
+ #endif /* CONFIG_TWT_OFFLOAD_IFX */
++	.config_mbo = wpa_driver_nl80211_config_mbo,
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ };
+diff --git a/src/drivers/driver_nl80211.h b/src/drivers/driver_nl80211.h
+index f681afb41..6d2c09477 100644
+--- a/src/drivers/driver_nl80211.h
++++ b/src/drivers/driver_nl80211.h
+@@ -182,6 +182,7 @@ struct wpa_driver_nl80211_data {
+ 	unsigned int brcm_do_acs:1;
+ #ifdef CONFIG_DRIVER_NL80211_IFX
+ 	unsigned int ifx_twt_offload:1;
++	unsigned int ifx_mbo_offload:1;
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+ 	u64 vendor_scan_cookie;
+diff --git a/src/drivers/driver_nl80211_capa.c b/src/drivers/driver_nl80211_capa.c
+index 19d1569bf..b0807a7fc 100644
+--- a/src/drivers/driver_nl80211_capa.c
++++ b/src/drivers/driver_nl80211_capa.c
+@@ -1059,6 +1059,9 @@ static int wiphy_info_handler(struct nl_msg *msg, void *arg)
+ 				case IFX_VENDOR_SCMD_TWT:
+ 					drv->ifx_twt_offload = 1;
+ 					break;
++				case IFX_VENDOR_SCMD_MBO:
++					drv->ifx_mbo_offload = 1;
++					break;
+ 				}
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 			}
+diff --git a/wpa_supplicant/ctrl_iface.c b/wpa_supplicant/ctrl_iface.c
+index 90cc4861c..9f0149a20 100644
+--- a/wpa_supplicant/ctrl_iface.c
++++ b/wpa_supplicant/ctrl_iface.c
+@@ -10150,6 +10150,194 @@ static int wpas_ctrl_iface_send_twt_teardown(struct wpa_supplicant *wpa_s,
+ }
+ 
+ 
++#ifdef CONFIG_DRIVER_NL80211_IFX
++int wpas_config_offload_send_mbo_config(struct wpa_supplicant *wpa_s, u8 cmd_id,
++					u8 oper_class, u8 chan, u8 pref_val,
++					u8 reason_code, u8 enable, u8 notif_type,
++					u8 time_offset, u8 rssi_trig_delta,
++					bool enable_anqpo, bool enable_cell_pref,
++					u8 cell_pref_val, u8 cell_cap)
++{
++	struct drv_config_mbo_params params;
++	int ret = 0;
++
++	memset(&params, 0, sizeof(struct drv_config_mbo_params));
++
++	switch (cmd_id) {
++	case IFX_MBO_CONFIG_CMD_ADD_CHAN_PREF:
++		if (!oper_class || !chan ||
++		    (pref_val != 0 && pref_val != 1 && pref_val != 255) ||
++		    reason_code > 3) {
++			wpa_printf(MSG_ERROR,
++				   "MBO: incorrect parameter for add_chan_pref oper_class: %d "
++				   "chan:%d pref_val:%d reason_code:%d",
++				   oper_class, chan, pref_val, reason_code);
++			ret = -EOPNOTSUPP;
++			goto fail;
++		}
++		params.cmd = cmd_id;
++		params.u.add_chan_pref.op_class = oper_class;
++		params.u.add_chan_pref.chan = chan;
++		params.u.add_chan_pref.pref_val = pref_val;
++		params.u.add_chan_pref.reason = reason_code;
++		break;
++	case IFX_MBO_CONFIG_CMD_DEL_CHAN_PREF:
++		if (!oper_class || !chan) {
++			wpa_printf(MSG_ERROR,
++				   "MBO: incorrect parameter for del_chan_pref "
++				   "oper_class: %d chan:%d",
++				   oper_class, chan);
++			ret = -EOPNOTSUPP;
++			goto fail;
++		}
++		params.cmd = cmd_id;
++		params.u.del_chan_pref.op_class = oper_class;
++		params.u.del_chan_pref.chan = chan;
++		break;
++	case IFX_MBO_CONFIG_CMD_LIST_CHAN_PREF:
++	case IFX_MBO_CONFIG_CMD_DUMP_COUNTER:
++	case IFX_MBO_CONFIG_CMD_CLEAR_COUNTER:
++		params.cmd = cmd_id;
++		break;
++	case IFX_MBO_CONFIG_CMD_CELLULAR_DATA_CAP:
++		if (!cell_cap || cell_cap > 3) {
++			wpa_printf(MSG_ERROR,
++				   "MBO: incorrect parameter for cellular_data_cap:%d",
++				   cell_cap);
++			ret = -EOPNOTSUPP;
++			goto fail;
++		}
++		params.cmd = cmd_id;
++		params.u.cell_data_cap.cap = cell_cap;
++		break;
++	case IFX_MBO_CONFIG_CMD_FORCE_ASSOC:
++		if (enable > 1) {
++			wpa_printf(MSG_ERROR,
++				   "MBO: incorrect parameter for force_assoc:%d",
++				   enable);
++			ret = -EOPNOTSUPP;
++			goto fail;
++		}
++		params.cmd = cmd_id;
++		params.u.force_assoc.enable = enable;
++		break;
++	case IFX_MBO_CONFIG_CMD_BSSTRANS_REJ:
++		if (enable > 1 || reason_code > 6) {
++			wpa_printf(MSG_ERROR,
++				   "MBO: incorrect parameter for bsstrans reject, enable:%d, reason:%d",
++				   enable, reason_code);
++			ret = -EOPNOTSUPP;
++			goto fail;
++		}
++		params.cmd = cmd_id;
++		params.u.bsstrans_reject.enable = enable;
++		params.u.bsstrans_reject.reason = reason_code;
++		break;
++	case IFX_MBO_CONFIG_CMD_SEND_NOTIF:
++		if (notif_type != 2 && notif_type != 3) {
++			wpa_printf(MSG_ERROR,
++				   "MBO: incorrect parameter for send notifty:%d",
++				   notif_type);
++			ret = -EOPNOTSUPP;
++			goto fail;
++		}
++		params.cmd = cmd_id;
++		params.u.send_notif.type = notif_type;
++		break;
++	case IFX_MBO_CONFIG_CMD_NBR_INFO_CACHE:
++	case IFX_MBO_CONFIG_CMD_ANQPO_SUPPORT:
++	case IFX_MBO_CONFIG_CMD_CELLULAR_DATA_PREF:
++	default:
++		wpa_printf(MSG_DEBUG, "MBO: Unsupported cmd_id %d",
++			   cmd_id);
++		ret = -EOPNOTSUPP;
++		goto fail;
++	}
++
++	ret = wpa_drv_config_mbo(wpa_s, &params);
++
++fail:
++	return ret;
++}
++
++static int wpas_ctrl_iface_send_mbo_config(struct wpa_supplicant *wpa_s,
++					   const char *cmd)
++{
++	u8 oper_class = 0;
++	u8 chan = 0;
++	u8 pref_val = 0;
++	u8 reason_code = 0;
++	u8 cmd_id = 0;
++	u8 enable = 0;
++	u8 notif_type = 0;
++	u8 time_offset = 0;
++	u8 rssi_trig_delta = 0;
++	bool enable_anqpo = false;
++	bool enable_cell_pref = false;
++	u8 cell_pref_val = 0;
++	u8 cell_cap = 0;
++	const char *tok_s;
++
++	tok_s = os_strstr(cmd, " cmd_id=");
++	if (tok_s)
++		cmd_id = strtol(tok_s + os_strlen(" cmd_id="), NULL, 10);
++
++	tok_s = os_strstr(cmd, " oper_class=");
++	if (tok_s)
++		oper_class = strtol(tok_s + os_strlen(" oper_class="), NULL, 10);
++
++	tok_s = os_strstr(cmd, " pref_val=");
++	if (tok_s)
++		pref_val = strtol(tok_s + os_strlen(" pref_val="), NULL, 10);
++
++	tok_s = os_strstr(cmd, " reason_code=");
++	if (tok_s)
++		reason_code = strtol(tok_s + os_strlen(" reason_code="), NULL, 10);
++
++	tok_s = os_strstr(cmd, " chan=");
++	if (tok_s)
++		chan = strtol(tok_s + os_strlen(" chan="), NULL, 10);
++
++	tok_s = os_strstr(cmd, " cell_cap=");
++	if (tok_s)
++		cell_cap = strtol(tok_s + os_strlen(" cell_cap="), NULL, 10);
++
++	tok_s = os_strstr(cmd, " enable=");
++	if (tok_s)
++		enable = strtol(tok_s + os_strlen(" enable="), NULL, 10);
++
++	tok_s = os_strstr(cmd, " notif_type=");
++	if (tok_s)
++		notif_type = strtol(tok_s + os_strlen(" notif_type="), NULL, 10);
++
++	tok_s = os_strstr(cmd, " time_offset=");
++	if (tok_s)
++		time_offset = strtol(tok_s + os_strlen(" time_offset="), NULL, 10);
++
++	tok_s = os_strstr(cmd, " rssi_trig_delta=");
++	if (tok_s)
++		rssi_trig_delta = strtol(tok_s + os_strlen(" rssi_trig_delta="), NULL, 10);
++
++	tok_s = os_strstr(cmd, " enable_anqpo=");
++	if (tok_s)
++		enable_anqpo = strtol(tok_s + os_strlen(" enable_anqpo="), NULL, 10);
++
++	tok_s = os_strstr(cmd, " enable_cell_pref=");
++	if (tok_s)
++		enable_cell_pref = strtol(tok_s + os_strlen(" enable_cell_pref="), NULL, 10);
++
++	tok_s = os_strstr(cmd, " cell_pref_val=");
++	if (tok_s)
++		cell_pref_val = strtol(tok_s + os_strlen(" cell_pref_val="), NULL, 10);
++
++	return wpas_config_offload_send_mbo_config(wpa_s, cmd_id, oper_class,
++						   chan, pref_val, reason_code,
++						   enable, notif_type, time_offset,
++						   rssi_trig_delta, enable_anqpo,
++						   enable_cell_pref, cell_pref_val,
++						   cell_cap);
++}
++#endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+ static int wpas_ctrl_vendor_elem_add(struct wpa_supplicant *wpa_s, char *cmd)
+ {
+@@ -12271,6 +12459,11 @@ char * wpa_supplicant_ctrl_iface_process(struct wpa_supplicant *wpa_s,
+ 	} else if (os_strcmp(buf, "TWT_SETUP") == 0) {
+ 		if (wpas_ctrl_iface_send_twt_setup(wpa_s, ""))
+ 			reply_len = -1;
++#ifdef CONFIG_DRIVER_NL80211_IFX
++	} else if (os_strncmp(buf, "MBO ", 4) == 0) {
++		if (wpas_ctrl_iface_send_mbo_config(wpa_s, buf + 3))
++			reply_len = -1;
++#endif /* CONFIG_DRIVER_NL80211_IFX */
+ 	} else if (os_strncmp(buf, "TWT_TEARDOWN ", 13) == 0) {
+ 		if (wpas_ctrl_iface_send_twt_teardown(wpa_s, buf + 12))
+ 			reply_len = -1;
+diff --git a/wpa_supplicant/driver_i.h b/wpa_supplicant/driver_i.h
+index 9a7975a6a..2fcfa44a6 100644
+--- a/wpa_supplicant/driver_i.h
++++ b/wpa_supplicant/driver_i.h
+@@ -1145,6 +1145,14 @@ static inline int wpa_drv_teardown_twt(struct wpa_supplicant *wpa_s,
+ 	return wpa_s->driver->teardown_twt(wpa_s->drv_priv, params);
+ }
+ #endif /* CONFIG_TWT_OFFLOAD_IFX */
++
++static inline int wpa_drv_config_mbo(struct wpa_supplicant *wpa_s,
++				       struct drv_config_mbo_params *params)
++{
++	if (!wpa_s->driver->config_mbo)
++		return -1;
++	return wpa_s->driver->config_mbo(wpa_s->drv_priv, params);
++}
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+ #endif /* DRIVER_I_H */
+diff --git a/wpa_supplicant/mbo.c b/wpa_supplicant/mbo.c
+index 3df86ef07..714f9ef6f 100644
+--- a/wpa_supplicant/mbo.c
++++ b/wpa_supplicant/mbo.c
+@@ -663,3 +663,122 @@ void mbo_parse_rx_anqp_resp(struct wpa_supplicant *wpa_s,
+ 		break;
+ 	}
+ }
++
++#ifdef CONFIG_DRIVER_NL80211_IFX
++int wpas_config_offload_send_mbo_config(struct wpa_supplicant *wpa_s, u8 cmd_id,
++					u8 oper_class, u8 chan, u8 pref_val,
++					u8 reason_code, u8 enable, u8 notif_type,
++					u8 time_offset, u8 rssi_trig_delta,
++					bool enable_anqpo, bool enable_cell_pref,
++					u8 cell_pref_val, u8 cell_cap)
++{
++	struct drv_config_mbo_params params;
++	int ret = 0;
++
++	memset(&params, 0, sizeof(struct drv_config_mbo_params));
++
++	switch (cmd_id) {
++	case IFX_MBO_CONFIG_CMD_ADD_CHAN_PREF:
++		if (!oper_class || !chan ||
++		    (pref_val != 0 && pref_val != 1 && pref_val != 255) ||
++		    reason_code > 3) {
++			wpa_printf(MSG_ERROR,
++				   "MBO: incorrect parameter for add_chan_pref oper_class: %d "
++				   "chan:%d pref_val:%d reason_code:%d",
++				   oper_class, chan, pref_val, reason_code);
++			ret = -EOPNOTSUPP;
++			goto fail;
++		}
++		params.cmd = cmd_id;
++		params.u.add_chan_pref.op_class = oper_class;
++		params.u.add_chan_pref.chan = chan;
++		params.u.add_chan_pref.pref_val = pref_val;
++		params.u.add_chan_pref.reason = reason;
++		break;
++	case IFX_MBO_CONFIG_CMD_DEL_CHAN_PREF:
++		if (!oper_class || !chan) {
++			wpa_printf(MSG_ERROR,
++				   "MBO: incorrect parameter for del_chan_pref "
++				   "oper_class: %d chan:%d",
++				   oper_class, chan);
++			ret = -EOPNOTSUPP;
++			goto fail;
++		}
++		params.cmd = cmd_id;
++		params.u.del_chan_pref.op_class = oper_class;
++		params.u.del_chan_pref.chan = chan;
++		break;
++	case IFX_MBO_CONFIG_CMD_LIST_CHAN_PREF:
++		params.cmd = cmd_id;
++		break;
++	case IFX_MBO_CONFIG_CMD_CELLULAR_DATA_CAP:
++		if (!cell_cap || cell_cap > 3) {
++			wpa_printf(MSG_ERROR,
++				   "MBO: incorrect parameter for cellular_data_cap:%d",
++				   cell_cap);
++			ret = -EOPNOTSUPP;
++			goto fail;
++		}
++		params.cmd = cmd_id;
++		params.u.cell_data_cap.cap = cell_cap;
++		break;
++	case IFX_MBO_CONFIG_CMD_DUMP_COUNTER:
++		params.cmd = cmd_id;
++		break;
++	case IFX_MBO_CONFIG_CMD_CLEAR_COUNTER:
++		params.cmd = cmd_id;
++		break;
++	case IFX_MBO_CONFIG_CMD_FORCE_ASSOC:
++		if (enable > 1) {
++			wpa_printf(MSG_ERROR,
++				   "MBO: incorrect parameter for force_assoc:%d",
++				   enable);
++			ret = -EOPNOTSUPP;
++			goto fail;
++		}
++		params.cmd = cmd_id;
++		params.u.force_assoc.enable = enable;
++		break;
++	case IFX_MBO_CONFIG_CMD_BSSTRANS_REJ:
++		if (enable > 1 || reason_code > 6) {
++			wpa_printf(MSG_ERROR,
++				   "MBO: incorrect parameter for bsstrans reject, enable:%d, reason:%d",
++				   enable, reason_code);
++			ret = -EOPNOTSUPP;
++			goto fail;
++		}
++		params.cmd = cmd_id;
++		params.u.bsstrans_reject.enable = enable;
++		params.u.bsstrans_reject.reason = reason_code;
++		break;
++	case IFX_MBO_CONFIG_CMD_SEND_NOTIF:
++		if (notif_type != 2 && notif_type != 3) {
++			wpa_printf(MSG_ERROR,
++				   "MBO: incorrect parameter for send notifty:%d",
++				   notif_type);
++			ret = -EOPNOTSUPP;
++			goto fail;
++		}
++		params.cmd = cmd_id;
++		params.u.send_notif.type = notif_type;
++		break;
++	case IFX_MBO_CONFIG_CMD_NBR_INFO_CACHE:
++		break;
++	case IFX_MBO_CONFIG_CMD_ANQPO_SUPPORT:
++		break;
++	case IFX_MBO_CONFIG_CMD_CELLULAR_DATA_PREF:
++		break;
++	default:
++		wpa_printf(MSG_DEBUG, "MBO: Unsupported cmd_id %d",
++			   cmd_id);
++		ret = -EOPNOTSUPP;
++		goto fail;
++	}
++
++	ret = wpa_drv_config_mbo(wpa_s, params);
++
++fail:
++	return ret;
++}
++#endif /* CONFIG_DRIVER_NL80211_IFX */
++
+diff --git a/wpa_supplicant/wpa_cli.c b/wpa_supplicant/wpa_cli.c
+index 07160b5da..3055417fe 100644
+--- a/wpa_supplicant/wpa_cli.c
++++ b/wpa_supplicant/wpa_cli.c
+@@ -2957,6 +2957,15 @@ static int wpa_cli_cmd_twt_teardown(struct wpa_ctrl *ctrl, int argc,
+ }
+ 
+ 
++#ifdef CONFIG_DRIVER_NL80211_IFX
++static int wpa_cli_cmd_mbo_config(struct wpa_ctrl *ctrl, int argc,
++				 char *argv[])
++{
++	return wpa_cli_cmd(ctrl, "MBO", 0, argc, argv);
++}
++#endif /* CONFIG_DRIVER_NL80211_IFX */
++
++
+ static int wpa_cli_cmd_erp_flush(struct wpa_ctrl *ctrl, int argc, char *argv[])
+ {
+ 	return wpa_ctrl_command(ctrl, "ERP_FLUSH");
+@@ -3880,8 +3889,14 @@ static const struct wpa_cli_cmd wpa_cli_commands[] = {
+ 	},
+ 	{ "twt_teardown",
+ 	  wpa_cli_cmd_twt_teardown, NULL, cli_cmd_flag_none,
++	  "[cmd_id=<value>] [oper_class=0|1|255] [pref_val=0|1|255] [reason_code=<reason-u8>] [chan=<channel id>] [cell_cap=1|2] [enable=0|1] [notif_type=2|3] = Send MBO Setup frame"
++	},
++#ifdef CONFIG_DRIVER_NL80211_IFX
++	{ "mbo",
++	  wpa_cli_cmd_mbo_config, NULL, cli_cmd_flag_none,
+ 	  "[flags=<value>] = Send TWT Teardown frame"
+ 	},
++#endif/* CONFIG_DRIVER_NL80211_IFX */
+ 	{ "erp_flush", wpa_cli_cmd_erp_flush, NULL, cli_cmd_flag_none,
+ 	  "= flush ERP keys" },
+ 	{ "mac_rand_scan",
+diff --git a/wpa_supplicant/wpa_supplicant_i.h b/wpa_supplicant/wpa_supplicant_i.h
+index 28eff55ed..553d27d2c 100644
+--- a/wpa_supplicant/wpa_supplicant_i.h
++++ b/wpa_supplicant/wpa_supplicant_i.h
+@@ -1712,6 +1712,15 @@ void mbo_parse_rx_anqp_resp(struct wpa_supplicant *wpa_s,
+ 			    const u8 *data, size_t slen);
+ void wpas_update_mbo_connect_params(struct wpa_supplicant *wpa_s);
+ 
++#ifdef CONFIG_DRIVER_NL80211_IFX
++int wpas_config_offload_send_mbo_config(struct wpa_supplicant *wpa_s, u8 cmd_id,
++					u8 oper_class, u8 chan, u8 pref_val,
++					u8 reason_code, u8 enable, u8 notif_type,
++					u8 time_offset, u8 rssi_trig_delta,
++					bool enable_anqpo, bool enable_cell_pref,
++					u8 cell_pref_val, u8 cell_cap);
++#endif /* CONFIG_DRIVER_NL80211_IFX */
++
+ /* op_classes.c */
+ enum chan_allowed {
+ 	NOT_ALLOWED, NO_IR, RADAR, ALLOWED
+-- 
+2.17.1
+

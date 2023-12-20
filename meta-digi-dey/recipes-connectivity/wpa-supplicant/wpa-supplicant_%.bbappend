@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2023 Digi International.
+# Copyright (C) 2013-2024 Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -58,9 +58,20 @@ MURATA_COMMON_PATCHES = " \
     file://murata/0044-Establish-a-Default-TWT-session-in-the-STA-after-ass.patch \
     file://murata/0045-validate-the-TWT-parameters-exponent-and-mantissa-pa.patch \
     file://murata/0046-Fix-for-station-sending-open-auth-instead-of-SAE-aut.patch \
-    file://murata/0047-Fix-ROAMOFFLOAD-raises-portValid-too-early.patch \
-    file://murata/0048-Fix-associating-failed-when-PMK-lifetime-is-set-to-1.patch \
-    file://murata/0049-non-upstream-p2p_add_group-command-unification.patch \
+    file://murata/0047-Fix-associating-failed-when-PMK-lifetime-is-set-to-1.patch \
+    file://murata/0048-non-upstream-p2p_add_group-command-unification.patch \
+    file://murata/0049-non-upstream-MBO-wpa_cli-mbo-command-by-IFX-vendorID.patch \
+    file://murata/0050-EAP-TLS-Allow-TLSv1.3-support-to-be-enabled-with-bui.patch \
+    file://murata/0051-Enabling-TLS-v1.3-by-default.patch \
+    file://murata/0052-Disable-4-way-handshake-offload-for-DPP.patch \
+    file://murata/0053-non-upstream-WNM-wpa_cli-wnm_maxilde-command-by-IFX-.patch \
+    file://murata/0054-brcmfmac-sync-content-of-nl80211_copy.h-for-BSS_COLO.patch \
+    file://murata/0055-WPA3-SAE-enable-nl_connect-socket-while-WPA_DRIVER_F.patch \
+    file://murata/0056-OWE-AP-enable-OWE-compile-option-for-hostapd-executi.patch \
+    file://murata/0057-DPP2.0-support-DPP2.0-and-add-pfs-init-flow-on-EVENT.patch \
+    file://murata/0058-non-upstream-Prevent-invalid-akm-key-mgmt-when-MFP-r.patch \
+    file://murata/0059-Reset-authentication-and-encryption-parameters-while.patch \
+    file://murata/0060-brcmfmac-add-a-configurable-link_loss-parameter-for-.patch \
 "
 
 SRC_URI:append:ccimx6sbc = " file://wpa_supplicant_p2p.conf_atheros"

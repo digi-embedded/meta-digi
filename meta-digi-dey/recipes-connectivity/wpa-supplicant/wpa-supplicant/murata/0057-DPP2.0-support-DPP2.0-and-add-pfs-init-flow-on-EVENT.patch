@@ -1,0 +1,232 @@
+From 8a6154044994dbeac362d76bbe5822612af64067 Mon Sep 17 00:00:00 2001
+From: "Lin Ian (IFTW CSS ICW SW WFS 1)" <ian.lin-ee@infineon.com>
+Date: Mon, 16 Oct 2023 09:18:19 +0000
+Subject: [PATCH 57/60] DPP2.0: support DPP2.0 and add pfs init flow on
+ EVENT_UPDATE_DH
+
+---
+ hostapd/defconfig_base        |  1 +
+ src/ap/drv_callbacks.c        | 55 ++++++++++++++++-----------
+ src/ap/ieee802_11.c           | 70 ++++++++++++++++++++++++++++++++++-
+ src/ap/ieee802_11.h           |  3 ++
+ wpa_supplicant/defconfig_base |  1 +
+ 5 files changed, 107 insertions(+), 23 deletions(-)
+
+diff --git a/hostapd/defconfig_base b/hostapd/defconfig_base
+index 571ab6eda..eae36af0b 100644
+--- a/hostapd/defconfig_base
++++ b/hostapd/defconfig_base
+@@ -406,3 +406,4 @@ CONFIG_WPA3_SAE_AUTH_EARLY_SET=y
+ 
+ # Device Provisioning Protocol (DPP)
+ CONFIG_DPP=y
++CONFIG_DPP2=y
+diff --git a/src/ap/drv_callbacks.c b/src/ap/drv_callbacks.c
+index a50e6f2af..989ba735d 100644
+--- a/src/ap/drv_callbacks.c
++++ b/src/ap/drv_callbacks.c
+@@ -648,13 +648,12 @@ skip_wpa_check:
+ #endif /* CONFIG_OWE */
+ 
+ #ifdef CONFIG_DPP2
+-		dpp_pfs_free(sta->dpp_pfs);
+-		sta->dpp_pfs = NULL;
++	if ((hapd->conf->wpa_key_mgmt & WPA_KEY_MGMT_DPP) &&
++	    hapd->conf->dpp_netaccesskey && sta->wpa_sm &&
++	    wpa_auth_sta_key_mgmt(sta->wpa_sm) == WPA_KEY_MGMT_DPP &&
++	    elems.owe_dh) {
+ 
+-		if ((hapd->conf->wpa_key_mgmt & WPA_KEY_MGMT_DPP) &&
+-		    hapd->conf->dpp_netaccesskey && sta->wpa_sm &&
+-		    wpa_auth_sta_key_mgmt(sta->wpa_sm) == WPA_KEY_MGMT_DPP &&
+-		    elems.owe_dh) {
++		if (!sta->dpp_pfs) {
+ 			sta->dpp_pfs = dpp_pfs_init(
+ 				wpabuf_head(hapd->conf->dpp_netaccesskey),
+ 				wpabuf_len(hapd->conf->dpp_netaccesskey));
+@@ -664,19 +663,20 @@ skip_wpa_check:
+ 				/* Try to continue without PFS */
+ 				goto pfs_fail;
+ 			}
++		}
+ 
+-			if (dpp_pfs_process(sta->dpp_pfs, elems.owe_dh,
+-					    elems.owe_dh_len) < 0) {
+-				dpp_pfs_free(sta->dpp_pfs);
+-				sta->dpp_pfs = NULL;
+-				reason = WLAN_REASON_UNSPECIFIED;
+-				goto fail;
+-			}
++		if (dpp_pfs_process(sta->dpp_pfs, elems.owe_dh,
++				    elems.owe_dh_len) < 0) {
++			dpp_pfs_free(sta->dpp_pfs);
++			sta->dpp_pfs = NULL;
++			reason = WLAN_REASON_UNSPECIFIED;
++			goto fail;
+ 		}
++	}
+ 
+-		wpa_auth_set_dpp_z(sta->wpa_sm, sta->dpp_pfs ?
+-				   sta->dpp_pfs->secret : NULL);
+-	pfs_fail:
++	wpa_auth_set_dpp_z(sta->wpa_sm, sta->dpp_pfs ?
++		sta->dpp_pfs->secret : NULL);
++pfs_fail:
+ #endif /* CONFIG_DPP2 */
+ 
+ 	if (elems.rrm_enabled &&
+@@ -1792,8 +1792,9 @@ static int hostapd_notif_update_dh_ie(struct hostapd_data *hapd,
+ 		wpa_printf(MSG_DEBUG, "OWE: Peer unknown");
+ 		return -1;
+ 	}
+-	if (!(hapd->conf->wpa_key_mgmt & WPA_KEY_MGMT_OWE)) {
+-		wpa_printf(MSG_DEBUG, "OWE: No OWE AKM configured");
++	if (!(hapd->conf->wpa_key_mgmt & WPA_KEY_MGMT_OWE) &&
++		!(hapd->conf->wpa_key_mgmt & WPA_KEY_MGMT_DPP)) {
++		wpa_printf(MSG_DEBUG, "OWE/DPP: No OWE/DPP AKM configured");
+ 		status = WLAN_STATUS_AKMP_NOT_VALID;
+ 		goto err;
+ 	}
+@@ -1828,9 +1829,21 @@ static int hostapd_notif_update_dh_ie(struct hostapd_data *hapd,
+ 	}
+ 	sta->flags &= ~(WLAN_STA_WPS | WLAN_STA_MAYBE_WPS | WLAN_STA_WPS2);
+ 
+-	status = owe_process_rsn_ie(hapd, sta, elems.rsn_ie,
+-				    elems.rsn_ie_len, elems.owe_dh,
+-				    elems.owe_dh_len);
++#ifdef CONFIG_DPP2
++	if (hapd->conf->wpa_key_mgmt & WPA_KEY_MGMT_DPP) {
++		if (hapd->conf->dpp_netaccesskey && elems.owe_dh)
++			status = dpp_process_rsn_ie(hapd, sta, elems.rsn_ie,
++					    elems.rsn_ie_len, elems.owe_dh,
++					    elems.owe_dh_len);
++		else
++			status = WLAN_STATUS_UNSPECIFIED_FAILURE;
++	} else
++#endif /* CONFIG_DPP2 */
++	{
++		status = owe_process_rsn_ie(hapd, sta, elems.rsn_ie,
++					    elems.rsn_ie_len, elems.owe_dh,
++					    elems.owe_dh_len);
++	}
+ 	if (status != WLAN_STATUS_SUCCESS)
+ 		ap_free_sta(hapd, sta);
+ 
+diff --git a/src/ap/ieee802_11.c b/src/ap/ieee802_11.c
+index c4f7d00cc..564815381 100644
+--- a/src/ap/ieee802_11.c
++++ b/src/ap/ieee802_11.c
+@@ -4348,9 +4348,10 @@ u16 owe_validate_request(struct hostapd_data *hapd, const u8 *peer,
+ 		wpa_hexdump(MSG_DEBUG, "RSNE", rsn_ie, rsn_ie_len);
+ 		return wpa_res_to_status_code(res);
+ 	}
+-	if (!(data.key_mgmt & WPA_KEY_MGMT_OWE)) {
++	if (!(data.key_mgmt & WPA_KEY_MGMT_OWE) &&
++		!(data.key_mgmt & WPA_KEY_MGMT_DPP)) {
+ 		wpa_printf(MSG_DEBUG,
+-			   "OWE: Unexpected key mgmt 0x%x from " MACSTR,
++			   "OWE/DPP: Unexpected key mgmt 0x%x from " MACSTR,
+ 			   (unsigned int) data.key_mgmt, MAC2STR(peer));
+ 		return WLAN_STATUS_AKMP_NOT_VALID;
+ 	}
+@@ -4444,6 +4445,71 @@ end:
+ 
+ #endif /* CONFIG_OWE */
+ 
++#ifdef CONFIG_DPP2
++u16 dpp_process_rsn_ie(struct hostapd_data *hapd,
++		       struct sta_info *sta,
++		       const u8 *rsn_ie, size_t rsn_ie_len,
++		       const u8 *owe_dh, size_t owe_dh_len)
++{
++	u16 status = WLAN_STATUS_SUCCESS;
++	u8 *owe_buf, ie[256 * 2];
++	size_t ie_len = 0;
++	enum wpa_validate_result res;
++
++	if (!rsn_ie || rsn_ie_len < 2) {
++		wpa_printf(MSG_DEBUG, "DPP: No RSNE in (Re)AssocReq");
++		status = WLAN_STATUS_INVALID_IE;
++		goto end;
++	}
++
++	if (!sta->wpa_sm)
++		sta->wpa_sm = wpa_auth_sta_init(hapd->wpa_auth,	sta->addr,
++						NULL);
++	if (!sta->wpa_sm) {
++		wpa_printf(MSG_WARNING,
++			   "DPP: Failed to initialize WPA state machine");
++		status = WLAN_STATUS_UNSPECIFIED_FAILURE;
++		goto end;
++	}
++	rsn_ie -= 2;
++	rsn_ie_len += 2;
++	res = wpa_validate_wpa_ie(hapd->wpa_auth, sta->wpa_sm,
++				  hapd->iface->freq, rsn_ie, rsn_ie_len,
++				  NULL, 0, NULL, 0, owe_dh, owe_dh_len);
++	status = wpa_res_to_status_code(res);
++	if (status != WLAN_STATUS_SUCCESS)
++		goto end;
++
++	owe_buf = wpa_auth_write_assoc_resp_owe(sta->wpa_sm, ie, sizeof(ie),
++						NULL, 0);
++	if (!owe_buf) {
++		status = WLAN_STATUS_UNSPECIFIED_FAILURE;
++		goto end;
++	}
++
++	dpp_pfs_free(sta->dpp_pfs);
++	sta->dpp_pfs = NULL;
++	sta->dpp_pfs = dpp_pfs_init(
++		wpabuf_head(hapd->conf->dpp_netaccesskey),
++		wpabuf_len(hapd->conf->dpp_netaccesskey));
++
++	if (!sta->dpp_pfs) {
++		wpa_printf(MSG_DEBUG, "DPP: Could not initialize PFS");
++		status = WLAN_STATUS_UNSPECIFIED_FAILURE;
++	} else {
++		os_memcpy(owe_buf, wpabuf_head(sta->dpp_pfs->ie), wpabuf_len(sta->dpp_pfs->ie));
++		ie_len = owe_buf - ie + wpabuf_len(sta->dpp_pfs->ie);
++	}
++end:
++	wpa_printf(MSG_DEBUG, "DPP: Update status %d, ie len %d for peer "
++			      MACSTR, status, (unsigned int) ie_len,
++			      MAC2STR(sta->addr));
++	hostapd_drv_update_dh_ie(hapd, sta->addr, status,
++				 status == WLAN_STATUS_SUCCESS ? ie : NULL,
++				 ie_len);
++	return status;
++}
++#endif /* CONFIG_DPP2 */
+ 
+ static bool check_sa_query(struct hostapd_data *hapd, struct sta_info *sta,
+ 			   int reassoc)
+diff --git a/src/ap/ieee802_11.h b/src/ap/ieee802_11.h
+index c59ad5e38..3042b6bac 100644
+--- a/src/ap/ieee802_11.h
++++ b/src/ap/ieee802_11.h
+@@ -171,6 +171,9 @@ u8 * owe_assoc_req_process(struct hostapd_data *hapd, struct sta_info *sta,
+ u16 owe_process_rsn_ie(struct hostapd_data *hapd, struct sta_info *sta,
+ 		       const u8 *rsn_ie, size_t rsn_ie_len,
+ 		       const u8 *owe_dh, size_t owe_dh_len);
++u16 dpp_process_rsn_ie(struct hostapd_data *hapd, struct sta_info *sta,
++		       const u8 *rsn_ie, size_t rsn_ie_len,
++		       const u8 *owe_dh, size_t owe_dh_len);
+ u16 owe_validate_request(struct hostapd_data *hapd, const u8 *peer,
+ 			 const u8 *rsn_ie, size_t rsn_ie_len,
+ 			 const u8 *owe_dh, size_t owe_dh_len);
+diff --git a/wpa_supplicant/defconfig_base b/wpa_supplicant/defconfig_base
+index 59aeae69c..f34011d84 100644
+--- a/wpa_supplicant/defconfig_base
++++ b/wpa_supplicant/defconfig_base
+@@ -617,6 +617,7 @@ CONFIG_OWE=y
+ 
+ # Device Provisioning Protocol (DPP)
+ CONFIG_DPP=y
++CONFIG_DPP2=y
+ 
+ # Wired equivalent privacy (WEP)
+ # WEP is an obsolete cryptographic data confidentiality algorithm that is not
+-- 
+2.17.1
+
