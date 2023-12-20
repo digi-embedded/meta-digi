@@ -233,7 +233,7 @@ format_ubi_volume() {
 
 	# If the system is a multi-MTD, there must be an MTD partition by the
 	# same name as the UBI volume
-	result="$(grep '\"${1}\"$' /proc/mtd)"
+	result="$(grep "\"${1}\"$" /proc/mtd)"
 	if [ -n "${result}" ]; then
 		# Find the MTD partition.
 		local mtd_num="$(sed -ne "s/mtd\([0-9]\+\):.*\<${1}\>.*/\1/g;T;p" /proc/mtd 2>/dev/null)"
