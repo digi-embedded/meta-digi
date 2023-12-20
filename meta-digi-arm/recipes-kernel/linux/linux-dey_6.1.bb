@@ -2,7 +2,7 @@
 
 require recipes-kernel/linux/linux-dey.inc
 
-SRCBRANCH = "v6.1.36/nxp/master"
+SRCBRANCH = "v6.1.55/nxp/master"
 SRCREV = "${AUTOREV}"
 
 # Blacklist btnxpuart module. It will be managed by the bluetooth-init script
