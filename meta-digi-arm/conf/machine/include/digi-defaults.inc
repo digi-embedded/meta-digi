@@ -92,3 +92,6 @@ SWUPDATE_UBOOTIMG ?= "false"
 
 # ConnectCore Cloud Services packages to install
 CCCS_PKGS ?= "cccs-gs-demo dey-examples-cccs"
+
+# Default 1k-bloks seek in boot partition.
+BOOTLOADER_SEEK_BOOTPART ?= "0"
