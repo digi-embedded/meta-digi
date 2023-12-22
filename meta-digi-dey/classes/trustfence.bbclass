@@ -242,9 +242,15 @@ python () {
             else:
                 d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", keys_path + "/keys/IMG" + str(key_index_1) + "*key.pem")
                 d.setVar("CONFIG_SIGN_MODE", "HAB")
-
-        # Set the key password.
-        d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
+            # Set the key password.
+            d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
+        elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
+            d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", d.getVar("FIP_SIGN_KEY"))
+            # Set the key password.
+            if (d.getVar("DIGI_SOM") == "ccmp15"):
+                d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
+            elif (d.getVar("DIGI_SOM") == "ccmp13"):
+                d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass0" + str(key_index) + ".txt")
 
     # Enable partition encryption if rootfs encryption is enabled
     if (d.getVar("TRUSTFENCE_ENCRYPT_ROOTFS") == "1"):
