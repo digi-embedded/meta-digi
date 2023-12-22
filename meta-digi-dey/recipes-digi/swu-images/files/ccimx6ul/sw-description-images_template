@@ -12,6 +12,7 @@ software =
             scripts: (
                 {
                     filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    sha256 = "$swupdate_get_sha256(@@SWUPDATE_SCRIPT_NAME@@)";
                     type = "shellscript";
                 }
                 ##SCRIPT_UBOOT##
@@ -31,6 +32,7 @@ software =
             scripts: (
                 {
                     filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    sha256 = "$swupdate_get_sha256(@@SWUPDATE_SCRIPT_NAME@@)";
                     type = "shellscript";
                 }
                 ##SCRIPT_UBOOT##
@@ -50,6 +52,7 @@ software =
             scripts: (
                 {
                     filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    sha256 = "$swupdate_get_sha256(@@SWUPDATE_SCRIPT_NAME@@)";
                     type = "shellscript";
                 }
                 ##SCRIPT_UBOOT##
