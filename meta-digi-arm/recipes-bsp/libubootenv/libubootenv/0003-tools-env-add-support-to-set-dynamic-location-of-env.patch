@@ -27,10 +27,10 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  2 files changed, 90 insertions(+), 2 deletions(-)
 
 diff --git a/src/uboot_env.c b/src/uboot_env.c
-index 87f831b0cdc7..539e22f9a8ac 100644
+index b7ad4c4..924a6cf 100644
 --- a/src/uboot_env.c
 +++ b/src/uboot_env.c
-@@ -431,6 +431,73 @@ static int check_env_device(struct uboot_ctx *ctx, struct uboot_flash_env *dev)
+@@ -591,6 +591,73 @@ static int check_env_device(struct uboot_flash_env *dev)
  	return 0;
  }
  
@@ -104,9 +104,9 @@ index 87f831b0cdc7..539e22f9a8ac 100644
  static bool check_compatible_devices(struct uboot_ctx *ctx)
  {
  	if (!ctx->redundant)
-@@ -442,6 +509,12 @@ static bool check_compatible_devices(struct uboot_ctx *ctx)
+@@ -602,6 +669,12 @@ static bool check_compatible_devices(struct uboot_ctx *ctx)
  		return false;
- 	if (ctx->envdevs[0].envsize != ctx->envdevs[1].envsize) 
+ 	if (ctx->envdevs[0].envsize != ctx->envdevs[1].envsize)
  		return false;
 +	if (ctx->envdevs[0].offset == ctx->envdevs[1].offset) {
 +		ctx->dynamic_env = true;
@@ -117,7 +117,7 @@ index 87f831b0cdc7..539e22f9a8ac 100644
  
  	return true;
  }
-@@ -488,7 +561,7 @@ static int fileread(struct uboot_flash_env *dev, void *data)
+@@ -648,7 +721,7 @@ static int fileread(struct uboot_flash_env *dev, void *data)
  	return ret;
  }
  
@@ -126,7 +126,7 @@ index 87f831b0cdc7..539e22f9a8ac 100644
  {
  	size_t count;
  	size_t blocksize;
-@@ -507,6 +580,17 @@ static int mtdread(struct uboot_flash_env *dev, void *data)
+@@ -667,6 +740,17 @@ static int mtdread(struct uboot_flash_env *dev, void *data)
  		ret = read(dev->fd, data, dev->envsize);
  		break;
  	case MTD_NANDFLASH:
@@ -144,7 +144,7 @@ index 87f831b0cdc7..539e22f9a8ac 100644
  		if (dev->offset)
  			if (lseek(dev->fd, dev->offset, SEEK_SET) < 0) {
  				ret = -EIO;
-@@ -582,7 +666,7 @@ static int devread(struct uboot_ctx *ctx, unsigned int copy, void *data)
+@@ -742,7 +826,7 @@ static int devread(struct uboot_ctx *ctx, unsigned int copy, void *data)
  		ret = fileread(dev, data);
  		break;
  	case DEVICE_MTD:
@@ -154,10 +154,10 @@ index 87f831b0cdc7..539e22f9a8ac 100644
  	case DEVICE_UBI:
  		ret = ubiread(dev, data);
 diff --git a/src/uboot_private.h b/src/uboot_private.h
-index 22c8c14ce8cc..591df20d6936 100644
+index ee2d305..84bd1bc 100644
 --- a/src/uboot_private.h
 +++ b/src/uboot_private.h
-@@ -113,10 +113,14 @@ struct uboot_ctx {
+@@ -116,10 +116,14 @@ struct uboot_ctx {
  	bool redundant;
  	/** true if the environment is encrypted */
  	bool encrypted;

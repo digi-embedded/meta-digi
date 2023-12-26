@@ -18,10 +18,10 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  2 files changed, 119 insertions(+)
 
 diff --git a/src/libuboot.h b/src/libuboot.h
-index bfcaeb1d609f..b15969f89174 100644
+index 3ed3244..e83b3a5 100644
 --- a/src/libuboot.h
 +++ b/src/libuboot.h
-@@ -159,6 +159,29 @@ const char *libuboot_getname(void *entry);
+@@ -201,6 +201,29 @@ const char *libuboot_getname(void *entry);
   */
  const char *libuboot_getvalue(void *entry);
  
@@ -52,11 +52,11 @@ index bfcaeb1d609f..b15969f89174 100644
  }
  #endif
 diff --git a/src/uboot_env.c b/src/uboot_env.c
-index 2fd08f5a07db..87f831b0cdc7 100644
+index 750b736..b7ad4c4 100644
 --- a/src/uboot_env.c
 +++ b/src/uboot_env.c
-@@ -1632,3 +1632,99 @@ void libuboot_close(struct uboot_ctx *ctx) {
- void libuboot_exit(struct uboot_ctx *ctx) {
+@@ -2234,3 +2234,99 @@ void libuboot_exit(struct uboot_ctx *ctx)
+ 
  	free(ctx);
  }
 +

@@ -28,10 +28,10 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  create mode 100644 src/md5.h
 
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 4b71bc588827..d7e38a12feed 100644
+index ababe0f..fb1efa2 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -1,6 +1,8 @@
+@@ -4,6 +4,8 @@
  cmake_minimum_required (VERSION 2.6)
  # Sources and private headers
  SET(libubootenv_SOURCES
@@ -42,7 +42,7 @@ index 4b71bc588827..d7e38a12feed 100644
  )
 diff --git a/src/caam_keyblob.h b/src/caam_keyblob.h
 new file mode 100644
-index 000000000000..e313e87a3854
+index 0000000..e313e87
 --- /dev/null
 +++ b/src/caam_keyblob.h
 @@ -0,0 +1,42 @@
@@ -90,7 +90,7 @@ index 000000000000..e313e87a3854
 +#endif /* CAAM_KEYBLOB_H */
 diff --git a/src/md5.c b/src/md5.c
 new file mode 100644
-index 000000000000..47ae8bf34a4d
+index 0000000..47ae8bf
 --- /dev/null
 +++ b/src/md5.c
 @@ -0,0 +1,275 @@
@@ -371,7 +371,7 @@ index 000000000000..47ae8bf34a4d
 +}
 diff --git a/src/md5.h b/src/md5.h
 new file mode 100644
-index 000000000000..02a9a9d23e34
+index 0000000..02a9a9d
 --- /dev/null
 +++ b/src/md5.h
 @@ -0,0 +1,24 @@
@@ -400,13 +400,13 @@ index 000000000000..02a9a9d23e34
 +
 +#endif /* _MD5_H */
 diff --git a/src/uboot_env.c b/src/uboot_env.c
-index 30c39ebf6fa9..2fd08f5a07db 100644
+index ae85c7e..750b736 100644
 --- a/src/uboot_env.c
 +++ b/src/uboot_env.c
-@@ -33,11 +33,21 @@
- #include <sys/wait.h>
+@@ -34,11 +34,21 @@
  #include <sys/ioctl.h>
  #include <zlib.h>
+ #include <yaml.h>
 +#include <arpa/inet.h>
  #include <mtd/mtd-user.h>
  #include <mtd/ubi-user.h>
@@ -425,8 +425,8 @@ index 30c39ebf6fa9..2fd08f5a07db 100644
  #define UBI_MAX_VOLUME			128
  
  #define DEVICE_MTD_NAME 		"/dev/mtd"
-@@ -844,6 +854,105 @@ static int set_obsolete_flag(struct uboot_flash_env *dev)
- 	return ret;
+@@ -1028,6 +1038,105 @@ const struct uboot_version_info *libuboot_version_info(void)
+ 	return &libinfo;
  }
  
 +static int is_env_encrypted(void)
@@ -531,7 +531,7 @@ index 30c39ebf6fa9..2fd08f5a07db 100644
  int libuboot_env_store(struct uboot_ctx *ctx)
  {
  	struct var_entry *entry;
-@@ -919,6 +1028,15 @@ int libuboot_env_store(struct uboot_ctx *ctx)
+@@ -1103,6 +1212,15 @@ int libuboot_env_store(struct uboot_ctx *ctx)
  		((struct uboot_env_redund *)image)->flags = flags;
  	}
  
@@ -547,7 +547,7 @@ index 30c39ebf6fa9..2fd08f5a07db 100644
  	*(uint32_t *)image = crc32(0, (uint8_t *)data, ctx->size - offsetdata);
  
  	copy = ctx->redundant ? (ctx->current ? 0 : 1) : 0;
-@@ -984,6 +1102,13 @@ static int libuboot_load(struct uboot_ctx *ctx)
+@@ -1167,6 +1285,13 @@ static int libuboot_load(struct uboot_ctx *ctx)
  		}
  		crc = *(uint32_t *)(buf[i] + offsetcrc);
  		dev->crc = crc32(0, (uint8_t *)data, usable_envsize);
@@ -561,7 +561,7 @@ index 30c39ebf6fa9..2fd08f5a07db 100644
  		crcenv[i] = dev->crc == crc;
  		if (ctx->redundant)
  			dev->flags = *(uint8_t *)(buf[i] + offsetflags);
-@@ -1264,6 +1389,11 @@ int libuboot_read_config(struct uboot_ctx *ctx, const char *config)
+@@ -1773,6 +1898,11 @@ int libuboot_read_config_ext(struct uboot_ctx **ctxlist, const char *config)
  			break;
  		}
  	}
@@ -573,7 +573,7 @@ index 30c39ebf6fa9..2fd08f5a07db 100644
  	if (ndev == 0)
  		retval = -EINVAL;
  
-@@ -1461,6 +1591,7 @@ int libuboot_initialize(struct uboot_ctx **out,
+@@ -2042,6 +2172,7 @@ int libuboot_initialize(struct uboot_ctx **out,
  		return -ENOMEM;
  
  	ctx->valid = false;
@@ -582,10 +582,10 @@ index 30c39ebf6fa9..2fd08f5a07db 100644
  
  	if (ret < 0) {
 diff --git a/src/uboot_private.h b/src/uboot_private.h
-index 4b7a9f9602a6..22c8c14ce8cc 100644
+index 40e5446..ee2d305 100644
 --- a/src/uboot_private.h
 +++ b/src/uboot_private.h
-@@ -111,10 +111,14 @@ LIST_HEAD(vars, var_entry);
+@@ -114,10 +114,14 @@ LIST_HEAD(vars, var_entry);
  struct uboot_ctx {
  	/** true if the environment is redundant */
  	bool redundant;

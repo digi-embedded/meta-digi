@@ -21,10 +21,10 @@ https://onedigi.atlassian.net/browse/DEL-8444
  1 file changed, 52 insertions(+), 2 deletions(-)
 
 diff --git a/src/uboot_env.c b/src/uboot_env.c
-index 539e22f9a8ac..86f9b9ebfec2 100644
+index 924a6cf..d507cac 100644
 --- a/src/uboot_env.c
 +++ b/src/uboot_env.c
-@@ -945,6 +945,32 @@ static int is_env_encrypted(void)
+@@ -1129,6 +1129,32 @@ static int is_env_encrypted(void)
  	return access(dt_prop, F_OK) != -1;
  }
 
@@ -57,7 +57,7 @@ index 539e22f9a8ac..86f9b9ebfec2 100644
  #define MAX_HWID_WORDS		4
  static int env_caam_get_keymod(unsigned char output[16])
  {
-@@ -953,12 +979,11 @@ static int env_caam_get_keymod(unsigned char output[16])
+@@ -1137,12 +1163,11 @@ static int env_caam_get_keymod(unsigned char output[16])
  	int fd;
  	uint32_t ocotp_hwid[MAX_HWID_WORDS];
  	char dt_prop[32];
@@ -71,7 +71,7 @@ index 539e22f9a8ac..86f9b9ebfec2 100644
  			fd = open(dt_prop, O_RDONLY);
  			if (fd < 0)
  				return fd;
-@@ -969,6 +994,31 @@ static int env_caam_get_keymod(unsigned char output[16])
+@@ -1153,6 +1178,31 @@ static int env_caam_get_keymod(unsigned char output[16])
  			}
  			ocotp_hwid[i] = ntohl(*(uint32_t *)buf);
  			close(fd);
