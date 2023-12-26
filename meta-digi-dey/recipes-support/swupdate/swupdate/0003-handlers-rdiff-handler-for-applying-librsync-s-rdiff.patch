@@ -19,10 +19,10 @@ Signed-off-by: David Escalona <david.escalona@digi.com>
  create mode 100644 handlers/ubivol_rdiff_handler.c
 
 diff --git a/Makefile.flags b/Makefile.flags
-index 2a021c8..b542358 100644
+index 95c785c..5bdf520 100644
 --- a/Makefile.flags
 +++ b/Makefile.flags
-@@ -209,6 +209,10 @@ ifeq ($(CONFIG_RDIFFHANDLER),y)
+@@ -202,6 +202,10 @@ ifeq ($(CONFIG_RDIFFHANDLER),y)
  LDLIBS += rsync
  endif
  
@@ -34,10 +34,10 @@ index 2a021c8..b542358 100644
  LDLIBS += zmq
  endif
 diff --git a/configs/all_handlers_defconfig b/configs/all_handlers_defconfig
-index 8f6f8e0..9077220 100644
+index da4b28f..5da2d0d 100644
 --- a/configs/all_handlers_defconfig
 +++ b/configs/all_handlers_defconfig
-@@ -31,5 +31,6 @@ CONFIG_SHELLSCRIPTHANDLER=y
+@@ -30,5 +30,6 @@ CONFIG_SHELLSCRIPTHANDLER=y
  CONFIG_SWUFORWARDER_HANDLER=y
  CONFIG_SSBLSWITCH=y
  CONFIG_UBIVOL=y
@@ -45,10 +45,10 @@ index 8f6f8e0..9077220 100644
  CONFIG_UCFWHANDLER=y
  CONFIG_UNIQUEUUID=y
 diff --git a/handlers/Config.in b/handlers/Config.in
-index 107ffeb..62d54bd 100644
+index 9f4e177..129e972 100644
 --- a/handlers/Config.in
 +++ b/handlers/Config.in
-@@ -166,6 +166,19 @@ config RDIFFHANDLER
+@@ -158,6 +158,19 @@ config RDIFFHANDLER
  comment "rdiff support needs librsync"
  	depends on !HAVE_LIBRSYNC
  
@@ -69,7 +69,7 @@ index 107ffeb..62d54bd 100644
  	bool "readback"
  	depends on HASH_VERIFY
 diff --git a/handlers/Makefile b/handlers/Makefile
-index b5203f9..bd47d3b 100644
+index eb24a49..e74dacb 100644
 --- a/handlers/Makefile
 +++ b/handlers/Makefile
 @@ -21,6 +21,7 @@ obj-$(CONFIG_CFIHAMMING1)+= flash_hamming1_handler.o

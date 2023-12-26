@@ -13,10 +13,10 @@ Signed-off-by: Mike Engel <Mike.Engel@digi.com>
  2 files changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/Kconfig b/Kconfig
-index 85fa5fd71c4c..5ad2026c675c 100644
+index 5a3dc9a..17fa27c 100644
 --- a/Kconfig
 +++ b/Kconfig
-@@ -258,6 +258,13 @@ config FEATURE_SYSLOG
+@@ -262,6 +262,13 @@ config FEATURE_SYSLOG
  	#  This option is auto-selected when you select any applet which may
  	#  send its output to syslog. You do not need to select it manually.
  
@@ -31,10 +31,10 @@ index 85fa5fd71c4c..5ad2026c675c 100644
  
  menu 'Build Options'
 diff --git a/core/network_thread.c b/core/network_thread.c
-index 88042f1238cb..4bc100055e42 100644
+index ca23908..c539d27 100644
 --- a/core/network_thread.c
 +++ b/core/network_thread.c
-@@ -106,7 +106,9 @@ static bool is_selection_allowed(const char *software_set, char *running_mode,
+@@ -102,7 +102,9 @@ static bool is_selection_allowed(const char *software_set, char *running_mode,
  		}
  		free(swset);
  	}
