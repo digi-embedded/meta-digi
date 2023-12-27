@@ -20,7 +20,7 @@
 ENV_BOOT_RECOVERY="boot_recovery"
 ENV_RECOVERY_COMMAND="recovery_command"
 
-SW_CONFIG="/etc/swupdate.cfg"
+SW_CONFIG="/etc/swupdate.config"
 PUBLIC_KEY="/etc/ssl/certs/key.pub"
 
 USB_MOUNT_DIR="/run/media"

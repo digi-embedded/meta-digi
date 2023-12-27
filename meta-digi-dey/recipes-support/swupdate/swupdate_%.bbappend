@@ -12,7 +12,7 @@ SRC_URI += " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'file://systemd.cfg', '', d)} \
     ${@bb.utils.contains('STORAGE_MEDIA', 'mtd', 'file://mtd.cfg', '', d)} \
     ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'file://signed_images.cfg', '', d)} \
-    file://swupdate.cfg \
+    file://swupdate.config \
 "
 
 do_install:append() {
@@ -22,16 +22,16 @@ do_install:append() {
 
 	# Copy config file
 	install -d ${D}${sysconfdir}/
-	install -m 0755 ${WORKDIR}/swupdate.cfg ${D}${sysconfdir}
+	install -m 0755 ${WORKDIR}/swupdate.config ${D}${sysconfdir}
 
 	# Add MTD blacklist
 	if ${@oe.utils.conditional('STORAGE_MEDIA', 'mtd', 'true', 'false', d)}; then
-		sed -i "s,\(^\s*\)#mtd-blacklist,\1mtd-blacklist = \"${SWUPDATE_MTD_BLACKLIST}\",g" ${D}${sysconfdir}/swupdate.cfg
+		sed -i "s,\(^\s*\)#mtd-blacklist,\1mtd-blacklist = \"${SWUPDATE_MTD_BLACKLIST}\",g" ${D}${sysconfdir}/swupdate.config
 	fi
 
 	# Add public-key-file setting to config file if TrustFence is enabled
 	if ${@oe.utils.conditional('TRUSTFENCE_ENABLED', '1', 'true', 'false', d)}; then
-		sed -i "s,\(^\s*\)#public-key-file,\1public-key-file = \"${sysconfdir}/ssl/certs/key.pub\",g" ${D}${sysconfdir}/swupdate.cfg
+		sed -i "s,\(^\s*\)#public-key-file,\1public-key-file = \"${sysconfdir}/ssl/certs/key.pub\",g" ${D}${sysconfdir}/swupdate.config
 	fi
 }
 
