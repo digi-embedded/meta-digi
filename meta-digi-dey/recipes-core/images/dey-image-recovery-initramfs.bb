@@ -32,6 +32,7 @@ IMAGE_ROOTFS_SIZE = "8192"
 BAD_RECOMMENDATIONS += " \
     openssl-bin \
     openssl-conf \
+    openssl-ossl-module-legacy \
 "
 
 export IMAGE_BASENAME = "dey-image-recovery-initramfs"
