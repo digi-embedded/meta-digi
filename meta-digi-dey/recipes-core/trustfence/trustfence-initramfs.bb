@@ -23,7 +23,6 @@ RDEPENDS:${PN} = " \
     cryptsetup \
     trustfence-tool \
     util-linux-findfs \
-    wipe \
 "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

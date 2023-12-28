@@ -12,7 +12,6 @@ PACKAGE_INSTALL = " \
     recovery-initramfs \
     swupdate \
     trustfence-tool \
-    wipe \
     ${@bb.utils.contains('DEY_SOC_VENDOR', 'NXP', bb.utils.contains('STORAGE_MEDIA', 'mtd', 'imx-kobs', '', d), '', d)} \
 "
 
