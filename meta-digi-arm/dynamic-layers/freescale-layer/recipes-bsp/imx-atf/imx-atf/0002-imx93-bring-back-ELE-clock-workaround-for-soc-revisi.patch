@@ -12,10 +12,10 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  2 files changed, 14 insertions(+)
 
 diff --git a/plat/imx/imx93/imx93_psci.c b/plat/imx/imx93/imx93_psci.c
-index 0fd2bb7802df..461801afb126 100644
+index 6a21ee970079..b9c4e0a1752b 100644
 --- a/plat/imx/imx93/imx93_psci.c
 +++ b/plat/imx/imx93/imx93_psci.c
-@@ -783,6 +783,11 @@ void imx_pwr_domain_suspend(const psci_power_state_t *target_state)
+@@ -794,6 +794,11 @@ void imx_pwr_domain_suspend(const psci_power_state_t *target_state)
  		} else {
  			write_clusterpwrdn(DSU_CLUSTER_PWR_OFF);
  		}
@@ -27,7 +27,7 @@ index 0fd2bb7802df..461801afb126 100644
  	}
  
  	if (is_local_state_retn(SYSTEM_PWR_STATE(target_state))) {
-@@ -902,6 +907,11 @@ void imx_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
+@@ -924,6 +929,11 @@ void imx_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
  		mmio_write_32(IMX_GPC_BASE + A55C0_CMC_OFFSET + 0x800 * 2 + CM_MODE_CTRL, CM_MODE_RUN);
  		/* clear L3 retention */
  		mmio_clrbits_32(IMX_SRC_BASE + A55C0_MEM + 0x400 * 3 + 0x4, MEM_LP_RETENTION);

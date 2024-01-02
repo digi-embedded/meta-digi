@@ -9,8 +9,8 @@ SRC_URI:append:ccimx8m = " \
     file://0004-imx8mn-Disable-M7-debug-console.patch \
 "
 SRC_URI:append:ccimx93 = " \
-    file://0005-ccimx93-use-UART6-for-the-default-console.patch \
-    file://0006-imx93-bring-back-ELE-clock-workaround-for-soc-revisi.patch \
+    file://0001-ccimx93-use-UART6-for-the-default-console.patch \
+    file://0002-imx93-bring-back-ELE-clock-workaround-for-soc-revisi.patch \
 "
 
 BOOT_TOOLS = "imx-boot-tools"
