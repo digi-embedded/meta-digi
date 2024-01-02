@@ -38,6 +38,8 @@ compile_mx93:append:ccimx93() {
 		ATF_MACHINE_NAME_A0="$(echo ${ATF_MACHINE_NAME} | sed -e 's,.bin,-A0.bin,g')"
 		bbnote "Copy ATF binary for SOC revision A0: ${ATF_MACHINE_NAME_A0}"
 		\cp --remove-destination ${DEPLOY_DIR_IMAGE}/${ATF_MACHINE_NAME_A0} ${BOOT_STAGING}/bl31.bin
+		# Filename must match the deployed one in "optee-os" recipe for A0 SOC revision
+		\cp --remove-destination ${DEPLOY_DIR_IMAGE}/tee.ccimx93dvk_a0.bin ${BOOT_STAGING}/tee.bin
 		unset ATF_MACHINE_NAME_A0
 	fi
 }
@@ -107,6 +109,11 @@ do_deploy:append:ccimx93() {
 			ln -sf ${BOOT_NAME}-${MACHINE}.bin-${target} ${DEPLOYDIR}/${BOOT_NAME}-${MACHINE}-A0.bin
 		fi
 	done
+	# Deploy A0 optee binary
+	if ${DEPLOY_OPTEE}; then
+		# Filename must match the deployed one in "optee-os" recipe for A0 SOC revision
+		install -m 0644 ${DEPLOY_DIR_IMAGE}/tee.ccimx93dvk_a0.bin ${DEPLOYDIR}/${BOOT_TOOLS}
+	fi
 }
 
 do_deploy:ccimx8x () {
