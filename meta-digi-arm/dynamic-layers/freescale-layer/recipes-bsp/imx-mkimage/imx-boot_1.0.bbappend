@@ -12,10 +12,10 @@ SRC_URI:append:ccimx93 = " \
     file://0002-imx9-soc.mak-add-makefile-target-to-build-A0-revisio.patch \
 "
 
-# Use NXP's lf-6.1.36-2.1.0 release for ccimx93
+# Use NXP's lf-6.1.55-2.2.0 release for ccimx93
 SRC_URI:ccimx93 = "git://github.com/nxp-imx/imx-mkimage.git;protocol=https;branch=${SRCBRANCH}"
-SRCBRANCH:ccimx93 = "lf-6.1.36_2.1.0"
-SRCREV:ccimx93 = "5a0faefc223e51e088433663b6e7d6fbce89bf59"
+SRCBRANCH:ccimx93 = "lf-6.1.55_2.2.0"
+SRCREV:ccimx93 = "c4365450fb115d87f245df2864fee1604d97c06a"
 
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
