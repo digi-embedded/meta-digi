@@ -188,7 +188,7 @@ IMX_EXTRA_FIRMWARE                  ?= ""
 IMX_EXTRA_FIRMWARE:mx8-generic-bsp   = "firmware-imx-8 imx-sc-firmware imx-seco"
 IMX_EXTRA_FIRMWARE:mx8m-generic-bsp  = "firmware-imx-8m"
 IMX_EXTRA_FIRMWARE:mx8x-generic-bsp  = "imx-sc-firmware imx-seco"
-IMX_EXTRA_FIRMWARE:mx93-generic-bsp  = "firmware-imx-9 firmware-sentinel"
+IMX_EXTRA_FIRMWARE:mx93-generic-bsp  = "imx-boot-firmware-files firmware-ele-imx"
 
 # Firmware
 MACHINE_FIRMWARE ?= ""

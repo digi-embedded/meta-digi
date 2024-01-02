@@ -1,15 +1,15 @@
 # Copyright 2021-2023 NXP
-SUMMARY = "NXP i.MX Sentinel firmware"
-DESCRIPTION = "Firmware for i.MX Sentinel Security Controller"
+SUMMARY = "NXP i.MX ELE firmware"
+DESCRIPTION = "EdgeLock Enclave firmware for i.MX series SoCs"
 SECTION = "base"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=db4762b09b6bda63da103963e6e081de"
+LIC_FILES_CHKSUM = "file://COPYING;md5=2827219e81f28aba7c6a569f7c437fa7"
 
 inherit fsl-eula-unpack use-imx-security-controller-firmware deploy
 
 SRC_URI = "${FSL_MIRROR}/${BP}.bin;fsl-eula=true"
-SRC_URI[md5sum] = "339011b6b199151d835c03089a3c2221"
-SRC_URI[sha256sum] = "269480417a8ae9aa4cc4101ab947287fc33455a931021dbdc4d9badb5212bceb"
+SRC_URI[md5sum] = "7532c2e356574c1c9255c01169d38427"
+SRC_URI[sha256sum] = "4a0440168d8dfb95989a17be8fafb149589e110e7d4518e5e8a33463dfb5e5ca"
 
 do_compile[noexec] = "1"
 
