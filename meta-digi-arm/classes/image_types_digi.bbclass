@@ -204,7 +204,7 @@ IMAGE_CMD:recovery.ubifs() {
 	fi
 
 	# Build UBIFS recovery image out of temp folder
-	mkfs.ubifs -r ${TMP_RECOVERYDIR} -o ${IMGDEPLOYDIR}/${IMAGE_NAME}.recovery.ubifs ${MKUBIFS_BOOT_ARGS}
+	mkfs.ubifs -r ${TMP_RECOVERYDIR} -o ${IMGDEPLOYDIR}/${IMAGE_NAME}.recovery.ubifs ${MKUBIFS_RECOVERY_ARGS}
 
 	# Remove the temporary folder
 	rm -rf ${TMP_RECOVERYDIR}
