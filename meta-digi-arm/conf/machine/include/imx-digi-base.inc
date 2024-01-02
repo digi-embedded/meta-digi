@@ -272,11 +272,11 @@ PREFERRED_VERSION_vulkan-tools:imxvulkan   ??= "1.2.182.0"
 
 # Use i.MX optee Version
 PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "3.21.0.imx"
+PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "4.0.0.imx"
 PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "3.21.0.imx"
+PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "4.0.0.imx"
 PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "3.21.0.imx"
+PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "4.0.0.imx"
 
 # Machine learning backports from NXP's lf-6.1.36-2.1.0 release
 PREFERRED_VERSION_ethos-u-vela:ccimx93 = "3.8.0"

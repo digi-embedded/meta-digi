@@ -9,7 +9,7 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  2 files changed, 7 insertions(+)
 
 diff --git a/core/arch/arm/plat-imx/conf.mk b/core/arch/arm/plat-imx/conf.mk
-index 1d5081f96afe..5e2d0733dd04 100644
+index 0bd9ccd6bef1..4fa61d5c2619 100644
 --- a/core/arch/arm/plat-imx/conf.mk
 +++ b/core/arch/arm/plat-imx/conf.mk
 @@ -88,6 +88,7 @@ mx8ulp-flavorlist = \
@@ -20,7 +20,7 @@ index 1d5081f96afe..5e2d0733dd04 100644
  	mx93evk \
  
  ifneq (,$(filter $(PLATFORM_FLAVOR),$(mx6ul-flavorlist)))
-@@ -449,6 +450,11 @@ CFG_DDR_SIZE ?= 0x80000000
+@@ -451,6 +452,11 @@ CFG_DDR_SIZE ?= 0x80000000
  CFG_UART_BASE ?= UART1_BASE
  endif
  
@@ -33,7 +33,7 @@ index 1d5081f96afe..5e2d0733dd04 100644
  ifeq ($(filter y, $(CFG_MX6QP) $(CFG_MX6Q) $(CFG_MX6D) $(CFG_MX6DL) $(CFG_MX6S) \
  	$(CFG_MX6SL) $(CFG_MX6SLL) $(CFG_MX6SX)), y)
 diff --git a/core/arch/arm/plat-imx/registers/imx93.h b/core/arch/arm/plat-imx/registers/imx93.h
-index e91607537380..66a6408109c2 100644
+index 21080da82d04..17f4d8f5755e 100644
 --- a/core/arch/arm/plat-imx/registers/imx93.h
 +++ b/core/arch/arm/plat-imx/registers/imx93.h
 @@ -9,6 +9,7 @@
@@ -41,6 +41,6 @@ index e91607537380..66a6408109c2 100644
  
  #define UART1_BASE 0x44380000
 +#define UART6_BASE 0x425a0000
- #define MU_BASE	   0x47520000
- #define MU_SIZE	   0x10000
- 
+ /*
+  * For Normal MU - Use MU_BASE as 0x47520000
+  * For Trust MU - Use MU_BASE as 0x47530000

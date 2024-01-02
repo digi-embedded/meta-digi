@@ -10,9 +10,9 @@ SRC_URI = " \
     file://0007-allow-setting-sysroot-for-clang.patch \
     file://0001-core-imx-support-ccimx93-dvk.patch \
 "
-SRCBRANCH = "lf-6.1.36_2.1.0"
-# Tag: lf-6.1.36-2.1.0
-SRCREV = "4e32281904b15af9ddbdf00f73e1c08eae21c695"
+SRCBRANCH = "lf-6.1.55_2.2.0"
+# Tag: lf-6.1.55-2.2.0
+SRCREV = "a303fc80f7c4bd713315687a1fa1d6ed136e78ee"
 
 PLATFORM_FLAVOR:ccimx93 = "ccimx93dvk"
 
