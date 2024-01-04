@@ -8,11 +8,15 @@ include conf/machine/include/digi-defaults.inc
 
 DIGI_FAMILY = "ccmp1"
 
+# Platform T-FA settings
+TFA_SIGN_SUFFIX ?= "${@bb.utils.contains('TRUSTFENCE_SIGN', '1', '_signed', '', d)}"
+
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "bin"
 # Set U-Boot FIP settings
 FIP_UBOOT_DTB = "u-boot"
+FIP_SIGN_SUFFIX ?= "${@bb.utils.contains('TRUSTFENCE_SIGN', '1', '_Signed', '', d)}"
 
 STORAGE_MEDIA = "mtd"
 
