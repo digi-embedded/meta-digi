@@ -1,4 +1,4 @@
-From 89b035959578fe0d7714748487dad875bc018ef5 Mon Sep 17 00:00:00 2001
+From 768cac09ee47729e3ef38b477c7a69e5b3d10c60 Mon Sep 17 00:00:00 2001
 From: Mike Engel <Mike.Engel@digi.com>
 Date: Fri, 26 May 2023 11:21:43 +0200
 Subject: [PATCH] Implement support for environment encryption for CCMP1
@@ -19,8 +19,8 @@ Signed-off-by: Mike Engel <Mike.Engel@digi.com>
  src/teec_benchmark.h            |  37 ++
  src/teec_trace.c                | 141 +++++
  src/teec_trace.h                | 148 +++++
- src/uboot_env.c                 | 181 +++++-
- 11 files changed, 2655 insertions(+), 4 deletions(-)
+ src/uboot_env.c                 | 180 +++++-
+ 11 files changed, 2654 insertions(+), 4 deletions(-)
  create mode 100644 src/ta_ccmp1_aes.h
  create mode 100644 src/tee.h
  create mode 100644 src/tee_bench.h
@@ -2576,7 +2576,7 @@ index 0000000..b1e37ec
 +
 +#endif
 diff --git a/src/uboot_env.c b/src/uboot_env.c
-index 86f9b9e..f9aa985 100644
+index 86f9b9e..45b356f 100644
 --- a/src/uboot_env.c
 +++ b/src/uboot_env.c
 @@ -41,6 +41,9 @@
@@ -2598,15 +2598,7 @@ index 86f9b9e..f9aa985 100644
  {
  	int i;
  	int len;
-@@ -993,6 +996,7 @@ static int env_caam_get_keymod(unsigned char output[16])
- 				return -1;
- 			}
- 			ocotp_hwid[i] = ntohl(*(uint32_t *)buf);
-+			fprintf(stderr, "HWID_%d %x \n ",i,ocotp_hwid[i]);
- 			close(fd);
- 		} else if (machine_is_compatible("digi,ccimx6ul") ||
- 			   machine_is_compatible("digi,ccimx6")) {
-@@ -1040,7 +1044,7 @@ static int env_caam_crypt(char *data, unsigned int size, const int enc)
+@@ -1040,7 +1043,7 @@ static int env_caam_crypt(char *data, unsigned int size, const int enc)
  	char *buffer;
  	unsigned char key_modifier[16];
  
@@ -2615,7 +2607,7 @@ index 86f9b9e..f9aa985 100644
  	if (ret)
  		return ret;
  
-@@ -1087,6 +1091,165 @@ free:
+@@ -1087,6 +1090,165 @@ free:
  	return ret;
  }
  
@@ -2781,7 +2773,7 @@ index 86f9b9e..f9aa985 100644
  int libuboot_env_store(struct uboot_ctx *ctx)
  {
  	struct var_entry *entry;
-@@ -1163,7 +1326,12 @@ int libuboot_env_store(struct uboot_ctx *ctx)
+@@ -1163,7 +1325,12 @@ int libuboot_env_store(struct uboot_ctx *ctx)
  	}
  
  	if (ctx->encrypted) {
@@ -2795,7 +2787,7 @@ index 86f9b9e..f9aa985 100644
  		if (ret) {
  			fprintf(stderr,
  				"Error: can't encrypt env for flash\n");
-@@ -1237,7 +1405,12 @@ static int libuboot_load(struct uboot_ctx *ctx)
+@@ -1237,7 +1404,12 @@ static int libuboot_load(struct uboot_ctx *ctx)
  		crc = *(uint32_t *)(buf[i] + offsetcrc);
  		dev->crc = crc32(0, (uint8_t *)data, usable_envsize);
  		if (ctx->encrypted) {
