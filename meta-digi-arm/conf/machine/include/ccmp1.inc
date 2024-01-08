@@ -12,7 +12,7 @@ DIGI_FAMILY = "ccmp1"
 TFA_SIGN_SUFFIX ?= "${@bb.utils.contains('TRUSTFENCE_SIGN', '1', '_signed', '', d)}"
 
 # Platform u-boot settings
-UBOOT_PREFIX = "u-boot"
+UBOOT_PREFIX = "fip"
 UBOOT_SUFFIX = "bin"
 # Set U-Boot FIP settings
 FIP_UBOOT_DTB = "u-boot"
