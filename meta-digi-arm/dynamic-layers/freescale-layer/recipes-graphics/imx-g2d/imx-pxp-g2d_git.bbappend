@@ -1,5 +1,5 @@
-# Copyright 2023 Digi International Inc.
+# Copyright 2023, 2024 Digi International Inc.
 
-LIC_FILES_CHKSUM:ccimx93 = "file://LICENSE.txt;md5=db4762b09b6bda63da103963e6e081de"
+LIC_FILES_CHKSUM:ccimx93 = "file://LICENSE.txt;md5=2827219e81f28aba7c6a569f7c437fa7"
 
-SRCREV:ccimx93 = "8d8b48c7c3d95b6c54093a09873ae796a0f09e8a"
+SRCREV:ccimx93 = "f3adab05bd0cbb7c38578110d772e8ddf52b4e8e"
