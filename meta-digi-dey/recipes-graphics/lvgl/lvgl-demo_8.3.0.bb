@@ -1,16 +1,16 @@
 SUMMARY = "LVGL Demo Application"
-HOMEPAGE = "https://github.com/lvgl/lv_port_linux_frame_buffer"
+HOMEPAGE = "https://github.com/digi-embedded/lv_port_linux_frame_buffer"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=802d3d83ae80ef5f343050bf96cce3a4 \
                     file://lv_drivers/LICENSE;md5=d6fc0df890c5270ef045981b516bb8f2 \
                     file://lvgl/LICENCE.txt;md5=bf1198c89ae87f043108cea62460b03a"
 
+SRCBRANCH ?= "dey/master"
+
 SRC_URI = " \
-    gitsm://github.com/lvgl/lv_port_linux_frame_buffer.git;branch=master;protocol=https \
-    file://0001-Make-demo-compatible-with-any-backend.patch \
-    file://0002-Miscellaneous-improvements.patch \
+    gitsm://github.com/digi-embedded/lv_port_linux_frame_buffer.git;branch=${SRCBRANCH};protocol=https \
 "
-SRCREV = "adf2c4490e17a1b9ec1902cc412a24b3b8235c8e"
+SRCREV = "f9426988a70f485ba7895bb1c26493f2fffcd957"
 
 EXTRA_OEMAKE = "DESTDIR=${D}"
 
