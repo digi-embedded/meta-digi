@@ -47,8 +47,9 @@ if [ "${1}" = "pre" ]; then
 	fi
 elif [ "${1}" = "post" ]; then
 	if actions_needed; then
-		/etc/udev/scripts/load_iw612.sh
 		sleep 0.5
+		/etc/udev/scripts/load_iw612.sh
+
 		sh "${RESUME_ACTIONS}"
 		rm -f "${RESUME_ACTIONS}"
 	fi
