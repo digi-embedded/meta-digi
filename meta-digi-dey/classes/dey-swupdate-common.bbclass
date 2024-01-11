@@ -124,6 +124,18 @@ def get_swupdate_uboot_enc(d):
 
 SWUPDATE_UBOOT_ENC ?= "${@get_swupdate_uboot_enc(d)}"
 
+# Retrieve the redundant U-Boot value.
+def get_uboot_redundant(d):
+    if d.getVar("SWUPDATE_UBOOTIMG") == "true" and d.getVar("SWUPDATE_UBOOTIMG_REDUNDANT") == "true":
+        if any(d.getVar("MACHINE").startswith(platform) for platform in ("ccimx6", "ccimx8")):
+            bb.warn("Target does not support updating redundant U-Boot. Continuing with single SWU U-Boot update.")
+            return "single"
+        return "redundant"
+
+    return "single"
+
+SWUPDATE_UBOOT_REDUNDANT = "${@get_uboot_redundant(d)}"
+
 #######################################
 ########## SWU Update Script ##########
 #######################################

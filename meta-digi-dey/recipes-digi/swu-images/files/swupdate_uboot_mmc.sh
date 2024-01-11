@@ -16,8 +16,10 @@
 UBOOT_NAME="$1"
 UBOOT_ENC="$2"
 UBOOT_SEEK_KB="$3"
+UBOOT_REDUNDANT="$4"
 UBOOT_FILE="/tmp/${UBOOT_NAME}"
 UBOOT_BLOCK_MAIN="mmcblk0boot0"
+UBOOT_BLOCK_REDUNDANT="mmcblk0boot1"
 UBOOT_MMC_DEV_MAIN="/dev/${UBOOT_BLOCK_MAIN}"
 UBOOT_MMC_DUMP="/tmp/u-boot-dump.hex"
 UBOOT_ENCRYPTED_DEK="/tmp/u-boot-encrypted-with-dek.imx"
@@ -258,6 +260,10 @@ if [ "${UBOOT_ENC}" = "enc" ]; then
 fi
 # Write U-Boot
 write_uboot_emmc ${UBOOT_BLOCK_MAIN}
+# Check if redundant U-Boot update is requested.
+if [ "${UBOOT_REDUNDANT}" = "redundant" ]; then
+	write_uboot_emmc ${UBOOT_BLOCK_REDUNDANT}
+fi
 # Clean intermediate artifacts.
 clean_artifacts
 

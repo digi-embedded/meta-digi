@@ -16,7 +16,8 @@
 UBOOT_NAME="$1"
 UBOOT_ENC="$2"
 UBOOT_SEEK_KB="$3"
-UBOOT_TFA_NAME="$4"
+UBOOT_REDUNDANT="$4"
+UBOOT_TFA_NAME="$5"
 UBOOT_TFA_FILE="/tmp/${UBOOT_TFA_NAME}"
 UBOOT_FILE="/tmp/${UBOOT_NAME}"
 UBOOT_NAND_DUMP="/tmp/u-boot-dump.hex"
@@ -148,6 +149,13 @@ if expr "${PLATFORM}" : "ccmp1.*" >/dev/null; then
 	write_file_to_nand "/dev/mtd$(get_mtd_number_from_partition fsbl1)" "${UBOOT_TFA_FILE}"
 	# Install U-Boot FIP file in fip-a partition.
 	write_file_to_nand "/dev/mtd$(get_mtd_number_from_partition fip-a)" "${UBOOT_FILE}"
+	# Check if redundant U-Boot update is requested.
+	if [ "${UBOOT_REDUNDANT}" = "redundant" ]; then
+		# Install TFA file in fsbl2 partition (redundant).
+		write_file_to_nand "/dev/mtd$(get_mtd_number_from_partition fsbl2)" "${UBOOT_TFA_FILE}"
+		# Install U-Boot FIP file in fip-b partition (redundant).
+		write_file_to_nand "/dev/mtd$(get_mtd_number_from_partition fip-b)" "${UBOOT_FILE}"
+	fi
 else
 	# Mount debug file system to remove some kobs-ng warnings.
 	if ! grep -qs debugfs /proc/mounts; then
