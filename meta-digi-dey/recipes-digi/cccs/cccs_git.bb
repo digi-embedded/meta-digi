@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2023, Digi International Inc.
+# Copyright (C) 2017-2024, Digi International Inc.
 
 SUMMARY = "Digi's ConnectCore Cloud services"
 SECTION = "libs"
@@ -57,9 +57,10 @@ do_install:append:ccimx6ul() {
 }
 
 pkg_postinst_ontarget:${PN}() {
-	# If dualboot is enabled, change the CCCSD download path on the first boot
+	# If dualboot is enabled, change the CCCSD download path and set on the fly to yes on the first boot
 	if [ "$(fw_printenv -n dualboot 2>/dev/null)" = "yes" ]; then
 		sed -i "/firmware_download_path = \/mnt\/update/c\firmware_download_path = \/home\/root" /etc/cccs.conf
+		sed -i "/on_the_fly = false/c\on_the_fly = true" /etc/cccs.conf
 	fi
 }
 
