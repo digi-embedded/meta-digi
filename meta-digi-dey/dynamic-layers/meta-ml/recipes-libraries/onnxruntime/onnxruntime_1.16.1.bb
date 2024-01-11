@@ -6,16 +6,14 @@ LIC_FILES_CHKSUM_runtime = "file://LICENSE;md5=0f7e3b1308cb5c00b372a6e78835732d"
 LIC_FILES_CHKSUM_model = "file://${S}/example-models/squeezenet/LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 LIC_FILES_CHKSUM = "${LIC_FILES_CHKSUM_runtime} ${LIC_FILES_CHKSUM_model}"
 
-DEPENDS = "libpng zlib ${BPN}-native"
+DEPENDS = "libpng zlib"
 
 inherit setuptools3
 
+SRC_URI = "${ONNXRUNTIME_SRC};branch=${SRCBRANCH}"
 ONNXRUNTIME_SRC ?= "gitsm://github.com/nxp-imx/onnxruntime-imx.git;protocol=https"
-SRCBRANCH_runtime = "lf-6.1.36_2.1.0"
-SRC_URI = "${ONNXRUNTIME_SRC};branch=${SRCBRANCH_runtime};name=runtime"
-
-SRCREV_runtime = "0f642b5e71e6e9c9681b90b2844176ab7eacf6eb"
-SRCREV_FORMAT = "runtime_model"
+SRCBRANCH = "lf-6.1.55_2.2.0"
+SRCREV = "1582e774d7c120a5dfbdbf6e11c8788e710ab93f"
 
 S = "${WORKDIR}/git"
 
@@ -25,19 +23,11 @@ OECMAKE_SOURCEPATH = "${S}/cmake"
 OECMAKE_GENERATOR = "Unix Makefiles"
 
 # Notes:
-# Protobuff/Protoc: 
-#   - protobuf is essetially built twice for native and target system
-#   - DONNX_CUSTOM_PROTOC_EXECUTABLE  - use native protoc
-#   - onnxruntime_USE_PREBUILT_PB=OFF - we still need protobuf compiled from target system; although we already have native version
-# Eigen: 
-#   - the git operation within CMake fails, so we treat it as 'pre-installed' although it's fetched during fetch phase
-#   - the eigen_SOURCE_PATH needs to match 'destsuffix' in SRC_URI for eigen
 # Abseil:
 #   - FETCHCONTENT_FULLY_DISCONNECTED=OFF and do_configure:prepend() added to allow
 #     abseil build process (the issue was related to CMake not fetching sources)
 
 EXTRA_OECMAKE += "\
-    -DONNX_CUSTOM_PROTOC_EXECUTABLE=${STAGING_BINDIR_NATIVE}/${PN}-native/protoc \
     -DFETCHCONTENT_FULLY_DISCONNECTED=OFF \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -Donnxruntime_BUILD_UNIT_TESTS=ON \
@@ -61,7 +51,7 @@ PYTHON_RDEPENDS = "\
     ${PYTHON_PN}-sympy \
 "
 
-PACKAGECONFIG ?= "crosscompiling sharedlib nnapi python"
+PACKAGECONFIG ?= "crosscompiling sharedlib python"
 
 PACKAGECONFIG[nsync] = "-Donnxruntime_USE_NSYNC=ON, -Donnxruntime_USE_NSYNC=OFF"
 PACKAGECONFIG[prebuilt] = "-Donnxruntime_USE_PREBUILT_PB=ON, -Donnxruntime_USE_PREBUILT_PB=OFF"
@@ -163,7 +153,6 @@ do_install:append() {
     # Install test binaries and data in test package
     install -d ${D}${bindir}/${BP}/tests
     install -m 0744 ${B}/libcustom_op_library.so ${D}${bindir}/${BP}/tests
-    install -m 0744 ${B}/onnxruntime_api_tests_without_env ${D}${bindir}/${BP}/tests
     install -m 0744 ${B}/onnxruntime_global_thread_pools_test ${D}${bindir}/${BP}/tests
     install -m 0744 ${B}/onnxruntime_mlas_test ${D}${bindir}/${BP}/tests
     install -m 0744 ${B}/onnxruntime_shared_lib_test ${D}${bindir}/${BP}/tests
@@ -193,5 +182,3 @@ FILES:${PN}-tests = "${bindir}/${BP}/tests/*"
 # onnxruntime_shared_lib_test requires the shlib to be in the same directory as testdata to run properly
 INSANE_SKIP:${PN}-tests += "libdir"
 INSANE_SKIP:${PN}-dbg += "libdir"
-
-RDEPENDS:${PN}-tests += "arm-compute-library"

@@ -1,6 +1,0 @@
-# Copyright (C) 2023 Digi International
-
-LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=e3fc50a88d0a364313df4b21ef20c29e"
-
-SRCBRANCH = "lf-6.1.36_2.1.0"
-SRCREV = "98759f579297726474d6b32927694502c66ce15a"
