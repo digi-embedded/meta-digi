@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2013-2023, Digi International Inc.
+# Copyright (C) 2013-2024, Digi International Inc.
 #
 SUMMARY = "QT packagegroup for DEY image"
 
@@ -35,7 +35,24 @@ QT5_RDEPENDS:imxgpu3d = " \
     gstreamer1.0-plugins-good-qt \
 "
 
-QT5_RDEPENDS:ccmp15 = "${QT5_RDEPENDS_common}"
+QT5_RDEPENDS_eglfs = " \
+    qtbase                          \
+    qtbase-plugins                  \
+    qtbase-tools                    \
+    qtdeclarative                   \
+    qtdeclarative-qmlplugins        \
+    qtdeclarative-tools             \
+    qtgraphicaleffects-qmlplugins   \
+    qtmultimedia                    \
+    qtmultimedia-plugins            \
+    qtmultimedia-qmlplugins         \
+    qtscript                        \
+"
+
+QT5_RDEPENDS:ccmp15 = " \
+    ${QT5_RDEPENDS_common} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', '', '${QT5_RDEPENDS_eglfs}', d)} \
+"
 
 # Add packagegroup-qt5-webengine to QT5_RDEPENDS and comment out the line below to install qtwebengine to the rootfs.
 QT5_RDEPENDS:remove = " packagegroup-qt5-webengine"
