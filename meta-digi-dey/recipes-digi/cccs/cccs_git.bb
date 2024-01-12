@@ -16,6 +16,7 @@ CC_GITHUB = "gitsm://github.com/digi-embedded/cc_dey.git;protocol=https"
 CC_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${CC_STASH}', '${CC_GITHUB}', d)}"
 
 CCCS_DEVICE_TYPE ?= "${MACHINE}"
+CCCS_CONF_PATH ?= ""
 
 SRC_URI = " \
     ${CC_GIT_URI};branch=${SRCBRANCH} \
@@ -24,8 +25,25 @@ SRC_URI = " \
     file://cccs-gs-demo-init \
     file://cccs-gs-demo.service \
 "
+SRC_URI:append = "${@oe.utils.ifelse(d.getVar('CCCS_CONF_PATH'), \
+                     oe.utils.ifelse(d.getVar('CCCS_CONF_PATH').startswith('/'), "file://%s" % d.getVar('CCCS_CONF_PATH'), d.getVar('CCCS_CONF_PATH')), '')}"
 
 S = "${WORKDIR}/git"
+
+# The configuration file can be provided by the user, so provide a PREMIRROR to
+# a local directory that can be configured in the project's local.conf file
+# using CCCS_CONF_PATH variable.
+python() {
+    cccs_conf_path = d.getVar('CCCS_CONF_PATH')
+    if cccs_conf_path:
+        premirrors = d.getVar('PREMIRRORS')
+        if cccs_conf_path.startswith('/'):
+            cccs_conf_path = "file://%s" % cccs_conf_path
+        d.setVar('PREMIRRORS', "%s %s \\n %s" % (cccs_conf_path, cccs_conf_path, premirrors))
+        cccs_conf_sha256 = d.getVar('CCCS_CONF_SHA256')
+        if cccs_conf_sha256:
+            d.setVarFlag("SRC_URI", "sha256sum", cccs_conf_sha256)
+}
 
 inherit pkgconfig systemd update-rc.d
 
@@ -45,15 +63,29 @@ do_install() {
 	install -m 755 ${WORKDIR}/cccs-gs-demo-init ${D}${sysconfdir}/cccs-gs-demo
 	ln -sf /etc/cccs-gs-demo ${D}${sysconfdir}/init.d/cccs-gs-demo
 
-	# Set the device type. Its maximum length is 255 characters
-	[ -z "${CCCS_DEVICE_TYPE}" ] && device_type="${MACHINE}" || device_type="${CCCS_DEVICE_TYPE}"
-	device_type="$(echo "${device_type}" | cut -c1-255)"
-	sed -i "/device_type = .*/c\device_type = \"${device_type}\"" ${D}${sysconfdir}/cccs.conf
+	if [ -n "${CCCS_CONF_PATH}" ]; then
+		CONF="${CCCS_CONF_PATH}"
+		if [ "${CONF#file://}" != "${CONF}" ]; then
+			CONF="${CONF#file://}"
+		elif [ "${CONF#/}" != "${CONF}" ]; then
+			CONF="${CONF}"
+		else
+			CONF="${WORKDIR}/$(basename ${CONF})"
+		fi
+		install -m 0644 "${CONF}" ${D}${sysconfdir}/cccs.conf
+	else
+		# Set the device type. Its maximum length is 255 characters
+		[ -z "${CCCS_DEVICE_TYPE}" ] && device_type="${MACHINE}" || device_type="${CCCS_DEVICE_TYPE}"
+		device_type="$(echo "${device_type}" | cut -c1-255)"
+		sed -i "/device_type = .*/c\device_type = \"${device_type}\"" ${D}${sysconfdir}/cccs.conf
+	fi
 }
 
 do_install:append:ccimx6ul() {
-	sed -i "/url = \"edp12.devicecloud.com\"/c\url = \"remotemanager.digi.com\"" ${D}${sysconfdir}/cccs.conf
-	sed -i "/client_cert_path = \"\/mnt\/data\/drm_cert.pem\"/c\client_cert_path = \"\/etc\/ssl\/certs\/drm_cert.pem\"" ${D}${sysconfdir}/cccs.conf
+	if [ -z "${CCCS_CONF_PATH}" ]; then
+		sed -i "/url = \"edp12.devicecloud.com\"/c\url = \"remotemanager.digi.com\"" ${D}${sysconfdir}/cccs.conf
+		sed -i "/client_cert_path = \"\/mnt\/data\/drm_cert.pem\"/c\client_cert_path = \"\/etc\/ssl\/certs\/drm_cert.pem\"" ${D}${sysconfdir}/cccs.conf
+	fi
 }
 
 pkg_postinst_ontarget:${PN}() {
@@ -64,7 +96,8 @@ pkg_postinst_ontarget:${PN}() {
 	fi
 }
 
-inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}
+inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", \
+           oe.utils.ifelse(d.getVar("CCCS_CONF_PATH"), "remove-pkg-postinst-ontarget", ""), d)}
 
 INITSCRIPT_PACKAGES = "${PN}-daemon ${PN}-gs-demo"
 INITSCRIPT_NAME:${PN}-daemon = "cccsd"
