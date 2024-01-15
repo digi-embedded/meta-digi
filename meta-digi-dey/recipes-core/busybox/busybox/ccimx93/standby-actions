@@ -3,7 +3,7 @@
 #
 #  standby-actions
 #
-#  Copyright (C) 2023 by Digi International Inc.
+#  Copyright (C) 2023, 2024 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -18,39 +18,47 @@
 
 RESUME_ACTIONS="/tmp/resume_actions"
 
-actions_needed() {
+wifi_actions_needed() {
 	[ -d "/proc/device-tree/wireless" ] && [ ! -e "/sys/firmware/devicetree/base/soc@0/bus@42800000/mmc@428b0000/keep-power-in-suspend" ]
 }
 
+bt_actions_needed() {
+	systemctl -q is-active bluetooth-init
+}
+
 if [ "${1}" = "pre" ]; then
+	rm -f "${RESUME_ACTIONS}"
+
 	# Stop NetworkManager before suspend
 	systemctl stop NetworkManager
 
-	if actions_needed; then
-		rm -f "${RESUME_ACTIONS}"
+	if wifi_actions_needed; then
 		for iface in wlan0 uap0 wfd0; do
 			if grep -qs ${iface} /var/run/ifstate; then
 				ifdown ${iface} && echo "ifup ${iface}" >> "${RESUME_ACTIONS}"
 			fi
 		done
 
-		rmmod moal
-		rmmod mlan
+		{
+			echo "sleep 0.5"
+			echo "/etc/udev/scripts/load_iw612.sh"
+		} >> "${RESUME_ACTIONS}"
+		modprobe -r moal
+	fi
 
-		if systemctl is-active bluetooth-init; then
-			# bluetooth service relies on bluetooth-init service, so stop/start it unconditionally
-			echo "systemctl start bluetooth-init" >> "${RESUME_ACTIONS}"
-			echo "systemctl start bluetooth" >> "${RESUME_ACTIONS}"
-			systemctl stop bluetooth-init
-			systemctl stop bluetooth
-		fi
+	if bt_actions_needed; then
+		# bluetooth service relies on bluetooth-init service, so stop/start it unconditionally
+		{
+			echo "systemctl start bluetooth-init"
+			echo "systemctl start bluetooth"
+		} >> "${RESUME_ACTIONS}"
+		systemctl stop bluetooth-init
+		systemctl stop bluetooth
 	fi
 elif [ "${1}" = "post" ]; then
-	if actions_needed; then
-		sleep 0.5
-		/etc/udev/scripts/load_iw612.sh
-
-		sh "${RESUME_ACTIONS}"
+	if [ -f ${RESUME_ACTIONS} ]; then
+		chmod +x "${RESUME_ACTIONS}"
+		eval "${RESUME_ACTIONS}"
 		rm -f "${RESUME_ACTIONS}"
 	fi
 
