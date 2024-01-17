@@ -8,6 +8,6 @@ SRC_URI:append:ccimx6ul = " \
 "
 
 LIC_FILES_CHKSUM:ccimx93 = "file://LICENSE.txt;md5=fbc093901857fcd118f065f900982c24"
-PV:ccimx93 = "4.8.1+git${SRCPV}"
-SRCBRANCH:ccimx93 = "MM_04.08.01_2308_L6.1.y"
-SRCREV:ccimx93 = "903c03e8611a107508b1f60e4736df208e72247d"
+PV:ccimx93 = "4.8.2+git${SRCPV}"
+SRCBRANCH:ccimx93 = "MM_04.08.02_2310_L6.1.y"
+SRCREV:ccimx93 = "a72df52acfec5f849ec93906e33cb50da01b0b2e"
