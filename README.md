@@ -125,10 +125,39 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 # Downloads
 
-* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/4.0/r4/images/
-* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/4.0/r4/sdk/
+* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/4.0/r5/images/
+* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/4.0/r5/sdk/
 
 # Release Changelog
+
+## 4.0-r5
+
+* ST-based platforms
+  * Add support to boot signed FIT images.
+  * Add support to EGLFS backend for CCMP15 platform
+  * Add overlay to enable Cortex-M coprocessor
+* NXP-based platforms
+  * Updated BSP for ConnectCore 93
+    * U-Boot v2023.04 (based on tag 'lf-6.1.55-2.2.0' by NXP)
+    * Linux kernel v6.1.55 (based on tag 'lf-6.1.55-2.2.0' by NXP)
+  * Add overlay to enable Cortex-M coprocessor
+  * Added preliminary TrustFence support for ConnectCore 93
+* Add support to LVGL based images
+* Improved ConnectCore Cloud Services (CCCS):
+  * Data backlog support to locally store samples when it is not possible to upload them
+  * CCCS API to set the device maintenance state of devices
+  * CCCS API to upload binary data points
+  * Report to Remote Manager when a device is using a Wi-Fi connection
+  * Improve firmware download speed
+  * Configuration file:
+    * Use default values if configuration file is not provided
+    * Allow to disable firmware update service
+* Improved SWU package generation and support:
+  * Generalized and simplified recipes to generate the SWU packages using a custom class
+  * Added support to update bootloader using software update (SWU)
+* Update Python XBee library
+* Bootcount feature is now disabled by default.
+* General bug fixing and improvements
 
 ## 4.0-r4
 
