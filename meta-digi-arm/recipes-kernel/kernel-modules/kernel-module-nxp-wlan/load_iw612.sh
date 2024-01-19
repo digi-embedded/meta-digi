@@ -35,7 +35,7 @@ fi
 WLANADDR=$(hexdump -ve '1/1 "%02X" ":"' /proc/device-tree/wireless/mac-address 2>/dev/null | sed 's/:$//g')
 modprobe mlan && \
 modprobe moal ${MOAL_PARAMS} mac_addr=${WLANADDR} && \
-log "Wi-Fi activated" && exit 0
+[ -d "/sys/class/net/wlan0" ] && log "Wi-Fi activated" && exit 0
 
 log "[ERROR] cannot load Wi-Fi driver"
 exit 1

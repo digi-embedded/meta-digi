@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2022 by Digi International Inc.
+#  Copyright (C) 2022-2024 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -13,199 +13,258 @@
 #    Script will be called by swupdate to install a new u-boot within linux.
 #===============================================================================
 
-UBOOT_FILE="$1"
+UBOOT_NAME="$1"
 UBOOT_ENC="$2"
-uboot_seek_kb="$3"
+UBOOT_SEEK_KB="$3"
+UBOOT_REDUNDANT="$4"
+UBOOT_FILE="/tmp/${UBOOT_NAME}"
+UBOOT_BLOCK_MAIN="mmcblk0boot0"
+UBOOT_BLOCK_REDUNDANT="mmcblk0boot1"
+UBOOT_MMC_DEV_MAIN="/dev/${UBOOT_BLOCK_MAIN}"
+UBOOT_MMC_DUMP="/tmp/u-boot-dump.hex"
+UBOOT_ENCRYPTED_DEK="/tmp/u-boot-encrypted-with-dek.imx"
 
-echo "**** Start U-Boot update process *****"
+DEK_FILE="/tmp/dek.bin"
+DEK_KEY_SIZE="32"
+DEK_BLOB_SIZE="$((DEK_KEY_SIZE + 56))" # DEK blob has an overhead of 56 bytes: header (8 bytes) + random AES-256 key (32 bytes)+ MAC (16 bytes).
+DEK_BLOB_HEADER_CCIMX6="8100584"
+DEK_BLOB_HEADER_CCIMX8M="8100484"
+DEK_BLOB_HEADER_CCIMX8X="00580081"
 
-PLATFORM="$(cat /proc/device-tree/digi,machine,name)"
-UBOOT_MMC_DEV="/dev/mmcblk0boot0"
+PLATFORM="$(tr -d '\0' </proc/device-tree/digi,machine,name)"
+if expr "${PLATFORM}" : "ccimx8m.*" >/dev/null; then
+	# CCIMX8M platforms have a hardcoded DEK blob size of 96 bytes.
+	DEK_BLOB_SIZE="96"
+fi
+if expr "${PLATFORM}" : "ccimx8x.*" >/dev/null; then
+	# The U-Boot seek variable depends on the hardware variant of the i.MX8X module.
+	SOC_REV="$(fw_printenv -n soc_rev)"
+	if [ -n "${SOC_REV}" ]; then
+		case "${SOC_REV}" in
+			A0)
+				UBOOT_SEEK_KB="33"
+			;;
+			B0)
+				UBOOT_SEEK_KB="32"
+			;;
+			*)
+				UBOOT_SEEK_KB="0"
+			;;
+		esac
+	fi
+fi
 
-dump_dek ()
+clean_artifacts ()
 {
-	OUTPUT_FILE="/tmp/dek.bin"
-	KEY_SIZE_BYTES="32"
-	ENCRYPTED_UBOOT_DEK="u-boot-encrypted-with-dek.imx"
-	UBOOT_MMC_DUMP="/tmp/u-boot-dump.hex"
+	rm -f "${DEK_FILE}" "${UBOOT_MMC_DUMP}" "${UBOOT_ENCRYPTED_DEK}"
+}
 
-	# ConnectCore 8X
-	if [ "${PLATFORM}" = "ccimx8x-sbc-pro" ] || [ "${PLATFORM}" = "ccimx8x-sbc-express" ]; then
-		AHAB_AUTH_CONTAINER_TAG="87"
-		AHAB_AUTH_SIG_BLOCK_TAG="90"
-		AHAB_AUTH_BLOB_TAG="00 58 00 81"
-		AHAB_VERSION="00"
-		CONT_HEADER_OFFSET="0x400"
+exit_error ()
+{
+	local ERROR_MESSAGE="$1"
+	local ERROR_CODE="$2"
 
-		dd if=${UBOOT_MMC_DEV} of=${UBOOT_MMC_DUMP} count=100 bs=1K skip=${uboot_seek_kb} 2>/dev/null
-		auth_container_tag=$(hexdump -C "${UBOOT_MMC_DUMP}" | grep -m 1 "${AHAB_AUTH_CONTAINER_TAG}" | awk '{print $2 $5}')
-		echo "auth_container_tag ${auth_container_tag}"
-		if [ "${auth_container_tag}" = "${AHAB_VERSION}${AHAB_AUTH_CONTAINER_TAG}" ]; then
-			sig_block_offset="0x$(hexdump -C "${UBOOT_MMC_DUMP}" | grep -m 1 "${AHAB_AUTH_CONTAINER_TAG}" | awk '{print $13 $14}')"
-			echo " ++++ signature block offset ${sig_block_offset} "
+	echo "${ERROR_MESSAGE}"
+	clean_artifacts
+	[ -z "${ERROR_CODE}" ] && exit 1 || exit "${ERROR_CODE}"
+}
 
-			nd_sig_block="$((CONT_HEADER_OFFSET + sig_block_offset))"
-			printf '++++ header offset 0x%x\n' ${nd_sig_block}
-			auth_sig_block_tag=$(hexdump -C -s "${nd_sig_block}" "${UBOOT_MMC_DUMP}" | grep -m 1 "${AHAB_AUTH_SIG_BLOCK_TAG}" | awk '{print $2 $5}')
-			echo "auth_sig_block_tag ${auth_sig_block_tag}"
-			if [ "${auth_sig_block_tag}" = "${AHAB_VERSION}${AHAB_AUTH_SIG_BLOCK_TAG}" ]; then
-				blob_offset="0x$(hexdump -C -s "${nd_sig_block}" "${UBOOT_MMC_DUMP}" -n 16 | awk '{print $13 $12}')"
-				printf " ++++ blob offset 0x%x\n" ${blob_offset}
-				dek_blob="$((nd_sig_block + blob_offset))"
-				printf " ++++ dek_blob offset 0x%x\n" ${dek_blob}
+dump_dek_ccimx8x ()
+{
+	local AHAB_AUTH_CONTAINER_TAG="87"
+	local AHAB_AUTH_SIG_BLOCK_TAG="90"
+	local AHAB_VERSION="00"
+	local CONT_HEADER_OFFSET="0x400"
 
-				# DEK blobs have an overhead of 56 bytes.
-				dek_blob_size=$((KEY_SIZE_BYTES + 56))
-
-				# Dump dek blob into to a file
-				dd of=${OUTPUT_FILE} if=${UBOOT_MMC_DUMP} count=${dek_blob_size} bs=1 skip=${dek_blob} 2>/dev/null
-				rc=$?
-				if [ $rc -ne 0 ]; then
-					echo "DEK dump to the output file failed."
-					return $rc
-				fi
-				echo "dump_dek: output file has been created."
-				# Validate DEK blob
-				if [ -z "$(dd if=${OUTPUT_FILE} bs=1 count=4 2>/dev/null | hexdump -C | grep "${AHAB_AUTH_BLOB_TAG}")" ]; then
-					echo "Could not find DEK blob"
-					rm -rf ${OUTPUT_FILE}
-					return 1
-				fi
-				echo "DEK blob correctly dumped"
-			else
-				echo "## ERROR: AHAB authentication signature block tag not found."
+	# Dump U-Boot first 100Kb to file. The second AHAB container, which contains the DEK blob is there.
+	dd if="${UBOOT_MMC_DEV_MAIN}" of="${UBOOT_MMC_DUMP}" count=100 bs=1K skip="${UBOOT_SEEK_KB}" 2>/dev/null
+	# Look for second AHAB authentication container. Second Container Header is set with a 1KB padding (0x400)
+	local AUTH_CONTAINER_TAG="$(hexdump -C "${UBOOT_MMC_DUMP}" -s "${CONT_HEADER_OFFSET}" | grep -m 1 "${AHAB_AUTH_CONTAINER_TAG}" | awk '{print $2 $5}')"
+	if [ "${AUTH_CONTAINER_TAG}" = "${AHAB_VERSION}${AHAB_AUTH_CONTAINER_TAG}" ]; then
+		# Determine second signature block relative and final offset.
+		local SECOND_SIG_BLOCK_OFFSET="0x$(hexdump -C -s "${CONT_HEADER_OFFSET}" "${UBOOT_MMC_DUMP}" | grep -m 1 "${AHAB_AUTH_CONTAINER_TAG}" | awk '{print $15 $14}')"
+		local SECOND_SIG_BLOCK="$((CONT_HEADER_OFFSET + SECOND_SIG_BLOCK_OFFSET))"
+		# Validate second signature block.
+		local AUTH_SIG_BLOCK_TAG="$(hexdump -C -s "${SECOND_SIG_BLOCK}" "${UBOOT_MMC_DUMP}" | grep -m 1 "${AHAB_AUTH_SIG_BLOCK_TAG}" | awk '{print $2 $5}')"
+		if [ "${AUTH_SIG_BLOCK_TAG}" = "${AHAB_VERSION}${AHAB_AUTH_SIG_BLOCK_TAG}" ]; then
+			# Determine DEK blob relative and final offset.
+			local DEK_BLOB_RELATIVE_OFFSET="0x$(hexdump -C -s "${SECOND_SIG_BLOCK}" "${UBOOT_MMC_DUMP}" | grep -m 1 "${AHAB_AUTH_SIG_BLOCK_TAG}" | awk '{print $13 $12}')"
+			DEK_AHAB_OFFSET="$((SECOND_SIG_BLOCK + DEK_BLOB_RELATIVE_OFFSET))"
+			# Dump DEK blob into to a file.
+			dd if="${UBOOT_MMC_DUMP}" of="${DEK_FILE}" count="${DEK_BLOB_SIZE}" bs=1 skip="${DEK_AHAB_OFFSET}" 2>/dev/null
+			local rc=$?
+			if [ "${rc}" -ne 0 ]; then
+				exit_error "## ERROR: DEK dump to file failed." "${rc}"
+			fi
+			# Validate DEK blob.
+			if ! dd if="${DEK_FILE}" bs=1 count=4 2>/dev/null | hexdump -ve '1/1 "%.2X"' | grep -q "${DEK_BLOB_HEADER_CCIMX8X}"; then
+				exit_error "## ERROR: Could not find DEK blob."
 			fi
 		else
-			echo "## ERROR: AHAB authentication container tag not found."
-			return 1
+			exit_error "## ERROR: AHAB authentication signature block tag not found."
 		fi
 	else
-		#(The last byte lacks one digit on purpose, to match 40, 41 and 42; all HAB versions)
-		UBOOT_HEADER="d1 00 20 4"
-		if [ "${PLATFORM}" = "ccimx8mn-dvk" ] || [ "${PLATFORM}" = "ccimx8mm-dvk" ]; then
-			SKIP_BLOCKS="0"
-	                DEK_BLOB_HEADER="81 00 48 4"
-		else
-			SKIP_BLOCKS="2"
-			DEK_BLOB_HEADER="81 00 58 4"
-		fi
-
-		dd if=${UBOOT_MMC_DEV} of=${UBOOT_MMC_DUMP} count=1 skip=${SKIP_BLOCKS} 2>/dev/null
-		uboot_start="0x$(hexdump -C ${UBOOT_MMC_DUMP} | grep -m 1 "${UBOOT_HEADER}" | head -1 | cut -c -8)"
-		echo "++++ ${uboot_start} +++"
-		if [ "${uboot_start}" = "0x" ]; then
-			echo "Could not find U-Boot on MMC"
-			return 1
-		fi
-
-		uboot_size_offset="$((uboot_start + 36))"
-		uboot_size=$(hexdump -n 4 -s ${uboot_size_offset} -e '/4 "%d\t" "\n"' ${UBOOT_MMC_DUMP})
-
-		# DEK blobs have an overhead of 56 bytes.
-		dek_blob_size="$((KEY_SIZE_BYTES + 56))"
-
-		# remove the output DEK file before creating it.
-		# Since this function is called twice.
-		# For the actual upgrade and then for the validation after the upgrade.
-		rm -f ${OUTPUT_FILE}
-		dump_size="$((uboot_size / 512))"
-		echo "++++ ${dump_size} +++"
-		dd if=${UBOOT_MMC_DEV} of=${UBOOT_MMC_DUMP} count=${dump_size} skip=${SKIP_BLOCKS} conv=fsync 2>/dev/null
-		dek_start=$(hexdump -C ${UBOOT_MMC_DUMP} | grep -m 1 "${DEK_BLOB_HEADER}" | head -1 | cut -c -8)
-		echo "++++ dek_start ${dek_start} +++"
-		dek_start="$((16#${dek_start} + 8))"
-		echo "++++ dek_start ${dek_start} +++"
-		dd of=${OUTPUT_FILE} if=${UBOOT_MMC_DUMP} count=${dek_blob_size} bs=1 skip=${dek_start} 2>/dev/null
-		rc=$?
-		if [ $rc -ne 0 ]; then
-			echo "DEK dump to the output file failed."
-			return $rc
-		fi
-		echo "dump_dek: output file has been created."
-		# Validate DEK blob
-		if [ -z "$(dd if=${OUTPUT_FILE} bs=1 count=4 2>/dev/null | hexdump -C | grep "${DEK_BLOB_HEADER}")" ]; then
-			echo "Could not find DEK blob"
-			rm -rf ${OUTPUT_FILE}
-			return 1
-		fi
-		echo "DEK blob correctly dumped"
-		rm -f ${UBOOT_MMC_DUMP}
-		return 0
+		exit_error "## ERROR: AHAB authentication container tag not found."
 	fi
 }
 
-if [ "${UBOOT_ENC}" = "enc" ]; then
+dump_dek_ccimx8m_ccimx6 ()
+{
+	local IVT_HEADER="d1 00 20 4"  # The last byte lacks one digit on purpose, to match 40, 41 and 42; all HAB versions.
+	local DEK_BLOB_HEADER="$1"
+
+	# Look for U-Boot in the eMMC. It starts with the IVT table header.
+	dd if="${UBOOT_MMC_DEV_MAIN}" of="${UBOOT_MMC_DUMP}" bs=1k skip="${UBOOT_SEEK_KB}" 2>/dev/null
+	local UBOOT_START="0x$(hexdump -C "${UBOOT_MMC_DUMP}" | grep -m 1 "${IVT_HEADER}" | head -1 | cut -c -8)"
+	if [ "${UBOOT_START}" = "0x" ]; then
+		exit_error "## ERROR: Could not find U-Boot on MMC."
+	fi
+	# DEK blob must be extracted from the SPL image. First determine SPL image size.
+	local SPL_SIZE_OFFSET="$((UBOOT_START + 36))"  # Size information is at offset 36.
+	local SPL_SIZE="$(hexdump -n 4 -s "${SPL_SIZE_OFFSET}" -e '/4 "%d\t" "\n"' "${UBOOT_MMC_DUMP}")"
+	# Determine SPL size in blocks of 1Kb. Round up division if it is not exact.
+	local DUMP_SIZE="$(( (SPL_SIZE + 1023) / 1024 ))"
+	# Dump SPL image to file.
+	dd if="${UBOOT_MMC_DEV_MAIN}" of="${UBOOT_MMC_DUMP}" bs=1k count="${DUMP_SIZE}" skip="${UBOOT_SEEK_KB}" conv=fsync 2>/dev/null
+	# Look for the DEK blob in SPL image.
+	DEK_SPL_OFFSET="$(hexdump -ve '1/1 "%.2X"' ${UBOOT_MMC_DUMP} | awk -v pattern="${DEK_BLOB_HEADER}" 'BEGIN{IGNORECASE=1} {pos=index($0, pattern)} pos {print (pos-1)/2}')"
+	# Dump the DEK blob to file.
+	dd if="${UBOOT_MMC_DUMP}" of="${DEK_FILE}" count="${DEK_BLOB_SIZE}" bs=1 skip="${DEK_SPL_OFFSET}" 2>/dev/null
+	local rc=$?
+	if [ "${rc}" -ne 0 ]; then
+		exit_error "## ERROR: DEK dump to file failed." "${rc}"
+	fi
+	# Validate DEK blob.
+	if ! dd if="${DEK_FILE}" bs=1 count=4 2>/dev/null | hexdump -ve '1/1 "%.2X"' | grep -q "${DEK_BLOB_HEADER}"; then
+		exit_error "## ERROR: Could not find DEK blob."
+	fi
+}
+
+dump_dek_ccimx93 ()
+{
+	exit_error "## ERROR: DEK support not implemented yet for CCIMX93."
+}
+
+dump_dek ()
+{
+	case "${PLATFORM}" in
+		ccimx8x*)
+			dump_dek_ccimx8x
+		;;
+		ccimx8m*)
+			dump_dek_ccimx8m_ccimx6 "${DEK_BLOB_HEADER_CCIMX8M}"
+		;;
+		ccimx6*)
+			dump_dek_ccimx8m_ccimx6 "${DEK_BLOB_HEADER_CCIMX6}"
+		;;
+		ccimx93*)
+			dump_dek_ccimx93
+		;;
+		*)
+			exit_error "## ERROR: Device not supported ${PLATFORM}."
+		;;
+	esac
+}
+
+append_dek_ccimx8x ()
+{
+	cp "${UBOOT_FILE}" "${UBOOT_ENCRYPTED_DEK}"
+	# Insert the DEK blob into the AHAB container.
+	dd if="${DEK_FILE}" of="${UBOOT_ENCRYPTED_DEK}" bs=1 seek="${DEK_AHAB_OFFSET}" conv=notrunc 2>/dev/null
+	local rc=$?
+	if [ "${rc}" -ne 0 ]; then
+		exit_error "## ERROR: Merging DEK with AHAB container failed." "${rc}"
+	fi
+}
+
+append_dek_ccimx8m ()
+{
+	cp "${UBOOT_FILE}" "${UBOOT_ENCRYPTED_DEK}"
+	# Insert the DEK blob into the SPL image.
+	dd if="${DEK_FILE}" of="${UBOOT_ENCRYPTED_DEK}" bs=1 seek="${DEK_SPL_OFFSET}" conv=notrunc 2>/dev/null
+	local rc=$?
+	if [ "${rc}" -ne 0 ]; then
+		exit_error "## ERROR: Merging DEK with SPL image failed." "${rc}"
+	fi
+	# Get total iMX-Boot file size.
+	local UBOOT_FILE_SIZE="$(stat -L -c %s "${UBOOT_FILE}")"
+	# Determine FIT DEK blob offset.
+	local DEK_FIT_OFFSET="$((UBOOT_FILE_SIZE - DEK_BLOB_SIZE))"
+	# Insert the DEK blob into the FIT image.
+	dd if="${DEK_FILE}" of="${UBOOT_ENCRYPTED_DEK}" bs=1 seek="${DEK_FIT_OFFSET}" conv=notrunc 2>/dev/null
+	local rc=$?
+	if [ "${rc}" -ne 0 ]; then
+		exit_error "## ERROR: Merging DEK with FIT image failed." "${rc}"
+	fi
+}
+
+append_dek_ccimx6 ()
+{
+	cat "${UBOOT_FILE}" "${DEK_FILE}" > "${UBOOT_ENCRYPTED_DEK}"
+	local rc=$?
+	if [ "${rc}" -ne 0 ]; then
+		exit_error "## ERROR: Merging DEK with U-Boot image failed." "${rc}"
+	fi
+}
+
+append_dek_ccimx93 ()
+{
+	exit_error "## ERROR: DEK support not implemented yet for CCIMX93."
+}
+
+append_dek ()
+{
 	dump_dek
-	rc=$?
-	if [ "$rc" -ne 0 ]; then
-		echo "u-boot: DEK dump failed"
-		exit $rc
+	case "${PLATFORM}" in
+		ccimx8x*)
+			append_dek_ccimx8x
+		;;
+		ccimx8m*)
+			append_dek_ccimx8m
+		;;
+		ccimx6*)
+			append_dek_ccimx6
+		;;
+		ccimx93*)
+			append_dek_ccimx93
+		;;
+		*)
+			exit_error "## ERROR: Device not supported: ${PLATFORM}."
+		;;
+	esac
+	UBOOT_FILE="${UBOOT_ENCRYPTED_DEK}"
+}
+
+write_uboot_emmc ()
+{
+	local UBOOT_BLOCK="$1"
+
+	# Enable write access in the U-Boot partition.
+	echo 0 > "/sys/block/${UBOOT_BLOCK}/force_ro"
+	# Write the U-Boot into the eMMC.
+	dd if="${UBOOT_FILE}" of="/dev/${UBOOT_BLOCK}" seek="${UBOOT_SEEK_KB}" bs=1K 2>/dev/null
+	local rc=$?
+	# Disable write access in U-Boot partition.
+	echo 1 > "/sys/block/${UBOOT_BLOCK}/force_ro"
+	# Check update operation result.
+	if [ "${rc}" -ne 0 ]; then
+		exit_error "## ERROR: failed to write file ${UBOOT_FILE} to /dev/${UBOOT_BLOCK}" "${rc}"
 	fi
-	if [ "${PLATFORM}" = "ccimx8x-sbc-pro" ] || [ "${PLATFORM}" = "ccimx8x-sbc-express" ]; then
-		cp /tmp/${UBOOT_FILE} /tmp/${ENCRYPTED_UBOOT_DEK}
-		# insert the dek_blob into the AHAB container
-		dd if=${OUTPUT_FILE} of=/tmp/${ENCRYPTED_UBOOT_DEK} bs=1 seek=${dek_blob} conv=notrunc 2>/dev/null
-		rc=$?
-		if [ "$rc" -ne 0 ]; then
-			echo "u-boot: Merging DEK with U-Boot image failed (DEV/FILE = /tmp/$UBOOT_FILE)"
-			exit $rc
-		fi
-	elif [ "${PLATFORM}" = "ccimx8mn-dvk" ] || [ "${PLATFORM}" = "ccimx8mm-dvk" ]; then
-		FIT_DEK_BLOB_SIZE="96";
-		cp /tmp/${UBOOT_FILE} /tmp/${ENCRYPTED_UBOOT_DEK}
-		# insert the dek_blob into the SPL
-		dd if=${OUTPUT_FILE} of=/tmp/${ENCRYPTED_UBOOT_DEK} bs=1 seek=${dek_start} conv=notrunc 2>/dev/null
-		rc=$?
-		if [ "$rc" -ne 0 ]; then
-			echo "u-boot: Merging DEK with SPL image failed (DEV/FILE = /tmp/$UBOOT_FILE)"
-			exit $rc
-		fi
-		# get u-boot image file size
-		uboot_file_size="$(stat -L -c %s /tmp/${UBOOT_FILE})"
-		echo " ++++ uboot_file_size ${uboot_file_size} ***"
-		uboot_dek_blob_offset="$((uboot_file_size - FIT_DEK_BLOB_SIZE))"
-		echo " ----- uboot_dek_blob_offset ${uboot_dek_blob_offset} **"
-		# insert the dek_blob at the end of the bootloader
-		dd of=/tmp/${ENCRYPTED_UBOOT_DEK} if=${OUTPUT_FILE} bs=1 seek=${uboot_dek_blob_offset} conv=notrunc 2>/dev/null
-		rc=$?
-		if [ "$rc" -ne 0 ]; then
-			echo "u-boot: Merging DEK with U-Boot image failed (DEV/FILE = /tmp/$UBOOT_FILE)"
-			exit $rc
-		fi
-	else
-		cat /tmp/${UBOOT_FILE} ${OUTPUT_FILE} > /tmp/${ENCRYPTED_UBOOT_DEK}
-		rc=$?
-		if [ "$rc" -ne 0 ]; then
-			echo "u-boot: Merging DEK with U-Boot image failed (DEV/FILE = /tmp/$UBOOT_FILE)"
-			exit $rc
-		fi
-	fi
-	# enable write access
-	echo 0 > /sys/block/mmcblk0boot0/force_ro
-	UBOOT_FILE="/tmp/${ENCRYPTED_UBOOT_DEK}"
-	# write the encrypted u-boot into the MMC
-	dd if=${UBOOT_FILE} of=${UBOOT_MMC_DEV} seek=${uboot_seek_kb} bs=1K
-	rc=$? 2>/dev/null
-	if [ "$rc" -ne 0 ]; then
-		echo "u-boot: failed to write file ${UBOOT_FILE}"
-	else
-		echo "u-boot: successfully written file ${UBOOT_FILE}"
-	fi
-	# disable write access
-	echo 1 > /sys/block/mmcblk0boot0/force_ro
-	rm -f ${UBOOT_FILE} ${OUTPUT_FILE}
-else
-	# enable write access
-	echo 0 > /sys/block/mmcblk0boot0/force_ro
-	# write the u-boot into the MMC
-	dd if=${UBOOT_FILE} of=${UBOOT_MMC_DEV} seek=${uboot_seek_kb} bs=1K 2>/dev/null
-	rc=$?
-	if [ "$rc" -ne 0 ]; then
-		echo "u-boot: failed to write file ${UBOOT_FILE}"
-	else
-		echo "u-boot: successfully written file ${UBOOT_FILE}"
-	fi
-	# disable write access
-	echo 1 > /sys/block/mmcblk0boot0/force_ro
-	rm -f ${UBOOT_FILE} ${OUTPUT_FILE}
+	echo "U-Boot successfully writen to /dev/${UBOOT_BLOCK}"
+}
+
+# If U-Boot is encrypted, the DEK key blob needs to be extracted from existing U-Boot
+# and appended to the new U-Boot before writing it.
+if [ "${UBOOT_ENC}" = "enc" ]; then
+	append_dek
 fi
+# Write U-Boot
+write_uboot_emmc ${UBOOT_BLOCK_MAIN}
+# Check if redundant U-Boot update is requested.
+if [ "${UBOOT_REDUNDANT}" = "redundant" ]; then
+	write_uboot_emmc ${UBOOT_BLOCK_REDUNDANT}
+fi
+# Clean intermediate artifacts.
+clean_artifacts
+
+exit 0

@@ -14,7 +14,7 @@
 # CONFIG_CURL_SSL is not set
 # CONFIG_DISKFORMAT is not set
 # CONFIG_SYSTEMD is not set
-CONFIG_DEFAULT_CONFIG_FILE="/etc/swupdate.cfg"
+CONFIG_DEFAULT_CONFIG_FILE="/etc/swupdate.config"
 CONFIG_SCRIPTS=y
 # CONFIG_HW_COMPATIBILITY is not set
 CONFIG_SW_VERSIONS_FILE="/etc/sw-versions"

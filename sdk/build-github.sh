@@ -14,9 +14,11 @@
 #  !Description: Yocto autobuild script from Jenkins.
 #
 #  Parameters set by Jenkins:
-#     DY_PLATFORMS: Platforms to build
-#     DY_REVISION:  Revision of the manifest repository (for 'repo init')
-#     DY_TARGET:    Target image (the default is platform dependent)
+#     DY_BUILD_RELEASE:  Build for release mode
+#     DY_BUILD_TCHAIN:   Build toolchains for DEY images
+#     DY_PLATFORMS:      Platforms to build
+#     DY_REVISION:       Revision of the manifest repository (for 'repo init')
+#     DY_TARGET:         Target image (the default is platform dependent)
 #
 #===============================================================================
 
@@ -56,10 +58,15 @@ copy_images() {
 	# Copy individual packages only for 'release' builds, not for 'daily'.
 	# For 'daily' builds just copy the firmware images (the buildserver
 	# cannot afford such amount of disk space)
-	if echo "${JOB_NAME}" | grep -qs 'dey.*release'; then
+	if [ "${DY_BUILD_RELEASE}" = "true" ]; then
 		cp -r tmp/deploy/* "${1}"/
 	else
 		cp -r tmp/deploy/images "${1}"/
+		if [ "${DY_BUILD_TCHAIN}" = "true" ]; then
+			if [ -d tmp/deploy/sdk ]; then
+				cp -r tmp/deploy/sdk "${1}"/
+			fi
+		fi
 	fi
 
 	# Images directory post-processing
@@ -90,6 +97,7 @@ purge_sstate() {
 		packagegroup-dey-debug \
 		packagegroup-dey-examples \
 		packagegroup-dey-gstreamer \
+		packagegroup-dey-lvgl \
 		packagegroup-dey-network \
 		packagegroup-dey-qt \
 		packagegroup-dey-webkit \
@@ -109,9 +117,15 @@ swu_recipe_name() {
 	fi
 }
 
-# Sanity checks (Jenkins environment)
-[ -z "${DY_REVISION}" ] && error "DY_REVISION not specified"
-[ -z "${WORKSPACE}" ] && error "WORKSPACE not specified"
+# Sanity check (Jenkins environment)
+[ -z "${DY_REVISION}" ]       && error "DY_REVISION not specified"
+[ -z "${WORKSPACE}" ]         && error "WORKSPACE not specified"
+
+# Set default settings if Jenkins does not do it
+[ -z "${DY_BUILD_RELEASE}" ] && [[ "${JOB_NAME}" =~ dey-.*-release ]] && DY_BUILD_RELEASE="true"
+
+# If DY_BUILD_TCHAIN is unset, set it for release jobs
+[ -z "${DY_BUILD_TCHAIN}" ] && [ "${DY_BUILD_RELEASE}" = "true" ] && DY_BUILD_TCHAIN="true"
 
 # Per-platform data
 while read -r _pl _tgt; do
@@ -138,7 +152,8 @@ _EOF_
 DY_PLATFORMS="${DY_PLATFORMS:-${AVAILABLE_PLATFORMS}}"
 
 YOCTO_IMGS_DIR="${WORKSPACE}/images"
-YOCTO_INST_DIR="${WORKSPACE}/dey.$(echo "${DY_REVISION}" | tr '/' '_')"
+YOCTO_INST_DIR="${WORKSPACE}/digi-yocto-sdk-github.$(echo "${DY_REVISION}" | tr '/' '_')"
+YOCTO_DOWNLOAD_DIR="${DY_DOWNLOADS:-${WORKSPACE}}/downloads"
 YOCTO_PROJ_DIR="${WORKSPACE}/projects"
 
 # If CPUS is unset, set it with the machine cpus
@@ -149,8 +164,8 @@ fi
 
 printf "\n[INFO] Build Yocto \"%s\" for \"%s\" (cpus=%s)\n\n" "${DY_REVISION}" "${DY_PLATFORMS}" "${CPUS}"
 
-# Install DEY
-rm -rf "${YOCTO_INST_DIR}" && mkdir -p "${YOCTO_INST_DIR}"
+# Install/Update Digi's Yocto SDK
+mkdir -p "${YOCTO_INST_DIR}"
 if pushd "${YOCTO_INST_DIR}"; then
 	# Use git ls-remote to check the revision type
 	if [ "${DY_REVISION}" != "master" ]; then
@@ -174,13 +189,20 @@ if pushd "${YOCTO_INST_DIR}"; then
 	popd
 fi
 
-# Create projects and build
+# Clean downloads directory
+if [ "${DY_RM_DOWNLOADS}" = "true" ]; then
+	printf "\n[INFO] Removing the downloads folder.\n"
+	rm -rf "${YOCTO_DOWNLOAD_DIR}"
+fi
+
+# Clean images and projects folders
 rm -rf "${YOCTO_IMGS_DIR}" "${YOCTO_PROJ_DIR}"
+
+# Create projects and build
 for platform in ${DY_PLATFORMS}; do
 	# The variable <platform>_tgt got its dashes converted to
 	# underscores, so we must convert also the ones in ${platform}.
 	eval "platform_targets=\"\${${platform//-/_}_tgt}\""
-
 	_this_prj_dir="${YOCTO_PROJ_DIR}/${platform}"
 	_this_img_dir="${YOCTO_IMGS_DIR}/${platform}"
 	mkdir -p "${_this_img_dir}" "${_this_prj_dir}"
@@ -192,7 +214,7 @@ for platform in ${DY_PLATFORMS}; do
 			# shellcheck disable=SC1091,SC2086
 			MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p "${platform}" <<< "y"
 			# Set a common DL_DIR and SSTATE_DIR for all platforms
-			sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_PROJ_DIR}/downloads\"" \
+			sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_DOWNLOAD_DIR}\"" \
 				-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
 				conf/local.conf
 			{
@@ -204,6 +226,11 @@ for platform in ${DY_PLATFORMS}; do
 				printf "\n[INFO] Building the %s target.\n" "${target}"
 				# shellcheck disable=SC2046
 				time bitbake "${target}" $(swu_recipe_name "${target}")
+				# Build the toolchain for DEY images
+				if [ "${DY_BUILD_TCHAIN}" = "true" ] && echo "${target}" | grep -qs '^\(core\|dey\)-image-[^-]\+$'; then
+					printf "\n[INFO] Building the toolchain for %s.\n" "${target}"
+					time bitbake -c populate_sdk "${target}"
+				fi
 			done
 			purge_sstate
 		)

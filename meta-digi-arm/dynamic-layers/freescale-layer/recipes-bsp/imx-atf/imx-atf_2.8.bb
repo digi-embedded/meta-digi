@@ -7,6 +7,7 @@ require recipes-bsp/imx-atf/imx-atf_2.6.bb
 
 SRC_URI = "git://github.com/nxp-imx/imx-atf.git;protocol=https;branch=${SRCBRANCH}"
 SRCBRANCH = "lf_v2.8"
-SRCREV = "99195a23d3aef485fb8f10939583b1bdef18881c"
+# Tag: lf-6.1.55-2.2.0
+SRCREV = "08e9d4eef2262c0dd072b4325e8919e06d349e02"
 
 COMPATIBLE_MACHINE = "(ccimx93)"

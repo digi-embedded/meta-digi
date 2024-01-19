@@ -41,6 +41,10 @@ MACHINE_FEATURES:remove:use-mainline-bsp = "wifi"
 # Max LEB count (-c 255) calculated for a partition of up to 32 MiB considering 128 KiB erase-block size.
 MKUBIFS_BOOT_ARGS ?= "-m 2048 -e 126976 -c 255"
 
+# mkfs.ubifs parameters for recovery partition
+# Same parameters as the boot partition, but using zlib compression to reduce image size.
+MKUBIFS_RECOVERY_ARGS ?= "${MKUBIFS_BOOT_ARGS} -x zlib"
+
 # mkfs.ubifs parameters for rootfs partition
 # Max LEB count (-c 8191) calculated for a partition of up to 1 GiB considering 128 KiB erase-block size.
 MKUBIFS_ARGS ?= "-m 2048 -e 126976 -c 8191"
@@ -69,3 +73,7 @@ UBOOT_ENV_SIZE ?= "0x20000"
 # the U-Boot environment can take up (if undefined, it will take up all the
 # available space in the environment partition)
 UBOOT_ENV_RANGE ?= ""
+
+# Partitions to blacklist for swupdate:
+# bootloader, environment, safe
+SWUPDATE_MTD_BLACKLIST = "0 1 2"

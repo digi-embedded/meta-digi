@@ -188,7 +188,7 @@ IMX_EXTRA_FIRMWARE                  ?= ""
 IMX_EXTRA_FIRMWARE:mx8-generic-bsp   = "firmware-imx-8 imx-sc-firmware imx-seco"
 IMX_EXTRA_FIRMWARE:mx8m-generic-bsp  = "firmware-imx-8m"
 IMX_EXTRA_FIRMWARE:mx8x-generic-bsp  = "imx-sc-firmware imx-seco"
-IMX_EXTRA_FIRMWARE:mx93-generic-bsp  = "firmware-imx-9 firmware-sentinel"
+IMX_EXTRA_FIRMWARE:mx93-generic-bsp  = "imx-boot-firmware-files firmware-ele-imx"
 
 # Firmware
 MACHINE_FIRMWARE ?= ""
@@ -272,27 +272,29 @@ PREFERRED_VERSION_vulkan-tools:imxvulkan   ??= "1.2.182.0"
 
 # Use i.MX optee Version
 PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "3.21.0.imx"
+PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "4.0.0.imx"
 PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "3.21.0.imx"
+PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "4.0.0.imx"
 PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "3.21.0.imx"
+PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "4.0.0.imx"
 
-# Machine learning backports from NXP's lf-6.1.1_1.0.0 release
-PREFERRED_VERSION_deepview-rt:ccimx93 = "2.4.46.1-aarch64"
-PREFERRED_VERSION_ethos-u-vela:ccimx93 = "3.6.0"
+# Machine learning backports from NXP's lf-6.1.55-2.2.0 release
+PREFERRED_VERSION_ethos-u-driver-stack:ccimx93 = "23.08"
+PREFERRED_VERSION_ethos-u-firmware:ccimx93 = "23.08"
+PREFERRED_VERSION_ethos-u-vela:ccimx93 = "3.9.0"
 PREFERRED_VERSION_flatbuffers:ccimx93 = "2.0.7"
 PREFERRED_VERSION_flatbuffers-native:ccimx93 = "2.0.7"
-PREFERRED_VERSION_tensorflow-lite:ccimx93 = "2.10.0"
-PREFERRED_VERSION_tensorflow-lite-host-tools:ccimx93 = "2.10.0"
-PREFERRED_VERSION_tensorflow-lite-host-tools-native:ccimx93 = "2.10.0"
+PREFERRED_VERSION_onnxruntime:ccimx93 = "1.16.1"
+PREFERRED_VERSION_tensorflow-lite:ccimx93 = "2.12.1"
+PREFERRED_VERSION_tensorflow-lite-host-tools:ccimx93 = "2.12.1"
+PREFERRED_VERSION_tensorflow-lite-host-tools-native:ccimx93 = "2.12.1"
 
 # Optee runtime packages to install
 OPTEE_PKGS ??= "optee-client optee-os"
 
 # Use i.MX opencv Version
 PREFERRED_VERSION_opencv:mx8-nxp-bsp ??= "4.6.0.imx"
-PREFERRED_VERSION_opencv:mx9-nxp-bsp ??= "4.6.0.imx"
+PREFERRED_VERSION_opencv:mx9-nxp-bsp ??= "4.7.0.imx"
 
 EXTRA_IMAGEDEPENDS += "u-boot"
 

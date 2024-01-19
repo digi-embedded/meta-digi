@@ -32,7 +32,9 @@ show_usage()
 	echo "Usage: $0 [options]"
 	echo ""
 	echo "  Options:"
+	echo "   -b                     Activate bootcount mechanism (3 boot attempts)."
 	echo "   -d                     Install firmware on dualboot partitions (system A and system B)."
+	echo "                          (Implies -b)."
 	echo "   -h                     Show this help."
 	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
 	echo "                          'dey-image-webkit', 'core-image-base'..."
@@ -70,10 +72,11 @@ echo "############################################################"
 # Command line admits the following parameters:
 # -u <u-boot-filename>
 # -i <image-name>
-while getopts 'dhi:nu:' c
+while getopts 'bdhi:nu:' c
 do
 	case $c in
-	d) INSTALL_DUALBOOT=true ;;
+	b) BOOTCOUNT=true ;;
+	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
 	n) NOWAIT=true ;;
@@ -90,16 +93,26 @@ if [ "${dualboot}" = "yes" ]; then
 	DUALBOOT=true;
 fi
 
-# remove redirect
-uuu fb: ucmd setenv stdout serial
-
 echo ""
 echo "Determining image files to use..."
 
-# Determine U-Boot file to program basing on SOM's SOC type (linked to bus width)
+# Determine U-Boot file to program basing on SOM's SOC revision
 if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
-	INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##.bin"
+	soc_rev="$(getenv soc_rev)"
+	if [ -n "${soc_rev}" ]; then
+		[ "${soc_rev}" = "0x10" ] && SOCREV="-A0"
+	else
+		# Fallback to hardware version if soc_rev is empty
+		hwid_2="$(getenv hwid_2)"
+		hwid_2="0x${hwid_2#0x}"
+		som_hv="$(((hwid_2 & 0x78) >> 3))"
+		[ "${som_hv}" -lt "2" ] && SOCREV="-A0"
+	fi
+	INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##${SOCREV}.bin"
 fi
+
+# remove redirect
+uuu fb: ucmd setenv stdout serial
 
 # Determine linux, recovery, and rootfs image filenames to update
 if [ -z "${IMAGE_NAME}" ]; then
@@ -148,6 +161,11 @@ if [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; then
 		echo "\033[31m[ERROR] Could not find file '${INSTALL_ROOTFS_FILENAME}'\033[0m"
 		ABORT=true
 	fi
+fi
+
+# Enable bootcount mechanism by setting a bootlimit
+if [ "${BOOTCOUNT}" = true ]; then
+	bootlimit_cmd="setenv bootlimit 3"
 fi
 
 [ "${ABORT}" = true ] && exit 1
@@ -210,6 +228,7 @@ uuu fb: ucmd mmc partconf 0 1 1 1
 # Set 'bootcmd' for the second part of the script that will
 #  - Reset environment to defaults
 #  - Reset the bootcount
+#  - Set bootlimit (if required)
 #  - Save the environment
 #  - Partition the eMMC user data area for Linux
 #  - Update the 'linux' partition
@@ -219,6 +238,7 @@ uuu fb: ucmd setenv bootcmd "
 	env default -a;
 	setenv dualboot \${dualboot};
 	bootcount reset;
+	${bootlimit_cmd};
 	saveenv;
 	echo \"\";
 	echo \"\";

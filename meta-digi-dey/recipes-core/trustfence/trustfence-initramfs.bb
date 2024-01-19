@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2022, Digi International Inc.
+# Copyright (C) 2016-2023, Digi International Inc.
 
 SUMMARY = "Trustfence initramfs required files"
 LICENSE = "GPL-2.0-only"
@@ -23,8 +23,7 @@ RDEPENDS:${PN} = " \
     cryptsetup \
     trustfence-tool \
     util-linux-findfs \
-    wipe \
 "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6|ccimx8x|ccimx8m)"
+COMPATIBLE_MACHINE = "(ccimx6|ccimx8m|ccimx8x|ccimx93)"

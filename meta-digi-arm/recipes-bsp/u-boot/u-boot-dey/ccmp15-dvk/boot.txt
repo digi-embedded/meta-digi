@@ -53,8 +53,6 @@ setenv ORIG_overlays ${overlays}
 # Determine overlays to apply depending on the hardware capabilities
 # described by the HWID, SOM version, and carrier board version.
 #
-setexpr module_has_mca ${hwid_2} \& 10000
-setexpr module_has_mca ${module_has_mca} / 10000
 setexpr module_has_wifi ${hwid_2} \& 20000
 setexpr module_has_wifi ${module_has_wifi} / 20000
 setexpr module_has_bt ${hwid_2} \& 40000
@@ -68,18 +66,23 @@ if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
 	setenv overlays _ov_som_wifi_ccmp15.dtbo,${overlays}
 fi
 
-if test "${module_has_mca}" = "1" && test -z "${disable_mca}"; then
-	setenv overlays _ov_som_mca_ccmp15.dtbo,${overlays}
-fi
-
 # Apply DVKv1 overlay if the board_version is 1
 if test -z "${board_version}" || test "${board_version}" -eq "1"; then
 	setenv overlays _ov_board_v1_ccmp15-dvk.dtbo,${overlays}
 fi
 
+# Apply DVKv2 overlay if the board_version is 2
+if test "${board_version}" -eq "2"; then
+	setenv overlays _ov_board_v2_ccmp15-dvk.dtbo,${overlays}
+fi
+
 if test "${boot_device}" = "mmc"; then
 	dboot linux mmc
 else
+	if test "${dboot_kernel_var}" = "fitimage"; then
+		# Set temp var to avoid re-loading fitimage
+		setenv temp-fitimg-loaded yes
+	fi
 	dboot linux nand ${mtdbootpart}
 fi
 

@@ -62,7 +62,6 @@ fi
 
 # Default values
 [ -z "${CONFIG_KEY_INDEX}" ] && CONFIG_KEY_INDEX="0"
-KEY_PASS_FILE="${CONFIG_SIGN_KEYS_PATH}/keys/key_pass.txt"
 
 # Generate random keys if they don't exist
 if ! trustfence-gen-pki.sh -p ${PLATFORM}; then
@@ -70,9 +69,11 @@ if ! trustfence-gen-pki.sh -p ${PLATFORM}; then
 fi
 
 if [ "${PLATFORM}" = "ccmp15" ]; then
+	KEY_PASS_FILE="${CONFIG_SIGN_KEYS_PATH}/keys/key_pass.txt"
 	PUBLIC_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/publicKey.pem"
 	PRIVATE_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/privateKey.pem"
 elif [ "${PLATFORM}" = "ccmp13" ]; then
+	KEY_PASS_FILE="${CONFIG_SIGN_KEYS_PATH}/keys/key_pass0${CONFIG_KEY_INDEX}.txt"
 	PUBLIC_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/publicKey0*.pem"
 	PRIVATE_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/privateKey0${CONFIG_KEY_INDEX}.pem"
 else
@@ -90,8 +91,7 @@ INPUT_FILE="$(readlink -e "${1}")"
 OUTPUT_FILE="$(readlink -m "${2}")"
 
 # Obtain password from key pass file
-INDEX=$((CONFIG_KEY_INDEX + 1))
-PASS=$(cat "${KEY_PASS_FILE}" | cut -f "${INDEX}" -d " ")
+PASS=$(cat "${KEY_PASS_FILE}")
 
 # Sign TF-A artifact
 if [ "${ARTIFACT_TFA}" = "y" ]; then

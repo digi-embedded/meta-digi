@@ -6,13 +6,13 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=7bdef19938f3503cfc4c586461f99012"
 
 PV = "1.0+git${SRCPV}" 
 
-SRCBRANCH = "MM_04.06.03_2110_L5.10.y"
+SRCBRANCH = "MM_04.08.02_2310_L6.1.y"
 NXPAFE_SRC ?= "git://github.com/nxp-imx/nxp-afe.git;protocol=https"
 SRC_URI = " \
     ${NXPAFE_SRC};branch=${SRCBRANCH} \
 "
 
-SRCREV = "7d3295d250fe34325123cc9df94902a083308a46"
+SRCREV = "77343e302fb079e3d50f6c6d0eef565c09256e56" 
 
 S = "${WORKDIR}/git"
 
@@ -33,6 +33,7 @@ do_install() {
         install -m 0755 ${WORKDIR}/deploy_afe/afe ${D}/unit_tests/nxp-afe
         install -m 0644 ${WORKDIR}/deploy_afe/asound.conf*    ${D}/unit_tests/nxp-afe
         install -m 0644 ${WORKDIR}/deploy_afe/TODO.md    ${D}/unit_tests/nxp-afe
+        install -m 0755 ${WORKDIR}/deploy_afe/UAC_VCOM_composite.sh    ${D}/unit_tests/nxp-afe
 }
 
 FILES:${PN} += "/unit_tests"

@@ -8,6 +8,8 @@ MACHINEOVERRIDES =. "mx6:mx6dl:mx6q:${DIGI_FAMILY}:${DIGI_SOM}:"
 include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/arm/armv7a/tune-cortexa9.inc
 
+BOOTLOADER_SEEK_BOOTPART = "1"
+
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"

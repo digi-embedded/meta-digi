@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2020, Digi International Inc.
+# Copyright (C) 2016-2023, Digi International Inc.
 
 DESCRIPTION = "Recovery initramfs image"
 LICENSE = "MIT"
@@ -12,7 +12,7 @@ PACKAGE_INSTALL = " \
     recovery-initramfs \
     swupdate \
     trustfence-tool \
-    wipe \
+    ${@bb.utils.contains('DEY_SOC_VENDOR', 'NXP', bb.utils.contains('STORAGE_MEDIA', 'mtd', 'imx-kobs', '', d), '', d)} \
 "
 
 # Do not pollute the initrd image with rootfs features
@@ -31,6 +31,7 @@ IMAGE_ROOTFS_SIZE = "8192"
 BAD_RECOMMENDATIONS += " \
     openssl-bin \
     openssl-conf \
+    openssl-ossl-module-legacy \
 "
 
 export IMAGE_BASENAME = "dey-image-recovery-initramfs"

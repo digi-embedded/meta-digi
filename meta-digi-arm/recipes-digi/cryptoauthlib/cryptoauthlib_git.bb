@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2021 Digi International Inc.
+# Copyright (C) 2017-2023 Digi International Inc.
 
 SUMMARY = "Microchip CryptoAuthentication Library"
 SECTION = "libs"
@@ -53,4 +53,4 @@ RDEPENDS:${PN}-test = "${PN}"
 RRECOMMENDS:${PN} = "${PN}-test"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul|ccimx8x|ccimx8m)"
+COMPATIBLE_MACHINE = "(ccimx6qpsbc|ccimx6ul|ccimx8m|ccimx8x)"

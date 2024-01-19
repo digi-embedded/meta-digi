@@ -1,26 +1,19 @@
 # Copyright (C) 2023 Digi International.
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
+LIC_FILES_CHKSUM:ccimx93 = "file://LICENSE.txt;md5=2827219e81f28aba7c6a569f7c437fa7"
 
-LIC_FILES_CHKSUM:ccimx93 = "file://EULA.txt;md5=add2d392714d3096ed7e0f7e2190724b"
-
-SRCBRANCH:ccimx93 = "lf-6.1.1_1.0.0"
-SRCREV:ccimx93 = "bacbeb4789c1b13d13aab12ada29217ce8c3e905"
-
-# Use this temporal binary till it is released
-SRC_URI:append:ccimx93 = " \
-    file://sd_w61x_v1.bin.se \
-    file://uartspi_n61x_v1.bin.se \
-"
+SRCBRANCH:ccimx93 = "lf-6.1.55_2.2.0"
+SRCREV:ccimx93 = "7be5a936ce8677962dd7b41c6c9f41dd14350bec"
 
 do_install:append:ccimx93() {
-	install -m 444 ${WORKDIR}/sd_w61x_v1.bin.se ${D}${base_libdir}/firmware/nxp
-	install -m 444 ${WORKDIR}/uartspi_n61x_v1.bin.se ${D}${base_libdir}/firmware/nxp
+	# Install NXP Connectivity IW612 firmware
+	install -m 0644 nxp/FwImage_IW612_SD/sd_w61x_v1.bin.se  ${D}${nonarch_base_libdir}/firmware/nxp
+	install -m 0644 nxp/FwImage_IW612_SD/uartspi_n61x_v1.bin.se ${D}${nonarch_base_libdir}/firmware/nxp
 }
 
 PACKAGES:prepend:ccimx93 = "${PN}-nxpiw612 "
 
 FILES:${PN}-nxpiw612 = " \
-    ${base_libdir}/firmware/nxp/sd_w61x_v1.bin.se \
-    ${base_libdir}/firmware/nxp/uartspi_n61x_v1.bin.se \
+    ${nonarch_base_libdir}/firmware/nxp/sd_w61x_v1.bin.se \
+    ${nonarch_base_libdir}/firmware/nxp/uartspi_n61x_v1.bin.se \
 "

@@ -1,0 +1,217 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Wed, 22 Jul 2020 15:10:21 +0200
+Subject: [PATCH] ahab_pki_tree.sh: adapt script for DEY
+
+* support non interactive execution: introduce a new command line
+  argument to specify the CSF path folder and prepare it to automate the
+  build process.
+
+* use a random password for the default PKI generation
+
+* extract public keys from certificates: the public key needs to be
+  available on the rootfs so that signed SWU packages can be authenticated.
+
+Co-Authored-By: Javier Viguera <javier.viguera@digi.com>
+Co-Authored-By: Hector Palacios <hector.palacios@digi.com>
+Co-Authored-By: Mike Engel <Mike.Engel@digi.com>
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ keys/ahab_pki_tree.sh | 79 ++++++++++++++++++++++++++++++-------------
+ 1 file changed, 55 insertions(+), 24 deletions(-)
+
+diff --git a/keys/ahab_pki_tree.sh b/keys/ahab_pki_tree.sh
+index 0327f83..5c986b2 100755
+--- a/keys/ahab_pki_tree.sh
++++ b/keys/ahab_pki_tree.sh
+@@ -64,6 +64,8 @@ printf "    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+ 
+ stty erase 
+ 
++SCRIPT_BASEDIR="$(cd $(dirname ${0}) && pwd)"
++
+ if [ $# -gt 0 ]; then
+     interactive="n"
+ else
+@@ -78,7 +80,7 @@ usage()
+     echo "$0"
+     echo
+     echo "Command Line Mode:"
+-    echo "$0 -existing-ca <y/n> [-ca-key <CA key name> -ca-cert <CA cert name>] -kt <y/n> -kl <ECC/RSA Key Length> -da <digest algorithm> -duration <years> -srk-ca <y/n>"
++    echo "$0 [-csf-path] <CSF Path> -existing-ca <y/n> [-ca-key <CA key name> -ca-cert <CA cert name>] -kt <y/n> -kl <ECC/RSA Key Length> -da <digest algorithm> -duration <years> -srk-ca <y/n>"
+     echo "Options:"
+     echo "    -kt ecc     : then Supported key lengths: p256, p384, p521"
+     echo "    -kt rsa     : then Supported key lengths: 2048, 3072, 4096"
+@@ -89,10 +91,18 @@ usage()
+     echo
+ }
+ 
+-max_param=16
+-min_param=12
++max_param=18
++min_param=1
+ num_param=1
+ 
++# Default values
++existing_ca="n"
++kt="ecc"
++kl=p521
++da=sha512
++duration=10
++srk_ca="n"
++
+ if [ $interactive = "n" ]
+ then
+     # Validate command line parameters
+@@ -111,6 +121,11 @@ then
+     while [ $num_param -le $max_param ] && [ "$1" != "" ]
+     do
+         case $1 in
++            -csf-path)
++                shift
++                CSF_PATH=$1
++                shift
++                ;;
+             -existing-ca)
+                 shift
+                 existing_ca=$1
+@@ -164,9 +179,8 @@ then
+                 shift
+                 ;;
+             *)
+-                echo "ERROR: Invalid parameter: $1"
+-                usage
+-                exit 1
++                CSF_PATH=$1
++                shift
+                 ;;
+         esac
+         num_param=$(( num_param + 2 ))
+@@ -274,6 +288,16 @@ then
+     read duration
+ fi
+ 
++# CSF folder structure
++if [ ! -d "${CSF_PATH}" ]; then
++    echo "Invalid CSF_PATH: ${CSF_PATH}"
++    usage
++    exit 1
++fi
++cd "${CSF_PATH}"
++[ -d crts ] || mkdir crts
++[ -d keys ] || mkdir keys
++
+ # Compute validity period
+ val_period=$((duration*365))
+ 
+@@ -305,9 +329,9 @@ then
+ 	script_name=$0
+ fi
+ script_path=$(cd $(dirname "${script_name}") && pwd -P)
+-keys_dir=${script_path}/../keys/
+-crts_dir=${script_path}/../crts/
+-ca_dir=${script_path}/../ca/
++keys_dir=${CSF_PATH}/keys/
++crts_dir=${CSF_PATH}/crts/
++ca_dir=${CSF_PATH}/ca/
+ 
+ if [ ! -d "${keys_dir}" ]
+ then
+@@ -321,11 +345,11 @@ then
+     exit 1
+ fi
+ 
+-if [ ! -d "${ca_dir}" ]
+-then
+-    echo ERROR: "Openssl configuration directory ${ca_dir} is missing. Expecting <cst>/ca directory to hold openssl configuration files."
+-    exit 1
+-fi
++# if [ ! -d "${ca_dir}" ]
++# then
++#     echo ERROR: "Openssl configuration directory ${ca_dir} is missing. Expecting <cst>/ca directory to hold openssl configuration files."
++#     exit 1
++# fi
+ 
+ # Switch current working directory to keys directory, if needed.
+ if [ "${crt_dir}" != "${keys_dir}" ]
+@@ -348,9 +372,10 @@ fi
+ # Check that the file "key_pass.txt" is present, if not create it with default user/pwd:
+ if [ ! -f key_pass.txt ]
+ then
+-    echo "test" > key_pass.txt
+-    echo "test" >> key_pass.txt
+-    echo "A default file 'key_pass.txt' was created with password = test!"
++    password="$(openssl rand -base64 32)"
++    echo "${password}" > key_pass.txt
++    echo "${password}" >> key_pass.txt
++    echo "A file 'key_pass.txt' was created with a random password!"
+ fi
+ 
+ # The following is required otherwise OpenSSL complains
+@@ -396,7 +421,7 @@ then
+                    -x509 -extensions v3_ca \
+                    -keyout temp_ca.pem \
+                    -out ${ca_cert}.pem \
+-                   -days ${val_period} -config ../ca/openssl.cnf
++                   -days ${val_period} -config "${SCRIPT_BASEDIR}/openssl.cnf"
+ 
+     # Generate CA key in PKCS #8 format - both PEM and DER
+     openssl pkcs8 -passin file:./key_pass.txt -passout file:./key_pass.txt \
+@@ -464,10 +489,10 @@ then
+                       -in ./temp_srk_req.pem \
+                       -cert ${ca_cert}.pem \
+                    -keyfile ${ca_key}.pem \
+-                      -extfile ../ca/v3_usr.cnf \
++                      -extfile "${SCRIPT_BASEDIR}/v3_usr.cnf" \
+                       -out ${srk_crt}.pem \
+                       -days ${val_period} \
+-                      -config ../ca/openssl.cnf
++                      -config "${SCRIPT_BASEDIR}/openssl.cnf"
+ 
+         # Convert SRK Certificate to DER format
+         openssl x509 -inform PEM -outform DER \
+@@ -487,6 +512,9 @@ then
+                       -in temp_srk.pem \
+                       -out ${srk_key}.pem
+ 
++        # Extract public key from the certificate
++        openssl x509 -pubkey -noout -in "${srk_crt}.pem" > ../crts/key${i}.pub
++
+         # Cleanup
+         \rm ./temp_srk.pem ./temp_srk_req.pem
+         i=$((i+1))
+@@ -539,10 +567,10 @@ do
+                   -in ./temp_srk_req.pem \
+                   -cert ${ca_cert}.pem \
+                   -keyfile ${ca_key}.pem \
+-                  -extfile ../ca/v3_ca.cnf \
++                  -extfile "${SCRIPT_BASEDIR}/v3_ca.cnf" \
+                   -out ${srk_crt}.pem \
+                   -days ${val_period} \
+-                  -config ../ca/openssl.cnf
++                  -config "${SCRIPT_BASEDIR}/openssl.cnf"
+ 
+     # Convert SRK Certificate to DER format
+     openssl x509 -inform PEM -outform DER \
+@@ -609,10 +637,10 @@ do
+                -in ./temp_sgk_req.pem \
+                -cert ${srk_crt_i} \
+                -keyfile ${srk_key_i} \
+-               -extfile ../ca/v3_usr.cnf \
++               -extfile "${SCRIPT_BASEDIR}/v3_usr.cnf" \
+                -out ${sgk_crt}.pem \
+                -days ${val_period} \
+-               -config ../ca/openssl.cnf
++               -config "${SCRIPT_BASEDIR}/openssl.cnf"
+ 
+     # Convert SGK Certificate to DER format
+     openssl x509 -inform PEM -outform DER \
+@@ -630,6 +658,9 @@ do
+                   -in temp_sgk.pem \
+                   -out ${sgk_key}.pem
+ 
++    # Extract public key from the certificate
++    openssl x509 -pubkey -noout -in "${srk_crt_i}" > ../crts/key${i}.pub
++
+     # Cleanup
+     \rm ./temp_sgk.pem ./temp_sgk_req.pem
+ 

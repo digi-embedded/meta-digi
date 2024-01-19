@@ -1,13 +1,9 @@
-# Copyright (C) 2022 Digi International
+# Copyright (C) 2022-2023 Digi International
 
-DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
+DEPENDS += "${@oe.utils.vartrue('TRUSTFENCE_SIGN_ARTIFACTS', 'trustfence-sign-tools-native', '', d)}"
 
-do_deploy[postfuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence_sign', '', d)}"
-
+do_deploy[postfuncs] += "${@oe.utils.vartrue('TRUSTFENCE_SIGN_ARTIFACTS', 'trustfence_sign', '', d)}"
 trustfence_sign() {
-	# TODO: signing of artifacts for STM-based platforms
-	[ "${DEY_SOC_VENDOR}" = "STM" ] && return
-
 	# Set environment variables for trustfence configuration
 	export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 	[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"

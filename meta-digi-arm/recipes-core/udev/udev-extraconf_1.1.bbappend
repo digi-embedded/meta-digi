@@ -18,6 +18,12 @@ do_install:append() {
 		install -d ${D}/mnt/linux
 		install -d ${D}/mnt/update
 		install -d ${D}/mnt/data
+		# Change mount.sh to check "/sbin/init.orig" additionally to determine if a system is using systemd.
+		sed -i '/^BASE_INIT=/a BASE_INIT_ORIG="$(readlink -f "@base_sbindir@/init.orig")"' \
+		${D}${sysconfdir}/udev/scripts/mount.sh
+		sed -i 's/if \[ "x$BASE_INIT" = "x$INIT_SYSTEMD" \];then/if \[ "x$BASE_INIT" = "x$INIT_SYSTEMD" \] || \[ "x$BASE_INIT_ORIG" = "x$INIT_SYSTEMD" \]; then/' \
+		${D}${sysconfdir}/udev/scripts/mount.sh
+		sed -i -e 's|@base_sbindir@|${base_sbindir}|g' ${D}${sysconfdir}/udev/scripts/mount.sh
 	fi
 
 	install -m 0755 ${WORKDIR}/mount_digiparts.sh ${D}${sysconfdir}/udev/scripts/

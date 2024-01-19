@@ -9,6 +9,8 @@
 # * Disabled console
 #
 
+TRUSTFENCE_ENABLED = "1"
+
 # Default secure console configuration
 TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 
@@ -26,6 +28,7 @@ TRUSTFENCE_DEK_PATH:ccmp1 ?= "0"
 TRUSTFENCE_ENCRYPT_ENVIRONMENT ?= "1"
 TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 TRUSTFENCE_KEY_INDEX ?= "0"
+TRUSTFENCE_FIT_IMG:ccmp1 ?= "1"
 
 # Partition encryption configuration
 TRUSTFENCE_ENCRYPT_PARTITIONS ?= "1"
@@ -34,7 +37,27 @@ TRUSTFENCE_ENCRYPT_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-
 # Read-only rootfs
 TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "1", "0", d)}"
 
+#
+# NOTHING TO CUSTOMIZE BELOW THIS LINE
+#
+
+# TrustFence sign artifacts is not supported on all platforms
+TRUSTFENCE_SIGN_ARTIFACTS = "1"
+TRUSTFENCE_SIGN_ARTIFACTS:ccmp1 = "0"
+TRUSTFENCE_SIGN_ARTIFACTS:ccimx93 = "0"
+
 IMAGE_FEATURES += "dey-trustfence"
+
+# ---------------------------------
+#  Usage of FIT Image signed
+# ---------------------------------
+
+# Enable FIT image build when Trustfence is enabled
+MACHINE_FEATURES += "${@oe.utils.conditional('TRUSTFENCE_FIT_IMG', '1', 'fit', '', d)}"
+# key to sign FIT config nodes
+TRUSTFENCE_FIT_CFG_SIGN_KEYNAME ?= "fitcfg"
+# key to sign FIT image nodes
+TRUSTFENCE_FIT_IMG_SIGN_KEYNAME ?= "fitimg"
 
 # Function to generate a PKI tree (with lock dir protection)
 GENPKI_LOCK_DIR = "${TRUSTFENCE_SIGN_KEYS_PATH}/.genpki.lock"
@@ -82,7 +105,7 @@ copy_public_key() {
 			if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
 				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/IMG${KEY_INDEX}*crt.pem)"
 			elif [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
-				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK${KEY_INDEX}*_ca_crt.pem)"
+				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK${KEY_INDEX}*crt.pem)"
 			else
 				bberror "Unknown TRUSTFENCE_SIGN_MODE value"
 				exit 1
@@ -155,6 +178,8 @@ python () {
             d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/key_pass.txt")
 
         d.appendVar("UBOOT_TF_CONF", "CONFIG_SIGN_IMAGE=y ")
+        if (d.getVar("TRUSTFENCE_SIGN_ARTIFACTS") == "1"):
+            d.appendVar("UBOOT_TF_CONF", "CONFIG_AUTH_ARTIFACTS=y ")
         if (d.getVar("TRUSTFENCE_READ_ONLY_ROOTFS") == "1"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_AUTHENTICATE_SQUASHFS_ROOTFS=y ")
         if d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"):
@@ -164,11 +189,31 @@ python () {
         if d.getVar("TRUSTFENCE_KEY_INDEX"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_KEY_INDEX=%s " % d.getVar("TRUSTFENCE_KEY_INDEX"))
         if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
-            d.appendVar("UBOOT_TF_CONF", "CONFIG_AUTH_ARTIFACTS=y ")
             if (d.getVar("TRUSTFENCE_DEK_PATH") not in [None, "0"]):
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_DEK_PATH="%s" ' % d.getVar("TRUSTFENCE_DEK_PATH"))
             if d.getVar("TRUSTFENCE_SIGN_MODE"):
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_SIGN_MODE="%s" ' % d.getVar("TRUSTFENCE_SIGN_MODE"))
+
+
+        if (d.getVar("TRUSTFENCE_FIT_IMG") == "1"):
+            # FIT-related variables
+            # Create keys if not defined
+            d.setVar("FIT_GENERATE_KEYS", "1")
+            # Sign individual images (prevents running unsigned images in FIT)
+            d.setVar("FIT_SIGN_INDIVIDUAL", "1")
+            # Set variables required by poky to sign FIT image
+            d.setVar("UBOOT_SIGN_KEYNAME", d.getVar("TRUSTFENCE_FIT_CFG_SIGN_KEYNAME"))
+            d.setVar("UBOOT_SIGN_IMG_KEYNAME", d.getVar("TRUSTFENCE_FIT_IMG_SIGN_KEYNAME"))
+            d.setVar("UBOOT_MKIMAGE_DTCOPTS", "-I dts -O dtb -p 2000")
+            # Enable FIT signing support
+            d.setVar("UBOOT_SIGN_ENABLE", d.getVar("TRUSTFENCE_SIGN"))
+            # Set path to FIT signing keys
+            d.setVar("UBOOT_SIGN_KEYDIR", "%s/fit" % d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"))
+
+    else:
+        # Disable signing artifacts if TRUSTFENCE_SIGN != 1
+        d.setVar("TRUSTFENCE_SIGN_ARTIFACTS", "0")
+
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT") == "1"):
         if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y ")
@@ -197,9 +242,15 @@ python () {
             else:
                 d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", keys_path + "/keys/IMG" + str(key_index_1) + "*key.pem")
                 d.setVar("CONFIG_SIGN_MODE", "HAB")
-
-        # Set the key password.
-        d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
+            # Set the key password.
+            d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
+        elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
+            d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", d.getVar("FIP_SIGN_KEY"))
+            # Set the key password.
+            if (d.getVar("DIGI_SOM") == "ccmp15"):
+                d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
+            elif (d.getVar("DIGI_SOM") == "ccmp13"):
+                d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass0" + str(key_index) + ".txt")
 
     # Enable partition encryption if rootfs encryption is enabled
     if (d.getVar("TRUSTFENCE_ENCRYPT_ROOTFS") == "1"):

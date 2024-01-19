@@ -1,4 +1,6 @@
-# Copyright (c) 2023, Digi International Inc.
+# Copyright 2023, 2024 Digi International Inc.
+
+SRCREV:mx93-nxp-bsp = "4391dcda499870418bb38fe395c3cba0664c5bab"
 
 PACKAGECONFIG_IMPLEMENTATION:mx93-nxp-bsp = "pxp"
 

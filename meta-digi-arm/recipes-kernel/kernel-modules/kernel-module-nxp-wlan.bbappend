@@ -3,7 +3,6 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI:append = " \
-    file://0001-Fix-for-the-HE-Rate-Index.patch \
     file://81-iw612-wifi.rules \
     file://load_iw612.sh \
 "

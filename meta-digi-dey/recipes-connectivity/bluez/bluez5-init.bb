@@ -62,4 +62,4 @@ RDEPENDS:${PN} = "initscripts-functions"
 RDEPENDS:${PN}:append:ccimx93 = " firmware-nxp-wifi-nxpiw612"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x|ccimx8mn|ccimx8mm|ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx93)"

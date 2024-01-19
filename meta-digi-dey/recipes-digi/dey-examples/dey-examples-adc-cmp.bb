@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2022, Digi International Inc.
+# Copyright (C) 2017-2023, Digi International Inc.
 
 SUMMARY = "DEY examples: Analog Comparator test application"
 SECTION = "examples"
@@ -15,4 +15,4 @@ do_install() {
 }
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8x|ccimx8m)"
+COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx8x)"

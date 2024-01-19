@@ -8,17 +8,16 @@ software =
             images: (
                 ##IMAGES_PRIMARY##
             );
+            ##FILES_UBOOT##
             scripts: (
                 {
                     filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    sha256 = "$swupdate_get_sha256(@@SWUPDATE_SCRIPT_NAME@@)";
                     type = "shellscript";
                 }
+                ##SCRIPT_UBOOT##
             );
             uboot: (
-                {
-                    name = "upgrade_available";
-                    value = "1";
-                },
                 {
                     name = "rootfstype"
                     value = "@@SWUPDATE_ROOTFS_TYPE@@"
@@ -29,17 +28,16 @@ software =
             images: (
                 ##IMAGES_SECONDARY##
             );
+            ##FILES_UBOOT##
             scripts: (
                 {
                     filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    sha256 = "$swupdate_get_sha256(@@SWUPDATE_SCRIPT_NAME@@)";
                     type = "shellscript";
                 }
+                ##SCRIPT_UBOOT##
             );
             uboot: (
-                {
-                    name = "upgrade_available";
-                    value = "1";
-                },
                 {
                     name = "rootfstype"
                     value = "@@SWUPDATE_ROOTFS_TYPE@@"
@@ -50,11 +48,14 @@ software =
             images: (
                 ##IMAGES_SINGLE##
             );
+            ##FILES_UBOOT##
             scripts: (
                 {
                     filename = "@@SWUPDATE_SCRIPT_NAME@@";
+                    sha256 = "$swupdate_get_sha256(@@SWUPDATE_SCRIPT_NAME@@)";
                     type = "shellscript";
                 }
+                ##SCRIPT_UBOOT##
             );
             uboot: (
                 {

@@ -27,4 +27,4 @@ RDEPENDS:${PN}:append:ccimx6 = "\
 	dey-examples-v4l2 \
 "
 
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x|ccimx8m)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x)"

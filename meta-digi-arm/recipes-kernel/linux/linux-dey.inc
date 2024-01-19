@@ -5,7 +5,6 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 
 inherit kernel
 inherit ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'fsl-kernel-localversion', '', d)}
-require ${@oe.utils.conditional('DEY_SOC_VENDOR', 'STM', 'recipes-kernel/linux/linux-stm32mp.inc', '', d)}
 require ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'linux-virtualization.inc', '', d)}
 require ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'recipes-kernel/linux/linux-trustfence.inc', '', d)}
 
@@ -30,8 +29,6 @@ OVERLAYS_DTC_FLAGS:ccimx6ul = ""
 OVERLAYS_DTC_FLAGS:ccimx6 = ""
 KERNEL_DTC_FLAGS = "${OVERLAYS_DTC_FLAGS}"
 
-KERNEL_EXTRA_ARGS:stm32mpcommon += "LOADADDR=${ST_KERNEL_LOADADDR}"
-
 # A user can provide his own kernel 'defconfig' file by:
 # - setting the variable KERNEL_DEFCONFIG to a custom kernel configuration file
 #   inside the kernel repository.
@@ -49,7 +46,13 @@ do_copy_defconfig () {
 		cp -f ${KERNEL_DEFCONFIG} ${WORKDIR}/defconfig
 	fi
 }
-addtask copy_defconfig after do_patch before do_kernel_localversion
+
+python () {
+    if d.getVar('DEY_SOC_VENDOR') == "STM":
+        bb.build.addtask('copy_defconfig', 'do_configure', 'do_patch', d)
+    elif d.getVar('DEY_SOC_VENDOR') == "NXP":
+        bb.build.addtask('copy_defconfig', 'do_kernel_localversion', 'do_patch', d)
+}
 
 # This is needed because kernel_localversion (in fsl-kernel-localversion.bbclass)
 # creates a basic ${B}/.config file and because that file exists, kernel_do_configure

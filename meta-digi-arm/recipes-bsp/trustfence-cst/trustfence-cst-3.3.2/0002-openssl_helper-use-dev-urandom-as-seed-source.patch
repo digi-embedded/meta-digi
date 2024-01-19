@@ -1,0 +1,24 @@
+From: "Diaz de Grenu, Jose" <Jose.DiazdeGrenu@digi.com>
+Date: Tue, 12 Jul 2016 17:47:24 +0200
+Subject: [PATCH] openssl_helper: use /dev/urandom as seed source
+
+This is needed in order to avoid indefinitely blocking.
+
+Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
+---
+ code/cst/code/common/src/openssl_helper.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/code/cst/code/common/src/openssl_helper.c b/code/cst/code/common/src/openssl_helper.c
+index 1e1131b..918c82e 100755
+--- a/code/cst/code/common/src/openssl_helper.c
++++ b/code/cst/code/common/src/openssl_helper.c
+@@ -404,7 +404,7 @@ void print_version(void)
+ ---------------------------*/
+ uint32_t seed_prng(uint32_t bytes)
+ {
+-    return RAND_load_file("/dev/random", bytes);
++    return RAND_load_file("/dev/urandom", bytes);
+ }
+ 
+ 

@@ -17,6 +17,10 @@ BOOTLOADER_IMAGE_RECIPE = "imx-boot"
 BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 
+# Generate images for all SOC revisions (keep the override as otherwise the
+# one in "use-imx-security-controller-firmware.bbclass" takes precedence)
+SECO_FIRMWARE_NAME:ccimx93 = "mx93??-ahab-container.img"
+
 DDR_FIRMWARE_NAME = " \
     lpddr4_dmem_1d_v202201.bin \
     lpddr4_dmem_2d_v202201.bin \
@@ -48,7 +52,7 @@ MACHINE_EXTRA_RDEPENDS += " \
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "AHAB"
 
-IMXBOOT_TARGETS = "flash_singleboot"
+IMXBOOT_TARGETS = "flash_singleboot flash_singleboot_a0"
 
 IMX_BOOT_SOC_TARGET = "iMX9"
 IMX_BOOT_SEEK = "32"
@@ -72,3 +76,17 @@ BOOT_DEV_NAME ?= "/dev/mmcblk0p1"
 ROOTFS_DEV_NAME ?= "/dev/mmcblk0p3"
 ROOTFS_ENC_DEV = "/dev/mapper/cryptrootfs"
 ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS') == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
+
+PREFERRED_VERSION_gstreamer1.0:ccimx93              ?= "1.22.5.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-bad:ccimx93  ?= "1.22.5.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-base:ccimx93 ?= "1.22.5.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-good:ccimx93 ?= "1.22.5.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-ugly:ccimx93 ?= "1.22.6"
+
+PREFERRED_VERSION_libdrm:ccimx93            ?= "2.4.115.imx"
+PREFERRED_VERSION_nativesdk-wayland:ccimx93 ?= "1.22.0.imx"
+PREFERRED_VERSION_wayland:ccimx93           ?= "1.22.0.imx"
+PREFERRED_VERSION_wayland-native:ccimx93    ?= "1.22.0.imx"
+PREFERRED_VERSION_wayland-protocols:ccimx93 ?= "1.32.imx"
+PREFERRED_VERSION_weston:ccimx93            ?= "11.0.3.imx"
+PREFERRED_VERSION_xwayland:ccimx93          ?= "23.1.1.imx"

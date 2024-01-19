@@ -6,12 +6,14 @@ SRC_URI += " \
     file://digi_background.png \
     file://profile \
 "
+SRC_URI:append:ccimx93 = " file://weston-socket.sh"
 
 INI_UNCOMMENT_ASSIGNMENTS:append:mx9-nxp-bsp = " \
     repaint-window=16 \
 "
 INI_UNCOMMENT_ASSIGNMENTS:append:mx93-nxp-bsp = " \
-    use-g2d=1 \
+    gbm-format=argb8888 \
+    use-g2d=true \
 "
 
 update_file() {
@@ -39,6 +41,10 @@ do_install:append() {
 }
 
 do_install:append:ccimx93() {
+    # The ccimx93 uses a new version of weston where 'weston-socket.sh' supercedes 'weston.sh'
+    \rm -f ${D}${sysconfdir}/profile.d/weston.sh
+    install -Dm0644 ${WORKDIR}/weston-socket.sh ${D}${sysconfdir}/profile.d/weston-socket.sh
+
     install -d ${D}${sysconfdir}/default/
     echo "QMLSCENE_DEVICE=softwarecontext" >> ${D}${sysconfdir}/default/weston
 }

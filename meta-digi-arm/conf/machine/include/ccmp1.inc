@@ -8,11 +8,15 @@ include conf/machine/include/digi-defaults.inc
 
 DIGI_FAMILY = "ccmp1"
 
+# Platform T-FA settings
+TFA_SIGN_SUFFIX ?= "${@bb.utils.contains('TRUSTFENCE_SIGN', '1', '_signed', '', d)}"
+
 # Platform u-boot settings
-UBOOT_PREFIX = "u-boot"
+UBOOT_PREFIX = "fip"
 UBOOT_SUFFIX = "bin"
 # Set U-Boot FIP settings
 FIP_UBOOT_DTB = "u-boot"
+FIP_SIGN_SUFFIX ?= "${@bb.utils.contains('TRUSTFENCE_SIGN', '1', '_Signed', '', d)}"
 
 STORAGE_MEDIA = "mtd"
 
@@ -41,6 +45,7 @@ UBOOT_ENV_RANGE ?= ""
 MACHINE_EXTRA_RDEPENDS += " \
     mtd-utils-ubifs \
 "
+MACHINE_EXTRA_RRECOMMENDS:remove = "kernel-imagebootfs"
 
 # Image FS types
 IMAGE_FSTYPES:remove = "ext4 tar.xz"
@@ -72,3 +77,10 @@ TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 
 # Disable the generation of flashlayout files
 do_create_flashlayout_config[noexec] = "1"
+
+# Include boot script into the FIT image
+UBOOT_ENV = "${@bb.utils.contains('TRUSTFENCE_FIT_IMG', '1', 'boot', '', d)}"
+
+# Partitions to blacklist for swupdate:
+# fsbl1, fsbl2, metadata1, metadata2, fip-a, fip-b
+SWUPDATE_MTD_BLACKLIST = "0 1 2 3 4 5"

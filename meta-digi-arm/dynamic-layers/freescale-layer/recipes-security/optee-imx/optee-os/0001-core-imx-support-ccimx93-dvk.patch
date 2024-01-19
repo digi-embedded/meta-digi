@@ -2,25 +2,28 @@ From: Javier Viguera <javier.viguera@digi.com>
 Date: Mon, 15 May 2023 17:59:54 +0200
 Subject: [PATCH] core: imx: support ccimx93-dvk
 
+SOC revision A0 requires a different build.
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
- core/arch/arm/plat-imx/conf.mk           | 6 ++++++
- core/arch/arm/plat-imx/registers/imx93.h | 1 +
- 2 files changed, 7 insertions(+)
+ core/arch/arm/plat-imx/conf.mk           | 13 +++++++++++++
+ core/arch/arm/plat-imx/registers/imx93.h |  5 +++++
+ 2 files changed, 18 insertions(+)
 
 diff --git a/core/arch/arm/plat-imx/conf.mk b/core/arch/arm/plat-imx/conf.mk
-index 1d5081f96afe..5e2d0733dd04 100644
+index 0bd9ccd6bef1..5e4c02e27d2e 100644
 --- a/core/arch/arm/plat-imx/conf.mk
 +++ b/core/arch/arm/plat-imx/conf.mk
-@@ -88,6 +88,7 @@ mx8ulp-flavorlist = \
+@@ -88,6 +88,8 @@ mx8ulp-flavorlist = \
  	mx8ulpevk \
  
  mx93-flavorlist = \
 +	ccimx93dvk \
++	ccimx93dvk_a0 \
  	mx93evk \
  
  ifneq (,$(filter $(PLATFORM_FLAVOR),$(mx6ul-flavorlist)))
-@@ -449,6 +450,11 @@ CFG_DDR_SIZE ?= 0x80000000
+@@ -451,6 +453,17 @@ CFG_DDR_SIZE ?= 0x80000000
  CFG_UART_BASE ?= UART1_BASE
  endif
  
@@ -29,18 +32,33 @@ index 1d5081f96afe..5e2d0733dd04 100644
 +CFG_UART_BASE ?= UART6_BASE
 +endif
 +
++ifneq (,$(filter $(PLATFORM_FLAVOR),ccimx93dvk_a0))
++CFG_DDR_SIZE ?= 0x40000000
++CFG_UART_BASE ?= UART6_BASE
++$(call force,CFG_SOC_REV_A0,y)
++endif
++
  # i.MX6 Solo/SL/SoloX/DualLite/Dual/Quad specific config
  ifeq ($(filter y, $(CFG_MX6QP) $(CFG_MX6Q) $(CFG_MX6D) $(CFG_MX6DL) $(CFG_MX6S) \
  	$(CFG_MX6SL) $(CFG_MX6SLL) $(CFG_MX6SX)), y)
 diff --git a/core/arch/arm/plat-imx/registers/imx93.h b/core/arch/arm/plat-imx/registers/imx93.h
-index e91607537380..66a6408109c2 100644
+index 21080da82d04..29070eb917ac 100644
 --- a/core/arch/arm/plat-imx/registers/imx93.h
 +++ b/core/arch/arm/plat-imx/registers/imx93.h
-@@ -9,6 +9,7 @@
+@@ -9,11 +9,16 @@
  #define GICR_BASE 0x48040000
  
  #define UART1_BASE 0x44380000
 +#define UART6_BASE 0x425a0000
- #define MU_BASE	   0x47520000
+ /*
+  * For Normal MU - Use MU_BASE as 0x47520000
+  * For Trust MU - Use MU_BASE as 0x47530000
+  */
++#ifdef CFG_SOC_REV_A0
++#define MU_BASE 0x47520000
++#else
+ #define MU_BASE 0x47530000
++#endif
  #define MU_SIZE	   0x10000
  
+ #define MU_TRUST_BASE 0x47530000

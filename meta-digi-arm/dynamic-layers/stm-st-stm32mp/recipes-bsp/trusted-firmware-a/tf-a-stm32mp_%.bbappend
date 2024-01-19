@@ -74,7 +74,7 @@ do_deploy:append() {
 		i="$(expr ${i} + 1)"
 		dt_config="$(echo ${FIP_DEVICETREE} | cut -d',' -f${i})"
 		for dt in ${dt_config}; do
-			FIP_FILENAME="${FIP_BASENAME}-${dt}-${config}.${FIP_SUFFIX}"
+			FIP_FILENAME="${FIP_BASENAME}-${dt}-${config}${FIP_SIGN_SUFFIX}.${FIP_SUFFIX}"
 			echo "${FIP_FILENAME}"
 			if [ -f "${DEPLOYDIR}/fip/${FIP_FILENAME}" ]; then
 				cd "${DEPLOYDIR}"
@@ -104,9 +104,11 @@ tfa_sign() {
 				bl2)
 					TF_A_FILENAME="${tfa_basename}-${dt}-${config}.${TF_A_SUFFIX}"
 					if [ -f "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}" ]; then
-						trustfence-sign-artifact.sh -p "${DIGI_SOM}" -t "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}" "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}_signed"
+						trustfence-sign-artifact.sh -p "${DIGI_SOM}" -t "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}" "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}${TFA_SIGN_SUFFIX}"
 						# the generated artifact lacks 'w' permission which prevents deletion by the build system
-						chmod u+w "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}_signed"
+						chmod u+w "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}${TFA_SIGN_SUFFIX}"
+						# symlink TF-A
+						ln -s "arm-trusted-firmware/${TF_A_FILENAME}${TFA_SIGN_SUFFIX}" "${DEPLOYDIR}/"
 					fi
 				esac
 			done # for file_type in ${tfa_file_type}

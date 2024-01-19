@@ -1,5 +1,6 @@
-# Copyright 2023 Digi International Inc.
+# Copyright 2023,2024 Digi International Inc.
 
-# The package's SConscript doesn't recognize the MAXLINELENGTH variable
-# injected by scons.bbclass, so remove it
-EXTRA_OESCONS:remove = "${SCONS_MAXLINELENGTH}"
+SRCBRANCH:ccimx93 = "imx_22.05"
+SRCREV:ccimx93 = "37fc035060646db5048648da01db3738f08e3bfa"
+
+SCONS_MAXLINELENGTH = ""

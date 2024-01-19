@@ -1,4 +1,4 @@
-# Copyright (C) 2023 Digi International.
+# Copyright (C) 2023-2024 Digi International.
 #
 
 #######################################
@@ -88,10 +88,53 @@ SWUPDATE_IS_IMAGES_UPDATE = "${@update_based_on_images(d)}"
 
 # Determine the correct UBoot update script file to use depending on storage type.
 SWUPDATE_UBOOT_SCRIPT = "${@oe.utils.conditional('STORAGE_MEDIA', 'mmc', 'swupdate_uboot_mmc.sh', 'swupdate_uboot_nand.sh', d)}"
+SWUPDATE_UBOOT_SCRIPT_NAME = "${@os.path.basename(d.getVar('SWUPDATE_UBOOT_SCRIPT'))}"
 
-UBOOT_EXT ?= ".${UBOOT_SUFFIX}"
+# Retrieve the correct U-Boot prefix.
+def get_uboot_prefix(d):
+    prefix = d.getVar('UBOOT_PREFIX')
+    if d.getVar('DEY_SOC_VENDOR') == "NXP" and d.getVar('TRUSTFENCE_SIGN') == "1":
+        if "ccimx6" in d.getVar('MACHINE'):
+            prefix = f"{prefix}-dtb"
+        if d.getVar('TRUSTFENCE_DEK_PATH') and d.getVar('TRUSTFENCE_DEK_PATH') != "0":
+            prefix = f"{prefix}-encrypted"
+        else:
+            prefix = f"{prefix}-signed"
+    return prefix
 
-UBOOTIMG_OFFSET ?= "${BOOTLOADER_SEEK_BOOT}"
+SWUPDATE_UBOOT_PREFIX ?= "${@get_uboot_prefix(d)}"
+SWUPDATE_UBOOT_PREFIX_TFA ?= "tf-a"
+
+SWUPDATE_UBOOT_EXT ?= ".${UBOOT_SUFFIX}"
+SWUPDATE_UBOOT_EXT_TFA ?= ".stm32"
+
+SWUPDATE_UBOOT_NAME ?= "${SWUPDATE_UBOOT_PREFIX}-${MACHINE}${SWUPDATE_UBOOT_EXT}"
+SWUPDATE_UBOOT_NAME:ccimx6sbc ?= "${SWUPDATE_UBOOT_PREFIX}-ccimx6qsbc${SWUPDATE_UBOOT_EXT}"
+SWUPDATE_UBOOT_NAME:ccmp1 ?= "${SWUPDATE_UBOOT_PREFIX}-${MACHINE}-optee${FIP_SIGN_SUFFIX}${SWUPDATE_UBOOT_EXT}"
+SWUPDATE_UBOOT_NAME_TFA ?= ""
+SWUPDATE_UBOOT_NAME_TFA:ccmp1 ?= "${SWUPDATE_UBOOT_PREFIX_TFA}-${MACHINE}-nand${SWUPDATE_UBOOT_EXT_TFA}${TFA_SIGN_SUFFIX}"
+
+SWUPDATE_UBOOT_OFFSET ?= "${BOOTLOADER_SEEK_BOOTPART}"
+
+# Retrieve the correct encryption type.
+def get_swupdate_uboot_enc(d):
+    if d.getVar('TRUSTFENCE_DEK_PATH') and d.getVar('TRUSTFENCE_DEK_PATH') != "0" :
+        return "enc"
+    return "normal"
+
+SWUPDATE_UBOOT_ENC ?= "${@get_swupdate_uboot_enc(d)}"
+
+# Retrieve the redundant U-Boot value.
+def get_uboot_redundant(d):
+    if d.getVar("SWUPDATE_UBOOTIMG") == "true" and d.getVar("SWUPDATE_UBOOTIMG_REDUNDANT") == "true":
+        if any(d.getVar("MACHINE").startswith(platform) for platform in ("ccimx6", "ccimx8")):
+            bb.warn("Target does not support updating redundant U-Boot. Continuing with single SWU U-Boot update.")
+            return "single"
+        return "redundant"
+
+    return "single"
+
+SWUPDATE_UBOOT_REDUNDANT = "${@get_uboot_redundant(d)}"
 
 #######################################
 ########## SWU Update Script ##########

@@ -1,0 +1,6 @@
+                {
+                    filename = "@@SWUPDATE_UBOOT_SCRIPT_NAME@@";
+                    type = "preinstall";
+                    data = "@@SWUPDATE_UBOOT_NAME@@ @@SWUPDATE_UBOOT_ENC@@ @@SWUPDATE_UBOOT_OFFSET@@ @@SWUPDATE_UBOOT_REDUNDANT@@ @@SWUPDATE_UBOOT_NAME_TFA@@";
+                    sha256 = "$swupdate_get_sha256(@@SWUPDATE_UBOOT_SCRIPT_NAME@@)";
+                }
