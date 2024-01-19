@@ -10,7 +10,7 @@ SRCBRANCH ?= "dey/master"
 SRC_URI = " \
     gitsm://github.com/digi-embedded/lv_port_linux_frame_buffer.git;branch=${SRCBRANCH};protocol=https \
 "
-SRCREV = "f9426988a70f485ba7895bb1c26493f2fffcd957"
+SRCREV = "0a799d22a5aaf9de18aca428579945a0a9c2c270"
 
 EXTRA_OEMAKE = "DESTDIR=${D}"
 
