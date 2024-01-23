@@ -77,3 +77,7 @@ UBOOT_ENV_RANGE ?= ""
 # Partitions to blacklist for swupdate:
 # bootloader, environment, safe
 SWUPDATE_MTD_BLACKLIST = "0 1 2"
+
+# ccimx6ul LVGL images don't have a desktop backend, so we don't need to append
+# "-x11" to the image name in the install scripts.
+GRAPHICAL_IMAGES:remove = "dey-image-lvgl"

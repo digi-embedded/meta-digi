@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016-2023 Digi International.
+# Copyright (C) 2016-2024 Digi International.
 #
 DESCRIPTION = "DEY image with graphical libraries"
 LICENSE = "MIT"
@@ -44,7 +44,8 @@ IMAGE_ROOTFS_SIZE = "8192"
 
 BAD_RECOMMENDATIONS += "eudev-hwdb"
 
-export IMAGE_BASENAME = "dey-image-${GRAPHICAL_CORE}-${GRAPHICAL_BACKEND}"
+DEFAULT_IMAGE_BASENAME ??= "dey-image-${GRAPHICAL_CORE}-${GRAPHICAL_BACKEND}"
+export IMAGE_BASENAME = "${DEFAULT_IMAGE_BASENAME}"
 
 CORE_IMAGE_EXTRA_INSTALL += " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland', '', d)} \
