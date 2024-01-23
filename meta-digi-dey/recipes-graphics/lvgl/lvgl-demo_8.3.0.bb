@@ -36,6 +36,8 @@ LVGL_CONFIG_DRM_CARD:mx8-generic-bsp = "/dev/dri/card1"
 
 LVGL_CONFIG_HOR_RES ?= "800"
 LVGL_CONFIG_VER_RES ?= "480"
+LVGL_CONFIG_HOR_RES:ccimx6ul ?= "1280"
+LVGL_CONFIG_VER_RES:ccimx6ul ?= "800"
 
 do_configure:prepend() {
 	if [ "${LVGL_CONFIG_USE_DRM}" -eq 1 ] ; then
