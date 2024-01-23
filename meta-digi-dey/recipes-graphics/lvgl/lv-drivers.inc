@@ -8,6 +8,7 @@ LVGL_CONFIG_DRM_CARD ?= "/dev/dri/card0"
 
 LVGL_CONFIG_USE_EVDEV = "${@bb.utils.contains_any('PACKAGECONFIG', 'drm fbdev', '1', '0', d)}"
 LVGL_CONFIG_EVDEV_INPUT ?= "/dev/input/mouse0"
+LVGL_CONFIG_EVDEV_INPUT:ccimx6ul ?= "/dev/input/touchscreen0"
 
 LVGL_CONFIG_USE_FBDEV = "${@bb.utils.contains('PACKAGECONFIG', 'fbdev', '1', '0', d)}"
 
