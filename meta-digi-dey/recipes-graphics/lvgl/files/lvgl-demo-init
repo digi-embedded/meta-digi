@@ -1,0 +1,133 @@
+#!/bin/sh
+#===============================================================================
+#
+#  Copyright (C) 2024 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Initialize LVGL demo
+#
+#===============================================================================
+
+readonly DEMO_NAME="lvgl_demo"
+readonly DEMO_PATH="/usr/bin/${DEMO_NAME}"
+readonly DEMO_TITLE="LVGL Demo Application"
+readonly DEMO_DISPLAY="##DEMO_DISPLAY##"
+readonly DEMO_ENV="##DEMO_ENV##"
+readonly PID_FILE="/run/${DEMO_NAME}.pid"
+
+log() {
+	if type "systemd-cat" >/dev/null 2>/dev/null; then
+		systemd-cat -p "${1}" -t "${DEMO_NAME}" printf "%s" "${2}"
+	fi
+	logger -p "${1}" -t "${DEMO_NAME}" "${2}"
+}
+
+get_demo_pid() {
+	local pid="$(pgrep -f ${DEMO_PATH})"
+
+	[ -n "${pid}" ] && { echo "${pid}"; return 0; }
+
+	return 1
+}
+
+check_is_running() {
+	local pid
+
+	if [ -s "${PID_FILE}" ]; then
+		pid="$(cat ${PID_FILE})"
+	else
+		pid="$(get_demo_pid)"
+		echo "${pid}" > ${PID_FILE}
+	fi
+
+	if [ "${pid}" ]; then
+		kill -0 "${pid}" >/dev/null 2>&1 && return 0
+	fi
+
+	rm -f "${PID_FILE}"
+
+	return 1
+}
+
+wait_for_wayland() {
+	local count=20
+	local wayland_socket="/run/user/0/${DEMO_DISPLAY}"
+
+	while [ ! -S "${wayland_socket}" ]; do
+		sleep 1
+		count=$((count-1))
+		if [ "${count}" = 0 ]; then
+			return 1
+		fi
+	done
+	sleep 1
+	return 0
+}
+
+stop() {
+	check_is_running || return
+
+	local pid="$(cat ${PID_FILE})"
+	kill -TERM "${pid}" >/dev/null 2>&1
+
+	local STOP_TIMEOUT="5"
+	for i in $(seq ${STOP_TIMEOUT}); do
+		check_is_running || { log info "stopped"; break; }
+		if [ "${i}" -eq ${STOP_TIMEOUT} ]; then
+			log warning "stop: ${DEMO_NAME} did not stop gracefully"
+			kill -KILL "${pid}" >/dev/null 2>&1
+		fi
+		sleep 1
+	done
+}
+
+start() {
+	check_is_running && { log warning "start: ${DEMO_NAME} ALREADY running"; exit 0; }
+
+	if [ -d "/usr/share/wayland" ]; then
+		wait_for_wayland
+	else
+		# Disable the cursor when displaying at full screen on fbdev
+		echo "0" > /sys/class/graphics/fbcon/cursor_blink
+	fi
+
+	# Launch demo
+	env ${DEMO_ENV} ${DEMO_PATH} >/dev/null 2>&1 &
+
+	if [ $? -eq 0 ]; then
+		echo $! > ${PID_FILE}
+		log info "$(cat ${PID_FILE})"
+		log info "started"
+	fi
+}
+
+case "$1" in
+	start)
+		echo -n "Starting ${DEMO_TITLE}: "
+		start
+		echo "done."
+		;;
+	stop)
+		stop
+		echo -n "Stopping ${DEMO_TITLE}: "
+		if [ -n "`/bin/pidof ${DEMO_PATH}`" ] ; then
+			echo "FAIL"
+		else
+			echo "OK"
+		fi
+		;;
+	restart)
+		stop
+		sleep 1
+		start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+		;;
+esac
