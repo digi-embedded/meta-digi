@@ -9,9 +9,13 @@ FW_ATH6KL = " \
     file://athtcmd_ram.bin \
     file://athwlan.bin \
     file://Digi_6203_2_ANT-US.bin \
+    file://Digi_6203_2_ANT-US_b.bin \
     file://Digi_6203_2_ANT-World.bin \
+    file://Digi_6203_2_ANT-World_b.bin \
     file://Digi_6203-6233-US.bin \
+    file://Digi_6203-6233-US_b.bin \
     file://Digi_6203-6233-World.bin \
+    file://Digi_6203-6233-World_b.bin \
     file://fw-4.bin \
     file://nullTestFlow.bin \
     file://utf.bin \
@@ -47,9 +51,13 @@ do_install() {
 		athtcmd_ram.bin \
 		athwlan.bin \
 		Digi_6203_2_ANT-US.bin \
+		Digi_6203_2_ANT-US_b.bin \
 		Digi_6203_2_ANT-World.bin \
+		Digi_6203_2_ANT-World_b.bin \
 		Digi_6203-6233-US.bin \
+		Digi_6203-6233-US_b.bin \
 		Digi_6203-6233-World.bin \
+		Digi_6203-6233-World_b.bin \
 		fw-4.bin \
 		nullTestFlow.bin \
 		utf.bin \
@@ -65,6 +73,19 @@ do_install() {
 	ln -sf Digi_6203_2_ANT-US.bin ${D}${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.ANT-0x0.bin
 	ln -sf Digi_6203_2_ANT-World.bin ${D}${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.ANT-0x1.bin
 	ln -sf Digi_6203_2_ANT-World.bin ${D}${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.ANT-0x2.bin
+}
+
+# Point to BDF with optimized TxPower for new AR6233 (HV=>6)"
+pkg_postinst_ontarget:${PN}-ath6kl() {
+	MOD_VERSION="$(($(cat /proc/device-tree/digi,hwid,hv 2>/dev/null | tr -d '\0' || true)))"
+	if [ "${MOD_VERSION}" -ge "6" ]; then
+		ln -sf Digi_6203-6233-US_b.bin $D${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.0x0.bin
+		ln -sf Digi_6203-6233-World_b.bin $D${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.0x1.bin
+		ln -sf Digi_6203-6233-World_b.bin $D${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.0x2.bin
+		ln -sf Digi_6203_2_ANT-US_b.bin $D${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.ANT-0x0.bin
+		ln -sf Digi_6203_2_ANT-World_b.bin $D${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.ANT-0x1.bin
+		ln -sf Digi_6203_2_ANT-World_b.bin $D${base_libdir}/firmware/ath6k/AR6003/hw2.1.1/bdata.ANT-0x2.bin
+	fi
 }
 
 # Do not create empty debug and development packages (PN-dbg PN-dev PN-staticdev)
