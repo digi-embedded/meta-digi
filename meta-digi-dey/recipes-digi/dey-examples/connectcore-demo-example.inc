@@ -30,12 +30,17 @@ S = "${WORKDIR}/connectcore-demo-example"
 
 inherit systemd update-rc.d
 
+BOARD_IMAGE_FILE ?= "${MACHINE}_board.png"
+
+# The ccimx6qpsbc re-uses the ccimx6sbc board image
+BOARD_IMAGE_FILE:ccimx6qpsbc = "ccimx6sbc_board.png"
+
 do_install() {
 	install -d ${D}/srv/www
 	cp -r ${WORKDIR}/git/connectcore-demo-example/* ${D}/srv/www/
 
 	# Remove unused images
-	find ${D}/srv/www/static/images/ -type f -name '*_board.png' -not -name '${MACHINE}_board.png' -delete
+	find ${D}/srv/www/static/images/ -type f -name '*_board.png' -not -name '${BOARD_IMAGE_FILE}' -delete
 
 	# Install systemd service
 	if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
