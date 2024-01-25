@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2023, Digi International Inc.
+# Copyright (C) 2013-2024, Digi International Inc.
 
 SUMMARY = "DEY examples packagegroup"
 
@@ -27,4 +27,4 @@ RDEPENDS:${PN}:append:ccimx6 = "\
 	dey-examples-v4l2 \
 "
 
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx93)"
