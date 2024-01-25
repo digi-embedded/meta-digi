@@ -80,6 +80,7 @@ echo "############################################################"
 
 # Command line admits the following parameters:
 # -a <atf-filename>
+# -b, -d, -n (booleans)
 # -f <fip-filename>
 # -i <image-name>
 while getopts 'a:bdf:hi:n' c
@@ -170,12 +171,12 @@ if [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; then
 	fi
 fi
 
+[ "${ABORT}" = true ] && exit 1
+
 # Enable bootcount mechanism by setting a bootlimit
 if [ "${BOOTCOUNT}" = true ]; then
 	bootlimit_cmd="setenv bootlimit 3"
 fi
-
-[ "${ABORT}" = true ] && exit 1
 
 # parts names
 LINUX_NAME="linux"

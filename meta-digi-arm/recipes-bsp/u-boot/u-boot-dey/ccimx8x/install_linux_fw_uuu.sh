@@ -70,8 +70,9 @@ echo "#           Linux firmware install through USB OTG         #"
 echo "############################################################"
 
 # Command line admits the following parameters:
-# -u <u-boot-filename>
+# -b, -d, -n (booleans)
 # -i <image-name>
+# -u <u-boot-filename>
 while getopts 'bdhi:nu:' c
 do
 	case $c in
@@ -163,12 +164,12 @@ if [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; then
 	fi
 fi
 
+[ "${ABORT}" = true ] && exit 1
+
 # Enable bootcount mechanism by setting a bootlimit
 if [ "${BOOTCOUNT}" = true ]; then
 	bootlimit_cmd="setenv bootlimit 3"
 fi
-
-[ "${ABORT}" = true ] && exit 1
 
 # parts names
 LINUX_NAME="linux"
