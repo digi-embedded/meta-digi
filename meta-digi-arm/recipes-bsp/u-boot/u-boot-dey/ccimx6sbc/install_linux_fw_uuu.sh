@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2021-2023 by Digi International Inc.
+#  Copyright (C) 2021-2024 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -102,28 +102,23 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 	if [ -n "$soc_family" ]; then
 		module_variant=$(getenv "module_variant")
 		# Determine U-Boot file to program basing on SOM's variant
-		if [ -n "$module_variant" ]; then
-			if [ "$module_variant" = "0x12" ]; then
-				INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc2GB.imx"
-			elif [ "$module_variant" = "0x01" ] || \
-			     [ "$module_variant" = "0x02" ] || \
-			     [ "$module_variant" = "0x04" ] || \
-			     [ "$module_variant" = "0x05" ] || \
-			     [ "$module_variant" = "0x0b" ] || \
-			     [ "$module_variant" = "0x0d" ] || \
-			     [ "$module_variant" = "0x10" ] || \
-			     [ "$module_variant" = "0x11" ] || \
-			     [ "$module_variant" = "0x14" ] || \
-			     [ "$module_variant" = "0x15" ] || \
-			     [ "$module_variant" = "0x16" ]; then
-				INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc.imx"
-			elif [ "$module_variant" = "0x03" ] || \
-			     [ "$module_variant" = "0x0c" ] || \
-			     [ "$module_variant" = "0x0e" ] || \
-			     [ "$module_variant" = "0x0f" ] || \
-			     [ "$module_variant" = "0x13" ]; then
-				INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc512MB.imx"
-			fi
+		if [ "$module_variant" = "0x12" ]; then
+			INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc2GB.imx"
+		elif [ "$module_variant" = "0x02" ] || \
+		     [ "$module_variant" = "0x04" ] || \
+		     [ "$module_variant" = "0x05" ] || \
+		     [ "$module_variant" = "0x0b" ] || \
+		     [ "$module_variant" = "0x11" ] || \
+		     [ "$module_variant" = "0x14" ] || \
+		     [ "$module_variant" = "0x15" ] || \
+		     [ "$module_variant" = "0x16" ]; then
+			INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc.imx"
+		elif [ "$module_variant" = "0x03" ] || \
+		     [ "$module_variant" = "0x0c" ] || \
+		     [ "$module_variant" = "0x0e" ] || \
+		     [ "$module_variant" = "0x0f" ] || \
+		     [ "$module_variant" = "0x13" ]; then
+			INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc512MB.imx"
 		fi
 	fi
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2021-2023 by Digi International Inc.
+#  Copyright (C) 2021-2024 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -100,13 +100,12 @@ echo "Determining image files to use..."
 if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 	module_variant=$(getenv "module_variant")
 	# Determine U-Boot file to program basing on SOM's variant
-	if [ -n "$module_variant" ]; then
-		if [ "$module_variant" = "0x01" ] || \
-		   [ "$module_variant" = "0x02" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##2GB.imx"
-		elif [ "$module_variant" = "0x03" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##1GB.imx"
-		fi
+	# If module_variant is unknown or not set, return error asking the user
+	if [ "$module_variant" = "0x01" ] || \
+	   [ "$module_variant" = "0x02" ]; then
+		INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##2GB.imx"
+	elif [ "$module_variant" = "0x03" ] || \
+		INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##1GB.imx"
 	fi
 
 	# U-Boot when the checked value is empty.

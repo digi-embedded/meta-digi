@@ -8,13 +8,13 @@ install_abort=0
 BASEFILENAME=0
 
 # Determine U-Boot file to program basing on module variant
-if test -n "${module_variant}"; then
-	if test "${module_variant}" = "0x01" || test "${module_variant}" = "0x02"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##2GB.imx;
-	elif test "${module_variant}" = "0x03"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx;
-	fi
+# If module_variant is unknown or not set, return error asking the user
+if test "${module_variant}" = "0x01" || test "${module_variant}" = "0x02"; then
+	setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##2GB.imx;
+elif test "${module_variant}" = "0x03"; then
+	setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx;
 fi
+
 # Use 'test -n ...' because 'test -z ...' does not work well on old versions of
 # u-boot when the checked value is empty.
 if test -n "${INSTALL_UBOOT_FILENAME}"; then
