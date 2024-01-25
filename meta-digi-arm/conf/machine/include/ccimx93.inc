@@ -90,3 +90,6 @@ PREFERRED_VERSION_wayland-native:ccimx93    ?= "1.22.0.imx"
 PREFERRED_VERSION_wayland-protocols:ccimx93 ?= "1.32.imx"
 PREFERRED_VERSION_weston:ccimx93            ?= "11.0.3.imx"
 PREFERRED_VERSION_xwayland:ccimx93          ?= "23.1.1.imx"
+
+PREFERRED_VERSION_nativesdk-trustfence-sign-tools:ccimx93 ?= "2023.04"
+PREFERRED_VERSION_trustfence-sign-tools-native:ccimx93    ?= "2023.04"
