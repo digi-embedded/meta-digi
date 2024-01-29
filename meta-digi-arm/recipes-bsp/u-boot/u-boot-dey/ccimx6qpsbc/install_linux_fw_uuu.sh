@@ -132,7 +132,7 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 	if [ "$module_variant" = "0x01" ] || \
 	   [ "$module_variant" = "0x02" ]; then
 		INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##2GB.imx"
-	elif [ "$module_variant" = "0x03" ] || \
+	elif [ "$module_variant" = "0x03" ]; then
 		INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##1GB.imx"
 	fi
 
