@@ -68,7 +68,7 @@ WESTON_SERVICE:ccmp15 ?= "weston-launch.service"
 LVGL_DEMO_DISPLAY ?= "wayland-0"
 LVGL_DEMO_DISPLAY:ccmp15 ?= "wayland-1"
 LVGL_DEMO_DISPLAY:ccimx93 ?= "wayland-1"
-LVGL_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\${DEMO_DISPLAY}"
+LVGL_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\$\{DEMO_DISPLAY\}"
 LVGL_DEMO_ENV:ccimx6ul ?= ""
 
 do_install:append() {
