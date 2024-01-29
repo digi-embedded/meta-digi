@@ -16,8 +16,8 @@
 readonly DEMO_NAME="lvgl_demo"
 readonly DEMO_PATH="/usr/bin/${DEMO_NAME}"
 readonly DEMO_TITLE="LVGL Demo Application"
-readonly DEMO_DISPLAY="##DEMO_DISPLAY##"
-readonly DEMO_ENV="##DEMO_ENV##"
+readonly DEMO_DISPLAY="##LVGL_DEMO_DISPLAY##"
+readonly DEMO_ENV="##LVGL_DEMO_ENV##"
 readonly PID_FILE="/run/${DEMO_NAME}.pid"
 
 log() {
