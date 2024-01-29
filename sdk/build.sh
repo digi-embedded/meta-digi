@@ -176,8 +176,8 @@ done<<-_EOF_
 	ccimx8mn-dvk         dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
 	ccimx8x-sbc-pro      dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
 	ccimx8x-sbc-express  dey-image-qt
-	ccimx6qpsbc          dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
-	ccimx6sbc            dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
+	ccimx6qpsbc          dey-image-qt,dey-image-webkit,dey-image-lvgl
+	ccimx6sbc            dey-image-qt,dey-image-webkit,dey-image-lvgl
 	ccimx6ulsbc          core-image-base,dey-image-qt,dey-image-crank,dey-image-lvgl
 	ccimx6ulstarter      core-image-base
 	ccimx6ulsom          dey-image-mft-module-min
