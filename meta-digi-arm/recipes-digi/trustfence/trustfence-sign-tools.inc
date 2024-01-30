@@ -5,7 +5,7 @@ LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6"
 
 SRCBRANCH = "v2020.04/maint"
-SRCREV = "${AUTOREV}"
+SRCREV = "af77921f513e82add24e54a28a5353b9012fdaf6"
 
 S = "${WORKDIR}"
 
@@ -15,7 +15,7 @@ UBOOT_URI_GITHUB = "${DIGI_GITHUB_GIT}/u-boot.git;protocol=https"
 UBOOT_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${UBOOT_URI_STASH}', '${UBOOT_URI_GITHUB}', d)}"
 
 SRC_URI = " \
-    ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
+    ${UBOOT_GIT_URI};nobranch=1 \
     file://trustfence-sign-artifact-nxp.sh \
     file://trustfence-sign-artifact-stm.sh \
     file://trustfence-gen-pki-stm.sh \
