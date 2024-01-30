@@ -7,7 +7,7 @@ DEPENDS += "flex-native bison-native"
 DEPENDS += "python3-setuptools-native"
 
 SRCBRANCH = "v2021.10/maint"
-SRCREV = "b790ac5d6d1425604deefd8885e93f1a016d73b5"
+SRCREV = "${AUTOREV}"
 
 UBOOT_FIT_CFG_FRAGMENTS = " \
     file://fit_legacy.cfg \
