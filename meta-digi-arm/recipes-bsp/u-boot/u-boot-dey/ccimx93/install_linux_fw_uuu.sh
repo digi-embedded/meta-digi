@@ -42,6 +42,8 @@ show_usage()
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
 	echo "   -u <u-boot-filename>   U-Boot filename."
 	echo "                          Auto-determined by variant if not provided."
+	echo "   -U                     Update redundant bootloader partition."
+
 	exit 2
 }
 
@@ -57,7 +59,7 @@ part_update()
 	echo "====================================================================================="
 	echo "\033[0m"
 
-	if [ "${1}" = "bootloader" ]; then
+	if [ "${1}" = "bootloader" ] || [ "${1}" = "bootloader_redundant" ]; then
 		uuu fb: flash "${1}" "${2}"
 	else
 		uuu fb: flash -raw2sparse "${1}" "${2}"
@@ -73,7 +75,7 @@ echo "############################################################"
 # -b, -d, -n (booleans)
 # -i <image-name>
 # -u <u-boot-filename>
-while getopts 'bdhi:nu:' c
+while getopts 'bdhi:nu:U' c
 do
 	case $c in
 	b) BOOTCOUNT=true ;;
@@ -82,6 +84,7 @@ do
 	i) IMAGE_NAME=${OPTARG} ;;
 	n) NOWAIT=true ;;
 	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
+	U) INSTALL_REDUNDANT_UBOOT=true ;;
 	esac
 done
 
@@ -191,6 +194,9 @@ if [ "${NOWAIT}" != true ]; then
 	printf "   PARTITION\tFILENAME\n"
 	printf "   ---------\t--------\n"
 	printf "   bootloader\t${INSTALL_UBOOT_FILENAME}\n"
+	if [ "${INSTALL_REDUNDANT_UBOOT}" = true ]; then
+		printf "   bootloader_redundant\t${INSTALL_UBOOT_FILENAME}\n"
+	fi
 	if [ "${DUALBOOT}" = true ]; then
 		printf "   ${LINUX_NAME}_a\t${INSTALL_LINUX_FILENAME}\n"
 		if [ "${INSTALL_DUALBOOT}" = true ]; then
@@ -225,6 +231,9 @@ uuu fb: ucmd setenv forced_update 1
 
 # Update U-Boot
 part_update "bootloader" "${INSTALL_UBOOT_FILENAME}"
+if [ "${INSTALL_REDUNDANT_UBOOT}" = true ]; then
+	part_update bootloader_redundant "${INSTALL_UBOOT_FILENAME}"
+fi
 
 # Set MMC to boot from BOOT1 partition
 uuu fb: ucmd mmc partconf 0 1 1 1
