@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 DEPENDS = "libconfuse libdigiapix openssl recovery-utils swupdate zlib json-c"
 
 SRCBRANCH = "dey-4.0/maint"
-SRCREV = "${AUTOREV}"
+SRCREV = "dcf2cd2e041d3305f2da9ba248dd52e5bf24b008"
 
 CC_STASH = "gitsm://git@stash.digi.com/cc/cc_dey.git;protocol=ssh"
 CC_GITHUB = "gitsm://github.com/digi-embedded/cc_dey.git;protocol=https"
@@ -19,7 +19,7 @@ CCCS_DEVICE_TYPE ?= "${MACHINE}"
 CCCS_CONF_PATH ?= ""
 
 SRC_URI = " \
-    ${CC_GIT_URI};branch=${SRCBRANCH} \
+    ${CC_GIT_URI};nobranch=1 \
     file://cccsd-init \
     file://cccsd.service \
     file://cccs-gs-demo-init \
