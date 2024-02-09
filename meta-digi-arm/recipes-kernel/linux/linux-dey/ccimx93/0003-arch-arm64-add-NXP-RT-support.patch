@@ -1,0 +1,5862 @@
+From 163328f80e9cf316752e46023857fb5939140652 Mon Sep 17 00:00:00 2001
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Fri, 23 Feb 2024 12:20:36 +0100
+Subject: [PATCH 03/10] arch:arm64: add NXP RT support
+
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
+---
+ arch/arm64/Kconfig                            |   2 +
+ arch/arm64/Kconfig.platforms                  |  30 ++
+ arch/arm64/boot/dts/freescale/Makefile        |  54 ++-
+ .../boot/dts/freescale/fii-ls1028a-tsn.dts    | 325 ++++++++++++++++++
+ .../fsl-ls1028a-rdb-dsa-swp5-eno3.dts         |  37 ++
+ ...sl-ls1028a-rdb-jailhouse-without-enetc.dts |  98 ++++++
+ .../freescale/fsl-ls1028a-rdb-jailhouse.dts   |  59 ++++
+ .../dts/freescale/fsl-ls1028a-rdb-sdk-bm.dts  |  15 +
+ .../boot/dts/freescale/fsl-ls1028a-rdb.dts    |  25 ++
+ .../arm64/boot/dts/freescale/fsl-ls1028a.dtsi |   2 +-
+ .../dts/freescale/fsl-ls1043a-rdb-sdk-bm.dts  |  44 +++
+ ...sl-ls1043a-rdb-sdk-jailhouse-with-dpaa.dts | 263 ++++++++++++++
+ .../fsl-ls1043a-rdb-sdk-jailhouse.dts         | 267 ++++++++++++++
+ .../arm64/boot/dts/freescale/fsl-ls1043a.dtsi |   2 +-
+ .../dts/freescale/fsl-ls1046a-rdb-sdk-bm.dts  |  47 +++
+ ...sl-ls1046a-rdb-sdk-jailhouse-with-dpaa.dts | 274 +++++++++++++++
+ .../fsl-ls1046a-rdb-sdk-jailhouse.dts         | 278 +++++++++++++++
+ .../arm64/boot/dts/freescale/fsl-ls1046a.dtsi |   2 +-
+ .../boot/dts/freescale/imx8-ss-audio.dtsi     |  20 ++
+ .../dts/freescale/imx8dxl-evk-enet0-avb.dts   |   9 +
+ .../dts/freescale/imx8dxl-evk-enet0-avb.dtsi  |  54 +++
+ .../freescale/imx8dxl-evk-enet0-sja1105.dts   | 168 +++++++++
+ .../imx8dxl-evk-enet0-tja1100-avb.dts         |   9 +
+ arch/arm64/boot/dts/freescale/imx8dxl-evk.dts |  58 ++++
+ .../boot/dts/freescale/imx8dxl-ss-adma.dtsi   |   1 +
+ .../dts/freescale/imx8m-generic-mbox-1.dtsi   |  27 ++
+ .../dts/freescale/imx8m-generic-mbox.dtsi     |  27 ++
+ .../dts/freescale/imx8m-rpmsg-ca53-1.dtsi     |  37 ++
+ .../boot/dts/freescale/imx8m-rpmsg-ca53.dtsi  |  37 ++
+ .../boot/dts/freescale/imx8mm-evk-avb.dts     |  37 ++
+ .../dts/freescale/imx8mm-evk-baremetal.dts    |  39 +++
+ .../boot/dts/freescale/imx8mm-evk-ecat.dts    |  10 +
+ .../freescale/imx8mm-evk-multicore-rpmsg.dts  |  10 +
+ .../freescale/imx8mm-evk-multicore-rtos.dts   |  79 +++++
+ .../dts/freescale/imx8mm-evk-rpmsg-8m-buf.dts | 228 ++++++++++++
+ .../dts/freescale/imx8mm-evk-rpmsg-ca53.dts   |  39 +++
+ .../boot/dts/freescale/imx8mm-evk-rpmsg.dts   |  96 +++++-
+ .../freescale/imx8mm-evk-virtio-net-ca53.dts  |  82 +++++
+ .../freescale/imx8mm-evk-virtio-net-cm4.dts   |  81 +++++
+ .../freescale/imx8mm-evk-virtio-perf-ca53.dts |  78 +++++
+ .../freescale/imx8mm-evk-virtio-perf-cm4.dts  |  70 ++++
+ arch/arm64/boot/dts/freescale/imx8mm.dtsi     |  11 +
+ .../boot/dts/freescale/imx8mp-evk-avb.dts     |  42 +++
+ .../dts/freescale/imx8mp-evk-baremetal.dts    |  37 ++
+ .../boot/dts/freescale/imx8mp-evk-dsa.dts     |  79 +++++
+ .../boot/dts/freescale/imx8mp-evk-ecat.dts    |  10 +
+ .../freescale/imx8mp-evk-multicore-lwip.dts   |  21 ++
+ .../freescale/imx8mp-evk-multicore-rpmsg.dts  | 117 +++++++
+ .../freescale/imx8mp-evk-multicore-rtos.dts   |  79 +++++
+ .../freescale/imx8mp-evk-virtio-net-ca53.dts  |  81 +++++
+ .../freescale/imx8mp-evk-virtio-net-cm7.dts   |  72 ++++
+ .../dts/freescale/imx8mp-generic-mbox-1.dtsi  |  27 ++
+ .../dts/freescale/imx8mp-generic-mbox.dtsi    |  27 ++
+ .../dts/freescale/imx8mp-rpmsg-ca53-1.dtsi    |  37 ++
+ .../boot/dts/freescale/imx8mp-rpmsg-ca53.dtsi |  37 ++
+ arch/arm64/boot/dts/freescale/imx8mp.dtsi     |  10 +
+ .../dts/freescale/imx93-11x11-evk-avb.dts     |  41 +++
+ .../freescale/imx93-11x11-evk-baremetal.dts   |  31 ++
+ .../dts/freescale/imx93-11x11-evk-dsa.dts     |  96 ++++++
+ .../dts/freescale/imx93-11x11-evk-ecat.dts    |  11 +
+ .../imx93-11x11-evk-multicore-rtos.dts        |  38 ++
+ .../imx93-11x11-evk-uart-sharing-cm33.dts     |  96 ++++++
+ .../imx93-11x11-evk-virtio-net-ca55.dts       |  55 +++
+ .../imx93-11x11-evk-virtio-net-cm33.dts       |  53 +++
+ .../boot/dts/freescale/imx93-11x11-evk.dts    |  60 +++-
+ .../dts/freescale/imx93-9x9-qsb-baremetal.dts |  31 ++
+ .../dts/freescale/imx93-9x9-qsb-inmate.dts    | 151 ++++++++
+ .../boot/dts/freescale/imx93-9x9-qsb-root.dts |  54 +++
+ .../imx93-9x9-qsb-uart-sharing-cm33.dts       |  96 ++++++
+ .../boot/dts/freescale/imx93-9x9-qsb.dts      |  58 ++++
+ .../dts/freescale/imx93-generic-mbox.dtsi     |  27 ++
+ arch/arm64/configs/imx_avb.config             |   8 +
+ arch/arm64/configs/imx_v8_defconfig           |  38 +-
+ arch/arm64/configs/linux-dpaa-ethercat.config |   1 +
+ arch/arm64/configs/linux-rpmsg-8m-buf.config  |   1 +
+ arch/arm64/configs/lsdk.config                |  25 +-
+ arch/arm64/include/asm/preempt.h              |  25 +-
+ arch/arm64/include/asm/thread_info.h          |   8 +-
+ arch/arm64/kernel/asm-offsets.c               |   1 +
+ arch/arm64/kernel/signal.c                    |   2 +-
+ arch/arm64/kernel/smp.c                       |  25 ++
+ 81 files changed, 4813 insertions(+), 26 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/freescale/fii-ls1028a-tsn.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-dsa-swp5-eno3.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-jailhouse-without-enetc.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-jailhouse.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-sdk-bm.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/fsl-ls1043a-rdb-sdk-bm.dts
+ create mode 100755 arch/arm64/boot/dts/freescale/fsl-ls1043a-rdb-sdk-jailhouse-with-dpaa.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/fsl-ls1043a-rdb-sdk-jailhouse.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb-sdk-bm.dts
+ create mode 100755 arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb-sdk-jailhouse-with-dpaa.dts
+ create mode 100755 arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb-sdk-jailhouse.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-avb.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-avb.dtsi
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-sja1105.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-tja1100-avb.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8m-generic-mbox-1.dtsi
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8m-generic-mbox.dtsi
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8m-rpmsg-ca53-1.dtsi
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8m-rpmsg-ca53.dtsi
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-evk-avb.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-evk-baremetal.dts
+ create mode 100755 arch/arm64/boot/dts/freescale/imx8mm-evk-ecat.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-evk-multicore-rpmsg.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-evk-multicore-rtos.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-evk-rpmsg-8m-buf.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-evk-rpmsg-ca53.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-net-ca53.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-net-cm4.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-perf-ca53.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-perf-cm4.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-evk-avb.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-evk-baremetal.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-evk-dsa.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-evk-ecat.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-evk-multicore-lwip.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-evk-multicore-rpmsg.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-evk-multicore-rtos.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-evk-virtio-net-ca53.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-evk-virtio-net-cm7.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-generic-mbox-1.dtsi
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-generic-mbox.dtsi
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-rpmsg-ca53-1.dtsi
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-rpmsg-ca53.dtsi
+ create mode 100644 arch/arm64/boot/dts/freescale/imx93-11x11-evk-avb.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx93-11x11-evk-baremetal.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx93-11x11-evk-dsa.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx93-11x11-evk-ecat.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx93-11x11-evk-multicore-rtos.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx93-11x11-evk-uart-sharing-cm33.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx93-11x11-evk-virtio-net-ca55.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx93-11x11-evk-virtio-net-cm33.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx93-9x9-qsb-baremetal.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx93-9x9-qsb-inmate.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx93-9x9-qsb-root.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx93-9x9-qsb-uart-sharing-cm33.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx93-generic-mbox.dtsi
+ create mode 100644 arch/arm64/configs/imx_avb.config
+ create mode 100644 arch/arm64/configs/linux-dpaa-ethercat.config
+ create mode 100644 arch/arm64/configs/linux-rpmsg-8m-buf.config
+
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 386c2f1f5c86..5f0415085211 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -93,6 +93,7 @@ config ARM64
+ 	select ARCH_SUPPORTS_INT128 if CC_HAS_INT128
+ 	select ARCH_SUPPORTS_NUMA_BALANCING
+ 	select ARCH_SUPPORTS_PAGE_TABLE_CHECK
++	select ARCH_SUPPORTS_RT
+ 	select ARCH_WANT_COMPAT_IPC_PARSE_VERSION if COMPAT
+ 	select ARCH_WANT_DEFAULT_BPF_JIT
+ 	select ARCH_WANT_DEFAULT_TOPDOWN_MMAP_LAYOUT
+@@ -199,6 +200,7 @@ config ARM64
+ 	select HAVE_PERF_USER_STACK_DUMP
+ 	select HAVE_PREEMPT_DYNAMIC_KEY
+ 	select HAVE_REGS_AND_STACK_ACCESS_API
++	select HAVE_PREEMPT_LAZY
+ 	select HAVE_POSIX_CPU_TIMERS_TASK_WORK
+ 	select HAVE_FUNCTION_ARG_ACCESS_API
+ 	select MMU_GATHER_RCU_TABLE_FREE
+diff --git a/arch/arm64/Kconfig.platforms b/arch/arm64/Kconfig.platforms
+index d7ff250db02a..fb56a84ab54f 100644
+--- a/arch/arm64/Kconfig.platforms
++++ b/arch/arm64/Kconfig.platforms
+@@ -204,6 +204,24 @@ config ARCH_LAYERSCAPE
+ 	help
+ 	  This enables support for the Freescale Layerscape SoC family.
+ 
++config LS104XA_BAREMETAL
++	bool "NXP LS1043A/LS1046A baremetal support"
++	select BAREMETAL
++	help
++	  This enables support for Freescale LS1043A and LS1046A baremetal.
++
++config LS1028A_BAREMETAL
++	bool "NXP LS1028A baremetal support"
++	select BAREMETAL
++	help
++	  This enables support for NXP LS1028A baremetal.
++
++config LX2160A_BAREMETAL
++	bool "NXP LX2160A baremetal support"
++	select BAREMETAL
++	help
++	  This enables support for NXP LX2160A baremetal.
++
+ config ARCH_MXC
+ 	bool "ARMv8 based NXP i.MX SoC family"
+ 	select ARM64_ERRATUM_843419
+@@ -251,6 +269,18 @@ config ARCH_NPCM
+ 	  General support for NPCM8xx BMC (Arbel).
+ 	  Nuvoton NPCM8xx BMC based on the Cortex A35.
+ 
++config IMX8M_BAREMETAL
++	bool "NXP IMX8MM/IMX8MP baremetal support"
++	select BAREMETAL
++	help
++	  This enables support for NXP i.MX8MM and i.MX8MP baremetal.
++
++config IMX93_BAREMETAL
++	bool "NXP IMX93 baremetal support"
++	select BAREMETAL
++	help
++	  This enables support for NXP i.MX93 baremetal.
++
+ config ARCH_QCOM
+ 	bool "Qualcomm Platforms"
+ 	select GPIOLIB
+diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
+index 40006fbe1a43..ad95bb0acce5 100644
+--- a/arch/arm64/boot/dts/freescale/Makefile
++++ b/arch/arm64/boot/dts/freescale/Makefile
+@@ -14,11 +14,19 @@ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1028a-kontron-sl28-var3-ads2.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1028a-kontron-sl28-var4.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1028a-qds.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1028a-rdb.dtb
++dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1028a-rdb-jailhouse.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1028a-rdb-dpdk.dtb
++dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1028a-rdb-jailhouse-without-enetc.dtb
++dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1028a-rdb-sdk-bm.dtb
++dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1028a-rdb-dsa-swp5-eno3.dtb
++dtb-$(CONFIG_ARCH_LAYERSCAPE) += fii-ls1028a-tsn.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1043a-qds.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1043a-qds-sdk.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1043a-rdb.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1043a-rdb-sdk.dtb
++dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1043a-rdb-sdk-jailhouse.dtb
++dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1043a-rdb-sdk-jailhouse-with-dpaa.dtb
++dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1043a-rdb-sdk-bm.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1043a-rdb-usdpaa.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1046a-frwy.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1046a-frwy-sdk.dtb
+@@ -26,7 +34,10 @@ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1046a-frwy-usdpaa.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1046a-qds.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1046a-qds-sdk.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1046a-rdb.dtb
++dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1046a-rdb-sdk-bm.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1046a-rdb-sdk.dtb
++dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1046a-rdb-sdk-jailhouse.dtb
++dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1046a-rdb-sdk-jailhouse-with-dpaa.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1046a-rdb-usdpaa.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1046a-rdb-shared-mac9-only.dtb
+ dtb-$(CONFIG_ARCH_LAYERSCAPE) += fsl-ls1046a-rdb-usdpaa-shared-mac10.dtb
+@@ -68,13 +79,29 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mm-ab2.dtb imx8mm-ab2-m4.dtb imx8mm-ddr4-ab2.dtb i
+ dtb-$(CONFIG_ARCH_MXC) += imx8mm-evk.dtb imx8mm-evk-rpmsg.dtb imx8mm-evk-rm67191.dtb \
+ 			  imx8mm-evk-root.dtb imx8mm-evk-inmate.dtb imx8mm-evk-revb-qca-wifi.dtb \
+ 			  imx8mm-evk-ecspi-slave.dtb \
++			  imx8mm-evk-baremetal.dtb \
++			  imx8mm-evk-avb.dtb \
+ 			  imx8mm-evk-pcie-ep.dtb \
+ 			  imx8mm-evk-usd-wifi.dtb \
+ 			  imx8mm-evk-qca-wifi.dtb \
+ 			  imx8mm-evk-dpdk.dtb \
+ 			  imx8mm-evk-rm67199.dtb imx8mm-evk-rm67191-cmd-ram.dtb imx8mm-evk-rm67199-cmd-ram.dtb \
+-			  imx8mm-evk-lk.dtb imx8mm-evk-rpmsg-wm8524-lpv.dtb
++			  imx8mm-evk-lk.dtb imx8mm-evk-rpmsg-wm8524-lpv.dtb \
++			  imx8mm-evk-rpmsg-8m-buf.dtb \
++			  imx8mm-evk-ecat.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mm-evk-rpmsg-wm8524.dtb
++dtb-$(CONFIG_ARCH_MXC) += imx8mm-evk-rpmsg-ca53.dtb \
++			  imx8mm-evk-virtio-perf-ca53.dtb \
++			  imx8mm-evk-virtio-perf-cm4.dtb \
++			  imx8mm-evk-virtio-net-ca53.dtb \
++			  imx8mm-evk-virtio-net-cm4.dtb \
++			  imx8mm-evk-multicore-rtos.dtb \
++			  imx8mm-evk-multicore-rpmsg.dtb \
++			  imx8mp-evk-virtio-net-ca53.dtb \
++			  imx8mp-evk-virtio-net-cm7.dtb \
++			  imx8mp-evk-multicore-rtos.dtb \
++			  imx8mp-evk-multicore-lwip.dtb \
++			  imx8mp-evk-multicore-rpmsg.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mm-evk-ak4497.dtb imx8mm-evk-ak5558.dtb imx8mm-evk-audio-tdm.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mm-evk-8mic-revE.dtb imx8mm-evk-8mic-swpdm.dtb \
+ 			  imx8mm-evk-iqaudio-dacplus.dtb imx8mm-evk-iqaudio-dacpro.dtb imx8mm-evk-hifiberry-dacplus.dtb \
+@@ -124,12 +151,15 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk.dtb imx8mp-evk-rm67191.dtb imx8mp-evk-it626
+ 			  imx8mp-evk-iqaudio-dacplus.dtb imx8mp-evk-iqaudio-dacpro.dtb imx8mp-evk-hifiberry-dacplus.dtb \
+ 			  imx8mp-evk-hifiberry-dac2.dtb imx8mp-evk-hifiberry-dacplusadc.dtb \
+ 			  imx8mp-evk-usdhc1-m2.dtb imx8mp-evk-rm67199.dtb \
+-			  imx8mp-evk-dpdk.dtb imx8mp-evk-8mic-swpdm.dtb imx8mp-evk-rpmsg-lpv.dtb imx8mp-evk-revA3-8mic-revE.dtb
++			  imx8mp-evk-dpdk.dtb imx8mp-evk-8mic-swpdm.dtb imx8mp-evk-rpmsg-lpv.dtb imx8mp-evk-revA3-8mic-revE.dtb \
++			  imx8mp-evk-baremetal.dtb imx8mp-evk-avb.dtb \
++			  imx8mp-evk-ecat.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-msc-sm2s-ep1.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-phyboard-pollux-rdk.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-ab2.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-ddr4-evk.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-ndm.dtb
++dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-dsa.dtb
+ 
+ imx8mp-evk-revb4-dtbs := imx8mp-evk.dtb imx8mp-evk-revb4.dtbo
+ imx8mp-evk-revb4-rm67191-dtbs := imx8mp-evk-rm67191.dtb imx8mp-evk-revb4.dtbo
+@@ -162,6 +192,7 @@ imx8mp-evk-revb4-8mic-swpdm-dtbs := imx8mp-evk-8mic-swpdm.dtb imx8mp-evk-revb4.d
+ imx8mp-evk-revb4-8mic-revE-dtbs := imx8mp-evk-revA3-8mic-revE.dtb imx8mp-evk-revb4.dtbo
+ imx8mp-ddr4-evk-revb4-dtbs := imx8mp-ddr4-evk.dtb imx8mp-evk-revb4.dtbo
+ imx8mp-evk-revb4-ndm-dtbs := imx8mp-evk-ndm.dtb imx8mp-evk-revb4.dtbo
++imx8mp-evk-revb4-dsa-dtbs := imx8mp-evk-dsa.dtb imx8mp-evk-revb4.dtbo
+ 
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-revb4.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-revb4-rm67191.dtb
+@@ -197,6 +228,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-revb4-ndm.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-revb4-sof-wm8962.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-revb4-rpmsg.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-revb4-rpmsg-lpv.dtb
++dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk-revb4-dsa.dtb
+ 
+ dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk.dtb imx8mq-evk-rpmsg.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mq-evk.dtb imx8mq-evk-rpmsg.dtb imx8mq-evk-pcie1-m2.dtb imx8mq-evk-usd-wifi.dtb \
+@@ -298,7 +330,8 @@ dtb-$(CONFIG_ARCH_MXC) += imx8qm-mek-revd-root.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8qxp-ai_ml.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8qxp-colibri-eval-v3.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8dxl-evk.dtb \
+-			  imx8dxl-evk-enet0.dtb imx8dxl-evk-enet0-tja1100.dtb \
++			  imx8dxl-evk-enet0.dtb imx8dxl-evk-enet0-tja1100.dtb imx8dxl-evk-enet0-tja1100-avb.dtb \
++			  imx8dxl-evk-enet0-avb.dtb imx8dxl-evk-enet0-sja1105.dtb \
+ 			  imx8dxl-evk-pcie-ep.dtb \
+ 			  imx8dxl-evk-lcdif.dtb \
+ 			  imx8dxl-evk-lpspi-slave.dtb \
+@@ -359,6 +392,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx93-14x14-evk.dtb \
+ 			  imx93-14x14-evk-lvds-it6263.dtb imx93-14x14-evk-sja1105.dtb \
+ 			  imx93-14x14-evk-flexspi-m2.dtb imx93-14x14-evk-dsi-serdes.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx93-11x11-evk.dtb \
++			  imx93-11x11-evk-avb.dtb \
+ 			  imx93-11x11-evk-inmate.dtb imx93-11x11-evk-root.dtb imx93-11x11-evk-flexio-i2c.dtb \
+ 			  imx93-11x11-evk-lpspi.dtb imx93-11x11-evk-lpspi-slave.dtb \
+ 			  imx93-11x11-evk-i3c.dtb imx93-11x11-evk-lpuart.dtb \
+@@ -367,7 +401,14 @@ dtb-$(CONFIG_ARCH_MXC) += imx93-11x11-evk.dtb \
+ 			  imx93-11x11-evk-flexspi-m2.dtb \
+ 			  imx93-11x11-evk-mt9m114.dtb \
+ 			  imx93-11x11-evk-ld.dtb \
+-			  imx93-11x11-evk-rpmsg.dtb imx93-11x11-evk-rpmsg-lpv.dtb
++			  imx93-11x11-evk-rpmsg.dtb imx93-11x11-evk-rpmsg-lpv.dtb \
++			  imx93-11x11-evk-virtio-net-ca55.dtb \
++			  imx93-11x11-evk-virtio-net-cm33.dtb \
++			  imx93-11x11-evk-uart-sharing-cm33.dtb \
++			  imx93-11x11-evk-baremetal.dtb \
++			  imx93-11x11-evk-ecat.dtb \
++			  imx93-11x11-evk-multicore-rtos.dtb \
++			  imx93-11x11-evk-dsa.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx93-9x9-qsb.dtb \
+ 			  imx93-9x9-qsb-can1.dtb \
+ 			  imx93-9x9-qsb-flexspi-m2.dtb \
+@@ -375,8 +416,11 @@ dtb-$(CONFIG_ARCH_MXC) += imx93-9x9-qsb.dtb \
+ 			  imx93-9x9-qsb-mt9m114.dtb \
+ 			  imx93-9x9-qsb-i3c.dtb \
+ 			  imx93-9x9-qsb-lpspi.dtb imx93-9x9-qsb-lpspi-slave.dtb \
++			  imx93-9x9-qsb-baremetal.dtb \
+ 			  imx93-9x9-qsb-ld.dtb imx93-9x9-qsb-aud-hat.dtb \
+-			  imx93-9x9-qsb-rpmsg.dtb imx93-9x9-qsb-rpmsg-lpv.dtb
++			  imx93-9x9-qsb-rpmsg.dtb imx93-9x9-qsb-rpmsg-lpv.dtb \
++			  imx93-9x9-qsb-uart-sharing-cm33.dtb \
++			  imx93-9x9-qsb-inmate.dtb imx93-9x9-qsb-root.dtb
+ 
+ dtb-$(CONFIG_ARCH_MXC) += imx91p-9x9-qsb.dtb imx91p-9x9-qsb-aud-hat.dtb \
+ 			  imx91p-9x9-qsb-mt9m114.dtb \
+diff --git a/arch/arm64/boot/dts/freescale/fii-ls1028a-tsn.dts b/arch/arm64/boot/dts/freescale/fii-ls1028a-tsn.dts
+new file mode 100644
+index 000000000000..a28b47206334
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/fii-ls1028a-tsn.dts
+@@ -0,0 +1,325 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Device Tree file for Foxconn LS1028A TSN Board.
++ *
++ * Copyright 2020-2022 NXP
++ *
++ * Wes Li <wes.li@nxp.com>
++ * Vladimir Oltean <vladimir.oltean@nxp.com>
++ */
++
++/dts-v1/;
++#include "fsl-ls1028a.dtsi"
++
++/ {
++	model = "Foxconn LS1028A TSN Board";
++	compatible = "fsl,ls1028a-rdb", "fsl,ls1028a";
++
++	aliases {
++		crypto = &crypto;
++		serial0 = &duart0;
++		serial1 = &duart1;
++	};
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	memory@80000000 {
++		device_type = "memory";
++		reg = <0x0 0x80000000 0x1 0x0000000>;
++	};
++
++	sys_mclk: clock-mclk {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <25000000>;
++	};
++
++	reg_1p8v: regulator-1p8v {
++		compatible = "regulator-fixed";
++		regulator-name = "1P8V";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		regulator-always-on;
++	};
++
++	sb_3v3: regulator-sb3v3 {
++		compatible = "regulator-fixed";
++		regulator-name = "3v3_vbus";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-boot-on;
++		regulator-always-on;
++	};
++};
++
++&dspi2 {
++	bus-num = <2>;
++	status = "okay";
++
++	sja1105_switch0: ethernet-switch@0 {
++		reg = <0x0>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		compatible = "nxp,sja1105s";
++		dsa,member = <1 1>;
++		/* 20 MHz */
++		spi-max-frequency = <20000000>;
++		/* Sample data on trailing clock edge */
++		spi-cpha;
++		/* SPI controller settings for SJA1105 timing requirements */
++		fsl,spi-cs-sck-delay = <1000>;
++		fsl,spi-sck-cs-delay = <1000>;
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			port@0 {
++				label = "sw0p0";
++				phy-handle = <&sw0p0_rgmii_phy>;
++				phy-mode = "rgmii-id";
++				reg = <0>;
++			};
++
++			port@1 {
++				label = "sw0p1";
++				phy-handle = <&sw0p1_rgmii_phy>;
++				phy-mode = "rgmii-id";
++				reg = <1>;
++			};
++
++			port@2 {
++				label = "sw0p2";
++				phy-handle = <&sw0p2_rgmii_phy>;
++				phy-mode = "rgmii-id";
++				reg = <2>;
++			};
++
++			port@3 {
++				reg = <3>;
++				status = "disabled";
++			};
++
++			port@4 {
++				ethernet = <&mscc_felix_port0>;
++				phy-mode = "sgmii";
++				reg = <4>;
++
++				fixed-link {
++					speed = <1000>;
++					full-duplex;
++				};
++			};
++		};
++	};
++
++	/* Daughter card 1 */
++	sja1105_switch1: ethernet-switch@1 {
++		reg = <0x1>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		compatible = "nxp,sja1105s";
++		dsa,member = <2 2>;
++		/* 20 MHz */
++		spi-max-frequency = <20000000>;
++		spi-cpha;
++		fsl,spi-cs-sck-delay = <1000>;
++		fsl,spi-sck-cs-delay = <1000>;
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			port@0 {
++				label = "sw1p0";
++				phy-handle = <&sw1p0_rgmii_phy>;
++				phy-mode = "rgmii-id";
++				reg = <0>;
++			};
++
++			port@1 {
++				label = "sw1p1";
++				phy-handle = <&sw1p1_rgmii_phy>;
++				phy-mode = "rgmii-id";
++				reg = <1>;
++			};
++
++			port@2 {
++				label = "sw1p2";
++				phy-handle = <&sw1p2_rgmii_phy>;
++				phy-mode = "rgmii-id";
++				reg = <2>;
++			};
++
++			port@3 {
++				label = "sw1p3";
++				phy-handle = <&sw1p3_rgmii_phy>;
++				phy-mode = "rgmii-id";
++				reg = <3>;
++			};
++
++			port@4 {
++				ethernet = <&mscc_felix_port2>;
++				phy-mode = "sgmii";
++				reg = <4>;
++
++				fixed-link {
++					speed = <1000>;
++					full-duplex;
++				};
++			};
++		};
++	};
++};
++
++&duart0 {
++	status = "okay";
++};
++
++&duart1 {
++	status = "okay";
++};
++
++&enetc_mdio_pf3 {
++	status = "okay";
++
++	/*
++	 * PHYs on main board
++	 */
++
++	/* RTL8211FSI */
++	sw0p0_rgmii_phy: ethernet-phy@7 {
++		reg = <0x7>;
++	};
++
++	/* VSC8502 SGMII dual PHY */
++	sw0p1_rgmii_phy: ethernet-phy@0 {
++		reg = <0x0>;
++	};
++
++	sw0p2_rgmii_phy: ethernet-phy@1 {
++		reg = <0x1>;
++	};
++
++	/*
++	 * PHYs on daughter board 1
++	 */
++
++	/* RTL8211FSI */
++	sw1p0_rgmii_phy: ethernet-phy@9 {
++		reg = <0x9>;
++	};
++
++	sw1p1_rgmii_phy: ethernet-phy@8 {
++		reg = <0x8>;
++	};
++
++	/* VSC8502 RGMII dual PHY */
++	sw1p2_rgmii_phy: ethernet-phy@5 {
++		reg = <0x5>;
++	};
++
++	sw1p3_rgmii_phy: ethernet-phy@4 {
++		reg = <0x4>;
++	};
++};
++
++&enetc_port0 {
++	status = "disabled";
++};
++
++&enetc_port1 {
++	status = "disabled";
++};
++
++&enetc_port2 {
++	status = "okay";
++};
++
++&esdhc {
++	cap-sd-highspeed;
++	status = "okay";
++};
++
++&esdhc1 {
++	mmc-hs200-1_8v;
++	status = "okay";
++};
++
++&i2c0 {
++	status = "okay";
++
++	i2c-mux@77 {
++		compatible = "nxp,pca9847";
++		reg = <0x77>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		i2c@2 {
++			#address-cells = <1>;
++			#size-cells = <0>;
++			reg = <0x02>;
++
++			current-monitor@40 {
++				compatible = "ti,ina220";
++				reg = <0x40>;
++				shunt-resistor = <500>;
++			};
++		};
++
++		i2c@3 {
++			#address-cells = <1>;
++			#size-cells = <0>;
++			reg = <0x3>;
++
++			temperature-sensor@4c {
++				compatible = "nxp,sa56004";
++				reg = <0x4c>;
++				vcc-supply = <&sb_3v3>;
++			};
++
++			rtc@51 {
++				compatible = "nxp,pcf2129";
++				reg = <0x51>;
++			};
++		};
++	};
++};
++
++&mscc_felix {
++	status = "okay";
++};
++
++/* Master for SJA1105 on main board */
++&mscc_felix_port0 {
++	phy-mode = "sgmii";
++	status = "okay";
++
++	fixed-link {
++		speed = <1000>;
++		full-duplex;
++	};
++};
++
++/* Master for SJA1105 on daughter card 1 */
++&mscc_felix_port2 {
++	phy-mode = "sgmii";
++	status = "okay";
++
++	fixed-link {
++		speed = <1000>;
++		full-duplex;
++	};
++};
++
++&mscc_felix_port4 {
++	ethernet = <&enetc_port2>;
++	status = "okay";
++};
++
++&hdptx0 {
++	lane-mapping = <0x4e>;
++	status = "okay";
++};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-dsa-swp5-eno3.dts b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-dsa-swp5-eno3.dts
+new file mode 100644
+index 000000000000..4a2eebbc9b43
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-dsa-swp5-eno3.dts
+@@ -0,0 +1,37 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Device Tree file for NXP LS1028A RDB with dsa master swp5-eno3.
++ *
++ * Copyright 2018-2023 NXP
++ *
++ * Hongbo Wang <hongbo.wang@nxp.com>
++ *
++ */
++
++/dts-v1/;
++#include "fsl-ls1028a-rdb.dts"
++
++&enetc_port2 {
++	fixed-link {
++		pause;
++	};
++};
++
++&enetc_port3 {
++	status = "okay";
++};
++
++&mscc_felix_port4 {
++	label = "swp4";
++	/delete-property/ ethernet;
++	status = "okay";
++
++	fixed-link {
++		pause;
++	};
++};
++
++&mscc_felix_port5 {
++	ethernet = <&enetc_port3>;
++	status = "okay";
++};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-jailhouse-without-enetc.dts b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-jailhouse-without-enetc.dts
+new file mode 100644
+index 000000000000..00ade901c736
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-jailhouse-without-enetc.dts
+@@ -0,0 +1,98 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Device Tree file for NXP LS1028A RDB Board Jailhouse case.
++ *
++ * Copyright 2021-2023 NXP
++ *
++ * Hou Zhiqiang <Zhiqiang.Hou@nxp.com>
++ */
++
++#include "fsl-ls1028a-rdb.dts"
++
++/ {
++	reserved-memory {
++	       #address-cells = <2>;
++	       #size-cells = <2>;
++	       ranges;
++
++		/* Reserve 832MB for Jailhouse from 0xc000,0000 */
++		/* 4MB */
++		jh_reserved: jh@0xc0000000 {
++			no-map;
++			reg = <0x0 0xc0000000 0x0 0x400000>;
++		};
++		/* 1MB */
++		loader_reserved: loader@0xc0400000 {
++			no-map;
++			reg = <0x0 0xc0400000 0x0 0x00100000>;
++		};
++		/* 2MB */
++		ivshmem_reserved: ivshmem@0xc0500000 {
++			no-map;
++			reg = <0x0 0xc0500000 0x0 0x00200000>;
++		};
++		/* 2MB */
++		pci_reserved: pci@0xc0700000 {
++			no-map;
++			reg = <0x0 0xc0700000 0x0 0x00200000>;
++		};
++		/* 823MB */
++		inmate_reserved: inmate@0xc0900000 {
++			no-map;
++			reg = <0x0 0xc0900000 0x0 0x33700000>;
++		};
++	};
++};
++
++&duart0 {
++	status = "okay";
++	/delete-property/ interrupts;
++};
++
++&its {
++	status = "disabled";
++};
++
++&duart1 {
++	status = "disabled";
++};
++
++&smmu {
++	status = "disabled";
++};
++
++&enetc_pcie {
++	status = "disabled";
++};
++
++&enetc_port0 {
++	status = "disabled";
++};
++
++&enetc_port2 {
++	status = "disabled";
++};
++
++&mscc_felix {
++	status = "disabled";
++};
++
++&mscc_felix_port0 {
++	status = "disabled";
++};
++
++&mscc_felix_port1 {
++	status = "disabled";
++};
++
++&mscc_felix_port2 {
++	status = "disabled";
++};
++
++&mscc_felix_port3 {
++	status = "disabled";
++};
++
++&mscc_felix_port4 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-jailhouse.dts b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-jailhouse.dts
+new file mode 100644
+index 000000000000..00a241511258
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-jailhouse.dts
+@@ -0,0 +1,59 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Device Tree file for NXP LS1028A RDB Board Jailhouse case.
++ *
++ * Copyright 2018-2023 NXP
++ *
++ * Hongbo Wang <hongbo.wang@nxp.com>
++ *
++ */
++
++#include "fsl-ls1028a-rdb.dts"
++
++/ {
++       reserved-memory {
++               #address-cells = <2>;
++               #size-cells = <2>;
++               ranges;
++
++                /* Reserve 832MB for Jailhouse from 0xc000,0000 */
++                /* 4MB */
++                jh_reserved: jh@0xc0000000 {
++                        no-map;
++                        reg = <0x0 0xc0000000 0x0 0x400000>;
++                };
++                /* 1MB */
++                loader_reserved: loader@0xc0400000 {
++                        no-map;
++                        reg = <0x0 0xc0400000 0x0 0x00100000>;
++                };
++                /* 2MB */
++                ivshmem_reserved: ivshmem@0xc0500000 {
++                        no-map;
++                        reg = <0x0 0xc0500000 0x0 0x00200000>;
++                };
++                /* 2MB */
++                pci_reserved: pci@0xc0700000 {
++                        no-map;
++                        reg = <0x0 0xc0700000 0x0 0x00200000>;
++                };
++                /* 823MB */
++                inmate_reserved: inmate@0xc0900000 {
++                        no-map;
++                        reg = <0x0 0xc0900000 0x0 0x33700000>;
++                };
++       };
++};
++
++&duart0 {
++	status = "okay";
++	/delete-property/ interrupts;
++};
++
++&duart1 {
++	status = "disabled";
++};
++
++&gpio3 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-sdk-bm.dts b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-sdk-bm.dts
+new file mode 100644
+index 000000000000..dd9a9d7b425a
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb-sdk-bm.dts
+@@ -0,0 +1,15 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * DTS file for NXP Layerscape baremetal
++ *
++ * Copyright 2019-2023 NXP
++ *
++ * Author: Hongbo Wang <hongbo.wang@nxp.com>
++ *
++ */
++
++#include "fsl-ls1028a-rdb.dts"
++
++&enetc_pcie {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
+index 1f308455c613..8f9c6118f48b 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a-rdb.dts
+@@ -96,6 +96,19 @@ simple-audio-card,codec {
+ 	};
+ };
+ 
++&dspi2 {
++	bus-num = <2>;
++	status = "okay";
++
++	mikrobus@0 {
++		compatible = "semtech,sx1301";
++		reg = <0>;
++		spi-max-frequency = <2000000>;
++		fsl,spi-cs-sck-delay = <1000000>;
++		fsl,spi-sck-cs-delay = <50>;
++	};
++};
++
+ &can0 {
+ 	status = "okay";
+ 
+@@ -250,6 +263,18 @@ rtc@51 {
+ 				reg = <0x51>;
+ 			};
+ 		};
++
++		i2c@6 {
++			#address-cells = <1>;
++			#size-cells = <0>;
++			reg = <0x6>;
++
++			pn7120: pn7120@28 {
++				compatible = "nxp,pn7120", "nxp,pn544";
++				reg = <0x28>;
++				clock-frequency = <1000000>;
++			};
++		};
+ 	};
+ };
+ 
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
+index 81ad51219c64..36dab630ab43 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi
+@@ -1086,7 +1086,7 @@ tmu: tmu@1f80000 {
+ 			#thermal-sensor-cells = <1>;
+ 		};
+ 
+-		pcie@1f0000000 { /* Integrated Endpoint Root Complex */
++		enetc_pcie: pcie@1f0000000 { /* Integrated Endpoint Root Complex */
+ 			compatible = "pci-host-ecam-generic";
+ 			reg = <0x01 0xf0000000 0x0 0x100000>;
+ 			#address-cells = <3>;
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1043a-rdb-sdk-bm.dts b/arch/arm64/boot/dts/freescale/fsl-ls1043a-rdb-sdk-bm.dts
+new file mode 100644
+index 000000000000..a7036efb1729
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1043a-rdb-sdk-bm.dts
+@@ -0,0 +1,44 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * DTS file for NXP Layerscape baremetal
++ *
++ * Copyright 2018-2023 NXP
++ *
++ * Author: Changming Huang <jerry.huang@nxp.com>
++ *
++ */
++
++#include "fsl-ls1043a-rdb-sdk.dts"
++
++
++&usb0 {
++	status = "disabled";
++};
++
++&usb1 {
++	status = "disabled";
++};
++
++&usb2 {
++	status = "disabled";
++};
++
++&pcie1 {
++	status = "okay";
++};
++
++&pcie2 {
++	status = "disabled";
++};
++
++&pcie3 {
++	status = "disabled";
++};
++
++&optee {
++	status = "disabled";
++};
++
++&ifc {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1043a-rdb-sdk-jailhouse-with-dpaa.dts b/arch/arm64/boot/dts/freescale/fsl-ls1043a-rdb-sdk-jailhouse-with-dpaa.dts
+new file mode 100755
+index 000000000000..77bd7c1e6ed1
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1043a-rdb-sdk-jailhouse-with-dpaa.dts
+@@ -0,0 +1,263 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * DTS file for NXP Layerscape-1043ARDB jailhouse case
++ *
++ * Copyright 2018-2023 NXP
++ *
++ * Author: Hongbo Wang <hongbo.wang@nxp.com>
++ *
++ */
++
++#include "fsl-ls1043a-rdb.dts"
++#include "qoriq-qman-portals-sdk.dtsi"
++#include "qoriq-bman-portals-sdk.dtsi"
++
++/ {
++       reserved-memory {
++               #address-cells = <2>;
++               #size-cells = <2>;
++               ranges;
++
++                /* Reserve 832MB for Jailhouse from 0xc000,0000 */
++                /* 4MB */
++                jh_reserved: jh@0xc0000000 {
++                        no-map;
++                        reg = <0x0 0xc0000000 0x0 0x400000>;
++                };
++                /* 1MB */
++                loader_reserved: loader@0xc0400000 {
++                        no-map;
++                        reg = <0x0 0xc0400000 0x0 0x00100000>;
++                };
++                /* 2MB */
++                ivshmem_reserved: ivshmem@0xc0500000 {
++                        no-map;
++                        reg = <0x0 0xc0500000 0x0 0x00200000>;
++                };
++                /* 2MB */
++                pci_reserved: pci@0xc0700000 {
++                        no-map;
++                        reg = <0x0 0xc0700000 0x0 0x00200000>;
++                };
++                /* 823MB */
++                inmate_reserved: inmate@0xc0900000 {
++                        no-map;
++                        reg = <0x0 0xc0900000 0x0 0x33700000>;
++                };
++       };
++};
++
++&bman_fbpr {
++	compatible = "fsl,bman-fbpr";
++	alloc-ranges = <0 0 0x10000 0>;
++};
++&qman_fqd {
++	compatible = "fsl,qman-fqd";
++	alloc-ranges = <0 0 0x10000 0>;
++};
++&qman_pfdr {
++	compatible = "fsl,qman-pfdr";
++	alloc-ranges = <0 0 0x10000 0>;
++};
++
++&soc {
++/delete-property/ dma-coherent;
++
++#include "qoriq-dpaa-eth.dtsi"
++#include "qoriq-fman3-0-6oh.dtsi"
++
++pcie@3400000 {
++	/delete-property/ iommu-map;
++	dma-coherent;
++};
++
++pcie@3500000 {
++	/delete-property/ iommu-map;
++	dma-coherent;
++};
++
++pcie@3600000 {
++	/delete-property/ iommu-map;
++	dma-coherent;
++};
++
++/delete-node/ iommu@9000000;
++};
++
++&fman0 {
++	compatible = "fsl,fman", "simple-bus";
++};
++
++&clockgen {
++	dma-coherent;
++};
++
++&scfg {
++	dma-coherent;
++};
++
++&crypto {
++	dma-coherent;
++};
++
++&dcfg {
++	dma-coherent;
++};
++
++&ifc {
++	dma-coherent;
++};
++
++&qspi {
++	dma-coherent;
++};
++
++&esdhc {
++	dma-coherent;
++};
++
++&ddr {
++	dma-coherent;
++};
++
++&tmu {
++	dma-coherent;
++};
++
++&qman {
++	dma-coherent;
++};
++
++&bman {
++	dma-coherent;
++};
++
++&bportals {
++	dma-coherent;
++};
++
++&qportals {
++	dma-coherent;
++};
++
++&dspi0 {
++	dma-coherent;
++};
++
++&dspi1 {
++	dma-coherent;
++};
++
++&i2c0 {
++	dma-coherent;
++};
++
++&i2c1 {
++	dma-coherent;
++};
++
++&i2c2 {
++	dma-coherent;
++};
++
++&i2c3 {
++	dma-coherent;
++};
++
++&duart0 {
++	dma-coherent;
++	/delete-property/ interrupts;
++};
++
++&duart1 {
++	dma-coherent;
++	status = "disabled";
++};
++
++&duart2 {
++	dma-coherent;
++};
++
++&duart3 {
++	dma-coherent;
++};
++
++&gpio1 {
++	dma-coherent;
++};
++
++&gpio2 {
++	dma-coherent;
++};
++
++&gpio3 {
++	dma-coherent;
++};
++
++&gpio4 {
++	dma-coherent;
++};
++
++&lpuart0 {
++	dma-coherent;
++};
++
++&lpuart1 {
++	dma-coherent;
++};
++
++&lpuart2 {
++	dma-coherent;
++};
++
++&lpuart3 {
++	dma-coherent;
++};
++
++&lpuart4 {
++	dma-coherent;
++};
++
++&lpuart5 {
++	dma-coherent;
++};
++
++&ftm_alarm0 {
++	dma-coherent;
++};
++
++&wdog0 {
++	dma-coherent;
++};
++
++&edma0 {
++	dma-coherent;
++};
++
++&qdma {
++	dma-coherent;
++};
++
++&msi1 {
++	dma-coherent;
++};
++
++&msi2 {
++	dma-coherent;
++};
++
++&msi3 {
++	dma-coherent;
++};
++
++&fman0 {
++	dma-coherent;
++};
++
++&ptp_timer0 {
++	dma-coherent;
++};
++
++&fsldpaa {
++	dma-coherent;
++};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1043a-rdb-sdk-jailhouse.dts b/arch/arm64/boot/dts/freescale/fsl-ls1043a-rdb-sdk-jailhouse.dts
+new file mode 100644
+index 000000000000..a7335581c469
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1043a-rdb-sdk-jailhouse.dts
+@@ -0,0 +1,267 @@
++ // SPDX-License-Identifier: GPL-2.0+
++/*
++ * DTS file for NXP Layerscape-1043ARDB jailhouse case
++ *
++ * Copyright 2018-2023 NXP
++ *
++ * Author: Hongbo Wang <hongbo.wang@nxp.com>
++ *
++ */
++
++#include "fsl-ls1043a-rdb.dts"
++#include "qoriq-qman-portals-sdk.dtsi"
++#include "qoriq-bman-portals-sdk.dtsi"
++
++/ {
++       reserved-memory {
++               #address-cells = <2>;
++               #size-cells = <2>;
++               ranges;
++
++                /* Reserve 832MB for Jailhouse from 0xc000,0000 */
++                /* 4MB */
++                jh_reserved: jh@0xc0000000 {
++                        no-map;
++                        reg = <0x0 0xc0000000 0x0 0x400000>;
++                };
++                /* 1MB */
++                loader_reserved: loader@0xc0400000 {
++                        no-map;
++                        reg = <0x0 0xc0400000 0x0 0x00100000>;
++                };
++                /* 2MB */
++                ivshmem_reserved: ivshmem@0xc0500000 {
++                        no-map;
++                        reg = <0x0 0xc0500000 0x0 0x00200000>;
++                };
++                /* 2MB */
++                pci_reserved: pci@0xc0700000 {
++                        no-map;
++                        reg = <0x0 0xc0700000 0x0 0x00200000>;
++                };
++                /* 823MB */
++                inmate_reserved: inmate@0xc0900000 {
++                        no-map;
++                        reg = <0x0 0xc0900000 0x0 0x33700000>;
++                };
++       };
++};
++
++&bman_fbpr {
++	compatible = "fsl,bman-fbpr";
++	alloc-ranges = <0 0 0x10000 0>;
++};
++&qman_fqd {
++	compatible = "fsl,qman-fqd";
++	alloc-ranges = <0 0 0x10000 0>;
++};
++&qman_pfdr {
++	compatible = "fsl,qman-pfdr";
++	alloc-ranges = <0 0 0x10000 0>;
++};
++
++&soc {
++/delete-property/ dma-coherent;
++
++#include "qoriq-dpaa-eth.dtsi"
++#include "qoriq-fman3-0-6oh.dtsi"
++
++pcie@3400000 {
++	/delete-property/ iommu-map;
++	dma-coherent;
++};
++
++pcie@3500000 {
++	/delete-property/ iommu-map;
++	dma-coherent;
++};
++
++pcie@3600000 {
++	/delete-property/ iommu-map;
++	dma-coherent;
++};
++
++/delete-node/ iommu@9000000;
++/delete-node/ qman@1880000;
++/delete-node/ bman@1890000;
++/delete-node/ bman-portals@508000000;
++/delete-node/ qman-portals@500000000;
++};
++
++&fman0 {
++	compatible = "fsl,fman", "simple-bus";
++};
++
++&clockgen {
++	dma-coherent;
++};
++
++&scfg {
++	dma-coherent;
++};
++
++&crypto {
++	dma-coherent;
++};
++
++&dcfg {
++	dma-coherent;
++};
++
++&ifc {
++	dma-coherent;
++};
++
++&qspi {
++	dma-coherent;
++};
++
++&esdhc {
++	dma-coherent;
++};
++
++&ddr {
++	dma-coherent;
++};
++
++&tmu {
++	dma-coherent;
++};
++
++&dspi0 {
++	dma-coherent;
++};
++
++&dspi1 {
++	dma-coherent;
++};
++
++&i2c0 {
++	dma-coherent;
++};
++
++&i2c1 {
++	dma-coherent;
++};
++
++&i2c2 {
++	dma-coherent;
++};
++
++&i2c3 {
++	dma-coherent;
++};
++
++&duart0 {
++	dma-coherent;
++	/delete-property/ interrupts;
++};
++
++&duart1 {
++	dma-coherent;
++	status = "disabled";
++};
++
++&duart2 {
++	dma-coherent;
++};
++
++&duart3 {
++	dma-coherent;
++};
++
++&gpio1 {
++	dma-coherent;
++};
++
++&gpio2 {
++	dma-coherent;
++	status = "disabled";
++};
++
++&gpio3 {
++	dma-coherent;
++};
++
++&gpio4 {
++	dma-coherent;
++};
++
++&lpuart0 {
++	dma-coherent;
++};
++
++&lpuart1 {
++	dma-coherent;
++};
++
++&lpuart2 {
++	dma-coherent;
++};
++
++&lpuart3 {
++	dma-coherent;
++};
++
++&lpuart4 {
++	dma-coherent;
++};
++
++&lpuart5 {
++	dma-coherent;
++};
++
++&ftm_alarm0 {
++	dma-coherent;
++};
++
++&wdog0 {
++	dma-coherent;
++};
++
++&edma0 {
++	dma-coherent;
++};
++
++&qdma {
++	dma-coherent;
++};
++
++&msi1 {
++	dma-coherent;
++};
++
++&msi2 {
++	dma-coherent;
++};
++
++&msi3 {
++	dma-coherent;
++};
++
++&fman0 {
++	dma-coherent;
++	status = "disabled";
++};
++
++&ptp_timer0 {
++	dma-coherent;
++	status = "disabled";
++};
++
++&fsldpaa {
++	dma-coherent;
++	status = "disabled";
++};
++
++&bman_fbpr {
++	status = "disabled";
++};
++
++&qman_fqd {
++	status = "disabled";
++};
++
++&qman_pfdr {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1043a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1043a.dtsi
+index 16ad696b9478..816a02798525 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-ls1043a.dtsi
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1043a.dtsi
+@@ -1061,7 +1061,7 @@ ftm_alarm0: timer@29d0000 {
+ 	};
+ 
+ 	firmware {
+-		optee {
++		optee: optee {
+ 			compatible = "linaro,optee-tz";
+ 			method = "smc";
+ 		};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb-sdk-bm.dts b/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb-sdk-bm.dts
+new file mode 100644
+index 000000000000..097a95802919
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb-sdk-bm.dts
+@@ -0,0 +1,47 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * DTS file for NXP Layerscape baremetal
++ *
++ * Copyright 2018-2023 NXP
++ *
++ * Author: Changming Huang <jerry.huang@nxp.com>
++ *
++ */
++
++#include "fsl-ls1046a-rdb-sdk.dts"
++
++&usb0 {
++	status = "disabled";
++};
++
++&usb1 {
++	status = "disabled";
++};
++
++&usb2 {
++	status = "disabled";
++};
++
++&pcie1 {
++	status = "okay";
++};
++
++&pcie2 {
++	status = "disabled";
++};
++
++&pcie3 {
++	status = "disabled";
++};
++
++&optee {
++	status = "disabled";
++};
++
++&ifc {
++	status = "disabled";
++};
++
++&gpio1 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb-sdk-jailhouse-with-dpaa.dts b/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb-sdk-jailhouse-with-dpaa.dts
+new file mode 100755
+index 000000000000..35ec99ac4b3e
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb-sdk-jailhouse-with-dpaa.dts
+@@ -0,0 +1,274 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * DTS file for NXP Layerscape-1046ARDB jailhouse case
++ *
++ * Copyright 2018-2023 NXP
++ *
++ * Author: Hongbo Wang <hongbo.wang@nxp.com>
++ *
++ */
++
++#include "fsl-ls1046a-rdb.dts"
++#include "qoriq-qman-portals-sdk.dtsi"
++#include "qoriq-bman-portals-sdk.dtsi"
++
++/ {
++       reserved-memory {
++               #address-cells = <2>;
++               #size-cells = <2>;
++               ranges;
++
++                /* Reserve 832MB for Jailhouse from 0xc000,0000 */
++                /* 4MB */
++                jh_reserved: jh@0xc0000000 {
++                        no-map;
++                        reg = <0x0 0xc0000000 0x0 0x400000>;
++                };
++                /* 1MB */
++                loader_reserved: loader@0xc0400000 {
++                        no-map;
++                        reg = <0x0 0xc0400000 0x0 0x00100000>;
++                };
++                /* 2MB */
++                ivshmem_reserved: ivshmem@0xc0500000 {
++                        no-map;
++                        reg = <0x0 0xc0500000 0x0 0x00200000>;
++                };
++                /* 2MB */
++                pci_reserved: pci@0xc0700000 {
++                        no-map;
++                        reg = <0x0 0xc0700000 0x0 0x00200000>;
++                };
++                /* 823MB */
++                inmate_reserved: inmate@0xc0900000 {
++                        no-map;
++                        reg = <0x0 0xc0900000 0x0 0x33700000>;
++                };
++       };
++};
++
++&bman_fbpr {
++	compatible = "fsl,bman-fbpr";
++	alloc-ranges = <0 0 0x10000 0>;
++};
++&qman_fqd {
++	compatible = "fsl,qman-fqd";
++	alloc-ranges = <0 0 0x10000 0>;
++};
++&qman_pfdr {
++	compatible = "fsl,qman-pfdr";
++	alloc-ranges = <0 0 0x10000 0>;
++};
++
++&soc {
++/delete-property/ dma-coherent;
++
++#include "qoriq-dpaa-eth.dtsi"
++#include "qoriq-fman3-0-6oh.dtsi"
++
++pcie@3400000 {
++	/delete-property/ iommu-map;
++};
++
++pcie@3500000 {
++	/delete-property/ iommu-map;
++};
++
++pcie@3600000 {
++	/delete-property/ iommu-map;
++};
++
++/delete-node/ iommu@9000000;
++};
++
++&fsldpaa {
++	ethernet@0 {
++		status = "disabled";
++	};
++	ethernet@1 {
++		status = "disabled";
++	};
++	ethernet@9 {
++		compatible = "fsl,dpa-ethernet";
++		fsl,fman-mac = <&enet7>;
++		dma-coherent;
++	};
++};
++
++&fman0 {
++	compatible = "fsl,fman", "simple-bus";
++};
++
++&clockgen {
++	dma-coherent;
++};
++
++&scfg {
++	dma-coherent;
++};
++
++&crypto {
++	dma-coherent;
++};
++
++&dcfg {
++	dma-coherent;
++};
++
++&ifc {
++	dma-coherent;
++};
++
++&qspi {
++	dma-coherent;
++};
++
++&esdhc {
++	dma-coherent;
++};
++
++&ddr {
++	dma-coherent;
++};
++
++&tmu {
++	dma-coherent;
++};
++
++&qman {
++	dma-coherent;
++};
++
++&bman {
++	dma-coherent;
++};
++
++&bportals {
++	dma-coherent;
++};
++
++&qportals {
++	dma-coherent;
++};
++
++&dspi {
++	dma-coherent;
++};
++
++&i2c0 {
++	dma-coherent;
++};
++
++&i2c1 {
++	dma-coherent;
++};
++
++&i2c2 {
++	dma-coherent;
++};
++
++&i2c3 {
++	dma-coherent;
++};
++
++&duart0 {
++	dma-coherent;
++	/delete-property/ interrupts;
++};
++
++&duart1 {
++	dma-coherent;
++	status = "disabled";
++};
++
++&duart2 {
++	dma-coherent;
++};
++
++&duart3 {
++	dma-coherent;
++};
++
++&gpio0 {
++	dma-coherent;
++};
++
++&gpio1 {
++	dma-coherent;
++};
++
++&gpio2 {
++	dma-coherent;
++};
++
++&gpio3 {
++	dma-coherent;
++};
++
++&lpuart0 {
++	dma-coherent;
++};
++
++&lpuart1 {
++	dma-coherent;
++};
++
++&lpuart2 {
++	dma-coherent;
++};
++
++&lpuart3 {
++	dma-coherent;
++};
++
++&lpuart4 {
++	dma-coherent;
++};
++
++&lpuart5 {
++	dma-coherent;
++};
++
++&ftm_alarm0 {
++	dma-coherent;
++};
++
++&wdog0 {
++	dma-coherent;
++};
++
++&edma0 {
++	dma-coherent;
++};
++
++&sata {
++	dma-coherent;
++};
++
++&qdma {
++	dma-coherent;
++};
++
++&msi1 {
++	dma-coherent;
++};
++
++&msi2 {
++	dma-coherent;
++};
++
++&msi3 {
++	dma-coherent;
++};
++
++&fman0 {
++	dma-coherent;
++};
++
++&ptp_timer0 {
++	dma-coherent;
++};
++
++&fsldpaa {
++	dma-coherent;
++};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb-sdk-jailhouse.dts b/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb-sdk-jailhouse.dts
+new file mode 100755
+index 000000000000..8bf8d3eb03ee
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb-sdk-jailhouse.dts
+@@ -0,0 +1,278 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * DTS file for NXP Layerscape-1046ARDB jailhouse case
++ *
++ * Copyright 2018-2023 NXP
++ *
++ * Author: Hongbo Wang <hongbo.wang@nxp.com>
++ *
++ */
++
++#include "fsl-ls1046a-rdb.dts"
++#include "qoriq-qman-portals-sdk.dtsi"
++#include "qoriq-bman-portals-sdk.dtsi"
++
++/ {
++       reserved-memory {
++               #address-cells = <2>;
++               #size-cells = <2>;
++               ranges;
++
++                /* Reserve 832MB for Jailhouse from 0xc000,0000 */
++                /* 4MB */
++                jh_reserved: jh@0xc0000000 {
++                        no-map;
++                        reg = <0x0 0xc0000000 0x0 0x400000>;
++                };
++                /* 1MB */
++                loader_reserved: loader@0xc0400000 {
++                        no-map;
++                        reg = <0x0 0xc0400000 0x0 0x00100000>;
++                };
++                /* 2MB */
++                ivshmem_reserved: ivshmem@0xc0500000 {
++                        no-map;
++                        reg = <0x0 0xc0500000 0x0 0x00200000>;
++                };
++                /* 2MB */
++                pci_reserved: pci@0xc0700000 {
++                        no-map;
++                        reg = <0x0 0xc0700000 0x0 0x00200000>;
++                };
++                /* 823MB */
++                inmate_reserved: inmate@0xc0900000 {
++                        no-map;
++                        reg = <0x0 0xc0900000 0x0 0x33700000>;
++                };
++       };
++};
++
++&bman_fbpr {
++	compatible = "fsl,bman-fbpr";
++	alloc-ranges = <0 0 0x10000 0>;
++};
++&qman_fqd {
++	compatible = "fsl,qman-fqd";
++	alloc-ranges = <0 0 0x10000 0>;
++};
++&qman_pfdr {
++	compatible = "fsl,qman-pfdr";
++	alloc-ranges = <0 0 0x10000 0>;
++};
++
++&soc {
++/delete-property/ dma-coherent;
++
++#include "qoriq-dpaa-eth.dtsi"
++#include "qoriq-fman3-0-6oh.dtsi"
++
++pcie@3400000 {
++	/delete-property/ iommu-map;
++};
++
++pcie@3500000 {
++	/delete-property/ iommu-map;
++};
++
++pcie@3600000 {
++	/delete-property/ iommu-map;
++};
++
++/delete-node/ iommu@9000000;
++/delete-node/ qman@1880000;
++/delete-node/ bman@1890000;
++/delete-node/ bman-portals@508000000;
++/delete-node/ qman-portals@500000000;
++};
++
++&fsldpaa {
++	ethernet@0 {
++		status = "disabled";
++	};
++	ethernet@1 {
++		status = "disabled";
++	};
++	ethernet@9 {
++		compatible = "fsl,dpa-ethernet";
++		fsl,fman-mac = <&enet7>;
++		dma-coherent;
++	};
++};
++
++&fman0 {
++	compatible = "fsl,fman", "simple-bus";
++};
++
++&clockgen {
++	dma-coherent;
++};
++
++&scfg {
++	dma-coherent;
++};
++
++&crypto {
++	dma-coherent;
++};
++
++&dcfg {
++	dma-coherent;
++};
++
++&ifc {
++	dma-coherent;
++};
++
++&qspi {
++	dma-coherent;
++};
++
++&esdhc {
++	dma-coherent;
++};
++
++&ddr {
++	dma-coherent;
++};
++
++&tmu {
++	dma-coherent;
++};
++
++&dspi {
++	dma-coherent;
++};
++
++&i2c0 {
++	dma-coherent;
++};
++
++&i2c1 {
++	dma-coherent;
++};
++
++&i2c2 {
++	dma-coherent;
++};
++
++&i2c3 {
++	dma-coherent;
++};
++
++&duart0 {
++	dma-coherent;
++	/delete-property/ interrupts;
++};
++
++&duart1 {
++	dma-coherent;
++	status = "disabled";
++};
++
++&duart2 {
++	dma-coherent;
++};
++
++&duart3 {
++	dma-coherent;
++};
++
++&gpio0 {
++	dma-coherent;
++};
++
++&gpio1 {
++	dma-coherent;
++};
++
++&gpio2 {
++	dma-coherent;
++	status = "disabled";
++};
++
++&gpio3 {
++	dma-coherent;
++};
++
++&lpuart0 {
++	dma-coherent;
++};
++
++&lpuart1 {
++	dma-coherent;
++};
++
++&lpuart2 {
++	dma-coherent;
++};
++
++&lpuart3 {
++	dma-coherent;
++};
++
++&lpuart4 {
++	dma-coherent;
++};
++
++&lpuart5 {
++	dma-coherent;
++};
++
++&ftm_alarm0 {
++	dma-coherent;
++};
++
++&wdog0 {
++	dma-coherent;
++};
++
++&edma0 {
++	dma-coherent;
++};
++
++&sata {
++	dma-coherent;
++};
++
++&qdma {
++	dma-coherent;
++};
++
++&msi1 {
++	dma-coherent;
++};
++
++&msi2 {
++	dma-coherent;
++};
++
++&msi3 {
++	dma-coherent;
++};
++
++&fman0 {
++	dma-coherent;
++	status = "disabled";
++};
++
++&ptp_timer0 {
++	dma-coherent;
++	status = "disabled";
++};
++
++&fsldpaa {
++	dma-coherent;
++	status = "disabled";
++};
++
++&bman_fbpr {
++	status = "disabled";
++};
++
++&qman_fqd {
++	status = "disabled";
++};
++
++&qman_pfdr {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi
+index 96f501c76ea8..7877f13e1682 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi
+@@ -1028,7 +1028,7 @@ qman_pfdr: qman-pfdr {
+ 	};
+ 
+ 	firmware {
+-		optee {
++		optee: optee {
+ 			compatible = "linaro,optee-tz";
+ 			method = "smc";
+ 		};
+diff --git a/arch/arm64/boot/dts/freescale/imx8-ss-audio.dtsi b/arch/arm64/boot/dts/freescale/imx8-ss-audio.dtsi
+index c133f06ca748..c4ac0b498c4d 100644
+--- a/arch/arm64/boot/dts/freescale/imx8-ss-audio.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8-ss-audio.dtsi
+@@ -239,6 +239,15 @@ sai3: sai@59070000 {
+ 		status = "disabled";
+ 	};
+ 
++	gpt5: gpt@590b0000 {
++		reg = <0x590b0000 0x10000>;
++		clocks = <&gpt5_lpcg 1>,
++			<&gpt5_lpcg 1>;
++		clock-names = "ipg", "per";
++		power-domains = <&pd IMX_SC_R_GPT_5>;
++		status = "disabled";
++	};
++
+ 	asrc1: asrc@59800000 {
+ 		compatible = "fsl,imx8qm-asrc";
+ 		reg = <0x59800000 0x10000>;
+@@ -555,6 +564,17 @@ sai3_lpcg: clock-controller@59470000 {
+ 		power-domains = <&pd IMX_SC_R_SAI_3>;
+ 	};
+ 
++	gpt5_lpcg: clock-controller@594b0000 {
++		compatible = "fsl,imx8qxp-lpcg";
++		reg = <0x594b0000 0x10000>;
++		#clock-cells = <1>;
++		clocks = <&acm IMX_ADMA_ACM_GPT0_MUX_CLK_SEL>,
++			 <&audio_ipg_clk>;
++		bit-offset = <0 16>;
++		clock-output-names = "gpt5_lpcg_clk_in", "gpt5_lpcg_ipg_clk";
++		power-domains = <&pd IMX_SC_R_GPT_5>;
++	};
++
+ 	asrc1_lpcg: clock-controller@59c00000 {
+ 		compatible = "fsl,imx8qxp-lpcg";
+ 		reg = <0x59c00000 0x10000>;
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-avb.dts b/arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-avb.dts
+new file mode 100644
+index 000000000000..36cc1a616a9a
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-avb.dts
+@@ -0,0 +1,9 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2022-2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx8dxl-evk-enet0.dts"
++#include "imx8dxl-evk-enet0-avb.dtsi"
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-avb.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-avb.dtsi
+new file mode 100644
+index 000000000000..d7c268f056cc
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-avb.dtsi
+@@ -0,0 +1,54 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/* Set GPT Capture input to Ethernet 0 event */
++&acm {
++	gpt-capture-select = <IMX_ADMA_ACM_GPT0_CAPIN1_SEL IMX_ADMA_ACM_GPT_EVENT_INPUT_ETH0>;
++};
++
++/* AVB HW timer*/
++&gpt5 {
++	compatible = "fsl,avb-gpt";
++
++	clocks = <&gpt5_lpcg 1>,
++		<&gpt5_lpcg 1>,
++		<&gpt5_lpcg 0>,
++		<&clk IMX_SC_R_AUDIO_PLL_0 IMX_SC_PM_CLK_PLL>;
++	clock-names = "ipg", "per", "clk_in", "audio_pll";
++
++	/*  - Set ACM_AUD_CLK0 source to ACM_AUD_REC_CLK0
++	 *  - Set clk_in to Audio PLL0 Divider
++	 *  - Enable Audio PLL and its Master Bus clock (AUD_REC_CLK0): keep this in sync with sai nodes
++	 */
++
++	assigned-clocks =  <&acm IMX_ADMA_ACM_AUD_CLK0_SEL>,
++				<&acm IMX_ADMA_ACM_GPT0_MUX_CLK_SEL>,
++				<&clk IMX_SC_R_AUDIO_PLL_0 IMX_SC_PM_CLK_PLL>,
++				<&clk IMX_SC_R_AUDIO_PLL_0 IMX_SC_PM_CLK_MST_BUS>;
++
++	assigned-clock-parents = <&aud_rec0_lpcg 0>,
++					<&acm IMX_ADMA_ACM_AUD_CLK0_SEL>;
++
++	assigned-clock-rates = <0>, <0>, <786432000>, <12288000>;
++
++	/* Audio PLL is controlled through SCU */
++	fsl,pll-scu-controlled;
++
++	timer-channel = <1>; /* Use output compare channel 1*/
++	prescale = <1>;
++	domain = <0>;
++	rec-channel = <1 0 1>; // capture channel, eth port, ENET TC id
++
++	interrupts = <GIC_SPI 268 IRQ_TYPE_LEVEL_HIGH>;
++
++	status = "okay";
++};
++
++&fec1 {
++	fsl,rx-phy-delay-100-ns = <670>;
++	fsl,tx-phy-delay-100-ns = <670>;
++	fsl,rx-phy-delay-1000-ns = <0>;
++	fsl,tx-phy-delay-1000-ns = <0>;
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-sja1105.dts b/arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-sja1105.dts
+new file mode 100644
+index 000000000000..ddfdadfbe3f8
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-sja1105.dts
+@@ -0,0 +1,168 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx8dxl-evk.dts"
++
++&iomuxc {
++	pinctrl_lpspi2: lpspi2grp {
++		fsl,pins = <
++			IMX8DXL_USDHC1_VSELECT_ADMA_SPI2_SDO    0x600004c
++			IMX8DXL_USDHC1_WP_ADMA_SPI2_SDI         0x600004c
++			IMX8DXL_USDHC1_RESET_B_ADMA_SPI2_SCK    0x600004c
++		>;
++	};
++
++	pinctrl_lpspi2_cs: lpspi2cs {
++		fsl,pins = <
++			IMX8DXL_USDHC1_CD_B_LSIO_GPIO4_IO22        0x21
++		>;
++	};
++};
++
++&lpspi2 {
++	fsl,spi-num-chipselects = <1>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_lpspi2 &pinctrl_lpspi2_cs>;
++	cs-gpios = <&lsio_gpio4 22 GPIO_ACTIVE_LOW>;
++	status = "okay";
++
++	sja1105p@0 {
++		compatible = "nxp,sja1105q";
++		spi-max-frequency = <12500000>;
++		/* SJA1105PQRS operates in SPI MODE 1 : CPOL=0 CPHA=1 */
++		spi-cpha;
++		/* use queue 5 for managment traffic */
++		hostprio = <5>;
++
++		reg = <0>;
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			port@0 {
++				reg = <0>;
++				label = "cpu";
++				ethernet = <&fec1>;
++				phy-mode = "rgmii";
++				rx-internal-delay-ps = <2000>;
++				tx-internal-delay-ps = <2000>;
++
++				fixed-link {
++					speed = <1000>;
++					full-duplex;
++				};
++			};
++
++			port@1 {
++				reg = <1>;
++				label = "swp0";
++				phy-handle = <&phy0>;
++				phy-mode = "mii";
++			};
++
++			port@2 {
++				reg = <2>;
++				label = "swp1";
++				phy-handle = <&phy1>;
++				phy-mode = "mii";
++			};
++
++			port@3 {
++				reg = <3>;
++				label = "swp2";
++				phy-handle = <&phy2>;
++				phy-mode = "rmii";
++			};
++
++			port@4 {
++				reg = <4>;
++				label = "swp3";
++				phy-handle = <&phy3>;
++				phy-mode = "rmii";
++			};
++		};
++	};
++};
++
++&ethphy1 {
++	status = "disabled";
++};
++
++&fec1 {
++	assigned-clocks = <&clk IMX_SC_R_ENET_0 IMX_SC_C_CLKDIV>;
++	assigned-clock-rates = <12000000>;
++	phy-supply = <&mii_select>;
++	status = "okay";
++
++	fsl,magic-packet;
++	phy-mode = "rgmii";
++	/delete-property/ rx-internal-delay-ps;
++	/delete-property/ phy-handle;
++
++	fixed-link {
++		speed = <1000>;
++		full-duplex;
++	};
++
++	mdio {
++		#address-cells = <1>;
++		#size-cells = <0>;
++		/* SJA1105Q EVB switch ports : NXP TJA1102
++		the phys SMI addresses on EVB are hard coded giving
++		first TJA device at offset 0x8 and the 2nd once at offet 0xe */
++		phy0: ethernet-phy@8 {
++			#address-cells = <1>;
++			#size-cells = <0>;
++			reg = <0x8>;
++			max-speed = <100>;
++			phy1: ethernet-phy@9 {
++				reg = <0x9>;
++				max-speed = <100>;
++			};
++		};
++
++		phy2: ethernet-phy@e {
++			#address-cells = <1>;
++			#size-cells = <0>;
++			reg = <0xe>;
++			max-speed = <100>;
++			phy3: ethernet-phy@f {
++				reg = <0xf>;
++				max-speed = <100>;
++			};
++		};
++	};
++};
++
++&reg_fec1_sel {
++	status = "okay";
++};
++
++/* This would set max7233 (0) to high (intented for PHY power on) and would
++ * enable LPC SPI/SMI on the switch EVB which interferes with
++ * SPI communcation between the iMX and the SJA1105
++*/
++&reg_fec1_io {
++	status = "disabled";
++};
++
++&max7322 {
++	status = "disabled";
++};
++
++&mii_select {
++	/delete-property/ enable-active-high;
++};
++
++&eqos {
++	status = "disabled";
++};
++
++&usdhc2 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-tja1100-avb.dts b/arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-tja1100-avb.dts
+new file mode 100644
+index 000000000000..121b506cbc8c
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-evk-enet0-tja1100-avb.dts
+@@ -0,0 +1,9 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx8dxl-evk-enet0-tja1100.dts"
++#include "imx8dxl-evk-enet0-avb.dtsi"
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-evk.dts b/arch/arm64/boot/dts/freescale/imx8dxl-evk.dts
+index 139d3f1b8b7a..b5fc609be44f 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-evk.dts
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-evk.dts
+@@ -323,6 +323,9 @@ &eqos {
+ 	phy-handle = <&ethphy0>;
+ 	nvmem-cells = <&fec_mac1>;
+ 	nvmem-cell-names = "mac-address";
++	snps,force_thresh_dma_mode;
++	snps,mtl-tx-config = <&mtl_tx_setup>;
++	snps,mtl-rx-config = <&mtl_rx_setup>;
+ 	status = "okay";
+ 
+ 	mdio {
+@@ -347,6 +350,61 @@ vddio0: vddio-regulator {
+ 			};
+ 		};
+ 	};
++
++	mtl_tx_setup: tx-queues-config {
++		snps,tx-queues-to-use = <5>;
++		snps,tx-sched-sp;
++		queue0 {
++			snps,dcb-algorithm;
++			snps,priority = <0x1>;
++		};
++		queue1 {
++			snps,dcb-algorithm;
++			snps,priority = <0x2>;
++		};
++		queue2 {
++			snps,dcb-algorithm;
++			snps,priority = <0x4>;
++		};
++		queue3 {
++			snps,dcb-algorithm;
++			snps,priority = <0x8>;
++		};
++		queue4 {
++			snps,dcb-algorithm;
++			snps,priority = <0xf0>;
++		};
++	};
++
++	mtl_rx_setup: rx-queues-config {
++		snps,rx-queues-to-use = <5>;
++		snps,rx-sched-sp;
++		queue0 {
++			snps,dcb-algorithm;
++			snps,priority = <0x1>;
++			snps,map-to-dma-channel = <0>;
++		};
++		queue1 {
++			snps,dcb-algorithm;
++			snps,priority = <0x2>;
++			snps,map-to-dma-channel = <1>;
++		};
++		queue2 {
++			snps,dcb-algorithm;
++			snps,priority = <0x4>;
++			snps,map-to-dma-channel = <2>;
++		};
++		queue3 {
++			snps,dcb-algorithm;
++			snps,priority = <0x8>;
++			snps,map-to-dma-channel = <3>;
++		};
++		queue4 {
++			snps,dcb-algorithm;
++			snps,priority = <0xf0>;
++			snps,map-to-dma-channel = <4>;
++		};
++	};
+ };
+ 
+ /*
+diff --git a/arch/arm64/boot/dts/freescale/imx8dxl-ss-adma.dtsi b/arch/arm64/boot/dts/freescale/imx8dxl-ss-adma.dtsi
+index 2e6cd063ae9a..81541d269bb8 100644
+--- a/arch/arm64/boot/dts/freescale/imx8dxl-ss-adma.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8dxl-ss-adma.dtsi
+@@ -32,6 +32,7 @@ &acm {
+ 			<&pd IMX_SC_R_AUDIO_PLL_0>,
+ 			<&pd IMX_SC_R_AUDIO_PLL_1>,
+ 			<&pd IMX_SC_R_ASRC_0>,
++			<&pd IMX_SC_R_GPT_5>,
+ 			<&pd IMX_SC_R_SAI_0>,
+ 			<&pd IMX_SC_R_SAI_1>,
+ 			<&pd IMX_SC_R_SAI_2>,
+diff --git a/arch/arm64/boot/dts/freescale/imx8m-generic-mbox-1.dtsi b/arch/arm64/boot/dts/freescale/imx8m-generic-mbox-1.dtsi
+new file mode 100644
+index 000000000000..428e9b8cb4ae
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8m-generic-mbox-1.dtsi
+@@ -0,0 +1,27 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		gen_sw_mbox_1_reserved: gen-sw-mbox-1@b8501000 {
++			reg = <0 0xb8501000 0 0x1000>;
++			no-map;
++		};
++
++	};
++
++	gen_sw_mbox_1: generic-software-mailbox-1@b8501000 {
++		compatible = "fsl,generic-software-mbox";
++		reg = <0 0xb8501000 0 0x1000>;
++		#mbox-cells = <3>;
++		/* Use 2 unused SPI interrupts */
++		interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI 75 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "irq", "remote_irq";
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8m-generic-mbox.dtsi b/arch/arm64/boot/dts/freescale/imx8m-generic-mbox.dtsi
+new file mode 100644
+index 000000000000..e97e82c78aaa
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8m-generic-mbox.dtsi
+@@ -0,0 +1,27 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		gen_sw_mbox_reserved: gen-sw-mbox@b8500000 {
++			reg = <0 0xb8500000 0 0x1000>;
++			no-map;
++		};
++
++	};
++
++	gen_sw_mbox: generic-software-mailbox@b8500000 {
++		compatible = "fsl,generic-software-mbox";
++		reg = <0 0xb8500000 0 0x1000>;
++		#mbox-cells = <3>;
++		/* Use 2 unused SPI interrupts */
++		interrupts = <GIC_SPI 76 IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI 77 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "irq", "remote_irq";
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8m-rpmsg-ca53-1.dtsi b/arch/arm64/boot/dts/freescale/imx8m-rpmsg-ca53-1.dtsi
+new file mode 100644
+index 000000000000..70e33e6d834b
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8m-rpmsg-ca53-1.dtsi
+@@ -0,0 +1,37 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++#include "imx8m-generic-mbox-1.dtsi"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		rpmsg_ca53_1_reserved: rpmsg-ca53-1@b8610000 {
++			reg = <0 0xb8610000 0 0x10000>;
++			no-map;
++		};
++
++		vdevbuffer_ca53_1: vdevbuffer-ca53-1@b8800000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xb8800000 0 0x100000>;
++			no-map;
++		};
++	};
++
++	rpmsg-ca53-1 {
++		compatible = "fsl,imx8mm-rpmsg";
++		reg = <0x0 0xb8610000 0x0 0x10000>; /* 64K for one rpmsg instance */
++		dma-coherent;
++		memory-region = <&vdevbuffer_ca53_1>;
++		mbox-names = "tx", "rx", "rxdb";
++		mboxes = <&gen_sw_mbox_1 0 0 1		/* Tx channel with ACK */
++			  &gen_sw_mbox_1 1 0 0		/* Rx channel without ACK */
++			  &gen_sw_mbox_1 2 0 1>;	/* RXDB channel with ACK */
++		vdev-nums = <1>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8m-rpmsg-ca53.dtsi b/arch/arm64/boot/dts/freescale/imx8m-rpmsg-ca53.dtsi
+new file mode 100644
+index 000000000000..a3b0dbf563e8
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8m-rpmsg-ca53.dtsi
+@@ -0,0 +1,37 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2022-2023 NXP
++ */
++
++#include "imx8m-generic-mbox.dtsi"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		rpmsg_ca53_reserved: rpmsg-ca53@b8600000 {
++			reg = <0 0xb8600000 0 0x10000>;
++			no-map;
++		};
++
++		vdevbuffer_ca53: vdevbuffer-ca53@b8700000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xb8700000 0 0x100000>;
++			no-map;
++		};
++	};
++
++	rpmsg-ca53 {
++		compatible = "fsl,imx8mm-rpmsg";
++		reg = <0x0 0xb8600000 0x0 0x10000>; /* 64K for one rpmsg instance */
++		dma-coherent;
++		memory-region = <&vdevbuffer_ca53>;
++		mbox-names = "tx", "rx", "rxdb";
++		mboxes = <&gen_sw_mbox 0 0 1	/* Tx channel with ACK */
++			  &gen_sw_mbox 1 0 0	/* Rx channel without ACK */
++			  &gen_sw_mbox 2 0 1>;	/* RXDB channel with ACK */
++		vdev-nums = <1>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk-avb.dts b/arch/arm64/boot/dts/freescale/imx8mm-evk-avb.dts
+new file mode 100644
+index 000000000000..3ed975c348d4
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk-avb.dts
+@@ -0,0 +1,37 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2020-2021 NXP
++ */
++
++/dts-v1/;
++
++#include "imx8mm-evk.dts"
++
++/* AVB HW timer*/
++&gpt1 {
++	compatible = "fsl,avb-gpt";
++	timer-channel = <1>; /* Use output compare channel 1*/
++	prescale = <1>;
++	domain = <0>;
++
++	clocks = <&clk IMX8MM_CLK_GPT1_ROOT>,
++		 <&clk IMX8MM_CLK_GPT1_ROOT>, <&clk IMX8MM_AUDIO_PLL1>;
++	clock-names = "ipg", "per", "audio_pll";
++
++	/* Make the GPT clk root derive from the audio PLL */
++	assigned-clocks = <&clk IMX8MM_CLK_GPT1>;
++	assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
++	assigned-clock-rates = <0>;
++
++	/* Enble SW sampling for media clock recovery on port 0 */
++	sw-recovery = <0>;
++
++	status = "okay";
++};
++
++&fec1 {
++	fsl,rx-phy-delay-100-ns = <670>;
++	fsl,tx-phy-delay-100-ns = <670>;
++	fsl,rx-phy-delay-1000-ns = <0>;
++	fsl,tx-phy-delay-1000-ns = <0>;
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk-baremetal.dts b/arch/arm64/boot/dts/freescale/imx8mm-evk-baremetal.dts
+new file mode 100644
+index 000000000000..4a36d0e0c7a1
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk-baremetal.dts
+@@ -0,0 +1,39 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2020-2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx8mm-evk.dts"
++
++/ {
++	model = "FSL i.MX8MM LPDDR4 EVK RevB  board - Baremetal";
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		rpmsg_reserved: rpmsg@b8000000 {
++			no-map;
++			reg = <0 0xb8000000 0 0x400000>;
++		};
++		bm_reserved: baremetal@60000000 {
++			no-map;
++			reg = <0 0x60000000 0 0x10000000>;
++		};
++	};
++};
++
++&fec1 {
++       status = "disabled";
++};
++
++&gpio5 {
++	status = "disabled";
++};
++
++&uart3 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk-ecat.dts b/arch/arm64/boot/dts/freescale/imx8mm-evk-ecat.dts
+new file mode 100755
+index 000000000000..cde59ddaa3cf
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk-ecat.dts
+@@ -0,0 +1,10 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++#include "imx8mm-evk.dts"
++
++&fec1 {
++	compatible = "fsl,imx8mm-fec-ecat", "fsl,imx8mq-fec-ecat", "fsl,imx6sx-fec-ecat";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk-multicore-rpmsg.dts b/arch/arm64/boot/dts/freescale/imx8mm-evk-multicore-rpmsg.dts
+new file mode 100644
+index 000000000000..16919505668c
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk-multicore-rpmsg.dts
+@@ -0,0 +1,10 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx8mm-evk-multicore-rtos.dts"
++#include "imx8m-rpmsg-ca53.dtsi"
++#include "imx8m-rpmsg-ca53-1.dtsi"
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk-multicore-rtos.dts b/arch/arm64/boot/dts/freescale/imx8mm-evk-multicore-rtos.dts
+new file mode 100644
+index 000000000000..9f3dfaaf1650
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk-multicore-rtos.dts
+@@ -0,0 +1,79 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx8mm-evk.dts"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		/*
++		 * Reserve up to 48MB (16MB x 3) for three FreeRTOS instances running on
++		 * three Cortex-A Cores when booting Linux on at least on Cortex-A Core.
++		 */
++		rtos_ca53_reserved: rtos-ca53@93c00000 {
++			no-map;
++			reg = <0 0x93c00000 0x0 0x3000000>;
++		};
++
++		/* Reserve 16MB for FreeRTOS running on CM4 */
++		m4_reserved: m4@80000000 {
++			no-map;
++			reg = <0 0x80000000 0 0x1000000>;
++		};
++
++		vdev0vring0: vdev0vring0@b8000000 {
++			reg = <0 0xb8000000 0 0x8000>;
++			no-map;
++		};
++
++		vdev0vring1: vdev0vring1@b8008000 {
++			reg = <0 0xb8008000 0 0x8000>;
++			no-map;
++		};
++
++		rsc_table: rsc-table@b80ff000 {
++			reg = <0 0xb80ff000 0 0x1000>;
++			no-map;
++		};
++
++		vdevbuffer: vdevbuffer@b8400000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xb8400000 0 0x100000>;
++			no-map;
++		};
++	};
++
++	imx8mm-cm4 {
++		compatible = "fsl,imx8mm-cm4";
++		rsc-da = <0xb8000000>;
++		clocks = <&clk IMX8MM_CLK_M4_DIV>;
++		mbox-names = "tx", "rx", "rxdb";
++		mboxes = <&mu 0 1
++			  &mu 1 1
++			  &mu 3 1>;
++		memory-region = <&vdevbuffer>, <&vdev0vring0>, <&vdev0vring1>, <&rsc_table>;
++		syscon = <&src>;
++		fsl,startup-delay-ms = <500>;
++	};
++
++
++};
++
++&{/busfreq} {
++	status = "disabled";
++};
++
++&uart4 {
++	status = "disabled";
++};
++
++&clk {
++	init-on-array = <IMX8MM_CLK_UART4_ROOT>;
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk-rpmsg-8m-buf.dts b/arch/arm64/boot/dts/freescale/imx8mm-evk-rpmsg-8m-buf.dts
+new file mode 100644
+index 000000000000..ea5dbfd3b793
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk-rpmsg-8m-buf.dts
+@@ -0,0 +1,228 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2019-2023 NXP
++ */
++
++/dts-v1/;
++#include <dt-bindings/rpmsg/imx_srtm.h>
++#include "imx8mm-evk.dts"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		m4_reserved: m4@80000000 {
++			no-map;
++			reg = <0 0x80000000 0 0x1000000>;
++		};
++
++		vdev0vring0: vdev0vring0@b8000000 {
++			reg = <0 0xb8000000 0 0x100000>;
++			no-map;
++		};
++
++		vdev0vring1: vdev0vring1@b8100000 {
++			reg = <0 0xb8100000 0 0x100000>;
++			no-map;
++		};
++
++		rsc_table: rsc-table@b8a00000 {
++			reg = <0 0xb8a00000 0 0x1000>;
++			no-map;
++		};
++
++		vdevbuffer: vdevbuffer@b8200000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xb8200000 0 0x800000>;
++			no-map;
++		};
++	};
++
++	bt_sco_codec: bt_sco_codec {
++		status = "disabled";
++	};
++
++	sound-bt-sco {
++		status = "disabled";
++	};
++
++	sound-wm8524 {
++		status = "disabled";
++	};
++
++	wm8524: audio-codec {
++		status = "disabled";
++	};
++
++	rpmsg_audio: rpmsg_audio {
++		compatible = "fsl,imx8mm-rpmsg-audio";
++		model = "ak4497-audio";
++		fsl,platform = "rpmsg-audio-channel";
++		fsl,enable-lpa;
++		fsl,rpmsg-out;
++		assigned-clocks = <&clk IMX8MM_CLK_SAI1>;
++		assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
++		assigned-clock-rates = <49152000>;
++		clocks = <&clk IMX8MM_CLK_SAI1_IPG>,
++			 <&clk IMX8MM_CLK_SAI1_ROOT>,
++			 <&clk IMX8MM_CLK_SDMA3_ROOT>,
++			 <&clk IMX8MM_AUDIO_PLL1_OUT>,
++			 <&clk IMX8MM_AUDIO_PLL2_OUT>;
++		clock-names = "ipg", "mclk", "dma", "pll8k", "pll11k";
++		status = "okay";
++	};
++
++	uart_rpbus_0: uart-rpbus-0 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_1: uart-rpbus-1 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_2: uart-rpbus-2 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_3: uart-rpbus-3 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_4: uart-rpbus-4 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_5: uart-rpbus-5 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_6: uart-rpbus-6 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_7: uart-rpbus-7 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_8: uart-rpbus-8 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_9: uart-rpbus-9 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_10: uart-rpbus-10 {
++		compatible = "fsl,uart-rpbus";
++		status = "okay"; /* mcore directly print data that receive from acore */
++	};
++
++	imx8mm-cm4 {
++		compatible = "fsl,imx8mm-cm4";
++		rsc-da = <0xb8000000>;
++		clocks = <&clk IMX8MM_CLK_M4_DIV>;
++		mbox-names = "tx", "rx", "rxdb";
++		mboxes = <&mu 0 1
++			  &mu 1 1
++			  &mu 3 1>;
++		memory-region = <&vdevbuffer>, <&vdev0vring0>, <&vdev0vring1>, <&rsc_table>;
++		syscon = <&src>;
++		fsl,startup-delay-ms = <500>;
++	};
++};
++
++&clk {
++	init-on-array = <IMX8MM_CLK_UART4_ROOT
++	IMX8MM_CLK_AHB IMX8MM_CLK_DRAM_CORE
++	IMX8MM_CLK_NOC IMX8MM_CLK_NOC_APB
++	IMX8MM_CLK_USB_BUS
++	IMX8MM_CLK_MAIN_AXI IMX8MM_CLK_AUDIO_AHB
++	IMX8MM_CLK_DRAM_APB IMX8MM_CLK_A53_DIV
++	IMX8MM_ARM_PLL_OUT IMX8MM_CLK_DISP_AXI
++	IMX8MM_CLK_DISP_APB
++	>;
++};
++
++/*
++ * ATTENTION: M4 may use IPs like below
++ * ECSPI0/ECSPI2, GPIO1/GPIO5, GPT1, I2C3, I2S3, WDOG1, UART3, UART4, PWM3, SDMA1
++ */
++
++&i2c3 {
++	status = "disabled";
++};
++
++/* the uart3 is used by m4 to support srtm uart service */
++&uart3 {
++	status = "disabled";
++};
++
++&uart4 {
++	status = "disabled";
++};
++
++&sdma3 {
++	status = "disabled";
++};
++
++&sai3 {
++	status = "disabled";
++};
++
++&sai1 {
++	status = "disabled";
++};
++
++&sai2 {
++	status = "disabled";
++};
++
++&sai6 {
++	status = "disabled";
++};
++
++&flexspi {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk-rpmsg-ca53.dts b/arch/arm64/boot/dts/freescale/imx8mm-evk-rpmsg-ca53.dts
+new file mode 100644
+index 000000000000..89b686615df5
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk-rpmsg-ca53.dts
+@@ -0,0 +1,39 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++#include "imx8mm-evk.dts"
++#include "imx8m-rpmsg-ca53.dtsi"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		rtos_ca53_reserved: rtos-ca53@93c00000 {
++			reg = <0 0x93c00000 0x0 0x24000000>;
++			no-map;
++		};
++	};
++};
++
++&clk {
++	init-on-array = <IMX8MM_CLK_UART4_ROOT
++	IMX8MM_CLK_AHB IMX8MM_CLK_DRAM_CORE
++	IMX8MM_CLK_NOC IMX8MM_CLK_NOC_APB
++	IMX8MM_CLK_MAIN_AXI IMX8MM_CLK_DRAM_APB
++	IMX8MM_CLK_A53_DIV IMX8MM_ARM_PLL_OUT
++	>;
++};
++
++/*
++ * ATTENTION: The isolated CA53 core uses IPs below
++ * UART4
++ */
++
++&uart4 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk-rpmsg.dts b/arch/arm64/boot/dts/freescale/imx8mm-evk-rpmsg.dts
+index 2a477c74b634..237bf6eafef6 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mm-evk-rpmsg.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk-rpmsg.dts
+@@ -1,10 +1,10 @@
+ // SPDX-License-Identifier: (GPL-2.0 OR MIT)
+ /*
+- * Copyright 2019 NXP
++ * Copyright 2019-2023 NXP
+  */
+ 
+ /dts-v1/;
+-
++#include <dt-bindings/rpmsg/imx_srtm.h>
+ #include "imx8mm-evk.dts"
+ 
+ / {
+@@ -74,6 +74,91 @@ rpmsg_audio: rpmsg_audio {
+ 		status = "okay";
+ 	};
+ 
++	uart_rpbus_0: uart-rpbus-0 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_1: uart-rpbus-1 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_2: uart-rpbus-2 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_3: uart-rpbus-3 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_4: uart-rpbus-4 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_5: uart-rpbus-5 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_6: uart-rpbus-6 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_7: uart-rpbus-7 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_8: uart-rpbus-8 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_9: uart-rpbus-9 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <3>; /* use uart3 */
++		//flags=<IMX_SRTM_UART_RPMSG_OVER_UART_FLAG>;
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_10: uart-rpbus-10 {
++		compatible = "fsl,uart-rpbus";
++		status = "okay"; /* mcore directly print data that receive from acore */
++	};
++
+ 	imx8mm-cm4 {
+ 		compatible = "fsl,imx8mm-cm4";
+ 		rsc-da = <0xb8000000>;
+@@ -102,13 +187,18 @@ IMX8MM_CLK_DISP_APB
+ 
+ /*
+  * ATTENTION: M4 may use IPs like below
+- * ECSPI0/ECSPI2, GPIO1/GPIO5, GPT1, I2C3, I2S3, WDOG1, UART4, PWM3, SDMA1
++ * ECSPI0/ECSPI2, GPIO1/GPIO5, GPT1, I2C3, I2S3, WDOG1, UART3, UART4, PWM3, SDMA1
+  */
+ 
+ &i2c3 {
+ 	status = "disabled";
+ };
+ 
++/* the uart3 is used by m4 to support srtm uart service */
++&uart3 {
++	status = "disabled";
++};
++
+ &uart4 {
+ 	status = "disabled";
+ };
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-net-ca53.dts b/arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-net-ca53.dts
+new file mode 100644
+index 000000000000..f4f3726a52fe
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-net-ca53.dts
+@@ -0,0 +1,82 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++#include "imx8mm-evk.dts"
++#include "imx8m-generic-mbox.dtsi"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		virtio_reserved: virtio@b8400000 {
++			no-map;
++			reg = <0 0xb8400000 0x0 0x00100000>;
++		};
++
++		/* 512MB */
++		freertos_reserved: inmate@93c00000 {
++			no-map;
++			reg = <0 0x93c00000 0x0 0x20000000>;
++		};
++
++		virtio_buffer: virtio-buffer@b3c00000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xb3c00000 0 0x4000000>;
++		};
++	};
++
++	virtio_net@b8400000 {
++		compatible = "virtio,mmio";
++		reg = <0x0 0xb8400000 0x0 0x1000>;
++		dma-coherent;
++		hypervisor_less;
++		memory-region = <&virtio_buffer>;
++		mbox-names = "mmiowr", "mmioirq";
++		mboxes = <&gen_sw_mbox 0 1 1		/* TX channel with ACK */
++			  &gen_sw_mbox 1 1 0>;		/* RX channel without ACK */
++	};
++};
++
++&{/busfreq} {
++	/* Disable busfreq to avoid Linux busfreq crash multicore virtio backend */
++	status = "disabled";
++};
++
++&uart4 {
++	status = "disabled";
++};
++
++&clk {
++	init-on-array = <IMX8MM_CLK_USDHC3_ROOT
++			IMX8MM_CLK_NAND_USDHC_BUS
++			IMX8MM_CLK_UART4_ROOT>;
++};
++
++&iomuxc {
++	/*
++	 * Used for the 2nd Linux.
++	 * TODO: M4 may use these pins.
++	 */
++	pinctrl_uart4: uart4grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART4_RXD_UART4_DCE_RX	0x140
++			MX8MM_IOMUXC_UART4_TXD_UART4_DCE_TX	0x140
++		>;
++	};
++};
++
++&uart2 {
++	/* uart2 is used by the 2nd OS, so configure pin and clk */
++	pinctrl-0 = <&pinctrl_uart2>, <&pinctrl_uart4>;
++	assigned-clocks = <&clk IMX8MM_CLK_UART4>;
++	assigned-clock-parents = <&clk IMX8MM_CLK_24M>;
++};
++
++&fec1 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-net-cm4.dts b/arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-net-cm4.dts
+new file mode 100644
+index 000000000000..90965238e6dd
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-net-cm4.dts
+@@ -0,0 +1,81 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++#include "imx8mm-evk.dts"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		cm4_reserved: cm4@80000000 {
++			reg = <0 0x80000000 0x0 0x01000000>;
++			no-map;
++		};
++
++		virtio_buffer: virtio-buffer@b3c00000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xb3c00000 0 0x4000000>;
++			no-map;
++		};
++
++		virtio_reserved: virtio@b8400000 {
++			no-map;
++			reg = <0 0xb8400000 0x0 0x00100000>;
++		};
++	};
++
++	virtio_net@b8400000 {
++		compatible = "virtio,mmio";
++		reg = <0x0 0xb8400000 0x0 0x1000>;
++		hypervisor_less;
++		memory-region = <&virtio_buffer>;
++		interrupts = <GIC_SPI 88 IRQ_TYPE_LEVEL_HIGH>; //MU IRQ to CA53
++		mbox-names = "mmiowr", "mmioirq";
++		mboxes = <&mu 0 2
++			  &mu 1 2>;
++	};
++};
++
++&{/busfreq} {
++	/* Disable busfreq to avoid Linux busfreq crash multicore virtio backend */
++	status = "disabled";
++};
++
++&uart4 {
++	status = "disabled";
++};
++
++&clk {
++	init-on-array = <IMX8MM_CLK_USDHC3_ROOT
++			IMX8MM_CLK_NAND_USDHC_BUS
++			IMX8MM_CLK_UART4_ROOT>;
++};
++
++&iomuxc {
++	/*
++	 * Used for the 2nd Linux.
++	 * TODO: M4 may use these pins.
++	 */
++	pinctrl_uart4: uart4grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART4_RXD_UART4_DCE_RX	0x140
++			MX8MM_IOMUXC_UART4_TXD_UART4_DCE_TX	0x140
++		>;
++	};
++};
++
++&uart2 {
++	/* uart2 is used by the 2nd OS, so configure pin and clk */
++	pinctrl-0 = <&pinctrl_uart2>, <&pinctrl_uart4>;
++	assigned-clocks = <&clk IMX8MM_CLK_UART4>;
++	assigned-clock-parents = <&clk IMX8MM_CLK_24M>;
++};
++
++&fec1 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-perf-ca53.dts b/arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-perf-ca53.dts
+new file mode 100644
+index 000000000000..b6adb7aa27d8
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-perf-ca53.dts
+@@ -0,0 +1,78 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2022-2023 NXP
++ */
++
++/dts-v1/;
++#include "imx8mm-evk.dts"
++#include "imx8m-generic-mbox.dtsi"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		virtio_reserved: virtio@b8400000 {
++			no-map;
++			reg = <0 0xb8400000 0x0 0x00100000>;
++		};
++
++		/* 512MB */
++		freertos_reserved: inmate@93c00000 {
++			no-map;
++			reg = <0 0x93c00000 0x0 0x20000000>;
++		};
++
++		virtio_buffer: virtio-buffer@b3c00000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xb3c00000 0 0x4000000>;
++		};
++	};
++
++	virtio_trans@b8400000 {
++		compatible = "virtio,mmio";
++		reg = <0x0 0xb8400000 0x0 0x1000>;
++		hypervisor_less;
++		dma-coherent;
++		memory-region = <&virtio_buffer>;
++		mbox-names = "mmiowr", "mmioirq";
++		mboxes = <&gen_sw_mbox 0 1 1		/* TX channel with ACK */
++			  &gen_sw_mbox 1 1 0>;		/* RX channel without ACK */
++	};
++};
++
++&{/busfreq} {
++	/* Disable busfreq to avoid Linux busfreq crash multicore virtio backend */
++	status = "disabled";
++};
++
++&uart4 {
++	status = "disabled";
++};
++
++&clk {
++	init-on-array = <IMX8MM_CLK_USDHC3_ROOT
++			IMX8MM_CLK_NAND_USDHC_BUS
++			IMX8MM_CLK_UART4_ROOT>;
++};
++
++&iomuxc {
++	/*
++	 * Used for the 2nd Linux.
++	 * TODO: M4 may use these pins.
++	 */
++	pinctrl_uart4: uart4grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART4_RXD_UART4_DCE_RX	0x140
++			MX8MM_IOMUXC_UART4_TXD_UART4_DCE_TX	0x140
++		>;
++	};
++};
++
++&uart2 {
++	/* uart2 is used by the 2nd OS, so configure pin and clk */
++	pinctrl-0 = <&pinctrl_uart2>, <&pinctrl_uart4>;
++	assigned-clocks = <&clk IMX8MM_CLK_UART4>;
++	assigned-clock-parents = <&clk IMX8MM_CLK_24M>;
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-perf-cm4.dts b/arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-perf-cm4.dts
+new file mode 100644
+index 000000000000..9196eaf43015
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk-virtio-perf-cm4.dts
+@@ -0,0 +1,70 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2022-2023 NXP
++ */
++
++/dts-v1/;
++#include "imx8mm-evk.dts"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		cm4_reserved: cm4@80000000 {
++			reg = <0 0x80000000 0x0 0x01000000>;
++			no-map;
++		};
++
++		virtio_reserved: virtio@b8400000 {
++			no-map;
++			reg = <0 0xb8400000 0x0 0x00100000>;
++		};
++	};
++
++	virtio_trans@b8400000 {
++		compatible = "virtio,mmio";
++		reg = <0x0 0xb8400000 0x0 0x1000>;
++		hypervisor_less;
++		interrupts = <GIC_SPI 88 IRQ_TYPE_LEVEL_HIGH>; //MU IRQ to CA53
++		mbox-names = "mmiowr", "mmioirq";
++		mboxes = <&mu 0 2
++			  &mu 1 2>;
++	};
++};
++
++&{/busfreq} {
++	/* Disable busfreq to avoid Linux busfreq crash multicore virtio backend */
++	status = "disabled";
++};
++
++&uart4 {
++	status = "disabled";
++};
++
++&clk {
++	init-on-array = <IMX8MM_CLK_USDHC3_ROOT
++			IMX8MM_CLK_NAND_USDHC_BUS
++			IMX8MM_CLK_UART4_ROOT>;
++};
++
++&iomuxc {
++	/*
++	 * Used for the 2nd Linux.
++	 * TODO: M4 may use these pins.
++	 */
++	pinctrl_uart4: uart4grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART4_RXD_UART4_DCE_RX	0x140
++			MX8MM_IOMUXC_UART4_TXD_UART4_DCE_TX	0x140
++		>;
++	};
++};
++
++&uart2 {
++	/* uart2 is used by the 2nd OS, so configure pin and clk */
++	pinctrl-0 = <&pinctrl_uart2>, <&pinctrl_uart4>;
++	assigned-clocks = <&clk IMX8MM_CLK_UART4>;
++	assigned-clock-parents = <&clk IMX8MM_CLK_24M>;
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm.dtsi b/arch/arm64/boot/dts/freescale/imx8mm.dtsi
+index c63b5c467be2..589b52636e85 100755
+--- a/arch/arm64/boot/dts/freescale/imx8mm.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mm.dtsi
+@@ -593,6 +593,17 @@ sdma3: dma-controller@302b0000 {
+ 				fsl,sdma-ram-script-name = "imx/sdma/sdma-imx7d.bin";
+ 			};
+ 
++			gpt1: gpt@302d0000 {
++				compatible = "fsl,imx8mq-gpt", "fsl,imx7d-gpt";
++				reg = <0x302d0000 0x10000>;
++				interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH>;
++				clocks = <&clk IMX8MM_CLK_GPT1_ROOT>,
++					 <&clk IMX8MM_CLK_GPT1_ROOT>,
++					 <&clk IMX8MM_CLK_GPT_3M>;
++				clock-names = "ipg", "per", "osc_per";
++				status = "disabled";
++			};
++
+ 			iomuxc: pinctrl@30330000 {
+ 				compatible = "fsl,imx8mm-iomuxc";
+ 				reg = <0x30330000 0x10000>;
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-evk-avb.dts b/arch/arm64/boot/dts/freescale/imx8mp-evk-avb.dts
+new file mode 100644
+index 000000000000..70e3dba61494
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-evk-avb.dts
+@@ -0,0 +1,42 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2021 NXP
++ */
++
++/dts-v1/;
++
++#include "imx8mp-evk.dts"
++
++/* AVB HW timer*/
++&gpt1 {
++	compatible = "fsl,avb-gpt";
++	timer-channel = <1>; /* Use output compare channel 1*/
++	rec-channel = <1 0 1>; // capture channel, eth port, ENET TC id
++	prescale = <1>;
++	domain = <0>;
++
++	clocks = <&clk IMX8MP_CLK_GPT1_ROOT>,
++		 <&clk IMX8MP_CLK_GPT1_ROOT>,
++		 <&clk IMX8MP_AUDIO_PLL1>;
++	clock-names = "ipg", "per", "audio_pll";
++
++	/* Make the GPT clk root derive from the audio PLL*/
++	assigned-clocks = <&clk IMX8MP_CLK_GPT1>;
++	assigned-clock-parents = <&clk IMX8MP_AUDIO_PLL1_OUT>;
++	assigned-clock-rates = <0>;
++
++	gpt1_capin1_sel = <&gpr 0x4 2>;
++
++	status = "okay";
++};
++
++&fec {
++       fsl,rx-phy-delay-100-ns = <670>;
++       fsl,tx-phy-delay-100-ns = <670>;
++       fsl,rx-phy-delay-1000-ns = <0>;
++       fsl,tx-phy-delay-1000-ns = <0>;
++};
++
++&ethphy1 {
++	eee-broken-100tx;
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-evk-baremetal.dts b/arch/arm64/boot/dts/freescale/imx8mp-evk-baremetal.dts
+new file mode 100644
+index 000000000000..ce893a1d27c6
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-evk-baremetal.dts
+@@ -0,0 +1,37 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2020-2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx8mp-evk.dts"
++
++/ {
++	model = "NXP i.MX8MPlus EVK board - Baremetal";
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		rpmsg_reserved: rpmsg@55800000 {
++			no-map;
++			reg = <0 0x55800000 0 0x800000>;
++		};
++
++		/* baremetal: slave cores reserved memory */
++		bm_reserved: baremetal@60000000 {
++			no-map;
++			reg = <0 0x60000000 0 0x10000000>;
++		};
++	};
++};
++
++&fec {
++	status = "disabled";
++};
++
++&uart3 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-evk-dsa.dts b/arch/arm64/boot/dts/freescale/imx8mp-evk-dsa.dts
+new file mode 100644
+index 000000000000..18de77535a98
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-evk-dsa.dts
+@@ -0,0 +1,79 @@
++// SPDX-License-Identifier: GPL-2.0
++//
++// Copyright 2023 NXP
++
++#include "imx8mp-evk.dts"
++
++/delete-node/&spidev1;
++
++&ecspi2 {
++	status = "okay";
++
++	netcdsa: ethernet-switch@0 {
++		reg = <0x0>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		compatible = "nxp,imxrt1180-netc";
++		/* 500 kHz */
++		spi-max-frequency = <500000>;
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			port@0 {
++				label = "swp0";
++				reg = <0>;
++				phy-mode = "sgmii";
++
++				fixed-link {
++					speed = <100>;
++					full-duplex;
++				};
++			};
++
++			port@1 {
++				label = "swp1";
++				reg = <1>;
++				phy-mode = "sgmii";
++
++				fixed-link {
++					speed = <1000>;
++					full-duplex;
++				};
++			};
++
++			port@2 {
++				label = "swp2";
++				reg = <2>;
++				phy-mode = "sgmii";
++
++				fixed-link {
++					speed = <1000>;
++					full-duplex;
++				};
++			};
++
++			port@3 {
++				/* cpu port connected to eqos */
++				ethernet = <&eqos>;
++				label = "cpu";
++				reg = <3>;
++				phy-mode = "sgmii";
++
++				fixed-link {
++					speed = <1000>;
++					full-duplex;
++				};
++			};
++		};
++	};
++};
++
++&pinctrl_ecspi2 {
++	fsl,pins = <
++		MX8MP_IOMUXC_ECSPI2_SCLK__ECSPI2_SCLK		0x84
++		MX8MP_IOMUXC_ECSPI2_MOSI__ECSPI2_MOSI		0x84
++		MX8MP_IOMUXC_ECSPI2_MISO__ECSPI2_MISO		0x84
++	>;
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-evk-ecat.dts b/arch/arm64/boot/dts/freescale/imx8mp-evk-ecat.dts
+new file mode 100644
+index 000000000000..60d6028a240a
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-evk-ecat.dts
+@@ -0,0 +1,10 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++#include "imx8mp-evk.dts"
++
++&fec {
++    compatible = "fsl,imx8mp-fec-ecat", "fsl,imx8mq-fec-ecat", "fsl,imx6sx-fec-ecat";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-evk-multicore-lwip.dts b/arch/arm64/boot/dts/freescale/imx8mp-evk-multicore-lwip.dts
+new file mode 100644
+index 000000000000..06cf65278b98
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-evk-multicore-lwip.dts
+@@ -0,0 +1,21 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx8mp-evk-multicore-rtos.dts"
++
++&fec {
++	status = "disabled";
++};
++
++&eqos {
++	/delete-property/ clocks;
++	/delete-property/ clock-names;
++	clocks = <&clk IMX8MP_CLK_QOS_ENET_ROOT>,
++		 <&clk IMX8MP_CLK_ENET_QOS_TIMER>,
++		 <&clk IMX8MP_CLK_ENET_QOS>;
++	clock-names = "pclk", "ptp_ref", "tx";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-evk-multicore-rpmsg.dts b/arch/arm64/boot/dts/freescale/imx8mp-evk-multicore-rpmsg.dts
+new file mode 100644
+index 000000000000..85f1b55ee381
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-evk-multicore-rpmsg.dts
+@@ -0,0 +1,117 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx8mp-evk-multicore-rtos.dts"
++#include "imx8mp-rpmsg-ca53.dtsi"
++#include "imx8mp-rpmsg-ca53-1.dtsi"
++
++/ {
++	aliases {
++		i2c0 = &i2c1;
++		i2c1 = &i2c2;
++		i2c2 = &i2c_rpbus_3;
++	};
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		vdev0vring0: vdev0vring0@55000000 {
++			reg = <0 0x55000000 0 0x8000>;
++			no-map;
++		};
++
++		vdev0vring1: vdev0vring1@55008000 {
++			reg = <0 0x55008000 0 0x8000>;
++			no-map;
++		};
++
++		vdevbuffer: vdevbuffer@55400000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0x55400000 0 0x100000>;
++			no-map;
++		};
++
++		rsc_table: rsc-table@550ff000 {
++			reg = <0 0x550ff000 0 0x1000>;
++			no-map;
++		};
++	};
++
++	sound-wm8960 {
++		status = "disabled";
++	};
++
++	imx8mp-cm7 {
++		clocks = <&clk IMX8MP_CLK_M7_DIV>,
++			 <&audio_blk_ctrl IMX8MP_CLK_AUDIO_BLK_CTRL_AUDPLL_ROOT>;
++		clock-names = "core", "audio";
++	};
++};
++
++&sai3 {
++	status = "disabled";
++};
++
++&clk {
++	init-on-array = <IMX8MP_CLK_USDHC3_ROOT
++			 IMX8MP_CLK_NAND_USDHC_BUS
++			 IMX8MP_CLK_HSIO_ROOT
++			 IMX8MP_CLK_UART3_ROOT
++			 IMX8MP_CLK_UART4_ROOT>;
++};
++
++/delete-node/ &i2c3;
++
++&i2c_rpbus_3 {
++	compatible = "fsl,i2c-rpbus";
++	#address-cells = <1>;
++	#size-cells = <0>;
++	status = "okay";
++
++	pca6416: gpio@20 {
++		compatible = "ti,tca6416";
++		reg = <0x20>;
++		gpio-controller;
++		#gpio-cells = <2>;
++	};
++
++	ov5640_1: ov5640_mipi@3c {
++		compatible = "ovti,ov5640";
++		reg = <0x3c>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_csi0_pwn>, <&pinctrl_csi0_rst>;
++		clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
++		clock-names = "xclk";
++		assigned-clocks = <&clk IMX8MP_CLK_IPP_DO_CLKO2>;
++		assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
++		assigned-clock-rates = <24000000>;
++		csi_id = <0>;
++		powerdown-gpios = <&gpio4 1 GPIO_ACTIVE_HIGH>;
++		reset-gpios = <&gpio4 0 GPIO_ACTIVE_LOW>;
++		mclk = <24000000>;
++		mclk_source = <0>;
++		mipi_csi;
++		status = "disabled";
++
++		port {
++			ov5640_mipi_1_ep: endpoint {
++				remote-endpoint = <&mipi_csi1_ep>;
++				data-lanes = <1 2>;
++				clock-lanes = <0>;
++			};
++		};
++	};
++
++	codec: wm8960@1a {
++		compatible = "wlf,wm8960,lpa";
++		reg = <0x1a>;
++		wlf,shared-lrclk;
++		SPKVDD1-supply = <&reg_audio_pwr>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-evk-multicore-rtos.dts b/arch/arm64/boot/dts/freescale/imx8mp-evk-multicore-rtos.dts
+new file mode 100644
+index 000000000000..1799cad88062
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-evk-multicore-rtos.dts
+@@ -0,0 +1,79 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx8mp-evk.dts"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		/*
++		 * Reserve up to 48MB (16MB x 3) for three FreeRTOS instances running on
++		 * three Cortex-A Cores when booting Linux on at least on Cortex-A Core.
++		 */
++		ca53_reserved: ca53@c0000000 {
++			no-map;
++			reg = <0 0xc0000000 0x0 0x3000000>;
++		};
++
++		/* Reserve 16MB for RTOS running on CM7 */
++		m7_reserved: m7@80000000 {
++			no-map;
++			reg = <0 0x80000000 0 0x1000000>;
++		};
++
++		vdev0vring0: vdev0vring0@55000000 {
++			reg = <0 0x55000000 0 0x8000>;
++			no-map;
++		};
++
++		vdev0vring1: vdev0vring1@55008000 {
++			reg = <0 0x55008000 0 0x8000>;
++			no-map;
++		};
++
++		vdevbuffer: vdevbuffer@55400000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0x55400000 0 0x100000>;
++			no-map;
++		};
++
++		rsc_table: rsc-table@550ff000 {
++			reg = <0 0x550ff000 0 0x1000>;
++			no-map;
++		};
++	};
++
++	imx8mp-cm7 {
++		compatible = "fsl,imx8mn-cm7";
++		rsc-da = <0x55000000>;
++		clocks = <&clk IMX8MP_CLK_M7_DIV>;
++		clock-names = "core";
++		mbox-names = "tx", "rx", "rxdb";
++		mboxes = <&mu 0 1
++			  &mu 1 1
++			  &mu 3 1>;
++		memory-region = <&vdevbuffer>, <&vdev0vring0>, <&vdev0vring1>, <&rsc_table>;
++		status = "okay";
++		fsl,startup-delay-ms = <500>;
++	};
++};
++
++&{/busfreq} {
++	/* Disable busfreq to avoid Linux busfreq crash multicore virtio backend */
++	status = "disabled";
++};
++
++&uart4 {
++	status = "disabled";
++};
++
++&clk {
++	init-on-array = <IMX8MP_CLK_UART4_ROOT>;
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-evk-virtio-net-ca53.dts b/arch/arm64/boot/dts/freescale/imx8mp-evk-virtio-net-ca53.dts
+new file mode 100644
+index 000000000000..489daf4c30d3
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-evk-virtio-net-ca53.dts
+@@ -0,0 +1,81 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++#include "imx8mp-evk.dts"
++#include "imx8mp-generic-mbox.dtsi"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		virtio_reserved: virtio@fc700000 {
++			no-map;
++			reg = <0 0xfc700000 0x0 0x00100000>;
++		};
++
++		/* 512MB */
++		freertos_reserved: inmate@c0000000 {
++			no-map;
++			reg = <0 0xc0000000 0x0 0x20000000>;
++		};
++
++		virtio_buffer: virtio-buffer@f8700000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xf8700000 0 0x4000000>;
++		};
++	};
++
++	virtio_net@fc700000 {
++		compatible = "virtio,mmio";
++		reg = <0x0 0xfc700000 0x0 0x1000>;
++		dma-coherent;
++		hypervisor_less;
++		memory-region = <&virtio_buffer>;
++		mbox-names = "mmiowr", "mmioirq";
++		mboxes = <&gen_sw_mbox 0 1 1		/* TX channel with ACK */
++			  &gen_sw_mbox 1 1 0>;		/* RX channel without ACK */
++	};
++};
++
++&{/busfreq} {
++	/* Disable busfreq to avoid Linux busfreq crash multicore virtio backend */
++	status = "disabled";
++};
++
++&uart4 {
++	status = "disabled";
++};
++
++&clk {
++	init-on-array = <IMX8MP_CLK_USDHC3_ROOT
++			 IMX8MP_CLK_NAND_USDHC_BUS
++			 IMX8MP_CLK_HSIO_ROOT
++			 IMX8MP_CLK_UART4_ROOT>;
++};
++
++&iomuxc {
++	pinctrl_uart4: uart4grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_UART4_RXD__UART4_DCE_RX	0x140
++			MX8MP_IOMUXC_UART4_TXD__UART4_DCE_TX	0x140
++		>;
++	};
++};
++
++&fec {
++	status = "disabled";
++};
++
++&eqos {
++	/delete-property/ clocks;
++	/delete-property/ clock-names;
++	clocks =  <&clk IMX8MP_CLK_QOS_ENET_ROOT>,
++	       <&clk IMX8MP_CLK_ENET_QOS_TIMER>,
++	       <&clk IMX8MP_CLK_ENET_QOS>;
++	clock-names = "pclk", "ptp_ref", "tx";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-evk-virtio-net-cm7.dts b/arch/arm64/boot/dts/freescale/imx8mp-evk-virtio-net-cm7.dts
+new file mode 100644
+index 000000000000..3f8609b0413d
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-evk-virtio-net-cm7.dts
+@@ -0,0 +1,72 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++#include "imx8mp-evk.dts"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		cm7_reserved: cm7@80000000 {
++			reg = <0 0x80000000 0x0 0x01000000>;
++			no-map;
++		};
++
++		virtio_buffer: virtio-buffer@b3c00000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xb3c00000 0 0x4000000>;
++			no-map;
++		};
++
++		virtio_reserved: virtio@b8400000 {
++			no-map;
++			reg = <0 0xb8400000 0x0 0x00100000>;
++		};
++	};
++
++	virtio_net@b8400000 {
++		compatible = "virtio,mmio";
++		reg = <0x0 0xb8400000 0x0 0x1000>;
++		hypervisor_less;
++		memory-region = <&virtio_buffer>;
++		mbox-names = "mmiowr", "mmioirq";
++		mboxes = <&mu 0 2
++			  &mu 1 2>;
++	};
++};
++
++&{/busfreq} {
++	/* Disable busfreq to avoid Linux busfreq crash multicore virtio backend */
++	status = "disabled";
++};
++
++&uart4 {
++	status = "disabled";
++};
++
++
++&fec {
++	status = "disabled";
++};
++
++&eqos {
++	/delete-property/ clocks;
++	/delete-property/ clock-names;
++	clocks =  <&clk IMX8MP_CLK_QOS_ENET_ROOT>,
++	       <&clk IMX8MP_CLK_ENET_QOS_TIMER>,
++	       <&clk IMX8MP_CLK_ENET_QOS>;
++	clock-names = "pclk", "ptp_ref", "tx";
++};
++
++&i2c3 {
++	status = "disabled";
++};
++
++&sai3 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-generic-mbox-1.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-generic-mbox-1.dtsi
+new file mode 100644
+index 000000000000..5f8ba823c0bd
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-generic-mbox-1.dtsi
+@@ -0,0 +1,27 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		gen_sw_mbox_1_reserved: gen-sw-mbox-1@fe001000 {
++			reg = <0 0xfe001000 0 0x1000>;
++			no-map;
++		};
++
++	};
++
++	gen_sw_mbox_1: generic-software-mailbox-1@fe001000 {
++		compatible = "fsl,generic-software-mbox";
++		reg = <0 0xfe001000 0 0x1000>;
++		#mbox-cells = <3>;
++		/* Use 2 unused SPI interrupts */
++		interrupts = <GIC_SPI 152 IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI 153 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "irq", "remote_irq";
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-generic-mbox.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-generic-mbox.dtsi
+new file mode 100644
+index 000000000000..8709e076bcc0
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-generic-mbox.dtsi
+@@ -0,0 +1,27 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		gen_sw_mbox_reserved: gen-sw-mbox@fe000000 {
++			reg = <0 0xfe000000 0 0x1000>;
++			no-map;
++		};
++
++	};
++
++	gen_sw_mbox: generic-software-mailbox@fe000000 {
++		compatible = "fsl,generic-software-mbox";
++		reg = <0 0xfe000000 0 0x1000>;
++		#mbox-cells = <3>;
++		/* Use 2 unused SPI interrupts */
++		interrupts = <GIC_SPI 150 IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI 151 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "irq", "remote_irq";
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-rpmsg-ca53-1.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-rpmsg-ca53-1.dtsi
+new file mode 100644
+index 000000000000..0e1f484209ff
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-rpmsg-ca53-1.dtsi
+@@ -0,0 +1,37 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++#include "imx8mp-generic-mbox-1.dtsi"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		rpmsg_ca53_1_reserved: rpmsg-ca53-1@fe110000 {
++			reg = <0 0xfe110000 0 0x10000>;
++			no-map;
++		};
++
++		vdevbuffer_ca53_1: vdevbuffer-ca53-1@fe300000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xfe300000 0 0x100000>;
++			no-map;
++		};
++	};
++
++	rpmsg-ca53-1 {
++		compatible = "fsl,imx8mm-rpmsg";
++		reg = <0x0 0xfe110000 0x0 0x10000>; /* 64K for one rpmsg instance */
++		dma-coherent;
++		memory-region = <&vdevbuffer_ca53_1>;
++		mbox-names = "tx", "rx", "rxdb";
++		mboxes = <&gen_sw_mbox_1 0 0 1		/* Tx channel with ACK */
++			  &gen_sw_mbox_1 1 0 0		/* Rx channel without ACK */
++			  &gen_sw_mbox_1 2 0 1>;	/* RXDB channel with ACK */
++		vdev-nums = <1>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-rpmsg-ca53.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-rpmsg-ca53.dtsi
+new file mode 100644
+index 000000000000..32e127a6d203
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-rpmsg-ca53.dtsi
+@@ -0,0 +1,37 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2022-2023 NXP
++ */
++
++#include "imx8mp-generic-mbox.dtsi"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		rpmsg_ca53_reserved: rpmsg-ca53@fe100000 {
++			reg = <0 0xfe100000 0 0x10000>;
++			no-map;
++		};
++
++		vdevbuffer_ca53: vdevbuffer-ca53@fe200000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xfe200000 0 0x100000>;
++			no-map;
++		};
++	};
++
++	rpmsg-ca53 {
++		compatible = "fsl,imx8mm-rpmsg";
++		reg = <0x0 0xfe100000 0x0 0x10000>; /* 64K for one rpmsg instance */
++		dma-coherent;
++		memory-region = <&vdevbuffer_ca53>;
++		mbox-names = "tx", "rx", "rxdb";
++		mboxes = <&gen_sw_mbox 0 0 1	/* Tx channel with ACK */
++			  &gen_sw_mbox 1 0 0	/* Rx channel without ACK */
++			  &gen_sw_mbox 2 0 1>;	/* RXDB channel with ACK */
++		vdev-nums = <1>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp.dtsi b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+index 593b0c6ae72f..4a6b9d168c20 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+@@ -569,6 +569,16 @@ wdog3: watchdog@302a0000 {
+ 				status = "disabled";
+ 			};
+ 
++			gpt1: gpt@302d0000 {
++				compatible = "fsl,imx8mq-gpt", "fsl,imx7d-gpt";
++				reg = <0x302d0000 0x10000>;
++				interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH>;
++				clocks = <&clk IMX8MP_CLK_GPT1_ROOT>,
++					 <&clk IMX8MP_CLK_GPT1_ROOT>;
++				clock-names = "ipg", "per";
++				status = "disabled";
++			};
++
+ 			iomuxc: pinctrl@30330000 {
+ 				compatible = "fsl,imx8mp-iomuxc";
+ 				reg = <0x30330000 0x10000>;
+diff --git a/arch/arm64/boot/dts/freescale/imx93-11x11-evk-avb.dts b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-avb.dts
+new file mode 100644
+index 000000000000..f6dd57285814
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-avb.dts
+@@ -0,0 +1,41 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx93-11x11-evk.dts"
++
++/* AVB HW timer*/
++&tpm4 {
++	compatible = "fsl,avb-tpm";
++	timer-channel = <1>; /* Use output compare channel 1*/
++	prescale = <1>;
++	domain = <0>;
++	interrupts = <GIC_SPI 76 IRQ_TYPE_LEVEL_HIGH>;
++
++	clocks = <&clk IMX93_CLK_BUS_WAKEUP>, <&clk IMX93_CLK_TPM4_GATE>, <&clk IMX93_CLK_AUDIO_PLL>;
++	clock-names = "ipg", "per", "audio_pll";
++
++	/* Set TPM4 clock root to Audio PLL. */
++	assigned-clocks = <&clk IMX93_CLK_TPM4>;
++	assigned-clock-parents = <&clk IMX93_CLK_AUDIO_PLL>;
++	assigned-clock-rates = <0>;
++
++	/* Enble SW sampling for media clock recovery on port 0 */
++	sw-recovery = <0>;
++
++	status = "okay";
++};
++
++&fec {
++       fsl,rx-phy-delay-100-ns = <670>;
++       fsl,tx-phy-delay-100-ns = <670>;
++       fsl,rx-phy-delay-1000-ns = <0>;
++       fsl,tx-phy-delay-1000-ns = <0>;
++};
++
++&ethphy2 {
++	eee-broken-100tx;
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx93-11x11-evk-baremetal.dts b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-baremetal.dts
+new file mode 100644
+index 000000000000..84f9700437a1
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-baremetal.dts
+@@ -0,0 +1,31 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx93-11x11-evk.dts"
++
++/ {
++	model = "NXP i.MX93 11X11 EVK board - Baremetal";
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		bm_reserved: baremetal@b0000000 {
++			no-map;
++			reg = <0 0xb0000000 0 0x10000000>;
++		};
++	};
++};
++
++&fec {
++	status = "disabled";
++};
++
++&lpuart2 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx93-11x11-evk-dsa.dts b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-dsa.dts
+new file mode 100644
+index 000000000000..954e78a84f43
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-dsa.dts
+@@ -0,0 +1,96 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++#include "imx93-11x11-evk.dts"
++
++&flexcan2 {
++	status = "disabled";
++};
++
++&lpuart7 {
++	status = "disabled";
++};
++
++&lpspi3 {
++	fsl,spi-num-chipselects = <1>;
++	pinctrl-names = "default", "sleep";
++	pinctrl-0 = <&pinctrl_lpspi3>;
++	pinctrl-1 = <&pinctrl_lpspi3>;
++	cs-gpios = <&gpio2 8 GPIO_ACTIVE_LOW>;
++	pinctrl-assert-gpios = <&adp5585gpio 4 GPIO_ACTIVE_HIGH>;
++	status = "okay";
++
++	netcdsa: ethernet-switch@0 {
++		reg = <0x0>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		compatible = "nxp,imxrt1180-netc";
++		/* 1 MHz */
++		spi-max-frequency = <1000000>;
++		/* Sample data on trailing clock edge */
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			port@0 {
++				label = "swp0";
++				reg = <0>;
++				phy-mode = "sgmii";
++
++				fixed-link {
++					speed = <100>;
++					full-duplex;
++				};
++			};
++
++			port@1 {
++				label = "swp1";
++				reg = <1>;
++				phy-mode = "sgmii";
++
++				fixed-link {
++					speed = <1000>;
++					full-duplex;
++				};
++			};
++
++			port@2 {
++				label = "swp2";
++				reg = <2>;
++				phy-mode = "sgmii";
++
++				fixed-link {
++					speed = <1000>;
++					full-duplex;
++				};
++			};
++
++			port@3 {
++				/* cpu port connected to eqos */
++				ethernet = <&eqos>;
++				label = "cpu";
++				reg = <3>;
++				phy-mode = "sgmii";
++
++				fixed-link {
++					speed = <1000>;
++					full-duplex;
++				};
++			};
++		};
++	};
++};
++
++&iomuxc {
++	pinctrl_lpspi3: lpspi3grp {
++		fsl,pins = <
++			MX93_PAD_GPIO_IO08__GPIO2_IO08		0x3fe
++			MX93_PAD_GPIO_IO09__LPSPI3_SIN		0x3fe
++			MX93_PAD_GPIO_IO10__LPSPI3_SOUT		0x3fe
++			MX93_PAD_GPIO_IO11__LPSPI3_SCK		0x3fe
++		>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx93-11x11-evk-ecat.dts b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-ecat.dts
+new file mode 100644
+index 000000000000..3626356fb9b6
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-ecat.dts
+@@ -0,0 +1,11 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++#include "imx93-11x11-evk.dts"
++
++
++&fec {
++	compatible = "fsl,imx93-fec-ecat", "fsl,imx8mp-fec-ecat", "fsl,imx8mq-fec-ecat";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx93-11x11-evk-multicore-rtos.dts b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-multicore-rtos.dts
+new file mode 100644
+index 000000000000..cac3133ddc82
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-multicore-rtos.dts
+@@ -0,0 +1,38 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++#include "imx93-11x11-evk.dts"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		/*
++		 * Reserve up to 16MB for one possible FreeRTOS instances running on
++		 * one Cortex-A Cores when booting Linux on at least on Cortex-A Core.
++		 */
++		rtos_ca55_reserved: rtos-ca55@d0000000 {
++			no-map;
++			reg = <0 0xd0000000 0x0 0x1000000>;
++		};
++
++		/* Reserve 16MB for FreeRTOS on M33 */
++		m33_reserved: m33@a5000000 {
++			no-map;
++			reg = <0 0xa5000000 0 0x1000000>;
++		};
++	};
++};
++
++&lpuart2 {
++	status = "disabled";
++};
++
++&clk {
++	init-on-array = <IMX93_CLK_LPUART2_GATE>;
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx93-11x11-evk-uart-sharing-cm33.dts b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-uart-sharing-cm33.dts
+new file mode 100644
+index 000000000000..e55552658d09
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-uart-sharing-cm33.dts
+@@ -0,0 +1,96 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include <dt-bindings/rpmsg/imx_srtm.h>
++#include "imx93-11x11-evk.dts"
++
++/ {
++	uart_rpbus_0: uart-rpbus-0 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_1: uart-rpbus-1 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_2: uart-rpbus-2 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_3: uart-rpbus-3 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_4: uart-rpbus-4 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_5: uart-rpbus-5 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_6: uart-rpbus-6 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_7: uart-rpbus-7 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_8: uart-rpbus-8 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_9: uart-rpbus-9 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_10: uart-rpbus-10 {
++		compatible = "fsl,uart-rpbus";
++		status = "okay"; /* mcore directly print data that receive from acore */
++	};
++};
++
++/*
++ * ATTENTION: M33 may use IPs like below
++ * LPUART5
++ */
++
++/* the lpuart5 is used by m33 to support srtm uart service */
++&lpuart5 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx93-11x11-evk-virtio-net-ca55.dts b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-virtio-net-ca55.dts
+new file mode 100644
+index 000000000000..17a6fdeb8ca0
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-virtio-net-ca55.dts
+@@ -0,0 +1,55 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++#include "imx93-11x11-evk.dts"
++#include "imx93-generic-mbox.dtsi"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		virtio_reserved: virtio@fc700000 {
++			no-map;
++			reg = <0 0xfc700000 0x0 0x00100000>;
++		};
++
++		/* 512MB */
++		freertos_reserved: inmate@d0000000 {
++			no-map;
++			reg = <0 0xd0000000 0x0 0x20000000>;
++		};
++
++		virtio_buffer: virtio-buffer@f8700000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xf8700000 0 0x4000000>;
++		};
++	};
++
++	virtio_net@fc700000 {
++		compatible = "virtio,mmio";
++		reg = <0x0 0xfc700000 0x0 0x1000>;
++		dma-coherent;
++		hypervisor_less;
++		memory-region = <&virtio_buffer>;
++		mbox-names = "mmiowr", "mmioirq";
++		mboxes = <&gen_sw_mbox 0 1 1		/* TX channel with ACK */
++			  &gen_sw_mbox 1 1 0>;		/* RX channel without ACK */
++	};
++};
++
++&lpuart2 {
++	status = "disabled";
++};
++
++&clk {
++	init-on-array = <IMX93_CLK_LPUART2_GATE>;
++};
++
++&fec {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx93-11x11-evk-virtio-net-cm33.dts b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-virtio-net-cm33.dts
+new file mode 100644
+index 000000000000..f92138a94ab8
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx93-11x11-evk-virtio-net-cm33.dts
+@@ -0,0 +1,53 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++#include "imx93-11x11-evk.dts"
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		cm33_reserved: cm33@a0000000 {
++			reg = <0 0xa0000000 0x0 0x01000000>;
++			no-map;
++		};
++
++		virtio_buffer: virtio-buffer@a1000000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xa1000000 0 0x3000000>;
++			no-map;
++		};
++
++		virtio_reserved: virtio@a8400000 {
++			reg = <0 0xa8400000 0x0 0x00100000>;
++			no-map;
++		};
++	};
++
++	virtio_net@a8400000 {
++		compatible = "virtio,mmio";
++		reg = <0x0 0xa8400000 0x0 0x1000>;
++		hypervisor_less;
++		memory-region = <&virtio_buffer>;
++		mbox-names = "mmiowr", "mmioirq";
++		mboxes = <&mu1 0 2
++			  &mu1 1 2>;
++	};
++};
++
++&clk {
++	init-on-array = <IMX93_CLK_LPUART2_GATE>;
++};
++
++&lpuart2 {
++	status = "disabled";
++};
++
++&fec {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx93-11x11-evk.dts b/arch/arm64/boot/dts/freescale/imx93-11x11-evk.dts
+index d23880c3afcf..a597842e652c 100644
+--- a/arch/arm64/boot/dts/freescale/imx93-11x11-evk.dts
++++ b/arch/arm64/boot/dts/freescale/imx93-11x11-evk.dts
+@@ -331,7 +331,7 @@ &xcvr {
+ 	assigned-clock-rates = <12288000>, <200000000>;
+ 	status = "okay";
+ };
+-	
++
+ &adc1 {
+ 	vref-supply = <&reg_vref_1v8>;
+ 	status = "okay";
+@@ -367,6 +367,9 @@ &eqos {
+ 	pinctrl-0 = <&pinctrl_eqos>;
+ 	phy-mode = "rgmii-id";
+ 	phy-handle = <&ethphy1>;
++	snps,force_thresh_dma_mode;
++	snps,mtl-tx-config = <&mtl_tx_setup>;
++	snps,mtl-rx-config = <&mtl_rx_setup>;
+ 	status = "okay";
+ 
+ 	mdio {
+@@ -381,6 +384,61 @@ ethphy1: ethernet-phy@1 {
+ 			eee-broken-1000t;
+ 		};
+ 	};
++
++	mtl_tx_setup: tx-queues-config {
++		snps,tx-queues-to-use = <5>;
++		snps,tx-sched-sp;
++		queue0 {
++			snps,dcb-algorithm;
++			snps,priority = <0x1>;
++		};
++		queue1 {
++			snps,dcb-algorithm;
++			snps,priority = <0x2>;
++		};
++		queue2 {
++			snps,dcb-algorithm;
++			snps,priority = <0x4>;
++		};
++		queue3 {
++			snps,dcb-algorithm;
++			snps,priority = <0x8>;
++		};
++		queue4 {
++			snps,dcb-algorithm;
++			snps,priority = <0xf0>;
++		};
++	};
++
++	mtl_rx_setup: rx-queues-config {
++		snps,rx-queues-to-use = <5>;
++		snps,rx-sched-sp;
++		queue0 {
++			snps,dcb-algorithm;
++			snps,priority = <0x1>;
++			snps,map-to-dma-channel = <0>;
++		};
++		queue1 {
++			snps,dcb-algorithm;
++			snps,priority = <0x2>;
++			snps,map-to-dma-channel = <1>;
++		};
++		queue2 {
++			snps,dcb-algorithm;
++			snps,priority = <0x4>;
++			snps,map-to-dma-channel = <2>;
++		};
++		queue3 {
++			snps,dcb-algorithm;
++			snps,priority = <0x8>;
++			snps,map-to-dma-channel = <3>;
++		};
++		queue4 {
++			snps,dcb-algorithm;
++			snps,priority = <0xf0>;
++			snps,map-to-dma-channel = <4>;
++		};
++	};
+ };
+ 
+ &fec {
+diff --git a/arch/arm64/boot/dts/freescale/imx93-9x9-qsb-baremetal.dts b/arch/arm64/boot/dts/freescale/imx93-9x9-qsb-baremetal.dts
+new file mode 100644
+index 000000000000..8b4cbd366ae6
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx93-9x9-qsb-baremetal.dts
+@@ -0,0 +1,31 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx93-9x9-qsb.dts"
++
++/ {
++	model = "NXP i.MX93 9X9 QSB board - Baremetal";
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		bm_reserved: baremetal@b0000000 {
++			no-map;
++			reg = <0 0xb0000000 0 0x10000000>;
++		};
++	};
++};
++
++&fec {
++	status = "disabled";
++};
++
++&lpuart2 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx93-9x9-qsb-inmate.dts b/arch/arm64/boot/dts/freescale/imx93-9x9-qsb-inmate.dts
+new file mode 100644
+index 000000000000..cd1f0e0cc401
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx93-9x9-qsb-inmate.dts
+@@ -0,0 +1,151 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include <dt-bindings/interrupt-controller/arm-gic.h>
++
++/ {
++	model = "NXP i.MX93 9x9 QSB";
++	compatible = "fsl,imx93-9x9-qsb", "fsl,imx93";
++	interrupt-parent = <&gic>;
++	#address-cells = <2>;
++	#size-cells = <2>;
++
++	aliases {
++		mmc0 = &usdhc1;
++		serial1 = &lpuart2;
++	};
++
++	cpus {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		A55_0: cpu@0 {
++			device_type = "cpu";
++			compatible = "arm,cortex-a55";
++			reg = <0x0>;
++			enable-method = "psci";
++			#cooling-cells = <2>;
++		};
++	};
++
++	psci {
++		compatible = "arm,psci-1.0";
++		method = "smc";
++	};
++
++	gic: interrupt-controller@48000000 {
++		compatible = "arm,gic-v3";
++		reg = <0 0x48000000 0 0x10000>,
++		      <0 0x48040000 0 0xc0000>;
++		#interrupt-cells = <3>;
++		interrupt-controller;
++		interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-parent = <&gic>;
++	};
++
++	timer {
++		compatible = "arm,armv8-timer";
++		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(6) | IRQ_TYPE_LEVEL_LOW)>,
++			     <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(6) | IRQ_TYPE_LEVEL_LOW)>,
++			     <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(6) | IRQ_TYPE_LEVEL_LOW)>,
++			     <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(6) | IRQ_TYPE_LEVEL_LOW)>;
++		clock-frequency = <24000000>;
++	};
++
++	clk_dummy: clock-dummy {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <0>;
++		clock-output-names = "clk_dummy";
++	};
++
++	clk_400m: clock-400m {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <200000000>;
++		clock-output-names = "200m";
++	};
++
++	osc_24m: clock-osc-24m {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <24000000>;
++		clock-output-names = "osc_24m";
++	};
++
++	pci@fd700000 {
++		compatible = "pci-host-ecam-generic";
++		device_type = "pci";
++		bus-range = <0 0>;
++		#address-cells = <3>;
++		#size-cells = <2>;
++		#interrupt-cells = <1>;
++		interrupt-map-mask = <0 0 0 7>;
++		interrupt-map = <0 0 0 1 &gic GIC_SPI 227 IRQ_TYPE_EDGE_RISING>,
++				<0 0 0 2 &gic GIC_SPI 228 IRQ_TYPE_EDGE_RISING>,
++				<0 0 0 3 &gic GIC_SPI 229 IRQ_TYPE_EDGE_RISING>,
++				<0 0 0 4 &gic GIC_SPI 230 IRQ_TYPE_EDGE_RISING>;
++		reg = <0x0 0xfd700000 0x0 0x100000>;
++		ranges = <0x02000000 0x00 0x10000000 0x0 0x10000000 0x00 0x10000>;
++	};
++
++	soc@0 {
++		compatible = "simple-bus";
++		#address-cells = <1>;
++		#size-cells = <1>;
++		ranges = <0x0 0x0 0x0 0x80000000>,
++			 <0x28000000 0x0 0x28000000 0x10000000>;
++
++		aips1: bus@44000000 {
++			compatible = "fsl,aips-bus", "simple-bus";
++			reg = <0x44000000 0x800000>;
++			#address-cells = <1>;
++			#size-cells = <1>;
++			ranges;
++
++			lpuart2: serial@44390000 {
++				compatible = "fsl,imx93-lpuart", "fsl,imx8ulp-lpuart", "fsl,imx7ulp-lpuart";
++				reg = <0x44390000 0x1000>;
++				interrupts = <GIC_SPI 20 IRQ_TYPE_LEVEL_HIGH>;
++				status = "disabled";
++			};
++                };
++
++		aips3: bus@42800000 {
++			compatible = "fsl,aips-bus", "simple-bus";
++			reg = <0x42800000 0x800000>;
++			#address-cells = <1>;
++			#size-cells = <1>;
++			ranges;
++
++			usdhc1: mmc@42850000 {
++				compatible = "fsl,imx93-usdhc", "fsl,imx8mm-usdhc";
++				reg = <0x42850000 0x10000>;
++				interrupts = <GIC_SPI 86 IRQ_TYPE_LEVEL_HIGH>;
++				fsl,tuning-start-tap = <20>;
++				fsl,tuning-step= <2>;
++				status = "disabled";
++			};
++                };
++	};
++};
++
++&lpuart2 {
++	clocks = <&osc_24m>;
++	clock-names = "ipg";
++	status = "okay";
++};
++
++&usdhc1 {
++	clocks = <&clk_dummy>,
++		 <&clk_dummy>,
++		 <&clk_400m>;
++	clock-names = "ipg", "ahb", "per";
++	bus-width = <8>;
++	non-removable;
++	status = "okay";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx93-9x9-qsb-root.dts b/arch/arm64/boot/dts/freescale/imx93-9x9-qsb-root.dts
+new file mode 100644
+index 000000000000..e61f46be93b7
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx93-9x9-qsb-root.dts
+@@ -0,0 +1,54 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include "imx93-9x9-qsb.dts"
++
++/{
++	interrupt-parent = <&gic>;
++
++	resmem: reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++	};
++};
++
++&clk {
++	init-on-array = <IMX93_CLK_LPUART2_GATE
++			 IMX93_CLK_USDHC1_GATE>;
++};
++
++&iomuxc {
++	pinctrl_uart2: uart2grp {
++		fsl,pins = <
++			MX93_PAD_UART2_TXD__LPUART2_TX			0x31e
++			MX93_PAD_UART2_RXD__LPUART2_RX			0x31e
++		>;
++	};
++};
++
++&lpuart2 {
++	/delete-property/ dmas;
++	/delete-property/ dma-names;
++	status = "disabled";
++};
++
++&lpuart1 {
++	pinctrl-0 = <&pinctrl_uart1>, <&pinctrl_uart2>;
++	assigned-clocks = <&clk IMX93_CLK_LPUART2>;
++	assigned-clock-parents = <&clk IMX93_CLK_24M>;
++};
++
++&usdhc1 {
++	status = "disabled";
++};
++
++&usdhc2 {
++	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>, <&pinctrl_usdhc1>;
++	pinctrl-1 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>, <&pinctrl_usdhc1>;
++	pinctrl-2 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>, <&pinctrl_usdhc1>;
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx93-9x9-qsb-uart-sharing-cm33.dts b/arch/arm64/boot/dts/freescale/imx93-9x9-qsb-uart-sharing-cm33.dts
+new file mode 100644
+index 000000000000..c897b9e9ced2
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx93-9x9-qsb-uart-sharing-cm33.dts
+@@ -0,0 +1,96 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/dts-v1/;
++
++#include <dt-bindings/rpmsg/imx_srtm.h>
++#include "imx93-9x9-qsb.dts"
++
++/ {
++	uart_rpbus_0: uart-rpbus-0 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_1: uart-rpbus-1 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_2: uart-rpbus-2 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_3: uart-rpbus-3 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_4: uart-rpbus-4 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_5: uart-rpbus-5 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_6: uart-rpbus-6 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_7: uart-rpbus-7 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_8: uart-rpbus-8 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_9: uart-rpbus-9 {
++		compatible = "fsl,uart-rpbus";
++		bus_id = <5>; /* use lpuart5 */
++		flags=<IMX_SRTM_UART_SUPPORT_MULTI_UART_MSG_FLAG>;
++		status = "okay";
++	};
++
++	uart_rpbus_10: uart-rpbus-10 {
++		compatible = "fsl,uart-rpbus";
++		status = "okay"; /* mcore directly print data that receive from acore */
++	};
++};
++
++/*
++ * ATTENTION: M33 may use IPs like below
++ * LPUART5
++ */
++
++/* the lpuart5 is used by m33 to support srtm uart service */
++&lpuart5 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx93-9x9-qsb.dts b/arch/arm64/boot/dts/freescale/imx93-9x9-qsb.dts
+index fba9380bdc69..314bd2ef7820 100644
+--- a/arch/arm64/boot/dts/freescale/imx93-9x9-qsb.dts
++++ b/arch/arm64/boot/dts/freescale/imx93-9x9-qsb.dts
+@@ -224,6 +224,9 @@ &eqos {
+ 	pinctrl-0 = <&pinctrl_eqos>;
+ 	phy-mode = "rgmii-id";
+ 	phy-handle = <&ethphy1>;
++	snps,force_thresh_dma_mode;
++	snps,mtl-tx-config = <&mtl_tx_setup>;
++	snps,mtl-rx-config = <&mtl_rx_setup>;
+ 	status = "okay";
+ 
+ 	mdio {
+@@ -238,6 +241,61 @@ ethphy1: ethernet-phy@1 {
+ 			eee-broken-1000t;
+ 		};
+ 	};
++
++	mtl_tx_setup: tx-queues-config {
++		snps,tx-queues-to-use = <5>;
++		snps,tx-sched-sp;
++		queue0 {
++			snps,dcb-algorithm;
++			snps,priority = <0x1>;
++		};
++		queue1 {
++			snps,dcb-algorithm;
++			snps,priority = <0x2>;
++		};
++		queue2 {
++			snps,dcb-algorithm;
++			snps,priority = <0x4>;
++		};
++		queue3 {
++			snps,dcb-algorithm;
++			snps,priority = <0x8>;
++		};
++		queue4 {
++			snps,dcb-algorithm;
++			snps,priority = <0xf0>;
++		};
++	};
++
++	mtl_rx_setup: rx-queues-config {
++		snps,rx-queues-to-use = <5>;
++		snps,rx-sched-sp;
++		queue0 {
++			snps,dcb-algorithm;
++			snps,priority = <0x1>;
++			snps,map-to-dma-channel = <0>;
++		};
++		queue1 {
++			snps,dcb-algorithm;
++			snps,priority = <0x2>;
++			snps,map-to-dma-channel = <1>;
++		};
++		queue2 {
++			snps,dcb-algorithm;
++			snps,priority = <0x4>;
++			snps,map-to-dma-channel = <2>;
++		};
++		queue3 {
++			snps,dcb-algorithm;
++			snps,priority = <0x8>;
++			snps,map-to-dma-channel = <3>;
++		};
++		queue4 {
++			snps,dcb-algorithm;
++			snps,priority = <0xf0>;
++			snps,map-to-dma-channel = <4>;
++		};
++	};
+ };
+ 
+ &lpm {
+diff --git a/arch/arm64/boot/dts/freescale/imx93-generic-mbox.dtsi b/arch/arm64/boot/dts/freescale/imx93-generic-mbox.dtsi
+new file mode 100644
+index 000000000000..5e6e1723a05d
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx93-generic-mbox.dtsi
+@@ -0,0 +1,27 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright 2023 NXP
++ */
++
++/ {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		gen_sw_mbox_reserved: gen-sw-mbox@fe000000 {
++			reg = <0 0xfe000000 0 0x1000>;
++			no-map;
++		};
++
++	};
++
++	gen_sw_mbox: generic-software-mailbox@fe000000 {
++		compatible = "fsl,generic-software-mbox";
++		reg = <0 0xfe000000 0 0x1000>;
++		#mbox-cells = <3>;
++		/* Use 2 unused SPI interrupts */
++		interrupts = <GIC_SPI 168 IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI 169 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "irq", "remote_irq";
++	};
++};
+diff --git a/arch/arm64/configs/imx_avb.config b/arch/arm64/configs/imx_avb.config
+new file mode 100644
+index 000000000000..1c8ba04c0381
+--- /dev/null
++++ b/arch/arm64/configs/imx_avb.config
+@@ -0,0 +1,8 @@
++CONFIG_EXPERT=y
++CONFIG_PREEMPT_RT=y
++CONFIG_AVB_SUPPORT=y
++CONFIG_NET_SWITCHDEV=y
++CONFIG_DEBUG_INFO=y
++CONFIG_CPU_FREQ_GOV_PERFORMANCE=y
++CONFIG_CPU_FREQ_GOV_ONDEMAND=y
++CONFIG_CPU_FREQ_GOV_USERSPACE=y
+diff --git a/arch/arm64/configs/imx_v8_defconfig b/arch/arm64/configs/imx_v8_defconfig
+index 10979905f06e..2937c1bc49c5 100644
+--- a/arch/arm64/configs/imx_v8_defconfig
++++ b/arch/arm64/configs/imx_v8_defconfig
+@@ -5,6 +5,8 @@ CONFIG_NO_HZ_IDLE=y
+ CONFIG_HIGH_RES_TIMERS=y
+ CONFIG_BPF_SYSCALL=y
+ CONFIG_BPF_JIT=y
++CONFIG_BPF_JIT_ALWAYS_ON=y
++CONFIG_XDP_SOCKETS=y
+ CONFIG_PREEMPT=y
+ CONFIG_IRQ_TIME_ACCOUNTING=y
+ CONFIG_BSD_PROCESS_ACCT=y
+@@ -136,29 +138,37 @@ CONFIG_BRIDGE_NF_EBTABLES=m
+ CONFIG_BRIDGE=y
+ CONFIG_BRIDGE_VLAN_FILTERING=y
+ CONFIG_NET_DSA=m
++CONFIG_NET_DSA_SJA1105=m
++CONFIG_NET_DSA_SJA1105_PTP=y
++CONFIG_NET_DSA_SJA1105_TAS=y
++CONFIG_NET_DSA_SJA1105_VL=y
+ CONFIG_VLAN_8021Q_GVRP=y
+ CONFIG_VLAN_8021Q_MVRP=y
+ CONFIG_LLC2=y
+ CONFIG_NET_SCHED=y
+-CONFIG_NET_SCH_MULTIQ=m
+-CONFIG_NET_SCH_CBS=m
+-CONFIG_NET_SCH_ETF=m
+-CONFIG_NET_SCH_TAPRIO=m
+-CONFIG_NET_SCH_MQPRIO=m
+-CONFIG_NET_SCH_INGRESS=m
++CONFIG_NET_SCH_MULTIQ=y
++CONFIG_NET_SCH_CBS=y
++CONFIG_NET_SCH_ETF=y
++CONFIG_NET_SCH_TAPRIO=y
++CONFIG_NET_SCH_MQPRIO=y
++CONFIG_NET_SCH_INGRESS=y
+ CONFIG_NET_CLS_BASIC=m
+-CONFIG_NET_CLS_U32=m
++CONFIG_NET_CLS_U32=y
+ CONFIG_NET_CLS_FLOWER=m
+ CONFIG_NET_CLS_ACT=y
+ CONFIG_NET_ACT_GACT=m
+ CONFIG_NET_ACT_MIRRED=m
+-CONFIG_NET_ACT_SKBEDIT=m
++CONFIG_NET_ACT_SKBEDIT=y
+ CONFIG_NET_ACT_GATE=m
++CONFIG_NET_EMATCH=y
++CONFIG_NET_EMATCH_STACK=32
++CONFIG_NET_EMATCH_U32=y
++CONFIG_NET_EMATCH_META=y
+ CONFIG_TSN=y
+ CONFIG_QRTR=m
+ CONFIG_QRTR_SMD=m
+ CONFIG_QRTR_TUN=m
+-CONFIG_NET_PKTGEN=m
++CONFIG_NET_PKTGEN=y
+ CONFIG_CAN=m
+ CONFIG_BT=y
+ CONFIG_BT_RFCOMM=y
+@@ -286,6 +296,7 @@ CONFIG_TUN=y
+ CONFIG_VETH=m
+ CONFIG_VIRTIO_NET=y
+ CONFIG_NET_DSA_MSCC_FELIX=m
++CONFIG_NET_DSA_NETC=m
+ CONFIG_NET_DSA_SJA1105=m
+ CONFIG_NET_DSA_SJA1105_PTP=y
+ CONFIG_NET_DSA_SJA1105_TAS=y
+@@ -298,6 +309,7 @@ CONFIG_SYSTEMPORT=m
+ CONFIG_MACB=y
+ CONFIG_THUNDER_NIC_PF=y
+ CONFIG_FEC=y
++CONFIG_FEC_ECAT=y
+ CONFIG_FEC_UIO=y
+ CONFIG_FSL_FMAN=y
+ CONFIG_FSL_DPAA_ETH=y
+@@ -1131,3 +1143,11 @@ CONFIG_CORESIGHT_STM=m
+ CONFIG_CORESIGHT_CPU_DEBUG=m
+ CONFIG_CORESIGHT_CTI=m
+ CONFIG_MEMTEST=y
++
++# Preempt RT, depend on CONFIG_EXPERT
++CONFIG_EXPERT=y
++CONFIG_PREEMPT_RT=y
++
++CONFIG_RPMSG_TTY=m
++CONFIG_GENERIC_SOFTWARE_MAILBOX=y
++CONFIG_VIRTIO_TRANS=y
+diff --git a/arch/arm64/configs/linux-dpaa-ethercat.config b/arch/arm64/configs/linux-dpaa-ethercat.config
+new file mode 100644
+index 000000000000..15e4b306bc3d
+--- /dev/null
++++ b/arch/arm64/configs/linux-dpaa-ethercat.config
+@@ -0,0 +1 @@
++CONFIG_FSL_DPAA_ETHERCAT=y
+diff --git a/arch/arm64/configs/linux-rpmsg-8m-buf.config b/arch/arm64/configs/linux-rpmsg-8m-buf.config
+new file mode 100644
+index 000000000000..d7780b2b8299
+--- /dev/null
++++ b/arch/arm64/configs/linux-rpmsg-8m-buf.config
+@@ -0,0 +1 @@
++CONFIG_RPMSG_8M_BUF=y
+diff --git a/arch/arm64/configs/lsdk.config b/arch/arm64/configs/lsdk.config
+index e27248011e58..eb33235e4eab 100644
+--- a/arch/arm64/configs/lsdk.config
++++ b/arch/arm64/configs/lsdk.config
+@@ -84,12 +84,25 @@ CONFIG_BRIDGE_NF_EBTABLES=y
+ CONFIG_BRIDGE_EBT_T_NAT=y
+ CONFIG_BRIDGE_EBT_DNAT=y
+ CONFIG_BRIDGE_EBT_SNAT=y
++CONFIG_BRIDGE_EBT_BROUTE=y
++CONFIG_BRIDGE_EBT_802_3=y
++CONFIG_BRIDGE_EBT_IP=y
++CONFIG_BRIDGE_EBT_IP6=y
+ CONFIG_NETFILTER_XT_MATCH_COMMENT=y
+ CONFIG_SFP=y
+ CONFIG_PHY_FSL_LYNX_28G=y
+ CONFIG_BPF_SYSCALL=y
+ CONFIG_BPF_JIT_ALWAYS_ON=y
+ CONFIG_XDP_SOCKETS=y
++CONFIG_NET_SCH_INGRESS=y
++CONFIG_NET_ACT_POLICE=y
++CONFIG_NET_ACT_GACT=y
++CONFIG_NET_ACT_GATE=y
++CONFIG_NET_CLS_MATCHALL=y
++CONFIG_NET_PKTGEN=y
++
++# Enable felix switch TSN
++CONFIG_MSCC_FELIX_SWITCH_TSN=y
+ 
+ # GPU
+ CONFIG_DRM=y
+@@ -97,7 +110,6 @@ CONFIG_MXC_GPU_VIV=y
+ 
+ # disable unneeded options and override default options set by defconfig to deduce the size of modules
+ # CONFIG_NET_VENDOR_STMICRO is not set
+-# CONFIG_MEDIA_SUPPORT is not set
+ # CONFIG_BACKLIGHT_GENERIC is not set
+ # CONFIG_TEGRA_HOST1X is not set
+ # CONFIG_BT is not set
+@@ -181,6 +193,7 @@ CONFIG_NET_CLS_FLOWER=y
+ CONFIG_NET_EMATCH=y
+ CONFIG_NET_EMATCH_STACK=32
+ CONFIG_NET_EMATCH_U32=y
++CONFIG_NET_EMATCH_META=y
+ CONFIG_NET_CLS_ACT=y
+ CONFIG_NET_ACT_PEDIT=y
+ CONFIG_NET_ACT_SKBEDIT=y
+@@ -191,8 +204,16 @@ CONFIG_USB_RTL8152=y
+ CONFIG_USB_USBNET=y
+ CONFIG_USB_NET_AX8817X=y
+ CONFIG_USB_NET_AX88179_178A=y
+-# CONFIG_NET_PKTGEN is not set
+ 
+ #build-in drivers
+ CONFIG_FSL_DPAA2_SWITCH=y
+ CONFIG_QORIQ_THERMAL=y
++
++# Preempt RT, depend on CONFIG_EXPERT
++CONFIG_PREEMPT_RT=y
++
++CONFIG_NFC_NXP_PN5XX=m
++
++# IVSHMEM
++CONFIG_IVSHMEM_NET=y
++CONFIG_UIO_IVSHMEM=y
+diff --git a/arch/arm64/include/asm/preempt.h b/arch/arm64/include/asm/preempt.h
+index 0159b625cc7f..a5486918e5ee 100644
+--- a/arch/arm64/include/asm/preempt.h
++++ b/arch/arm64/include/asm/preempt.h
+@@ -71,13 +71,36 @@ static inline bool __preempt_count_dec_and_test(void)
+ 	 * interrupt occurring between the non-atomic READ_ONCE/WRITE_ONCE
+ 	 * pair.
+ 	 */
+-	return !pc || !READ_ONCE(ti->preempt_count);
++	if (!pc || !READ_ONCE(ti->preempt_count))
++		return true;
++#ifdef CONFIG_PREEMPT_LAZY
++	if ((pc & ~PREEMPT_NEED_RESCHED))
++		return false;
++	if (current_thread_info()->preempt_lazy_count)
++		return false;
++	return test_thread_flag(TIF_NEED_RESCHED_LAZY);
++#else
++	return false;
++#endif
+ }
+ 
+ static inline bool should_resched(int preempt_offset)
+ {
++#ifdef CONFIG_PREEMPT_LAZY
++	u64 pc = READ_ONCE(current_thread_info()->preempt_count);
++	if (pc == preempt_offset)
++		return true;
++
++	if ((pc & ~PREEMPT_NEED_RESCHED) != preempt_offset)
++		return false;
++
++	if (current_thread_info()->preempt_lazy_count)
++		return false;
++	return test_thread_flag(TIF_NEED_RESCHED_LAZY);
++#else
+ 	u64 pc = READ_ONCE(current_thread_info()->preempt_count);
+ 	return pc == preempt_offset;
++#endif
+ }
+ 
+ #ifdef CONFIG_PREEMPTION
+diff --git a/arch/arm64/include/asm/thread_info.h b/arch/arm64/include/asm/thread_info.h
+index 848739c15de8..4b7148fd5551 100644
+--- a/arch/arm64/include/asm/thread_info.h
++++ b/arch/arm64/include/asm/thread_info.h
+@@ -26,6 +26,7 @@ struct thread_info {
+ #ifdef CONFIG_ARM64_SW_TTBR0_PAN
+ 	u64			ttbr0;		/* saved TTBR0_EL1 */
+ #endif
++	int			preempt_lazy_count;	/* 0 => preemptable, <0 => bug */
+ 	union {
+ 		u64		preempt_count;	/* 0 => preemptible, <0 => bug */
+ 		struct {
+@@ -68,6 +69,7 @@ int arch_dup_task_struct(struct task_struct *dst,
+ #define TIF_UPROBE		4	/* uprobe breakpoint or singlestep */
+ #define TIF_MTE_ASYNC_FAULT	5	/* MTE Asynchronous Tag Check Fault */
+ #define TIF_NOTIFY_SIGNAL	6	/* signal notifications exist */
++#define TIF_NEED_RESCHED_LAZY	7
+ #define TIF_SYSCALL_TRACE	8	/* syscall trace active */
+ #define TIF_SYSCALL_AUDIT	9	/* syscall auditing */
+ #define TIF_SYSCALL_TRACEPOINT	10	/* syscall tracepoint for ftrace */
+@@ -100,8 +102,10 @@ int arch_dup_task_struct(struct task_struct *dst,
+ #define _TIF_SVE		(1 << TIF_SVE)
+ #define _TIF_MTE_ASYNC_FAULT	(1 << TIF_MTE_ASYNC_FAULT)
+ #define _TIF_NOTIFY_SIGNAL	(1 << TIF_NOTIFY_SIGNAL)
++#define _TIF_NEED_RESCHED_LAZY	(1 << TIF_NEED_RESCHED_LAZY)
+ 
+-#define _TIF_WORK_MASK		(_TIF_NEED_RESCHED | _TIF_SIGPENDING | \
++#define _TIF_WORK_MASK		(_TIF_NEED_RESCHED | _TIF_NEED_RESCHED_LAZY | \
++				 _TIF_SIGPENDING | \
+ 				 _TIF_NOTIFY_RESUME | _TIF_FOREIGN_FPSTATE | \
+ 				 _TIF_UPROBE | _TIF_MTE_ASYNC_FAULT | \
+ 				 _TIF_NOTIFY_SIGNAL)
+@@ -110,6 +114,8 @@ int arch_dup_task_struct(struct task_struct *dst,
+ 				 _TIF_SYSCALL_TRACEPOINT | _TIF_SECCOMP | \
+ 				 _TIF_SYSCALL_EMU)
+ 
++#define _TIF_NEED_RESCHED_MASK	(_TIF_NEED_RESCHED | _TIF_NEED_RESCHED_LAZY)
++
+ #ifdef CONFIG_SHADOW_CALL_STACK
+ #define INIT_SCS							\
+ 	.scs_base	= init_shadow_call_stack,			\
+diff --git a/arch/arm64/kernel/asm-offsets.c b/arch/arm64/kernel/asm-offsets.c
+index 1197e7679882..e74c0415f67e 100644
+--- a/arch/arm64/kernel/asm-offsets.c
++++ b/arch/arm64/kernel/asm-offsets.c
+@@ -32,6 +32,7 @@ int main(void)
+   DEFINE(TSK_TI_CPU,		offsetof(struct task_struct, thread_info.cpu));
+   DEFINE(TSK_TI_FLAGS,		offsetof(struct task_struct, thread_info.flags));
+   DEFINE(TSK_TI_PREEMPT,	offsetof(struct task_struct, thread_info.preempt_count));
++  DEFINE(TSK_TI_PREEMPT_LAZY,	offsetof(struct task_struct, thread_info.preempt_lazy_count));
+ #ifdef CONFIG_ARM64_SW_TTBR0_PAN
+   DEFINE(TSK_TI_TTBR0,		offsetof(struct task_struct, thread_info.ttbr0));
+ #endif
+diff --git a/arch/arm64/kernel/signal.c b/arch/arm64/kernel/signal.c
+index 82f4572c8ddf..2a606c7bf025 100644
+--- a/arch/arm64/kernel/signal.c
++++ b/arch/arm64/kernel/signal.c
+@@ -1108,7 +1108,7 @@ static void do_signal(struct pt_regs *regs)
+ void do_notify_resume(struct pt_regs *regs, unsigned long thread_flags)
+ {
+ 	do {
+-		if (thread_flags & _TIF_NEED_RESCHED) {
++		if (thread_flags & _TIF_NEED_RESCHED_MASK) {
+ 			/* Unmask Debug and SError for the next task */
+ 			local_daif_restore(DAIF_PROCCTX_NOIRQ);
+ 
+diff --git a/arch/arm64/kernel/smp.c b/arch/arm64/kernel/smp.c
+index 5241f13c4068..8e534c956720 100644
+--- a/arch/arm64/kernel/smp.c
++++ b/arch/arm64/kernel/smp.c
+@@ -54,6 +54,10 @@
+ #define CREATE_TRACE_POINTS
+ #include <trace/events/ipi.h>
+ 
++#ifdef CONFIG_BAREMETAL
++#include <linux/ipi_baremetal.h>
++#endif
++
+ DEFINE_PER_CPU_READ_MOSTLY(int, cpu_number);
+ EXPORT_PER_CPU_SYMBOL(cpu_number);
+ 
+@@ -74,6 +78,13 @@ enum ipi_msg_type {
+ 	IPI_TIMER,
+ 	IPI_IRQ_WORK,
+ 	IPI_WAKEUP,
++#ifdef CONFIG_BAREMETAL
++#if defined(CONFIG_IMX8M_BAREMETAL) || defined(CONFIG_IMX93_BAREMETAL)
++	IPI_BAREMETAL_COMM = 9,
++#else
++	IPI_BAREMETAL_COMM = 8,
++#endif
++#endif
+ 	NR_IPI
+ };
+ 
+@@ -770,6 +781,9 @@ static const char *ipi_types[NR_IPI] __tracepoint_string = {
+ 	[IPI_TIMER]		= "Timer broadcast interrupts",
+ 	[IPI_IRQ_WORK]		= "IRQ work interrupts",
+ 	[IPI_WAKEUP]		= "CPU wake-up interrupts",
++#ifdef CONFIG_BAREMETAL
++	[IPI_BAREMETAL_COMM]	= "Baremetal inter-core interrupts",
++#endif
+ };
+ 
+ static void smp_cross_call(const struct cpumask *target, unsigned int ipinr);
+@@ -908,6 +922,17 @@ static void do_handle_IPI(int ipinr)
+ 		break;
+ #endif
+ 
++#ifdef CONFIG_BAREMETAL
++	case IPI_BAREMETAL_COMM: {
++		/* FIXME: use the fixed source coreID from core1 */
++		int irqsrc = 1;
++		/*linux core is 0 core, so iterate from 1 core.*/
++		for(irqsrc = 1; irqsrc < CONFIG_MAX_CPUS; irqsrc++)
++			ipi_baremetal_handle(ipinr, irqsrc);
++		}
++		break;
++#endif
++
+ 	default:
+ 		pr_crit("CPU%u: Unknown IPI message 0x%x\n", cpu, ipinr);
+ 		break;
+-- 
+2.34.1
+
