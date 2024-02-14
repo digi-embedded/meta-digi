@@ -39,6 +39,6 @@ FILES:${PN} += " \
 
 INITSCRIPT_PACKAGES += "${PN}"
 INITSCRIPT_NAME:${PN} = "bootcount-init"
-INITSCRIPT_PARAMS:${PN = "start 19 2 3 4 5 . stop 21 0 1 6 ."
+INITSCRIPT_PARAMS:${PN} = "start 19 2 3 4 5 . stop 21 0 1 6 ."
 
 SYSTEMD_SERVICE:${PN} = "bootcount-init.service"
