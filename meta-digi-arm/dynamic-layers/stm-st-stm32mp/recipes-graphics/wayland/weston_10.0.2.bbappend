@@ -5,6 +5,7 @@ SRC_URI:append:stm32mpcommon = " \
     file://0002-Force-to-close-all-output.patch \
     file://0004-Disable-request-to-EGL_DRM_RENDER_NODE_FILE_EXT.patch \
     file://0005-clients-simple-egl-call-eglSwapInterval-after-eglMak.patch \
+    file://0006-Revert-libweston-libinput-device-Enable-Set-pointer-.patch \
     "
 
 SIMPLECLIENTS="egl,touch,dmabuf-v4l,dmabuf-egl"

@@ -57,6 +57,12 @@ software =
                 }
                 ##SCRIPT_UBOOT##
             );
+            uboot: (
+                {
+                    name = "upgrade_available";
+                    value = "@@UPGRADE_AVAILABLE@@";
+                }
+            );
         }
         platform = {
             ref = "#./single";

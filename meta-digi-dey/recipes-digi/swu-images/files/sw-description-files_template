@@ -25,6 +25,10 @@ software =
             );
             uboot: (
                 {
+                    name = "upgrade_available";
+                    value = "@@UPGRADE_AVAILABLE@@";
+                },
+                {
                     name = "swap_bank";
                     value = "false";
                 }
@@ -51,6 +55,12 @@ software =
                     type = "shellscript";
                 }
                 ##SCRIPT_UBOOT##
+            );
+            uboot: (
+                {
+                    name = "upgrade_available";
+                    value = "@@UPGRADE_AVAILABLE@@";
+                }
             );
         }
         platform = {

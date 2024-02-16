@@ -16,7 +16,8 @@
 #
 #===============================================================================
 
-RESUME_ACTIONS="/tmp/resume_actions"
+RESUME_FILE="/tmp/resume_actions"
+RESUME_ACTIONS=""
 
 wifi_actions_needed() {
 	[ -d "/proc/device-tree/wireless" ] && [ ! -e "/sys/firmware/devicetree/base/soc@0/bus@42800000/mmc@428b0000/keep-power-in-suspend" ]
@@ -27,39 +28,61 @@ bt_actions_needed() {
 }
 
 if [ "${1}" = "pre" ]; then
-	rm -f "${RESUME_ACTIONS}"
+	rm -f "${RESUME_FILE}"
 
 	# Stop NetworkManager before suspend
 	systemctl stop NetworkManager
 
+	if bt_actions_needed; then
+		# bluetooth service relies on bluetooth-init service so
+		# stop it unconditionally
+		systemctl stop bluetooth-init
+		systemctl stop bluetooth
+		# Program the resume actions to start the services
+		RESUME_ACTIONS_BT="systemctl start bluetooth-init; systemctl start bluetooth;"
+	fi
+
 	if wifi_actions_needed; then
+		RESUME_ACTIONS_WIFI=""
 		for iface in wlan0 uap0 wfd0; do
 			if grep -qs ${iface} /var/run/ifstate; then
-				ifdown ${iface} && echo "ifup ${iface}" >> "${RESUME_ACTIONS}"
+				# Bring the interface down
+				ifdown ${iface}
+				# Program the resume action to bring it up
+				# (prepend to use reverse order)
+				RESUME_ACTIONS_WIFI="ifup ${iface};${RESUME_ACTIONS_WIFI}"
 			fi
 		done
 
-		{
-			echo "sleep 0.5"
-			echo "/etc/udev/scripts/load_iw612.sh"
-		} >> "${RESUME_ACTIONS}"
+		# Unload Wi-Fi modules
 		modprobe -r moal
+		# Program the resume action to reload the modules
+		# (prepend to use reverse order)
+		RESUME_ACTIONS_WIFI="/etc/udev/scripts/load_iw612.sh;${RESUME_ACTIONS_WIFI}"
 	fi
 
-	if bt_actions_needed; then
-		# bluetooth service relies on bluetooth-init service, so stop/start it unconditionally
-		{
-			echo "systemctl start bluetooth-init"
-			echo "systemctl start bluetooth"
-		} >> "${RESUME_ACTIONS}"
-		systemctl stop bluetooth-init
-		systemctl stop bluetooth
+	# Compound resume actions (enable BT first, or else add a sleep, to give
+	# some time to the system to be ready to load the Wi-Fi)
+	if [ -n "${RESUME_ACTIONS_BT}" ]; then
+		RESUME_ACTIONS="${RESUME_ACTIONS_BT}"
+	fi
+	if [ -n "${RESUME_ACTIONS_WIFI}" ]; then
+		if [ ! -n "${RESUME_ACTIONS_BT}" ]; then
+			RESUME_ACTIONS="sleep 0.5;"
+		fi
+		RESUME_ACTIONS="${RESUME_ACTIONS}${RESUME_ACTIONS_WIFI}"
+	fi
+
+	if [ -n "${RESUME_ACTIONS}" ]; then
+		# Create temp file with resume actions
+		echo "${RESUME_ACTIONS}" > "${RESUME_FILE}"
+		chmod +x "${RESUME_FILE}"
 	fi
 elif [ "${1}" = "post" ]; then
-	if [ -f ${RESUME_ACTIONS} ]; then
-		chmod +x "${RESUME_ACTIONS}"
-		eval "${RESUME_ACTIONS}"
-		rm -f "${RESUME_ACTIONS}"
+	if [ -f "${RESUME_FILE}" ]; then
+		eval "${RESUME_FILE}"
+		# Clean-up
+		rm -f "${RESUME_FILE}"
 	fi
 
 	# Resume NetworkManager after suspend

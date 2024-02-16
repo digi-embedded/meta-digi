@@ -8,4 +8,5 @@ inherit packagegroup
 
 RDEPENDS:${PN} += " \
     lvgl-demo \
+    lvgl-demo-init \
 "

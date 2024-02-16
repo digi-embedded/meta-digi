@@ -1,4 +1,4 @@
-# Copyright (C) 2022, Digi International Inc.
+# Copyright (C) 2022-2024 Digi International Inc.
 
 SUMMARY = "Crank Demo"
 HOMEPAGE = "https://www.cranksoftware.com/"
@@ -19,7 +19,8 @@ WESTON_SERVICE:ccmp15 ?= "weston-launch.service"
 CRANK_DEMOS_TARBALL_PATH ?= ""
 CRANK_DEMO_DISPLAY ?= "wayland-0"
 CRANK_DEMO_DISPLAY:ccmp15 ?= "wayland-1"
-CRANK_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\${DEMO_DISPLAY}"
+CRANK_DEMO_DISPLAY:ccimx93 ?= "wayland-1"
+CRANK_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\$\{DEMO_DISPLAY\}"
 CRANK_DEMO_ENV:ccimx6ul ?= ""
 CRANK_DEMO_OPTIONS ?= "-orender_mgr,multisample=0"
 CRANK_DEMO_OPTIONS:ccimx6ul ?= "-orender_mgr,multisample=0 -odev-input,mouse=/dev/input/mouse0 -oscreen_mgr,swcursor"

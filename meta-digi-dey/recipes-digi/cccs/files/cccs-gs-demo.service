@@ -3,6 +3,8 @@ Description=CCCS get start demo
 After=cccsd.service
 BindsTo=cccsd.service
 Upholds=cccsd.service
+# Do not limit the number of restarting times
+StartLimitIntervalSec=0
 
 [Service]
 Type=forking
@@ -10,7 +12,9 @@ ExecStart=/etc/cccs-gs-demo start
 ExecStop=/etc/cccs-gs-demo stop
 # SIGTERM signal is a valid status value
 SuccessExitStatus=143
+# Restart the service every 30 seconds if it fails
 Restart=on-failure
+RestartSec=30s
 
 [Install]
 WantedBy=multi-user.target

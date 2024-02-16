@@ -1,4 +1,4 @@
-# Copyright (C) 2022, 2023 Digi International.
+# Copyright (C) 2022-2024 Digi International.
 
 require recipes-digi/dey-examples/connectcore-demo-example.inc
 
@@ -7,7 +7,8 @@ WESTON_SERVICE:ccmp15 ?= "weston-launch.service"
 
 CC_DEMO_DISPLAY ?= "wayland-0"
 CC_DEMO_DISPLAY:ccmp15 ?= "wayland-1"
-CC_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\${DEMO_DISPLAY}"
+CC_DEMO_DISPLAY:ccimx93 ?= "wayland-1"
+CC_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\$\{DEMO_DISPLAY\}"
 CC_DEMO_ENV:ccimx6ul ?= ""
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/../../../../recipes-digi/dey-examples/connectcore-demo-example:"

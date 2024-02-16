@@ -102,7 +102,7 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 	if [ -n "$soc_family" ]; then
 		module_variant=$(getenv "module_variant")
 		# Determine U-Boot file to program basing on SOM's variant
-		if [ -n "$module_variant" ] || [ "$module_variant" = "0x00" ]; then
+		if [ -n "$module_variant" ]; then
 			if [ "$module_variant" = "0x12" ]; then
 				INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc2GB.imx"
 			elif [ "$module_variant" = "0x01" ] || \
@@ -117,7 +117,11 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 			     [ "$module_variant" = "0x15" ] || \
 			     [ "$module_variant" = "0x16" ]; then
 				INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc.imx"
-			else
+			elif [ "$module_variant" = "0x03" ] || \
+			     [ "$module_variant" = "0x0c" ] || \
+			     [ "$module_variant" = "0x0e" ] || \
+			     [ "$module_variant" = "0x0f" ] || \
+			     [ "$module_variant" = "0x13" ]; then
 				INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc512MB.imx"
 			fi
 		fi

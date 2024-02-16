@@ -115,7 +115,7 @@ echo "Determining image files to use..."
 if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 	module_variant=$(getenv "module_variant")
 	# Determine U-Boot file to program basing on SOM's variant
-	if [ -n "$module_variant" ] || [ "$module_variant" = "0x00" ]; then
+	if [ -n "$module_variant" ]; then
 		if [ "$module_variant" = "0x08" ] || \
 		   [ "$module_variant" = "0x0a" ]; then
 			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##512MB.imx"
@@ -123,7 +123,10 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 		     [ "$module_variant" = "0x05" ] || \
 		     [ "$module_variant" = "0x07" ]; then
 			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##1GB.imx"
-		else
+		elif [ "$module_variant" = "0x02" ] || \
+		     [ "$module_variant" = "0x03" ] || \
+		     [ "$module_variant" = "0x06" ] || \
+		     [ "$module_variant" = "0x09" ]; then
 			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##.imx"
 		fi
 	fi

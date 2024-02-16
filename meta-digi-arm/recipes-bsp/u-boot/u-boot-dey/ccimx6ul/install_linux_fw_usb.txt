@@ -153,7 +153,7 @@ fi
 #  - Save the environment
 #  - If Dual Boot
 #     - Update the system partitions: linux_a, linux_b, rootfs_a, rootfs_b
-      - Set bootlimit to 3
+#     - Set bootlimit to 3
 #  - If Normal Boot:
 #     - Update the system partitions: linux, recovery, rootfs
 #     - Erase the 'update' partition

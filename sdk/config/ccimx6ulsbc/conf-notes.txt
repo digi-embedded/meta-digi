@@ -7,8 +7,7 @@ Digi Embedded Yocto provides the following image recipes:
 
   * dey-image-lvgl: graphical LVGL image
 
-    By default the image is X11-based so it provides a full SATO theme
-    desktop environment.
+    A framebuffer-based image including an LVGL demo application.
 
   * core-image-base: a console-only image
 
