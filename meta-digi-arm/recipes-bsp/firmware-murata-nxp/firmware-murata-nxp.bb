@@ -1,4 +1,4 @@
-# Copyright (C) 2023 Digi International.
+# Copyright (C) 2023-2024, Digi International.
 
 SUMMARY = "Murata NXP firmware binaries"
 LICENSE = "GPL-2.0-only"
@@ -15,9 +15,13 @@ do_compile[noexec] = "1"
 
 do_install () {
 	install -d ${D}${nonarch_base_libdir}/firmware/nxp
-	install -m 0644 murata/files/2DL/txpower_US.bin ${D}${nonarch_base_libdir}/firmware/nxp
-	install -m 0644 murata/files/2DL/rutxpower_US.bin ${D}${nonarch_base_libdir}/firmware/nxp
-	install -m 0755 murata/files/2DL/bt_power_config_US_CA_JP.sh ${D}${nonarch_base_libdir}/firmware/nxp
+	install -m 0644 murata/files/2DL/* ${D}${nonarch_base_libdir}/firmware/nxp
+	# For the EU BT power file, set the baudrate to 3Mbps (as used by the btnxpuart driver)
+	sed -i -e "s,00 C2 01 00 00 00 00 00 00 00 00 00,C0 C6 2D 00 00 00 00 00 00 00 00 00,g" \
+		  ${D}${nonarch_base_libdir}/firmware/nxp/bt_power_config_EU.sh
+	# For all the BT power scripts, replace the hcitool reset command to avoid misleading BT behaviour.
+	sed -i -e "s,hcitool -i hci0 cmd 0x03 0x003,hciconfig hci0 reset,g" \
+		  ${D}${nonarch_base_libdir}/firmware/nxp/bt_power_config*.sh
 }
 
 FILES:${PN} = "${nonarch_base_libdir}/firmware"
