@@ -82,24 +82,22 @@ build_uboot_scripts() {
 			-e 's,##DEFAULT_IMAGE_NAME##,${DEFAULT_IMAGE_NAME},g' \
 			${WORKDIR}/${f} > ${TMP_INSTALL_SCR}
 		# Change the u-boot name when TrustFence is enabled
-		if [ "${TRUSTFENCE_SIGN}" == "1" ]; then
-			if [ "${DEY_SOC_VENDOR}" == "NXP" ]; then
+		if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+			if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
 				if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
-					sed -e 's,##SIGNED##,-encrypted,g' \
-					${WORKDIR}/${f} > ${TMP_INSTALL_SCR}
+					sed -i -e 's,##SIGNED##,-encrypted,g' ${TMP_INSTALL_SCR}
 				else
-					sed -e 's,##SIGNED##,-signed,g' \
-					${WORKDIR}/${f} > ${TMP_INSTALL_SCR}
+					sed -i -e 's,##SIGNED##,-signed,g' ${TMP_INSTALL_SCR}
 				fi
 			else
-				sed -e 's,##SIGNED##,_Signed,g' \
-				${WORKDIR}/${f} > ${TMP_INSTALL_SCR}
-				sed -e 's,##SIGNED_TFA##,_signed,g' \
-				${WORKDIR}/${f} > ${TMP_INSTALL_SCR}
+				sed -i -e 's,##SIGNED##,_Signed,g' ${TMP_INSTALL_SCR}
+				sed -i -e 's,##SIGNED_TFA##,_signed,g' ${TMP_INSTALL_SCR}
 			fi
 		else
-			sed -e 's,##SIGNED##,,g' \
-			${WORKDIR}/${f} > ${TMP_INSTALL_SCR}
+			sed -i -e 's,##SIGNED##,,g' ${TMP_INSTALL_SCR}
+			if [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+				sed -i -e 's,##SIGNED_TFA##,,g' ${TMP_INSTALL_SCR}
+			fi
 		fi
 		if [ "${f_ext}" = "txt" ]; then
 			mkimage -T script -n "DEY firmware install script" -C none -d ${TMP_INSTALL_SCR} ${DEPLOYDIR}/${f%.*}.scr
