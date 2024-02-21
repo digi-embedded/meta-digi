@@ -42,12 +42,6 @@ set_btaddr() {
 
 set_power_config() {
 	sh -e /lib/firmware/nxp/bt_power_config_US_CA_JP.sh
-
-	# The bash script resets the HCI interface, and currenlty it breaks
-	#  the LE support. Until it is fixed in the FW, workaround it by doing
-	#  a SW power cycle of the stack.
-	btmgmt -i ${HCI_IFACE} power off
-	btmgmt -i ${HCI_IFACE} power on
 }
 
 is_kernel_module_loaded() {
