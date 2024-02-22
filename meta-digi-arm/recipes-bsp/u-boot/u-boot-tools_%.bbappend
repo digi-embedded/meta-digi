@@ -18,4 +18,7 @@ do_install:append () {
 	fi
 }
 
-FILES:${PN}-mkimage += "${bindir}/uboot-fdt_add_pubkey"
+FILES:${PN}-mkimage += " \
+	${bindir}/uboot-fdt_add_pubkey \
+	${bindir}/fdt_add_pubkey \
+"
