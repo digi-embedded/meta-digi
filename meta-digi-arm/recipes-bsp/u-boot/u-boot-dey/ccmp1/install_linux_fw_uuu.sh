@@ -126,7 +126,7 @@ echo "Determining image files to use..."
 
 # Determine ATF file to program
 if [ -z "${INSTALL_ATF_FILENAME}" ]; then
-	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-${module_ram}-nand##SIGNED_TFA##.stm32"
+	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-${module_ram}-nand.stm32##SIGNED_TFA##"
 fi
 
 # Determine FIP file to program
