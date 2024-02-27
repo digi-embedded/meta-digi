@@ -27,7 +27,6 @@ CONFIG_SOCKET_PROGRESS_PATH=""
 # CONFIG_MTD is not set
 # CONFIG_LUA is not set
 # CONFIG_FEATURE_SYSLOG is not set
-CONFIG_DIGI_ON_THE_FLY="n"
 
 #
 # Build Options

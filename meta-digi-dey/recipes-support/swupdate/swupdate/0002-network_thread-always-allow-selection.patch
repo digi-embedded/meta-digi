@@ -1,0 +1,27 @@
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Wed, 23 Jun 2021 15:11:12 +0200
+Subject: [PATCH] network_thread: always allow selection
+
+This is needed for on-the-fly updates to avoid errors when using sw-description
+files with multiple image/installation sets. Make sure to keep returning
+"false" in case of an OOM error.
+
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ core/network_thread.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/network_thread.c b/core/network_thread.c
+index ca23908d..b0767ab2 100644
+--- a/core/network_thread.c
++++ b/core/network_thread.c
+@@ -80,7 +80,7 @@ static bool is_selection_allowed(const char *software_set, char *running_mode,
+ 	char *swset = NULL;
+ 	struct dict_list *sets;
+ 	struct dict_list_elem *selection;
+-	bool allowed = false;
++	bool allowed = true;
+ 
+ 	/*
+ 	 * No attempt to change software set
