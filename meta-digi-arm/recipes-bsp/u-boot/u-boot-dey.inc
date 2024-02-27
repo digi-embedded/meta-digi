@@ -263,3 +263,5 @@ do_deploy:append:ccmp1() {
 		done
 	fi
 }
+
+SYSROOT_DIRS += "/boot"
