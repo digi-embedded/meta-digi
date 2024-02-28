@@ -71,6 +71,20 @@ do_configure:append() {
 	if [ -n "${@' '.join(find_cfgs(d))}" ]; then
 		${S}/scripts/kconfig/merge_config.sh -m -O ${B} ${B}/.config ${@" ".join(find_cfgs(d))}
 	fi
+	# Apply ST-specific config fragments (ending in .config and stored in a different folder)
+	if [ ! -z "${KERNEL_CONFIG_FRAGMENTS}" ]; then
+		for f in ${KERNEL_CONFIG_FRAGMENTS}
+		do
+			# Check if the config fragment was copied into the WORKDIR from
+			# the OE meta data
+			if [ ! -e "$f" ]; then
+				bb_warn "Could not find kernel config fragment $f"
+				exit 1
+			fi
+		done
+		# Now that all the fragments are located merge them.
+		(${S}/scripts/kconfig/merge_config.sh -m -r -O ${B} ${B}/.config ${KERNEL_CONFIG_FRAGMENTS} 1>&2 )
+	fi
 }
 
 # Don't create custom folder for kernel artifacts

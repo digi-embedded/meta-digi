@@ -1,0 +1,26 @@
+From 63e709173a20b85b473bbf4832f4e909692fd361 Mon Sep 17 00:00:00 2001
+From: Lionel VITTE <lionel.vitte@st.com>
+Date: Wed, 8 Feb 2023 09:54:24 +0100
+Subject: [PATCH 23/28] 5.15-stm32mp-rt-49-r1 CLOCK
+
+Signed-off-by: Lionel VITTE <lionel.vitte@st.com>
+---
+ drivers/clk/stm32/clk-stm32mp13.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/clk/stm32/clk-stm32mp13.c b/drivers/clk/stm32/clk-stm32mp13.c
+index 15ee05df8..2f7a823bf 100644
+--- a/drivers/clk/stm32/clk-stm32mp13.c
++++ b/drivers/clk/stm32/clk-stm32mp13.c
+@@ -840,7 +840,7 @@ static CLK_STM32_GATE(sai1, "pclk2", 0, GATE_SAI1);
+ static CLK_STM32_GATE(sai2, "pclk2", 0, GATE_SAI2);
+ static CLK_STM32_GATE(spi1, "pclk2", 0, GATE_SPI1);
+ 
+-static CLK_STM32_GATE(syscfg, "pclk3", 0, GATE_SYSCFG);
++static CLK_STM32_GATE(syscfg, "pclk3", CLK_IS_CRITICAL, GATE_SYSCFG);
+ static CLK_STM32_GATE(vref, "pclk3", 0, GATE_VREF);
+ static CLK_STM32_GATE(dts, "pclk3", 0, GATE_DTS);
+ static CLK_STM32_GATE(pmbctrl, "pclk3", 0, GATE_PMBCTRL);
+-- 
+2.34.1
+

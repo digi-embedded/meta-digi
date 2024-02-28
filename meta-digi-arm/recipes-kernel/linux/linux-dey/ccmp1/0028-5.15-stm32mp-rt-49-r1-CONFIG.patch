@@ -1,0 +1,82 @@
+From 05ea3c26ccad3359d94dbe3c7ba758c2ba2f7dd9 Mon Sep 17 00:00:00 2001
+From: Lionel VITTE <lionel.vitte@st.com>
+Date: Wed, 8 Feb 2023 09:59:08 +0100
+Subject: [PATCH 28/28] 5.15-stm32mp-rt-49-r1 CONFIG
+
+Signed-off-by: Lionel VITTE <lionel.vitte@st.com>
+---
+ .../configs/fragment-07-rt-sysvinit.config    | 12 +++++++
+ arch/arm/configs/fragment-07-rt.config        | 32 +++++++++++++++++++
+ arch/arm/configs/fragment-08-rt-mp13.config   |  2 ++
+ 3 files changed, 46 insertions(+)
+ create mode 100644 arch/arm/configs/fragment-07-rt-sysvinit.config
+ create mode 100644 arch/arm/configs/fragment-07-rt.config
+ create mode 100644 arch/arm/configs/fragment-08-rt-mp13.config
+
+diff --git a/arch/arm/configs/fragment-07-rt-sysvinit.config b/arch/arm/configs/fragment-07-rt-sysvinit.config
+new file mode 100644
+index 000000000..49a4baf60
+--- /dev/null
++++ b/arch/arm/configs/fragment-07-rt-sysvinit.config
+@@ -0,0 +1,12 @@
++CONFIG_CGROUPS=y
++# CONFIG_CGROUP_SCHED is not set
++# CONFIG_CGROUP_PIDS is not set
++# CONFIG_CGROUP_RDMA is not set
++# CONFIG_CGROUP_FREEZER is not set
++# CONFIG_CGROUP_DEVICE is not set
++# CONFIG_CGROUP_CPUACCT is not set
++# CONFIG_CGROUP_PERF is not set
++# CONFIG_CGROUP_DEBUG is not set
++# CONFIG_CGROUP_NET_PRIO is not set
++# CONFIG_CGROUP_NET_CLASSID is not set
++
+diff --git a/arch/arm/configs/fragment-07-rt.config b/arch/arm/configs/fragment-07-rt.config
+new file mode 100644
+index 000000000..98bb8735f
+--- /dev/null
++++ b/arch/arm/configs/fragment-07-rt.config
+@@ -0,0 +1,32 @@
++CONFIG_PREEMPT_RT=y
++
++# disable SCHED_MC
++# CONFIG_MCPM is not set
++
++# Disable CPUFREQ and CPUIDLE
++# CONFIG_CPU_FREQ is not set
++# CONFIG_CPU_IDLE is not set
++
++# Force to have HIGH_RES_TIMERS
++CONFIG_HIGH_RES_TIMERS=y
++
++# force do not go to sleep
++# For multiple core, you should set the specific boot options
++# for isolate the core and render it tickless: "isolcpus=2,3 nohz_full=2,3"
++# Warning: to active only if SMP are present
++# CONFIG_HZ_PERIODIC=y
++
++# to Enable ftrace, you need to enable the following configuraiton:
++# CONFIG_FTRACE=y
++# CONFIG_IRQSOFF_TRACER=y
++# CONFIG_PREEMPT_TRACER=y
++# CONFIG_SCHED_TRACER=y
++# CONFIG_FUNCTION_TRACER=y
++# By default, the ftrace for RT kernel are disabled
++# CONFIG_FTRACE is not set
++# CONFIG_IRQSOFF_TRACER is not set
++# CONFIG_PREEMPT_TRACER is not set
++# CONFIG_SCHED_TRACER is not set
++# CONFIG_FUNCTION_TRACER is not set
++
++
+diff --git a/arch/arm/configs/fragment-08-rt-mp13.config b/arch/arm/configs/fragment-08-rt-mp13.config
+new file mode 100644
+index 000000000..c70d7adc6
+--- /dev/null
++++ b/arch/arm/configs/fragment-08-rt-mp13.config
+@@ -0,0 +1,2 @@
++# Disable SMP on MP13
++# CONFIG_SMP is not set
+-- 
+2.34.1
+

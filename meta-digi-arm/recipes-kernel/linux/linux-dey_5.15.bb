@@ -7,6 +7,24 @@ SRCBRANCH:stm32mpcommon = "v5.15.118/stm/master"
 SRCREV = "${AUTOREV}"
 SRCREV:stm32mpcommon = "${AUTOREV}"
 
+STM_RT_PATCHES = " \
+	file://patch-5.15.119-rt65.patch \
+	file://0023-5.15-stm32mp-rt-49-r1-CLOCK.patch \
+	file://0024-5.15-stm32mp-rt-49-r1-DMA.patch \
+	file://0025-5.15-stm32mp-rt-49-r1-MFD.patch \
+	file://0026-5.15-stm32mp-rt-49-r1-NET-TTY.patch \
+	file://0027-5.15-stm32mp-rt-49-r1-DEVICETREE.patch \
+	file://0028-5.15-stm32mp-rt-49-r1-CONFIG.patch \
+"
+
+SRC_URI:append:stm32mpcommon = " \
+	${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${STM_RT_PATCHES}', '', d)} \
+"
+
+KERNEL_CONFIG_FRAGMENTS:append:stm32mpcommon = " ${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${S}/arch/arm/configs/fragment-07-rt.config', '', d)}"
+KERNEL_CONFIG_FRAGMENTS:append:stm32mpcommon = " ${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${S}/arch/arm/configs/fragment-07-rt-sysvinit.config', '', d)}"
+KERNEL_CONFIG_FRAGMENTS:append:ccmp13 = " ${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${S}/arch/arm/configs/fragment-08-rt-mp13.config', '', d)}"
+
 do_assemble_fitimage:append:ccmp1() {
 	#
 	# Step 9: Add public keys to the different U-Boot dtb files

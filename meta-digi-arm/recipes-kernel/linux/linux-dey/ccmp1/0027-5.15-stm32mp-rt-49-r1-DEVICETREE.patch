@@ -1,0 +1,25 @@
+From e1bd8bc5502e661be4feaadfca1889da1d48cd73 Mon Sep 17 00:00:00 2001
+From: Lionel VITTE <lionel.vitte@st.com>
+Date: Wed, 8 Feb 2023 09:57:43 +0100
+Subject: [PATCH 27/28] 5.15-stm32mp-rt-49-r1 DEVICETREE
+
+Signed-off-by: Lionel VITTE <lionel.vitte@st.com>
+---
+ arch/arm/boot/dts/stm32mp131.dtsi | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/stm32mp131.dtsi b/arch/arm/boot/dts/stm32mp131.dtsi
+index 8121ddc97..3fc06961a 100644
+--- a/arch/arm/boot/dts/stm32mp131.dtsi
++++ b/arch/arm/boot/dts/stm32mp131.dtsi
+@@ -1241,7 +1241,6 @@ exti-interrupt-map {
+ 		syscfg: syscon@50020000 {
+ 			compatible = "st,stm32mp157-syscfg", "syscon";
+ 			reg = <0x50020000 0x400>;
+-			clocks = <&rcc SYSCFG>;
+ 		};
+ 
+ 		lptimer2: timer@50021000 {
+-- 
+2.34.1
+

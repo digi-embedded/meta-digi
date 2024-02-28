@@ -1,0 +1,64 @@
+From 1f4b70cda804c4f3771902254a2614d87a1d366c Mon Sep 17 00:00:00 2001
+From: Lionel VITTE <lionel.vitte@st.com>
+Date: Wed, 8 Feb 2023 09:57:06 +0100
+Subject: [PATCH 26/28] 5.15-stm32mp-rt-49-r1 NET-TTY
+
+Signed-off-by: Lionel VITTE <lionel.vitte@st.com>
+---
+ drivers/tty/serial/stm32-usart.c | 32 +++++++++++---------------------
+ 1 file changed, 11 insertions(+), 21 deletions(-)
+
+diff --git a/drivers/tty/serial/stm32-usart.c b/drivers/tty/serial/stm32-usart.c
+index 4d7a31664..0cd8e9672 100644
+--- a/drivers/tty/serial/stm32-usart.c
++++ b/drivers/tty/serial/stm32-usart.c
+@@ -772,26 +772,16 @@ static irqreturn_t stm32_usart_interrupt(int irq, void *ptr)
+ 	}
+ 
+ 	if ((sr & USART_SR_RTOF) && !(stm32_port->throttled) &&
+-	    stm32_usart_rx_dma_started(stm32_port))
+-		return IRQ_WAKE_THREAD;
+-	else
+-		return IRQ_HANDLED;
+-}
+-
+-static irqreturn_t stm32_usart_threaded_interrupt(int irq, void *ptr)
+-{
+-	struct uart_port *port = ptr;
+-	struct tty_port *tport = &port->state->port;
+-	unsigned int size;
+-	unsigned long flags;
+-
+-	/* Receiver timeout irq for DMA RX */
+-	spin_lock_irqsave(&port->lock, flags);
+-	size = stm32_usart_receive_chars(port, false);
+-	uart_unlock_and_check_sysrq_irqrestore(port, flags);
+-	if (size)
+-		tty_flip_buffer_push(tport);
++	    stm32_usart_rx_dma_started(stm32_port)) {
++		unsigned long flags;
+ 
++		spin_lock_irqsave(&port->lock, flags);
++		/* Receiver timeout irq for DMA RX */
++		size = stm32_usart_receive_chars(port, false);
++		uart_unlock_and_check_sysrq_irqrestore(port, flags);
++		if (size)
++			tty_flip_buffer_push(tport);
++	}
+ 	return IRQ_HANDLED;
+ }
+ 
+@@ -980,8 +970,8 @@ static int stm32_usart_startup(struct uart_port *port)
+ 	u32 val;
+ 	int ret;
+ 
+-	ret = request_threaded_irq(port->irq, stm32_usart_interrupt,
+-				   stm32_usart_threaded_interrupt,
++	ret = request_threaded_irq(port->irq, NULL,
++				   stm32_usart_interrupt,
+ 				   IRQF_ONESHOT | IRQF_NO_SUSPEND,
+ 				   name, port);
+ 	if (ret)
+-- 
+2.34.1
+
