@@ -2,7 +2,8 @@
 
 ML_NNSTREAMER_PKGS_LIST:remove = "nnstreamer-deepview-rt"
 
-ML_PKGS:mx9-nxp-bsp:remove = "deepview-rt-examples"
+# Only install tensorflow-lite to save space
+ML_PKGS:mx9-nxp-bsp:mx93-nxp-bsp = "tensorflow-lite"
 
 # ARM ethos-u package
 ETHOS_U_PKGS:append:mx93-nxp-bsp = " \
