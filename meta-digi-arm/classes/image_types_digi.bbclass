@@ -221,10 +221,11 @@ trustence_sign_cpio() {
 	# Image generation code for image type 'cpio.gz.u-boot.tf'
 	# (signed/encrypted ramdisk)
 	#
-	if [ "${TRUSTFENCE_SIGN_ARTIFACTS}" = "1" ]; then
+	if [ "${TRUSTFENCE_SIGN_ARTIFACTS}" = "1" ] && [ "${TRUSTFENCE_SIGN_FIT_ARTIFACT}" = "0" ]; then
 		# Set environment variables for trustfence configuration
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
+		[ -n "${TRUSTFENCE_SRK_REVOKE_MASK}" ] && export SRK_REVOKE_MASK="${TRUSTFENCE_SRK_REVOKE_MASK}"
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
 		# Sign/encrypt the ramdisk
 		trustfence-sign-artifact.sh -p "${DIGI_SOM}" -i "${1}" "${1}.tf"

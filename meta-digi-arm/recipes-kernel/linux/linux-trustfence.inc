@@ -7,8 +7,8 @@ trustfence_sign() {
 	# Set environment variables for trustfence configuration
 	export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 	[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
+	[ -n "${TRUSTFENCE_SRK_REVOKE_MASK}" ] && export SRK_REVOKE_MASK="${TRUSTFENCE_SRK_REVOKE_MASK}"
 	[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
-	[ -n "${TRUSTFENCE_SIGN_MODE}" ] && export CONFIG_SIGN_MODE="${TRUSTFENCE_SIGN_MODE}"
 
 	# Sign/encrypt the kernel images
 	for type in ${KERNEL_IMAGETYPES}; do
@@ -30,6 +30,9 @@ trustfence_sign() {
 
 		mv "${TMP_KERNEL_IMAGE_SIGNED}" "${KERNEL_IMAGE}"
 	done
+
+	# For FIT images there is no need to sign the rest of artifacts
+	[ "${TRUSTFENCE_SIGN_FIT_ARTIFACT}" = "1" ] && return 0
 
 	# Sign/encrypt the device tree blobs
 	for DTB in ${KERNEL_DEVICETREE}; do

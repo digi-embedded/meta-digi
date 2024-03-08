@@ -30,6 +30,8 @@ TRUSTFENCE_ENCRYPT_ENVIRONMENT ?= "1"
 TRUSTFENCE_ENCRYPT_ENVIRONMENT:ccimx93 ?= "0"
 TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 TRUSTFENCE_KEY_INDEX ?= "0"
+TRUSTFENCE_SIGN_ARTIFACTS = "1"
+TRUSTFENCE_SIGN_ARTIFACTS:ccmp1 = "0"
 TRUSTFENCE_FIT_IMG:ccmp1 ?= "1"
 
 # Partition encryption configuration
@@ -45,10 +47,9 @@ TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-onl
 # NOTHING TO CUSTOMIZE BELOW THIS LINE
 #
 
-# TrustFence sign artifacts is not supported on all platforms
-TRUSTFENCE_SIGN_ARTIFACTS = "1"
-TRUSTFENCE_SIGN_ARTIFACTS:ccmp1 = "0"
-TRUSTFENCE_SIGN_ARTIFACTS:ccimx93 = "0"
+# NXP-based sign a FIT-format boot artifact
+TRUSTFENCE_SIGN_FIT_ARTIFACT = "0"
+TRUSTFENCE_SIGN_FIT_ARTIFACT:ccimx93 = "${TRUSTFENCE_SIGN_ARTIFACTS}"
 
 IMAGE_FEATURES += "dey-trustfence"
 
@@ -184,6 +185,9 @@ python () {
         d.appendVar("UBOOT_TF_CONF", "CONFIG_SIGN_IMAGE=y ")
         if (d.getVar("TRUSTFENCE_SIGN_ARTIFACTS") == "1"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_AUTH_ARTIFACTS=y ")
+            if (d.getVar("TRUSTFENCE_SIGN_FIT_ARTIFACT") == "1"):
+                d.appendVar("UBOOT_TF_CONF", '"# CONFIG_CMD_BOOTI is not set" ')
+                d.appendVar("UBOOT_TF_CONF", '"# CONFIG_LEGACY_IMAGE_FORMAT is not set" ')
         if (d.getVar("TRUSTFENCE_READ_ONLY_ROOTFS") == "1"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_AUTHENTICATE_SQUASHFS_ROOTFS=y ")
         if d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"):

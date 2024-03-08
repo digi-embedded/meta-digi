@@ -15,8 +15,10 @@ UBOOT_ENV = "boot"
 UBOOT_PREFIX = "imx-boot"
 UBOOT_SUFFIX = "bin"
 
-# Platform kernel settings
+# Platform kernel settings (keep the override as otherwise KERNEL_IMAGETYPE
+# from imx-digi-base.inc takes precedence)
 KERNEL_CLASSES = "kernel-fitimage"
+KERNEL_IMAGETYPE:ccimx93 = "${@oe.utils.vartrue('TRUSTFENCE_SIGN_ARTIFACTS', 'fitImage', 'Image.gz', d)}"
 
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS += "imx-boot"
