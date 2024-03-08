@@ -80,7 +80,7 @@ if [ -z "${CONFIG_SIGN_KEYS_PATH}" ]; then
 fi
 [ -d "${CONFIG_SIGN_KEYS_PATH}" ] || mkdir "${CONFIG_SIGN_KEYS_PATH}"
 
-while read -r pl kaddr raddr fdtaddr fitaddr mode csf; do
+while read -r pl kaddr raddr fdtaddr fitaddr mode csf srk; do
 	AVAILABLE_PLATFORMS="${AVAILABLE_PLATFORMS:+${AVAILABLE_PLATFORMS} }${pl}"
 	eval "${pl}_kernel_addr=\"${kaddr}\""
 	eval "${pl}_ramdisk_addr=\"${raddr}\""
@@ -88,13 +88,14 @@ while read -r pl kaddr raddr fdtaddr fitaddr mode csf; do
 	eval "${pl}_fit_addr=\"${fitaddr}\""
 	eval "${pl}_mode=\"${mode}\""
 	eval "${pl}_csf_size=\"${csf}\""
+	eval "${pl}_srk_params=${srk}"
 done<<-_EOF_
-	ccimx6      0x12000000  0x19000000  0x18000000  -  HAB   0x4000
-	ccimx6qp    0x12000000  0x19000000  0x18000000  -  HAB   0x4000
-	ccimx6ul    0x80800000  0x83800000  0x83000000  -  HAB   0x4000
-	ccimx8mm    0x40480000  0x43800000  0x43000000  -  HAB   0x2000
-	ccimx8mn    0x40480000  0x43800000  0x43000000  -  HAB   0x2000
-	ccimx8x     0x80280000  0x82100000  0x82000000  -  AHAB  -
+	ccimx6      0x12000000  0x19000000  0x18000000  -  HAB   0x4000  "-h 4 -d sha256"
+	ccimx6qp    0x12000000  0x19000000  0x18000000  -  HAB   0x4000  "-h 4 -d sha256"
+	ccimx6ul    0x80800000  0x83800000  0x83000000  -  HAB   0x4000  "-h 4 -d sha256"
+	ccimx8mm    0x40480000  0x43800000  0x43000000  -  HAB   0x2000  "-h 4 -d sha256"
+	ccimx8mn    0x40480000  0x43800000  0x43000000  -  HAB   0x2000  "-h 4 -d sha256"
+	ccimx8x     0x80280000  0x82100000  0x82000000  -  AHAB  -       "-a -d sha512 -s sha512"
 _EOF_
 
 if ! echo "${AVAILABLE_PLATFORMS}" | grep -qs -F -w "${PLATFORM}"; then
@@ -224,10 +225,6 @@ get_image_size()
 
 SRK_TABLE="$(pwd)/SRK_table.bin"
 if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
-	HAB_VER="hab_ver 4"
-	DIGEST="digest"
-	DIGEST_ALGO="sha256"
-
 	# Other constants
 	GAP_FILLER="0x00"
 
@@ -302,10 +299,6 @@ elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 	KERNEL_START_OFFSET="0x0"
 	KERNEL_SIG_BLOCK_OFFSET="0x90"
 
-	HAB_VER="ahab"
-	DIGEST="sign_digest"
-	DIGEST_ALGO="sha512"
-
 	# Prepare the image container
 	mkimage_imx8 -soc "QX" -rev "B0" -c -ap ${UIMAGE_PATH} a35 ${CONFIG_RAM_START} -out temp-mkimg
 	KERNEL_NAME="$(readlink -e temp-mkimg)"
@@ -338,8 +331,8 @@ elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 	fi
 fi
 
-# Generate SRK tables
-srktool --${HAB_VER} --certs "${SRK_KEYS}" --table "${SRK_TABLE}" --efuses /dev/null --${DIGEST} "${DIGEST_ALGO}"
+eval "PDATA_SRKTOOL=\"\${${PLATFORM}_srk_params}\""
+srktool ${PDATA_SRKTOOL} --certs "${SRK_KEYS}" --table "${SRK_TABLE}" --efuses /dev/null
 if [ $? -ne 0 ]; then
 	echo "[ERROR] Could not generate SRK tables"
 	exit 1
