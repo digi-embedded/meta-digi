@@ -3,7 +3,7 @@
 #
 #  trustfence-sign-artifact.sh
 #
-#  Copyright (C) 2016-2022 by Digi International Inc.
+#  Copyright (C) 2016-2024 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -80,35 +80,35 @@ if [ -z "${CONFIG_SIGN_KEYS_PATH}" ]; then
 fi
 [ -d "${CONFIG_SIGN_KEYS_PATH}" ] || mkdir "${CONFIG_SIGN_KEYS_PATH}"
 
-# Get RAM_START address
-if [ "${PLATFORM}" = "ccimx6" ] || [ "${PLATFORM}" = "ccimx6qp" ]; then
-	CONFIG_FDT_LOADADDR="0x18000000"
-	CONFIG_RAMDISK_LOADADDR="0x19000000"
-	CONFIG_KERNEL_LOADADDR="0x12000000"
-	CONFIG_CSF_SIZE="0x4000"
-	CONFIG_SIGN_MODE="HAB"
-elif [ "${PLATFORM}" = "ccimx6ul" ]; then
-	CONFIG_FDT_LOADADDR="0x83000000"
-	CONFIG_RAMDISK_LOADADDR="0x83800000"
-	CONFIG_KERNEL_LOADADDR="0x80800000"
-	CONFIG_CSF_SIZE="0x4000"
-	CONFIG_SIGN_MODE="HAB"
-elif [ "${PLATFORM}" = "ccimx8x" ]; then
-	CONFIG_FDT_LOADADDR="0x82000000"
-	CONFIG_RAMDISK_LOADADDR="0x82100000"
-	CONFIG_KERNEL_LOADADDR="0x80280000"
-	CONFIG_SIGN_MODE="AHAB"
-elif [ "${PLATFORM}" = "ccimx8mn" ] || [ "${PLATFORM}" = "ccimx8mm" ]; then
-	CONFIG_FDT_LOADADDR="0x43000000"
-	CONFIG_RAMDISK_LOADADDR="0x43800000"
-	CONFIG_KERNEL_LOADADDR="0x40480000"
-	CONFIG_CSF_SIZE="0x2000"
-	CONFIG_SIGN_MODE="HAB"
-else
+while read -r pl kaddr raddr fdtaddr fitaddr mode csf; do
+	AVAILABLE_PLATFORMS="${AVAILABLE_PLATFORMS:+${AVAILABLE_PLATFORMS} }${pl}"
+	eval "${pl}_kernel_addr=\"${kaddr}\""
+	eval "${pl}_ramdisk_addr=\"${raddr}\""
+	eval "${pl}_fdt_addr=\"${fdtaddr}\""
+	eval "${pl}_fit_addr=\"${fitaddr}\""
+	eval "${pl}_mode=\"${mode}\""
+	eval "${pl}_csf_size=\"${csf}\""
+done<<-_EOF_
+	ccimx6      0x12000000  0x19000000  0x18000000  -  HAB   0x4000
+	ccimx6qp    0x12000000  0x19000000  0x18000000  -  HAB   0x4000
+	ccimx6ul    0x80800000  0x83800000  0x83000000  -  HAB   0x4000
+	ccimx8mm    0x40480000  0x43800000  0x43000000  -  HAB   0x2000
+	ccimx8mn    0x40480000  0x43800000  0x43000000  -  HAB   0x2000
+	ccimx8x     0x80280000  0x82100000  0x82000000  -  AHAB  -
+_EOF_
+
+if ! echo "${AVAILABLE_PLATFORMS}" | grep -qs -F -w "${PLATFORM}"; then
 	echo "Invalid platform: ${PLATFORM}"
-	echo "Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn, ccimx8mm"
+	echo "Supported platforms: ${AVAILABLE_PLATFORMS}"
 	exit 1
 fi
+
+eval "CONFIG_KERNEL_LOADADDR=\"\${${PLATFORM}_kernel_addr}\""
+eval "CONFIG_RAMDISK_LOADADDR=\"\${${PLATFORM}_ramdisk_addr}\""
+eval "CONFIG_FDT_LOADADDR=\"\${${PLATFORM}_fdt_addr}\""
+eval "CONFIG_FIT_LOADADDR=\"\${${PLATFORM}_fit_addr}\""
+eval "CONFIG_SIGN_MODE=\"\${${PLATFORM}_mode}\""
+eval "CONFIG_CSF_SIZE=\"\${${PLATFORM}_csf_size}\""
 
 [ "${ARTIFACT_DTB}" = "y" ] && CONFIG_RAM_START="${CONFIG_FDT_LOADADDR}"
 [ "${ARTIFACT_INITRAMFS}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
