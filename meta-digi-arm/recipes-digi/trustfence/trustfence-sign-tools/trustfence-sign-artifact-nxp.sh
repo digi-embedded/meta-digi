@@ -17,6 +17,7 @@
 #    The following environment variables define the script behaviour:
 #      CONFIG_SIGN_KEYS_PATH: (mandatory) path to the CST folder by NXP with keys generated.
 #      CONFIG_KEY_INDEX: (optional) key index to use for signing. Default is 0.
+#      SRK_REVOKE_MASK: (optional) bitmask of the revoked SRKs.
 #      CONFIG_DEK_PATH: (optional) Path to keyfile. Define it to generate
 #			encrypted images
 #
@@ -61,6 +62,10 @@ Usage: ${SCRIPT_NAME} [OPTIONS] input-unsigned-image output-signed-image
 Supported platforms: ccimx6, ccimx6qp, ccimx6ul, ccimx8x, ccimx8mn, ccimx8mm
 
 EOF
+}
+
+to_hex() {
+	printf '0x%x' "${1}"
 }
 
 if [ "${#}" != "2" ]; then
@@ -155,6 +160,12 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	# Negative offset with respect to CONFIG_RAM_START in which U-Boot
 	# copies the DEK blob.
 	DEK_BLOB_OFFSET="0x100"
+fi
+
+[ -z "${SRK_REVOKE_MASK}" ] && SRK_REVOKE_MASK="0x0"
+if [ "$((SRK_REVOKE_MASK & 0x8))" != 0 ]; then
+	echo "Key 3 cannot be revoked. Removed from mask."
+	SRK_REVOKE_MASK="$((SRK_REVOKE_MASK - 8))"
 fi
 
 # Function to generate a PKI tree (with lock dir protection)
@@ -324,6 +335,7 @@ elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 		-e "s,%cert_img%,${SRK_CERT_KEY_IMG},g"		   	\
 		-e "s,%kernel-img%,${KERNEL_NAME},g"		   	\
 		-e "s,%key_index%,${CONFIG_KEY_INDEX},g"	   	\
+		-e "s,%srk_rvk_mask%,$(to_hex "${SRK_REVOKE_MASK}"),g"	\
 		-e "s,%container_offset%,${container_header_offset},g" 	\
 		-e "s,%block_offset%,${signature_block_offset},g" 	\
 		-e "s,%dek_path%,${CONFIG_DEK_PATH},g"		   	\
@@ -334,6 +346,7 @@ elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 		-e "s,%cert_img%,${SRK_CERT_KEY_IMG},g"		   	\
 		-e "s,%kernel-img%,${KERNEL_NAME},g"		   	\
 		-e "s,%key_index%,${CONFIG_KEY_INDEX},g"	   	\
+		-e "s,%srk_rvk_mask%,$(to_hex "${SRK_REVOKE_MASK}"),g"	\
 		-e "s,%container_offset%,${container_header_offset},g" 	\
 		-e "s,%block_offset%,${signature_block_offset},g" 	\
 		"${SCRIPT_PATH}/csf_templates/sign_ahab" > csf_descriptor
