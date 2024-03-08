@@ -90,12 +90,13 @@ while read -r pl kaddr raddr fdtaddr fitaddr mode csf srk; do
 	eval "${pl}_csf_size=\"${csf}\""
 	eval "${pl}_srk_params=${srk}"
 done<<-_EOF_
-	ccimx6      0x12000000  0x19000000  0x18000000  -  HAB   0x4000  "-h 4 -d sha256"
-	ccimx6qp    0x12000000  0x19000000  0x18000000  -  HAB   0x4000  "-h 4 -d sha256"
-	ccimx6ul    0x80800000  0x83800000  0x83000000  -  HAB   0x4000  "-h 4 -d sha256"
-	ccimx8mm    0x40480000  0x43800000  0x43000000  -  HAB   0x2000  "-h 4 -d sha256"
-	ccimx8mn    0x40480000  0x43800000  0x43000000  -  HAB   0x2000  "-h 4 -d sha256"
-	ccimx8x     0x80280000  0x82100000  0x82000000  -  AHAB  -       "-a -d sha512 -s sha512"
+	ccimx6      0x12000000  0x19000000  0x18000000  -           HAB   0x4000  "-h 4 -d sha256"
+	ccimx6qp    0x12000000  0x19000000  0x18000000  -           HAB   0x4000  "-h 4 -d sha256"
+	ccimx6ul    0x80800000  0x83800000  0x83000000  -           HAB   0x4000  "-h 4 -d sha256"
+	ccimx8mm    0x40480000  0x43800000  0x43000000  -           HAB   0x2000  "-h 4 -d sha256"
+	ccimx8mn    0x40480000  0x43800000  0x43000000  -           HAB   0x2000  "-h 4 -d sha256"
+	ccimx8x     0x80280000  0x82100000  0x82000000  -           AHAB  -       "-a -d sha512 -s sha512"
+	ccimx93     -           -           -           0x84000000  AHAB  -       "-a -d sha256 -s sha512"
 _EOF_
 
 if ! echo "${AVAILABLE_PLATFORMS}" | grep -qs -F -w "${PLATFORM}"; then
@@ -120,6 +121,9 @@ eval "CONFIG_CSF_SIZE=\"\${${PLATFORM}_csf_size}\""
 [ "${ARTIFACT_DTB_OVERLAY}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
 # Rootfs is loaded to $initrd_addr, just like the ramdisk
 [ "${ARTIFACT_ROOTFS}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
+
+# For ccimx93 do not require image type (assume FIT image)
+[ "${PLATFORM}" = "ccimx93" ] && CONFIG_RAM_START="${CONFIG_FIT_LOADADDR}"
 
 if [ -z "${CONFIG_RAM_START}" ]; then
 	echo "Specify the type of image to process (-b, -i, -d, -l, -r, or -o)"
@@ -300,7 +304,12 @@ elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 	KERNEL_SIG_BLOCK_OFFSET="0x90"
 
 	# Prepare the image container
-	mkimage_imx8 -soc "QX" -rev "B0" -c -ap ${UIMAGE_PATH} a35 ${CONFIG_RAM_START} -out temp-mkimg
+	if [ "${PLATFORM}" = "ccimx93" ]; then
+		# Only FIT image supported for CC93
+		mkimage_imx8 -soc IMX9 -c -ap ${UIMAGE_PATH} a55 ${CONFIG_FIT_LOADADDR} -out temp-mkimg
+	else
+		mkimage_imx8 -soc "QX" -rev "B0" -c -ap ${UIMAGE_PATH} a35 ${CONFIG_RAM_START} -out temp-mkimg
+	fi
 	KERNEL_NAME="$(readlink -e temp-mkimg)"
 
 	# Compute the layout: sizes and offsets.
