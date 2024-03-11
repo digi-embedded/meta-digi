@@ -51,7 +51,7 @@ unset do_vigiles_check[noexec]
 VIGILES_KEY_FILE = \"${DY_VIGILES_DIR}/linuxlink_key.json\"
 VIGILES_DASHBOARD_CONFIG = \"##VIGILES_CONF_PATH##\"
 VIGILES_SUBFOLDER_NAME = \"${DY_REVISION}\"
-INHERIT += \"vigiles\"
+INHERIT += \"##VIGILES_BBCLASS##\"
 "
 
 ZIP_INSTALLER_CFG="
@@ -285,11 +285,12 @@ for platform in ${DY_PLATFORMS}; do
 			if [ "${DY_CVE_REPORT}" = "true" ]; then
 				# Build Vigiles config path using platform and patch status
 				status="non-patched"
-				[ "${DY_USE_CVE_LAYER}" = "true" ] && status="patched"
+				bbclass="vigiles"
+				[ "${DY_USE_CVE_LAYER}" = "true" ] && { status="patched"; bbclass="digi_ccss"; }
 				VIGILES_CONF_PATH="${DY_VIGILES_DIR}/configs/${platform}_${status}_config"
 				# Return error if config file doesn't exist
 				[ ! -f "${VIGILES_CONF_PATH}" ] && error "Cannot find Vigiles config file ${VIGILES_CONF_PATH}"
-				printf "%s" "${VIGILES_CFG}" | sed -e "s,##VIGILES_CONF_PATH##,${VIGILES_CONF_PATH},g" >> conf/local.conf
+				printf "%s" "${VIGILES_CFG}" | sed -e "s,##VIGILES_CONF_PATH##,${VIGILES_CONF_PATH},g" -e "s,##VIGILES_BBCLASS##,${bbclass},g" >> conf/local.conf
 			fi
 			# Apply CVE layer if needed
 			[ "${DY_USE_CVE_LAYER}" = "true" ] && bitbake-layers add-layer ${YOCTO_INST_DIR}/sources/meta-digi-security
