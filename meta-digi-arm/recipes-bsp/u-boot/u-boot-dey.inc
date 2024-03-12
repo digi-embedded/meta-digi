@@ -49,9 +49,13 @@ python __anonymous() {
 
 do_configure[prefuncs] += "${@oe.utils.ifelse(d.getVar('UBOOT_TF_CONF'), 'trustfence_config', '')}"
 python trustfence_config() {
+    import shlex
     config_path = d.expand('${WORKDIR}/uboot-trustfence.cfg')
     with open(config_path, 'w') as f:
-        for cfg in d.getVar('UBOOT_TF_CONF').split():
+        for cfg in shlex.split(d.getVar('UBOOT_TF_CONF'), posix=False):
+            # strip quotes for "is not set" options
+            if 'is not set' in cfg:
+                cfg = cfg.strip('"\'')
             f.write('%s\n' % cfg)
     d.appendVar('SRC_URI', ' file://%s' % config_path)
 }
