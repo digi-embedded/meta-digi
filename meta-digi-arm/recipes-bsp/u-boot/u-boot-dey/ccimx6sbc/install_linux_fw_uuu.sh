@@ -208,7 +208,7 @@ fi
 # Verify existence of files before starting the update
 FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME}"
 if [ "${DUALBOOT}" != true ]; then
-	FILES"${INSTALL_RECOVERY_FILENAME}"
+	FILES="${FILES} ${INSTALL_RECOVERY_FILENAME}"
 fi
 for f in ${FILES}; do
 	if [ ! -f ${f} ]; then
