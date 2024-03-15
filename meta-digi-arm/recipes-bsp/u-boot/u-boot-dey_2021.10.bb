@@ -15,7 +15,7 @@ UBOOT_FIT_CFG_FRAGMENTS = " \
 "
 
 SRC_URI += " \
-    ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', '${UBOOT_FIT_CFG_FRAGMENTS}', '', d)} \
+    ${@oe.utils.conditional('TRUSTFENCE_FIT_IMG', '1', '${UBOOT_FIT_CFG_FRAGMENTS}', '', d)} \
 "
 
 install_helper_files() {
@@ -41,7 +41,7 @@ install_helper_files() {
 
 do_install:append() {
 	# Copy additional files, so kernel can use it when creating the FIT image
-	if [ "${TRUSTFENCE_FIT_IMG}" = "1" ]; then
+	if [ "${KERNEL_IMAGETYPE}" = "fitImage" ]; then
 		install_helper_files
 	fi
 }

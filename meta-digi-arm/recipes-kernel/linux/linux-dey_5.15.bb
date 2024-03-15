@@ -41,7 +41,7 @@ do_assemble_fitimage:append:ccmp1() {
 }
 
 kernel_do_deploy:append:ccmp1() {
-	if [ "${UBOOT_SIGN_ENABLE}" = "1" -o "${UBOOT_FITIMAGE_ENABLE}" = "1" ] && \
+	if [ "${UBOOT_SIGN_ENABLE}" = "1" ] && \
 	   [ -n "${UBOOT_DTB_BINARY}" ] ; then
 		# Install device tree files with signature
 		if [ -n "${UBOOT_DEVICETREE}" ]; then

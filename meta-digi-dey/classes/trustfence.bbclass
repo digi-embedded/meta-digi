@@ -57,8 +57,6 @@ IMAGE_FEATURES += "dey-trustfence"
 #  Usage of FIT Image signed
 # ---------------------------------
 
-# Enable FIT image build when Trustfence is enabled
-MACHINE_FEATURES += "${@oe.utils.conditional('TRUSTFENCE_FIT_IMG', '1', 'fit', '', d)}"
 # key to sign FIT config nodes
 TRUSTFENCE_FIT_CFG_SIGN_KEYNAME ?= "fitcfg"
 # key to sign FIT image nodes
