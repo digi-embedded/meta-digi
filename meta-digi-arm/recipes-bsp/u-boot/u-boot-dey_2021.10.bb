@@ -19,15 +19,6 @@ SRC_URI += " \
 "
 
 install_helper_files() {
-	# Install UBOOT_ENV_BINARY to datadir, so that kernel can use it
-	# to include it into the FIT image.
-	if [ -f "${D}/boot/${UBOOT_ENV_BINARY}" ]; then
-		install -Dm 0644 ${D}/boot/${UBOOT_ENV_BINARY} ${D}${datadir}/${UBOOT_ENV_IMAGE}
-		ln -sf ${UBOOT_ENV_IMAGE} ${D}${datadir}/${UBOOT_ENV_BINARY}
-	else
-		bbwarn "${D}/boot/${UBOOT_ENV_BINARY} not found"
-	fi
-
 	# Install dtbs from UBOOT_DEVICETREE to datadir, so that kernel
 	# can use it for signing, and kernel will deploy after signs it.
 	if [ -n "${UBOOT_DEVICETREE}" ]; then
