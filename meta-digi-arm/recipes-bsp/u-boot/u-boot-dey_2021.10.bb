@@ -9,13 +9,8 @@ DEPENDS += "python3-setuptools-native"
 SRCBRANCH = "v2021.10/master"
 SRCREV = "${AUTOREV}"
 
-UBOOT_FIT_CFG_FRAGMENTS = " \
-    file://fit_legacy.cfg \
-    file://fit_signature.cfg \
-"
-
 SRC_URI += " \
-    ${@oe.utils.conditional('TRUSTFENCE_FIT_IMG', '1', '${UBOOT_FIT_CFG_FRAGMENTS}', '', d)} \
+    ${@oe.utils.conditional('TRUSTFENCE_FIT_IMG', '1', 'file://fit_signature.cfg', '', d)} \
 "
 
 install_helper_files() {
