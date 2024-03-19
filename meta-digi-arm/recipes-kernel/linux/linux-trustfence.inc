@@ -32,7 +32,7 @@ trustfence_sign() {
 	done
 
 	# For FIT images there is no need to sign the rest of artifacts
-	[ "${TRUSTFENCE_SIGN_FIT_ARTIFACT}" = "1" ] && return 0
+	[ "${TRUSTFENCE_SIGN_FIT_NXP}" = "1" ] && return 0
 
 	# Sign/encrypt the device tree blobs
 	for DTB in ${KERNEL_DEVICETREE}; do

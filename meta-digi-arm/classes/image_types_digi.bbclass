@@ -221,7 +221,7 @@ trustence_sign_cpio() {
 	# Image generation code for image type 'cpio.gz.u-boot.tf'
 	# (signed/encrypted ramdisk)
 	#
-	if [ "${TRUSTFENCE_SIGN_ARTIFACTS}" = "1" ] && [ "${TRUSTFENCE_SIGN_FIT_ARTIFACT}" = "0" ]; then
+	if [ "${TRUSTFENCE_SIGN_ARTIFACTS}" = "1" ] && [ "${TRUSTFENCE_SIGN_FIT_NXP}" = "0" ]; then
 		# Set environment variables for trustfence configuration
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"

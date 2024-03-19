@@ -10,7 +10,7 @@ SRCBRANCH = "v2021.10/master"
 SRCREV = "${AUTOREV}"
 
 SRC_URI += " \
-    ${@oe.utils.conditional('TRUSTFENCE_FIT_IMG', '1', 'file://fit_signature.cfg', '', d)} \
+    ${@oe.utils.conditional('TRUSTFENCE_SIGN_FIT_STM', '1', 'file://fit_signature.cfg', '', d)} \
 "
 
 install_helper_files() {
