@@ -1,0 +1,10 @@
+[Unit]
+Description=CYW4373 autocountry (802.11d)
+After=network.target suspend.target
+
+[Service]
+Type=oneshot
+ExecStart=/etc/cyw4373-autocountry
+
+[Install]
+WantedBy=multi-user.target suspend.target
