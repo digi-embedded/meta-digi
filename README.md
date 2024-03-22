@@ -292,8 +292,6 @@ updated list can be found on the online documentation.
   * Wireless
     * P2P on the ConnectCore MP1 doesn't currently work in concurrency with
       other modes (station or SoftAP).
-    * Connecting to a 802.11r network throws an unexpected error with the latest
-      CYW4373E wireless firmware.
 
 ## ConnectCore 6UL
 
