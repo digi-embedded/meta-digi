@@ -74,7 +74,10 @@ if [ "${PLATFORM}" = "ccmp15" ]; then
 		chmod 400 "${KEY_PASS_FILE}"
 	fi
 elif [ "${PLATFORM}" = "ccmp13" ]; then
-	if [ "${N_PUBK}" = "8" ] && [ "${N_PRVK}" = "8" ] && [ "${N_PASS}" != "8" ] && [ -f "${KEY_PASS_FILE}" ]; then
+	if [ "${N_PUBK}" = "8" ] && [ "${N_PRVK}" = "8" ] && [ "${N_PASS}" = "8" ]; then
+		# PKI tree already exists.
+		echo "Using existing PKI tree"
+	elif [ "${N_PUBK}" = "8" ] && [ "${N_PRVK}" = "8" ] && [ "${N_PASS}" != "8" ] && [ -f "${KEY_PASS_FILE}" ]; then
 		# Backwards compatibility: if a single key_pass.txt file exists,
 		# split into 8 files with one password each
 		for i in $(seq 0 7); do
