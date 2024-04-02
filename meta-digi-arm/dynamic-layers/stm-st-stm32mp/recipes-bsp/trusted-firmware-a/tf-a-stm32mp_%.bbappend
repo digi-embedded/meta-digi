@@ -44,12 +44,9 @@ python set_fip_sign_key() {
     passfile = d.getVar('TRUSTFENCE_PASSWORD_FILE')
     if (os.path.isfile(passfile)):
         with open(passfile, "r") as file:
-            p = file.read().split()
-            i = int(d.getVar('TRUSTFENCE_KEY_INDEX'))
-            if (i > 7):
-                i = 0
+            p = file.read().strip()
             if (p):
-                d.setVar('FIP_SIGN_KEY_PASS', p[i])
+                d.setVar('FIP_SIGN_KEY_PASS', p)
 }
 
 do_deploy:append() {
