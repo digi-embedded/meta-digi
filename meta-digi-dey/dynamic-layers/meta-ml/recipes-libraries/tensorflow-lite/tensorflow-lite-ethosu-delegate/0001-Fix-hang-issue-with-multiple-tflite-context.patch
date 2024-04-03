@@ -1,0 +1,102 @@
+From: nxf77310 <rhody.ma@nxp.com>
+Date: Tue, 26 Mar 2024 12:38:26 +0530
+Subject: [PATCH] Fix hang issue with multiple tflite context
+
+---
+ ethosu_delegate.cc | 34 ++++++++++++++++++++++------------
+ simple_delegate.cc |  2 +-
+ simple_delegate.h  |  2 +-
+ 3 files changed, 24 insertions(+), 14 deletions(-)
+
+diff --git a/ethosu_delegate.cc b/ethosu_delegate.cc
+index b45ba26..b975b31 100644
+--- a/ethosu_delegate.cc
++++ b/ethosu_delegate.cc
+@@ -456,19 +456,21 @@ class EthosuDelegate : public SimpleDelegateInterface {
+ 
+   TfLiteStatus Initialize(TfLiteContext* context) override {
+     try {
+-        ethosu_context.device =
+-		EthosU::Device::GetSingleton(options_.device_name.c_str());
++	TfLiteEthosuContext *ethosu_context = new TfLiteEthosuContext;
++        ethosu_context->device =
++	EthosU::Device::GetSingleton(options_.device_name.c_str());
+ 
+         if (options_.enable_profiling && options_.profiling_buffer_size != 0){
+             size_t size = sizeof(EthosuQreadEvent) * options_.profiling_buffer_size;
+-            ethosu_context.qread_buffer =
+-		    make_shared<EthosU::Buffer>(*ethosu_context.device, size);
+-            ethosu_context.qread_buffer->resize(0);
+-        } else {
+-            ethosu_context.qread_buffer = nullptr;
++            ethosu_context->qread_buffer =
++	    make_shared<EthosU::Buffer>(*ethosu_context->device, size);
++            ethosu_context->qread_buffer->resize(0);
++	} else {
++            ethosu_context->qread_buffer = nullptr;
+         }
+-	ethosu_context.arena_buffer = nullptr;
+-	ethosu_context.flash_buffer = nullptr;
++	ethosu_context->arena_buffer = nullptr;
++	ethosu_context->flash_buffer = nullptr;
++	context_map_[context] = ethosu_context;
+     } catch (exception &e) {
+         TF_LITE_KERNEL_LOG(context, "Failed to create ethos_u driver.\n");
+         return kTfLiteDelegateError;
+@@ -477,8 +479,9 @@ class EthosuDelegate : public SimpleDelegateInterface {
+     return kTfLiteOk;
+   }
+ 
+-  void *GetDelegateContext() const{
+-      return (void*) &ethosu_context;
++  void *GetDelegateContext(TfLiteContext* context) const{
++      return context_map_.at(context);
++
+   }
+ 
+   const char* Name() const override {
+@@ -496,9 +499,16 @@ class EthosuDelegate : public SimpleDelegateInterface {
+     return SimpleDelegateInterface::Options();
+   }
+ 
++  ~EthosuDelegate() {
++    std::map<TfLiteContext*, void*>::iterator itr;
++    for (itr = context_map_.begin(); itr != context_map_.end(); ++itr) {
++       delete (TfLiteEthosuContext*)itr->second;
++    }
++  }
++
+  private:
+   const EthosuDelegateOptions options_;
+-  TfLiteEthosuContext ethosu_context;
++  std::map<TfLiteContext*, void*> context_map_;
+ };
+ 
+ }  // namespace ethosu
+diff --git a/simple_delegate.cc b/simple_delegate.cc
+index 51bd5b7..f65b475 100644
+--- a/simple_delegate.cc
++++ b/simple_delegate.cc
+@@ -48,7 +48,7 @@ TfLiteRegistration GetDelegateKernelRegistration(
+     }
+     auto* delegate =
+         reinterpret_cast<SimpleDelegateInterface*>(params->delegate->data_);
+-    void* delegate_context = delegate->GetDelegateContext();
++    void* delegate_context = delegate->GetDelegateContext(context);
+     std::unique_ptr<SimpleDelegateKernelInterface> delegate_kernel(
+         delegate->CreateDelegateKernelInterface());
+     if (delegate_kernel->Init(context, params, delegate_context) != kTfLiteOk) {
+diff --git a/simple_delegate.h b/simple_delegate.h
+index 9bd891d..6509374 100644
+--- a/simple_delegate.h
++++ b/simple_delegate.h
+@@ -115,7 +115,7 @@ class SimpleDelegateInterface {
+   virtual SimpleDelegateInterface::Options DelegateOptions() const = 0;
+ 
+   // Get the SimpleDelegate global context data
+-  virtual void *GetDelegateContext() const = 0;
++  virtual void *GetDelegateContext(TfLiteContext* context) const = 0;
+ };
+ 
+ // Factory class that provides static methods to deal with SimpleDelegate
+
