@@ -84,7 +84,7 @@ if test "${module_has_npu}" = "1" && test -z "${disable_npu}"; then
 	setenv overlays _ov_som_npu_ccimx93.dtbo,${overlays}
 fi
 
-if test "${dboot_kernel_var}" = "fitimage"; then
+if test "${dboot_kernel_var}" = "fitimage" && test -z "${temp-fitimg-loaded}"; then
 	# Set temp var to avoid re-loading fitimage
 	setenv temp-fitimg-loaded yes
 fi
