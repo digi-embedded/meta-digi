@@ -42,6 +42,9 @@ UBOOT_ENV_SIZE ?= "0x20000"
 # available space in the environment partition)
 UBOOT_ENV_RANGE ?= ""
 
+# OPTEE runtime packages to install
+OPTEE_PKGS ??= "optee-client"
+
 MACHINE_EXTRA_RDEPENDS += " \
     mtd-utils-ubifs \
 "
