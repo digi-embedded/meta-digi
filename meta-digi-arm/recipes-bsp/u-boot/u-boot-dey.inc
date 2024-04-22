@@ -89,9 +89,9 @@ build_uboot_scripts() {
 		if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 			if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
 				if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
-					sed -i -e 's,##SIGNED##,-encrypted,g' ${TMP_INSTALL_SCR}
+					sed -i -e 's,##SIGNED##,encrypted,g' ${TMP_INSTALL_SCR}
 				else
-					sed -i -e 's,##SIGNED##,-signed,g' ${TMP_INSTALL_SCR}
+					sed -i -e 's,##SIGNED##,signed,g' ${TMP_INSTALL_SCR}
 				fi
 			else
 				sed -i -e 's,##SIGNED##,_Signed,g' ${TMP_INSTALL_SCR}
