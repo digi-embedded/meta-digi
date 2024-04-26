@@ -146,8 +146,8 @@ if [ "${SUBSYSTEM}" = "block" ]; then
 elif [ "${SUBSYSTEM}" = "mtd" ]; then
 	# Before attaching, find out if partition already attached
 	MTD_NUM="$(echo ${MTDN} | sed -ne 's,.*mtd\([0-9]\+\),\1,g;T;p')"
-	for ubidev in /sys/devices/virtual/ubi/*; do
-		echo "${ubidev}" | grep -qs '/sys/devices/virtual/ubi/\*' && continue
+	for ubidev in /sys/class/ubi/*; do
+		echo "${ubidev}" | grep -qs '/sys/class/ubi/\*' && continue
 		mtd_att="$(cat ${ubidev}/mtd_num)"
 		if [ "${mtd_att}" = "${MTD_NUM}" ]; then
 			dev_number="$(echo ${ubidev} | sed -ne 's,.*ubi\([0-9]\+\),\1,g;T;p')"
