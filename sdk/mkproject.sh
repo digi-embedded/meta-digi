@@ -25,7 +25,7 @@ MKP_GREEN="\033[1;32m"
 MKP_NONE="\033[0m"
 
 # Path to platform config files
-MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/meta-digi/sdk/config"
+MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/meta-digi/meta-digi-arm/conf/templates"
 
 # Blacklist platforms (not officially supported in a DEY release)
 MKP_BLACKLIST_PLATFORMS=""
@@ -180,12 +180,12 @@ while getopts "lp:m:" c; do
 	case "${c}" in
 		l) MKP_LIST_PLATFORMS="y";;
 		p) MKP_PLATFORM="${OPTARG}";;
-		m) MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/${OPTARG}/sdk/config";;
+		m) MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/${OPTARG}/meta-digi-arm/conf/templates";;
 	esac
 done
 
 ## Get available platforms
-MKP_AVAILABLE_PLATFORMS="$(echo $(ls -1 ${MKP_CONFIGPATH}/*/local.conf.sample | sed -e 's,^.*config/\([^/]\+\)/local\.conf\.sample,\1,g'))"
+MKP_AVAILABLE_PLATFORMS="$(echo $(ls -1 ${MKP_CONFIGPATH}/*/local.conf.sample | sed -e 's,^.*templates/\([^/]\+\)/local\.conf\.sample,\1,g'))"
 
 ## Sanity checks
 if [ "${BASH_SOURCE}" = "${0}" ]; then
