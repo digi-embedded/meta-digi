@@ -16,7 +16,7 @@ BBLAYERS ?= " \
   ##DIGIBASE##/meta-swupdate \
   ##DIGIBASE##/meta-timesys \
   ##DIGIBASE##/meta-st-stm32mp \
-  ##DIGIBASE##/meta-st-stm32mpu-ai \
+  ##DIGIBASE##/meta-st-x-linux-ai \
   ##DIGIBASE##/meta-digi/meta-digi-arm \
   ##DIGIBASE##/meta-digi/meta-digi-dey \
   "
