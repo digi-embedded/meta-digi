@@ -6,7 +6,8 @@ inherit fsl-eula-unpack fsl-eula2
 
 IMX_PACKAGE_VERSION = "${PV}"
 
-SRC_URI = "${FSL_MIRROR}${IMX_PACKAGE_NAME}.bin;fsl-eula=true"
+SRC_URI = "${NXP_BASE_URL}/${IMX_PACKAGE_NAME}.bin;fsl-eula=true"
+NXP_BASE_URL ??= "${FSL_MIRROR}"
 
 S = "${WORKDIR}/${IMX_PACKAGE_NAME}"
 
@@ -24,12 +25,17 @@ do_install () {
     install -d ${D}${D_SUBDIR}
     cp -r ${S}/* ${D}${D_SUBDIR}
 
-    # Adjust for multilib
-    if [ "${base_libdir}" != "/lib" ] && [ -d "${D}/lib" ]; then
-        mv ${D}/lib ${D}${base_libdir}
+    # Adjust for multilib and usrmerge
+    # FIXME: This does not handle nonarch_base_libdir
+    if [ -d "${D}/lib" ] && [ "/lib" != "${base_libdir}" ]; then
+        install -d ${D}${base_libdir}
+        mv ${D}/lib/* ${D}${base_libdir}
+        rm -r ${D}/lib
     fi
-    if [ "${libdir}" != "/usr/lib" ] && [ -d "${D}/usr/lib" ]; then
-        mv ${D}/usr/lib ${D}${libdir}
+    if [ -d "${D}/usr/lib" ] && [ "/usr/lib" != "${libdir}" ]; then
+        install -d ${D}${libdir}
+        mv ${D}/usr/lib/* ${D}${libdir}
+        rm -r ${D}/usr/lib
     fi
 
     rm ${D}${D_SUBDIR}/COPYING
