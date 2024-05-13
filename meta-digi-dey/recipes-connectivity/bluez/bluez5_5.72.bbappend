@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2023, Digi International Inc.
+# Copyright (C) 2015-2024, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:${THISDIR}/${BP}:"
 
@@ -28,6 +28,7 @@ SRC_URI:append:ccimx6sbc = " \
 "
 
 do_install:append() {
+	install -d ${D}${sysconfdir}/bluetooth/
 	install -m 0644 ${WORKDIR}/main.conf ${D}${sysconfdir}/bluetooth/
 	sed -i -e "s,##BT_DEVICE_NAME##,${BT_DEVICE_NAME},g" \
 		${D}${sysconfdir}/bluetooth/main.conf
