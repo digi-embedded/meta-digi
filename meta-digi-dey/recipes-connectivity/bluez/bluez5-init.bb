@@ -59,7 +59,7 @@ SYSTEMD_SERVICE:${PN} = "bluetooth-init.service"
 RDEPENDS:${PN} = "initscripts-functions"
 
 # IW61x Bluetooth support requires the WiFi FW support
-RDEPENDS:${PN}:append:ccimx9 = " firmware-nxp-wifi-nxpiw612"
+RDEPENDS:${PN}:append:ccimx9 = " firmware-nxp-wifi-nxpiw612-sdio"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx9)"

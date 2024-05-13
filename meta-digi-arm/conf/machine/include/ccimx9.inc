@@ -84,7 +84,7 @@ WIRELESS_MODULE:append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-mod
 HAS_WIFI_VIRTWLANS = "true"
 
 # Machine firmware
-MACHINE_FIRMWARE:append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-nxp-wifi-nxpiw612 firmware-murata-nxp', '', d)}"
+MACHINE_FIRMWARE:append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-nxp-wifi-nxpiw612-sdio firmware-murata-nxp', '', d)}"
 
 MACHINE_EXTRA_RRECOMMENDS += "${WIRELESS_MODULE}"
 
