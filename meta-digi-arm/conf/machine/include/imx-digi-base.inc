@@ -14,15 +14,18 @@ IMX_DEFAULT_BSP ?= "nxp"
 MACHINEOVERRIDES =. "use-${IMX_DEFAULT_BSP}-bsp:"
 
 # Allow setting the UART used during the boot by ATF.
+
 # FIXME: We should return INVALID here but currently only i.MX8M has support to override the UART
 # base address in source code.
-SOC_ATF_BOOT_UART_BASE         = ""
-SOC_ATF_BOOT_UART_BASE:ccimx8m = "0x30860000"
-ATF_BOOT_UART_BASE            ?= "${SOC_ATF_BOOT_UART_BASE}"
+SOC_ATF_BOOT_UART_BASE                    = ""
 
-XSERVER_DRIVER = "xf86-video-fbdev"
-XSERVER_DRIVER:imxgpu2d = "xf86-video-imx-vivante"
-XSERVER_DRIVER:append:mx8-generic-bsp = " xf86-video-modesetting"
+SOC_ATF_BOOT_UART_BASE:mx8m-generic-bsp   = "0x30860000"
+ATF_BOOT_UART_BASE                       ?= "${SOC_ATF_BOOT_UART_BASE}"
+
+PREFERRED_PROVIDER_virtual/xserver      = "xserver-xorg"
+XSERVER_DRIVER                          = "xf86-video-fbdev"
+XSERVER_DRIVER:vf-generic-bsp           = "xf86-video-modesetting"
+XSERVER_DRIVER:append:mx8-generic-bsp   = " xf86-video-modesetting"
 XSERVER = "xserver-xorg \
            xf86-input-evdev \
            ${XSERVER_DRIVER}"
@@ -139,6 +142,7 @@ MACHINE_SOCARCH_FILTER:append:imxvulkan = " \
     vulkan-headers \
     vulkan-loader \
     vulkan-tools \
+    vulkan-validation-layers \
 "
 MACHINE_SOCARCH_FILTER:append:imxgpu = " \
     virtual/egl \
@@ -189,12 +193,12 @@ SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS:append = " \
 "
 
 # Firmware used for boot.
-IMX_EXTRA_FIRMWARE                  ?= ""
-IMX_EXTRA_FIRMWARE:mx8-generic-bsp   = "firmware-imx-8 imx-sc-firmware imx-seco"
-IMX_EXTRA_FIRMWARE:mx8m-generic-bsp  = "firmware-imx-8m"
-IMX_EXTRA_FIRMWARE:mx8x-generic-bsp  = "imx-sc-firmware imx-seco"
-IMX_EXTRA_FIRMWARE:mx91-generic-bsp  = "imx-boot-firmware-files firmware-ele-imx"
-IMX_EXTRA_FIRMWARE:mx93-generic-bsp  = "imx-boot-firmware-files firmware-ele-imx"
+IMX_EXTRA_FIRMWARE                   ?= ""
+IMX_EXTRA_FIRMWARE:mx8-generic-bsp    = "imx-boot-firmware-files imx-sc-firmware imx-seco"
+IMX_EXTRA_FIRMWARE:mx8m-generic-bsp   = "imx-boot-firmware-files"
+IMX_EXTRA_FIRMWARE:mx8x-generic-bsp   = "imx-sc-firmware imx-seco"
+IMX_EXTRA_FIRMWARE:mx91-generic-bsp   = "imx-boot-firmware-files firmware-ele-imx"
+IMX_EXTRA_FIRMWARE:mx93-generic-bsp   = "imx-boot-firmware-files firmware-ele-imx"
 
 # Firmware
 MACHINE_FIRMWARE ?= ""
@@ -203,8 +207,8 @@ MACHINE_FIRMWARE:append:mx6q-generic-bsp     = " firmware-imx-vpu-imx6q"
 MACHINE_FIRMWARE:append:mx6dl-generic-bsp    = " firmware-imx-vpu-imx6d firmware-imx-epdc"
 MACHINE_FIRMWARE:append:mx8mm-generic-bsp    = " firmware-imx-sdma-imx7d"
 MACHINE_FIRMWARE:append:mx8mn-generic-bsp    = " firmware-imx-sdma-imx7d firmware-imx-easrc-imx8mn"
-MACHINE_FIRMWARE:append:mx8qxp-generic-bsp   = " firmware-imx-sdma-imx7d firmware-imx-vpu-imx8"
-MACHINE_FIRMWARE:append:mx8dx-generic-bsp    = " firmware-imx-sdma-imx7d firmware-imx-vpu-imx8"
+MACHINE_FIRMWARE:append:mx8qxp-generic-bsp   = " firmware-imx-sdma-imx7d firmware-imx-vpu-amphion"
+MACHINE_FIRMWARE:append:mx8dx-generic-bsp    = " firmware-imx-sdma-imx7d firmware-imx-vpu-amphion"
 
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE}"
 
@@ -213,6 +217,11 @@ IMX_ALSA_EXTRA = ""
 IMX_ALSA_EXTRA:imx-nxp-bsp = "imx-alsa-plugins"
 MACHINE_EXTRA_RRECOMMENDS:append:mx6-nxp-bsp = " ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', '${IMX_ALSA_EXTRA}', '', d)}"
 MACHINE_EXTRA_RRECOMMENDS:append:mx8-nxp-bsp = " ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', '${IMX_ALSA_EXTRA}', '', d)}"
+MACHINE_EXTRA_RRECOMMENDS:append:mx9-nxp-bsp = " ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', '${IMX_ALSA_EXTRA}', '', d)}"
+
+# ELE extra Firmware
+SECOEXT_FIRMWARE_NAME ?= "UNDEFINED"
+SECOEXT_FIRMWARE_NAME:mx8ulp-generic-bsp ?= "mx8ulp${IMX_SOC_REV_LOWER}ext-ahab-container.img"
 
 # GStreamer 1.0 plugins
 MACHINE_GSTREAMER_1_0_PLUGIN                ?= ""
@@ -224,11 +233,16 @@ MACHINE_GSTREAMER_1_0_PLUGIN:mx9-nxp-bsp    ?= "imx-gst1.0-plugin"
 
 # In 'meta-freescale' these gstreamer preferred versions are restricted to 'mx8-nxp-bsp'
 # but in DEY we use them also in the 6UL, so relax the override to 'imx-nxp-base'
-PREFERRED_VERSION_gstreamer1.0:imx-nxp-bsp              ??= "1.20.3.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-base:imx-nxp-bsp ??= "1.20.3.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-good:imx-nxp-bsp ??= "1.20.3.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-bad:imx-nxp-bsp  ??= "1.20.3.imx"
-PREFERRED_VERSION_ffmpeg:imx-nxp-bsp                    ??= "4.4.1"
+PREFERRED_VERSION_gstreamer1.0:imx-nxp-bsp              ??= "1.24.0.imx"
+PREFERRED_VERSION_gstreamer1.0-libav:imx-nxp-bsp        ??= "1.24.0.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-bad:imx-nxp-bsp  ??= "1.24.0.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-base:imx-nxp-bsp ??= "1.24.0.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-good:imx-nxp-bsp ??= "1.24.0.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-ugly:imx-nxp-bsp ??= "1.24.0.imx"
+PREFERRED_VERSION_gstreamer1.0-rtsp-server:imx-nxp-bsp  ??= "1.24.0.imx"
+
+# GStreamer downgrade ffmpeg
+PREFERRED_VERSION_ffmpeg:imx-nxp-bsp ??= "4.4.1"
 
 # Determines if the SoC has support for Vivante kernel driver
 SOC_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT        = "0"
@@ -246,7 +260,8 @@ PREFERRED_PROVIDER_virtual/libgles1 ?= "mesa"
 PREFERRED_PROVIDER_virtual/libgles2 ?= "mesa"
 
 PREFERRED_PROVIDER_virtual/egl:imxgpu        ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/libgl:imxgpu3d    ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/libgl:imxgpu      ?= "mesa-gl"
+PREFERRED_PROVIDER_virtual/mesa:imxgpu       ?= "mesa-gl"
 PREFERRED_PROVIDER_virtual/libgles1:imxgpu3d ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libgles2:imxgpu3d ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/libgles3:imxgpu3d ?= "imx-gpu-viv"
@@ -258,52 +273,46 @@ PREFERRED_PROVIDER_opencl-headers:imxgpu     ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_opencl-icd-loader:imxgpu  ?= "imx-gpu-viv"
 PREFERRED_PROVIDER_virtual/opencl-icd:imxgpu ?= "imx-gpu-viv"
 
-PREFERRED_VERSION_weston:imx-nxp-bsp      ??= "10.0.1.imx"
+PREFERRED_VERSION_weston:imx-nxp-bsp      ??= "12.0.4.imx"
+# i.MX 6 & 7 stay on weston 10.0 for fbdev
+PREFERRED_VERSION_weston:mx6-nxp-bsp      ??= "10.0.5.imx"
+PREFERRED_VERSION_weston:mx7-nxp-bsp      ??= "10.0.5.imx"
 PREFERRED_VERSION_weston:imx-mainline-bsp   = ""
 
-PREFERRED_VERSION_wayland-protocols:mx6-nxp-bsp ??= "1.25.imx"
-PREFERRED_VERSION_wayland-protocols:mx7-nxp-bsp ??= "1.25.imx"
-PREFERRED_VERSION_wayland-protocols:mx8-nxp-bsp ??= "1.25.imx"
-PREFERRED_VERSION_wayland-protocols:mx9-nxp-bsp ??= "1.25.imx"
+PREFERRED_VERSION_wayland-protocols:mx6-nxp-bsp  ??= "1.32.imx"
+PREFERRED_VERSION_wayland-protocols:mx7-nxp-bsp  ??= "1.32.imx"
+PREFERRED_VERSION_wayland-protocols:mx8-nxp-bsp  ??= "1.32.imx"
+PREFERRED_VERSION_wayland-protocols:mx9-nxp-bsp  ??= "1.32.imx"
+
+PREFERRED_VERSION_xwayland:imx-nxp-bsp ??= "23.1.1.imx"
 
 # Use i.MX libdrm Version
-PREFERRED_VERSION_libdrm:mx6-nxp-bsp ??= "2.4.109.imx"
-PREFERRED_VERSION_libdrm:mx7-nxp-bsp ??= "2.4.109.imx"
-PREFERRED_VERSION_libdrm:mx8-nxp-bsp ??= "2.4.109.imx"
-PREFERRED_VERSION_libdrm:mx9-nxp-bsp ??= "2.4.109.imx"
+PREFERRED_VERSION_libdrm:mx6-nxp-bsp ??= "2.4.116.imx"
+PREFERRED_VERSION_libdrm:mx7-nxp-bsp ??= "2.4.116.imx"
+PREFERRED_VERSION_libdrm:mx8-nxp-bsp ??= "2.4.116.imx"
+PREFERRED_VERSION_libdrm:mx9-nxp-bsp ??= "2.4.116.imx"
 
-PREFERRED_VERSION_vulkan-headers:imxvulkan ??= "1.2.182.0"
-PREFERRED_VERSION_vulkan-loader:imxvulkan  ??= "1.2.182.0"
-PREFERRED_VERSION_vulkan-tools:imxvulkan   ??= "1.2.182.0"
+PREFERRED_VERSION_spirv-headers:imxvulkan            ??= "1.3.275.0"
+PREFERRED_VERSION_spirv-tools:imxvulkan              ??= "1.3.275.0"
+PREFERRED_VERSION_vulkan-headers:imxvulkan           ??= "1.3.275.0"
+PREFERRED_VERSION_vulkan-loader:imxvulkan            ??= "1.3.275.0"
+PREFERRED_VERSION_vulkan-tools:imxvulkan             ??= "1.3.275.0"
+PREFERRED_VERSION_vulkan-validation-layers:imxvulkan ??= "1.3.275.0"
 
 # Use i.MX optee Version
-PREFERRED_VERSION_optee-os:mx8-nxp-bsp      ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-os:mx91-nxp-bsp     ??= "4.2.0.imx"
-PREFERRED_VERSION_optee-os:mx93-nxp-bsp     ??= "4.0.0.imx"
-PREFERRED_VERSION_optee-client:mx8-nxp-bsp  ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-client:mx91-nxp-bsp ??= "4.2.0.imx"
-PREFERRED_VERSION_optee-client:mx93-nxp-bsp ??= "4.0.0.imx"
-PREFERRED_VERSION_optee-test:mx8-nxp-bsp    ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-test:mx91-nxp-bsp   ??= "4.2.0.imx"
-PREFERRED_VERSION_optee-test:mx93-nxp-bsp   ??= "4.0.0.imx"
-
-# Machine learning backports from NXP's lf-6.1.55-2.2.0 release
-PREFERRED_VERSION_ethos-u-driver-stack:ccimx93 = "23.08"
-PREFERRED_VERSION_ethos-u-firmware:ccimx93 = "23.08"
-PREFERRED_VERSION_ethos-u-vela:ccimx93 = "3.9.0"
-PREFERRED_VERSION_flatbuffers:ccimx93 = "2.0.7"
-PREFERRED_VERSION_flatbuffers-native:ccimx93 = "2.0.7"
-PREFERRED_VERSION_onnxruntime:ccimx93 = "1.16.1"
-PREFERRED_VERSION_tensorflow-lite:ccimx93 = "2.12.1"
-PREFERRED_VERSION_tensorflow-lite-host-tools:ccimx93 = "2.12.1"
-PREFERRED_VERSION_tensorflow-lite-host-tools-native:ccimx93 = "2.12.1"
+PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "4.2.0.imx"
+PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "4.2.0.imx"
+PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "4.2.0.imx"
+PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "4.2.0.imx"
+PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "4.2.0.imx"
+PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "4.2.0.imx"
 
 # Optee runtime packages to install
 OPTEE_PKGS ??= "optee-client optee-os"
 
 # Use i.MX opencv Version
-PREFERRED_VERSION_opencv:mx8-nxp-bsp ??= "4.6.0.imx"
-PREFERRED_VERSION_opencv:mx9-nxp-bsp ??= "4.7.0.imx"
+PREFERRED_VERSION_opencv:mx8-nxp-bsp ??= "4.9.0.imx"
+PREFERRED_VERSION_opencv:mx9-nxp-bsp ??= "4.9.0.imx"
 
 EXTRA_IMAGEDEPENDS += "u-boot"
 
