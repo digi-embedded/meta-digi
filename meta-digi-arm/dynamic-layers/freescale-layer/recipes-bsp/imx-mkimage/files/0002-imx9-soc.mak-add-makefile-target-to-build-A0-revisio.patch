@@ -2,24 +2,25 @@ From: Javier Viguera <javier.viguera@digi.com>
 Date: Thu, 2 Nov 2023 15:03:13 +0100
 Subject: [PATCH] imx9: soc.mak: add makefile target to build A0 revision
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
- iMX9/soc.mak | 5 +++++
- 1 file changed, 5 insertions(+)
+ iMX93/soc.mak | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/iMX9/soc.mak b/iMX9/soc.mak
-index c4bcac4e42cd..4f741451d1d0 100644
---- a/iMX9/soc.mak
-+++ b/iMX9/soc.mak
-@@ -290,6 +290,11 @@ flash_singleboot: $(MKIMG) $(AHAB_IMG) $(SPL_A55_IMG) u-boot-atf-container.img $
- 		   -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR) -out flash.bin | tee -a $(MKIMAGE_LOG)
+diff --git a/iMX93/soc.mak b/iMX93/soc.mak
+index 6339d80..dc739c2 100644
+--- a/iMX93/soc.mak
++++ b/iMX93/soc.mak
+@@ -218,6 +218,10 @@ flash_singleboot: $(MKIMG) $(AHAB_IMG) $(SPL_A55_IMG) u-boot-atf-container.img
+ 	./$(MKIMG) -soc IMX9 -append $(AHAB_IMG) -c -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR) -out flash.bin | tee -a $(MKIMAGE_LOG)
  	$(call append_container,u-boot-atf-container.img,1)
  
-+flash_singleboot_a0: $(MKIMG) mx93a0-ahab-container.img $(SPL_A55_IMG) u-boot-atf-container.img $(OEI_A55_DDR)
-+	./$(MKIMG) -soc IMX9 -append mx93a0-ahab-container.img -c $(OEI_OPT_A55) \
-+		   -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR) -out flash.bin | tee -a $(MKIMAGE_LOG)
++flash_singleboot_a0: $(MKIMG) mx93a0-ahab-container.img $(SPL_A55_IMG) u-boot-atf-container.img
++	./$(MKIMG) -soc IMX9 -append mx93a0-ahab-container.img -c -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR) -out flash.bin | tee -a $(MKIMAGE_LOG)
 +	$(call append_container,u-boot-atf-container.img,1)
 +
- flash_singleboot_no_ahabfw: $(MKIMG) $(SPL_A55_IMG) u-boot-atf-container.img $(OEI_A55_DDR)
- 	./$(MKIMG) -soc IMX9 -c $(OEI_OPT_A55) \
- 		   -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR) -out flash.bin
+ flash_singleboot_no_ahabfw: $(MKIMG) $(SPL_A55_IMG) u-boot-atf-container.img
+ 	./$(MKIMG) -soc IMX9 -c -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR) -out flash.bin
+ 	$(call append_container,u-boot-atf-container.img,1)

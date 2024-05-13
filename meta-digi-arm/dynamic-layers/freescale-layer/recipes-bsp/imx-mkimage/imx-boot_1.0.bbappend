@@ -5,8 +5,6 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 SRC_URI:append:ccimx8m = " \
     file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch \
     file://0002-imx8m-soc.mak-capture-commands-output-into-a-log-fil.patch \
-    file://0003-LFU-573-1-imx8m-Generate-hash-of-FIT-FDT-structure-t.patch \
-    file://0004-LFU-573-2-imx8m-Reserve-new-IVT-CSF-for-FIT-FDT-sign.patch \
 "
 SRC_URI:append:ccimx91 = " \
     file://0001-imx91-soc.mak-capture-commands-output-into-a-log-fil.patch \
@@ -16,24 +14,18 @@ SRC_URI:append:ccimx93 = " \
     file://0002-imx9-soc.mak-add-makefile-target-to-build-A0-revisio.patch \
 "
 
-# Use NXP's lf-6.1.55-2.2.0 release for ccimx93
-SRC_URI:ccimx9 = "git://github.com/nxp-imx/imx-mkimage.git;protocol=https;branch=${SRCBRANCH}"
-SRCBRANCH:ccimx91 = "lf-6.6.23_2.0.0"
-SRCBRANCH:ccimx93 = "lf-6.1.55_2.2.0"
-SRCREV:ccimx91 = "ca5d6b2d3fd9ab15825b97f7ef6f1ce9a8644966"
-SRCREV:ccimx93 = "c4365450fb115d87f245df2864fee1604d97c06a"
-
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 # Do not tag imx-boot
 UUU_BOOTLOADER = ""
 UUU_BOOTLOADER_TAGGED = ""
 BOOT_STAGING:mx91-generic-bsp  = "${S}/iMX91"
-BOOT_STAGING:mx93-generic-bsp  = "${S}/iMX9"
+BOOT_STAGING:mx93-generic-bsp  = "${S}/iMX93"
 
 # Add SOC family
 SOC_FAMILY:mx91-generic-bsp = "mx91"
 
+REV_OPTION:ccimx91 = "REV=A0"
 REV_OPTION:ccimx93 = "REV=A1"
 
 compile_mx8m:append:ccimx8m() {

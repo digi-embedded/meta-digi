@@ -14,31 +14,35 @@ file pointed at by the dtbs variable does no longer exist.
 
 Remove the file removal to avoid this.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
- iMX8M/soc.mak | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ iMX8M/soc.mak | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
-index 0a69b7167c5c..4a0cd4e59360 100644
+index 6751759..5a96614 100644
 --- a/iMX8M/soc.mak
 +++ b/iMX8M/soc.mak
-@@ -154,7 +154,7 @@ u-boot.itb: $(dtb)
- 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb)
- 	BL32=$(TEE) DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ../$(SOC_DIR)/mkimage_fit_atf.sh $(dtb) > u-boot.its
- 	mkimage -E -p 0x3000 -f u-boot.its u-boot.itb
+@@ -161,7 +161,7 @@ u-boot.itb: $(dtb) $(supp_dtbs)
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb) $(supp_dtbs)
+ 	BL32=$(TEE) DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ../$(SOC_DIR)/mkimage_fit_atf.sh $(dtb) $(supp_dtbs) > u-boot.its
+ 	mkimage -E -p $(FIT_EXTERNAL_POSITION) -f u-boot.its u-boot.itb
 -	@rm -f u-boot.its $(dtb)
 +	@rm -f u-boot.its
  
  dtb_ddr3l = valddr3l.dtb
  $(dtb_ddr3l):
-@@ -322,7 +322,6 @@ print_fit_hab: u-boot-nodtb.bin bl31.bin $(dtb)
+@@ -329,7 +329,8 @@ print_fit_hab: u-boot-nodtb.bin bl31.bin $(dtb) $(supp_dtbs)
  	./$(PAD_IMAGE) bl31.bin
- 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb)
- 	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ../$(SOC_DIR)/print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtb)
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb) $(supp_dtbs)
+ 	FIT_DATA_POS=$(FIT_EXTERNAL_POSITION) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ../$(SOC_DIR)/print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtb) $(supp_dtbs)
 -	@rm -f $(dtb)
++	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb)
++	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ../$(SOC_DIR)/print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtb)
  
- print_fit_hab_ddr4: u-boot-nodtb.bin bl31.bin $(dtb_ddr4_evk)
+ print_fit_hab_ddr4: u-boot-nodtb.bin bl31.bin $(dtb_ddr4_evk) $(supp_dtbs)
  	./$(PAD_IMAGE) $(TEE)
