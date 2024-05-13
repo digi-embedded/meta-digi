@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2023, Digi International Inc.
+# Copyright (C) 2020-2024, Digi International Inc.
 
 FILES_SOLIBSDEV = " \
     ${base_libdir}/lib*${SOLIBSDEV} \
