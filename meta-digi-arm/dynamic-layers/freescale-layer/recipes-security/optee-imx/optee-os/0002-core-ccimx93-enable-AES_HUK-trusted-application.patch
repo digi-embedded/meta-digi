@@ -4,6 +4,8 @@ Subject: [PATCH] core: ccimx93: enable AES_HUK trusted application
 
 This provides the support for u-boot environment encryption.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
  core/arch/arm/plat-imx/conf.mk      |   2 +
@@ -24,10 +26,10 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  create mode 100644 ta/aes_huk/user_ta_header_defines.h
 
 diff --git a/core/arch/arm/plat-imx/conf.mk b/core/arch/arm/plat-imx/conf.mk
-index 5e4c02e27d2e..40d0bb4116dd 100644
+index 202cceb5c..42297508c 100644
 --- a/core/arch/arm/plat-imx/conf.mk
 +++ b/core/arch/arm/plat-imx/conf.mk
-@@ -456,12 +456,14 @@ endif
+@@ -504,12 +504,14 @@ endif
  ifneq (,$(filter $(PLATFORM_FLAVOR),ccimx93dvk))
  CFG_DDR_SIZE ?= 0x40000000
  CFG_UART_BASE ?= UART6_BASE
@@ -44,7 +46,7 @@ index 5e4c02e27d2e..40d0bb4116dd 100644
  # i.MX6 Solo/SL/SoloX/DualLite/Dual/Quad specific config
 diff --git a/ta/aes_huk/Android.mk b/ta/aes_huk/Android.mk
 new file mode 100644
-index 000000000000..931f8e4065c9
+index 000000000..931f8e406
 --- /dev/null
 +++ b/ta/aes_huk/Android.mk
 @@ -0,0 +1,4 @@
@@ -54,7 +56,7 @@ index 000000000000..931f8e4065c9
 +include $(BUILD_OPTEE_MK)
 diff --git a/ta/aes_huk/Makefile b/ta/aes_huk/Makefile
 new file mode 100644
-index 000000000000..e41d9913e6ae
+index 000000000..e41d9913e
 --- /dev/null
 +++ b/ta/aes_huk/Makefile
 @@ -0,0 +1,13 @@
@@ -73,7 +75,7 @@ index 000000000000..e41d9913e6ae
 +endif
 diff --git a/ta/aes_huk/aes_ta.c b/ta/aes_huk/aes_ta.c
 new file mode 100644
-index 000000000000..036d64b83478
+index 000000000..036d64b83
 --- /dev/null
 +++ b/ta/aes_huk/aes_ta.c
 @@ -0,0 +1,477 @@
@@ -556,7 +558,7 @@ index 000000000000..036d64b83478
 +}
 diff --git a/ta/aes_huk/include/aes_ta.h b/ta/aes_huk/include/aes_ta.h
 new file mode 100644
-index 000000000000..c07b4bc479ee
+index 000000000..c07b4bc47
 --- /dev/null
 +++ b/ta/aes_huk/include/aes_ta.h
 @@ -0,0 +1,82 @@
@@ -644,7 +646,7 @@ index 000000000000..c07b4bc479ee
 +#endif /* __AES_TA_H */
 diff --git a/ta/aes_huk/sub.mk b/ta/aes_huk/sub.mk
 new file mode 100644
-index 000000000000..cfce14e6c119
+index 000000000..cfce14e6c
 --- /dev/null
 +++ b/ta/aes_huk/sub.mk
 @@ -0,0 +1,3 @@
@@ -653,14 +655,14 @@ index 000000000000..cfce14e6c119
 +srcs-y += aes_ta.c
 diff --git a/ta/aes_huk/user_ta.mk b/ta/aes_huk/user_ta.mk
 new file mode 100644
-index 000000000000..d49d309558ba
+index 000000000..d49d30955
 --- /dev/null
 +++ b/ta/aes_huk/user_ta.mk
 @@ -0,0 +1 @@
 +user-ta-uuid := c2fad363-5d9f-4fc4-a417-555841e05745
 diff --git a/ta/aes_huk/user_ta_header_defines.h b/ta/aes_huk/user_ta_header_defines.h
 new file mode 100644
-index 000000000000..9f944b8b9ab3
+index 000000000..9f944b8b9
 --- /dev/null
 +++ b/ta/aes_huk/user_ta_header_defines.h
 @@ -0,0 +1,48 @@
