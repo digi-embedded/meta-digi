@@ -1,16 +1,18 @@
 From: Gabriel Valcazar <gabriel.valcazar@digi.com>
 Date: Fri, 19 Jan 2024 09:45:19 +0100
-Subject: [PATCH] Restore wl_shell to weston 11
+Subject: [PATCH] Restore wl_shell to weston 12
 
-This shell was deprecated some time ago and removed in weston 11, but it's the
+This shell was deprecated some time ago and removed in weston 12, but it's the
 default shell used by LVGL's wayland backend. Until we migrate said backend to
-use xdg_shell, restore wl_shell in weston 11.
+use xdg_shell, restore wl_shell in weston 12.
 
 This reverts the following commits:
 
     * d40cedc8af9a42e1f6746fb58f4556080c6ff133
     * 7cae2a1fb0aeec24ca33ac4c7cbb268f77095cb5
     * e6b8f5a5e40cd6c0b934e8ae079c86d5193efa96
+
+Upstream-Status: Inappropriate [digi specific]
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 ---
@@ -26,11 +28,11 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  create mode 100644 libweston/desktop/wl-shell.c
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 91fadd0b..fced4d76 100644
+index 99ad3dfb..51097b72 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -1163,16 +1163,16 @@ resize_grab_motion(struct weston_pointer_grab *grab,
- 				      pointer->x, pointer->y, &to_x, &to_y);
+@@ -1367,16 +1367,16 @@ resize_grab_motion(struct weston_pointer_grab *grab,
+ 	to_y = wl_fixed_from_double(tmp_s.c.y);
  
  	width = resize->width;
 -	if (resize->edges & WESTON_DESKTOP_SURFACE_EDGE_LEFT) {
@@ -50,7 +52,7 @@ index 91fadd0b..fced4d76 100644
  		height += wl_fixed_to_int(to_y - from_y);
  	}
  
-@@ -1250,9 +1250,9 @@ surface_resize(struct shell_surface *shsurf,
+@@ -1454,9 +1454,9 @@ surface_resize(struct shell_surface *shsurf,
  {
  	struct weston_resize_grab *resize;
  	const unsigned resize_topbottom =
@@ -62,7 +64,7 @@ index 91fadd0b..fced4d76 100644
  	const unsigned resize_any = resize_topbottom | resize_leftright;
  	struct weston_geometry geometry;
  
-@@ -1262,7 +1262,7 @@ surface_resize(struct shell_surface *shsurf,
+@@ -1466,7 +1466,7 @@ surface_resize(struct shell_surface *shsurf,
  		return 0;
  
  	/* Check for invalid edge combinations. */
@@ -71,7 +73,7 @@ index 91fadd0b..fced4d76 100644
  	    (edges & resize_topbottom) == resize_topbottom ||
  	    (edges & resize_leftright) == resize_leftright)
  		return 0;
-@@ -2123,9 +2123,9 @@ desktop_surface_committed(struct weston_desktop_surface *desktop_surface,
+@@ -2469,9 +2469,9 @@ desktop_surface_committed(struct weston_desktop_surface *desktop_surface,
  			sy = 0;
  		}
  
@@ -82,9 +84,9 @@ index 91fadd0b..fced4d76 100644
 +		if (shsurf->resize_edges & WL_SHELL_SURFACE_RESIZE_TOP)
  			sy = shsurf->last_height - surface->height;
  
- 		weston_view_to_global_float(shsurf->view, 0, 0, &from_x, &from_y);
-@@ -3084,18 +3084,18 @@ resize_binding(struct weston_pointer *pointer, const struct timespec *time,
- 				&x, &y);
+ 		to_s = weston_coord_surface(sx, sy, view->surface);
+@@ -3450,18 +3450,18 @@ resize_binding(struct weston_pointer *pointer, const struct timespec *time,
+ 	y = surf_pos.c.y;
  
  	if (x < surface->width / 3)
 -		edges |= WESTON_DESKTOP_SURFACE_EDGE_LEFT;
@@ -107,10 +109,10 @@ index 91fadd0b..fced4d76 100644
  	surface_resize(shsurf, pointer, edges);
  }
 diff --git a/libweston/backend-wayland/wayland.c b/libweston/backend-wayland/wayland.c
-index bb5648d5..3ba20ff7 100644
+index 48c21b99..7a82b1a6 100644
 --- a/libweston/backend-wayland/wayland.c
 +++ b/libweston/backend-wayland/wayland.c
-@@ -76,6 +76,7 @@ struct wayland_backend {
+@@ -85,6 +85,7 @@ struct wayland_backend {
  		struct wl_display *wl_display;
  		struct wl_registry *registry;
  		struct wl_compositor *compositor;
@@ -118,7 +120,7 @@ index bb5648d5..3ba20ff7 100644
  		struct xdg_wm_base *xdg_wm_base;
  		struct zwp_fullscreen_shell_v1 *fshell;
  		struct wl_shm *shm;
-@@ -111,6 +112,7 @@ struct wayland_output {
+@@ -123,6 +124,7 @@ struct wayland_output {
  		struct wl_output *output;
  		uint32_t global_id;
  
@@ -126,7 +128,7 @@ index bb5648d5..3ba20ff7 100644
  		struct xdg_surface *xdg_surface;
  		struct xdg_toplevel *xdg_toplevel;
  		int configure_width, configure_height;
-@@ -715,6 +717,11 @@ wayland_backend_destroy_output_surface(struct wayland_output *output)
+@@ -665,6 +667,11 @@ wayland_backend_destroy_output_surface(struct wayland_output *output)
  		output->parent.xdg_surface = NULL;
  	}
  
@@ -138,7 +140,7 @@ index bb5648d5..3ba20ff7 100644
  	wl_surface_destroy(output->parent.surface);
  	output->parent.surface = NULL;
  }
-@@ -787,6 +794,8 @@ wayland_output_destroy(struct weston_output *base)
+@@ -737,6 +744,8 @@ wayland_output_destroy(struct weston_output *base)
  	free(output);
  }
  
@@ -147,7 +149,7 @@ index bb5648d5..3ba20ff7 100644
  #ifdef ENABLE_EGL
  static int
  wayland_output_init_gl_renderer(struct wayland_output *output)
-@@ -940,6 +949,8 @@ wayland_output_set_windowed(struct wayland_output *output)
+@@ -899,6 +908,8 @@ wayland_output_set_windowed(struct wayland_output *output)
  
  	if (output->parent.xdg_toplevel) {
  		xdg_toplevel_unset_fullscreen(output->parent.xdg_toplevel);
@@ -156,7 +158,7 @@ index bb5648d5..3ba20ff7 100644
  	} else {
  		abort();
  	}
-@@ -949,6 +960,7 @@ wayland_output_set_windowed(struct wayland_output *output)
+@@ -908,6 +919,7 @@ wayland_output_set_windowed(struct wayland_output *output)
  
  static void
  wayland_output_set_fullscreen(struct wayland_output *output,
@@ -164,7 +166,7 @@ index bb5648d5..3ba20ff7 100644
  			      uint32_t framerate, struct wl_output *target)
  {
  	if (output->frame) {
-@@ -960,6 +972,9 @@ wayland_output_set_fullscreen(struct wayland_output *output,
+@@ -919,6 +931,9 @@ wayland_output_set_fullscreen(struct wayland_output *output,
  
  	if (output->parent.xdg_toplevel) {
  		xdg_toplevel_set_fullscreen(output->parent.xdg_toplevel, target);
@@ -174,16 +176,16 @@ index bb5648d5..3ba20ff7 100644
  	} else {
  		abort();
  	}
-@@ -1089,7 +1104,7 @@ wayland_output_switch_mode(struct weston_output *output_base,
+@@ -1139,7 +1154,7 @@ wayland_output_switch_mode(struct weston_output *output_base,
  
- 	b = to_wayland_backend(output_base->compositor);
+ 	if (output->parent.xdg_surface)
+ 		return wayland_output_switch_mode_xdg(output, mode);
+-	if (output->backend->parent.fshell)
++	if (output->backend->parent.fshell || output->parent.shell_surface)
+ 		return wayland_output_switch_mode_fshell(output, mode);
  
--	if (output->parent.xdg_surface || !b->parent.fshell)
-+	if (output->parent.xdg_surface || output->parent.shell_surface || !b->parent.fshell)
- 		return -1;
- 
- 	mode = wayland_output_choose_mode(output, mode);
-@@ -1230,6 +1245,20 @@ wayland_backend_create_output_surface(struct wayland_output *output)
+ 	return -1;
+@@ -1245,6 +1260,20 @@ wayland_backend_create_output_surface(struct wayland_output *output)
  
  		weston_log("wayland-backend: Using xdg_wm_base\n");
  	}
@@ -204,7 +206,7 @@ index bb5648d5..3ba20ff7 100644
  
  	return 0;
  }
-@@ -1294,9 +1323,13 @@ wayland_output_enable(struct weston_output *base)
+@@ -1309,9 +1338,13 @@ wayland_output_enable(struct weston_output *base)
  
  				output->parent.draw_initial_frame = true;
  			}
@@ -219,7 +221,7 @@ index bb5648d5..3ba20ff7 100644
  	} else {
  		wayland_output_set_windowed(output);
  	}
-@@ -1578,10 +1611,13 @@ wayland_output_setup_fullscreen(struct wayland_output *output,
+@@ -1600,10 +1633,13 @@ wayland_output_setup_fullscreen(struct wayland_output *output,
  		return -1;
  
  	/* What should size be set if conditional is false? */
@@ -234,7 +236,7 @@ index bb5648d5..3ba20ff7 100644
  
  		wl_display_roundtrip(b->parent.wl_display);
  
-@@ -1605,6 +1641,36 @@ err_set_size:
+@@ -1627,6 +1663,36 @@ err_set_size:
  	return -1;
  }
  
@@ -271,7 +273,7 @@ index bb5648d5..3ba20ff7 100644
  /* Events received from the wayland-server this compositor is client of: */
  
  /* parent input interface */
-@@ -1782,6 +1848,9 @@ input_handle_button(void *data, struct wl_pointer *pointer,
+@@ -1808,6 +1874,9 @@ input_handle_button(void *data, struct wl_pointer *pointer,
  			if (input->output->parent.xdg_toplevel)
  				xdg_toplevel_move(input->output->parent.xdg_toplevel,
  						  input->parent.seat, serial);
@@ -281,7 +283,7 @@ index bb5648d5..3ba20ff7 100644
  			frame_status_clear(input->output->frame,
  					   FRAME_STATUS_MOVE);
  			return;
-@@ -2135,6 +2204,9 @@ input_handle_touch_down(void *data, struct wl_touch *wl_touch,
+@@ -2169,6 +2238,9 @@ input_handle_touch_down(void *data, struct wl_touch *wl_touch,
  			if (output->parent.xdg_toplevel)
  				xdg_toplevel_move(output->parent.xdg_toplevel,
  						  input->parent.seat, serial);
@@ -291,7 +293,7 @@ index bb5648d5..3ba20ff7 100644
  			frame_status_clear(output->frame,
  					   FRAME_STATUS_MOVE);
  			return;
-@@ -2647,6 +2719,10 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t name,
+@@ -2683,6 +2755,10 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t name,
  					 &xdg_wm_base_interface, 1);
  		xdg_wm_base_add_listener(b->parent.xdg_wm_base,
  					 &wm_base_listener, b);
@@ -302,7 +304,7 @@ index bb5648d5..3ba20ff7 100644
  	} else if (strcmp(interface, "zwp_fullscreen_shell_v1") == 0) {
  		b->parent.fshell =
  			wl_registry_bind(registry, name,
-@@ -2741,6 +2817,9 @@ wayland_destroy(struct weston_compositor *ec)
+@@ -2778,6 +2854,9 @@ wayland_destroy(struct weston_backend *backend)
  	if (b->parent.xdg_wm_base)
  		xdg_wm_base_destroy(b->parent.xdg_wm_base);
  
@@ -312,7 +314,7 @@ index bb5648d5..3ba20ff7 100644
  	if (b->parent.fshell)
  		zwp_fullscreen_shell_v1_release(b->parent.fshell);
  
-@@ -2808,7 +2887,7 @@ fullscreen_binding(struct weston_keyboard *keyboard,
+@@ -2847,7 +2926,7 @@ fullscreen_binding(struct weston_keyboard *keyboard,
  		return;
  
  	if (input->output->frame)
@@ -322,10 +324,10 @@ index bb5648d5..3ba20ff7 100644
  		wayland_output_set_windowed(input->output);
  
 diff --git a/libweston/desktop/internal.h b/libweston/desktop/internal.h
-index 1d035d5c..93b15919 100644
+index c8d09272..41e81b13 100644
 --- a/libweston/desktop/internal.h
 +++ b/libweston/desktop/internal.h
-@@ -241,6 +241,10 @@ weston_desktop_xdg_wm_base_create(struct weston_desktop *desktop,
+@@ -249,6 +249,10 @@ weston_desktop_xdg_wm_base_create(struct weston_desktop *desktop,
  struct wl_global *
  weston_desktop_xdg_shell_v6_create(struct weston_desktop *desktop,
  				   struct wl_display *display);
@@ -337,7 +339,7 @@ index 1d035d5c..93b15919 100644
  weston_desktop_xwayland_init(struct weston_desktop *desktop);
  void
 diff --git a/libweston/desktop/libweston-desktop.c b/libweston/desktop/libweston-desktop.c
-index 0be9d717..cbe69942 100644
+index 05240cfb..b74ee09f 100644
 --- a/libweston/desktop/libweston-desktop.c
 +++ b/libweston/desktop/libweston-desktop.c
 @@ -42,6 +42,7 @@ struct weston_desktop {
@@ -394,7 +396,7 @@ index 4588ad10..d8e1a709 100644
  ])
 diff --git a/libweston/desktop/wl-shell.c b/libweston/desktop/wl-shell.c
 new file mode 100644
-index 00000000..9efec89b
+index 00000000..26360de9
 --- /dev/null
 +++ b/libweston/desktop/wl-shell.c
 @@ -0,0 +1,497 @@
@@ -433,7 +435,7 @@ index 00000000..9efec89b
 +#include <libweston/libweston.h>
 +#include <libweston/zalloc.h>
 +
-+#include <libweston-desktop/libweston-desktop.h>
++#include <libweston/desktop.h>
 +#include "internal.h"
 +
 +#define WD_WL_SHELL_PROTOCOL_VERSION 1
@@ -747,7 +749,7 @@ index 00000000..9efec89b
 +
 +	weston_desktop_wl_shell_change_state(surface, POPUP,
 +					     parent_surface, x, y);
-+	weston_desktop_surface_popup_grab(surface->surface, seat, serial);
++	weston_desktop_surface_popup_grab(surface->surface, parent_surface, seat, serial);
 +	surface->popup_seat = seat;
 +}
 +
@@ -896,10 +898,10 @@ index 00000000..9efec89b
 +				weston_desktop_wl_shell_bind);
 +}
 diff --git a/meson.build b/meson.build
-index 6452ca05..64575226 100644
+index 53dd670b..a6b2cb61 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -141,6 +141,12 @@ if dep_xkbcommon.version().version_compare('>= 0.5.0')
+@@ -137,6 +137,12 @@ if dep_xkbcommon.version().version_compare('>= 0.5.0')
  	config_h.set('HAVE_XKBCOMMON_COMPOSE', '1')
  endif
  
@@ -913,10 +915,10 @@ index 6452ca05..64575226 100644
  dep_wayland_client = dependency('wayland-client', version: '>= 1.20.0')
  dep_pixman = dependency('pixman-1', version: '>= 0.25.2')
 diff --git a/meson_options.txt b/meson_options.txt
-index 695eb780..203fa12d 100644
+index 643c6d61..cb833c2d 100644
 --- a/meson_options.txt
 +++ b/meson_options.txt
-@@ -132,6 +132,13 @@ option(
+@@ -144,6 +144,13 @@ option(
  	description: 'Weston desktop shell: default helper client selection'
  )
  

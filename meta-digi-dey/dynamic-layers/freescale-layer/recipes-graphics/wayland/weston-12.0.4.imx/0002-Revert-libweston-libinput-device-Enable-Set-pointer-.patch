@@ -8,19 +8,21 @@ This reverts commit e825fe389ebd63470028abd828019840c1170a03.
 This commit will cause waylandsink cannot register pointer seat.
 As a result, mouse cannot move waylandsink window
 
+Upstream-Status: Inappropriate [digi specific]
+
 (cherry picked from commit 3f8f336b5d2cf7ea7aa4e047d669d093fc46dfe6)
 ---
  libweston/libinput-device.c | 29 +++++------------------------
  1 file changed, 5 insertions(+), 24 deletions(-)
 
 diff --git a/libweston/libinput-device.c b/libweston/libinput-device.c
-index 4ea89de0..2d7a7d5f 100644
+index 31b88ac4..207d0075 100644
 --- a/libweston/libinput-device.c
 +++ b/libweston/libinput-device.c
-@@ -60,21 +60,6 @@ evdev_led_update(struct evdev_device *device, enum weston_led weston_leds)
+@@ -67,21 +67,6 @@ evdev_led_update(struct evdev_device *device, enum weston_led weston_leds)
  	libinput_device_led_update(device->device, leds);
  }
-
+ 
 -static void
 -ensure_pointer_capability(struct libinput_device *libinput_device)
 -{
@@ -39,44 +41,44 @@ index 4ea89de0..2d7a7d5f 100644
  static void
  handle_keyboard_key(struct libinput_device *libinput_device,
  		    struct libinput_event_keyboard *keyboard_event)
-@@ -112,8 +97,6 @@ handle_pointer_motion(struct libinput_device *libinput_device,
+@@ -119,8 +104,6 @@ handle_pointer_motion(struct libinput_device *libinput_device,
  	struct timespec time;
  	double dx_unaccel, dy_unaccel;
-
+ 
 -	ensure_pointer_capability(libinput_device);
 -
  	timespec_from_usec(&time,
  			   libinput_event_pointer_get_time_usec(pointer_event));
  	dx_unaccel = libinput_event_pointer_get_dx_unaccelerated(pointer_event);
-@@ -146,8 +129,6 @@ handle_pointer_motion_absolute(
+@@ -152,8 +135,6 @@ handle_pointer_motion_absolute(
  	double x, y;
  	uint32_t width, height;
-
+ 
 -	ensure_pointer_capability(libinput_device);
 -
  	if (!output)
  		return false;
-
-@@ -179,8 +160,6 @@ handle_pointer_button(struct libinput_device *libinput_device,
+ 
+@@ -184,8 +165,6 @@ handle_pointer_button(struct libinput_device *libinput_device,
  		libinput_event_pointer_get_seat_button_count(pointer_event);
  	struct timespec time;
-
+ 
 -	ensure_pointer_capability(libinput_device);
 -
  	/* Ignore button events that are not seat wide state changes. */
  	if ((button_state == LIBINPUT_BUTTON_STATE_PRESSED &&
  	     seat_button_count != 1) ||
-@@ -260,8 +239,6 @@ handle_pointer_axis(struct libinput_device *libinput_device,
+@@ -264,8 +243,6 @@ handle_pointer_axis(struct libinput_device *libinput_device,
  	bool has_vert, has_horiz;
  	struct timespec time;
-
+ 
 -	ensure_pointer_capability(libinput_device);
 -
  	has_vert = libinput_event_pointer_has_axis(pointer_event,
  				   LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL);
  	has_horiz = libinput_event_pointer_has_axis(pointer_event,
-@@ -738,7 +715,11 @@ evdev_device_create(struct libinput_device *libinput_device,
-
+@@ -1025,7 +1002,11 @@ evdev_device_create(struct libinput_device *libinput_device,
+ 
  		device->seat_caps |= EVDEV_SEAT_KEYBOARD;
  	}
 -
