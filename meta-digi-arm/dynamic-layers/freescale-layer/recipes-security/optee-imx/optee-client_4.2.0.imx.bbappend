@@ -1,13 +1,7 @@
-# Copyright (C) 2023,2024, Digi International Inc.
-
-#
-# Reuse meta-freescale's optee-client_3.19.0.imx.bb
-#
-require recipes-security/optee-imx/optee-client_3.19.0.imx.bb
+# Copyright (C) 2024, Digi International Inc.
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += "${@oe.utils.vartrue('TRUSTFENCE_FILE_BASED_ENCRYPT', 'file://tee-supplicant', '', d)}"
-SRCBRANCH = "lf-6.1.55_2.2.0"
-SRCREV = "acb0885c117e73cb6c5c9b1dd9054cb3f93507ee"
 
 EXTRA_OEMAKE += "PKG_CONFIG=pkg-config CFG_TEE_FS_PARENT_PATH='${localstatedir}/lib/tee'"
 
@@ -23,5 +17,3 @@ do_install() {
 		install -m 0644 ${WORKDIR}/tee-supplicant ${D}${sysconfdir}/default/tee-supplicant
 	fi
 }
-
-COMPATIBLE_MACHINE = "(ccimx93)"
