@@ -9,6 +9,8 @@ EAP-TLS unless explicitly enabled in network configuration. The new
 CONFIG_EAP_TLSV1_3=y build parameter can be used to change this to
 enable TLSv1.3 by default (if supported by the TLS library).
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Jouni Malinen <quic_jouni@quicinc.com>
 ---
  src/eap_peer/eap_tls_common.c | 12 +++++++-----

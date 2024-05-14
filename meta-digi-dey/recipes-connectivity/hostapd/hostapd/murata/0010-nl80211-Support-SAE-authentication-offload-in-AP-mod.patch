@@ -6,6 +6,8 @@ Subject: [PATCH 10/60] nl80211: Support SAE authentication offload in AP mode
 If driver advertises support for SAE authentication offload, pass SAE
 password in NL80211_CMD_NEW_BEACON command for AP mode.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---
  src/drivers/driver.h              | 12 +++++++++++-

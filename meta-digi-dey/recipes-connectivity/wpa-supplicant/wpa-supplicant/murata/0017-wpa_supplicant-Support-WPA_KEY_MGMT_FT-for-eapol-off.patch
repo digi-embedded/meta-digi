@@ -7,6 +7,8 @@ Subject: [PATCH 17/60] wpa_supplicant: Support WPA_KEY_MGMT_FT for eapol
 Add WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_PSK / WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X /
 WPA_DRIVER_FLAGS_ROAM_OFFLOAD for IEEE80211R support
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Chien-Chia Chen<carella.chen@infineon.com>
 ---
  src/drivers/driver.h              | 2 ++

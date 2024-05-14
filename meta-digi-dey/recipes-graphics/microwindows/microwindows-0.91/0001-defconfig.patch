@@ -2,6 +2,8 @@ From: Javier Viguera <javier.viguera@digi.com>
 Date: Thu, 27 Jun 2013 13:20:56 +0200
 Subject: [PATCH] defconfig
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
  src/config | 40 ++++++++++++++++++++--------------------

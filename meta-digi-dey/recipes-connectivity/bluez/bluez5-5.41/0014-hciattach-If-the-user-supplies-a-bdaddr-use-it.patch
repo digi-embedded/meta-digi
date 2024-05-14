@@ -5,6 +5,8 @@ Subject: [PATCH] hciattach: If the user supplies a bdaddr, use it
 The QCA6564 has no non-volatile configuration file for the bluetooth
 MAC, so use the one supplied on the command line.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 ---
  tools/hciattach.c      |  4 +--

@@ -3,6 +3,8 @@ From: Lionel VITTE <lionel.vitte@st.com>
 Date: Wed, 8 Feb 2023 09:57:06 +0100
 Subject: [PATCH 26/28] 5.15-stm32mp-rt-49-r1 NET-TTY
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Lionel VITTE <lionel.vitte@st.com>
 ---
  drivers/tty/serial/stm32-usart.c | 32 +++++++++++---------------------

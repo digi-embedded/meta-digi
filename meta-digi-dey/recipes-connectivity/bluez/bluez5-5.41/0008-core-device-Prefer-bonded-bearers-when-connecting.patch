@@ -7,6 +7,8 @@ When attempting to connect a dual-mode device prefer bonded bearer if
 only one has been marked as bonded. This prevents connecting to a
 different bearer after pairing is complete and cross transport pairing
 is not supported.
+
+Upstream-Status: Inappropriate [digi specific]
 ---
  src/device.c | 6 ++++++
  1 file changed, 6 insertions(+)

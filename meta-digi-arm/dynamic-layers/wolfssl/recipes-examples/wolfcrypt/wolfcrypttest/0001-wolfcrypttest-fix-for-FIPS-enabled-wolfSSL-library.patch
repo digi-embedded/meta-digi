@@ -4,6 +4,8 @@ Subject: [PATCH] wolfcrypttest: fix for FIPS enabled wolfSSL library
 
 FIPS does not support MD5
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
  test.c | 6 ++++++

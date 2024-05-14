@@ -7,6 +7,8 @@ Subject: [PATCH 34/60] wpa_supplicant: Set PMKSA to driver while key mgmt is
 When the fast roaming is determined by the firmware, the
 firmware needs the pmk to calculate PMK-R0name.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: JasonHuang <Jason.Huang2@infineon.com>
 ---
  src/rsn_supp/wpa.c | 6 ++++--

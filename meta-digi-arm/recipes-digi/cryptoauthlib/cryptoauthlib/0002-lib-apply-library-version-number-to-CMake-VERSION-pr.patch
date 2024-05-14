@@ -8,6 +8,8 @@ additional symlink without it. This avoids bitbake errors that appear when
 creating *-dev packages, as Yocto development packages should only include
 the soname symlinks instead of the actual library file.
 
+Upstream-Status: Inappropriate [digi specific]
+
 https://jira.digi.com/browse/DEL-6826
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>

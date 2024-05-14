@@ -8,6 +8,8 @@ drm/kms kernel driver ioctl DRM_IOCTL_MODE_CREATE_DUMB.
 This pool is selected if video/x-raw(memory:DMABuf)
 is set in caps.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Change-Id: I0507752a1a64ee2c657b73d8c802c44fd707f49f
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>
 ---

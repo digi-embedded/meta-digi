@@ -6,6 +6,8 @@ Subject: [PATCH 25/60] non-upstream: wl-cmd: create ops table to do wl
 
 Creeate wl_cmds to handle wl commands
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Ian Lin <ian.lin@infineon.com>
 Signed-off-by: Kurt Lee <kurt.lee@infineon.com>
 ---

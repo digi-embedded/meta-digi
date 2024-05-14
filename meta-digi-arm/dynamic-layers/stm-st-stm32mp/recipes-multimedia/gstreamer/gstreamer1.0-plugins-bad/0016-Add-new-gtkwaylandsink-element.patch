@@ -3,6 +3,7 @@ From: George Kiagiadakis <george.kiagiadakis@collabora.com>
 Date: Fri, 17 Dec 2021 14:02:51 +0200
 Subject: [PATCH 16/16] Add new gtkwaylandsink element
 
+Upstream-Status: Inappropriate [digi specific]
 ---
  ext/gtk/gstgtkutils.c         |  71 +++++
  ext/gtk/gstgtkutils.h         |  29 ++

@@ -9,6 +9,8 @@ it will not reset sm->pmk in wpa_supplicant_select_config since old and new SSID
 It causes using wrong pmk when roaming from WPA3 to WPA2.
 So add the flow to only reset sm->pmk while handling roam event.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Ian Lin <ian.lin@infineon.com>
 ---
  src/drivers/driver.h               | 6 ++++++

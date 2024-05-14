@@ -7,6 +7,8 @@ Subject: [PATCH 04/14] waylandsink: do not hardcode dmabuf bufferpool info
 Read pool config to get the maximum number of buffers
 for info size pool allocation.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>
 ---
  ext/wayland/waylandpool.c | 12 +++++++++++-

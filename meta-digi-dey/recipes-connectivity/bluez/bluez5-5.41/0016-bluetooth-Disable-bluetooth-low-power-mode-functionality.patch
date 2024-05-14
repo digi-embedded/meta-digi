@@ -6,6 +6,8 @@ In some conditions the low power modes cause communication
 errors between the BT chip and the system, for this reason
 we disable it by default.
 
+Upstream-Status: Inappropriate [digi specific]
+
 https://jira.digi.com/browse/DEL-3711
 
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>

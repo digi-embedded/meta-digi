@@ -10,6 +10,8 @@ offload is considered.
 This patch enables the report of connection authorized in EVENT_ASSOC to
 indicate the requirement of 802.1X authentication.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---
  src/drivers/driver_nl80211_event.c | 5 +++--

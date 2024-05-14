@@ -6,6 +6,8 @@ Subject: [PATCH 06/60] nl80211: Check SAE authentication offload support
 Set WPA_DRIVER_FLAGS2_SAE_OFFLOAD flag if driver indicates SAE
 authentication offload support.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---
  src/drivers/driver.h              | 2 ++

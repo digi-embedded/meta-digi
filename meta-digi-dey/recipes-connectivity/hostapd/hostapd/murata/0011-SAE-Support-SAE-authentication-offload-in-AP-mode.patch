@@ -6,6 +6,8 @@ Subject: [PATCH 11/60] SAE: Support SAE authentication offload in AP mode
 Add support for SAE authentication offload in AP mode. In this case, the
 SAE authentication process is handled by driver instead of user space.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---
  src/ap/beacon.c        | 11 +++++++++++

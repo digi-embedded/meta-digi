@@ -6,6 +6,8 @@ Subject: [PATCH 13/60] non-upstream: defconfig_base: Add Infineon default
 
 Add Infineon default configuration files (defconfig_base).
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Kurt Lee <kurt.lee@infineon.com>
 Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---

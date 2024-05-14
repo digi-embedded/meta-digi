@@ -7,6 +7,8 @@ Added GPIO_SET_DEBOUNCE_IOCTL define and gpioline_debounce struct.
 This allows calling gpiod_set_debounce() function through char device ioctl to
 gpiolib.
 
+Upstream-Status: Inappropriate [digi specific]
+
 https://jira.digi.com/browse/DEL-6425
 
 Signed-off-by: Hector Bujanda <hector.bujanda@digi.com>

@@ -3,6 +3,8 @@ Date: Mon, 2 Jan 2017 13:11:02 +0100
 Subject: [PATCH] pulseaudio: keep headphones volume in platforms without jack
  detection
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Hector Palacios <hector.palacios@digi.com>
 ---
  src/modules/alsa/mixer/paths/analog-output-headphones.conf | 4 ++--

@@ -12,6 +12,8 @@ and virtual memory path.
 This fix is required to reach 30fps on display driver side
 with 30fps VGA video content.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>
 ---
  ext/libav/gstavviddec.c | 2 +-

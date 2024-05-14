@@ -5,6 +5,8 @@ Subject: [PATCH] bdaddr: support setting MAC address for NXP iw612
 It uses same command sequence than ericsson's, so reuse
 ericsson_store_in_flash function.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
  tools/bdaddr.c | 6 ++++++

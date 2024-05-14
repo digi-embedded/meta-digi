@@ -7,6 +7,8 @@ H1 combo is using internal supplicant and 4-way handshake is offloaded
 to firmware for softap mode.
 For DPP Softap role external supplicant will be used.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: avishad verma <avishad.verma@infineon.com>
 ---
  src/ap/wpa_auth_glue.c | 3 +++

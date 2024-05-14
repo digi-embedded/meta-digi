@@ -3,6 +3,8 @@ From: Lionel VITTE <lionel.vitte@st.com>
 Date: Wed, 8 Feb 2023 09:54:24 +0100
 Subject: [PATCH 23/28] 5.15-stm32mp-rt-49-r1 CLOCK
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Lionel VITTE <lionel.vitte@st.com>
 ---
  drivers/clk/stm32/clk-stm32mp13.c | 2 +-

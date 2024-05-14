@@ -2,6 +2,8 @@ From: Javier Viguera <javier.viguera@digi.com>
 Date: Wed, 29 Oct 2014 13:06:15 +0100
 Subject: [PATCH] sysvinit: disable all cpus but cpu0 for halt/reboot
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
  src/Makefile    |  6 ++---

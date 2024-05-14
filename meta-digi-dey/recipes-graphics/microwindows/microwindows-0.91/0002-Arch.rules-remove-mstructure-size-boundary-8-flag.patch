@@ -4,6 +4,8 @@ Subject: [PATCH] Arch.rules: remove 'mstructure-size-boundary' flag
 
 This flag is not supported in ARM64 toolchains.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>
 ---
  Arch.rules | 2 +-

@@ -3,6 +3,8 @@ Date: Mon, 28 Jun 2021 18:45:20 +0200
 Subject: [PATCH] Makefile: change Makefile to build swupdate library
  statically
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Mike Engel <Mike.Engel@digi.com>
 ---
  Makefile                    | 2 ++

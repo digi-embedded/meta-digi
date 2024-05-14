@@ -12,6 +12,7 @@ vendor nl80211 CMD interface with OUI_IFX.
 
 Infineon OUI - 00:03:19 (Ref https://standards-oui.ieee.org/)
 
+Upstream-Status: Inappropriate [digi specific]
 
 Signed-off-by: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
 Signed-off-by: Ian Lin <ian.lin@infineon.com>

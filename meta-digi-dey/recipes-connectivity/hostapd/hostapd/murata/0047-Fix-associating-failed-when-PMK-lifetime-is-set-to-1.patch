@@ -17,6 +17,8 @@ So there's not necessary to reauth with radius server to get the new PMK.
 
 Solution: use the same parameter to decide whether register timer to reauth.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Fixed: SWLINUX-2883
 Signed-off-by: Owen Huang <Owen.Huang@infineon.com>
 ---

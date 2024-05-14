@@ -7,6 +7,8 @@ Subject: [PATCH] imx6ul: Add MCA tamper support for ConnectCore 6UL SOM and
 Synched with v4.14.78/master at:
 3f8b03950b323db4ca89b1cdc1c2288f79facaa3
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 ---
  arch/arm/boot/dts/imx6ul-ccimx6ulsbcpro.dts |   7 +

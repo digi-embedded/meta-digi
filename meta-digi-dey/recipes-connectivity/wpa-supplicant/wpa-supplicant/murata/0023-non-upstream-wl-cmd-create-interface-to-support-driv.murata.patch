@@ -8,6 +8,8 @@ Subject: [PATCH 23/60] non-upstream: wl-cmd: create interface to support
 2. Create files and compile flag to separate this feature
 3. Support 2g_rate/5g_rate command
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Ian Lin <ian.lin@infineon.com>
 Signed-off-by: Kurt Lee <kurt.lee@infineon.com>
 ---

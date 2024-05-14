@@ -8,6 +8,8 @@ configurations and wpa_cli commands.
 
 Fixes: SWLINUX-2712
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Carter Chen <carter.chen@infineon.com>
 ---
  wpa_supplicant/defconfig_base | 3 +++

@@ -10,6 +10,8 @@ This solves a problem, where udev was setting the mode and group of
 the newly created files, so they are accessible for users (not root)
 belonging to that group.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
  lib/gpio.c | 3 +++

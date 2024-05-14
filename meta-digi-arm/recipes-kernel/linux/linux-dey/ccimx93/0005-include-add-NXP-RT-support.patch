@@ -3,6 +3,8 @@ From: Mike Engel <Mike.Engel@digi.com>
 Date: Fri, 23 Feb 2024 12:30:39 +0100
 Subject: [PATCH 05/10] include: add NXP RT support
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Mike Engel <Mike.Engel@digi.com>
 ---
  include/dt-bindings/clock/imx8-clock.h |  10 +++

@@ -15,6 +15,8 @@ auth frames.
 
 Fixes: SWLINUX-3420
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Carter Chen <carter.chen@infineon.com>
 ---
  src/drivers/driver_nl80211.c | 1 +

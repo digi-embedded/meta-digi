@@ -7,6 +7,8 @@ Subject: [PATCH 05/14] waylandsink: increase max buffers to 32 to enable
 libav software decoders requires max buffers in pool config to be
 at least 32, otherwise this pool is rejected.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Change-Id: If1a54ee8c1a9f320fd91537e8e2082c4a7a78700
 ---
  ext/wayland/gstwaylandsink.c | 8 ++++++--

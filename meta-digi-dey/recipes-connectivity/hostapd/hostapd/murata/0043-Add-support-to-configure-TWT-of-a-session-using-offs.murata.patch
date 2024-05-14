@@ -14,6 +14,7 @@ $ wpa_cli twt_setup setup_cmd=0 min_twt=80 mantissa=38400 exponent=3 \
 	twt_offset=102400 trigger=0 implicit=1 flow_type=0 flow_id=5 \
 	control=0
 
+Upstream-Status: Inappropriate [digi specific]
 
 Signed-off-by: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
 Signed-off-by: Ian Lin <ian.lin@infineon.com>

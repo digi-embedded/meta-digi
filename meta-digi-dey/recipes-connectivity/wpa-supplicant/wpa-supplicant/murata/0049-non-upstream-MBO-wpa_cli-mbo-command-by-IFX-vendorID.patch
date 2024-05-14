@@ -3,6 +3,8 @@ From: Carter Chen <carter.chen@infineon.com>
 Date: Wed, 14 Dec 2022 01:34:23 -0600
 Subject: [PATCH 49/60] non-upstream: MBO: wpa_cli mbo command by IFX vendorID
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Carter Chen <carter.chen@infineon.com>
 Signed-off-by: Shelley Yang <shelley.yang@infineon.com>
 ---

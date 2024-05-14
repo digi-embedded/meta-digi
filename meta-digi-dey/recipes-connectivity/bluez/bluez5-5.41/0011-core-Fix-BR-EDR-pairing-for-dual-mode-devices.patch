@@ -8,6 +8,8 @@ events to reply with correct one on agent reply. Otherwise reply for
 BR/EDR pairing of dual mode device would use address type (which is
 valid only for LE address) resulting in reply being ignored by kernel
 and eventually pairing timeout.
+
+Upstream-Status: Inappropriate [digi specific]
 ---
  src/adapter.c |  7 ++++---
  src/device.c  | 31 +++++++++++++++++--------------

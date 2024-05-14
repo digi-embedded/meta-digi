@@ -9,6 +9,8 @@ If an ouput fail to be attach or enable then this output must be only
 destroyed and an error doesn't be re which detach & destroy
 all other output.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Yannick Fertré <yannick.fertre@st.com>
 ---
  compositor/main.c | 8 +++++++-

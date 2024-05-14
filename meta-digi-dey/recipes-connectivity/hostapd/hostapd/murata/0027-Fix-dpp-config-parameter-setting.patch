@@ -3,6 +3,7 @@ From: "Shankar Amar (CSTIPL CSS ICW SW WFS 1)" <amar.shankar@infineon.com>
 Date: Mon, 20 Jun 2022 05:57:46 +0000
 Subject: [PATCH 27/60] Fix dpp config parameter setting
 
+Upstream-Status: Inappropriate [digi specific]
 ---
  src/common/dpp.c | 7 ++++---
  1 file changed, 4 insertions(+), 3 deletions(-)

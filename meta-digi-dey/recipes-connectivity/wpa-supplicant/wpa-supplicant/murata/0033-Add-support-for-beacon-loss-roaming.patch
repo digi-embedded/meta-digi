@@ -3,6 +3,7 @@ From: root <root@cy-blr-au146.india.cypress.com>
 Date: Tue, 26 Jul 2022 17:24:49 -0400
 Subject: [PATCH 33/60] Add support for beacon loss roaming
 
+Upstream-Status: Inappropriate [digi specific]
 ---
  wpa_supplicant/bgscan_learn.c  | 19 ++++++++++++++++++-
  wpa_supplicant/bgscan_simple.c | 20 +++++++++++++++++++-

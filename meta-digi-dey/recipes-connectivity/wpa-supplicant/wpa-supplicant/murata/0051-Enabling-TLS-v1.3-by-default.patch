@@ -3,6 +3,8 @@ From: Carter Chen <carter.chen@infineon.com>
 Date: Fri, 24 Mar 2023 01:45:06 -0500
 Subject: [PATCH 51/60] Enabling TLS v1.3 by default
 
+Upstream-Status: Inappropriate [digi specific]
+
 Fixes: SWLINUX-3331
 ---
  wpa_supplicant/defconfig_base | 3 +++

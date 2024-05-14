@@ -11,6 +11,8 @@ Subject: [PATCH] ahab_pki_tree.sh: adapt script for DEY
 * extract public keys from certificates: the public key needs to be
   available on the rootfs so that signed SWU packages can be authenticated.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Co-Authored-By: Javier Viguera <javier.viguera@digi.com>
 Co-Authored-By: Hector Palacios <hector.palacios@digi.com>
 Co-Authored-By: Mike Engel <Mike.Engel@digi.com>

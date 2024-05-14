@@ -2,6 +2,8 @@ From: Mike Engel <Mike.Engel@digi.com>
 Date: Fri, 26 May 2023 11:21:43 +0200
 Subject: [PATCH] Implement support for environment encryption using Optee
 
+Upstream-Status: Inappropriate [digi specific]
+
 Co-authored-by: Javier Viguera <javier.viguera@digi.com>
 Signed-off-by: Mike Engel <Mike.Engel@digi.com>
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>

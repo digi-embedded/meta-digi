@@ -8,6 +8,8 @@ cryptoauth_test app. Additional installation instructions were added as well.
 Move the ATCA_HAL_I2C build option to the root CMake file to enable it for both
 the library and the test app.
 
+Upstream-Status: Inappropriate [digi specific]
+
 https://jira.digi.com/browse/DEL-6826
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>

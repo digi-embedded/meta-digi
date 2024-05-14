@@ -7,6 +7,8 @@ Linux Kernel 4.10 DRM/KMS requires DRM_RDWR rights
 in addition to DRM_CLOEXEC (see drmPrimeHandleToFD())
 in order to mmap in RD/WR.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Change-Id: I9c26642a47e6f71b56c0a4ad4714a5b85d814e5f
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>
 ---

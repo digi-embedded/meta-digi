@@ -3,6 +3,8 @@ Date: Tue, 16 Nov 2021 15:44:20 +0100
 Subject: [PATCH] lib: set ATECC508A as default device type in default
  configuration
 
+Upstream-Status: Inappropriate [digi specific]
+
 https://onedigi.atlassian.net/browse/DEL-7727
 
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>

@@ -4,6 +4,8 @@ Subject: [PATCH] openssl_helper: use /dev/urandom as seed source
 
 This is needed in order to avoid indefinitely blocking.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
 ---
  code/cst/code/common/src/openssl_helper.c | 2 +-

@@ -7,6 +7,8 @@ Subject: [PATCH 04/60] wpa_supplicant: Add PMKSA cache for 802.1X 4-way
 Add PMKSA cache and set PMK to the driver for 802.1X 4-way handshake
 offload.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---
  wpa_supplicant/wpas_glue.c | 59 +++++++++++++++++++++++---------------

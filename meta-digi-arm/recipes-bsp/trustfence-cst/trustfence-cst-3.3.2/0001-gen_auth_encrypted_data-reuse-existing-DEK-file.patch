@@ -8,6 +8,8 @@ needed to allow the CST to reuse an existing DEK file.
 Previous to this patch, the DEK is generated on the fly and placed on the
 specified path. After this patch, the DEK is taken from the specified path.
 
+Upstream-Status: Inappropriate [digi specific]
+
 https://jira.digi.com/browse/DUB-608
 
 Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>

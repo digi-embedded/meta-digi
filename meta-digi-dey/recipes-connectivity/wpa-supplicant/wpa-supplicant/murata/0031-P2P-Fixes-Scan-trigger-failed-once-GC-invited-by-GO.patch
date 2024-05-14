@@ -7,6 +7,8 @@ It's regression between 2.9 and 2.10. The 5g frequencys be
 repeatedly added to the list, then nl80211 driver will return
 -22 (Invalid argument).
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: JasonHuang <Jason.Huang-EE@infineon.com>
 ---
  wpa_supplicant/scan.c | 28 ++++++++++------------------

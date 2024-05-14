@@ -6,6 +6,8 @@ Subject: [PATCH 09/60] AP: Support 4-way handshake offload for WPA/WPA2-PSK
 Add support for WPA/WPA2-PSK 4-way handshake offload in AP mode. In this
 case, the 4-way handshake is handled by driver instead of user space.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---
  src/ap/beacon.c        | 10 ++++++++++

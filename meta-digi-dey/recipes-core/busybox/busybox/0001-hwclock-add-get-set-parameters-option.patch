@@ -27,6 +27,8 @@ static.hwclock_longopts                               60      84     +24
 ------------------------------------------------------------------------------
 (add/remove: 0/0 grow/shrink: 4/0 up/down: 506/0)             Total: 506 bytes
 
+Upstream-Status: Backport [master]
+
 Signed-off-by: Andrej Picej <andrej.picej@norik.com>
 Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
 (cherry picked from commit d70256a5c719439cc6fab6a4571c1bb46178e4c7)

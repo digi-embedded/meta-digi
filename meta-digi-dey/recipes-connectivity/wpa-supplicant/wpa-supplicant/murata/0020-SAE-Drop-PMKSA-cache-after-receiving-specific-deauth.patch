@@ -5,6 +5,8 @@ Subject: [PATCH 20/60] SAE: Drop PMKSA cache after receiving specific deauth
 
 As a STA mode, when receiving deauth frame with reason code
 WLAN_REASON_PREV_AUTH_NOT_VALID, it should drop its PMKSA cache.
+
+Upstream-Status: Inappropriate [digi specific]
 ---
  wpa_supplicant/events.c | 19 +++++++++++++++++++
  1 file changed, 19 insertions(+)

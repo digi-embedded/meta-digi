@@ -2,6 +2,8 @@ From: Luiz Augusto von Dentz <luiz.von.dentz@intel.com>
 Date: Tue, 2 Mar 2021 11:38:33 -0800
 Subject: shared/gatt-server: Fix not properly checking for secure flags
 
+Upstream-Status: Inappropriate [digi specific]
+
 When passing the mask to check_permissions all valid permissions for
 the operation must be set including BT_ATT_PERM_SECURE flags.
 ---

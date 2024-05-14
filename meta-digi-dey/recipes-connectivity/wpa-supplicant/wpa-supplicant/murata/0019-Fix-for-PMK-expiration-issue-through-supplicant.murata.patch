@@ -11,6 +11,8 @@ element in wpa_authenticator structure to pass to the lower API's
 occurs.
 Tested: Confirmed once PMK timeout occurs AP is sending deauth and STA
 starting AUTH frame.
+
+Upstream-Status: Inappropriate [digi specific]
 ---
  src/ap/ap_config.h    | 2 ++
  src/ap/ieee802_11.c   | 1 +

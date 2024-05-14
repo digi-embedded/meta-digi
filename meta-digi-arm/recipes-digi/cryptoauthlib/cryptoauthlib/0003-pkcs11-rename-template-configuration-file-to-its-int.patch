@@ -6,6 +6,8 @@ Subject: [PATCH 3/6] pkcs11: rename template configuration file to its
 Otherwise, users will need to manually rename the file in the rootfs to use
 the pkcs11 feature.
 
+Upstream-Status: Inappropriate [digi specific]
+
 https://jira.digi.com/browse/DEL-6835
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>

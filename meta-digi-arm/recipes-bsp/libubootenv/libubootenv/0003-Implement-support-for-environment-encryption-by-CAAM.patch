@@ -7,6 +7,8 @@ based on the u-boot-fw-utils implementation of the CAAM encryption support.
 
 Port a subset of U-Boot's md5 implementation.
 
+Upstream-Status: Inappropriate [digi specific]
+
 https://jira.digi.com/browse/DEL-7410
 https://jira.digi.com/browse/DEL-7185
 https://jira.digi.com/browse/DEL-2836

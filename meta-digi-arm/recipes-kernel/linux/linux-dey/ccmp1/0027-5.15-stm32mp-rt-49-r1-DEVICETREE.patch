@@ -3,6 +3,8 @@ From: Lionel VITTE <lionel.vitte@st.com>
 Date: Wed, 8 Feb 2023 09:57:43 +0100
 Subject: [PATCH 27/28] 5.15-stm32mp-rt-49-r1 DEVICETREE
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Lionel VITTE <lionel.vitte@st.com>
 ---
  arch/arm/boot/dts/stm32mp131.dtsi | 1 -

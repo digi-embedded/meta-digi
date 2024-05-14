@@ -4,6 +4,7 @@ Date: Mon, 16 Oct 2023 09:18:19 +0000
 Subject: [PATCH 57/60] DPP2.0: support DPP2.0 and add pfs init flow on
  EVENT_UPDATE_DH
 
+Upstream-Status: Inappropriate [digi specific]
 ---
  hostapd/defconfig_base        |  1 +
  src/ap/drv_callbacks.c        | 55 ++++++++++++++++-----------

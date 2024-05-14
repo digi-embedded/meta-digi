@@ -3,6 +3,8 @@ From: Christophe Priouzeau <christophe.priouzeau@st.com>
 Date: Tue, 18 Feb 2020 13:33:21 +0100
 Subject: [PATCH 14/14] waylandsink add waylandpool on meson build
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Christophe Priouzeau <christophe.priouzeau@st.com>
 ---
  ext/wayland/meson.build | 3 ++-

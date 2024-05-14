@@ -13,6 +13,8 @@ after: wpa_cli wnm_maxidle
 
 Fixes: SWWLAN-145213
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Shelley Yang <shelley.yang@infineon.com>
 ---
  src/common/ifx_vendor.h           | 55 ++++++++++++++++++

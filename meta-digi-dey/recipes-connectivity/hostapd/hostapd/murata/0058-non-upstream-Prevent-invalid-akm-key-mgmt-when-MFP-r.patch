@@ -4,6 +4,7 @@ Date: Fri, 20 Oct 2023 08:34:04 +0000
 Subject: [PATCH 58/60] non-upstream: Prevent invalid akm key mgmt when MFP
  required is set
 
+Upstream-Status: Inappropriate [digi specific]
 ---
  src/ap/ap_config.c | 7 +++++++
  1 file changed, 7 insertions(+)

@@ -4,6 +4,8 @@ Subject: [PATCH] hciattach: Add verbosity option
 
 And reduce the verbosity of the hciattach_rome plugin.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 ---
  lib/bluetooth.h        |   3 +

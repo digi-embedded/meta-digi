@@ -8,6 +8,8 @@ Enabling OWE compile option
 
 Fixes: SWLINUX-3620
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Carter Chen <carter.chen@infineon.com>
 ---
  hostapd/defconfig_base | 2 +-

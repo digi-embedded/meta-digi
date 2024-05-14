@@ -6,6 +6,8 @@ Subject: [PATCH 32/60] non-upstream: SAE: disconnect after PMKSA cache expire
 If the dot11RSNAConfigPMKLifetime is set, skip the flow of postponing
 the expiration in b0f457b6 and run disconnect flow.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Ian Lin <ian.lin@infineon.com>
 ---
  src/rsn_supp/pmksa_cache.c | 3 ++-

@@ -6,6 +6,8 @@ Keep the same function signatures as u-boot-fw-utils, so that all code making
 use of this functionality remains compatible. Use the libubootenv
 implementation of the fw_printenv and fw_setenv apps as reference.
 
+Upstream-Status: Inappropriate [digi specific]
+
 https://jira.digi.com/browse/DEL-7410
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>

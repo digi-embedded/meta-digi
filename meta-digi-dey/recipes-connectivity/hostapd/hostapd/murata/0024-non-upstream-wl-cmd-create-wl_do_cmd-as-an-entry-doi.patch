@@ -6,6 +6,8 @@ Subject: [PATCH 24/60] non-upstream: wl-cmd: create wl_do_cmd as an entry
 
 Create wl_do_cmd as an entry doing wl commands
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Ian Lin <ian.lin@infineon.com>
 Signed-off-by: Kurt Lee <kurt.lee@infineon.com>
 ---

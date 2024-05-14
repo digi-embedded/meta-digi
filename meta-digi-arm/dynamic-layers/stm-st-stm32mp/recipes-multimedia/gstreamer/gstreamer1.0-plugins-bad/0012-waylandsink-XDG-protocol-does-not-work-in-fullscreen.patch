@@ -8,6 +8,8 @@ fullscreen support.
 This patch avoids to over commit surface during configuration and takes
 into account render region when provided within wayland callback.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Pierre-Yves MORDRET <pierre-yves.mordret@st.com>
 ---
  ext/wayland/wlwindow.c | 19 +++++++++++++++----

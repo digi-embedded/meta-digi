@@ -4,6 +4,8 @@ Subject: [PATCH] qtsmarthome: fix runtime warning
 
 Both point size and pixel size set. Using pixel size.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
  components/qml/components/timepicker/PickerPathView.qml | 2 +-

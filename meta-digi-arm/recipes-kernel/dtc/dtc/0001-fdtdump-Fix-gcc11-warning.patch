@@ -10,6 +10,8 @@ bytes of the buffer.
 This trips a new warning in GCC 11 - and it's entirely possible it was
 always UB.  So, don't do that.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: David Gibson <david@gibson.dropbear.id.au>
 (cherry picked from commit ca16a723fa9dde9c5da80dba567f48715000e77c)
 ---

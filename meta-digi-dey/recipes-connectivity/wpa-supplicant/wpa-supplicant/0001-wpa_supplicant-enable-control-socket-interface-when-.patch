@@ -7,6 +7,8 @@ Otherwise trying to use the "wpa_cli" fails with:
 
 Failed to connect to non-global ctrl_ifname
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
 ---

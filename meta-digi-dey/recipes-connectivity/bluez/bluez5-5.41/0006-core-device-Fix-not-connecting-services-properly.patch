@@ -6,6 +6,8 @@ Subject: [PATCH 2/7] core/device: Fix not connecting services properly
 Device.Connect shall check if the service discovery is pending or no
 service have been connected yet before switching to LE otherwise these
 services may never be connected.
+
+Upstream-Status: Inappropriate [digi specific]
 ---
  src/device.c | 15 ++++++++++++---
  1 file changed, 12 insertions(+), 3 deletions(-)
