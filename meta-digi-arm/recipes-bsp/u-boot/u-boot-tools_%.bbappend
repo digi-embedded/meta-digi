@@ -1,13 +1,5 @@
 # Copyright (C) 2024 Digi International
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
-
-# Backport from v2023.07
-SRC_URI:append = " \
-	file://0001-tools-add-fdt_add_pubkey.patch \
-	file://0002-tools-avoid-implicit-fallthrough-in-fdt_add_pubkey.patch \
-"
-
 do_install:append () {
 	install -d ${D}${bindir}
 
