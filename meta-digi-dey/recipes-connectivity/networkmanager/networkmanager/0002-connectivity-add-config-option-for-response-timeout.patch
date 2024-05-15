@@ -6,6 +6,8 @@ Instead of the 20 seconds hardcoded currently in the code, allow to
 configure the response timeout in the connectivity section of the main
 NetworkManager config file.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 ---
@@ -17,7 +19,7 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  5 files changed, 66 insertions(+), 1 deletion(-)
 
 diff --git a/src/core/nm-config-data.c b/src/core/nm-config-data.c
-index ddb7787feffa..e1774ead4090 100644
+index 468e56b821..9e986c7233 100644
 --- a/src/core/nm-config-data.c
 +++ b/src/core/nm-config-data.c
 @@ -62,6 +62,7 @@ NM_GOBJECT_PROPERTIES_DEFINE_BASE(PROP_CONFIG_MAIN_FILE,
@@ -36,7 +38,7 @@ index ddb7787feffa..e1774ead4090 100644
      } connectivity;
  
      int autoconnect_retries_default;
-@@ -298,6 +300,14 @@ nm_config_data_get_connectivity_interval(const NMConfigData *self)
+@@ -304,6 +306,14 @@ nm_config_data_get_connectivity_interval(const NMConfigData *self)
      return NM_CONFIG_DATA_GET_PRIVATE(self)->connectivity.interval;
  }
  
@@ -51,7 +53,7 @@ index ddb7787feffa..e1774ead4090 100644
  const char *
  nm_config_data_get_connectivity_response(const NMConfigData *self)
  {
-@@ -1891,6 +1901,8 @@ nm_config_data_diff(NMConfigData *old_data, NMConfigData *new_data)
+@@ -2006,6 +2016,8 @@ nm_config_data_diff(NMConfigData *old_data, NMConfigData *new_data)
              != nm_config_data_get_connectivity_enabled(new_data)
          || nm_config_data_get_connectivity_interval(old_data)
                 != nm_config_data_get_connectivity_interval(new_data)
@@ -60,7 +62,7 @@ index ddb7787feffa..e1774ead4090 100644
          || !nm_streq0(nm_config_data_get_connectivity_uri(old_data),
                        nm_config_data_get_connectivity_uri(new_data))
          || !nm_streq0(nm_config_data_get_connectivity_response(old_data),
-@@ -1964,6 +1976,9 @@ get_property(GObject *object, guint prop_id, GValue *value, GParamSpec *pspec)
+@@ -2079,6 +2091,9 @@ get_property(GObject *object, guint prop_id, GValue *value, GParamSpec *pspec)
      case PROP_CONNECTIVITY_INTERVAL:
          g_value_set_uint(value, nm_config_data_get_connectivity_interval(self));
          break;
@@ -70,7 +72,7 @@ index ddb7787feffa..e1774ead4090 100644
      case PROP_CONNECTIVITY_RESPONSE:
          g_value_set_string(value, nm_config_data_get_connectivity_response(self));
          break;
-@@ -2106,6 +2121,19 @@ constructed(GObject *object)
+@@ -2221,6 +2236,19 @@ constructed(GObject *object)
                                       NM_CONFIG_DEFAULT_CONNECTIVITY_INTERVAL);
      g_free(str);
  
@@ -90,7 +92,7 @@ index ddb7787feffa..e1774ead4090 100644
      priv->dns_mode   = nm_strstrip(g_key_file_get_string(priv->keyfile,
                                                         NM_CONFIG_KEYFILE_GROUP_MAIN,
                                                         NM_CONFIG_KEYFILE_KEY_MAIN_DNS,
-@@ -2305,6 +2333,15 @@ nm_config_data_class_init(NMConfigDataClass *config_class)
+@@ -2420,6 +2448,15 @@ nm_config_data_class_init(NMConfigDataClass *config_class)
                            0,
                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
  
@@ -107,10 +109,10 @@ index ddb7787feffa..e1774ead4090 100644
          g_param_spec_string(NM_CONFIG_DATA_CONNECTIVITY_RESPONSE,
                              "",
 diff --git a/src/core/nm-config-data.h b/src/core/nm-config-data.h
-index fdc7e1fc3d2b..fa7a2814819e 100644
+index 9e7a50fc24..868e0ee4c1 100644
 --- a/src/core/nm-config-data.h
 +++ b/src/core/nm-config-data.h
-@@ -46,6 +46,7 @@ typedef enum {
+@@ -47,6 +47,7 @@ typedef enum {
  #define NM_CONFIG_DATA_CONNECTIVITY_ENABLED  "connectivity-enabled"
  #define NM_CONFIG_DATA_CONNECTIVITY_URI      "connectivity-uri"
  #define NM_CONFIG_DATA_CONNECTIVITY_INTERVAL "connectivity-interval"
@@ -118,7 +120,7 @@ index fdc7e1fc3d2b..fa7a2814819e 100644
  #define NM_CONFIG_DATA_CONNECTIVITY_RESPONSE "connectivity-response"
  #define NM_CONFIG_DATA_NO_AUTO_DEFAULT       "no-auto-default"
  #define NM_CONFIG_DATA_DNS_MODE              "dns"
-@@ -171,6 +172,7 @@ char      **nm_config_data_get_plugins(const NMConfigData *config_data, gboolean
+@@ -172,6 +173,7 @@ char      **nm_config_data_get_plugins(const NMConfigData *config_data, gboolean
  gboolean    nm_config_data_get_connectivity_enabled(const NMConfigData *config_data);
  const char *nm_config_data_get_connectivity_uri(const NMConfigData *config_data);
  guint       nm_config_data_get_connectivity_interval(const NMConfigData *config_data);
@@ -127,10 +129,10 @@ index fdc7e1fc3d2b..fa7a2814819e 100644
  
  int nm_config_data_get_autoconnect_retries_default(const NMConfigData *config_data);
 diff --git a/src/core/nm-config.c b/src/core/nm-config.c
-index 60a2f1df53b2..864eadd9dd6c 100644
+index 43eb364699..20c51cb75c 100644
 --- a/src/core/nm-config.c
 +++ b/src/core/nm-config.c
-@@ -45,6 +45,7 @@ struct NMConfigCmdLineOptions {
+@@ -47,6 +47,7 @@ struct NMConfigCmdLineOptions {
       * set or not via GOptionEntry
       */
      int   connectivity_interval;
@@ -138,7 +140,7 @@ index 60a2f1df53b2..864eadd9dd6c 100644
      char *connectivity_response;
  
      /* @first_start is not provided by command line. It is a convenient hack
-@@ -479,6 +480,7 @@ _nm_config_cmd_line_options_clear(NMConfigCmdLineOptions *cli)
+@@ -481,6 +482,7 @@ _nm_config_cmd_line_options_clear(NMConfigCmdLineOptions *cli)
      nm_clear_g_free(&cli->connectivity_uri);
      nm_clear_g_free(&cli->connectivity_response);
      cli->connectivity_interval = -1;
@@ -146,7 +148,7 @@ index 60a2f1df53b2..864eadd9dd6c 100644
      cli->first_start           = FALSE;
  }
  
-@@ -502,6 +504,7 @@ _nm_config_cmd_line_options_copy(const NMConfigCmdLineOptions *cli, NMConfigCmdL
+@@ -504,6 +506,7 @@ _nm_config_cmd_line_options_copy(const NMConfigCmdLineOptions *cli, NMConfigCmdL
      dst->connectivity_uri      = g_strdup(cli->connectivity_uri);
      dst->connectivity_response = g_strdup(cli->connectivity_response);
      dst->connectivity_interval = cli->connectivity_interval;
@@ -154,21 +156,21 @@ index 60a2f1df53b2..864eadd9dd6c 100644
      dst->first_start           = cli->first_start;
  }
  
-@@ -652,6 +655,13 @@ nm_config_cmd_line_options_add_to_entries(NMConfigCmdLineOptions *cli, GOptionCo
-          &cli->connectivity_interval,
-          N_("The interval between connectivity checks (in seconds)"),
-          G_STRINGIFY(NM_CONFIG_DEFAULT_CONNECTIVITY_INTERVAL)},
+@@ -654,6 +657,13 @@ nm_config_cmd_line_options_add_to_entries(NMConfigCmdLineOptions *cli, GOptionCo
+           &cli->connectivity_interval,
+           N_("The interval between connectivity checks (in seconds)"),
+           G_STRINGIFY(NM_CONFIG_DEFAULT_CONNECTIVITY_INTERVAL)},
 +        {"connectivity-timeout",
-+         0,
-+         G_OPTION_FLAG_HIDDEN,
-+         G_OPTION_ARG_INT,
-+         &cli->connectivity_timeout,
-+         N_("The timeout for the connectivity checks (in seconds)"),
-+         G_STRINGIFY(NM_CONFIG_DEFAULT_CONNECTIVITY_TIMEOUT)},
++          0,
++          G_OPTION_FLAG_HIDDEN,
++          G_OPTION_ARG_INT,
++          &cli->connectivity_timeout,
++          N_("The timeout for the connectivity checks (in seconds)"),
++          G_STRINGIFY(NM_CONFIG_DEFAULT_CONNECTIVITY_TIMEOUT)},
          {"connectivity-response",
-          0,
-          G_OPTION_FLAG_HIDDEN,
-@@ -1412,6 +1422,11 @@ read_entire_config(const NMConfigCmdLineOptions *cli,
+           0,
+           G_OPTION_FLAG_HIDDEN,
+@@ -1415,6 +1425,11 @@ read_entire_config(const NMConfigCmdLineOptions *cli,
                                     NM_CONFIG_KEYFILE_GROUP_CONNECTIVITY,
                                     "interval",
                                     cli->connectivity_interval);
@@ -181,10 +183,10 @@ index 60a2f1df53b2..864eadd9dd6c 100644
              g_key_file_set_string(keyfile,
                                    NM_CONFIG_KEYFILE_GROUP_CONNECTIVITY,
 diff --git a/src/core/nm-config.h b/src/core/nm-config.h
-index 2c23ff200e1d..58c8b3e67712 100644
+index e65582c34a..8cb00e72bd 100644
 --- a/src/core/nm-config.h
 +++ b/src/core/nm-config.h
-@@ -26,6 +26,7 @@
+@@ -28,6 +28,7 @@
  #define NM_CONFIG_SIGNAL_CONFIG_CHANGED "config-changed"
  
  #define NM_CONFIG_DEFAULT_CONNECTIVITY_INTERVAL 300
@@ -193,7 +195,7 @@ index 2c23ff200e1d..58c8b3e67712 100644
  
  typedef struct NMConfigCmdLineOptions NMConfigCmdLineOptions;
 diff --git a/src/core/nm-connectivity.c b/src/core/nm-connectivity.c
-index 7199c9a242ad..46f5a8da1d9f 100644
+index 15dc31aa24..f25831e300 100644
 --- a/src/core/nm-connectivity.c
 +++ b/src/core/nm-connectivity.c
 @@ -108,6 +108,7 @@ typedef struct {
@@ -204,24 +206,24 @@ index 7199c9a242ad..46f5a8da1d9f 100644
      guint      interval;
  
      bool enabled : 1;
-@@ -642,6 +643,7 @@ _idle_cb(gpointer user_data)
+@@ -714,6 +715,7 @@ _idle_cb(gpointer user_data)
  static void
- do_curl_request(NMConnectivityCheckHandle *cb_data)
+ do_curl_request(NMConnectivityCheckHandle *cb_data, const char *hosts)
  {
 +    NMConnectivityPrivate *priv = NM_CONNECTIVITY_GET_PRIVATE (cb_data->self);
      CURLM *mhandle;
      CURL  *ehandle;
      long   resolve;
-@@ -662,7 +664,7 @@ do_curl_request(NMConnectivityCheckHandle *cb_data)
+@@ -738,7 +740,7 @@ do_curl_request(NMConnectivityCheckHandle *cb_data, const char *hosts)
      cb_data->concheck.curl_mhandle    = mhandle;
      cb_data->concheck.curl_ehandle    = ehandle;
      cb_data->concheck.request_headers = curl_slist_append(NULL, "Connection: close");
--    cb_data->timeout_id               = g_timeout_add_seconds(20, _timeout_cb, cb_data);
-+    cb_data->timeout_id               = g_timeout_add_seconds(priv->timeout, _timeout_cb, cb_data);
+-    cb_data->timeout_source           = nm_g_timeout_add_seconds_source(20, _timeout_cb, cb_data);
++    cb_data->timeout_source           = nm_g_timeout_add_seconds_source(priv->timeout, _timeout_cb, cb_data);
  
      curl_multi_setopt(mhandle, CURLMOPT_SOCKETFUNCTION, multi_socket_cb);
      curl_multi_setopt(mhandle, CURLMOPT_SOCKETDATA, cb_data);
-@@ -1044,6 +1046,7 @@ update_config(NMConnectivity *self, NMConfigData *config_data)
+@@ -1226,6 +1228,7 @@ update_config(NMConnectivity *self, NMConfigData *config_data)
  {
      NMConnectivityPrivate *priv = NM_CONNECTIVITY_GET_PRIVATE(self);
      guint                  interval;
@@ -229,7 +231,7 @@ index 7199c9a242ad..46f5a8da1d9f 100644
      gboolean               enabled;
      gboolean               changed      = FALSE;
      const char            *cur_uri      = priv->con_config ? priv->con_config->uri : NULL;
-@@ -1130,6 +1133,13 @@ update_config(NMConnectivity *self, NMConfigData *config_data)
+@@ -1312,6 +1315,13 @@ update_config(NMConnectivity *self, NMConfigData *config_data)
          changed       = TRUE;
      }
  
