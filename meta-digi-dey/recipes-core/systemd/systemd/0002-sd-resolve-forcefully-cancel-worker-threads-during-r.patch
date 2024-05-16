@@ -7,16 +7,18 @@ For services that use sd-resolve, such as timesyncd, this prevents the system
 from stalling whenever the service stops while a worker thread is busy calling
 getaddrinfo().
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 ---
  src/libsystemd/sd-resolve/sd-resolve.c | 4 +++-
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/src/libsystemd/sd-resolve/sd-resolve.c b/src/libsystemd/sd-resolve/sd-resolve.c
-index a189f14..571604c 100644
+index 2000f86e69..027f6940b9 100644
 --- a/src/libsystemd/sd-resolve/sd-resolve.c
 +++ b/src/libsystemd/sd-resolve/sd-resolve.c
-@@ -577,8 +577,10 @@ static void resolve_free(sd_resolve *resolve) {
+@@ -593,8 +593,10 @@ static sd_resolve *resolve_free(sd_resolve *resolve) {
  
          /* Now terminate them and wait until they are gone.
             If we get an error than most likely the thread already exited. */
