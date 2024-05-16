@@ -10,7 +10,7 @@ include conf/machine/include/imx-digi-base.inc
 include conf/machine/include/arm/armv7a/tune-cortexa7.inc
 
 # Override default init manager from distro config
-INIT_MANAGER ?= "sysvinit"
+INIT_MANAGER:ccimx6ul = "sysvinit"
 
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
