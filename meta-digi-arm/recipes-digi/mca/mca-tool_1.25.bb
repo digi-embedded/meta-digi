@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2023, Digi International Inc.
+# Copyright (C) 2016-2024, Digi International Inc.
 
 SUMMARY = "MCA firmware management tool"
 SECTION = "console/tools"
@@ -19,6 +19,16 @@ SRC_URI[aarch64.sha256sum] = "2467e426c6a4e6b89f4aaced846c1f52787e130f16ffb62e6f
 S = "${WORKDIR}/${PKGNAME}-${PV}"
 
 inherit bin_package
+
+HAS_USRMERGE = "${@bb.utils.contains('DISTRO_FEATURES', 'usrmerge', '1', '0', d)}"
+
+do_install:append() {
+	# Move binaries from /sbin to /usr/sbin to avoid usrmerge QA error.
+	if [ "${HAS_USRMERGE}" = "1" ]; then
+		install -d ${D}${base_sbindir}
+		mv ${D}/sbin/* ${D}${base_sbindir} && rmdir ${D}/sbin
+	fi
+}
 
 INSANE_SKIP:${PN} = "already-stripped"
 
