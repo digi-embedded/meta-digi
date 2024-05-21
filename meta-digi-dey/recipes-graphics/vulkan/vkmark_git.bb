@@ -10,12 +10,13 @@ DEPENDS = "vulkan-loader assimp glm"
 SRC_URI = " \
     git://github.com/vkmark/vkmark;protocol=https;branch=master \
     file://0001-scenes-Use-depth-format-supported-by-i.MX.patch \
-    file://0001-src-meson.build-Prepend-sysroot-for-the-includedir.patch \
+    file://0002-src-meson.build-Prepend-sysroot-for-the-includedir.patch \
+    file://0003-meson.build-Enable-native-wayland-scanner.patch \
 "
-SRCREV = "53abc4f660191051fba91ea30de084f412e7c68e"
+SRCREV = "ab6e6f34077722d5ae33f6bd40b18ef9c0e99a15"
 S = "${WORKDIR}/git"
 
-inherit meson
+inherit meson pkgconfig
 
 PACKAGECONFIG ?= " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'wayland', \
