@@ -4,6 +4,8 @@ Subject: [PATCH] imx8mm: Define UART1 as console for boot stage
 
 UART1 is the default console for ConnectCore i.MX8M Mini
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 ---
@@ -11,15 +13,15 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/plat/imx/imx8m/imx8mm/platform.mk b/plat/imx/imx8m/imx8mm/platform.mk
-index a24e41fd77e9..1c8c66435db7 100644
+index 0a8f12a26..55f83f462 100644
 --- a/plat/imx/imx8m/imx8mm/platform.mk
 +++ b/plat/imx/imx8m/imx8mm/platform.mk
-@@ -153,7 +153,7 @@ $(eval $(call add_define,BL32_BASE))
+@@ -159,7 +159,7 @@ $(eval $(call add_define,BL32_BASE))
  BL32_SIZE		?=	0x2000000
  $(eval $(call add_define,BL32_SIZE))
  
 -IMX_BOOT_UART_BASE	?=	0x30890000
 +IMX_BOOT_UART_BASE	?=	0x30860000
- $(eval $(call add_define,IMX_BOOT_UART_BASE))
- 
- $(eval $(call add_define,IMX8M_DDR4_DVFS))
+ ifeq (${IMX_BOOT_UART_BASE},auto)
+     override IMX_BOOT_UART_BASE	:=	0
+ endif

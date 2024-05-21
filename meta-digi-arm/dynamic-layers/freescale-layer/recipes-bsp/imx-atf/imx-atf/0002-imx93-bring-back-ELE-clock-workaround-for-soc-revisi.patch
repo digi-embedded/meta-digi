@@ -5,6 +5,8 @@ Subject: [PATCH] imx93: bring back ELE clock workaround for soc revision A0
 Revert commit 7411561db535a20f61ff6621fec5b374130d34f9 to allow building
 for soc revision A0 using a compilation flag.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
  plat/imx/imx93/imx93_psci.c | 10 ++++++++++
@@ -12,12 +14,12 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  2 files changed, 14 insertions(+)
 
 diff --git a/plat/imx/imx93/imx93_psci.c b/plat/imx/imx93/imx93_psci.c
-index 6a21ee970079..b9c4e0a1752b 100644
+index 68eb49cc2..cc482a17d 100644
 --- a/plat/imx/imx93/imx93_psci.c
 +++ b/plat/imx/imx93/imx93_psci.c
-@@ -794,6 +794,11 @@ void imx_pwr_domain_suspend(const psci_power_state_t *target_state)
- 		} else {
- 			write_clusterpwrdn(DSU_CLUSTER_PWR_OFF);
+@@ -739,6 +739,11 @@ void imx_pwr_domain_suspend(const psci_power_state_t *target_state)
+ 		if (is_local_state_retn(CLUSTER_PWR_STATE(target_state))) {
+ 			write_clusterpwrdn(DSU_CLUSTER_PWR_OFF | BIT(1));
  		}
 +
 +#ifdef SOC_REV_A0
@@ -27,23 +29,23 @@ index 6a21ee970079..b9c4e0a1752b 100644
  	}
  
  	if (is_local_state_retn(SYSTEM_PWR_STATE(target_state))) {
-@@ -924,6 +929,11 @@ void imx_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
- 		mmio_write_32(IMX_GPC_BASE + A55C0_CMC_OFFSET + 0x800 * 2 + CM_MODE_CTRL, CM_MODE_RUN);
- 		/* clear L3 retention */
- 		mmio_clrbits_32(IMX_SRC_BASE + A55C0_MEM + 0x400 * 3 + 0x4, MEM_LP_RETENTION);
+@@ -870,6 +875,11 @@ void imx_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
+ 	if (!is_local_state_run(CLUSTER_PWR_STATE(target_state))) {
+ 		/* set the cluster's target mode to RUN */
+ 		gpc_set_cpu_mode(CPU_A55_PLAT, CM_MODE_RUN);
 +
 +#ifdef SOC_REV_A0
 +		/* FIXME:  set S401 clock back */
 +		mmio_setbits_32(0x44450200, BIT(9));
 +#endif
  	}
+ 
  	/* do core level */
- 	if (is_local_state_off(CORE_PWR_STATE(target_state))) {
 diff --git a/plat/imx/imx93/platform.mk b/plat/imx/imx93/platform.mk
-index be09b9f0be7a..440c13c1dbe1 100644
+index a43d3c4f5..d69f7e2de 100644
 --- a/plat/imx/imx93/platform.mk
 +++ b/plat/imx/imx93/platform.mk
-@@ -57,3 +57,7 @@ BL32_BASE               ?=      0x96000000
+@@ -61,3 +61,7 @@ BL32_BASE               ?=      0x96000000
  BL32_SIZE               ?=      0x02000000
  $(eval $(call add_define,BL32_BASE))
  $(eval $(call add_define,BL32_SIZE))
