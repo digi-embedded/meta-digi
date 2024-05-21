@@ -20,6 +20,7 @@ NXP_RT_PATCHES = " \
 
 SRC_URI:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${NXP_RT_PATCHES}', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'tsn', 'file://tsn_conf.cfg', '', d)} \
 "
 
 SRCREV = "${AUTOREV}"
