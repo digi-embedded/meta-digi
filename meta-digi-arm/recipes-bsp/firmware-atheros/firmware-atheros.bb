@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2017, Digi International Inc.
+# Copyright (C) 2013-2024, Digi International Inc.
 
 SUMMARY = "Firmware files for Digi's platforms, such as Atheros bluetooth."
 SECTION = "base"
@@ -91,8 +91,8 @@ pkg_postinst_ontarget:${PN}-ath6kl() {
 # Do not create empty debug and development packages (PN-dbg PN-dev PN-staticdev)
 PACKAGES = "${PN}-ar3k ${PN}-ath6kl"
 
-FILES:${PN}-ar3k = "/lib/firmware/ar3k"
-FILES:${PN}-ath6kl = "/lib/firmware/ath6k"
+FILES:${PN}-ar3k = "${base_libdir}/firmware/ar3k"
+FILES:${PN}-ath6kl = "${base_libdir}/firmware/ath6k"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx6sbc)"

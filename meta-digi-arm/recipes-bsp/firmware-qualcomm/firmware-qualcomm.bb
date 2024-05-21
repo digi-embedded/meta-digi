@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2023, Digi International Inc.
+# Copyright (C) 2016-2024, Digi International Inc.
 
 SUMMARY = "Qualcomm firmware files for Digi's platforms."
 SECTION = "base"
@@ -144,8 +144,8 @@ QCA_MODEL:ccimx8x = "qca6574"
 # Do not create empty debug and development packages (PN-dbg PN-dev PN-staticdev)
 PACKAGES = "${PN}-${QCA_MODEL}-bt ${PN}-${QCA_MODEL}-wifi"
 
-FILES:${PN}-${QCA_MODEL}-bt = "/lib/firmware/qca"
-FILES:${PN}-${QCA_MODEL}-wifi = "/lib/firmware"
+FILES:${PN}-${QCA_MODEL}-bt = "${base_libdir}/firmware/qca"
+FILES:${PN}-${QCA_MODEL}-wifi = "${base_libdir}/firmware"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x)"
