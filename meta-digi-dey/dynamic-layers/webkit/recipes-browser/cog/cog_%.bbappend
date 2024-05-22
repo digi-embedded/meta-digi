@@ -1,10 +1,4 @@
-# Copyright (C) 2020-2023, Digi International Inc.
-
-FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
-
-SRC_URI:append = " \
-    file://0001-wl-Fix-wrong-wl_shm-for-cursor.patch \
-"
+# Copyright (C) 2020-2024, Digi International Inc.
 
 EXTRA_OECMAKE += "-DCOG_HOME_URI=http://127.0.0.1/"
 
