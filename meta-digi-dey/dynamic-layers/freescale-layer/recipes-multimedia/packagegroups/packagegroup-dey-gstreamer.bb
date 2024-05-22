@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2017, Digi International Inc.
+# Copyright (C) 2012-2024, Digi International Inc.
 #
 SUMMARY = "Gstreamer framework packagegroup for DEY image"
 
@@ -20,8 +20,7 @@ MACHINE_GSTREAMER_1_0_PKGS:ccimx6ul = " \
     gstreamer1.0-plugins-base-audioresample \
     gstreamer1.0-plugins-base-playback \
     gstreamer1.0-plugins-base-typefindfunctions \
-    gstreamer1.0-plugins-base-videoconvert \
-    gstreamer1.0-plugins-base-videoscale \
+    gstreamer1.0-plugins-base-videoconvertscale \
     gstreamer1.0-plugins-base-volume \
     gstreamer1.0-plugins-good-pulseaudio \
     gstreamer1.0-plugins-good-video4linux2 \
