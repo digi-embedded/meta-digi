@@ -9,6 +9,8 @@ is registered as /dev/video1.
 In the mappings for video devices we must map /dev/video1 to /dev/fb0 so
 that the imxv4l2sink can work with it.
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Hector Palacios <hector.palacios@digi.com>
 
 https://jira.digi.com/browse/DEL-3399
@@ -17,10 +19,10 @@ https://jira.digi.com/browse/DEL-3399
  1 file changed, 1 insertion(+)
 
 diff --git a/libs/v4l2_core/gstimxv4l2.c b/libs/v4l2_core/gstimxv4l2.c
-index 257a60422e76..58cdcdad3ffd 100755
+index 2c8eee9..3078cf1 100755
 --- a/libs/v4l2_core/gstimxv4l2.c
 +++ b/libs/v4l2_core/gstimxv4l2.c
-@@ -212,6 +212,7 @@ static guint g_camera_format_PXP[] = {
+@@ -208,6 +208,7 @@ static guint g_camera_format_PXP[] = {
  
  static IMXV4l2DeviceMap g_device_maps[] = {
    {"/dev/video0", FALSE, "/dev/fb0"},

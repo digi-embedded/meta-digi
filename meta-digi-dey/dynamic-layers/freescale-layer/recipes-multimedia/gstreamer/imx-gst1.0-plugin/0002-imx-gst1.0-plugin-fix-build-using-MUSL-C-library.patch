@@ -2,14 +2,16 @@ From: Javier Viguera <javier.viguera@digi.com>
 Date: Thu, 2 Jan 2020 16:49:51 +0100
 Subject: [PATCH] imx-gst1.0-plugin: fix build using MUSL C library
 
+Upstream-Status: Inappropriate [digi specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
  tools/gplay2/gplay2.c       | 1 -
- tools/grecorder/grecorder.c | 2 ++
- 2 files changed, 2 insertions(+), 1 deletion(-)
+ tools/grecorder/grecorder.c | 1 +
+ 2 files changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/tools/gplay2/gplay2.c b/tools/gplay2/gplay2.c
-index 1e37521a06cc..f001a883d74f 100755
+index 9e406b9..ae193b7 100755
 --- a/tools/gplay2/gplay2.c
 +++ b/tools/gplay2/gplay2.c
 @@ -26,7 +26,6 @@
@@ -21,14 +23,12 @@ index 1e37521a06cc..f001a883d74f 100755
  #include <pthread.h>
  #include <stdio.h>
 diff --git a/tools/grecorder/grecorder.c b/tools/grecorder/grecorder.c
-index c8eff2f53efd..841a0aa83fba 100644
+index c315605..ee772b0 100644
 --- a/tools/grecorder/grecorder.c
 +++ b/tools/grecorder/grecorder.c
-@@ -24,7 +24,9 @@
- #include <pthread.h>
- #include <signal.h>
- #include <getopt.h>
-+#include <unistd.h>
+@@ -27,6 +27,7 @@
+ #include <unistd.h>
+ #include <glib.h>
  #define __USE_LARGEFILE64
 +#define _GNU_SOURCE  # For MUSL statvfs64
  #include <sys/statvfs.h>
