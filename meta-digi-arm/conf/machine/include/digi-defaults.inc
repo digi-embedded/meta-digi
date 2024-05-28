@@ -79,6 +79,10 @@ MACHINE_EXTRA_RRECOMMENDS += "${@bb.utils.contains_any('VIRTUAL-RUNTIME_dev_mana
 # Default image name (for install scripts)
 DEFAULT_IMAGE_NAME ??= "dey-image-qt"
 
+# Remove IMAGE_NAME_SUFFIX from IMAGE_LINK_NAME so that our image name format
+# matches the ones used in old DEY versions
+IMAGE_LINK_NAME = "${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}"
+
 # List of graphical images names (for install scripts)
 GRAPHICAL_IMAGES ?= "dey-image-crank dey-image-qt dey-image-webkit dey-image-lvgl"
 
