@@ -27,10 +27,10 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  2 files changed, 90 insertions(+), 2 deletions(-)
 
 diff --git a/src/uboot_env.c b/src/uboot_env.c
-index b7ad4c4..924a6cf 100644
+index 358dfbb..c1f334e 100644
 --- a/src/uboot_env.c
 +++ b/src/uboot_env.c
-@@ -591,6 +591,73 @@ static int check_env_device(struct uboot_flash_env *dev)
+@@ -581,6 +581,73 @@ static int check_env_device(struct uboot_flash_env *dev)
  	return 0;
  }
  
@@ -104,7 +104,7 @@ index b7ad4c4..924a6cf 100644
  static bool check_compatible_devices(struct uboot_ctx *ctx)
  {
  	if (!ctx->redundant)
-@@ -602,6 +669,12 @@ static bool check_compatible_devices(struct uboot_ctx *ctx)
+@@ -592,6 +659,12 @@ static bool check_compatible_devices(struct uboot_ctx *ctx)
  		return false;
  	if (ctx->envdevs[0].envsize != ctx->envdevs[1].envsize)
  		return false;
@@ -117,7 +117,7 @@ index b7ad4c4..924a6cf 100644
  
  	return true;
  }
-@@ -648,7 +721,7 @@ static int fileread(struct uboot_flash_env *dev, void *data)
+@@ -638,7 +711,7 @@ static int fileread(struct uboot_flash_env *dev, void *data)
  	return ret;
  }
  
@@ -126,7 +126,7 @@ index b7ad4c4..924a6cf 100644
  {
  	size_t count;
  	size_t blocksize;
-@@ -667,6 +740,17 @@ static int mtdread(struct uboot_flash_env *dev, void *data)
+@@ -657,6 +730,17 @@ static int mtdread(struct uboot_flash_env *dev, void *data)
  		ret = read(dev->fd, data, dev->envsize);
  		break;
  	case MTD_NANDFLASH:
@@ -144,7 +144,7 @@ index b7ad4c4..924a6cf 100644
  		if (dev->offset)
  			if (lseek(dev->fd, dev->offset, SEEK_SET) < 0) {
  				ret = -EIO;
-@@ -742,7 +826,7 @@ static int devread(struct uboot_ctx *ctx, unsigned int copy, void *data)
+@@ -732,7 +816,7 @@ static int devread(struct uboot_ctx *ctx, unsigned int copy, void *data)
  		ret = fileread(dev, data);
  		break;
  	case DEVICE_MTD:
@@ -154,13 +154,13 @@ index b7ad4c4..924a6cf 100644
  	case DEVICE_UBI:
  		ret = ubiread(dev, data);
 diff --git a/src/uboot_private.h b/src/uboot_private.h
-index ee2d305..84bd1bc 100644
+index 40e5446..c8fecc4 100644
 --- a/src/uboot_private.h
 +++ b/src/uboot_private.h
-@@ -116,10 +116,14 @@ struct uboot_ctx {
+@@ -114,10 +114,14 @@ LIST_HEAD(vars, var_entry);
+ struct uboot_ctx {
+ 	/** true if the environment is redundant */
  	bool redundant;
- 	/** true if the environment is encrypted */
- 	bool encrypted;
 +	/** true if the environment is dynamic */
 +	bool dynamic_env;
  	/** set to valid after a successful load */
@@ -169,6 +169,6 @@ index ee2d305..84bd1bc 100644
  	size_t size;
 +	/** top limit of the dynamic environment */
 +	loff_t top_limit;
- 	/** usable environment size */
- 	unsigned int usable_size;
  	/** devices where environment is stored */
+ 	struct uboot_flash_env envdevs[2];
+ 	/** Set which device contains the current(last valid) environment */

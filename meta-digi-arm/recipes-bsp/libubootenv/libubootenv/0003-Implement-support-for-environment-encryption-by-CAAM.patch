@@ -15,26 +15,63 @@ Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
 Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
 Signed-off-by: Hector Palacios <hector.palacios@digi.com>
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+
+ # This is the commit message #2:
+
+fall back to read HWID from nvmem device if not available on DT
+
+Old U-Boot versions don't populate the HWID on the device tree. This may
+be used as a key modifier for TrustFence encryption and, if not available
+on the DT, newer firmware may be unable to unencrypt the U-Boot
+environment.
+
+This patch implements a fall-back function to query the HWID directly from
+the nvmem device node if it cannot locate it at the DT.
+This is only implemented for ccimx6 family, which may be in the case of
+having an old U-Boot.
+
+https://onedigi.atlassian.net/browse/DEL-8444
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+
+ # This is the commit message #3:
+
+ubootenv: generalize env encryption code
+
+Generalize the code to make room for Optee-based encryption.
+* Move the code to the crypt.c/h files to minimize changes on the upstream
+  uboot_env.c file.
+* Rename env_caam_get_keymod to env_get_keymod as this function is not
+  CAAM-specific.
+* Create a public env_crypt function that will select the proper (CAAM,
+  Optee) implementation.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
- src/CMakeLists.txt  |   2 +
- src/caam_keyblob.h  |  42 +++++++
- src/md5.c           | 275 ++++++++++++++++++++++++++++++++++++++++++++
- src/md5.h           |  24 ++++
- src/uboot_env.c     | 131 +++++++++++++++++++++
- src/uboot_private.h |   4 +
- 6 files changed, 478 insertions(+)
+ src/CMakeLists.txt |   4 +
+ src/caam_keyblob.h |  42 +++++++
+ src/crypt.c        | 179 +++++++++++++++++++++++++++++
+ src/crypt.h        |  10 ++
+ src/md5.c          | 275 +++++++++++++++++++++++++++++++++++++++++++++
+ src/md5.h          |  24 ++++
+ src/uboot_env.c    |  18 +++
+ 7 files changed, 552 insertions(+)
  create mode 100644 src/caam_keyblob.h
+ create mode 100644 src/crypt.c
+ create mode 100644 src/crypt.h
  create mode 100644 src/md5.c
  create mode 100644 src/md5.h
 
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index ababe0f..fb1efa2 100644
+index ababe0f..638f1c1 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -4,6 +4,8 @@
+@@ -4,6 +4,10 @@
  cmake_minimum_required (VERSION 2.6)
  # Sources and private headers
  SET(libubootenv_SOURCES
++  crypt.c
++  crypt.h
 +  md5.c
 +  md5.h
    uboot_env.c
@@ -88,6 +125,207 @@ index 0000000..e313e87
 +#endif
 +
 +#endif /* CAAM_KEYBLOB_H */
+diff --git a/src/crypt.c b/src/crypt.c
+new file mode 100644
+index 0000000..213cffd
+--- /dev/null
++++ b/src/crypt.c
+@@ -0,0 +1,179 @@
++/*
++ * Copyright 2024 Digi International Inc
++ *
++ * SPDX-License-Identifier: GPL-2.0+
++ */
++
++#include <arpa/inet.h>
++#include <fcntl.h>
++#include <stdbool.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/ioctl.h>
++#include <sys/stat.h>
++#include <unistd.h>
++
++#include "caam_keyblob.h"
++#include "md5.h"
++
++/*
++ * The BLOB includes a random AES-256 key (32 bytes) and a
++ * Message Authentication Code (MAC) (16 bytes)
++ */
++#define BLOB_OVERHEAD	48
++#define CAAM_KEY_DEV	"/dev/caam_kb"
++#define MAX_HWID_WORDS	4
++
++/* Function that checks if machine is compatible (on the DT) */
++static bool machine_is_compatible(char *machine)
++{
++	int fd, nchars, len = 0;
++	int ret = false;
++	char str[256];
++	char *p = str;
++
++	fd = open("/proc/device-tree/compatible", O_RDONLY);
++	if (fd < 0)
++		return false;
++
++	nchars = read(fd, str, 255);
++	while (len < nchars) {
++		if (!strcmp(p, machine)) {
++			ret = true;
++			break;
++		}
++		len += strlen(p) + 1;
++		p += strlen(p) + 1;
++	}
++	close(fd);
++
++	return ret;
++}
++
++static int env_get_keymod(unsigned char output[16])
++{
++	int i;
++	int len;
++	int fd;
++	uint32_t ocotp_hwid[MAX_HWID_WORDS];
++	char dt_prop[32];
++	char buf[sizeof(uint32_t)];
++
++	for (i = 0; i < MAX_HWID_WORDS; i++) {
++		sprintf(dt_prop, "/proc/device-tree/digi,hwid_%d", i);
++		if (access(dt_prop, F_OK) != -1) {
++			fd = open(dt_prop, O_RDONLY);
++			if (fd < 0)
++				return fd;
++			len = read(fd, buf, sizeof(uint32_t));
++			if (len < 0) {
++				close(fd);
++				return -1;
++			}
++			ocotp_hwid[i] = ntohl(*(uint32_t *) buf);
++			close(fd);
++		} else if (machine_is_compatible("digi,ccimx6ul") ||
++			   machine_is_compatible("digi,ccimx6")) {
++			/*
++			 * If HWID not available on the DT (old U-Boot version),
++			 * fall back to read it directly from the nvmem device.
++			 */
++			int hwid_offset = 136;	/* (Bank * 8 + Word) * 4 */
++
++			/* HWID for CC6 family only has two words */
++			if (i == 2)
++				break;
++
++			fd = open("/sys/bus/nvmem/devices/imx-ocotp0/nvmem",
++				  O_RDONLY);
++			if (fd < 0)
++				return fd;
++			len = lseek(fd, hwid_offset + i * 4, SEEK_SET);
++
++			len = read(fd, buf, sizeof(unsigned int));
++			if (len < 0) {
++				close(fd);
++				return -1;
++			}
++			ocotp_hwid[i] = *(unsigned int *)buf;
++			close(fd);
++		} else {
++			break;
++		}
++	}
++
++	/* Calculate md5sum on the raw HWID array */
++	md5((unsigned char *)(&ocotp_hwid), sizeof(uint32_t) * i, output);
++
++	return 0;
++}
++
++static int env_caam_crypt(char *data, unsigned int size, const int enc)
++{
++	struct caam_kb_data enc_data;
++	int fd;
++	int ret = 0;
++	const int len = size;
++	int ioctl_mode;
++	char *buffer;
++	unsigned char key_modifier[16];
++
++	ret = env_get_keymod(key_modifier);
++	if (ret)
++		return ret;
++
++	enc_data.keymod = (char *)key_modifier;
++	enc_data.keymod_len = sizeof(key_modifier);
++
++	enc_data.keyblob_len = len;
++	enc_data.rawkey_len = len - BLOB_OVERHEAD;
++
++	buffer = malloc(len);
++	if (!buffer) {
++		printf("Could not allocate memory\n");
++		return -1;
++	}
++
++	if (enc) {
++		enc_data.rawkey = data;
++		ioctl_mode = CAAM_KB_ENCRYPT;
++		enc_data.keyblob = buffer;
++	} else {
++		enc_data.keyblob = data;
++		ioctl_mode = CAAM_KB_DECRYPT;
++		enc_data.rawkey = buffer;
++	}
++
++	if ((fd = open(CAAM_KEY_DEV, O_RDWR)) < 0) {
++		ret = fd;
++		goto free;
++	}
++
++	ret = ioctl(fd, ioctl_mode, &enc_data);
++	if (ret) {
++		printf("CAAM_KEY_DEV ioctl failed: %d\n", ret);
++		goto out;
++	}
++
++	memcpy(data, buffer, enc ? len : len - BLOB_OVERHEAD);
++
++out:
++	close(fd);
++free:
++	free(buffer);
++
++	return ret;
++}
++
++int env_crypt(char *data, unsigned int size, const int enc)
++{
++	return env_caam_crypt(data, size, enc);
++}
++
++int is_env_encrypted(void)
++{
++	const char *dt_prop = "/proc/device-tree/digi,uboot-env,encrypted";
++
++	return access(dt_prop, F_OK) != -1;
++}
+diff --git a/src/crypt.h b/src/crypt.h
+new file mode 100644
+index 0000000..8d85c7f
+--- /dev/null
++++ b/src/crypt.h
+@@ -0,0 +1,10 @@
++/*
++ * Copyright 2024 Digi International Inc
++ *
++ * SPDX-License-Identifier: GPL-2.0+
++ */
++
++#pragma once
++
++int env_crypt(char *data, unsigned int size, const int enc);
++int is_env_encrypted(void);
 diff --git a/src/md5.c b/src/md5.c
 new file mode 100644
 index 0000000..47ae8bf
@@ -400,146 +638,26 @@ index 0000000..02a9a9d
 +
 +#endif /* _MD5_H */
 diff --git a/src/uboot_env.c b/src/uboot_env.c
-index ae85c7e..750b736 100644
+index c1f334e..30ef835 100644
 --- a/src/uboot_env.c
 +++ b/src/uboot_env.c
-@@ -34,11 +34,21 @@
- #include <sys/ioctl.h>
- #include <zlib.h>
- #include <yaml.h>
-+#include <arpa/inet.h>
+@@ -37,6 +37,7 @@
  #include <mtd/mtd-user.h>
  #include <mtd/ubi-user.h>
  
-+#include "caam_keyblob.h"
-+#include "md5.h"
++#include "crypt.h"
  #include "uboot_private.h"
  
-+/*
-+ * The BLOB includes a random AES-256 key (32 bytes) and a
-+ * Message Authentication Code (MAC) (16 bytes)
-+ */
-+#define BLOB_OVERHEAD	48
-+#define CAAM_KEY_DEV	"/dev/caam_kb"
-+
  #define UBI_MAX_VOLUME			128
- 
- #define DEVICE_MTD_NAME 		"/dev/mtd"
-@@ -1028,6 +1038,105 @@ const struct uboot_version_info *libuboot_version_info(void)
- 	return &libinfo;
- }
- 
-+static int is_env_encrypted(void)
-+{
-+	const char *dt_prop = "/proc/device-tree/digi,uboot-env,encrypted";
-+
-+	return access(dt_prop, F_OK) != -1;
-+}
-+
-+#define MAX_HWID_WORDS		4
-+static int env_caam_get_keymod(unsigned char output[16])
-+{
-+	int i;
-+	int len;
-+	int fd;
-+	uint32_t ocotp_hwid[MAX_HWID_WORDS];
-+	char dt_prop[32];
-+
-+	for (i = 0; i < MAX_HWID_WORDS; i++) {
-+		sprintf(dt_prop, "/proc/device-tree/digi,hwid_%d", i);
-+		if (access(dt_prop, F_OK) != -1) {
-+			char buf[sizeof(uint32_t)];
-+
-+			fd = open(dt_prop, O_RDONLY);
-+			if (fd < 0)
-+				return fd;
-+			len = read(fd, buf, sizeof(uint32_t));
-+			if (len < 0) {
-+				close(fd);
-+				return -1;
-+			}
-+			ocotp_hwid[i] = ntohl(*(uint32_t *)buf);
-+			close(fd);
-+		} else {
-+			break;
-+		}
-+	}
-+
-+	/* Calculate md5sum on the raw HWID array */
-+	md5((unsigned char *)(&ocotp_hwid), sizeof(uint32_t) * i, output);
-+
-+	return 0;
-+}
-+
-+static int env_caam_crypt(char *data, unsigned int size, const int enc)
-+{
-+	struct caam_kb_data enc_data;
-+	int fd;
-+	int ret = 0;
-+	const int len = size;
-+	int ioctl_mode;
-+	char *buffer;
-+	unsigned char key_modifier[16];
-+
-+	ret = env_caam_get_keymod(key_modifier);
-+	if (ret)
-+		return ret;
-+
-+	enc_data.keymod = (char *)key_modifier;
-+	enc_data.keymod_len = sizeof(key_modifier);
-+
-+	enc_data.keyblob_len = len;
-+	enc_data.rawkey_len = len - BLOB_OVERHEAD;
-+
-+	buffer = malloc(len);
-+	if (!buffer) {
-+		printf("Could not allocate memory\n");
-+		return -1;
-+	}
-+
-+	if (enc) {
-+		enc_data.rawkey = data;
-+		ioctl_mode = CAAM_KB_ENCRYPT;
-+		enc_data.keyblob = buffer;
-+	} else {
-+		enc_data.keyblob = data;
-+		ioctl_mode = CAAM_KB_DECRYPT;
-+		enc_data.rawkey = buffer;
-+	}
-+
-+	if ((fd = open(CAAM_KEY_DEV, O_RDWR)) < 0) {
-+		ret = fd;
-+		goto free;
-+	}
-+
-+	ret = ioctl(fd, ioctl_mode, &enc_data);
-+	if (ret) {
-+		printf("CAAM_KEY_DEV ioctl failed: %d\n", ret);
-+		goto out;
-+	}
-+
-+	memcpy(data, buffer, enc ? len : len - BLOB_OVERHEAD);
-+
-+out:
-+	close(fd);
-+free:
-+	free(buffer);
-+
-+	return ret;
-+}
-+
- int libuboot_env_store(struct uboot_ctx *ctx)
- {
- 	struct var_entry *entry;
-@@ -1103,6 +1212,15 @@ int libuboot_env_store(struct uboot_ctx *ctx)
+@@ -1187,6 +1188,15 @@ int libuboot_env_store(struct uboot_ctx *ctx)
  		((struct uboot_env_redund *)image)->flags = flags;
  	}
  
-+	if (ctx->encrypted) {
-+		ret = env_caam_crypt(data, ctx->usable_size, 1);
++	if (is_env_encrypted()) {
++		size_t usable_envsize = ctx->size - offsetdata;
++		ret = env_crypt(data, usable_envsize, 1);
 +		if (ret) {
-+			fprintf(stderr,
-+				"Error: can't encrypt env for flash\n");
++			fprintf(stderr, "Error: can't encrypt env for flash\n");
 +			return ret;
 +		}
 +	}
@@ -547,56 +665,18 @@ index ae85c7e..750b736 100644
  	*(uint32_t *)image = crc32(0, (uint8_t *)data, ctx->size - offsetdata);
  
  	copy = ctx->redundant ? (ctx->current ? 0 : 1) : 0;
-@@ -1167,6 +1285,13 @@ static int libuboot_load(struct uboot_ctx *ctx)
+@@ -1251,6 +1261,14 @@ static int libuboot_load(struct uboot_ctx *ctx)
  		}
  		crc = *(uint32_t *)(buf[i] + offsetcrc);
  		dev->crc = crc32(0, (uint8_t *)data, usable_envsize);
-+		if (ctx->encrypted) {
-+			ret = env_caam_crypt((char *)data, ctx->usable_size, 0);
++		if (is_env_encrypted()) {
++			ret = env_crypt(data, usable_envsize, 0);
 +			if (ret) {
-+				fprintf(stderr, "Error: can't decrypt environment\n");
++				fprintf(stderr,
++					"Error: can't decrypt environment\n");
 +				return ret;
 +			}
 +		}
  		crcenv[i] = dev->crc == crc;
  		if (ctx->redundant)
  			dev->flags = *(uint8_t *)(buf[i] + offsetflags);
-@@ -1773,6 +1898,11 @@ int libuboot_read_config_ext(struct uboot_ctx **ctxlist, const char *config)
- 			break;
- 		}
- 	}
-+
-+	ctx->usable_size = ctx->size - sizeof(uint32_t);
-+	if (ctx->redundant)
-+		ctx->usable_size -= sizeof(char);
-+
- 	if (ndev == 0)
- 		retval = -EINVAL;
- 
-@@ -2042,6 +2172,7 @@ int libuboot_initialize(struct uboot_ctx **out,
- 		return -ENOMEM;
- 
- 	ctx->valid = false;
-+	ctx->encrypted = is_env_encrypted();
- 	ret = libuboot_configure(ctx, envdevs);
- 
- 	if (ret < 0) {
-diff --git a/src/uboot_private.h b/src/uboot_private.h
-index 40e5446..ee2d305 100644
---- a/src/uboot_private.h
-+++ b/src/uboot_private.h
-@@ -114,10 +114,14 @@ LIST_HEAD(vars, var_entry);
- struct uboot_ctx {
- 	/** true if the environment is redundant */
- 	bool redundant;
-+	/** true if the environment is encrypted */
-+	bool encrypted;
- 	/** set to valid after a successful load */
- 	bool valid;
- 	/** size of the environment */
- 	size_t size;
-+	/** usable environment size */
-+	unsigned int usable_size;
- 	/** devices where environment is stored */
- 	struct uboot_flash_env envdevs[2];
- 	/** Set which device contains the current(last valid) environment */

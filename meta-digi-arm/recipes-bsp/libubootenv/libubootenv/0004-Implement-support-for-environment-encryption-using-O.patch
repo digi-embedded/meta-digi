@@ -1,0 +1,259 @@
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Fri, 26 May 2023 11:21:43 +0200
+Subject: [PATCH] Implement support for environment encryption using Optee
+
+Co-authored-by: Javier Viguera <javier.viguera@digi.com>
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ src/CMakeLists.txt |   3 +
+ src/crypt.c        |  10 ++-
+ src/crypt_optee.c  | 172 +++++++++++++++++++++++++++++++++++++++++++++
+ src/crypt_optee.h  |  10 +++
+ 4 files changed, 194 insertions(+), 1 deletion(-)
+ create mode 100644 src/crypt_optee.c
+ create mode 100644 src/crypt_optee.h
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 638f1c1..f218b35 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -6,6 +6,8 @@ cmake_minimum_required (VERSION 2.6)
+ SET(libubootenv_SOURCES
+   crypt.c
+   crypt.h
++  crypt_optee.c
++  crypt_optee.h
+   md5.c
+   md5.h
+   uboot_env.c
+@@ -26,6 +28,7 @@ ADD_LIBRARY(ubootenv_static STATIC ${libubootenv_SOURCES} ${include_HEADERS})
+ SET_TARGET_PROPERTIES(ubootenv_static PROPERTIES OUTPUT_NAME ubootenv)
+ add_executable(fw_printenv fw_printenv.c)
+ target_link_libraries(ubootenv z yaml)
++target_link_libraries(ubootenv teec)
+ target_link_libraries(fw_printenv ubootenv)
+ add_custom_target(fw_setenv ALL ${CMAKE_COMMAND} -E create_symlink fw_printenv fw_setenv)
+ 
+diff --git a/src/crypt.c b/src/crypt.c
+index 213cffd..e3f9a5d 100644
+--- a/src/crypt.c
++++ b/src/crypt.c
+@@ -15,6 +15,7 @@
+ #include <unistd.h>
+ 
+ #include "caam_keyblob.h"
++#include "crypt_optee.h"
+ #include "md5.h"
+ 
+ /*
+@@ -168,7 +169,14 @@ free:
+ 
+ int env_crypt(char *data, unsigned int size, const int enc)
+ {
+-	return env_caam_crypt(data, size, enc);
++	if (is_env_optee_encrypted()) {
++		unsigned char key_modifier[16];
++		if (env_get_keymod(key_modifier))
++			return -1;
++		return env_optee_crypt((char *)key_modifier, data, size, enc);
++	} else {
++		return env_caam_crypt(data, size, enc);
++	}
+ }
+ 
+ int is_env_encrypted(void)
+diff --git a/src/crypt_optee.c b/src/crypt_optee.c
+new file mode 100644
+index 0000000..fc74141
+--- /dev/null
++++ b/src/crypt_optee.c
+@@ -0,0 +1,172 @@
++/*
++ * Copyright 2024 Digi International Inc
++ *
++ * SPDX-License-Identifier: GPL-2.0+
++ */
++
++#include <arpa/inet.h>
++#include <errno.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <tee_client_api.h>
++#include <unistd.h>
++
++#define AES_BLOCK_LENGTH	16
++
++/* From TA's public header (aes_ta.h) */
++#define TA_AES_UUID \
++	{ 0xc2fad363, 0x5d9f, 0x4fc4, \
++		{ 0xa4, 0x17, 0x55, 0x58, 0x41, 0xe0, 0x57, 0x45 } }
++#define TA_AES_ALGO_ECB			0
++#define TA_AES_ALGO_CBC			1
++#define TA_AES_ALGO_CTR			2
++#define TA_AES_SIZE_128BIT		(128 / 8)
++#define TA_AES_SIZE_256BIT		(256 / 8)
++#define TA_AES_MODE_DECODE		0
++#define TA_AES_MODE_ENCODE		1
++#define TA_AES_CMD_PREPARE		0
++#define TA_AES_CMD_SET_KEY		1
++#define TA_AES_CMD_SET_IV		2
++#define TA_AES_CMD_CIPHER		3
++
++struct tee_ctx {
++	TEEC_Context ctx;
++	TEEC_Session sess;
++};
++
++static void prepare_tee_session(struct tee_ctx *ctx)
++{
++	TEEC_Result ret;
++	uint32_t origin;
++	TEEC_UUID uuid = TA_AES_UUID;
++
++	ret = TEEC_InitializeContext(NULL, &ctx->ctx);
++	if (ret != TEEC_SUCCESS)
++		printf("TEEC_InitializeContext failed with code 0x%x", ret);
++
++	/* Open a session with the TA */
++	ret = TEEC_OpenSession(&ctx->ctx, &ctx->sess, &uuid,
++			       TEEC_LOGIN_PUBLIC, NULL, NULL, &origin);
++	if (ret != TEEC_SUCCESS)
++		printf("TEEC_Opensession failed with code 0x%x origin 0x%x",
++		       ret, origin);
++
++}
++
++static void terminate_tee_session(struct tee_ctx *ctx)
++{
++	TEEC_CloseSession(&ctx->sess);
++	TEEC_FinalizeContext(&ctx->ctx);
++}
++
++static void prepare_aes(struct tee_ctx *ctx, int encode)
++{
++	TEEC_Operation op;
++	uint32_t origin;
++	TEEC_Result res;
++
++	memset(&op, 0, sizeof(op));
++	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT,
++					 TEEC_VALUE_INPUT,
++					 TEEC_VALUE_INPUT, TEEC_NONE);
++
++	op.params[0].value.a = TA_AES_ALGO_CTR;
++	op.params[1].value.a = TA_AES_SIZE_256BIT;
++	op.params[2].value.a = encode ? TA_AES_MODE_ENCODE : TA_AES_MODE_DECODE;
++
++	res = TEEC_InvokeCommand(&ctx->sess, TA_AES_CMD_PREPARE, &op, &origin);
++	if (res != TEEC_SUCCESS)
++		printf("TEEC_InvokeCommand(PREPARE) failed 0x%x origin 0x%x",
++		       res, origin);
++}
++
++static void set_key(struct tee_ctx *ctx, size_t key_sz)
++{
++	TEEC_Operation op;
++	uint32_t origin;
++	TEEC_Result res;
++
++	memset(&op, 0, sizeof(op));
++
++	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT,
++					 TEEC_NONE, TEEC_NONE, TEEC_NONE);
++
++	op.params[0].value.a = key_sz;
++
++	res = TEEC_InvokeCommand(&ctx->sess, TA_AES_CMD_SET_KEY, &op, &origin);
++	if (res != TEEC_SUCCESS)
++		printf("TEEC_InvokeCommand(SET_KEY) failed 0x%x origin 0x%x",
++		       res, origin);
++}
++
++static void set_iv(struct tee_ctx *ctx, char *iv, size_t iv_sz)
++{
++	TEEC_Operation op;
++	uint32_t origin;
++	TEEC_Result res;
++
++	memset(&op, 0, sizeof(op));
++	op.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_TEMP_INPUT,
++					 TEEC_NONE, TEEC_NONE, TEEC_NONE);
++	op.params[0].tmpref.buffer = iv;
++	op.params[0].tmpref.size = iv_sz;
++
++	res = TEEC_InvokeCommand(&ctx->sess, TA_AES_CMD_SET_IV, &op, &origin);
++	if (res != TEEC_SUCCESS)
++		printf("TEEC_InvokeCommand(SET_IV) failed 0x%x origin 0x%x",
++		       res, origin);
++}
++
++static void cipher_buffer(struct tee_ctx *ctx, char *in, char *out, size_t sz)
++{
++	TEEC_Operation op;
++	uint32_t origin;
++	TEEC_Result res;
++
++	memset(&op, 0, sizeof(op));
++	op.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_TEMP_INPUT,
++					 TEEC_MEMREF_TEMP_OUTPUT,
++					 TEEC_NONE, TEEC_NONE);
++	op.params[0].tmpref.buffer = in;
++	op.params[0].tmpref.size = sz;
++	op.params[1].tmpref.buffer = out;
++	op.params[1].tmpref.size = sz;
++
++	res = TEEC_InvokeCommand(&ctx->sess, TA_AES_CMD_CIPHER, &op, &origin);
++	if (res != TEEC_SUCCESS)
++		printf("TEEC_InvokeCommand(CIPHER) failed 0x%x origin 0x%x",
++		       res, origin);
++}
++
++int env_optee_crypt(char *keymod, char *data, unsigned int size, const int enc)
++{
++	struct tee_ctx tee;
++	char *cryptdata;
++	int ret = 0;
++
++	prepare_tee_session(&tee);
++	prepare_aes(&tee, enc);
++	set_key(&tee, TA_AES_SIZE_256BIT);
++	set_iv(&tee, keymod, AES_BLOCK_LENGTH);
++	cryptdata = calloc(1, size);
++	if (cryptdata) {
++		cipher_buffer(&tee, data, cryptdata, size);
++		memcpy(data, cryptdata, size);
++		free(cryptdata);
++	} else {
++		printf("%s: can't allocate memory\n", __func__);
++		ret = -ENOMEM;
++	}
++	terminate_tee_session(&tee);
++
++	return ret;
++}
++
++int is_env_optee_encrypted(void)
++{
++	const char *dt_prop =
++	    "/proc/device-tree/digi,uboot-env,encrypted-optee";
++
++	return access(dt_prop, F_OK) != -1;
++}
+diff --git a/src/crypt_optee.h b/src/crypt_optee.h
+new file mode 100644
+index 0000000..e0c77a7
+--- /dev/null
++++ b/src/crypt_optee.h
+@@ -0,0 +1,10 @@
++/*
++ * Copyright 2024 Digi International Inc
++ *
++ * SPDX-License-Identifier: GPL-2.0+
++ */
++
++#pragma once
++
++int env_optee_crypt(char *keymod, char *data, unsigned int size, const int enc);
++int is_env_optee_encrypted(void);

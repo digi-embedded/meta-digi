@@ -52,10 +52,10 @@ index 3ed3244..e83b3a5 100644
  }
  #endif
 diff --git a/src/uboot_env.c b/src/uboot_env.c
-index 750b736..b7ad4c4 100644
+index ae85c7e..358dfbb 100644
 --- a/src/uboot_env.c
 +++ b/src/uboot_env.c
-@@ -2234,3 +2234,99 @@ void libuboot_exit(struct uboot_ctx *ctx)
+@@ -2103,3 +2103,99 @@ void libuboot_exit(struct uboot_ctx *ctx)
  
  	free(ctx);
  }
