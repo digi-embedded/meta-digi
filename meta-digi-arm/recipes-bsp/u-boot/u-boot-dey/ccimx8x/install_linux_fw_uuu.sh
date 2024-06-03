@@ -68,9 +68,9 @@ part_update()
 			uuu fb: ucmd setenv fastboot_buffer $initrd_addr
 			uuu fb: download -f "${3}"
 			uuu fb: ucmd setenv dek_size $filesize
-			uuu fb: ucmd trustfence update "${1}" ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
+			uuu fb: ucmd trustfence update ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
 		else
-			uuu fb: ucmd trustfence update "${1}" ram \${fastboot_buffer} \${fastboot_bytes}
+			uuu fb: ucmd trustfence update ram \${fastboot_buffer} \${fastboot_bytes}
 		fi
 	else
 		if [ "${1}" = "bootloader" ]; then
