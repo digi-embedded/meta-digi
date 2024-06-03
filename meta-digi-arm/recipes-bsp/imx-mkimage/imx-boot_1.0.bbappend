@@ -1,7 +1,11 @@
 # Copyright 2019,2020 Digi International, Inc.
 inherit boot-artifacts
 
-SRC_URI_append_ccimx8m = " file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch"
+SRC_URI_append_ccimx8m = " \
+    file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch \
+    file://0002-LFU-573-1-imx8m-Generate-hash-of-FIT-FDT-structure-t.patch \
+    file://0003-LFU-573-2-imx8m-Reserve-new-IVT-CSF-for-FIT-FDT-sign.patch \
+"
 
 IMX_EXTRA_FIRMWARE_ccimx8x = "digi-sc-firmware imx-seco"
 

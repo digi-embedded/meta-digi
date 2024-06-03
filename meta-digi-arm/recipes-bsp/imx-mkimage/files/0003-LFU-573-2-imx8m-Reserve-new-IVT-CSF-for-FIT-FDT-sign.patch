@@ -1,0 +1,179 @@
+From: Ye Li <ye.li@nxp.com>
+Date: Thu, 27 Jul 2023 09:52:33 +0800
+Subject: [PATCH] LFU-573-2 imx8m: Reserve new IVT+CSF for FIT FDT signature
+
+Without using FIT FDT hash, we also allow user to sign FIT FDT structure,
+so that FIT image can upgrade individually. The option needs
+CONFIG_IMX_SPL_FIT_FDT_SIGNATURE enabled in SPL.
+
+imx-mkimage will insert the new IVT for FIT FDT signature by default
+and reserve the CSF (0x2000) for the FIT FDT signature.
+
+Signed-off-by: Ye Li <ye.li@nxp.com>
+(cherry picked from commit 5a0faefc223e51e088433663b6e7d6fbce89bf59)
+---
+ iMX8M/mkimage_imx8.c   | 30 +++++++++++++++++++++++++++++-
+ iMX8M/print_fit_hab.sh |  4 ++--
+ iMX8M/soc.mak          | 17 +++++++++--------
+ 3 files changed, 40 insertions(+), 11 deletions(-)
+
+diff --git a/iMX8M/mkimage_imx8.c b/iMX8M/mkimage_imx8.c
+index f8484d0..c2a6c29 100644
+--- a/iMX8M/mkimage_imx8.c
++++ b/iMX8M/mkimage_imx8.c
+@@ -999,7 +999,7 @@ int generate_ivt_for_fit(int fd, int fit_offset, uint32_t ep, uint32_t *fit_load
+ 	}
+ 
+ 	/* ep is the u-boot entry. SPL loads the FIT before the u-boot address. 0x2000 is for CSF_SIZE */
+-	load_addr = (ep - (fit_size + CSF_SIZE) - 512 -
++	load_addr = (ep - (fit_size + 2 * CSF_SIZE) - 512 -
+ 			align_len) & ~align_len;
+ 
+ 	flash_header_v2_t ivt_header = { { 0xd1, 0x2000, 0x40 },
+@@ -1013,6 +1013,24 @@ int generate_ivt_for_fit(int fd, int fit_offset, uint32_t ep, uint32_t *fit_load
+ 		exit(EXIT_FAILURE);
+ 	}
+ 
++	ret = lseek(fd, fit_offset + fit_size + CSF_SIZE, SEEK_SET);
++	if (ret < 0) {
++		fprintf(stderr, "%s: lseek error %s\n",
++				__func__, strerror(errno));
++		exit(EXIT_FAILURE);
++	}
++
++	flash_header_v2_t fdt_ivt_header = { { 0xd1, 0x2000, 0x40 },
++		load_addr, 0, 0, 0,
++		(load_addr + fit_size + CSF_SIZE ),
++		(load_addr + fit_size + CSF_SIZE + 0x20),
++		0 };
++
++	if (write(fd, &fdt_ivt_header, sizeof(flash_header_v2_t)) != sizeof(flash_header_v2_t)) {
++		fprintf(stderr, "FIT FDT IVT writing error on fit image\n");
++		exit(EXIT_FAILURE);
++	}
++
+ 	*fit_load_addr = load_addr;
+ 
+ 	return fit_offset + fit_size;
+@@ -1229,6 +1247,11 @@ int main(int argc, char **argv)
+ 		fprintf(stderr, " fit hab block: \t0x%x 0x%x 0x%x\n",
+ 			sld_load_addr, sld_src_off, sld_csf_off - sld_src_off);
+ 
++		fprintf(stderr, " fit-fdt_csf_off \t0x%x\n",
++			sld_csf_off + CSF_SIZE);
++		fprintf(stderr, " fit-fdt hab block: \t0x%x 0x%x 0x%x\n",
++			sld_load_addr, sld_src_off, sld_csf_off + CSF_SIZE - sld_src_off);
++
+ 		exit(0);
+ 	}
+ 
+@@ -1769,6 +1792,11 @@ int main(int argc, char **argv)
+ 	fprintf(stderr, " sld hab block: \t0x%x 0x%x 0x%x\n",
+ 		sld_load_addr, sld_header_off, sld_csf_off - sld_header_off);
+ 
++	fprintf(stderr, " fit-fdt csf_off \t0x%x\n",
++		sld_csf_off + CSF_SIZE);
++	fprintf(stderr, " fit-fdt hab block: \t0x%x 0x%x 0x%x\n",
++		sld_load_addr, sld_header_off, sld_csf_off + CSF_SIZE - sld_header_off);
++
+ 	return 0;
+ }
+ 
+diff --git a/iMX8M/print_fit_hab.sh b/iMX8M/print_fit_hab.sh
+index b915115..ecefb5e 100755
+--- a/iMX8M/print_fit_hab.sh
++++ b/iMX8M/print_fit_hab.sh
+@@ -20,10 +20,10 @@ fi
+ 
+ if [ "$BOOT_DEV" = "flexspi" ] || [ ${fit_off} == 0 ]; then
+ 	# We dd flash.bin to 0 offset for flexspi
+-	let uboot_sign_off=$((fit_off + 0x3000))
++	let uboot_sign_off=$((fit_off + $FIT_DATA_POS))
+ else
+ 	# We dd flash.bin to 33KB "0x8400" offset, so need minus 0x8400
+-	let uboot_sign_off=$((fit_off - 0x8000 - ivt_off + 0x3000))
++	let uboot_sign_off=$((fit_off - 0x8000 - ivt_off + $FIT_DATA_POS))
+ fi
+ 
+ let uboot_size=$(ls -lct u-boot-nodtb.bin | awk '{print $5}')
+diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
+index bd8b1ed..1f7ec9d 100644
+--- a/iMX8M/soc.mak
++++ b/iMX8M/soc.mak
+@@ -76,6 +76,7 @@ QSPI_PACKER = ../scripts/fspi_packer.sh
+ VERSION = v1
+ endif
+ 
++FIT_EXTERNAL_POSITION = 0x5000
+ 
+ FW_DIR = imx-boot/imx-boot-tools/$(PLAT)
+ 
+@@ -150,7 +151,7 @@ u-boot.itb: $(dtbs)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtbs)
+ 	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtbs) > u-boot.its
+-	./mkimage_uboot -E -p 0x3000 -f u-boot.its u-boot.itb
++	./mkimage_uboot -E -p $(FIT_EXTERNAL_POSITION) -f u-boot.its u-boot.itb
+ 	@rm -f u-boot.its
+ 
+ dtbs_ddr3l = valddr3l.dtb
+@@ -162,7 +163,7 @@ u-boot-ddr3l.itb: $(dtbs_ddr3l)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtbs_ddr3l)
+ 	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtbs_ddr3l) > u-boot-ddr3l.its
+-	./mkimage_uboot -E -p 0x3000 -f u-boot-ddr3l.its u-boot-ddr3l.itb
++	./mkimage_uboot -E -p $(FIT_EXTERNAL_POSITION) -f u-boot-ddr3l.its u-boot-ddr3l.itb
+ 	@rm -f u-boot.its $(dtbs_ddr3l)
+ 
+ dtbs_ddr3l_evk = evkddr3l.dtb
+@@ -174,7 +175,7 @@ u-boot-ddr3l-evk.itb: $(dtbs_ddr3l_evk)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtbs_ddr3l_evk)
+ 	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtbs_ddr3l_evk) > u-boot-ddr3l-evk.its
+-	./mkimage_uboot -E -p 0x3000 -f u-boot-ddr3l-evk.its u-boot-ddr3l-evk.itb
++	./mkimage_uboot -E -p $(FIT_EXTERNAL_POSITION) -f u-boot-ddr3l-evk.its u-boot-ddr3l-evk.itb
+ 	@rm -f u-boot.its $(dtbs_ddr3l_evk)
+ 
+ dtbs_ddr4 = valddr4.dtb
+@@ -186,7 +187,7 @@ u-boot-ddr4.itb: $(dtbs_ddr4)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtbs_ddr4)
+ 	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtbs_ddr4) > u-boot-ddr4.its
+-	./mkimage_uboot -E -p 0x3000 -f u-boot-ddr4.its u-boot-ddr4.itb
++	./mkimage_uboot -E -p $(FIT_EXTERNAL_POSITION) -f u-boot-ddr4.its u-boot-ddr4.itb
+ 	@rm -f u-boot.its $(dtbs_ddr4)
+ 
+ dtbs_ddr4_evk = evkddr4.dtb
+@@ -198,7 +199,7 @@ u-boot-ddr4-evk.itb: $(dtbs_ddr4_evk)
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtbs_ddr4_evk)
+ 	DEK_BLOB_LOAD_ADDR=$(DEK_BLOB_LOAD_ADDR) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtbs_ddr4_evk) > u-boot-ddr4-evk.its
+-	./mkimage_uboot -E -p 0x3000 -f u-boot-ddr4-evk.its u-boot-ddr4-evk.itb
++	./mkimage_uboot -E -p $(FIT_EXTERNAL_POSITION) -f u-boot-ddr4-evk.its u-boot-ddr4-evk.itb
+ 	@rm -f u-boot.its $(dtbs_ddr4_evk)
+ 
+ ifeq ($(HDMI),yes)
+@@ -284,20 +285,20 @@ print_fit_hab: u-boot-nodtb.bin bl31.bin $(dtbs)
+ 	./$(PAD_IMAGE) tee.bin
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtbs)
+-	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ./print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtbs)
++	FIT_DATA_POS=$(FIT_EXTERNAL_POSITION) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ./print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtbs)
+ 
+ print_fit_hab_ddr4: u-boot-nodtb.bin bl31.bin $(dtbs_ddr4_evk)
+ 	./$(PAD_IMAGE) tee.bin
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtbs_ddr4_evk)
+-	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ./print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtbs_ddr4_evk)
++	FIT_DATA_POS=$(FIT_EXTERNAL_POSITION) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ./print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtbs_ddr4_evk)
+ 	@rm -f $(dtbs_ddr4_evk)
+ 
+ print_fit_hab_flexspi: u-boot-nodtb.bin bl31.bin $(dtbs)
+ 	./$(PAD_IMAGE) tee.bin
+ 	./$(PAD_IMAGE) bl31.bin
+ 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtbs)
+-	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) BOOT_DEV="flexspi" ./print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtbs)
++	FIT_DATA_POS=$(FIT_EXTERNAL_POSITION) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) BOOT_DEV="flexspi" ./print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtbs)
+ 	@rm -f $(dtbs)
+ 
+ nightly :
