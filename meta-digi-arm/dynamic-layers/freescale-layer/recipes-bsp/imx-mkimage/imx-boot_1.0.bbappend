@@ -5,6 +5,8 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 SRC_URI:append:ccimx8m = " \
     file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch \
     file://0002-imx8m-soc.mak-capture-commands-output-into-a-log-fil.patch \
+    file://0003-LFU-573-1-imx8m-Generate-hash-of-FIT-FDT-structure-t.patch \
+    file://0004-LFU-573-2-imx8m-Reserve-new-IVT-CSF-for-FIT-FDT-sign.patch \
 "
 
 SRC_URI:append:ccimx93 = " \
