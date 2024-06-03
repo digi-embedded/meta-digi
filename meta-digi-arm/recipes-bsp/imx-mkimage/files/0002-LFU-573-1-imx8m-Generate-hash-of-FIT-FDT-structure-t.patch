@@ -1,0 +1,207 @@
+From: Ye Li <ye.li@nxp.com>
+Date: Mon, 3 Jul 2023 17:31:32 +0800
+Subject: [PATCH] LFU-573-1 imx8m: Generate hash of FIT FDT structure to SPL
+ image
+
+Generate the hash of FIT FDT structure by SHA256 and append it
+to end of SPL image (after DDR FW).
+SPL will get the hash from the position to verify the FIT FDT
+structure in loaded FIT image.
+
+Signed-off-by: Ye Li <ye.li@nxp.com>
+(cherry picked from commit 2f2d426f03ebbcf7a9c28cf53680cd5777e70ea1)
+---
+ iMX8M/mkimage_imx8.c | 109 ++++++++++++++++++++++++++++++++++++++++++-
+ iMX8M/soc.mak        |  14 ++++--
+ 2 files changed, 117 insertions(+), 6 deletions(-)
+
+diff --git a/iMX8M/mkimage_imx8.c b/iMX8M/mkimage_imx8.c
+index f6c1f9e..5de6136 100644
+--- a/iMX8M/mkimage_imx8.c
++++ b/iMX8M/mkimage_imx8.c
+@@ -366,6 +366,31 @@ copy_file (int ifd, const char *datafile, int pad, int offset, int datafile_offs
+ 	(void) close (dfd);
+ }
+ 
++static void append_data(char *filename, uint8_t *data, int size)
++{
++	int dfd, ret;
++
++	if ((dfd = open(filename, O_RDWR|O_BINARY)) < 0) {
++		fprintf (stderr, "Can't open %s: %s\n",
++			filename, strerror(errno));
++		exit (EXIT_FAILURE);
++	}
++
++	ret = lseek(dfd, 0, SEEK_END);
++	if (ret < 0) {
++		fprintf(stderr, "%s: lseek error %s\n",
++				__func__, strerror(errno));
++		exit(EXIT_FAILURE);
++	}
++	if (write(dfd, data, size) != size) {
++		fprintf (stderr, "Write error %s\n",
++			strerror(errno));
++		exit (EXIT_FAILURE);
++	}
++	(void) close (dfd);
++}
++
++
+ enum imximage_fld_types {
+ 	CFG_INVALID = -1,
+ 	CFG_COMMAND,
+@@ -861,6 +886,77 @@ void generate_sld_with_ivt(char * input_file, uint32_t ep, char *out_file)
+ 	close(input_fd);
+ }
+ 
++#define HASH_MAX_LEN 32
++static void calc_fitimage_hash(char* filename, uint8_t *hash)
++{
++	int sld_fd;
++	FILE *fp = NULL;
++	char sha_command[512];
++	char *digest_type = "sha256sum";
++	char hash_char[2 * HASH_MAX_LEN + 1];
++	int digest_length = 64;
++
++	uimage_header_t image_header;
++	uint32_t fit_size;
++
++	sld_fd = open(filename, O_RDONLY | O_BINARY);
++	if (sld_fd < 0) {
++		fprintf(stderr, "%s: Can't open: %s\n",
++                            filename, strerror(errno));
++		exit(EXIT_FAILURE);
++	}
++
++	if (read(sld_fd, (char *)&image_header, sizeof(uimage_header_t)) != sizeof(uimage_header_t)) {
++		fprintf (stderr, "generate_ivt_for_fit read failed: %s\n",
++			strerror(errno));
++		exit (EXIT_FAILURE);
++	}
++
++	if (be32_to_cpu(image_header.ih_magic) != FDT_MAGIC){
++		fprintf (stderr, "generate_ivt_for_fit error: not a FIT file\n");
++		exit (EXIT_FAILURE);
++	}
++
++	fit_size = fdt_totalsize(&image_header);
++
++	fprintf(stderr, "fit_size: %u\n", fit_size);
++
++	sprintf(sha_command, "dd if=\'%s\' of=tmp_pad bs=%d count=1;\
++				%s tmp_pad; rm -f tmp_pad;",
++			filename, fit_size, digest_type);
++
++	memset(hash, 0, HASH_MAX_LEN);
++
++	fp = popen(sha_command, "r");
++	if (fp == NULL) {
++		fprintf(stderr, "Failed to run command hash\n" );
++		exit(EXIT_FAILURE);
++	}
++
++	if(fgets(hash_char, digest_length + 1, fp) == NULL) {
++		fprintf(stderr, "Failed to hash file: %s\n", filename);
++		exit(EXIT_FAILURE);
++	}
++
++	for(int i = 0; i < strlen(hash_char)/2; i++){
++		sscanf(hash_char + 2*i, "%02hhx", &hash[i]);
++	}
++
++	pclose(fp);
++	(void) close (sld_fd);
++}
++
++void dump_fit_hash(uint8_t *hash, int size)
++{
++	int i;
++
++	fprintf(stderr, "FIT hash: ");
++	for (i = 0; i < size; i++) {
++		fprintf(stderr, "%x", hash[i]);
++	}
++	fprintf(stderr, "\n");
++}
++
+ /* Return this IVT offset in the final output file */
+ int generate_ivt_for_fit(int fd, int fit_offset, uint32_t ep, uint32_t *fit_load_addr)
+ {
+@@ -943,6 +1039,8 @@ int main(int argc, char **argv)
+ 	uimage_header_t uimage_hdr;
+ 	uint32_t version = ROM_V1;
+ 
++	uint8_t fit_hash[HASH_MAX_LEN];
++
+ 	static struct option long_options[] =
+ 	{
+ 		{"loader", required_argument, NULL, 'i'},
+@@ -1146,6 +1244,15 @@ int main(int argc, char **argv)
+ 		exit(1);
+ 	}
+ 
++	if (sld_img && using_fit) {
++		calc_fitimage_hash(sld_img, fit_hash);
++
++		/* Append hash to ap_img */
++		append_data(ap_img, fit_hash, HASH_MAX_LEN);
++
++		dump_fit_hash(fit_hash, HASH_MAX_LEN);
++	}
++
+ 	if (version == ROM_V2) {
+ 
+ 		/* On V2, flexspi IVT offset is 0, image offset is 0x1000 */
+@@ -1641,7 +1748,7 @@ int main(int argc, char **argv)
+ 	}
+ 
+ 	/* The FLEXSPI configuration parameters will add to flash.bin by script, so need add 0x1000 offset to every offset prints */
+-	if ((version == ROM_V2 && rom_image_offset == IVT_OFFSET_FLEXSPI) || 
++	if ((version == ROM_V2 && rom_image_offset == IVT_OFFSET_FLEXSPI) ||
+         (version == ROM_V1 && ivt_offset == IVT_OFFSET_FLEXSPI)) {
+ 		header_image_off += IVT_OFFSET_FLEXSPI;
+ 		dcd_off += IVT_OFFSET_FLEXSPI;
+diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
+index 9f5c96b..bd8b1ed 100644
+--- a/iMX8M/soc.mak
++++ b/iMX8M/soc.mak
+@@ -93,8 +93,9 @@ u-boot-spl-ddr.bin: u-boot-spl.bin $(lpddr4_imem_1d) $(lpddr4_dmem_1d) $(lpddr4_
+ 	@objcopy -I binary -O binary --pad-to 0x8000 --gap-fill=0x0 $(lpddr4_imem_1d) lpddr4_pmu_train_1d_imem_pad.bin
+ 	@objcopy -I binary -O binary --pad-to 0x4000 --gap-fill=0x0 $(lpddr4_dmem_1d) lpddr4_pmu_train_1d_dmem_pad.bin
+ 	@objcopy -I binary -O binary --pad-to 0x8000 --gap-fill=0x0 $(lpddr4_imem_2d) lpddr4_pmu_train_2d_imem_pad.bin
++	@objcopy -I binary -O binary --pad-to 0x4000 --gap-fill=0x0 $(lpddr4_dmem_2d) lpddr4_pmu_train_2d_dmem_pad.bin
+ 	@cat lpddr4_pmu_train_1d_imem_pad.bin lpddr4_pmu_train_1d_dmem_pad.bin > lpddr4_pmu_train_1d_fw.bin
+-	@cat lpddr4_pmu_train_2d_imem_pad.bin $(lpddr4_dmem_2d) > lpddr4_pmu_train_2d_fw.bin
++	@cat lpddr4_pmu_train_2d_imem_pad.bin lpddr4_pmu_train_2d_dmem_pad.bin > lpddr4_pmu_train_2d_fw.bin
+ 	@dd if=u-boot-spl.bin of=u-boot-spl-pad.bin bs=4 conv=sync
+ 	@cat u-boot-spl-pad.bin lpddr4_pmu_train_1d_fw.bin lpddr4_pmu_train_2d_fw.bin > u-boot-spl-ddr.bin
+ 	@rm -f u-boot-spl-pad.bin lpddr4_pmu_train_1d_fw.bin lpddr4_pmu_train_2d_fw.bin lpddr4_pmu_train_1d_imem_pad.bin lpddr4_pmu_train_1d_dmem_pad.bin lpddr4_pmu_train_2d_imem_pad.bin
+@@ -108,8 +109,9 @@ u-boot-spl-ddr4.bin: u-boot-spl.bin $(ddr4_imem_1d) $(ddr4_dmem_1d) $(ddr4_imem_
+ 	@objcopy -I binary -O binary --pad-to 0x8000 --gap-fill=0x0 $(ddr4_imem_1d) ddr4_imem_1d_pad.bin
+ 	@objcopy -I binary -O binary --pad-to 0x4000 --gap-fill=0x0 $(ddr4_dmem_1d) ddr4_dmem_1d_pad.bin
+ 	@objcopy -I binary -O binary --pad-to 0x8000 --gap-fill=0x0 $(ddr4_imem_2d) ddr4_imem_2d_pad.bin
++	@objcopy -I binary -O binary --pad-to 0x4000 --gap-fill=0x0 $(ddr4_dmem_2d) ddr4_dmem_2d_pad.bin
+ 	@cat ddr4_imem_1d_pad.bin ddr4_dmem_1d_pad.bin > ddr4_1d_fw.bin
+-	@cat ddr4_imem_2d_pad.bin $(ddr4_dmem_2d) > ddr4_2d_fw.bin
++	@cat ddr4_imem_2d_pad.bin ddr4_dmem_2d_pad.bin > ddr4_2d_fw.bin
+ 	@dd if=u-boot-spl.bin of=u-boot-spl-pad.bin bs=4 conv=sync
+ 	@cat u-boot-spl-pad.bin ddr4_1d_fw.bin ddr4_2d_fw.bin > u-boot-spl-ddr4.bin
+ 	@rm -f u-boot-spl-pad.bin ddr4_1d_fw.bin ddr4_2d_fw.bin ddr4_imem_1d_pad.bin ddr4_dmem_1d_pad.bin ddr4_imem_2d_pad.bin
+@@ -119,10 +121,12 @@ ddr3_dmem_1d = ddr3_dmem_1d$(DDR_FW_VERSION).bin
+ 
+ u-boot-spl-ddr3l.bin: u-boot-spl.bin $(ddr3_imem_1d) $(ddr3_dmem_1d)
+ 	@objcopy -I binary -O binary --pad-to 0x8000 --gap-fill=0x0 $(ddr3_imem_1d) ddr3_imem_1d.bin_pad.bin
+-	@cat ddr3_imem_1d.bin_pad.bin $(ddr3_dmem_1d) > ddr3_pmu_train_fw.bin
++	@objcopy -I binary -O binary --pad-to 0x4000 --gap-fill=0x0 $(ddr3_dmem_1d) ddr3_dmem_1d.bin_pad.bin
++	@cat ddr3_imem_1d.bin_pad.bin ddr3_dmem_1d.bin_pad.bin > ddr3_pmu_train_fw.bin
++	@dd if=/dev/zero of=ddr3_fw_zero_pad.bin bs=1 count=49152 conv=sync
+ 	@dd if=u-boot-spl.bin of=u-boot-spl-pad.bin bs=4 conv=sync
+-	@cat u-boot-spl-pad.bin ddr3_pmu_train_fw.bin > u-boot-spl-ddr3l.bin
+-	@rm -f u-boot-spl-pad.bin ddr3_pmu_train_fw.bin ddr3_imem_1d.bin_pad.bin
++	@cat u-boot-spl-pad.bin ddr3_pmu_train_fw.bin ddr3_fw_zero_pad.bin > u-boot-spl-ddr3l.bin
++	@rm -f u-boot-spl-pad.bin ddr3_pmu_train_fw.bin ddr3_imem_1d.bin_pad.bin ddr3_fw_zero_pad.bin
+ 
+ u-boot-atf.bin: u-boot.bin bl31.bin
+ 	@cp bl31.bin u-boot-atf.bin
