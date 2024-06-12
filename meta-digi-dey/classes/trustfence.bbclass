@@ -150,6 +150,12 @@ python () {
         elif d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"):
             if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
                 d.appendVar("UBOOT_TF_CONF", "CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NR=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"))
+                if d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_NAME"):
+                    d.appendVar("UBOOT_TF_CONF", 'CONFIG_CONSOLE_ENABLE_GPIO_NAME="%s" ' % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_NAME"))
+                    if d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_ACTIVE_LOW"):
+                        d.appendVar("UBOOT_TF_CONF", "CONFIG_CONSOLE_ENABLE_GPIO_ACTIVE_LOW=y ")
+                    else:
+                        d.appendVar("UBOOT_TF_CONF", '"# CONFIG_CONSOLE_ENABLE_GPIO_ACTIVE_LOW is not set" ')
             elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NAME="%s" ' % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_NAME"))
 
