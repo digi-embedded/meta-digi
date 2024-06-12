@@ -15,6 +15,8 @@ SRC_URI:append:ccimx93 = " \
 
 BOOT_TOOLS = "imx-boot-tools"
 
+EXTRA_OEMAKE += "${@oe.utils.conditional('TRUSTFENCE_CONSOLE_DISABLE', '1', 'LOG_LEVEL=0', '', d)}"
+
 # Build ATF for imx93 SOC revision A0
 do_compile:append:ccimx93() {
 	oe_runmake SOC_REV_A0=1 BUILD_BASE=build-A0 clean
