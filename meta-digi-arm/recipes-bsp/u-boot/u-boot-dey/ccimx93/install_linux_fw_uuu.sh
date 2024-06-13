@@ -39,8 +39,11 @@ show_usage()
 	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
 	echo "                          'dey-image-webkit', 'core-image-base'..."
 	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
+	echo "   -k <dek-blob-file>     Update includes dek blob file."
+	echo "                          (requires -t)."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
 	echo "   -u <u-boot-filename>   U-Boot filename."
+	echo "   -t                     Install Trustfence artifacts."
 	echo "                          Auto-determined by variant if not provided."
 	echo "   -U                     Update redundant bootloader partition."
 
@@ -51,6 +54,7 @@ show_usage()
 #   Params:
 #	1. partition
 #	2. file
+#	3. dek blob file when updating an encrypted bootloader
 part_update()
 {
 	echo "\033[36m"
@@ -59,10 +63,23 @@ part_update()
 	echo "====================================================================================="
 	echo "\033[0m"
 
-	if [ "${1}" = "bootloader" ] || [ "${1}" = "bootloader_redundant" ]; then
-		uuu fb: flash "${1}" "${2}"
+	if [ "${TRUSTFENCE}" = "true" ] && [ "${1}" = "bootloader" ]; then
+		uuu fb: download -f "${2}"
+		if [ -n "${DEK_BLOB_KEY}" ]; then
+			uuu fb: ucmd setenv uboot_size \${filesize}
+			uuu fb: ucmd setenv fastboot_buffer \${initrd_addr}
+			uuu fb: download -f "${3}"
+			uuu fb: ucmd setenv dek_size \${filesize}
+			uuu fb: ucmd trustfence update ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
+		else
+			uuu fb: ucmd trustfence update ram \${fastboot_buffer} \${fastboot_bytes}
+		fi
 	else
-		uuu fb: flash -raw2sparse "${1}" "${2}"
+		if [ "${1}" = "bootloader" ] || [ "${1}" = "bootloader_redundant" ]; then
+			uuu fb: flash "${1}" "${2}"
+		else
+			uuu fb: flash -raw2sparse "${1}" "${2}"
+		fi
 	fi
 }
 
@@ -75,15 +92,18 @@ echo "############################################################"
 # -b, -d, -n (booleans)
 # -i <image-name>
 # -u <u-boot-filename>
-while getopts 'bdhi:nu:U' c
+# -k <dek-blob-name>
+while getopts 'bdhti:nu:Uk:' c
 do
 	case $c in
 	b) BOOTCOUNT=true ;;
 	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
+	k) DEK_BLOB_KEY=${OPTARG} ;;
 	n) NOWAIT=true ;;
 	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
+	t) TRUSTFENCE=true ;;
 	U) INSTALL_REDUNDANT_UBOOT=true ;;
 	esac
 done
@@ -112,7 +132,7 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 		som_hv="$(((hwid_2 & 0x78) >> 3))"
 		[ "${som_hv}" -lt "2" ] && SOCREV="-A0"
 	fi
-	INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##${SOCREV}.bin"
+	INSTALL_UBOOT_FILENAME="imx-boot-##SIGNED##-##MACHINE##${SOCREV}.bin"
 fi
 
 # remove redirect
@@ -230,7 +250,7 @@ uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 uuu fb: ucmd setenv forced_update 1
 
 # Update U-Boot
-part_update "bootloader" "${INSTALL_UBOOT_FILENAME}"
+part_update "bootloader" "${INSTALL_UBOOT_FILENAME}" "${DEK_BLOB_KEY}"
 if [ "${INSTALL_REDUNDANT_UBOOT}" = true ]; then
 	part_update bootloader_redundant "${INSTALL_UBOOT_FILENAME}"
 fi
@@ -312,6 +332,10 @@ fi
 # If the rootfs image was originally compressed, remove the uncompressed image
 if [ -f ${COMPRESSED_ROOTFS_IMAGE} ] && [ -f ${INSTALL_ROOTFS_FILENAME} ]; then
 	rm -f "${INSTALL_ROOTFS_FILENAME}"
+fi
+# Set the dboot_kernel_var to fitimage if Trustfence is enabled
+if [ "${TRUSTFENCE}" = "true" ] || echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "signed" -e "encrypted"; then
+	uuu fb: ucmd setenv dboot_kernel_var fitimage
 fi
 
 if [ "${DUALBOOT}" != true ]; then
