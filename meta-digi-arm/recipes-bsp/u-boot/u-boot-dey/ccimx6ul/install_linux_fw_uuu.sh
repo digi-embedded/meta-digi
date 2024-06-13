@@ -76,10 +76,10 @@ part_update()
 	uuu fb: download -f "${2}"
 	if [ "${TRUSTFENCE}" = "true" ] && [ "${1}" = "uboot" ]; then
 		if [ -n "${DEK_BLOB_FILE}" ]; then
-			uuu fb: ucmd setenv uboot_size $filesize
-			uuu fb: ucmd setenv fastboot_buffer $initrd_addr
+			uuu fb: ucmd setenv uboot_size \${filesize}
+			uuu fb: ucmd setenv fastboot_buffer \${initrd_addr}
 			uuu fb: download -f "${4}"
-			uuu fb: ucmd setenv dek_size $filesize
+			uuu fb: ucmd setenv dek_size \${filesize}
 			uuu "fb[-t ${3}]:" ucmd trustfence update ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
 		else
 			uuu "fb[-t ${3}]:" ucmd trustfence update ram \${fastboot_buffer} \${fastboot_bytes}
