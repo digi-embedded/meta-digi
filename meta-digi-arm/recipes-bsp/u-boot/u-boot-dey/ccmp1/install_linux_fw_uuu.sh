@@ -50,6 +50,7 @@ show_usage()
 	echo "                          'dey-image-webkit', 'core-image-base'..."
 	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
+	echo "   -t                     Install Trustfence artifacts."
 	exit 2
 }
 
@@ -93,6 +94,7 @@ do
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
 	n) NOWAIT=true ;;
+	t) TRUSTFENCE=true ;;
 	esac
 done
 
@@ -312,6 +314,11 @@ else
 	uuu fb: ucmd saveenv
 fi
 
+# Set the dboot_kernel_var to fitimage if Trustfence is enabled
+if [ "${TRUSTFENCE}" = "true" ] || echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "signed"; then
+	uuu fb: ucmd setenv dboot_kernel_var fitimage
+	uuu fb: ucmd saveenv
+fi
 # Set the rootfstype if squashfs
 if [ "${SQUASHFS}" = true ]; then
 	uuu fb: ucmd setenv rootfstype squashfs
