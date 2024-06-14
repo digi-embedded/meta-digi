@@ -98,7 +98,7 @@ build_uboot_scripts() {
 				sed -i -e 's,##SIGNED_TFA##,_signed,g' ${TMP_INSTALL_SCR}
 			fi
 		else
-			sed -i -e 's,##SIGNED##,,g' ${TMP_INSTALL_SCR}
+			sed -i -e 's,-##SIGNED##,,g' -e 's,##SIGNED##,,g' ${TMP_INSTALL_SCR}
 			if [ "${DEY_SOC_VENDOR}" = "STM" ]; then
 				sed -i -e 's,##SIGNED_TFA##,,g' ${TMP_INSTALL_SCR}
 			fi
