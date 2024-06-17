@@ -90,8 +90,15 @@ echo "############################################################"
 # -b, -d, -n (booleans)
 # -i <image-name>
 # -u <u-boot-filename>
-while getopts 'bdhi:k:ntu:' c
+while getopts ':bdhi:k:ntu:' c
 do
+	if [ "${c}" = ":" ]; then
+		c="${OPTARG}"
+		unset OPTARG
+	elif echo "${OPTARG}" | grep -qs '^-'; then
+		OPTIND="$((OPTIND-1))"
+		unset OPTARG
+	fi
 	case $c in
 	b) BOOTCOUNT=true ;;
 	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;

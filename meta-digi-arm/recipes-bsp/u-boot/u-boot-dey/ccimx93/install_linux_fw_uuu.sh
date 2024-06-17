@@ -93,8 +93,15 @@ echo "############################################################"
 # -i <image-name>
 # -u <u-boot-filename>
 # -k <dek-blob-name>
-while getopts 'bdhti:nu:Uk:' c
+while getopts ':bdhti:nu:Uk:' c
 do
+	if [ "${c}" = ":" ]; then
+		c="${OPTARG}"
+		unset OPTARG
+	elif echo "${OPTARG}" | grep -qs '^-'; then
+		OPTIND="$((OPTIND-1))"
+		unset OPTARG
+	fi
 	case $c in
 	b) BOOTCOUNT=true ;;
 	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
