@@ -30,6 +30,8 @@ SRCREV_cyw-bt-patch="3275a7036dd0d6eacecccccc760b7e7fe91a9e32"
 SRCREV_cyw-fmac-utils-imx32="fcdd231e9bb23db3c93c10e5dff43a1182f220c5"
 SRCREV_cyw-fmac-utils-imx64="52cc4cc6be8629781014505aa276b67e18cf6e8d"
 
+SRCREV_FORMAT = "cyw-fmac-fw_cyw-fmac-nvram_cyw-bt-patch_cyw-fmac-utils-imx32_cyw-fmac-utils-imx64"
+
 SRCREV_default = "${AUTOREV}"
 
 S = "${WORKDIR}"
