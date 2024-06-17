@@ -42,7 +42,7 @@ show_usage()
 	echo "   -k <dek-blob-file>     Update includes dek blob file."
 	echo "                          (requires -t)."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
-	echo "   -t                     Install Trustfence artifacts."
+	echo "   -t                     Install TrustFence artifacts."
 	echo "   -u <u-boot-filename>   U-Boot filename."
 	echo "                          Auto-determined by variant if not provided."
 	exit 2

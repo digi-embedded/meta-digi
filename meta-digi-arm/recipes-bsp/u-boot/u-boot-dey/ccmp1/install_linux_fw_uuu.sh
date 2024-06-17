@@ -50,7 +50,7 @@ show_usage()
 	echo "                          'dey-image-webkit', 'core-image-base'..."
 	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
-	echo "   -t                     Install Trustfence artifacts."
+	echo "   -t                     Install TrustFence artifacts."
 	exit 2
 }
 

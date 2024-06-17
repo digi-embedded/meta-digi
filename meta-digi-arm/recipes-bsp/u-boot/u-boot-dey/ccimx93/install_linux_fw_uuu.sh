@@ -43,7 +43,7 @@ show_usage()
 	echo "                          (requires -t)."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
 	echo "   -u <u-boot-filename>   U-Boot filename."
-	echo "   -t                     Install Trustfence artifacts."
+	echo "   -t                     Install TrustFence artifacts."
 	echo "                          Auto-determined by variant if not provided."
 	echo "   -U                     Update redundant bootloader partition."
 
