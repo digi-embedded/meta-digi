@@ -23,8 +23,7 @@ TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 # Default secure boot configuration
 TRUSTFENCE_SIGN ?= "1"
 TRUSTFENCE_SIGN_KEYS_PATH ?= "default"
-TRUSTFENCE_DEK_PATH ?= "default"
-TRUSTFENCE_DEK_PATH:ccmp1 ?= "0"
+TRUSTFENCE_DEK_PATH ?= "${TF_DEK_PATH}"
 TRUSTFENCE_ENCRYPT_ENVIRONMENT ?= "1"
 TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 TRUSTFENCE_KEY_INDEX ?= "0"
@@ -44,6 +43,11 @@ TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-onl
 #
 # NOTHING TO CUSTOMIZE BELOW THIS LINE
 #
+
+# Platform specific defaults
+TF_DEK_PATH = "default"
+TF_DEK_PATH:ccimx93 = "0"
+TF_DEK_PATH:ccmp1 = "0"
 
 # NXP-based sign a FIT-format boot artifact
 TRUSTFENCE_SIGN_FIT_NXP = "0"
