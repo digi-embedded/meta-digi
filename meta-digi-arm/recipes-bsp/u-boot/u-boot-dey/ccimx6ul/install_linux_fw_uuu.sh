@@ -39,8 +39,8 @@ show_usage()
 	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
 	echo "                          'dey-image-webkit', 'core-image-base'..."
 	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
-	echo "   -k <dek-blob-file>     Update includes dek blob file."
-	echo "                          (requires -t)."
+	echo "   -k <dek-filename>      Update includes dek file."
+	echo "                          (implies -t)."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
 	echo "   -t                     Install TrustFence artifacts."
 	echo "   -u <u-boot-filename>   U-Boot filename."
@@ -56,7 +56,7 @@ show_usage()
 #   Description:
 #	- downloads image to RAM
 #	- runs 'update' command from RAM
-#	4. dek blob file when updating an encrypted u-boot
+#	4. dek file when updating an encrypted u-boot
 part_update()
 {
 	echo "\033[36m"
@@ -75,7 +75,7 @@ part_update()
 	fi
 	uuu fb: download -f "${2}"
 	if [ "${TRUSTFENCE}" = "true" ] && [ "${1}" = "uboot" ]; then
-		if [ -n "${DEK_BLOB_FILE}" ]; then
+		if [ -n "${DEK_FILE}" ]; then
 			uuu fb: ucmd setenv uboot_size \${filesize}
 			uuu fb: ucmd setenv fastboot_buffer \${initrd_addr}
 			uuu fb: download -f "${4}"
@@ -98,7 +98,7 @@ echo "############################################################"
 # -b, -d, -n (booleans)
 # -i <image-name>
 # -u <u-boot-filename>
-# -k <dek-blob-name>
+# -k <dek-filename>
 while getopts ':bdhi:k:ntu:' c
 do
 	if [ "${c}" = ":" ]; then
@@ -113,7 +113,7 @@ do
 	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
-	k) DEK_BLOB_FILE=${OPTARG} ;;
+	k) DEK_FILE=${OPTARG} && TRUSTFENCE=true ;;
 	n) NOWAIT=true ;;
 	t) TRUSTFENCE=true ;;
 	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
@@ -286,7 +286,7 @@ uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 uuu fb: ucmd setenv forced_update 1
 
 # Update U-Boot
-part_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000 "${DEK_BLOB_FILE}"
+part_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000 "${DEK_FILE}"
 
 # Set 'bootcmd' for the second part of the script that will
 #  - Reset environment to defaults

@@ -39,8 +39,8 @@ show_usage()
 	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
 	echo "                          'dey-image-webkit', 'core-image-base'..."
 	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
-	echo "   -k <dek-blob-file>     Update includes dek blob file."
-	echo "                          (requires -t)."
+	echo "   -k <dek-filename>      Update includes dek file."
+	echo "                          (implies -t)."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
 	echo "   -t                     Install TrustFence artifacts."
 	echo "   -u <u-boot-filename>   U-Boot filename."
@@ -52,7 +52,7 @@ show_usage()
 #   Params:
 #	1. partition
 #	2. file
-#	3. dek blob file when updating an encrypted bootloader
+#	3. dek file when updating an encrypted bootloader
 part_update()
 {
 	echo "\033[36m"
@@ -63,7 +63,7 @@ part_update()
 
 	if [ "${TRUSTFENCE}" = "true" ] && [ "${1}" = "bootloader" ]; then
 		uuu fb: download -f "${2}"
-		if [ -n "${DEK_BLOB_FILE}" ]; then
+		if [ -n "${DEK_FILE}" ]; then
 			uuu fb: ucmd setenv uboot_size \${filesize}
 			uuu fb: ucmd setenv fastboot_buffer \${initrd_addr}
 			uuu fb: download -f "${3}"
@@ -90,7 +90,7 @@ echo "############################################################"
 # -b, -d, -n (booleans)
 # -i <image-name>
 # -u <u-boot-filename>
-# -k <dek-blob-name>
+# -k <dek-filename>
 while getopts ':bdhi:k:ntu:' c
 do
 	if [ "${c}" = ":" ]; then
@@ -105,7 +105,7 @@ do
 	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
-	k) DEK_BLOB_FILE=${OPTARG} ;;
+	k) DEK_FILE=${OPTARG} && TRUSTFENCE=true ;;
 	n) NOWAIT=true ;;
 	t) TRUSTFENCE=true ;;
 	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
@@ -289,7 +289,7 @@ fi
 uuu fb: ucmd setenv forced_update 1
 
 # Update U-Boot
-part_update "bootloader" "${INSTALL_UBOOT_FILENAME}" "${DEK_BLOB_FILE}"
+part_update "bootloader" "${INSTALL_UBOOT_FILENAME}" "${DEK_FILE}"
 
 # Set MMC to boot from BOOT1 partition
 uuu fb: ucmd mmc partconf 0 1 1 1
