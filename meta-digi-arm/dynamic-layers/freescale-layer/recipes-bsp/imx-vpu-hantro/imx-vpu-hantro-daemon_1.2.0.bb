@@ -1,4 +1,4 @@
-# Copyright 2021-2022 NXP
+# Copyright 2021-2024 NXP
 DESCRIPTION = "i.MX Hantro V4L2 Daemon"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=cd8bc2a79509c22fc9c1782a151210b1"
@@ -6,9 +6,13 @@ LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=cd8bc2a79509c22fc9c1782a151210b1"
 DEPENDS = "imx-vpu-hantro"
 DEPENDS:append:mx8mp-nxp-bsp = " imx-vpu-hantro-vc"
 
-SRC_URI = "${FSL_MIRROR}/${BP}.tar.gz"
-SRC_URI[md5sum] = "485b2eb3cb145c2dd0f77d1a4a2f9834"
-SRC_URI[sha256sum] = "f8a9130865829aa3212d4ed568ac8220fa8cf495bb172e5dd082730d13da2293"
+SRC_URI = "${FSL_MIRROR}/${BP}-${IMX_SRCREV_ABBREV}.tar.gz"
+IMX_SRCREV_ABBREV = "67fa7a7"
+
+SRC_URI[md5sum] = "f9f3b18b33afdc1ef4d6cbef7edc8a54"
+SRC_URI[sha256sum] = "79aecdf7fbeb90ca7322a6dbc61465d1d2996f6fa5d880019066cc873621238f"
+
+S = "${WORKDIR}/${BP}-${IMX_SRCREV_ABBREV}"
 
 PLATFORM:mx8mm-nxp-bsp = "IMX8MM"
 PLATFORM:mx8mq-nxp-bsp = "IMX8MQ"
@@ -20,6 +24,11 @@ EXTRA_OEMAKE = " \
     CTRLSW_HDRPATH="${STAGING_INCDIR}" \
     PLATFORM="${PLATFORM}" \
 "
+
+do_compile () {
+    oe_runmake clean
+    oe_runmake PLATFORM="${PLATFORM}" all
+}
 
 do_install () {
     oe_runmake install DEST_DIR="${D}"
