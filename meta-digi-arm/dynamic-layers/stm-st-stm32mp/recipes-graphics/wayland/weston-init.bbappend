@@ -39,9 +39,8 @@ do_install:append() {
 
     install -d ${D}${systemd_system_unitdir} ${D}${sbindir}
 
-    install -d ${D}/lib/systemd/system/
-    if [ -e ${D}/lib/systemd/system/weston.service ]; then
-        rm ${D}/lib/systemd/system/weston.service ${D}/lib/systemd/system/weston.socket
+    if [ -e ${D}/${systemd_system_unitdir}/weston.service ]; then
+        rm ${D}/${systemd_system_unitdir}/weston.service ${D}/${systemd_system_unitdir}/weston.socket
         install -D -p -m0644 ${WORKDIR}/weston-launch.service ${D}${systemd_system_unitdir}/weston-launch.service
         sed -i -e s:/etc:${sysconfdir}:g \
             -e s:/usr/bin:${bindir}:g \
@@ -59,7 +58,10 @@ do_install:append() {
         # uncomment modules line for support of xwayland
         sed -i -e 's,#xwayland=true,xwayland=true,g' ${D}${sysconfdir}/xdg/weston/weston.ini
     fi
-    sed -i 's,@DATADIR@,${datadir},g' ${D}${bindir}/weston-start
+
+    if [ -e ${D}${bindir}/weston-start ]; then
+        sed -i 's,@DATADIR@,${datadir},g' ${D}${bindir}/weston-start
+    fi
     # /etc/default/weston
     install -d ${D}${sysconfdir}/default
     echo "WESTON_USER=root" > ${D}${sysconfdir}/default/weston
