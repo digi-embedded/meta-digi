@@ -1,7 +1,7 @@
 From 5604eb8aaf8382376e6511850e70b66c6e2a22b8 Mon Sep 17 00:00:00 2001
 From: Kurt Lee <kurt.lee@cypress.com>
 Date: Sun, 13 Feb 2022 21:34:09 -0600
-Subject: [PATCH 19/49] Fix for PMK expiration issue through supplicant
+Subject: [PATCH 19/60] Fix for PMK expiration issue through supplicant
 
 Description : Sending Deauth from AP once PMK timeout occurs, So that
 STA will initiate the Auth process.

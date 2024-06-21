@@ -1,7 +1,7 @@
 From 21271c00b29db8c178aa704daaf665967e141d47 Mon Sep 17 00:00:00 2001
 From: Chung-Hsien Hsu <stanley.hsu@cypress.com>
 Date: Tue, 29 Oct 2019 15:55:21 +0800
-Subject: [PATCH 03/49] nl80211: Report connection authorized in EVENT_ASSOC
+Subject: [PATCH 03/60] nl80211: Report connection authorized in EVENT_ASSOC
 
 When roaming in a network that requires 802.1X authentication, device
 driver could set the authorized flag if 4-way handshake offload or FT

@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2023 Digi International
+# Copyright (C) 2018-2024 Digi International
 
 require recipes-bsp/u-boot/u-boot.inc
 
@@ -49,9 +49,13 @@ python __anonymous() {
 
 do_configure[prefuncs] += "${@oe.utils.ifelse(d.getVar('UBOOT_TF_CONF'), 'trustfence_config', '')}"
 python trustfence_config() {
+    import shlex
     config_path = d.expand('${WORKDIR}/uboot-trustfence.cfg')
     with open(config_path, 'w') as f:
-        for cfg in d.getVar('UBOOT_TF_CONF').split():
+        for cfg in shlex.split(d.getVar('UBOOT_TF_CONF'), posix=False):
+            # strip quotes for "is not set" options
+            if 'is not set' in cfg:
+                cfg = cfg.strip('"\'')
             f.write('%s\n' % cfg)
     d.appendVar('SRC_URI', ' file://%s' % config_path)
 }
@@ -81,6 +85,24 @@ build_uboot_scripts() {
 			-e 's,##GRAPHICAL_IMAGES##,${GRAPHICAL_IMAGES},g' \
 			-e 's,##DEFAULT_IMAGE_NAME##,${DEFAULT_IMAGE_NAME},g' \
 			${WORKDIR}/${f} > ${TMP_INSTALL_SCR}
+		# Change the u-boot name when TrustFence is enabled
+		if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+			if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+				if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+					sed -i -e 's,##SIGNED##,encrypted,g' ${TMP_INSTALL_SCR}
+				else
+					sed -i -e 's,##SIGNED##,signed,g' ${TMP_INSTALL_SCR}
+				fi
+			else
+				sed -i -e 's,##SIGNED##,_Signed,g' ${TMP_INSTALL_SCR}
+				sed -i -e 's,##SIGNED_TFA##,_signed,g' ${TMP_INSTALL_SCR}
+			fi
+		else
+			sed -i -e 's,-##SIGNED##,,g' -e 's,##SIGNED##,,g' ${TMP_INSTALL_SCR}
+			if [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+				sed -i -e 's,##SIGNED_TFA##,,g' ${TMP_INSTALL_SCR}
+			fi
+		fi
 		if [ "${f_ext}" = "txt" ]; then
 			mkimage -T script -n "DEY firmware install script" -C none -d ${TMP_INSTALL_SCR} ${DEPLOYDIR}/${f%.*}.scr
 		else
@@ -95,10 +117,11 @@ build_uboot_scripts() {
 	mkimage -T script -n bootscript -C none -d ${TMP_BOOTSCR} ${DEPLOYDIR}/boot.scr
 	rm -f ${TMP_BOOTSCR}
 
-	# Sign the boot script
-	if [ "${TRUSTFENCE_SIGN_ARTIFACTS}" = "1" ]; then
+	# Sign the boot script if not contained in a FIT image
+	if [ "${TRUSTFENCE_SIGN_ARTIFACTS}" = "1" ] && [ "${TRUSTFENCE_SIGN_FIT_NXP}" = "0" ]; then
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
+		[ -n "${TRUSTFENCE_SRK_REVOKE_MASK}" ] && export SRK_REVOKE_MASK="${TRUSTFENCE_SRK_REVOKE_MASK}"
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
 
 		# Sign boot script
@@ -168,10 +191,35 @@ sign_uboot() {
 	fi
 }
 
+# -----------------------------------------------------------------------------
+# Append compile to handle specific device tree compilation
+#
+do_compile:append:ccmp1() {
+	if [ -n "${UBOOT_DEVICETREE}" ]; then
+		unset i j
+		for config in ${UBOOT_MACHINE}; do
+			i=$(expr $i + 1);
+			for devicetree in ${UBOOT_DEVICETREE}; do
+				# Cleanup previous build artifact
+				[ -f "${B}/${config}/dts/dt.dtb" ] && rm "${B}/${config}/dts/dt.dtb"
+				# Build target for specific device tree
+				oe_runmake -C ${S} O=${B}/${config} DEVICE_TREE=${devicetree} DEVICE_TREE_EXT=${devicetree}.dtb
+				# Install specific binary
+				for binary in ${UBOOT_BINARIES}; do
+					j=$(expr $j + 1);
+					if [ $j -eq $i ]; then
+						binarysuffix=$(echo ${binary} | cut -d'.' -f2)
+						install -m 644 ${B}/${config}/${binary} ${B}/${config}/u-boot-${devicetree}.${binarysuffix}
+					fi
+				done
+				unset j
+			done
+		done
+	fi
+}
+
 BOOT_TOOLS = "imx-boot-tools"
 BOOT_TOOLS:ccmp1 = "u-boot"
-FIP_UBOOT_HEADER = "ccmp15-dvk"
-FIP_UBOOT_HEADER:ccmp13 = "ccmp13-dvk"
 
 do_deploy:append:ccimx8m() {
 	# Deploy u-boot-nodtb.bin and ccimx8m[m|n]-dvk.dtb, to be packaged in boot binary by imx-boot
@@ -195,21 +243,30 @@ do_deploy:append:ccimx8m() {
 }
 
 do_deploy:append:ccmp1() {
-	# Deploy u-boot-nodtb.bin and ccmp1x-dvk.dtb, to be packaged in fip binary by tf-a
+	# Deploy u-boot-nodtb.bin and ccmp1x-dvk-xxxx.dtb, to be packaged in fip binary by tf-a
 	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
-	install -m 0777 ${B}/${config}/arch/arm/dts/${UBOOT_DTB_NAME} ${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${FIP_UBOOT_HEADER}.dtb
+	if [ -n "${UBOOT_DEVICETREE}" ]; then
+		for devicetree in ${UBOOT_DEVICETREE}; do
+			# Install u-boot dtb
+			install -m 644 ${B}/${config}/arch/arm/dts/${devicetree}.dtb ${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${devicetree}.dtb
+		done
+	fi
 	install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin
 
 	# Append signature to u-boot DT
-	if [ "x${UBOOT_SIGN_ENABLE}" = "x1" ] ; then
-		# get name of u-boot devicetree without signature
-		ubootdevicetree="${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-${UBOOT_DTB_NAME}"
-		namewithoutsignature=`echo $ubootdevicetree | sed "s/\.dtb/-without-signature.dtb/g"`
-		namewithsignature=`echo $ubootdevicetree | sed "s/\.dtb/-with-signature.dtb/g"`
-		mv $ubootdevicetree $namewithoutsignature
-		# get name of U-Boot device tree from DEPLOY_DIR
-		nameonkernel="${DEPLOY_DIR_IMAGE}/u-boot-${MACHINE}*.dtb"
-		cp $nameonkernel $namewithsignature
-		cp $nameonkernel $ubootdevicetree
+	if [ "x${UBOOT_SIGN_ENABLE}" = "x1" ] && [ -n "${UBOOT_DEVICETREE}" ] ; then
+		for devicetree in ${UBOOT_DEVICETREE}; do
+			# get name of u-boot devicetree without signature
+			ubootdevicetree="${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${devicetree}.dtb"
+			namewithoutsignature=`echo $ubootdevicetree | sed "s/\.dtb/-without-signature.dtb/g"`
+			namewithsignature=`echo $ubootdevicetree | sed "s/\.dtb/-with-signature.dtb/g"`
+			mv $ubootdevicetree $namewithoutsignature
+			# get name of U-Boot device tree from DEPLOY_DIR
+			nameonkernel="${DEPLOY_DIR_IMAGE}/${FIP_UBOOT_DTB}-${devicetree}-with-signature.dtb"
+			cp $nameonkernel $namewithsignature
+			cp $nameonkernel $ubootdevicetree
+		done
 	fi
 }
+
+SYSROOT_DIRS += "/boot"

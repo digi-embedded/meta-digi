@@ -1,7 +1,7 @@
 From a6028c58032672f86c9fe87ba3abbd31c79166e3 Mon Sep 17 00:00:00 2001
 From: Kurt Lee <kurt.lee@infineon.com>
 Date: Wed, 25 May 2022 19:12:47 -0500
-Subject: [PATCH 26/49] non-upstream: wl-cmd: add more compile flag
+Subject: [PATCH 26/60] non-upstream: wl-cmd: add more compile flag
 
 add more CONFIG_DRIVER_BRCM_WL to separeta this feature
 

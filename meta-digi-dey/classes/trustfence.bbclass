@@ -23,14 +23,13 @@ TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 # Default secure boot configuration
 TRUSTFENCE_SIGN ?= "1"
 TRUSTFENCE_SIGN_KEYS_PATH ?= "default"
-TRUSTFENCE_DEK_PATH ?= "default"
-TRUSTFENCE_DEK_PATH:ccimx93 ?= "0"
-TRUSTFENCE_DEK_PATH:ccmp1 ?= "0"
+TRUSTFENCE_DEK_PATH ?= "${TF_DEK_PATH}"
 TRUSTFENCE_ENCRYPT_ENVIRONMENT ?= "1"
-TRUSTFENCE_ENCRYPT_ENVIRONMENT:ccimx93 ?= "0"
 TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 TRUSTFENCE_KEY_INDEX ?= "0"
-TRUSTFENCE_FIT_IMG:ccmp1 ?= "1"
+TRUSTFENCE_SIGN_ARTIFACTS = "1"
+TRUSTFENCE_SIGN_ARTIFACTS:ccmp1 = "0"
+TRUSTFENCE_SIGN_FIT_STM:ccmp1 ?= "1"
 
 # Partition encryption configuration
 TRUSTFENCE_ENCRYPT_PARTITIONS ?= "1"
@@ -45,10 +44,14 @@ TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-onl
 # NOTHING TO CUSTOMIZE BELOW THIS LINE
 #
 
-# TrustFence sign artifacts is not supported on all platforms
-TRUSTFENCE_SIGN_ARTIFACTS = "1"
-TRUSTFENCE_SIGN_ARTIFACTS:ccmp1 = "0"
-TRUSTFENCE_SIGN_ARTIFACTS:ccimx93 = "0"
+# Platform specific defaults
+TF_DEK_PATH = "default"
+TF_DEK_PATH:ccimx93 = "0"
+TF_DEK_PATH:ccmp1 = "0"
+
+# NXP-based sign a FIT-format boot artifact
+TRUSTFENCE_SIGN_FIT_NXP = "0"
+TRUSTFENCE_SIGN_FIT_NXP:ccimx93 = "${TRUSTFENCE_SIGN_ARTIFACTS}"
 
 IMAGE_FEATURES += "dey-trustfence"
 
@@ -56,8 +59,6 @@ IMAGE_FEATURES += "dey-trustfence"
 #  Usage of FIT Image signed
 # ---------------------------------
 
-# Enable FIT image build when Trustfence is enabled
-MACHINE_FEATURES += "${@oe.utils.conditional('TRUSTFENCE_FIT_IMG', '1', 'fit', '', d)}"
 # key to sign FIT config nodes
 TRUSTFENCE_FIT_CFG_SIGN_KEYNAME ?= "fitcfg"
 # key to sign FIT image nodes
@@ -153,6 +154,12 @@ python () {
         elif d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"):
             if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
                 d.appendVar("UBOOT_TF_CONF", "CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NR=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"))
+                if d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_NAME"):
+                    d.appendVar("UBOOT_TF_CONF", 'CONFIG_CONSOLE_ENABLE_GPIO_NAME="%s" ' % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_NAME"))
+                    if d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_ACTIVE_LOW"):
+                        d.appendVar("UBOOT_TF_CONF", "CONFIG_CONSOLE_ENABLE_GPIO_ACTIVE_LOW=y ")
+                    else:
+                        d.appendVar("UBOOT_TF_CONF", '"# CONFIG_CONSOLE_ENABLE_GPIO_ACTIVE_LOW is not set" ')
             elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NAME="%s" ' % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_NAME"))
 
@@ -185,6 +192,9 @@ python () {
         d.appendVar("UBOOT_TF_CONF", "CONFIG_SIGN_IMAGE=y ")
         if (d.getVar("TRUSTFENCE_SIGN_ARTIFACTS") == "1"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_AUTH_ARTIFACTS=y ")
+            if (d.getVar("TRUSTFENCE_SIGN_FIT_NXP") == "1"):
+                d.appendVar("UBOOT_TF_CONF", '"# CONFIG_CMD_BOOTI is not set" ')
+                d.appendVar("UBOOT_TF_CONF", '"# CONFIG_LEGACY_IMAGE_FORMAT is not set" ')
         if (d.getVar("TRUSTFENCE_READ_ONLY_ROOTFS") == "1"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_AUTHENTICATE_SQUASHFS_ROOTFS=y ")
         if d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"):
@@ -200,7 +210,7 @@ python () {
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_SIGN_MODE="%s" ' % d.getVar("TRUSTFENCE_SIGN_MODE"))
 
 
-        if (d.getVar("TRUSTFENCE_FIT_IMG") == "1"):
+        if (d.getVar("TRUSTFENCE_SIGN_FIT_STM") == "1"):
             # FIT-related variables
             # Create keys if not defined
             d.setVar("FIT_GENERATE_KEYS", "1")
@@ -221,7 +231,7 @@ python () {
 
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT") == "1"):
         if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
-            d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y ")
+            d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y CONFIG_ENV_ENCRYPT=y ")
         elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES_CCMP1=y ")
 

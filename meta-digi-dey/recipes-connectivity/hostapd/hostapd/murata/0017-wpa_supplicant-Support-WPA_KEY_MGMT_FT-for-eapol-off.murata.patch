@@ -1,7 +1,7 @@
 From 6fa06f214ba1cfc4e80dc7413874175146b9c2a5 Mon Sep 17 00:00:00 2001
 From: Chien-Chia Chen <carella.chen@infineon.com>
 Date: Tue, 23 Nov 2021 21:29:08 -0600
-Subject: [PATCH 17/49] wpa_supplicant: Support WPA_KEY_MGMT_FT for eapol
+Subject: [PATCH 17/60] wpa_supplicant: Support WPA_KEY_MGMT_FT for eapol
  offloading and driver base roaming
 
 Add WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_PSK / WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_8021X /

@@ -17,18 +17,18 @@ Signed-off-by: Mike Engel <Mike.Engel@digi.com>
  create mode 120000 ipc-static/progress_ipc.c
 
 diff --git a/Makefile b/Makefile
-index 09d03a3..f34810b 100644
+index cdcab69..9065a40 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -364,6 +364,7 @@ include $(srctree)/Makefile.flags
  
  objs-y		:= core handlers bootloader suricatta
- libs-y		:= corelib mongoose parser fs
+ libs-y		:= corelib mongoose parser fs containers
 +libs-y		+= ipc-static
  bindings-y	:= bindings
  tools-y		:= tools
  
-@@ -480,6 +481,7 @@ install: all
+@@ -479,6 +480,7 @@ install: all
  	install -m 0644 $(srctree)/include/progress_ipc.h ${DESTDIR}/${INCLUDEDIR}
  	install -m 0755 $(objtree)/${swupdate-ipc-lib} ${DESTDIR}/${LIBDIR}
  	ln -sfr ${DESTDIR}/${LIBDIR}/${swupdate-ipc-lib} ${DESTDIR}/${LIBDIR}/libswupdate.so

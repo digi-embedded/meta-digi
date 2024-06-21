@@ -1,0 +1,1486 @@
+From 05d5158bf43c26c1bc70017da27b125cd8d7cb31 Mon Sep 17 00:00:00 2001
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Mon, 26 Feb 2024 09:25:16 +0100
+Subject: [PATCH 08/10] net: add RT NXP support
+
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
+---
+ net/8021q/vlan_dev.c           |   4 +-
+ net/bridge/br_multicast.c      |   4 +-
+ net/bridge/br_switchdev.c      |  24 +++++
+ net/bridge/br_vlan.c           |   4 +-
+ net/core/dev.c                 |  64 ++++++++---
+ net/core/drop_monitor.c        |   8 +-
+ net/core/gen_stats.c           |  16 +--
+ net/core/skbuff.c              |   7 +-
+ net/devlink/leftover.c         |   4 +-
+ net/dsa/Kconfig                |   6 ++
+ net/dsa/Makefile               |   1 +
+ net/dsa/slave.c                |  53 ++++++++-
+ net/dsa/tag_netc.c             | 168 +++++++++++++++++++++++++++++
+ net/dsa/tag_sja1105.c          |   5 +-
+ net/ethtool/Makefile           |   2 +-
+ net/ethtool/ioctl.c            |  55 ++++++++++
+ net/ethtool/netlink.c          |  17 +++
+ net/ethtool/netlink.h          |   3 +
+ net/ethtool/preempt.c          | 191 +++++++++++++++++++++++++++++++++
+ net/ipv4/af_inet.c             |   4 +-
+ net/ipv6/seg6_local.c          |   4 +-
+ net/mac80211/sta_info.c        |   8 +-
+ net/mpls/af_mpls.c             |   4 +-
+ net/netfilter/ipvs/ip_vs_ctl.c |   4 +-
+ net/netfilter/nf_tables_api.c  |   4 +-
+ net/openvswitch/datapath.c     |   4 +-
+ net/openvswitch/flow_table.c   |   9 +-
+ net/packet/af_packet.c         |   9 +-
+ net/sched/sch_cbs.c            |   5 +
+ net/sched/sch_taprio.c         |  20 ++++
+ net/socket.c                   |  27 +++++
+ net/tsn/genl_tsn.c             |  13 ++-
+ 32 files changed, 679 insertions(+), 72 deletions(-)
+ create mode 100644 net/dsa/tag_netc.c
+ create mode 100644 net/ethtool/preempt.c
+
+diff --git a/net/8021q/vlan_dev.c b/net/8021q/vlan_dev.c
+index d3e511e1eba8..0fa52bcc296b 100644
+--- a/net/8021q/vlan_dev.c
++++ b/net/8021q/vlan_dev.c
+@@ -712,13 +712,13 @@ static void vlan_dev_get_stats64(struct net_device *dev,
+ 
+ 		p = per_cpu_ptr(vlan_dev_priv(dev)->vlan_pcpu_stats, i);
+ 		do {
+-			start = u64_stats_fetch_begin_irq(&p->syncp);
++			start = u64_stats_fetch_begin(&p->syncp);
+ 			rxpackets	= u64_stats_read(&p->rx_packets);
+ 			rxbytes		= u64_stats_read(&p->rx_bytes);
+ 			rxmulticast	= u64_stats_read(&p->rx_multicast);
+ 			txpackets	= u64_stats_read(&p->tx_packets);
+ 			txbytes		= u64_stats_read(&p->tx_bytes);
+-		} while (u64_stats_fetch_retry_irq(&p->syncp, start));
++		} while (u64_stats_fetch_retry(&p->syncp, start));
+ 
+ 		stats->rx_packets	+= rxpackets;
+ 		stats->rx_bytes		+= rxbytes;
+diff --git a/net/bridge/br_multicast.c b/net/bridge/br_multicast.c
+index db4f2641d1cd..7e2a9fb5786c 100644
+--- a/net/bridge/br_multicast.c
++++ b/net/bridge/br_multicast.c
+@@ -4899,9 +4899,9 @@ void br_multicast_get_stats(const struct net_bridge *br,
+ 		unsigned int start;
+ 
+ 		do {
+-			start = u64_stats_fetch_begin_irq(&cpu_stats->syncp);
++			start = u64_stats_fetch_begin(&cpu_stats->syncp);
+ 			memcpy(&temp, &cpu_stats->mstats, sizeof(temp));
+-		} while (u64_stats_fetch_retry_irq(&cpu_stats->syncp, start));
++		} while (u64_stats_fetch_retry(&cpu_stats->syncp, start));
+ 
+ 		mcast_stats_add_dir(tdst.igmp_v1queries, temp.igmp_v1queries);
+ 		mcast_stats_add_dir(tdst.igmp_v2queries, temp.igmp_v2queries);
+diff --git a/net/bridge/br_switchdev.c b/net/bridge/br_switchdev.c
+index 4b3982c368b3..7e6fbd0962f6 100644
+--- a/net/bridge/br_switchdev.c
++++ b/net/bridge/br_switchdev.c
+@@ -171,6 +171,26 @@ br_switchdev_fdb_notify(struct net_bridge *br,
+ 	}
+ }
+ 
++static u16 br_switchdev_get_bridge_vlan_proto(const struct net_device *dev)
++{
++	const struct net_device *br = NULL;
++	u16 vlan_proto = ETH_P_8021Q;
++	struct net_bridge_port *p;
++
++	if (netif_is_bridge_master(dev)) {
++		br = dev;
++	} else {
++		p = br_port_get_rtnl_rcu(dev);
++		if (p)
++			br = p->br->dev;
++	}
++
++	if (br)
++		br_vlan_get_proto(br, &vlan_proto);
++
++	return vlan_proto;
++}
++
+ int br_switchdev_port_vlan_add(struct net_device *dev, u16 vid, u16 flags,
+ 			       bool changed, struct netlink_ext_ack *extack)
+ {
+@@ -182,6 +202,8 @@ int br_switchdev_port_vlan_add(struct net_device *dev, u16 vid, u16 flags,
+ 		.changed = changed,
+ 	};
+ 
++	v.proto = br_switchdev_get_bridge_vlan_proto(dev);
++
+ 	return switchdev_port_obj_add(dev, &v.obj, extack);
+ }
+ 
+@@ -193,6 +215,8 @@ int br_switchdev_port_vlan_del(struct net_device *dev, u16 vid)
+ 		.vid = vid,
+ 	};
+ 
++	v.proto = br_switchdev_get_bridge_vlan_proto(dev);
++
+ 	return switchdev_port_obj_del(dev, &v.obj);
+ }
+ 
+diff --git a/net/bridge/br_vlan.c b/net/bridge/br_vlan.c
+index 9ffd40b8270c..bc75fa1e4666 100644
+--- a/net/bridge/br_vlan.c
++++ b/net/bridge/br_vlan.c
+@@ -1389,12 +1389,12 @@ void br_vlan_get_stats(const struct net_bridge_vlan *v,
+ 
+ 		cpu_stats = per_cpu_ptr(v->stats, i);
+ 		do {
+-			start = u64_stats_fetch_begin_irq(&cpu_stats->syncp);
++			start = u64_stats_fetch_begin(&cpu_stats->syncp);
+ 			rxpackets = u64_stats_read(&cpu_stats->rx_packets);
+ 			rxbytes = u64_stats_read(&cpu_stats->rx_bytes);
+ 			txbytes = u64_stats_read(&cpu_stats->tx_bytes);
+ 			txpackets = u64_stats_read(&cpu_stats->tx_packets);
+-		} while (u64_stats_fetch_retry_irq(&cpu_stats->syncp, start));
++		} while (u64_stats_fetch_retry(&cpu_stats->syncp, start));
+ 
+ 		u64_stats_add(&stats->rx_packets, rxpackets);
+ 		u64_stats_add(&stats->rx_bytes, rxbytes);
+diff --git a/net/core/dev.c b/net/core/dev.c
+index a2e3c6470ab3..bd2ab2988ca5 100644
+--- a/net/core/dev.c
++++ b/net/core/dev.c
+@@ -1385,8 +1385,8 @@ static int napi_kthread_create(struct napi_struct *n)
+ 	 * TASK_INTERRUPTIBLE mode to avoid the blocked task
+ 	 * warning and work with loadavg.
+ 	 */
+-	n->thread = kthread_run(napi_threaded_poll, n, "napi/%s-%d",
+-				n->dev->name, n->napi_id);
++	n->thread = kthread_run(napi_threaded_poll, n, "napi/%s-%s",
++				n->dev->name, n->name);
+ 	if (IS_ERR(n->thread)) {
+ 		err = PTR_ERR(n->thread);
+ 		pr_err("kthread_run failed with err %d\n", err);
+@@ -4589,15 +4589,6 @@ static void rps_trigger_softirq(void *data)
+ 
+ #endif /* CONFIG_RPS */
+ 
+-/* Called from hardirq (IPI) context */
+-static void trigger_rx_softirq(void *data)
+-{
+-	struct softnet_data *sd = data;
+-
+-	__raise_softirq_irqoff(NET_RX_SOFTIRQ);
+-	smp_store_release(&sd->defer_ipi_scheduled, 0);
+-}
+-
+ /*
+  * Check if this softnet_data structure is another cpu one
+  * If yes, queue it to our IPI list and return 1
+@@ -6369,8 +6360,9 @@ int dev_set_threaded(struct net_device *dev, bool threaded)
+ }
+ EXPORT_SYMBOL(dev_set_threaded);
+ 
+-void netif_napi_add_weight(struct net_device *dev, struct napi_struct *napi,
+-			   int (*poll)(struct napi_struct *, int), int weight)
++void netif_napi_add_named(struct net_device *dev, struct napi_struct *napi,
++			   int (*poll)(struct napi_struct *, int), int weight,
++			   const char *name)
+ {
+ 	if (WARN_ON(test_and_set_bit(NAPI_STATE_LISTED, &napi->state)))
+ 		return;
+@@ -6397,6 +6389,12 @@ void netif_napi_add_weight(struct net_device *dev, struct napi_struct *napi,
+ 	list_add_rcu(&napi->dev_list, &dev->napi_list);
+ 	napi_hash_add(napi);
+ 	napi_get_frags_check(napi);
++
++	if (name)
++		strncpy(napi->name, name, NAPINAMSIZ);
++	else
++		snprintf(napi->name, NAPINAMSIZ, "%d", napi->napi_id);
++
+ 	/* Create kthread for this napi if dev->threaded is set.
+ 	 * Clear dev->threaded if kthread creation failed so that
+ 	 * threaded mode will not be enabled in napi_enable().
+@@ -6404,6 +6402,13 @@ void netif_napi_add_weight(struct net_device *dev, struct napi_struct *napi,
+ 	if (dev->threaded && napi_kthread_create(napi))
+ 		dev->threaded = 0;
+ }
++EXPORT_SYMBOL(netif_napi_add_named);
++
++void netif_napi_add_weight(struct net_device *dev, struct napi_struct *napi,
++			   int (*poll)(struct napi_struct *, int), int weight)
++{
++	netif_napi_add_named(dev, napi, poll, weight, NULL);
++}
+ EXPORT_SYMBOL(netif_napi_add_weight);
+ 
+ void napi_disable(struct napi_struct *n)
+@@ -6655,6 +6660,30 @@ static void skb_defer_free_flush(struct softnet_data *sd)
+ 	}
+ }
+ 
++#ifndef CONFIG_PREEMPT_RT
++/* Called from hardirq (IPI) context */
++static void trigger_rx_softirq(void *data)
++{
++	struct softnet_data *sd = data;
++
++	__raise_softirq_irqoff(NET_RX_SOFTIRQ);
++	smp_store_release(&sd->defer_ipi_scheduled, 0);
++}
++
++#else
++
++static void trigger_rx_softirq(struct work_struct *defer_work)
++{
++	struct softnet_data *sd;
++
++	sd = container_of(defer_work, struct softnet_data, defer_work);
++	smp_store_release(&sd->defer_ipi_scheduled, 0);
++	local_bh_disable();
++	skb_defer_free_flush(sd);
++	local_bh_enable();
++}
++#endif
++
+ static __latent_entropy void net_rx_action(struct softirq_action *h)
+ {
+ 	struct softnet_data *sd = this_cpu_ptr(&softnet_data);
+@@ -10476,12 +10505,12 @@ void dev_fetch_sw_netstats(struct rtnl_link_stats64 *s,
+ 
+ 		stats = per_cpu_ptr(netstats, cpu);
+ 		do {
+-			start = u64_stats_fetch_begin_irq(&stats->syncp);
++			start = u64_stats_fetch_begin(&stats->syncp);
+ 			rx_packets = u64_stats_read(&stats->rx_packets);
+ 			rx_bytes   = u64_stats_read(&stats->rx_bytes);
+ 			tx_packets = u64_stats_read(&stats->tx_packets);
+ 			tx_bytes   = u64_stats_read(&stats->tx_bytes);
+-		} while (u64_stats_fetch_retry_irq(&stats->syncp, start));
++		} while (u64_stats_fetch_retry(&stats->syncp, start));
+ 
+ 		s->rx_packets += rx_packets;
+ 		s->rx_bytes   += rx_bytes;
+@@ -10607,6 +10636,7 @@ struct net_device *alloc_netdev_mqs(int sizeof_priv, const char *name,
+ 	dev_mc_init(dev);
+ 	dev_uc_init(dev);
+ 
++	dev->fast_raw_device = 0;
+ 	dev_net_set(dev, &init_net);
+ 
+ 	dev->gso_max_size = GSO_LEGACY_MAX_SIZE;
+@@ -11396,7 +11426,11 @@ static int __init net_dev_init(void)
+ 		INIT_CSD(&sd->csd, rps_trigger_softirq, sd);
+ 		sd->cpu = i;
+ #endif
++#ifndef CONFIG_PREEMPT_RT
+ 		INIT_CSD(&sd->defer_csd, trigger_rx_softirq, sd);
++#else
++		INIT_WORK(&sd->defer_work, trigger_rx_softirq);
++#endif
+ 		spin_lock_init(&sd->defer_lock);
+ 
+ 		init_gro_hash(&sd->backlog);
+diff --git a/net/core/drop_monitor.c b/net/core/drop_monitor.c
+index f084a4a6b7ab..11aa6e8a3098 100644
+--- a/net/core/drop_monitor.c
++++ b/net/core/drop_monitor.c
+@@ -1432,9 +1432,9 @@ static void net_dm_stats_read(struct net_dm_stats *stats)
+ 		u64 dropped;
+ 
+ 		do {
+-			start = u64_stats_fetch_begin_irq(&cpu_stats->syncp);
++			start = u64_stats_fetch_begin(&cpu_stats->syncp);
+ 			dropped = u64_stats_read(&cpu_stats->dropped);
+-		} while (u64_stats_fetch_retry_irq(&cpu_stats->syncp, start));
++		} while (u64_stats_fetch_retry(&cpu_stats->syncp, start));
+ 
+ 		u64_stats_add(&stats->dropped, dropped);
+ 	}
+@@ -1476,9 +1476,9 @@ static void net_dm_hw_stats_read(struct net_dm_stats *stats)
+ 		u64 dropped;
+ 
+ 		do {
+-			start = u64_stats_fetch_begin_irq(&cpu_stats->syncp);
++			start = u64_stats_fetch_begin(&cpu_stats->syncp);
+ 			dropped = u64_stats_read(&cpu_stats->dropped);
+-		} while (u64_stats_fetch_retry_irq(&cpu_stats->syncp, start));
++		} while (u64_stats_fetch_retry(&cpu_stats->syncp, start));
+ 
+ 		u64_stats_add(&stats->dropped, dropped);
+ 	}
+diff --git a/net/core/gen_stats.c b/net/core/gen_stats.c
+index c8d137ef5980..b71ccaec0991 100644
+--- a/net/core/gen_stats.c
++++ b/net/core/gen_stats.c
+@@ -135,10 +135,10 @@ static void gnet_stats_add_basic_cpu(struct gnet_stats_basic_sync *bstats,
+ 		u64 bytes, packets;
+ 
+ 		do {
+-			start = u64_stats_fetch_begin_irq(&bcpu->syncp);
++			start = u64_stats_fetch_begin(&bcpu->syncp);
+ 			bytes = u64_stats_read(&bcpu->bytes);
+ 			packets = u64_stats_read(&bcpu->packets);
+-		} while (u64_stats_fetch_retry_irq(&bcpu->syncp, start));
++		} while (u64_stats_fetch_retry(&bcpu->syncp, start));
+ 
+ 		t_bytes += bytes;
+ 		t_packets += packets;
+@@ -162,10 +162,10 @@ void gnet_stats_add_basic(struct gnet_stats_basic_sync *bstats,
+ 	}
+ 	do {
+ 		if (running)
+-			start = u64_stats_fetch_begin_irq(&b->syncp);
++			start = u64_stats_fetch_begin(&b->syncp);
+ 		bytes = u64_stats_read(&b->bytes);
+ 		packets = u64_stats_read(&b->packets);
+-	} while (running && u64_stats_fetch_retry_irq(&b->syncp, start));
++	} while (running && u64_stats_fetch_retry(&b->syncp, start));
+ 
+ 	_bstats_update(bstats, bytes, packets);
+ }
+@@ -187,10 +187,10 @@ static void gnet_stats_read_basic(u64 *ret_bytes, u64 *ret_packets,
+ 			u64 bytes, packets;
+ 
+ 			do {
+-				start = u64_stats_fetch_begin_irq(&bcpu->syncp);
++				start = u64_stats_fetch_begin(&bcpu->syncp);
+ 				bytes = u64_stats_read(&bcpu->bytes);
+ 				packets = u64_stats_read(&bcpu->packets);
+-			} while (u64_stats_fetch_retry_irq(&bcpu->syncp, start));
++			} while (u64_stats_fetch_retry(&bcpu->syncp, start));
+ 
+ 			t_bytes += bytes;
+ 			t_packets += packets;
+@@ -201,10 +201,10 @@ static void gnet_stats_read_basic(u64 *ret_bytes, u64 *ret_packets,
+ 	}
+ 	do {
+ 		if (running)
+-			start = u64_stats_fetch_begin_irq(&b->syncp);
++			start = u64_stats_fetch_begin(&b->syncp);
+ 		*ret_bytes = u64_stats_read(&b->bytes);
+ 		*ret_packets = u64_stats_read(&b->packets);
+-	} while (running && u64_stats_fetch_retry_irq(&b->syncp, start));
++	} while (running && u64_stats_fetch_retry(&b->syncp, start));
+ }
+ 
+ static int
+diff --git a/net/core/skbuff.c b/net/core/skbuff.c
+index bacc7b486a7f..1339c79171a7 100644
+--- a/net/core/skbuff.c
++++ b/net/core/skbuff.c
+@@ -6705,6 +6705,11 @@ nodefer:	__kfree_skb(skb);
+ 	/* Make sure to trigger NET_RX_SOFTIRQ on the remote CPU
+ 	 * if we are unlucky enough (this seems very unlikely).
+ 	 */
+-	if (unlikely(kick) && !cmpxchg(&sd->defer_ipi_scheduled, 0, 1))
++	if (unlikely(kick) && !cmpxchg(&sd->defer_ipi_scheduled, 0, 1)) {
++#ifndef CONFIG_PREEMPT_RT
+ 		smp_call_function_single_async(cpu, &sd->defer_csd);
++#else
++		schedule_work_on(cpu, &sd->defer_work);
++#endif
++	}
+ }
+diff --git a/net/devlink/leftover.c b/net/devlink/leftover.c
+index 032c7af065cd..94e8cc3de330 100644
+--- a/net/devlink/leftover.c
++++ b/net/devlink/leftover.c
+@@ -8307,10 +8307,10 @@ static void devlink_trap_stats_read(struct devlink_stats __percpu *trap_stats,
+ 
+ 		cpu_stats = per_cpu_ptr(trap_stats, i);
+ 		do {
+-			start = u64_stats_fetch_begin_irq(&cpu_stats->syncp);
++			start = u64_stats_fetch_begin(&cpu_stats->syncp);
+ 			rx_packets = u64_stats_read(&cpu_stats->rx_packets);
+ 			rx_bytes = u64_stats_read(&cpu_stats->rx_bytes);
+-		} while (u64_stats_fetch_retry_irq(&cpu_stats->syncp, start));
++		} while (u64_stats_fetch_retry(&cpu_stats->syncp, start));
+ 
+ 		u64_stats_add(&stats->rx_packets, rx_packets);
+ 		u64_stats_add(&stats->rx_bytes, rx_bytes);
+diff --git a/net/dsa/Kconfig b/net/dsa/Kconfig
+index 3eef72ce99a4..0feef61007ef 100644
+--- a/net/dsa/Kconfig
++++ b/net/dsa/Kconfig
+@@ -166,4 +166,10 @@ config NET_DSA_TAG_XRS700X
+ 	  Say Y or M if you want to enable support for tagging frames for
+ 	  Arrow SpeedChips XRS700x switches that use a single byte tag trailer.
+ 
++config NET_DSA_TAG_NETC
++	tristate "Tag driver for NETC family of switches, using VLAN"
++	help
++	  Say Y or M if you want to enable support for tagging frames with a
++	  NXP NETC switch family. The custom 802.1Q VLAN header is available.
++
+ endif
+diff --git a/net/dsa/Makefile b/net/dsa/Makefile
+index bf57ef3bce2a..640101b28f33 100644
+--- a/net/dsa/Makefile
++++ b/net/dsa/Makefile
+@@ -29,3 +29,4 @@ obj-$(CONFIG_NET_DSA_TAG_RZN1_A5PSW) += tag_rzn1_a5psw.o
+ obj-$(CONFIG_NET_DSA_TAG_SJA1105) += tag_sja1105.o
+ obj-$(CONFIG_NET_DSA_TAG_TRAILER) += tag_trailer.o
+ obj-$(CONFIG_NET_DSA_TAG_XRS700X) += tag_xrs700x.o
++obj-$(CONFIG_NET_DSA_TAG_NETC) += tag_netc.o
+\ No newline at end of file
+diff --git a/net/dsa/slave.c b/net/dsa/slave.c
+index 5fe075bf479e..637568fcedac 100644
+--- a/net/dsa/slave.c
++++ b/net/dsa/slave.c
+@@ -976,12 +976,12 @@ static void dsa_slave_get_ethtool_stats(struct net_device *dev,
+ 
+ 		s = per_cpu_ptr(dev->tstats, i);
+ 		do {
+-			start = u64_stats_fetch_begin_irq(&s->syncp);
++			start = u64_stats_fetch_begin(&s->syncp);
+ 			tx_packets = u64_stats_read(&s->tx_packets);
+ 			tx_bytes = u64_stats_read(&s->tx_bytes);
+ 			rx_packets = u64_stats_read(&s->rx_packets);
+ 			rx_bytes = u64_stats_read(&s->rx_bytes);
+-		} while (u64_stats_fetch_retry_irq(&s->syncp, start));
++		} while (u64_stats_fetch_retry(&s->syncp, start));
+ 		data[0] += tx_packets;
+ 		data[1] += tx_bytes;
+ 		data[2] += rx_packets;
+@@ -1610,6 +1610,41 @@ static int dsa_slave_get_ts_info(struct net_device *dev,
+ 	return ds->ops->get_ts_info(ds, p->dp->index, ts);
+ }
+ 
++static int dsa_slave_reset_preempt(struct net_device *dev, bool enable)
++{
++	struct dsa_slave_priv *p = netdev_priv(dev);
++	struct dsa_switch *ds = p->dp->ds;
++
++	if (!ds->ops->reset_preempt)
++		return -EOPNOTSUPP;
++
++	return ds->ops->reset_preempt(ds, p->dp->index, enable);
++}
++
++static int dsa_slave_set_preempt(struct net_device *dev,
++				 struct ethtool_fp *fpcmd)
++{
++	struct dsa_slave_priv *p = netdev_priv(dev);
++	struct dsa_switch *ds = p->dp->ds;
++
++	if (!ds->ops->set_preempt)
++		return -EOPNOTSUPP;
++
++	return ds->ops->set_preempt(ds, p->dp->index, fpcmd);
++}
++
++static int dsa_slave_get_preempt(struct net_device *dev,
++				 struct ethtool_fp *fpcmd)
++{
++	struct dsa_slave_priv *p = netdev_priv(dev);
++	struct dsa_switch *ds = p->dp->ds;
++
++	if (!ds->ops->get_preempt)
++		return -EOPNOTSUPP;
++
++	return ds->ops->get_preempt(ds, p->dp->index, fpcmd);
++}
++
+ static int dsa_slave_vlan_rx_add_vid(struct net_device *dev, __be16 proto,
+ 				     u16 vid)
+ {
+@@ -1619,6 +1654,7 @@ static int dsa_slave_vlan_rx_add_vid(struct net_device *dev, __be16 proto,
+ 		.vid = vid,
+ 		/* This API only allows programming tagged, non-PVID VIDs */
+ 		.flags = 0,
++		.proto = ntohs(proto),
+ 	};
+ 	struct netlink_ext_ack extack = {0};
+ 	int ret;
+@@ -1632,6 +1668,7 @@ static int dsa_slave_vlan_rx_add_vid(struct net_device *dev, __be16 proto,
+ 	}
+ 
+ 	/* And CPU port... */
++	vlan.proto = ETH_P_8021Q;
+ 	ret = dsa_port_host_vlan_add(dp, &vlan, &extack);
+ 	if (ret) {
+ 		if (extack._msg)
+@@ -1651,6 +1688,7 @@ static int dsa_slave_vlan_rx_kill_vid(struct net_device *dev, __be16 proto,
+ 		.vid = vid,
+ 		/* This API only allows programming tagged, non-PVID VIDs */
+ 		.flags = 0,
++		.proto = ntohs(proto),
+ 	};
+ 	int err;
+ 
+@@ -2159,6 +2197,9 @@ static const struct ethtool_ops dsa_slave_ethtool_ops = {
+ 	.set_rxnfc		= dsa_slave_set_rxnfc,
+ 	.get_ts_info		= dsa_slave_get_ts_info,
+ 	.self_test		= dsa_slave_net_selftest,
++	.set_preempt		= dsa_slave_set_preempt,
++	.get_preempt		= dsa_slave_get_preempt,
++	.reset_preempt		= dsa_slave_reset_preempt,
+ };
+ 
+ static const struct dcbnl_rtnl_ops __maybe_unused dsa_slave_dcbnl_ops = {
+@@ -2770,7 +2811,9 @@ dsa_slave_check_8021q_upper(struct net_device *dev,
+ 	struct net_device *br = dsa_port_bridge_dev_get(dp);
+ 	struct bridge_vlan_info br_info;
+ 	struct netlink_ext_ack *extack;
++	bool update_proto = false;
+ 	int err = NOTIFY_DONE;
++	u16 br_proto, proto;
+ 	u16 vid;
+ 
+ 	if (!br || !br_vlan_enabled(br))
+@@ -2778,13 +2821,17 @@ dsa_slave_check_8021q_upper(struct net_device *dev,
+ 
+ 	extack = netdev_notifier_info_to_extack(&info->info);
+ 	vid = vlan_dev_vlan_id(info->upper_dev);
++	proto = vlan_dev_vlan_proto(info->upper_dev);
++	err = br_vlan_get_proto(br, &br_proto);
++	if (err == 0 && br_proto != proto)
++		update_proto = true;
+ 
+ 	/* br_vlan_get_info() returns -EINVAL or -ENOENT if the
+ 	 * device, respectively the VID is not found, returning
+ 	 * 0 means success, which is a failure for us here.
+ 	 */
+ 	err = br_vlan_get_info(br, vid, &br_info);
+-	if (err == 0) {
++	if (err == 0 && !update_proto) {
+ 		NL_SET_ERR_MSG_MOD(extack,
+ 				   "This VLAN is already configured by the bridge");
+ 		return notifier_from_errno(-EBUSY);
+diff --git a/net/dsa/tag_netc.c b/net/dsa/tag_netc.c
+new file mode 100644
+index 000000000000..84bf6e02cf12
+--- /dev/null
++++ b/net/dsa/tag_netc.c
+@@ -0,0 +1,168 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright 2023 NXP
++ */
++
++#include <linux/if_vlan.h>
++#include <linux/dsa/netc.h>
++#include <linux/packing.h>
++#include "dsa_priv.h"
++
++struct netc_tagger_private {
++	struct netc_tagger_data data; /* Must be first */
++	struct kthread_worker *xmit_worker;
++};
++
++/* Similar to is_link_local_ether_addr(hdr->h_dest) but also covers PTP */
++static inline bool netc_is_link_local(const struct sk_buff *skb)
++{
++	const struct ethhdr *hdr = eth_hdr(skb);
++	u64 dmac = ether_addr_to_u64(hdr->h_dest);
++
++	if (ntohs(hdr->h_proto) == ETH_P_NETC_META)
++		return false;
++
++	if ((dmac & NETC_LINKLOCAL_FILTER_A_MASK) ==
++		    NETC_LINKLOCAL_FILTER_A)
++		return true;
++
++	return false;
++}
++
++static struct sk_buff *netc_defer_xmit(struct dsa_port *dp,
++				       struct sk_buff *skb)
++{
++	struct netc_tagger_private *priv = dp->ds->tagger_data;
++	struct netc_tagger_data *data = &priv->data;
++	void (*xmit_work_fn)(struct kthread_work *work);
++	struct netc_deferred_xmit_work *xmit_work;
++	struct kthread_worker *xmit_worker;
++
++	xmit_work_fn = data->xmit_work_fn;
++	xmit_worker = priv->xmit_worker;
++
++	if (!xmit_work_fn || !xmit_worker)
++		return NULL;
++
++	/* PTP over IP packets need UDP checksumming. We may have inherited
++	 * NETIF_F_HW_CSUM from the DSA master, but these packets are not sent
++	 * through the DSA master, so calculate the checksum here.
++	 */
++	if (skb->ip_summed == CHECKSUM_PARTIAL && skb_checksum_help(skb))
++		return NULL;
++
++	xmit_work = kzalloc(sizeof(*xmit_work), GFP_ATOMIC);
++	if (!xmit_work)
++		return NULL;
++
++	/* Calls felix_port_deferred_xmit in felix.c */
++	kthread_init_work(&xmit_work->work, xmit_work_fn);
++	/* Increase refcount so the kfree_skb in dsa_slave_xmit
++	 * won't really free the packet.
++	 */
++	xmit_work->dp = dp;
++	xmit_work->skb = skb_get(skb);
++
++	kthread_queue_work(xmit_worker, &xmit_work->work);
++
++	return NULL;
++}
++
++static struct sk_buff *netc_xmit(struct sk_buff *skb,
++				 struct net_device *netdev)
++{
++	struct dsa_port *dp = dsa_slave_to_port(netdev);
++	u16 queue_mapping = skb_get_queue_mapping(skb);
++	u8 pcp = netdev_txq_to_tc(netdev, queue_mapping);
++	u16 tx_vid = dsa_tag_8021q_standalone_vid(dp);
++
++	if (unlikely(netc_is_link_local(skb)))
++		return netc_defer_xmit(dp, skb);
++
++	return dsa_8021q_xmit(skb, netdev, ETH_P_8021Q,
++			      ((pcp << VLAN_PRIO_SHIFT) | tx_vid));
++}
++
++static struct sk_buff *netc_rcv(struct sk_buff *skb,
++				struct net_device *netdev)
++{
++	int src_port = -1, switch_id = -1, vid = -1;
++	struct ethhdr *hdr;
++	bool is_link_local;
++
++	hdr = eth_hdr(skb);
++	is_link_local = netc_is_link_local(skb);
++
++	if (is_link_local) {
++		/* Management traffic path. Switch embeds the switch ID and
++		 * port ID into bytes of the destination MAC, courtesy of
++		 * the incl_srcpt options.
++		 */
++		src_port = hdr->h_dest[3];
++		switch_id = hdr->h_dest[4];
++	}
++
++	if (skb_vlan_tag_present(skb))
++		/* Normal traffic path. */
++		dsa_8021q_rcv(skb, &src_port, &switch_id, &vid);
++	else
++		return NULL;
++
++	skb->dev = dsa_master_find_slave(netdev, switch_id, src_port);
++	if (!skb->dev) {
++		netdev_warn(netdev, "Couldn't decode source port switch-%d port- %d\n",
++			    switch_id, src_port);
++		return NULL;
++	}
++
++	if (!is_link_local)
++		dsa_default_offload_fwd_mark(skb);
++
++	return skb;
++}
++
++static void netc_disconnect(struct dsa_switch *ds)
++{
++	struct netc_tagger_private *priv = ds->tagger_data;
++
++	kthread_destroy_worker(priv->xmit_worker);
++	kfree(priv);
++	ds->tagger_data = NULL;
++}
++
++static int netc_connect(struct dsa_switch *ds)
++{
++	struct netc_tagger_private *priv;
++	int err;
++
++	priv = kzalloc(sizeof(*priv), GFP_KERNEL);
++	if (!priv)
++		return -ENOMEM;
++
++	priv->xmit_worker = kthread_create_worker(0, "netc_xmit");
++	if (IS_ERR(priv->xmit_worker)) {
++		err = PTR_ERR(priv->xmit_worker);
++		kfree(priv);
++		return err;
++	}
++
++	ds->tagger_data = priv;
++
++	return 0;
++}
++
++static const struct dsa_device_ops netc_netdev_ops = {
++	.name			= "netc-8021q",
++	.proto			= DSA_TAG_PROTO_NETC,
++	.xmit			= netc_xmit,
++	.rcv			= netc_rcv,
++	.connect		= netc_connect,
++	.disconnect		= netc_disconnect,
++	.needed_headroom	= VLAN_HLEN,
++	.promisc_on_master	= true,
++};
++
++MODULE_LICENSE("GPL v2");
++MODULE_ALIAS_DSA_TAG_DRIVER(DSA_TAG_PROTO_NETC);
++
++module_dsa_tag_driver(netc_netdev_ops);
+diff --git a/net/dsa/tag_sja1105.c b/net/dsa/tag_sja1105.c
+index 143348962a21..b472d6b2870e 100644
+--- a/net/dsa/tag_sja1105.c
++++ b/net/dsa/tag_sja1105.c
+@@ -262,9 +262,8 @@ static struct sk_buff *sja1105_xmit(struct sk_buff *skb,
+ 				    struct net_device *netdev)
+ {
+ 	struct dsa_port *dp = dsa_slave_to_port(netdev);
+-	u16 queue_mapping = skb_get_queue_mapping(skb);
+-	u8 pcp = netdev_txq_to_tc(netdev, queue_mapping);
+ 	u16 tx_vid = dsa_tag_8021q_standalone_vid(dp);
++	u8 pcp = skb->priority;
+ 
+ 	if (skb->offload_fwd_mark)
+ 		return sja1105_imprecise_xmit(skb, netdev);
+@@ -474,7 +473,7 @@ static bool sja1110_skb_has_inband_control_extension(const struct sk_buff *skb)
+ static void sja1105_vlan_rcv(struct sk_buff *skb, int *source_port,
+ 			     int *switch_id, int *vbid, u16 *vid)
+ {
+-	struct vlan_ethhdr *hdr = (struct vlan_ethhdr *)skb_mac_header(skb);
++	struct vlan_ethhdr *hdr = vlan_eth_hdr(skb);
+ 	u16 vlan_tci;
+ 
+ 	if (skb_vlan_tag_present(skb))
+diff --git a/net/ethtool/Makefile b/net/ethtool/Makefile
+index 72ab0944262a..194eeedf7581 100644
+--- a/net/ethtool/Makefile
++++ b/net/ethtool/Makefile
+@@ -8,4 +8,4 @@ ethtool_nl-y	:= netlink.o bitset.o strset.o linkinfo.o linkmodes.o \
+ 		   linkstate.o debug.o wol.o features.o privflags.o rings.o \
+ 		   channels.o coalesce.o pause.o eee.o tsinfo.o cabletest.o \
+ 		   tunnels.o fec.o eeprom.o stats.o phc_vclocks.o module.o \
+-		   pse-pd.o
++		   pse-pd.o preempt.o
+diff --git a/net/ethtool/ioctl.c b/net/ethtool/ioctl.c
+index e31d1247b9f0..a7b4a749fcb3 100644
+--- a/net/ethtool/ioctl.c
++++ b/net/ethtool/ioctl.c
+@@ -2713,6 +2713,49 @@ static int ethtool_set_fecparam(struct net_device *dev, void __user *useraddr)
+ 	return dev->ethtool_ops->set_fecparam(dev, &fecparam);
+ }
+ 
++static int ethtool_get_preempt(struct net_device *dev, void __user *useraddr)
++{
++	struct ethtool_fp fpparam = { .cmd = ETHTOOL_GFP };
++	int rc;
++
++	if (!dev->ethtool_ops->get_preempt)
++		return -EOPNOTSUPP;
++
++	rc = dev->ethtool_ops->get_preempt(dev, &fpparam);
++	if (rc)
++		return rc;
++
++	if (copy_to_user(useraddr, &fpparam, sizeof(fpparam)))
++		return -EFAULT;
++	return 0;
++}
++
++static int ethtool_set_preempt(struct net_device *dev, void __user *useraddr)
++{
++	struct ethtool_fp fpparam;
++
++	if (!dev->ethtool_ops->set_preempt)
++		return -EOPNOTSUPP;
++
++	if (copy_from_user(&fpparam, useraddr, sizeof(fpparam)))
++		return -EFAULT;
++
++	return dev->ethtool_ops->set_preempt(dev, &fpparam);
++}
++
++static int ethtool_reset_preempt(struct net_device *dev, void __user *useraddr)
++{
++	struct ethtool_fp fpparam;
++
++	if (!dev->ethtool_ops->reset_preempt)
++		return -EOPNOTSUPP;
++
++	if (copy_from_user(&fpparam, useraddr, sizeof(fpparam)))
++		return -EFAULT;
++
++	return dev->ethtool_ops->reset_preempt(dev, fpparam.fp_enabled);
++}
++
+ /* The main entry point in this file.  Called from net/core/dev_ioctl.c */
+ 
+ static int
+@@ -2772,6 +2815,9 @@ __dev_ethtool(struct net *net, struct ifreq *ifr, void __user *useraddr,
+ 	case ETHTOOL_PHY_GTUNABLE:
+ 	case ETHTOOL_GLINKSETTINGS:
+ 	case ETHTOOL_GFECPARAM:
++	case ETHTOOL_GFP:
++	case ETHTOOL_SFP:
++	case ETHTOOL_RFP:
+ 		break;
+ 	default:
+ 		if (!ns_capable(net->user_ns, CAP_NET_ADMIN))
+@@ -2999,6 +3045,15 @@ __dev_ethtool(struct net *net, struct ifreq *ifr, void __user *useraddr,
+ 	case ETHTOOL_SFECPARAM:
+ 		rc = ethtool_set_fecparam(dev, useraddr);
+ 		break;
++	case ETHTOOL_GFP:
++		rc = ethtool_get_preempt(dev, useraddr);
++		break;
++	case ETHTOOL_SFP:
++		rc = ethtool_set_preempt(dev, useraddr);
++		break;
++	case ETHTOOL_RFP:
++		rc = ethtool_reset_preempt(dev, useraddr);
++		break;
+ 	default:
+ 		rc = -EOPNOTSUPP;
+ 	}
+diff --git a/net/ethtool/netlink.c b/net/ethtool/netlink.c
+index 1a4c11356c96..3e0ed6cf7cce 100644
+--- a/net/ethtool/netlink.c
++++ b/net/ethtool/netlink.c
+@@ -287,6 +287,7 @@ ethnl_default_requests[__ETHTOOL_MSG_USER_CNT] = {
+ 	[ETHTOOL_MSG_PHC_VCLOCKS_GET]	= &ethnl_phc_vclocks_request_ops,
+ 	[ETHTOOL_MSG_MODULE_GET]	= &ethnl_module_request_ops,
+ 	[ETHTOOL_MSG_PSE_GET]		= &ethnl_pse_request_ops,
++	[ETHTOOL_MSG_PREEMPT_GET]	= &ethnl_preempt_request_ops,
+ };
+ 
+ static struct ethnl_dump_ctx *ethnl_dump_context(struct netlink_callback *cb)
+@@ -602,6 +603,7 @@ ethnl_default_notify_ops[ETHTOOL_MSG_KERNEL_MAX + 1] = {
+ 	[ETHTOOL_MSG_EEE_NTF]		= &ethnl_eee_request_ops,
+ 	[ETHTOOL_MSG_FEC_NTF]		= &ethnl_fec_request_ops,
+ 	[ETHTOOL_MSG_MODULE_NTF]	= &ethnl_module_request_ops,
++	[ETHTOOL_MSG_PREEMPT_NTF]	= &ethnl_preempt_request_ops,
+ };
+ 
+ /* default notification handler */
+@@ -695,6 +697,7 @@ static const ethnl_notify_handler_t ethnl_notify_handlers[] = {
+ 	[ETHTOOL_MSG_EEE_NTF]		= ethnl_default_notify,
+ 	[ETHTOOL_MSG_FEC_NTF]		= ethnl_default_notify,
+ 	[ETHTOOL_MSG_MODULE_NTF]	= ethnl_default_notify,
++	[ETHTOOL_MSG_PREEMPT_NTF]	= ethnl_default_notify,
+ };
+ 
+ void ethtool_notify(struct net_device *dev, unsigned int cmd, const void *data)
+@@ -1040,6 +1043,20 @@ static const struct genl_ops ethtool_genl_ops[] = {
+ 		.policy = ethnl_pse_set_policy,
+ 		.maxattr = ARRAY_SIZE(ethnl_pse_set_policy) - 1,
+ 	},
++	{
++		.cmd	= ETHTOOL_MSG_PREEMPT_GET,
++		.doit	= ethnl_default_doit,
++		.start	= ethnl_default_start,
++		.dumpit	= ethnl_default_dumpit,
++		.done	= ethnl_default_done,
++		.policy	= preempt_get_policy,
++		.maxattr = ETHTOOL_A_PREEMPT_MAX,
++	},
++	{
++		.cmd	= ETHTOOL_MSG_PREEMPT_SET,
++		.flags	= GENL_UNS_ADMIN_PERM,
++		.doit	= ethnl_set_preempt,
++	},
+ };
+ 
+ static const struct genl_multicast_group ethtool_nl_mcgrps[] = {
+diff --git a/net/ethtool/netlink.h b/net/ethtool/netlink.h
+index 1bfd374f9718..4fd801446147 100644
+--- a/net/ethtool/netlink.h
++++ b/net/ethtool/netlink.h
+@@ -346,6 +346,7 @@ extern const struct ethnl_request_ops ethnl_stats_request_ops;
+ extern const struct ethnl_request_ops ethnl_phc_vclocks_request_ops;
+ extern const struct ethnl_request_ops ethnl_module_request_ops;
+ extern const struct ethnl_request_ops ethnl_pse_request_ops;
++extern const struct ethnl_request_ops ethnl_preempt_request_ops;
+ 
+ extern const struct nla_policy ethnl_header_policy[ETHTOOL_A_HEADER_FLAGS + 1];
+ extern const struct nla_policy ethnl_header_policy_stats[ETHTOOL_A_HEADER_FLAGS + 1];
+@@ -386,6 +387,7 @@ extern const struct nla_policy ethnl_module_get_policy[ETHTOOL_A_MODULE_HEADER +
+ extern const struct nla_policy ethnl_module_set_policy[ETHTOOL_A_MODULE_POWER_MODE_POLICY + 1];
+ extern const struct nla_policy ethnl_pse_get_policy[ETHTOOL_A_PSE_HEADER + 1];
+ extern const struct nla_policy ethnl_pse_set_policy[ETHTOOL_A_PSE_MAX + 1];
++extern const struct nla_policy preempt_get_policy[ETHTOOL_A_PREEMPT_MAX + 1];
+ 
+ int ethnl_set_linkinfo(struct sk_buff *skb, struct genl_info *info);
+ int ethnl_set_linkmodes(struct sk_buff *skb, struct genl_info *info);
+@@ -406,6 +408,7 @@ int ethnl_tunnel_info_dumpit(struct sk_buff *skb, struct netlink_callback *cb);
+ int ethnl_set_fec(struct sk_buff *skb, struct genl_info *info);
+ int ethnl_set_module(struct sk_buff *skb, struct genl_info *info);
+ int ethnl_set_pse(struct sk_buff *skb, struct genl_info *info);
++int ethnl_set_preempt(struct sk_buff *skb, struct genl_info *info);
+ 
+ extern const char stats_std_names[__ETHTOOL_STATS_CNT][ETH_GSTRING_LEN];
+ extern const char stats_eth_phy_names[__ETHTOOL_A_STATS_ETH_PHY_CNT][ETH_GSTRING_LEN];
+diff --git a/net/ethtool/preempt.c b/net/ethtool/preempt.c
+new file mode 100644
+index 000000000000..2d98942002e4
+--- /dev/null
++++ b/net/ethtool/preempt.c
+@@ -0,0 +1,191 @@
++// SPDX-License-Identifier: GPL-2.0-only
++
++#include "netlink.h"
++#include "common.h"
++
++struct preempt_req_info {
++	struct ethnl_req_info		base;
++};
++
++struct preempt_reply_data {
++	struct ethnl_reply_data		base;
++	struct ethtool_fp		fp;
++};
++
++#define PREEMPT_REPDATA(__reply_base) \
++	container_of(__reply_base, struct preempt_reply_data, base)
++
++const struct nla_policy preempt_get_policy[ETHTOOL_A_PREEMPT_MAX + 1] = {
++	[ETHTOOL_A_PREEMPT_UNSPEC]		= { .type = NLA_REJECT },
++	[ETHTOOL_A_PREEMPT_HEADER]		= { .type = NLA_NESTED },
++	[ETHTOOL_A_PREEMPT_SUPPORTED]		= { .type = NLA_REJECT },
++	[ETHTOOL_A_PREEMPT_STATUS]		= { .type = NLA_REJECT },
++	[ETHTOOL_A_PREEMPT_ACTIVE]		= { .type = NLA_REJECT },
++	[ETHTOOL_A_PREEMPT_MIN_FRAG_SIZE]	= { .type = NLA_REJECT },
++	[ETHTOOL_A_PREEMPT_QUEUES_SUPPORTED]	= { .type = NLA_REJECT },
++	[ETHTOOL_A_PREEMPT_QUEUES_PREEMPTIBLE]	= { .type = NLA_REJECT },
++};
++
++static int preempt_prepare_data(const struct ethnl_req_info *req_base,
++				struct ethnl_reply_data *reply_base,
++				struct genl_info *info)
++{
++	struct preempt_reply_data *data = PREEMPT_REPDATA(reply_base);
++	struct net_device *dev = reply_base->dev;
++	int ret;
++
++	if (!dev->ethtool_ops->get_preempt)
++		return -EOPNOTSUPP;
++
++	ret = ethnl_ops_begin(dev);
++	if (ret < 0)
++		return ret;
++
++	ret = dev->ethtool_ops->get_preempt(dev, &data->fp);
++	ethnl_ops_complete(dev);
++
++	return ret;
++}
++
++static int preempt_reply_size(const struct ethnl_req_info *req_base,
++			      const struct ethnl_reply_data *reply_base)
++{
++	int len = 0;
++
++	len += nla_total_size(sizeof(u8)); /* _PREEMPT_SUPPORTED */
++	len += nla_total_size(sizeof(u8)); /* _PREEMPT_STATUS */
++	len += nla_total_size(sizeof(u8)); /* _PREEMPT_ACTIVE */
++	len += nla_total_size(sizeof(u32)); /* _PREEMPT_QUEUES_SUPPORTED */
++	len += nla_total_size(sizeof(u32)); /* _PREEMPT_QUEUES_PREEMPTIBLE */
++	len += nla_total_size(sizeof(u32)); /* _PREEMPT_MIN_FRAG_SIZE */
++
++	return len;
++}
++
++static int preempt_fill_reply(struct sk_buff *skb,
++			      const struct ethnl_req_info *req_base,
++			      const struct ethnl_reply_data *reply_base)
++{
++	const struct preempt_reply_data *data = PREEMPT_REPDATA(reply_base);
++	const struct ethtool_fp *preempt = &data->fp;
++
++	if (nla_put_u32(skb, ETHTOOL_A_PREEMPT_QUEUES_SUPPORTED,
++			  preempt->supported_queues_mask))
++		return -EMSGSIZE;
++
++	if (nla_put_u32(skb, ETHTOOL_A_PREEMPT_QUEUES_PREEMPTIBLE,
++			  preempt->preemptible_queues_mask))
++		return -EMSGSIZE;
++
++	if (nla_put_u8(skb, ETHTOOL_A_PREEMPT_STATUS, preempt->fp_status))
++		return -EMSGSIZE;
++
++	if (nla_put_u8(skb, ETHTOOL_A_PREEMPT_ACTIVE, preempt->fp_active))
++		return -EMSGSIZE;
++
++	if (nla_put_u8(skb, ETHTOOL_A_PREEMPT_SUPPORTED,
++		       preempt->fp_supported))
++		return -EMSGSIZE;
++
++	if (nla_put_u32(skb, ETHTOOL_A_PREEMPT_MIN_FRAG_SIZE,
++			preempt->min_frag_size))
++		return -EMSGSIZE;
++
++	return 0;
++}
++
++const struct ethnl_request_ops ethnl_preempt_request_ops = {
++	.request_cmd		= ETHTOOL_MSG_PREEMPT_GET,
++	.reply_cmd		= ETHTOOL_MSG_PREEMPT_GET_REPLY,
++	.hdr_attr		= ETHTOOL_A_PREEMPT_HEADER,
++	.req_info_size		= sizeof(struct preempt_req_info),
++	.reply_data_size	= sizeof(struct preempt_reply_data),
++
++	.prepare_data		= preempt_prepare_data,
++	.reply_size		= preempt_reply_size,
++	.fill_reply		= preempt_fill_reply,
++};
++
++static const struct nla_policy
++preempt_set_policy[ETHTOOL_A_PREEMPT_MAX + 1] = {
++	[ETHTOOL_A_PREEMPT_UNSPEC]			= { .type = NLA_REJECT },
++	[ETHTOOL_A_PREEMPT_HEADER]			= { .type = NLA_NESTED },
++	[ETHTOOL_A_PREEMPT_DISABLED]			= { .type = NLA_FLAG },
++	[ETHTOOL_A_PREEMPT_SUPPORTED]			= { .type = NLA_REJECT },
++	[ETHTOOL_A_PREEMPT_STATUS]			= { .type = NLA_REJECT },
++	[ETHTOOL_A_PREEMPT_ACTIVE]			= { .type = NLA_U8 },
++	[ETHTOOL_A_PREEMPT_MIN_FRAG_SIZE]		= { .type = NLA_U32 },
++	[ETHTOOL_A_PREEMPT_QUEUES_SUPPORTED]		= { .type = NLA_REJECT },
++	[ETHTOOL_A_PREEMPT_QUEUES_PREEMPTIBLE]		= { .type = NLA_U32 },
++};
++
++int ethnl_set_preempt(struct sk_buff *skb, struct genl_info *info)
++{
++	struct nlattr *tb[ARRAY_SIZE(preempt_set_policy)];
++	struct ethtool_fp preempt = {};
++	struct ethnl_req_info req_info = {};
++	struct net_device *dev;
++	bool mod = false;
++	int ret;
++
++	ret = nlmsg_parse(info->nlhdr, GENL_HDRLEN, tb,
++			  ETHTOOL_A_PREEMPT_MAX, preempt_set_policy,
++			  info->extack);
++	if (ret < 0)
++		return ret;
++
++	ret = ethnl_parse_header_dev_get(&req_info,
++					 tb[ETHTOOL_A_PREEMPT_HEADER],
++					 genl_info_net(info), info->extack,
++					 true);
++	if (ret < 0)
++		return ret;
++	dev = req_info.dev;
++	ret = -EOPNOTSUPP;
++	if (!dev->ethtool_ops->get_preempt ||
++	    !dev->ethtool_ops->set_preempt)
++		goto out_dev;
++
++	rtnl_lock();
++	ret = ethnl_ops_begin(dev);
++	if (ret < 0)
++		goto out_rtnl;
++
++	if (nla_get_flag(tb[ETHTOOL_A_PREEMPT_DISABLED])) {
++		preempt.disabled = 1;
++		mod = true;
++	}
++	if (tb[ETHTOOL_A_PREEMPT_ACTIVE]) {
++		ethnl_update_u8(&preempt.fp_enabled,
++				tb[ETHTOOL_A_PREEMPT_ACTIVE], &mod);
++		mod = true;
++	}
++	if (tb[ETHTOOL_A_PREEMPT_MIN_FRAG_SIZE])
++		ethnl_update_u32(&preempt.min_frag_size,
++				 tb[ETHTOOL_A_PREEMPT_MIN_FRAG_SIZE], &mod);
++	else
++		preempt.min_frag_size = 60;
++	if (tb[ETHTOOL_A_PREEMPT_QUEUES_PREEMPTIBLE]) {
++		ethnl_update_u32(&preempt.preemptible_queues_mask,
++				 tb[ETHTOOL_A_PREEMPT_QUEUES_PREEMPTIBLE], &mod);
++		mod = true;
++	}
++
++	ret = 0;
++	if (!mod)
++		goto out_ops;
++
++	ret = dev->ethtool_ops->set_preempt(dev, &preempt);
++	if (ret < 0)
++		GENL_SET_ERR_MSG(info, "frame preemption settings update failed");
++	else
++		ethtool_notify(dev, ETHTOOL_MSG_PREEMPT_NTF, NULL);
++
++out_ops:
++	ethnl_ops_complete(dev);
++out_rtnl:
++	rtnl_unlock();
++out_dev:
++	dev_put(dev);
++	return ret;
++}
+diff --git a/net/ipv4/af_inet.c b/net/ipv4/af_inet.c
+index 04853c83c85c..82b46fb51530 100644
+--- a/net/ipv4/af_inet.c
++++ b/net/ipv4/af_inet.c
+@@ -1702,9 +1702,9 @@ u64 snmp_get_cpu_field64(void __percpu *mib, int cpu, int offt,
+ 	bhptr = per_cpu_ptr(mib, cpu);
+ 	syncp = (struct u64_stats_sync *)(bhptr + syncp_offset);
+ 	do {
+-		start = u64_stats_fetch_begin_irq(syncp);
++		start = u64_stats_fetch_begin(syncp);
+ 		v = *(((u64 *)bhptr) + offt);
+-	} while (u64_stats_fetch_retry_irq(syncp, start));
++	} while (u64_stats_fetch_retry(syncp, start));
+ 
+ 	return v;
+ }
+diff --git a/net/ipv6/seg6_local.c b/net/ipv6/seg6_local.c
+index 8370726ae7bf..487f8e98deaa 100644
+--- a/net/ipv6/seg6_local.c
++++ b/net/ipv6/seg6_local.c
+@@ -1644,13 +1644,13 @@ static int put_nla_counters(struct sk_buff *skb, struct seg6_local_lwt *slwt)
+ 
+ 		pcounters = per_cpu_ptr(slwt->pcpu_counters, i);
+ 		do {
+-			start = u64_stats_fetch_begin_irq(&pcounters->syncp);
++			start = u64_stats_fetch_begin(&pcounters->syncp);
+ 
+ 			packets = u64_stats_read(&pcounters->packets);
+ 			bytes = u64_stats_read(&pcounters->bytes);
+ 			errors = u64_stats_read(&pcounters->errors);
+ 
+-		} while (u64_stats_fetch_retry_irq(&pcounters->syncp, start));
++		} while (u64_stats_fetch_retry(&pcounters->syncp, start));
+ 
+ 		counters.packets += packets;
+ 		counters.bytes += bytes;
+diff --git a/net/mac80211/sta_info.c b/net/mac80211/sta_info.c
+index b8c6f6a668fc..605bdb673d1e 100644
+--- a/net/mac80211/sta_info.c
++++ b/net/mac80211/sta_info.c
+@@ -2397,9 +2397,9 @@ static inline u64 sta_get_tidstats_msdu(struct ieee80211_sta_rx_stats *rxstats,
+ 	u64 value;
+ 
+ 	do {
+-		start = u64_stats_fetch_begin_irq(&rxstats->syncp);
++		start = u64_stats_fetch_begin(&rxstats->syncp);
+ 		value = rxstats->msdu[tid];
+-	} while (u64_stats_fetch_retry_irq(&rxstats->syncp, start));
++	} while (u64_stats_fetch_retry(&rxstats->syncp, start));
+ 
+ 	return value;
+ }
+@@ -2465,9 +2465,9 @@ static inline u64 sta_get_stats_bytes(struct ieee80211_sta_rx_stats *rxstats)
+ 	u64 value;
+ 
+ 	do {
+-		start = u64_stats_fetch_begin_irq(&rxstats->syncp);
++		start = u64_stats_fetch_begin(&rxstats->syncp);
+ 		value = rxstats->bytes;
+-	} while (u64_stats_fetch_retry_irq(&rxstats->syncp, start));
++	} while (u64_stats_fetch_retry(&rxstats->syncp, start));
+ 
+ 	return value;
+ }
+diff --git a/net/mpls/af_mpls.c b/net/mpls/af_mpls.c
+index f1f43894efb8..dc5165d3eec4 100644
+--- a/net/mpls/af_mpls.c
++++ b/net/mpls/af_mpls.c
+@@ -1079,9 +1079,9 @@ static void mpls_get_stats(struct mpls_dev *mdev,
+ 
+ 		p = per_cpu_ptr(mdev->stats, i);
+ 		do {
+-			start = u64_stats_fetch_begin_irq(&p->syncp);
++			start = u64_stats_fetch_begin(&p->syncp);
+ 			local = p->stats;
+-		} while (u64_stats_fetch_retry_irq(&p->syncp, start));
++		} while (u64_stats_fetch_retry(&p->syncp, start));
+ 
+ 		stats->rx_packets	+= local.rx_packets;
+ 		stats->rx_bytes		+= local.rx_bytes;
+diff --git a/net/netfilter/ipvs/ip_vs_ctl.c b/net/netfilter/ipvs/ip_vs_ctl.c
+index 17a1b731a76b..2be696513629 100644
+--- a/net/netfilter/ipvs/ip_vs_ctl.c
++++ b/net/netfilter/ipvs/ip_vs_ctl.c
+@@ -2299,13 +2299,13 @@ static int ip_vs_stats_percpu_show(struct seq_file *seq, void *v)
+ 		u64 conns, inpkts, outpkts, inbytes, outbytes;
+ 
+ 		do {
+-			start = u64_stats_fetch_begin_irq(&u->syncp);
++			start = u64_stats_fetch_begin(&u->syncp);
+ 			conns = u64_stats_read(&u->cnt.conns);
+ 			inpkts = u64_stats_read(&u->cnt.inpkts);
+ 			outpkts = u64_stats_read(&u->cnt.outpkts);
+ 			inbytes = u64_stats_read(&u->cnt.inbytes);
+ 			outbytes = u64_stats_read(&u->cnt.outbytes);
+-		} while (u64_stats_fetch_retry_irq(&u->syncp, start));
++		} while (u64_stats_fetch_retry(&u->syncp, start));
+ 
+ 		seq_printf(seq, "%3X %8LX %8LX %8LX %16LX %16LX\n",
+ 			   i, (u64)conns, (u64)inpkts,
+diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
+index 3c5cac9bd9b7..32423597bca0 100644
+--- a/net/netfilter/nf_tables_api.c
++++ b/net/netfilter/nf_tables_api.c
+@@ -1687,10 +1687,10 @@ static int nft_dump_stats(struct sk_buff *skb, struct nft_stats __percpu *stats)
+ 	for_each_possible_cpu(cpu) {
+ 		cpu_stats = per_cpu_ptr(stats, cpu);
+ 		do {
+-			seq = u64_stats_fetch_begin_irq(&cpu_stats->syncp);
++			seq = u64_stats_fetch_begin(&cpu_stats->syncp);
+ 			pkts = cpu_stats->pkts;
+ 			bytes = cpu_stats->bytes;
+-		} while (u64_stats_fetch_retry_irq(&cpu_stats->syncp, seq));
++		} while (u64_stats_fetch_retry(&cpu_stats->syncp, seq));
+ 		total.pkts += pkts;
+ 		total.bytes += bytes;
+ 	}
+diff --git a/net/openvswitch/datapath.c b/net/openvswitch/datapath.c
+index 3c7b24535409..0953f531f984 100644
+--- a/net/openvswitch/datapath.c
++++ b/net/openvswitch/datapath.c
+@@ -716,9 +716,9 @@ static void get_dp_stats(const struct datapath *dp, struct ovs_dp_stats *stats,
+ 		percpu_stats = per_cpu_ptr(dp->stats_percpu, i);
+ 
+ 		do {
+-			start = u64_stats_fetch_begin_irq(&percpu_stats->syncp);
++			start = u64_stats_fetch_begin(&percpu_stats->syncp);
+ 			local_stats = *percpu_stats;
+-		} while (u64_stats_fetch_retry_irq(&percpu_stats->syncp, start));
++		} while (u64_stats_fetch_retry(&percpu_stats->syncp, start));
+ 
+ 		stats->n_hit += local_stats.n_hit;
+ 		stats->n_missed += local_stats.n_missed;
+diff --git a/net/openvswitch/flow_table.c b/net/openvswitch/flow_table.c
+index d4a2db0b2299..0a0e4c283f02 100644
+--- a/net/openvswitch/flow_table.c
++++ b/net/openvswitch/flow_table.c
+@@ -205,9 +205,9 @@ static void tbl_mask_array_reset_counters(struct mask_array *ma)
+ 
+ 			stats = per_cpu_ptr(ma->masks_usage_stats, cpu);
+ 			do {
+-				start = u64_stats_fetch_begin_irq(&stats->syncp);
++				start = u64_stats_fetch_begin(&stats->syncp);
+ 				counter = stats->usage_cntrs[i];
+-			} while (u64_stats_fetch_retry_irq(&stats->syncp, start));
++			} while (u64_stats_fetch_retry(&stats->syncp, start));
+ 
+ 			ma->masks_usage_zero_cntr[i] += counter;
+ 		}
+@@ -1136,10 +1136,9 @@ void ovs_flow_masks_rebalance(struct flow_table *table)
+ 
+ 			stats = per_cpu_ptr(ma->masks_usage_stats, cpu);
+ 			do {
+-				start = u64_stats_fetch_begin_irq(&stats->syncp);
++				start = u64_stats_fetch_begin(&stats->syncp);
+ 				counter = stats->usage_cntrs[i];
+-			} while (u64_stats_fetch_retry_irq(&stats->syncp,
+-							   start));
++			} while (u64_stats_fetch_retry(&stats->syncp, start));
+ 
+ 			masks_and_count[i].counter += counter;
+ 		}
+diff --git a/net/packet/af_packet.c b/net/packet/af_packet.c
+index 451bd8bfafd2..08daa7932d63 100644
+--- a/net/packet/af_packet.c
++++ b/net/packet/af_packet.c
+@@ -3186,9 +3186,10 @@ static int packet_release(struct socket *sock)
+  *	Attach a packet hook.
+  */
+ 
+-static int packet_do_bind(struct sock *sk, const char *name, int ifindex,
++static int packet_do_bind(struct socket *sock, const char *name, int ifindex,
+ 			  __be16 proto)
+ {
++	struct sock *sk = sock->sk;
+ 	struct packet_sock *po = pkt_sk(sk);
+ 	struct net_device *dev = NULL;
+ 	bool unlisted = false;
+@@ -3254,6 +3255,7 @@ static int packet_do_bind(struct sock *sk, const char *name, int ifindex,
+ 			po->prot_hook.dev = dev;
+ 			WRITE_ONCE(po->ifindex, dev ? dev->ifindex : 0);
+ 			packet_cached_dev_assign(po, dev);
++			sock->ndev = dev;
+ 		}
+ 		dev_put(dev);
+ 	}
+@@ -3298,7 +3300,8 @@ static int packet_bind_spkt(struct socket *sock, struct sockaddr *uaddr,
+ 	memcpy(name, uaddr->sa_data, sizeof(uaddr->sa_data));
+ 	name[sizeof(uaddr->sa_data)] = 0;
+ 
+-	return packet_do_bind(sk, name, 0, 0);
++
++	return packet_do_bind(sock, name, 0, 0);
+ }
+ 
+ static int packet_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
+@@ -3315,7 +3318,7 @@ static int packet_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len
+ 	if (sll->sll_family != AF_PACKET)
+ 		return -EINVAL;
+ 
+-	return packet_do_bind(sk, NULL, sll->sll_ifindex, sll->sll_protocol);
++	return packet_do_bind(sock, NULL, sll->sll_ifindex, sll->sll_protocol);
+ }
+ 
+ static struct proto packet_proto = {
+diff --git a/net/sched/sch_cbs.c b/net/sched/sch_cbs.c
+index cac870eb7897..36a6a79697e2 100644
+--- a/net/sched/sch_cbs.c
++++ b/net/sched/sch_cbs.c
+@@ -379,6 +379,11 @@ static int cbs_change(struct Qdisc *sch, struct nlattr *opt,
+ 
+ 	qopt = nla_data(tb[TCA_CBS_PARMS]);
+ 
++	if (qopt->idleslope < 0 || qopt->sendslope > 0 || qopt->hicredit < 0 || qopt->locredit > 0) {
++		NL_SET_ERR_MSG(extack, "Invalid CBS parameters");
++		return -EINVAL;
++	}
++
+ 	if (!qopt->offload) {
+ 		cbs_set_port_rate(dev, q);
+ 		cbs_disable_offload(dev, q);
+diff --git a/net/sched/sch_taprio.c b/net/sched/sch_taprio.c
+index b03898aba101..abfdbea767e2 100644
+--- a/net/sched/sch_taprio.c
++++ b/net/sched/sch_taprio.c
+@@ -1237,6 +1237,25 @@ static void taprio_sched_to_offload(struct net_device *dev,
+ 	offload->num_entries = i;
+ }
+ 
++static void
++taprio_mqprio_qopt_reconstruct(struct net_device *dev,
++			       struct tc_mqprio_qopt_offload *mqprio)
++{
++	struct tc_mqprio_qopt *qopt = &mqprio->qopt;
++	int num_tc = netdev_get_num_tc(dev);
++	int tc, prio;
++
++	qopt->num_tc = num_tc;
++
++	for (prio = 0; prio <= TC_BITMASK; prio++)
++		qopt->prio_tc_map[prio] = netdev_get_prio_tc_map(dev, prio);
++
++	for (tc = 0; tc < num_tc; tc++) {
++		qopt->count[tc] = dev->tc_to_txq[tc].count;
++		qopt->offset[tc] = dev->tc_to_txq[tc].offset;
++	}
++}
++
+ static int taprio_enable_offload(struct net_device *dev,
+ 				 struct taprio_sched *q,
+ 				 struct sched_gate_list *sched,
+@@ -1273,6 +1292,7 @@ static int taprio_enable_offload(struct net_device *dev,
+ 		return -ENOMEM;
+ 	}
+ 	offload->enable = 1;
++	taprio_mqprio_qopt_reconstruct(dev, &offload->mqprio);
+ 	taprio_sched_to_offload(dev, sched, offload);
+ 
+ 	for (tc = 0; tc < TC_MAX_QUEUE; tc++)
+diff --git a/net/socket.c b/net/socket.c
+index d281a7ef4b1d..092230bb778b 100644
+--- a/net/socket.c
++++ b/net/socket.c
+@@ -107,6 +107,10 @@
+ #include <linux/errqueue.h>
+ #include <linux/ptp_clock_kernel.h>
+ 
++static int fast_raw_socket_fd = -1;
++static struct net_device *fast_raw_socket_dev;
++static struct socket *fast_raw_socket_sock = NULL;
++
+ #ifdef CONFIG_NET_RX_BUSY_POLL
+ unsigned int sysctl_net_busy_read __read_mostly;
+ unsigned int sysctl_net_busy_poll __read_mostly;
+@@ -664,6 +668,10 @@ static void __sock_release(struct socket *sock, struct inode *inode)
+ 		iput(SOCK_INODE(sock));
+ 		return;
+ 	}
++	if (fast_raw_socket_sock != NULL && fast_raw_socket_sock == sock) {
++		fast_raw_socket_sock = NULL;
++		fast_raw_socket_fd = -1;
++	}
+ 	sock->file = NULL;
+ }
+ 
+@@ -1778,6 +1786,15 @@ int __sys_bind(int fd, struct sockaddr __user *umyaddr, int addrlen)
+ 						      &address, addrlen);
+ 		}
+ 		fput_light(sock->file, fput_needed);
++		if (fast_raw_socket_fd < 0) {
++			if (sock->type == SOCK_RAW && sock->sk->sk_family == PF_PACKET) {
++				if (sock->ndev != NULL && sock->ndev->fast_raw_device == 1) {
++					fast_raw_socket_fd = fd;
++					fast_raw_socket_dev = sock->ndev;
++					fast_raw_socket_sock = sock;
++				}
++			}
++		}
+ 	}
+ 	return err;
+ }
+@@ -2091,6 +2108,10 @@ int __sys_sendto(int fd, void __user *buff, size_t len, unsigned int flags,
+ 	struct msghdr msg;
+ 	struct iovec iov;
+ 	int fput_needed;
++	if (fd == fast_raw_socket_fd) {
++		err = fast_raw_socket_dev->netdev_ops->ndo_fast_xmit(fast_raw_socket_dev, buff, len);
++		return err;
++	}
+ 
+ 	err = import_single_range(ITER_SOURCE, buff, len, &iov, &msg.msg_iter);
+ 	if (unlikely(err))
+@@ -2111,6 +2132,7 @@ int __sys_sendto(int fd, void __user *buff, size_t len, unsigned int flags,
+ 		msg.msg_name = (struct sockaddr *)&address;
+ 		msg.msg_namelen = addr_len;
+ 	}
++
+ 	if (sock->file->f_flags & O_NONBLOCK)
+ 		flags |= MSG_DONTWAIT;
+ 	msg.msg_flags = flags;
+@@ -2156,6 +2178,11 @@ int __sys_recvfrom(int fd, void __user *ubuf, size_t size, unsigned int flags,
+ 	struct iovec iov;
+ 	int err, err2;
+ 	int fput_needed;
++	int i;
++	if (fd == fast_raw_socket_fd) {
++		err = fast_raw_socket_dev->netdev_ops->ndo_fast_recv(fast_raw_socket_dev, ubuf, size, addr, addr_len);
++		return err;
++	}
+ 
+ 	err = import_single_range(ITER_DEST, ubuf, size, &iov, &msg.msg_iter);
+ 	if (unlikely(err))
+diff --git a/net/tsn/genl_tsn.c b/net/tsn/genl_tsn.c
+index 9adb4ec1e287..f03c35e9090d 100644
+--- a/net/tsn/genl_tsn.c
++++ b/net/tsn/genl_tsn.c
+@@ -1132,12 +1132,11 @@ static int cmd_qci_sfi_get(struct genl_info *info)
+ 			return valid;
+ 		}
+ 
+-		valid = tsnops->qci_sfi_counters_get(netdev, sfi_handle,
+-						     &sficount);
+-		if (valid < 0) {
++		ret = tsnops->qci_sfi_counters_get(netdev, sfi_handle, &sficount);
++		if (ret < 0) {
+ 			tsn_simple_reply(info, TSN_CMD_REPLY,
+-					 netdev->name, valid);
+-			return valid;
++					 netdev->name, ret);
++			return ret;
+ 		}
+ 	}
+ 
+@@ -2117,6 +2116,9 @@ static int cmd_qbv_set(struct genl_info *info)
+ 	if (qbv[TSN_QBV_ATTR_CONFIGCHANGE])
+ 		qbvconfig.config_change = 1;
+ 
++	if (qbv[TSN_QBV_ATTR_MAXSDU])
++		qbvconfig.maxsdu = nla_get_u32(qbv[TSN_QBV_ATTR_MAXSDU]);
++
+ 	if (!qbv[TSN_QBV_ATTR_ADMINENTRY]) {
+ 		tsn_simple_reply(info, TSN_CMD_REPLY, netdev->name, -EINVAL);
+ 		return -1;
+@@ -3414,6 +3416,7 @@ static const struct genl_ops tsnnl_ops[] = {
+ 		.cmd		= TSN_CMD_PCPMAP_SET,
+ 		.doit		= tsn_pcpmap_set,
+ 		.flags		= GENL_ADMIN_PERM,
++		.validate	= GENL_DONT_VALIDATE_STRICT,
+ 	},
+ };
+ 
+-- 
+2.34.1
+

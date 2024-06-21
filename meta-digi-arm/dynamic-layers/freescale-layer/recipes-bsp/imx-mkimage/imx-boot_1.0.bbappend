@@ -203,10 +203,12 @@ trustfence_sign_imxboot:ccimx8x() {
 	done
 
 	# Generate symlinks for trustfence artifacts.
-	ln -sf ${UBOOT_PREFIX}-signed-${MACHINE}-${rev}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}.bin
-	if [ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
-		ln -sf ${UBOOT_PREFIX}-encrypted-${MACHINE}-${rev}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${UBOOT_PREFIX}-encrypted-${MACHINE}.bin
-	fi
+	for rev in ${SOC_REVISIONS}; do
+		ln -sf ${UBOOT_PREFIX}-signed-${MACHINE}-${rev}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}.bin
+		if [ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+			ln -sf ${UBOOT_PREFIX}-encrypted-${MACHINE}-${rev}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${UBOOT_PREFIX}-encrypted-${MACHINE}-${rev}.bin
+		fi
+	done
 }
 
 trustfence_sign_imxboot[dirs] = "${DEPLOYDIR}"

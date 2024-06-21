@@ -20,6 +20,9 @@ host_mlme=1 \
 drv_mode=${DRIVER_MODE} \
 drvdbg=${DRIVER_DEBUG} \
 sta_name=wlan \
+country_ie_ignore=1 \
+txpwrlimit_cfg=nxp/txpower_US.bin \
+init_hostcmd_cfg=nxp/rutxpower_US.bin \
 fw_name=nxp/sd_w61x_v1.bin.se\
 "
 
@@ -33,6 +36,8 @@ if ! [ -e "/proc/device-tree/wireless/mac-address" ]; then
 fi
 
 WLANADDR=$(hexdump -ve '1/1 "%02X" ":"' /proc/device-tree/wireless/mac-address 2>/dev/null | sed 's/:$//g')
+
+iw reg set US && \
 modprobe mlan && \
 modprobe moal ${MOAL_PARAMS} mac_addr=${WLANADDR} && \
 [ -d "/sys/class/net/wlan0" ] && log "Wi-Fi activated" && exit 0

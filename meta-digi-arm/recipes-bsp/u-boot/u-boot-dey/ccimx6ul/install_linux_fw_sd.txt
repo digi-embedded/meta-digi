@@ -8,14 +8,13 @@ install_abort=0
 BASEFILENAME=0
 
 # Determine U-Boot file to program basing on module variant
-if test -n "${module_variant}"; then
-	if test "${module_variant}" = "0x02" || test "${module_variant}" = "0x03" || test "${module_variant}" = "0x06" || test "${module_variant}" = "0x09"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##.imx;
-	elif test "${module_variant}" = "0x04" || test "${module_variant}" = "0x05" || test "${module_variant}" = "0x07"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx;
-	elif test "${module_variant}" = "0x08" || test "${module_variant}" = "0x0a"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##512MB.imx
-	fi
+# If module_variant is unknown or not set, return error asking the user
+if test "${module_variant}" = "0x02" || test "${module_variant}" = "0x03" || test "${module_variant}" = "0x06" || test "${module_variant}" = "0x09"; then
+	setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##.imx;
+elif test "${module_variant}" = "0x04" || test "${module_variant}" = "0x05" || test "${module_variant}" = "0x07"; then
+	setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx;
+elif test "${module_variant}" = "0x08" || test "${module_variant}" = "0x0a"; then
+	setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##512MB.imx
 fi
 
 # Use 'test -n ...' because 'test -z ...' does not work well on old versions of
@@ -60,7 +59,11 @@ setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.ubifs
 setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.ubifs
 
 # Check for presence of firmware files on the SD card
-for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME}; do
+FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME}"
+if test "${dualboot}" != "yes"; then
+	FILES="${FILES} ${INSTALL_RECOVERY_FILENAME}"
+fi
+for install_f in ${FILES}; do
 	if test ! -e mmc ${INSTALL_MMCDEV} ${install_f}; then
 		echo "ERROR: Could not find file ${install_f}";
 		install_abort=1;

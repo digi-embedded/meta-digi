@@ -1,7 +1,7 @@
 From 621de92cbd36719e3febe385411a65ccfa646344 Mon Sep 17 00:00:00 2001
 From: "Shankar Amar (CSTIPL CSS ICW SW WFS 1)" <amar.shankar@infineon.com>
 Date: Fri, 22 Jul 2022 07:52:30 +0000
-Subject: [PATCH 30/49] DPP: Enabling CLI_EDIT option for enrollee plus
+Subject: [PATCH 30/60] DPP: Enabling CLI_EDIT option for enrollee plus
  responder in STA role with fmac
 
 ---

@@ -42,6 +42,9 @@ UBOOT_ENV_SIZE ?= "0x20000"
 # available space in the environment partition)
 UBOOT_ENV_RANGE ?= ""
 
+# OPTEE runtime packages to install
+OPTEE_PKGS ??= "optee-client"
+
 MACHINE_EXTRA_RDEPENDS += " \
     mtd-utils-ubifs \
 "
@@ -62,7 +65,6 @@ MULTIUBI_BUILD:remove = "nand_4_256"
 IMAGE_FSTYPES:remove = "stmultiubi"
 
 # Wic files
-WKS_FILE += "ccmp1.wks.in"
 WKS_FILE_DEPENDS ?= " \
     virtual/bootloader \
     virtual/trusted-firmware-a \
@@ -79,7 +81,7 @@ TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 do_create_flashlayout_config[noexec] = "1"
 
 # Include boot script into the FIT image
-UBOOT_ENV = "${@bb.utils.contains('TRUSTFENCE_FIT_IMG', '1', 'boot', '', d)}"
+UBOOT_ENV = "boot"
 
 # Partitions to blacklist for swupdate:
 # fsbl1, fsbl2, metadata1, metadata2, fip-a, fip-b

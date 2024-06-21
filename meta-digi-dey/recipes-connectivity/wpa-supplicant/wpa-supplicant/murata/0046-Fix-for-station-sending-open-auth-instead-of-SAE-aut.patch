@@ -1,7 +1,7 @@
 From ed256e852f6ff9c45974128cba4d2f0fbbdece2f Mon Sep 17 00:00:00 2001
 From: Ramesh Rangavittal <ramesh.rangavittal@infineon.com>
 Date: Mon, 21 Nov 2022 11:21:59 -0600
-Subject: [PATCH 46/49] Fix for station sending open auth instead of SAE auth
+Subject: [PATCH 46/60] Fix for station sending open auth instead of SAE auth
 
 ---
  wpa_supplicant/events.c | 2 +-

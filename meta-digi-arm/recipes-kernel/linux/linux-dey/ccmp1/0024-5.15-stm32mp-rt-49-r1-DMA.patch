@@ -1,0 +1,131 @@
+From 5a55de398d12848f13f7df59fb2f1853b7dd9ee8 Mon Sep 17 00:00:00 2001
+From: Lionel VITTE <lionel.vitte@st.com>
+Date: Wed, 8 Feb 2023 09:56:07 +0100
+Subject: [PATCH 24/28] 5.15-stm32mp-rt-49-r1 DMA
+
+Signed-off-by: Lionel VITTE <lionel.vitte@st.com>
+---
+ drivers/dma/stm32-dma.c  | 35 +++++++++++++++++++++++++----------
+ drivers/dma/stm32-mdma.c |  4 ++++
+ 2 files changed, 29 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/dma/stm32-dma.c b/drivers/dma/stm32-dma.c
+index 7c6078c6c..128edfb4f 100644
+--- a/drivers/dma/stm32-dma.c
++++ b/drivers/dma/stm32-dma.c
+@@ -238,6 +238,7 @@ struct stm32_dma_chan {
+ 	u32 residue_after_drain;
+ 	struct workqueue_struct *mdma_wq;
+ 	struct work_struct mdma_work;
++	struct completion mdma_drain_completion;
+ };
+ 
+ struct stm32_dma_device {
+@@ -570,8 +571,9 @@ static u32 stm32_dma_get_remaining_bytes(struct stm32_dma_chan *chan)
+ 	return ndtr << width;
+ }
+ 
+-static int stm32_dma_mdma_drain(struct stm32_dma_chan *chan)
++static void stm32_dma_mdma_drain_worker(struct work_struct *work)
+ {
++	struct stm32_dma_chan *chan = container_of(work, struct stm32_dma_chan, mdma_work);
+ 	struct stm32_dma_mdma *mchan = &chan->mchan;
+ 	struct stm32_dma_sg_req *sg_req;
+ 	struct dma_device *ddev = mchan->chan->device;
+@@ -583,14 +585,12 @@ static int stm32_dma_mdma_drain(struct stm32_dma_chan *chan)
+ 	int ret;
+ 	unsigned long flags;
+ 
+-	flush_workqueue(chan->mdma_wq);
+-
+ 	/* DMA/MDMA chain: drain remaining data in SRAM */
+ 
+ 	/* Get the residue on MDMA side */
+ 	status = dmaengine_tx_status(mchan->chan, mchan->chan->cookie, &state);
+ 	if (status == DMA_COMPLETE)
+-		return status;
++		goto mdma_complete;
+ 
+ 	mdma_residue = state.residue;
+ 	sg_req = &chan->desc->sg_req[chan->next_sg - 1];
+@@ -623,24 +623,25 @@ static int stm32_dma_mdma_drain(struct stm32_dma_chan *chan)
+ 		desc = ddev->device_prep_dma_memcpy(mchan->chan, dst_buf, src_buf, dma_to_write,
+ 						    DMA_PREP_INTERRUPT);
+ 		if (!desc)
+-			return -EINVAL;
++			return;
+ 
+ 		ret = dma_submit_error(dmaengine_submit(desc));
+ 		if (ret < 0)
+-			return ret;
++			return;
+ 
+ 		status = dma_wait_for_async_tx(desc);
+ 		if (status != DMA_COMPLETE) {
+ 			dev_err(chan2dev(chan), "%s dma_wait_for_async_tx error\n", __func__);
+ 			dmaengine_terminate_async(mchan->chan);
+-			return -EBUSY;
++			return;
+ 		}
+ 
+ 		/* We need to store residue for tx_status() */
+ 		chan->residue_after_drain = len - (mdma_wrote + dma_to_write);
+ 	}
+ 
+-	return 0;
++mdma_complete:
++	complete(&chan->mdma_drain_completion);
+ }
+ 
+ static void stm32_dma_synchronize(struct dma_chan *c)
+@@ -648,9 +649,22 @@ static void stm32_dma_synchronize(struct dma_chan *c)
+ 	struct stm32_dma_chan *chan = to_stm32_dma_chan(c);
+ 	struct stm32_dma_mdma *mchan = &chan->mchan;
+ 
+-	if (chan->desc && chan->use_mdma && mchan->dir == DMA_DEV_TO_MEM)
+-		if (stm32_dma_mdma_drain(chan))
++	if (chan->desc && chan->use_mdma && mchan->dir == DMA_DEV_TO_MEM) {
++		unsigned long ms = 5000 + 100; /* dma_sync_wait_timeout + extra 100ms */
++
++		reinit_completion(&chan->mdma_drain_completion);
++
++		flush_workqueue(chan->mdma_wq);
++		INIT_WORK(&chan->mdma_work, stm32_dma_mdma_drain_worker);
++
++		if (!queue_work(chan->mdma_wq, &chan->mdma_work))
++			dev_warn(chan2dev(chan), "Work already queued\n");
++
++		ms = wait_for_completion_timeout(&chan->mdma_drain_completion,
++						 msecs_to_jiffies(ms));
++		if (ms == 0)
+ 			dev_err(chan2dev(chan), "%s: can't drain DMA\n", __func__);
++	}
+ 
+ 	if (chan->use_mdma)
+ 		dmaengine_synchronize(mchan->chan);
+@@ -2338,6 +2352,7 @@ static int stm32_dma_probe(struct platform_device *pdev)
+ 					dev_warn(&pdev->dev,
+ 						 "can't alloc MDMA workqueue for %s\n", name);
+ 				}
++				init_completion(&chan->mdma_drain_completion);
+ 			}
+ 		}
+ 	}
+diff --git a/drivers/dma/stm32-mdma.c b/drivers/dma/stm32-mdma.c
+index 133534663..a08c94638 100644
+--- a/drivers/dma/stm32-mdma.c
++++ b/drivers/dma/stm32-mdma.c
+@@ -1270,6 +1270,10 @@ static int stm32_mdma_resume(struct dma_chan *c)
+ 	unsigned long flags;
+ 	u32 status, reg;
+ 
++	/* Transfer can be terminated */
++	if (!chan->desc || (stm32_mdma_read(dmadev, STM32_MDMA_CCR(chan->id)) & STM32_MDMA_CCR_EN))
++		return -EPERM;
++
+ 	hwdesc = chan->desc->node[chan->curr_hwdesc].hwdesc;
+ 
+ 	spin_lock_irqsave(&chan->vchan.lock, flags);
+-- 
+2.34.1
+

@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2022-2023 by Digi International Inc.
+#  Copyright (C) 2022-2024 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -50,6 +50,7 @@ show_usage()
 	echo "                          'dey-image-webkit', 'core-image-base'..."
 	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
+	echo "   -t                     Install TrustFence artifacts."
 	exit 2
 }
 
@@ -80,6 +81,7 @@ echo "############################################################"
 
 # Command line admits the following parameters:
 # -a <atf-filename>
+# -b, -d, -n (booleans)
 # -f <fip-filename>
 # -i <image-name>
 while getopts 'a:bdf:hi:n' c
@@ -92,6 +94,7 @@ do
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
 	n) NOWAIT=true ;;
+	t) TRUSTFENCE=true ;;
 	esac
 done
 
@@ -111,6 +114,12 @@ if [ "${check}" = "1" ]; then
 	RUNVOLS=true
 fi
 
+# Check module_ram variable exists
+module_ram=$(getenv "module_ram")
+if [ -z "${module_ram}" ]; then
+	module_ram="512MB" # Default variant
+fi
+
 # remove redirect
 uuu fb: ucmd setenv stdout serial
 
@@ -119,12 +128,12 @@ echo "Determining image files to use..."
 
 # Determine ATF file to program
 if [ -z "${INSTALL_ATF_FILENAME}" ]; then
-	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-nand.stm32"
+	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-${module_ram}-nand.stm32##SIGNED_TFA##"
 fi
 
 # Determine FIP file to program
 if [ -z "${INSTALL_FIP_FILENAME}" ]; then
-	INSTALL_FIP_FILENAME="fip-##MACHINE##-optee.bin"
+	INSTALL_FIP_FILENAME="fip-##MACHINE##-${module_ram}-optee##SIGNED##.bin"
 fi
 
 # Determine linux, recovery, and rootfs image filenames to update
@@ -145,7 +154,11 @@ INSTALL_RECOVERY_FILENAME="${BASEFILENAME}-##MACHINE##.recovery.ubifs"
 INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.ubifs"
 
 # Verify existence of files before starting the update
-FILES="${INSTALL_ATF_FILENAME} ${INSTALL_FIP_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME}"
+FILES="${INSTALL_ATF_FILENAME} ${INSTALL_FIP_FILENAME} ${INSTALL_LINUX_FILENAME}"
+if [ "${DUALBOOT}" != true ]; then
+	FILES="${FILES} ${INSTALL_RECOVERY_FILENAME}"
+fi
+
 for f in ${FILES}; do
 	if [ ! -f ${f} ]; then
 		echo "\033[31m[ERROR] Could not find file '${f}'\033[0m"
@@ -166,12 +179,12 @@ if [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; then
 	fi
 fi
 
+[ "${ABORT}" = true ] && exit 1
+
 # Enable bootcount mechanism by setting a bootlimit
 if [ "${BOOTCOUNT}" = true ]; then
 	bootlimit_cmd="setenv bootlimit 3"
 fi
-
-[ "${ABORT}" = true ] && exit 1
 
 # parts names
 LINUX_NAME="linux"
@@ -301,6 +314,11 @@ else
 	uuu fb: ucmd saveenv
 fi
 
+# Set the dboot_kernel_var to fitimage if Trustfence is enabled
+if [ "${TRUSTFENCE}" = "true" ] || echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "signed"; then
+	uuu fb: ucmd setenv dboot_kernel_var fitimage
+	uuu fb: ucmd saveenv
+fi
 # Set the rootfstype if squashfs
 if [ "${SQUASHFS}" = true ]; then
 	uuu fb: ucmd setenv rootfstype squashfs

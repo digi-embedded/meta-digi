@@ -1,0 +1,682 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Wed, 7 Apr 2021 09:15:07 +0200
+Subject: [PATCH] Implement support for environment encryption by CAAM
+
+Use the md5sum of HWID words (on the device tree) as key modifier. This is
+based on the u-boot-fw-utils implementation of the CAAM encryption support.
+
+Port a subset of U-Boot's md5 implementation.
+
+https://jira.digi.com/browse/DEL-7410
+https://jira.digi.com/browse/DEL-7185
+https://jira.digi.com/browse/DEL-2836
+
+Signed-off-by: Diaz de Grenu, Jose <Jose.DiazdeGrenu@digi.com>
+Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+
+ # This is the commit message #2:
+
+fall back to read HWID from nvmem device if not available on DT
+
+Old U-Boot versions don't populate the HWID on the device tree. This may
+be used as a key modifier for TrustFence encryption and, if not available
+on the DT, newer firmware may be unable to unencrypt the U-Boot
+environment.
+
+This patch implements a fall-back function to query the HWID directly from
+the nvmem device node if it cannot locate it at the DT.
+This is only implemented for ccimx6 family, which may be in the case of
+having an old U-Boot.
+
+https://onedigi.atlassian.net/browse/DEL-8444
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+
+ # This is the commit message #3:
+
+ubootenv: generalize env encryption code
+
+Generalize the code to make room for Optee-based encryption.
+* Move the code to the crypt.c/h files to minimize changes on the upstream
+  uboot_env.c file.
+* Rename env_caam_get_keymod to env_get_keymod as this function is not
+  CAAM-specific.
+* Create a public env_crypt function that will select the proper (CAAM,
+  Optee) implementation.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ src/CMakeLists.txt |   4 +
+ src/caam_keyblob.h |  42 +++++++
+ src/crypt.c        | 179 +++++++++++++++++++++++++++++
+ src/crypt.h        |  10 ++
+ src/md5.c          | 275 +++++++++++++++++++++++++++++++++++++++++++++
+ src/md5.h          |  24 ++++
+ src/uboot_env.c    |  18 +++
+ 7 files changed, 552 insertions(+)
+ create mode 100644 src/caam_keyblob.h
+ create mode 100644 src/crypt.c
+ create mode 100644 src/crypt.h
+ create mode 100644 src/md5.c
+ create mode 100644 src/md5.h
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index ababe0f..638f1c1 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -4,6 +4,10 @@
+ cmake_minimum_required (VERSION 2.6)
+ # Sources and private headers
+ SET(libubootenv_SOURCES
++  crypt.c
++  crypt.h
++  md5.c
++  md5.h
+   uboot_env.c
+   uboot_private.h
+ )
+diff --git a/src/caam_keyblob.h b/src/caam_keyblob.h
+new file mode 100644
+index 0000000..e313e87
+--- /dev/null
++++ b/src/caam_keyblob.h
+@@ -0,0 +1,42 @@
++/*
++ * CAAM public-level include definitions for the key blob
++ *
++ * Copyright (C) 2015 Freescale Semiconductor, Inc.
++ */
++
++#ifndef CAAM_KEYBLOB_H
++#define CAAM_KEYBLOB_H
++
++#include <linux/ioctl.h>
++#include <linux/types.h>
++
++struct caam_kb_data {
++	char *rawkey;
++	size_t rawkey_len;
++	char *keyblob;
++	size_t keyblob_len;
++	char *keymod;
++	size_t keymod_len;
++};
++
++#define CAAM_KB_MAGIC		'I'
++
++/**
++ * DOC: CAAM_KB_ENCRYPT - generate a key blob from raw key
++ *
++ * Takes an caam_kb_data struct and returns it with the key blob
++ */
++#define CAAM_KB_ENCRYPT		_IOWR(CAAM_KB_MAGIC, 0, struct caam_kb_data)
++
++/**
++ * DOC: CAAM_KB_DECRYPT - get keys from a key blob
++ *
++ * Takes an caam_kb_data struct and returns it with the raw key.
++ */
++#define CAAM_KB_DECRYPT		_IOWR(CAAM_KB_MAGIC, 1, struct caam_kb_data)
++
++#ifndef GENMEM_KEYMOD_LEN
++#define GENMEM_KEYMOD_LEN 16
++#endif
++
++#endif /* CAAM_KEYBLOB_H */
+diff --git a/src/crypt.c b/src/crypt.c
+new file mode 100644
+index 0000000..213cffd
+--- /dev/null
++++ b/src/crypt.c
+@@ -0,0 +1,179 @@
++/*
++ * Copyright 2024 Digi International Inc
++ *
++ * SPDX-License-Identifier: GPL-2.0+
++ */
++
++#include <arpa/inet.h>
++#include <fcntl.h>
++#include <stdbool.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/ioctl.h>
++#include <sys/stat.h>
++#include <unistd.h>
++
++#include "caam_keyblob.h"
++#include "md5.h"
++
++/*
++ * The BLOB includes a random AES-256 key (32 bytes) and a
++ * Message Authentication Code (MAC) (16 bytes)
++ */
++#define BLOB_OVERHEAD	48
++#define CAAM_KEY_DEV	"/dev/caam_kb"
++#define MAX_HWID_WORDS	4
++
++/* Function that checks if machine is compatible (on the DT) */
++static bool machine_is_compatible(char *machine)
++{
++	int fd, nchars, len = 0;
++	int ret = false;
++	char str[256];
++	char *p = str;
++
++	fd = open("/proc/device-tree/compatible", O_RDONLY);
++	if (fd < 0)
++		return false;
++
++	nchars = read(fd, str, 255);
++	while (len < nchars) {
++		if (!strcmp(p, machine)) {
++			ret = true;
++			break;
++		}
++		len += strlen(p) + 1;
++		p += strlen(p) + 1;
++	}
++	close(fd);
++
++	return ret;
++}
++
++static int env_get_keymod(unsigned char output[16])
++{
++	int i;
++	int len;
++	int fd;
++	uint32_t ocotp_hwid[MAX_HWID_WORDS];
++	char dt_prop[32];
++	char buf[sizeof(uint32_t)];
++
++	for (i = 0; i < MAX_HWID_WORDS; i++) {
++		sprintf(dt_prop, "/proc/device-tree/digi,hwid_%d", i);
++		if (access(dt_prop, F_OK) != -1) {
++			fd = open(dt_prop, O_RDONLY);
++			if (fd < 0)
++				return fd;
++			len = read(fd, buf, sizeof(uint32_t));
++			if (len < 0) {
++				close(fd);
++				return -1;
++			}
++			ocotp_hwid[i] = ntohl(*(uint32_t *) buf);
++			close(fd);
++		} else if (machine_is_compatible("digi,ccimx6ul") ||
++			   machine_is_compatible("digi,ccimx6")) {
++			/*
++			 * If HWID not available on the DT (old U-Boot version),
++			 * fall back to read it directly from the nvmem device.
++			 */
++			int hwid_offset = 136;	/* (Bank * 8 + Word) * 4 */
++
++			/* HWID for CC6 family only has two words */
++			if (i == 2)
++				break;
++
++			fd = open("/sys/bus/nvmem/devices/imx-ocotp0/nvmem",
++				  O_RDONLY);
++			if (fd < 0)
++				return fd;
++			len = lseek(fd, hwid_offset + i * 4, SEEK_SET);
++
++			len = read(fd, buf, sizeof(unsigned int));
++			if (len < 0) {
++				close(fd);
++				return -1;
++			}
++			ocotp_hwid[i] = *(unsigned int *)buf;
++			close(fd);
++		} else {
++			break;
++		}
++	}
++
++	/* Calculate md5sum on the raw HWID array */
++	md5((unsigned char *)(&ocotp_hwid), sizeof(uint32_t) * i, output);
++
++	return 0;
++}
++
++static int env_caam_crypt(char *data, unsigned int size, const int enc)
++{
++	struct caam_kb_data enc_data;
++	int fd;
++	int ret = 0;
++	const int len = size;
++	int ioctl_mode;
++	char *buffer;
++	unsigned char key_modifier[16];
++
++	ret = env_get_keymod(key_modifier);
++	if (ret)
++		return ret;
++
++	enc_data.keymod = (char *)key_modifier;
++	enc_data.keymod_len = sizeof(key_modifier);
++
++	enc_data.keyblob_len = len;
++	enc_data.rawkey_len = len - BLOB_OVERHEAD;
++
++	buffer = malloc(len);
++	if (!buffer) {
++		printf("Could not allocate memory\n");
++		return -1;
++	}
++
++	if (enc) {
++		enc_data.rawkey = data;
++		ioctl_mode = CAAM_KB_ENCRYPT;
++		enc_data.keyblob = buffer;
++	} else {
++		enc_data.keyblob = data;
++		ioctl_mode = CAAM_KB_DECRYPT;
++		enc_data.rawkey = buffer;
++	}
++
++	if ((fd = open(CAAM_KEY_DEV, O_RDWR)) < 0) {
++		ret = fd;
++		goto free;
++	}
++
++	ret = ioctl(fd, ioctl_mode, &enc_data);
++	if (ret) {
++		printf("CAAM_KEY_DEV ioctl failed: %d\n", ret);
++		goto out;
++	}
++
++	memcpy(data, buffer, enc ? len : len - BLOB_OVERHEAD);
++
++out:
++	close(fd);
++free:
++	free(buffer);
++
++	return ret;
++}
++
++int env_crypt(char *data, unsigned int size, const int enc)
++{
++	return env_caam_crypt(data, size, enc);
++}
++
++int is_env_encrypted(void)
++{
++	const char *dt_prop = "/proc/device-tree/digi,uboot-env,encrypted";
++
++	return access(dt_prop, F_OK) != -1;
++}
+diff --git a/src/crypt.h b/src/crypt.h
+new file mode 100644
+index 0000000..8d85c7f
+--- /dev/null
++++ b/src/crypt.h
+@@ -0,0 +1,10 @@
++/*
++ * Copyright 2024 Digi International Inc
++ *
++ * SPDX-License-Identifier: GPL-2.0+
++ */
++
++#pragma once
++
++int env_crypt(char *data, unsigned int size, const int enc);
++int is_env_encrypted(void);
+diff --git a/src/md5.c b/src/md5.c
+new file mode 100644
+index 0000000..47ae8bf
+--- /dev/null
++++ b/src/md5.c
+@@ -0,0 +1,275 @@
++/*
++ * This file was transplanted with slight modifications from Linux sources
++ * (fs/cifs/md5.c) into U-Boot by Bartlomiej Sieka <tur@semihalf.com>.
++ */
++
++/*
++ * This code implements the MD5 message-digest algorithm.
++ * The algorithm is due to Ron Rivest.  This code was
++ * written by Colin Plumb in 1993, no copyright is claimed.
++ * This code is in the public domain; do with it what you wish.
++ *
++ * Equivalent code is available from RSA Data Security, Inc.
++ * This code has been tested against that, and is equivalent,
++ * except that you don't need to include two pages of legalese
++ * with every copy.
++ *
++ * To compute the message digest of a chunk of bytes, declare an
++ * MD5Context structure, pass it to MD5Init, call MD5Update as
++ * needed on buffers full of bytes, and then call MD5Final, which
++ * will fill a supplied 16-byte array with the digest.
++ */
++
++/* This code slightly modified to fit into Samba by
++   abartlet@samba.org Jun 2001
++   and to fit the cifs vfs by
++   Steve French sfrench@us.ibm.com */
++
++#include <stdint.h>
++#include <string.h>
++
++#include "md5.h"
++
++static void
++MD5Transform(uint32_t buf[4], uint32_t const in[16]);
++
++/*
++ * Note: this code is harmless on little-endian machines.
++ */
++static void
++byteReverse(unsigned char *buf, unsigned longs)
++{
++	uint32_t t;
++	do {
++		t = (uint32_t) ((unsigned) buf[3] << 8 | buf[2]) << 16 |
++		    ((unsigned) buf[1] << 8 | buf[0]);
++		*(uint32_t *) buf = t;
++		buf += 4;
++	} while (--longs);
++}
++
++/*
++ * Start MD5 accumulation.  Set bit count to 0 and buffer to mysterious
++ * initialization constants.
++ */
++static void
++MD5Init(struct MD5Context *ctx)
++{
++	ctx->buf[0] = 0x67452301;
++	ctx->buf[1] = 0xefcdab89;
++	ctx->buf[2] = 0x98badcfe;
++	ctx->buf[3] = 0x10325476;
++
++	ctx->bits[0] = 0;
++	ctx->bits[1] = 0;
++}
++
++/*
++ * Update context to reflect the concatenation of another buffer full
++ * of bytes.
++ */
++static void
++MD5Update(struct MD5Context *ctx, unsigned char const *buf, unsigned len)
++{
++	register uint32_t t;
++
++	/* Update bitcount */
++
++	t = ctx->bits[0];
++	if ((ctx->bits[0] = t + ((uint32_t) len << 3)) < t)
++		ctx->bits[1]++;	/* Carry from low to high */
++	ctx->bits[1] += len >> 29;
++
++	t = (t >> 3) & 0x3f;	/* Bytes already in shsInfo->data */
++
++	/* Handle any leading odd-sized chunks */
++
++	if (t) {
++		unsigned char *p = (unsigned char *) ctx->in + t;
++
++		t = 64 - t;
++		if (len < t) {
++			memmove(p, buf, len);
++			return;
++		}
++		memmove(p, buf, t);
++		byteReverse(ctx->in, 16);
++		MD5Transform(ctx->buf, (uint32_t *) ctx->in);
++		buf += t;
++		len -= t;
++	}
++	/* Process data in 64-byte chunks */
++
++	while (len >= 64) {
++		memmove(ctx->in, buf, 64);
++		byteReverse(ctx->in, 16);
++		MD5Transform(ctx->buf, (uint32_t *) ctx->in);
++		buf += 64;
++		len -= 64;
++	}
++
++	/* Handle any remaining bytes of data. */
++
++	memmove(ctx->in, buf, len);
++}
++
++/*
++ * Final wrapup - pad to 64-byte boundary with the bit pattern
++ * 1 0* (64-bit count of bits processed, MSB-first)
++ */
++static void
++MD5Final(unsigned char digest[16], struct MD5Context *ctx)
++{
++	unsigned int count;
++	unsigned char *p;
++
++	/* Compute number of bytes mod 64 */
++	count = (ctx->bits[0] >> 3) & 0x3F;
++
++	/* Set the first char of padding to 0x80.  This is safe since there is
++	   always at least one byte free */
++	p = ctx->in + count;
++	*p++ = 0x80;
++
++	/* Bytes of padding needed to make 64 bytes */
++	count = 64 - 1 - count;
++
++	/* Pad out to 56 mod 64 */
++	if (count < 8) {
++		/* Two lots of padding:  Pad the first block to 64 bytes */
++		memset(p, 0, count);
++		byteReverse(ctx->in, 16);
++		MD5Transform(ctx->buf, (uint32_t *) ctx->in);
++
++		/* Now fill the next block with 56 bytes */
++		memset(ctx->in, 0, 56);
++	} else {
++		/* Pad block to 56 bytes */
++		memset(p, 0, count - 8);
++	}
++	byteReverse(ctx->in, 14);
++
++	/* Append length in bits and transform */
++	ctx->in32[14] = ctx->bits[0];
++	ctx->in32[15] = ctx->bits[1];
++
++	MD5Transform(ctx->buf, (uint32_t *) ctx->in);
++	byteReverse((unsigned char *) ctx->buf, 4);
++	memmove(digest, ctx->buf, 16);
++	memset(ctx, 0, sizeof(*ctx));	/* In case it's sensitive */
++}
++
++/* The four core functions - F1 is optimized somewhat */
++
++/* #define F1(x, y, z) (x & y | ~x & z) */
++#define F1(x, y, z) (z ^ (x & (y ^ z)))
++#define F2(x, y, z) F1(z, x, y)
++#define F3(x, y, z) (x ^ y ^ z)
++#define F4(x, y, z) (y ^ (x | ~z))
++
++/* This is the central step in the MD5 algorithm. */
++#define MD5STEP(f, w, x, y, z, data, s) \
++	( w += f(x, y, z) + data,  w = w<<s | w>>(32-s),  w += x )
++
++/*
++ * The core of the MD5 algorithm, this alters an existing MD5 hash to
++ * reflect the addition of 16 longwords of new data.  MD5Update blocks
++ * the data and converts bytes into longwords for this routine.
++ */
++static void
++MD5Transform(uint32_t buf[4], uint32_t const in[16])
++{
++	register uint32_t a, b, c, d;
++
++	a = buf[0];
++	b = buf[1];
++	c = buf[2];
++	d = buf[3];
++
++	MD5STEP(F1, a, b, c, d, in[0] + 0xd76aa478, 7);
++	MD5STEP(F1, d, a, b, c, in[1] + 0xe8c7b756, 12);
++	MD5STEP(F1, c, d, a, b, in[2] + 0x242070db, 17);
++	MD5STEP(F1, b, c, d, a, in[3] + 0xc1bdceee, 22);
++	MD5STEP(F1, a, b, c, d, in[4] + 0xf57c0faf, 7);
++	MD5STEP(F1, d, a, b, c, in[5] + 0x4787c62a, 12);
++	MD5STEP(F1, c, d, a, b, in[6] + 0xa8304613, 17);
++	MD5STEP(F1, b, c, d, a, in[7] + 0xfd469501, 22);
++	MD5STEP(F1, a, b, c, d, in[8] + 0x698098d8, 7);
++	MD5STEP(F1, d, a, b, c, in[9] + 0x8b44f7af, 12);
++	MD5STEP(F1, c, d, a, b, in[10] + 0xffff5bb1, 17);
++	MD5STEP(F1, b, c, d, a, in[11] + 0x895cd7be, 22);
++	MD5STEP(F1, a, b, c, d, in[12] + 0x6b901122, 7);
++	MD5STEP(F1, d, a, b, c, in[13] + 0xfd987193, 12);
++	MD5STEP(F1, c, d, a, b, in[14] + 0xa679438e, 17);
++	MD5STEP(F1, b, c, d, a, in[15] + 0x49b40821, 22);
++
++	MD5STEP(F2, a, b, c, d, in[1] + 0xf61e2562, 5);
++	MD5STEP(F2, d, a, b, c, in[6] + 0xc040b340, 9);
++	MD5STEP(F2, c, d, a, b, in[11] + 0x265e5a51, 14);
++	MD5STEP(F2, b, c, d, a, in[0] + 0xe9b6c7aa, 20);
++	MD5STEP(F2, a, b, c, d, in[5] + 0xd62f105d, 5);
++	MD5STEP(F2, d, a, b, c, in[10] + 0x02441453, 9);
++	MD5STEP(F2, c, d, a, b, in[15] + 0xd8a1e681, 14);
++	MD5STEP(F2, b, c, d, a, in[4] + 0xe7d3fbc8, 20);
++	MD5STEP(F2, a, b, c, d, in[9] + 0x21e1cde6, 5);
++	MD5STEP(F2, d, a, b, c, in[14] + 0xc33707d6, 9);
++	MD5STEP(F2, c, d, a, b, in[3] + 0xf4d50d87, 14);
++	MD5STEP(F2, b, c, d, a, in[8] + 0x455a14ed, 20);
++	MD5STEP(F2, a, b, c, d, in[13] + 0xa9e3e905, 5);
++	MD5STEP(F2, d, a, b, c, in[2] + 0xfcefa3f8, 9);
++	MD5STEP(F2, c, d, a, b, in[7] + 0x676f02d9, 14);
++	MD5STEP(F2, b, c, d, a, in[12] + 0x8d2a4c8a, 20);
++
++	MD5STEP(F3, a, b, c, d, in[5] + 0xfffa3942, 4);
++	MD5STEP(F3, d, a, b, c, in[8] + 0x8771f681, 11);
++	MD5STEP(F3, c, d, a, b, in[11] + 0x6d9d6122, 16);
++	MD5STEP(F3, b, c, d, a, in[14] + 0xfde5380c, 23);
++	MD5STEP(F3, a, b, c, d, in[1] + 0xa4beea44, 4);
++	MD5STEP(F3, d, a, b, c, in[4] + 0x4bdecfa9, 11);
++	MD5STEP(F3, c, d, a, b, in[7] + 0xf6bb4b60, 16);
++	MD5STEP(F3, b, c, d, a, in[10] + 0xbebfbc70, 23);
++	MD5STEP(F3, a, b, c, d, in[13] + 0x289b7ec6, 4);
++	MD5STEP(F3, d, a, b, c, in[0] + 0xeaa127fa, 11);
++	MD5STEP(F3, c, d, a, b, in[3] + 0xd4ef3085, 16);
++	MD5STEP(F3, b, c, d, a, in[6] + 0x04881d05, 23);
++	MD5STEP(F3, a, b, c, d, in[9] + 0xd9d4d039, 4);
++	MD5STEP(F3, d, a, b, c, in[12] + 0xe6db99e5, 11);
++	MD5STEP(F3, c, d, a, b, in[15] + 0x1fa27cf8, 16);
++	MD5STEP(F3, b, c, d, a, in[2] + 0xc4ac5665, 23);
++
++	MD5STEP(F4, a, b, c, d, in[0] + 0xf4292244, 6);
++	MD5STEP(F4, d, a, b, c, in[7] + 0x432aff97, 10);
++	MD5STEP(F4, c, d, a, b, in[14] + 0xab9423a7, 15);
++	MD5STEP(F4, b, c, d, a, in[5] + 0xfc93a039, 21);
++	MD5STEP(F4, a, b, c, d, in[12] + 0x655b59c3, 6);
++	MD5STEP(F4, d, a, b, c, in[3] + 0x8f0ccc92, 10);
++	MD5STEP(F4, c, d, a, b, in[10] + 0xffeff47d, 15);
++	MD5STEP(F4, b, c, d, a, in[1] + 0x85845dd1, 21);
++	MD5STEP(F4, a, b, c, d, in[8] + 0x6fa87e4f, 6);
++	MD5STEP(F4, d, a, b, c, in[15] + 0xfe2ce6e0, 10);
++	MD5STEP(F4, c, d, a, b, in[6] + 0xa3014314, 15);
++	MD5STEP(F4, b, c, d, a, in[13] + 0x4e0811a1, 21);
++	MD5STEP(F4, a, b, c, d, in[4] + 0xf7537e82, 6);
++	MD5STEP(F4, d, a, b, c, in[11] + 0xbd3af235, 10);
++	MD5STEP(F4, c, d, a, b, in[2] + 0x2ad7d2bb, 15);
++	MD5STEP(F4, b, c, d, a, in[9] + 0xeb86d391, 21);
++
++	buf[0] += a;
++	buf[1] += b;
++	buf[2] += c;
++	buf[3] += d;
++}
++
++/*
++ * Calculate and store in 'output' the MD5 digest of 'len' bytes at
++ * 'input'. 'output' must have enough space to hold 16 bytes.
++ */
++void
++md5 (unsigned char *input, int len, unsigned char output[16])
++{
++	struct MD5Context context;
++
++	MD5Init(&context);
++	MD5Update(&context, input, len);
++	MD5Final(output, &context);
++}
+diff --git a/src/md5.h b/src/md5.h
+new file mode 100644
+index 0000000..02a9a9d
+--- /dev/null
++++ b/src/md5.h
+@@ -0,0 +1,24 @@
++/*
++ * This file was transplanted with slight modifications from Linux sources
++ * (fs/cifs/md5.h) into U-Boot by Bartlomiej Sieka <tur@semihalf.com>.
++ */
++
++#ifndef _MD5_H
++#define _MD5_H
++
++struct MD5Context {
++	uint32_t buf[4];
++	uint32_t bits[2];
++	union {
++		unsigned char in[64];
++		uint32_t in32[16];
++	};
++};
++
++/*
++ * Calculate and store in 'output' the MD5 digest of 'len' bytes at
++ * 'input'. 'output' must have enough space to hold 16 bytes.
++ */
++void md5 (unsigned char *input, int len, unsigned char output[16]);
++
++#endif /* _MD5_H */
+diff --git a/src/uboot_env.c b/src/uboot_env.c
+index c1f334e..30ef835 100644
+--- a/src/uboot_env.c
++++ b/src/uboot_env.c
+@@ -37,6 +37,7 @@
+ #include <mtd/mtd-user.h>
+ #include <mtd/ubi-user.h>
+ 
++#include "crypt.h"
+ #include "uboot_private.h"
+ 
+ #define UBI_MAX_VOLUME			128
+@@ -1187,6 +1188,15 @@ int libuboot_env_store(struct uboot_ctx *ctx)
+ 		((struct uboot_env_redund *)image)->flags = flags;
+ 	}
+ 
++	if (is_env_encrypted()) {
++		size_t usable_envsize = ctx->size - offsetdata;
++		ret = env_crypt(data, usable_envsize, 1);
++		if (ret) {
++			fprintf(stderr, "Error: can't encrypt env for flash\n");
++			return ret;
++		}
++	}
++
+ 	*(uint32_t *)image = crc32(0, (uint8_t *)data, ctx->size - offsetdata);
+ 
+ 	copy = ctx->redundant ? (ctx->current ? 0 : 1) : 0;
+@@ -1251,6 +1261,14 @@ static int libuboot_load(struct uboot_ctx *ctx)
+ 		}
+ 		crc = *(uint32_t *)(buf[i] + offsetcrc);
+ 		dev->crc = crc32(0, (uint8_t *)data, usable_envsize);
++		if (is_env_encrypted()) {
++			ret = env_crypt(data, usable_envsize, 0);
++			if (ret) {
++				fprintf(stderr,
++					"Error: can't decrypt environment\n");
++				return ret;
++			}
++		}
+ 		crcenv[i] = dev->crc == crc;
+ 		if (ctx->redundant)
+ 			dev->flags = *(uint8_t *)(buf[i] + offsetflags);

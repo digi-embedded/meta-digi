@@ -35,4 +35,6 @@ RDEPENDS:${PN} = "\
 	${VIRTUAL-RUNTIME_network-utils} \
 	${VIRTUAL-RUNTIME_snmp-manager} \
 	${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '', '${VIRTUAL-RUNTIME_ntp-client}', d)} \
+	${@bb.utils.contains('DISTRO_FEATURES', 'tsn', 'iproute2-tc', '', d)} \
+	${@bb.utils.contains('DISTRO_FEATURES', 'tsn', 'linuxptp', '', d)} \
 "

@@ -7,8 +7,8 @@
 install_abort=0
 BASEFILENAME=0
 
-setenv INSTALL_ATF_FILENAME tf-a-##MACHINE##-nand.stm32
-setenv INSTALL_FIP_FILENAME fip-##MACHINE##-optee.bin
+setenv INSTALL_ATF_FILENAME tf-a-##MACHINE##-${module_ram}-nand.stm32
+setenv INSTALL_FIP_FILENAME fip-##MACHINE##-${module_ram}-optee.bin
 setenv INSTALL_MMCDEV 1
 
 if test -z "${image-name}"; then
@@ -28,7 +28,11 @@ setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.ubifs
 setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.ubifs
 
 # Check for presence of firmware files on the SD card
-for install_f in ${INSTALL_ATF_FILENAME} ${INSTALL_FIP_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME}; do
+FILES="${INSTALL_ATF_FILENAME} ${INSTALL_FIP_FILENAME} ${INSTALL_LINUX_FILENAME}"
+if test "${dualboot}" != "yes"; then
+	FILES="${FILES} ${INSTALL_RECOVERY_FILENAME}"
+fi
+for install_f in ${FILES}; do
 	if test ! -e mmc ${INSTALL_MMCDEV} ${install_f}; then
 		echo "ERROR: Could not find file ${install_f}";
 		install_abort=1;

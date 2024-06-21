@@ -1,0 +1,28 @@
+From 98287df3a9d231a31fbc8b2e15be6174d6af1673 Mon Sep 17 00:00:00 2001
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Mon, 26 Feb 2024 09:43:05 +0100
+Subject: [PATCH 09/10] init: add NXP RT support
+
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
+---
+ init/Kconfig | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/init/Kconfig b/init/Kconfig
+index de255842f5d0..d45312780b3a 100644
+--- a/init/Kconfig
++++ b/init/Kconfig
+@@ -1582,6 +1582,10 @@ config PRINTK
+ 	  very difficult to diagnose system problems, saying N here is
+ 	  strongly discouraged.
+ 
++config HAVE_ATOMIC_CONSOLE
++	bool
++	default n
++
+ config BUG
+ 	bool "BUG() support" if EXPERT
+ 	default y
+-- 
+2.34.1
+

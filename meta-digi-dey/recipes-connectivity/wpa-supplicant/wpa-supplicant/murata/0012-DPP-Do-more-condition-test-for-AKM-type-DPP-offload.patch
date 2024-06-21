@@ -1,7 +1,7 @@
 From 234dbe729a1041d93efc51b8467ac063b74b2c81 Mon Sep 17 00:00:00 2001
 From: Kurt Lee <kurt.lee@cypress.com>
 Date: Mon, 18 May 2020 08:36:59 -0500
-Subject: [PATCH 12/49] DPP: Do more condition test for AKM type DPP offload.
+Subject: [PATCH 12/60] DPP: Do more condition test for AKM type DPP offload.
 
 If supplicant recieves eapol frame with driver declared
 WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_PSK, supplicant will check AKM type

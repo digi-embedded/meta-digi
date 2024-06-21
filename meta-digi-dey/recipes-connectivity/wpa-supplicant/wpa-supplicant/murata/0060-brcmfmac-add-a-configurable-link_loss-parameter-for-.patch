@@ -1,0 +1,117 @@
+From 326cd433b6c98a757188ea84e383f58cd8be23f1 Mon Sep 17 00:00:00 2001
+From: Carter Chen <carter.chen@infineon.com>
+Date: Wed, 15 Nov 2023 21:09:55 -0600
+Subject: [PATCH 60/60] brcmfmac: add a configurable link_loss parameter for
+ bgscan modules
+
+add a parameter for make the 600 seconds hard coding link_loss threshold
+become configurable.
+
+---
+ wpa_supplicant/bgscan_learn.c  | 16 +++++++++++++---
+ wpa_supplicant/bgscan_simple.c | 16 +++++++++++++---
+ 2 files changed, 26 insertions(+), 6 deletions(-)
+
+diff --git a/wpa_supplicant/bgscan_learn.c b/wpa_supplicant/bgscan_learn.c
+index c872d8d35..8e35b6ae4 100644
+--- a/wpa_supplicant/bgscan_learn.c
++++ b/wpa_supplicant/bgscan_learn.c
+@@ -42,6 +42,7 @@ struct bgscan_learn_data {
+ 	struct dl_list bss;
+ 	int *supp_freqs;
+ 	int probe_idx;
++	int link_loss_thresh_secs;
+ };
+ 
+ 
+@@ -350,6 +351,12 @@ static int bgscan_learn_get_params(struct bgscan_learn_data *data,
+ 	}
+ 	pos++;
+ 	data->long_interval = atoi(pos);
++	pos = os_strchr(pos, ':');
++	if (pos) {
++		pos++;
++		data->link_loss_thresh_secs = atoi(pos);
++	}
++
+ 	pos = os_strchr(pos, ':');
+ 	if (pos) {
+ 		pos++;
+@@ -420,10 +427,13 @@ static void * bgscan_learn_init(struct wpa_supplicant *wpa_s,
+ 		return NULL;
+ 	}
+ 
++	if (data->link_loss_thresh_secs <= 0 || data->link_loss_thresh_secs >= 600)
++		data->link_loss_thresh_secs = 600;
++
+ 	wpa_printf(MSG_DEBUG, "bgscan learn: Signal strength threshold %d  "
+-		   "Short bgscan interval %d  Long bgscan interval %d",
++		   "Short bgscan interval %d  Long bgscan interval %d Link Lost threshold secs %d",
+ 		   data->signal_threshold, data->short_interval,
+-		   data->long_interval);
++		   data->long_interval, data->link_loss_thresh_secs);
+ 
+ 	if (data->signal_threshold &&
+ 	    wpa_drv_signal_monitor(wpa_s, data->signal_threshold, 4) < 0) {
+@@ -571,7 +581,7 @@ static void bgscan_learn_notify_beacon_loss(void *priv)
+ 	wpa_printf(MSG_DEBUG, "bgscan learn: beacon loss");
+ 
+ 	wpa_printf(MSG_DEBUG, "bgscan learn: Start Link Loss timer");
+-	eloop_register_timeout(BGSCAN_LEARN_LINK_LOSS_THRESH_SECS,
++	eloop_register_timeout(data->link_loss_thresh_secs,
+ 				0, bgscan_learn_link_loss_timeout, data, NULL);
+ 
+ 	wpa_printf(MSG_DEBUG, "bgscan learn: Flush all prev bss entries");
+diff --git a/wpa_supplicant/bgscan_simple.c b/wpa_supplicant/bgscan_simple.c
+index bf9184e43..24e9f8658 100644
+--- a/wpa_supplicant/bgscan_simple.c
++++ b/wpa_supplicant/bgscan_simple.c
+@@ -30,6 +30,7 @@ struct bgscan_simple_data {
+ 	int short_interval; /* use if signal < threshold */
+ 	int long_interval; /* use if signal > threshold */
+ 	struct os_reltime last_bgscan;
++	int link_loss_thresh_secs;
+ };
+ 
+ 
+@@ -111,6 +112,12 @@ static int bgscan_simple_get_params(struct bgscan_simple_data *data,
+ 	pos++;
+ 	data->long_interval = atoi(pos);
+ 
++	pos = os_strchr(pos, ':');
++	if (pos) {
++		pos++;
++		data->link_loss_thresh_secs = atoi(pos);
++	}
++
+ 	return 0;
+ }
+ 
+@@ -135,10 +142,13 @@ static void * bgscan_simple_init(struct wpa_supplicant *wpa_s,
+ 	if (data->long_interval <= 0)
+ 		data->long_interval = 30;
+ 
++	if (data->link_loss_thresh_secs <= 0 || data->link_loss_thresh_secs >= 600)
++		data->link_loss_thresh_secs = 600;
++
+ 	wpa_printf(MSG_DEBUG, "bgscan simple: Signal strength threshold %d  "
+-		   "Short bgscan interval %d  Long bgscan interval %d",
++		   "Short bgscan interval %d  Long bgscan interval %d Link Lost threshold secs %d",
+ 		   data->signal_threshold, data->short_interval,
+-		   data->long_interval);
++		   data->long_interval, data->link_loss_thresh_secs);
+ 
+ 	if (data->signal_threshold &&
+ 	    wpa_drv_signal_monitor(wpa_s, data->signal_threshold, 4) < 0) {
+@@ -212,7 +222,7 @@ static void bgscan_simple_notify_beacon_loss(void *priv)
+ 	wpa_printf(MSG_DEBUG, "bgscan simple: beacon loss");
+ 
+ 	wpa_printf(MSG_DEBUG, "bgscan simple: Start Link Loss timer");
+-	eloop_register_timeout(BGSCAN_SIMPLE_LINK_LOSS_THRESH_SECS,
++	eloop_register_timeout(data->link_loss_thresh_secs,
+ 				0, bgscan_simple_link_loss_timeout, data, NULL);
+ 
+ 	wpa_printf(MSG_DEBUG, "bgscan simple: Flush all prev bss entries");
+-- 
+2.17.1
+

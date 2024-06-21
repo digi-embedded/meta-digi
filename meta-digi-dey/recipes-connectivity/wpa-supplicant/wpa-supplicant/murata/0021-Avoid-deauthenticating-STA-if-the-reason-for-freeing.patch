@@ -1,7 +1,7 @@
 From ed487600a81fa99688201a50176072555c90e690 Mon Sep 17 00:00:00 2001
 From: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
 Date: Mon, 25 Apr 2022 18:35:14 +0530
-Subject: [PATCH 21/49] Avoid deauthenticating STA if the reason for freeing
+Subject: [PATCH 21/60] Avoid deauthenticating STA if the reason for freeing
  PMK entry isn't expiry
 
 The PMK cache entry for a STA in the SoftAP managed by wpa_supplicant

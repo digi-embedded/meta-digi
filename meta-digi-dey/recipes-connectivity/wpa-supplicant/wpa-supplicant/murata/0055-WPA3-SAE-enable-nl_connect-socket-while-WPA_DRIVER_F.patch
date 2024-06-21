@@ -1,0 +1,37 @@
+From 2d7ff191ddcea8740b6fb48094b87de12150c88f Mon Sep 17 00:00:00 2001
+From: Carter Chen <carter.chen@infineon.com>
+Date: Wed, 3 May 2023 20:43:09 -0500
+Subject: [PATCH 55/60] WPA3-SAE: enable nl_connect socket while
+ WPA_DRIVER_FLAGS_BSS_SELECTION
+
+The driver-base roaming uses WPA_DRIVER_FLAGS_BSS_SELECTION flag.
+
+As the SAE is handled by wpa_supplicant,
+the driver will report send_req of auth req frame.
+
+WPA3-CERT 5.8.3 connects to PSK AP first, then roaming to SAE AP.
+the nl_connect needs to keep opening to listen the event for process
+auth frames.
+
+Fixes: SWLINUX-3420
+
+Signed-off-by: Carter Chen <carter.chen@infineon.com>
+---
+ src/drivers/driver_nl80211.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
+index ed7c969c1..55b4d07dc 100644
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -557,6 +557,7 @@ send_and_recv_msgs_connect_handle(struct wpa_driver_nl80211_data *drv,
+ struct nl_sock * get_connect_handle(struct i802_bss *bss)
+ {
+ 	if ((bss->drv->capa.flags2 & WPA_DRIVER_FLAGS2_CONTROL_PORT_RX) ||
++	    (bss->drv->capa.flags & WPA_DRIVER_FLAGS_BSS_SELECTION) ||
+ 	    bss->use_nl_connect)
+ 		return bss->nl_connect;
+ 
+-- 
+2.17.1
+

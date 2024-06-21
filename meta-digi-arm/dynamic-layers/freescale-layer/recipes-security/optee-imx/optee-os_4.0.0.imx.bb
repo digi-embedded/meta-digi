@@ -9,6 +9,7 @@ SRC_URI = " \
     git://github.com/nxp-imx/imx-optee-os.git;protocol=https;branch=${SRCBRANCH} \
     file://0007-allow-setting-sysroot-for-clang.patch \
     file://0001-core-imx-support-ccimx93-dvk.patch \
+    file://0002-core-ccimx93-enable-AES_HUK-trusted-application.patch \
 "
 SRCBRANCH = "lf-6.1.55_2.2.0"
 # Tag: lf-6.1.55-2.2.0

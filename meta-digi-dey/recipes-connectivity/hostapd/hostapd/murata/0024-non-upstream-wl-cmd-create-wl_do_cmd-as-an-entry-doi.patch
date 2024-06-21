@@ -1,7 +1,7 @@
 From ea5cd91f744dc3c5ebf8e5b8cf1746bec41c1d19 Mon Sep 17 00:00:00 2001
 From: Kurt Lee <kurt.lee@infineon.com>
 Date: Tue, 26 Apr 2022 03:02:12 -0500
-Subject: [PATCH 24/49] non-upstream: wl-cmd: create wl_do_cmd as an entry
+Subject: [PATCH 24/60] non-upstream: wl-cmd: create wl_do_cmd as an entry
  doing wl commands
 
 Create wl_do_cmd as an entry doing wl commands

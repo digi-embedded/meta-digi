@@ -1,7 +1,7 @@
 From ab61a3dd6d968c62b407c170079a236194357931 Mon Sep 17 00:00:00 2001
 From: Danny Chiu <Danny.Chiu@infineon.com>
 Date: Thu, 4 Nov 2021 02:44:17 -0500
-Subject: [PATCH 15/49] Add CONFIG_WPA3_SAE_AUTH_EARLY_SET flags and codes
+Subject: [PATCH 15/60] Add CONFIG_WPA3_SAE_AUTH_EARLY_SET flags and codes
 
 Enable this flags allow the AP to set authorization to firmware earier as the SAE confirm from is ok.
 ---

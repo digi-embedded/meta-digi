@@ -1,0 +1,21 @@
+From 5a9357f51ccd92dd11f188a14edf4b92ba1543ee Mon Sep 17 00:00:00 2001
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Fri, 23 Feb 2024 10:12:23 +0100
+Subject: [PATCH 02/10] RT: add RT localversion
+
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
+---
+ localversion-rt | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 localversion-rt
+
+diff --git a/localversion-rt b/localversion-rt
+new file mode 100644
+index 000000000000..6e44e540b927
+--- /dev/null
++++ b/localversion-rt
+@@ -0,0 +1 @@
++-rt12
+-- 
+2.34.1
+

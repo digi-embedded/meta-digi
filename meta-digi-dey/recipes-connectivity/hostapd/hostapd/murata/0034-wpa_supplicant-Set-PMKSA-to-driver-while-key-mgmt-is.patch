@@ -1,7 +1,7 @@
 From da53435d4d11db827e3661be372e7b9773eaa842 Mon Sep 17 00:00:00 2001
 From: JasonHuang <Jason.Huang2@infineon.com>
 Date: Thu, 8 Sep 2022 03:26:23 -0500
-Subject: [PATCH 34/49] wpa_supplicant: Set PMKSA to driver while key mgmt is
+Subject: [PATCH 34/60] wpa_supplicant: Set PMKSA to driver while key mgmt is
  FT
 
 When the fast roaming is determined by the firmware, the

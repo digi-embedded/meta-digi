@@ -15,13 +15,18 @@ FW_CONFIG_FILE:ccmp1 = "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs
 				'ubi/fw_env.config_default', \
 				'ubi/fw_env.config', d)}"
 
+DEPENDS += "${@oe.utils.conditional('OPTEE_PATCHES', '', '', 'optee-client', d)}"
+
+OPTEE_PATCHES = ""
+OPTEE_PATCHES:ccimx93 = "file://0004-Implement-support-for-environment-encryption-using-O.patch"
+OPTEE_PATCHES:ccmp1 = "file://0004-Implement-support-for-environment-encryption-using-O.patch"
+
 SRC_URI += " \
     file://${FW_CONFIG_FILE} \
-    file://0001-Implement-support-for-environment-encryption-by-CAAM.patch \
-    file://0002-Implement-U-Boot-environment-access-functions.patch \
-    file://0003-tools-env-add-support-to-set-dynamic-location-of-env.patch \
-    file://0004-fall-back-to-read-HWID-from-nvmem-device-if-not-avai.patch \
-    file://0005-Implement-support-for-environment-encryption-for-CCM.patch \
+    file://0001-Implement-U-Boot-environment-access-functions.patch \
+    file://0002-tools-env-add-support-to-set-dynamic-location-of-env.patch \
+    file://0003-Implement-support-for-environment-encryption-by-CAAM.patch \
+    ${@bb.utils.contains('MACHINE_FEATURES', 'optee', '${OPTEE_PATCHES}', '', d)} \
 "
 
 do_install:append() {

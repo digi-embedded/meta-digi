@@ -1,7 +1,7 @@
 From 89d2f8b07c948cc5fbe8767948128f487eae2ed5 Mon Sep 17 00:00:00 2001
 From: Chung-Hsien Hsu <stanley.hsu@cypress.com>
 Date: Tue, 10 Dec 2019 14:05:16 -0600
-Subject: [PATCH 10/49] nl80211: Support SAE authentication offload in AP mode
+Subject: [PATCH 10/60] nl80211: Support SAE authentication offload in AP mode
 
 If driver advertises support for SAE authentication offload, pass SAE
 password in NL80211_CMD_NEW_BEACON command for AP mode.

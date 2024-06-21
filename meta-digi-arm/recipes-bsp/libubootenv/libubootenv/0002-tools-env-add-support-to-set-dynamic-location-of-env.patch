@@ -1,0 +1,174 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Wed, 7 Apr 2021 13:47:37 +0200
+Subject: [PATCH] tools: env: add support to set dynamic location of
+ environment copies
+
+A mechanism was added in U-Boot to set the location of environment copies
+dynamically in a shared area. If the config file sets both copies to the same
+offset, a function will be called to set the offset of each copy to the first
+two good NAND sectors within the specified area.
+
+The config file should contain the sector size and the number of sectors of the
+area, like in this example:
+
+  # Device name    Offset   Size       Erase-size    No.Blocks
+  /dev/mtd1        0x0      0x20000    0x20000       8
+  /dev/mtd1        0x0      0x20000    0x20000       8
+
+https://jira.digi.com/browse/DUB-741
+https://jira.digi.com/browse/DEL-7410
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ src/uboot_env.c     | 88 +++++++++++++++++++++++++++++++++++++++++++--
+ src/uboot_private.h |  4 +++
+ 2 files changed, 90 insertions(+), 2 deletions(-)
+
+diff --git a/src/uboot_env.c b/src/uboot_env.c
+index 358dfbb..c1f334e 100644
+--- a/src/uboot_env.c
++++ b/src/uboot_env.c
+@@ -581,6 +581,73 @@ static int check_env_device(struct uboot_flash_env *dev)
+ 	return 0;
+ }
+ 
++static bool set_dynamic_location(struct uboot_ctx *ctx)
++{
++	int fd, i, nsectors, rc;
++	loff_t offset, blocksize, tmp;
++	int dev = 0;
++	int copies = 1;
++	bool ret = false;
++
++	if (ctx->redundant)
++		copies++;
++
++	fd = open(ctx->envdevs[dev].devname, O_RDONLY);
++	if (fd < 0) {
++		fprintf(stderr, "Can't open %s: %s\n", ctx->envdevs[dev].devname,
++			strerror(errno));
++		goto error;
++	}
++
++	/* Set initial block to start looking for environment */
++	offset = ctx->envdevs[dev].offset;
++	/* Use variables for common values */
++	blocksize = ctx->envdevs[dev].sectorsize;
++	/* Look for the number of sectors specified for the primary copy */
++	nsectors = ctx->envdevs[dev].envsectors;
++
++	for (i = 0; i < nsectors && copies; i++) {
++		rc = 0;
++
++		/*
++		 * The implementation of is_nand_badblock() expects dev->fd to
++		 * be initialized, but it isn't at this point, so re-implementat
++		 * it here. Copy the offset to a temporary variable so the
++		 * original offset doesn't get overwritten by the ioctl.
++		 */
++		if (ctx->envdevs[dev].mtdinfo.type == MTD_NANDFLASH) {
++			tmp = offset;
++			rc = ioctl(fd, MEMGETBADBLOCK, &tmp);
++		}
++
++		if (rc < 0) {
++			goto error;
++		} else if (!rc) {
++			/*
++			 * Set first good block as primary (no matter if it is
++			 * the other copy. After all, the 'current' copy is
++			 * determined by the active flag.
++			 */
++			ctx->envdevs[dev].offset = offset;
++			copies--;
++			dev++;
++		}
++		offset += blocksize;
++	}
++
++	while (copies) {
++		/* No good sectors available. Set offset out of bounds */
++		ctx->envdevs[dev].offset = offset;
++		copies--;
++		dev++;
++	}
++	ret = true;
++
++error:
++	close(fd);
++	return ret;
++}
++
+ static bool check_compatible_devices(struct uboot_ctx *ctx)
+ {
+ 	if (!ctx->redundant)
+@@ -592,6 +659,12 @@ static bool check_compatible_devices(struct uboot_ctx *ctx)
+ 		return false;
+ 	if (ctx->envdevs[0].envsize != ctx->envdevs[1].envsize)
+ 		return false;
++	if (ctx->envdevs[0].offset == ctx->envdevs[1].offset) {
++		ctx->dynamic_env = true;
++		ctx->top_limit = ctx->envdevs[0].offset +
++		                 (ctx->envdevs[0].envsectors * ctx->envdevs[0].sectorsize);
++		return set_dynamic_location(ctx);
++	}
+ 
+ 	return true;
+ }
+@@ -638,7 +711,7 @@ static int fileread(struct uboot_flash_env *dev, void *data)
+ 	return ret;
+ }
+ 
+-static int mtdread(struct uboot_flash_env *dev, void *data)
++static int mtdread(struct uboot_flash_env *dev, void *data, bool is_dynamic, loff_t top_limit)
+ {
+ 	size_t count;
+ 	size_t blocksize;
+@@ -657,6 +730,17 @@ static int mtdread(struct uboot_flash_env *dev, void *data)
+ 		ret = read(dev->fd, data, dev->envsize);
+ 		break;
+ 	case MTD_NANDFLASH:
++		if (!is_dynamic)
++			top_limit = ((dev->offset / dev->envsize) +
++					dev->envsectors) * dev->envsize;
++
++		if (dev->offset >= top_limit) {
++			/* End of range is reached */
++			fprintf(stderr, "Too few good blocks within range\n");
++			ret = -EIO;
++			break;
++		}
++
+ 		if (dev->offset)
+ 			if (lseek(dev->fd, dev->offset, SEEK_SET) < 0) {
+ 				ret = -EIO;
+@@ -732,7 +816,7 @@ static int devread(struct uboot_ctx *ctx, unsigned int copy, void *data)
+ 		ret = fileread(dev, data);
+ 		break;
+ 	case DEVICE_MTD:
+-		ret = mtdread(dev, data);
++		ret = mtdread(dev, data, ctx->dynamic_env, ctx->top_limit);
+ 		break;
+ 	case DEVICE_UBI:
+ 		ret = ubiread(dev, data);
+diff --git a/src/uboot_private.h b/src/uboot_private.h
+index 40e5446..c8fecc4 100644
+--- a/src/uboot_private.h
++++ b/src/uboot_private.h
+@@ -114,10 +114,14 @@ LIST_HEAD(vars, var_entry);
+ struct uboot_ctx {
+ 	/** true if the environment is redundant */
+ 	bool redundant;
++	/** true if the environment is dynamic */
++	bool dynamic_env;
+ 	/** set to valid after a successful load */
+ 	bool valid;
+ 	/** size of the environment */
+ 	size_t size;
++	/** top limit of the dynamic environment */
++	loff_t top_limit;
+ 	/** devices where environment is stored */
+ 	struct uboot_flash_env envdevs[2];
+ 	/** Set which device contains the current(last valid) environment */

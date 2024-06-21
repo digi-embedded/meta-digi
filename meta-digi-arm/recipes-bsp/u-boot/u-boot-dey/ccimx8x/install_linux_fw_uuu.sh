@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2020-2023 by Digi International Inc.
+#  Copyright (C) 2020-2024 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -39,7 +39,10 @@ show_usage()
 	echo "   -i <dey-image-name>    Image name that prefixes the image filenames, such as 'dey-image-qt', "
 	echo "                          'dey-image-webkit', 'core-image-base'..."
 	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
+	echo "   -k <dek-filename>      Update includes dek file."
+	echo "                          (implies -t)."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
+	echo "   -t                     Install TrustFence artifacts."
 	echo "   -u <u-boot-filename>   U-Boot filename."
 	echo "                          Auto-determined by variant if not provided."
 	exit 2
@@ -49,6 +52,7 @@ show_usage()
 #   Params:
 #	1. partition
 #	2. file
+#	3. dek file when updating an encrypted bootloader
 part_update()
 {
 	echo "\033[36m"
@@ -57,10 +61,23 @@ part_update()
 	echo "====================================================================================="
 	echo "\033[0m"
 
-	if [ "${1}" = "bootloader" ]; then
-		uuu fb: flash "${1}" "${2}"
+	if [ "${TRUSTFENCE}" = "true" ] && [ "${1}" = "bootloader" ]; then
+		uuu fb: download -f "${2}"
+		if [ -n "${DEK_FILE}" ]; then
+			uuu fb: ucmd setenv uboot_size \${filesize}
+			uuu fb: ucmd setenv fastboot_buffer \${initrd_addr}
+			uuu fb: download -f "${3}"
+			uuu fb: ucmd setenv dek_size \${filesize}
+			uuu fb: ucmd trustfence update ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
+		else
+			uuu fb: ucmd trustfence update ram \${fastboot_buffer} \${fastboot_bytes}
+		fi
 	else
-		uuu fb: flash -raw2sparse "${1}" "${2}"
+		if [ "${1}" = "bootloader" ]; then
+			uuu fb: flash "${1}" "${2}"
+		else
+			uuu fb: flash -raw2sparse "${1}" "${2}"
+		fi
 	fi
 }
 
@@ -70,16 +87,27 @@ echo "#           Linux firmware install through USB OTG         #"
 echo "############################################################"
 
 # Command line admits the following parameters:
-# -u <u-boot-filename>
+# -b, -d, -n (booleans)
 # -i <image-name>
-while getopts 'bdhi:nu:' c
+# -u <u-boot-filename>
+# -k <dek-filename>
+while getopts ':bdhi:k:ntu:' c
 do
+	if [ "${c}" = ":" ]; then
+		c="${OPTARG}"
+		unset OPTARG
+	elif echo "${OPTARG}" | grep -qs '^-'; then
+		OPTIND="$((OPTIND-1))"
+		unset OPTARG
+	fi
 	case $c in
 	b) BOOTCOUNT=true ;;
 	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
+	k) DEK_FILE=${OPTARG} && TRUSTFENCE=true ;;
 	n) NOWAIT=true ;;
+	t) TRUSTFENCE=true ;;
 	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
 	esac
 done
@@ -105,7 +133,7 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		soc_rev="B0"
 	fi
 
-	INSTALL_UBOOT_FILENAME="imx-boot-##MACHINE##-${soc_rev}.bin"
+	INSTALL_UBOOT_FILENAME="imx-boot-##SIGNED##-##MACHINE##-${soc_rev}.bin"
 fi
 
 # remove redirect
@@ -141,7 +169,10 @@ if [ -f ${COMPRESSED_ROOTFS_IMAGE} ] && [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; the
 fi
 
 # Verify existence of files before starting the update
-FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME}"
+FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME}"
+if [ "${DUALBOOT}" != true ]; then
+	FILES="${FILES} ${INSTALL_RECOVERY_FILENAME}"
+fi
 for f in ${FILES}; do
 	if [ ! -f ${f} ]; then
 		echo "\033[31m[ERROR] Could not find file '${f}'\033[0m"
@@ -160,12 +191,12 @@ if [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; then
 	fi
 fi
 
+[ "${ABORT}" = true ] && exit 1
+
 # Enable bootcount mechanism by setting a bootlimit
 if [ "${BOOTCOUNT}" = true ]; then
 	bootlimit_cmd="setenv bootlimit 3"
 fi
-
-[ "${ABORT}" = true ] && exit 1
 
 # parts names
 LINUX_NAME="linux"
@@ -210,11 +241,14 @@ if [ "${NOWAIT}" != true ]; then
 	printf " Starting update process\n"
 fi
 
+# Set fastboot buffer address to $loadaddr, just in case
+uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
+
 # Skip user confirmation for U-Boot update
 uuu fb: ucmd setenv forced_update 1
 
 # Update U-Boot
-part_update "bootloader" "${INSTALL_UBOOT_FILENAME}"
+part_update "bootloader" "${INSTALL_UBOOT_FILENAME}" "${DEK_FILE}"
 
 # Set MMC to boot from BOOT1 partition
 uuu fb: ucmd mmc partconf 0 1 1 1

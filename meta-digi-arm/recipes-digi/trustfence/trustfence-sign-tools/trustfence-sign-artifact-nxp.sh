@@ -3,7 +3,7 @@
 #
 #  trustfence-sign-artifact.sh
 #
-#  Copyright (C) 2016-2022 by Digi International Inc.
+#  Copyright (C) 2016-2024 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -17,6 +17,7 @@
 #    The following environment variables define the script behaviour:
 #      CONFIG_SIGN_KEYS_PATH: (mandatory) path to the CST folder by NXP with keys generated.
 #      CONFIG_KEY_INDEX: (optional) key index to use for signing. Default is 0.
+#      SRK_REVOKE_MASK: (optional) bitmask of the revoked SRKs.
 #      CONFIG_DEK_PATH: (optional) Path to keyfile. Define it to generate
 #			encrypted images
 #
@@ -63,6 +64,10 @@ Supported platforms: ccimx6, ccimx6qp, ccimx6ul, ccimx8x, ccimx8mn, ccimx8mm
 EOF
 }
 
+to_hex() {
+	printf '0x%x' "${1}"
+}
+
 if [ "${#}" != "2" ]; then
 	usage
 	exit 1
@@ -80,35 +85,37 @@ if [ -z "${CONFIG_SIGN_KEYS_PATH}" ]; then
 fi
 [ -d "${CONFIG_SIGN_KEYS_PATH}" ] || mkdir "${CONFIG_SIGN_KEYS_PATH}"
 
-# Get RAM_START address
-if [ "${PLATFORM}" = "ccimx6" ] || [ "${PLATFORM}" = "ccimx6qp" ]; then
-	CONFIG_FDT_LOADADDR="0x18000000"
-	CONFIG_RAMDISK_LOADADDR="0x19000000"
-	CONFIG_KERNEL_LOADADDR="0x12000000"
-	CONFIG_CSF_SIZE="0x4000"
-	CONFIG_SIGN_MODE="HAB"
-elif [ "${PLATFORM}" = "ccimx6ul" ]; then
-	CONFIG_FDT_LOADADDR="0x83000000"
-	CONFIG_RAMDISK_LOADADDR="0x83800000"
-	CONFIG_KERNEL_LOADADDR="0x80800000"
-	CONFIG_CSF_SIZE="0x4000"
-	CONFIG_SIGN_MODE="HAB"
-elif [ "${PLATFORM}" = "ccimx8x" ]; then
-	CONFIG_FDT_LOADADDR="0x82000000"
-	CONFIG_RAMDISK_LOADADDR="0x82100000"
-	CONFIG_KERNEL_LOADADDR="0x80280000"
-	CONFIG_SIGN_MODE="AHAB"
-elif [ "${PLATFORM}" = "ccimx8mn" ] || [ "${PLATFORM}" = "ccimx8mm" ]; then
-	CONFIG_FDT_LOADADDR="0x43000000"
-	CONFIG_RAMDISK_LOADADDR="0x43800000"
-	CONFIG_KERNEL_LOADADDR="0x40480000"
-	CONFIG_CSF_SIZE="0x2000"
-	CONFIG_SIGN_MODE="HAB"
-else
+while read -r pl kaddr raddr fdtaddr fitaddr mode csf srk; do
+	AVAILABLE_PLATFORMS="${AVAILABLE_PLATFORMS:+${AVAILABLE_PLATFORMS} }${pl}"
+	eval "${pl}_kernel_addr=\"${kaddr}\""
+	eval "${pl}_ramdisk_addr=\"${raddr}\""
+	eval "${pl}_fdt_addr=\"${fdtaddr}\""
+	eval "${pl}_fit_addr=\"${fitaddr}\""
+	eval "${pl}_mode=\"${mode}\""
+	eval "${pl}_csf_size=\"${csf}\""
+	eval "${pl}_srk_params=${srk}"
+done<<-_EOF_
+	ccimx6      0x12000000  0x19000000  0x18000000  -           HAB   0x4000  "-h 4 -d sha256"
+	ccimx6qp    0x12000000  0x19000000  0x18000000  -           HAB   0x4000  "-h 4 -d sha256"
+	ccimx6ul    0x80800000  0x83800000  0x83000000  -           HAB   0x4000  "-h 4 -d sha256"
+	ccimx8mm    0x40480000  0x43800000  0x43000000  -           HAB   0x2000  "-h 4 -d sha256"
+	ccimx8mn    0x40480000  0x43800000  0x43000000  -           HAB   0x2000  "-h 4 -d sha256"
+	ccimx8x     0x80280000  0x82100000  0x82000000  -           AHAB  -       "-a -d sha512 -s sha512"
+	ccimx93     -           -           -           0x84000000  AHAB  -       "-a -d sha256 -s sha512"
+_EOF_
+
+if ! echo "${AVAILABLE_PLATFORMS}" | grep -qs -F -w "${PLATFORM}"; then
 	echo "Invalid platform: ${PLATFORM}"
-	echo "Supported platforms: ccimx6, ccimx6ul, ccimx8x, ccimx8mn, ccimx8mm"
+	echo "Supported platforms: ${AVAILABLE_PLATFORMS}"
 	exit 1
 fi
+
+eval "CONFIG_KERNEL_LOADADDR=\"\${${PLATFORM}_kernel_addr}\""
+eval "CONFIG_RAMDISK_LOADADDR=\"\${${PLATFORM}_ramdisk_addr}\""
+eval "CONFIG_FDT_LOADADDR=\"\${${PLATFORM}_fdt_addr}\""
+eval "CONFIG_FIT_LOADADDR=\"\${${PLATFORM}_fit_addr}\""
+eval "CONFIG_SIGN_MODE=\"\${${PLATFORM}_mode}\""
+eval "CONFIG_CSF_SIZE=\"\${${PLATFORM}_csf_size}\""
 
 [ "${ARTIFACT_DTB}" = "y" ] && CONFIG_RAM_START="${CONFIG_FDT_LOADADDR}"
 [ "${ARTIFACT_INITRAMFS}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
@@ -119,6 +126,9 @@ fi
 [ "${ARTIFACT_DTB_OVERLAY}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
 # Rootfs is loaded to $initrd_addr, just like the ramdisk
 [ "${ARTIFACT_ROOTFS}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
+
+# For ccimx93 do not require image type (assume FIT image)
+[ "${PLATFORM}" = "ccimx93" ] && CONFIG_RAM_START="${CONFIG_FIT_LOADADDR}"
 
 if [ -z "${CONFIG_RAM_START}" ]; then
 	echo "Specify the type of image to process (-b, -i, -d, -l, -r, or -o)"
@@ -150,6 +160,12 @@ if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
 	# Negative offset with respect to CONFIG_RAM_START in which U-Boot
 	# copies the DEK blob.
 	DEK_BLOB_OFFSET="0x100"
+fi
+
+[ -z "${SRK_REVOKE_MASK}" ] && SRK_REVOKE_MASK="0x0"
+if [ "$((SRK_REVOKE_MASK & 0x8))" != 0 ]; then
+	echo "Key 3 cannot be revoked. Removed from mask."
+	SRK_REVOKE_MASK="$((SRK_REVOKE_MASK - 8))"
 fi
 
 # Function to generate a PKI tree (with lock dir protection)
@@ -224,10 +240,6 @@ get_image_size()
 
 SRK_TABLE="$(pwd)/SRK_table.bin"
 if [ "${CONFIG_SIGN_MODE}" = "HAB" ]; then
-	HAB_VER="hab_ver 4"
-	DIGEST="digest"
-	DIGEST_ALGO="sha256"
-
 	# Other constants
 	GAP_FILLER="0x00"
 
@@ -302,12 +314,13 @@ elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 	KERNEL_START_OFFSET="0x0"
 	KERNEL_SIG_BLOCK_OFFSET="0x90"
 
-	HAB_VER="ahab"
-	DIGEST="sign_digest"
-	DIGEST_ALGO="sha512"
-
 	# Prepare the image container
-	mkimage_imx8 -soc "QX" -rev "B0" -c -ap ${UIMAGE_PATH} a35 ${CONFIG_RAM_START} -out temp-mkimg
+	if [ "${PLATFORM}" = "ccimx93" ]; then
+		# Only FIT image supported for CC93
+		mkimage_imx8 -soc IMX9 -c -ap ${UIMAGE_PATH} a55 ${CONFIG_FIT_LOADADDR} -out temp-mkimg
+	else
+		mkimage_imx8 -soc "QX" -rev "B0" -c -ap ${UIMAGE_PATH} a35 ${CONFIG_RAM_START} -out temp-mkimg
+	fi
 	KERNEL_NAME="$(readlink -e temp-mkimg)"
 
 	# Compute the layout: sizes and offsets.
@@ -322,6 +335,7 @@ elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 		-e "s,%cert_img%,${SRK_CERT_KEY_IMG},g"		   	\
 		-e "s,%kernel-img%,${KERNEL_NAME},g"		   	\
 		-e "s,%key_index%,${CONFIG_KEY_INDEX},g"	   	\
+		-e "s,%srk_rvk_mask%,$(to_hex "${SRK_REVOKE_MASK}"),g"	\
 		-e "s,%container_offset%,${container_header_offset},g" 	\
 		-e "s,%block_offset%,${signature_block_offset},g" 	\
 		-e "s,%dek_path%,${CONFIG_DEK_PATH},g"		   	\
@@ -332,14 +346,15 @@ elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 		-e "s,%cert_img%,${SRK_CERT_KEY_IMG},g"		   	\
 		-e "s,%kernel-img%,${KERNEL_NAME},g"		   	\
 		-e "s,%key_index%,${CONFIG_KEY_INDEX},g"	   	\
+		-e "s,%srk_rvk_mask%,$(to_hex "${SRK_REVOKE_MASK}"),g"	\
 		-e "s,%container_offset%,${container_header_offset},g" 	\
 		-e "s,%block_offset%,${signature_block_offset},g" 	\
 		"${SCRIPT_PATH}/csf_templates/sign_ahab" > csf_descriptor
 	fi
 fi
 
-# Generate SRK tables
-srktool --${HAB_VER} --certs "${SRK_KEYS}" --table "${SRK_TABLE}" --efuses /dev/null --${DIGEST} "${DIGEST_ALGO}"
+eval "PDATA_SRKTOOL=\"\${${PLATFORM}_srk_params}\""
+srktool ${PDATA_SRKTOOL} --certs "${SRK_KEYS}" --table "${SRK_TABLE}" --efuses /dev/null
 if [ $? -ne 0 ]; then
 	echo "[ERROR] Could not generate SRK tables"
 	exit 1

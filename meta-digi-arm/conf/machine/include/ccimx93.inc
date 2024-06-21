@@ -8,8 +8,17 @@ require conf/machine/include/imx-digi-base.inc
 require conf/machine/include/arm/armv8-2a/tune-cortexa55.inc
 
 # Platform u-boot settings
+UBOOT_DTB_LOADADDRESS = "0x83000000"
+UBOOT_DTBO_LOADADDRESS = "0x83000000"
+UBOOT_ENTRYPOINT = "0x80400000"
+UBOOT_ENV = "boot"
 UBOOT_PREFIX = "imx-boot"
 UBOOT_SUFFIX = "bin"
+
+# Platform kernel settings (keep the override as otherwise KERNEL_IMAGETYPE
+# from imx-digi-base.inc takes precedence)
+KERNEL_CLASSES = "kernel-fitimage"
+KERNEL_IMAGETYPE:ccimx93 = "${@oe.utils.vartrue('TRUSTFENCE_SIGN_ARTIFACTS', 'fitImage', 'Image.gz', d)}"
 
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS += "imx-boot"

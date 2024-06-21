@@ -1,7 +1,7 @@
 From 2173b4648a59f7ab499b7974189f2ba025b6a25e Mon Sep 17 00:00:00 2001
 From: Tova Mussai <tova.mussai@intel.com>
 Date: Sun, 24 Apr 2022 12:57:52 +0300
-Subject: [PATCH 35/49] nl80211: Set NL80211_SCAN_FLAG_COLOCATED_6GHZ in scan
+Subject: [PATCH 35/60] nl80211: Set NL80211_SCAN_FLAG_COLOCATED_6GHZ in scan
 
 Set NL80211_SCAN_FLAG_COLOCATED_6GHZ in the scan parameters to enable
 scanning for co-located APs discovered based on neighbor reports from

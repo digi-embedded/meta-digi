@@ -1,7 +1,7 @@
 From b19b6f1165800106ccd941b6042ea804bfa95d5f Mon Sep 17 00:00:00 2001
 From: "Shankar Amar (CSTIPL CSS ICW SW WFS 1)" <amar.shankar@infineon.com>
 Date: Thu, 30 Jun 2022 08:01:45 +0000
-Subject: [PATCH 28/49] DPP: Resolving failure of dpp configurator exchange for
+Subject: [PATCH 28/60] DPP: Resolving failure of dpp configurator exchange for
  configurator plus initiator in AP role with fmac
 
 ---

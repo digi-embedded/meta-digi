@@ -1,7 +1,7 @@
 From dfa364f9970f1d88782cc9a9b7292afadbf2358b Mon Sep 17 00:00:00 2001
 From: Chung-Hsien Hsu <stanley.hsu@cypress.com>
 Date: Tue, 10 Dec 2019 14:06:20 -0600
-Subject: [PATCH 11/49] SAE: Support SAE authentication offload in AP mode
+Subject: [PATCH 11/60] SAE: Support SAE authentication offload in AP mode
 
 Add support for SAE authentication offload in AP mode. In this case, the
 SAE authentication process is handled by driver instead of user space.

@@ -1,0 +1,382 @@
+From 54929427eb8af4affaf8017bc8d127cc7c629581 Mon Sep 17 00:00:00 2001
+From: Shelley Yang <shelley.yang@infineon.com>
+Date: Wed, 29 Mar 2023 03:28:59 -0500
+Subject: [PATCH 53/60] non-upstream: WNM: wpa_cli wnm_maxilde command by IFX
+ vendorID
+
+1. set
+before: wl wnm_maxidle 10 1
+after: wpa_cli wnm_maxidle period=10 option=1
+2. get
+before: wl wnm_maxidle
+after: wpa_cli wnm_maxidle
+
+Fixes: SWWLAN-145213
+
+Signed-off-by: Shelley Yang <shelley.yang@infineon.com>
+---
+ src/common/ifx_vendor.h           | 55 ++++++++++++++++++
+ src/drivers/driver.h              |  7 +++
+ src/drivers/driver_nl80211.c      | 92 +++++++++++++++++++++++++++++++
+ src/drivers/driver_nl80211.h      |  1 +
+ src/drivers/driver_nl80211_capa.c |  3 +
+ wpa_supplicant/ctrl_iface.c       | 56 +++++++++++++++++++
+ wpa_supplicant/driver_i.h         |  8 +++
+ wpa_supplicant/wpa_cli.c          | 10 ++++
+ 8 files changed, 232 insertions(+)
+
+diff --git a/src/common/ifx_vendor.h b/src/common/ifx_vendor.h
+index 6cd3b874c..2fed69ca6 100644
+--- a/src/common/ifx_vendor.h
++++ b/src/common/ifx_vendor.h
+@@ -78,6 +78,7 @@ enum ifx_nl80211_vendor_subcmds {
+ 	IFX_VENDOR_SCMD_TWT		= 14,
+ 	/* Reserved 15-17 */
+ 	IFX_VENDOR_SCMD_MBO		= 18,
++	IFX_VENDOR_SCMD_WNM     = 25,
+ 	IFX_VENDOR_SCMD_MAX
+ };
+ 
+@@ -312,4 +313,58 @@ enum ifx_vendor_attr_mbo_param {
+ 	IFX_VENDOR_ATTR_MBO_PARAM_MAX
+ };
+ 
++enum ifx_vendor_attr_wnm {
++	IFX_VENDOR_ATTR_WNM_UNSPEC,
++	IFX_VENDOR_ATTR_WNM_CMD,
++	IFX_VENDOR_ATTR_WNM_PARAMS,
++	IFX_VENDOR_ATTR_WNM_MAX
++};
++
++enum ifx_wnm_config_cmd_type {
++	IFX_WNM_CONFIG_CMD_TYPE_INVALID				= -1,
++	//align internal definition
++	IFX_WNM_CONFIG_CMD_IOV_WNM					= 1,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_MAXIDLE			= 2,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_TIMBC_OFFSET		= 3,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_BSSTRANS_URL		= 4,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_BSSTRANS_REQ		= 5,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_TFS_TCLASTYPE	= 6,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_PARP_DISCARD		= 7,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_PARP_ALLNODE		= 8,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_TIMBC_SET		= 9,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_TIMBC_STATUS		= 10,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_DMS_SET			= 11,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_DMS_TERM			= 12,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_SERVICE_TERM		= 13,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_SLEEP_INTV		= 14,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_SLEEP_MODE		= 15,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_BSSTRANS_QUERY	= 16,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_BSSTRANS_RESP	= 17,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_TCLAS_ADD		= 18,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_TCLAS_DEL		= 19,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_TCLAS_LIST		= 20,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_DMS_STATUS		= 21,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_KEEPALIVES_MAX_IDLE		= 22,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_PM_IGNORE_BCMC			= 23,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_DMS_DEPENDENCY			= 24,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_BSSTRANS_ROAMTHROTTLE	= 25,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_TFS_SET			= 26,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_TFS_TERM			= 27,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_TFS_STATUS		= 28,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_BTQ_NBR_ADD		= 29,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_BTQ_NBR_DEL		= 30,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_BTQ_NBR_LIST		= 31,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_BSSTRANS_RSSI_RATE_MAP	= 32,
++	IFX_WNM_CONFIG_CMD_IOV_WNM_KEEPALIVE_PKT_TYPE		= 33,
++	IFX_WNM_CONFIG_CMD_TYPE_MAX
++};
++
++enum ifx_vendor_attr_wnm_maxidle_param {
++	IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_UNSPEC,
++	IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_GET_INFO,
++	IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_IDLE_PERIOD,
++	IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_PROTECTION_OPT,
++	IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_MAX
++};
++
+ #endif /* IFX_VENDOR_H */
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 996614ee5..d75abbd5e 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -2598,6 +2598,12 @@ struct drv_config_mbo_params {
+ 		} cellular_pref;
+ 	} u;
+ };
++
++struct drv_maxidle_wnm_params {
++	u8  get_info;
++	int period;
++	int protect;
++};
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+ struct wpa_bss_trans_info {
+@@ -4727,6 +4733,7 @@ struct wpa_driver_ops {
+ 	int (*teardown_twt)(void *priv, struct drv_teardown_twt_params *params); 
+ #endif /* CONFIG_TWT_OFFLOAD_IFX */
+ 	int (*config_mbo)(void *priv, struct drv_config_mbo_params *params);
++	int (*maxidle_wnm)(void *priv, struct drv_maxidle_wnm_params *params);
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+ };
+diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
+index 506b1e406..ed7c969c1 100644
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -12613,6 +12613,97 @@ fail:
+ 	nlmsg_free(msg);
+ 	return ret;
+ }
++
++static int wpa_driver_nl80211_maxidle_wnm_reply_handler(struct nl_msg *msg, void *arg)
++{
++	struct nlattr *tb_msg[NL80211_ATTR_MAX + 1];
++	struct genlmsghdr *gnlh = nlmsg_data(nlmsg_hdr(msg));
++	char *buf = arg;
++	char *data;
++	int len;
++
++	wpa_printf(MSG_INFO, "nl80211: maxidle_wnm command reply handler");
++
++	nla_parse(tb_msg, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0),
++			genlmsg_attrlen(gnlh, 0), NULL);
++
++	if (tb_msg[NL80211_ATTR_VENDOR_DATA]) {
++		data = (char *)((char *)tb_msg[NL80211_ATTR_VENDOR_DATA] + GENL_HDRLEN);
++		len = nla_len(tb_msg[NL80211_ATTR_VENDOR_DATA]);
++		os_memcpy(buf, data, len);
++	}
++	return NL_SKIP;
++}
++
++static int wpa_driver_nl80211_config_maxidle_wnm(void *priv, struct drv_maxidle_wnm_params *params)
++{
++	struct i802_bss *bss = priv;
++	struct wpa_driver_nl80211_data *drv = bss->drv;
++	struct nl_msg *msg = NULL;
++	struct nlattr *data, *wnm_param_attrs;
++	int ret = -1, get_period = 0;
++
++	if (!drv->ifx_wnm_offload)
++		goto fail;
++
++	if (!(msg = nl80211_drv_msg(drv, 0, NL80211_CMD_VENDOR)) ||
++	    nla_put_u32(msg, NL80211_ATTR_VENDOR_ID, OUI_IFX) ||
++	    nla_put_u32(msg, NL80211_ATTR_VENDOR_SUBCMD, IFX_VENDOR_SCMD_WNM))
++		goto fail;
++
++	data = nla_nest_start(msg, NL80211_ATTR_VENDOR_DATA);
++	if (!data)
++		goto fail;
++
++	if (nla_put_u8(msg, IFX_VENDOR_ATTR_WNM_CMD, IFX_WNM_CONFIG_CMD_IOV_WNM_MAXIDLE))
++		goto fail;
++
++	wnm_param_attrs = nla_nest_start(msg, IFX_VENDOR_ATTR_WNM_PARAMS);
++	if (!wnm_param_attrs)
++		goto fail;
++
++	if (params->get_info) {
++		if (nla_put_u8(msg, IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_GET_INFO,
++			params->get_info)) {
++			wpa_printf(MSG_ERROR,
++				"nl80211: WNM config: build msg ATTR:%d failed",
++				IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_GET_INFO);
++			goto fail;
++		}
++	} else {
++		if (nla_put_u8(msg, IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_IDLE_PERIOD,
++			params->period) ||
++		nla_put_u8(msg, IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_PROTECTION_OPT,
++			params->protect)) {
++			wpa_printf(MSG_ERROR,
++				"nl80211: WNM config: build ATTR:%d %d failed",
++				IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_IDLE_PERIOD,
++				IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_PROTECTION_OPT);
++			goto fail;
++		}
++	}
++	nla_nest_end(msg, wnm_param_attrs);
++	nla_nest_end(msg, data);
++
++	if (params->get_info)
++		ret = send_and_recv_msgs(drv, msg, wpa_driver_nl80211_maxidle_wnm_reply_handler,
++			&get_period, NULL, NULL);
++	else
++		ret = send_and_recv_msgs(drv, msg, NULL, NULL, NULL, NULL);
++
++	if (ret)
++		wpa_printf(MSG_ERROR, "nl80211: WNM maxidle: Failed to invoke driver %s",
++			strerror(-ret));
++	else
++		if (params->get_info)
++			params->period = get_period;
++
++	return ret;
++fail:
++	nl80211_nlmsg_clear(msg);
++	nlmsg_free(msg);
++	return ret;
++}
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+ const struct wpa_driver_ops wpa_driver_nl80211_ops = {
+@@ -12765,5 +12856,6 @@ const struct wpa_driver_ops wpa_driver_nl80211_ops = {
+ 	.teardown_twt = wpa_driver_nl80211_teardown_twt,
+ #endif /* CONFIG_TWT_OFFLOAD_IFX */
+ 	.config_mbo = wpa_driver_nl80211_config_mbo,
++	.maxidle_wnm = wpa_driver_nl80211_config_maxidle_wnm,
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ };
+diff --git a/src/drivers/driver_nl80211.h b/src/drivers/driver_nl80211.h
+index 6d2c09477..6d9945c88 100644
+--- a/src/drivers/driver_nl80211.h
++++ b/src/drivers/driver_nl80211.h
+@@ -183,6 +183,7 @@ struct wpa_driver_nl80211_data {
+ #ifdef CONFIG_DRIVER_NL80211_IFX
+ 	unsigned int ifx_twt_offload:1;
+ 	unsigned int ifx_mbo_offload:1;
++	unsigned int ifx_wnm_offload:1;
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+ 	u64 vendor_scan_cookie;
+diff --git a/src/drivers/driver_nl80211_capa.c b/src/drivers/driver_nl80211_capa.c
+index b0807a7fc..21b9c03ff 100644
+--- a/src/drivers/driver_nl80211_capa.c
++++ b/src/drivers/driver_nl80211_capa.c
+@@ -1062,6 +1062,9 @@ static int wiphy_info_handler(struct nl_msg *msg, void *arg)
+ 				case IFX_VENDOR_SCMD_MBO:
+ 					drv->ifx_mbo_offload = 1;
+ 					break;
++				case IFX_VENDOR_SCMD_WNM:
++					drv->ifx_wnm_offload = 1;
++					break;
+ 				}
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 			}
+diff --git a/wpa_supplicant/ctrl_iface.c b/wpa_supplicant/ctrl_iface.c
+index 9f0149a20..d07fdb0a9 100644
+--- a/wpa_supplicant/ctrl_iface.c
++++ b/wpa_supplicant/ctrl_iface.c
+@@ -10337,6 +10337,58 @@ static int wpas_ctrl_iface_send_mbo_config(struct wpa_supplicant *wpa_s,
+ 						   enable_cell_pref, cell_pref_val,
+ 						   cell_cap);
+ }
++
++static int wpas_ctrl_iface_send_wnm_maxidle(struct wpa_supplicant *wpa_s,
++					     const char *cmd, char *reply, int reply_size)
++{
++	u8 params_check = 0;
++	int period = 0, option = 0, ret = 0;
++	const char *tok_s;
++	struct drv_maxidle_wnm_params params;
++	char *pos, *end;
++
++	pos = reply;
++	end = pos + reply_size;
++	os_memset(&params, 0, sizeof(struct drv_maxidle_wnm_params));
++
++	if (cmd) {
++		tok_s = os_strstr(cmd, " period=");
++		if (tok_s) {
++			period = atoi(tok_s + os_strlen(" period="));
++			params_check |= BIT(IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_IDLE_PERIOD);
++		}
++
++		tok_s = os_strstr(cmd, " option=");
++		if (tok_s) {
++			option = atoi(tok_s + os_strlen(" option="));
++			params_check |= BIT(IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_PROTECTION_OPT);
++		}
++
++		if (params_check & BIT(IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_IDLE_PERIOD) &&
++			params_check & BIT(IFX_VENDOR_ATTR_WNM_MAXIDLE_PARAM_PROTECTION_OPT)) {
++			params.period = period;
++			params.protect = option;
++			params.get_info = false;
++		} else {
++			wpa_printf(MSG_ERROR, "set wnm_maxidle parameters not full(%02x).\n",
++				params_check);
++			ret = -EINVAL;
++			goto fail;
++		}
++	} else {
++		params.get_info = true;
++		wpa_printf(MSG_DEBUG, "get wnm_maxidle parameters\n");
++	}
++	ret = wpa_drv_maxidle_wnm(wpa_s, &params);
++	if (cmd == NULL && !ret) {
++		ret = os_snprintf(pos, end - pos, "BSS Max Idle Period: %d\n", params.period);
++		if (os_snprintf_error(end - pos, ret))
++			return pos - reply;
++	}
++
++fail:
++	return ret;
++}
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+ static int wpas_ctrl_vendor_elem_add(struct wpa_supplicant *wpa_s, char *cmd)
+@@ -12463,6 +12515,10 @@ char * wpa_supplicant_ctrl_iface_process(struct wpa_supplicant *wpa_s,
+ 	} else if (os_strncmp(buf, "MBO ", 4) == 0) {
+ 		if (wpas_ctrl_iface_send_mbo_config(wpa_s, buf + 3))
+ 			reply_len = -1;
++	} else if (os_strncmp(buf, "WNM_MAXIDLE ", 12) == 0) {
++		reply_len = wpas_ctrl_iface_send_wnm_maxidle(wpa_s, buf + 11, reply, reply_size);
++	} else if (os_strcmp(buf, "WNM_MAXIDLE") == 0) {
++		reply_len = wpas_ctrl_iface_send_wnm_maxidle(wpa_s, NULL, reply, reply_size);
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 	} else if (os_strncmp(buf, "TWT_TEARDOWN ", 13) == 0) {
+ 		if (wpas_ctrl_iface_send_twt_teardown(wpa_s, buf + 12))
+diff --git a/wpa_supplicant/driver_i.h b/wpa_supplicant/driver_i.h
+index 2fcfa44a6..fa11f72aa 100644
+--- a/wpa_supplicant/driver_i.h
++++ b/wpa_supplicant/driver_i.h
+@@ -1153,6 +1153,14 @@ static inline int wpa_drv_config_mbo(struct wpa_supplicant *wpa_s,
+ 		return -1;
+ 	return wpa_s->driver->config_mbo(wpa_s->drv_priv, params);
+ }
++
++static inline int wpa_drv_maxidle_wnm(struct wpa_supplicant *wpa_s,
++						struct drv_maxidle_wnm_params *params)
++{
++	if (!wpa_s->driver->maxidle_wnm)
++		return -1;
++	return wpa_s->driver->maxidle_wnm(wpa_s->drv_priv, params);
++}
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+ #endif /* DRIVER_I_H */
+diff --git a/wpa_supplicant/wpa_cli.c b/wpa_supplicant/wpa_cli.c
+index 3055417fe..8119d0865 100644
+--- a/wpa_supplicant/wpa_cli.c
++++ b/wpa_supplicant/wpa_cli.c
+@@ -2963,6 +2963,12 @@ static int wpa_cli_cmd_mbo_config(struct wpa_ctrl *ctrl, int argc,
+ {
+ 	return wpa_cli_cmd(ctrl, "MBO", 0, argc, argv);
+ }
++
++static int wpa_cli_cmd_wnm_maxidle(struct wpa_ctrl *ctrl, int argc,
++					char *argv[])
++{
++	return wpa_cli_cmd(ctrl, "WNM_MAXIDLE", 0, argc, argv);
++}
+ #endif /* CONFIG_DRIVER_NL80211_IFX */
+ 
+ 
+@@ -3896,6 +3902,10 @@ static const struct wpa_cli_cmd wpa_cli_commands[] = {
+ 	  wpa_cli_cmd_mbo_config, NULL, cli_cmd_flag_none,
+ 	  "[flags=<value>] = Send TWT Teardown frame"
+ 	},
++	{ "wnm_maxidle",
++		wpa_cli_cmd_wnm_maxidle, NULL, cli_cmd_flag_none,
++		"[period=<value>] [option=<value>]"
++	},
+ #endif/* CONFIG_DRIVER_NL80211_IFX */
+ 	{ "erp_flush", wpa_cli_cmd_erp_flush, NULL, cli_cmd_flag_none,
+ 	  "= flush ERP keys" },
+-- 
+2.17.1
+

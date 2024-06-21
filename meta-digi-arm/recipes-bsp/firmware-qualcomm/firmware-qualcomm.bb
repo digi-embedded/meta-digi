@@ -132,6 +132,10 @@ do_install() {
 	length="$(expr $(stat -L -c %s ${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin) - 4)"
 	/bin/echo -ne "\x$(printf '%02x' $(expr $length % 256))" | dd of=${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin bs=1 seek=1 count=1 conv=notrunc,fsync
 	/bin/echo -ne "\x$(printf '%02x' $(expr $length / 256))" | dd of=${D}${base_libdir}/firmware/qca/nvm_tlv_3.2.bin bs=1 seek=2 count=1 conv=notrunc,fsync
+
+	# Create World BDF file
+	cp ${D}${WIFI_FW_PATH}/bdwlan30_US.bin ${D}${WIFI_FW_PATH}/bdwlan30_World.bin
+	/bin/echo -ne "\x60\x00" | dd of="${D}${WIFI_FW_PATH}/bdwlan30_World.bin" bs=1 seek=12 count=2 conv=notrunc,fsync
 }
 
 QCA_MODEL ?= "qca6564"

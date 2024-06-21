@@ -1,7 +1,7 @@
 From 9af850cef2007cabe1bbffad3ef1d2b13396832d Mon Sep 17 00:00:00 2001
 From: Darren Li <hsil@cypress.com>
 Date: Tue, 22 Feb 2022 00:34:47 -0600
-Subject: [PATCH 18/49] wpa_supplicant: suppress deauth for PMKSA caching
+Subject: [PATCH 18/60] wpa_supplicant: suppress deauth for PMKSA caching
  disabled
 
 wpa_supplicant: Need a command/parameter suppress deauth for PMKSA caching disabled

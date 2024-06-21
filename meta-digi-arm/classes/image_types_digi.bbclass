@@ -22,7 +22,7 @@ IMAGE_CMD:boot.vfat() {
 	BOOTIMG_FILES="$(readlink -e ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin)"
 	BOOTIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
 	# Exclude DTB and DTBO from VFAT image when creating a FIT image
-	if [ "${TRUSTFENCE_FIT_IMG}" != "1" ]; then
+	if [ "${KERNEL_IMAGETYPE}" != "fitImage" ]; then
 		if [ -n "${KERNEL_DEVICETREE}" ]; then
 			for DTB in ${KERNEL_DEVICETREE}; do
 				# Remove potential sub-folders
@@ -61,7 +61,7 @@ IMAGE_CMD:boot.vfat() {
 	mcopy -i ${IMGDEPLOYDIR}/${IMAGE_NAME}.boot.vfat ${BOOTIMG_FILES_SYMLINK} ::/
 
 	# Exclude boot scripts from VFAT image when creating a FIT image
-	if [ "${TRUSTFENCE_FIT_IMG}" != "1" ]; then
+	if [ "${KERNEL_IMAGETYPE}" != "fitImage" ]; then
 		# Copy boot scripts into the VFAT image
 		for item in ${BOOT_SCRIPTS}; do
 			src=`echo $item | awk -F':' '{ print $1 }'`
@@ -90,7 +90,7 @@ do_image_boot_ubifs[depends] += " \
 IMAGE_CMD:boot.ubifs() {
 	BOOTIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
 	# Exclude DTB and DTBO from UBIFS image when creating a FIT image
-	if [ "${TRUSTFENCE_FIT_IMG}" != "1" ]; then
+	if [ "${KERNEL_IMAGETYPE}" != "fitImage" ]; then
 		if [ -n "${KERNEL_DEVICETREE}" ]; then
 			for DTB in ${KERNEL_DEVICETREE}; do
 				# Remove potential sub-folders
@@ -117,7 +117,7 @@ IMAGE_CMD:boot.ubifs() {
 	done
 
 	# Exclude boot scripts from UBIFS image when creating a FIT image
-	if [ "${TRUSTFENCE_FIT_IMG}" != "1" ]; then
+	if [ "${KERNEL_IMAGETYPE}" != "fitImage" ]; then
 		# Hard-link boot scripts into the temporary folder
 		for item in ${BOOT_SCRIPTS}; do
 			src="$(echo ${item} | awk -F':' '{ print $1 }')"
@@ -148,7 +148,7 @@ IMAGE_CMD:recovery.vfat() {
 	cp --remove-destination ${IMGDEPLOYDIR}/${IMAGE_NAME}.boot.vfat ${IMGDEPLOYDIR}/${IMAGE_NAME}.recovery.vfat
 
 	# Exclude initRAMFS from VFAT image when creating a FIT image
-	if [ "${TRUSTFENCE_FIT_IMG}" != "1" ]; then
+	if [ "${KERNEL_IMAGETYPE}" != "fitImage" ]; then
 		# Copy the recovery initramfs into the VFAT image
 		mcopy -i ${IMGDEPLOYDIR}/${IMAGE_NAME}.recovery.vfat -s ${DEPLOY_DIR_IMAGE}/${RECOVERY_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf ::/uramdisk-recovery.img
 	fi
@@ -169,7 +169,7 @@ do_image_recovery_ubifs[depends] += " \
 IMAGE_CMD:recovery.ubifs() {
 	RECOVERYIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
 	# Exclude DTB and DTBO from VFAT image when creating a FIT image
-	if [ "${TRUSTFENCE_FIT_IMG}" != "1" ]; then
+	if [ "${KERNEL_IMAGETYPE}" != "fitImage" ]; then
 		if [ -n "${KERNEL_DEVICETREE}" ]; then
 			for DTB in ${KERNEL_DEVICETREE}; do
 				# Remove potential sub-folders
@@ -191,7 +191,7 @@ IMAGE_CMD:recovery.ubifs() {
 	done
 
 	# Exclude bootscript from VFAT image when creating a FIT image
-	if [ "${TRUSTFENCE_FIT_IMG}" != "1" ]; then
+	if [ "${KERNEL_IMAGETYPE}" != "fitImage" ]; then
 		# Hard-link boot scripts into the temporary folder
 		for item in ${BOOT_SCRIPTS}; do
 			src="$(echo ${item} | awk -F':' '{ print $1 }')"
@@ -221,10 +221,11 @@ trustence_sign_cpio() {
 	# Image generation code for image type 'cpio.gz.u-boot.tf'
 	# (signed/encrypted ramdisk)
 	#
-	if [ "${TRUSTFENCE_SIGN_ARTIFACTS}" = "1" ]; then
+	if [ "${TRUSTFENCE_SIGN_ARTIFACTS}" = "1" ] && [ "${TRUSTFENCE_SIGN_FIT_NXP}" = "0" ]; then
 		# Set environment variables for trustfence configuration
 		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
+		[ -n "${TRUSTFENCE_SRK_REVOKE_MASK}" ] && export SRK_REVOKE_MASK="${TRUSTFENCE_SRK_REVOKE_MASK}"
 		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
 		# Sign/encrypt the ramdisk
 		trustfence-sign-artifact.sh -p "${DIGI_SOM}" -i "${1}" "${1}.tf"

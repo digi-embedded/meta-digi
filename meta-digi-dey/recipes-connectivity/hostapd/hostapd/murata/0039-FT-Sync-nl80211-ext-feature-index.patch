@@ -1,7 +1,7 @@
 From 7076f7634cc9d7a88f009c448ada307841b42a2a Mon Sep 17 00:00:00 2001
 From: JasonHuang <Jason.Huang2@infineon.com>
 Date: Sun, 30 Oct 2022 21:58:34 -0500
-Subject: [PATCH 39/49] FT: Sync nl80211 ext feature index
+Subject: [PATCH 39/60] FT: Sync nl80211 ext feature index
 
 The backports-5.15.58 has been used. Supplicant should sync the
 nl80211_ext_feature_index with backports to avoid unexpected fail.

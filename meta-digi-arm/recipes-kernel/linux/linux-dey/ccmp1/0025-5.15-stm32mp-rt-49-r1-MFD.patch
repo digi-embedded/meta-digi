@@ -1,0 +1,27 @@
+From be5ec688053e6d136bc8ea54ed1e93d523b24580 Mon Sep 17 00:00:00 2001
+From: Lionel VITTE <lionel.vitte@st.com>
+Date: Wed, 8 Feb 2023 09:56:45 +0100
+Subject: [PATCH 25/28] 5.15-stm32mp-rt-49-r1 MFD
+
+Signed-off-by: Lionel VITTE <lionel.vitte@st.com>
+---
+ drivers/mfd/syscon.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/mfd/syscon.c b/drivers/mfd/syscon.c
+index 191fdb87c..24530dfe5 100644
+--- a/drivers/mfd/syscon.c
++++ b/drivers/mfd/syscon.c
+@@ -38,6 +38,9 @@ static const struct regmap_config syscon_regmap_config = {
+ 	.reg_bits = 32,
+ 	.val_bits = 32,
+ 	.reg_stride = 4,
++#ifdef CONFIG_PREEMPT_RT
++	.use_raw_spinlock = true,
++#endif
+ };
+ 
+ static struct syscon *of_syscon_register(struct device_node *np, bool check_clk)
+-- 
+2.34.1
+

@@ -1,7 +1,7 @@
 From e03937fecb74cf50d70721ea2a0b14fa5e12153a Mon Sep 17 00:00:00 2001
 From: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
 Date: Mon, 11 Jul 2022 11:17:04 +0530
-Subject: [PATCH 43/49] Add support to configure TWT of a session using offset
+Subject: [PATCH 43/60] Add support to configure TWT of a session using offset
  in microseconds
 
 Introduce a new cmd line argument "twt_offset=<u64>" in the existing list

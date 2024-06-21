@@ -40,7 +40,11 @@ setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.vfat
 setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.ext4
 
 # Check for presence of firmware files on the USB
-for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME}; do
+FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME}"
+if test "${dualboot}" != "yes"; then
+	FILES="${FILES} ${INSTALL_RECOVERY_FILENAME}"
+fi
+for install_f in ${FILES}; do
 	if test ! -e usb ${INSTALL_USBDEV} ${install_f}; then
 		echo "ERROR: Could not find file ${install_f}";
 		install_abort=1;
@@ -72,7 +76,10 @@ echo " on the partitions of the eMMC."
 echo ""
 echo "   PARTITION   FILENAME"
 echo "   ---------   --------"
-echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
+echo "   bootloader1 ${INSTALL_UBOOT_FILENAME}"
+if test "${install_redundant_bootloader}" = "yes"; then
+	echo "   bootloader2 ${INSTALL_UBOOT_FILENAME}"
+fi
 if test "${dualboot}" = "yes"; then
 	echo "   linux_a     ${INSTALL_LINUX_FILENAME}"
 	if test "${install_dualboot}" = "yes"; then
@@ -124,6 +131,21 @@ if test $? -eq 1; then
 		exit;
 	fi
 fi
+
+if test "${install_redundant_bootloader}" = yes; then
+	echo "";
+	echo "";
+	echo ">> Installing U-Boot boot loader image ${INSTALL_UBOOT_FILENAME} on redundant partition";
+	echo "";
+	echo "";
+	update uboot-redundant usb ${INSTALL_USBDEV} ${INSTALL_UBOOT_FILENAME};
+	if test $? -eq 1; then
+		echo "[ERROR] Failed to update redundant U-Boot boot loader!";
+		echo "";
+		echo "Aborted.";
+		exit;
+	fi;
+fi;
 
 # Set 'bootcmd' to the second part of the script that will
 #  - Reset environment to defaults

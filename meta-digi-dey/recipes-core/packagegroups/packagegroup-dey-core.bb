@@ -43,6 +43,7 @@ RDEPENDS:${PN} = "\
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'firmwared', '',d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "touchscreen", "${VIRTUAL-RUNTIME_touchscreen}", "",d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'rt', 'hwlatdetect', '',d)} \
     init-ifupdown \
     libdigiapix \
     libgpiod \
@@ -54,6 +55,7 @@ RDEPENDS:${PN} = "\
     os-release \
     ${@bb.utils.contains('MACHINE_FEATURES', 'pci', 'pciutils', '',d)} \
     recovery-utils \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'rt', 'rt-tests', '',d)} \
     sysinfo \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'system-monitor', '',d)} \
     usbutils \

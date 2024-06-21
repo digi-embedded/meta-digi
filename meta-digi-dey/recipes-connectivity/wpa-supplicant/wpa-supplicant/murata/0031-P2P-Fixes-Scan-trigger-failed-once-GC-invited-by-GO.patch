@@ -1,7 +1,7 @@
 From a7e23d28ccd14800f0dd3f12bf0d053df6987fe7 Mon Sep 17 00:00:00 2001
 From: JasonHuang <Jason.Huang-EE@infineon.com>
 Date: Tue, 19 Jul 2022 01:44:19 -0500
-Subject: [PATCH 31/49] P2P: Fixes Scan trigger failed, once GC invited by GO
+Subject: [PATCH 31/60] P2P: Fixes Scan trigger failed, once GC invited by GO
 
 It's regression between 2.9 and 2.10. The 5g frequencys be
 repeatedly added to the list, then nl80211 driver will return

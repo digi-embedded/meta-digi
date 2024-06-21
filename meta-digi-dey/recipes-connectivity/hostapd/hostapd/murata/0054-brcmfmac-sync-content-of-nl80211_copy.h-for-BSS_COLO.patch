@@ -1,0 +1,170 @@
+From b3165e0a92a3090a99ef396e77fa90b7e61d6558 Mon Sep 17 00:00:00 2001
+From: Carter Chen <carter.chen@infineon.com>
+Date: Wed, 3 May 2023 21:13:26 -0500
+Subject: [PATCH 54/60] brcmfmac: sync content of nl80211_copy.h for BSS_COLOR
+ attributes
+
+sync the nl80211.h as of 0d2ab3aea in brcm80211
+
+Signed-off-by: Carter Chen <carter.chen@infineon.com>
+---
+ src/drivers/driver_nl80211_event.c |  5 +++
+ src/drivers/nl80211_copy.h         | 56 ++++++++++++++++++++++++++++--
+ 2 files changed, 59 insertions(+), 2 deletions(-)
+
+diff --git a/src/drivers/driver_nl80211_event.c b/src/drivers/driver_nl80211_event.c
+index fe91fff90..d3cb8d882 100644
+--- a/src/drivers/driver_nl80211_event.c
++++ b/src/drivers/driver_nl80211_event.c
+@@ -172,6 +172,11 @@ static const char * nl80211_command_to_string(enum nl80211_commands cmd)
+ 	C2S(NL80211_CMD_UNPROT_BEACON)
+ 	C2S(NL80211_CMD_CONTROL_PORT_FRAME_TX_STATUS)
+ 	C2S(NL80211_CMD_SET_SAR_SPECS)
++	C2S(NL80211_CMD_OBSS_COLOR_COLLISION)
++	C2S(NL80211_CMD_COLOR_CHANGE_REQUEST)
++	C2S(NL80211_CMD_COLOR_CHANGE_STARTED)
++	C2S(NL80211_CMD_COLOR_CHANGE_ABORTED)
++	C2S(NL80211_CMD_COLOR_CHANGE_COMPLETED)
+ 	C2S(__NL80211_CMD_AFTER_LAST)
+ 	}
+ #undef C2S
+diff --git a/src/drivers/nl80211_copy.h b/src/drivers/nl80211_copy.h
+index db5b1503d..ee80ae025 100644
+--- a/src/drivers/nl80211_copy.h
++++ b/src/drivers/nl80211_copy.h
+@@ -11,7 +11,7 @@
+  * Copyright 2008 Jouni Malinen <jouni.malinen@atheros.com>
+  * Copyright 2008 Colin McCabe <colin@cozybit.com>
+  * Copyright 2015-2017	Intel Deutschland GmbH
+- * Copyright (C) 2018-2020 Intel Corporation
++ * Copyright (C) 2018-2021 Intel Corporation
+  *
+  * Permission to use, copy, modify, and/or distribute this software for any
+  * purpose with or without fee is hereby granted, provided that the above
+@@ -1185,6 +1185,21 @@
+  *	passed using %NL80211_ATTR_SAR_SPEC. %NL80211_ATTR_WIPHY is used to
+  *	specify the wiphy index to be applied to.
+  *
++ * @NL80211_CMD_OBSS_COLOR_COLLISION: This notification is sent out whenever
++ *	mac80211/drv detects a bss color collision.
++ *
++ * @NL80211_CMD_COLOR_CHANGE_REQUEST: This command is used to indicate that
++ *	userspace wants to change the BSS color.
++ *
++ * @NL80211_CMD_COLOR_CHANGE_STARTED: Notify userland, that a color change has
++ *	started
++ *
++ * @NL80211_CMD_COLOR_CHANGE_ABORTED: Notify userland, that the color change has
++ *	been aborted
++ *
++ * @NL80211_CMD_COLOR_CHANGE_COMPLETED: Notify userland that the color change
++ *	has completed
++ *
+  * @NL80211_CMD_MAX: highest used command number
+  * @__NL80211_CMD_AFTER_LAST: internal use
+  */
+@@ -1417,6 +1432,14 @@ enum nl80211_commands {
+ 
+ 	NL80211_CMD_SET_SAR_SPECS,
+ 
++	NL80211_CMD_OBSS_COLOR_COLLISION,
++
++	NL80211_CMD_COLOR_CHANGE_REQUEST,
++
++	NL80211_CMD_COLOR_CHANGE_STARTED,
++	NL80211_CMD_COLOR_CHANGE_ABORTED,
++	NL80211_CMD_COLOR_CHANGE_COMPLETED,
++
+ 	/* add new commands above here */
+ 
+ 	/* used to define NL80211_CMD_MAX below */
+@@ -2403,7 +2426,10 @@ enum nl80211_commands {
+  *	in %NL80211_CMD_CONNECT to indicate that for 802.1X authentication it
+  *	wants to use the supported offload of the 4-way handshake.
+  * @NL80211_ATTR_PMKR0_NAME: PMK-R0 Name for offloaded FT.
+- * @NL80211_ATTR_PORT_AUTHORIZED: (reserved)
++ * @NL80211_ATTR_PORT_AUTHORIZED: flag attribute used in %NL80211_CMD_ROAMED
++ *	notification indicating that that 802.1X authentication was done by
++ *	the driver or is not needed (because roaming used the Fast Transition
++ *	protocol).
+  *
+  * @NL80211_ATTR_EXTERNAL_AUTH_ACTION: Identify the requested external
+  *     authentication operation (u32 attribute with an
+@@ -2560,6 +2586,16 @@ enum nl80211_commands {
+  *	disassoc events to indicate that an immediate reconnect to the AP
+  *	is desired.
+  *
++ * @NL80211_ATTR_OBSS_COLOR_BITMAP: bitmap of the u64 BSS colors for the
++ *	%NL80211_CMD_OBSS_COLOR_COLLISION event.
++ *
++ * @NL80211_ATTR_COLOR_CHANGE_COUNT: u8 attribute specifying the number of TBTT's
++ *	until the color switch event.
++ * @NL80211_ATTR_COLOR_CHANGE_COLOR: u8 attribute specifying the color that we are
++ *	switching to
++ * @NL80211_ATTR_COLOR_CHANGE_ELEMS: Nested set of attributes containing the IE
++ *	information for the time while performing a color switch.
++ *
+  * @NUM_NL80211_ATTR: total number of nl80211_attrs available
+  * @NL80211_ATTR_MAX: highest attribute number currently defined
+  * @__NL80211_ATTR_AFTER_LAST: internal use
+@@ -3057,6 +3093,12 @@ enum nl80211_attrs {
+ 
+ 	NL80211_ATTR_DISABLE_HE,
+ 
++	NL80211_ATTR_OBSS_COLOR_BITMAP,
++
++	NL80211_ATTR_COLOR_CHANGE_COUNT,
++	NL80211_ATTR_COLOR_CHANGE_COLOR,
++	NL80211_ATTR_COLOR_CHANGE_ELEMS,
++
+ 	/* add attributes here, update the policy in nl80211.c */
+ 
+ 	__NL80211_ATTR_AFTER_LAST,
+@@ -3654,6 +3696,8 @@ enum nl80211_mpath_info {
+  *     defined
+  * @NL80211_BAND_IFTYPE_ATTR_HE_6GHZ_CAPA: HE 6GHz band capabilities (__le16),
+  *	given for all 6 GHz band channels
++ * @NL80211_BAND_IFTYPE_ATTR_VENDOR_ELEMS: vendor element capabilities that are
++ *	advertised on this band/for this iftype (binary)
+  * @__NL80211_BAND_IFTYPE_ATTR_AFTER_LAST: internal use
+  */
+ enum nl80211_band_iftype_attr {
+@@ -3665,6 +3709,7 @@ enum nl80211_band_iftype_attr {
+ 	NL80211_BAND_IFTYPE_ATTR_HE_CAP_MCS_SET,
+ 	NL80211_BAND_IFTYPE_ATTR_HE_CAP_PPE,
+ 	NL80211_BAND_IFTYPE_ATTR_HE_6GHZ_CAPA,
++	NL80211_BAND_IFTYPE_ATTR_VENDOR_ELEMS,
+ 
+ 	/* keep last */
+ 	__NL80211_BAND_IFTYPE_ATTR_AFTER_LAST,
+@@ -5950,6 +5995,9 @@ enum nl80211_feature_flags {
+  *      frame protection for all management frames exchanged during the
+  *      negotiation and range measurement procedure.
+  *
++ * @NL80211_EXT_FEATURE_BSS_COLOR: The driver supports BSS color collision
++ *	detection and change announcemnts.
++ *
+  * @NUM_NL80211_EXT_FEATURES: number of extended features.
+  * @MAX_NL80211_EXT_FEATURES: highest extended feature index.
+  */
+@@ -6914,6 +6962,9 @@ enum nl80211_peer_measurement_ftm_capa {
+  * @NL80211_PMSR_FTM_REQ_ATTR_LMR_FEEDBACK: negotiate for LMR feedback. Only
+  *	valid if either %NL80211_PMSR_FTM_REQ_ATTR_TRIGGER_BASED or
+  *	%NL80211_PMSR_FTM_REQ_ATTR_NON_TRIGGER_BASED is set.
++ * @NL80211_PMSR_FTM_REQ_ATTR_BSS_COLOR: optional. The BSS color of the
++ *	responder. Only valid if %NL80211_PMSR_FTM_REQ_ATTR_NON_TRIGGER_BASED
++ *	or %NL80211_PMSR_FTM_REQ_ATTR_TRIGGER_BASED is set.
+  *
+  * @NUM_NL80211_PMSR_FTM_REQ_ATTR: internal
+  * @NL80211_PMSR_FTM_REQ_ATTR_MAX: highest attribute number
+@@ -6933,6 +6984,7 @@ enum nl80211_peer_measurement_ftm_req {
+ 	NL80211_PMSR_FTM_REQ_ATTR_TRIGGER_BASED,
+ 	NL80211_PMSR_FTM_REQ_ATTR_NON_TRIGGER_BASED,
+ 	NL80211_PMSR_FTM_REQ_ATTR_LMR_FEEDBACK,
++	NL80211_PMSR_FTM_REQ_ATTR_BSS_COLOR,
+ 
+ 	/* keep last */
+ 	NUM_NL80211_PMSR_FTM_REQ_ATTR,
+-- 
+2.17.1
+

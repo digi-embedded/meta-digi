@@ -1,7 +1,7 @@
 From 013beb7bc5036bf627fce3707a7a83344ffa05aa Mon Sep 17 00:00:00 2001
 From: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
 Date: Mon, 11 Jul 2022 11:16:37 +0530
-Subject: [PATCH 41/49] add support to offload TWT setup request handling to
+Subject: [PATCH 41/60] add support to offload TWT setup request handling to
  the Firmware
 
 With "TWT_SETUP" control sock cmd interface currently available in the

@@ -8,19 +8,15 @@ install_abort=0
 BASEFILENAME=0
 
 # Determine U-Boot file to program basing on module variant
-if test -n "${module_variant}"; then
-	if test "${module_variant}" = "0x12"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc2GB.imx;
-	elif test "${module_variant}" = "0x02" || test "${module_variant}" = "0x04" || test "${module_variant}" = "0x05" || test "${module_variant}" = "0x11" || test "${module_variant}" = "0x14" || test "${module_variant}" = "0x16"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc.imx;
-	elif test "${module_variant}" = "0x03" || test "${module_variant}" = "0x0e" || test "${module_variant}" = "0x0f"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc512MB.imx;
-	elif test "${module_variant}" = "0x0b" || test "${module_variant}" = "0x15"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc.imx;
-	elif test "${module_variant}" = "0x0c" || test "${module_variant}" = "0x13"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc512MB.imx;
-	fi
+# If module_variant is unknown or not set, return error asking the user
+if test "${module_variant}" = "0x12"; then
+	setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc2GB.imx;
+elif test "${module_variant}" = "0x02" || test "${module_variant}" = "0x04" || test "${module_variant}" = "0x05" || test "${module_variant}" = "0x0b" || test "${module_variant}" = "0x11" || test "${module_variant}" = "0x14" || test "${module_variant}" = "0x15" || test "${module_variant}" = "0x16"; then
+	setenv INSTALL_UBOOT_FILENAME u-boot-cc${soc_family}sbc.imx;
+elif test "${module_variant}" = "0x03" || test "${module_variant}" = "0x0c" || test "${module_variant}" = "0x0e" || test "${module_variant}" = "0x0f" || test "${module_variant}" = "0x13"; then
+	setenv INSTALL_UBOOT_FILENAME u-boot-cc${soc_family}sbc512MB.imx;
 fi
+
 # Use 'test -n ...' because 'test -z ...' does not work well on old versions of
 # u-boot when the checked value is empty.
 if test -n "${INSTALL_UBOOT_FILENAME}"; then
@@ -67,7 +63,11 @@ setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.vfat
 setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.ext4
 
 # Check for presence of firmware files on the SD card
-for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME}; do
+FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME}"
+if test "${dualboot}" != "yes"; then
+	FILES="${FILES} ${INSTALL_RECOVERY_FILENAME}"
+fi
+for install_f in ${FILES}; do
 	if test ! -e mmc ${INSTALL_MMCDEV} ${install_f}; then
 		echo "ERROR: Could not find file ${install_f}";
 		install_abort=1;

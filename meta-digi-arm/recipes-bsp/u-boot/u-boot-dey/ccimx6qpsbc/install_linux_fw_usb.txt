@@ -8,13 +8,13 @@ install_abort=0
 BASEFILENAME=0
 
 # Determine U-Boot file to program basing on module variant
-if test -n "${module_variant}"; then
-	if test "${module_variant}" = "0x01" || test "${module_variant}" = "0x02"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##2GB.imx;
-	elif test "${module_variant}" = "0x03"; then
-		setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx;
-	fi
+# If module_variant is unknown or not set, return error asking the user
+if test "${module_variant}" = "0x01" || test "${module_variant}" = "0x02"; then
+	setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##2GB.imx;
+elif test "${module_variant}" = "0x03"; then
+	setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx;
 fi
+
 # Use 'test -n ...' because 'test -z ...' does not work well on old versions of
 # u-boot when the checked value is empty.
 if test -n "${INSTALL_UBOOT_FILENAME}"; then
@@ -56,7 +56,11 @@ setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.vfat
 setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.ext4
 
 # Check for presence of firmware files on the USB
-for install_f in ${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME} ${INSTALL_RECOVERY_FILENAME}; do
+FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME}"
+if test "${dualboot}" != "yes"; then
+	FILES="${FILES} ${INSTALL_RECOVERY_FILENAME}"
+fi
+for install_f in ${FILES}; do
 	if test ! -e usb ${INSTALL_USBDEV} ${install_f}; then
 		echo "ERROR: Could not find file ${install_f}";
 		install_abort=1;

@@ -1,0 +1,38 @@
+#!/bin/sh
+#===============================================================================
+#
+#  Copyright (C) 2024 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Enable Wireless autocountry feature (802.11d)
+#
+#===============================================================================
+
+SCRIPTNAME="$(basename ${0})"
+
+log() {
+	if type "systemd-cat" >/dev/null 2>/dev/null; then
+		systemd-cat -p "${1}" -t "${SCRIPTNAME}" printf "%s" "${2}"
+	else
+		logger -p "${1}" -t "${SCRIPTNAME}" "${2}"
+	fi
+}
+
+# Only for Wireless variants
+if [ -d "/proc/device-tree/wireless" ]; then
+	# Check if WorldWide regulatory domain is available
+	if wl country list | grep -qs ^XZ; then
+		# Select WorldWide Country Code as driver operational region
+		wl country XZ/0 agg
+		# Select WorldWide Country Code for use with Auto Contry Discovery
+		wl autocountry_default XZ
+		# Enable 802.11d
+		wl autocountry 1
+		log info "Set WorldWide regulatory domain"
+	fi
+fi

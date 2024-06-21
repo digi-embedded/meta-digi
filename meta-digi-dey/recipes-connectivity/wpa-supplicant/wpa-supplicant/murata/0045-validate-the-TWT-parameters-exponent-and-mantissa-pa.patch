@@ -1,7 +1,7 @@
 From ad935d3fefec7f775188d305a5bf63a64d30a065 Mon Sep 17 00:00:00 2001
 From: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
 Date: Fri, 11 Nov 2022 19:40:04 +0530
-Subject: [PATCH 45/49] validate the TWT parameters exponent and mantissa
+Subject: [PATCH 45/60] validate the TWT parameters exponent and mantissa
  passed to wpa_cli
 
 The exponent is a 5 bit param and the max value is 31 (0x1F). The mantissa
