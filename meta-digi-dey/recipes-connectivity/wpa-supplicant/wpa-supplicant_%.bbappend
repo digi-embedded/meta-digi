@@ -8,6 +8,7 @@ SRC_URI += " \
     file://0001-wpa_supplicant-enable-control-socket-interface-when-.patch \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'file://0002-wpa_supplicant-systemd-enable-control-socket-interfa.patch', '', d)} \
     file://wpa_supplicant_p2p.conf \
+    file://defconfig \
 "
 
 # Patch series from Murata release
@@ -77,6 +78,27 @@ MURATA_COMMON_PATCHES = " \
 SRC_URI:append:ccimx6sbc = " file://wpa_supplicant_p2p.conf_atheros"
 SRC_URI:append:stm32mpcommon = " ${MURATA_COMMON_PATCHES}"
 
+# Re-define do_configure() to be able to use our own defconfig while
+# maintaining the logic of the original recipe. This is the exact same as it is
+# in poky, but using our custom defconfig instead of the one in the
+# wpa-supplicant tree.
+do_configure () {
+	${MAKE} -C wpa_supplicant clean
+	#sed -e '/^CONFIG_TLS=/d' <wpa_supplicant/defconfig >wpa_supplicant/.config
+	sed -e '/^CONFIG_TLS=/d' <${WORKDIR}/defconfig >wpa_supplicant/.config
+
+	if ${@ bb.utils.contains('PACKAGECONFIG', 'openssl', 'true', 'false', d) }; then
+		echo 'CONFIG_TLS=openssl' >>wpa_supplicant/.config
+	elif ${@ bb.utils.contains('PACKAGECONFIG', 'gnutls', 'true', 'false', d) }; then
+		echo 'CONFIG_TLS=gnutls' >>wpa_supplicant/.config
+        sed -i -e 's/\(^CONFIG_DPP=\)/#\1/' \
+               -e 's/\(^CONFIG_EAP_PWD=\)/#\1/' \
+               -e 's/\(^CONFIG_SAE=\)/#\1/' wpa_supplicant/.config
+	fi
+
+	# For rebuild
+	rm -f wpa_supplicant/*.d wpa_supplicant/dbus/*.d
+}
 do_install:append() {
 	install -m 600 ${WORKDIR}/wpa_supplicant_p2p.conf ${D}${sysconfdir}/wpa_supplicant_p2p.conf
 	sed -i -e "s,##WLAN_P2P_DEVICE_NAME##,${WLAN_P2P_DEVICE_NAME},g" \
