@@ -25,6 +25,9 @@ EXTRA_OECMAKE = " \
     -DBUILD_SHARED_LIBS=ON \
     "
 
+# If TF file based encryption is enabled, move the TEE_FS_PARENT_PATH out of the rootfs
+EXTRA_OECMAKE += "${@oe.utils.vartrue('TRUSTFENCE_FILE_BASED_ENCRYPT', '-DCFG_TEE_FS_PARENT_PATH=/mnt/data/tee', '', d)}"
+
 do_install:append() {
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -D -p -m0644 ${WORKDIR}/tee-supplicant.service ${D}${systemd_system_unitdir}/tee-supplicant.service
