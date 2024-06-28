@@ -277,8 +277,8 @@ format_ubi_volume() {
 				volname="$(ubinfo ${v} | grep ^Name | awk '{print $(2)}')"
 				if [ "${volname}" = "${1}" ]; then
 					# Find mountpoint
-					u="$(basename ${d})"
-					mountpoint="$(mount | grep ${u}:${1} | awk '{print $(3) }')"
+					u="$(basename ${v})"
+					mountpoint="$(mount | grep ${u} | awk '{print $(3) }')"
 					umount ${mountpoint} 2> /dev/null
 					# Wipe out volume
 					ubiupdatevol ${v} -t
