@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2023 Digi International
+# Copyright (C) 2018-2024 Digi International
 SUMMARY = "Linux kernel for Digi boards"
 LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
@@ -18,6 +18,7 @@ SRC_URI = " \
     ${LINUX_GIT_URI};branch=${SRCBRANCH} \
     ${@oe.utils.conditional('KERNEL_DEFCONFIG', '', 'file://defconfig', '', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://docker_conf.cfg', '', d)} \
+    ${@oe.utils.vartrue('TRUSTFENCE_FILE_BASED_ENCRYPT', 'file://fscrypt.cfg', '', d)} \
 "
 S = "${WORKDIR}/git"
 

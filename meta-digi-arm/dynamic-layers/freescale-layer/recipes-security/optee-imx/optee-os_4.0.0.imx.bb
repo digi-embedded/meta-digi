@@ -10,6 +10,7 @@ SRC_URI = " \
     file://0007-allow-setting-sysroot-for-clang.patch \
     file://0001-core-imx-support-ccimx93-dvk.patch \
     file://0002-core-ccimx93-enable-AES_HUK-trusted-application.patch \
+    file://environment.d-optee-sdk.sh \
 "
 SRCBRANCH = "lf-6.1.55_2.2.0"
 # Tag: lf-6.1.55-2.2.0
@@ -22,8 +23,15 @@ do_compile:append:ccimx93 () {
 }
 do_compile[cleandirs] += "${B}-A0"
 
+do_install:append:ccimx93 () {
+	mkdir -p ${D}/environment-setup.d
+	sed -e "s,#OPTEE_ARCH#,${OPTEE_ARCH},g" ${WORKDIR}/environment.d-optee-sdk.sh > ${D}/environment-setup.d/optee-sdk.sh
+}
+
 do_deploy:append:ccimx93 () {
     cp ${B}-A0/core/tee-raw.bin ${DEPLOYDIR}/tee.${PLATFORM_FLAVOR}_a0.bin
 }
+
+FILES:${PN}-staticdev += "/environment-setup.d/"
 
 COMPATIBLE_MACHINE = "(ccimx93)"
