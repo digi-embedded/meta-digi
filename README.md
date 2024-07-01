@@ -125,10 +125,35 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 # Downloads
 
-* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/4.0/r5/images/
-* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/4.0/r5/sdk/
+* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/4.0/r6/images/
+* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/4.0/r6/sdk/
 
 # Release Changelog
+
+## 4.0-r6
+
+* ST-based platforms
+  * Added device tree overlay to fix internal RTC drift on ConnectCore MP15 SOM v1
+  * Added support for real-time Linux (RT-PREEMPT) for ConnectCore MP15 and ConnectCore MP13
+  * Added support for different memory variants
+  * Updated Wireless firmware binaries to v5.15.58-2023_1128
+  * TrustFence
+    * Added file system encryption support via `fscrypt` using OP-TEE secure storage for the encryption key
+* NXP-based platforms
+  * Added support for real-time Linux (RT-PREEMPT) for ConnectCore 93
+  * Added missing TPM definitions of i.MX93 to allow using any TPM for PWM signals
+  * Added basic Time Sensitive Networking support (TSN) for ConnectCore 93
+  * Workaround LPUART IP bug of i.MX93 that affected the behavior of CTS line
+  * TrustFence
+    * Add support for secure JTAG
+    * Added secure console for ConnectCore 93
+    * Added support to boot signed FIT images (kernel + device tree + U-Boot boot script) for ConnectCore 93
+    * Added U-Boot environment encryption support for ConnectCore 93
+    * Added support to encrypted boot artifacts for ConnectCore 93
+    * Added file system encryption support via `fscrypt` using OP-TEE secure storage for the encryption key for ConnectCore 93
+* Added support to Worldwide regulatory domains
+* Added support for Docker and LXC
+* General bug fixing and improvements
 
 ## 4.0-r5
 
