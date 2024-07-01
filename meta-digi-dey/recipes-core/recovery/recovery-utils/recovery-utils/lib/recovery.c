@@ -61,6 +61,7 @@ static char *nand_parts_blacklist[] = {
 	"linux",
 	"recovery",
 	"safe",
+	"system",
 	NULL
 };
 
@@ -758,6 +759,12 @@ int set_encryption_key(char *key, unsigned char force)
 		return ret;
 	}
 
+	/* Check if we are in singlemtdsys mode */
+	if (is_device_nand() && check_uboot_var("singlemtdsys", "yes")) {
+		fprintf(stderr, "Error: partition encryption unavailable in singlemtdsys mode\n");
+		return ret;
+	}
+
 	/* Initialize arrays */
 	parts[0] = NULL;
 	encrypted[0] = NULL;
@@ -859,6 +866,12 @@ int encrypt_partitions(char *to_encrypt, char *to_unencrypt, unsigned char force
 	/* Check if we are in dualboot mode */
 	if (check_uboot_var("dualboot", "yes")) {
 		fprintf(stderr, "Error: dualboot enabled recovery cannot be used\n");
+		return 1;
+	}
+
+	/* Check if we are in singlemtdsys mode */
+	if (is_device_nand() && check_uboot_var("singlemtdsys", "yes")) {
+		fprintf(stderr, "Error: partition encryption unavailable in singlemtdsys mode\n");
 		return 1;
 	}
 
