@@ -23,7 +23,7 @@ SRC_URI:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'tsn', 'file://tsn_conf.cfg', '', d)} \
 "
 
-SRCREV = "${AUTOREV}"
+SRCREV = "0f687b135fed7694e0a2007fe2ab73cd4a6ef81c"
 
 # Blacklist btnxpuart module. It will be managed by the bluetooth-init script
 KERNEL_MODULE_PROBECONF += "btnxpuart"
