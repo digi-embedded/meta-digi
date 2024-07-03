@@ -21,6 +21,10 @@ OS versions:
 
 Software for the following hardware platforms is in production support:
 
+## ConnectCore 91
+* ConnectCore 91 System-on-Module (SOM)
+  * [CC-WMX-XXXX-XX](https://www.digi.com/products/models/cc-wmx-yc7d-kn)
+
 ## ConnectCore 93
 * ConnectCore 93 System-on-Module (SOM)
   * [CC-WMX-YC7D-KN](https://www.digi.com/products/models/cc-wmx-yc7d-kn)

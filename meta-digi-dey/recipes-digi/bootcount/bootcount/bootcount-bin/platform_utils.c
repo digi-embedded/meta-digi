@@ -29,6 +29,7 @@ char* platform_names[] = {
 	[PLATFORM_CC8MM] = "ccimx8mm",
 	[PLATFORM_CC8MN] = "ccimx8mn",
 	[PLATFORM_CC8X] = "ccimx8x",
+	[PLATFORM_CC91] = "ccimx91",
 	[PLATFORM_CC93] = "ccimx93",
 	[PLATFORM_CCMP13] = "ccmp13",
 	[PLATFORM_CCMP15] = "ccmp15",

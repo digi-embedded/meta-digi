@@ -9,21 +9,27 @@ SRC_URI:append:ccimx8m = " \
     file://0004-LFU-573-2-imx8m-Reserve-new-IVT-CSF-for-FIT-FDT-sign.patch \
 "
 
-SRC_URI:append:ccimx93 = " \
+SRC_URI:append:ccimx9 = " \
     file://0001-imx9-soc.mak-capture-commands-output-into-a-log-file.patch \
+"
+SRC_URI:append:ccimx93 = " \
     file://0002-imx9-soc.mak-add-makefile-target-to-build-A0-revisio.patch \
 "
 
 # Use NXP's lf-6.1.55-2.2.0 release for ccimx93
-SRC_URI:ccimx93 = "git://github.com/nxp-imx/imx-mkimage.git;protocol=https;branch=${SRCBRANCH}"
-SRCBRANCH:ccimx93 = "lf-6.1.55_2.2.0"
-SRCREV:ccimx93 = "c4365450fb115d87f245df2864fee1604d97c06a"
+SRC_URI:ccimx9 = "git://github.com/nxp-imx/imx-mkimage.git;protocol=https;branch=${SRCBRANCH}"
+SRCBRANCH:ccimx9 = "lf-6.1.55_2.2.0"
+SRCREV:ccimx9 = "c4365450fb115d87f245df2864fee1604d97c06a"
 
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 # Do not tag imx-boot
 UUU_BOOTLOADER = ""
 UUU_BOOTLOADER_TAGGED = ""
+BOOT_STAGING:mx9-generic-bsp = "${S}/iMX9"
+
+# Add SOC family
+SOC_FAMILY:mx91-generic-bsp = "mx93"
 
 REV_OPTION:ccimx93 = "REV=A1"
 
@@ -100,6 +106,13 @@ do_deploy:append:ccimx8m() {
 		install -m 0644 ${BOOT_STAGING}/mkimage-${target}.log ${DEPLOYDIR}/${BOOT_TOOLS}
 	done
 	install -m 0644 ${BOOT_STAGING}/mkimage-print_fit_hab.log ${DEPLOYDIR}/${BOOT_TOOLS}
+}
+
+do_deploy:append:ccimx91() {
+	generate_symlinks
+	for target in ${IMXBOOT_TARGETS}; do
+		install -m 0644 ${BOOT_STAGING}/mkimage-${target}.log ${DEPLOYDIR}/${BOOT_TOOLS}
+	done
 }
 
 do_deploy:append:ccimx93() {

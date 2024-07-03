@@ -8,16 +8,18 @@ install_abort=0
 BASEFILENAME=0
 
 # Determine U-Boot file to program basing on SOM's SOC revision
-if test -z "${soc_rev}"; then
-	# Fallback to hardware version if soc_rev is empty
-	setexpr som_hv ${hwid_2} \& 78
-	setexpr som_hv ${som_hv} / 8
-	if test "${som_hv}" -lt "2"; then
-		SOCREV="-A0"
-	fi
-else
-	if test "${soc_rev}" = "0x10"; then
-		SOCREV="-A0"
+if test "${soc_type}" = "imx93"; then
+	if test -z "${soc_rev}"; then
+		# Fallback to hardware version if soc_rev is empty
+		setexpr som_hv ${hwid_2} \& 78
+		setexpr som_hv ${som_hv} / 8
+		if test "${som_hv}" -lt "2"; then
+			SOCREV="-A0"
+		fi
+	else
+		if test "${soc_rev}" = "0x10"; then
+			SOCREV="-A0"
+		fi
 	fi
 fi
 setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##${SOCREV}.bin

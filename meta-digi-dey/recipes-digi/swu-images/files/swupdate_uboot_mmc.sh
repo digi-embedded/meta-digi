@@ -140,9 +140,9 @@ dump_dek_ccimx8m_ccimx6 ()
 	fi
 }
 
-dump_dek_ccimx93 ()
+dump_dek_ccimx9 ()
 {
-	exit_error "## ERROR: DEK support not implemented yet for CCIMX93."
+	exit_error "## ERROR: DEK support not implemented yet for CCIMX9."
 }
 
 dump_dek ()
@@ -157,8 +157,8 @@ dump_dek ()
 		ccimx6*)
 			dump_dek_ccimx8m_ccimx6 "${DEK_BLOB_HEADER_CCIMX6}"
 		;;
-		ccimx93*)
-			dump_dek_ccimx93
+		ccimx9*)
+			dump_dek_ccimx9
 		;;
 		*)
 			exit_error "## ERROR: Device not supported ${PLATFORM}."
@@ -207,9 +207,9 @@ append_dek_ccimx6 ()
 	fi
 }
 
-append_dek_ccimx93 ()
+append_dek_ccimx9 ()
 {
-	exit_error "## ERROR: DEK support not implemented yet for CCIMX93."
+	exit_error "## ERROR: DEK support not implemented yet for CCIMX9."
 }
 
 append_dek ()
@@ -225,8 +225,8 @@ append_dek ()
 		ccimx6*)
 			append_dek_ccimx6
 		;;
-		ccimx93*)
-			append_dek_ccimx93
+		ccimx9*)
+			append_dek_ccimx9
 		;;
 		*)
 			exit_error "## ERROR: Device not supported: ${PLATFORM}."

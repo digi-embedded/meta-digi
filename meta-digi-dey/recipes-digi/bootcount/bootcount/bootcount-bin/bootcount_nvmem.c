@@ -37,6 +37,7 @@ struct platform_nvmem platforms_nvmem[] = {
 	[PLATFORM_CC8MM] = {"/sys/bus/i2c/devices/0-0063/nvram", 0, 1},
 	[PLATFORM_CC8MN] = {"/sys/bus/i2c/devices/0-0063/nvram", 0, 1},
 	[PLATFORM_CC8X] = {"/sys/bus/i2c/devices/0-0063/nvram", 0, 1},
+	[PLATFORM_CC91] = {"/sys/bus/i2c/devices/2-0052/rv3028_nvram0/nvmem", 0, 1},
 	[PLATFORM_CC93] = {"/sys/bus/i2c/devices/2-0052/rv3028_nvram0/nvmem", 0, 1},
 	[PLATFORM_CCMP13] = {"/sys/bus/i2c/devices/2-0052/rv3028_nvram0/nvmem", 0, 1},
 	[PLATFORM_CCMP15] = {"/sys/bus/i2c/devices/6-0052/rv3028_nvram0/nvmem", 0, 1},

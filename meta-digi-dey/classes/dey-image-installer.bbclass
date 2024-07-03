@@ -1,7 +1,7 @@
 #
 # Generate DEY installer ZIP package
 #
-# Copyright 2017-2023, Digi International Inc.
+# Copyright 2017-2024, Digi International Inc.
 #
 DEPENDS += "zip-native"
 
@@ -27,7 +27,7 @@ FSTYPES_WHITELIST:ccmp1 = " \
 
 HAS_USB_DRIVER = "false"
 HAS_USB_DRIVER:ccimx8m = "true"
-HAS_USB_DRIVER:ccimx93 = "true"
+HAS_USB_DRIVER:ccimx9 = "true"
 HAS_USB_DRIVER:ccmp1 = "true"
 
 generate_installer_zip () {

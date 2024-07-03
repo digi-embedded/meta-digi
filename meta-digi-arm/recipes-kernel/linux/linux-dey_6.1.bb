@@ -29,4 +29,4 @@ SRCREV = "${AUTOREV}"
 KERNEL_MODULE_PROBECONF += "btnxpuart"
 module_conf_btnxpuart = "blacklist btnxpuart"
 
-COMPATIBLE_MACHINE = "(ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx9)"

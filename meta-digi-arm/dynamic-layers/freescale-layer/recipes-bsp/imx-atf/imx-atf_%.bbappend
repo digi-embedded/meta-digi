@@ -1,4 +1,4 @@
-# Copyright (C) 2022,2023, Digi International Inc.
+# Copyright (C) 2022-2024, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -8,7 +8,7 @@ SRC_URI:append:ccimx8m = " \
     file://0003-imx8mn-Define-UART1-as-console-for-boot-stage.patch \
     file://0004-imx8mn-Disable-M7-debug-console.patch \
 "
-SRC_URI:append:ccimx93 = " \
+SRC_URI:append:ccimx9 = " \
     file://0001-ccimx93-use-UART6-for-the-default-console.patch \
     file://0002-imx93-bring-back-ELE-clock-workaround-for-soc-revisi.patch \
 "

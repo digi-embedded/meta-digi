@@ -19,7 +19,7 @@ SRCREV = "0f889a1f9640f6210132dd565141eb19005245fb"
 S = "${WORKDIR}/git"
 
 DEFAULT_PREFERENCE = "-1"
-COMPATIBLE_MACHINE = "(ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx9)"
 
 inherit meson pkgconfig manpages
 

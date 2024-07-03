@@ -1,4 +1,4 @@
-# Copyright (C) 2023, Digi International Inc.
+# Copyright (C) 2023,2024, Digi International Inc.
 
 #
 # Reuse meta-freescale's optee-client_3.19.0.imx.bb
@@ -24,4 +24,4 @@ do_install() {
 	fi
 }
 
-COMPATIBLE_MACHINE = "(ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx9)"

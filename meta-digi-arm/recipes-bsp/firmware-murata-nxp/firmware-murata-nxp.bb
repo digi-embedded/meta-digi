@@ -27,4 +27,4 @@ do_install () {
 FILES:${PN} = "${nonarch_base_libdir}/firmware"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "ccimx93"
+COMPATIBLE_MACHINE = "(ccimx9)"

@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023, Digi International Inc.
+# Copyright (C) 2021-2024, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -18,7 +18,7 @@ FW_CONFIG_FILE:ccmp1 = "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs
 DEPENDS += "${@oe.utils.conditional('OPTEE_PATCHES', '', '', 'optee-client', d)}"
 
 OPTEE_PATCHES = ""
-OPTEE_PATCHES:ccimx93 = "file://0004-Implement-support-for-environment-encryption-using-O.patch"
+OPTEE_PATCHES:ccimx9 = "file://0004-Implement-support-for-environment-encryption-using-O.patch"
 OPTEE_PATCHES:ccmp1 = "file://0004-Implement-support-for-environment-encryption-using-O.patch"
 
 SRC_URI += " \

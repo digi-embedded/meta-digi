@@ -8,7 +8,7 @@ SRC_URI:append = " \
     ${@oe.utils.conditional('HAS_WIFI_VIRTWLANS', 'true', 'file://hostapd_wlan1.conf', '', d)} \
 "
 
-SRC_URI:append:ccimx93 = " \
+SRC_URI:append:ccimx9 = " \
     file://hostapd_uap0.conf \
 "
 
@@ -92,7 +92,7 @@ add_hostapd_files() {
 	fi
 }
 
-add_hostapd_files:ccimx93() {
+add_hostapd_files:ccimx9() {
 	install -m 0644 ${WORKDIR}/hostapd_uap0.conf ${D}${sysconfdir}
 }
 
