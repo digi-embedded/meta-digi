@@ -1,0 +1,32 @@
+From 27dd5642469b49aa6a94d99d97bce793f2473053 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
+Date: Tue, 28 Nov 2023 14:18:02 +0100
+Subject: [PATCH] Correct git error
+
+When there is no .git for scp firmware, the git describe command
+return error:
+fatal: not a git repository (or any parent up to mount point /mnt)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+
+To correct this kind of error, we can redirect the error on a variable
+
+Signed-off-by: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
+---
+ framework/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/framework/CMakeLists.txt b/framework/CMakeLists.txt
+index 9b9bb229..9a9f0bd4 100644
+--- a/framework/CMakeLists.txt
++++ b/framework/CMakeLists.txt
+@@ -197,6 +197,7 @@ if(GIT_FOUND)
+         COMMAND "${GIT_EXECUTABLE}" describe --tags --dirty --always
+         WORKING_DIRECTORY "${SCP_SOURCE_DIR}"
+         OUTPUT_VARIABLE SCP_DESCRIBE
++        ERROR_VARIABLE _errorOut
+         OUTPUT_STRIP_TRAILING_WHITESPACE)
+ endif()
+ 
+-- 
+2.34.1
+
