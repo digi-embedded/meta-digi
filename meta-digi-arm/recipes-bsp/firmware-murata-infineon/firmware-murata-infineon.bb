@@ -103,4 +103,4 @@ INSANE_SKIP:${PN} += "build-deps"
 INSANE_SKIP:${PN} += "file-rdeps"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccmp1)"
+COMPATIBLE_MACHINE = "(ccmp1|ccmp2)"

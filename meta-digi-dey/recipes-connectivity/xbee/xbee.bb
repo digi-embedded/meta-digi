@@ -42,4 +42,4 @@ SYSTEMD_PACKAGES = "${PN}-init"
 SYSTEMD_SERVICE:${PN}-init = "xbee-init.service"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx8m|ccimx8x|ccimx9)"
+COMPATIBLE_MACHINE = "(ccimx8m|ccimx8x|ccimx9|ccmp2)"
