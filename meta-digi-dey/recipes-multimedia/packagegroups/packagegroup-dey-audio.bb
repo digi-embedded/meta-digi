@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2022 Digi International.
+# Copyright (C) 2012-2022, Digi International Inc.
 #
 SUMMARY = "Audio packagegroup for DEY image"
 

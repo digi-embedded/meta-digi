@@ -1,4 +1,4 @@
-# Copyright (C) 2016 Digi International.
+# Copyright (C) 2016, Digi International Inc.
 
 python __anonymous () {
     if (d.getVar("TRUSTFENCE_CONSOLE_DISABLE") == "1"):

@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2024 Digi International
+# Copyright (C) 2018-2024, Digi International Inc.
 
 require recipes-bsp/u-boot/u-boot.inc
 

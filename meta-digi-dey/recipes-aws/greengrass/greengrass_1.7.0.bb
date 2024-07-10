@@ -1,4 +1,4 @@
-# Copyright (C) 2018, 2019, Digi International Inc.
+# Copyright (C) 2018,2019, Digi International Inc.
 
 require greengrass.inc
 

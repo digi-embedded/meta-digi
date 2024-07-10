@@ -1,4 +1,4 @@
-# Copyright (C) 2019-2022 Digi International Inc.
+# Copyright (C) 2019-2022, Digi International Inc.
 
 SRCBRANCH = "master"
 SRCREV = "${AUTOREV}"

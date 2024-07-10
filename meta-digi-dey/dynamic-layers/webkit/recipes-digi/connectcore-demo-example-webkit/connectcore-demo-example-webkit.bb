@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2024 Digi International.
+# Copyright (C) 2022-2024, Digi International Inc.
 
 require recipes-digi/dey-examples/connectcore-demo-example.inc
 

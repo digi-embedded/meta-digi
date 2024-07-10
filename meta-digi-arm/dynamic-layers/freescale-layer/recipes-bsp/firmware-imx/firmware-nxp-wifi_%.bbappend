@@ -1,4 +1,4 @@
-# Copyright (C) 2023 Digi International.
+# Copyright (C) 2023, Digi International Inc.
 
 LIC_FILES_CHKSUM:ccimx93 = "file://LICENSE.txt;md5=2827219e81f28aba7c6a569f7c437fa7"
 

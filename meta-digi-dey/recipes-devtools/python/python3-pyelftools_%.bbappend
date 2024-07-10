@@ -1,3 +1,3 @@
-# Copyright (c) 2023, Digi International Inc.
+# Copyright (C) 2023, Digi International Inc.
 
 BBCLASSEXTEND += "nativesdk"

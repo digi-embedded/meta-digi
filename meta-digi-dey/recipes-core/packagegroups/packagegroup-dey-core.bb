@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2023 Digi International.
+# Copyright (C) 2012-2023, Digi International Inc.
 #
 SUMMARY = "Core packagegroup for DEY image"
 

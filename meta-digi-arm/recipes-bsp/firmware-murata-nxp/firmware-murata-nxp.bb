@@ -1,4 +1,4 @@
-# Copyright (C) 2023-2024, Digi International.
+# Copyright (C) 2023,2024, Digi International Inc.
 
 SUMMARY = "Murata NXP firmware binaries"
 LICENSE = "GPL-2.0-only"

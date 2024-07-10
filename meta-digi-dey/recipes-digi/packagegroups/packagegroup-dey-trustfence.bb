@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2024 Digi International.
+# Copyright (C) 2016-2024, Digi International Inc.
 
 SUMMARY = "DEY trustfence packagegroup"
 

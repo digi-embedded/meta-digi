@@ -1,4 +1,4 @@
-# Copyright 2023 Digi International Inc.
+# Copyright (C) 2023, Digi International Inc.
 
 #
 # Reuse meta-freescale's wayland-protocols_1.25.imx.bb

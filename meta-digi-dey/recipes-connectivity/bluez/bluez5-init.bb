@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2023, Digi International Inc.
+# Copyright (C) 2022,2023, Digi International Inc.
 
 SUMMARY = "Bluetooth init scripts"
 LICENSE = "GPL-2.0-only"

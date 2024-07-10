@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2024 Digi International
+# Copyright (C) 2022-2024, Digi International Inc.
 
 require u-boot-dey.inc
 LIC_FILES_CHKSUM = "file://Licenses/README;md5=5a7450c57ffe5ae63fd732446b988025"

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2022 Digi International.
+# Copyright (C) 2015-2022, Digi International Inc.
 
 SRC_URI += " \
     file://bluetooth.service-add-customizations.patch \

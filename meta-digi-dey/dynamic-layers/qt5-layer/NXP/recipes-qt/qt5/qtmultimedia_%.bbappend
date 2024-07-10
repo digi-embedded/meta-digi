@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2019 Digi International
+# Copyright (C) 2015-2019, Digi International Inc.
 
 PACKAGECONFIG:append = " gstreamer"
 

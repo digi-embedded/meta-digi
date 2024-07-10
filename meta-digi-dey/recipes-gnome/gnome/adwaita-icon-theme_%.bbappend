@@ -1,4 +1,4 @@
-# Copyright (C) 2019 Digi International.
+# Copyright (C) 2019, Digi International Inc.
 
 do_install:append() {
 	# We don't use the scalable icons anywhere and they take up over

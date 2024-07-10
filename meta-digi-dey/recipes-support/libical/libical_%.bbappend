@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2023 Digi International Inc.
+# Copyright (C) 2017-2023, Digi International Inc.
 
 #
 # Remove ICU support for platforms with little storage memory to save space

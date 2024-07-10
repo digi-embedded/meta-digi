@@ -1,4 +1,4 @@
-# Copyright 2023, 2024 Digi International Inc.
+# Copyright (C) 2023,2024, Digi International Inc.
 
 #
 # Reuse meta-freescale's linux-imx-headers_5.15.bb

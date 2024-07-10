@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2024 Digi International Inc.
+# Copyright (C) 2022-2024, Digi International Inc.
 
 SUMMARY = "Murata Infineon firmware binaries"
 SECTION = "base"

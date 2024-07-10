@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020-2022 Digi International.
+# Copyright (C) 2020-2022, Digi International Inc.
 #
 require recipes-core/images/dey-image-graphical.inc
 

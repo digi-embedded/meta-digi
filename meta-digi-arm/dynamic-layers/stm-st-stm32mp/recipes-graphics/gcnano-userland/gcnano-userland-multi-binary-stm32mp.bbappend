@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2023, Digi International Inc.
+# Copyright (C) 2022,2023, Digi International Inc.
 
 #
 # Workarounds for Crank storyboard engine

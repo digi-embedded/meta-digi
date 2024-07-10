@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Digi International
+# Copyright (C) 2017, Digi International Inc.
 
 SUMMARY = "Recovery reboot utilities"
 LICENSE = "MPL-2.0"

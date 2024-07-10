@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2022 Digi International Inc.
+# Copyright (C) 2022, Digi International Inc.
 #
 
 # Select internal or Github OPTEE repo

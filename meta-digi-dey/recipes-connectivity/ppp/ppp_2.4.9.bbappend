@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Digi International Inc.
+# Copyright (C) 2017, Digi International Inc.
 
 do_install:append() {
 	# NetworkManager manages the 'resolv.conf' file globally, so

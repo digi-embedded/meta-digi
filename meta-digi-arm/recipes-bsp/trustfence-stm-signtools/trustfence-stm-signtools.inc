@@ -1,4 +1,4 @@
-# Copyright (C) 2023,2024 Digi International.
+# Copyright (C) 2023,2024, Digi International Inc.
 
 SUMMARY = "STM key generation and signing tools"
 SECTION = "console/tools"

@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2023 Digi International.
+# Copyright (C) 2016-2023, Digi International Inc.
 
 SUMMARY = "Qualcomm's wireless driver for qca65xx"
 DESCRIPTION = "qcacld-2.0 module"

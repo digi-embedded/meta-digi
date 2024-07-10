@@ -1,7 +1,7 @@
 /*
  * ConnectCore Analog Comparator sample application.
  *
- * Copyright (c) 2017-2020 Digi International Inc.
+ * Copyright (C) 2017-2020, Digi International Inc.
  * All rights reserved.
  *
  * Based on iio_event_monitor.c from the tools/iio directory, of the linux

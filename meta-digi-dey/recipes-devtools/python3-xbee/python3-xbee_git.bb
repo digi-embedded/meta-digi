@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2024 Digi International Inc.
+# Copyright (C) 2022-2024, Digi International Inc.
 
 SUMMARY = "Python library to interact with Digi International's XBee radio frequency modules."
 DESCRIPTION = "The XBee Python Library provides the ability to communicate with remote nodes in the network, IoT devices and other interfaces of the local device."

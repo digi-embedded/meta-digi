@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2024 Digi International Inc.
+# Copyright (C) 2022-2024, Digi International Inc.
 
 SUMMARY = "Crank Demo"
 HOMEPAGE = "https://www.cranksoftware.com/"

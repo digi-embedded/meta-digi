@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2017 Digi International Inc.
+# Copyright (C) 2012-2017, Digi International Inc.
 #
 SUMMARY = "Gstreamer framework packagegroup for DEY image"
 
