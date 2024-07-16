@@ -15,6 +15,13 @@ SRC_URI = " \
     file://cyfmac4373-sdio_World.clm_blob \
     file://cyw4373-autocountry \
     file://cyw4373-autocountry.service \
+    file://cyfmac55500-sdio.txt \
+    file://cyfmac55500-sdio_US.clm_blob \
+    file://cyfmac55500-sdio.trxse \
+    file://CYW55500A1_001.002.032.0121.0000_Generic_UART_37_4MHz_wlbga_iPA_sLNA_ANT0.hcd \
+    file://cyw55512-bluetooth \
+    file://cyw55512-bluetooth.service \
+    file://mbt \
 "
 
 SRCREV_cyw-fmac-fw="db8deb03b8d24e5069ac4581d1c35b767012e926"
@@ -31,9 +38,36 @@ DEPENDS = "libnl"
 
 do_install () {
 	bbnote "Installing Murata Infineon firmware binaries: "
+	install -d ${D}${sbindir}
+
+	if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
+		# Install systemd unit files
+		install -d ${D}${systemd_unitdir}/system/
+		install -m 0644 ${WORKDIR}/cyw4373-autocountry.service ${D}${systemd_unitdir}/system/cyw4373-autocountry.service
+		install -m 0644 ${WORKDIR}/cyw55512-bluetooth.service ${D}${systemd_unitdir}/system/cyw55512-bluetooth.service
+	fi
+
+	install -d ${D}${sysconfdir}/init.d/
+
+	# Install autocountry service
+	install -m 0755 ${WORKDIR}/cyw4373-autocountry ${D}${sysconfdir}/cyw4373-autocountry
+	ln -sf /etc/cyw4373-autocountry ${D}${sysconfdir}/init.d/cyw4373-autocountry
+
+	# Install bluetooth init service
+	install -m 0755 ${WORKDIR}/cyw55512-bluetooth ${D}${sysconfdir}/cyw55512-bluetooth
+	ln -sf /etc/cyw55512-bluetooth ${D}${sysconfdir}/init.d/cyw55512-bluetooth
+
+	# Install WLAN client utility binary based on 32-bit/64-bit arch
+	if [ ${TARGET_ARCH} = "aarch64" ]; then
+		install -m 755 ${S}/cyw-fmac-utils-imx64/wl ${D}${sbindir}
+	else
+		install -m 755 ${S}/cyw-fmac-utils-imx32/wl ${D}${sbindir}
+	fi
+}
+
+do_install:append:ccmp1 () {
 	install -d ${D}${base_libdir}/firmware/cypress
 	install -d ${D}${base_libdir}/firmware/brcm
-	install -d ${D}${sbindir}
 
 	# Install Bluetooth patch *.HCD file
 	# For Murata 2AE (LBEE5PK2AE-564)
@@ -49,37 +83,45 @@ do_install () {
 	# Install NVRAM files (*.txt)
 	# For Murata 2AE (LBEE5PK2AE-564)
 	install -m 444 ${S}/cyw-fmac-nvram/cyfmac4373-sdio.2AE.txt ${D}${base_libdir}/firmware/cypress/cyfmac4373-sdio.txt
+}
 
-	# Install WLAN client utility binary based on 32-bit/64-bit arch
-	if [ ${TARGET_ARCH} = "aarch64" ]; then
-		install -m 755 ${S}/cyw-fmac-utils-imx64/wl ${D}${sbindir}
-	else
-		install -m 755 ${S}/cyw-fmac-utils-imx32/wl ${D}${sbindir}
-	fi
+do_install:append:ccmp2 () {
+	install -d ${D}${base_libdir}/firmware/cypress
+	install -d ${D}${base_libdir}/firmware/brcm
 
-	if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
-		# Install systemd unit files
-		install -d ${D}${systemd_unitdir}/system/
-		install -m 0644 ${WORKDIR}/cyw4373-autocountry.service ${D}${systemd_unitdir}/system/cyw4373-autocountry.service
-	fi
+	# Install Bluetooth patch *.HCD file
+	# For Murata 2GY (LBEE5HY2GY-SMP)
+	install -m 444 CYW55500A1_001.002.032.0121.0000_Generic_UART_37_4MHz_wlbga_iPA_sLNA_ANT0.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1.hcd
 
-	install -d ${D}${sysconfdir}/init.d/
-	install -m 0755 ${WORKDIR}/cyw4373-autocountry ${D}${sysconfdir}/cyw4373-autocountry
-	ln -sf /etc/cyw4373-autocountry ${D}${sysconfdir}/init.d/cyw4373-autocountry
+	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
+	# For Murata 2GY (LBEE5HY2GY-SMP)
+	install -m 444 cyfmac55500-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.trxse
+	install -m 444 cyfmac55500-sdio_US.clm_blob ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio_US.clm_blob
+
+	# Install NVRAM files (*.txt)
+	# For Murata 2GY (LBEE5HY2GY-SMP)
+	install -m 444 cyfmac55500-sdio.txt ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.txt
+
+	# Install Manufacturing Bluetooth Test tool (MBT)
+	install -m 755 mbt ${D}${sbindir}
 }
 
 inherit update-rc.d systemd
 
-INITSCRIPT_PACKAGES += "${PN}-autocountry"
+INITSCRIPT_PACKAGES += "${PN}-autocountry ${PN}-bluetooth"
 INITSCRIPT_NAME:${PN}-autocountry = "cyw4373-autocountry"
 INITSCRIPT_PARAMS:${PN}-autocountry = "start 19 2 3 4 5 . stop 21 0 1 6 ."
+INITSCRIPT_NAME:${PN}-bluetooth = "cyw55512-bluetooth"
+INITSCRIPT_PARAMS:${PN}-bluetooth = "start 19 2 3 4 5 . stop 21 0 1 6 ."
 
-SYSTEMD_PACKAGES = "${PN}-autocountry"
+SYSTEMD_PACKAGES = "${PN}-autocountry ${PN}-bluetooth"
 SYSTEMD_SERVICE:${PN}-autocountry = "cyw4373-autocountry.service"
+SYSTEMD_SERVICE:${PN}-bluetooth = "cyw55512-bluetooth.service"
 
 PACKAGES =+ " \
     ${PN}-mfgtest \
     ${PN}-autocountry \
+    ${PN}-bluetooth \
 "
 
 FILES:${PN} = " \
@@ -87,7 +129,7 @@ FILES:${PN} = " \
 "
 
 FILES:${PN}-mfgtest = " \
-    ${sbindir} \
+    ${sbindir}/wl \
 "
 
 FILES:${PN}-autocountry = " \
@@ -96,8 +138,16 @@ FILES:${PN}-autocountry = " \
     ${systemd_unitdir}/system/cyw4373-autocountry.service \
 "
 
-RDEPENDS:${PN}:append = " ${PN}-autocountry"
+FILES:${PN}-bluetooth = " \
+    ${sysconfdir}/cyw55512-bluetooth \
+    ${sysconfdir}/init.d/cyw55512-bluetooth \
+    ${systemd_unitdir}/system/cyw55512-bluetooth.service \
+    ${sbindir}/mbt \
+"
+
+RDEPENDS:${PN}:append:ccmp1 = " ${PN}-autocountry"
 RDEPENDS:${PN}-autocountry:append = " ${PN}-mfgtest"
+RDEPENDS:${PN}:append:ccmp2 = " ${PN}-bluetooth"
 
 INSANE_SKIP:${PN} += "build-deps"
 INSANE_SKIP:${PN} += "file-rdeps"

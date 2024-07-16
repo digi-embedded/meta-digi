@@ -1,0 +1,50 @@
+#!/bin/sh
+#===============================================================================
+#
+#  Copyright (C) 2024 by Digi International Inc.
+#  All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License version 2 as published by
+#  the Free Software Foundation.
+#
+#
+#  !Description: Initialize Bluetooth interface
+#
+#===============================================================================
+
+SCRIPTNAME="$(basename ${0})"
+export MBT_TRANSPORT=/dev/ttySTM1
+
+log() {
+	if type "systemd-cat" >/dev/null 2>/dev/null; then
+		systemd-cat -p "${1}" -t "${SCRIPTNAME}" printf "%s" "${2}"
+	else
+		logger -p "${1}" -t "${SCRIPTNAME}" "${2}"
+	fi
+}
+
+bt_power_cycle() {
+	#CCMP2 BT_REG_EN GPIO PZ5
+	gpioset gpiochip11 5=0
+	sleep 0.5
+	gpioset gpiochip11 5=1
+}
+
+bt_init() {
+	bt_power_cycle
+	# Load Bluetooth firmware on device
+	mbt download /lib/firmware/brcm/CYW55500A1.hcd
+	# Attach serial UART to the Bluetooth stack
+	btattach -B /dev/ttySTM1 -P bcm -S 921600 &
+	sleep 2
+
+	# Up the interface to be able to send hci commands
+	if ! hciconfig hci0 up; then
+		log err "FAILED (hci0 up)"
+		exit
+	fi
+	log info "OK"
+}
+
+bt_init
