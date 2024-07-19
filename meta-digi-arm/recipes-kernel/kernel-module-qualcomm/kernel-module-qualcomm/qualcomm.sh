@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2023 by Digi International Inc.
+# Copyright (c) 2023,2024 Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -16,12 +16,20 @@
 #
 
 MMC_NODE="##NODE##"
+# Lock file to track and prevent to re-run the script when rebinding the MMC node.
+LOCKFILE="/tmp/qca65x4.lock"
 
 # At this point of the boot (udev script), the system log (syslog) is not
 # available yet, so use the kernel log buffer from userspace.
 log() {
 	printf "<$1>qca65x4: $2\n" >/dev/kmsg
 }
+
+if test -f "$LOCKFILE"; then
+	# Script called due to rebinding of mmc. Ignore it and remove the lock file.
+	rm $LOCKFILE
+	exit 1
+fi
 
 # Force re-detection of the mmc node
 rebind_mmc_node() {
@@ -47,6 +55,10 @@ load_and_check && log "3" "[INFO] wlan module loaded" && exit 0
 
 # If we are here, the load has failed. Retry.
 log "3" "[WARN] Loading wlan module failed, retrying..."
+
+# Create a lock file, as rebinding the mmc node will trigger the udev rules
+# Do not remove the file at the end, it will be called by the script in the rebind call
+touch $LOCKFILE
 
 # Try by re-binding the mmc node.
 rebind_mmc_node && load_and_check && log "3" "[INFO] wlan module loaded" && exit 0

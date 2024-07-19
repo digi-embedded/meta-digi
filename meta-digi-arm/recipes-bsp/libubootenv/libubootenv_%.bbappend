@@ -83,6 +83,8 @@ pkg_postinst_ontarget:${PN}() {
 			-e "s/##NBLOCKS##/${NBLOCKS}/g" \
 			${CONFIG_FILE}
 	fi
+	# Flush the file system to have the changes written
+	sync ${CONFIG_FILE}
 }
 
 inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}

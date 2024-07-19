@@ -30,11 +30,12 @@ ROOTFS_IMAGE_IN_PACKAGE="no"
 ENCRYPT_ROOTFS="no"
 SWUPDATE_OUTPUT="swupdate_output.txt"
 
+ALLOW_ENC="yes"
 PART_LIST=""
 ENC_PARTS=""
 DEFAULT_ENC_PARTS="yes"
 
-NAND_PARTS_BLACKLIST="bootloader environment linux recovery safe"
+NAND_PARTS_BLACKLIST="bootloader environment linux recovery safe system"
 EMMC_PARTS_BLACKLIST="linux recovery safe"
 
 ENC_DIFF=""
@@ -277,8 +278,8 @@ format_ubi_volume() {
 				volname="$(ubinfo ${v} | grep ^Name | awk '{print $(2)}')"
 				if [ "${volname}" = "${1}" ]; then
 					# Find mountpoint
-					u="$(basename ${d})"
-					mountpoint="$(mount | grep ${u}:${1} | awk '{print $(3) }')"
+					u="$(basename ${v})"
+					mountpoint="$(mount | grep ${u} | awk '{print $(3) }')"
 					umount ${mountpoint} 2> /dev/null
 					# Wipe out volume
 					ubiupdatevol ${v} -t
@@ -418,7 +419,7 @@ check_swu_package() {
 	fi
 
 	# Check if the rootfs is meant to be encrypted
-	if [ "${ROOTFS_IMAGE_IN_PACKAGE}" = "yes" ]; then
+	if [ "${ROOTFS_IMAGE_IN_PACKAGE}" = "yes"  -a "${ALLOW_ENC}" = "yes" ]; then
 		grep "Description" "${SWUPDATE_OUTPUT}" | grep -qs "Encrypted rootfs" && ENCRYPT_ROOTFS="yes"
 	fi
 }
@@ -552,6 +553,10 @@ psplash_message "Starting recovery..."
 # Read the recovery command.
 read_uboot_var "${ENV_RECOVERY_COMMAND}" COMMAND
 
+# Check if system is single-MTD to allow partition encryption or not
+read_uboot_var singlemtdsys singlemtdsys
+[ "$(is_nand)" = "yes" -a "${singlemtdsys}" = "yes" ] && ALLOW_ENC="no"
+
 # Check if there is any command.
 if [ -z "${COMMAND}" ]; then
 	quit_with_error "No command found"
@@ -563,8 +568,11 @@ for arg in ${COMMAND}; do
 		wipe_update)
 			wipe_update_bool=true;;
 		encryption_key=*)
-			encryption_key_bool=true;
-			eval "${arg}";;
+			if [ "${ALLOW_ENC}" = "yes" ]; then
+				encryption_key_bool=true;
+				eval "${arg}";
+			fi
+			;;
 		update_package=*)
 			update_package_bool=true;
 			eval "${arg}";;
@@ -572,10 +580,13 @@ for arg in ${COMMAND}; do
 			update_image_set_bool=true;
 			eval "${arg}";;
 		encrypt_partitions=*)
-			eval "${arg}";
-			DEFAULT_ENC_PARTS="no";
-			encrypt_partitions=$(echo ${encrypt_partitions} | tr "," " ");
-			encrypt_partitions=$(remove_duplicates "${encrypt_partitions}");;
+			if [ "${ALLOW_ENC}" = "yes" ]; then
+				eval "${arg}";
+				DEFAULT_ENC_PARTS="no";
+				encrypt_partitions=$(echo ${encrypt_partitions} | tr "," " ");
+				encrypt_partitions=$(remove_duplicates "${encrypt_partitions}");
+			fi
+			;;
 		wipe_ubi_partitions=*)
 			eval "${arg}";
 			wipe_ubi_partitions=$(echo ${wipe_ubi_partitions} | tr "," " ");

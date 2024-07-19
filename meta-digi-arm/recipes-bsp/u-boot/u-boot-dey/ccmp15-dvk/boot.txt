@@ -57,6 +57,13 @@ setexpr module_has_wifi ${hwid_2} \& 20000
 setexpr module_has_wifi ${module_has_wifi} / 20000
 setexpr module_has_bt ${hwid_2} \& 40000
 setexpr module_has_bt ${module_has_bt} / 40000
+setexpr som_hv ${hwid_2} \& 78
+setexpr som_hv ${som_hv} / 8
+
+# Apply SOMv1 overlay if the HWID field 'hv' is 1
+if test "${som_hv}" -eq "1"; then
+	setenv overlays _ov_som_v1_ccmp15.dtbo,${overlays}
+fi
 
 if test "${module_has_bt}" = "1" && test -z "${disable_bt}"; then
 	setenv overlays _ov_som_bt_ccmp15.dtbo,${overlays}

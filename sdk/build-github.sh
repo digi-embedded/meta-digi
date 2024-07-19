@@ -81,6 +81,18 @@ copy_images() {
 }
 
 #
+# Pre-fetch all the source packages (with a retries mechanism)
+#
+fetch_all() {
+	local FETCH_LOG="fetch.log"
+	for _ in $(seq 1 3); do
+		bitbake --runall=fetch "${1}" 2>&1 | tee "${FETCH_LOG}"
+		grep -qs 'Summary.*ERROR' "${FETCH_LOG}" || break
+	done
+	rm -f "${FETCH_LOG}"
+}
+
+#
 # In the buildserver we share the state-cache for all the different platforms
 # we build in a jenkins job. This may cause problems with some packages that
 # have different runtime dependences depending on the platform.
@@ -224,6 +236,7 @@ for platform in ${DY_PLATFORMS}; do
 			} >> conf/local.conf
 			for target in ${platform_targets:?}; do
 				printf "\n[INFO] Building the %s target.\n" "${target}"
+				time fetch_all "${target}"
 				# shellcheck disable=SC2046
 				time bitbake "${target}" $(swu_recipe_name "${target}")
 				# Build the toolchain for DEY images

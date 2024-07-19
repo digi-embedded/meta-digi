@@ -325,8 +325,7 @@ uuu fb: ucmd setenv fastboot_buffer \${loadaddr}
 uuu "fb[-t 10000]:" ucmd run partition_nand_linux
 
 if [ "${SINGLEMTDSYS}" = true ]; then
-	uuu "fb[-t 30000]:" ucmd nand erase.part system
-	uuu "fb[-t 10000]:" ucmd run ubivolscript
+	uuu "fb[-t 30000]:" ucmd run ubivolscript
 fi
 
 if [ "${DUALBOOT}" = true ]; then
@@ -346,7 +345,7 @@ else
 	# Update Linux
 	part_update "${LINUX_NAME}" "${INSTALL_LINUX_FILENAME}" 15000
 	# Update Recovery
-	part_update "${RECOVERY_NAME}" "${INSTALL_RECOVERY_FILENAME}" 15000
+	part_update "${RECOVERY_NAME}" "${INSTALL_RECOVERY_FILENAME}" 20000
 	# Update Rootfs
 	part_update "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}" 120000
 fi
