@@ -158,6 +158,7 @@ done<<-_EOF_
 	ccmp15-dvk           dey-image-webkit
 	ccmp13-dvk           core-image-base
 	ccmp25-dvk           dey-image-qt
+	ccimx91-dvk          core-image-base
 	ccimx93-dvk          dey-image-qt
 _EOF_
 
