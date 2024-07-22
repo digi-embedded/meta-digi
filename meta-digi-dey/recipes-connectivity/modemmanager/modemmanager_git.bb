@@ -13,7 +13,7 @@ DEPENDS = "glib-2.0 intltool-native libgudev"
 PV = "1.7.0+git${SRCPV}"
 
 SRC_URI = " \
-    git://anongit.freedesktop.org/git/ModemManager/ModemManager.git;protocol=https \
+    git://gitlab.freedesktop.org/mobile-broadband/ModemManager.git;protocol=https;nobranch=1 \
     file://0001-configure.ac-add-foreign-automake-option.patch \
 "
 SRCREV = "d41d717112e6a183a0df510c210e80a86fc11060"
