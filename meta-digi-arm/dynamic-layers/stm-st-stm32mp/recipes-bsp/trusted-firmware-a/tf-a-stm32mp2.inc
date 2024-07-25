@@ -596,7 +596,7 @@ do_deploy() {
     if [ "${TF_A_ENABLE_METADATA}" = "1" ]; then
         install -d "${DEPLOYDIR}/arm-trusted-firmware"
         if [ -f "${B}/${TF_A_METADATA_NAME}.${TF_A_METADATA_SUFFIX}" ]; then
-            install -m 644 "${B}/${TF_A_METADATA_NAME}.${TF_A_METADATA_SUFFIX}" "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_METADATA_BIN}"
+            install -m 644 "${B}/${TF_A_METADATA_NAME}.${TF_A_METADATA_SUFFIX}" "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_METADATA_BINARY}"
         fi
     fi
 }
