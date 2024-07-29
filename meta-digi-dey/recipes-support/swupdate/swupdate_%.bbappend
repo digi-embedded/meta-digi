@@ -11,7 +11,7 @@ SRC_URI += " \
     file://0003-handlers-rdiff-handler-for-applying-librsync-s-rdiff.patch \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'file://systemd.cfg', '', d)} \
     ${@bb.utils.contains('STORAGE_MEDIA', 'mtd', 'file://mtd.cfg', '', d)} \
-    ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'file://signed_images.cfg', '', d)} \
+    ${@oe.utils.conditional('TRUSTFENCE_ENABLED', '1', 'file://signed_images.cfg', '', d)} \
     file://swupdate.config \
 "
 

@@ -57,7 +57,7 @@ python do_swuimage:prepend() {
     import shutil
 
     # Set signing key for trustfence enabled updates.
-    if (d.getVar('TRUSTFENCE_SIGN') == "1"):
+    if (d.getVar('TRUSTFENCE_ENABLED') == "1"):
         d.setVar('SWUPDATE_PRIVATE_KEY', glob.glob(d.getVar('SWUPDATE_PRIVATE_KEY_TEMPLATE'))[0])
 
     # Copy script file.
