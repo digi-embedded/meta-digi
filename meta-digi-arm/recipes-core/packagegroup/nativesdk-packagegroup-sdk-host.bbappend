@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2023 Digi International.
+# Copyright (C) 2016-2023, Digi International Inc.
 
 IMX_OPTEE_SDK_RDEPENDS ?= " \
     nativesdk-python3-cryptography \

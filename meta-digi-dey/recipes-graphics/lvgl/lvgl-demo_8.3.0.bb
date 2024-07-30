@@ -64,9 +64,11 @@ do_configure:prepend() {
 
 WESTON_SERVICE ?= "weston.service"
 WESTON_SERVICE:ccmp15 ?= "weston-launch.service"
+WESTON_SERVICE:ccmp2 ?= "weston-launch.service"
 
 LVGL_DEMO_DISPLAY ?= "wayland-0"
 LVGL_DEMO_DISPLAY:ccmp15 ?= "wayland-1"
+LVGL_DEMO_DISPLAY:ccmp2 ?= "wayland-1"
 LVGL_DEMO_DISPLAY:ccimx93 ?= "wayland-1"
 LVGL_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\$\{DEMO_DISPLAY\}"
 LVGL_DEMO_ENV:ccimx6ul ?= ""
@@ -107,4 +109,4 @@ INITSCRIPT_PARAMS:${PN}-init = "start 99 3 5 . stop 20 0 1 2 6 ."
 SYSTEMD_PACKAGES = "${PN}-init"
 SYSTEMD_SERVICE:${PN}-init = "lvgl-demo-init.service"
 
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx93|ccmp15)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx93|ccmp15|ccmp2)"

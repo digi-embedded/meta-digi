@@ -1,4 +1,4 @@
-# Copyright 2023 Digi International Inc.
+# Copyright (C) 2023, Digi International Inc.
 
 RDEPENDS:packagegroup-x-linux-ai-tflite:remove:ccmp13 = " \
     tflite-cv-apps-image-classification-c++ \

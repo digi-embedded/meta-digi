@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Digi International.
+# Copyright (C) 2017, Digi International Inc.
 
 SUMMARY = "An open source, portable, easy to use, readable and flexible SSL \
 library"

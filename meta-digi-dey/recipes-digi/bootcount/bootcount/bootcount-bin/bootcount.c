@@ -56,6 +56,7 @@ struct platform_functions platforms_functions[] = {
 	[PLATFORM_CC8MM] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_CC8MN] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_CC8X] = {read_bootcount_nvmem, write_bootcount_nvmem},
+	[PLATFORM_CC91] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_CC93] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_CCMP13] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_CCMP15] = {read_bootcount_nvmem, write_bootcount_nvmem},

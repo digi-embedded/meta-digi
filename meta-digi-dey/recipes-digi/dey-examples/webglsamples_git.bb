@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2023 Digi International.
+# Copyright (C) 2020-2023, Digi International Inc.
 
 SUMMARY = "A collection of WebGL samples"
 DESCRIPTION = "This repo contains several examples of the WebGL JavaScript API, which allows web browsers to render 2D and 3D graphics with direct access to the system's GPU."

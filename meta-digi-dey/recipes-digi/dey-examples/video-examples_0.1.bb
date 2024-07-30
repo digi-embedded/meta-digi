@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2022 Digi International.
+# Copyright (C) 2020-2022, Digi International Inc.
 
 SUMMARY = "Short videos to demonstrate video playback on the WPE WebKit"
 DESCRIPTION = "This package contains fragments of the short film 'Big Buck Bunny', which are used to demonstrate how WebKit makes use of hardware acceleration for video decoding"

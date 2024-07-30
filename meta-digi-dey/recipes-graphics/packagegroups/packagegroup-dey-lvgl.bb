@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2023 Digi International Inc.
+# Copyright (C) 2023, Digi International Inc.
 #
 SUMMARY = "LVGL packagegroup for DEY image"
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Digi International.
+# Copyright (C) 2017, Digi International Inc.
 
 SUMMARY = "SDK for connecting to AWS IoT from a device using embedded C"
 HOMEPAGE = "https://github.com/aws/aws-iot-device-sdk-embedded-C"

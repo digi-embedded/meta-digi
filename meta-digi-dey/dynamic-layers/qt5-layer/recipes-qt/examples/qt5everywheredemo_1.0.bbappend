@@ -1,4 +1,4 @@
-# Copyright (C) 2015 Digi International.
+# Copyright (C) 2015, Digi International Inc.
 
 LIC_FILES_CHKSUM = "file://main.cpp;md5=a3ecdc1d777da347f1bf35dd9966606f"
 

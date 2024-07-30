@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016-2023 Digi International.
+# Copyright (C) 2016-2023, Digi International Inc.
 #
 require dey-image-graphical.inc
 

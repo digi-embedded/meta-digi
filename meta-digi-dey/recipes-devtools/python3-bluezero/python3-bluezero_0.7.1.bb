@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Digi International Inc.
+# Copyright (C) 2022, Digi International Inc.
 
 SUMMARY = "Library providing an API to access to Bluez with zero boilerplate code"
 DESCRIPTION = "The library will use calls to the BlueZ D-Bus API and use ‘sensible’ defaults to help with that simplification."

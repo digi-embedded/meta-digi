@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2021 Digi International.
+# Copyright (C) 2016-2021, Digi International Inc.
 
 SUMMARY = "Trustfence command line tool"
 SECTION = "console/tools"

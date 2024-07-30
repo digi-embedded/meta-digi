@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2022 Digi International Inc.
+# Copyright (C) 2022, Digi International Inc.
 #
 
 # Select internal or Github OPTEE repo
@@ -14,3 +14,6 @@ SRC_URI = " \
     ${OPTEE_GIT_URI};branch=${SRCBRANCH};name=os \
     file://fonts.tar.gz;subdir=git;name=fonts \
 "
+
+# If TF enabled, force use of HUK in OTP bits
+EXTRA_OEMAKE += "${@oe.utils.conditional('TRUSTFENCE_ENABLED', '1', 'CFG_OTP_HUK=1', '', d)}"

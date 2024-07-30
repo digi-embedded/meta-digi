@@ -1,4 +1,4 @@
-# Copyright (C) 2023-2024, Digi International.
+# Copyright (C) 2023,2024, Digi International Inc.
 
 SUMMARY = "Murata NXP firmware binaries"
 LICENSE = "GPL-2.0-only"
@@ -27,4 +27,4 @@ do_install () {
 FILES:${PN} = "${nonarch_base_libdir}/firmware"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "ccimx93"
+COMPATIBLE_MACHINE = "(ccimx9)"

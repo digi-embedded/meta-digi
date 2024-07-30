@@ -1,4 +1,4 @@
-# Copyright (C) 2023,2024 Digi International Inc.
+# Copyright (C) 2023,2024, Digi International Inc.
 
 require swu.inc
 

@@ -1,4 +1,4 @@
-# Copyright 2023, 2024 Digi International Inc.
+# Copyright (C) 2023,2024, Digi International Inc.
 
 #
 # Reuse meta-freescale's linux-imx-headers_5.15.bb
@@ -11,4 +11,4 @@ SRCREV = "770c5fe2c1d1529fae21b7043911cd50c6cf087e"
 
 IMX_UAPI_HEADERS:remove = "isl29023.h"
 
-COMPATIBLE_MACHINE = "(ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx9)"

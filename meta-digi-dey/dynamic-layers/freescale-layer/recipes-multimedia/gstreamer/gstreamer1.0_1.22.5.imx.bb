@@ -107,6 +107,6 @@ S = "${WORKDIR}/git"
 
 PACKAGECONFIG[tests] = "-Dtests=enabled,-Dtests=disabled"
 
-COMPATIBLE_MACHINE = "(ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx9)"
 
 ########### End of i.MX overrides #########

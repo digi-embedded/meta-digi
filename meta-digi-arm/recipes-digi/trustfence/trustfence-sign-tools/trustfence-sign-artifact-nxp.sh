@@ -101,6 +101,7 @@ done<<-_EOF_
 	ccimx8mm    0x40480000  0x43800000  0x43000000  -           HAB   0x2000  "-h 4 -d sha256"
 	ccimx8mn    0x40480000  0x43800000  0x43000000  -           HAB   0x2000  "-h 4 -d sha256"
 	ccimx8x     0x80280000  0x82100000  0x82000000  -           AHAB  -       "-a -d sha512 -s sha512"
+	ccimx91     -           -           -           0x84000000  AHAB  -       "-a -d sha256 -s sha512"
 	ccimx93     -           -           -           0x84000000  AHAB  -       "-a -d sha256 -s sha512"
 _EOF_
 
@@ -127,6 +128,8 @@ eval "CONFIG_CSF_SIZE=\"\${${PLATFORM}_csf_size}\""
 # Rootfs is loaded to $initrd_addr, just like the ramdisk
 [ "${ARTIFACT_ROOTFS}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
 
+# For ccimx91 do not require image type (assume FIT image)
+[ "${PLATFORM}" = "ccimx91" ] && CONFIG_RAM_START="${CONFIG_FIT_LOADADDR}"
 # For ccimx93 do not require image type (assume FIT image)
 [ "${PLATFORM}" = "ccimx93" ] && CONFIG_RAM_START="${CONFIG_FIT_LOADADDR}"
 

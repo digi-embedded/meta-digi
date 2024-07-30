@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2023 Digi International
+# Copyright (C) 2017-2023, Digi International Inc.
 
 SUMMARY = "NXP Code signing Tool for the High Assurance Boot library"
 DESCRIPTION = "Provides software code signing support designed for use with \

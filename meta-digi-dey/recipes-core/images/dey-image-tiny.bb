@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2014 Digi International.
+# Copyright (C) 2014, Digi International Inc.
 #
 DESCRIPTION = "DEY busybox only based image."
 

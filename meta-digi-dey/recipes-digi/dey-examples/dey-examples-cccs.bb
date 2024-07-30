@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2023 Digi International Inc.
+# Copyright (C) 2017-2023, Digi International Inc.
 
 require recipes-digi/dey-examples/dey-examples-src.inc
 

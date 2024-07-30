@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Digi International Inc.
+# Copyright (C) 2021-2023, Digi International Inc.
 
 SUMMARY = "Digi Embedded Yocto Dual boot support"
 SECTION = "base"

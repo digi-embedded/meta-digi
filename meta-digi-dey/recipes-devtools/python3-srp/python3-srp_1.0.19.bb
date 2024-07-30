@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Digi International Inc.
+# Copyright (C) 2022, Digi International Inc.
 
 SUMMARY = "Library providing an implementation of the Secure Remote Password protocol (SRP)"
 DESCRIPTION = "SRP is a cryptographically strong authentication protocol for password-based, mutual authentication over an insecure network connection."

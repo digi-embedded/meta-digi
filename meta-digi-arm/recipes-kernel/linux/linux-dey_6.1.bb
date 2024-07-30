@@ -1,8 +1,9 @@
-# Copyright (C) 2023-2024 Digi International
+# Copyright (C) 2023,2024, Digi International Inc.
 
 require recipes-kernel/linux/linux-dey.inc
 
 SRCBRANCH = "v6.1/nxp/dey-4.0/maint"
+SRCBRANCH:stm32mp2common = "v6.1.28/stm/master"
 
 # Patch series for RT Kernel
 NXP_RT_PATCHES = " \
@@ -29,4 +30,26 @@ SRCREV = "${AUTOREV}"
 KERNEL_MODULE_PROBECONF += "btnxpuart"
 module_conf_btnxpuart = "blacklist btnxpuart"
 
-COMPATIBLE_MACHINE = "(ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx9)"
+
+# ---------------------------------------------------------------------
+# stub for devicetree which are located on digi directory
+do_install:prepend:ccmp2() {
+    if [ -d "${B}/arch/${ARCH}/boot/dts/digi" ]; then
+        for dtbf in ${KERNEL_DEVICETREE}; do
+            install -m 0644 "${B}/arch/${ARCH}/boot/dts/digi/${dtbf}" "${B}/arch/${ARCH}/boot/dts/"
+        done
+    fi
+}
+
+do_install:append:ccmp2() {
+    if ${@bb.utils.contains('MACHINE_FEATURES','gpu','true','false',d)}; then
+        # when ACCEPT_EULA are filled
+        install -d ${D}/${sysconfdir}/modprobe.d/
+        echo "blacklist etnaviv" > ${D}/${sysconfdir}/modprobe.d/blacklist.conf
+    fi
+}
+
+FILES:${KERNEL_PACKAGE_NAME}-modules:ccmp2 += "${sysconfdir}/modprobe.d"
+
+COMPATIBLE_MACHINE = "(ccimx9|ccmp2)"

@@ -1,4 +1,4 @@
-# Copyright (C) 2023 Digi International
+# Copyright (C) 2023, Digi International Inc.
 
 SUMMARY = "Application to manage the bootcount value"
 LICENSE = "MPL-2.0"

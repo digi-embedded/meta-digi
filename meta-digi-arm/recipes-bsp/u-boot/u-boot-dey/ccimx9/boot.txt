@@ -66,18 +66,20 @@ setexpr module_has_bt ${hwid_2} \& 40000
 setexpr module_has_bt ${module_has_bt} / 40000
 
 if test "${module_has_bt}" = "1" && test -z "${disable_bt}"; then
-	setenv overlays _ov_som_bt_ccimx93.dtbo,${overlays}
+	setenv overlays _ov_som_bt_ccimx9.dtbo,${overlays}
 fi
 
 if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
-	setenv overlays _ov_som_wifi_ccimx93.dtbo,${overlays}
+	setenv overlays _ov_som_wifi_ccimx9.dtbo,${overlays}
 fi
 
-if test "${cpu_type}" = "imx9352" || \
-   test "${cpu_type}" = "imx9351" || \
-   test "${cpu_type}" = "imx9322" || \
-   test "${cpu_type}" = "imx9321"; then
-	module_has_npu="1"
+if test "${soc-type}" = "imx93"; then
+	if test "${cpu_type}" = "imx9352" || \
+	   test "${cpu_type}" = "imx9351" || \
+	   test "${cpu_type}" = "imx9322" || \
+	   test "${cpu_type}" = "imx9321"; then
+		module_has_npu="1"
+	fi
 fi
 
 if test "${module_has_npu}" = "1" && test -z "${disable_npu}"; then

@@ -1,4 +1,4 @@
-# Copyright (C) 2019 Digi International.
+# Copyright (C) 2019, Digi International Inc.
 
 # The most recent version of this tool is unable to boot closed devices.
 # Revert to the version that was used in DEY 2.4.

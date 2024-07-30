@@ -114,6 +114,6 @@ SRCREV = "a4631334ad32abc513bde8f73491ef345f865a48"
 
 S = "${WORKDIR}/git"
 
-COMPATIBLE_MACHINE = "(ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx9)"
 
 ########### End of i.MX overrides #########

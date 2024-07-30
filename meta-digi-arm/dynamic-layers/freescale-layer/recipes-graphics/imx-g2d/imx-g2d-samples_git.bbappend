@@ -1,4 +1,4 @@
-# Copyright 2023, 2024 Digi International Inc.
+# Copyright (C) 2023,2024, Digi International Inc.
 
 SRCREV:mx93-nxp-bsp = "4391dcda499870418bb38fe395c3cba0664c5bab"
 

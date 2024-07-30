@@ -1,4 +1,4 @@
-# Copyright (C) 2018 Digi International
+# Copyright (C) 2018, Digi International Inc.
 
 do_install:append() {
     # Redirect output to log file

@@ -1,7 +1,7 @@
 /*
  * ConnectCore 6UL tamper sample application.
  *
- * Copyright (c) 2016 Digi International Inc.
+ * Copyright (C) 2016, Digi International Inc.
  * All rights reserved.
  *
  * Based on iio_event_monitor.c from the tools/iio directory, of the linux

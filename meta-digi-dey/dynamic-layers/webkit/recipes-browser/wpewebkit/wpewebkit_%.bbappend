@@ -1,4 +1,4 @@
-# Copyright 2020-2022 Digi International Inc.
+# Copyright (C) 2020-2022, Digi International Inc.
 
 # We can't build the WebKit with fb images, so force wayland as a required
 # distro feature.

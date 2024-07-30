@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2021 Digi International
+# Copyright (C) 2014-2021, Digi International Inc.
 
 # Disable network manager
 NETWORK_MANAGER = ""

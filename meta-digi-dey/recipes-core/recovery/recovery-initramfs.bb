@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2023 Digi International Inc.
+# Copyright (C) 2016-2023, Digi International Inc.
 
 SUMMARY = "Recovery initramfs files"
 LICENSE = "GPL-2.0-only"
