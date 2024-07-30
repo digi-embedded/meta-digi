@@ -1,6 +1,6 @@
 # Copyright (C) 2019-2022, Digi International Inc.
 
-SRCBRANCH = "dey-4.0/maint"
+SRCBRANCH = "dey-4.0/maint_ccmp2-cc91-beta"
 SRCREV = "${AUTOREV}"
 
 DEY_EXAMPLES_STASH = "${DIGI_MTK_GIT}/dey/dey-examples.git;protocol=ssh"
