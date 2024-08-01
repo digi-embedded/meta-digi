@@ -29,6 +29,7 @@ HAS_USB_DRIVER = "false"
 HAS_USB_DRIVER:ccimx8m = "true"
 HAS_USB_DRIVER:ccimx9 = "true"
 HAS_USB_DRIVER:ccmp1 = "true"
+HAS_USB_DRIVER:ccmp2 = "true"
 
 generate_installer_zip () {
 	# Get list of files to pack
