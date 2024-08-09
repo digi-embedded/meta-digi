@@ -42,6 +42,9 @@ UBOOT_ENV_SIZE ?= "0x20000"
 # available space in the environment partition)
 UBOOT_ENV_RANGE ?= ""
 
+# Set InitRAMDisk load address to U-boot initrd_addr
+UBOOT_RD_LOADADDRESS = "0xc4400000"
+
 # OPTEE runtime packages to install
 OPTEE_PKGS ??= "optee-client"
 

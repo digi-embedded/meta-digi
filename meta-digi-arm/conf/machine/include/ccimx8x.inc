@@ -13,6 +13,9 @@ include conf/machine/include/arm/armv8a/tune-cortexa35.inc
 UBOOT_PREFIX = "imx-boot"
 UBOOT_SUFFIX = "bin"
 
+# Set InitRAMDisk load address to U-boot initrd_addr
+UBOOT_RD_LOADADDRESS = "0x8A100000"
+
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS += "imx-boot"
 BOOTLOADER_IMAGE_RECIPE = "imx-boot"

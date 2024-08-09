@@ -20,7 +20,11 @@ IMAGE_FEATURES = ""
 IMAGE_LINGUAS = ""
 
 python() {
-    d.setVar('IMAGE_FSTYPES', 'cpio.gz.u-boot.tf')
+    # If Kernel image is FIT create different initramfs file without u-boot header
+    if (d.getVar("KERNEL_IMAGETYPE") == "fitImage"):
+        d.setVar('IMAGE_FSTYPES', 'cpio.gz')
+    else:
+        d.setVar('IMAGE_FSTYPES', 'cpio.gz.u-boot.tf')
 }
 
 inherit core-image image_types

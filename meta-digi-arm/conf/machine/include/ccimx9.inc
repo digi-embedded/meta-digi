@@ -15,6 +15,9 @@ UBOOT_ENV = "boot"
 UBOOT_PREFIX = "imx-boot"
 UBOOT_SUFFIX = "bin"
 
+# Set InitRAMDisk load address to U-boot initrd_addr
+UBOOT_RD_LOADADDRESS = "0x83800000"
+
 # Platform kernel settings (keep the override as otherwise KERNEL_IMAGETYPE
 # from imx-digi-base.inc takes precedence)
 KERNEL_CLASSES = "kernel-fitimage"
