@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Digi International Inc.
+ * Copyright (c) 2023-2024 Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -41,6 +41,7 @@ struct platform_nvmem platforms_nvmem[] = {
 	[PLATFORM_CC93] = {"/sys/bus/i2c/devices/2-0052/rv3028_nvram0/nvmem", 0, 1},
 	[PLATFORM_CCMP13] = {"/sys/bus/i2c/devices/2-0052/rv3028_nvram0/nvmem", 0, 1},
 	[PLATFORM_CCMP15] = {"/sys/bus/i2c/devices/6-0052/rv3028_nvram0/nvmem", 0, 1},
+	[PLATFORM_CCMP25] = {"/sys/bus/i2c/devices/0-0052/rv3028_nvram0/nvmem", 0, 1},
 	[PLATFORM_UNKNOWN] = {NULL, 0, 0},
 };
 

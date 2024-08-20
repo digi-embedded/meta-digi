@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Digi International Inc.
+ * Copyright (c) 2023-2024 Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -60,6 +60,7 @@ struct platform_functions platforms_functions[] = {
 	[PLATFORM_CC93] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_CCMP13] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_CCMP15] = {read_bootcount_nvmem, write_bootcount_nvmem},
+	[PLATFORM_CCMP25] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_UNKNOWN] = {NULL, NULL}
 };
 

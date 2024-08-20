@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Digi International Inc.
+ * Copyright (c) 2023-2024 Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -33,6 +33,7 @@ char* platform_names[] = {
 	[PLATFORM_CC93] = "ccimx93",
 	[PLATFORM_CCMP13] = "ccmp13",
 	[PLATFORM_CCMP15] = "ccmp15",
+	[PLATFORM_CCMP25] = "ccmp25",
 	[PLATFORM_UNKNOWN] = "unknown"
 };
 
