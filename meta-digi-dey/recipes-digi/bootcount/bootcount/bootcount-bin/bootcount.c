@@ -14,6 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
 
@@ -162,6 +163,11 @@ int main(int argc, char *argv[]) {
 	/* Determine platform. */
 	platform = get_platform();
 	pfuncs = &platforms_functions[platform];
+	if (!pfuncs->read_bootcount || !pfuncs->write_bootcount) {
+		printf("Platform not supported\n");
+		ret = -ENOTSUP;
+		goto end;
+	}
 
 	/* Execute the requested action. */
 	if (read) {
@@ -176,5 +182,6 @@ int main(int argc, char *argv[]) {
 		ret = pfuncs->write_bootcount(0);
 	}
 
+end:
 	return ret;
 }
