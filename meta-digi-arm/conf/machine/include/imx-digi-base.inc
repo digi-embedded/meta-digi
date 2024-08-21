@@ -277,12 +277,15 @@ PREFERRED_VERSION_vulkan-loader:imxvulkan  ??= "1.2.182.0"
 PREFERRED_VERSION_vulkan-tools:imxvulkan   ??= "1.2.182.0"
 
 # Use i.MX optee Version
-PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "4.0.0.imx"
-PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "4.0.0.imx"
-PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "4.0.0.imx"
+PREFERRED_VERSION_optee-os:mx8-nxp-bsp      ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-os:mx91-nxp-bsp     ??= "4.2.0.imx"
+PREFERRED_VERSION_optee-os:mx93-nxp-bsp     ??= "4.0.0.imx"
+PREFERRED_VERSION_optee-client:mx8-nxp-bsp  ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-client:mx91-nxp-bsp ??= "4.2.0.imx"
+PREFERRED_VERSION_optee-client:mx93-nxp-bsp ??= "4.0.0.imx"
+PREFERRED_VERSION_optee-test:mx8-nxp-bsp    ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-test:mx91-nxp-bsp   ??= "4.2.0.imx"
+PREFERRED_VERSION_optee-test:mx93-nxp-bsp   ??= "4.0.0.imx"
 
 # Machine learning backports from NXP's lf-6.1.55-2.2.0 release
 PREFERRED_VERSION_ethos-u-driver-stack:ccimx93 = "23.08"
