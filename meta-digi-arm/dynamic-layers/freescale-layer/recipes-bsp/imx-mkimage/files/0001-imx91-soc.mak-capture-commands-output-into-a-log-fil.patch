@@ -1,0 +1,49 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Mon, 19 Aug 2024 17:07:33 +0200
+Subject: [PATCH] imx91: soc.mak: capture commands output into a log file
+
+This is later used to get the needed information for the signing of the
+boot artifacts.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ iMX91/soc.mak | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/iMX91/soc.mak b/iMX91/soc.mak
+index b87a5bef79ce..3db3760c546d 100644
+--- a/iMX91/soc.mak
++++ b/iMX91/soc.mak
+@@ -1,4 +1,5 @@
+ MKIMG = ../mkimage_imx8
++MKIMAGE_LOG = "mkimage-$(firstword $(MAKECMDGOALS)).log"
+ 
+ CC ?= gcc
+ REV ?= A0
+@@ -51,7 +52,7 @@ define append_container
+ 	@flashbin_size=`wc -c flash.bin | awk '{print $$1}'`; \
+                    psize=$$((0x400 * $(2))); \
+                    pad_cnt=$$(((flashbin_size + psize - 1) / psize)); \
+-                   echo "append $(1) at $$((pad_cnt * $(2))) KB, psize=$$psize"; \
++                   echo "append $(1) at $$((pad_cnt * $(2))) KB, psize=$$psize" | tee -a $(MKIMAGE_LOG); \
+                    dd if=$(1) of=flash.bin bs=1K seek=$$((pad_cnt * $(2)));
+ endef
+ 
+@@ -126,7 +127,7 @@ u-boot-atf-container.img: bl31.bin u-boot-hash.bin
+ 			   -ap bl31.bin a55 $(ATF_LOAD_ADDR) \
+ 			   -ap u-boot-hash.bin a55 $(UBOOT_LOAD_ADDR) \
+ 			   -out u-boot-atf-container.img; \
+-	fi
++	fi | tee $(MKIMAGE_LOG)
+ 
+ u-boot-atf-container-spinand.img: bl31.bin u-boot-hash.bin
+ 	if [ -f $(TEE) ]; then \
+@@ -202,7 +203,7 @@ endif
+ 
+ 
+ flash_singleboot: $(MKIMG) $(AHAB_IMG) $(SPL_A55_IMG) u-boot-atf-container.img
+-	./$(MKIMG) -soc IMX9 -append $(AHAB_IMG) -c -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR) -out flash.bin
++	./$(MKIMG) -soc IMX9 -append $(AHAB_IMG) -c -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR) -out flash.bin | tee -a $(MKIMAGE_LOG)
+ 	$(call append_container,u-boot-atf-container.img,1)
+ 
+ flash_singleboot_no_ahabfw: $(MKIMG) $(SPL_A55_IMG) u-boot-atf-container.img
