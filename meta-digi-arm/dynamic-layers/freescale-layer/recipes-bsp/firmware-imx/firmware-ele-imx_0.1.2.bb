@@ -1,15 +1,18 @@
 # Copyright 2021-2023 NXP
 SUMMARY = "NXP i.MX ELE firmware"
-DESCRIPTION = "EdgeLock Enclave firmware for i.MX series SoCs"
+DESCRIPTION = "EdgeLock Secure Enclave firmware for i.MX series SoCs"
 SECTION = "base"
 LICENSE = "Proprietary"
-LIC_FILES_CHKSUM = "file://COPYING;md5=2827219e81f28aba7c6a569f7c437fa7"
+LIC_FILES_CHKSUM = "file://COPYING;md5=10c0fda810c63b052409b15a5445671a"
 
 inherit fsl-eula-unpack use-imx-security-controller-firmware deploy
 
-SRC_URI = "${FSL_MIRROR}/${BP}.bin;fsl-eula=true"
-SRC_URI[md5sum] = "7532c2e356574c1c9255c01169d38427"
-SRC_URI[sha256sum] = "4a0440168d8dfb95989a17be8fafb149589e110e7d4518e5e8a33463dfb5e5ca"
+SRC_URI = "${FSL_MIRROR}/${BP}-${IMX_SRCREV_ABBREV}.bin;fsl-eula=true"
+IMX_SRCREV_ABBREV = "4ed450a"
+SRC_URI[md5sum] = "1359bc7d378bddfe1d8479eba05b05ec"
+SRC_URI[sha256sum] = "d858fcbb47482a898a1af5fe5f3f8be53bb21fac793b33e9bcdfd2b4dda79d3c"
+
+S = "${WORKDIR}/${BP}-${IMX_SRCREV_ABBREV}"
 
 do_compile[noexec] = "1"
 
@@ -26,4 +29,4 @@ addtask deploy after do_install before do_build
 
 FILES:${PN} += "${nonarch_base_libdir}/firmware/imx/ele/${SECO_FIRMWARE_NAME}"
 
-COMPATIBLE_MACHINE = "(ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx91)"

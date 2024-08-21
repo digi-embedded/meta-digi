@@ -27,10 +27,6 @@ BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 BOOTLOADER_SEEK_USERDATA = "32"
 
-# Generate images for all SOC revisions (keep the override as otherwise the
-# one in "use-imx-security-controller-firmware.bbclass" takes precedence)
-SECO_FIRMWARE_NAME:ccimx9 = "mx93??-ahab-container.img"
-
 DDR_FIRMWARE_NAME = " \
     lpddr4_dmem_1d_v202201.bin \
     lpddr4_dmem_2d_v202201.bin \
