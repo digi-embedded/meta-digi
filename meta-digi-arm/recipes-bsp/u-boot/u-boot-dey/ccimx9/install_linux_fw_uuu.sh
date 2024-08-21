@@ -129,15 +129,18 @@ echo "Determining image files to use..."
 
 # Determine U-Boot file to program basing on SOM's SOC revision
 if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
-	soc_rev="$(getenv soc_rev)"
-	if [ -n "${soc_rev}" ]; then
-		[ "${soc_rev}" = "0x10" ] && SOCREV="-A0"
-	else
-		# Fallback to hardware version if soc_rev is empty
-		hwid_2="$(getenv hwid_2)"
-		hwid_2="0x${hwid_2#0x}"
-		som_hv="$(((hwid_2 & 0x78) >> 3))"
-		[ "${som_hv}" -lt "2" ] && SOCREV="-A0"
+	soc_type="$(getenv soc_type)"
+	if [ "${soc_type}" = "imx93" ]; then
+		soc_rev="$(getenv soc_rev)"
+		if [ -n "${soc_rev}" ]; then
+			[ "${soc_rev}" = "0x10" ] && SOCREV="-A0"
+		else
+			# Fallback to hardware version if soc_rev is empty
+			hwid_2="$(getenv hwid_2)"
+			hwid_2="0x${hwid_2#0x}"
+			som_hv="$(((hwid_2 & 0x78) >> 3))"
+			[ "${som_hv}" -lt "2" ] && SOCREV="-A0"
+		fi
 	fi
 	INSTALL_UBOOT_FILENAME="imx-boot-##SIGNED##-##MACHINE##${SOCREV}.bin"
 fi
