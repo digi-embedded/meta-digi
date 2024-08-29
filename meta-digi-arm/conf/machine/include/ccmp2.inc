@@ -85,3 +85,10 @@ SIGN_SUFFIX ?= "_Signed"
 # =========================================================================
 # activate/deactivate the debug and trace on boot stage
 ST_DEBUG_TRACE = "0"
+
+# Wic files
+WKS_FILE_DEPENDS ?= " \
+    virtual/bootloader \
+    virtual/trusted-firmware-a \
+    ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', 'virtual/optee-os', '', d)} \
+"
