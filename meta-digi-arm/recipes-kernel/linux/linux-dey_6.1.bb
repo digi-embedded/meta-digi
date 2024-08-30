@@ -30,8 +30,6 @@ SRCREV = "${AUTOREV}"
 KERNEL_MODULE_PROBECONF += "btnxpuart"
 module_conf_btnxpuart = "blacklist btnxpuart"
 
-COMPATIBLE_MACHINE = "(ccimx9)"
-
 # ---------------------------------------------------------------------
 # stub for devicetree which are located on digi directory
 do_install:prepend:ccmp2() {
@@ -52,4 +50,4 @@ do_install:append:ccmp2() {
 
 FILES:${KERNEL_PACKAGE_NAME}-modules:ccmp2 += "${sysconfdir}/modprobe.d"
 
-COMPATIBLE_MACHINE = "(ccimx9|ccmp2)"
+COMPATIBLE_MACHINE = "(ccimx93|ccmp2)"

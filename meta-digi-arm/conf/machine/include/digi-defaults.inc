@@ -16,7 +16,7 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 # ccimx8x       5.15              2020.04 (packaged in imx-boot)
 # ccimx8mn      5.15              2020.04 (packaged in imx-boot)
 # ccimx8mm      5.15              2020.04 (packaged in imx-boot)
-# ccimx91       6.1               2023.04 (packaged in imx-boot)
+# ccimx91       6.6               2024.04 (packaged in imx-boot)
 # ccimx93       6.1               2023.04 (packaged in imx-boot)
 # ccmp15        5.15              2021.10
 # ccmp13        5.15              2021.10
