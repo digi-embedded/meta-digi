@@ -1,0 +1,79 @@
+From: David Escalona <david.escalona@digi.com>
+Date: Wed, 11 Sep 2024 17:25:05 +0200
+Subject: [PATCH] download_models: update the download location of some models
+
+Signed-off-by: David Escalona <david.escalona@digi.com>
+---
+ download_models.py | 43 ++++++++++++++++++++++++++-----------------
+ 1 file changed, 26 insertions(+), 17 deletions(-)
+
+diff --git a/download_models.py b/download_models.py
+index 3111f29..462f7b7 100644
+--- a/download_models.py
++++ b/download_models.py
+@@ -35,21 +35,33 @@ def download_all_models(model_dir, vela_dir):
+     os.makedirs(model_dir, exist_ok=True)
+     os.makedirs(vela_dir, exist_ok=True)
+ 
++    github_url = 'https://raw.githubusercontent.com/'
++
+     #Download gesture models
+     #https://github.com/PINTO0309/PINTO_model_zoo
+-    url = 'https://drive.google.com/uc?export=download&&id=1yjWyXsac5CbGWYuHWYhhnr_9cAwg3uNI'
+-    path = os.path.join(model_dir, 'gesture_models.tar.gz')
+-    download_file('gesture recognition', url, path)
+-    decompress(path, model_dir)
++    #url = 'https://drive.google.com/uc?export=download&&id=1yjWyXsac5CbGWYuHWYhhnr_9cAwg3uNI'
++    #path = os.path.join(model_dir, 'gesture_models.tar.gz')
++    #download_file('gesture recognition', url, path)
++    #decompress(path, model_dir)
++
++    #Download gesture models
++    #https://github.com/terryky/tflite_gles_app
++    url = github_url + 'terryky/tflite_gles_app/master/gl2handpose/handpose_model/'
++    file_name = 'palm_detection_builtin_256_integer_quant.tflite'
++    path = os.path.join(model_dir, file_name)
++    download_file('hand landmark', url + file_name, path)
++    file_name = 'hand_landmark_3d_256_integer_quant.tflite'
++    path = os.path.join(model_dir, file_name)
++    download_file('hand detection', url + file_name, path)
+ 
+     #Download face recognition models
+     #https://github.com/imuncle/yoloface-50k
+-    url = 'https://raw.githubusercontent.com/imuncle/yoloface-50k/main/tflite/yoloface_int8.tflite'
++    url = github_url + 'imuncle/yoloface-50k/main/tflite/yoloface_int8.tflite'
+     path = os.path.join(model_dir, 'yoloface_int8.tflite')
+     download_file('face detection', url, path)
+ 
+     #https://github.com/shubham0204/FaceRecognition_With_FaceNet_Android
+-    url = 'https://raw.githubusercontent.com/shubham0204/FaceRecognition_With_FaceNet_Android/master/app/src/main/assets/facenet_512_int_quantized.tflite'
++    url = github_url + 'shubham0204/FaceRecognition_With_FaceNet_Android/master/app/src/main/assets/facenet_512_int_quantized.tflite'
+     path = os.path.join(model_dir, 'facenet_512_int_quantized.tflite')
+     download_file('face recognition', url, path)
+ 
+@@ -67,17 +79,14 @@ def download_all_models(model_dir, vela_dir):
+     decompress(path, model_dir)
+ 
+     #Download dms models
+-    #https://github.com/PINTO0309/PINTO_model_zoo
+-    url = "https://drive.google.com/uc?export=download&id=1YEAgUuHyJ7_fTY9XyDaALDidM6Sbzhd8"
+-    path = os.path.join(model_dir, 'dms_face_detection.tar.gz')
+-    download_file('DMS face detection', url, path)
+-    decompress(path, model_dir)
+-
+-    #https://github.com/PINTO0309/PINTO_model_zoo
+-    url = "https://s3.ap-northeast-2.wasabisys.com/pinto-model-zoo/043_face_landmark/resources.tar.gz"
+-    path = os.path.join(model_dir, 'dms_face_landmark.tar.gz')
+-    download_file('DMS face landmark', url, path)
+-    decompress(path, model_dir)
++    #https://github.com/terryky/tflite_gles_app
++    url = github_url + 'terryky/tflite_gles_app/master/gl2facemesh/facemesh_model/'
++    file_name = 'face_detection_front_128_full_integer_quant.tflite'
++    path = os.path.join(model_dir, file_name)
++    download_file('DMS face detection', url + file_name, path)
++    file_name = 'face_landmark_192_full_integer_quant.tflite'
++    path = os.path.join(model_dir, file_name)
++    download_file('DMS face landmark', url + file_name, path)
+ 
+     #https://github.com/PINTO0309/PINTO_model_zoo
+     url = "https://s3.ap-northeast-2.wasabisys.com/pinto-model-zoo/049_iris_landmark/resources.tar.gz"

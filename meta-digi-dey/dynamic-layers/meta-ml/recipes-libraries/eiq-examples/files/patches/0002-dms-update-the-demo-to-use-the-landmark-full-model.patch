@@ -1,0 +1,22 @@
+From: David Escalona <david.escalona@digi.com>
+Date: Thu, 5 Sep 2024 11:04:19 +0200
+Subject: [PATCH] dms: update the demo to use the landmark full model
+
+Signed-off-by: David Escalona <david.escalona@digi.com>
+---
+ dms/main.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dms/main.py b/dms/main.py
+index 8ba99b2..e74b6be 100644
+--- a/dms/main.py
++++ b/dms/main.py
+@@ -22,7 +22,7 @@ FORMAT=0     # None, skip (YUYV, default), 0 MJPG (for usb camera)
+ # Always enforce the Ethos NPU, use the converted vela models
+ MODEL_PATH = pathlib.Path("../vela_models/")
+ DETECT_MODEL = "face_detection_front_128_full_integer_quant_vela.tflite"
+-LANDMARK_MODEL = "face_landmark_192_integer_quant_vela.tflite"
++LANDMARK_MODEL = "face_landmark_192_full_integer_quant_vela.tflite"
+ EYE_MODEL = "iris_landmark_quant_vela.tflite"
+ 
+ # turn on camera

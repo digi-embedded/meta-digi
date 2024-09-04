@@ -1,0 +1,10 @@
+[Unit]
+Description=Initialization of EiQ DMS demo
+After=multi-user.target
+
+[Service]
+Type=forking
+ExecStart=/etc/demos/scripts/launch_eiq_demo.sh
+
+[Install]
+WantedBy=multi-user.target
