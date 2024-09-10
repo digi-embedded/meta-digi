@@ -73,7 +73,7 @@ if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
 	setenv overlays _ov_som_wifi_ccimx9.dtbo,${overlays}
 fi
 
-if test "${soc-type}" = "imx93"; then
+if test "${soc_type}" = "imx93"; then
 	if test "${cpu_type}" = "imx9352" || \
 	   test "${cpu_type}" = "imx9351" || \
 	   test "${cpu_type}" = "imx9322" || \
