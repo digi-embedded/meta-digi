@@ -67,7 +67,7 @@ if [ "${1}" = "pre" ]; then
 		RESUME_ACTIONS="${RESUME_ACTIONS_BT}"
 	fi
 	if [ -n "${RESUME_ACTIONS_WIFI}" ]; then
-		if [ ! -n "${RESUME_ACTIONS_BT}" ]; then
+		if [ -z "${RESUME_ACTIONS_BT}" ]; then
 			RESUME_ACTIONS="sleep 0.5;"
 		fi
 		RESUME_ACTIONS="${RESUME_ACTIONS}${RESUME_ACTIONS_WIFI}"
