@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2022, Digi International Inc.
+# Copyright (C) 2020-2024, Digi International Inc.
 
 # We can't build the WebKit with fb images, so force wayland as a required
 # distro feature.
@@ -8,3 +8,8 @@ REQUIRED_DISTRO_FEATURES = "wayland"
 
 # Limit number of parallel threads make can run to avoid a ninja build issue
 PARALLEL_MAKE = "-j ${@oe.utils.cpu_count(at_most=16)}"
+
+# gbm PACKAGECONFIG pulls in libgbm dependency, which isn't available
+# on the i.MX6 and ccmp1
+PACKAGECONFIG:remove:ccimx6 = "gbm"
+PACKAGECONFIG:remove:ccmp1 = "gbm"
