@@ -28,6 +28,12 @@ BOOT_DEV_NAME_B ?= "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', '/dev/mmcblk0p2
 ROOTFS_DEV_NAME_A ?= "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', '/dev/mmcblk0p3', 'rootfs_a', d)}"
 ROOTFS_DEV_NAME_B ?= "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', '/dev/mmcblk0p4', 'rootfs_b', d)}"
 
+# Partition table is different in ccmp25
+BOOT_DEV_NAME_A:ccmp25 ?= "/dev/mmcblk0p5"
+BOOT_DEV_NAME_B:ccmp25 ?= "/dev/mmcblk0p6"
+ROOTFS_DEV_NAME_A:ccmp25 ?= "/dev/mmcblk0p7"
+ROOTFS_DEV_NAME_B:ccmp25 ?= "/dev/mmcblk0p8"
+
 #######################################
 ###### SWU Update based on files ######
 #######################################
