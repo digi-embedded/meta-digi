@@ -28,6 +28,36 @@ SOC_FAMILY:mx91-generic-bsp = "mx91"
 REV_OPTION:ccimx91 = "REV=A0"
 REV_OPTION:ccimx93 = "REV=A1"
 
+# Revert compile_mx8m() to how it was in kirkstone branch of meta-freescale,
+# otherwise, a dead symlink is created in place of the dtb
+compile_mx8m() {
+    bbnote 8MQ/8MM/8MN/8MP boot binary build
+    for ddr_firmware in ${DDR_FIRMWARE_NAME}; do
+        bbnote "Copy ddr_firmware: ${ddr_firmware} from ${DEPLOY_DIR_IMAGE} -> ${BOOT_STAGING} "
+        cp ${DEPLOY_DIR_IMAGE}/${ddr_firmware}               ${BOOT_STAGING}
+    done
+
+    cp ${DEPLOY_DIR_IMAGE}/signed_dp_imx8m.bin               ${BOOT_STAGING}
+    cp ${DEPLOY_DIR_IMAGE}/signed_hdmi_imx8m.bin             ${BOOT_STAGING}
+    cp ${DEPLOY_DIR_IMAGE}/u-boot-spl.bin-${MACHINE}-${UBOOT_CONFIG_EXTRA} \
+                                                             ${BOOT_STAGING}/u-boot-spl.bin
+
+    if [ "x${UBOOT_SIGN_ENABLE}" = "x1" ] ; then
+        # Use DTB binary patched with signature node
+        cp ${DEPLOY_DIR_IMAGE}/${UBOOT_DTB_BINARY} ${BOOT_STAGING}/${UBOOT_DTB_NAME_EXTRA}
+    else
+        cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_DTB_NAME_EXTRA}   ${BOOT_STAGING}
+    fi
+
+    cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/u-boot-nodtb.bin-${MACHINE}-${UBOOT_CONFIG_EXTRA} \
+                                                             ${BOOT_STAGING}/u-boot-nodtb.bin
+
+    cp ${DEPLOY_DIR_IMAGE}/${ATF_MACHINE_NAME}               ${BOOT_STAGING}/bl31.bin
+
+    cp ${DEPLOY_DIR_IMAGE}/${UBOOT_NAME_EXTRA}                     ${BOOT_STAGING}/u-boot.bin
+
+}
+
 compile_mx8m:append:ccimx8m() {
 	# Create dummy DEK blob to support building with encrypted u-boot
 	if [ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
