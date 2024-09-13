@@ -1,0 +1,26 @@
+From ce4219ad77d422b9b5adc032ab911824ef212c41 Mon Sep 17 00:00:00 2001
+From: Othmane AHL ZOUAOUI <othmane.ahlzouaoui@st.com>
+Date: Wed, 20 Mar 2024 15:59:12 +0100
+Subject: [PATCH 1/1] onnxruntime: cmake: change visibility compilation options
+
+Changing the compile options of the libonnxruntime shared lib
+to export all the symbols of the lib and make them visible during
+the runtime.
+
+Signed-off-by: Othmane AHL ZOUAOUI <othmane.ahlzouaoui@st.com>
+---
+ cmake/CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+index 08a4c6af52..1336ceb19b 100644
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -1620,3 +1620,5 @@ endif()
+ 
+ message("ONNXRUNTIME_VERSION_MAJOR=${ONNXRUNTIME_VERSION_MAJOR}")
+ set_target_properties(onnxruntime PROPERTIES SOVERSION "${ONNXRUNTIME_VERSION_MAJOR}")
++target_compile_options(onnxruntime PRIVATE -fvisibility=hidden)
++target_compile_options(onnxruntime PRIVATE -fvisibility=default)
+-- 
+2.34.1
