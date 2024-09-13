@@ -1,0 +1,46 @@
+From: David Escalona <david.escalona@digi.com>
+Date: Mon, 16 Sep 2024 18:45:59 +0200
+Subject: [PATCH 1/3] pose-estimation: remove weston user check from launch
+
+Signed-off-by: David Escalona <david.escalona@digi.com>
+---
+ .../files/tflite/launch_python_pose_estimation.sh         | 8 +-------
+ .../tflite/launch_python_pose_estimation_testdata.sh      | 8 +-------
+ 2 files changed, 2 insertions(+), 14 deletions(-)
+
+diff --git a/tflite/launch_python_pose_estimation.sh b/tflite/launch_python_pose_estimation.sh
+index f1edba5..221f47d 100755
+--- a/tflite/launch_python_pose_estimation.sh
++++ b/tflite/launch_python_pose_estimation.sh
+@@ -1,12 +1,6 @@
+ #!/bin/sh
+-weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
+ 
+ source /usr/local/demo-ai/resources/config_board.sh
+ cmd="python3 /usr/local/demo-ai/pose-estimation/tflite/tflite_pose_estimation.py -m /usr/local/demo-ai/pose-estimation/models/movenet/movenet_singlepose_lightning.tflite --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT $COMPUTE_ENGINE"
+ 
+-if [ "$weston_user" != "root" ]; then
+-	echo "user : "$weston_user
+-	script -qc "su -l $weston_user -c '$cmd'"
+-else
+-	$cmd
+-fi
++$cmd
+diff --git a/tflite/launch_python_pose_estimation_testdata.sh b/tflite/launch_python_pose_estimation_testdata.sh
+index 957d841..481de89 100755
+--- a/tflite/launch_python_pose_estimation_testdata.sh
++++ b/tflite/launch_python_pose_estimation_testdata.sh
+@@ -1,12 +1,6 @@
+ #!/bin/sh
+-weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
+ 
+ source /usr/local/demo-ai/resources/config_board.sh
+ cmd="python3 /usr/local/demo-ai/pose-estimation/tflite/tflite_pose_estimation.py -m /usr/local/demo-ai/pose-estimation/models/movenet/movenet_singlepose_lightning.tflite -i /usr/local/demo-ai/pose-estimation/models/movenet/testdata/ $COMPUTE_ENGINE"
+ 
+-if [ "$weston_user" != "root" ]; then
+-	echo "user : "$weston_user
+-	script -qc "su -l $weston_user -c '$cmd'"
+-else
+-	$cmd
+-fi
++$cmd

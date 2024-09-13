@@ -1,0 +1,47 @@
+From: David Escalona <david.escalona@digi.com>
+Date: Mon, 16 Sep 2024 18:48:10 +0200
+Subject: [PATCH 1/4] semantic-segmentation: remove weston user check from
+ launch
+
+Signed-off-by: David Escalona <david.escalona@digi.com>
+---
+ .../files/tflite/launch_python_semantic_segmentation.sh   | 8 +-------
+ .../launch_python_semantic_segmentation_testdata.sh       | 8 +-------
+ 2 files changed, 2 insertions(+), 14 deletions(-)
+
+diff --git a/tflite/launch_python_semantic_segmentation.sh b/tflite/launch_python_semantic_segmentation.sh
+index f4e599c..868c537 100755
+--- a/tflite/launch_python_semantic_segmentation.sh
++++ b/tflite/launch_python_semantic_segmentation.sh
+@@ -1,12 +1,6 @@
+ #!/bin/sh
+-weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
+ 
+ source /usr/local/demo-ai/resources/config_board.sh
+ cmd="python3 /usr/local/demo-ai/semantic-segmentation/tflite/tflite_semantic_segmentation.py -m /usr/local/demo-ai/semantic-segmentation/models/deeplabv3/deeplabv3.tflite -l /usr/local/demo-ai/semantic-segmentation/models/deeplabv3/labelmap.txt --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT $COMPUTE_ENGINE"
+ 
+-if [ "$weston_user" != "root" ]; then
+-	echo "user : "$weston_user
+-	script -qc "su -l $weston_user -c '$cmd'"
+-else
+-	$cmd
+-fi
++$cmd
+diff --git a/tflite/launch_python_semantic_segmentation_testdata.sh b/tflite/launch_python_semantic_segmentation_testdata.sh
+index cb39131..4322b4e 100755
+--- a/tflite/launch_python_semantic_segmentation_testdata.sh
++++ b/tflite/launch_python_semantic_segmentation_testdata.sh
+@@ -1,12 +1,6 @@
+ #!/bin/sh
+-weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
+ 
+ source /usr/local/demo-ai/resources/config_board.sh
+ cmd="python3 /usr/local/demo-ai/semantic-segmentation/tflite/tflite_semantic_segmentation.py -m /usr/local/demo-ai/semantic-segmentation/models/deeplabv3/deeplabv3.tflite -l /usr/local/demo-ai/semantic-segmentation/models/deeplabv3/labelmap.txt -i /usr/local/demo-ai/semantic-segmentation/models/deeplabv3/testdata $COMPUTE_ENGINE"
+ 
+-if [ "$weston_user" != "root" ]; then
+-	echo "user : "$weston_user
+-	script -qc "su -l $weston_user -c '$cmd'"
+-else
+-	$cmd
+-fi
++$cmd
