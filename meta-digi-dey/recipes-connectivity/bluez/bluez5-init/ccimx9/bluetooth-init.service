@@ -1,7 +1,7 @@
 [Unit]
 Description=Initialization of the IW612 bluetooth chip
 ConditionPathIsDirectory=/proc/device-tree/bluetooth
-After=systemd-udev-settle.service,bluetooth.service
+After=systemd-udev-settle.service bluetooth.service
 
 [Service]
 Type=oneshot
