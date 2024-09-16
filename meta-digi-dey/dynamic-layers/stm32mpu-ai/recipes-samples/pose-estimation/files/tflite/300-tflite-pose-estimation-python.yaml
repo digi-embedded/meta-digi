@@ -1,0 +1,15 @@
+Application:
+    Name: Pose Estimation
+    Description: movenet singlepose lightning
+    Icon: ../demo-ai/resources/tfl_python.png
+    Board:
+        List: all
+    Type: script
+    Script:
+        Exist:
+            File: /usr/local/demo-ai/resources/check_camera_preview.sh
+            Msg_false: Camera is not connected
+        Start: ../demo-ai/pose-estimation/tflite/launch_python_pose_estimation.sh
+    Action:
+        button_release_event: script_management
+        button_press_event: highlight_eventBox

@@ -1,0 +1,15 @@
+Application:
+    Name: Image Classification
+    Description: Mobilenet v1
+    Icon: ../demo-ai/resources/onnx_python.png
+    Board:
+        List: all
+    Type: script
+    Script:
+        Exist:
+            File: /usr/local/demo-ai/resources/check_camera_preview.sh
+            Msg_false: Camera is not connected
+        Start: ../demo-ai/image-classification/onnx/launch_python_image_classification.sh
+    Action:
+        button_release_event: script_management
+        button_press_event: highlight_eventBox
