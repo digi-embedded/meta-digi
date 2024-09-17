@@ -21,9 +21,17 @@ OS versions:
 
 Software for the following hardware platforms is in production support:
 
+## ConnectCore MP25
+* ConnectCore MP25 System-on-Module (SOM)
+  * [CC-WST-J17D-NK](https://www.digi.com/products/models/cc-wst-j17d-nk)
+  * [CC-ST-J17D-ZK](https://www.digi.com/products/models/cc-st-j17d-zk)
+* ConnectCore MP25 Development Kit (DVK)
+  * [CC-WMP255-KIT](https://www.digi.com/products/models/cc-wmp255-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/ccmp25/yocto-gs_index))
+
 ## ConnectCore 91
 * ConnectCore 91 System-on-Module (SOM)
-  * [CC-WMX-XXXX-XX](https://www.digi.com/products/models/cc-wmx-yc7d-kn)
+  * [CC-WMX-F26D-L1](https://www.digi.com/products/models/cc-wmx-f26d-l1)
+  * [CC-MX-F26D-Z1](https://www.digi.com/products/models/cc-mx-f26d-z1)
 
 ## ConnectCore 93
 * ConnectCore 93 System-on-Module (SOM)
@@ -136,7 +144,23 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 ## 4.0-r7
 
-TODO
+* ST-based platforms
+  * Added support to ConnectCore MP25
+    * Trusted Firmware ARM v2.8 (based on tag 'v2.8-stm32mp25-beta-r2' by ST)
+    * OP-TEE v3.19.0 (based on tag '3.19.0-stm32mp25-beta-r1' by ST)
+    * U-Boot v2022.10 (based on tag 'v2020.10-stm32mp25-beta-r1' by ST)
+    * Linux kernel v6.1.28 (based on tag 'stm32mp25-beta-r1' by ST)
+  * Added support to create signed SDcard image for ConnectCore MP15/MP13
+  * Added support to program and use hardware unique key (HUK) on OTP bits as derivative for encryption key on ConnectCore MP15
+  * Enable spread-spectrum on PLL2 to mitigate emission on 533MHz frequency on ConnectCore MP15
+* NXP-based platforms
+  * Added support to ConnectCore 91
+    * U-Boot v2024.04
+    * Linux kernel v6.6.23 (based on tag 'lf-6.6.23-2.0.0' by NXP)
+* Improved SWU package generation and support:
+  * Added software update (SWU) authentication when Trustfence is enabled
+* Added support to fix Y2K38 problem on 32-bit platforms
+* General bug fixing and improvements
 
 ## 4.0-r6
 
@@ -318,6 +342,14 @@ updated list can be found on the online documentation.
   * For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
     devices (ConnectCore 6UL, ConnectCore 6 Plus, and ConnectCore 8M Nano) fail
     to join autonomous groups.
+
+## ConnectCore MP25
+
+* ConnectCore MP2 System-on-Module (SOM)
+  * Power management
+    * Power management support is not yet implemented.
+  * Firmware update
+    * Update single file and update with rdiff don't currently work.
 
 ## ConnectCore MP15/MP13
 
