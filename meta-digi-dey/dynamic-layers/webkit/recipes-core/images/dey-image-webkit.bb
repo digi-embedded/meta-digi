@@ -7,4 +7,6 @@ DESCRIPTION = "DEY image with WebKit browser engine support"
 
 GRAPHICAL_CORE = "webkit"
 
+IMAGE_INSTALL:append:ccmp25 = " packagegroup-x-linux-ai"
+
 COMPATIBLE_MACHINE = "(ccimx6$|ccimx8m|ccimx8x|ccimx93|ccmp15|ccmp2)"
