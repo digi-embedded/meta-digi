@@ -61,7 +61,7 @@ MURATA_COMMON_PATCHES = " \
 	file://murata/0059-Reset-authentication-and-encryption-parameters-while.digi.patch \
 "
 
-SRC_URI:append:ccmp1 = " ${MURATA_COMMON_PATCHES}"
+SRC_URI:append:stm32mpcommon = " ${MURATA_COMMON_PATCHES}"
 
 SYSTEMD_SERVICE:${PN}:append = " hostapd@.service"
 
