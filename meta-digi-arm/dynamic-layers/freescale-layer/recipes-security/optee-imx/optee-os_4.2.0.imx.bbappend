@@ -19,7 +19,7 @@ do_install:append:ccimx91 () {
 	sed -e "s,#OPTEE_ARCH#,${OPTEE_ARCH},g" ${WORKDIR}/environment.d-optee-sdk.sh > ${D}/environment-setup.d/optee-sdk.sh
 }
 
-FILES:${PN}-staticdev:ccimx91 += "/environment-setup.d/"
+FILES:${PN}-staticdev:append:ccimx91 = " /environment-setup.d/"
 
 do_compile:append:ccimx93 () {
     oe_runmake PLATFORM=imx-${PLATFORM_FLAVOR}_a0 O=${B}-A0 all
