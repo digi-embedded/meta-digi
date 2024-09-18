@@ -17,8 +17,8 @@ SRC_URI:append:ccimx93 = " \
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 # Do not tag imx-boot
-UUU_BOOTLOADER = ""
-UUU_BOOTLOADER_TAGGED = ""
+UUU_BOOTLOADER:mx8-generic-bsp = ""
+UUU_BOOTLOADER:mx9-generic-bsp = ""
 BOOT_STAGING:mx91-generic-bsp  = "${S}/iMX91"
 BOOT_STAGING:mx93-generic-bsp  = "${S}/iMX93"
 
