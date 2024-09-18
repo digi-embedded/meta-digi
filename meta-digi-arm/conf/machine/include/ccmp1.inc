@@ -81,7 +81,7 @@ TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 # TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE = ""
 
 # Disable the generation of flashlayout files
-do_create_flashlayout_config[noexec] = "1"
+ENABLE_FLASHLAYOUT_CONFIG = "0"
 
 # Include boot script into the FIT image
 UBOOT_ENV = "boot"
