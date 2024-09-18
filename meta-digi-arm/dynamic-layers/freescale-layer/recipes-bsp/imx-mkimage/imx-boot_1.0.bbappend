@@ -100,7 +100,7 @@ do_compile:ccimx8x() {
 			bbnote "building ${IMX_BOOT_SOC_TARGET} - REV=${rev} ${target}"
 			make SOC=${IMX_BOOT_SOC_TARGET} REV=${rev} ${target} > ${S}/mkimage-${rev}-${target}.log 2>&1
 			if [ -e "${BOOT_STAGING}/flash.bin" ]; then
-				cp ${BOOT_STAGING}/flash.bin ${S}/${BOOT_NAME}-${MACHINE}-${rev}.bin-${target}
+				cp ${BOOT_STAGING}/flash.bin ${S}/imx-boot-${MACHINE}-${rev}.bin-${target}
 			fi
 			# Remove u-boot-atf-container.img so it gets generated in the next iteration
 			rm ${BOOT_STAGING}/u-boot-atf-container.img
@@ -128,10 +128,10 @@ generate_symlinks() {
 	# We assume here only ONE build configuration for our platforms (otherwise
 	# UBOOT_CONFIG would be incorrectly expanded)
 	for target in ${IMXBOOT_TARGETS}; do
-		mv ${DEPLOYDIR}/${BOOT_NAME}-${MACHINE}-${UBOOT_CONFIG}.bin-${target} ${DEPLOYDIR}/${BOOT_NAME}-${MACHINE}.bin-${target}
+		mv ${DEPLOYDIR}/imx-boot-${MACHINE}-${UBOOT_CONFIG}.bin-${target} ${DEPLOYDIR}/imx-boot-${MACHINE}.bin-${target}
 	done
-	ln -sf ${BOOT_NAME}-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${BOOT_NAME}-${MACHINE}.bin
-	ln -sf ${BOOT_NAME}-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${BOOT_NAME}
+	ln -sf imx-boot-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/imx-boot-${MACHINE}.bin
+	ln -sf imx-boot-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/imx-boot
 }
 
 do_deploy:append:ccimx8m() {
@@ -155,7 +155,7 @@ do_deploy:append:ccimx93() {
 		install -m 0644 ${BOOT_STAGING}/mkimage-${target}.log ${DEPLOYDIR}/${BOOT_TOOLS}
 		# Generate symlink for SOC revision A0
 		if [ "$target" = "flash_singleboot_a0" ]; then
-			ln -sf ${BOOT_NAME}-${MACHINE}.bin-${target} ${DEPLOYDIR}/${BOOT_NAME}-${MACHINE}-A0.bin
+			ln -sf imx-boot-${MACHINE}.bin-${target} ${DEPLOYDIR}/imx-boot-${MACHINE}-A0.bin
 		fi
 	done
 	# Deploy A0 optee binary
@@ -212,17 +212,17 @@ trustfence_sign_imxboot() {
 			echo "Set boot target as $IMAGE_IMXBOOT_TARGET"
 		fi
 		TF_SIGN_ENV="$TF_SIGN_ENV CONFIG_MKIMAGE_LOG_PATH=${DEPLOYDIR}/${BOOT_TOOLS}/mkimage-${target}.log"
-		env $TF_SIGN_ENV trustfence-sign-uboot.sh ${BOOT_NAME}-${MACHINE}.bin-${target} ${BOOT_NAME}-signed-${MACHINE}.bin-${target}
+		env $TF_SIGN_ENV trustfence-sign-uboot.sh imx-boot-${MACHINE}.bin-${target} imx-boot-signed-${MACHINE}.bin-${target}
 		if [ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
 			TF_ENC_ENV="CONFIG_DEK_PATH=${TRUSTFENCE_DEK_PATH} ENABLE_ENCRYPTION=y"
-			env $TF_SIGN_ENV $TF_ENC_ENV trustfence-sign-uboot.sh ${BOOT_NAME}-${MACHINE}.bin-${target} ${BOOT_NAME}-encrypted-${MACHINE}.bin-${target}
+			env $TF_SIGN_ENV $TF_ENC_ENV trustfence-sign-uboot.sh imx-boot-${MACHINE}.bin-${target} imx-boot-encrypted-${MACHINE}.bin-${target}
 		fi
 	done
 
 	# Generate symlinks for trustfence artifacts.
-	ln -sf ${BOOT_NAME}-signed-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${BOOT_NAME}-signed-${MACHINE}.bin
+	ln -sf imx-boot-signed-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/imx-boot-signed-${MACHINE}.bin
 	if [ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
-		ln -sf ${BOOT_NAME}-encrypted-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${BOOT_NAME}-encrypted-${MACHINE}.bin
+		ln -sf imx-boot-encrypted-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/imx-boot-encrypted-${MACHINE}.bin
 	fi
 }
 
@@ -241,10 +241,10 @@ trustfence_sign_imxboot:ccimx8x() {
 		fi
 		for rev in ${SOC_REVISIONS}; do
 			TF_SIGN_ENV="$TF_SIGN_ENV CONFIG_MKIMAGE_LOG_PATH=${DEPLOYDIR}/${BOOT_TOOLS}/mkimage-${rev}-${target}.log"
-			env $TF_SIGN_ENV trustfence-sign-uboot.sh ${BOOT_NAME}-${MACHINE}-${rev}.bin-${target} ${BOOT_NAME}-signed-${MACHINE}-${rev}.bin-${target}
+			env $TF_SIGN_ENV trustfence-sign-uboot.sh imx-boot-${MACHINE}-${rev}.bin-${target} imx-boot-signed-${MACHINE}-${rev}.bin-${target}
 			if [ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
 				TF_ENC_ENV="CONFIG_DEK_PATH=${TRUSTFENCE_DEK_PATH} ENABLE_ENCRYPTION=y"
-				env $TF_SIGN_ENV $TF_ENC_ENV trustfence-sign-uboot.sh ${BOOT_NAME}-${MACHINE}-${rev}.bin-${target} ${BOOT_NAME}-encrypted-${MACHINE}-${rev}.bin-${target}
+				env $TF_SIGN_ENV $TF_ENC_ENV trustfence-sign-uboot.sh imx-boot-${MACHINE}-${rev}.bin-${target} imx-boot-encrypted-${MACHINE}-${rev}.bin-${target}
 			fi
 		done
 	done
