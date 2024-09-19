@@ -119,7 +119,7 @@ state.ccmp25dvk {
 	control.10 {
 		iface MIXER
 		name 'MIC2 Boost Volume'
-		value 1
+		value 0
 		comment {
 			access 'read write'
 			type INTEGER
@@ -127,7 +127,7 @@ state.ccmp25dvk {
 			range '0 - 2'
 			dbmin 0
 			dbmax 3000
-			dbvalue.0 2000
+			dbvalue.0 0
 		}
 	}
 	control.11 {
@@ -144,7 +144,7 @@ state.ccmp25dvk {
 	control.12 {
 		iface MIXER
 		name 'INA Volume'
-		value 4
+		value 0
 		comment {
 			access 'read write'
 			type INTEGER
@@ -439,7 +439,7 @@ state.ccmp25dvk {
 	control.37 {
 		iface MIXER
 		name 'Left HP Mixer Right DAC1 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -459,7 +459,7 @@ state.ccmp25dvk {
 	control.39 {
 		iface MIXER
 		name 'Left HP Mixer Right DAC2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -479,7 +479,7 @@ state.ccmp25dvk {
 	control.41 {
 		iface MIXER
 		name 'Left HP Mixer MIC2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -499,7 +499,7 @@ state.ccmp25dvk {
 	control.43 {
 		iface MIXER
 		name 'Left HP Mixer INA2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -519,7 +519,7 @@ state.ccmp25dvk {
 	control.45 {
 		iface MIXER
 		name 'Left HP Mixer INB2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -579,7 +579,7 @@ state.ccmp25dvk {
 	control.51 {
 		iface MIXER
 		name 'Right HP Mixer MIC2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -599,7 +599,7 @@ state.ccmp25dvk {
 	control.53 {
 		iface MIXER
 		name 'Right HP Mixer INA2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -619,7 +619,7 @@ state.ccmp25dvk {
 	control.55 {
 		iface MIXER
 		name 'Right HP Mixer INB2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -639,7 +639,7 @@ state.ccmp25dvk {
 	control.57 {
 		iface MIXER
 		name 'Left SPK Mixer Right DAC1 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -659,7 +659,7 @@ state.ccmp25dvk {
 	control.59 {
 		iface MIXER
 		name 'Left SPK Mixer Right DAC2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -679,7 +679,7 @@ state.ccmp25dvk {
 	control.61 {
 		iface MIXER
 		name 'Left SPK Mixer MIC2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -699,7 +699,7 @@ state.ccmp25dvk {
 	control.63 {
 		iface MIXER
 		name 'Left SPK Mixer INA2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -719,7 +719,7 @@ state.ccmp25dvk {
 	control.65 {
 		iface MIXER
 		name 'Left SPK Mixer INB2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -779,7 +779,7 @@ state.ccmp25dvk {
 	control.71 {
 		iface MIXER
 		name 'Right SPK Mixer MIC2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -799,7 +799,7 @@ state.ccmp25dvk {
 	control.73 {
 		iface MIXER
 		name 'Right SPK Mixer INA2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -819,7 +819,7 @@ state.ccmp25dvk {
 	control.75 {
 		iface MIXER
 		name 'Right SPK Mixer INB2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -839,7 +839,7 @@ state.ccmp25dvk {
 	control.77 {
 		iface MIXER
 		name 'Left REC Mixer Right DAC1 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -859,7 +859,7 @@ state.ccmp25dvk {
 	control.79 {
 		iface MIXER
 		name 'Left REC Mixer Right DAC2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -879,7 +879,7 @@ state.ccmp25dvk {
 	control.81 {
 		iface MIXER
 		name 'Left REC Mixer MIC2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -899,7 +899,7 @@ state.ccmp25dvk {
 	control.83 {
 		iface MIXER
 		name 'Left REC Mixer INA2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -919,7 +919,7 @@ state.ccmp25dvk {
 	control.85 {
 		iface MIXER
 		name 'Left REC Mixer INB2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -979,7 +979,7 @@ state.ccmp25dvk {
 	control.91 {
 		iface MIXER
 		name 'Right REC Mixer MIC2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -999,7 +999,7 @@ state.ccmp25dvk {
 	control.93 {
 		iface MIXER
 		name 'Right REC Mixer INA2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -1019,7 +1019,7 @@ state.ccmp25dvk {
 	control.95 {
 		iface MIXER
 		name 'Right REC Mixer INB2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -1049,7 +1049,7 @@ state.ccmp25dvk {
 	control.98 {
 		iface MIXER
 		name 'Left ADC Mixer INA1 Switch'
-		value true
+		value false
 		comment {
 			access 'read write'
 			type BOOLEAN
