@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2023 Digi International.
+# Copyright (C) 2012-2023, Digi International Inc.
 #
 SUMMARY = "Core packagegroup for DEY image"
 
@@ -71,6 +71,10 @@ RDEPENDS:${PN} = "\
 "
 
 RDEPENDS:${PN}:append:ccmp15 = " \
+    v4l-utils \
+"
+
+RDEPENDS:${PN}:append:ccmp2 = " \
     v4l-utils \
 "
 

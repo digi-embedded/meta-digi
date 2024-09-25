@@ -1,4 +1,4 @@
-# Copyright 2021-2022 NXP
+# Copyright 2021-2024 NXP
 
 SUMMARY = "NXP i.MX SECURE ENCLAVE library"
 DESCRIPTION = "NXP IMX SECURE ENCLAVE library"
@@ -25,4 +25,4 @@ do_install () {
 	oe_runmake DESTDIR=${D} install_tests
 }
 
-COMPATIBLE_MACHINE = "(mx8ulp-nxp-bsp|mx93-nxp-bsp)"
+COMPATIBLE_MACHINE = "(mx8ulp-nxp-bsp|mx91-nxp-bsp|mx93-nxp-bsp)"

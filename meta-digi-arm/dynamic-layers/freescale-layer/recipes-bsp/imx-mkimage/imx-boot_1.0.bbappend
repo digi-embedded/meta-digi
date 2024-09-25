@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2024 Digi International Inc.
+# Copyright (C) 2022-2024, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
@@ -8,15 +8,19 @@ SRC_URI:append:ccimx8m = " \
     file://0003-LFU-573-1-imx8m-Generate-hash-of-FIT-FDT-structure-t.patch \
     file://0004-LFU-573-2-imx8m-Reserve-new-IVT-CSF-for-FIT-FDT-sign.patch \
 "
-
+SRC_URI:append:ccimx91 = " \
+    file://0001-imx91-soc.mak-capture-commands-output-into-a-log-fil.patch \
+"
 SRC_URI:append:ccimx93 = " \
     file://0001-imx9-soc.mak-capture-commands-output-into-a-log-file.patch \
     file://0002-imx9-soc.mak-add-makefile-target-to-build-A0-revisio.patch \
 "
 
 # Use NXP's lf-6.1.55-2.2.0 release for ccimx93
-SRC_URI:ccimx93 = "git://github.com/nxp-imx/imx-mkimage.git;protocol=https;branch=${SRCBRANCH}"
+SRC_URI:ccimx9 = "git://github.com/nxp-imx/imx-mkimage.git;protocol=https;branch=${SRCBRANCH}"
+SRCBRANCH:ccimx91 = "lf-6.6.23_2.0.0"
 SRCBRANCH:ccimx93 = "lf-6.1.55_2.2.0"
+SRCREV:ccimx91 = "ca5d6b2d3fd9ab15825b97f7ef6f1ce9a8644966"
 SRCREV:ccimx93 = "c4365450fb115d87f245df2864fee1604d97c06a"
 
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
@@ -24,6 +28,11 @@ DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-too
 # Do not tag imx-boot
 UUU_BOOTLOADER = ""
 UUU_BOOTLOADER_TAGGED = ""
+BOOT_STAGING:mx91-generic-bsp  = "${S}/iMX91"
+BOOT_STAGING:mx93-generic-bsp  = "${S}/iMX9"
+
+# Add SOC family
+SOC_FAMILY:mx91-generic-bsp = "mx91"
 
 REV_OPTION:ccimx93 = "REV=A1"
 
@@ -44,6 +53,11 @@ compile_mx93:append:ccimx93() {
 		\cp --remove-destination ${DEPLOY_DIR_IMAGE}/tee.ccimx93dvk_a0.bin ${BOOT_STAGING}/tee.bin
 		unset ATF_MACHINE_NAME_A0
 	fi
+}
+
+compile_mx91() {
+	bbnote i.MX 91 boot binary build
+	compile_mx93
 }
 
 do_compile:append:ccimx8m() {
@@ -83,6 +97,10 @@ do_install:ccimx8x () {
 	done
 }
 
+deploy_mx91() {
+	deploy_mx93
+}
+
 generate_symlinks() {
 	# imx-boot recipe in meta-freescale supports *multiple* build configurations.
 	# We assume here only ONE build configuration for our platforms (otherwise
@@ -100,6 +118,13 @@ do_deploy:append:ccimx8m() {
 		install -m 0644 ${BOOT_STAGING}/mkimage-${target}.log ${DEPLOYDIR}/${BOOT_TOOLS}
 	done
 	install -m 0644 ${BOOT_STAGING}/mkimage-print_fit_hab.log ${DEPLOYDIR}/${BOOT_TOOLS}
+}
+
+do_deploy:append:ccimx91() {
+	generate_symlinks
+	for target in ${IMXBOOT_TARGETS}; do
+		install -m 0644 ${BOOT_STAGING}/mkimage-${target}.log ${DEPLOYDIR}/${BOOT_TOOLS}
+	done
 }
 
 do_deploy:append:ccimx93() {

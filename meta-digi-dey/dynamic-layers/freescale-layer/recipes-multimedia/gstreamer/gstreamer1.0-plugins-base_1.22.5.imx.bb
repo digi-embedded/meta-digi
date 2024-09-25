@@ -145,6 +145,6 @@ EXTRA_OEMESON += "-Dc_args="${CFLAGS} -I${STAGING_INCDIR_IMX}""
 # gcompat will address it during runtime
 LDFLAGS:append:imxgpu:libc-musl = " -Wl,--allow-shlib-undefined"
 
-COMPATIBLE_MACHINE = "(ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx9)"
 
 ########### End of i.MX overrides #########

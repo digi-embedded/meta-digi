@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2023, Digi International Inc.
+# Copyright (C) 2017-2024, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -42,7 +42,7 @@ ETH1_STATIC_CIDR = "${@ipaddr_to_cidr('eth1', d)}"
 WLAN0_STATIC_CIDR = "${@ipaddr_to_cidr('wlan0', d)}"
 
 UNMANAGED_DEVICES = "interface-name:p2p*;interface-name:wlan1"
-UNMANAGED_DEVICES:ccimx93 = "interface-name:p2p-wfd0-0;interface-name:wfd0;interface-name:uap0"
+UNMANAGED_DEVICES:ccimx9 = "interface-name:p2p-wfd0-0;interface-name:wfd0;interface-name:uap0"
 
 inherit update-rc.d
 

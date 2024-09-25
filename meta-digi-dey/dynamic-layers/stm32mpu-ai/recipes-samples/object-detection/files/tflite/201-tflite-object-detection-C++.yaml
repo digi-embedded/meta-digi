@@ -1,0 +1,15 @@
+Application:
+    Name: Object Detection
+    Description: COCO SSD v1
+    Icon: ../demo-ai/resources/tfl_cpp.png
+    Board:
+        List: all
+    Type: script
+    Script:
+        Exist:
+            File: /usr/local/demo-ai/resources/check_camera_preview.sh
+            Msg_false: Camera is not connected
+        Start: ../demo-ai/object-detection/tflite/launch_bin_object_detection.sh
+    Action:
+        button_release_event: script_management
+        button_press_event: highlight_eventBox

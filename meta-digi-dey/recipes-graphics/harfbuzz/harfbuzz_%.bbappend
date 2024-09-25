@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Digi International Inc.
+# Copyright (C) 2017, Digi International Inc.
 
 #
 # Remove ICU support for 'ccimx6ul' to save space in the rootfs.

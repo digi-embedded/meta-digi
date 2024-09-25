@@ -1,6 +1,6 @@
 # Copyright (C) 2016 Freescale Semiconductor
 # Copyright 2017-2018 NXP
-# Copyright (C) 2018-2024 Digi International.
+# Copyright (C) 2018-2024, Digi International Inc.
 
 DESCRIPTION = "i.MX System Controller Firmware, customized for Digi platforms"
 LICENSE = "Proprietary"

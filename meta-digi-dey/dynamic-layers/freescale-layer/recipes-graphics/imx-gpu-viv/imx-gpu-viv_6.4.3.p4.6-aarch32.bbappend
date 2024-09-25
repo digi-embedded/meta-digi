@@ -1,4 +1,4 @@
-# Copyright (C) 2023 Digi International
+# Copyright (C) 2023, Digi International Inc.
 
 # We configure imx-gpu-viv driver as built-in, so there's no need to install
 # the module.

@@ -33,9 +33,9 @@ TRUSTFENCE_SIGN_FIT_STM:ccmp1 ?= "1"
 
 # Partition encryption configuration
 TRUSTFENCE_ENCRYPT_PARTITIONS ?= "1"
-TRUSTFENCE_ENCRYPT_PARTITIONS:ccimx93 ?= "0"
+TRUSTFENCE_ENCRYPT_PARTITIONS:ccimx9 ?= "0"
 TRUSTFENCE_ENCRYPT_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "0", "1", d)}"
-TRUSTFENCE_ENCRYPT_ROOTFS:ccimx93 ?= "0"
+TRUSTFENCE_ENCRYPT_ROOTFS:ccimx9 ?= "0"
 TRUSTFENCE_FILE_BASED_ENCRYPT ?= "${TF_FILE_BASED_ENCRYPT}"
 
 # Read-only rootfs
@@ -47,15 +47,15 @@ TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-onl
 
 # Platform specific defaults
 TF_DEK_PATH = "default"
-TF_DEK_PATH:ccimx93 = "0"
+TF_DEK_PATH:ccimx9 = "0"
 TF_DEK_PATH:ccmp1 = "0"
 TF_FILE_BASED_ENCRYPT = "0"
-TF_FILE_BASED_ENCRYPT:ccimx93 = "1"
+TF_FILE_BASED_ENCRYPT:ccimx9 = "1"
 TF_FILE_BASED_ENCRYPT:ccmp1 = "1"
 
 # NXP-based sign a FIT-format boot artifact
 TRUSTFENCE_SIGN_FIT_NXP = "0"
-TRUSTFENCE_SIGN_FIT_NXP:ccimx93 = "${TRUSTFENCE_SIGN_ARTIFACTS}"
+TRUSTFENCE_SIGN_FIT_NXP:ccimx9 = "${TRUSTFENCE_SIGN_ARTIFACTS}"
 
 IMAGE_FEATURES += "dey-trustfence"
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2020 Digi International Inc.
+# Copyright (C) 2020, Digi International Inc.
 
 require recipes-digi/swu-images/swu.inc
 

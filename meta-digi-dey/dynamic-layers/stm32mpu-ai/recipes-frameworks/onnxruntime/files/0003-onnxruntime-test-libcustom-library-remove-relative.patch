@@ -1,0 +1,59 @@
+From e13955dec97f7635cb055e86cb2db026f74e4823 Mon Sep 17 00:00:00 2001
+From: Othmane AHL ZOUAOUI <othmane.ahlzouaoui@st.com>
+Date: Tue, 9 May 2023 13:50:46 +0200
+Subject: [PATCH 3/5] onnxruntime: test: libcustom library remove relative
+
+Signed-off-by: Othmane AHL ZOUAOUI <othmane.ahlzouaoui@st.com>
+
+%% original patch: 0003-onnxruntime-test-libcustom-library-remove-relative.patch
+---
+ onnxruntime/test/python/onnxruntime_test_python.py | 4 ++--
+ onnxruntime/test/shared_lib/test_inference.cc      | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/onnxruntime/test/python/onnxruntime_test_python.py b/onnxruntime/test/python/onnxruntime_test_python.py
+index 89fd90ad3a..6bf0eb0399 100644
+--- a/onnxruntime/test/python/onnxruntime_test_python.py
++++ b/onnxruntime/test/python/onnxruntime_test_python.py
+@@ -953,7 +953,7 @@ class TestInferenceSession(unittest.TestCase):
+                 raise FileNotFoundError("Unable to find '{0}'".format(shared_library))
+
+         else:
+-            shared_library = "./libcustom_op_library.so"
++            shared_library = "/usr/lib/libcustom_op_library.so"
+             if not os.path.exists(shared_library):
+                 raise FileNotFoundError("Unable to find '{0}'".format(shared_library))
+
+@@ -1312,7 +1312,7 @@ class TestInferenceSession(unittest.TestCase):
+             return
+
+         else:
+-            shared_library = "./libtest_execution_provider.so"
++            shared_library = "/usr/lib/libtest_execution_provider.so"
+
+         if not os.path.exists(shared_library):
+             raise FileNotFoundError("Unable to find '{0}'".format(shared_library))
+diff --git a/onnxruntime/test/shared_lib/test_inference.cc b/onnxruntime/test/shared_lib/test_inference.cc
+index 09219b40de..db4d73f4c0 100644
+--- a/onnxruntime/test/shared_lib/test_inference.cc
++++ b/onnxruntime/test/shared_lib/test_inference.cc
+@@ -1302,7 +1302,7 @@ TEST(CApiTest, test_custom_op_library) {
+ #elif defined(__APPLE__)
+   lib_name = ORT_TSTR("libcustom_op_library.dylib");
+ #else
+-  lib_name = ORT_TSTR("./libcustom_op_library.so");
++  lib_name = ORT_TSTR("libcustom_op_library.so");
+ #endif
+
+ #ifdef USE_CUDA
+@@ -1329,7 +1329,7 @@ TEST(CApiTest, test_custom_op_library_registration_error) {
+ #elif defined(__APPLE__)
+   lib_name = ORT_TSTR("libcustom_op_invalid_library.dylib");
+ #else
+-  lib_name = ORT_TSTR("./libcustom_op_invalid_library.so");
++  lib_name = ORT_TSTR("libcustom_op_invalid_library.so");
+ #endif
+
+   Ort::SessionOptions session_options;
+--
+2.25.1

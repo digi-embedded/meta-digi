@@ -1,4 +1,4 @@
-# Copyright 2023 Digi International Inc.
+# Copyright (C) 2023,2024, Digi International Inc.
 
 #
 # Reuse meta-freescale's optee-test_3.19.0.imx.bb

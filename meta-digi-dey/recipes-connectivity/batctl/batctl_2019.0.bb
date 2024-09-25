@@ -1,4 +1,4 @@
-# Copyright (C) 2019 Digi International.
+# Copyright (C) 2019, Digi International Inc.
 DESCRIPTION = "Control application for B.A.T.M.A.N. routing protocol kernel module for multi-hop ad-hoc mesh networks."
 HOMEPAGE = "http://www.open-mesh.net/"
 SECTION = "console/network"

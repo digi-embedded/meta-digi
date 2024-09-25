@@ -3,7 +3,7 @@
 #
 #  mkproject.sh
 #
-#  Copyright (C) 2013-2022 by Digi International Inc.
+#  Copyright (C) 2013-2024 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -94,7 +94,9 @@ do_license() {
 		${MKP_SCRIPTPATH}/sources/meta-digi/meta-digi-arm/DIGI_EULA \
 		${MKP_SCRIPTPATH}/sources/meta-digi/meta-digi-arm/DIGI_OPEN_EULA \
 	"
-	if [ "${MKP_PLATFORM}" = "ccmp15-dvk" ] || [ "${MKP_PLATFORM}" = "ccmp13-dvk" ]; then
+	if [ "${MKP_PLATFORM}" = "ccmp15-dvk" ] || \
+	   [ "${MKP_PLATFORM}" = "ccmp13-dvk" ] || \
+	   [ "${MKP_PLATFORM}" = "ccmp25-dvk" ]; then
 		local SOC_VENDOR="STM"
 		MKP_LICENSE_FILES=" \
 			${MKP_LICENSE_FILES} \

@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Digi International
+# Copyright (C) 2017-2024, Digi International Inc.
 
 SUMMARY = "Recovery reboot utilities"
 LICENSE = "MPL-2.0"
@@ -11,6 +11,9 @@ PV = "0.1"
 SRC_URI = "file://${BPN}"
 
 S = "${WORKDIR}/${BPN}"
+
+# Set compilation flag to disable some recovery features that are not supported
+CFLAGS = "${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', ' -DSUPPORTS_FS_ENCRYPTION', '', d)}"
 
 do_install() {
 	oe_runmake DESTDIR=${D} install

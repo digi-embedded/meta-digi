@@ -1,4 +1,4 @@
-# Copyright (C) 2019-2022 Digi International
+# Copyright (C) 2019-2022, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -39,7 +39,7 @@ SRC_URI:append:ccimx6ulsbc = " \
     file://0001-pulseaudio-keep-headphones-volume-in-platforms-witho.patch \
 "
 
-SRC_URI:append:ccmp1 = " \
+SRC_URI:append:stm32mpcommon = " \
     file://daemon.conf \
     file://0001-pulseaudio-keep-headphones-volume-in-platforms-witho.patch \
 "
@@ -105,7 +105,7 @@ do_install:append() {
 }
 
 # Pulse audio configuration files installation
-do_install:append:ccmp1() {
+do_install:append:stm32mpcommon() {
 	if [ -e "${WORKDIR}/daemon.conf" ]; then
 		install -m 0644 ${WORKDIR}/daemon.conf ${D}/${sysconfdir}/pulse/daemon.conf
 	fi

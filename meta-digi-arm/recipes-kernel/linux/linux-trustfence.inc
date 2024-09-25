@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2023 Digi International
+# Copyright (C) 2022,2023, Digi International Inc.
 
 DEPENDS += "${@oe.utils.vartrue('TRUSTFENCE_SIGN_ARTIFACTS', 'trustfence-sign-tools-native', '', d)}"
 

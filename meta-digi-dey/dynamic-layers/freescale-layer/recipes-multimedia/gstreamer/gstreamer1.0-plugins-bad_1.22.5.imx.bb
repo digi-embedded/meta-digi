@@ -211,6 +211,6 @@ EXTRA_OEMESON += " \
     -Dc_args="${CFLAGS} -I${STAGING_INCDIR_IMX}" \
 "
 
-COMPATIBLE_MACHINE = "(ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx9)"
 
 ########### End of i.MX overrides #########

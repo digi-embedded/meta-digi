@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2021 Digi International.
+# Copyright (C) 2012-2021, Digi International Inc.
 #
 SUMMARY = "Wireless packagegroup for DEY image"
 

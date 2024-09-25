@@ -1,0 +1,10 @@
+[Unit]
+Description=CYW55512 Bluetooth Initialization
+After=network.target suspend.target
+
+[Service]
+Type=forking
+ExecStart=/etc/cyw55512-bluetooth
+
+[Install]
+WantedBy=multi-user.target suspend.target

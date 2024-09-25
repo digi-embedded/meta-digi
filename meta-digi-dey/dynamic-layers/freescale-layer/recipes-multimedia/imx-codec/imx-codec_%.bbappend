@@ -1,4 +1,4 @@
-# Copyright (C) 2017, 2018 Digi International Inc.
+# Copyright (C) 2017,2018, Digi International Inc.
 
 # Empirically detected binaries that are not needed for a given platform
 REDUNDANT_BINS ?= ""

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2020 Digi International.
+# Copyright (C) 2012-2020, Digi International Inc.
 #
 SUMMARY = "Bluetooth packagegroup for DEY image"
 

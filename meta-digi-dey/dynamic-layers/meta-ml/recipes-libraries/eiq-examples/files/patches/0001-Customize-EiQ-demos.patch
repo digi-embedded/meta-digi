@@ -1,0 +1,407 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Fri, 15 Sep 2023 17:02:43 +0200
+Subject: [PATCH] Customize EiQ demos
+
+Just do the changes in the scripts to:
+ * Always use the NPU
+ * Get a better performance with USB Cameras
+ * Add option to use a bigger camera resolution
+ * Option to set the window in full screen
+ * Fix some exceptions of the demos
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ dms/main.py               | 79 +++++++++++++++++++++++++++------------
+ face_recognition/main.py  | 44 ++++++++++++++++++----
+ gesture_detection/main.py | 32 ++++++++++++++--
+ object_detection/main.py  | 40 ++++++++++++++++----
+ 4 files changed, 153 insertions(+), 42 deletions(-)
+
+diff --git a/dms/main.py b/dms/main.py
+index 6e04dc3..8ba99b2 100644
+--- a/dms/main.py
++++ b/dms/main.py
+@@ -14,10 +14,16 @@ from eye_landmark import EyeMesher
+ from face_landmark import FaceMesher
+ from utils import *
+ 
+-MODEL_PATH = pathlib.Path("../models/")
+-DETECT_MODEL = "face_detection_front_128_full_integer_quant.tflite"
+-LANDMARK_MODEL = "face_landmark_192_integer_quant.tflite"
+-EYE_MODEL = "iris_landmark_quant.tflite"
++WIDTH=640
++HEIGH=480
++FLIP=None    # None, skip, 0: Flip vertically, 1: Flip horizontally (around the y-axis), -1: Flip both vertically and horizontally
++FORMAT=0     # None, skip (YUYV, default), 0 MJPG (for usb camera)
++
++# Always enforce the Ethos NPU, use the converted vela models
++MODEL_PATH = pathlib.Path("../vela_models/")
++DETECT_MODEL = "face_detection_front_128_full_integer_quant_vela.tflite"
++LANDMARK_MODEL = "face_landmark_192_integer_quant_vela.tflite"
++EYE_MODEL = "iris_landmark_quant_vela.tflite"
+ 
+ # turn on camera
+ parser = argparse.ArgumentParser()
+@@ -29,16 +35,31 @@ parser.add_argument(
+ parser.add_argument(
+     '-d',
+     '--delegate',
+-    default='',
++    default='/usr/lib/libethosu_delegate.so',
+     help='delegate path')
++parser.add_argument("-f", "--fullscreen", action="store_true", help='run on full screen mode')
+ args = parser.parse_args()
+ 
+ if args.input.isdigit():
+     cap_input = int(args.input)
+ else:
+     cap_input = args.input
++
++# This pipeline for the OV5640 camera in case the other command fails
++# cap = cv2.VideoCapture("v4l2src device=%s ! imxvideoconvert_pxp ! video/x-raw,format=RGB16,width=%d,height=%d " \
++#                         "! videoconvert ! appsink" % (args.input, WIDTH, HEIGH))
++
+ cap = cv2.VideoCapture(cap_input)
++cap.set(cv2.CAP_PROP_FRAME_WIDTH, WIDTH)
++cap.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGH)
++
++if FORMAT == 0:
++    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
++    cap.set(cv2.CAP_PROP_FOURCC, fourcc)
++
+ ret, image = cap.read()
++if FLIP is not None:
++    image = cv2.flip(image, FLIP)
+ if not ret:
+     print("Can't read frame from source file ", args.input)
+     sys.exit(-1)
+@@ -66,9 +87,9 @@ def draw_face_box(image, bboxes, landmarks, scores):
+         label_btmleft = bbox[:2].copy() + 10
+         label_btmleft[0] += label_width
+         label_btmleft[1] += label_height
+-        cv2.rectangle(image, tuple(bbox[:2]), tuple(label_btmleft), color=(255, 0, 0), thickness=cv2.FILLED)
+-        cv2.putText(image, score_label, (bbox[0] + 5, label_btmleft[1] - 5),
+-                    cv2.FONT_HERSHEY_SIMPLEX, fontScale=1.0, color=(255, 255, 255), thickness=2)
++        #cv2.rectangle(image, tuple(bbox[:2]), tuple(label_btmleft), color=(255, 0, 0), thickness=cv2.FILLED)
++        #cv2.putText(image, score_label, (bbox[0] + 5, label_btmleft[1] - 5),
++                    #cv2.FONT_HERSHEY_SIMPLEX, fontScale=1.0, color=(255, 255, 255), thickness=2)
+     return image
+ 
+ # detect single frame
+@@ -111,8 +132,8 @@ def main(image):
+         right_eye_img = padded[right_box[0][1]:right_box[1][1], right_box[0][0]:right_box[1][0]]
+         left_eye_landmarks, left_iris_landmarks = eye_mesher.inference(left_eye_img)
+         right_eye_landmarks, right_iris_landmarks = eye_mesher.inference(right_eye_img)
+-        #cv2.rectangle(image_show, left_box[0], left_box[1], color=(255, 0, 0), thickness=2)
+-        #cv2.rectangle(image_show, right_box[0], right_box[1], color=(255, 0, 0), thickness=2)
++        cv2.rectangle(image_show, left_box[0], left_box[1], color=(255, 0, 0), thickness=2)
++        cv2.rectangle(image_show, right_box[0], right_box[1], color=(255, 0, 0), thickness=2)
+         left_eye_ratio = get_eye_ratio(left_eye_landmarks, image_show, left_box[0])
+         right_eye_ratio = get_eye_ratio(right_eye_landmarks, image_show, right_box[0])
+ 
+@@ -155,20 +176,32 @@ def main(image):
+ 
+ 
+ # endless loop
++window_name = "EiQ DMS demo"
+ while ret:
+-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+-    # detect single
+-    image_show = main(image)
+-
+-    # put fps
+-    result = cv2.cvtColor(image_show, cv2.COLOR_RGB2BGR)
+-
+-    # display the result
+-    cv2.imshow('demo', result)
+-
+-    ret, image = cap.read()
+-    if cv2.waitKey(1) & 0xFF == ord('q'):
+-        break
++    try:
++        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
++        # detect single
++        image_show = main(image)
++
++        # put fps
++        result = cv2.cvtColor(image_show, cv2.COLOR_RGB2BGR)
++
++        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
++        if args.fullscreen:
++            cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
++
++        # display the result
++        cv2.imshow(window_name, result)
++
++        ret, image = cap.read()
++        if FLIP is not None:
++            image = cv2.flip(image, FLIP)
++        if cv2.waitKey(1) & 0xFF == ord('q'):
++            break
++    except Exception as err:
++        # Ignore exceptions
++        time.sleep(0.2)
++        print("Exception catched:%s\n... continuing with test" % repr(err))
+ 
+ time.sleep(2)
+ cap.release()
+diff --git a/face_recognition/main.py b/face_recognition/main.py
+index acc838e..33ffa71 100644
+--- a/face_recognition/main.py
++++ b/face_recognition/main.py
+@@ -13,6 +13,11 @@ from face_detection import YoloFace
+ from face_recognition import Facenet
+ from face_database import FaceDatabase
+ 
++WIDTH=640
++HEIGH=480
++FLIP=None    # None, skip, 0: Flip vertically, 1: Flip horizontally (around the y-axis), -1: Flip both vertically and horizontally
++FORMAT=0     # None, skip (YUYV, default), 0 MJPG (for usb camera)
++
+ parser = argparse.ArgumentParser()
+ parser.add_argument(
+     '-i',
+@@ -22,12 +27,14 @@ parser.add_argument(
+ parser.add_argument(
+     '-d',
+     '--delegate',
+-    default='',
++    default='/usr/lib/libethosu_delegate.so',
+     help='delegate path')
++parser.add_argument("-f", "--fullscreen", action="store_true", help='run on full screen mode')
+ args = parser.parse_args()
+ 
+-detector = YoloFace("../models/yoloface_int8.tflite", args.delegate)
+-recognizer = Facenet("../models/facenet_512_int_quantized.tflite", args.delegate)
++# Always enforce the Ethos NPU, use the converted vela models
++detector = YoloFace("../vela_models/yoloface_int8_vela.tflite", args.delegate)
++recognizer = Facenet("../vela_models/facenet_512_int_quantized_vela.tflite", args.delegate)
+ database = FaceDatabase()
+ 
+ def ischar(c):
+@@ -39,7 +46,7 @@ def get_inputs(img, msg):
+         cv2.rectangle(img, (0, 0), (img.shape[1], 40), (0, 0, 0), -1)
+         cv2.putText(img, msg + inputs, (30, 30),
+                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+-        cv2.imshow('img', img)
++        cv2.imshow(window_name, img)
+         key = cv2.waitKey(20) & 0xFF
+         if key == 13 or key == 141:
+             break
+@@ -68,13 +75,28 @@ if args.input.isdigit():
+     cap_input = int(args.input)
+ else:
+     cap_input = args.input
++
++# This pipeline for the OV5640 camera in case the other command fails
++# vid = cv2.VideoCapture("v4l2src device=%s ! imxvideoconvert_pxp ! video/x-raw,format=RGB16,width=%d,height=%d " \
++#                         "! videoconvert ! appsink" % (args.input, WIDTH, HEIGH))
+ vid = cv2.VideoCapture(cap_input)
++vid.set(cv2.CAP_PROP_FRAME_WIDTH, WIDTH)
++vid.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGH)
++
++if FORMAT == 0:
++    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
++    vid.set(cv2.CAP_PROP_FOURCC, fourcc)
++
+ PADDING = 10
+ tips = "Press 'a' to add person, 'd' to delete person, 'p' to print database"
++
++window_name = "Face recognition Demo"
+ while True:
+     embeddings = None
+ 
+     ret, img = vid.read()
++    if FLIP is not None:
++        img = cv2.flip(img, FLIP)
+     if (ret == False):
+         break
+     boxes = detector.detect(img)
+@@ -97,12 +119,20 @@ while True:
+ 
+     cv2.putText(img, tips, (30, 30),
+                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 3)
+-    cv2.imshow('img', img)
++
++    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
++    if args.fullscreen:
++        cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
++
++    cv2.imshow(window_name, img)
+     key = cv2.waitKey(1) & 0xFF
+     if (key == ord('a')):
+         msg = "ADD. Please input name:"
+         name = get_inputs(img, msg)
+-        database.add_name(name, embeddings)
++        if embeddings:
++            database.add_name(name, embeddings)
++        else:
++            print ("Not a valid face, not adding user to database, ignoring...")
+     elif (key == ord('d')):
+         msg = "DEL. Please input name:"
+         name = get_inputs(img, msg)
+@@ -110,7 +140,7 @@ while True:
+     elif (key == ord('p')):
+         names = ",".join(database.get_names())
+         print_longtext(img, names + "   Press any key to continue.")
+-        cv2.imshow('img', img)
++        cv2.imshow(window_name, img)
+         while cv2.waitKey(100) & 0xFF == 0xFF:
+             pass
+ 
+diff --git a/gesture_detection/main.py b/gesture_detection/main.py
+index da83ce0..15b8597 100644
+--- a/gesture_detection/main.py
++++ b/gesture_detection/main.py
+@@ -9,8 +9,9 @@ import time
+ import argparse
+ from hand_tracker import HandTracker
+ 
+-PALM_MODEL_PATH = "../models/palm_detection_builtin_256_integer_quant.tflite"
+-LANDMARK_MODEL_PATH = "../models/hand_landmark_3d_256_integer_quant.tflite"
++# Always enforce the Ethos NPU, use the converted vela models
++PALM_MODEL_PATH = "../vela_models/palm_detection_builtin_256_integer_quant_vela.tflite"
++LANDMARK_MODEL_PATH = "../vela_models/hand_landmark_3d_256_integer_quant_vela.tflite"
+ ANCHORS_PATH = "anchors.csv"
+ 
+ def draw_landmarks(points, frame):
+@@ -52,15 +53,33 @@ parser.add_argument(
+ parser.add_argument(
+     '-d',
+     '--delegate',
+-    default='',
++    default='/usr/lib/libethosu_delegate.so',
+     help='delegate path')
++parser.add_argument("-f", "--fullscreen", action="store_true", help='run on full screen mode')
+ args = parser.parse_args()
+ 
+ if args.input.isdigit():
+     cap_input = int(args.input)
+ else:
+     cap_input = args.input
++
++WIDTH=640
++HEIGH=480
++FLIP=None    # None, skip, 0: Flip vertically, 1: Flip horizontally (around the y-axis), -1: Flip both vertically and horizontally
++FORMAT=0     # None, skip (YUYV, default), 0 MJPG (for usb camera)
++
++# This pipeline for the OV5640 camera in case the other command fails
++# capture = cv2.VideoCapture("v4l2src device=%s ! imxvideoconvert_pxp ! video/x-raw,format=RGB16,width=%d,height=%d " \
++#                         "! videoconvert ! appsink" % (args.input, WIDTH, HEIGH))
++
+ capture = cv2.VideoCapture(cap_input)
++capture.set(cv2.CAP_PROP_FRAME_WIDTH, WIDTH)
++capture.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGH)
++
++if FORMAT == 0:
++    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
++    capture.set(cv2.CAP_PROP_FOURCC, fourcc)
++
+ ret, frame = capture.read()
+ if (frame is None):
+     print("Can't read frame from source file ", args.input)
+@@ -68,11 +87,16 @@ if (frame is None):
+ 
+ detector = HandTracker(PALM_MODEL_PATH, LANDMARK_MODEL_PATH, ANCHORS_PATH, args.delegate, box_shift=0.2, box_enlarge=1.3)
+ 
++window_name = "Hand Gesture Demo"
+ while ret:
+     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+     points, _ = detector(image)
+     draw_landmarks(points, frame)
+-    cv2.imshow("hand", frame)
++
++    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
++    if args.fullscreen:
++        cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
++    cv2.imshow(window_name, frame)
+ 
+     ret, frame = capture.read()
+     if cv2.waitKey(1) & 0xFF == ord('q'):
+diff --git a/object_detection/main.py b/object_detection/main.py
+index 1356111..efa614e 100644
+--- a/object_detection/main.py
++++ b/object_detection/main.py
+@@ -13,7 +13,13 @@ import argparse
+ 
+ from labels import label2string
+ 
+-MODEL_PATH = "../models/ssd_mobilenet_v1_quant.tflite"
++WIDTH=640
++HEIGH=480
++FLIP=None    # None, skip, 0: Flip vertically, 1: Flip horizontally (around the y-axis), -1: Flip both vertically and horizontally
++FORMAT=0     # None, skip (YUYV, default), 0 MJPG (for usb camera)
++
++# Always enforce the Ethos NPU, use the converted vela models
++MODEL_PATH = "../vela_models/ssd_mobilenet_v1_quant_vela.tflite"
+ 
+ parser = argparse.ArgumentParser()
+ parser.add_argument(
+@@ -24,21 +30,31 @@ parser.add_argument(
+ parser.add_argument(
+     '-d',
+     '--delegate',
+-    default='',
++    default='/usr/lib/libethosu_delegate.so',
+     help='delegate path')
++parser.add_argument("-f", "--fullscreen", action="store_true", help='run on full screen mode')
+ args = parser.parse_args()
+ 
+ if args.input.isdigit():
+     cap_input = int(args.input)
+ else:
+     cap_input = args.input
++
++# This pipeline for the OV5640 camera in case the other command fails
++# vid = cv2.VideoCapture("v4l2src device=%s ! imxvideoconvert_pxp ! video/x-raw,format=RGB16,width=%d,height=%d " \
++#                         "! videoconvert ! appsink" % (args.input, WIDTH, HEIGH))
++
+ vid = cv2.VideoCapture(cap_input)
++vid.set(cv2.CAP_PROP_FRAME_WIDTH, WIDTH)
++vid.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGH)
+ 
+-if(args.delegate):
+-    ext_delegate = [tflite.load_delegate(args.delegate)]
+-    interpreter = tflite.Interpreter(model_path=MODEL_PATH, experimental_delegates=ext_delegate)
+-else:
+-    interpreter = tflite.Interpreter(model_path=MODEL_PATH)
++if FORMAT == 0:
++    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
++    vid.set(cv2.CAP_PROP_FOURCC, fourcc)
++
++# Always enforce the Ethos NPU
++ext_delegate = [tflite.load_delegate(args.delegate)]
++interpreter = tflite.Interpreter(model_path=MODEL_PATH, experimental_delegates=ext_delegate)
+ interpreter.allocate_tensors()
+ 
+ input_details = interpreter.get_input_details()
+@@ -52,10 +68,13 @@ total_fps = 0
+ total_time = 0
+ 
+ ret, frame = vid.read()
++if FLIP is not None:
++    frame = cv2.flip(frame, FLIP)
+ if (frame is None):
+     print("Can't read frame from source file ", args.input)
+     exit(0)
+ 
++window_name = "Object Detection Demo"
+ while ret:
+     total_fps += 1
+     loop_start = time.time()
+@@ -94,9 +113,14 @@ while ret:
+     msg = "FPS:" + str(fps) + "  Invoke time:" + str(invoke_time) + "ms"
+     cv2.putText(frame, msg, (0, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 3)
+ 
+-    cv2.imshow("image", frame)
++    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
++    if args.fullscreen:
++        cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
++    cv2.imshow(window_name, frame)
+ 
+     ret, frame = vid.read()
++    if FLIP is not None:
++        frame = cv2.flip(frame, FLIP)
+     if cv2.waitKey(1) & 0xFF == ord('q'):
+         break
+ 

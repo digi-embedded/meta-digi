@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2023,2024 Digi International.
+# Copyright (C) 2023,2024, Digi International Inc.
 #
 require dey-image-graphical.inc
 

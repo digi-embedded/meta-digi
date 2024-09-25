@@ -41,6 +41,7 @@ DEFAULTTUNE:mx6-generic-bsp    ?= "cortexa9thf-neon"
 DEFAULTTUNE:mx6ul-generic-bsp  ?= "cortexa7thf-neon"
 DEFAULTTUNE:mx8m-generic-bsp   ?= "cortexa53-crypto"
 DEFAULTTUNE:mx8x-generic-bsp   ?= "cortexa35-crypto"
+DEFAULTTUNE:mx91-generic-bsp   ?= "cortexa55"
 DEFAULTTUNE:mx93-generic-bsp   ?= "cortexa55"
 
 INHERIT += "machine-overrides-extender"
@@ -56,6 +57,7 @@ MACHINEOVERRIDES_EXTENDER:mx8mn:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxd
 MACHINEOVERRIDES_EXTENDER:mx8mp:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxvpu:imxgpu:imxgpu2d:imxgpu3d:imxvulkan:mx8-generic-bsp:mx8-nxp-bsp:mx8m-generic-bsp:mx8m-nxp-bsp:mx8mp-generic-bsp:mx8mp-nxp-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8qxp:use-nxp-bsp = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxdpu:imxgpu:imxgpu2d:imxgpu3d:imxvulkan:mx8-generic-bsp:mx8-nxp-bsp:mx8x-generic-bsp:mx8x-nxp-bsp:mx8qxp-generic-bsp:mx8qxp-nxp-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8dx:use-nxp-bsp  = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxdpu:imxgpu:imxgpu2d:imxgpu3d:imxvulkan:mx8-generic-bsp:mx8-nxp-bsp:mx8x-generic-bsp:mx8x-nxp-bsp:mx8dx-generic-bsp:mx8dx-nxp-bsp"
+MACHINEOVERRIDES_EXTENDER:mx91:use-nxp-bsp   = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxpxp:mx9-generic-bsp:mx9-nxp-bsp:mx91-generic-bsp:mx91-nxp-bsp"
 MACHINEOVERRIDES_EXTENDER:mx93:use-nxp-bsp   = "imx-generic-bsp:imx-nxp-bsp:imxdrm:imxpxp:mx9-generic-bsp:mx9-nxp-bsp:mx93-generic-bsp:mx93-nxp-bsp"
 
 #######
@@ -69,6 +71,7 @@ MACHINEOVERRIDES_EXTENDER:mx8mn:use-mainline-bsp  = "imx-generic-bsp:imx-mainlin
 MACHINEOVERRIDES_EXTENDER:mx8mp:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:mx8-generic-bsp:mx8-mainline-bsp:mx8m-generic-bsp:mx8m-mainline-bsp:mx8mp-generic-bsp:mx8mp-mainline-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8qxp:use-mainline-bsp = "imx-generic-bsp:imx-mainline-bsp:mx8-generic-bsp:mx8-mainline-bsp:mx8x-generic-bsp:mx8x-mainline-bsp:mx8qxp-generic-bsp:mx8qxp-mainline-bsp"
 MACHINEOVERRIDES_EXTENDER:mx8dx:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:mx8-generic-bsp:mx8-mainline-bsp:mx8x-generic-bsp:mx8x-mainline-bsp:mx8dx-generic-bsp:mx8dx-mainline-bsp"
+MACHINEOVERRIDES_EXTENDER:mx91:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:mx9-generic-bsp:mx9-mainline-bsp:mx91-generic-bsp:mx91-mainline-bsp"
 MACHINEOVERRIDES_EXTENDER:mx93:use-mainline-bsp  = "imx-generic-bsp:imx-mainline-bsp:mx9-generic-bsp:mx9-mainline-bsp:mx93-generic-bsp:mx93-mainline-bsp"
 
 MACHINEOVERRIDES_EXTENDER_FILTER_OUT = " \
@@ -98,6 +101,7 @@ MACHINEOVERRIDES_EXTENDER_FILTER_OUT = " \
     mx8qxp \
     mx8dx \
     mx8dxl \
+    mx91 \
     mx93 \
 "
 
@@ -113,6 +117,7 @@ MACHINE_SOCARCH_SUFFIX:mx8mn-nxp-bsp  = "-mx8mn"
 MACHINE_SOCARCH_SUFFIX:mx8mp-nxp-bsp  = "-mx8mp"
 MACHINE_SOCARCH_SUFFIX:mx8qxp-nxp-bsp = "-mx8"
 MACHINE_SOCARCH_SUFFIX:mx8dx-nxp-bsp  = "-mx8"
+MACHINE_SOCARCH_SUFFIX:mx91-nxp-bsp = "-mx91"
 MACHINE_SOCARCH_SUFFIX:mx93-nxp-bsp = "-mx93"
 
 # For Mainline we use a single SoC suffix as we don't have different build options
@@ -188,6 +193,7 @@ IMX_EXTRA_FIRMWARE                  ?= ""
 IMX_EXTRA_FIRMWARE:mx8-generic-bsp   = "firmware-imx-8 imx-sc-firmware imx-seco"
 IMX_EXTRA_FIRMWARE:mx8m-generic-bsp  = "firmware-imx-8m"
 IMX_EXTRA_FIRMWARE:mx8x-generic-bsp  = "imx-sc-firmware imx-seco"
+IMX_EXTRA_FIRMWARE:mx91-generic-bsp  = "imx-boot-firmware-files firmware-ele-imx"
 IMX_EXTRA_FIRMWARE:mx93-generic-bsp  = "imx-boot-firmware-files firmware-ele-imx"
 
 # Firmware
@@ -271,12 +277,15 @@ PREFERRED_VERSION_vulkan-loader:imxvulkan  ??= "1.2.182.0"
 PREFERRED_VERSION_vulkan-tools:imxvulkan   ??= "1.2.182.0"
 
 # Use i.MX optee Version
-PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "4.0.0.imx"
-PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "4.0.0.imx"
-PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "3.19.0.imx"
-PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "4.0.0.imx"
+PREFERRED_VERSION_optee-os:mx8-nxp-bsp      ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-os:mx91-nxp-bsp     ??= "4.2.0.imx"
+PREFERRED_VERSION_optee-os:mx93-nxp-bsp     ??= "4.0.0.imx"
+PREFERRED_VERSION_optee-client:mx8-nxp-bsp  ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-client:mx91-nxp-bsp ??= "4.2.0.imx"
+PREFERRED_VERSION_optee-client:mx93-nxp-bsp ??= "4.0.0.imx"
+PREFERRED_VERSION_optee-test:mx8-nxp-bsp    ??= "3.19.0.imx"
+PREFERRED_VERSION_optee-test:mx91-nxp-bsp   ??= "4.2.0.imx"
+PREFERRED_VERSION_optee-test:mx93-nxp-bsp   ??= "4.0.0.imx"
 
 # Machine learning backports from NXP's lf-6.1.55-2.2.0 release
 PREFERRED_VERSION_ethos-u-driver-stack:ccimx93 = "23.08"

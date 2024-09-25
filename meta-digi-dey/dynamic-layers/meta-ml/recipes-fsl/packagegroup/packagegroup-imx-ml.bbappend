@@ -1,4 +1,4 @@
-# Copyright 2023,2024 Digi International Inc.
+# Copyright (C) 2023,2024, Digi International Inc.
 
 ML_NNSTREAMER_PKGS_LIST:remove = "nnstreamer-deepview-rt"
 

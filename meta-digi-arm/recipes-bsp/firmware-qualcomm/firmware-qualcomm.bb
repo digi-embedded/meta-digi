@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2023 Digi International.
+# Copyright (C) 2016-2023, Digi International Inc.
 
 SUMMARY = "Qualcomm firmware files for Digi's platforms."
 SECTION = "base"

@@ -1,4 +1,4 @@
-# Copyright (C) 2023,2024 Digi International.
+# Copyright (C) 2023,2024, Digi International Inc.
 
 SUMMARY = "STM key generation and signing tools"
 SECTION = "console/tools"
@@ -10,8 +10,8 @@ PKGNAME = "trustfence-stm-signtools"
 
 # tarball
 SRC_URI = "${DIGI_PKG_SRC}/${PKGNAME}-${PV}.tar.gz"
-SRC_URI[md5sum] = "995b612c1da7e3d9b9b402ede578f41d"
-SRC_URI[sha256sum] = "b3c975c12f71acda356e086c1440398ca95256e104fd4813ef6a720237f6dd72"
+SRC_URI[md5sum] = "5693ed0cd34f858dea5bc3d1a94e9eee"
+SRC_URI[sha256sum] = "be3ab77b98f5f8b8508cda090cc5eeccd0cdc39ebe9cee45b5ef52528c4ce515"
 
 inherit bin_package
 

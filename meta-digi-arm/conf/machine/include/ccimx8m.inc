@@ -17,6 +17,9 @@ BOOTLOADER_IMAGE_RECIPE = "imx-boot"
 BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 
+# Set InitRAMDisk load address to U-boot initramfs_addr
+UBOOT_RD_LOADADDRESS = "0x43800000"
+
 # LPDDR4 firmware
 DDR_FIRMWARE_NAME = " \
     lpddr4_pmu_train_1d_imem.bin \

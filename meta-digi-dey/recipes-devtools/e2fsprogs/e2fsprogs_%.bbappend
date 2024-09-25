@@ -1,4 +1,4 @@
-# Copyright (C) 2023 Digi International.
+# Copyright (C) 2023, Digi International Inc.
 
 pkg_postinst_ontarget:${PN}-mke2fs() {
 	get_emmc_block_device() {

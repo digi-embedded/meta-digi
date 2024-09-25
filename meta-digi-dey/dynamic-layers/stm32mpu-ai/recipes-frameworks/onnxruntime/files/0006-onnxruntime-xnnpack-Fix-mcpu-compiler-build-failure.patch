@@ -1,0 +1,43 @@
+From a313277345bb498f9a788b905ed3f4e37ba31b57 Mon Sep 17 00:00:00 2001
+From: Othmane AHL ZOUAOUI <othmane.ahlzouaoui@st.com>
+Date: Tue, 30 May 2023 17:17:39 +0200
+Subject: [PATCH 6/6] onnxruntime: xnnpack: Fix -mcpu compiler build failure
+
+The "-mcpu=" switch is introduced externaly into CMake by Yocto
+buildsystem toolchain. This switch is not compatible with XNNPACK
+build mechanism and causes the XNNPACK compilation break due to
+"unsupported instructions".
+This switch needs to be removed for XNNPACK In order to isolate
+the changes only for XNNPACK and its depencencies, a subfolder and
+a fix are introduced through this patch.
+
+Signed-off-by: Othmane AHL ZOUAOUI <othmane.ahlzouaoui@st.com>
+---
+ cmake/external/xnnpack.cmake | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/cmake/external/xnnpack.cmake b/cmake/external/xnnpack.cmake
+index 1fc2c6ccdc..62fad6ce38 100644
+--- a/cmake/external/xnnpack.cmake
++++ b/cmake/external/xnnpack.cmake
+@@ -11,6 +11,18 @@ if(CMAKE_ANDROID_ARCH_ABI STREQUAL armeabi-v7a)
+   set(XNNPACK_ENABLE_ARM_BF16 OFF)
+ ENDIF()
+
++string(REGEX REPLACE "-mcpu=[-a-zA-Z0-9_.^$*+?]*" "" _tmp ${CMAKE_C_FLAGS})
++set(CMAKE_C_FLAGS ${_tmp})
++message("CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
++
++string(REGEX REPLACE "-mcpu=[-a-zA-Z0-9_.^$*+?]*" "" _tmp ${CMAKE_ASM_FLAGS})
++set(CMAKE_ASM_FLAGS ${_tmp})
++message("CMAKE_ASM_FLAGS: ${CMAKE_ASM_FLAGS}")
++
++string(REGEX REPLACE "-mcpu=[-a-zA-Z0-9_.^$*+?]*" "" _tmp ${CMAKE_CXX_FLAGS})
++set(CMAKE_CXX_FLAGS ${_tmp})
++message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
++
+ # fp16 depends on psimd
+ FetchContent_Declare(psimd URL ${DEP_URL_psimd} URL_HASH SHA1=${DEP_SHA1_psimd})
+ onnxruntime_fetchcontent_makeavailable(psimd)
+--
+2.25.1

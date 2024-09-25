@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Digi International Inc.
+ * Copyright (c) 2017-2024, Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -26,13 +26,24 @@
 
 #include <recovery.h>
 
-#define VERSION		"0.3" GIT_REVISION
+#define VERSION		"0.4" GIT_REVISION
 
 #define REBOOT_TIMEOUT	10
 
 #define CMD_RECOVERY	"recovery-reboot"
 #define CMD_UPDATEFW	"update-firmware"
 #define CMD_ENCRYPT	"encrypt-partitions"
+
+#ifdef SUPPORTS_FS_ENCRYPTION
+#define HELP_ENCRYPT	"  -e <partitions> --encrypt=<partitions>     Encrypt the list of provided partitions.\n"
+#define HELP_UNENCRYPT	"  -d <partitions> --unencrypt=<partitions>   Un-encrypt the list of provided partitions.\n"
+#define HELP_KEY	"  -k [<key>]      --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
+			"                                             Empty to generate a random key.\n"
+#else
+#define HELP_ENCRYPT ""
+#define HELP_UNENCRYPT ""
+#define HELP_KEY ""
+#endif /* CCMP_RECOVERY_SUPPORT */
 
 #define RECOVERY_USAGE \
 	"Reboot into recovery mode setting recovery commands.\n" \
@@ -43,10 +54,9 @@
 	"Usage: %s [options] [<SWU-package-path>]\n\n" \
 	"  -u              --update-firmware          Perform firmware update\n" \
 	"  -i <image>      --image-set=<image>        Use the specified image-set from sw-description (only together with -u).\n" \
-	"  -e <partitions> --encrypt=<partitions>     Encrypt the list of provided partitions.\n" \
-	"  -d <partitions> --unencrypt=<partitions>   Un-encrypt the list of provided partitions.\n" \
-	"  -k [<key>]      --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
-	"                                             Empty to generate a random key.\n" \
+	HELP_ENCRYPT \
+	HELP_UNENCRYPT \
+	HELP_KEY \
 	"  -w              --wipe-update-partition    Wipe 'update' partition\n" \
 	"  -T <N>          --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
 	"  -f              --force                    Force (un)encryption and key change operations.\n" \
@@ -63,8 +73,7 @@
 	"\n" \
 	"Usage: %s [options] <SWU-package-path>\n\n" \
 	"  -i <image>  --image-set=<image>        Use the specified image-set from sw-description.\n" \
-	"  -k [<key>]  --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
-	"                                         Empty to generate a random key.\n" \
+	HELP_KEY \
 	"  -T <N>      --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
 	"  -f          --force                    Force (un)encryption and key change operations.\n" \
 	"              --help                     Print help and exit\n" \
@@ -79,10 +88,9 @@
 	"Version: %s\n" \
 	"\n" \
 	"Usage: %s [-e <partitions>] [-d <partitions>] [options]\n\n" \
-	"  -e <partitions> --encrypt=<partitions>     Encrypt the list of provided partitions.\n" \
-	"  -d <partitions> --unencrypt=<partitions>   Un-encrypt the list of provided partitions.\n" \
-	"  -k [<key>]      --encryption-key[=<key>]   Set <key> as file system encryption key.\n" \
-	"                                             Empty to generate a random key.\n" \
+	HELP_ENCRYPT \
+	HELP_UNENCRYPT \
+	HELP_KEY \
 	"  -T <N>          --reboot-timeout=<N>       Reboot after N seconds (default %d)\n" \
 	"  -f              --force                    Force (un)encryption and key change operations.\n" \
 	"                  --help                     Print help and exit\n" \
@@ -133,6 +141,7 @@ static void usage_and_exit(int exitval)
 static void parse_options(int argc, char *argv[])
 {
 	static int opt_index, opt;
+#ifdef SUPPORTS_FS_ENCRYPTION
 	static const char *short_options = "ui:k::wT:e:d:f";
 	static const struct option long_options[] = {
 		{"update-firmware", no_argument, NULL, 'u'},
@@ -146,6 +155,18 @@ static void parse_options(int argc, char *argv[])
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
+#else
+	static const char *short_options = "ui:wT:f";
+	static const struct option long_options[] = {
+                {"update-firmware", no_argument, NULL, 'u'},
+                {"image_set", required_argument, NULL, 'i'},
+                {"wipe-update-partition", no_argument, NULL, 'w'},
+                {"reboot-timeout", required_argument, NULL, 'T'},
+                {"force", no_argument, NULL, 'f'},
+                {"help", no_argument, NULL, 'h'},
+                {NULL, 0, NULL, 0}
+        };
+#endif
 	char *endptr;
 
 	if (argc == 1)

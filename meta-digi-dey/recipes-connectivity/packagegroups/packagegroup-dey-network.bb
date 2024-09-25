@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Digi International.
+# Copyright (C) 2012, Digi International Inc.
 #
 SUMMARY = "Network applications packagegroup for DEY image"
 

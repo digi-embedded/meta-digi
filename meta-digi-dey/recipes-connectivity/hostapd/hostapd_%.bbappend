@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2024 Digi International Inc.
+# Copyright (C) 2016-2024, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -8,7 +8,7 @@ SRC_URI:append = " \
     ${@oe.utils.conditional('HAS_WIFI_VIRTWLANS', 'true', 'file://hostapd_wlan1.conf', '', d)} \
 "
 
-SRC_URI:append:ccimx93 = " \
+SRC_URI:append:ccimx9 = " \
     file://hostapd_uap0.conf \
 "
 
@@ -61,7 +61,7 @@ MURATA_COMMON_PATCHES = " \
 	file://murata/0059-Reset-authentication-and-encryption-parameters-while.digi.patch \
 "
 
-SRC_URI:append:ccmp1 = " ${MURATA_COMMON_PATCHES}"
+SRC_URI:append:stm32mpcommon = " ${MURATA_COMMON_PATCHES}"
 
 SYSTEMD_SERVICE:${PN}:append = " hostapd@.service"
 
@@ -92,7 +92,7 @@ add_hostapd_files() {
 	fi
 }
 
-add_hostapd_files:ccimx93() {
+add_hostapd_files:ccimx9() {
 	install -m 0644 ${WORKDIR}/hostapd_uap0.conf ${D}${sysconfdir}
 }
 

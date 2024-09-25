@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Digi International Inc.
+ * Copyright (c) 2023-2024 Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -14,6 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
 
@@ -56,9 +57,11 @@ struct platform_functions platforms_functions[] = {
 	[PLATFORM_CC8MM] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_CC8MN] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_CC8X] = {read_bootcount_nvmem, write_bootcount_nvmem},
+	[PLATFORM_CC91] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_CC93] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_CCMP13] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_CCMP15] = {read_bootcount_nvmem, write_bootcount_nvmem},
+	[PLATFORM_CCMP25] = {read_bootcount_nvmem, write_bootcount_nvmem},
 	[PLATFORM_UNKNOWN] = {NULL, NULL}
 };
 
@@ -160,6 +163,11 @@ int main(int argc, char *argv[]) {
 	/* Determine platform. */
 	platform = get_platform();
 	pfuncs = &platforms_functions[platform];
+	if (!pfuncs->read_bootcount || !pfuncs->write_bootcount) {
+		printf("Platform not supported\n");
+		ret = -ENOTSUP;
+		goto end;
+	}
 
 	/* Execute the requested action. */
 	if (read) {
@@ -174,5 +182,6 @@ int main(int argc, char *argv[]) {
 		ret = pfuncs->write_bootcount(0);
 	}
 
+end:
 	return ret;
 }

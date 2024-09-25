@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2024 Digi International
+# Copyright (C) 2018-2024, Digi International Inc.
 
 require recipes-bsp/u-boot/u-boot.inc
 
@@ -220,6 +220,7 @@ do_compile:append:ccmp1() {
 
 BOOT_TOOLS = "imx-boot-tools"
 BOOT_TOOLS:ccmp1 = "u-boot"
+BOOT_TOOLS:ccmp2 = "u-boot"
 
 do_deploy:append:ccimx8m() {
 	# Deploy u-boot-nodtb.bin and ccimx8m[m|n]-dvk.dtb, to be packaged in boot binary by imx-boot
@@ -267,6 +268,18 @@ do_deploy:append:ccmp1() {
 			cp $nameonkernel $ubootdevicetree
 		done
 	fi
+}
+
+do_deploy:append:ccmp2() {
+	# Deploy u-boot-nodtb.bin and ccmp2x-dvk-xxxx.dtb, to be packaged in fip binary by tf-a
+	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
+	if [ -n "${UBOOT_DEVICETREE}" ]; then
+		for devicetree in ${UBOOT_DEVICETREE}; do
+			# Install u-boot dtb
+			install -m 644 ${B}/${config}/arch/arm/dts/${devicetree}.dtb ${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${devicetree}.dtb
+		done
+	fi
+	install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin
 }
 
 SYSROOT_DIRS += "/boot"

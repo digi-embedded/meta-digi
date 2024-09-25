@@ -184,6 +184,6 @@ PACKAGECONFIG[imxg2d] = "-Drenderer-g2d=true,-Drenderer-g2d=false,virtual/libg2d
 LDFLAGS:append:imxgpu:libc-musl = " -Wl,--allow-shlib-undefined"
 
 PACKAGE_ARCH = "${MACHINE_SOCARCH}"
-COMPATIBLE_MACHINE = "(ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx9)"
 
 ########### End of i.MX overrides #########

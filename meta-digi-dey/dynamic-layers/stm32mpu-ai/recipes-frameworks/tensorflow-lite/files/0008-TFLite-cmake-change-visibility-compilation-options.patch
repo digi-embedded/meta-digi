@@ -1,0 +1,30 @@
+From 0675ef8a401c5f77aeb674b006594190c7f58810 Mon Sep 17 00:00:00 2001
+From: Othmane AHL ZOUAOUI <othmane.ahlzouaoui@st.com>
+Date: Wed, 20 Mar 2024 15:05:40 +0100
+Subject: [PATCH 8/8] TFLite: cmake: change visibility compilation options
+
+Changing the compile options of the libtensorflow-lite shared lib
+to export all the symbols of the lib and make them visible during
+the runtime.
+
+Change-Id: I25a88a3ba29b00d1f40336e10acb898ab8b016a5
+Signed-off-by: Othmane AHL ZOUAOUI <othmane.ahlzouaoui@st.com>
+---
+ tensorflow/lite/CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
+index 40812886306..f7bb65d894a 100644
+--- a/tensorflow/lite/CMakeLists.txt
++++ b/tensorflow/lite/CMakeLists.txt
+@@ -517,6 +517,8 @@ set(_ALL_TFLITE_SRCS
+ add_library(tensorflow-lite SHARED EXCLUDE_FROM_ALL
+   ${_ALL_TFLITE_SRCS}
+ )
++target_compile_options(tensorflow-lite PRIVATE -fvisibility=hidden)
++target_compile_options(tensorflow-lite PRIVATE -fvisibility=default)
+ set(_ALL_TFLITE_HDRS ${_ALL_TFLITE_SRCS})
+ list(FILTER _ALL_TFLITE_HDRS INCLUDE REGEX ".*\\.h$")
+ target_include_directories(tensorflow-lite
+--
+2.34.1

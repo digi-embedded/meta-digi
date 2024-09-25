@@ -89,7 +89,7 @@ do_image_boot_ubifs[depends] += " \
 
 IMAGE_CMD:boot.ubifs() {
 	BOOTIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
-	# Exclude DTB and DTBO from UBIFS image when creating a FIT image
+	# Exclude DTB and DTBO from final image, when creating a FIT file
 	if [ "${KERNEL_IMAGETYPE}" != "fitImage" ]; then
 		if [ -n "${KERNEL_DEVICETREE}" ]; then
 			for DTB in ${KERNEL_DEVICETREE}; do
@@ -116,7 +116,7 @@ IMAGE_CMD:boot.ubifs() {
 		ln ${orig} ${TMP_BOOTDIR}/$(basename ${item})
 	done
 
-	# Exclude boot scripts from UBIFS image when creating a FIT image
+	# Exclude boot scripts from final image, when creating a FIT file
 	if [ "${KERNEL_IMAGETYPE}" != "fitImage" ]; then
 		# Hard-link boot scripts into the temporary folder
 		for item in ${BOOT_SCRIPTS}; do
@@ -167,8 +167,12 @@ do_image_recovery_ubifs[depends] += " \
 "
 
 IMAGE_CMD:recovery.ubifs() {
-	RECOVERYIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
-	# Exclude DTB and DTBO from VFAT image when creating a FIT image
+	if [ "${KERNEL_IMAGETYPE}" = "fitImage" ]; then
+		RECOVERYIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${RECOVERY_INITRAMFS_IMAGE}-${MACHINE}-${MACHINE}"
+	else
+		RECOVERYIMG_FILES_SYMLINK="${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${MACHINE}.bin"
+	fi
+	# Exclude DTB and DTBO from final image, when creating a FIT file
 	if [ "${KERNEL_IMAGETYPE}" != "fitImage" ]; then
 		if [ -n "${KERNEL_DEVICETREE}" ]; then
 			for DTB in ${KERNEL_DEVICETREE}; do
@@ -190,15 +194,17 @@ IMAGE_CMD:recovery.ubifs() {
 		ln ${orig} ${TMP_RECOVERYDIR}/$(basename ${item})
 	done
 
-	# Exclude bootscript from VFAT image when creating a FIT image
-	if [ "${KERNEL_IMAGETYPE}" != "fitImage" ]; then
+	# Exclude bootscript from final image when creating a FIT file
+	if [ "${KERNEL_IMAGETYPE}" = "fitImage" ]; then
+		# rename FITimage to u-boot default kernel load name
+		mv ${TMP_RECOVERYDIR}/${KERNEL_IMAGETYPE}-${RECOVERY_INITRAMFS_IMAGE}-${MACHINE}-${MACHINE} ${TMP_RECOVERYDIR}/${KERNEL_IMAGETYPE}-${MACHINE}.bin
+	else
 		# Hard-link boot scripts into the temporary folder
 		for item in ${BOOT_SCRIPTS}; do
 			src="$(echo ${item} | awk -F':' '{ print $1 }')"
 			dst="$(echo ${item} | awk -F':' '{ print $2 }')"
 			ln ${DEPLOY_DIR_IMAGE}/${src} ${TMP_RECOVERYDIR}/${dst}
 		done
-
 		# Copy the recovery initramfs into the temporary folder
 		cp ${DEPLOY_DIR_IMAGE}/${RECOVERY_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz.u-boot.tf ${TMP_RECOVERYDIR}/uramdisk-recovery.img
 	fi

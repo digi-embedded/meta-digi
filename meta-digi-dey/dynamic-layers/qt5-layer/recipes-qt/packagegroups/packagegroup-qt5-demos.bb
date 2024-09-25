@@ -33,3 +33,9 @@ RDEPENDS:${PN}:append:ccmp15 = " \
     cinematicexperience-rhi \
     cinematicexperience-rhi-tools \
 "
+
+RDEPENDS:${PN}:append:ccmp2 = " \
+    qt5everywheredemo \
+    cinematicexperience-rhi \
+    cinematicexperience-rhi-tools \
+"

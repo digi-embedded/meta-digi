@@ -1,0 +1,47 @@
+From a17c1c5d0b4957b5b3a65fc5d211f5ba6764d404 Mon Sep 17 00:00:00 2001
+From: Vincent ABRIOU <vincent.abriou@st.com>
+Date: Fri, 24 Mar 2023 11:09:00 +0100
+Subject: [PATCH 1/5] onnxruntime: test: remove AVX specific micro benchmark
+
+Signed-off-by: Vincent ABRIOU <vincent.abriou@st.com>
+
+%% original patch: 0001-onnxruntime-test-remove-AVX-specific-micro-benchmark.patch
+---
+ .../test/onnx/microbenchmark/reduceminmax.cc  | 24 -------------------
+ 1 file changed, 24 deletions(-)
+
+diff --git a/onnxruntime/test/onnx/microbenchmark/reduceminmax.cc b/onnxruntime/test/onnx/microbenchmark/reduceminmax.cc
+index 06a7f50c9a..eeaa9e0067 100644
+--- a/onnxruntime/test/onnx/microbenchmark/reduceminmax.cc
++++ b/onnxruntime/test/onnx/microbenchmark/reduceminmax.cc
+@@ -91,28 +91,4 @@ BENCHMARK(BM_FindMinMaxMlasSSE2)
+     ->Arg(98304)
+     ->Arg(160000);
+
+-// MLAS avx implementation
+-static void BM_FindMinMaxMlasAvx(benchmark::State& state) {
+-  const size_t batch_size = static_cast<size_t>(state.range(0));
+-  float* data = GenerateArrayWithRandomValue<float>(batch_size, -1, 1);
+-  float min = std::numeric_limits<float>::max();
+-  float max = std::numeric_limits<float>::lowest();
+-  for (auto _ : state) {
+-    MlasReduceMinimumMaximumF32KernelAvx(data, &min, &max, batch_size);
+-  }
+-  aligned_free(data);
+-}
+-
+-BENCHMARK(BM_FindMinMaxMlasAvx)
+-    ->UseRealTime()
+-    ->UseRealTime()
+-    ->Unit(benchmark::TimeUnit::kNanosecond)
+-    ->Arg(100)
+-    ->Arg(1000)
+-    ->Arg(10000)
+-    ->Arg(20000)
+-    ->Arg(40000)
+-    ->Arg(80000)
+-    ->Arg(98304)
+-    ->Arg(160000);
+
+--
+2.25.1

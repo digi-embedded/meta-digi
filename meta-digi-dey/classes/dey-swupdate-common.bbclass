@@ -28,6 +28,12 @@ BOOT_DEV_NAME_B ?= "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', '/dev/mmcblk0p2
 ROOTFS_DEV_NAME_A ?= "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', '/dev/mmcblk0p3', 'rootfs_a', d)}"
 ROOTFS_DEV_NAME_B ?= "${@bb.utils.contains('STORAGE_MEDIA', 'mmc', '/dev/mmcblk0p4', 'rootfs_b', d)}"
 
+# Partition table is different in ccmp25
+BOOT_DEV_NAME_A:ccmp25 ?= "/dev/mmcblk0p5"
+BOOT_DEV_NAME_B:ccmp25 ?= "/dev/mmcblk0p6"
+ROOTFS_DEV_NAME_A:ccmp25 ?= "/dev/mmcblk0p7"
+ROOTFS_DEV_NAME_B:ccmp25 ?= "/dev/mmcblk0p8"
+
 #######################################
 ###### SWU Update based on files ######
 #######################################
@@ -93,7 +99,7 @@ SWUPDATE_UBOOT_SCRIPT_NAME = "${@os.path.basename(d.getVar('SWUPDATE_UBOOT_SCRIP
 # Retrieve the correct U-Boot prefix.
 def get_uboot_prefix(d):
     prefix = d.getVar('UBOOT_PREFIX')
-    if d.getVar('DEY_SOC_VENDOR') == "NXP" and d.getVar('TRUSTFENCE_SIGN') == "1":
+    if d.getVar('DEY_SOC_VENDOR') == "NXP" and d.getVar('TRUSTFENCE_ENABLED') == "1":
         if "ccimx6" in d.getVar('MACHINE'):
             prefix = f"{prefix}-dtb"
         if d.getVar('TRUSTFENCE_DEK_PATH') and d.getVar('TRUSTFENCE_DEK_PATH') != "0":

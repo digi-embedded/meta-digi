@@ -1,0 +1,22 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Mon, 19 Aug 2024 16:50:20 +0200
+Subject: [PATCH] ccimx91: use UART6 for the default console
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ plat/imx/imx91/include/platform_def.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plat/imx/imx91/include/platform_def.h b/plat/imx/imx91/include/platform_def.h
+index 0ddd699f5e0b..6de23d8ef06f 100644
+--- a/plat/imx/imx91/include/platform_def.h
++++ b/plat/imx/imx91/include/platform_def.h
+@@ -55,7 +55,7 @@
+ #define MAX_MMAP_REGIONS		17
+ #endif
+ 
+-#define IMX_LPUART_BASE			0x44380000
++#define IMX_LPUART_BASE			0x425a0000
+ #define IMX_BOOT_UART_CLK_IN_HZ		24000000 /* Select 24MHz oscillator */
+ #define IMX_CONSOLE_BAUDRATE		115200
+ 

@@ -1,0 +1,46 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Mon, 19 Aug 2024 17:42:24 +0200
+Subject: [PATCH] core: imx: support ccimx91-dvk
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ core/arch/arm/plat-imx/conf.mk           | 6 ++++++
+ core/arch/arm/plat-imx/registers/imx93.h | 1 +
+ 2 files changed, 7 insertions(+)
+
+diff --git a/core/arch/arm/plat-imx/conf.mk b/core/arch/arm/plat-imx/conf.mk
+index 9ab3e1e95133..5128e9ee5e8e 100644
+--- a/core/arch/arm/plat-imx/conf.mk
++++ b/core/arch/arm/plat-imx/conf.mk
+@@ -95,6 +95,7 @@ mx95-flavorlist = \
+ 	mx95evk \
+ 
+ mx91-flavorlist = \
++	ccimx91dvk \
+ 	mx91evk \
+ 
+ ifneq (,$(filter $(PLATFORM_FLAVOR),$(mx6ul-flavorlist)))
+@@ -491,6 +492,11 @@ CFG_DDR_SIZE ?= 0x80000000
+ CFG_UART_BASE ?= UART1_BASE
+ endif
+ 
++ifneq (,$(filter $(PLATFORM_FLAVOR),ccimx91dvk))
++CFG_DDR_SIZE ?= 0x20000000
++CFG_UART_BASE ?= UART6_BASE
++endif
++
+ ifneq (,$(filter $(PLATFORM_FLAVOR),mx95evk))
+ CFG_DDR_SIZE ?= 0x80000000
+ CFG_UART_BASE ?= UART1_BASE
+diff --git a/core/arch/arm/plat-imx/registers/imx93.h b/core/arch/arm/plat-imx/registers/imx93.h
+index 21080da82d04..17f4d8f5755e 100644
+--- a/core/arch/arm/plat-imx/registers/imx93.h
++++ b/core/arch/arm/plat-imx/registers/imx93.h
+@@ -9,6 +9,7 @@
+ #define GICR_BASE 0x48040000
+ 
+ #define UART1_BASE 0x44380000
++#define UART6_BASE 0x425a0000
+ /*
+  * For Normal MU - Use MU_BASE as 0x47520000
+  * For Trust MU - Use MU_BASE as 0x47530000

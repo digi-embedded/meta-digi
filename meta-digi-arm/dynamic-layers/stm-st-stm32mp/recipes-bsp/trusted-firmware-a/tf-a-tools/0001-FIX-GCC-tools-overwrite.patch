@@ -1,0 +1,48 @@
+From 68a2098a3035b8374d0ce0b1feead650dadbce64 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
+Date: Thu, 24 Nov 2022 16:18:27 +0100
+Subject: [PATCH] FIX GCC tools overwrite
+
+Signed-off-by: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
+---
+ Makefile | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 1ddb7b844..d6583dfe9 100644
+--- a/Makefile
++++ b/Makefile
+@@ -183,19 +183,19 @@ endif
+ # Toolchain
+ ################################################################################
+ 
+-HOSTCC			:=	gcc
++HOSTCC			?=	gcc
+ export HOSTCC
+ 
+-CC			:=	${CROSS_COMPILE}gcc
+-CPP			:=	${CROSS_COMPILE}cpp
+-AS			:=	${CROSS_COMPILE}gcc
+-AR			:=	${CROSS_COMPILE}ar
+-LINKER			:=	${CROSS_COMPILE}ld
+-OC			:=	${CROSS_COMPILE}objcopy
+-OD			:=	${CROSS_COMPILE}objdump
+-NM			:=	${CROSS_COMPILE}nm
+-PP			:=	${CROSS_COMPILE}gcc -E
+-DTC			:=	dtc
++#CC			:=	${CROSS_COMPILE}gcc
++#CPP			:=	${CROSS_COMPILE}cpp
++#AS			:=	${CROSS_COMPILE}gcc
++#AR			:=	${CROSS_COMPILE}ar
++#LINKER			:=	${CROSS_COMPILE}ld
++#OC			:=	${CROSS_COMPILE}objcopy
++#OD			:=	${CROSS_COMPILE}objdump
++#NM			:=	${CROSS_COMPILE}nm
++#PP			:=	${CROSS_COMPILE}gcc -E
++#DTC			:=	dtc
+ 
+ # Use ${LD}.bfd instead if it exists (as absolute path or together with $PATH).
+ ifneq ($(strip $(wildcard ${LD}.bfd) \
+-- 
+2.25.1
+

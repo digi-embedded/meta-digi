@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Digi International.
+# Copyright (C) 2022, Digi International Inc.
 
 # In sysvinit builds, cups pulls in procps as a dependency, which causes
 # conflicts when building the SDK, so remove it

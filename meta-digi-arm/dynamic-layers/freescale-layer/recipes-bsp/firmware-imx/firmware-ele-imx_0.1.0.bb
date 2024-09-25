@@ -26,4 +26,4 @@ addtask deploy after do_install before do_build
 
 FILES:${PN} += "${nonarch_base_libdir}/firmware/imx/ele/${SECO_FIRMWARE_NAME}"
 
-COMPATIBLE_MACHINE = "(mx8ulp-nxp-bsp|mx9-nxp-bsp)"
+COMPATIBLE_MACHINE = "(ccimx93)"

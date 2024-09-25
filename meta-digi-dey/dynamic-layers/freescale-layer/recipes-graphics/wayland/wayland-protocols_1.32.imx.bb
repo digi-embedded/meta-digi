@@ -1,4 +1,4 @@
-# Copyright 2023 Digi International Inc.
+# Copyright (C) 2023, Digi International Inc.
 
 #
 # Reuse meta-freescale's wayland-protocols_1.25.imx.bb
@@ -13,4 +13,4 @@ SRCREV = "7ece577d467f8afb2f5a2f7fff3761a1e0ee9dad"
 
 BBCLASSEXTEND = "native nativesdk"
 
-COMPATIBLE_MACHINE = "(ccimx93)"
+COMPATIBLE_MACHINE = "(ccimx9)"

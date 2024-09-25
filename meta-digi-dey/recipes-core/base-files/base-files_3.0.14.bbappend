@@ -1,12 +1,12 @@
-# Copyright (C) 2013-2021 Digi International.
+# Copyright (C) 2013-2024, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
-SRC_URI += " \
+SRC_URI:append:dey = " \
     file://sysctl.conf \
 "
 
-do_install:append() {
+do_install:append:dey() {
 	install -m 0644 ${WORKDIR}/sysctl.conf ${D}${sysconfdir}/
 }
 
@@ -56,4 +56,4 @@ pkg_postinst_ontarget:${PN}() {
 
 inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}
 
-CONFFILES:${PN} += "${sysconfdir}/sysctl.conf"
+CONFFILES:${PN}:dey += "${sysconfdir}/sysctl.conf"

@@ -16,6 +16,9 @@ UBOOT_SUFFIX = "imx"
 BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.${UBOOT_SUFFIX}"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 
+# Set InitRAMDisk load address to U-boot initramfs_addr
+UBOOT_RD_LOADADDRESS = "0x19000000"
+
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm/configs/ccimx6sbc_defconfig"
 

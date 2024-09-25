@@ -54,6 +54,10 @@ QT5_RDEPENDS:ccmp15 = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', '', '${QT5_RDEPENDS_eglfs}', d)} \
 "
 
+QT5_RDEPENDS:ccmp2 = " \
+    ${QT5_RDEPENDS_common} \
+"
+
 # Add packagegroup-qt5-webengine to QT5_RDEPENDS and comment out the line below to install qtwebengine to the rootfs.
 QT5_RDEPENDS:remove = " packagegroup-qt5-webengine"
 

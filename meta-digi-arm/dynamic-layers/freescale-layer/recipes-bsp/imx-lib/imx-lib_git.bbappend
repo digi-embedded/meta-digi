@@ -1,4 +1,4 @@
-# Copyright (C) 2023 Digi International
+# Copyright (C) 2023, Digi International Inc.
 
 PLATFORM:mx9-nxp-bsp = "IMX8ULP"
 

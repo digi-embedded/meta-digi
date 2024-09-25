@@ -1,4 +1,4 @@
-# Copyright (C) 2022, 2023, Digi International Inc.
+# Copyright (C) 2022,2023, Digi International Inc.
 
 require dey-image-graphical.inc
 

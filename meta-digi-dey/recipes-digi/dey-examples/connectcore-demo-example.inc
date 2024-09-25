@@ -1,4 +1,4 @@
-# Copyright (C) 2022, 2023 Digi International.
+# Copyright (C) 2022-2024, Digi International Inc.
 
 require dey-examples-src.inc
 
@@ -32,8 +32,9 @@ inherit systemd update-rc.d
 
 BOARD_IMAGE_FILE ?= "${MACHINE}_board.png"
 
-# The ccimx6qpsbc re-uses the ccimx6sbc board image
+# Some boards re-use other boards' images
 BOARD_IMAGE_FILE:ccimx6qpsbc = "ccimx6sbc_board.png"
+BOARD_IMAGE_FILE:ccimx91-dvk = "ccimx93-dvk_board.png"
 
 do_install() {
 	install -d ${D}/srv/www

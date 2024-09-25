@@ -1,0 +1,25 @@
+From c8af5997f3d9b851ff81ef1fb4045ec59f80d976 Mon Sep 17 00:00:00 2001
+From: Alexis BRISSON <alexis.brisson@st.com>
+Date: Wed, 10 May 2023 16:44:47 +0200
+Subject: [PATCH 1/1] TFLite add XNNPACK delegate u8 and i8 definition
+
+Signed-off-by: Alexis BRISSON <alexis.brisson@st.com>
+---
+ tensorflow/lite/CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
+index 073b29c4860..b3b89a4236c 100644
+--- a/tensorflow/lite/CMakeLists.txt
++++ b/tensorflow/lite/CMakeLists.txt
+@@ -404,6 +404,8 @@ if(TFLITE_ENABLE_XNNPACK)
+     TFLITE_DELEGATES_XNNPACK_SRCS
+     FILTER ".*(_test|_tester)\\.(cc|h)"
+   )
++  add_definitions( -DXNNPACK_DELEGATE_ENABLE_QS8=1 )
++  add_definitions( -DXNNPACK_DELEGATE_ENABLE_QU8=1 )
+   list(APPEND TFLITE_TARGET_DEPENDENCIES
+     XNNPACK
+   )
+-- 
+2.25.1

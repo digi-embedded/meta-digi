@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016-2022 Digi International.
+# Copyright (C) 2016-2022, Digi International Inc.
 #
 
 IMAGE_FEATURES += " \

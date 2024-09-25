@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Digi International Inc.
+ * Copyright (c) 2023-2024 Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -27,9 +27,11 @@ typedef enum {
 	PLATFORM_CC8MM,
 	PLATFORM_CC8MN,
 	PLATFORM_CC8X,
+	PLATFORM_CC91,
 	PLATFORM_CC93,
 	PLATFORM_CCMP13,
 	PLATFORM_CCMP15,
+	PLATFORM_CCMP25,
 	PLATFORM_UNKNOWN
 } platform_t;
 

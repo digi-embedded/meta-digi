@@ -16,6 +16,9 @@ INIT_MANAGER ?= "sysvinit"
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"
 
+# Set InitRAMDisk load address to U-boot initramfs_addr
+UBOOT_RD_LOADADDRESS = "0x83800000"
+
 STORAGE_MEDIA = "mtd"
 
 # Wireless external module
