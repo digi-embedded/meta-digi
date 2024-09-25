@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://Licenses/README;md5=2ca5f2c35c8cc335f0a19756634782f1"
 DEPENDS += "flex-native bison-native"
 DEPENDS += "python3-setuptools-native"
 
-SRCBRANCH = "v2022.10/master"
+SRCBRANCH = "v2022.10/maint_ccmp2-beta"
 SRCREV = "${AUTOREV}"
 
 SRC_URI += " \

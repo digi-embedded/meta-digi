@@ -7,7 +7,7 @@ OPTEE_URI_STASH = "${DIGI_MTK_GIT}/emp/optee_os.git;protocol=ssh"
 OPTEE_URI_GITHUB = "${DIGI_GITHUB_GIT}/optee_os.git;protocol=https"
 OPTEE_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${OPTEE_URI_STASH}', '${OPTEE_URI_GITHUB}', d)}"
 
-SRCBRANCH = "3.19.0/stm/master"
+SRCBRANCH = "3.19.0/stm/maint_ccmp2-beta"
 SRCREV = "${AUTOREV}"
 
 SRC_URI = " \
