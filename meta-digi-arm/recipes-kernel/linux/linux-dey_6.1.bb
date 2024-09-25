@@ -4,6 +4,8 @@ require recipes-kernel/linux/linux-dey.inc
 
 SRCBRANCH = "v6.1.55/nxp/master"
 SRCBRANCH:stm32mp2common = "v6.1.28/stm/master"
+SRCREV = "${AUTOREV}"
+SRCREV:stm32mp2common = "${AUTOREV}"
 
 # Patch series for RT Kernel
 NXP_RT_PATCHES = " \
@@ -23,8 +25,6 @@ SRC_URI:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${NXP_RT_PATCHES}', '', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'tsn', 'file://tsn_conf.cfg', '', d)} \
 "
-
-SRCREV = "${AUTOREV}"
 
 # Blacklist btnxpuart module. It will be managed by the bluetooth-init script
 KERNEL_MODULE_PROBECONF += "btnxpuart"
