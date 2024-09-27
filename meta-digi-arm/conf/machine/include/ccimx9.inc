@@ -67,6 +67,7 @@ BT_TTY ?= "ttyLP0"
 
 # Per-machine DISTRO_FEATURES customization
 MACHINE_DISTRO_FEATURES_REMOVE = "vulkan"
+MACHINE_DISTRO_FEATURES_REMOVE:ccimx91 = "gstreamer opengl vulkan wayland x11"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"
