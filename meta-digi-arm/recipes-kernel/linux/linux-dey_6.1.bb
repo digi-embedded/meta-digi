@@ -4,8 +4,8 @@ require recipes-kernel/linux/linux-dey.inc
 
 SRCBRANCH = "v6.1/nxp/dey-4.0/maint"
 SRCBRANCH:stm32mp2common = "v6.1/stm/dey-4.0/maint_ccmp2-beta"
-SRCREV = "${AUTOREV}"
-SRCREV:stm32mp2common = "${AUTOREV}"
+SRCREV = "740c551407b63f39a6f2261407eb1b7e2eda40e2"
+SRCREV:stm32mp2common = "459438b270fd3576bdf3d4841dc5316b462f9ff2"
 
 # Patch series for RT Kernel
 NXP_RT_PATCHES = " \
