@@ -45,3 +45,6 @@ do_compile() {
 
 	setuptools3_do_compile
 }
+
+# Require the external NPU delegate.
+RDEPENDS:${PN}:append:stm32mp25common = " tflite-vx-delegate "

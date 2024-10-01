@@ -32,4 +32,5 @@ RDEPENDS:packagegroup-x-linux-ai-tflite:append:ccmp25 = " \
     tflite-object-detection-python \
     tflite-pose-estimation-python \
     tflite-semantic-segmentation-python \
+    tim-vx \
 "

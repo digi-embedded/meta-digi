@@ -1,0 +1,59 @@
+From 23cdc22779175fea6d73848a98e85702d99051c9 Mon Sep 17 00:00:00 2001
+From: Maxence GUILHIN <maxence.guilhin@st.com>
+Date: Mon, 4 Dec 2023 11:19:21 +0100
+Subject: [PATCH 1/1] tim-vx-tests : disable AVG_ANDROID tests which fails with
+ tensor HDL OFF
+
+Signed-off-by: Maxence GUILHIN <maxence.guilhin@st.com>
+---
+ src/tim/transform/average_pool_layout_infer_test.cc | 2 +-
+ src/tim/vx/ops/avg_pool_test.cc                     | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/tim/transform/average_pool_layout_infer_test.cc b/src/tim/transform/average_pool_layout_infer_test.cc
+index 0ff8115..07048f3 100644
+--- a/src/tim/transform/average_pool_layout_infer_test.cc
++++ b/src/tim/transform/average_pool_layout_infer_test.cc
+@@ -4,7 +4,7 @@
+ #include "tim/transform/layout_inference.h"
+ 
+ #include "gtest/gtest.h"
+-TEST(AVG_ANDROID, layout_infer_) {
++TEST(AVG_ANDROID, DISABLED_layout_infer_) {
+     auto ctx = tim::vx::Context::Create();
+     auto graph = ctx->CreateGraph();
+ 
+diff --git a/src/tim/vx/ops/avg_pool_test.cc b/src/tim/vx/ops/avg_pool_test.cc
+index 3a9aed8..3f3f17d 100644
+--- a/src/tim/vx/ops/avg_pool_test.cc
++++ b/src/tim/vx/ops/avg_pool_test.cc
+@@ -463,7 +463,7 @@ TEST(AVG, shape_60_52_3_5_fp32_kernel_35_stride_5) {
+     ArraysMatch(golden, output,1e-4f);
+ }
+ 
+-TEST(AVG_ANDROID, shape_60_52_3_5_fp32_kernel_35_stride_5) {
++TEST(AVG_ANDROID, DISABLED_shape_60_52_3_5_fp32_kernel_35_stride_5) {
+     auto ctx = tim::vx::Context::Create();
+     auto graph = ctx->CreateGraph();
+ 
+@@ -529,7 +529,7 @@ TEST(AVG_ANDROID, shape_60_52_3_5_fp32_kernel_35_stride_5) {
+     ArraysMatch(golden, output, 1e-5f);
+ }
+ 
+-TEST(AVG_ANDROID, shape_60_52_3_5_fp32_kernel_50_stride_5) {
++TEST(AVG_ANDROID, DISABLED_shape_60_52_3_5_fp32_kernel_50_stride_5) {
+     auto ctx = tim::vx::Context::Create();
+     auto graph = ctx->CreateGraph();
+ 
+@@ -578,7 +578,7 @@ TEST(AVG_ANDROID, shape_60_52_3_5_fp32_kernel_50_stride_5) {
+     ArraysMatch(golden, output, 1e-5f);
+ }
+ 
+-TEST(AVG_ANDROID, shape_60_52_3_5_uint8_kernel_35_stride_5) {
++TEST(AVG_ANDROID, DISABLED_shape_60_52_3_5_uint8_kernel_35_stride_5) {
+     auto ctx = tim::vx::Context::Create();
+     auto graph = ctx->CreateGraph();
+ 
+-- 
+2.25.1
+
