@@ -88,7 +88,7 @@ do_install:append:ccimx6ul() {
 	fi
 }
 
-pkg_postinst_ontarget:${PN}() {
+pkg_postinst_ontarget:${PN}-daemon() {
 	# If dualboot is enabled, change the CCCSD download path and set on the fly to yes on the first boot
 	if [ "$(fw_printenv -n dualboot 2>/dev/null)" = "yes" ]; then
 		sed -i "/firmware_download_path = \/mnt\/update/c\firmware_download_path = \/home\/root" /etc/cccs.conf
