@@ -157,6 +157,7 @@ RDEPENDS:${PN}-daemon = " \
     ${PN} \
     ${PN}-cert \
     initscripts-functions \
+    libubootenv \
 "
 
 # 'cccsd-gs-demo-init' script uses '/etc/init.d/functions'
