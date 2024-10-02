@@ -152,15 +152,20 @@ CONFFILES:${PN}-daemon += "${sysconfdir}/cccs.conf"
 
 CONFFILES:${PN}-legacy += "${sysconfdir}/cc.conf"
 
-RDEPENDS:${PN}-daemon = "${PN} ${PN}-cert"
+# 'cccsd-init' script uses '/etc/init.d/functions'
+RDEPENDS:${PN}-daemon = " \
+    ${PN} \
+    ${PN}-cert \
+    initscripts-functions \
+"
 
-RDEPENDS:${PN}-gs-demo = "${PN}-daemon"
+# 'cccsd-gs-demo-init' script uses '/etc/init.d/functions'
+RDEPENDS:${PN}-gs-demo = " \
+    ${PN}-daemon \
+    initscripts-functions \
+"
 
 RDEPENDS:${PN}-legacy = "${PN} ${PN}-cert"
-
-# 'cccsd-init' and 'cccs-gs-demo-init' scripts use '/etc/init.d/functions'
-RDEPENDS:${PN}-daemon += "initscripts-functions"
-RDEPENDS:${PN}-gs-demo += "initscripts-functions"
 
 # Disable extra compilation checks from SECURITY_CFLAGS to avoid build errors
 lcl_maybe_fortify:pn-cccs = ""
