@@ -1,0 +1,138 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Wed, 2 Oct 2024 11:58:15 +0200
+Subject: [PATCH] improvements: capture "x" windows and increase resolution
+
+When running in window mode (no fullscreen), stop the application.
+Increase the camera resolution to 1280x720.
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ dms/main.py               | 13 +++++++++----
+ face_recognition/main.py  | 12 ++++++++----
+ gesture_detection/main.py | 13 +++++++++----
+ object_detection/main.py  | 13 +++++++++----
+ 4 files changed, 35 insertions(+), 16 deletions(-)
+
+diff --git a/dms/main.py b/dms/main.py
+index e74b6be1b938..99b501ca2194 100644
+--- a/dms/main.py
++++ b/dms/main.py
+@@ -14,10 +14,10 @@ from eye_landmark import EyeMesher
+ from face_landmark import FaceMesher
+ from utils import *
+
+-WIDTH=640
+-HEIGH=480
+-FLIP=None    # None, skip, 0: Flip vertically, 1: Flip horizontally (around the y-axis), -1: Flip both vertically and horizontally
+-FORMAT=0     # None, skip (YUYV, default), 0 MJPG (for usb camera)
++WIDTH=1280
++HEIGH=720
++FLIP=None   # None, skip, 0: Flip vertically, 1: Flip horizontally (around the y-axis), -1: Flip both vertically and horizontally
++FORMAT=None # None, skip (YUYV, default), 0 MJPG (for usb camera)
+
+ # Always enforce the Ethos NPU, use the converted vela models
+ MODEL_PATH = pathlib.Path("../vela_models/")
+@@ -197,6 +197,11 @@ while ret:
+         if FLIP is not None:
+             image = cv2.flip(image, FLIP)
+         if cv2.waitKey(1) & 0xFF == ord('q'):
++            # "q" key pressed
++            break
++
++        if cv2.getWindowProperty(window_name, cv2.WND_PROP_AUTOSIZE):
++            # Window closed by click 'X'
+             break
+     except Exception as err:
+         # Ignore exceptions
+diff --git a/face_recognition/main.py b/face_recognition/main.py
+index 33ffa7161fac..40ca9f8afb91 100644
+--- a/face_recognition/main.py
++++ b/face_recognition/main.py
+@@ -13,10 +13,10 @@ from face_detection import YoloFace
+ from face_recognition import Facenet
+ from face_database import FaceDatabase
+
+-WIDTH=640
+-HEIGH=480
+-FLIP=None    # None, skip, 0: Flip vertically, 1: Flip horizontally (around the y-axis), -1: Flip both vertically and horizontally
+-FORMAT=0     # None, skip (YUYV, default), 0 MJPG (for usb camera)
++WIDTH=1280
++HEIGH=720
++FLIP=None   # None, skip, 0: Flip vertically, 1: Flip horizontally (around the y-axis), -1: Flip both vertically and horizontally
++FORMAT=None # None, skip (YUYV, default), 0 MJPG (for usb camera)
+
+ parser = argparse.ArgumentParser()
+ parser.add_argument(
+@@ -144,6 +144,10 @@ while True:
+         while cv2.waitKey(100) & 0xFF == 0xFF:
+             pass
+
++    if cv2.getWindowProperty(window_name, cv2.WND_PROP_AUTOSIZE):
++        # Window closed by click 'X'
++        break
++
+ time.sleep(2)
+ vid.release()
+ cv2.destroyAllWindows()
+diff --git a/gesture_detection/main.py b/gesture_detection/main.py
+index 15b85976fd72..8ad2c9bd409b 100644
+--- a/gesture_detection/main.py
++++ b/gesture_detection/main.py
+@@ -63,10 +63,10 @@ if args.input.isdigit():
+ else:
+     cap_input = args.input
+
+-WIDTH=640
+-HEIGH=480
+-FLIP=None    # None, skip, 0: Flip vertically, 1: Flip horizontally (around the y-axis), -1: Flip both vertically and horizontally
+-FORMAT=0     # None, skip (YUYV, default), 0 MJPG (for usb camera)
++WIDTH=1280
++HEIGH=720
++FLIP=None   # None, skip, 0: Flip vertically, 1: Flip horizontally (around the y-axis), -1: Flip both vertically and horizontally
++FORMAT=None # None, skip (YUYV, default), 0 MJPG (for usb camera)
+
+ # This pipeline for the OV5640 camera in case the other command fails
+ # capture = cv2.VideoCapture("v4l2src device=%s ! imxvideoconvert_pxp ! video/x-raw,format=RGB16,width=%d,height=%d " \
+@@ -100,6 +100,11 @@ while ret:
+
+     ret, frame = capture.read()
+     if cv2.waitKey(1) & 0xFF == ord('q'):
++        # "q" key pressed
++        break
++
++    if cv2.getWindowProperty(window_name, cv2.WND_PROP_AUTOSIZE):
++        # Window closed by click 'X'
+         break
+
+ cv2.waitKey(2000)
+diff --git a/object_detection/main.py b/object_detection/main.py
+index efa614ebd44b..34ba17eddffb 100644
+--- a/object_detection/main.py
++++ b/object_detection/main.py
+@@ -13,10 +13,10 @@ import argparse
+
+ from labels import label2string
+
+-WIDTH=640
+-HEIGH=480
+-FLIP=None    # None, skip, 0: Flip vertically, 1: Flip horizontally (around the y-axis), -1: Flip both vertically and horizontally
+-FORMAT=0     # None, skip (YUYV, default), 0 MJPG (for usb camera)
++WIDTH=1280
++HEIGH=720
++FLIP=None   # None, skip, 0: Flip vertically, 1: Flip horizontally (around the y-axis), -1: Flip both vertically and horizontally
++FORMAT=None # None, skip (YUYV, default), 0 MJPG (for usb camera)
+
+ # Always enforce the Ethos NPU, use the converted vela models
+ MODEL_PATH = "../vela_models/ssd_mobilenet_v1_quant_vela.tflite"
+@@ -122,6 +122,11 @@ while ret:
+     if FLIP is not None:
+         frame = cv2.flip(frame, FLIP)
+     if cv2.waitKey(1) & 0xFF == ord('q'):
++        # "q" key pressed
++        break
++
++    if cv2.getWindowProperty(window_name, cv2.WND_PROP_AUTOSIZE):
++        # Window closed by click 'X'
+         break
+
+ cv2.waitKey(2000)

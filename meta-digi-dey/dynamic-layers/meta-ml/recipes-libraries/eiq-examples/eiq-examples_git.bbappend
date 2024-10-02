@@ -13,6 +13,7 @@ SRC_URI += " \
     file://patches/0001-Customize-EiQ-demos.patch \
     file://patches/0002-dms-update-the-demo-to-use-the-landmark-full-model.patch \
     file://patches/0003-download_models-update-the-download-location-of-some.patch \
+    file://patches/0004-improvements-capture-x-windows-and-increase-resoluti.patch \
     file://scripts/launch_eiq_demo.sh \
     file://service/eiqdemo.service \
 "
@@ -25,7 +26,7 @@ do_download_transform_models() {
 do_download_transform_models[network] = "1"
 
 # Add the custom task to download and transform the models.
-addtask do_download_transform_models after do_patch before do_install
+addtask download_transform_models after do_patch before do_install
 
 inherit systemd
 
