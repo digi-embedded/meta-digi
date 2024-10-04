@@ -15,16 +15,19 @@ SRC_URI += " \
     file://service/eiqdemo.service \
 "
 
+inherit python3native systemd
+
 # Custom task to download and transform the models using Vela.
 do_download_transform_models() {
-    python3 download_models.py
+    ${PYTHON} download_models.py
 }
-do_download_transform_models[depends] = "ethos-u-vela-native:do_populate_sysroot"
+do_download_transform_models[depends] += " \
+    ethos-u-vela-native:do_populate_sysroot \
+    python3-requests-native:do_populate_sysroot \
+"
 do_download_transform_models[dirs] = "${S}"
 do_download_transform_models[network] = "1"
 addtask download_transform_models after do_patch before do_install
-
-inherit systemd
 
 do_install () {
     # Install scripts to /usr/bin.
