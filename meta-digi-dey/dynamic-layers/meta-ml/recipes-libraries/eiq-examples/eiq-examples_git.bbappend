@@ -6,9 +6,6 @@ MODELS_DIR = "models"
 # Directory for transformation tasks.
 VELA_MODELS_DIR = "vela_models"
 
-# The Vela native tool is required to transform the models.
-DEPENDS += "ethos-u-vela-native"
-
 SRC_URI += " \
     file://patches/0001-Customize-EiQ-demos.patch \
     file://patches/0002-dms-update-the-demo-to-use-the-landmark-full-model.patch \
@@ -20,12 +17,11 @@ SRC_URI += " \
 
 # Custom task to download and transform the models using Vela.
 do_download_transform_models() {
-    cd "${S}"
-    python3 "${S}/download_models.py"
+    python3 download_models.py
 }
+do_download_transform_models[depends] = "ethos-u-vela-native:do_populate_sysroot"
+do_download_transform_models[dirs] = "${S}"
 do_download_transform_models[network] = "1"
-
-# Add the custom task to download and transform the models.
 addtask download_transform_models after do_patch before do_install
 
 inherit systemd
