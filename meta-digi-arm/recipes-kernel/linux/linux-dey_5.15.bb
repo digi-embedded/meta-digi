@@ -4,8 +4,8 @@ require recipes-kernel/linux/linux-dey.inc
 
 SRCBRANCH = "v5.15/nxp/dey-4.0/maint"
 SRCBRANCH:stm32mpcommon = "v5.15/stm/dey-4.0/maint"
-SRCREV = "${AUTOREV}"
-SRCREV:stm32mpcommon = "${AUTOREV}"
+SRCREV = "b11cc21dcd3ea7b1ebaf06455ced4a6e721cc421"
+SRCREV:stm32mpcommon = "35bde2fa4824c3fc87971a94b188e1f063d7cdf6"
 
 STM_RT_PATCHES = " \
 	file://patch-5.15.119-rt65.patch \
