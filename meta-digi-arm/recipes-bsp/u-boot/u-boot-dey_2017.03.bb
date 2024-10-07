@@ -3,7 +3,7 @@
 require u-boot-dey.inc
 
 SRCBRANCH = "v2017.03/maint"
-SRCREV = "1ef810133fcecacf14e09155bee10aa66fc6ade7"
+SRCREV = "${AUTOREV}"
 
 # Disable support to initial environment for U-Boot
 UBOOT_INITIAL_ENV = ""
