@@ -96,6 +96,7 @@ pkg_postinst_ontarget:${PN}-daemon() {
 	fi
 }
 
+REMOVE_POSTINST_RPN = "${PN}-daemon"
 inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", \
            oe.utils.ifelse(d.getVar("CCCS_CONF_PATH"), "remove-pkg-postinst-ontarget", ""), d)}
 
