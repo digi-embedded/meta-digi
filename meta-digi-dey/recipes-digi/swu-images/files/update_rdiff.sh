@@ -32,8 +32,8 @@ fi
 # Variables.
 BLOCK_SIZE=4096
 ROOTFS_SOURCE_ENDPOINT="/dev/rdiff_source_rootfs"
-ROOTFS_DEV_BLOCK_A="mmcblk0p3"
-ROOTFS_DEV_BLOCK_B="mmcblk0p4"
+ROOTFS_DEV_BLOCK_A="mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<rootfs_a\>.*,\1,g;T;p")"
+ROOTFS_DEV_BLOCK_B="mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<rootfs_b\>.*,\1,g;T;p")"
 
 # Determines whether the file system type is UBIFS or not.
 is_ubifs() {

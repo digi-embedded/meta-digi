@@ -22,9 +22,9 @@ fi
 
 # Variables.
 FS_TYPE="ext4"
-LINUX_DEV_BLOCK="/dev/mmcblk0p1"
+LINUX_DEV_BLOCK="/dev/mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<linux\>.*,\1,g;T;p")"
 LINUX_MOUNT_POINT="/mnt/linux"
-ROOTFS_DEV_BLOCK="/dev/mmcblk0p3"
+ROOTFS_DEV_BLOCK="/dev/mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<rootfs\>.*,\1,g;T;p")"
 ROOTFS_MOUNT_POINT="/system"
 
 # Determines whether the file system type is UBI or not.
