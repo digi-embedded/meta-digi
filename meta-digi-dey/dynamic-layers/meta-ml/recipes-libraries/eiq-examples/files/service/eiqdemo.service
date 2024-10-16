@@ -1,10 +1,12 @@
 [Unit]
 Description=Initialization of EiQ DMS demo
-After=multi-user.target
+After=graphical.target
+ConditionPathExists=/dev/video0
 
 [Service]
-Type=forking
+Type=exec
+RemainAfterExit=yes
 ExecStart=/etc/demos/scripts/launch_eiq_demo.sh
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=graphical.target

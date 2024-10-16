@@ -36,4 +36,4 @@ DEMO_DIR="/usr/bin/eiq-examples-git/${DEMO}"
 cd "${DEMO_DIR}" || exit
 
 # Execute the demo pre-configuring the display settings.
-WAYLAND_DISPLAY=/run/wayland-0 DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 python3 main.py -i /dev/video0 -f -d /usr/lib/libethosu_delegate.so &
+WAYLAND_DISPLAY=/run/wayland-0 DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 python3 main.py -i /dev/video0 -f -d /usr/lib/libethosu_delegate.so

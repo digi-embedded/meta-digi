@@ -31,11 +31,9 @@ fi
 
 # Variables.
 BLOCK_SIZE=4096
-ROOTFS_NAME="rootfs"
 ROOTFS_SOURCE_ENDPOINT="/dev/rdiff_source_rootfs"
-ROOTFS_DEV_BLOCK="mmcblk0p3"
-ROOTFS_DEV_BLOCK_A="mmcblk0p3"
-ROOTFS_DEV_BLOCK_B="mmcblk0p4"
+ROOTFS_DEV_BLOCK_A="mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<rootfs_a\>.*,\1,g;T;p")"
+ROOTFS_DEV_BLOCK_B="mmcblk0p$(fdisk -l /dev/mmcblk0 | sed -ne "s,^[^0-9]*\([0-9]\+\).*\<rootfs_b\>.*,\1,g;T;p")"
 
 # Determines whether the file system type is UBIFS or not.
 is_ubifs() {
@@ -141,22 +139,15 @@ get_ubi_volume() {
 # For this reason, hook the source update to a well known endpoint and just create the
 # required link from the running system once all the information is available.
 create_source_endpoint() {
-	# Initialize vars. Assume system is MMC based.
-	local rootfs_source_partiton="${ROOTFS_NAME}"
-	local rootfs_source_dev="${ROOTFS_DEV_BLOCK}"
-
 	# Remove previous link.
 	[ -L "${ROOTFS_SOURCE_ENDPOINT}" ] && unlink "${ROOTFS_SOURCE_ENDPOINT}"
 
-	# Update variables for dualboot systems.
-	if is_dualboot; then
-		local active_part="$(get_active_system)"
-		rootfs_source_partiton="${rootfs_source_partiton}_${active_part}"
-		if [ "${active_part}" = "a" ]; then
-			rootfs_source_dev=${ROOTFS_DEV_BLOCK_A}
-		else
-			rootfs_source_dev=${ROOTFS_DEV_BLOCK_B}
-		fi
+	local active_part="$(get_active_system)"
+	rootfs_source_partiton="rootfs_${active_part}"
+	if [ "${active_part}" = "a" ]; then
+		rootfs_source_dev=${ROOTFS_DEV_BLOCK_A}
+	else
+		rootfs_source_dev=${ROOTFS_DEV_BLOCK_B}
 	fi
 
 	# Update variables for MTD systems.

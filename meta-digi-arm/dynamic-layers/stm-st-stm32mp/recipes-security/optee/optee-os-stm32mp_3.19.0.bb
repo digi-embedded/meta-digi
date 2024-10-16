@@ -38,6 +38,11 @@ OPTEEOUTPUTMACHINE ?= "stm32mp1"
 OPTEEOUTPUTMACHINE:stm32mp1common = "stm32mp1"
 OPTEEOUTPUTMACHINE:stm32mp2common = "stm32mp2"
 
+# Enable OPTEE_DEBUG_TRACE; If set to 0, LOG_LEVEL defaults to 3 on optee code
+ST_OPTEE_DEBUG_TRACE = "1"
+# Log level
+ST_OPTEE_DEBUG_LOG_LEVEL = "0"
+
 # The package is empty but must be generated to avoid apt-get installation issue
 ALLOW_EMPTY:${PN} = "1"
 

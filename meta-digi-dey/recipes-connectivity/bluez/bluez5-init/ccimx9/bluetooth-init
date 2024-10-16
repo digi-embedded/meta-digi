@@ -66,8 +66,12 @@ bluetooth_start() {
 }
 
 bluetooth_stop() {
-	# Remove the kernel module
-	rmmod "${MODULE_NAME}"
+	#
+	# The btnxpuart driver hits a null pointer dereference on module
+	# unloading when the interface is down. So as a workaround, make
+	# sure the interface is UP before unloading the module.
+	#
+	hciconfig "${HCI_IFACE}" up && rmmod "${MODULE_NAME}"
 	power 0
 }
 

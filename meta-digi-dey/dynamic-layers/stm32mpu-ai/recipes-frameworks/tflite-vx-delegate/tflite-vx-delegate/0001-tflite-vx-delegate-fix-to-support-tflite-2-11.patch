@@ -1,0 +1,111 @@
+commit 7ac938965051de91c493b75a8825b007e1f52599
+Author: Feiyue Chen <Feiyue.Chen@verisilicon.com>
+Date:   Thu Jul 6 10:41:35 2023 +0000
+
+    Fixed bugs for kernel test building
+
+diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
+index 073b29c4860..67486fa183b 100644
+--- a/tensorflow/lite/CMakeLists.txt
++++ b/tensorflow/lite/CMakeLists.txt
+@@ -209,6 +209,8 @@ list(FILTER TFLITE_SRCS EXCLUDE REGEX ".*tflite_with_xnnpack\\.cc$")
+ # Exclude Flex related files.
+ list(FILTER TFLITE_SRCS EXCLUDE REGEX ".*with_selected_ops\\.cc$")
+
++list(FILTER TFLITE_SRCS EXCLUDE REGEX "tensorflow_profiler_logger\\.cc$")
++
+ if(_TFLITE_ENABLE_MMAP)
+   list(FILTER TFLITE_SRCS EXCLUDE REGEX ".*mmap_allocation_disabled\\.cc$")
+ else()
+diff --git a/tensorflow/lite/kernels/CMakeLists.txt b/tensorflow/lite/kernels/CMakeLists.txt
+index f5e22ee97da..d0da2680e7b 100644
+--- a/tensorflow/lite/kernels/CMakeLists.txt
++++ b/tensorflow/lite/kernels/CMakeLists.txt
+@@ -63,16 +63,16 @@ build_flatbuffers(
+ set(DELEGATE_PROVIDERS_SUPP
+   ${TFLITE_SOURCE_DIR}/nnapi/sl/SupportLibrary.cc
+   ${TFLITE_SOURCE_DIR}/tools/delegates/delegate_provider.cc
+-  ${TFLITE_SOURCE_DIR}/tools/evaluation/utils.cc
++  # ${TFLITE_SOURCE_DIR}/tools/evaluation/utils.cc
+ )
+
+ set(DELEGATE_PROVIDERS
+   ${DELEGATE_PROVIDERS_SUPP}
+   ${TFLITE_SOURCE_DIR}/tools/delegates/default_execution_provider.cc
+   # List of delegates referenced as options in the tensorflow/lite/CMakeLists.txt
+-  ${TFLITE_SOURCE_DIR}/tools/delegates/gpu_delegate_provider.cc
++  # ${TFLITE_SOURCE_DIR}/tools/delegates/gpu_delegate_provider.cc
+   ${TFLITE_SOURCE_DIR}/tools/delegates/nnapi_delegate_provider.cc
+-  ${TFLITE_SOURCE_DIR}/tools/delegates/xnnpack_delegate_provider.cc
++  # ${TFLITE_SOURCE_DIR}/tools/delegates/xnnpack_delegate_provider.cc
+ )
+
+ if(TFLITE_ENABLE_EXTERNAL_DELEGATE)
+@@ -92,9 +92,9 @@ set(TEST_FRAMEWORK_SRC
+   ${TFLITE_SOURCE_DIR}/tools/tool_params.cc
+   ${TFLITE_SOURCE_DIR}/tools/versioning/op_version.cc
+   ${TFLITE_SOURCE_DIR}/tools/versioning/op_signature.cc
+-  ${TF_SOURCE_DIR}/core/platform/default/env_time.cc
+-  ${TF_SOURCE_DIR}/core/platform/default/logging.cc
+-  ${TF_SOURCE_DIR}/core/platform/default/mutex.cc
++  ${TF_SOURCE_DIR}/tsl/platform/default/env_time.cc
++  ${TF_SOURCE_DIR}/tsl/platform/default/logging.cc
++  ${TF_SOURCE_DIR}/tsl/platform/default/mutex.cc
+   internal/test_util.cc
+   acceleration_test_util.cc
+   acceleration_test_util_internal.cc
+@@ -154,7 +154,8 @@ macro(add_kernel_test TEST_SRC TEST_LIB)
+     set(DELEGATE_TEST "${TEST_NAME}_delegate")
+     add_test(
+       NAME ${DELEGATE_TEST}
+-      COMMAND cmake -DTEST_EXECUTABLE=$<TARGET_FILE:${TEST_NAME}> -P run-tests.cmake
++      # COMMAND cmake -DTEST_EXECUTABLE=$<TARGET_FILE:${TEST_NAME}> -P run-tests.cmake
++      COMMAND cmake -DTEST_EXECUTABLE=$<TARGET_FILE:${TEST_NAME}> -P ${TFLITE_SOURCE_DIR}/tools/cmake/test_utils/run-tests.cmake
+     )
+     set_tests_properties(${DELEGATE_TEST} PROPERTIES LABELS "delegate")
+   endif()
+diff --git a/tensorflow/lite/kernels/test_main.cc b/tensorflow/lite/kernels/test_main.cc
+index 1887533399b..6e3958b77dc 100644
+--- a/tensorflow/lite/kernels/test_main.cc
++++ b/tensorflow/lite/kernels/test_main.cc
+@@ -16,7 +16,6 @@ limitations under the License.
+ #include <vector>
+
+ #include <gtest/gtest.h>
+-#include "benchmark/benchmark.h"  // from @com_google_benchmark
+ #include "tensorflow/lite/kernels/test_delegate_providers.h"
+ #include "tensorflow/lite/kernels/test_util.h"
+ #include "tensorflow/lite/testing/util.h"
+@@ -51,7 +50,6 @@ int main(int argc, char** argv) {
+   ::tflite::LogToStderr();
+   if (InitKernelTest(&argc, argv)) {
+     ::testing::InitGoogleTest(&argc, argv);
+-    benchmark::RunSpecifiedBenchmarks();
+     return RUN_ALL_TESTS();
+   } else {
+     return EXIT_FAILURE;
+diff --git a/tensorflow/lite/kernels/unidirectional_sequence_lstm_test.cc b/tensorflow/lite/kernels/unidirectional_sequence_lstm_test.cc
+index cf3fd3a031a..e96f4e3f357 100644
+--- a/tensorflow/lite/kernels/unidirectional_sequence_lstm_test.cc
++++ b/tensorflow/lite/kernels/unidirectional_sequence_lstm_test.cc
+@@ -18,7 +18,6 @@ limitations under the License.
+
+ #include <gmock/gmock.h>
+ #include <gtest/gtest.h>
+-#include "benchmark/benchmark.h"  // from @com_google_benchmark
+ #include "flatbuffers/flatbuffers.h"  // from @flatbuffers
+ #include "tensorflow/lite/kernels/test_util.h"
+ #include "tensorflow/lite/kernels/unidirectional_sequence_lstm_test_util.h"
+diff --git a/tensorflow/lite/tools/cmake/modules/flatbuffers.cmake b/tensorflow/lite/tools/cmake/modules/flatbuffers.cmake
+index 54b413f69ac..d7a2f8ce0f2 100644
+--- a/tensorflow/lite/tools/cmake/modules/flatbuffers.cmake
++++ b/tensorflow/lite/tools/cmake/modules/flatbuffers.cmake
+@@ -23,7 +23,7 @@ OverridableFetchContent_Declare(
+   flatbuffers
+   GIT_REPOSITORY https://github.com/google/flatbuffers
+   # Sync with tensorflow/third_party/flatbuffers/workspace.bzl
+-  GIT_TAG v2.0.6
++  GIT_TAG v2.0.8
+   GIT_SHALLOW TRUE
+   GIT_PROGRESS TRUE
+   SOURCE_DIR "${CMAKE_BINARY_DIR}/flatbuffers"

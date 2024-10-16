@@ -88,7 +88,7 @@ do_install:append:ccimx6ul() {
 	fi
 }
 
-pkg_postinst_ontarget:${PN}() {
+pkg_postinst_ontarget:${PN}-daemon() {
 	# If dualboot is enabled, change the CCCSD download path and set on the fly to yes on the first boot
 	if [ "$(fw_printenv -n dualboot 2>/dev/null)" = "yes" ]; then
 		sed -i "/firmware_download_path = \/mnt\/update/c\firmware_download_path = \/home\/root" /etc/cccs.conf
@@ -96,6 +96,7 @@ pkg_postinst_ontarget:${PN}() {
 	fi
 }
 
+REMOVE_POSTINST_RPN = "${PN}-daemon"
 inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", \
            oe.utils.ifelse(d.getVar("CCCS_CONF_PATH"), "remove-pkg-postinst-ontarget", ""), d)}
 
@@ -152,15 +153,21 @@ CONFFILES:${PN}-daemon += "${sysconfdir}/cccs.conf"
 
 CONFFILES:${PN}-legacy += "${sysconfdir}/cc.conf"
 
-RDEPENDS:${PN}-daemon = "${PN} ${PN}-cert"
+# 'cccsd-init' script uses '/etc/init.d/functions'
+RDEPENDS:${PN}-daemon = " \
+    ${PN} \
+    ${PN}-cert \
+    initscripts-functions \
+    libubootenv \
+"
 
-RDEPENDS:${PN}-gs-demo = "${PN}-daemon"
+# 'cccsd-gs-demo-init' script uses '/etc/init.d/functions'
+RDEPENDS:${PN}-gs-demo = " \
+    ${PN}-daemon \
+    initscripts-functions \
+"
 
 RDEPENDS:${PN}-legacy = "${PN} ${PN}-cert"
-
-# 'cccsd-init' and 'cccs-gs-demo-init' scripts use '/etc/init.d/functions'
-RDEPENDS:${PN}-daemon += "initscripts-functions"
-RDEPENDS:${PN}-gs-demo += "initscripts-functions"
 
 # Disable extra compilation checks from SECURITY_CFLAGS to avoid build errors
 lcl_maybe_fortify:pn-cccs = ""

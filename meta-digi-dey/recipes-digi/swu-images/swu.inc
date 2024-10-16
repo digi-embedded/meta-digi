@@ -80,7 +80,7 @@ python do_swuimage:prepend() {
 }
 
 # Upgrade available.
-UPGRADE_AVAILABLE = ""
+UPGRADE_AVAILABLE = "0"
 UPGRADE_AVAILABLE:ccimx6 = "1"
 
 # Create and fill 'sw-description' file.

@@ -85,6 +85,8 @@ if test "${soc_type}" = "imx93"; then
 		module_has_npu="0"
 		setenv extra_bootargs ${extra_bootargs} mem=512M
 		setenv overlays _ov_som_emulate-ccimx91_ccimx93.dtbo,${overlays}
+	elif test "${module_variant}" = "0x03" || test "${module_variant}" = "0x04"; then
+		setenv overlays _ov_som_single-core-512M_ccimx93.dtbo,${overlays}
 	fi
 fi
 
