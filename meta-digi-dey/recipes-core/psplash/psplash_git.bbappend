@@ -11,4 +11,4 @@ do_configure:prepend:dey() {
 	\cp --remove-destination ${WORKDIR}/psplash-digi-bar.png ${S}/base-images/psplash-bar.png
 }
 
-SPLASH_IMAGES = "file://logo.png;outsuffix=default"
+SPLASH_IMAGES:dey = "file://logo.png;outsuffix=default"
