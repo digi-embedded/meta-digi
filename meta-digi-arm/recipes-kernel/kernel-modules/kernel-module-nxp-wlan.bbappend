@@ -1,15 +1,16 @@
-# Copyright (C) 2023, Digi International Inc.
+# Copyright (C) 2023,2024, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI:append = " \
     file://81-iw612-wifi.rules \
     file://load_iw612.sh \
+    file://0001-issue-fix-wlan_src_driver_patch_release_base_version.patch \
 "
 
-SRCBRANCH:ccimx91 = "lf-6.6.23_2.0.0"
-SRCREV:ccimx91 = "88372772badbf30152b3ad12ae251dc567095cab"
-S:ccimx91 = "${WORKDIR}/git"
+SRCBRANCH = "lf-6.6.36_2.1.0"
+SRCREV = "e5c9a169d7b7a441a20d2cf10a9752e249b71cff"
+S = "${WORKDIR}/git"
 
 do_install:append () {
 	install -d ${D}${sysconfdir}/udev/rules.d
