@@ -1,7 +1,13 @@
 #
-# Copyright (C) 2016-2023, Digi International Inc.
+# Copyright (C) 2016-2024, Digi International Inc.
 #
 require dey-image-graphical.inc
+
+#
+# Create QT5/6 capable toolchain/SDK
+#
+inherit qt-version
+inherit ${QT_POPULATE_SDK}
 
 DESCRIPTION = "DEY image with QT graphical libraries"
 

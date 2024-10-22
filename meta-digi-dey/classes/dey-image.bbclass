@@ -1,6 +1,7 @@
 # DEY image features.
 #
-# Copyright (C) 2012 Digi International.
+# Copyright (C) 2012-2024, Digi International Inc.
+#
 
 #
 # Add build info to rootfs images (/etc/build)
@@ -21,12 +22,6 @@ MD5_ROOT_PASSWD ?= "\$1\$SML0de4S\$lOWs3t82QAH0oEf8NyNKA0"
 EXTRA_USERS_PARAMS += "\
     usermod -p '${MD5_ROOT_PASSWD}' root; \
 "
-
-#
-# Create QT5 capable toolchain/SDK if 'dey-qt' image feature is enabled
-#
-inherit qt-version
-inherit ${@bb.utils.contains("IMAGE_FEATURES", "dey-qt", "${QT_POPULATE_SDK}", "",d)}
 
 #
 # Generate ZIP installer if configured in the project's local.conf
