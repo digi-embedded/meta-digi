@@ -7,7 +7,7 @@ For services that use sd-resolve, such as timesyncd, this prevents the system
 from stalling whenever the service stops while a worker thread is busy calling
 getaddrinfo().
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 ---

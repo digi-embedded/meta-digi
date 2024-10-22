@@ -4,7 +4,7 @@ Subject: [PATCH] core: ccimx93: enable AES_HUK trusted application
 
 This provides the support for u-boot environment encryption.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---

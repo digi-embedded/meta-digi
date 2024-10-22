@@ -8,7 +8,7 @@ scanning for co-located APs discovered based on neighbor reports from
 the 2.4/5 GHz bands when not scanning passively. Do so only when
 collocated scanning is not disabled by higher layer logic.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Tova Mussai <tova.mussai@intel.com>
 Signed-off-by: Andrei Otcheretianski <andrei.otcheretianski@intel.com>

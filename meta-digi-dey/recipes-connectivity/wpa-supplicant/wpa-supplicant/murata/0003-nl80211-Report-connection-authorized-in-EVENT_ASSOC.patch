@@ -10,7 +10,7 @@ offload is considered.
 This patch enables the report of connection authorized in EVENT_ASSOC to
 indicate the requirement of 802.1X authentication.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---

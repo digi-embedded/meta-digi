@@ -7,7 +7,7 @@ Subject: [PATCH] ARM: Add support for the ConnectCore 6UL System-On-Module
 * Define "digi,ccimx6ul" in the compatible property so the MCA can be
   managed using the available tools.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 ---

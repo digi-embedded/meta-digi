@@ -6,7 +6,7 @@ Subject: [PATCH 16/60] SAE: Set the right WPA Versions for FT-SAE key
 
 Set the right WPA Versions for FT-SAE key management
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Darren Li Darren.Li@infineon.com
 ---

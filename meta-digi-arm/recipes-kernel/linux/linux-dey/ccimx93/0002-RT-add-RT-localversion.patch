@@ -3,7 +3,7 @@ From: Mike Engel <Mike.Engel@digi.com>
 Date: Fri, 23 Feb 2024 10:12:23 +0100
 Subject: [PATCH 02/10] RT: add RT localversion
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Mike Engel <Mike.Engel@digi.com>
 ---

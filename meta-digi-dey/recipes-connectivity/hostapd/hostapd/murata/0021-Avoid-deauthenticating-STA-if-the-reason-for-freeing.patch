@@ -20,7 +20,7 @@ The PMKSA free reasons PMK_FREE, PMK_REPLACE and PMK_EXPIRE are introduced
 for SoftAP to be consistent with the PMKSA reasons defined for STA mode in
 src/rsn_supp/pmksa_cache.h
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 ---
  src/ap/pmksa_cache_auth.c | 22 +++++++++++++---------

@@ -2,7 +2,7 @@ From: Javier Viguera <javier.viguera@digi.com>
 Date: Thu, 2 Jan 2020 16:49:51 +0100
 Subject: [PATCH] imx-gst1.0-plugin: fix build using MUSL C library
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---

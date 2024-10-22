@@ -9,7 +9,7 @@ This allows 0-copy path with software downstream elements
 (use of dmabuf buffers mmapped memory directly instead
 of copying).
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Change-Id: Icb6e8ff272c562e829bb3ff91150e7d77b25dfd1
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>

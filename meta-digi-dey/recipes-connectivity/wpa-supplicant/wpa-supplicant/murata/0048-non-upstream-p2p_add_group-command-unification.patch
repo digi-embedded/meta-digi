@@ -13,7 +13,7 @@ wpa_cli p2p_group_add freq=5180
 
 Fixes: SWLINUX-3008
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Carter Chen <carter.chen@infineon.com>
 ---

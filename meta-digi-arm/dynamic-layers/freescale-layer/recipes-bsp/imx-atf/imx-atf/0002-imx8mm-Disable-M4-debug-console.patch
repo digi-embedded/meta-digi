@@ -5,7 +5,7 @@ Subject: [PATCH] imx8mm: Disable M4 debug console
 The Cortex-M4 uses the UART4 as debug console, and it is
 shared with the Cortex-A53.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>

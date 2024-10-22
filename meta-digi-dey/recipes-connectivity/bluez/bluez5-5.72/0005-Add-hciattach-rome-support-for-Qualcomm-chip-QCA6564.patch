@@ -5,7 +5,7 @@ Subject: [PATCH] Add hciattach rome support for Qualcomm chip QCA6564
 This is a multiple patch including all the specific qualcomm commits to add
 support for its chip in bluez stack (hciattach rome).
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
 Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>

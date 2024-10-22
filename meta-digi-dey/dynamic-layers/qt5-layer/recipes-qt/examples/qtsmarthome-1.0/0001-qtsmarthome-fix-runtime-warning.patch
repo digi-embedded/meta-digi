@@ -4,7 +4,7 @@ Subject: [PATCH] qtsmarthome: fix runtime warning
 
 Both point size and pixel size set. Using pixel size.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---

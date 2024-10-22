@@ -3,7 +3,7 @@ From: Mike Engel <Mike.Engel@digi.com>
 Date: Fri, 23 Feb 2024 12:20:36 +0100
 Subject: [PATCH 03/10] arch:arm64: add NXP RT support
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Mike Engel <Mike.Engel@digi.com>
 ---

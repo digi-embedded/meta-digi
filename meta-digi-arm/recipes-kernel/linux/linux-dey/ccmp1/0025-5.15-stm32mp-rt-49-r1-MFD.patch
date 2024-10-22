@@ -3,7 +3,7 @@ From: Lionel VITTE <lionel.vitte@st.com>
 Date: Wed, 8 Feb 2023 09:56:45 +0100
 Subject: [PATCH 25/28] 5.15-stm32mp-rt-49-r1 MFD
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Lionel VITTE <lionel.vitte@st.com>
 ---

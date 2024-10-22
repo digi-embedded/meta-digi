@@ -12,7 +12,7 @@ and virtual memory path.
 This fix is required to reach 30fps on display driver side
 with 30fps VGA video content.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>
 ---

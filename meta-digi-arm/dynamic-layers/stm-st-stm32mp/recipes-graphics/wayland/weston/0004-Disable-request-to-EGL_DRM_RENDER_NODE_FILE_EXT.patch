@@ -5,7 +5,7 @@ Subject: [PATCH 4/4] Disable request to EGL_DRM_RENDER_NODE_FILE_EXT
 Depending on GPU userland implementationn the reqest of EGL_DRM_RENDER_NODE_FILE_EXT
 return /dev/dri/renderD128 but this interface are not always present.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
 ---

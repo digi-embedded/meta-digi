@@ -7,7 +7,7 @@ Subject: [PATCH 1/7] core: Prefer BR/EDR over LE if it set in advertisement
 This makes the code prefer BR/EDR if the last advertisement has it set
 in the flags.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 ---
  src/adapter.c | 5 ++++-
  src/device.c  | 6 +++++-

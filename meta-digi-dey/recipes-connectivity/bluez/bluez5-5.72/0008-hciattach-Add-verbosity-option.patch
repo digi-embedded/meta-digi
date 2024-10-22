@@ -4,7 +4,7 @@ Subject: [PATCH] hciattach: Add verbosity option
 
 And reduce the verbosity of the hciattach_rome plugin.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 Signed-off-by: Jose Diaz de Grenu <Jose.DiazdeGrenu@digi.com>

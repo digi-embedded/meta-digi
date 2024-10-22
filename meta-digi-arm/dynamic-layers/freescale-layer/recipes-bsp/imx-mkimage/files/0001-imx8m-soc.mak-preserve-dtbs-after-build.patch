@@ -14,7 +14,7 @@ file pointed at by the dtbs variable does no longer exist.
 
 Remove the file removal to avoid this.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>

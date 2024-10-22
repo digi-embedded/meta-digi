@@ -24,7 +24,7 @@ cc1: all warnings being treated as errors
 which means the declaration is completely redundant and can just be
 dropped.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Dirk Mueller <dmueller@suse.com>
 Message-Id: <20200114175341.2994-1-dmueller@suse.com>

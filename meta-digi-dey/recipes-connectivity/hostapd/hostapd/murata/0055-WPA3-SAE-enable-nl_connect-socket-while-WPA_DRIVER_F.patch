@@ -15,7 +15,7 @@ auth frames.
 
 Fixes: SWLINUX-3420
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Carter Chen <carter.chen@infineon.com>
 ---

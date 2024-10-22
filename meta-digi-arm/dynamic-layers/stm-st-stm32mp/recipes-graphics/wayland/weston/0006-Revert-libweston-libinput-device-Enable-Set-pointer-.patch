@@ -10,7 +10,7 @@ As a result, mouse cannot move waylandsink window
 
 (cherry picked from commit 3f8f336b5d2cf7ea7aa4e047d669d093fc46dfe6)
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 ---
  libweston/libinput-device.c | 29 +++++------------------------
  1 file changed, 5 insertions(+), 24 deletions(-)

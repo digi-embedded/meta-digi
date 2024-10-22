@@ -3,7 +3,7 @@ Date: Mon, 31 May 2021 14:40:24 +0200
 Subject: [PATCH] sysv-generator: reduce message level for packages that still
  ship only a SysV init script
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
 ---

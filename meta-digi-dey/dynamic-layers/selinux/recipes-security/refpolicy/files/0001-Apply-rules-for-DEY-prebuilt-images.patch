@@ -7,7 +7,7 @@ extracting all of the AVC denials, and then running them through audit2allow.
 This allows to use most of the features that are expected to work out of the
 box in DEY.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 ---

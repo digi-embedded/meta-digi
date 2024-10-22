@@ -7,7 +7,7 @@ Subject: [PATCH 60/60] brcmfmac: add a configurable link_loss parameter for
 add a parameter for make the 600 seconds hard coding link_loss threshold
 become configurable.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 ---
  wpa_supplicant/bgscan_learn.c  | 16 +++++++++++++---
  wpa_supplicant/bgscan_simple.c | 16 +++++++++++++---

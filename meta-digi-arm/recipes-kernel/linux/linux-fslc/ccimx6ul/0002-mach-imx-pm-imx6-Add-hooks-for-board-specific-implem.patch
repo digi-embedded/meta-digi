@@ -9,7 +9,7 @@ optionally, can be implemented by the platform code.
 This is needed on platforms like the CC6UL where the i.MX6UL has to
 notify the MCA when suspending the system or resuming from suspend.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 Signed-off-by: Pedro Perez de Heredia <pedro.perez@digi.com>

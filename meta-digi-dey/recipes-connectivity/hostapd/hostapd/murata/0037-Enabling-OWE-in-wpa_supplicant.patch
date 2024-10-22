@@ -7,7 +7,7 @@ Enabling the compile options for OWE.
 
 Fixes: SWLINUX-2956
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Carter Chen <carter.chen@infineon.com>
 ---

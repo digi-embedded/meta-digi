@@ -13,7 +13,7 @@ after: wpa_cli wnm_maxidle
 
 Fixes: SWWLAN-145213
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Shelley Yang <shelley.yang@infineon.com>
 ---

@@ -4,7 +4,7 @@ Subject: [PATCH] imx8mm: Define UART1 as console for boot stage
 
 UART1 is the default console for ConnectCore i.MX8M Mini
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>

@@ -11,7 +11,7 @@ before sending the TWT setup request to the driver.
 Set the default value of flow ID as 255 instead of 0 to let the FW choose
 it when explicitly not specified by the userpsace.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
 ---

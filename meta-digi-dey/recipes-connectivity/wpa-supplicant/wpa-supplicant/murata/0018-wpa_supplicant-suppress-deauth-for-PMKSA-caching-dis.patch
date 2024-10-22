@@ -6,7 +6,7 @@ Subject: [PATCH 18/60] wpa_supplicant: suppress deauth for PMKSA caching
 
 wpa_supplicant: Need a command/parameter suppress deauth for PMKSA caching disabled
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Darren Li <Darren.Li@infineon.com>
 ---

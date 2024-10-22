@@ -8,7 +8,7 @@ supports hardware flow control.
 Basically, use 'flow' or 'noflow' on the hciattach command line arguments
 to indicate whether to use or not hardware flow control.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 ---

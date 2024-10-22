@@ -8,7 +8,7 @@ Content-Transfer-Encoding: 8bit
 In case of plug/unplug HMDI, it's necessary to close all output enabled.
 Without this patch, weston is stuck on DSI output.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Yannick Fertré <yannick.fertre@st.com>
 ---

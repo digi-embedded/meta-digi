@@ -8,7 +8,7 @@ YUV components color range.
 If set, components are in full color range.
 If not set, components are in limited color range.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Change-Id: Id4589f050d83d00298a834c444b01a13365ae6f2
 Signed-off-by: Mickael Reulier <mickael.reulier@st.com>

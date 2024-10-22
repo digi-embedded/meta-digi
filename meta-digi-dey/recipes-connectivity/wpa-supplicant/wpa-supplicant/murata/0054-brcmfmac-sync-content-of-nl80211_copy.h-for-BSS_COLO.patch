@@ -6,7 +6,7 @@ Subject: [PATCH 54/60] brcmfmac: sync content of nl80211_copy.h for BSS_COLOR
 
 sync the nl80211.h as of 0d2ab3aea in brcm80211
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Carter Chen <carter.chen@infineon.com>
 ---

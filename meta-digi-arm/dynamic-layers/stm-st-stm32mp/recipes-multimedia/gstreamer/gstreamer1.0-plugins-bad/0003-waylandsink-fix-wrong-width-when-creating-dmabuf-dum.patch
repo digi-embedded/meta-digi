@@ -6,7 +6,7 @@ Subject: [PATCH 03/14] waylandsink: fix wrong width when creating dmabuf dumb
 
 Unaligned width is given in argument of create_dumb(), fix this.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Change-Id: Ifc57aa24331f58f588aae480baa2099a47d5f31b
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>

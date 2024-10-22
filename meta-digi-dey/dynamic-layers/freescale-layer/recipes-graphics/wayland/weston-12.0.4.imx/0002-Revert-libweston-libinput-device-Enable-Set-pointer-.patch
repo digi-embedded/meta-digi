@@ -8,7 +8,7 @@ This reverts commit e825fe389ebd63470028abd828019840c1170a03.
 This commit will cause waylandsink cannot register pointer seat.
 As a result, mouse cannot move waylandsink window
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 (cherry picked from commit 3f8f336b5d2cf7ea7aa4e047d669d093fc46dfe6)
 ---

@@ -4,7 +4,7 @@ Date: Thu, 30 Jun 2022 08:01:45 +0000
 Subject: [PATCH 28/60] DPP: Resolving failure of dpp configurator exchange for
  configurator plus initiator in AP role with fmac
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 ---
  hostapd/defconfig_base | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)

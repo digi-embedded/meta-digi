@@ -10,7 +10,7 @@ This commit uses the IOEXP GPIO29 to control the DISP_5V supply which
 controls the voltage source for the reset line pull-up. It also sets the
 internal pull-up on the INT line so the line is not left floating.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Alex Gonzalez <alex.gonzalez@digi.com>
 ---

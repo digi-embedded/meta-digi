@@ -2,7 +2,7 @@ From: Tatiana Leon <tatiana.leon@digi.com>
 Date: Fri, 28 Apr 2017 14:47:43 +0200
 Subject: [PATCH] mbedtls library: add pkg-config file
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Tatiana Leon <tatiana.leon@digi.com>
 ---

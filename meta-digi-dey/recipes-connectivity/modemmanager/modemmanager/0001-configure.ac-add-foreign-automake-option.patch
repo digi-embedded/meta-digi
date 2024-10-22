@@ -5,7 +5,7 @@ Subject: [PATCH] configure.ac: add foreign automake option
 Needed to build the repository directly in Yocto, so the missing
 autotools files are generated.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---

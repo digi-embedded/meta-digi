@@ -8,7 +8,7 @@ fullscreen support.
 This patch avoids to over commit surface during configuration and takes
 into account render region when provided within wayland callback.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Pierre-Yves MORDRET <pierre-yves.mordret@st.com>
 ---

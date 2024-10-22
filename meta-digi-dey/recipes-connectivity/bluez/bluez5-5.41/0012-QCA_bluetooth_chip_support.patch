@@ -10,7 +10,7 @@ discipline driver. Invoke hciattach from command line and
 download the firmware patches:
 	hciattach /dev/ttyHS0 qca 3000000 -t120 flow -f0
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Change-Id: I87f2927d7096904071a02d73d3afef0dc34db414
 Signed-off-by: Rupesh Tatiya <rtatiya@codeaurora.org>

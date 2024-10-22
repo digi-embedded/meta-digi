@@ -6,7 +6,7 @@ Subject: [PATCH 6/7] src/device: Free bonding while failed to pair device
 device unable pair since another pairng is in progress, and need to
 free bonding before it created for next pairing.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 ---
  src/device.c | 62 +++++++++++++++++++++++++++++++-----------------------------
  1 file changed, 32 insertions(+), 30 deletions(-)

@@ -5,7 +5,7 @@ Subject: [PATCH] imx8mn: Disable M7 debug console
 The Cortex-M7 uses the UART4 as debug console, and it is
 shared with the Cortex-A53.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Mike Engel <Mike.Engel@digi.com>
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>

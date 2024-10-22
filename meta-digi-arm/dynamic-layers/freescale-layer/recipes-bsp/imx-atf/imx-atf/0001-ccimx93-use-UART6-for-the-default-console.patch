@@ -2,7 +2,7 @@ From: Javier Viguera <javier.viguera@digi.com>
 Date: Thu, 20 Oct 2022 17:04:37 +0200
 Subject: [PATCH] ccimx93: use UART6 for the default console
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---

@@ -3,7 +3,7 @@ Date: Thu, 31 Oct 2019 11:49:06 +0100
 Subject: [PATCH 1/6] lib: add parameters to be able to modify default I2C bus
  index and speed
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 https://jira.digi.com/browse/DEL-6826
 

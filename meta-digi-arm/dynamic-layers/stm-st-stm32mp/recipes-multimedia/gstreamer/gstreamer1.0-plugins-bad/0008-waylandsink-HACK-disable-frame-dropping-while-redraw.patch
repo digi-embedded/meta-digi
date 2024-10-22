@@ -18,7 +18,7 @@ Even if not observed yet, there is a risk of visible decoding artefacts
 due to the fact that downstream elements could rewrite in a frame
 being currently rendered by display subsystem...
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>
 ---

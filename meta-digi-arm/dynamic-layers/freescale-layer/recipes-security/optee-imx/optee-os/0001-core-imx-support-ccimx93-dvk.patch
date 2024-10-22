@@ -4,7 +4,7 @@ Subject: [PATCH] core: imx: support ccimx93-dvk
 
 SOC revision A0 requires a different build.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---

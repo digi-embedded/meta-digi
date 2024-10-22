@@ -5,7 +5,7 @@ Subject: [PATCH 10/14] waylandsink: set video alignment to 32 bytes
 
 Display subsystem requires at least 32 bytes alignment.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>
 ---

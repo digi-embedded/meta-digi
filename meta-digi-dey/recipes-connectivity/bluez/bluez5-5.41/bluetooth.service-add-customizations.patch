@@ -6,7 +6,7 @@ These changes include:
 
 * Having the bluetooth stack start automatically on boot.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 ---

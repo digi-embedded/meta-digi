@@ -12,7 +12,7 @@ GHz band mandated in IEEE Std 802.11ax-2021 it is very likely that
 non-PSC channels would be scanned passively and this can take a
 significant amount of time.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Ilan Peer <ilan.peer@intel.com>
 ---

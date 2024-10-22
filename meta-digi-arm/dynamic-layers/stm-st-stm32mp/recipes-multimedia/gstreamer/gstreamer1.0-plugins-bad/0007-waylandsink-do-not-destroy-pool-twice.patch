@@ -7,7 +7,7 @@ Fix segfault in wayland client due to pool
 destroy being called with null pool...
 This problem was encountered with GStreamer-1.14.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>
 ---

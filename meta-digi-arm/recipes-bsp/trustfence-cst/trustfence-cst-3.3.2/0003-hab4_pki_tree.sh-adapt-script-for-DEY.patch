@@ -11,7 +11,7 @@ Subject: [PATCH] hab4_pki_tree.sh: adapt script for DEY
 * extract public keys from certificates: the public key needs to be
   available on the rootfs so that signed SWU packages can be authenticated.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Co-Authored-By: Javier Viguera <javier.viguera@digi.com>
 Co-Authored-By: Hector Palacios <hector.palacios@digi.com>

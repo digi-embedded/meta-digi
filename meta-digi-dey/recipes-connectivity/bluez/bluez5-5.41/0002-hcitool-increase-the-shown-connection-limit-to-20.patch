@@ -5,7 +5,7 @@ Subject: [PATCH] hcitool: increase the shown connection limit to 20
 Created a variable to set the number of connections to shown and increase that
 value so we can list more current LE connections.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 https://jira.digi.com/browse/DEL-2735
 

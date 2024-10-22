@@ -6,7 +6,7 @@ The current libsocketcan library doesn't include support to configure
 the data bitrate. This patch has been applied from the following e-mail
 thread
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 https://www.spinics.net/lists/linux-can/msg00388.html
 

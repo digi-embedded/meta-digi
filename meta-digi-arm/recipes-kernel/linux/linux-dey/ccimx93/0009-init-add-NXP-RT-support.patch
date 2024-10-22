@@ -3,7 +3,7 @@ From: Mike Engel <Mike.Engel@digi.com>
 Date: Mon, 26 Feb 2024 09:43:05 +0100
 Subject: [PATCH 09/10] init: add NXP RT support
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Mike Engel <Mike.Engel@digi.com>
 ---

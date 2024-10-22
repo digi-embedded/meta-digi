@@ -10,7 +10,7 @@ Note: In order to run it, the bluetoothd daemon needs to be started with the
 experimental (-E) flag and needs to enable and advertise the BLE
 functionallity (btmgmt le on/connectable on/advertisement on).
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 https://jira.digi.com/browse/DEL-5023
 

@@ -2,7 +2,7 @@ From: Hector Bujanda <hector.bujanda@digi.com>
 Date: Tue, 11 Apr 2023 12:47:24 +0200
 Subject: [PATCH] add CCX tags support for kernel v5.15
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 https://onedigi.atlassian.net/browse/DEL-8038
 

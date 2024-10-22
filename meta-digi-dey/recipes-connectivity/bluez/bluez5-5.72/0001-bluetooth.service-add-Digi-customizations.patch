@@ -12,7 +12,7 @@ These changes include:
   registered in the host to take care of the pairing. Removing the battery plugin at startup
   fixes the issue.
   
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 Signed-off-by: David Escalona <david.escalona@digi.com>

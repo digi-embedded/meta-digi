@@ -5,7 +5,7 @@ Subject: [PATCH 15/60] Add CONFIG_WPA3_SAE_AUTH_EARLY_SET flags and codes
 
 Enable this flags allow the AP to set authorization to firmware earier as the SAE confirm from is ok.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 ---
  hostapd/Android.mk            |  4 ++++
  hostapd/Makefile              |  4 ++++

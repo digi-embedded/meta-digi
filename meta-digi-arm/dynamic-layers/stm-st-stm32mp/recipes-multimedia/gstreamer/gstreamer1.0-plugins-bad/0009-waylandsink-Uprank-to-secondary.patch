@@ -3,7 +3,7 @@ From: Christophe Priouzeau <christophe.priouzeau@st.com>
 Date: Mon, 21 May 2018 14:26:47 +0200
 Subject: [PATCH 09/14] waylandsink: Uprank to secondary
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Christophe Priouzeau <christophe.priouzeau@st.com>
 ---

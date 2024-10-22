@@ -2,7 +2,7 @@ From: Javier Viguera <javier.viguera@digi.com>
 Date: Thu, 2 Nov 2023 15:03:13 +0100
 Subject: [PATCH] imx9: soc.mak: add makefile target to build A0 revision
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---

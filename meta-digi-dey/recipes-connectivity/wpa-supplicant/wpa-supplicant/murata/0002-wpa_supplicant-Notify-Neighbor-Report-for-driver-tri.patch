@@ -8,7 +8,7 @@ Sending a Neighbor Report request can be triggered by either supplicant
 or device driver. This patch adds the notification of incoming Neighbor
 Report response for the driver-triggered request.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---

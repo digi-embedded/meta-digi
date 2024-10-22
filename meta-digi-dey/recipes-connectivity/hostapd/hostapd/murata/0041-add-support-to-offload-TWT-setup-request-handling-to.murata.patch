@@ -18,7 +18,7 @@ then could inform the TWT module in the firmware through the corresponding
 IOVAR to initiate a TWT Setup request while updating the TWT negotiation
 handshake state machine as needed.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>
 Signed-off-by: Ian Lin <ian.lin@infineon.com>

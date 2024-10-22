@@ -6,7 +6,7 @@ Instead of the 20 seconds hardcoded currently in the code, allow to
 configure the response timeout in the connectivity section of the main
 NetworkManager config file.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>

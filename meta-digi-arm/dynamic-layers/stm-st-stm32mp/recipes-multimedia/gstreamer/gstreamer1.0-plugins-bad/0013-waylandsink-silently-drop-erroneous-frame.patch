@@ -9,7 +9,7 @@ file descriptor to wayland backend (which may crash on fatal error)
 - if file descriptors are not valid, do not fall into general
 "GST_ELEMENT_ERROR" nor return FLOW_ERROR.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>
 ---

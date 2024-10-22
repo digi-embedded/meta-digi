@@ -5,7 +5,7 @@ Subject: [PATCH] imx8m: soc.mak: capture commands output into a log file
 This is later used to get the needed information for the signing of the
 boot artifacts.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---

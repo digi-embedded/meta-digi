@@ -1,6 +1,6 @@
 Index: git/src/plugins/platforms/eglfs/eglfs-plugin.pro
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 ===================================================================
 --- git.orig/src/plugins/platforms/eglfs/eglfs-plugin.pro	2017-01-04 16:54:05.000000000 -0600
 +++ git/src/plugins/platforms/eglfs/eglfs-plugin.pro	2017-01-04 16:56:25.000000000 -0600

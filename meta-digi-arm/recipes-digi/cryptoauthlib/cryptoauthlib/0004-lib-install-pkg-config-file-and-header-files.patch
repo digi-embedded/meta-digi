@@ -4,7 +4,7 @@ Subject: [PATCH 4/6] lib: install pkg-config file and header files
 
 These are needed to be able to develop using cryptoauthlib.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 https://jira.digi.com/browse/DEL-6826
 

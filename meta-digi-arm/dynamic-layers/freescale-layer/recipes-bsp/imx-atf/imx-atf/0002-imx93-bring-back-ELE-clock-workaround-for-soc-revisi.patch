@@ -5,7 +5,7 @@ Subject: [PATCH] imx93: bring back ELE clock workaround for soc revision A0
 Revert commit 7411561db535a20f61ff6621fec5b374130d34f9 to allow building
 for soc revision A0 using a compilation flag.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---

@@ -9,7 +9,7 @@ is registered as /dev/video1.
 In the mappings for video devices we must map /dev/video1 to /dev/fb0 so
 that the imxv4l2sink can work with it.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Hector Palacios <hector.palacios@digi.com>
 

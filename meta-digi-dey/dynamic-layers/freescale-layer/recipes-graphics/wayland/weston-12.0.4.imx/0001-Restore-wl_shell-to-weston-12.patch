@@ -12,7 +12,7 @@ This reverts the following commits:
     * 7cae2a1fb0aeec24ca33ac4c7cbb268f77095cb5
     * e6b8f5a5e40cd6c0b934e8ae079c86d5193efa96
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
 ---

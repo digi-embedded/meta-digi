@@ -6,7 +6,7 @@ This is needed for on-the-fly updates to avoid errors when using sw-description
 files with multiple image/installation sets. Make sure to keep returning
 "false" in case of an OOM error.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Mike Engel <Mike.Engel@digi.com>
 Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>

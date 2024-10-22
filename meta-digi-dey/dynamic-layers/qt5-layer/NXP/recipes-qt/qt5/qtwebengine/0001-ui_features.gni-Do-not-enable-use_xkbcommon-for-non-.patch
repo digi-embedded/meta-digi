@@ -8,7 +8,7 @@ xkbcommon is set as default in chromium
 https://chromium.googlesource.com/chromium/src.git/+/63d3d7eb06c3518c3be4d97797819d445c8060e4
 Disable it for framebuffer as xkcommon is not supported. It is supported only on x11 and wayland.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Neena Busireddy <neenareddy.busireddy@nxp.com>
 ---

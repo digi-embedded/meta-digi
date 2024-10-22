@@ -8,7 +8,7 @@ gets triggered whenever one interface fails in the upstream connectivity
 check, regardless of the system having connectivity through a different
 interface.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>

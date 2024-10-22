@@ -8,7 +8,7 @@ If driver advertises support for WPA/WPA2-PSK 4-way handshake offload in
 AP mode, set WPA_DRIVER_FLAGS2_4WAY_HANDSHAKE_AP_PSK flag and pass PSK
 in NL80211_CMD_NEW_BEACON command.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---

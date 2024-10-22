@@ -7,7 +7,7 @@ Otherwise the command "wpa_cli" fails with:
 
 Failed to connect to non-global ctrl_ifname
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 https://jira.digi.com/browse/DEL-6483
 

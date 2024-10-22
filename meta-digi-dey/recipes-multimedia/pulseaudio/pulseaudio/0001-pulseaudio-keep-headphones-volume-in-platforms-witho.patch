@@ -3,7 +3,7 @@ Date: Mon, 2 Jan 2017 13:11:02 +0100
 Subject: [PATCH] pulseaudio: keep headphones volume in platforms without jack
  detection
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Hector Palacios <hector.palacios@digi.com>
 ---

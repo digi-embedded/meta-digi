@@ -6,7 +6,7 @@ Subject: [PATCH 11/14] waylandsink: fallback to shm if display does not
 
 Fallback to shm if display does not support dmabuf.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>
 ---

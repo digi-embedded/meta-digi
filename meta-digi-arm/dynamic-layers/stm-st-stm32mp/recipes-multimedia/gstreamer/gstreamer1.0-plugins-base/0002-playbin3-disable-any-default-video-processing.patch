@@ -6,7 +6,7 @@ Subject: [PATCH 2/2] playbin3: disable any default video processing
 Do not enable by default software video processing
 to not degrade performances.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>
 ---

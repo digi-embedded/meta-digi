@@ -7,7 +7,7 @@ If supplicant recieves eapol frame with driver declared
 WPA_DRIVER_FLAGS_4WAY_HANDSHAKE_PSK, supplicant will check AKM type
 and process 4-way handshake if AKM type is not PSK.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Kurt Lee <kurt.lee@infineon.com>
 Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>

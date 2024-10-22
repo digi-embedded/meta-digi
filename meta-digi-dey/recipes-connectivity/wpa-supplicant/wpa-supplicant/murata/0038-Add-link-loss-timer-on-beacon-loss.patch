@@ -3,7 +3,7 @@ From: root <root@cy-blr-au147.india.cypress.com>
 Date: Tue, 16 Aug 2022 15:00:14 -0400
 Subject: [PATCH 38/60] Add link loss timer on beacon loss
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 ---
  wpa_supplicant/bgscan_learn.c  | 19 +++++++++++++++++++
  wpa_supplicant/bgscan_simple.c | 19 +++++++++++++++++++

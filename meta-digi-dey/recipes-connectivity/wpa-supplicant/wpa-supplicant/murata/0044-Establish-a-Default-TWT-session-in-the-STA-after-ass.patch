@@ -8,7 +8,7 @@ Add a new wpa_supplicant conf param "twt_def_algo" to set the Default/Auto
 TWT profile. Allowed Values are 0-disable, 1-idle profile, 2-active profile
 TWT session
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Ramanathan Ramakrishnan <rmrk@cypress.com>
 Signed-off-by: Gokul Sivakumar <gokulkumar.sivakumar@infineon.com>

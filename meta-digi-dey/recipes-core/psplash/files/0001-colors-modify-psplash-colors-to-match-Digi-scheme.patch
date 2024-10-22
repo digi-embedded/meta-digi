@@ -2,7 +2,7 @@ From: David Escalona <david.escalona@digi.com>
 Date: Thu, 29 Dec 2016 09:42:26 +0100
 Subject: [PATCH] colors: modify psplash colors to match Digi scheme
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: David Escalona <david.escalona@digi.com>
 ---

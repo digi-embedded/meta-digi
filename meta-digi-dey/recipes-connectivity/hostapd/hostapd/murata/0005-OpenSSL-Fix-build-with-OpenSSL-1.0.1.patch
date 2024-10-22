@@ -7,7 +7,7 @@ The openssl_debug_dump_certificate_chains() implementation used
 SSL_CERT_SET_FIRST and SSL_CERT_SET_NEXT, which were added in OpenSSL
 1.0.2. Bypass this function to fix build failure with OpenSSL 1.0.1.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---

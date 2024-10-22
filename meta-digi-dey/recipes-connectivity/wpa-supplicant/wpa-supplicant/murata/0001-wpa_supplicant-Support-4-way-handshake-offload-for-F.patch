@@ -6,7 +6,7 @@ Subject: [PATCH 01/60] wpa_supplicant: Support 4-way handshake offload for
 
 Add support of 4-way handshake offload for FT-EAP.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Chung-Hsien Hsu <chung-hsien.hsu@infineon.com>
 ---

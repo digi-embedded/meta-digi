@@ -5,7 +5,7 @@ Subject: [PATCH 22/60] wpa_supplicant: support bgscan
 
 Modify defconfig_base to support bgscan feature
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Ian Lin <ian.lin@infineon.com>
 ---

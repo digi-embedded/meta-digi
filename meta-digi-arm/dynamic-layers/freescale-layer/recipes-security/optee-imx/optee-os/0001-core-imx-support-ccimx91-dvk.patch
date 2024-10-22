@@ -2,7 +2,7 @@ From: Javier Viguera <javier.viguera@digi.com>
 Date: Mon, 19 Aug 2024 17:42:24 +0200
 Subject: [PATCH] core: imx: support ccimx91-dvk
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---

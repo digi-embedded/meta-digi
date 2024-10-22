@@ -15,7 +15,7 @@ gst-launch-1.0 filesrc location=<png> ! pngdec ! videoconvert ! imagefreeze ! wa
 Problem is not reproduced with this pipeline:
 gst-launch-1.0 filesrc location=<png> ! pngdec ! imagefreeze ! videoconvert ! waylandsink
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Hugues Fruchet <hugues.fruchet@st.com>
 ---

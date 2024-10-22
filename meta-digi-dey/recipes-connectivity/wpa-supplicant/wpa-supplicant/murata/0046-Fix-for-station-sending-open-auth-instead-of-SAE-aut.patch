@@ -3,7 +3,7 @@ From: Ramesh Rangavittal <ramesh.rangavittal@infineon.com>
 Date: Mon, 21 Nov 2022 11:21:59 -0600
 Subject: [PATCH 46/60] Fix for station sending open auth instead of SAE auth
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 ---
  wpa_supplicant/events.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

@@ -8,7 +8,7 @@ incoming connections, this fixes the wrong behavior or connecting LE
 with dual mode devices immediatelly after probing service as profiles
 may have auto-connect flag for outgoing connection (usually BR/EDR only).
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 ---
  src/device.c | 5 ++++-
  1 file changed, 4 insertions(+), 1 deletion(-)

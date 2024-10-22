@@ -5,7 +5,7 @@ Subject: [PATCH 26/60] non-upstream: wl-cmd: add more compile flag
 
 add more CONFIG_DRIVER_BRCM_WL to separeta this feature
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Ian Lin <ian.lin@infineon.com>
 Signed-off-by: Kurt Lee <kurt.lee@infineon.com>

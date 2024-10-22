@@ -6,7 +6,7 @@ Subject: [PATCH 5/7] input/hog: Use .accept and .disconnect instead of attio
 This adds .accept and .disconnect callbacks instead of attio which
 is deprecated.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 ---
  profiles/input/hog.c | 56 ++++++++++++++++++++++++++--------------------------
  src/device.c         |  8 ++++++++

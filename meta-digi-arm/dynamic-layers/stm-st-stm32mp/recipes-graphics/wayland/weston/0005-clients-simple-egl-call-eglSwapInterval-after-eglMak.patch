@@ -9,7 +9,7 @@ eglSwapInterval call to have no effect. To fix this, wait until the
 EGLContext has been made current in init_gl before updating the swap
 interval.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Erik Kurzinger <ekurzinger@nvidia.com>
 ---

@@ -6,7 +6,7 @@ Some test commands apply to chips other than the ATECC508A, and can cause
 errors when used incorrectly. Remove all code that doesn't apply to our
 platforms.
 
-Upstream-Status: Inappropriate [digi specific]
+Upstream-Status: Inappropriate [DEY specific]
 
 https://jira.digi.com/browse/DEL-6826
 
