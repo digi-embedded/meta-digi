@@ -1,0 +1,227 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Mon, 21 Oct 2024 10:34:34 +0200
+Subject: [PATCH] issue fix: wlan_src_driver_patch_release_base_version_437.p30
+
+Patch from Wireless_Patch_Release_W9098_IW612_W8997_W8987_IW416_v0.1.
+incremental patch release based on the Q3-2024 release "lf-6.6.36-2.1.0"
+
+[Patch Description]
+ - Wi-Fi driver patch based on driver base version 437.p30 to fix the issues observed on version 437.p28.
+
+https://onedigi.atlassian.net/browse/DEL-9306
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ Makefile                   |  2 +-
+ mlan/mlan_cfp.c            | 95 +++++++++++++++++++++++++++++++++-----
+ mlinux/moal_init.c         |  6 +++
+ mlinux/moal_sta_cfg80211.c | 12 +----
+ 4 files changed, 93 insertions(+), 22 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index af1a9e5de535..66b690f032f9 100644
+--- a/Makefile
++++ b/Makefile
+@@ -186,7 +186,7 @@ APPDIR= $(shell if test -d "mapp"; then echo mapp; fi)
+ #############################################################################
+ 
+ 	ccflags-y += -I$(KERNELDIR)/include
+-	ccflags-y += -DMLAN_RELEASE_VERSION='"437.p30"'
++	ccflags-y += -DMLAN_RELEASE_VERSION='"437.p31"'
+ 
+ 	ccflags-y += -DFPNUM='"92"'
+ 
+diff --git a/mlan/mlan_cfp.c b/mlan/mlan_cfp.c
+index 0fdb12b4a70c..191d567871de 100644
+--- a/mlan/mlan_cfp.c
++++ b/mlan/mlan_cfp.c
+@@ -3232,8 +3232,9 @@ static void wlan_sort_cfp_otp_table(mlan_adapter *pmadapter)
+  */
+ static void wlan_set_otp_cfp_max_tx_pwr(mlan_adapter *pmadapter, t_bool is6g)
+ {
+-	t_u8 i, j;
++	t_u8 i, j, k, n;
+ 	t_u8 rows, cols, max = 0;
++	t_u8 bonded_chan_count = 0;
+ 
+ 	if (!pmadapter->otp_region)
+ 		return;
+@@ -3243,20 +3244,48 @@ static void wlan_set_otp_cfp_max_tx_pwr(mlan_adapter *pmadapter, t_bool is6g)
+ 		cols = pmadapter->tx_power_table_bg_cols;
+ 		if (pmadapter->tx_power_table_bg_size < (rows * cols))
+ 			goto table_a;
++		max = 0;
+ 		for (i = 0; i < rows; i++) {
+-			max = 0;
+ 			if ((pmadapter->cfp_otp_bg + i)->dynamic.flags &
+ 			    NXP_CHANNEL_DISABLED)
+ 				continue;
+ 			/* get the max value among all mod group for this
+ 			 * channel */
+-			for (j = 1; j < cols; j++)
++			for (j = 1; j < cols; j++) {
+ 				max = MAX(
+ 					max,
+ 					pmadapter->tx_power_table_bg[i * cols +
+ 								     j]);
++			}
+ 
+-			(pmadapter->cfp_otp_bg + i)->max_tx_power = max;
++			bonded_chan_count++;
++			/* As the BG band allows overlapping 40MHz
++			 * bonded groups, keep comparing the max value
++			 * with the next consecutive 40Mhz channel, if
++			 * all of below 4 cases are true:
++			 *   1. this is not the last row
++			 *   2. this channel suports 40 MHz
++			 *   3. the next channel also supports 40MHz
++			 *   4. the next channel is not disabled
++			 */
++			if ((i < (rows - 1)) &&
++			    (!((pmadapter->cfp_otp_bg + i)->dynamic.flags &
++				NXP_CHANNEL_NOHT40)) &&
++			    (!((pmadapter->cfp_otp_bg + i + 1)->dynamic.flags &
++				NXP_CHANNEL_NOHT40)) &&
++			    (!((pmadapter->cfp_otp_bg + i + 1)->dynamic.flags &
++				NXP_CHANNEL_DISABLED))) {
++				continue;
++			}
++			/* Apply the max power value to all channels in this
++			 * bonded group
++			 */
++			for (k = 0; k < bonded_chan_count; k++) {
++				(pmadapter->cfp_otp_bg + i - k)->max_tx_power =
++					max;
++			}
++			max = 0;
++			bonded_chan_count = 0;
+ 		}
+ 	}
+ table_a:
+@@ -3265,19 +3294,64 @@ table_a:
+ 		cols = pmadapter->tx_power_table_a_cols;
+ 		if (pmadapter->tx_power_table_a_size < (rows * cols))
+ 			return;
++		max = 0;
++		bonded_chan_count = 0;
+ 		for (i = 0; i < rows; i++) {
+-			max = 0;
+ 			if ((pmadapter->cfp_otp_a + i)->dynamic.flags &
+ 			    NXP_CHANNEL_DISABLED)
+ 				continue;
+-			/* get the max value among all mod group for this
+-			 * channel */
++
++                        /* The 5G cfp table is sorted based on the channel num
++                         * and may contain 4G and 5.9G channels. As the cfp
++                         * table index may not match the 5G powertable channel
++                         * index, get the corresponding channel row from
++                         * powertable
++                         */
++                        n = 0;
++                        while (n < pmadapter->tx_power_table_a_rows) {
++                                if (pmadapter->tx_power_table_a[n * cols] ==
++                                    (pmadapter->cfp_otp_a + i)->channel)
++                                        break;
++                                n++;
++                        }
++                        /* Get the max value among all mod groups for this chan
++                         */
++
+ 			for (j = 1; j < cols; j++)
+ 				max = MAX(max,
+-					  pmadapter->tx_power_table_a[i * cols +
++					  pmadapter->tx_power_table_a[n * cols +
+ 								      j]);
+ 
+-			(pmadapter->cfp_otp_a + i)->max_tx_power = max;
++                        bonded_chan_count++;
++
++                        if ((i < (rows - 1)) &&
++                            !((pmadapter->cfp_otp_a + i + 1)->dynamic.flags &
++                              NXP_CHANNEL_DISABLED)) {
++                                /* Compare the max power value with the next
++                                 * chan in this bonded group, unless this is the
++                                 * last or the next one is disabled
++                                 */
++                                if (!((pmadapter->cfp_otp_a + i)->dynamic.flags &
++                                      NXP_CHANNEL_NOHT80)) {
++                                        if (bonded_chan_count < 4)
++                                                continue;
++                                } else if (!((pmadapter->cfp_otp_a + i)
++                                                     ->dynamic.flags &
++                                             NXP_CHANNEL_NOHT40)) {
++                                        if (bonded_chan_count < 2)
++                                                continue;
++                                }
++                        }
++
++                        /* Apply the max power value to all channels in this
++                         * bonded group
++                         */
++                        for (k = 0; k < bonded_chan_count; k++)
++                                (pmadapter->cfp_otp_a + i - k)->max_tx_power =
++                                        max;
++                        max = 0;
++                        bonded_chan_count = 0;
++
+ 		}
+ 	}
+ }
+@@ -3612,8 +3686,6 @@ void wlan_add_fw_cfp_tables(pmlan_private pmpriv, t_u8 *buf, t_u16 buf_left)
+ 	if (!pmadapter->cfp_otp_bg || !pmadapter->tx_power_table_bg)
+ 		goto out;
+ 
+-	wlan_set_otp_cfp_max_tx_pwr(pmadapter, MFALSE);
+-
+ 	/* Set remaining flags for BG */
+ 	rows = pmadapter->tx_power_table_bg_rows;
+ 	cols = pmadapter->tx_power_table_bg_cols;
+@@ -3637,6 +3709,7 @@ void wlan_add_fw_cfp_tables(pmlan_private pmpriv, t_u8 *buf, t_u16 buf_left)
+ 	}
+ 	if (pmadapter->cfp_otp_a)
+ 		wlan_sort_cfp_otp_table(pmadapter);
++	wlan_set_otp_cfp_max_tx_pwr(pmadapter, MFALSE);
+ out:
+ 	LEAVE();
+ }
+diff --git a/mlinux/moal_init.c b/mlinux/moal_init.c
+index 6bfbfd0138d5..a1e66d2d1188 100644
+--- a/mlinux/moal_init.c
++++ b/mlinux/moal_init.c
+@@ -454,6 +454,12 @@ static t_size parse_cfg_get_line(t_u8 *data, t_size size, t_u8 *line_pos)
+ 		else
+ 			src++;
+ 		pos++;
++		if ((dest - line_pos) >= (MAX_LINE_LEN - 1)) {
++			PRINTM(MERROR,
++				"error: input data size exceeds the dest buff limit\n");
++			LEAVE();
++			return -1;
++		}
+ 	}
+ 	/* parse new line */
+ 	pos++;
+diff --git a/mlinux/moal_sta_cfg80211.c b/mlinux/moal_sta_cfg80211.c
+index 3a487b4b9401..e7689ea924f4 100644
+--- a/mlinux/moal_sta_cfg80211.c
++++ b/mlinux/moal_sta_cfg80211.c
+@@ -3937,16 +3937,8 @@ create_custom_regdomain(moal_private *priv,
+ 			new_rule = true;
+ 		}
+ 		if (!new_rule && pwr != prev_pwr) {
+-			if (band == IEEE80211_BAND_2GHZ &&
+-			    !(chflags & NXP_CHANNEL_NOHT40)) {
+-				/* skip adding new pwr rule for 40 MHz 2G
+-				 * overlapping bonded channels, as max tx
+-				 * power value may differ
+-				 */
+-			} else {
+-				valid_rules++;
+-				new_rule = true;
+-			}
++			valid_rules++;
++			new_rule = true;
+ 		}
+ 
+ 		rule = &regd->reg_rules[valid_rules - 1];
