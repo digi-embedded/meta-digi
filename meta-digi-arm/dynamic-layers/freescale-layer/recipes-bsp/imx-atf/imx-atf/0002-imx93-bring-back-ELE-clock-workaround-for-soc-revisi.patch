@@ -14,10 +14,10 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  2 files changed, 14 insertions(+)
 
 diff --git a/plat/imx/imx93/imx93_psci.c b/plat/imx/imx93/imx93_psci.c
-index 68eb49cc2..cc482a17d 100644
+index ccd82d1d2bdc..325fcf75911a 100644
 --- a/plat/imx/imx93/imx93_psci.c
 +++ b/plat/imx/imx93/imx93_psci.c
-@@ -739,6 +739,11 @@ void imx_pwr_domain_suspend(const psci_power_state_t *target_state)
+@@ -747,6 +747,11 @@ void imx_pwr_domain_suspend(const psci_power_state_t *target_state)
  		if (is_local_state_retn(CLUSTER_PWR_STATE(target_state))) {
  			write_clusterpwrdn(DSU_CLUSTER_PWR_OFF | BIT(1));
  		}
@@ -29,7 +29,7 @@ index 68eb49cc2..cc482a17d 100644
  	}
  
  	if (is_local_state_retn(SYSTEM_PWR_STATE(target_state))) {
-@@ -870,6 +875,11 @@ void imx_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
+@@ -878,6 +883,11 @@ void imx_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
  	if (!is_local_state_run(CLUSTER_PWR_STATE(target_state))) {
  		/* set the cluster's target mode to RUN */
  		gpc_set_cpu_mode(CPU_A55_PLAT, CM_MODE_RUN);
@@ -42,7 +42,7 @@ index 68eb49cc2..cc482a17d 100644
  
  	/* do core level */
 diff --git a/plat/imx/imx93/platform.mk b/plat/imx/imx93/platform.mk
-index a43d3c4f5..d69f7e2de 100644
+index a43d3c4f5a9f..d69f7e2de058 100644
 --- a/plat/imx/imx93/platform.mk
 +++ b/plat/imx/imx93/platform.mk
 @@ -61,3 +61,7 @@ BL32_BASE               ?=      0x96000000

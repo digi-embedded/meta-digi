@@ -13,7 +13,7 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  2 files changed, 18 insertions(+)
 
 diff --git a/core/arch/arm/plat-imx/conf.mk b/core/arch/arm/plat-imx/conf.mk
-index 9ab3e1e95..202cceb5c 100644
+index 33647835f2fb..8d065a3d3db3 100644
 --- a/core/arch/arm/plat-imx/conf.mk
 +++ b/core/arch/arm/plat-imx/conf.mk
 @@ -89,6 +89,8 @@ mx8ulp-flavorlist = \
@@ -25,8 +25,8 @@ index 9ab3e1e95..202cceb5c 100644
  	mx93evk \
  
  mx95-flavorlist = \
-@@ -499,6 +501,17 @@ CFG_NSEC_DDR_1_SIZE ?= 0x380000000UL
- CFG_CORE_ARM64_PA_BITS ?= 40
+@@ -493,6 +495,17 @@ CFG_DDR_SIZE ?= 0x80000000
+ CFG_UART_BASE ?= UART1_BASE
  endif
  
 +ifneq (,$(filter $(PLATFORM_FLAVOR),ccimx93dvk))
@@ -40,11 +40,11 @@ index 9ab3e1e95..202cceb5c 100644
 +$(call force,CFG_SOC_REV_A0,y)
 +endif
 +
- # i.MX6 Solo/SL/SoloX/DualLite/Dual/Quad specific config
- ifeq ($(filter y, $(CFG_MX6QP) $(CFG_MX6Q) $(CFG_MX6D) $(CFG_MX6DL) $(CFG_MX6S) \
- 	$(CFG_MX6SL) $(CFG_MX6SLL) $(CFG_MX6SX)), y)
+ ifneq (,$(filter $(PLATFORM_FLAVOR),mx95evk))
+ CFG_DDR_SIZE ?= 0x80000000
+ CFG_UART_BASE ?= UART1_BASE
 diff --git a/core/arch/arm/plat-imx/registers/imx93.h b/core/arch/arm/plat-imx/registers/imx93.h
-index 21080da82..29070eb91 100644
+index 21080da82d04..29070eb917ac 100644
 --- a/core/arch/arm/plat-imx/registers/imx93.h
 +++ b/core/arch/arm/plat-imx/registers/imx93.h
 @@ -9,11 +9,16 @@

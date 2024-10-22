@@ -10,9 +10,12 @@ SRC_URI:append:ccimx91 = " \
     file://0001-imx91-soc.mak-capture-commands-output-into-a-log-fil.patch \
 "
 SRC_URI:append:ccimx93 = " \
-    file://0001-imx9-soc.mak-capture-commands-output-into-a-log-file.patch \
-    file://0002-imx9-soc.mak-add-makefile-target-to-build-A0-revisio.patch \
+    file://0001-imx93-soc.mak-capture-commands-output-into-a-log-fil.patch \
+    file://0002-imx93-soc.mak-add-makefile-target-to-build-A0-revisi.patch \
 "
+
+SRCBRANCH:ccimx9 = "lf-6.6.36_2.1.0"
+SRCREV:ccimx9 = "4622115cbc037f79039c4522faeced4aabea986b"
 
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 

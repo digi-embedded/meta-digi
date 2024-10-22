@@ -5,6 +5,8 @@ Subject: [PATCH] imx91: soc.mak: capture commands output into a log file
 This is later used to get the needed information for the signing of the
 boot artifacts.
 
+Upstream-Status: Inappropriate [DEY specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
  iMX91/soc.mak | 7 ++++---

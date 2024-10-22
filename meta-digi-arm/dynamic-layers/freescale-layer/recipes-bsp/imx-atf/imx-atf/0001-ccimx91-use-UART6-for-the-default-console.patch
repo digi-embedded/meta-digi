@@ -2,6 +2,8 @@ From: Javier Viguera <javier.viguera@digi.com>
 Date: Mon, 19 Aug 2024 16:50:20 +0200
 Subject: [PATCH] ccimx91: use UART6 for the default console
 
+Upstream-Status: Inappropriate [DEY specific]
+
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
 ---
  plat/imx/imx91/include/platform_def.h | 2 +-

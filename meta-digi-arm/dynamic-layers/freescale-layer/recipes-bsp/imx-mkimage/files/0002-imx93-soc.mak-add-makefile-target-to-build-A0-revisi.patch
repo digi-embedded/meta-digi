@@ -1,6 +1,6 @@
 From: Javier Viguera <javier.viguera@digi.com>
 Date: Thu, 2 Nov 2023 15:03:13 +0100
-Subject: [PATCH] imx9: soc.mak: add makefile target to build A0 revision
+Subject: [PATCH] imx93: soc.mak: add makefile target to build A0 revision
 
 Upstream-Status: Inappropriate [DEY specific]
 
@@ -10,7 +10,7 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 4 insertions(+)
 
 diff --git a/iMX93/soc.mak b/iMX93/soc.mak
-index 6339d80..dc739c2 100644
+index bb4042c1262f..1a50aa940b98 100644
 --- a/iMX93/soc.mak
 +++ b/iMX93/soc.mak
 @@ -218,6 +218,10 @@ flash_singleboot: $(MKIMG) $(AHAB_IMG) $(SPL_A55_IMG) u-boot-atf-container.img
@@ -21,6 +21,6 @@ index 6339d80..dc739c2 100644
 +	./$(MKIMG) -soc IMX9 -append mx93a0-ahab-container.img -c -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR) -out flash.bin | tee -a $(MKIMAGE_LOG)
 +	$(call append_container,u-boot-atf-container.img,1)
 +
- flash_singleboot_no_ahabfw: $(MKIMG) $(SPL_A55_IMG) u-boot-atf-container.img
- 	./$(MKIMG) -soc IMX9 -c -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR) -out flash.bin
+ flash_singleboot_gdet: $(MKIMG) $(AHAB_IMG) $(SPL_A55_IMG) u-boot-atf-container.img
+ 	./$(MKIMG) -soc IMX9 -append $(AHAB_IMG) -cntr_flags 0x200010 -c -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR) -out flash.bin
  	$(call append_container,u-boot-atf-container.img,1)
