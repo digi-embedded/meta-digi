@@ -66,4 +66,4 @@ kernel_do_deploy:append:ccmp1() {
 	fi
 }
 
-COMPATIBLE_MACHINE = "(ccimx6|ccimx6ul|ccimx8m|ccimx8x|ccmp1)"
+COMPATIBLE_MACHINE = "(ccimx6|ccimx8m|ccmp1)"
