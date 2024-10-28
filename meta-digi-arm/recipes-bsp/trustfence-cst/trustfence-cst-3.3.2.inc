@@ -27,6 +27,8 @@ SRC_URI[openssl.sha256sum] = "8dee9b24bdb1dcbf0c3d1e9b02fb8f6bf22165e807f45adeb7
 
 S = "${WORKDIR}/cst-${PV}"
 
+EXTRA_OEMAKE = 'CC="${CC}" LD="${CC}" AR="${AR}" OBJCOPY="${OBJCOPY}"'
+
 do_compile() {
 	cd code/cst
 	oe_runmake OPENSSL_PATH=${WORKDIR}/openssl-${OPENSSL1_VERSION} OSTYPE=linux64 openssl
