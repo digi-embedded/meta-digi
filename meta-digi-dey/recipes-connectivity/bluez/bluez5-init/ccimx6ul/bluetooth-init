@@ -70,7 +70,10 @@ bluetooth_init() {
 		if hciattach ttyBt qca ${BT_RATE:-3000000} -t30 ${BT_FLOW:-flow} unused ${BT_MACADDR} >${HCIATTACH_LOG} 2>&1; then
 			# hciattach performs a reset to load the new firmware and needs some time to be ready
 			sleep 1
-			return
+			# Validate that FW was correcly loaded by checking if file exists
+			if [ -f "/sys/kernel/debug/bluetooth/hci0/features" ]; then
+				return
+			fi
 		fi
 		sleep 1
 
