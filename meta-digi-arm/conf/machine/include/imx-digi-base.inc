@@ -313,8 +313,8 @@ PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "4.2.0.imx"
 OPTEE_PKGS ??= "optee-client optee-os"
 
 # Use i.MX opencv Version
-PREFERRED_VERSION_opencv:mx8-nxp-bsp ??= "4.9.0.imx"
-PREFERRED_VERSION_opencv:mx9-nxp-bsp ??= "4.9.0.imx"
+PREFERRED_VERSION_opencv:mx8-nxp-bsp ??= "4.10.0.imx"
+PREFERRED_VERSION_opencv:mx9-nxp-bsp ??= "4.10.0.imx"
 
 EXTRA_IMAGEDEPENDS += "u-boot"
 

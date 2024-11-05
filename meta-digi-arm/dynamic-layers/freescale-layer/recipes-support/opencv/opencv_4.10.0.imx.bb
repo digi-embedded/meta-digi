@@ -17,7 +17,7 @@ ARM_INSTRUCTION_SET:armv5 = "arm"
 
 DEPENDS = "libtool swig-native bzip2 zlib glib-2.0 libwebp"
 
-SRCREV_opencv = "1ea4cc711b46ebd5e676515b5372ab4659c987ea"
+SRCREV_opencv = "93bb210db7cb5ae3dcd80dd6e3f8e5cfb42aa5fa"
 SRCREV_contrib = "c7602a8f74205e44389bd6a4e8d727d32e7e27b4"
 SRCREV_boostdesc = "34e4206aef44d50e6bbcd0ab06354b52e7466d26"
 SRCREV_vgg = "fccf7cd6a4b12079f73bbfb21745f9babcd4eb1d"
@@ -228,8 +228,9 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 SRC_URI:remove = "git://github.com/opencv/opencv.git;name=opencv;branch=4.x;protocol=https"
 SRC_URI =+ "${OPENCV_SRC};branch=${SRCBRANCH_opencv};name=opencv"
 OPENCV_SRC ?= "git://github.com/nxp-imx/opencv-imx.git;protocol=https;branch=master"
-SRCBRANCH_opencv = "4.9.0_imx"
-SRCREV_opencv = "1ea4cc711b46ebd5e676515b5372ab4659c987ea"
+SRCBRANCH_opencv = "4.10.0_imx"
+SRCREV_opencv = "93bb210db7cb5ae3dcd80dd6e3f8e5cfb42aa5fa"
+SRCREV_contrib = "1ed3dd2c53888e3289afdb22ec4e9ebbff3dba87"
 
 # Add opencv_extra
 SRC_URI += " \
@@ -237,7 +238,7 @@ SRC_URI += " \
     file://0001-Add-smaller-version-of-download_models.py.patch;patchdir=../extra \
 "
 SRCREV_FORMAT:append = "_extra"
-SRCREV_extra = "7f0ba7adefcbbbe3df7d939f5246ba0382c7c629"
+SRCREV_extra = "dd1fbd0717ef4d83f86899b4144fdd9bc0364a5f"
 
 # Patch DNN example
 SRC_URI += " \
@@ -246,10 +247,13 @@ SRC_URI += " \
 
 PACKAGECONFIG:remove = "eigen"
 
-PACKAGECONFIG:append:mx8-nxp-bsp = " dnn text"
-PACKAGECONFIG:append:mx9-nxp-bsp = " dnn text"
+PACKAGECONFIG:append = " \
+    dnn \
+    text \
+    ${@bb.utils.contains('BBFILE_COLLECTIONS', 'qt6-layer', 'qt6', '', d)} \
+    ${PACKAGECONFIG_OPENCL} \
+"
 
-PACKAGECONFIG:append = " ${PACKAGECONFIG_OPENCL}"
 PACKAGECONFIG_OPENCL                   = ""
 PACKAGECONFIG_OPENCL:mx8-nxp-bsp       = "opencl"
 PACKAGECONFIG_OPENCL:mx8dxl-nxp-bsp    = ""
