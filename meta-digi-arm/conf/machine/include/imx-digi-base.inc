@@ -221,25 +221,33 @@ MACHINE_EXTRA_RRECOMMENDS:append:mx9-nxp-bsp = " ${@bb.utils.contains('DISTRO_FE
 
 # ELE extra Firmware
 SECOEXT_FIRMWARE_NAME ?= "UNDEFINED"
-SECOEXT_FIRMWARE_NAME:mx8ulp-generic-bsp ?= "mx8ulp${IMX_SOC_REV_LOWER}ext-ahab-container.img"
 
 # GStreamer 1.0 plugins
-MACHINE_GSTREAMER_1_0_PLUGIN                ?= ""
-MACHINE_GSTREAMER_1_0_PLUGIN:mx6dl-nxp-bsp  ?= "imx-gst1.0-plugin"
-MACHINE_GSTREAMER_1_0_PLUGIN:mx6q-nxp-bsp   ?= "imx-gst1.0-plugin"
-MACHINE_GSTREAMER_1_0_PLUGIN:mx6ul-nxp-bsp  ?= "imx-gst1.0-plugin"
-MACHINE_GSTREAMER_1_0_PLUGIN:mx8-nxp-bsp    ?= "imx-gst1.0-plugin"
-MACHINE_GSTREAMER_1_0_PLUGIN:mx9-nxp-bsp    ?= "imx-gst1.0-plugin"
+MACHINE_GSTREAMER_1_0_PLUGIN               ?= ""
+MACHINE_GSTREAMER_1_0_PLUGIN:mx6dl-nxp-bsp ?= "imx-gst1.0-plugin"
+MACHINE_GSTREAMER_1_0_PLUGIN:mx6q-nxp-bsp  ?= "imx-gst1.0-plugin"
+MACHINE_GSTREAMER_1_0_PLUGIN:mx6ul-nxp-bsp ?= "imx-gst1.0-plugin"
+MACHINE_GSTREAMER_1_0_PLUGIN:mx8-nxp-bsp   ?= "imx-gst1.0-plugin"
+MACHINE_GSTREAMER_1_0_PLUGIN:mx9-nxp-bsp   ?= "imx-gst1.0-plugin"
 
-# In 'meta-freescale' these gstreamer preferred versions are restricted to 'mx8-nxp-bsp'
-# but in DEY we use them also in the 6UL, so relax the override to 'imx-nxp-base'
+#
+# In 'meta-freescale' these gstreamer preferred versions are restricted to
+# 'mx8|9-nxp-bsp' but in DEY we use them also in the 6UL, so relax the override
+# to 'imx-nxp-bsp'
+#
+# GStreamer forked recipes
 PREFERRED_VERSION_gstreamer1.0:imx-nxp-bsp              ??= "1.24.0.imx"
-PREFERRED_VERSION_gstreamer1.0-libav:imx-nxp-bsp        ??= "1.24.0.imx"
 PREFERRED_VERSION_gstreamer1.0-plugins-bad:imx-nxp-bsp  ??= "1.24.0.imx"
 PREFERRED_VERSION_gstreamer1.0-plugins-base:imx-nxp-bsp ??= "1.24.0.imx"
 PREFERRED_VERSION_gstreamer1.0-plugins-good:imx-nxp-bsp ??= "1.24.0.imx"
+
+# GStreamer copied recipes
+PREFERRED_VERSION_gst-devtools:imx-nxp-bsp              ??= "1.22.5.imx"
+PREFERRED_VERSION_gstreamer1.0-libav:imx-nxp-bsp        ??= "1.24.0.imx"
 PREFERRED_VERSION_gstreamer1.0-plugins-ugly:imx-nxp-bsp ??= "1.24.0.imx"
+PREFERRED_VERSION_gstreamer1.0-python:imx-nxp-bsp       ??= "1.24.0.imx"
 PREFERRED_VERSION_gstreamer1.0-rtsp-server:imx-nxp-bsp  ??= "1.24.0.imx"
+PREFERRED_VERSION_gstreamer1.0-vaapi:imx-nxp-bsp        ??= "1.24.0.imx"
 
 # GStreamer downgrade ffmpeg
 PREFERRED_VERSION_ffmpeg:imx-nxp-bsp ??= "4.4.1"
@@ -279,25 +287,19 @@ PREFERRED_VERSION_weston:mx6-nxp-bsp      ??= "10.0.5.imx"
 PREFERRED_VERSION_weston:mx7-nxp-bsp      ??= "10.0.5.imx"
 PREFERRED_VERSION_weston:imx-mainline-bsp   = ""
 
-PREFERRED_VERSION_wayland-protocols:mx6-nxp-bsp  ??= "1.32.imx"
-PREFERRED_VERSION_wayland-protocols:mx7-nxp-bsp  ??= "1.32.imx"
-PREFERRED_VERSION_wayland-protocols:mx8-nxp-bsp  ??= "1.32.imx"
-PREFERRED_VERSION_wayland-protocols:mx9-nxp-bsp  ??= "1.32.imx"
+PREFERRED_VERSION_wayland-protocols:imx-nxp-bsp  ??= "1.32.imx"
 
 PREFERRED_VERSION_xwayland:imx-nxp-bsp ??= "23.1.1.imx"
 
 # Use i.MX libdrm Version
-PREFERRED_VERSION_libdrm:mx6-nxp-bsp ??= "2.4.116.imx"
-PREFERRED_VERSION_libdrm:mx7-nxp-bsp ??= "2.4.116.imx"
-PREFERRED_VERSION_libdrm:mx8-nxp-bsp ??= "2.4.116.imx"
-PREFERRED_VERSION_libdrm:mx9-nxp-bsp ??= "2.4.116.imx"
+PREFERRED_VERSION_libdrm:imx-nxp-bsp ??= "2.4.116.imx"
 
-PREFERRED_VERSION_spirv-headers:imxvulkan            ??= "1.3.275.0"
-PREFERRED_VERSION_spirv-tools:imxvulkan              ??= "1.3.275.0"
-PREFERRED_VERSION_vulkan-headers:imxvulkan           ??= "1.3.275.0"
-PREFERRED_VERSION_vulkan-loader:imxvulkan            ??= "1.3.275.0"
-PREFERRED_VERSION_vulkan-tools:imxvulkan             ??= "1.3.275.0"
-PREFERRED_VERSION_vulkan-validation-layers:imxvulkan ??= "1.3.275.0"
+PREFERRED_VERSION_spirv-headers:imxvulkan            ??= "1.3.275.0.imx"
+PREFERRED_VERSION_spirv-tools:imxvulkan              ??= "1.3.275.0.imx"
+PREFERRED_VERSION_vulkan-headers:imxvulkan           ??= "1.3.275.0.imx"
+PREFERRED_VERSION_vulkan-loader:imxvulkan            ??= "1.3.275.0.imx"
+PREFERRED_VERSION_vulkan-tools:imxvulkan             ??= "1.3.275.0.imx"
+PREFERRED_VERSION_vulkan-validation-layers:imxvulkan ??= "1.3.275.0.imx"
 
 # Use i.MX optee Version
 PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "4.2.0.imx"
