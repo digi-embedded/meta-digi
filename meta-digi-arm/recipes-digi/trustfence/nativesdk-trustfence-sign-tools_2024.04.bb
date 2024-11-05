@@ -2,5 +2,5 @@
 
 require nativesdk-trustfence-sign-tools_git.bb
 
-SRCBRANCH = "v2023.04/master"
+SRCBRANCH = "v2024.04/master"
 SRCREV = "${AUTOREV}"
