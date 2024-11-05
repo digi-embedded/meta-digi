@@ -1,5 +1,7 @@
 # Copyright (C) 2024, Digi International Inc.
 
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
+
 # Directory for models.
 MODELS_DIR = "models"
 
@@ -7,10 +9,8 @@ MODELS_DIR = "models"
 VELA_MODELS_DIR = "vela_models"
 
 SRC_URI += " \
-    file://patches/0001-Customize-EiQ-demos.patch \
-    file://patches/0002-dms-update-the-demo-to-use-the-landmark-full-model.patch \
-    file://patches/0003-download_models-update-the-download-location-of-some.patch \
-    file://patches/0004-improvements-capture-x-windows-and-increase-resoluti.patch \
+    file://0001-Customize-EiQ-demos.patch \
+    file://0002-improvements-capture-x-windows-and-increase-resoluti.patch \
     file://scripts/launch_eiq_demo.sh \
     file://service/eiqdemo.service \
 "

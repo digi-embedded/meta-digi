@@ -9,16 +9,18 @@ Just do the changes in the scripts to:
  * Option to set the window in full screen
  * Fix some exceptions of the demos
 
+Upstream-Status: Inappropriate [DEY specific]
+
 Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
 ---
  dms/main.py               | 79 +++++++++++++++++++++++++++------------
- face_recognition/main.py  | 44 ++++++++++++++++++----
+ face_recognition/main.py  | 43 +++++++++++++++++----
  gesture_detection/main.py | 32 ++++++++++++++--
  object_detection/main.py  | 40 ++++++++++++++++----
- 4 files changed, 153 insertions(+), 42 deletions(-)
+ 4 files changed, 152 insertions(+), 42 deletions(-)
 
 diff --git a/dms/main.py b/dms/main.py
-index 6e04dc3..8ba99b2 100644
+index 902ea1819620..e74b6be1b938 100644
 --- a/dms/main.py
 +++ b/dms/main.py
 @@ -14,10 +14,16 @@ from eye_landmark import EyeMesher
@@ -27,7 +29,7 @@ index 6e04dc3..8ba99b2 100644
  
 -MODEL_PATH = pathlib.Path("../models/")
 -DETECT_MODEL = "face_detection_front_128_full_integer_quant.tflite"
--LANDMARK_MODEL = "face_landmark_192_integer_quant.tflite"
+-LANDMARK_MODEL = "face_landmark_192_full_integer_quant.tflite"
 -EYE_MODEL = "iris_landmark_quant.tflite"
 +WIDTH=640
 +HEIGH=480
@@ -37,7 +39,7 @@ index 6e04dc3..8ba99b2 100644
 +# Always enforce the Ethos NPU, use the converted vela models
 +MODEL_PATH = pathlib.Path("../vela_models/")
 +DETECT_MODEL = "face_detection_front_128_full_integer_quant_vela.tflite"
-+LANDMARK_MODEL = "face_landmark_192_integer_quant_vela.tflite"
++LANDMARK_MODEL = "face_landmark_192_full_integer_quant_vela.tflite"
 +EYE_MODEL = "iris_landmark_quant_vela.tflite"
  
  # turn on camera
@@ -146,7 +148,7 @@ index 6e04dc3..8ba99b2 100644
  time.sleep(2)
  cap.release()
 diff --git a/face_recognition/main.py b/face_recognition/main.py
-index acc838e..33ffa71 100644
+index e917c0aae8c3..c3eed09aad31 100644
 --- a/face_recognition/main.py
 +++ b/face_recognition/main.py
 @@ -13,6 +13,11 @@ from face_detection import YoloFace
@@ -188,7 +190,7 @@ index acc838e..33ffa71 100644
          key = cv2.waitKey(20) & 0xFF
          if key == 13 or key == 141:
              break
-@@ -68,13 +75,28 @@ if args.input.isdigit():
+@@ -68,17 +75,31 @@ if args.input.isdigit():
      cap_input = int(args.input)
  else:
      cap_input = args.input
@@ -197,13 +199,16 @@ index acc838e..33ffa71 100644
 +# vid = cv2.VideoCapture("v4l2src device=%s ! imxvideoconvert_pxp ! video/x-raw,format=RGB16,width=%d,height=%d " \
 +#                         "! videoconvert ! appsink" % (args.input, WIDTH, HEIGH))
  vid = cv2.VideoCapture(cap_input)
+ if (not vid.isOpened()):
+     print("Can't read frame from source file ", args.input)
+     exit(1)
 +vid.set(cv2.CAP_PROP_FRAME_WIDTH, WIDTH)
 +vid.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGH)
 +
 +if FORMAT == 0:
 +    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
 +    vid.set(cv2.CAP_PROP_FOURCC, fourcc)
-+
+ 
  PADDING = 10
  tips = "Press 'a' to add person, 'd' to delete person, 'p' to print database"
 +
@@ -217,7 +222,7 @@ index acc838e..33ffa71 100644
      if (ret == False):
          break
      boxes = detector.detect(img)
-@@ -97,12 +119,20 @@ while True:
+@@ -101,12 +122,20 @@ while True:
  
      cv2.putText(img, tips, (30, 30),
                  cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 3)
@@ -240,7 +245,7 @@ index acc838e..33ffa71 100644
      elif (key == ord('d')):
          msg = "DEL. Please input name:"
          name = get_inputs(img, msg)
-@@ -110,7 +140,7 @@ while True:
+@@ -114,7 +143,7 @@ while True:
      elif (key == ord('p')):
          names = ",".join(database.get_names())
          print_longtext(img, names + "   Press any key to continue.")
@@ -250,7 +255,7 @@ index acc838e..33ffa71 100644
              pass
  
 diff --git a/gesture_detection/main.py b/gesture_detection/main.py
-index da83ce0..15b8597 100644
+index ea99a021236a..52f23b9600f4 100644
 --- a/gesture_detection/main.py
 +++ b/gesture_detection/main.py
 @@ -9,8 +9,9 @@ import time
@@ -319,7 +324,7 @@ index da83ce0..15b8597 100644
      ret, frame = capture.read()
      if cv2.waitKey(1) & 0xFF == ord('q'):
 diff --git a/object_detection/main.py b/object_detection/main.py
-index 1356111..efa614e 100644
+index 1356111046fd..efa614ebd44b 100644
 --- a/object_detection/main.py
 +++ b/object_detection/main.py
 @@ -13,7 +13,13 @@ import argparse
