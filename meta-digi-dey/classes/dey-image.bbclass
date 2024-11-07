@@ -1,9 +1,9 @@
 # DEY image features.
 #
-# Copyright (C) 2012 Digi International.
+# Copyright (C) 2012-2024 Digi International.
 
 #
-# Add build info to rootfs images (/etc/build)
+# Add build info to rootfs images (/etc/buildinfo)
 #
 inherit image-buildinfo
 

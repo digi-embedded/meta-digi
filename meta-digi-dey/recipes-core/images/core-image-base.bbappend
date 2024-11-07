@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016-2022, Digi International Inc.
+# Copyright (C) 2016-2024, Digi International Inc.
 #
 
 IMAGE_FEATURES += " \
@@ -25,5 +25,5 @@ CORE_IMAGE_BASE_INSTALL:append:ccimx6ul = " connectcore-demo-example"
 # SDK features (for toolchains generated from an image with populate_sdk)
 SDKIMAGE_FEATURES ?= "dev-pkgs dbg-pkgs staticdev-pkgs"
 
-# Add our dey-image tweaks to the final image (like /etc/build info)
+# Add our dey-image tweaks to the final image (like /etc/buildinfo info)
 inherit dey-image
