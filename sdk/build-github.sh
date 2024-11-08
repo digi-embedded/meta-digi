@@ -79,7 +79,7 @@ copy_images() {
 fetch_all() {
 	local FETCH_LOG="fetch.log"
 	for _ in $(seq 1 3); do
-		bitbake --runall=fetch "${1}" 2>&1 | tee "${FETCH_LOG}"
+		bitbake -k --runall=fetch "${1}" 2>&1 | tee "${FETCH_LOG}"
 		grep -qs 'Summary.*ERROR' "${FETCH_LOG}" || break
 	done
 	rm -f "${FETCH_LOG}"
