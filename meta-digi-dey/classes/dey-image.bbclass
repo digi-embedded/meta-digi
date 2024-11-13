@@ -62,7 +62,7 @@ create_sw_versions_file() {
 ROOTFS_POSTPROCESS_COMMAND:append = " create_sw_versions_file;"
 
 #
-# Add dependency for read-only signed rootfs
+# Add dependency for read-only signed rootfs and SWU public key copying
 #
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 

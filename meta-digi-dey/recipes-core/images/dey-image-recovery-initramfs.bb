@@ -31,6 +31,11 @@ inherit core-image image_types
 
 IMAGE_ROOTFS_SIZE = "8192"
 
+#
+# Add dependency for SWU public key copying
+#
+DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
+
 # Remove some packages added via recommendations
 BAD_RECOMMENDATIONS += " \
     openssl-bin \

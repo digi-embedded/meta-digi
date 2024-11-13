@@ -102,42 +102,47 @@ check_gen_pki_tree() {
 }
 
 copy_public_key() {
-	if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
-		KEY_INDEX="$(expr ${TRUSTFENCE_KEY_INDEX} + 1)"
-		PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/crts/key${KEY_INDEX}.pub"
-		# The new hab/ahab_pki_tree.sh script extracts the public keys after the PKI
-		# generation and leaves them in the crts/ folder. However, the PKI tree may
-		# already exist, the PKI generation script not called, and then the public
-		# keys may not be available. This is a fall-back to generate at least the
-		# selected public key.
-		if [ ! -f "${PUBLIC_KEY}" ]; then
-			if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
-				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/IMG${KEY_INDEX}*crt.pem)"
-			elif [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
-				CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK${KEY_INDEX}*crt.pem)"
+	if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+		# Make sure a valid PKI exists before attempting to copy the key
+		check_gen_pki_tree
+
+		if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
+			KEY_INDEX="$(expr ${TRUSTFENCE_KEY_INDEX} + 1)"
+			PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/crts/key${KEY_INDEX}.pub"
+			# The new hab/ahab_pki_tree.sh script extracts the public keys after the PKI
+			# generation and leaves them in the crts/ folder. However, the PKI tree may
+			# already exist, the PKI generation script not called, and then the public
+			# keys may not be available. This is a fall-back to generate at least the
+			# selected public key.
+			if [ ! -f "${PUBLIC_KEY}" ]; then
+				if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
+					CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/IMG${KEY_INDEX}*crt.pem)"
+				elif [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
+					CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK${KEY_INDEX}*crt.pem)"
+				else
+					bberror "Unknown TRUSTFENCE_SIGN_MODE value"
+					exit 1
+				fi
+				# Extract the public key from the certificate.
+				openssl x509 -pubkey -noout -in "${CERT_IMG}" > "${PUBLIC_KEY}"
+			fi
+		elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+			if [ "${DIGI_SOM}" = "ccmp15" ]; then
+				PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey.pem"
+			elif [ "${DIGI_SOM}" = "ccmp13" ]; then
+				PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey0${TRUSTFENCE_KEY_INDEX}.pem"
 			else
-				bberror "Unknown TRUSTFENCE_SIGN_MODE value"
+				bberror "Unknown DIGI_SOM"
 				exit 1
 			fi
-			# Extract the public key from the certificate.
-			openssl x509 -pubkey -noout -in "${CERT_IMG}" > "${PUBLIC_KEY}"
-		fi
-	elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
-		if [ "${DIGI_SOM}" = "ccmp15" ]; then
-			PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey.pem"
-		elif [ "${DIGI_SOM}" = "ccmp13" ]; then
-			PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey0${TRUSTFENCE_KEY_INDEX}.pem"
 		else
-			bberror "Unknown DIGI_SOM"
+			echo "ERROR: Cannot determine the public key"
 			exit 1
 		fi
-	else
-		echo "ERROR: Cannot determine the public key"
-		exit 1
+		# Copy the public key to the rootfs
+		install -d ${IMAGE_ROOTFS}${sysconfdir}/ssl/certs
+		cp -f "${PUBLIC_KEY}" "${IMAGE_ROOTFS}${sysconfdir}/ssl/certs/key.pub"
 	fi
-	# Copy the public key to the rootfs
-	install -d ${IMAGE_ROOTFS}${sysconfdir}/ssl/certs
-	cp -f "${PUBLIC_KEY}" "${IMAGE_ROOTFS}${sysconfdir}/ssl/certs/key.pub"
 }
 ROOTFS_POSTPROCESS_COMMAND:append = " copy_public_key;"
 
