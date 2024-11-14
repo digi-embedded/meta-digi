@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2019-2023, Digi International Inc.
+# Copyright (C) 2019-2024, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -54,25 +54,26 @@ if [ "${MODE}" = "start" ]; then
 	[ -z "${peer_found}" ] && { log err "p2p discover: peer NOT found"; exit 1; }
 
 	# Peer found, establish the link
-	log info "establish P2P link"
+	log info "Peer found, establishing the P2P link"
 	wpa_cli -i"${IFACE}" p2p_connect "${IF_P2P_PEER_MAC}" pbc ${IF_P2P_NETWORK_ID:+persistent=${IF_P2P_NETWORK_ID}} ${IF_P2P_FREQ:+freq=${IF_P2P_FREQ}} auto
 	for _ in $(seq 20); do
-		if wpa_cli status 2>&1 | grep -qs "^wpa_state=COMPLETED$"; then
-			if wpa_cli status 2>&1 | grep -qs "^mode=P2P GO$"; then
+		# When a new connection is created, we need to get the index of the new interface (p2p-${IFACE}-[0-9]
+		# Check for the interface matching the pattern "p2p-${IFACE}-*"
+		P2P_IFNAME=$(ip link | grep -o "p2p-${IFACE}-[0-9]")
+		[ -z "$P2P_IFNAME" ] && sleep 1 && continue
+
+		if wpa_cli -i "${P2P_IFNAME}" status 2>&1 | grep -qs "^wpa_state=COMPLETED$"; then
+			if wpa_cli -i "${P2P_IFNAME}" status 2>&1 | grep -qs "^mode=P2P GO$"; then
 				# P2P GO side: verify the remote peer has connected
-				wpa_cli all_sta 2>&1 | grep -i -qs "^p2p_device_addr=${IF_P2P_PEER_MAC}$" && p2p_link_found="1"
-			elif wpa_cli status 2>&1 | grep -qs "^mode=station$"; then
+				wpa_cli -i "${P2P_IFNAME}" all_sta 2>&1 | grep -i -qs "^p2p_device_addr=${IF_P2P_PEER_MAC}$" && p2p_link_found="1"
+			elif wpa_cli -i "${P2P_IFNAME}" status 2>&1 | grep -qs "^mode=station$"; then
 				p2p_link_found="1"
 			fi
 		fi
 		if [ -n "${p2p_link_found}" ]; then
 			# Configure the newly created interface
 			if [ -n "${IF_P2P_LOCAL_ADDRESS}" ]; then
-				for P2P_IFNAME in $(basename $(echo /sys/class/net/p2p-"${IFACE}"-*)); do
-					echo "${P2P_IFNAME}" | grep -qs "p2p-${IFACE}-\*" && continue
-					ifconfig "${P2P_IFNAME}" "${IF_P2P_LOCAL_ADDRESS}" ${IF_P2P_LOCAL_NETMASK:+netmask ${IF_P2P_LOCAL_NETMASK}} up
-					break
-				done
+				ifconfig "${P2P_IFNAME}" "${IF_P2P_LOCAL_ADDRESS}" ${IF_P2P_LOCAL_NETMASK:+netmask ${IF_P2P_LOCAL_NETMASK}} up
 			fi
 			break
 		fi
@@ -80,5 +81,5 @@ if [ "${MODE}" = "start" ]; then
 	done
 
 	# Give 'ifupdown' a proper error return value if 'wpa_state' is NOT COMPLETED
-	[ -n "${p2p_link_found}" ] && true || false
+	[ -n "${p2p_link_found}" ] && log info "P2P link created" || { log err "P2P link not created"; false ;}
 fi
