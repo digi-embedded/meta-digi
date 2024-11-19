@@ -24,7 +24,7 @@ wifi_actions_needed() {
 }
 
 bt_actions_needed() {
-	systemctl -q is-active bluetooth-init
+	systemctl -q is-active bluetooth-init && [ ! -e "/sys/firmware/devicetree/base/soc@0/bus@42800000/mmc@428b0000/keep-power-in-suspend" ]
 }
 
 if [ "${1}" = "pre" ]; then
