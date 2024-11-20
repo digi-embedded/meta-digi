@@ -39,7 +39,7 @@ trustfence_sign() {
 		DTB=`normalize_dtb "${DTB}"`
 		DTB_EXT=${DTB##*.}
 		DTB_BASE_NAME=`basename ${DTB} ."${DTB_EXT}"`
-		DTB_IMAGE="${DTB_BASE_NAME}-${KERNEL_IMAGE_NAME}.${DTB_EXT}"
+		DTB_IMAGE="${DTB_BASE_NAME}.${DTB_EXT}"
 
 		TMP_DTB_IMAGE_SIGNED="$(mktemp ${DTB_IMAGE}-signed.XXXXXX)"
 		if [ "${DTB_EXT}" = "dtbo" ]; then
