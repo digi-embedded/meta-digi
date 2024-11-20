@@ -128,10 +128,8 @@ eval "CONFIG_CSF_SIZE=\"\${${PLATFORM}_csf_size}\""
 # Rootfs is loaded to $initrd_addr, just like the ramdisk
 [ "${ARTIFACT_ROOTFS}" = "y" ] && CONFIG_RAM_START="${CONFIG_RAMDISK_LOADADDR}"
 
-# For ccimx91 do not require image type (assume FIT image)
-[ "${PLATFORM}" = "ccimx91" ] && CONFIG_RAM_START="${CONFIG_FIT_LOADADDR}"
-# For ccimx93 do not require image type (assume FIT image)
-[ "${PLATFORM}" = "ccimx93" ] && CONFIG_RAM_START="${CONFIG_FIT_LOADADDR}"
+# For ccimx9 do not require image type (assume FIT image)
+echo "${PLATFORM}" | grep -qs "ccimx9" && CONFIG_RAM_START="${CONFIG_FIT_LOADADDR}"
 
 if [ -z "${CONFIG_RAM_START}" ]; then
 	echo "Specify the type of image to process (-b, -i, -d, -l, -r, or -o)"
@@ -318,8 +316,8 @@ elif [ "${CONFIG_SIGN_MODE}" = "AHAB" ]; then
 	KERNEL_SIG_BLOCK_OFFSET="0x90"
 
 	# Prepare the image container
-	if [ "${PLATFORM}" = "ccimx93" ]; then
-		# Only FIT image supported for CC93
+	if echo "${PLATFORM}" | grep -qs "ccimx9"; then
+		# Only FIT image supported for CC9
 		mkimage_imx8 -soc IMX9 -c -ap ${UIMAGE_PATH} a55 ${CONFIG_FIT_LOADADDR} -out temp-mkimg
 	else
 		mkimage_imx8 -soc "QX" -rev "B0" -c -ap ${UIMAGE_PATH} a35 ${CONFIG_RAM_START} -out temp-mkimg
