@@ -15,7 +15,7 @@
 #
 #  Parameters set by Jenkins:
 #     DY_BUILD_RELEASE:  Build for release mode
-#     DY_BUILD_TCHAIN:   Build toolchains for DEY images
+#     DY_BUILD_TCHAIN:   Build toolchain for DEY images
 #     DY_PLATFORMS:      Platforms to build
 #     DY_REVISION:       Revision of the manifest repository (for 'repo init')
 #     DY_TARGET:         Target image (the default is platform dependent)
@@ -241,12 +241,12 @@ for platform in ${DY_PLATFORMS}; do
 				time fetch_all "${target}"
 				# shellcheck disable=SC2046
 				time bitbake "${target}" $(swu_recipe_name "${target}")
-				# Build the toolchain for DEY images
-				if [ "${DY_BUILD_TCHAIN}" = "true" ] && echo "${target}" | grep -qs '^\(core\|dey\)-image-[^-]\+$'; then
-					printf "\n[INFO] Building the toolchain for %s.\n" "${target}"
-					time bitbake -c populate_sdk "${target}"
-				fi
 			done
+			# Build the toolchain for DEY images
+			if [ "${DY_BUILD_TCHAIN}" = "true" ]; then
+				printf "\n[INFO] Building the toolchain for %s.\n" "${platform}"
+				time bitbake -c populate_sdk dey-toolchain
+			fi
 			purge_sstate
 		)
 		copy_images "${_this_img_dir}"
