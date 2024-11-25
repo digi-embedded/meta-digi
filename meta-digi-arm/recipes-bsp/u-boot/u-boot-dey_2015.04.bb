@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2015 Digi International
+# Copyright (C) 2012-2024, Digi International Inc.
 
 require u-boot.inc
 
@@ -12,12 +12,9 @@ DEPENDS += "${@base_conditional('TRUSTFENCE_SIGN', '1', 'trustfence-cst-native',
 PROVIDES += "u-boot"
 
 # Select internal or Github U-Boot repo
-DIGI_LOG_REPO = "u-boot-denx.git"
-DIGI_MTK_REPO = "uboot/u-boot-denx.git"
-GITHUB_REPO = "u-boot.git"
-UBOOT_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , \
-					base_conditional('DIGI_GIT', '${DIGI_LOG_GIT}', '${DIGI_GIT}/${DIGI_LOG_REPO}', '${DIGI_GIT}/${DIGI_MTK_REPO};protocol=ssh', d), \
-					'${DIGI_GITHUB_GIT}/${GITHUB_REPO};protocol=https', d)}"
+UBOOT_URI_STASH = "${DIGI_MTK_GIT}/uboot/u-boot-denx.git;protocol=ssh"
+UBOOT_URI_GITHUB = "${DIGI_GITHUB_GIT}/u-boot.git;protocol=https"
+UBOOT_GIT_URI ?= "${@base_conditional('DIGI_INTERNAL_GIT', '1' , '${UBOOT_URI_STASH}', '${UBOOT_URI_GITHUB}', d)}"
 
 SRCBRANCH = "v2015.04/maint"
 SRCREV = "${AUTOREV}"
