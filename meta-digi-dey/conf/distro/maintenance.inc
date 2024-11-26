@@ -10,3 +10,5 @@ SRC_URI_prepend_pn-qtsmarthome = "https://artifacts.toradex.com/artifactory/tdxr
 SRC_URI_remove_pn-qtsmarthome = "http://share.basyskom.com/demos/smarthome_src.tar.gz"
 SRC_URI_prepend_pn-thin-provisioning-tools = "git://github.com/jthornber/thin-provisioning-tools;branch=main "
 SRC_URI_remove_pn-thin-provisioning-tools = "git://github.com/jthornber/thin-provisioning-tools"
+SRC_URI_prepend_pn-x264 = "git://github.com/mirror/x264.git;protocol=https;branch=stable "
+SRC_URI_remove_pn-x264 = "git://git.videolan.org/x264.git"
