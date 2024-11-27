@@ -6,6 +6,14 @@ LICENSE = "MIT"
 inherit core-image dey-image-sdk qt-version
 inherit populate_sdk ${QT_POPULATE_SDK}
 
+# Add a minimal set of IMAGE_FEATURES to allow for integration with the
+# appropriate desktop backend (if any)
+IMAGE_FEATURES += " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston', \
+       bb.utils.contains('DISTRO_FEATURES',     'x11', 'x11-base x11-sato', \
+                                                       '', d), d)} \
+"
+
 # Do not include kernel in the toolchain
 PACKAGE_EXCLUDE = " \
     kernel-image-* \
