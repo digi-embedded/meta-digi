@@ -22,8 +22,5 @@ CORE_IMAGE_BASE_INSTALL += "dey-examples-digiapix"
 # non-graphical core-image-base.
 CORE_IMAGE_BASE_INSTALL:append:ccimx6ul = " connectcore-demo-example"
 
-# Add staticdev packages to SDK
-SDKIMAGE_FEATURES:append = " staticdev-pkgs"
-
 # Add our dey-image tweaks to the final image (like /etc/buildinfo info)
 inherit dey-image

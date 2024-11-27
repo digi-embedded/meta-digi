@@ -29,9 +29,6 @@ IMAGE_FEATURES += " \
     ${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'dey-wireless', '', d)} \
 "
 
-# Add staticdev packages to SDK
-SDKIMAGE_FEATURES:append = " staticdev-pkgs"
-
 IMAGE_LINGUAS = ""
 
 inherit core-image
