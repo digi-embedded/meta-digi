@@ -38,7 +38,7 @@ inherit ${@oe.utils.conditional("DEY_IMAGE_INSTALLER", "1", "dey-image-installer
 # using the proper 'IMAGE_BASENAME' value.
 #
 SDK_PREPACKAGING_COMMAND ?= "toolchain_create_sdk_dey_version"
-SDK_POSTPROCESS_COMMAND = " create_sdk_files; check_sdk_sysroots; ${SDK_PREPACKAGING_COMMAND}; archive_sdk; ${SDK_PACKAGING_COMMAND} "
+SDK_POSTPROCESS_COMMAND = " create_sdk_files check_sdk_sysroots ${SDK_PREPACKAGING_COMMAND} archive_sdk ${SDK_PACKAGING_COMMAND} "
 
 # This function creates a DEY version information file
 fakeroot toolchain_create_sdk_dey_version() {
@@ -59,7 +59,7 @@ create_sw_versions_file() {
 	touch $swversionsfile
 	echo 'firmware ${DEY_FIRMWARE_VERSION}' >> $swversionsfile
 }
-ROOTFS_POSTPROCESS_COMMAND:append = " create_sw_versions_file;"
+ROOTFS_POSTPROCESS_COMMAND:append = " create_sw_versions_file"
 
 #
 # Add dependency for read-only signed rootfs and SWU public key copying

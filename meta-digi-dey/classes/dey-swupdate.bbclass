@@ -61,7 +61,7 @@ create_swupdate_targz_file() {
 	# Compress the tar file.
 	gzip "${targzfile%.*}"
 }
-ROOTFS_POSTPROCESS_COMMAND:append = "${@oe.utils.conditional('SWUPDATE_IS_FILES_UPDATE', 'true', ' create_swupdate_targz_file;', '', d)}"
+ROOTFS_POSTPROCESS_COMMAND:append = "${@oe.utils.conditional('SWUPDATE_IS_FILES_UPDATE', 'true', ' create_swupdate_targz_file', '', d)}"
 
 #######################################
 ###### SWU Update based on RDIFF ######
@@ -84,4 +84,4 @@ create_swupdate_rdiff_file() {
 	# Clean intermediates.
 	rm -f "${signature_file}"
 }
-IMAGE_POSTPROCESS_COMMAND:append = "${@oe.utils.conditional('SWUPDATE_IS_RDIFF_UPDATE', 'true', ' create_swupdate_rdiff_file;', '', d)}"
+IMAGE_POSTPROCESS_COMMAND:append = "${@oe.utils.conditional('SWUPDATE_IS_RDIFF_UPDATE', 'true', ' create_swupdate_rdiff_file', '', d)}"

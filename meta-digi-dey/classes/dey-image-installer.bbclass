@@ -82,4 +82,4 @@ _EOF_
 	fi
 }
 
-IMAGE_POSTPROCESS_COMMAND += "generate_installer_zip; "
+IMAGE_POSTPROCESS_COMMAND += "generate_installer_zip "

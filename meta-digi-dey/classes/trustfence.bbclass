@@ -144,7 +144,7 @@ copy_public_key() {
 		cp -f "${PUBLIC_KEY}" "${IMAGE_ROOTFS}${sysconfdir}/ssl/certs/key.pub"
 	fi
 }
-ROOTFS_POSTPROCESS_COMMAND:append = " copy_public_key;"
+ROOTFS_POSTPROCESS_COMMAND:append = " copy_public_key"
 
 python () {
     import binascii

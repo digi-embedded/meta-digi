@@ -49,4 +49,4 @@ initramfs_cleanup() {
 	# Delete SWUPDATE postinst script
 	rm -f ${IMAGE_ROOTFS}${sysconfdir}/rpm-postinsts/*swupdate*
 }
-ROOTFS_POSTPROCESS_COMMAND += "initramfs_cleanup; "
+ROOTFS_POSTPROCESS_COMMAND += "initramfs_cleanup "
