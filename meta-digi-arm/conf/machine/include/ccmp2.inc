@@ -25,7 +25,6 @@ FIP_BL31_ENABLE = "1"
 # optee-os
 # =========================================================================
 PREFERRED_PROVIDER_virtual/optee-os = "optee-os-stm32mp"
-PREFERRED_VERSION_optee-os-stm32mp ?= "3.19%"
 
 PREFERRED_VERSION_gcnano-driver-stm32mp ?= "6.4.15%"
 PREFERRED_VERSION_gcnano-userland-multi-binary-stm32mp ?= "6.4.15%"
