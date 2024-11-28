@@ -17,7 +17,6 @@ FIP_UBOOT_DTB = "u-boot"
 # trusted-firmware-a
 # =========================================================================
 PREFERRED_PROVIDER_virtual/trusted-firmware-a = "tf-a-stm32mp"
-PREFERRED_VERSION_tf-a-stm32mp ?= "v2.8%"
 
 # Configure use of BL31
 FIP_BL31_ENABLE = "1"
@@ -30,9 +29,6 @@ PREFERRED_VERSION_optee-os-stm32mp ?= "3.19%"
 
 PREFERRED_VERSION_gcnano-driver-stm32mp ?= "6.4.15%"
 PREFERRED_VERSION_gcnano-userland-multi-binary-stm32mp ?= "6.4.15%"
-
-PREFERRED_VERSION_nativesdk-tf-a-tools ?= "v2.8%"
-PREFERRED_VERSION_tf-a-tools-native ?= "v2.8%"
 
 # =========================================================================
 # Kernel

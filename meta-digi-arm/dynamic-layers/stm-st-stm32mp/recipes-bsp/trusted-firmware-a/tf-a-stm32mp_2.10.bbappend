@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2022, Digi International Inc.
+# Copyright (C) 2022-2024, Digi International Inc.
 #
 
 # Select internal or Github TF-A repo
@@ -7,7 +7,7 @@ TFA_URI_STASH = "${DIGI_MTK_GIT}/emp/arm-trusted-firmware.git;protocol=ssh"
 TFA_URI_GITHUB = "${DIGI_GITHUB_GIT}/arm-trusted-firmware.git;protocol=https"
 TFA_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${TFA_URI_STASH}', '${TFA_URI_GITHUB}', d)}"
 
-SRCBRANCH = "v2.6/stm32mp/master"
+SRCBRANCH = "v2.10/stm32mp/master"
 SRCREV = "${AUTOREV}"
 
 SRC_URI = " \
@@ -65,6 +65,13 @@ do_deploy:append() {
 			fi
 		done
 	done
+
+    # Last value of 'dt' is good for metadata binary, so use that.
+    if [ "${TF_A_ENABLE_METADATA}" = "1" ]; then
+            if [ -f "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_METADATA_BINARY}" ]; then
+                ln -s "arm-trusted-firmware/${TF_A_METADATA_BINARY}" "${DEPLOYDIR}/${TF_A_METADATA_NAME}-${dt}.${TF_A_METADATA_SUFFIX}"
+            fi
+    fi
 
 	unset i
 	for config in ${FIP_CONFIG}; do
