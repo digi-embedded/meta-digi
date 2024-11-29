@@ -11,16 +11,17 @@ else
 fi
 cat > /tmp/pulse_temp_switch.sh <<EOF
 #!/bin/sh
-cards=\$(pactl list cards |  egrep -i 'Card #' | sed 's/Card //g')
+cards=\$(pactl list cards |  grep -i 'Card #' | sed 's/Card //g')
 index=0
 for i in \$cards;
 do
-    card_info=\$(pactl list cards | grep "Card \$i" -A15 |  grep "alsa.card_name" | sed 's/ //g'| sed 's/alsa.card_name=\"//g'| sed 's/\"//g' | tr '\t' ' ' | sed 's/^\s*//g')
-    echo "\$i \$card_info"
-    # for each card, search alsa.card_name
+    card_info=\$(pactl list cards | grep "Card \$i" -A15 |  grep "api.alsa.card.name" | sed 's/ //g'| sed 's/api.alsa.card.name=\"//g'| sed 's/\"//g' | tr '\t' ' ' | sed 's/^\s*//g')
+    echo ">\$i< \$card_info"
+    # for each card, search alsa_card
     found=\$(echo \$card_info | grep -n STM32MP | wc -l)
     if [ \$found -eq 1 ];
     then
+        index=\$(echo \$i | sed 's/#//')
         echo "pactl set-card-profile \$index $PROFILE"
         pactl set-card-profile \$index $PROFILE
         break;

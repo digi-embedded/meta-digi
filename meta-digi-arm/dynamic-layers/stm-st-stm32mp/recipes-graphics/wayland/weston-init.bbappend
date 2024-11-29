@@ -39,16 +39,13 @@ do_install:append() {
 
     install -d ${D}${systemd_system_unitdir} ${D}${sbindir}
 
-    if [ -e ${D}/${systemd_system_unitdir}/weston.service ]; then
-        rm ${D}/${systemd_system_unitdir}/weston.service ${D}/${systemd_system_unitdir}/weston.socket
+    if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -D -p -m0644 ${WORKDIR}/weston-launch.service ${D}${systemd_system_unitdir}/weston-launch.service
         sed -i -e s:/etc:${sysconfdir}:g \
             -e s:/usr/bin:${bindir}:g \
             -e s:/var:${localstatedir}:g \
             ${D}${systemd_unitdir}/system/weston-launch.service
-        install -d ${D}${sysconfdir}/systemd/system/multi-user.target.wants/
-        #ln -s /lib/systemd/system/weston-launch.service ${D}${sysconfdir}/systemd/system/multi-user.target.wants/display-manager.service
-        install -D -p -m0644 ${WORKDIR}/weston-checkgpu.service ${D}${systemd_system_unitdir}/
+        install -D -p -m0644 ${WORKDIR}/weston-checkgpu.service ${D}${systemd_system_unitdir}/weston-checkgpu.service
     fi
 
     install -d ${D}${sysconfdir}/profile.d
@@ -59,9 +56,10 @@ do_install:append() {
         sed -i -e 's,#xwayland=true,xwayland=true,g' ${D}${sysconfdir}/xdg/weston/weston.ini
     fi
 
-    if [ -e ${D}${bindir}/weston-start ]; then
-        sed -i 's,@DATADIR@,${datadir},g' ${D}${bindir}/weston-start
-    fi
+    install -Dm755 ${WORKDIR}/weston-start ${D}${bindir}/weston-start
+    sed -i 's,@DATADIR@,${datadir},g' ${D}${bindir}/weston-start
+    sed -i 's,@LOCALSTATEDIR@,${localstatedir},g' ${D}${bindir}/weston-start
+
     # /etc/default/weston
     install -d ${D}${sysconfdir}/default
     echo "WESTON_USER=root" > ${D}${sysconfdir}/default/weston
