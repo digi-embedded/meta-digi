@@ -20,7 +20,7 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 # ccimx93       6.6               2024.04 (packaged in imx-boot)
 # ccmp15        5.15              2021.10
 # ccmp13        5.15              2021.10
-# ccmp25        6.6               2022.10
+# ccmp25        6.6               2023.10
 #
 
 # Help variables used in recipes
