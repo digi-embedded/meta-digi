@@ -92,3 +92,6 @@ WKS_FILE_DEPENDS ?= " \
 
 # Disable the generation of flashlayout files
 ENABLE_FLASHLAYOUT_CONFIG = "0"
+
+# Remove custom kernel headers from toolchain
+ST_TOOLS_FOR_TARGET_SDK:remove = " kernel-headers "
