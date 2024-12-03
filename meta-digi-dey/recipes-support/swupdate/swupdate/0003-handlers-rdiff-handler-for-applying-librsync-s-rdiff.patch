@@ -14,7 +14,7 @@ Signed-off-by: David Escalona <david.escalona@digi.com>
 ---
  Makefile.flags                  |   4 +
  configs/all_handlers_defconfig  |   1 +
- handlers/Config.in              |  13 +
+ handlers/Kconfig                |  13 +
  handlers/Makefile               |   1 +
  handlers/ubivol_rdiff_handler.c | 606 ++++++++++++++++++++++++++++++++
  5 files changed, 625 insertions(+)
@@ -24,7 +24,7 @@ diff --git a/Makefile.flags b/Makefile.flags
 index 95c785c..5bdf520 100644
 --- a/Makefile.flags
 +++ b/Makefile.flags
-@@ -202,6 +202,10 @@ ifeq ($(CONFIG_RDIFFHANDLER),y)
+@@ -207,6 +207,10 @@ ifeq ($(CONFIG_RDIFFHANDLER),y)
  LDLIBS += rsync
  endif
  
@@ -39,18 +39,18 @@ diff --git a/configs/all_handlers_defconfig b/configs/all_handlers_defconfig
 index da4b28f..5da2d0d 100644
 --- a/configs/all_handlers_defconfig
 +++ b/configs/all_handlers_defconfig
-@@ -30,5 +30,6 @@ CONFIG_SHELLSCRIPTHANDLER=y
+@@ -29,5 +29,6 @@ CONFIG_SHELLSCRIPTHANDLER=y
  CONFIG_SWUFORWARDER_HANDLER=y
  CONFIG_SSBLSWITCH=y
  CONFIG_UBIVOL=y
 +CONFIG_UBIVOL_RDIFFHANDLER=y
  CONFIG_UCFWHANDLER=y
  CONFIG_UNIQUEUUID=y
-diff --git a/handlers/Config.in b/handlers/Config.in
-index 9f4e177..129e972 100644
---- a/handlers/Config.in
-+++ b/handlers/Config.in
-@@ -158,6 +158,19 @@ config RDIFFHANDLER
+diff --git a/handlers/Kconfig b/handlers/Kconfig
+index 152bc080..7f7eed8c 100644
+--- a/handlers/Kconfig
++++ b/handlers/Kconfig
+@@ -169,6 +169,19 @@ config RDIFFHANDLER
  comment "rdiff support needs librsync"
  	depends on !HAVE_LIBRSYNC
  
@@ -74,7 +74,7 @@ diff --git a/handlers/Makefile b/handlers/Makefile
 index eb24a49..e74dacb 100644
 --- a/handlers/Makefile
 +++ b/handlers/Makefile
-@@ -21,6 +21,7 @@ obj-$(CONFIG_CFIHAMMING1)+= flash_hamming1_handler.o
+@@ -22,6 +22,7 @@ obj-$(CONFIG_CFIHAMMING1)+= flash_hamming1_handler.o
  obj-$(CONFIG_LUASCRIPTHANDLER) += lua_scripthandler.o
  obj-$(CONFIG_RAW)	+= raw_handler.o
  obj-$(CONFIG_RDIFFHANDLER) += rdiff_handler.o
