@@ -17,9 +17,6 @@ WESTON_SERVICE ?= "weston.service"
 WESTON_SERVICE:ccmp15 ?= "weston-launch.service"
 
 CRANK_DEMOS_TARBALL_PATH ?= ""
-CRANK_DEMO_DISPLAY ?= "wayland-0"
-CRANK_DEMO_DISPLAY:ccmp15 ?= "wayland-1"
-CRANK_DEMO_DISPLAY:ccimx93 ?= "wayland-1"
 CRANK_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\$\{DEMO_DISPLAY\}"
 CRANK_DEMO_ENV:ccimx6ul ?= ""
 CRANK_DEMO_OPTIONS ?= "-orender_mgr,multisample=0"
@@ -81,7 +78,7 @@ do_install () {
 	sed -i -e "s@##CRANK_DEMO_PATH##@${CRANK_DEMO_PATH}@g" \
 	       -e "s@##CRANK_DEMO_OPTIONS##@${CRANK_DEMO_OPTIONS}@g" \
 	       -e "s@##CRANK_DEMO_ENV##@${CRANK_DEMO_ENV}@g" \
-	       -e "s@##CRANK_DEMO_DISPLAY##@${CRANK_DEMO_DISPLAY}@g" \
+	       -e "s@##CRANK_DEMO_DISPLAY##@${WAYLAND_DISPLAY}@g" \
 	       "${D}${sysconfdir}/crank-demo"
 	ln -sf ${sysconfdir}/crank-demo ${D}${sysconfdir}/init.d/crank-demo
 }

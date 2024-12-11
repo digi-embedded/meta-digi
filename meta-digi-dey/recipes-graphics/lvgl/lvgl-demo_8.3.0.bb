@@ -66,10 +66,6 @@ WESTON_SERVICE ?= "weston.service"
 WESTON_SERVICE:ccmp15 ?= "weston-launch.service"
 WESTON_SERVICE:ccmp2 ?= "weston-launch.service"
 
-LVGL_DEMO_DISPLAY ?= "wayland-0"
-LVGL_DEMO_DISPLAY:ccmp15 ?= "wayland-1"
-LVGL_DEMO_DISPLAY:ccmp2 ?= "wayland-1"
-LVGL_DEMO_DISPLAY:ccimx93 ?= "wayland-1"
 LVGL_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\$\{DEMO_DISPLAY\}"
 LVGL_DEMO_ENV:ccimx6ul ?= ""
 
@@ -89,7 +85,7 @@ do_install:append() {
 	# Install wrapper bootscript to launch LVGL demo on boot
 	install -d ${D}${sysconfdir}/init.d
 	install -m 0755 ${WORKDIR}/lvgl-demo-init ${D}${sysconfdir}/lvgl-demo-init
-	sed -i -e "s@##LVGL_DEMO_DISPLAY##@${LVGL_DEMO_DISPLAY}@g" \
+	sed -i -e "s@##LVGL_DEMO_DISPLAY##@${WAYLAND_DISPLAY}@g" \
 		   -e "s@##LVGL_DEMO_ENV##@${LVGL_DEMO_ENV}@g" \
 		   "${D}${sysconfdir}/lvgl-demo-init"
 	ln -sf ${sysconfdir}/lvgl-demo-init ${D}${sysconfdir}/init.d/lvgl-demo-init

@@ -6,10 +6,6 @@ WESTON_SERVICE ?= "weston.service"
 WESTON_SERVICE:ccmp15 ?= "weston-launch.service"
 WESTON_SERVICE:ccmp25 ?= "weston-launch.service"
 
-CC_DEMO_DISPLAY ?= "wayland-0"
-CC_DEMO_DISPLAY:ccmp15 ?= "wayland-1"
-CC_DEMO_DISPLAY:ccmp25 ?= "wayland-1"
-CC_DEMO_DISPLAY:ccimx93 ?= "wayland-1"
 CC_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\$\{DEMO_DISPLAY\}"
 CC_DEMO_ENV:ccimx6ul ?= ""
 
@@ -34,7 +30,7 @@ do_install:append() {
 	install -d ${D}${sysconfdir}/init.d/
 	install -m 755 ${WORKDIR}/connectcore-demo-example-init ${D}${sysconfdir}/connectcore-demo-example
 	sed -i -e "s@##CC_DEMO_ENV##@${CC_DEMO_ENV}@g" \
-	       -e "s@##CC_DEMO_DISPLAY##@${CC_DEMO_DISPLAY}@g" \
+	       -e "s@##CC_DEMO_DISPLAY##@${WAYLAND_DISPLAY}@g" \
 	       "${D}${sysconfdir}/connectcore-demo-example"
 	ln -sf ${sysconfdir}/connectcore-demo-example ${D}${sysconfdir}/init.d/connectcore-demo-example
 }

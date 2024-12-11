@@ -86,6 +86,9 @@ IMAGE_LINK_NAME = "${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}"
 # List of graphical images names (for install scripts)
 GRAPHICAL_IMAGES ?= "dey-image-crank dey-image-qt dey-image-webkit dey-image-lvgl"
 
+# Default wayland socket
+WAYLAND_DISPLAY ?= "wayland-1"
+
 # Include DEY SELinux policy modifications by default
 DEY_SELINUX_POLICY ?= "1"
 
