@@ -7,7 +7,7 @@ inherit features_check
 REQUIRED_DISTRO_FEATURES = "wayland"
 
 # Limit number of parallel threads make can run to avoid a ninja build issue
-PARALLEL_MAKE = "-j ${@oe.utils.cpu_count(at_most=16)}"
+PARALLEL_MAKE = "-j ${@oe.utils.cpu_count(at_most=8)}"
 
 # Remove PACKAGECONFIGs that either no longer work or pull in unwanted
 # dependencies
