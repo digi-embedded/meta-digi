@@ -17,11 +17,12 @@
 DEFAULT_DEMO="pose_estimation"
 
 # Prepare MIPI camera.
-media-ctl -d /dev/media2 --set-v4l2 "'ov5640 0-003c':0[fmt:SBGGR8_1X8/1280x720]"
-media-ctl -d /dev/media2 --set-v4l2 "'stm32_csi2host.48020000.csi2hos':1[fmt:SBGGR8_1X8/1280x720]"
-media-ctl -d /dev/media2 --set-v4l2 "'dcmipp_main_isp':1[fmt:RGB888_1X24/1280x720 field:none]"
-media-ctl -d /dev/media2 --set-v4l2 "'dcmipp_main_postproc':0[compose:(0,0)/640x480]"
-media-ctl -d /dev/media2 --set-v4l2 "'dcmipp_main_postproc':1[fmt:RGB565_2X8_LE/640x480]"
+media-ctl -d /dev/media0 --set-v4l2 "'ov5640 0-003c':0[fmt:SBGGR8_1X8/1280x720]"
+media-ctl -d /dev/media0 --set-v4l2 "'48020000.csi':1[fmt:SBGGR8_1X8/1280x720]"
+media-ctl -d /dev/media0 --set-v4l2 "'dcmipp_input':2[fmt:SBGGR8_1X8/1280x720]"
+media-ctl -d /dev/media0 --set-v4l2 "'dcmipp_main_isp':1[fmt:RGB888_1X24/1280x720 field:none]"
+media-ctl -d /dev/media0 --set-v4l2 "'dcmipp_main_postproc':0[compose:(0,0)/640x480]"
+media-ctl -d /dev/media0 --set-v4l2 "'dcmipp_main_postproc':1[fmt:RGB565_2X8_LE/640x480]"
 
 # Mirror the image.
 v4l2-ctl -d /dev/v4l-subdev6 --set-ctrl "horizontal_flip=1"
@@ -63,10 +64,10 @@ fi
 DEMO_FOLDER_NAME="$(echo "${DEMO}" | sed 's/_/-/g')"
 
 # Build the demo full path.
-DEMO_DIR="/usr/local/demo-ai/${DEMO_FOLDER_NAME}"
+DEMO_DIR="/usr/local/x-linux-ai/${DEMO_FOLDER_NAME}"
 
 # Verify that the demo directory exists.
 [ -d "${DEMO_DIR}" ] || { echo "Error: Demo ${DEMO} does not exist"; exit 1; }
 
 # Execute the demo.
-"${DEMO_DIR}/tflite/launch_python_${DEMO}.sh"
+"${DEMO_DIR}/launch_python_${DEMO}.sh"
