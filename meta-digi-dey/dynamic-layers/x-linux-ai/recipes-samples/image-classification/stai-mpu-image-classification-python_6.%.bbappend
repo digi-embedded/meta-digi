@@ -1,13 +1,12 @@
 # Copyright (C) 2024, Digi International Inc.
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/../common:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/../common:${THISDIR}/files:"
 
 SRC_URI += " \
     file://scripts/launch_npu_demo.sh \
-    file://patches/0001-semantic-segmentation-remove-weston-user-check-from-.patch \
-    file://patches/0002-semantic-segmentation-reduce-font-size-for-big-scree.patch \
-    file://patches/0003-semantic-segmentation-adapt-sample-for-root-user.patch \
-    file://patches/0004-semantic-segmentation-set-camera-preview-to-640x480.patch \
+    file://patches/0001-image-classification-remove-weston-user-check-from-l.patch \
+    file://patches/0002-image-classification-reduce-font-size-for-big-screen.patch \
+    file://patches/0003-image-classification-set-camera-preview-to-640x480.patch \
 "
 
 do_install:append () {
@@ -15,7 +14,7 @@ do_install:append () {
     install -d ${D}${sysconfdir}/demos/scripts
     install -m 755 ${WORKDIR}/scripts/launch_npu_demo.sh ${D}${sysconfdir}/demos/scripts/
     # Create launch symlink for the demo.
-    ln -sf launch_npu_demo.sh ${D}${sysconfdir}/demos/scripts/launch_npu_demo_semantic_segmentation.sh
+    ln -sf launch_npu_demo.sh ${D}${sysconfdir}/demos/scripts/launch_npu_demo_image_classification.sh
 }
 
 RDEPENDS:${PN} += " \

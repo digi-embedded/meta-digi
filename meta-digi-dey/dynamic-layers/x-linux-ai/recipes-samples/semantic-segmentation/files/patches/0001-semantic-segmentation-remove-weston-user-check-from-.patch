@@ -5,21 +5,24 @@ Subject: [PATCH 1/4] semantic-segmentation: remove weston user check from
 
 Signed-off-by: David Escalona <david.escalona@digi.com>
 ---
- .../files/tflite/launch_python_semantic_segmentation.sh   | 8 +-------
+ .../files/stai-mpu/launch_python_semantic_segmentation.sh | 8 +-------
  .../launch_python_semantic_segmentation_testdata.sh       | 8 +-------
  2 files changed, 2 insertions(+), 14 deletions(-)
 
-diff --git a/tflite/launch_python_semantic_segmentation.sh b/tflite/launch_python_semantic_segmentation.sh
-index f4e599c..868c537 100755
---- a/tflite/launch_python_semantic_segmentation.sh
-+++ b/tflite/launch_python_semantic_segmentation.sh
-@@ -1,12 +1,6 @@
- #!/bin/sh
+diff --git a/stai-mpu/launch_python_semantic_segmentation.sh b/stai-mpu/launch_python_semantic_segmentation.sh
+index e3c3a6c..e008572 100755
+--- a/stai-mpu/launch_python_semantic_segmentation.sh
++++ b/stai-mpu/launch_python_semantic_segmentation.sh
+@@ -7,15 +7,9 @@
+ # in the root directory of this software component.
+ # If no LICENSE file comes with this software, it is provided AS-IS.
+
 -weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
- 
- source /usr/local/demo-ai/resources/config_board.sh
- cmd="python3 /usr/local/demo-ai/semantic-segmentation/tflite/tflite_semantic_segmentation.py -m /usr/local/demo-ai/semantic-segmentation/models/deeplabv3/deeplabv3.tflite -l /usr/local/demo-ai/semantic-segmentation/models/deeplabv3/labelmap.txt --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT $COMPUTE_ENGINE"
- 
+ FRAMEWORK=$1
+ echo "stai-mpu wrapper used : "$FRAMEWORK
+ source /usr/local/x-linux-ai/resources/config_board.sh
+ cmd="python3 /usr/local/x-linux-ai/semantic-segmentation/stai_mpu_semantic_segmentation.py -m /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_MODEL -l /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_LABEL.txt --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT $OPTIONS"
+
 -if [ "$weston_user" != "root" ]; then
 -	echo "user : "$weston_user
 -	script -qc "su -l $weston_user -c '$cmd'"
@@ -27,21 +30,25 @@ index f4e599c..868c537 100755
 -	$cmd
 -fi
 +$cmd
-diff --git a/tflite/launch_python_semantic_segmentation_testdata.sh b/tflite/launch_python_semantic_segmentation_testdata.sh
-index cb39131..4322b4e 100755
---- a/tflite/launch_python_semantic_segmentation_testdata.sh
-+++ b/tflite/launch_python_semantic_segmentation_testdata.sh
-@@ -1,12 +1,6 @@
- #!/bin/sh
+diff --git a/stai-mpu/launch_python_semantic_segmentation_testdata.sh b/stai-mpu/launch_python_semantic_segmentation_testdata.sh
+index 2d3db4b..5375e0f 100755
+--- a/stai-mpu/launch_python_semantic_segmentation_testdata.sh
++++ b/stai-mpu/launch_python_semantic_segmentation_testdata.sh
+@@ -7,15 +7,9 @@
+ # in the root directory of this software component.
+ # If no LICENSE file comes with this software, it is provided AS-IS.
+
 -weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
- 
- source /usr/local/demo-ai/resources/config_board.sh
- cmd="python3 /usr/local/demo-ai/semantic-segmentation/tflite/tflite_semantic_segmentation.py -m /usr/local/demo-ai/semantic-segmentation/models/deeplabv3/deeplabv3.tflite -l /usr/local/demo-ai/semantic-segmentation/models/deeplabv3/labelmap.txt -i /usr/local/demo-ai/semantic-segmentation/models/deeplabv3/testdata $COMPUTE_ENGINE"
- 
+ FRAMEWORK=$1
+ echo "stai-mpu wrapper used : "$FRAMEWORK
+ source /usr/local/x-linux-ai/resources/config_board.sh
+ cmd="python3 /usr/local/x-linux-ai/semantic-segmentation/stai_mpu_semantic_segmentation.py -m /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_MODEL -l /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_LABEL.txt -i /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_DATA"
+
 -if [ "$weston_user" != "root" ]; then
 -	echo "user : "$weston_user
 -	script -qc "su -l $weston_user -c '$cmd'"
 -else
 -	$cmd
 -fi
+\ No newline at end of file
 +$cmd

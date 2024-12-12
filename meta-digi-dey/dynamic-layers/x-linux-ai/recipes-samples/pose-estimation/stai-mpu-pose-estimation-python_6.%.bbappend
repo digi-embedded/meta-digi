@@ -1,6 +1,6 @@
 # Copyright (C) 2024, Digi International Inc.
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/../common:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/../common:${THISDIR}/files:"
 
 SRC_URI += " \
     file://scripts/launch_npu_demo.sh \

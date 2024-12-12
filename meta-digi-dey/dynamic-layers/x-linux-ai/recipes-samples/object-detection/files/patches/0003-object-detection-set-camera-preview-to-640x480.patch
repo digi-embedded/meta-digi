@@ -4,14 +4,14 @@ Subject: [PATCH 3/3] object-detection: set camera preview to 640x480
 
 Signed-off-by: David Escalona <david.escalona@digi.com>
 ---
- .../files/tflite/tflite_object_detection.py               | 8 ++++++--
+ .../files/stai-mpu/stai_mpu_object_detection.py           | 8 ++++++--
  1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/tflite/tflite_object_detection.py b/tflite/tflite_object_detection.py
-index 924143d..4ae2add 100644
---- a/tflite/tflite_object_detection.py
-+++ b/tflite/tflite_object_detection.py
-@@ -781,8 +781,10 @@ class MainWindow(Gtk.Window):
+diff --git a/stai-mpu/stai_mpu_object_detection.py b/stai-mpu/stai_mpu_object_detection.py
+index a841093..acd5e81 100644
+--- a/stai-mpu/stai_mpu_object_detection.py
++++ b/stai-mpu/stai_mpu_object_detection.py
+@@ -531,8 +531,10 @@ class MainWindow(Gtk.Window):
          if self.app.enable_camera_preview == True:
              # camera preview => gst stream
              self.video_widget = self.app.gst_widget
@@ -23,7 +23,7 @@ index 924143d..4ae2add 100644
          else :
              # still picture => openCV picture
              self.image = Gtk.Image()
-@@ -973,10 +975,12 @@ class OverlayWindow(Gtk.Window):
+@@ -715,10 +717,12 @@ class OverlayWindow(Gtk.Window):
          self.video_box.set_name("gui_overlay_video")
          self.video_box.set_app_paintable(True)
          self.drawing_area = Gtk.DrawingArea()
@@ -34,6 +34,6 @@ index 924143d..4ae2add 100644
 -        self.video_box.pack_start(self.drawing_area, True, True, 0)
 +        self.video_box.pack_start(self.drawing_area, True, False, 0)
 +        self.video_box.set_center_widget(self.drawing_area)
- 
+
          # setup the exit box which contains the exit button
          self.exit_box = Gtk.VBox()

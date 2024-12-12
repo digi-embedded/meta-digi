@@ -4,32 +4,31 @@ Subject: [PATCH 2/3] object-detection: reduce font size for big screens
 
 Signed-off-by: David Escalona <david.escalona@digi.com>
 ---
- .../files/tflite/tflite_object_detection.py               | 8 ++++----
+ .../files/stai-mpu/stai_mpu_object_detection.py           | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/tflite/tflite_object_detection.py b/tflite/tflite_object_detection.py
-index bbdfb8c..924143d 100644
---- a/tflite/tflite_object_detection.py
-+++ b/tflite/tflite_object_detection.py
-@@ -703,8 +703,8 @@ class MainWindow(Gtk.Window):
-                self.ui_icon_st_height = '160'
+diff --git a/stai-mpu/stai_mpu_object_detection.py b/stai-mpu/stai_mpu_object_detection.py
+index 5a78826..a841093 100644
+--- a/stai-mpu/stai_mpu_object_detection.py
++++ b/stai-mpu/stai_mpu_object_detection.py
+@@ -462,8 +462,8 @@ class MainWindow(Gtk.Window):
+                self.ui_icon_st_size = '160'
          elif window_constraint <= 1080:
                 #Display 1920x1080
 -               self.ui_cairo_font_size = 33
 -               self.ui_cairo_font_size_label = 48
 +               self.ui_cairo_font_size = 23
 +               self.ui_cairo_font_size_label = 38
-                self.ui_icon_exit_width = '50'
-                self.ui_icon_exit_height = '50'
-                self.ui_icon_st_width = '130'
-@@ -895,8 +895,8 @@ class OverlayWindow(Gtk.Window):
-                self.ui_icon_st_height = '160'
+                self.ui_icon_exit_size = '50'
+                self.ui_icon_st_size = '160'
+
+@@ -645,8 +645,8 @@ class OverlayWindow(Gtk.Window):
+                self.ui_icon_st_size = '160'
          elif window_constraint <= 1080:
                 #Display 1920x1080
 -               self.ui_cairo_font_size = 33
 -               self.ui_cairo_font_size_label = 48
 +               self.ui_cairo_font_size = 23
 +               self.ui_cairo_font_size_label = 38
-                self.ui_icon_exit_width = '50'
-                self.ui_icon_exit_height = '50'
-                self.ui_icon_st_width = '130'
+                self.ui_icon_exit_size = '50'
+                self.ui_icon_st_size = '160'

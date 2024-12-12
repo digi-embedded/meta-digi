@@ -4,14 +4,16 @@ Subject: [PATCH 3/3] pose-estimation: set camera preview to 640x480
 
 Signed-off-by: David Escalona <david.escalona@digi.com>
 ---
- .../files/tflite/tflite_pose_estimation.py                | 8 ++++++--
+ stai-mpu/stai_mpu_pose_estimation.py | 8 ++++++--
  1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/tflite/tflite_pose_estimation.py b/tflite/tflite_pose_estimation.py
-index 9d83ae3..ed33d5c 100644
---- a/tflite/tflite_pose_estimation.py
-+++ b/tflite/tflite_pose_estimation.py
-@@ -574,8 +574,10 @@ class MainWindow(Gtk.Window):
+diff --git a/stai-mpu/stai_mpu_pose_estimation.py b/stai-mpu/stai_mpu_pose_estimation.py
+index 25d9dd2..e6a0198 100644
+--- a/stai-mpu/stai_mpu_pose_estimation.py
++++ b/stai-mpu/stai_mpu_pose_estimation.py
+@@ -536,12 +536,14 @@ class MainWindow(Gtk.Window):
+         self.video_box = Gtk.HBox()
+         self.video_box.set_name("gui_main_video")
          if self.app.enable_camera_preview == True:
              # camera preview => gst stream
              self.video_widget = self.app.gst_widget
@@ -23,7 +25,11 @@ index 9d83ae3..ed33d5c 100644
          else :
              # still picture => openCV picture
              self.image = Gtk.Image()
-@@ -759,10 +761,12 @@ class OverlayWindow(Gtk.Window):
+             self.video_box.pack_start(self.image, True, True, 0)
+         # setup the exit box which contains the exit button
+@@ -709,14 +711,16 @@ class OverlayWindow(Gtk.Window):
+         # to draw over the video stream
+         self.video_box = Gtk.HBox()
          self.video_box.set_name("gui_overlay_video")
          self.video_box.set_app_paintable(True)
          self.drawing_area = Gtk.DrawingArea()
@@ -37,3 +43,5 @@ index 9d83ae3..ed33d5c 100644
  
          # setup the exit box which contains the exit button
          self.exit_box = Gtk.VBox()
+         self.exit_box.set_name("gui_overlay_exit")
+         self.exit_icon_path = RESOURCES_DIRECTORY + 'exit_' + self.ui_icon_exit_size + 'x' +  self.ui_icon_exit_size + '.png'

@@ -4,32 +4,32 @@ Subject: [PATCH 2/4] semantic-segmentation: reduce font size for big screens
 
 Signed-off-by: David Escalona <david.escalona@digi.com>
 ---
- .../files/tflite/tflite_semantic_segmentation.py          | 8 ++++----
+ .../files/stai-mpu/stai_mpu_semantic_segmentation.py      | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/tflite/tflite_semantic_segmentation.py b/tflite/tflite_semantic_segmentation.py
-index eed2ae1..04b1f61 100644
---- a/tflite/tflite_semantic_segmentation.py
-+++ b/tflite/tflite_semantic_segmentation.py
-@@ -480,8 +480,8 @@ class MainWindow(Gtk.Window):
-                self.ui_icon_label_height = '64'
+diff --git a/stai-mpu/stai_mpu_semantic_segmentation.py b/stai-mpu/stai_mpu_semantic_segmentation.py
+index 0c0f242..35b8bea 100644
+--- a/stai-mpu/stai_mpu_semantic_segmentation.py
++++ b/stai-mpu/stai_mpu_semantic_segmentation.py
+@@ -475,8 +475,8 @@ class MainWindow(Gtk.Window):
+                self.ui_icon_label_size = '64'
          elif window_constraint <= 1080:
                 #Display 1920x1080
 -               self.ui_cairo_font_size = 33
 -               self.ui_cairo_font_size_label = 48
 +               self.ui_cairo_font_size = 23
 +               self.ui_cairo_font_size_label = 38
-                self.ui_icon_exit_width = '50'
-                self.ui_icon_exit_height = '50'
-                self.ui_icon_st_width = '130'
-@@ -725,8 +725,8 @@ class OverlayWindow(Gtk.Window):
-                self.ui_icon_label_height = '64'
+                self.ui_icon_exit_size = '50'
+                self.ui_icon_st_size = '160'
+                self.ui_icon_label_size = '64'
+@@ -711,8 +711,8 @@ class OverlayWindow(Gtk.Window):
+                self.ui_icon_label_size = '64'
          elif window_constraint <= 1080:
                 #Display 1920x1080
 -               self.ui_cairo_font_size = 33
 -               self.ui_cairo_font_size_label = 48
 +               self.ui_cairo_font_size = 23
 +               self.ui_cairo_font_size_label = 38
-                self.ui_icon_exit_width = '50'
-                self.ui_icon_exit_height = '50'
-                self.ui_icon_st_width = '130'
+                self.ui_icon_exit_size = '50'
+                self.ui_icon_st_size = '160'
+                self.ui_icon_label_size = '64'
