@@ -13,6 +13,8 @@ SRC_URI += " \
             file://73-pulseaudio-hdmi.rules \
             file://default_pulseaudio_profile \
             file://pulseaudio_hdmi_switch.sh \
+            file://weston.service \
+            file://weston.socket \
             "
 SRC_URI:append:stm32mpcommon = " file://check-gpu "
 
@@ -24,13 +26,19 @@ FILES:${PN} += " ${datadir}/weston \
          ${sysconfdir}/etc/profile.d \
          ${sysconfdir}/xdg/weston/weston.ini \
          /home/root \
+         ${systemd_user_unitdir} \
+         ${systemd_system_unitdir} \
          "
 
 CONFFILES:${PN} += "${sysconfdir}/xdg/weston/weston.ini"
 
-do_install:append() {
+do_install() {
     install -d ${D}${sysconfdir}/xdg/weston/
     install -d ${D}${datadir}/weston/backgrounds
+
+    if [ "${@bb.utils.filter('DISTRO_FEATURES', 'pam', d)}" ]; then
+        install -D -p -m0644 ${WORKDIR}/weston-autologin ${D}${sysconfdir}/pam.d/weston-autologin
+    fi
 
     install -m 0644 ${WORKDIR}/weston.ini ${D}${sysconfdir}/xdg/weston
 
@@ -46,6 +54,11 @@ do_install:append() {
             -e s:/var:${localstatedir}:g \
             ${D}${systemd_unitdir}/system/weston-launch.service
         install -D -p -m0644 ${WORKDIR}/weston-checkgpu.service ${D}${systemd_system_unitdir}/weston-checkgpu.service
+
+        install -d ${D}${systemd_user_unitdir}
+        install -D -p -m0644 ${WORKDIR}/weston.service ${D}${systemd_user_unitdir}/weston.service
+        install -D -p -m0644 ${WORKDIR}/weston.socket ${D}${systemd_user_unitdir}/weston.socket
+        install -D -p -m0644 ${WORKDIR}/weston-socket.sh ${D}${sysconfdir}/profile.d/weston-socket.sh
     fi
 
     install -d ${D}${sysconfdir}/profile.d
