@@ -13,3 +13,20 @@ RDEPENDS:packagegroup-x-linux-ai-tflite-edgetpu:remove:ccmp13 = " \
 RDEPENDS:packagegroup-x-linux-ai:remove:ccmp25 = " \
     packagegroup-x-linux-ai-onnxruntime      \
 "
+
+RDEPENDS:packagegroup-x-linux-ai-tflite:remove:ccmp25 = " \
+    x-linux-ai-tool                          \
+    x-linux-ai-application                   \
+"
+
+RDEPENDS:packagegroup-x-linux-ai-onnxruntime:remove:ccmp25 = " \
+    x-linux-ai-tool                          \
+    x-linux-ai-application                   \
+"
+
+RDEPENDS:packagegroup-x-linux-ai-npu:remove:ccmp25 = " \
+    x-linux-ai-tool                          \
+    x-linux-ai-application                   \
+    ort-vsinpu-ep-example-cpp                \
+    ort-vsinpu-ep-example-python             \
+"
