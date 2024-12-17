@@ -6,29 +6,25 @@ LICENSE = "CYPRESS-EULA"
 LIC_FILES_CHKSUM = "file://${S}/cyw-bt-patch/LICENCE.cypress;md5=cbc5f665d04f741f1e006d2096236ba7"
 
 SRC_URI = " \
-    git://github.com/murata-wireless/cyw-fmac-fw;protocol=http;branch=hedorah;destsuffix=cyw-fmac-fw;name=cyw-fmac-fw \
-    git://github.com/murata-wireless/cyw-fmac-nvram;protocol=http;branch=hedorah;destsuffix=cyw-fmac-nvram;name=cyw-fmac-nvram \
-    git://github.com/murata-wireless/cyw-bt-patch;protocol=http;branch=mickledore-hedorah;destsuffix=cyw-bt-patch;name=cyw-bt-patch \
+    git://github.com/murata-wireless/cyw-fmac-fw;protocol=http;branch=jaculus;destsuffix=cyw-fmac-fw;name=cyw-fmac-fw \
+    git://github.com/murata-wireless/cyw-fmac-nvram;protocol=http;branch=master;destsuffix=cyw-fmac-nvram;name=cyw-fmac-nvram \
+    git://github.com/murata-wireless/cyw-bt-patch;protocol=http;branch=master;destsuffix=cyw-bt-patch;name=cyw-bt-patch \
     git://github.com/murata-wireless/cyw-fmac-utils-imx32;protocol=http;branch=master;destsuffix=cyw-fmac-utils-imx32;name=cyw-fmac-utils-imx32 \
     git://github.com/murata-wireless/cyw-fmac-utils-imx64;protocol=http;branch=master;destsuffix=cyw-fmac-utils-imx64;name=cyw-fmac-utils-imx64 \
     file://cyfmac4373-sdio_US.clm_blob \
     file://cyfmac4373-sdio_World.clm_blob \
     file://cyw4373-autocountry \
     file://cyw4373-autocountry.service \
-    file://cyfmac55500-sdio.txt \
-    file://cyfmac55500-sdio_US.clm_blob \
-    file://cyfmac55500-sdio.trxse \
-    file://CYW55500A1_001.002.032.0121.0000_Generic_UART_37_4MHz_wlbga_iPA_sLNA_ANT0.hcd \
     file://cyw55512-bluetooth \
     file://cyw55512-bluetooth.service \
     file://mbt \
 "
 
-SRCREV_cyw-fmac-fw="db8deb03b8d24e5069ac4581d1c35b767012e926"
-SRCREV_cyw-fmac-nvram="9b7d93eb3e13b2d2ed8ce3a01338ceb54151b77a"
-SRCREV_cyw-bt-patch="3275a7036dd0d6eacecccccc760b7e7fe91a9e32"
-SRCREV_cyw-fmac-utils-imx32="fcdd231e9bb23db3c93c10e5dff43a1182f220c5"
-SRCREV_cyw-fmac-utils-imx64="52cc4cc6be8629781014505aa276b67e18cf6e8d"
+SRCREV_cyw-fmac-fw="acc1006a873a196495ed209bd18b3f47b4128426"
+SRCREV_cyw-fmac-nvram="fd6587f8183b612ea52404c7a73aeb2698099587"
+SRCREV_cyw-bt-patch="83f8e16423c47e195f52a06fd68ac92a20a80a9f"
+SRCREV_cyw-fmac-utils-imx32="dad9ed86bf6691910197bc91d42a45ea8175180c"
+SRCREV_cyw-fmac-utils-imx64="368bd9a4163e115468d79c238192b41f6266c523"
 
 SRCREV_FORMAT = "cyw-fmac-fw_cyw-fmac-nvram_cyw-bt-patch_cyw-fmac-utils-imx32_cyw-fmac-utils-imx64"
 
@@ -92,17 +88,17 @@ do_install:append:ccmp2 () {
 	install -d ${D}${base_libdir}/firmware/brcm
 
 	# Install Bluetooth patch *.HCD file
-	# For Murata 2GY (LBEE5HY2GY-SMP)
-	install -m 444 CYW55500A1_001.002.032.0121.0000_Generic_UART_37_4MHz_wlbga_iPA_sLNA_ANT0.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1.hcd
+	# For Murata 2GY (LBEE5HY2GY) and Murata 2FY (LBEE5HY2FY)
+	install -m 444 ${S}/cyw-bt-patch/CYW55500A1_001.002.032.0040.0033_FCC.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1.hcd
 
 	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
-	# For Murata 2GY (LBEE5HY2GY-SMP)
-	install -m 444 cyfmac55500-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.trxse
-	install -m 444 cyfmac55500-sdio_US.clm_blob ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio_US.clm_blob
+	# For Murata 2GY (LBEE5HY2GY) and Murata 2FY (LBEE5HY2FY)
+	install -m 444 ${S}/cyw-fmac-fw/cyfmac55500-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.trxse
+	install -m 444 ${S}/cyw-fmac-fw/cyfmac55500-sdio.2FY.clm_blob ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio_US.clm_blob
 
 	# Install NVRAM files (*.txt)
-	# For Murata 2GY (LBEE5HY2GY-SMP)
-	install -m 444 cyfmac55500-sdio.txt ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.txt
+	# For Murata 2GY (LBEE5HY2GY) and Murata 2FY (LBEE5HY2FY)
+	install -m 444 ${S}/cyw-fmac-nvram/cyfmac55500-sdio.2FY.txt ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.txt
 
 	# Install Manufacturing Bluetooth Test tool (MBT)
 	install -m 755 mbt ${D}${sbindir}
