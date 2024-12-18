@@ -11,6 +11,7 @@ VELA_MODELS_DIR = "vela_models"
 SRC_URI += " \
     file://0001-Customize-EiQ-demos.patch \
     file://0002-improvements-capture-x-windows-and-increase-resoluti.patch \
+    file://0003-check-vela-return-code.patch \
     file://scripts/launch_eiq_demo.sh \
     file://service/eiqdemo.service \
 "
