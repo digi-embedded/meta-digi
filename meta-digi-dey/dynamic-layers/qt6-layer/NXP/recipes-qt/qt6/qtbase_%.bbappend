@@ -9,12 +9,13 @@ IMX_BACKEND = \
 IMX_BACKEND_FB          = "linuxfb"
 IMX_BACKEND_FB:imxgpu3d = "eglfs"
 
-PACKAGECONFIG_GRAPHICS:imxdrm = "gbm kms"
-PACKAGECONFIG_GRAPHICS:imxpxp = "${PACKAGECONFIG_GRAPHICS_IMX_DRM}"
-PACKAGECONFIG_GRAPHICS_IMX_DRM        = ""
-PACKAGECONFIG_GRAPHICS_IMX_DRM:imxdrm = "gbm kms"
+PACKAGECONFIG_GRAPHICS_IMX_GPU:mx9-nxp-bsp = " \
+    gbm kms"
 
 PACKAGECONFIG_PLATFORM = "no-opengl linuxfb"
+
+PACKAGECONFIG_PLATFORM_EGLFS:mx9-nxp-bsp = " \
+    eglfs"
 
 PACKAGECONFIG_VULKAN_IMX_GPU:mx8mm-nxp-bsp = "vulkan"
 PACKAGECONFIG_VULKAN_IMX_GPU:mx9-nxp-bsp   = "vulkan"
