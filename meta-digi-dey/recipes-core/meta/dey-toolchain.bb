@@ -7,8 +7,9 @@ inherit core-image dey-image-sdk qt-version
 inherit populate_sdk ${QT_POPULATE_SDK}
 
 # Add a minimal set of IMAGE_FEATURES to allow for integration with the
-# appropriate desktop backend (if any)
+# appropriate desktop backend (if any) as well as multimedia support
 IMAGE_FEATURES += " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'gstreamer', 'dey-gstreamer', '', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston', \
        bb.utils.contains('DISTRO_FEATURES',     'x11', 'x11-base x11-sato', \
                                                        '', d), d)} \
