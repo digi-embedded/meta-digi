@@ -33,6 +33,7 @@ XSERVER = "xserver-xorg \
 # Ship kernel modules
 MACHINE_EXTRA_RRECOMMENDS += "kernel-modules"
 
+# DEFAULTTUNE values ported form meta-freescale (imx-base.inc)
 # Tunes for hard/soft float-point selection. Note that we allow building for
 # thumb support giving distros the chance to enable thumb by setting
 # ARM_INSTRUCTION_SET = "thumb"
@@ -46,6 +47,13 @@ DEFAULTTUNE:mx8m-generic-bsp   ?= "cortexa53-crypto"
 DEFAULTTUNE:mx8x-generic-bsp   ?= "cortexa35-crypto"
 DEFAULTTUNE:mx91-generic-bsp   ?= "cortexa55"
 DEFAULTTUNE:mx93-generic-bsp   ?= "cortexa55"
+
+# DEFAULTTUNE values ported form meta-imx (fsl-imx-base.inc)
+# Set a more generic tuning for code reuse across parts
+DEFAULTTUNE:mx8m-nxp-bsp   ?= "armv8a-crc-crypto"
+DEFAULTTUNE:mx8x-nxp-bsp   ?= "armv8a-crc-crypto"
+DEFAULTTUNE:mx91-nxp-bsp   ?= "armv8a-crc-crypto"
+DEFAULTTUNE:mx93-nxp-bsp   ?= "armv8a-crc-crypto"
 
 INHERIT += "machine-overrides-extender"
 
