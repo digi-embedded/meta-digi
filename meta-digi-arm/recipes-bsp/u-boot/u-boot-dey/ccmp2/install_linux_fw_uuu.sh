@@ -108,13 +108,13 @@ echo "Determining image files to use..."
 
 # Determine ATF file to program
 if [ -z "${INSTALL_ATF_FILENAME}" ]; then
-	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-emmc.stm32##SIGNED_TFA##"
+	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-optee-emmc.stm32##SIGNED_TFA##"
 fi
 INSTALL_METADATA_FILENAME="metadata-##MACHINE##.bin"
 
 # Determine FIP file to program
 if [ -z "${INSTALL_FIP_FILENAME}" ]; then
-	INSTALL_FIP_FILENAME="fip-##MACHINE##-optee##SIGNED##.bin"
+	INSTALL_FIP_FILENAME="fip-##MACHINE##-optee-emmc##SIGNED##.bin"
 fi
 
 # remove redirect

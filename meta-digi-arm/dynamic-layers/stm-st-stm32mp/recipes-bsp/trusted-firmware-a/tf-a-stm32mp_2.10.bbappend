@@ -68,8 +68,8 @@ do_deploy:append() {
 
     # Last value of 'dt' is good for metadata binary, so use that.
     if [ "${TF_A_ENABLE_METADATA}" = "1" ]; then
-            if [ -f "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_METADATA_BINARY}" ]; then
-                ln -s "arm-trusted-firmware/${TF_A_METADATA_BINARY}" "${DEPLOYDIR}/${TF_A_METADATA_NAME}-${dt}.${TF_A_METADATA_SUFFIX}"
+            if [ -f "${DEPLOYDIR}/${TF_A_METADATA_BINARY}" ]; then
+                ln -s "${TF_A_METADATA_BINARY}" "${DEPLOYDIR}/${TF_A_METADATA_NAME}-${dt}.${TF_A_METADATA_SUFFIX}"
             fi
     fi
 
