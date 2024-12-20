@@ -55,3 +55,8 @@ SYSTEMD_SERVICE:${PN} = "connectcore-demo-example.service"
 
 RREPLACES:${PN} = "connectcore-demo-example"
 RCONFLICTS:${PN} = "connectcore-demo-example"
+
+RDEPENDS:${PN}-multimedia += " \
+    video-examples \
+    webglsamples \
+"

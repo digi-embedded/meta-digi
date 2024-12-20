@@ -86,11 +86,7 @@ FILES:${PN}-server = " \
 "
 
 RDEPENDS:${PN} = "${PN}-server"
-RDEPENDS:${PN}-multimedia = " \
-    ${PN} \
-    video-examples \
-    webglsamples \
-"
+RDEPENDS:${PN}-multimedia = "${PN}"
 
 INITSCRIPT_PACKAGES = "${PN}-server"
 INITSCRIPT_NAME:${PN}-server = "connectcore-demo-server"
