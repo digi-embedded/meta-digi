@@ -11,8 +11,8 @@ inherit pkgconfig deploy
 
 SRC_URI = "${DIGI_PKG_SRC}/${BPN}-${PV}.tar.gz"
 
-SRC_URI[md5sum] = "edab1c179ee05d67964e8b4e9f947c21"
-SRC_URI[sha256sum] = "449dfcdee25923c9703e3218876a93ccd8fd8bc84125ab26812ea6a86db31896"
+SRC_URI[md5sum] = "d82809196c07f66c2ce099f6133b934e"
+SRC_URI[sha256sum] = "fffab35a1be9f478863e7d843494118ee018d818a58d4e48de3add2385283dab"
 
 S = "${WORKDIR}/${PN}-${PV}"
 
