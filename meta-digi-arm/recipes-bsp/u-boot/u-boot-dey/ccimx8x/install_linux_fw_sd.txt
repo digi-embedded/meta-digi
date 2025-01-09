@@ -50,6 +50,10 @@ else
 			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin;
 		elif test "${module_variant}" = "0x0B"; then
 			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin;
+		elif test "${module_variant}" = "0x0C"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin;
+		elif test "${module_variant}" = "0x0D"; then
+			setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-4GB_32bit.bin;
 		fi
 	fi
 fi
@@ -67,6 +71,8 @@ else
 	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin";
 	echo "   - For a QuadXPlus CPU with 2GB LPDDR4, run:";
 	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin";
+	echo "   - For a QuadXPlus CPU with 4GB LPDDR4, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-4GB_32bit.bin";
 	echo "   - For a DualX CPU with 1GB LPDDR4, run:";
 	echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin";
 	echo "   - For a DualX CPU with 512MB LPDDR4, run:";

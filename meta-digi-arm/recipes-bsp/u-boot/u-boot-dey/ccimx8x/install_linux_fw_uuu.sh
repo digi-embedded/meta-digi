@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2020-2021 by Digi International Inc.
+#  Copyright (C) 2020-2025 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -113,11 +113,17 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		if [ -n "$module_variant" ] || [ "$module_variant" = "0x00" ]; then
 			if [ "$module_variant" = "0x01" ] || \
 			   [ "$module_variant" = "0x04" ] || \
-			   [ "$module_variant" = "0x05" ]; then
+			   [ "$module_variant" = "0x05" ] || \
+			   [ "$module_variant" = "0x07" ] || \
+			   [ "$module_variant" = "0x08" ] || \
+			   [ "$module_variant" = "0x0a" ] || \
+			   [ "$module_variant" = "0x0b" ]; then
 				module_ram="1GB"
 			elif [ "$module_variant" = "0x06" ] || \
 			     [ "$module_variant" = "0x09" ]; then
 				module_ram="512MB"
+			elif [ "$module_variant" = "0x0d" ]; then
+				module_ram="4GB"
 			else
 				module_ram="2GB"
 			fi
@@ -142,6 +148,8 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-1GB_32bit.bin"
 		echo "   - For a QuadXPlus CPU with 2GB LPDDR4, run:"
 		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-2GB_32bit.bin"
+		echo "   - For a QuadXPlus CPU with 4GB LPDDR4, run:"
+		echo "     => setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}-4GB_32bit.bin"
 		echo "   - For a DualX CPU with 1GB LPDDR4, run:"
 		echo "     => ./install_linux_fw_uuu.sh -u imx-boot-##MACHINE##-${soc_rev}-1GB_16bit.bin"
 		echo "   - For a DualX CPU with 512MB LPDDR4, run:"
