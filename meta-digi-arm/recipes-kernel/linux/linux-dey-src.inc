@@ -8,12 +8,9 @@ SRCBRANCH = "v5.4/dey-3.2/maint"
 SRCREV = "${AUTOREV}"
 
 # Select internal or Github Linux repo
-DIGI_LOG_REPO = "linux-2.6.git"
-DIGI_MTK_REPO = "linux/linux.git"
-GITHUB_REPO = "linux.git"
-LINUX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , \
-					oe.utils.conditional('DIGI_GIT', '${DIGI_LOG_GIT}', '${DIGI_GIT}/${DIGI_LOG_REPO}', '${DIGI_GIT}/${DIGI_MTK_REPO};protocol=ssh', d), \
-					'${DIGI_GITHUB_GIT}/${GITHUB_REPO};protocol=https', d)}"
+LINUX_URI_STASH = "${DIGI_MTK_GIT}/linux/linux.git;protocol=ssh"
+LINUX_URI_GITHUB = "${DIGI_GITHUB_GIT}/linux.git;protocol=https"
+LINUX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${LINUX_URI_STASH}', '${LINUX_URI_GITHUB}', d)}"
 
 SRC_URI = "${LINUX_GIT_URI};branch=${SRCBRANCH}"
 
