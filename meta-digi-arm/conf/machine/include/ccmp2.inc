@@ -68,6 +68,9 @@ MACHINE_EXTRA_RDEPENDS += " \
     xbee-init \
 "
 
+# Image FS types
+IMAGE_FSTYPES:remove = "ext4 tar.xz"
+
 # =========================================================================
 # Signing configuration
 # =========================================================================
