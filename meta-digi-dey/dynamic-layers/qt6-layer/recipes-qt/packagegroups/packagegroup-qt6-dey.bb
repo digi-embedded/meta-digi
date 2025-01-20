@@ -24,6 +24,7 @@ QT6_IMAGE_INSTALL_CINEMATICEXPERIENCE         = ""
 QT6_IMAGE_INSTALL_CINEMATICEXPERIENCE:imxgpu  = "cinematicexperience-rhi cinematicexperience-rhi-tools"
 QT6_IMAGE_INSTALL_CINEMATICEXPERIENCE:ccimx93 = "cinematicexperience-rhi cinematicexperience-rhi-tools"
 QT6_IMAGE_INSTALL_CINEMATICEXPERIENCE:ccmp15 = "cinematicexperience-rhi cinematicexperience-rhi-tools"
+QT6_IMAGE_INSTALL_CINEMATICEXPERIENCE:ccmp25 = "cinematicexperience-rhi cinematicexperience-rhi-tools"
 
 QT6_IMAGE_INSTALL_EXAMPLES = "qtbase-examples qtdeclarative-examples"
 
