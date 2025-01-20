@@ -95,8 +95,8 @@ XBEE_TTY ?= "ttyLP3"
 
 # Image FS types
 IMAGE_FSTYPES ?= '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", \
-				       "boot.vfat recovery.vfat squashfs tar.bz2", \
-				       "boot.vfat recovery.vfat ext4.gz tar.bz2 sdcard.gz", d)}'
+				       "boot.vfat recovery.vfat squashfs tar.xz", \
+				       "boot.vfat recovery.vfat ext4.gz tar.xz sdcard.gz", d)}'
 
 # Default overlayfs_etc mount point and type
 OVERLAYFS_ETC_MOUNT_POINT ?= "/mnt/data"

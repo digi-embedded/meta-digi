@@ -54,7 +54,7 @@ MACHINE_EXTRA_RDEPENDS += " \
 MACHINE_EXTRA_RRECOMMENDS:remove = "kernel-imagebootfs"
 
 # Image FS types
-IMAGE_FSTYPES:remove = "ext4 tar.xz"
+IMAGE_FSTYPES:remove = "ext4"
 IMAGE_FSTYPES:append = " ${@bb.utils.contains('BOOTDEVICE_LABELS', 'sdcard', 'boot.vfat ext4.gz', '', d)}"
 
 # List of supported boot devices

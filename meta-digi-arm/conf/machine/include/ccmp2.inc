@@ -78,7 +78,7 @@ MACHINE_EXTRA_RDEPENDS += " \
 "
 
 # Image FS types
-IMAGE_FSTYPES:remove = "ext4 tar.xz"
+IMAGE_FSTYPES:remove = "ext4"
 
 # =========================================================================
 # Signing configuration
