@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2022, Digi International Inc.
+# Copyright (C) 2013-2025, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -10,6 +10,12 @@ SRC_URI += " \
 SRC_URI:append:ccmp1 = " \
     file://99-ext-rtc-wakeup.rules \
 "
+
+do_install:append:ccimx9() {
+    # The IW61x, when enabled as AP or P2P (or bridge with AP), generates udev triggers that lead the wifi card to fail.
+    # The text to replace is 'echo "$INTERFACE" | grep -q wifi && exit 0'.
+    sed -i -e 's|grep -q wifi|grep -q "uap0\|wfd0\|br0"|g' ${D}${sysconfdir}/udev/scripts/network.sh
+}
 
 do_install:append() {
 
