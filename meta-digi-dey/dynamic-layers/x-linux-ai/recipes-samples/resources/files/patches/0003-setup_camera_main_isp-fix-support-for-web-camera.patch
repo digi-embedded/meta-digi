@@ -1,0 +1,39 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Tue, 21 Jan 2025 12:08:51 +0100
+Subject: [PATCH] setup_camera_main_isp: fix support for web camera
+
+This commit fixes the logic for detecting internal DCMIPP camera devices and
+disables any image post-processing when using USB cameras.
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ .../resources/files/resources-files/setup_camera_main_isp.sh   | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/resources-files/setup_camera_main_isp.sh b/resources-files/setup_camera_main_isp.sh
+index b52ffa2..444bf37 100644
+--- a/resources-files/setup_camera_main_isp.sh
++++ b/resources-files/setup_camera_main_isp.sh
+@@ -56,11 +56,11 @@ function is_dcmipp_present() {
+
+ function get_webcam_device() {
+     found="NOTFOUND"
+     for video in $(find /sys/class/video4linux -name "video*" -type l | sort);
+     do
+-        if [ "$(cat $video/name)" = "dcmipp_main_capture" ] || [ "$(cat $video/name)" = "st,stm32mp25-vdec-dec" ] || [ "$(cat $video/name)" = "st,stm32mp25-venc-enc" ] || [ "$(cat $video/name)" = "dcmipp_dump_capture" ] || [ "$(cat $video/name)" = "dcmipp_aux_capture" ] || [ "$(cat $video/name)" = "dcmipp_main_isp_stat_capture" ] ; then
++        if [ "$(cat $video/name)" = "dcmipp_main_capture" ] || [ "$(cat $video/name)" = "st,stm32mp25-vdec-dec" ] || [ "$(cat $video/name)" = "st,stm32mp25-venc-enc" ] || [ "$(cat $video/name)" = "dcmipp_dump_capture" ] || [ "$(cat $video/name)" = "dcmipp_aux_capture" ] || [ "$(cat $video/name)" = "dcmipp_main_isp_stat_capture" ] || [ "$(cat $video/name)" = "dcmipp_main_isp_params_output" ] ; then
+             found="FOUND"
+         else
+             V4L_DEVICE="$(basename $video)"
+             break;
+         fi
+@@ -220,6 +220,7 @@ else
+ 	V4L2_CAPS="video/x-raw, width=$WIDTH, height=$HEIGHT"
+ 	V4L_OPT="io-mode=4"
+ 	v4l2-ctl --set-parm=20
+ 	echo "V4L_DEVICE_PREV="$V4L_DEVICE
+ 	echo "V4L2_CAPS_PREV="$V4L2_CAPS
++	echo "MAIN_POSTPROC= "
+ fi
+--
+2.34.1
