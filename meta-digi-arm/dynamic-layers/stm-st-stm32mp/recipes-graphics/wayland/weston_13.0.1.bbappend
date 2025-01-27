@@ -6,6 +6,7 @@ SRC_URI:append:stm32mpcommon = " \
     file://0003-Revert-compositor-improve-opacity-handling-for-scale.patch \
     file://0004-Revert-compositor-set-transform.opaque-for-surfaces-.patch \
     file://0005-Revert-libweston-libinput-device-Enable-Set-pointer-.patch \
+    file://0006-Restore-wl_shell-to-weston-13.patch \
     "
 
 SIMPLECLIENTS="egl,touch,dmabuf-v4l,dmabuf-egl"
@@ -22,3 +23,5 @@ PACKAGECONFIG ??= "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'kms wayla
                    shell-kiosk \
                    remoting \
                 "
+
+EXTRA_OEMESON += "-Ddeprecated-wl-shell=true"
