@@ -1,0 +1,49 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Mon, 27 Jan 2025 14:15:48 +0100
+Subject: [PATCH] gc_hal_kernel_command: fix Kernel NULL pointer on
+ gckCOMMAND_Detach()
+
+During uncontrolled shutdown sequences, detaching a user process might leave it
+uninitialized, causing the gckCOMMAND pointer to be NULL. This results in an
+unexpected Kernel NULL pointer exception, which prevents the system from
+powering off.
+
+https://onedigi.atlassian.net/browse/DEL-9449
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ .../hal/kernel/gc_hal_kernel_command.c          | 17 +++++++++--------
+ 1 file changed, 9 insertions(+), 8 deletions(-)
+
+diff --git a/hal/kernel/gc_hal_kernel_command.c b/hal/kernel/gc_hal_kernel_command.c
+index 995947a..cd9907b 100644
+--- a/hal/kernel/gc_hal_kernel_command.c
++++ b/hal/kernel/gc_hal_kernel_command.c
+@@ -3885,15 +3885,16 @@ OnError:
+ gceSTATUS
+ gckCOMMAND_Detach(gckCOMMAND Command, gckCONTEXT Context)
+ {
+-    if (Command->feType == gcvHW_FE_WAIT_LINK || Command->feType == gcvHW_FE_END) {
+-        return _DetachWaitLinkFECommand(Command, Context);
+-    } else if (Command->feType == gcvHW_FE_MULTI_CHANNEL) {
+-        gcmkOS_SAFE_FREE(Context->os, Context);
+-        return gcvSTATUS_OK;
+-    } else {
+-        /* Nothing to do. */
+-        return gcvSTATUS_OK;
++    if (Command != gcvNULL) {
++        if (Command->feType == gcvHW_FE_WAIT_LINK || Command->feType == gcvHW_FE_END) {
++            return _DetachWaitLinkFECommand(Command, Context);
++        } else if (Command->feType == gcvHW_FE_MULTI_CHANNEL) {
++            gcmkOS_SAFE_FREE(Context->os, Context);
++            return gcvSTATUS_OK;
++        }
+     }
++    /* Nothing to do. */
++    return gcvSTATUS_OK;
+ }
+ 
+ static void
+-- 
+2.48.1
+
