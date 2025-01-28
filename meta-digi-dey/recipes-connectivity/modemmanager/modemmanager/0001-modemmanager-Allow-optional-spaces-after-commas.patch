@@ -1,0 +1,33 @@
+Date: Tue, 28 Jan 2025 10:18:20 +0100
+Subject: [PATCH] modemmanager: Allow optional spaces after commas in ^SXRAT
+ response parsing
+
+Updated the regex in `mm_cinterion_parse_sxrat_test` to allow
+optional spaces after commas when parsing the ^SXRAT response.
+This improves robustness by handling both spaced and non-spaced formats.
+
+Fixes potential mismatches in responses like:
+  - `^SXRAT: (0-6),(0,2,3),(0,2,3)`
+  - `^SXRAT: (0-6), (0,2,3), (0,2,3)`
+
+Signed-off-by: Francisco Gil <francisco.gilmartinez@digi.com>
+---
+ src/plugins/cinterion/mm-modem-helpers-cinterion.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/plugins/cinterion/mm-modem-helpers-cinterion.c b/src/plugins/cinterion/mm-modem-helpers-cinterion.c
+index 8af032b1..55cdf8d6 100644
+--- a/src/plugins/cinterion/mm-modem-helpers-cinterion.c
++++ b/src/plugins/cinterion/mm-modem-helpers-cinterion.c
+@@ -778,7 +778,7 @@ mm_cinterion_parse_sxrat_test (const gchar *response,
+         return FALSE;
+     }
+ 
+-    r = g_regex_new ("\\^SXRAT:\\s*\\(([^\\)]*)\\),\\(([^\\)]*)\\)(,\\(([^\\)]*)\\))?(?:\\r\\n)?",
++    r = g_regex_new ("\\^SXRAT:\\s*\\(([^\\)]*)\\),\\s*\\(([^\\)]*)\\)(?:,\\s*\\(([^\\)]*)\\))?(?:\\r\\n)?",
+                      G_REGEX_DOLLAR_ENDONLY | G_REGEX_RAW,
+                      0, NULL);
+ 
+-- 
+2.34.1
+

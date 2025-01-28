@@ -1,8 +1,9 @@
-# Copyright (C) 2017, Digi International Inc.
+# Copyright (C) 2017-2025, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
+    file://0001-modemmanager-Allow-optional-spaces-after-commas.patch \
     file://80-mm-net-device-blacklist.rules \
     file://late-modems-scan.service \
     file://late-modems-scan.timer \
