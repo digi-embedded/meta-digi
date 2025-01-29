@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2024, Digi International Inc.
+# Copyright (C) 2013-2025, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -73,6 +73,7 @@ MURATA_COMMON_PATCHES = " \
     file://murata/0058-non-upstream-Prevent-invalid-akm-key-mgmt-when-MFP-r.patch \
     file://murata/0059-Reset-authentication-and-encryption-parameters-while.patch \
     file://murata/0060-brcmfmac-add-a-configurable-link_loss-parameter-for-.patch \
+    file://murata/0061-nl80211-Synchronize-with-Linux-kernel-include-uapi-l.patch \
 "
 
 SRC_URI:append:ccimx6sbc = " file://wpa_supplicant_p2p.conf_atheros"
