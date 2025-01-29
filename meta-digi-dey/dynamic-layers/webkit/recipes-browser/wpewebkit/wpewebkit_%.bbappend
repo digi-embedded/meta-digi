@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2024, Digi International Inc.
+# Copyright (C) 2020-2025, Digi International Inc.
 
 # We can't build the WebKit with fb images, so force wayland as a required
 # distro feature.
@@ -23,3 +23,10 @@ PACKAGECONFIG:remove = " \
 # on the i.MX6 and ccmp1
 PACKAGECONFIG:remove:ccimx6 = "gbm"
 PACKAGECONFIG:remove:ccmp1 = "gbm"
+
+# If BBLAYERS contains meta-qt6, the wpewebkit recipe inherits the qt6-cmake
+# bbclass, which is necessary if the qtwpe PACKAGECONFIG is enabled. However,
+# even if this config is disabled, the bbclass automatically adds a dependency
+# with qtbase-native. Only keep this dependency if we enable qtwpe, and remove
+# it otherwise.
+DEPENDS:remove = "${@bb.utils.contains('PACKAGECONFIG', 'qtwpe', '', 'qtbase-native', d)}"
