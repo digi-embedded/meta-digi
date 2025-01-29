@@ -49,7 +49,13 @@ python set_fip_sign_key() {
                 d.setVar('FIP_SIGN_KEY_PASS', p)
 }
 
-do_deploy:append() {
+# This runs after 'tf_a_sysroot_populate()' which populates all
+# TF-A artifacts on the image deploy dir.
+# The purpose of this function is to create symlinks to the files needed
+# by the uuu installer that are located in subdirectories.
+deploy_symlinks() {
+	# Remove trailing slash (/) from ST variable
+	TF_A_BASEDIR="$(echo ${FIP_DIR_TFA_BASE} | cut -c2-)"
 	unset i
 	for config in ${TF_A_CONFIG}; do
 		i=$(expr $i + 1)
@@ -58,36 +64,45 @@ do_deploy:append() {
 		tfa_basename=$(echo ${TF_A_BINARIES} | cut -d',' -f${i})
 		for dt in ${dt_config}; do
 			TF_A_FILENAME="${tfa_basename}-${dt}-${config}.${TF_A_SUFFIX}"
-			if [ -f "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}" ]; then
-				cd "${DEPLOYDIR}"
+			if [ -f "${DEPLOY_DIR_IMAGE}/${TF_A_BASEDIR}/${TF_A_FILENAME}" ]; then
+				cd "${DEPLOY_DIR_IMAGE}"
 				# symlink TF-A
-				ln -s "arm-trusted-firmware/${TF_A_FILENAME}" "${DEPLOYDIR}/"
+				ln -sf "${TF_A_BASEDIR}/${TF_A_FILENAME}" "${DEPLOY_DIR_IMAGE}/"
 			fi
 		done
 	done
 
-    # Last value of 'dt' is good for metadata binary, so use that.
-    if [ "${TF_A_ENABLE_METADATA}" = "1" ]; then
-            if [ -f "${DEPLOYDIR}/${TF_A_METADATA_BINARY}" ]; then
-                ln -s "${TF_A_METADATA_BINARY}" "${DEPLOYDIR}/${TF_A_METADATA_NAME}-${dt}.${TF_A_METADATA_SUFFIX}"
-            fi
-    fi
+	# Last value of 'dt' is good for metadata binary, so use that.
+	if [ "${TF_A_ENABLE_METADATA}" = "1" ]; then
+		if [ -f "${DEPLOY_DIR_IMAGE}/${TF_A_BASEDIR}/${TF_A_METADATA_BINARY}" ]; then
+			cd "${DEPLOY_DIR_IMAGE}"
+			# symlink metadata
+			ln -sf "${TF_A_BASEDIR}/${TF_A_METADATA_BINARY}" "${DEPLOY_DIR_IMAGE}/${TF_A_METADATA_NAME}-${dt}.${TF_A_METADATA_SUFFIX}"
+		fi
+	fi
 
+	# Remove trailing slash (/) from ST variables
+	FIP_BASEDIR="$(echo ${FIP_DIR_FIP} | cut -c2-)"
 	unset i
 	for config in ${FIP_CONFIG}; do
 		i="$(expr ${i} + 1)"
 		dt_config="$(echo ${FIP_DEVICETREE} | cut -d',' -f${i})"
 		for dt in ${dt_config}; do
 			FIP_FILENAME="${FIP_BASENAME}-${dt}-${config}${FIP_SIGN_SUFFIX}.${FIP_SUFFIX}"
-			echo "${FIP_FILENAME}"
-			if [ -f "${DEPLOYDIR}/fip/${FIP_FILENAME}" ]; then
-				cd "${DEPLOYDIR}"
+			if [ -f "${DEPLOY_DIR_IMAGE}/${FIP_BASEDIR}/${FIP_FILENAME}" ]; then
+				cd "${DEPLOY_DIR_IMAGE}"
 				# symlink FIP
-				ln -s "fip/${FIP_FILENAME}" "${DEPLOYDIR}/"
+				ln -sf "${FIP_BASEDIR}/${FIP_FILENAME}" "${DEPLOY_DIR_IMAGE}/"
+			fi
+			if [ -f "${DEPLOY_DIR_IMAGE}/${FIP_BASEDIR}/${FIP_BASENAME}-${dt}-ddr-${config}.${FWDDR_SUFFIX}" ]; then
+				cd "${DEPLOY_DIR_IMAGE}"
+				# symlink DDR firmware (needed for USB recovery)
+				ln -sf "${FIP_BASEDIR}/${FIP_BASENAME}-${dt}-ddr-${config}.${FWDDR_SUFFIX}" "${DEPLOY_DIR_IMAGE}/"
 			fi
 		done
 	done
 }
+SYSROOT_PREPROCESS_FUNCS += "deploy_symlinks"
 
 # Sign TF-A image
 do_deploy[postfuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'tfa_sign', '', d)}"
