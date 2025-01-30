@@ -15,8 +15,6 @@ SRC_URI = " \
     file://cyfmac4373-sdio_World.clm_blob \
     file://cyw4373-autocountry \
     file://cyw4373-autocountry.service \
-    file://cyw55512-bluetooth \
-    file://cyw55512-bluetooth.service \
     file://mbt \
 "
 
@@ -42,7 +40,6 @@ do_install () {
 		# Install systemd unit files
 		install -d ${D}${systemd_unitdir}/system/
 		install -m 0644 ${WORKDIR}/cyw4373-autocountry.service ${D}${systemd_unitdir}/system/cyw4373-autocountry.service
-		install -m 0644 ${WORKDIR}/cyw55512-bluetooth.service ${D}${systemd_unitdir}/system/cyw55512-bluetooth.service
 	fi
 
 	install -d ${D}${sysconfdir}/init.d/
@@ -50,10 +47,6 @@ do_install () {
 	# Install autocountry service
 	install -m 0755 ${WORKDIR}/cyw4373-autocountry ${D}${sysconfdir}/cyw4373-autocountry
 	ln -sf /etc/cyw4373-autocountry ${D}${sysconfdir}/init.d/cyw4373-autocountry
-
-	# Install bluetooth init service
-	install -m 0755 ${WORKDIR}/cyw55512-bluetooth ${D}${sysconfdir}/cyw55512-bluetooth
-	ln -sf /etc/cyw55512-bluetooth ${D}${sysconfdir}/init.d/cyw55512-bluetooth
 
 	# Install WLAN client utility binary based on 32-bit/64-bit arch
 	if [ ${TARGET_ARCH} = "aarch64" ]; then
@@ -109,12 +102,9 @@ inherit update-rc.d systemd
 INITSCRIPT_PACKAGES += "${PN}-autocountry ${PN}-bluetooth"
 INITSCRIPT_NAME:${PN}-autocountry = "cyw4373-autocountry"
 INITSCRIPT_PARAMS:${PN}-autocountry = "start 19 2 3 4 5 . stop 21 0 1 6 ."
-INITSCRIPT_NAME:${PN}-bluetooth = "cyw55512-bluetooth"
-INITSCRIPT_PARAMS:${PN}-bluetooth = "start 19 2 3 4 5 . stop 21 0 1 6 ."
 
 SYSTEMD_PACKAGES = "${PN}-autocountry ${PN}-bluetooth"
 SYSTEMD_SERVICE:${PN}-autocountry = "cyw4373-autocountry.service"
-SYSTEMD_SERVICE:${PN}-bluetooth = "cyw55512-bluetooth.service"
 
 PACKAGES =+ " \
     ${PN}-mfgtest \
@@ -137,9 +127,6 @@ FILES:${PN}-autocountry = " \
 "
 
 FILES:${PN}-bluetooth = " \
-    ${sysconfdir}/cyw55512-bluetooth \
-    ${sysconfdir}/init.d/cyw55512-bluetooth \
-    ${systemd_unitdir}/system/cyw55512-bluetooth.service \
     ${sbindir}/mbt \
 "
 

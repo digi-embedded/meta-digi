@@ -60,6 +60,7 @@ RDEPENDS:${PN} = "initscripts-functions"
 
 # IW61x Bluetooth support requires the WiFi FW support
 RDEPENDS:${PN}:append:ccimx9 = " firmware-nxp-wifi-nxpiw612-sdio"
+RDEPENDS:${PN}:append:ccmp25 = " firmware-murata-infineon"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx9)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx9|ccmp25)"
