@@ -5,7 +5,8 @@ ConditionPathIsDirectory=/proc/device-tree/bluetooth
 
 [Service]
 Type=forking
-ExecStart=/etc/cyw55512-bluetooth
+ExecStart=/etc/cyw55512-bluetooth start
+ExecStop=/etc/cyw55512-bluetooth stop
 
 [Install]
 WantedBy=multi-user.target suspend.target
