@@ -61,19 +61,19 @@ python do_swuimage:prepend() {
         d.setVar('SWUPDATE_PRIVATE_KEY', glob.glob(d.getVar('SWUPDATE_PRIVATE_KEY_TEMPLATE'))[0])
 
     # Copy script file.
-    updatescript = d.getVar('SWUPDATE_SCRIPT', True)
-    imgdeploydir = d.getVar('DEPLOY_DIR_IMAGE', True)
+    updatescript = d.getVar('SWUPDATE_SCRIPT')
+    imgdeploydir = d.getVar('DEPLOY_DIR_IMAGE')
     if "/" not in updatescript:
-        workdir = d.getVar('WORKDIR', True)
+        workdir = d.getVar('WORKDIR')
         updatescript = os.path.join(workdir, updatescript)
     if os.path.isfile(updatescript):
         shutil.copyfile(updatescript, os.path.join(imgdeploydir, os.path.basename(updatescript)))
 
     # Copy U-Boot script file.
     if d.getVar('SWUPDATE_UBOOTIMG') == "true":
-        uboot_updatescript = d.getVar('SWUPDATE_UBOOT_SCRIPT_NAME', True)
+        uboot_updatescript = d.getVar('SWUPDATE_UBOOT_SCRIPT_NAME')
         if "/" not in uboot_updatescript:
-            workdir = d.getVar('WORKDIR', True)
+            workdir = d.getVar('WORKDIR')
             uboot_updatescript = os.path.join(workdir, uboot_updatescript)
         if os.path.isfile(uboot_updatescript):
             shutil.copyfile(uboot_updatescript, os.path.join(imgdeploydir, os.path.basename(uboot_updatescript)))

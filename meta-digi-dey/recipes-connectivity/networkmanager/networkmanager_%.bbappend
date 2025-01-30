@@ -30,8 +30,8 @@ PACKAGECONFIG:append = " gnutls modemmanager ppp concheck"
 # NetworkManager only accepts IP addresses in CIDR format
 #
 def ipaddr_to_cidr(iface, d):
-    ipaddr = d.getVar('%s_STATIC_IP' % iface.upper(), True)
-    netmask = d.getVar('%s_STATIC_NETMASK' % iface.upper(), True)
+    ipaddr = d.getVar('%s_STATIC_IP' % iface.upper())
+    netmask = d.getVar('%s_STATIC_NETMASK' % iface.upper())
     binary_str = ''
     for byte in netmask.split('.'):
         binary_str += bin(int(byte))[2:].zfill(8)
