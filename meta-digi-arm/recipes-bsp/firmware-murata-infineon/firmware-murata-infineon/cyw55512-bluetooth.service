@@ -1,6 +1,7 @@
 [Unit]
 Description=CYW55512 Bluetooth Initialization
 After=network.target suspend.target
+ConditionPathIsDirectory=/proc/device-tree/bluetooth
 
 [Service]
 Type=forking
