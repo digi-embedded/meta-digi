@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2024, Digi International Inc.
+# Copyright (C) 2022-2025, Digi International Inc.
 
 SUMMARY = "Murata Infineon firmware binaries"
 SECTION = "base"
@@ -11,10 +11,16 @@ SRC_URI = " \
     git://github.com/murata-wireless/cyw-bt-patch;protocol=http;branch=master;destsuffix=cyw-bt-patch;name=cyw-bt-patch \
     git://github.com/murata-wireless/cyw-fmac-utils-imx32;protocol=http;branch=master;destsuffix=cyw-fmac-utils-imx32;name=cyw-fmac-utils-imx32 \
     git://github.com/murata-wireless/cyw-fmac-utils-imx64;protocol=http;branch=master;destsuffix=cyw-fmac-utils-imx64;name=cyw-fmac-utils-imx64 \
-    file://cyfmac4373-sdio_US.clm_blob \
-    file://cyfmac4373-sdio_World.clm_blob \
     file://cyw4373-autocountry \
     file://cyw4373-autocountry.service \
+"
+
+SRC_URI:append:ccmp1 = " \
+    file://cyfmac4373-sdio_US.clm_blob \
+    file://cyfmac4373-sdio_World.clm_blob \
+"
+
+SRC_URI:append:ccmp2 = " \
     file://mbt \
 "
 
@@ -99,17 +105,16 @@ do_install:append:ccmp2 () {
 
 inherit update-rc.d systemd
 
-INITSCRIPT_PACKAGES += "${PN}-autocountry ${PN}-bluetooth"
+INITSCRIPT_PACKAGES += "${PN}-autocountry"
 INITSCRIPT_NAME:${PN}-autocountry = "cyw4373-autocountry"
 INITSCRIPT_PARAMS:${PN}-autocountry = "start 19 2 3 4 5 . stop 21 0 1 6 ."
 
-SYSTEMD_PACKAGES = "${PN}-autocountry ${PN}-bluetooth"
 SYSTEMD_SERVICE:${PN}-autocountry = "cyw4373-autocountry.service"
+SYSTEMD_PACKAGES = "${PN}-autocountry"
 
 PACKAGES =+ " \
     ${PN}-mfgtest \
     ${PN}-autocountry \
-    ${PN}-bluetooth \
 "
 
 FILES:${PN} = " \
@@ -126,13 +131,12 @@ FILES:${PN}-autocountry = " \
     ${systemd_unitdir}/system/cyw4373-autocountry.service \
 "
 
-FILES:${PN}-bluetooth = " \
+FILES:${PN}:append:ccmp2 = " \
     ${sbindir}/mbt \
 "
 
 RDEPENDS:${PN}:append:ccmp1 = " ${PN}-autocountry"
 RDEPENDS:${PN}-autocountry:append = " ${PN}-mfgtest"
-RDEPENDS:${PN}:append:ccmp2 = " ${PN}-bluetooth"
 
 INSANE_SKIP:${PN} += "build-deps"
 INSANE_SKIP:${PN} += "file-rdeps"
