@@ -94,6 +94,9 @@ SIGN_SUFFIX ?= "_Signed"
 # =========================================================================
 # activate/deactivate the debug and trace on boot stage
 ST_DEBUG_TRACE = "0"
+# Reduce optee log level
+ST_OPTEE_DEBUG_TRACE = "1"
+ST_OPTEE_DEBUG_LOG_LEVEL = "1"
 
 # Wic files
 WKS_FILE_DEPENDS ?= " \
