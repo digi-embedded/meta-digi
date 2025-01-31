@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2022-2024, Digi International Inc.
+# Copyright (C) 2022-2025, Digi International Inc.
 #
 
 # Select internal or Github TF-A repo
@@ -15,6 +15,20 @@ SRC_URI = " \
 "
 
 TF_A_CONFIG[nand]   = "${DEVICE_BOARD_ENABLE:NAND},STM32MP_RAW_NAND=1 ${@'STM32MP_FORCE_MTD_START_OFFSET=${TF_A_MTD_START_OFFSET_NAND}' if ${TF_A_MTD_START_OFFSET_NAND} else ''} STM32MP_USB_PROGRAMMER=1"
+# TF_A_CONFIG[uart] (same as 'optee-programmer-uart')
+TF_A_CONFIG[uart] ?= "\
+    ${STM32MP_DEVICETREE_PROGRAMMER},\
+    ${TF_A_CONFIG_OPTS_optee} STM32MP_UART_PROGRAMMER=1,\
+    ${TF_A_CONFIG_BASENAME_BIN},\
+    ${TF_A_CONFIG_MAKE_TARGET} ${TF_A_CONFIG_MAKE_EXTRAS},\
+    ${TF_A_CONFIG_DEPLOY_FTYPE} ${TF_A_CONFIG_DEPLOY_EXTRA}"
+# TF_A_CONFIG[usb] (same as 'optee-programmer-uart')
+TF_A_CONFIG[usb] ?= "\
+    ${STM32MP_DEVICETREE_PROGRAMMER},\
+    ${TF_A_CONFIG_OPTS_optee} STM32MP_USB_PROGRAMMER=1,\
+    ${TF_A_CONFIG_BASENAME_BIN},\
+    ${TF_A_CONFIG_MAKE_TARGET} ${TF_A_CONFIG_MAKE_EXTRAS},\
+    ${TF_A_CONFIG_DEPLOY_FTYPE} ${TF_A_CONFIG_DEPLOY_EXTRA}"
 
 DEPENDS += " \
     ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)} \
