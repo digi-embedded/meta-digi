@@ -1,10 +1,12 @@
 [Unit]
 Description=Initialization of the bluetooth chip
 ConditionPathIsDirectory=/proc/device-tree/bluetooth
+After=systemd-udev-settle.service
 Before=bluetooth.service
 
 [Service]
-Type=forking
+Type=oneshot
+RemainAfterExit=yes
 ExecStart=/etc/bluetooth-init start
 ExecStop=/etc/bluetooth-init stop
 
