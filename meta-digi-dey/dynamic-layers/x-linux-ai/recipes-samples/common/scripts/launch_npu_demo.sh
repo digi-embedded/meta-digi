@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2024 by Digi International Inc.
+#  Copyright (C) 2024,2025, by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -15,18 +15,6 @@
 
 # Default demo to launch.
 DEFAULT_DEMO="pose_estimation"
-
-# Prepare MIPI camera.
-media-ctl -d /dev/media0 --set-v4l2 "'ov5640 0-003c':0[fmt:SBGGR8_1X8/1280x720]"
-media-ctl -d /dev/media0 --set-v4l2 "'48020000.csi':1[fmt:SBGGR8_1X8/1280x720]"
-media-ctl -d /dev/media0 --set-v4l2 "'dcmipp_input':2[fmt:SBGGR8_1X8/1280x720]"
-media-ctl -d /dev/media0 --set-v4l2 "'dcmipp_main_isp':1[fmt:RGB888_1X24/1280x720 field:none]"
-media-ctl -d /dev/media0 --set-v4l2 "'dcmipp_main_postproc':0[compose:(0,0)/640x480]"
-media-ctl -d /dev/media0 --set-v4l2 "'dcmipp_main_postproc':1[fmt:RGB565_2X8_LE/640x480]"
-
-# Mirror the image.
-v4l2-ctl -d /dev/v4l-subdev6 --set-ctrl "horizontal_flip=1"
-#v4l2-ctl -d /dev/v4l-subdev6 --set-ctrl "vertical_flip=1"
 
 # Configure Wayland/Weston settings.
 export "DISPLAY=:0.0"
