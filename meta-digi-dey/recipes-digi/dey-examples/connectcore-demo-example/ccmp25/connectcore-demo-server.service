@@ -5,6 +5,7 @@ After=busybox-httpd.service bluetooth.service cyw55512-bluetooth.service
 [Service]
 Type=forking
 ExecStart=/etc/connectcore-demo-server start
+ExecStartPost=/bin/sleep 1
 ExecStop=/etc/connectcore-demo-server stop
 
 [Install]
