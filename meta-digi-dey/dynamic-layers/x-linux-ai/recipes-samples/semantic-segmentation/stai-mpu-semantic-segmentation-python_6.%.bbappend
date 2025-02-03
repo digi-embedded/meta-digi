@@ -1,4 +1,4 @@
-# Copyright (C) 2024, Digi International Inc.
+# Copyright (C) 2024,2025, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/../common:${THISDIR}/files:"
 
@@ -20,6 +20,7 @@ do_install:append () {
 
 RDEPENDS:${PN} += " \
     libdrm-tests \
+    dcmipp-isp-ctrl \
 "
 
 FILES:${PN} += " \
