@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012, Digi International Inc.
+# Copyright (C) 2012-2025, Digi International Inc.
 #
 SUMMARY = "Debug applications packagegroup for DEY image"
 
@@ -8,7 +8,6 @@ inherit packagegroup
 
 RDEPENDS:${PN} = "\
     evtest \
-    fbtest \
     i2c-tools \
     memwatch \
     packagegroup-core-tools-debug \
