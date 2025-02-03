@@ -1,4 +1,4 @@
-# Copyright 2017-2021 NXP
+# Copyright 2017-2024 NXP
 
 DESCRIPTION = "Sample program to monitor i.MX GPU performance data"
 LICENSE = "MIT"
@@ -9,11 +9,17 @@ DEPENDS = "libgpuperfcnt"
 GPUTOP_SRC ?= "git://github.com/nxp-imx/imx-gputop.git;protocol=https"
 SRCBRANCH = "release"
 SRC_URI = "${GPUTOP_SRC};branch=${SRCBRANCH} "
-SRCREV = "9bd1c4213daf2b32509bf86e7443ab3060d251c4"
+SRCREV = "627e8823e1ba17c6d12b408835029a1c065bea84"
 
 S = "${WORKDIR}/git"
 
 inherit cmake pkgconfig
+
+PACKAGECONFIG ??= "vivante"
+PACKAGECONFIG:mx95-nxp-bsp = "mali"
+
+PACKAGECONFIG[mali] = "-DMALI_GPU=1,,,,,vivante"
+PACKAGECONFIG[vivante] = ",,,,,mali"
 
 do_compile:append () {
     oe_runmake -C ${S} man
