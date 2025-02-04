@@ -29,8 +29,8 @@ int read_bootcount_env() {
 	const char *var;
 
 	/* Obtain 'bootcount' value from environment. */
-	ret = uboot_getenv(ENV_VAR_BOOTCOUNT, &var);
-	if (!ret) {
+	uboot_getenv(ENV_VAR_BOOTCOUNT, &var);
+	if (var != NULL) {
 		/* Convert read value to integer. */
 		ret = (int)strtoul(var, &endptr, 10);
 		if (*endptr) {
