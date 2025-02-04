@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Digi International Inc.
+ * Copyright (c) 2023-2025, Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -22,6 +22,7 @@
 /* Environment variables. */
 #define ENV_VAR_UPGRADE_AVAILABLE	"upgrade_available"
 #define ENV_VAR_BOOTCOUNT			"bootcount"
+#define ENV_VAR_BOOTLIMIT			"bootlimit"
 
 int read_bootcount_env() {
 	int ret;
@@ -39,6 +40,29 @@ int read_bootcount_env() {
 		}
 	} else {
 		fprintf(stderr, "Error: could not read '%s' variable from U-Boot environment'\n", ENV_VAR_BOOTCOUNT);
+		ret = -1;
+	}
+
+	free((char*)var);
+	return ret;
+}
+
+int read_bootlimit_env() {
+	int ret = -1;
+	char* endptr;
+	const char *var;
+
+	/* Obtain 'bootlimit' value from environment. */
+	uboot_getenv(ENV_VAR_BOOTLIMIT, &var);
+	if (var != NULL) {
+		/* Convert read value to integer. */
+		ret = (int)strtoul(var, &endptr, 10);
+		if (*endptr) {
+			printf("Error: incorrect bootlimit value in environment\n");
+			ret = -1;
+		}
+	} else {
+		/* Could not read bootlimit variable from U-Boot environment */
 		ret = -1;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Digi International Inc.
+ * Copyright (c) 2023-2025, Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -29,6 +29,16 @@
  * @return The 'bootcount' value as an integer on success, -1 on error.
  */
 int read_bootcount_env();
+
+/**
+ * @brief Read the 'bootlimit' variable from the U-Boot environment.
+ *
+ * This function retrieves the 'bootlimit' value from the U-Boot environment and
+ * converts it to an integer.
+ *
+ * @return The 'bootlimit' value as an integer on success, -1 on error.
+ */
+int read_bootlimit_env();
 
 /**
  * @brief Set the 'bootcount' variable in the U-Boot environment.

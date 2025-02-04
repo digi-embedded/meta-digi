@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Digi International Inc.
+ * Copyright (c) 2023-2025 Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -22,13 +22,16 @@
 #include "bootcount_nvmem.h"
 #include "platform_utils.h"
 
-#define VERSION		"1.0" GIT_REVISION
+#define VERSION		"1.1" GIT_REVISION
 
 #define USAGE \
 		"Bootcount utility.\n" \
 		"Copyright(c) Digi International Inc.\n" \
 		"\n" \
 		"Version: %s\n" \
+		"\n" \
+		"For these commands to work, bootcount function must be enabled by\n" \
+		"setting 'bootlimit' variable in U-Boot environment!!!\n" \
 		"\n" \
 		"Usage: bootcount [options] \n\n" \
 		"  -p              --print          Print the current bootcount value (Default action)\n" \
@@ -155,6 +158,7 @@ static void parse_options(int argc, char *argv[]) {
  */
 int main(int argc, char *argv[]) {
 	int ret = 0;
+	int bootlimit;
 	struct platform_functions *pfuncs;
 
 	/* Read and parse command line */
@@ -165,6 +169,13 @@ int main(int argc, char *argv[]) {
 	pfuncs = &platforms_functions[platform];
 	if (!pfuncs->read_bootcount || !pfuncs->write_bootcount) {
 		printf("Platform not supported\n");
+		ret = -ENOTSUP;
+		goto end;
+	}
+
+	bootlimit = read_bootlimit_env();
+	if (bootlimit == -1 || bootlimit == 0) {
+		printf("\nBootcount functionality is disabled.\n");
 		ret = -ENOTSUP;
 		goto end;
 	}
