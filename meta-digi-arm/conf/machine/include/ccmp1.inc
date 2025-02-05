@@ -74,12 +74,6 @@ WKS_FILE_DEPENDS ?= " \
     ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', 'virtual/optee-os', '', d)} \
 "
 
-# Default secure console configuration
-TRUSTFENCE_CONSOLE_DISABLE ?= "0"
-
-# Alternatively, uncommment to enable the console autoboot stop passphrase
-# TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE = ""
-
 # Disable the generation of flashlayout files
 ENABLE_FLASHLAYOUT_CONFIG = "0"
 

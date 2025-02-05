@@ -14,12 +14,6 @@ TRUSTFENCE_ENABLED = "1"
 # Default secure console configuration
 TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 
-# Uncomment to enable the console with the specified passphrase
-#TRUSTFENCE_CONSOLE_PASSPHRASE_ENABLE = "my_secure_passphrase"
-
-# Alternatively, uncommment to enable the console with the specified GPIO
-#TRUSTFENCE_CONSOLE_GPIO_ENABLE = "4"
-
 # Default secure boot configuration
 TRUSTFENCE_SIGN ?= "1"
 TRUSTFENCE_SIGN_KEYS_PATH ?= "default"
@@ -161,16 +155,12 @@ python () {
             elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_AUTOBOOT_KEYED=y CONFIG_AUTOBOOT_ENCRYPTION=y CONFIG_AUTOBOOT_STOP_STR_ENABLE=y CONFIG_AUTOBOOT_STOP_STR_SHA256="%s" ' % passphrase_hash)
         elif d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"):
+            d.appendVar("UBOOT_TF_CONF", 'CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NAME="%s" ' % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"))
             if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
-                d.appendVar("UBOOT_TF_CONF", "CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NR=%s " % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE"))
-                if d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_NAME"):
-                    d.appendVar("UBOOT_TF_CONF", 'CONFIG_CONSOLE_ENABLE_GPIO_NAME="%s" ' % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_NAME"))
-                    if d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_ACTIVE_LOW"):
-                        d.appendVar("UBOOT_TF_CONF", "CONFIG_CONSOLE_ENABLE_GPIO_ACTIVE_LOW=y ")
-                    else:
-                        d.appendVar("UBOOT_TF_CONF", '"# CONFIG_CONSOLE_ENABLE_GPIO_ACTIVE_LOW is not set" ')
-            elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
-                d.appendVar("UBOOT_TF_CONF", 'CONFIG_CONSOLE_ENABLE_GPIO=y CONFIG_CONSOLE_ENABLE_GPIO_NAME="%s" ' % d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_NAME"))
+                if d.getVar("TRUSTFENCE_CONSOLE_GPIO_ENABLE_ACTIVE_LOW"):
+                    d.appendVar("UBOOT_TF_CONF", "CONFIG_CONSOLE_ENABLE_GPIO_ACTIVE_LOW=y ")
+                else:
+                    d.appendVar("UBOOT_TF_CONF", '"# CONFIG_CONSOLE_ENABLE_GPIO_ACTIVE_LOW is not set" ')
 
     # Secure boot configuration
     if (d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") == "default"):
