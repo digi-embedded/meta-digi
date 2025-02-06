@@ -96,6 +96,11 @@ DEY_SELINUX_POLICY ?= "1"
 # (use the '+=' operator, since other layers may append scripts to this list)
 BOOT_SCRIPTS += "boot.scr:boot.scr"
 
+# Select internal or Github Linux repo
+LINUX_URI_STASH = "${DIGI_MTK_GIT}/linux/linux.git;protocol=ssh"
+LINUX_URI_GITHUB = "${DIGI_GITHUB_GIT}/linux.git;protocol=https"
+LINUX_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1', '${LINUX_URI_STASH}', '${LINUX_URI_GITHUB}', d)}"
+
 # This can be used to enable U-Boot update through swupdate
 SWUPDATE_UBOOTIMG ?= "false"
 SWUPDATE_UBOOTIMG_REDUNDANT ?= "false"
