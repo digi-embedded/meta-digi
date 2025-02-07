@@ -6,6 +6,9 @@ SRC_URI:append:ccimx8m = " \
     file://0001-imx8m-soc.mak-preserve-dtbs-after-build.patch \
     file://0002-imx8m-soc.mak-capture-commands-output-into-a-log-fil.patch \
 "
+SRC_URI:append:ccimx8x = " \
+    file://0001-iMX8QX-soc.mak-capture-commands-output-into-a-log-fi.patch \
+"
 SRC_URI:append:ccimx91 = " \
     file://0001-imx91-soc.mak-capture-commands-output-into-a-log-fil.patch \
 "

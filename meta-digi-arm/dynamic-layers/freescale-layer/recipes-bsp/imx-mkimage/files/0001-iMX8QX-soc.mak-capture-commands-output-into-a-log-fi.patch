@@ -1,0 +1,44 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Mon, 25 Sep 2023 14:42:33 +0200
+Subject: [PATCH] iMX8QX: soc.mak: capture commands output into a log file
+
+This is later used to get the needed information for the signing of the
+boot artifacts.
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ iMX8QX/soc.mak | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/iMX8QX/soc.mak b/iMX8QX/soc.mak
+index 4817f321554b..f03aba353940 100755
+--- a/iMX8QX/soc.mak
++++ b/iMX8QX/soc.mak
+@@ -1,4 +1,5 @@
+ MKIMG = ../mkimage_imx8
++MKIMAGE_LOG = "mkimage-$(firstword $(MAKECMDGOALS)).log"
+ 
+ CC ?= gcc
+ REV ?= B0
+@@ -61,7 +62,7 @@ u-boot-atf-container.img: bl31.bin u-boot-hash.bin
+ 		fi; \
+ 	else \
+ 	./$(MKIMG) -soc QX -rev B0 -c -ap bl31.bin a35 0x80000000 -ap u-boot-hash.bin a35 0x80020000 -out u-boot-atf-container.img; \
+-	fi
++	fi | tee $(MKIMAGE_LOG)
+ 
+ Image0: Image
+ 	@dd if=Image of=Image0 bs=10M count=1
+@@ -86,10 +87,10 @@ flash_nand: $(MKIMG) $(AHAB_IMG) scfw_tcm.bin u-boot-atf.bin
+ 	./$(MKIMG) -soc QX -rev B0 -append $(AHAB_IMG) -c -scfw scfw_tcm.bin -ap u-boot-atf.bin a35 0x80000000 -out flash_fw.bin
+ 
+ flash_spl: $(MKIMG) $(AHAB_IMG) scfw_tcm.bin u-boot-spl.bin u-boot-atf-container.img
+-	./$(MKIMG) -soc QX -rev B0 -dcd skip -append $(AHAB_IMG) -c -scfw scfw_tcm.bin -ap u-boot-spl.bin a35 0x00100000 -out flash.bin
++	./$(MKIMG) -soc QX -rev B0 -dcd skip -append $(AHAB_IMG) -c -scfw scfw_tcm.bin -ap u-boot-spl.bin a35 0x00100000 -out flash.bin | tee -a $(MKIMAGE_LOG)
+ 	@flashbin_size=`wc -c flash.bin | awk '{print $$1}'`; \
+                    pad_cnt=$$(((flashbin_size + 0x400 - 1) / 0x400)); \
+-                   echo "append u-boot-atf-container.img at $$pad_cnt KB"; \
++                   echo "append u-boot-atf-container.img at $$pad_cnt KB" | tee -a $(MKIMAGE_LOG); \
+                    dd if=u-boot-atf-container.img of=flash.bin bs=1K seek=$$pad_cnt;
+ 
+ flash_spl_flexspi: $(MKIMG) $(AHAB_IMG) scfw_tcm.bin u-boot-spl.bin u-boot-atf-container.img
