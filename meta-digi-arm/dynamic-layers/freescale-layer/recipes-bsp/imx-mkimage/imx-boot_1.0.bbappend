@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2024, Digi International Inc.
+# Copyright (C) 2022-2025, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
@@ -16,9 +16,8 @@ SRC_URI:append:ccimx93 = " \
     file://0001-imx93-soc.mak-capture-commands-output-into-a-log-fil.patch \
     file://0002-imx93-soc.mak-add-makefile-target-to-build-A0-revisi.patch \
 "
-
-SRCBRANCH:ccimx9 = "lf-6.6.36_2.1.0"
-SRCREV:ccimx9 = "4622115cbc037f79039c4522faeced4aabea986b"
+SRCBRANCH = "lf-6.6.52_2.2.0"
+SRCREV = "71b8c18af93a5eb972d80fbec290006066cff24f"
 
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
