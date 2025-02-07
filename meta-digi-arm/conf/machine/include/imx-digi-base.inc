@@ -310,12 +310,12 @@ PREFERRED_VERSION_vulkan-tools:imxvulkan             ??= "1.3.275.0.imx"
 PREFERRED_VERSION_vulkan-validation-layers:imxvulkan ??= "1.3.275.0.imx"
 
 # Use i.MX optee Version
-PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "4.2.0.imx"
-PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "4.2.0.imx"
-PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "4.2.0.imx"
-PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "4.2.0.imx"
-PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "4.2.0.imx"
-PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "4.2.0.imx"
+PREFERRED_VERSION_optee-os:mx8-nxp-bsp     ??= "4.4.0.imx"
+PREFERRED_VERSION_optee-os:mx9-nxp-bsp     ??= "4.4.0.imx"
+PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "4.4.0.imx"
+PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "4.4.0.imx"
+PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "4.4.0.imx"
+PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "4.4.0.imx"
 
 # Optee runtime packages to install
 OPTEE_PKGS ??= "optee-client optee-os"

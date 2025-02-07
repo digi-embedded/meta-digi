@@ -1,4 +1,4 @@
-# Copyright (C) 2024, Digi International Inc.
+# Copyright (C) 2024, 2025, Digi International Inc.
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += "file://environment.d-optee-sdk.sh"
