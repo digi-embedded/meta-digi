@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2024, Digi International Inc.
+# Copyright (C) 2022-2025, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -15,6 +15,8 @@ SRC_URI:append:ccimx93 = " \
     file://0001-ccimx93-use-UART6-for-the-default-console.patch \
     file://0002-imx93-bring-back-ELE-clock-workaround-for-soc-revisi.patch \
 "
+
+SRCREV = "1b27ee3edbb40ef9432c69ccaa744d1ac5d54c5d"
 
 BOOT_TOOLS = "imx-boot-tools"
 
