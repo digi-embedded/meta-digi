@@ -1,15 +1,12 @@
-# Copyright (C) 2023,2024 Digi International Inc.
+# Copyright (C) 2023-2025 Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI:append = " \
     file://81-iw612-wifi.rules \
     file://load_iw612.sh \
-    file://0001-issue-fix-wlan_src_driver_patch_release_base_version.patch \
+    file://0001-issue-fix-wlan_src_driver_patch_release_lf-6.6.52-2..patch \
 "
-
-SRCBRANCH = "lf-6.6.36_2.1.0"
-SRCREV = "e5c9a169d7b7a441a20d2cf10a9752e249b71cff"
 
 do_install:append () {
 	install -d ${D}${sysconfdir}/udev/rules.d

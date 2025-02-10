@@ -1,9 +1,17 @@
-# Copyright (C) 2024, Digi International Inc.
+# Copyright (C) 2024, 2025, Digi International Inc.
 
-LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=ca53281cc0caa7e320d4945a896fb837"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
-SRCBRANCH = "lf-6.6.36_2.1.0"
-SRCREV = "1b26d19284d202b1531837ce37a05afc49ad1d98"
+SRC_URI:append = " \
+    file://sd_w61x_v1.bin.se \
+    file://sduart_nw61x_v1.bin.se \
+    file://uartspi_n61x_v1.bin.se \
+"
 
-FILES:${PN}-nxp8997-common += "${nonarch_base_libdir}/firmware/nxp/uart8997_bt_v4.bin"
-FILES:${PN}-nxp9098-common += "${nonarch_base_libdir}/firmware/nxp/uart9098_bt_v1.bin"
+do_install:append() {
+    install -d ${D}${nonarch_base_libdir}/firmware/nxp
+
+    install -m 0644 ${WORKDIR}/sd_w61x_v1.bin.se ${D}${nonarch_base_libdir}/firmware/nxp/
+    install -m 0644 ${WORKDIR}/sduart_nw61x_v1.bin.se ${D}${nonarch_base_libdir}/firmware/nxp/
+    install -m 0644 ${WORKDIR}/uartspi_n61x_v1.bin.se ${D}${nonarch_base_libdir}/firmware/nxp/
+}
