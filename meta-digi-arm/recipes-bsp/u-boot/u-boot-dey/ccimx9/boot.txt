@@ -66,11 +66,11 @@ setexpr module_has_bt ${hwid_2} \& 40000
 setexpr module_has_bt ${module_has_bt} / 40000
 
 if test "${module_has_bt}" = "1" && test -z "${disable_bt}"; then
-	setenv overlays _ov_som_bt_ccimx9.dtbo,${overlays}
+	setenv overlays ccimx9_bt.dtbo,${overlays}
 fi
 
 if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
-	setenv overlays _ov_som_wifi_ccimx9.dtbo,${overlays}
+	setenv overlays ccimx9_wifi.dtbo,${overlays}
 fi
 
 if test "${soc_type}" = "imx93"; then
@@ -84,14 +84,14 @@ if test "${soc_type}" = "imx93"; then
 		echo "Emulating a ConnectCore 91 (emulate-cc91=yes)"
 		module_has_npu="0"
 		setenv extra_bootargs ${extra_bootargs} mem=512M
-		setenv overlays _ov_som_emulate-ccimx91_ccimx93.dtbo,${overlays}
+		setenv overlays ccimx93_emulate-ccimx91.dtbo,${overlays}
 	elif test "${module_variant}" = "0x03" || test "${module_variant}" = "0x04"; then
-		setenv overlays _ov_som_single-core-512M_ccimx93.dtbo,${overlays}
+		setenv overlays ccimx93_single-core-512M.dtbo,${overlays}
 	fi
 fi
 
 if test "${module_has_npu}" = "1" && test -z "${disable_npu}"; then
-	setenv overlays _ov_som_npu_ccimx93.dtbo,${overlays}
+	setenv overlays ccimx93_npu.dtbo,${overlays}
 fi
 
 if test "${dboot_kernel_var}" = "fitimage" && test -z "${temp-fitimg-loaded}"; then

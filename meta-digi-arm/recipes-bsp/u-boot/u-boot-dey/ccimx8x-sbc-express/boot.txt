@@ -73,28 +73,28 @@ if test -n "${module_ram}"; then
 	setexpr module_has_bt ${module_has_bt} / 2
 
 	if test "${module_has_bt}" = "1" && test -z "${disable_bt}"; then
-		setenv overlays _ov_som_bt_ccimx8x.dtbo,${overlays}
+		setenv overlays ccimx8x_bt.dtbo,${overlays}
 	fi
 
 	if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
-		setenv overlays _ov_som_wifi_ccimx8x.dtbo,${overlays}
+		setenv overlays ccimx8x_wifi.dtbo,${overlays}
 	fi
 else
 	#
 	# Set overlays depending on the hardware variant
 	#
 	if test "${module_variant}" = "0x01"; then
-		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
+		setenv overlays ccimx8x_bt.dtbo,ccimx8x_wifi.dtbo,${overlays}
 	elif test "${module_variant}" = "0x02"; then
-		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
+		setenv overlays ccimx8x_bt.dtbo,ccimx8x_wifi.dtbo,${overlays}
 	elif test "${module_variant}" = "0x04"; then
-		setenv overlays _ov_som_bt_ccimx8x.dtbo,_ov_som_wifi_ccimx8x.dtbo,${overlays}
+		setenv overlays ccimx8x_bt.dtbo,ccimx8x_wifi.dtbo,${overlays}
 	fi
 fi
 
 # Apply QXP overlay if the SOC type is "imx8qxp"
 if test "${soc_type}" = "imx8qxp"; then
-	setenv overlays _ov_som_quad_ccimx8x.dtbo,${overlays}
+	setenv overlays ccimx8x_quad.dtbo,${overlays}
 fi
 
 setenv extra_bootargs fbcon=logo-pos:center fbcon=logo-count:1 ${extra_bootargs}

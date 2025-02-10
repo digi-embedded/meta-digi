@@ -77,11 +77,11 @@ if test -n "${module_ram}"; then
 	setexpr module_has_bt ${module_has_bt} / 20000
 
 	if test "${module_has_bt}" = "1" && test -z "${disable_bt}"; then
-		setenv overlays _ov_som_bt_ccimx8m.dtbo,${overlays}
+		setenv overlays ccimx8m_bt.dtbo,${overlays}
 	fi
 
 	if test "${module_has_wifi}" = "1" && test -z "${disable_wifi}"; then
-		setenv overlays _ov_som_wifi_ccimx8m.dtbo,${overlays}
+		setenv overlays ccimx8m_wifi.dtbo,${overlays}
 	fi
 fi
 
