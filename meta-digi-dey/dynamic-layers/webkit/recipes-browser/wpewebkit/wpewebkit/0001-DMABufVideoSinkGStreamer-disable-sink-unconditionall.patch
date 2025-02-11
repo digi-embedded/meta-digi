@@ -1,0 +1,44 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Thu, 13 Feb 2025 11:35:27 +0100
+Subject: [PATCH] DMABufVideoSinkGStreamer: disable sink unconditionally
+
+The i.MX8X's VPU requires the use of the imxvideoconvert_g2d gstreamer plugin,
+which is only available in GLVideoSinkGStreamer. The DMABuf sink has always
+taken precedence over the GL one, but it used to be disabled by default. Now,
+it's enabled by default and can only be disabled via an environment variable,
+breaking video playback on the i.MX8X.
+
+Change this logic so that the GL sink is always used instead of the DMABuf one.
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ .../gstreamer/DMABufVideoSinkGStreamer.cpp       | 16 +---------------
+ 1 file changed, 1 insertion(+), 15 deletions(-)
+
+diff --git a/Source/WebCore/platform/graphics/gstreamer/DMABufVideoSinkGStreamer.cpp b/Source/WebCore/platform/graphics/gstreamer/DMABufVideoSinkGStreamer.cpp
+index 4c0415d35e18..a367f029495e 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/DMABufVideoSinkGStreamer.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/DMABufVideoSinkGStreamer.cpp
+@@ -175,21 +175,7 @@ static void webkit_dmabuf_video_sink_class_init(WebKitDMABufVideoSinkClass* klas
+ 
+ bool webKitDMABufVideoSinkIsEnabled()
+ {
+-    static bool s_disabled = false;
+-#if USE(GBM)
+-    static std::once_flag s_flag;
+-    std::call_once(s_flag, [&] {
+-        const char* value = g_getenv("WEBKIT_GST_DMABUF_SINK_DISABLED");
+-        s_disabled = value && (equalLettersIgnoringASCIICase(value, "true"_s) || equalLettersIgnoringASCIICase(value, "1"_s));
+-        if (!s_disabled && !GBMDevice::singleton().device()) {
+-            WTFLogAlways("Unable to access the GBM device, disabling DMABuf video sink.");
+-            s_disabled = true;
+-        }
+-    });
+-#else
+-    s_disabled = true;
+-#endif
+-    return !s_disabled;
++    return false;
+ }
+ 
+ bool webKitDMABufVideoSinkProbePlatform()

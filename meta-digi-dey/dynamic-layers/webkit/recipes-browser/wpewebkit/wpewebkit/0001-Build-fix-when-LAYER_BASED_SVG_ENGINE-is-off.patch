@@ -1,0 +1,102 @@
+From: Takashi Komori <Takashi.Komori@sony.com>
+Date: Mon, 4 Mar 2024 18:52:40 -0800
+Subject: [PATCH] Build fix when LAYER_BASED_SVG_ENGINE is off
+ https://bugs.webkit.org/show_bug.cgi?id=270213
+
+Reviewed by Fujii Hironori.
+
+Build fix by checking LAYER_BASED_SVG_ENGINE option.
+
+* Source/WebCore/rendering/svg/RenderSVGResourceMarker.h:
+* Source/WebCore/rendering/svg/RenderSVGResourceMasker.h:
+* Source/WebCore/svg/SVGClipPathElement.cpp:
+* Source/WebCore/svg/SVGMaskElement.cpp:
+
+Canonical link: https://commits.webkit.org/275668@main
+
+(cherry picked from commit 5651f991dcb7da30b961f3bbf70b5fc3c3954344)
+---
+ Source/WebCore/rendering/svg/RenderSVGResourceMarker.h | 4 ++++
+ Source/WebCore/rendering/svg/RenderSVGResourceMasker.h | 4 ++++
+ Source/WebCore/svg/SVGClipPathElement.cpp              | 2 ++
+ Source/WebCore/svg/SVGMaskElement.cpp                  | 2 ++
+ 4 files changed, 12 insertions(+)
+
+diff --git a/Source/WebCore/rendering/svg/RenderSVGResourceMarker.h b/Source/WebCore/rendering/svg/RenderSVGResourceMarker.h
+index 8019b9049653..f3a1566a8419 100644
+--- a/Source/WebCore/rendering/svg/RenderSVGResourceMarker.h
++++ b/Source/WebCore/rendering/svg/RenderSVGResourceMarker.h
+@@ -23,6 +23,8 @@
+ #include "RenderSVGResourceContainer.h"
+ #include "SVGMarkerTypes.h"
+ 
++#if ENABLE(LAYER_BASED_SVG_ENGINE)
++
+ namespace WebCore {
+ 
+ class GraphicsContext;
+@@ -76,3 +78,5 @@ private:
+ }
+ 
+ SPECIALIZE_TYPE_TRAITS_RENDER_OBJECT(RenderSVGResourceMarker, isRenderSVGResourceMarker())
++
++#endif // ENABLE(LAYER_BASED_SVG_ENGINE)
+diff --git a/Source/WebCore/rendering/svg/RenderSVGResourceMasker.h b/Source/WebCore/rendering/svg/RenderSVGResourceMasker.h
+index fe868a49fc42..28777bb52631 100644
+--- a/Source/WebCore/rendering/svg/RenderSVGResourceMasker.h
++++ b/Source/WebCore/rendering/svg/RenderSVGResourceMasker.h
+@@ -25,6 +25,8 @@
+ 
+ #include <wtf/HashMap.h>
+ 
++#if ENABLE(LAYER_BASED_SVG_ENGINE)
++
+ namespace WebCore {
+ 
+ class GraphicsContext;
+@@ -54,3 +56,5 @@ private:
+ }
+ 
+ SPECIALIZE_TYPE_TRAITS_RENDER_OBJECT(RenderSVGResourceMasker, isRenderSVGResourceMasker())
++
++#endif // ENABLE(LAYER_BASED_SVG_ENGINE)
+diff --git a/Source/WebCore/svg/SVGClipPathElement.cpp b/Source/WebCore/svg/SVGClipPathElement.cpp
+index 9f3d824d7287..d5651c014e3e 100644
+--- a/Source/WebCore/svg/SVGClipPathElement.cpp
++++ b/Source/WebCore/svg/SVGClipPathElement.cpp
+@@ -169,6 +169,7 @@ SVGGraphicsElement* SVGClipPathElement::shouldApplyPathClipping() const
+ FloatRect SVGClipPathElement::calculateClipContentRepaintRect(RepaintRectCalculation repaintRectCalculation)
+ {
+     ASSERT(renderer());
++#if ENABLE(LAYER_BASED_SVG_ENGINE)
+     auto transformationMatrixFromChild = [&](const RenderLayerModelObject& child) -> std::optional<AffineTransform> {
+         if (!document().settings().layerBasedSVGEngineEnabled())
+             return std::nullopt;
+@@ -182,6 +183,7 @@ FloatRect SVGClipPathElement::calculateClipContentRepaintRect(RepaintRectCalcula
+         auto transform = SVGLayerTransformComputation(child).computeAccumulatedTransform(downcast<RenderLayerModelObject>(renderer()), TransformState::TrackSVGCTMMatrix);
+         return transform.isIdentity() ? std::nullopt : std::make_optional(WTFMove(transform));
+     };
++#endif
+ 
+     FloatRect clipContentRepaintRect;
+     // This is a rough heuristic to appraise the clip size and doesn't consider clip on clip.
+diff --git a/Source/WebCore/svg/SVGMaskElement.cpp b/Source/WebCore/svg/SVGMaskElement.cpp
+index f622b955da14..c9a1c31c0572 100644
+--- a/Source/WebCore/svg/SVGMaskElement.cpp
++++ b/Source/WebCore/svg/SVGMaskElement.cpp
+@@ -159,6 +159,7 @@ RenderPtr<RenderElement> SVGMaskElement::createElementRenderer(RenderStyle&& sty
+ FloatRect SVGMaskElement::calculateMaskContentRepaintRect(RepaintRectCalculation repaintRectCalculation)
+ {
+     ASSERT(renderer());
++#if ENABLE(LAYER_BASED_SVG_ENGINE)
+     auto transformationMatrixFromChild = [&](const RenderLayerModelObject& child) -> std::optional<AffineTransform> {
+         if (!document().settings().layerBasedSVGEngineEnabled())
+             return std::nullopt;
+@@ -172,6 +173,7 @@ FloatRect SVGMaskElement::calculateMaskContentRepaintRect(RepaintRectCalculation
+         auto transform = SVGLayerTransformComputation(child).computeAccumulatedTransform(downcast<RenderLayerModelObject>(renderer()), TransformState::TrackSVGCTMMatrix);
+         return transform.isIdentity() ? std::nullopt : std::make_optional(WTFMove(transform));
+     };
++#endif
+     FloatRect maskRepaintRect;
+     for (auto* childNode = firstChild(); childNode; childNode = childNode->nextSibling()) {
+         auto* renderer = childNode->renderer();
