@@ -67,7 +67,7 @@ python set_fip_sign_key() {
 # TF-A artifacts on the image deploy dir.
 # The purpose of this function is to create symlinks to the files needed
 # by the uuu installer that are located in subdirectories.
-deploy_symlinks() {
+deploy_symlinks_atf() {
 	# Remove trailing slash (/) from ST variable
 	TF_A_BASEDIR="$(echo ${FIP_DIR_TFA_BASE} | cut -c2-)"
 	unset i
@@ -94,29 +94,8 @@ deploy_symlinks() {
 			ln -sf "${TF_A_BASEDIR}/${TF_A_METADATA_BINARY}" "${DEPLOY_DIR_IMAGE}/${TF_A_METADATA_NAME}-${dt}.${TF_A_METADATA_SUFFIX}"
 		fi
 	fi
-
-	# Remove trailing slash (/) from ST variables
-	FIP_BASEDIR="$(echo ${FIP_DIR_FIP} | cut -c2-)"
-	unset i
-	for config in ${FIP_CONFIG}; do
-		i="$(expr ${i} + 1)"
-		dt_config="$(echo ${FIP_DEVICETREE} | cut -d',' -f${i})"
-		for dt in ${dt_config}; do
-			FIP_FILENAME="${FIP_BASENAME}-${dt}-${config}${FIP_SIGN_SUFFIX}.${FIP_SUFFIX}"
-			if [ -f "${DEPLOY_DIR_IMAGE}/${FIP_BASEDIR}/${FIP_FILENAME}" ]; then
-				cd "${DEPLOY_DIR_IMAGE}"
-				# symlink FIP
-				ln -sf "${FIP_BASEDIR}/${FIP_FILENAME}" "${DEPLOY_DIR_IMAGE}/"
-			fi
-			if [ -f "${DEPLOY_DIR_IMAGE}/${FIP_BASEDIR}/${FIP_BASENAME}-${dt}-ddr-${config}.${FWDDR_SUFFIX}" ]; then
-				cd "${DEPLOY_DIR_IMAGE}"
-				# symlink DDR firmware (needed for USB recovery)
-				ln -sf "${FIP_BASEDIR}/${FIP_BASENAME}-${dt}-ddr-${config}.${FWDDR_SUFFIX}" "${DEPLOY_DIR_IMAGE}/"
-			fi
-		done
-	done
 }
-SYSROOT_PREPROCESS_FUNCS += "deploy_symlinks"
+SYSROOT_PREPROCESS_FUNCS += "deploy_symlinks_atf"
 
 # Sign TF-A image
 do_deploy[postfuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'tfa_sign', '', d)}"
