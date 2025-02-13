@@ -9,5 +9,5 @@ inherit pypi setuptools3
 PYPI_PACKAGE = "svgwrite"
 PYPI_PACKAGE_EXT = "zip"
 
-SRC_URI[md5sum] = "6132f0d8611ac0d5a8a8731636aa03f8"
-SRC_URI[sha256sum] = "e220a4bf189e7e214a55e8a11421d152b5b6fb1dd660c86a8b6b61fe8cc2ac48"
+SRC_URI[md5sum] = "8e6d536bdffefa03341b77dff5add485"
+SRC_URI[sha256sum] = "a8fbdfd4443302a6619a7f76bc937fc683daf2628d9b737c891ec08b8ce524c3"
