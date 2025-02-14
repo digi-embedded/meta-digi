@@ -25,7 +25,7 @@ FILES:${PN} += " ${datadir}/weston \
          ${sysconfdir}/etc/default \
          ${sysconfdir}/etc/profile.d \
          ${sysconfdir}/xdg/weston/weston.ini \
-         /home/root \
+         ${ROOT_HOME} \
          ${systemd_user_unitdir} \
          ${systemd_system_unitdir} \
          "
@@ -78,8 +78,8 @@ do_install() {
     echo "WESTON_USER=root" > ${D}${sysconfdir}/default/weston
 
     # check GPU
-    install -d ${D}/home/root/
-    install -m 644 ${WORKDIR}/README-CHECK-GPU ${D}/home/root/
+    install -d ${D}${ROOT_HOME}
+    install -m 644 ${WORKDIR}/README-CHECK-GPU ${D}${ROOT_HOME}
     if ! test -f ${D}${base_sbindir}/check-gpu; then
         install -d ${D}${base_sbindir}
         echo '#!/bin/sh' > ${WORKDIR}/check-gpu.empty

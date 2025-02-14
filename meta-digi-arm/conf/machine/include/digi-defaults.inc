@@ -110,3 +110,8 @@ CCCS_PKGS ?= "cccs-gs-demo dey-examples-cccs"
 
 # Default 1k-bloks seek in boot partition.
 BOOTLOADER_SEEK_BOOTPART ?= "0"
+
+# Default all platforms to use /root as the home root folder.
+# This is otherwise forced by systemd because of hard-coded paths
+# in systemd source code.
+ROOT_HOME ?= "/root"

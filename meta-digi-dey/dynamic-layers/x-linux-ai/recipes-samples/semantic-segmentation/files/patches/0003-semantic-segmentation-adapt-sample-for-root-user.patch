@@ -16,11 +16,11 @@ index 35b8bea..68d554b 100644
              img = img.resize(size)
              img_alpha = img.copy()
 -            img_alpha.save("/home/weston/bitmap.png","PNG")
-+            img_alpha.save("/home/root/bitmap.png","PNG")
++            img_alpha.save(os.path.join(os.path.expanduser("~"), "bitmap.png"), "PNG")
 
              #load the bitmap to display it as overlay
 -            pixbuf = GdkPixbuf.Pixbuf.new_from_file('/home/weston/bitmap.png')
-+            pixbuf = GdkPixbuf.Pixbuf.new_from_file('/home/root/bitmap.png')
++            pixbuf = GdkPixbuf.Pixbuf.new_from_file(os.path.join(os.path.expanduser("~"), "bitmap.png"))
              img = Gdk.cairo_set_source_pixbuf(cr, pixbuf.copy(),int(offset), int(vertical_offset))
              cr.paint()
              if (self.app.enable_camera_preview == False):
@@ -29,7 +29,7 @@ index 35b8bea..68d554b 100644
      #remove bitmap.png file before closing app
      file = 'bitmap.png'
 -    location = "/home/weston"
-+    location = "/home/root"
++    location = os.path.expanduser("~")
      path = os.path.join(location,file)
      os.remove(path)
      print("gtk main finished")
