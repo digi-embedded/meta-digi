@@ -102,6 +102,3 @@ IMAGE_FSTYPES ?= '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", \
 OVERLAYFS_ETC_MOUNT_POINT ?= "/mnt/data"
 OVERLAYFS_ETC_DEVICE ?= "/dev/mmcblk0p7"
 OVERLAYFS_ETC_FSTYPE ?= "ext4"
-
-PREFERRED_VERSION_nativesdk-trustfence-sign-tools:ccimx9 ?= "2024.04"
-PREFERRED_VERSION_trustfence-sign-tools-native:ccimx9    ?= "2024.04"
