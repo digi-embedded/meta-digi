@@ -1,9 +1,9 @@
-# Copyright (C) 2024, Digi International Inc.
+# Copyright (C) 2024,2025 Digi International Inc.
 
 require recipes-kernel/linux/linux-dey.inc
 
-SRCBRANCH = "v6.6.52/nxp/master"
-SRCBRANCH:stm32mp2common = "v6.6.48/stm/master"
+SRCBRANCH = "v6.6/nxp/dey-5.0/maint"
+SRCBRANCH:stm32mp2common = "v6.6/stm/dey-5.0/maint"
 SRCREV = "${AUTOREV}"
 SRCREV:stm32mp2common = "${AUTOREV}"
 
