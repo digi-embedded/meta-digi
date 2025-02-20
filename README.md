@@ -152,6 +152,24 @@ Documentation is available online at https://www.digi.com/resources/documentatio
   * Updated gstreamer1.0 to v1.22.12
   * Updated OpenSSL to v3.2.3
   * Package upgrades and security fixes
+* ST-based platforms
+  * Added support to ConnectCore MP25
+  * Updated BSP
+    * Updated Trusted Firmware ARM v2.10 (based on tag 'v2.10-stm32mp-r1' by ST)
+    * Updated OP-TEE v4.0.0 (based on tag '4.0.0-stm32mp-r1' by ST)
+    * Updated U-Boot v2023.10 (based on tag 'v2023.10-stm32mp-r1' by ST)
+    * Updated Linux kernel v6.6.48 (based on tag 'v6.6-stm32mp-r1.1' by ST)
+    * Updated Wifi driver (based on 'v6.1.97-2024_1115' release from Cypress)
+    * Updated Wifi firmware to 'imx-scarthgap-jaculus_r1.0' release from Murata
+* NXP-based platforms
+  * Added support to ConnectCore 6UL
+  * Added support to ConnectCore 8X
+  * Added support to ConnectCore 91
+  * Added support to ConnectCore 93
+  * Updated BSP
+    * Updated U-Boot v2024.04 (based on tag 'lf-6.6.52-2.2.0' by NXP)
+    * Updated Linux kernel v6.6.52 (based on tag 'lf-6.6.52-2.2.0' by NXP)
+
 
 # Known Issues and Limitations
 
@@ -175,23 +193,15 @@ updated list can be found on the online documentation.
   * When working as an access point, DFS-capable channels in the 5GHz band are
     not supported.
   * For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
-    devices (ConnectCore 6UL, ConnectCore 6 Plus, and ConnectCore 8M Nano) fail
-    to join autonomous groups.
+    devices fail to join autonomous groups.
 
-## ConnectCore MP25
+## ConnectCore 93
 
-* ConnectCore MP2 System-on-Module (SOM)
-  * Power management
-    * Power management support is not yet implemented.
-  * Firmware update
-    * Update single file and update with rdiff don't currently work.
-
-## ConnectCore MP15/MP13
-
-* ConnectCore MP1 System-on-Module (SOM)
-  * Wireless
-    * P2P on the ConnectCore MP1 doesn't currently work in concurrency with
-      other modes (station or SoftAP).
+* ConnectCore 93 System-on-Module (SOM)
+  * Trustfence
+    * It is not possible to close a device using U-Boot v2024.04 for Secure boot
+      on a device with CPU revision A0. However, it is possible to boot v2024.04
+      signed images on an already closed device.
 
 ## ConnectCore 6UL
 
