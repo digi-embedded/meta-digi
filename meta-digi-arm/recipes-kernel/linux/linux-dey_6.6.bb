@@ -4,8 +4,8 @@ require recipes-kernel/linux/linux-dey.inc
 
 SRCBRANCH = "v6.6/nxp/dey-5.0/maint"
 SRCBRANCH:stm32mp2common = "v6.6/stm/dey-5.0/maint"
-SRCREV = "87cedd7e8231fee5992dc8d27b6c1448dbfcb1ac"
-SRCREV:stm32mp2common = "ff0c2b76588b0cf61cf12b6ebbb929ac84da9ebe"
+SRCREV = "${AUTOREV}"
+SRCREV:stm32mp2common = "${AUTOREV}"
 
 # Blacklist btnxpuart module. It will be managed by the bluetooth-init script
 KERNEL_MODULE_PROBECONF += "btnxpuart"

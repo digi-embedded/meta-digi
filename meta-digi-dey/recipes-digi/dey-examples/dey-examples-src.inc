@@ -1,11 +1,11 @@
 # Copyright (C) 2019-2025, Digi International Inc.
 
 SRCBRANCH = "dey-5.0/maint"
-SRCREV = "46100efac498c4336baefcd8c7bde3217bac122e"
+SRCREV = "${AUTOREV}"
 
 DEY_EXAMPLES_STASH = "${DIGI_MTK_GIT}/dey/dey-examples.git;protocol=ssh"
 DEY_EXAMPLES_GITHUB = "${DIGI_GITHUB_GIT}/dey-examples.git;protocol=https"
 
 DEY_EXAMPLES_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${DEY_EXAMPLES_STASH}', '${DEY_EXAMPLES_GITHUB}', d)}"
 
-SRC_URI = "${DEY_EXAMPLES_GIT_URI};nobranch=1"
+SRC_URI = "${DEY_EXAMPLES_GIT_URI};branch=${SRCBRANCH}"
