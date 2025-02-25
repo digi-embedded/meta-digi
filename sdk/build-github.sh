@@ -178,6 +178,10 @@ fi
 printf "\n[INFO] Build Yocto \"%s\" for \"%s\" (cpus=%s)\n\n" "${DY_REVISION}" "${DY_PLATFORMS}" "${CPUS}"
 
 # Install/Update Digi's Yocto SDK
+if [ "${DY_BUILD_RELEASE}" = "true" ]; then
+	# Start a build release environment from scratch
+	rm -rf "${YOCTO_INST_DIR}"
+fi
 mkdir -p "${YOCTO_INST_DIR}"
 if pushd "${YOCTO_INST_DIR}"; then
 	# Use git ls-remote to check the revision type
