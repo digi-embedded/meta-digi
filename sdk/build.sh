@@ -115,7 +115,6 @@ purge_sstate() {
 		packagegroup-dey-audio \
 		packagegroup-dey-bluetooth \
 		packagegroup-dey-core \
-		packagegroup-dey-crank \
 		packagegroup-dey-debug \
 		packagegroup-dey-examples \
 		packagegroup-dey-gstreamer \
@@ -172,17 +171,17 @@ while read -r _pl _tgt; do
 	# the fly with underscores.
 	eval "${_pl//-/_}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
-	ccimx8mm-dvk         dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
-	ccimx8mn-dvk         dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
-	ccimx8x-sbc-pro      dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
+	ccimx8mm-dvk         dey-image-qt,dey-image-webkit,dey-image-lvgl
+	ccimx8mn-dvk         dey-image-qt,dey-image-webkit,dey-image-lvgl
+	ccimx8x-sbc-pro      dey-image-qt,dey-image-webkit,dey-image-lvgl
 	ccimx8x-sbc-express  dey-image-qt
 	ccimx6qpsbc          dey-image-qt,dey-image-webkit,dey-image-lvgl
 	ccimx6sbc            dey-image-qt,dey-image-webkit,dey-image-lvgl
-	ccimx6ulsbc          core-image-base,dey-image-qt,dey-image-crank,dey-image-lvgl
+	ccimx6ulsbc          core-image-base,dey-image-qt,dey-image-lvgl
 	ccimx6ulstarter      core-image-base
 	ccimx6ulsom          dey-image-mft-module-min
 	ccimx6ulrftest       dey-image-mft-module-rf
-	ccmp15-dvk           dey-image-qt,dey-image-crank,dey-image-webkit,dey-image-lvgl
+	ccmp15-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl
 	ccmp13-dvk           core-image-base
 	ccmp25-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl
 	ccimx91-dvk          core-image-base
