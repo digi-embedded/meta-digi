@@ -1,0 +1,13 @@
+[Unit]
+Description=RDP & SSH Session Updater
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /usr/bin/rdp_updater
+Restart=always
+User=root
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
