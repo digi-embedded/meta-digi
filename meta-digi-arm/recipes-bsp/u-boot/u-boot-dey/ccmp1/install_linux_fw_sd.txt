@@ -173,7 +173,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_a\";
 		echo \"\";
 		echo \"\";
-		update linux_a mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME} ${force_erase};
+		update linux_a mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update linux_a!\";
 			echo \"\";
@@ -186,7 +186,7 @@ setenv bootcmd "
 			echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_b\";
 			echo \"\";
 			echo \"\";
-			update linux_b mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME} ${force_erase};
+			update linux_b mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
 			if test \$? -eq 1; then
 				echo \"[ERROR] Failed to update linux_b!\";
 				echo \"\";
@@ -199,7 +199,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_a\";
 		echo \"\";
 		echo \"\";
-		update rootfs_a mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME} ${force_erase};
+		update rootfs_a mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update rootfs_a partition!\";
 			echo \"\";
@@ -212,7 +212,7 @@ setenv bootcmd "
 			echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_b\";
 			echo \"\";
 			echo \"\";
-			update rootfs_b mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME} ${force_erase};
+			update rootfs_b mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
 			if test \$? -eq 1; then
 				echo \"[ERROR] Failed to update rootfs_b partition!\";
 				echo \"\";
@@ -227,7 +227,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux\";
 		echo \"\";
 		echo \"\";
-		update linux mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME} ${force_erase};
+		update linux mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update linux!\";
 			echo \"\";
@@ -239,7 +239,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_RECOVERY_FILENAME} on recovery\";
 		echo \"\";
 		echo \"\";
-		update recovery mmc ${INSTALL_MMCDEV} ${INSTALL_RECOVERY_FILENAME} ${force_erase};
+		update recovery mmc ${INSTALL_MMCDEV} ${INSTALL_RECOVERY_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update recovery partition!\";
 			echo \"\";
@@ -251,7 +251,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs\";
 		echo \"\";
 		echo \"\";
-		update rootfs mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME} ${force_erase};
+		update rootfs mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update rootfs partition!\";
 			echo \"\";
