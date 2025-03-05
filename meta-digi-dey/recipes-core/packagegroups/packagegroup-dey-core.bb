@@ -43,7 +43,6 @@ RDEPENDS:${PN} = "\
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'firmwared', '',d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "keyboard", "${VIRTUAL-RUNTIME_keymaps}", "", d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "touchscreen", "${VIRTUAL-RUNTIME_touchscreen}", "",d)} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'rt', 'hwlatdetect', '',d)} \
     init-ifupdown \
     libdigiapix \
     libgpiod \
