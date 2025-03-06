@@ -23,7 +23,7 @@ SRC_URI += " \
 # Adjust compile time options:
 #   * consolekit depends on X11. Disable to allow building framebuffer images.
 #
-PACKAGECONFIG:remove:dey = "consolekit nss"
+PACKAGECONFIG:remove:dey = "consolekit dnsmasq nss"
 PACKAGECONFIG:append = " gnutls modemmanager ppp concheck"
 
 #
@@ -43,6 +43,8 @@ WLAN0_STATIC_CIDR = "${@ipaddr_to_cidr('wlan0', d)}"
 
 UNMANAGED_DEVICES = "interface-name:p2p*;interface-name:wlan1"
 UNMANAGED_DEVICES:ccimx9 = "interface-name:p2p-wfd0-0;interface-name:wfd0;interface-name:uap0"
+DNS_MANAGER = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd','systemd-resolved','default', d)}"
+RC_MANAGER = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'unmanaged', 'file', d)}"
 
 inherit update-rc.d
 
@@ -55,6 +57,8 @@ do_install:append() {
 	# Customize NetworkManager
 	#
 	sed -i -e "s,##UNMANAGED_DEVICES##,${UNMANAGED_DEVICES},g" ${D}${sysconfdir}/NetworkManager/NetworkManager.conf
+	sed -i -e "s,##DNS_MANAGER##,${DNS_MANAGER},g" ${D}${sysconfdir}/NetworkManager/NetworkManager.conf
+	sed -i -e "s,##RC_MANAGER##,${RC_MANAGER},g" ${D}${sysconfdir}/NetworkManager/NetworkManager.conf
 
 	#
 	# Connections config files
