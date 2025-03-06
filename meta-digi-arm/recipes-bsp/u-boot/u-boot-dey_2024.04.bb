@@ -7,6 +7,6 @@ LIC_FILES_CHKSUM = "file://Licenses/README;md5=2ca5f2c35c8cc335f0a19756634782f1"
 DEPENDS += "flex-native bison-native"
 
 SRCBRANCH = "v2024.04/maint"
-SRCREV = "f8357fd57e589bc0abbc754ce17a66f933402ff8"
+SRCREV = "${AUTOREV}"
 
 COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8x|ccimx9)"
