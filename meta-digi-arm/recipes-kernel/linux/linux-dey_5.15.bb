@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2024, Digi International Inc.
+# Copyright (C) 2022-2025, Digi International Inc.
 
 require recipes-kernel/linux/linux-dey.inc
 
@@ -66,4 +66,4 @@ kernel_do_deploy:append:ccmp1() {
 	fi
 }
 
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx8m|ccmp1)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccmp1)"

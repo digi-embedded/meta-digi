@@ -1,4 +1,4 @@
-# Copyright (C) 2024,2025 Digi International Inc.
+# Copyright (C) 2024,2025, Digi International Inc.
 
 require recipes-kernel/linux/linux-dey.inc
 
@@ -47,4 +47,4 @@ do_install:append:ccmp2() {
 
 FILES:${KERNEL_PACKAGE_NAME}-modules:ccmp2 += "${sysconfdir}/modprobe.d"
 
-COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8x|ccimx9|ccmp2)"
+COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx8x|ccimx9|ccmp2)"
