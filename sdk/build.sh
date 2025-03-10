@@ -161,6 +161,7 @@ fi
 [ -z "${DY_USE_CVE_LAYER}" ] && DY_USE_CVE_LAYER="false"
 
 [ "${DY_CVE_REPORT}" = "true" ] && [ -z "${DY_VIGILES_DIR}" ] && error "DY_VIGILES_DIR not specified"
+[ "${DY_CVE_REPORT}" = "true" ] && [ -z "${DY_CODENAME}" ] && error "DY_CODENAME not specified"
 
 # Per-platform data
 while read -r _pl _tgt; do
@@ -290,7 +291,7 @@ for platform in ${DY_PLATFORMS}; do
 				status="non-patched"
 				bbclass="vigiles"
 				[ "${DY_USE_CVE_LAYER}" = "true" ] && { status="patched"; bbclass="digi_ccss"; }
-				VIGILES_CONF_PATH="${DY_VIGILES_DIR}/configs/${platform}_${status}_config"
+				VIGILES_CONF_PATH="${DY_VIGILES_DIR}/configs/${DY_CODENAME}/${platform}_${status}_config"
 				# Return error if config file doesn't exist
 				[ ! -f "${VIGILES_CONF_PATH}" ] && error "Cannot find Vigiles config file ${VIGILES_CONF_PATH}"
 				printf "%s" "${VIGILES_CFG}" | sed -e "s,##VIGILES_CONF_PATH##,${VIGILES_CONF_PATH},g" -e "s,##VIGILES_BBCLASS##,${bbclass},g" >> conf/local.conf
