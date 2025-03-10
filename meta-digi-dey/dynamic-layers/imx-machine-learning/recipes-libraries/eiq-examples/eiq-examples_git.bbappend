@@ -1,4 +1,4 @@
-# Copyright (C) 2024, Digi International Inc.
+# Copyright (C) 2024,2025, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -12,6 +12,9 @@ SRC_URI += " \
     file://0001-Customize-EiQ-demos.patch \
     file://0002-improvements-capture-x-windows-and-increase-resoluti.patch \
     file://0003-check-vela-return-code.patch \
+    file://0004-use-local-copy-of-ssd_mobilenet_v1_quant-model.patch \
+    file://ssd_mobilenet_v1_quant.tflite \
+    file://ssd_mobilenet_v1_quant_vela.tflite \
     file://scripts/launch_eiq_demo.sh \
     file://service/eiqdemo.service \
 "
@@ -43,12 +46,14 @@ do_install () {
     for archive in "${S}/${MODELS_DIR}"/*.tflite; do
         cp "${archive}" "${D}${bindir}/${PN}-${PV}/${MODELS_DIR}"
     done
+    cp ${WORKDIR}/ssd_mobilenet_v1_quant.tflite "${D}${bindir}/${PN}-${PV}/${MODELS_DIR}"
 
     # Install the transformed Vela models.
     install -d "${D}${bindir}/${PN}-${PV}/${VELA_MODELS_DIR}"
     for archive in "${S}/${VELA_MODELS_DIR}"/*.tflite; do
         cp "${archive}" "${D}${bindir}/${PN}-${PV}/${VELA_MODELS_DIR}"
     done
+    cp ${WORKDIR}/ssd_mobilenet_v1_quant_vela.tflite "${D}${bindir}/${PN}-${PV}/${VELA_MODELS_DIR}"
 
     # Install the launch script.
     install -d ${D}${sysconfdir}/demos/scripts

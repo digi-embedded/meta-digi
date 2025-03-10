@@ -22,6 +22,7 @@ MACHINE_GSTREAMER_1_0_PKGS:ccimx6ul = " \
     gstreamer1.0-plugins-base-typefindfunctions \
     gstreamer1.0-plugins-base-videoconvertscale \
     gstreamer1.0-plugins-base-volume \
+    gstreamer1.0-plugins-good-autodetect \
     gstreamer1.0-plugins-good-pulseaudio \
     gstreamer1.0-plugins-good-video4linux2 \
     gstreamer1.0-plugins-good-videofilter \

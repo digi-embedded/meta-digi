@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2024, Digi International Inc.
+# Copyright (C) 2017-2025, Digi International Inc.
 
 SUMMARY = "Digi's ConnectCore Cloud services"
 SECTION = "libs"
