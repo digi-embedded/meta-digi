@@ -17,7 +17,9 @@ UBOOT_NAME="$1"
 UBOOT_ENC="$2"
 UBOOT_SEEK_KB="$3"
 UBOOT_REDUNDANT="$4"
+UBOOT_TFA_NAME="$5"
 UBOOT_FILE="/tmp/${UBOOT_NAME}"
+UBOOT_TFA_FILE="/tmp/${UBOOT_TFA_NAME}"
 UBOOT_BLOCK_MAIN="mmcblk0boot0"
 UBOOT_BLOCK_REDUNDANT="mmcblk0boot1"
 UBOOT_MMC_DEV_MAIN="/dev/${UBOOT_BLOCK_MAIN}"
@@ -235,22 +237,28 @@ append_dek ()
 	UBOOT_FILE="${UBOOT_ENCRYPTED_DEK}"
 }
 
-write_uboot_emmc ()
+write_artifact_emmc ()
 {
-	local UBOOT_BLOCK="$1"
+	local BLOCK_TO_WRITE="$1"
+	local FILE_TO_WRITE="$2"
+	local ENABLE_WRITE_ACCESS="$3"
 
-	# Enable write access in the U-Boot partition.
-	echo 0 > "/sys/block/${UBOOT_BLOCK}/force_ro"
-	# Write the U-Boot into the eMMC.
-	dd if="${UBOOT_FILE}" of="/dev/${UBOOT_BLOCK}" seek="${UBOOT_SEEK_KB}" bs=1K 2>/dev/null
+	if [ "${ENABLE_WRITE_ACCESS}" -eq 1 ]; then
+		# Enable write access in the partition.
+		echo 0 > "/sys/block/${BLOCK_TO_WRITE}/force_ro"
+	fi
+	# Write the file into the eMMC.
+	dd if="${FILE_TO_WRITE}" of="/dev/${BLOCK_TO_WRITE}" seek="${UBOOT_SEEK_KB}" bs=1K 2>/dev/null
 	local rc=$?
-	# Disable write access in U-Boot partition.
-	echo 1 > "/sys/block/${UBOOT_BLOCK}/force_ro"
+	if [ "${ENABLE_WRITE_ACCESS}" -eq 1 ]; then
+		# Disable write access in partition.
+		echo 1 > "/sys/block/${BLOCK_TO_WRITE}/force_ro"
+	fi
 	# Check update operation result.
 	if [ "${rc}" -ne 0 ]; then
-		exit_error "## ERROR: failed to write file ${UBOOT_FILE} to /dev/${UBOOT_BLOCK}" "${rc}"
+		exit_error "## ERROR: failed to write file ${FILE_TO_WRITE} to /dev/${BLOCK_TO_WRITE}" "${rc}"
 	fi
-	echo "U-Boot successfully writen to /dev/${UBOOT_BLOCK}"
+	echo "U-Boot successfully writen to /dev/${BLOCK_TO_WRITE}"
 }
 
 # If U-Boot is encrypted, the DEK key blob needs to be extracted from existing U-Boot
@@ -258,11 +266,22 @@ write_uboot_emmc ()
 if [ "${UBOOT_ENC}" = "enc" ]; then
 	append_dek
 fi
+# Write TFA.
+if expr "${PLATFORM}" : "ccmp2.*" >/dev/null; then
+	# Write TFA artifact into eMMC BOOT1 and BOOT2 partitions.
+	write_artifact_emmc ${UBOOT_BLOCK_MAIN} ${UBOOT_TFA_FILE} 1
+	if [ "${UBOOT_REDUNDANT}" = "redundant" ]; then
+		write_artifact_emmc ${UBOOT_BLOCK_REDUNDANT} ${UBOOT_TFA_FILE} 1
+	fi
+	# Redefine block devices to write FIP artifact into 'fip-a' and 'fip-b' partitions.
+	UBOOT_BLOCK_MAIN="mmcblk0p3"
+	UBOOT_BLOCK_REDUNDANT="mmcblk0p4"
+fi
 # Write U-Boot
-write_uboot_emmc ${UBOOT_BLOCK_MAIN}
+write_artifact_emmc ${UBOOT_BLOCK_MAIN} ${UBOOT_FILE} 0
 # Check if redundant U-Boot update is requested.
 if [ "${UBOOT_REDUNDANT}" = "redundant" ]; then
-	write_uboot_emmc ${UBOOT_BLOCK_REDUNDANT}
+	write_artifact_emmc ${UBOOT_BLOCK_REDUNDANT} ${UBOOT_FILE} 0
 fi
 # Clean intermediate artifacts.
 clean_artifacts
