@@ -21,6 +21,12 @@ UBOOT_PREFIX = "fip"
 UBOOT_SUFFIX = "bin"
 # Set U-Boot FIP settings
 FIP_UBOOT_DTB = "u-boot"
+# Include boot script into the FIT image
+UBOOT_ENV = "boot"
+# For FIT image usage
+UBOOT_ENTRYPOINT = "0x88000000"
+UBOOT_DTB_LOADADDRESS = "0x8a000000"
+UBOOT_DTBO_LOADADDRESS = "0x8a000000"
 
 # =========================================================================
 # trusted-firmware-a
@@ -40,8 +46,8 @@ PREFERRED_PROVIDER_virtual/optee-os = "optee-os-stm32mp"
 # =========================================================================
 # Kernel
 # =========================================================================
-KERNEL_IMAGETYPE = "${@bb.utils.contains('TRUSTFENCE_FIT_IMG', '1', 'fitImage', 'Image.gz', d)}"
-KERNEL_CLASSES = "${@bb.utils.contains('TRUSTFENCE_FIT_IMG', '1', 'kernel-fitimage', 'kernel-uimage', d)}"
+KERNEL_IMAGETYPE = "${@bb.utils.contains('TRUSTFENCE_SIGN_FIT_STM', '1', 'fitImage', 'Image.gz', d)}"
+KERNEL_CLASSES = "kernel-fitimage"
 KERNEL_ALT_IMAGETYPE = "vmlinux"
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccmp2_defconfig"
 
