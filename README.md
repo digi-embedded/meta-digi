@@ -36,6 +36,9 @@ Software for the following hardware platforms is in production support:
 ## ConnectCore 93
 * ConnectCore 93 System-on-Module (SOM)
   * [CC-WMX-YC7D-KN](https://www.digi.com/products/models/cc-wmx-yc7d-kn)
+  * [CC-MX-YC7D-ZN](https://www.digi.com/products/models/cc-mx-yc7d-zn)
+  * [CC-WMX-ZC6D-L1](https://www.digi.com/products/models/cc-wmx-zc6d-l1)
+  * [CC-MX-ZC6D-Z1](https://www.digi.com/products/models/cc-mx-zc6d-z1)
 * ConnectCore 93 Development Kit (DVK)
   * [CC-WMX93-KIT](https://www.digi.com/products/models/cc-wmx93-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/5.0/cc93/yocto-gs_index))
 
