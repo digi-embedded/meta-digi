@@ -63,7 +63,7 @@ ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS'
 STM32MP_DEVICETREE_PROGRAMMER_ENABLE ?= "0"
 
 # List of supported boot devices
-BOOTDEVICE_LABELS ?= "emmc"
+BOOTDEVICE_LABELS ?= "emmc usb"
 # Supported boot schemes
 BOOTSCHEME_LABELS ?= "optee"
 

@@ -1,6 +1,11 @@
 #
-# Copyright (C) 2024, Digi International Inc.
+# Copyright (C) 2024,2025, Digi International Inc.
 #
+
+# Add optee-usb FIP configuration
+STM32MP_DEVICETREE_USB = " ${@' '.join('%s' % dt_file for dt_file in list(dict.fromkeys((d.getVar('STM32MP_DT_FILES_USB') or '').split())))} "
+FIP_CONFIG[optee-usb]  ?= "optee,${STM32MP_DEVICETREE_USB},default:optee,usb"
+FIP_CONFIG += "${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', bb.utils.contains('BOOTDEVICE_LABELS', 'usb', 'optee-usb', '', d), '', d)}"
 
 # Addons parameters for FIP_WRAPPER
 FIP_SOC_SEARCH ?= ""
