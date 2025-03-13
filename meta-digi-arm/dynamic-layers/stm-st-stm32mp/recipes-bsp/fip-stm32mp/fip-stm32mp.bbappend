@@ -19,8 +19,8 @@ python set_fip_sign_key() {
                 d.setVar('SIGN_KEY_PASS', p)
 }
 # Addons parameters for FIP_WRAPPER
-FIP_SOC_SEARCH ?= ""
-FIP_SOC_SEARCH:ccmp2 ?= " stm32mp25 "
+FIP_SOC_SEARCH ?= " ${STM32MP_SOC_NAME} "
+FIP_SOC_MATCH ?= " ${DIGI_SOM} "
 
 # Deploy the fip binary for current target
 do_deploy() {
@@ -83,7 +83,9 @@ do_deploy() {
                     unset k
                     for soc in ${STM32MP_SOC_NAME}; do
                         k=$(expr $k + 1)
-                        [ "$(echo ${dt} | grep -c ${soc})" -eq 1 ] && sign_key=$(echo ${SIGN_KEY_PATH_LIST} | cut -d',' -f${k})
+                        if [ "$(echo ${dt} | grep -c ${soc})" -eq 1 ] || [ "$(echo ${dt} | grep -c ${FIP_SOC_MATCH})" -eq 1 ] ;then
+                            sign_key=$(echo ${SIGN_KEY_PATH_LIST} | cut -d',' -f${k})
+                        fi
                     done
                 fi
                 FIP_PARAM_SIGN="--sign --signature-key $sign_key --signature-key-pass $sign_single_key_pass"
