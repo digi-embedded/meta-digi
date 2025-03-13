@@ -14,6 +14,13 @@ SRC_URI = " \
     ${TFA_GIT_URI};branch=${SRCBRANCH} \
 "
 
+# stm32mp15 = header-version 1
+SIGN_TOOL_EXTRA_soc:ccmp15 = " ${@bb.utils.contains('ENCRYPT_ENABLE', '1', '-of ${TF_A_ENCRYPT_OF}', '', d)}"
+# stm32mp13 = header-version 2
+SIGN_TOOL_EXTRA_soc:ccmp13 = " ${@bb.utils.contains('ENCRYPT_ENABLE', '1', '-of ${TF_A_ENCRYPT_OF}', '-of ${TF_A_SIGN_OF}', d)}"
+# stm32mp2 = header-version 2.2
+SIGN_TOOL_EXTRA_soc:stm32mp2common = " --header-version 2.2 ${@bb.utils.contains('ENCRYPT_ENABLE', '1', '-of ${TF_A_ENCRYPT_OF}', '-of ${TF_A_SIGN_OF}', d)}"
+
 TF_A_CONFIG[nand]   = "${DEVICE_BOARD_ENABLE:NAND},STM32MP_RAW_NAND=1 ${@'STM32MP_FORCE_MTD_START_OFFSET=${TF_A_MTD_START_OFFSET_NAND}' if ${TF_A_MTD_START_OFFSET_NAND} else ''} STM32MP_USB_PROGRAMMER=1"
 # TF_A_CONFIG[uart] (same as 'optee-programmer-uart')
 TF_A_CONFIG[uart] ?= "\
@@ -43,24 +50,25 @@ do_install[depends] = " \
 "
 
 # Generate PKI tree if it doesn't exist.
-# This is an append to do_compile because in this recipe, the do_deploy
-# task comes right after do_compile, and the keys must be ready before that.
-do_compile:append() {
+# This is an prepend to do_compile because in this recipe, the keys
+# must be ready before that.
+do_generate_pki_tree() {
 	if ${@oe.utils.conditional('TRUSTFENCE_SIGN','1','true','false',d)}; then
 		check_gen_pki_tree
 	fi
 }
+addtask generate_pki_tree before do_compile after do_configure
 
-# Obtain password to use in FIP generation
+# Obtain password to use in TF-A generation
 # Get password from file using the given key index
-do_deploy[prefuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'set_fip_sign_key', '', d)}"
-python set_fip_sign_key() {
+do_compile[prefuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'set_tfa_sign_key', '', d)}"
+python set_tfa_sign_key() {
     passfile = d.getVar('TRUSTFENCE_PASSWORD_FILE')
     if (os.path.isfile(passfile)):
         with open(passfile, "r") as file:
             p = file.read().strip()
             if (p):
-                d.setVar('FIP_SIGN_KEY_PASS', p)
+                d.setVar('SIGN_KEY_PASS', p)
 }
 
 # This runs after 'tf_a_sysroot_populate()' which populates all
@@ -96,34 +104,3 @@ deploy_symlinks_atf() {
 	fi
 }
 SYSROOT_PREPROCESS_FUNCS += "deploy_symlinks_atf"
-
-# Sign TF-A image
-do_deploy[postfuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'tfa_sign', '', d)}"
-tfa_sign() {
-	export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
-	export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
-
-	unset i
-	for config in ${TF_A_CONFIG}; do
-		i=$(expr $i + 1)
-		# Initialize devicetree list and tf-a basename
-		dt_config=$(echo ${TF_A_DEVICETREE} | cut -d',' -f${i})
-		tfa_basename=$(echo ${TF_A_BINARIES} | cut -d',' -f${i})
-		tfa_file_type=$(echo ${TF_A_FILES} | cut -d',' -f${i})
-		for dt in ${dt_config}; do
-			for file_type in ${tfa_file_type}; do
-				case "${file_type}" in
-				bl2)
-					TF_A_FILENAME="${tfa_basename}-${dt}-${config}.${TF_A_SUFFIX}"
-					if [ -f "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}" ]; then
-						trustfence-sign-artifact.sh -p "${DIGI_SOM}" -t "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}" "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}${TFA_SIGN_SUFFIX}"
-						# the generated artifact lacks 'w' permission which prevents deletion by the build system
-						chmod u+w "${DEPLOYDIR}/arm-trusted-firmware/${TF_A_FILENAME}${TFA_SIGN_SUFFIX}"
-						# symlink TF-A
-						ln -s "arm-trusted-firmware/${TF_A_FILENAME}${TFA_SIGN_SUFFIX}" "${DEPLOYDIR}/"
-					fi
-				esac
-			done # for file_type in ${tfa_file_type}
-		done # for dt in ${dt_config}
-	done # for config in ${TF_A_CONFIG}
-}

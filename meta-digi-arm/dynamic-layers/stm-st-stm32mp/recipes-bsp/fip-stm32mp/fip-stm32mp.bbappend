@@ -7,6 +7,17 @@ STM32MP_DEVICETREE_USB = " ${@' '.join('%s' % dt_file for dt_file in list(dict.f
 FIP_CONFIG[optee-usb]  ?= "optee,${STM32MP_DEVICETREE_USB},default:optee,usb"
 FIP_CONFIG += "${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', bb.utils.contains('BOOTDEVICE_LABELS', 'usb', 'optee-usb', '', d), '', d)}"
 
+# Obtain password to use in FIP generation
+# Get password from file using the given key index
+do_deploy[prefuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'set_fip_sign_key', '', d)}"
+python set_fip_sign_key() {
+    passfile = d.getVar('TRUSTFENCE_PASSWORD_FILE')
+    if (os.path.isfile(passfile)):
+        with open(passfile, "r") as file:
+            p = file.read().strip()
+            if (p):
+                d.setVar('SIGN_KEY_PASS', p)
+}
 # Addons parameters for FIP_WRAPPER
 FIP_SOC_SEARCH ?= ""
 FIP_SOC_SEARCH:ccmp2 ?= " stm32mp25 "

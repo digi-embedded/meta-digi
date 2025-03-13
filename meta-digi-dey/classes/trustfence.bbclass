@@ -23,15 +23,19 @@ TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 TRUSTFENCE_KEY_INDEX ?= "0"
 TRUSTFENCE_SIGN_ARTIFACTS = "1"
 TRUSTFENCE_SIGN_ARTIFACTS:ccmp1 = "0"
+TRUSTFENCE_SIGN_ARTIFACTS:ccmp2 = "0"
 TRUSTFENCE_SIGN_FIT_STM:ccmp1 ?= "1"
+TRUSTFENCE_SIGN_FIT_STM:ccmp2 ?= "1"
 
 # Partition encryption configuration
 TRUSTFENCE_ENCRYPT_PARTITIONS ?= "1"
 TRUSTFENCE_ENCRYPT_PARTITIONS:ccimx9 ?= "0"
 TRUSTFENCE_ENCRYPT_PARTITIONS:ccmp1 ?= "0"
+TRUSTFENCE_ENCRYPT_PARTITIONS:ccmp2 ?= "0"
 TRUSTFENCE_ENCRYPT_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "0", "1", d)}"
 TRUSTFENCE_ENCRYPT_ROOTFS:ccimx9 ?= "0"
 TRUSTFENCE_ENCRYPT_ROOTFS:ccmp1 ?= "0"
+TRUSTFENCE_ENCRYPT_ROOTFS:ccmp2 ?= "0"
 TRUSTFENCE_FILE_BASED_ENCRYPT ?= "${TF_FILE_BASED_ENCRYPT}"
 
 # Read-only rootfs
@@ -45,9 +49,11 @@ TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-onl
 TF_DEK_PATH = "default"
 TF_DEK_PATH:ccimx9 = "0"
 TF_DEK_PATH:ccmp1 = "0"
+TF_DEK_PATH:ccmp2 = "0"
 TF_FILE_BASED_ENCRYPT = "0"
 TF_FILE_BASED_ENCRYPT:ccimx9 = "1"
 TF_FILE_BASED_ENCRYPT:ccmp1 = "1"
+TF_FILE_BASED_ENCRYPT:ccmp2 = "1"
 
 # NXP-based sign a FIT-format boot artifact
 TRUSTFENCE_SIGN_FIT_NXP = "0"
@@ -125,11 +131,8 @@ copy_public_key() {
 		elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
 			if [ "${DIGI_SOM}" = "ccmp15" ]; then
 				PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey.pem"
-			elif [ "${DIGI_SOM}" = "ccmp13" ]; then
-				PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey0${TRUSTFENCE_KEY_INDEX}.pem"
 			else
-				bberror "Unknown DIGI_SOM"
-				exit 1
+				PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey0${TRUSTFENCE_KEY_INDEX}.pem"
 			fi
 		else
 			echo "ERROR: Cannot determine the public key"
@@ -171,24 +174,20 @@ python () {
     if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
         if (d.getVar("TRUSTFENCE_DEK_PATH") == "default"):
             d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/dek.bin");
-    elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
-        # Enable authentication capabilities on TF-A independently
-        # of whether the images are going to be signed by DEY or externally
-        d.setVar("TF_A_SIGN_ENABLE", "1")
-        if (d.getVar("TRUSTFENCE_SIGN") == "0"):
-            d.setVar("FIP_SIGN_ENABLE", "0")
 
     if (d.getVar("TRUSTFENCE_SIGN") == "1"):
         # Set STM-specific variables for signing images
         if (d.getVar("DEY_SOC_VENDOR") == "STM"):
-            d.setVar("FIP_SIGN_ENABLE", "1")
-            d.setVar("FIP_SIGN_KEY_EXTERNAL", "1")
+            d.setVar("SIGN_ENABLE", "1")
+            d.setVar("EXTERNAL_KEY_CONF", "1")
+            d.setVar("SIGN_TOOL", "STM32MP_SigningTool_CLI")
             if (d.getVar("DIGI_SOM") == "ccmp15" ):
-                d.setVar("FIP_SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey.pem");
+                d.setVar("SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey.pem");
                 d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/key_pass.txt")
-            elif (d.getVar("DIGI_SOM") == "ccmp13" ):
-                d.setVar("FIP_SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey0%s.pem" % d.getVar("TRUSTFENCE_KEY_INDEX"));
+            else:
+                d.setVar("SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey0%s.pem" % d.getVar("TRUSTFENCE_KEY_INDEX"));
                 d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/key_pass0%s.txt" % d.getVar("TRUSTFENCE_KEY_INDEX"))
+            d.setVar("SIGN_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("SIGN_KEY"));
 
         d.appendVar("UBOOT_TF_CONF", "CONFIG_SIGN_IMAGE=y ")
         if (d.getVar("TRUSTFENCE_SIGN_ARTIFACTS") == "1"):
@@ -265,7 +264,7 @@ python () {
             # Set the key password.
             if (d.getVar("DIGI_SOM") == "ccmp15"):
                 d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
-            elif (d.getVar("DIGI_SOM") == "ccmp13"):
+            else:
                 d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass0" + str(key_index) + ".txt")
 
     # Enable partition encryption if rootfs encryption is enabled
