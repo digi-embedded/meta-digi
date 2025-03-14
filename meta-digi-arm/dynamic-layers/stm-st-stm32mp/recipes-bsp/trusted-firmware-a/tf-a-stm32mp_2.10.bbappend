@@ -2,6 +2,9 @@
 # Copyright (C) 2022-2025, Digi International Inc.
 #
 
+# Inherit custom DIGI sign class to skip signing tool and key parsing restrictions
+inherit sign-stm32mp-digi
+
 # Select internal or Github TF-A repo
 TFA_URI_STASH = "${DIGI_MTK_GIT}/emp/arm-trusted-firmware.git;protocol=ssh"
 TFA_URI_GITHUB = "${DIGI_GITHUB_GIT}/arm-trusted-firmware.git;protocol=https"

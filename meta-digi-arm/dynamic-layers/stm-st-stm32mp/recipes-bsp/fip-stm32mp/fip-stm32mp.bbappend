@@ -2,6 +2,9 @@
 # Copyright (C) 2024,2025, Digi International Inc.
 #
 
+# Inherit custom DIGI sign class to skip signing tool and key parsing restrictions
+inherit sign-stm32mp-digi
+
 # Add optee-usb FIP configuration
 STM32MP_DEVICETREE_USB = " ${@' '.join('%s' % dt_file for dt_file in list(dict.fromkeys((d.getVar('STM32MP_DT_FILES_USB') or '').split())))} "
 FIP_CONFIG[optee-usb]  ?= "optee,${STM32MP_DEVICETREE_USB},default:optee,usb"
