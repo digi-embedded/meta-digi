@@ -313,11 +313,11 @@ deploy_symlinks_atf() {
 		dt_config=$(echo ${TF_A_DEVICETREE} | cut -d',' -f${i})
 		tfa_basename=$(echo ${TF_A_BINARIES} | cut -d',' -f${i})
 		for dt in ${dt_config}; do
-			TF_A_FILENAME="${tfa_basename}-${dt}-${config}.${TF_A_SUFFIX}"
+			TF_A_FILENAME="${tfa_basename}-${dt}-${config}${TF_A_ENCRYPT_SUFFIX}${TF_A_SIGN_SUFFIX}.${TF_A_SUFFIX}"
 			if [ -f "${DEPLOY_DIR_IMAGE}/${TF_A_BASEDIR}/${TF_A_FILENAME}" ]; then
 				cd "${DEPLOY_DIR_IMAGE}"
 				# symlink TF-A
-				ln -sf "${TF_A_BASEDIR}/${TF_A_FILENAME}" "${DEPLOY_DIR_IMAGE}/"
+				ln -sf "${TF_A_BASEDIR}/${TF_A_FILENAME}" "${DEPLOY_DIR_IMAGE}"
 			fi
 		done
 	done

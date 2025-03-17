@@ -174,16 +174,18 @@ deploy_symlinks_fip() {
 		i="$(expr ${i} + 1)"
 		dt_config=$(echo ${FIP_DEVICETREE} | cut -d',' -f${i})
 		for dt in ${dt_config}; do
-			FIP_FILENAME="${FIP_BASENAME}-${dt}-${config}${FIP_SIGN_SUFFIX}.${FIP_SUFFIX}"
+			FIP_FILENAME="${FIP_BASENAME}-${dt}-${config}${FIP_ENCRYPT_SUFFIX}${FIP_SIGN_SUFFIX}.${FIP_SUFFIX}"
 			if [ -f "${DEPLOY_DIR_IMAGE}/${FIP_BASEDIR}/${FIP_FILENAME}" ]; then
 				cd "${DEPLOY_DIR_IMAGE}"
 				# symlink FIP
 				ln -sf "${FIP_BASEDIR}/${FIP_FILENAME}" "${DEPLOY_DIR_IMAGE}/"
 			fi
-			if [ -f "${DEPLOY_DIR_IMAGE}/${FIP_BASEDIR}/${FIP_BASENAME}-${dt}-ddr-${config}.${FWDDR_SUFFIX}" ]; then
+
+			FIP_DDR_FILENAME="${FIP_BASENAME}-${dt}-ddr-${config}${FIP_ENCRYPT_SUFFIX}${FIP_SIGN_SUFFIX}.${FWDDR_SUFFIX}"
+			if [ -f "${DEPLOY_DIR_IMAGE}/${FIP_BASEDIR}/${FIP_DDR_FILENAME}" ]; then
 				cd "${DEPLOY_DIR_IMAGE}"
 				# symlink DDR firmware (needed for USB recovery)
-				ln -sf "${FIP_BASEDIR}/${FIP_BASENAME}-${dt}-ddr-${config}.${FWDDR_SUFFIX}" "${DEPLOY_DIR_IMAGE}/"
+				ln -sf "${FIP_BASEDIR}/${FIP_DDR_FILENAME}" "${DEPLOY_DIR_IMAGE}/"
 			fi
 		done
 	done
