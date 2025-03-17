@@ -29,7 +29,7 @@ module_conf_btnxpuart = "blacklist btnxpuart"
 
 # ---------------------------------------------------------------------
 # stub for devicetree which are located on digi directory
-do_install:prepend:ccmp2() {
+do_compile:append:ccmp2() {
     if [ -d "${B}/arch/${ARCH}/boot/dts/digi" ]; then
         for dtbf in ${KERNEL_DEVICETREE}; do
             install -m 0644 "${B}/arch/${ARCH}/boot/dts/digi/${dtbf}" "${B}/arch/${ARCH}/boot/dts/"
