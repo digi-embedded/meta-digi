@@ -42,6 +42,8 @@ TF_A_METADATA_TOOL_ARGS ?= "-g -i 1 -b 2 -v ${TF_A_METADATA_TOOL_VERSION} ${DEVI
 # optee-os
 # =========================================================================
 PREFERRED_PROVIDER_virtual/optee-os = "optee-os-stm32mp"
+# OPTEE runtime packages to install
+OPTEE_PKGS ??= "optee-client"
 
 # =========================================================================
 # Kernel
