@@ -160,12 +160,12 @@ addtask deploy before do_build after do_compile
 
 FWDDR_SUFFIX ?= "bin"
 
-# This runs after 'sysroot_populate()' which populates all
+# This runs after 'do_compile()' which populates all
 # FIP artifacts on the image deploy dir.
 # The purpose of this function is to create symlinks to the files needed
 # by the uuu installer that are located in subdirectories.
-deploy_symlinks_fip() {
-	# Create symlinks in DEPLOY_DIR_IMAGE
+do_deploy:append() {
+	# Create symlinks in DEPLOYDIR
 
 	# Remove trailing slash (/) from ST variables
 	FIP_BASEDIR="$(echo ${FIP_DIR_FIP} | cut -c2-)"
@@ -175,19 +175,18 @@ deploy_symlinks_fip() {
 		dt_config=$(echo ${FIP_DEVICETREE} | cut -d',' -f${i})
 		for dt in ${dt_config}; do
 			FIP_FILENAME="${FIP_BASENAME}-${dt}-${config}${FIP_ENCRYPT_SUFFIX}${FIP_SIGN_SUFFIX}.${FIP_SUFFIX}"
-			if [ -f "${DEPLOY_DIR_IMAGE}/${FIP_BASEDIR}/${FIP_FILENAME}" ]; then
-				cd "${DEPLOY_DIR_IMAGE}"
+			if [ -f "${DEPLOYDIR}/${FIP_BASEDIR}/${FIP_FILENAME}" ]; then
+				cd "${DEPLOYDIR}"
 				# symlink FIP
-				ln -sf "${FIP_BASEDIR}/${FIP_FILENAME}" "${DEPLOY_DIR_IMAGE}/"
+				ln -sf "${FIP_BASEDIR}/${FIP_FILENAME}" "${DEPLOYDIR}/"
 			fi
 
 			FIP_DDR_FILENAME="${FIP_BASENAME}-${dt}-ddr-${config}${FIP_ENCRYPT_SUFFIX}${FIP_SIGN_SUFFIX}.${FWDDR_SUFFIX}"
-			if [ -f "${DEPLOY_DIR_IMAGE}/${FIP_BASEDIR}/${FIP_DDR_FILENAME}" ]; then
-				cd "${DEPLOY_DIR_IMAGE}"
+			if [ -f "${DEPLOYDIR}/${FIP_BASEDIR}/${FIP_DDR_FILENAME}" ]; then
+				cd "${DEPLOYDIR}"
 				# symlink DDR firmware (needed for USB recovery)
-				ln -sf "${FIP_BASEDIR}/${FIP_DDR_FILENAME}" "${DEPLOY_DIR_IMAGE}/"
+				ln -sf "${FIP_BASEDIR}/${FIP_DDR_FILENAME}" "${DEPLOYDIR}/"
 			fi
 		done
 	done
 }
-SYSROOT_PREPROCESS_FUNCS += "deploy_symlinks_fip"
