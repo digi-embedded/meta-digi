@@ -1,0 +1,49 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Tue, 5 Dec 2023 18:10:43 +0100
+Subject: [PATCH] imx8m: print_fit_hab: follow symlinks
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ iMX8M/print_fit_hab.sh | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/iMX8M/print_fit_hab.sh b/iMX8M/print_fit_hab.sh
+index 06fca5f88554..a65f78c07a0f 100755
+--- a/iMX8M/print_fit_hab.sh
++++ b/iMX8M/print_fit_hab.sh
+@@ -33,7 +33,7 @@ else
+ 	let uboot_sign_off=$((fit_off - 0x8000 - ivt_off + $FIT_DATA_POS))
+ fi
+ 
+-let uboot_size=$(stat --printf="%s" $BL33)
++let uboot_size=$(stat -L --printf="%s" $BL33)
+ let uboot_load_addr=0x40200000
+ 
+ let last_sign_off=$(((uboot_sign_off + uboot_size + 3) & ~3))
+@@ -50,7 +50,7 @@ for dtname in $*
+ do
+ 	if [ ${cnt} != 0 ]
+ 	then
+-		let fdt${cnt}_size=$(stat --printf="%s" $dtname)
++		let fdt${cnt}_size=$(stat -L --printf="%s" $dtname)
+ 
+ 		let fdt${cnt}_sign_off=$((last_sign_off))
+ 		let fdt${cnt}_load_addr=$((last_load_addr))
+@@ -71,13 +71,13 @@ done
+ 
+ let atf_sign_off=$((last_sign_off))
+ let atf_load_addr=$ATF_LOAD_ADDR
+-let atf_size=$(stat --printf="%s" $BL31)
++let atf_size=$(stat -L --printf="%s" $BL31)
+ 
+ if [ ! -f $BL32 ]; then
+ 	let tee_size=0x0
+ 	let tee_sign_off=$((atf_sign_off + atf_size))
+ else
+-	let tee_size=$(stat --printf="%s" $BL32)
++	let tee_size=$(stat -L --printf="%s" $BL32)
+ 
+ 	let tee_sign_off=$(((atf_sign_off + atf_size + 3) & ~3))
+ 	let tee_load_addr=$TEE_LOAD_ADDR
