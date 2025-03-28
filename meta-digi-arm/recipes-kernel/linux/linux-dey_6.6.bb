@@ -3,9 +3,9 @@
 require recipes-kernel/linux/linux-dey.inc
 
 SRCBRANCH = "v6.6.52/nxp/master"
-SRCBRANCH:stm32mp2common = "v6.6.48/stm/master"
+SRCBRANCH:stm32mpcommon = "v6.6.48/stm/master"
 SRCREV = "${AUTOREV}"
-SRCREV:stm32mp2common = "${AUTOREV}"
+SRCREV:stm32mpcommon = "${AUTOREV}"
 
 # Define RT patches per machine
 RT_FILES:use-nxp-bsp = " \
@@ -38,7 +38,7 @@ module_conf_btnxpuart:ccimx9 = "blacklist btnxpuart"
 
 # ---------------------------------------------------------------------
 # stub for devicetree which are located on digi directory
-do_compile:append:ccmp2() {
+do_compile:append:stm32mpcommon() {
     if [ -d "${B}/arch/${ARCH}/boot/dts/digi" ]; then
         for dtbf in ${KERNEL_DEVICETREE}; do
             install -m 0644 "${B}/arch/${ARCH}/boot/dts/digi/${dtbf}" "${B}/arch/${ARCH}/boot/dts/"
@@ -46,7 +46,7 @@ do_compile:append:ccmp2() {
     fi
 }
 
-do_install:append:ccmp2() {
+do_install:append:stm32mpcommon() {
     if ${@bb.utils.contains('MACHINE_FEATURES','gpu','true','false',d)}; then
         # when ACCEPT_EULA are filled
         install -d ${D}/${sysconfdir}/modprobe.d/
@@ -54,6 +54,6 @@ do_install:append:ccmp2() {
     fi
 }
 
-FILES:${KERNEL_PACKAGE_NAME}-modules:ccmp2 += "${sysconfdir}/modprobe.d"
+FILES:${KERNEL_PACKAGE_NAME}-modules:stm32mpcommon += "${sysconfdir}/modprobe.d"
 
-COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx8x|ccimx9|ccmp2)"
+COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx8x|ccimx9|ccmp2|ccmp1)"

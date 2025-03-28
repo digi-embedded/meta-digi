@@ -32,4 +32,4 @@ do_install:append() {
 	fi
 }
 
-COMPATIBLE_MACHINE = "(ccmp2)"
+COMPATIBLE_MACHINE = "(ccmp2|ccmp1)"
