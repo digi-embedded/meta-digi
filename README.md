@@ -42,6 +42,20 @@ Software for the following hardware platforms is in production support:
 * ConnectCore 93 Development Kit (DVK)
   * [CC-WMX93-KIT](https://www.digi.com/products/models/cc-wmx93-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/5.0/cc93/yocto-gs_index))
 
+## ConnectCore MP13
+* ConnectCore MP13 System-on-Module (SOM)
+  * [CC-WST-DX58-NK](https://www.digi.com/products/models/cc-wst-dx58-nk)
+  * [CC-ST-DX58-ZK](https://www.digi.com/products/models/cc-st-dx58-zk)
+* ConnectCore MP13 Development Kit (DVK)
+  * [CC-WMP133-KIT](https://www.digi.com/products/models/cc-wmp133-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/ccmp13/yocto-gs_index))
+
+## ConnectCore MP15
+* ConnectCore MP15 System-on-Module (SOM)
+  * [CC-WST-DW69-NM](https://www.digi.com/products/models/cc-wst-dw69-nm)
+  * [CC-ST-DW69-ZM](https://www.digi.com/products/models/cc-st-dw69-zm)
+* ConnectCore MP15 Development Kit (DVK)
+  * [CC-WMP157-KIT](https://www.digi.com/products/models/cc-wmp157-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/ccmp15/yocto-gs_index))
+
 ## ConnectCore 8M Mini
 * ConnectCore 8M Mini System-on-Module (SOM)
   * [CC-WMX-ET8D-NN](https://www.digi.com/products/models/cc-wmx-et8d-nn)
