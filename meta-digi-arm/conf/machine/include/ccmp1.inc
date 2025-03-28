@@ -83,3 +83,6 @@ UBOOT_ENV = "boot"
 # Partitions to blacklist for swupdate:
 # fsbl1, fsbl2, metadata1, metadata2, fip-a, fip-b
 SWUPDATE_MTD_BLACKLIST = "0 1 2 3 4 5"
+
+# Remove custom kernel headers from toolchain
+ST_TOOLS_FOR_TARGET_SDK:remove = "kernel-headers"
