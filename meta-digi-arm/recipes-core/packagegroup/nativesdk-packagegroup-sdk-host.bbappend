@@ -18,3 +18,6 @@ RDEPENDS:${PN} += " \
     ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', '${IMX_OPTEE_SDK_RDEPENDS} ${IMX_TRUSTFENCE_SDK_TOOLS}', '', d)} \
     ${@oe.utils.conditional('DEY_SOC_VENDOR', 'STM', '${STM_TRUSTFENCE_SDK_TOOLS}', '', d)} \
 "
+
+RDEPENDS:${PN}:append:ccmp25 = " nativesdk-flutter-sdk"
+RDEPENDS:${PN}:append:imxgpu = " nativesdk-flutter-sdk"
