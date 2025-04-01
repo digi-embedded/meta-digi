@@ -14,3 +14,8 @@ Digi Embedded Yocto provides the following image recipes:
 
     By default the image is XWayland-based so it provides a full Weston
     desktop environment.
+
+  * dey-image-flutter: graphical Flutter image
+
+    Expansion of custom Digi core-image-base including full Flutter
+    framework support.

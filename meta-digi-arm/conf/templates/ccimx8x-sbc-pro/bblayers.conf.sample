@@ -22,6 +22,9 @@ BBLAYERS ?= " \
   ##DIGIBASE##/meta-imx/meta-imx-ml \
   ##DIGIBASE##/meta-selinux \
   ##DIGIBASE##/meta-timesys \
+  ##DIGIBASE##/meta-flutter \
+  ##DIGIBASE##/meta-flutter/meta-flutter-apps \
+  ##DIGIBASE##/meta-clang \
   ##DIGIBASE##/meta-digi/meta-digi-arm \
   ##DIGIBASE##/meta-digi/meta-digi-dey \
   "
