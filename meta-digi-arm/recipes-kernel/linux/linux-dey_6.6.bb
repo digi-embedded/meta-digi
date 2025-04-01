@@ -24,8 +24,8 @@ STM_RT_CONFIG_FRAGS = " \
 KERNEL_CONFIG_FRAGMENTS:append:stm32mpcommon = " ${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${STM_RT_CONFIG_FRAGS}', '', d)}"
 
 # Blacklist btnxpuart module. It will be managed by the bluetooth-init script
-KERNEL_MODULE_PROBECONF += "btnxpuart"
-module_conf_btnxpuart = "blacklist btnxpuart"
+KERNEL_MODULE_PROBECONF:ccimx9 += "btnxpuart"
+module_conf_btnxpuart:ccimx9 = "blacklist btnxpuart"
 
 # ---------------------------------------------------------------------
 # stub for devicetree which are located on digi directory
