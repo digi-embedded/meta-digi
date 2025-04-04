@@ -5,7 +5,6 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 SRC_URI:append = " \
     file://81-iw612-wifi.rules \
     file://load_iw612.sh \
-    file://0001-issue-fix-wlan_src_driver_patch_release_lf-6.6.52-2..patch \
 "
 
 do_install:append () {
