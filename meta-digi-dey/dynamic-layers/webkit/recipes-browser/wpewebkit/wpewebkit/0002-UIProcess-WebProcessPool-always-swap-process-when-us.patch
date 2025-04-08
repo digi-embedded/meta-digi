@@ -1,0 +1,62 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Mon, 7 Apr 2025 12:02:30 +0200
+Subject: [PATCH] UIProcess: WebProcessPool: always swap process when using
+ non-HTTP(S) protocols
+
+When browsing through a local web application via the file:// protocol, the
+same WPEWebProcess is re-used for all pages. Browsing through several memory
+intensive pages in a row (especially multimedia) causes the web process to hog
+lots of memory, which can cause issues on systems with small RAM sizes. For
+example, on ConnectCore platforms with 1 GiB of RAM, opening a WebGL sample
+followed by playing a video sometimes causes a kernel panic due to extremely
+low CMA memory, which is needed for the video decoding process.
+
+To avoid this, make sure a new WPEWebProcess is generated each time a page is
+opened on non-HTTP(S) protocols such as file://. This adds some loading time
+overhead, but it assures that each page's memory is freed when exiting it,
+drastically reducing the chances of unexpected behavior. To accomplish this:
+
+    * Set m_processSwapsOnNavigationWithinSameNonHTTPFamilyProtocol to "true"
+      to ensure the web process isn't re-used when navigating with a
+      non-HTTP(S) protocol. The WPE version of WebKit doesn't expose the API
+      that can change this value at runtime, so simply change the default value
+    * Skip the same-site navigation check when non-HTTP(S) process swap is
+      enabled and the protocol is non-HTTP(S). Otherwise, the same web process
+      will get re-used even if non-HTTP(S) process swap is enabled.
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ Source/WebKit/UIProcess/API/APIProcessPoolConfiguration.h | 2 +-
+ Source/WebKit/UIProcess/WebProcessPool.cpp                | 6 ++++--
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/Source/WebKit/UIProcess/API/APIProcessPoolConfiguration.h b/Source/WebKit/UIProcess/API/APIProcessPoolConfiguration.h
+index dbbfea6b..6574f435 100644
+--- a/Source/WebKit/UIProcess/API/APIProcessPoolConfiguration.h
++++ b/Source/WebKit/UIProcess/API/APIProcessPoolConfiguration.h
+@@ -174,7 +174,7 @@ private:
+     std::optional<bool> m_processSwapsOnNavigationFromClient;
+     bool m_processSwapsOnNavigationFromExperimentalFeatures { false };
+     bool m_alwaysKeepAndReuseSwappedProcesses { false };
+-    bool m_processSwapsOnNavigationWithinSameNonHTTPFamilyProtocol { false };
++    bool m_processSwapsOnNavigationWithinSameNonHTTPFamilyProtocol { true };
+     std::optional<bool> m_isAutomaticProcessWarmingEnabledByClient;
+     bool m_usesWebProcessCache { false };
+     bool m_usesBackForwardCache { true };
+diff --git a/Source/WebKit/UIProcess/WebProcessPool.cpp b/Source/WebKit/UIProcess/WebProcessPool.cpp
+index 1b147534..5b541aad 100644
+--- a/Source/WebKit/UIProcess/WebProcessPool.cpp
++++ b/Source/WebKit/UIProcess/WebProcessPool.cpp
+@@ -2138,8 +2138,10 @@ std::tuple<Ref<WebProcessProxy>, SuspendedPageProxy*, ASCIILiteral> WebProcessPo
+     if (!m_configuration->processSwapsOnNavigationWithinSameNonHTTPFamilyProtocol() && !sourceURL.protocolIsInHTTPFamily() && sourceURL.protocol() == targetURL.protocol())
+         return { WTFMove(sourceProcess), nullptr, "Navigation within the same non-HTTP(s) protocol"_s };
+ 
+-    if (!sourceURL.isValid() || !targetURL.isValid() || sourceURL.isEmpty() || targetRegistrableDomain.matches(sourceURL) || (sourceURL.protocolIsAbout() && (!sourceProcess->hasCommittedAnyMeaningfulProvisionalLoads() || sourceProcess->registrableDomain().matches(targetURL))) || targetRegistrableDomain.matches(sourceURL))
+-        return { WTFMove(sourceProcess), nullptr, "Navigation is same-site"_s };
++    if (!m_configuration->processSwapsOnNavigationWithinSameNonHTTPFamilyProtocol() || (sourceURL.protocolIsInHTTPFamily() && sourceURL.protocol() == targetURL.protocol())) {
++        if (!sourceURL.isValid() || !targetURL.isValid() || sourceURL.isEmpty() || targetRegistrableDomain.matches(sourceURL) || (sourceURL.protocolIsAbout() && (!sourceProcess->hasCommittedAnyMeaningfulProvisionalLoads() || sourceProcess->registrableDomain().matches(targetURL))) || targetRegistrableDomain.matches(sourceURL))
++            return { WTFMove(sourceProcess), nullptr, "Navigation is same-site"_s };
++    }
+ 
+     auto reason = "Navigation is cross-site"_s;
+     
