@@ -58,13 +58,13 @@ IMAGE_FSTYPES:remove = "ext4"
 IMAGE_FSTYPES:append = " ${@bb.utils.contains('BOOTDEVICE_LABELS', 'sdcard', 'boot.vfat ext4.gz', '', d)}"
 
 # List of supported boot devices
-BOOTDEVICE_LABELS ?= "nand-4-256"
+BOOTDEVICE_LABELS ?= "nand-4-256-1024 usb"
 # Supported boot schemes
 BOOTSCHEME_LABELS ?= "optee"
 
 # Remove NAND-based ubi/ubifs images added by st-machine-common-stm32mp.inc
 # because image_types_digi.bbclass already builds their own.
-MULTIUBI_BUILD:remove = "nand_4_256"
+MULTIUBI_BUILD:remove = "nand-4-256-1024"
 IMAGE_FSTYPES:remove = "stmultiubi"
 
 # Wic files
