@@ -277,9 +277,10 @@ u_boot_sysroot_populate() {
 			for devicetree in ${UBOOT_DEVICETREE}; do
 				# Install u-boot dtb
 				install -m 644 ${B}/${config}/arch/arm/dts/${devicetree}.dtb ${dest}/${FIP_UBOOT_DTB}-${devicetree}.dtb
+				# Install u-boot binary
+				install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${dest}/u-boot-nodtb-${devicetree}.bin
 			done
 		fi
-		install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${dest}/u-boot-nodtb-${devicetree}.bin
 	done
 }
 SYSROOT_PREPROCESS_FUNCS:stm32mpcommon =+ "u_boot_sysroot_populate"
