@@ -11,11 +11,27 @@ DIGI_FAMILY = "ccmp1"
 # Platform T-FA settings
 TFA_SIGN_SUFFIX ?= "${@bb.utils.contains('TRUSTFENCE_SIGN', '1', '_signed', '', d)}"
 
+# =========================================================================
+# U-Boot
+# =========================================================================
 # Platform u-boot settings
 UBOOT_PREFIX = "fip"
 UBOOT_SUFFIX = "bin"
 # Set U-Boot FIP settings
 FIP_UBOOT_DTB = "u-boot"
+# Include boot script into the FIT image
+UBOOT_ENV = "boot"
+# Set InitRAMDisk load address to U-boot initrd_addr
+UBOOT_RD_LOADADDRESS = "0xc4400000"
+# U-Boot environment offset (within partition)
+UBOOT_ENV_OFFSET ?= "0x0"
+UBOOT_ENV_REDUND_OFFSET ?= "0x0"
+# U-Boot environment size
+UBOOT_ENV_SIZE ?= "0x20000"
+# U-Boot environment range: size (in hex) in the environment partition that
+# the U-Boot environment can take up (if undefined, it will take up all the
+# available space in the environment partition)
+UBOOT_ENV_RANGE ?= ""
 FIP_SIGN_SUFFIX ?= "${@bb.utils.contains('TRUSTFENCE_SIGN', '1', '_Signed', '', d)}"
 
 STORAGE_MEDIA = "mtd"
@@ -31,19 +47,6 @@ BOOT_DEV_NAME ?= "linux"
 ROOTFS_DEV_NAME ?= "rootfs"
 ROOTFS_ENC_DEV = "${ROOTFS_DEV_NAME}"
 ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS') == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
-
-# U-Boot environment offset (within partition)
-UBOOT_ENV_OFFSET ?= "0x0"
-UBOOT_ENV_REDUND_OFFSET ?= "0x0"
-# U-Boot environment size
-UBOOT_ENV_SIZE ?= "0x20000"
-# U-Boot environment range: size (in hex) in the environment partition that
-# the U-Boot environment can take up (if undefined, it will take up all the
-# available space in the environment partition)
-UBOOT_ENV_RANGE ?= ""
-
-# Set InitRAMDisk load address to U-boot initrd_addr
-UBOOT_RD_LOADADDRESS = "0xc4400000"
 
 # OPTEE runtime packages to install
 OPTEE_PKGS ??= "optee-client"
@@ -76,9 +79,6 @@ WKS_FILE_DEPENDS ?= " \
 
 # Disable the generation of flashlayout files
 ENABLE_FLASHLAYOUT_CONFIG = "0"
-
-# Include boot script into the FIT image
-UBOOT_ENV = "boot"
 
 # Partitions to blacklist for swupdate:
 # fsbl1, fsbl2, metadata1, metadata2, fip-a, fip-b
