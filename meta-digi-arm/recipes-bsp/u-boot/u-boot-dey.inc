@@ -282,7 +282,7 @@ u_boot_sysroot_populate() {
 		install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${dest}/u-boot-nodtb-${devicetree}.bin
 	done
 }
-SYSROOT_PREPROCESS_FUNCS:ccmp2 =+ "u_boot_sysroot_populate"
-SYSROOT_DIRS:append:ccmp2 = " ${FIP_DIR_UBOOT}"
+SYSROOT_PREPROCESS_FUNCS:stm32mpcommon =+ "u_boot_sysroot_populate"
+SYSROOT_DIRS:append:stm32mpcommon = " ${FIP_DIR_UBOOT}"
 
 SYSROOT_DIRS += "/boot"
