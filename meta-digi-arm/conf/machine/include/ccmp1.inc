@@ -60,6 +60,9 @@ ROOTFS_DEV_NAME ?= "rootfs"
 ROOTFS_ENC_DEV = "${ROOTFS_DEV_NAME}"
 ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS') == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
 
+# Disable by default programmer support:
+STM32MP_DEVICETREE_PROGRAMMER_ENABLE ?= "0"
+
 # OPTEE runtime packages to install
 OPTEE_PKGS ??= "optee-client"
 
