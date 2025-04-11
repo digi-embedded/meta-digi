@@ -21,6 +21,9 @@ UBOOT_SUFFIX = "bin"
 FIP_UBOOT_DTB = "u-boot"
 # Include boot script into the FIT image
 UBOOT_ENV = "boot"
+# For FIT image usage
+UBOOT_DTB_LOADADDRESS = "0xc4000000"
+UBOOT_DTBO_LOADADDRESS = "0xc4000000"
 # Set InitRAMDisk load address to U-boot initrd_addr
 UBOOT_RD_LOADADDRESS = "0xc4400000"
 # U-Boot environment offset (within partition)
@@ -32,7 +35,16 @@ UBOOT_ENV_SIZE ?= "0x20000"
 # the U-Boot environment can take up (if undefined, it will take up all the
 # available space in the environment partition)
 UBOOT_ENV_RANGE ?= ""
+
 FIP_SIGN_SUFFIX ?= "${@bb.utils.contains('TRUSTFENCE_SIGN', '1', '_Signed', '', d)}"
+
+# =========================================================================
+# Kernel
+# =========================================================================
+KERNEL_IMAGETYPE = "${@bb.utils.contains('TRUSTFENCE_SIGN_FIT_STM', '1', 'fitImage', 'zImage', d)}"
+KERNEL_CLASSES = "kernel-fitimage"
+KERNEL_ALT_IMAGETYPE = "Image vmlinux"
+KERNEL_DEFCONFIG ?= "arch/arm/configs/ccmp1_defconfig"
 
 STORAGE_MEDIA = "mtd"
 
