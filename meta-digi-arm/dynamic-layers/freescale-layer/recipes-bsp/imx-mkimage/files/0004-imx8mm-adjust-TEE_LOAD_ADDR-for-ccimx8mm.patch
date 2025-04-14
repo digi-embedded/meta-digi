@@ -1,0 +1,26 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Mon, 7 Apr 2025 16:57:39 +0200
+Subject: [PATCH] imx8mm: adjust TEE_LOAD_ADDR for ccimx8mm
+
+This change aligns with equivalent changes in the Optee and ATF.
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ iMX8M/soc.mak | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
+index ffd70af8ac7d..7ab1ea099894 100644
+--- a/iMX8M/soc.mak
++++ b/iMX8M/soc.mak
+@@ -35,7 +35,7 @@ PLAT = imx8mm
+ HDMI = no
+ SPL_LOAD_ADDR = 0x7E1000
+ SPL_FSPI_LOAD_ADDR = 0x7E2000
+-TEE_LOAD_ADDR ?= 0xbe000000
++TEE_LOAD_ADDR ?= 0x7e000000
+ ATF_LOAD_ADDR = 0x00920000
+ VAL_BOARD = val
+ #define the F(Q)SPI header file

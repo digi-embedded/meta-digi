@@ -1,0 +1,55 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Fri, 11 Apr 2025 15:13:18 +0200
+Subject: [PATCH] plat-imx: add support for ConnectCore 8M Mini
+
+Add support for ccimx8mmdvk platform flavor:
+* Define a DDR size that supports up to 4GB.
+* Force TZDRAM base to 0x7e000000 for consistent OP-TEE base address
+  across all ccimx8mm variants, regardless of actual DDR size.
+* Set UART base to UART1_BASE.
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ core/arch/arm/plat-imx/conf.mk | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/core/arch/arm/plat-imx/conf.mk b/core/arch/arm/plat-imx/conf.mk
+index d1fc2882e598..62cc51b61063 100644
+--- a/core/arch/arm/plat-imx/conf.mk
++++ b/core/arch/arm/plat-imx/conf.mk
+@@ -63,6 +63,7 @@ mx8mq-flavorlist = \
+ 	mx8mqevk
+ 
+ mx8mm-flavorlist = \
++	ccimx8mmdvk \
+ 	mx8mmevk \
+ 	mx8mm_cl_iot_gate
+ 
+@@ -412,6 +413,15 @@ CFG_DDR_SIZE ?= 0xc0000000
+ CFG_UART_BASE ?= UART1_BASE
+ endif
+ 
++ifneq (,$(filter $(PLATFORM_FLAVOR),ccimx8mmdvk))
++# Configure DDR size for the variant with maximum memory
++CFG_DDR_SIZE ?= 0x100000000
++CFG_UART_BASE ?= UART1_BASE
++$(call force,CFG_CCIMX8MM,y)
++$(call force,CFG_CORE_LARGE_PHYS_ADDR,y)
++$(call force,CFG_CORE_ARM64_PA_BITS,36)
++endif
++
+ ifneq (,$(filter $(PLATFORM_FLAVOR),mx8mmevk))
+ CFG_DDR_SIZE ?= 0x80000000
+ CFG_UART_BASE ?= UART2_BASE
+@@ -587,6 +597,9 @@ else ifneq (,$(filter y, $(CFG_MX95)))
+ CFG_TZDRAM_START ?= ($(CFG_DRAM_BASE) + 0x0C000000)
+ # On i.MX95 we will have 32MB OP-TEE memory and 2MB Shared Memory after that.
+ CFG_TZDRAM_SIZE ?= 0x02000000
++else ifneq (,$(filter y, $(CFG_CCIMX8MM)))
++# Set the Optee base address at the end of the first GB (where 0x02000000 = CFG_TZDRAM_SIZE + CFG_SHMEM_SIZE).
++CFG_TZDRAM_START ?= ($(CFG_DRAM_BASE) - 0x02000000 + 0x40000000)
+ else ifneq (,$(filter y, $(CFG_MX8MM) $(CFG_MX8MQ) $(CFG_MX8QM) $(CFG_MX8QX)))
+ CFG_TZDRAM_START ?= ($(CFG_DRAM_BASE) - 0x02000000 + $(CFG_DDR_SIZE))
+ else

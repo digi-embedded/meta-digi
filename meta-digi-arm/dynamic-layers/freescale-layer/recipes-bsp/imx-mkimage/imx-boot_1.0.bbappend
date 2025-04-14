@@ -5,6 +5,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 SRC_URI:append:ccimx8m = " \
     file://0002-imx8m-soc.mak-capture-commands-output-into-a-log-fil.patch \
     file://0003-imx8m-print_fit_hab-follow-symlinks.patch \
+    file://0004-imx8mm-adjust-TEE_LOAD_ADDR-for-ccimx8mm.patch \
 "
 SRC_URI:append:ccimx8x = " \
     file://0001-iMX8QX-soc.mak-capture-commands-output-into-a-log-fi.patch \
