@@ -10,17 +10,19 @@ Signed-off-by: David Escalona <david.escalona@digi.com>
  2 files changed, 2 insertions(+), 14 deletions(-)
 
 diff --git a/stai-mpu/launch_python_semantic_segmentation.sh b/stai-mpu/launch_python_semantic_segmentation.sh
-index e3c3a6c..e008572 100755
+index a1c2479..94cd540 100755
 --- a/stai-mpu/launch_python_semantic_segmentation.sh
 +++ b/stai-mpu/launch_python_semantic_segmentation.sh
-@@ -7,15 +7,9 @@
+@@ -5,17 +5,11 @@
+ #
+ # This software is licensed under terms that can be found in the LICENSE file
  # in the root directory of this software component.
  # If no LICENSE file comes with this software, it is provided AS-IS.
 
 -weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
  FRAMEWORK=$1
  echo "stai-mpu wrapper used : "$FRAMEWORK
- source /usr/local/x-linux-ai/resources/config_board.sh
+ source /usr/local/x-linux-ai/resources/config_board_npu.sh
  cmd="python3 /usr/local/x-linux-ai/semantic-segmentation/stai_mpu_semantic_segmentation.py -m /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_MODEL -l /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_LABEL.txt --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT $OPTIONS"
 
 -if [ "$weston_user" != "root" ]; then
@@ -31,17 +33,19 @@ index e3c3a6c..e008572 100755
 -fi
 +$cmd
 diff --git a/stai-mpu/launch_python_semantic_segmentation_testdata.sh b/stai-mpu/launch_python_semantic_segmentation_testdata.sh
-index 2d3db4b..5375e0f 100755
+index bf3ac5e..a02de8f 100755
 --- a/stai-mpu/launch_python_semantic_segmentation_testdata.sh
 +++ b/stai-mpu/launch_python_semantic_segmentation_testdata.sh
-@@ -7,15 +7,9 @@
+@@ -5,17 +5,11 @@
+ #
+ # This software is licensed under terms that can be found in the LICENSE file
  # in the root directory of this software component.
  # If no LICENSE file comes with this software, it is provided AS-IS.
 
 -weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
  FRAMEWORK=$1
  echo "stai-mpu wrapper used : "$FRAMEWORK
- source /usr/local/x-linux-ai/resources/config_board.sh
+ source /usr/local/x-linux-ai/resources/config_board_npu.sh
  cmd="python3 /usr/local/x-linux-ai/semantic-segmentation/stai_mpu_semantic_segmentation.py -m /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_MODEL -l /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_LABEL.txt -i /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_DATA"
 
 -if [ "$weston_user" != "root" ]; then

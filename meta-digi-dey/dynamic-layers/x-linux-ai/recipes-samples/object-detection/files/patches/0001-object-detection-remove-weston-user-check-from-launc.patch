@@ -9,17 +9,20 @@ Signed-off-by: David Escalona <david.escalona@digi.com>
  2 files changed, 2 insertions(+), 14 deletions(-)
 
 diff --git a/stai-mpu/launch_python_object_detection.sh b/stai-mpu/launch_python_object_detection.sh
-index d0332dc..54f5e54 100755
+index e460fb3..b595f7f 100755
 --- a/stai-mpu/launch_python_object_detection.sh
 +++ b/stai-mpu/launch_python_object_detection.sh
-@@ -7,15 +7,9 @@
+@@ -5,18 +5,12 @@
+ #
+ # This software is licensed under terms that can be found in the LICENSE file
  # in the root directory of this software component.
  # If no LICENSE file comes with this software, it is provided AS-IS.
 
 -weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
  FRAMEWORK=$1
  echo "stai_mpu wrapper used : "$FRAMEWORK
- source /usr/local/x-linux-ai/resources/config_board.sh
+ CONFIG=$(find /usr/local/x-linux-ai -name "config_board_*.sh")
+ source $CONFIG
  cmd="/usr/local/x-linux-ai/object-detection/stai_mpu_object_detection.py -m /usr/local/x-linux-ai/object-detection/models/$OBJ_DETEC_MODEL -l /usr/local/x-linux-ai/object-detection/models/$OBJ_DETEC_MODEL_LABEL.txt --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT $OPTIONS"
 
 -if [ "$weston_user" != "root" ]; then
@@ -30,17 +33,20 @@ index d0332dc..54f5e54 100755
 -fi
 +$cmd
 diff --git a/stai-mpu/launch_python_object_detection_testdata.sh b/stai-mpu/launch_python_object_detection_testdata.sh
-index c8e4d5b..bd9a9b9 100755
+index 7c5a6e5..ca547a4 100755
 --- a/stai-mpu/launch_python_object_detection_testdata.sh
 +++ b/stai-mpu/launch_python_object_detection_testdata.sh
-@@ -7,15 +7,9 @@
+@@ -5,18 +5,12 @@
+ #
+ # This software is licensed under terms that can be found in the LICENSE file
  # in the root directory of this software component.
  # If no LICENSE file comes with this software, it is provided AS-IS.
 
 -weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
  FRAMEWORK=$1
  echo "stai_mpu wrapper used : "$FRAMEWORK
- source /usr/local/x-linux-ai/resources/config_board.sh
+ CONFIG=$(find /usr/local/x-linux-ai -name "config_board_*.sh")
+ source $CONFIG
  cmd="/usr/local/x-linux-ai/object-detection/stai_mpu_object_detection.py -m /usr/local/x-linux-ai/object-detection/models/$OBJ_DETEC_MODEL -l /usr/local/x-linux-ai/object-detection/models/$OBJ_DETEC_MODEL_LABEL.txt -i /usr/local/x-linux-ai/object-detection/models/$OBJ_DETECT_DATA"
 
 -if [ "$weston_user" != "root" ]; then

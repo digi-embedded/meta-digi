@@ -10,17 +10,20 @@ Signed-off-by: David Escalona <david.escalona@digi.com>
  2 files changed, 2 insertions(+), 14 deletions(-)
 
 diff --git a/stai-mpu/launch_python_image_classification.sh b/stai-mpu/launch_python_image_classification.sh
-index ac5efb5..ab0ed4b 100755
+index 3cb5259..afbedf8 100755
 --- a/stai-mpu/launch_python_image_classification.sh
 +++ b/stai-mpu/launch_python_image_classification.sh
-@@ -7,15 +7,9 @@
+@@ -5,18 +5,12 @@
+ #
+ # This software is licensed under terms that can be found in the LICENSE file
  # in the root directory of this software component.
  # If no LICENSE file comes with this software, it is provided AS-IS.
 
 -weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
  FRAMEWORK=$1
  echo "stai wrapper used : "$FRAMEWORK
- source /usr/local/x-linux-ai/resources/config_board.sh
+ CONFIG=$(find /usr/local/x-linux-ai -name "config_board_*.sh")
+ source $CONFIG
  cmd="python3 /usr/local/x-linux-ai/image-classification/stai_mpu_image_classification.py -m /usr/local/x-linux-ai/image-classification/models/$IMAGE_CLASSIFICATION_MODEL -l /usr/local/x-linux-ai/image-classification/models/$IMAGE_CLASSIFICATION_LABEL.txt --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT $OPTIONS"
 
 -if [ "$weston_user" != "root" ]; then
@@ -31,17 +34,20 @@ index ac5efb5..ab0ed4b 100755
 -fi
 +$cmd
 diff --git a/stai-mpu/launch_python_image_classification_testdata.sh b/stai-mpu/launch_python_image_classification_testdata.sh
-index 31ac124..a35f615 100755
+index 25388cd..9d68e90 100755
 --- a/stai-mpu/launch_python_image_classification_testdata.sh
 +++ b/stai-mpu/launch_python_image_classification_testdata.sh
-@@ -7,15 +7,9 @@
+@@ -5,18 +5,12 @@
+ #
+ # This software is licensed under terms that can be found in the LICENSE file
  # in the root directory of this software component.
  # If no LICENSE file comes with this software, it is provided AS-IS.
 
 -weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
  FRAMEWORK=$1
  echo "stai wrapper used : "$FRAMEWORK
- source /usr/local/x-linux-ai/resources/config_board.sh
+ CONFIG=$(find /usr/local/x-linux-ai -name "config_board_*.sh")
+ source $CONFIG
  cmd="python3 /usr/local/x-linux-ai/image-classification/stai_mpu_image_classification.py -m /usr/local/x-linux-ai/image-classification/models/$IMAGE_CLASSIFICATION_MODEL -l /usr/local/x-linux-ai/image-classification/models/$IMAGE_CLASSIFICATION_LABEL.txt -i /usr/local/x-linux-ai/image-classification/models/$IMAGE_CLASSIF_DATA"
 
 -if [ "$weston_user" != "root" ]; then

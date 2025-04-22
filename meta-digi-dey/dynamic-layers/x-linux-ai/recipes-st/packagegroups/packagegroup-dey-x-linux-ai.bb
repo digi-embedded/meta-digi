@@ -11,30 +11,30 @@ COMMON_PACKAGES = " \
 "
 
 TFLITE_PACKAGES = " \
-    stai-mpu-image-classification-cpp-tfl \
-    stai-mpu-image-classification-python-tfl \
-    stai-mpu-object-detection-cpp-tfl \
-    stai-mpu-object-detection-python-tfl \
+    stai-mpu-image-classification-cpp-tfl-npu \
+    stai-mpu-image-classification-python-tfl-npu \
+    stai-mpu-object-detection-cpp-tfl-npu \
+    stai-mpu-object-detection-python-tfl-npu \
     tflite-vx-delegate-example \
 "
 
 ONNX_PACKAGES = " \
     onnxruntime-tools                        \
-    stai-mpu-image-classification-cpp-ort    \
-    stai-mpu-image-classification-python-ort \
-    stai-mpu-object-detection-python-ort     \
-    stai-mpu-object-detection-cpp-ort        \
+    stai-mpu-image-classification-cpp-ort-npu    \
+    stai-mpu-image-classification-python-ort-npu \
+    stai-mpu-object-detection-python-ort-npu     \
+    stai-mpu-object-detection-cpp-ort-npu        \
 "
 
 OPENVX_PACKAGES = " \
     nbg-benchmark \
-    stai-mpu-image-classification-cpp-ovx \
-    stai-mpu-image-classification-python-ovx \
-    stai-mpu-object-detection-cpp-ovx \
-    stai-mpu-object-detection-python-ovx \
-    stai-mpu-semantic-segmentation-python-ovx \
-    stai-mpu-pose-estimation-python-ovx \
-    stai-mpu-face-recognition-cpp-ovx \
+    stai-mpu-image-classification-cpp-ovx-npu \
+    stai-mpu-image-classification-python-ovx-npu \
+    stai-mpu-object-detection-cpp-ovx-npu \
+    stai-mpu-object-detection-python-ovx-npu \
+    stai-mpu-semantic-segmentation-python-ovx-npu \
+    stai-mpu-pose-estimation-python-ovx-npu \
+    stai-mpu-face-recognition-cpp-ovx-npu \
 "
 
 RDEPENDS:${PN} += " \
