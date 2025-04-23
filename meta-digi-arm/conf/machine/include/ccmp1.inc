@@ -77,8 +77,6 @@ IMAGE_FSTYPES:append = " ${@bb.utils.contains('BOOTDEVICE_LABELS', 'sdcard', 'bo
 
 # List of supported boot devices
 BOOTDEVICE_LABELS ?= "nand-4-256-1024 usb"
-# Supported boot schemes
-BOOTSCHEME_LABELS ?= "optee"
 
 # Remove NAND-based ubi/ubifs images added by st-machine-common-stm32mp.inc
 # because image_types_digi.bbclass already builds their own.
