@@ -15,8 +15,8 @@ SRC_URI[arm.sha256sum] = "7dee4bbcff21d817bbbc152e904e8091362378446b08ad2d485f37
 
 # Trustfence fscrypt based on libteec v1.0.0
 SRC_URI:stm32mpcommon = "${DIGI_PKG_SRC}/${BP}-${TF_FSCRYPT_ARCH}-libteec-v1.0.0.tar.gz;name=${TARGET_ARCH}-libteecv1"
-SRC_URI[aarch64-libteecv1.md5sum] = "538f3bff6c9cd6110b7207581e4300d3"
-SRC_URI[aarch64-libteecv1.sha256sum] = "a15a657f7350f9f5c9d39eb0f5d634174c1bc22d7e50333cc01de295e95c0fa4"
+SRC_URI[aarch64-libteecv1.md5sum] = "67c2d87312ccae750de8165e82691c63"
+SRC_URI[aarch64-libteecv1.sha256sum] = "43c2e900ca8d0aaac15963ffb5a7c57e3dd07613b2fe236955012039027b03f4"
 
 # Needed to resolve dependencies to libteec
 RDEPENDS:${PN} += "optee-client"
