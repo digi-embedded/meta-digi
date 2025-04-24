@@ -85,6 +85,11 @@ MACHINE_EXTRA_RDEPENDS += " \
     xbee-init \
 "
 
+# =========================================================================
+# alsa
+# =========================================================================
+ALSA_LIST:stm32mp2common = ""
+
 # Image FS types
 IMAGE_FSTYPES:remove = "ext4"
 

@@ -71,6 +71,11 @@ MACHINE_EXTRA_RDEPENDS += " \
 "
 MACHINE_EXTRA_RRECOMMENDS:remove = "kernel-imagebootfs"
 
+# =========================================================================
+# alsa
+# =========================================================================
+ALSA_LIST:stm32mp1common = ""
+
 # Image FS types
 IMAGE_FSTYPES:remove = "ext4"
 IMAGE_FSTYPES:append = " ${@bb.utils.contains('BOOTDEVICE_LABELS', 'sdcard', 'boot.vfat ext4.gz', '', d)}"
