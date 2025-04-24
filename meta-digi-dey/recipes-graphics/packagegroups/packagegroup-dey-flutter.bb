@@ -9,6 +9,7 @@ inherit packagegroup
 RDEPENDS:${PN} += " \
     flutter-pi \
     flutter-samples-veggieseasons \
+    flutter-samples-veggieseasons-init \
 "
 
 RDEPENDS:${PN}:append:imxgpu = " \
