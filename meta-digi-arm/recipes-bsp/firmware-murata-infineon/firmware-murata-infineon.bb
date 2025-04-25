@@ -41,6 +41,8 @@ S = "${WORKDIR}"
 
 DEPENDS = "libnl"
 
+INSANE_SKIP:append:stm32mp1common = " 32bit-time"
+
 do_install () {
 	bbnote "Installing Murata Infineon firmware binaries: "
 	install -d ${D}${sbindir}
