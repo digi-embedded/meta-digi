@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2022-2024 by Digi International Inc.
+#  Copyright (C) 2022-2025 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -84,7 +84,7 @@ echo "############################################################"
 # -b, -d, -n (booleans)
 # -f <fip-filename>
 # -i <image-name>
-while getopts 'a:bdf:hi:n' c
+while getopts 'a:bdf:hi:nt' c
 do
 	case $c in
 	a) INSTALL_ATF_FILENAME=${OPTARG} ;;
@@ -128,12 +128,12 @@ echo "Determining image files to use..."
 
 # Determine ATF file to program
 if [ -z "${INSTALL_ATF_FILENAME}" ]; then
-	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-${module_ram}-nand.stm32##SIGNED_TFA##"
+	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-${module_ram}-optee-nand.stm32##SIGNED##"
 fi
 
 # Determine FIP file to program
 if [ -z "${INSTALL_FIP_FILENAME}" ]; then
-	INSTALL_FIP_FILENAME="fip-##MACHINE##-${module_ram}-optee##SIGNED##.bin"
+	INSTALL_FIP_FILENAME="fip-##MACHINE##-${module_ram}-optee-nand##SIGNED##.bin"
 fi
 
 # Determine linux, recovery, and rootfs image filenames to update
