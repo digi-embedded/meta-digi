@@ -85,6 +85,9 @@ build_uboot_scripts() {
 			-e 's,##GRAPHICAL_IMAGES##,${GRAPHICAL_IMAGES},g' \
 			-e 's,##DEFAULT_IMAGE_NAME##,${DEFAULT_IMAGE_NAME},g' \
 			${WORKDIR}/${f} > ${TMP_INSTALL_SCR}
+		if [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+			sed -i -e 's,##BOOTSCHEME_DEFAULT##,${BOOTSCHEME_DEFAULT},g' ${TMP_INSTALL_SCR}
+		fi
 		# Change the u-boot name when TrustFence is enabled
 		if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 			if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then

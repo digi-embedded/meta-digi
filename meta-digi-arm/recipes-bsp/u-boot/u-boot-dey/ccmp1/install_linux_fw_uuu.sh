@@ -64,11 +64,11 @@ show_usage()
 #	- runs 'update' command from RAM
 part_update()
 {
-	echo "\033[36m"
-	echo "====================================================================================="
-	echo "Updating '${1}' partition with file: ${2}"
-	echo "====================================================================================="
-	echo "\033[0m"
+	printf "\033[36m\n"
+	printf "=====================================================================================\n"
+	printf "Updating '%s' partition with file: %s\n" "${1}" "${2}"
+	printf "=====================================================================================\n"
+	printf "\033[0m\n"
 
 	uuu fb: download -f "${2}"
 	uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${filesize} ${ERASE}
@@ -128,12 +128,13 @@ echo "Determining image files to use..."
 
 # Determine ATF file to program
 if [ -z "${INSTALL_ATF_FILENAME}" ]; then
-	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-${module_ram}-optee-nand.stm32##SIGNED##"
+	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-${module_ram}-##BOOTSCHEME_DEFAULT##-nand##SIGNED##.stm32"
 fi
+INSTALL_METADATA_FILENAME="metadata-##MACHINE##.bin"
 
 # Determine FIP file to program
 if [ -z "${INSTALL_FIP_FILENAME}" ]; then
-	INSTALL_FIP_FILENAME="fip-##MACHINE##-${module_ram}-optee-nand##SIGNED##.bin"
+	INSTALL_FIP_FILENAME="fip-##MACHINE##-${module_ram}-##BOOTSCHEME_DEFAULT##-nand##SIGNED##.bin"
 fi
 
 # Determine linux, recovery, and rootfs image filenames to update
@@ -154,27 +155,26 @@ INSTALL_RECOVERY_FILENAME="${BASEFILENAME}-##MACHINE##.recovery.ubifs"
 INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.ubifs"
 
 # Verify existence of files before starting the update
-FILES="${INSTALL_ATF_FILENAME} ${INSTALL_FIP_FILENAME} ${INSTALL_LINUX_FILENAME}"
+FILES="${INSTALL_ATF_FILENAME} ${INSTALL_METADATA_FILENAME} ${INSTALL_FIP_FILENAME} ${INSTALL_LINUX_FILENAME}"
 if [ "${DUALBOOT}" != true ]; then
 	FILES="${FILES} ${INSTALL_RECOVERY_FILENAME}"
 fi
-
 for f in ${FILES}; do
-	if [ ! -f ${f} ]; then
-		echo "\033[31m[ERROR] Could not find file '${f}'\033[0m"
+	if [ ! -f "${f}" ]; then
+		printf "\033[31m[ERROR] Could not find file '%s'\033[0m\n" "${f}"
 		ABORT=true
 	fi
 done;
 
 # Verify what kind of rootfs is going to be programmed
 if [ ! -f ${INSTALL_ROOTFS_FILENAME} ]; then
-	echo "\033[31m[ERROR] Could not find file '${INSTALL_ROOTFS_FILENAME}'\033[0m"
+	printf "\033[31m[ERROR] Could not find file '${INSTALL_ROOTFS_FILENAME}'\033[0m\n"
 	INSTALL_ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.squashfs"
-	echo "\033[32m[INFO] Trying with file '${INSTALL_ROOTFS_FILENAME}'\033[0m"
+	printf "\033[32m[INFO] Trying with file '${INSTALL_ROOTFS_FILENAME}'\033[0m\n"
 	if [ -f "${INSTALL_ROOTFS_FILENAME}" ]; then
 		SQUASHFS=true
 	else
-		echo "\033[31m[ERROR] Could not find file '${INSTALL_ROOTFS_FILENAME}'\033[0m"
+		printf "\033[31m[ERROR] Could not find any rootfs image\033[0m\n"
 		ABORT=true
 	fi
 fi
@@ -202,23 +202,25 @@ if [ "${NOWAIT}" != true ]; then
 	printf "\n"
 	printf "   PARTITION\tFILENAME\n"
 	printf "   ---------\t--------\n"
-	printf "   fsbl1\t${INSTALL_ATF_FILENAME}\n"
-	printf "   fsbl2\t${INSTALL_ATF_FILENAME}\n"
-	printf "   fip-a\t${INSTALL_FIP_FILENAME}\n"
-	printf "   fip-b\t${INSTALL_FIP_FILENAME}\n"
+	printf "   fsbl1\t%s\n" "${INSTALL_ATF_FILENAME}"
+	printf "   fsbl2\t%s\n" "${INSTALL_ATF_FILENAME}"
+	printf "   metadata1\t%s\n" "${INSTALL_METADATA_FILENAME}"
+	printf "   metadata2\t%s\n" "${INSTALL_METADATA_FILENAME}"
+	printf "   fip-a\t%s\n" "${INSTALL_FIP_FILENAME}"
+	printf "   fip-b\t%s\n" "${INSTALL_FIP_FILENAME}"
 	if [ "${DUALBOOT}" = true ]; then
-		printf "   ${LINUX_NAME}_a\t${INSTALL_LINUX_FILENAME}\n"
+		printf "   %s_a\t%s\n" "${LINUX_NAME}" "${INSTALL_LINUX_FILENAME}"
 		if [ "${INSTALL_DUALBOOT}" = true ]; then
-			printf "   ${LINUX_NAME}_b\t${INSTALL_LINUX_FILENAME}\n"
+			printf "   %s_b\t%s\n" "${LINUX_NAME}" "${INSTALL_LINUX_FILENAME}"
 		fi
-		printf "   ${ROOTFS_NAME}_a\t${INSTALL_ROOTFS_FILENAME}\n"
+		printf "   %s_a\t%s\n" "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}"
 		if [ "${INSTALL_DUALBOOT}" = true ]; then
-			printf "   ${ROOTFS_NAME}_b\t${INSTALL_ROOTFS_FILENAME}\n"
+			printf "   %s_b\t%s\n" "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}"
 		fi
 	else
-		printf "   ${LINUX_NAME}\t${INSTALL_LINUX_FILENAME}\n"
-		printf "   ${RECOVERY_NAME}\t${INSTALL_RECOVERY_FILENAME}\n"
-		printf "   ${ROOTFS_NAME}\t${INSTALL_ROOTFS_FILENAME}\n"
+		printf "   %s\t%s\n" "${LINUX_NAME}" "${INSTALL_LINUX_FILENAME}"
+		printf "   %s\t%s\n" "${RECOVERY_NAME}" "${INSTALL_RECOVERY_FILENAME}"
+		printf "   %s\t%s\n" "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}"
 	fi
 	printf "\n"
 	printf " Press CTRL+C now if you wish to abort.\n"
@@ -226,7 +228,7 @@ if [ "${NOWAIT}" != true ]; then
 	while [ ${WAIT} -gt 0 ]; do
 		printf "\r Update process starts in %d " ${WAIT}
 		sleep 1
-		WAIT=$(( ${WAIT} - 1 ))
+		WAIT="$((WAIT - 1))"
 	done
 	printf "\r                                   \n"
 	printf " Starting update process\n"
@@ -241,6 +243,10 @@ uuu fb: ucmd setenv forced_update 1
 # Update ATF
 part_update "fsbl1" "${INSTALL_ATF_FILENAME}" 5000
 part_update "fsbl2" "${INSTALL_ATF_FILENAME}" 5000
+
+# Update metadata
+part_update "metadata1" "${INSTALL_METADATA_FILENAME}" 5000
+part_update "metadata2" "${INSTALL_METADATA_FILENAME}" 5000
 
 # Update FIP
 part_update "fip-a" "${INSTALL_FIP_FILENAME}" 5000
@@ -315,7 +321,7 @@ else
 fi
 
 # Set the dboot_kernel_var to fitimage if Trustfence is enabled
-if [ "${TRUSTFENCE}" = "true" ] || echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "signed"; then
+if [ "${TRUSTFENCE}" = "true" ] || echo "${INSTALL_FIP_FILENAME}" | grep -q -e "Signed"; then
 	uuu fb: ucmd setenv dboot_kernel_var fitimage
 	uuu fb: ucmd saveenv
 fi
@@ -330,10 +336,10 @@ uuu fb: ucmd bootcount reset
 # Reset the target
 uuu fb: acmd reset
 
-echo "\033[32m"
-echo "============================================================="
-echo "Done! Wait for the target to complete first boot process."
-echo "============================================================="
-echo "\033[0m"
+printf "\033[32m\n"
+printf "=============================================================\n"
+printf "Done! Wait for the target to complete first boot process.\n"
+printf "=============================================================\n"
+printf "\033[0m\n"
 
 exit

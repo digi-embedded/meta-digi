@@ -7,8 +7,9 @@
 install_abort=0
 BASEFILENAME=0
 
-setenv INSTALL_ATF_FILENAME tf-a-##MACHINE##-${module_ram}-nand.stm32
-setenv INSTALL_FIP_FILENAME fip-##MACHINE##-${module_ram}-optee.bin
+setenv INSTALL_ATF_FILENAME tf-a-##MACHINE##-${module_ram}-##BOOTSCHEME_DEFAULT##-nand.stm32
+setenv INSTALL_METADATA_FILENAME metadata-##MACHINE##.bin
+setenv INSTALL_FIP_FILENAME fip-##MACHINE##-${module_ram}-##BOOTSCHEME_DEFAULT##-nand.bin
 setenv INSTALL_MMCDEV 1
 
 if test -z "${image-name}"; then
@@ -28,7 +29,7 @@ setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.ubifs
 setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.ubifs
 
 # Check for presence of firmware files on the SD card
-FILES="${INSTALL_ATF_FILENAME} ${INSTALL_FIP_FILENAME} ${INSTALL_LINUX_FILENAME}"
+FILES="${INSTALL_ATF_FILENAME} ${INSTALL_METADATA_FILENAME} ${INSTALL_FIP_FILENAME} ${INSTALL_LINUX_FILENAME}"
 if test "${dualboot}" != "yes"; then
 	FILES="${FILES} ${INSTALL_RECOVERY_FILENAME}"
 fi
@@ -68,6 +69,8 @@ echo "   PARTITION   FILENAME"
 echo "   ---------   --------"
 echo "   fsbl1       ${INSTALL_ATF_FILENAME}"
 echo "   fsbl2       ${INSTALL_ATF_FILENAME}"
+echo "   metadata1   ${INSTALL_METADATA_FILENAME}"
+echo "   metadata2   ${INSTALL_METADATA_FILENAME}"
 echo "   fip-a       ${INSTALL_FIP_FILENAME}"
 echo "   fip-b       ${INSTALL_FIP_FILENAME}"
 if test "${dualboot}" = "yes"; then
@@ -101,7 +104,7 @@ setenv forced_update 1
 # the first reset.
 setenv bootdelay 0
 
-# Update ATF and FIP images
+# Update ATF, METADATA and FIP images
 echo ""
 echo ""
 echo ">> Installing ATF boot loader image ${INSTALL_ATF_FILENAME}"
@@ -117,6 +120,25 @@ fi
 update fsbl2 mmc ${INSTALL_MMCDEV} ${INSTALL_ATF_FILENAME}
 if test $? -eq 1; then
 	echo "[ERROR] Failed to update fsbl2!";
+	echo "";
+	echo "Aborted.";
+	exit;
+fi
+echo ""
+echo ""
+echo ">> Installing METADATA boot loader image ${INSTALL_METADATA_FILENAME}"
+echo ""
+echo ""
+update metadata1 mmc ${INSTALL_MMCDEV} ${INSTALL_METADATA_FILENAME}
+if test $? -eq 1; then
+	echo "[ERROR] Failed to update metadata1!";
+	echo "";
+	echo "Aborted.";
+	exit;
+fi
+update metadata2 mmc ${INSTALL_MMCDEV} ${INSTALL_METADATA_FILENAME}
+if test $? -eq 1; then
+	echo "[ERROR] Failed to update metadata2!";
 	echo "";
 	echo "Aborted.";
 	exit;
