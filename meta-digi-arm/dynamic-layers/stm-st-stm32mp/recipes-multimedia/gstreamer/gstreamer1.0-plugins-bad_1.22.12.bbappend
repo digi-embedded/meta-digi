@@ -101,8 +101,3 @@ do_install:append() {
     install -d ${D}${includedir}/gstreamer-1.0/wayland
     install -m 644 ${S}/gst-libs/gst/wayland/wayland.h ${D}${includedir}/gstreamer-1.0/wayland
 }
-
-# DEY: revert STM patch nº8 to fix .flv video playback error
-SRC_URI:append = " \
-    file://Revert-wllinuxdmabuf-Handle-video-meta-inside-the-im.patch \
-"
