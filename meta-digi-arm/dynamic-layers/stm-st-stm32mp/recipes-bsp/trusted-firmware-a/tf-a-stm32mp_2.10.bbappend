@@ -332,7 +332,7 @@ deploy_symlinks_atf() {
 		if [ -f "${DEPLOY_DIR_IMAGE}/${TF_A_BASEDIR}/${TF_A_METADATA_BINARY}" ]; then
 			cd "${DEPLOY_DIR_IMAGE}"
 			# symlink metadata
-			ln -sf "${TF_A_BASEDIR}/${TF_A_METADATA_BINARY}" "${DEPLOY_DIR_IMAGE}/${TF_A_METADATA_NAME}-${dt}.${TF_A_METADATA_SUFFIX}"
+			ln -sf "${TF_A_BASEDIR}/${TF_A_METADATA_BINARY}" "${DEPLOY_DIR_IMAGE}/${TF_A_METADATA_NAME}-${MACHINE}.${TF_A_METADATA_SUFFIX}"
 		fi
 	fi
 }
