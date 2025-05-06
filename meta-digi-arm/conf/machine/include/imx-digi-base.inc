@@ -244,10 +244,10 @@ MACHINE_GSTREAMER_1_0_PLUGIN:mx9-nxp-bsp   ?= "imx-gst1.0-plugin"
 # to 'imx-nxp-bsp'
 #
 # GStreamer forked recipes
-PREFERRED_VERSION_gstreamer1.0:imx-nxp-bsp              ??= "1.24.0.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-bad:imx-nxp-bsp  ??= "1.24.0.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-base:imx-nxp-bsp ??= "1.24.0.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-good:imx-nxp-bsp ??= "1.24.0.imx"
+PREFERRED_VERSION_gstreamer1.0:imx-nxp-bsp              ??= "1.24.7.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-bad:imx-nxp-bsp  ??= "1.24.7.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-base:imx-nxp-bsp ??= "1.24.7.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-good:imx-nxp-bsp ??= "1.24.7.imx"
 
 # GStreamer copied recipes
 PREFERRED_VERSION_gst-devtools:imx-nxp-bsp              ??= "1.22.5.imx"
