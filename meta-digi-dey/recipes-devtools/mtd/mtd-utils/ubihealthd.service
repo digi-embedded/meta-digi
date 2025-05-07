@@ -1,0 +1,13 @@
+[Unit]
+Description=UBI health monitor
+After=ubi.mount
+ConditionDirectoryNotEmpty=/sys/class/ubi
+
+[Service]
+Type=oneshot
+ExecStart=/etc/ubihealthd-init start
+ExecStop=/etc/ubihealthd-init stop
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
