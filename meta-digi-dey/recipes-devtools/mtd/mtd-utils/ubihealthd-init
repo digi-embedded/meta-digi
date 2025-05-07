@@ -1,0 +1,38 @@
+#!/bin/sh
+
+DAEMON="/usr/sbin/ubihealthd"
+CMD="$1"
+INTERVAL="${2:-3600}"  # Optional (default to 1 hour if not specified)
+
+[ -z "$CMD" ] && usage
+
+usage() {
+	echo "Usage: $0 {start|stop|restart} [interval_sec]"
+	exit 1
+}
+
+case "$CMD" in
+	start)
+		for dev in $(ls /sys/class/ubi/ | grep -E '^ubi[0-9]+$'); do
+			PIDFILE="/run/ubihealthd-${dev}.pid"
+			echo -n "Starting UBI health monitor on ${dev} (interval ${INTERVAL} s): "
+			start-stop-daemon -S -b -x "${DAEMON}" -m -p "${PIDFILE}" -- -d /dev/"${dev}" -i "${INTERVAL}" -f
+			echo "done."
+		done
+		;;
+	stop)
+		for dev in $(ls /sys/class/ubi/ | grep -E '^ubi[0-9]+$'); do
+			PIDFILE="/run/ubihealthd-${dev}.pid"
+			start-stop-daemon -K -x "${DAEMON}" -p "${PIDFILE}"
+			rm -f "$PIDFILE"
+		done
+		;;
+	restart)
+		$0 stop
+		sleep 1
+		$0 start
+		;;
+	*)
+		usage
+		;;
+esac
