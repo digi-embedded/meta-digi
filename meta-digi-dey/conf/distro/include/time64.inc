@@ -6,6 +6,9 @@ GLIBC_64BIT_TIME_FLAGS = " -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64"
 # Only needed for some 32-bit architectures
 TARGET_CC_ARCH:append:arm = "${GLIBC_64BIT_TIME_FLAGS}"
 
+# Do not apply to CCMP15 platform to avoid side effects with GStreamer
+TARGET_CC_ARCH:remove:ccmp15 = "${GLIBC_64BIT_TIME_FLAGS}"
+
 # Do not apply the 64Bit compile flag to the following packages
 # to avoid build errors
 GLIBC_64BIT_TIME_FLAGS:pn-alsa-lib = ""
