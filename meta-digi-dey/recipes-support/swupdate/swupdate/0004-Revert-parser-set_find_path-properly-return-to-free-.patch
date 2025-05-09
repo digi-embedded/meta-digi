@@ -1,0 +1,170 @@
+From: Stefano Babic <stefano.babic@swupdate.org>
+Date: Fri, 28 Feb 2025 17:19:05 +0100
+Subject: [PATCH] Revert "parser: set_find_path: properly return to-free string
+ array"
+
+This reverts commit cefc5ae2e43c78697281c529a29b61c4bdb3c037.
+
+The commit causes a regression bug by following links in the
+sw-description if the root of the tree is redirected via a link. An
+example to create the issue is:
+
+	stable : {
+              copy1: {
+                partitions: (
+			..........
+                );
+                images: (
+		        ..........
+                );
+                scripts: (
+		        ..........
+                );
+              };
+
+              copy2: {
+                 ref = "#./copy1";
+              };
+        };
+
+An update with -e stable,copy1 works, while -e stable,copy2 does not
+find anything to be installed because the link is not followed.
+
+Signed-off-by: Stefano Babic <stefano.babic@swupdate.org>
+Reported-by: Konstantin Shabalovski <shabalovskikn@gmail.com>
+Reported-by: Florian Amstutz <florian.amstutz@scs.ch>
+(cherry picked from commit 4294da8b720ac9bbf25001fddb0ee63d39207dc1)
+
+parser: fix issues related to commit cefc5ae2
+
+The commit above fixes a memory leak, but on a structure that was mainly
+used for debugging and points to used node array in case of links. If
+this structure is freed, links recursion does not work anymore.
+
+After reverting the commit above, remove the structure causing the
+regression bug because it is not really used.
+
+Signed-off-by: Stefano Babic <stefano.babic@swupdate.org>
+(cherry picked from commit 93fd657cd2fd4a396cd903bfcd576f6475d1dcdf)
+---
+ core/parsing_library.c              | 4 ++--
+ corelib/parsing_library_libconfig.c | 4 +---
+ corelib/parsing_library_libjson.c   | 4 +---
+ include/parselib.h                  | 2 +-
+ parser/parser.c                     | 4 +---
+ 5 files changed, 6 insertions(+), 12 deletions(-)
+
+diff --git a/core/parsing_library.c b/core/parsing_library.c
+index 1dc0c42a..a1fcfdd8 100644
+--- a/core/parsing_library.c
++++ b/core/parsing_library.c
+@@ -239,7 +239,7 @@ void get_hash_value(parsertype p, void *elem, unsigned char *hash)
+ 	ascii_to_hash(hash, hash_ascii);
+ }
+ 
+-bool set_find_path(const char **nodes, const char *newpath, char ***tmp)
++bool set_find_path(const char **nodes, const char *newpath)
+ {
+ 	char **paths;
+ 	unsigned int count;
+@@ -329,7 +329,7 @@ bool set_find_path(const char **nodes, const char *newpath, char ***tmp)
+ 	}
+ 
+ 	free(ref);
+-	*tmp = paths;
++	free(paths);
+ 
+ 	return true;
+ }
+diff --git a/corelib/parsing_library_libconfig.c b/corelib/parsing_library_libconfig.c
+index 35ae903e..bcb72a11 100644
+--- a/corelib/parsing_library_libconfig.c
++++ b/corelib/parsing_library_libconfig.c
+@@ -182,7 +182,6 @@ void *find_root_libconfig(config_t *cfg, const char **nodes, unsigned int depth)
+ 	config_setting_t *elem;
+ 	char *root;
+ 	const char *ref;
+-	char **tmp = NULL;
+ 
+ 	/*
+ 	 * check for deadlock links, block recursion
+@@ -204,12 +203,11 @@ void *find_root_libconfig(config_t *cfg, const char **nodes, unsigned int depth)
+ 	if (elem && config_setting_is_group(elem) == CONFIG_TRUE) {
+ 		ref = get_field_string_libconfig(elem, "ref");
+ 		if (ref) {
+-			if (!set_find_path(nodes, ref, &tmp)) {
++			if (!set_find_path(nodes, ref)) {
+ 				free(root);
+ 				return NULL;
+ 			}
+ 			elem = find_root_libconfig(cfg, nodes, depth);
+-			free_string_array(tmp);
+ 		}
+ 	}
+ 
+diff --git a/corelib/parsing_library_libjson.c b/corelib/parsing_library_libjson.c
+index e78ed000..99b60f55 100644
+--- a/corelib/parsing_library_libjson.c
++++ b/corelib/parsing_library_libjson.c
+@@ -220,7 +220,6 @@ void *find_root_json(json_object *root, const char **nodes, unsigned int depth)
+ {
+ 	json_object *node;
+ 	enum json_type type;
+-	char **tmp = NULL;
+ 	const char *str;
+ 
+ 	/*
+@@ -237,10 +236,9 @@ void *find_root_json(json_object *root, const char **nodes, unsigned int depth)
+ 		if (type == json_type_object || type == json_type_array) {
+ 			str = get_field_string_json(node, "ref");
+ 			if (str) {
+-				if (!set_find_path(nodes, str, &tmp))
++				if (!set_find_path(nodes, str))
+ 					return NULL;
+ 				node = find_root_json(root, nodes, depth);
+-				free_string_array(tmp);
+ 			}
+ 		}
+ 	}
+diff --git a/include/parselib.h b/include/parselib.h
+index 2837dc33..40e98f68 100644
+--- a/include/parselib.h
++++ b/include/parselib.h
+@@ -63,7 +63,7 @@ void get_hash_value(parsertype p, void *elem, unsigned char *hash);
+ void check_field_string(const char *src, char *dst, const size_t max_len);
+ void *find_root(parsertype p, void *root, const char **nodes);
+ void *get_node(parsertype p, void *root, const char **nodes);
+-bool set_find_path(const char **nodes, const char *newpath, char ***tmp);
++bool set_find_path(const char **nodes, const char *newpath);
+ 
+ static inline void get_field_bool(parsertype p, void *e, const char *path, bool *dest)
+ {
+diff --git a/parser/parser.c b/parser/parser.c
+index 99c3396e..a8f4a691 100644
+--- a/parser/parser.c
++++ b/parser/parser.c
+@@ -132,7 +132,6 @@ static int parser_follow_link(parsertype p, void *cfg, void *elem,
+ {
+ 	const char *ref;
+ 	void *link;
+-	char **tmp = NULL;	/* to store temporary link path */
+ 	const char **linknodes;
+ 	int result = 0;
+ 
+@@ -144,7 +143,7 @@ static int parser_follow_link(parsertype p, void *cfg, void *elem,
+ 	for (int j = 0; j < count_string_array(nodes); j++) {
+ 		linknodes[j] = nodes[j];
+ 	}
+-	if (!set_find_path(linknodes, ref, &tmp)) {
++	if (!set_find_path(linknodes, ref)) {
+ 		free(linknodes);
+ 		return -1;
+ 	}
+@@ -153,7 +152,6 @@ static int parser_follow_link(parsertype p, void *cfg, void *elem,
+ 	if (link) {
+ 		result = fn(p, cfg, link, linknodes, swcfg, L);
+ 	}
+-	free_string_array(tmp);
+ 	free(linknodes);
+ 	return result;
+ }
