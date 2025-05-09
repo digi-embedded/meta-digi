@@ -106,7 +106,7 @@ SWUPDATE_MTD_BLACKLIST = "0 1 2 3 4 5"
 ST_TOOLS_FOR_TARGET_SDK:remove = "kernel-headers"
 
 # Skip warnings for packages using 32-bit APIs
-INSANE_SKIP:append:alsa-lib = " 32bit-time"
-INSANE_SKIP:append:ir-keytable = " 32bit-time"
-INSANE_SKIP:append:kbd = " 32bit-time"
-INSANE_SKIP:append:v4l-utils = " 32bit-time"
+INSANE_SKIP:append:pn-alsa-lib = " 32bit-time"
+INSANE_SKIP:append:pn-ir-keytable = " 32bit-time"
+INSANE_SKIP:append:pn-kbd = " 32bit-time"
+INSANE_SKIP:append:pn-v4l-utils = " 32bit-time"

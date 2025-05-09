@@ -10,3 +10,5 @@ SRC_URI:append:ccimx6ul = " \
 
 SRCBRANCH = "MM_04.09.02_2410_L6.6.y"
 SRCREV = "ef9c1a080e739e6f0be878148d9f4a050dc83bec"
+
+INSANE_SKIP:append:mx6-nxp-bsp = " 32bit-time"
