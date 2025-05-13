@@ -11,6 +11,6 @@ SRC_URI:append:ccimx8x = " \
     file://0001-DMABufVideoSinkGStreamer-disable-sink-unconditionall.patch \
 "
 
-SRC_URI:append:ccimx8m = " \
+SRC_URI:append:ccimx8mm = " \
     file://0001-DMABufVideoSinkGStreamer-disable-sink-unconditionall.patch \
 "
