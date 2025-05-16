@@ -85,8 +85,8 @@ BOOTDEVICE_LABELS ?= "nand-4-256-1024 usb"
 
 # Remove NAND-based ubi/ubifs images added by st-machine-common-stm32mp.inc
 # because image_types_digi.bbclass already builds their own.
-MULTIUBI_BUILD:remove = "nand-4-256-1024"
-IMAGE_FSTYPES:remove = "stmultiubi"
+MULTIUBI_BUILD:remove = "nand_4_256_1024"
+IMAGE_FSTYPES:remove = "multiubi"
 
 # Wic files
 WKS_FILE_DEPENDS ?= " \
