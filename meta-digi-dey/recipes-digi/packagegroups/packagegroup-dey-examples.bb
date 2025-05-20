@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020, Digi International Inc.
+# Copyright (C) 2013-2025, Digi International Inc.
 
 SUMMARY = "DEY examples packagegroup"
 
@@ -24,7 +24,6 @@ RDEPENDS_${PN} = "\
 "
 RDEPENDS_${PN}_append_ccimx6 = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \
-	dey-examples-v4l2 \
 "
 
 COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8x|ccimx8m)"
