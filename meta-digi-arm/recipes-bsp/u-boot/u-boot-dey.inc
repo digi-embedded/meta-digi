@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2024, Digi International Inc.
+# Copyright (C) 2018-2025, Digi International Inc.
 
 require recipes-bsp/u-boot/u-boot.inc
 
@@ -218,7 +218,7 @@ do_compile:append:ccmp1() {
 }
 
 BOOT_TOOLS = "imx-boot-tools"
-BOOT_TOOLS:ccmp1 = "u-boot"
+BOOT_TOOLS:stm32mpcommon = "u-boot"
 
 do_deploy:append:ccimx8m() {
 	# Deploy u-boot-nodtb.bin and ccimx8m[m|n]-dvk.dtb, to be packaged in boot binary by imx-boot
@@ -241,32 +241,58 @@ do_deploy:append:ccimx8m() {
 	fi
 }
 
-do_deploy:append:ccmp1() {
+do_deploy:append:stm32mpcommon() {
 	# Deploy u-boot-nodtb.bin and ccmp1x-dvk-xxxx.dtb, to be packaged in fip binary by tf-a
 	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
 	if [ -n "${UBOOT_DEVICETREE}" ]; then
 		for devicetree in ${UBOOT_DEVICETREE}; do
 			# Install u-boot dtb
 			install -m 644 ${B}/${config}/arch/arm/dts/${devicetree}.dtb ${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${devicetree}.dtb
+
+			if [ "${UBOOT_SIGN_ENABLE}" = "1" ]; then
+				# Keep u-boot devicetree without signature
+				ubootdevicetree="${B}/${config}/arch/arm/dts/${devicetree}.dtb"
+				namewithoutsignature=`echo $ubootdevicetree | sed "s/\.dtb/-without-signature.dtb/g"`
+				# Install unsigned U-Boot dtb
+				install -m 644 ${namewithoutsignature} ${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${devicetree}-without-signature.dtb
+			fi
 		done
 	fi
 	install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin
-
-	# Append signature to u-boot DT
-	if [ "x${UBOOT_SIGN_ENABLE}" = "x1" ] && [ -n "${UBOOT_DEVICETREE}" ] ; then
-		for devicetree in ${UBOOT_DEVICETREE}; do
-			# get name of u-boot devicetree without signature
-			ubootdevicetree="${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${devicetree}.dtb"
-			namewithoutsignature=`echo $ubootdevicetree | sed "s/\.dtb/-without-signature.dtb/g"`
-			namewithsignature=`echo $ubootdevicetree | sed "s/\.dtb/-with-signature.dtb/g"`
-			mv $ubootdevicetree $namewithoutsignature
-			# get name of U-Boot device tree from DEPLOY_DIR
-			nameonkernel="${DEPLOY_DIR_IMAGE}/${FIP_UBOOT_DTB}-${devicetree}-with-signature.dtb"
-			cp $nameonkernel $namewithsignature
-			cp $nameonkernel $ubootdevicetree
-		done
-	fi
 }
+
+do_uboot_assemble_fitimage:append:stm32mpcommon() {
+	for config in ${UBOOT_MACHINE}; do
+		if [ -n "${UBOOT_DEVICETREE}" ] && [ "${UBOOT_SIGN_ENABLE}" = "1" ]; then
+			for devicetree in ${UBOOT_DEVICETREE}; do
+				# Keep u-boot devicetree without signature
+				ubootdevicetree="${B}/${config}/arch/arm/dts/${devicetree}.dtb"
+				namewithoutsignature=`echo $ubootdevicetree | sed "s/\.dtb/-without-signature.dtb/g"`
+				cp $ubootdevicetree $namewithoutsignature
+
+				# Add image public key in U-Boot dtb file
+				fdt_add_pubkey -a "${FIT_HASH_ALG},${FIT_SIGN_ALG}" \
+								-k "${UBOOT_SIGN_KEYDIR}" \
+								-n "${UBOOT_SIGN_IMG_KEYNAME}" \
+								-r "image" \
+								"${ubootdevicetree}"
+
+				# Add configuration public key in U-Boot dtb file
+				fdt_add_pubkey -a "${FIT_HASH_ALG},${FIT_SIGN_ALG}" \
+								-k "${UBOOT_SIGN_KEYDIR}" \
+								-n "${UBOOT_SIGN_KEYNAME}" \
+								-r "conf" \
+								"${ubootdevicetree}"
+			done
+		fi
+	done
+}
+# Add dependency to make sure that RSA keys generated to sign fitImage are available for u-boot
+do_uboot_assemble_fitimage[depends] += " \
+	${@'virtual/kernel:do_kernel_generate_rsa_keys' \
+	if "stm32mpcommon" in d.getVar('MACHINEOVERRIDES') \
+	and "fitImage" in d.getVar('KERNEL_IMAGETYPE') else ''} \
+"
 
 FIP_DIR_UBOOT  ?= "/u-boot"
 
