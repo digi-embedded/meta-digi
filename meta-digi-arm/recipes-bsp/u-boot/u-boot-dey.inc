@@ -145,7 +145,7 @@ adapt_uboot_filenames() {
 				if [ $j -eq $i ]
 				then
 					cd ${DEPLOYDIR}
-					rm -r ${UBOOT_BINARY}-${type}
+					rm -f ${UBOOT_BINARY}-${type}
 					ln -sf ${UBOOT_BINARYNAME}-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-${type}.${UBOOT_SUFFIX}
 				fi
 			done
