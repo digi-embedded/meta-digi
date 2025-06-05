@@ -1,14 +1,17 @@
 #
-# U-Boot script for installing Linux images created by Yocto from the SD
-# card into the eMMC
+# U-Boot script for installing Linux images created by Yocto from external media
+# into the eMMC
 #
 
 # Reset temp variables
 install_abort=0
 BASEFILENAME=0
 
-setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##.bin;
-setenv INSTALL_MMCDEV 1
+setenv INSTALL_ATF_FILENAME tf-a-##MACHINE##-optee-emmc.stm32
+setenv INSTALL_METADATA_FILENAME metadata-##MACHINE##.bin
+setenv INSTALL_FIP_FILENAME fip-##MACHINE##-optee-emmc.bin
+setenv INSTALL_MEDIA_INDEX ##INSTALL_MEDIA_INDEX##
+setenv INSTALL_MEDIA ##INSTALL_MEDIA##
 
 if test -z "${image-name}"; then
 	setenv image-name ##DEFAULT_IMAGE_NAME##
@@ -25,13 +28,13 @@ fi
 setenv INSTALL_LINUX_FILENAME ${BASEFILENAME}-##MACHINE##.boot.vfat
 setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.vfat
 
-# Check for presence of firmware files on the SD card
-FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME}"
+# Check for presence of firmware files on the media
+FILES="${INSTALL_ATF_FILENAME} ${INSTALL_METADATA_FILENAME} ${INSTALL_FIP_FILENAME} ${INSTALL_LINUX_FILENAME}"
 if test "${dualboot}" != "yes"; then
 	FILES="${FILES} ${INSTALL_RECOVERY_FILENAME}"
 fi
 for install_f in ${FILES}; do
-	if test ! -e mmc ${INSTALL_MMCDEV} ${install_f}; then
+	if test ! -e ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${install_f}; then
 		echo "ERROR: Could not find file ${install_f}";
 		install_abort=1;
 	fi;
@@ -39,9 +42,9 @@ done
 # Verify what kind of rootfs is going to be programmed
 ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.ext4"
 ROOTFS_FILENAME_SQFS="${BASEFILENAME}-##MACHINE##.squashfs"
-if test -e mmc ${INSTALL_MMCDEV} ${ROOTFS_FILENAME}; then
+if test -e ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${ROOTFS_FILENAME}; then
 	setenv INSTALL_ROOTFS_FILENAME ${ROOTFS_FILENAME};
-elif test -e mmc ${INSTALL_MMCDEV} ${ROOTFS_FILENAME_SQFS}; then
+elif test -e ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${ROOTFS_FILENAME_SQFS}; then
 	setenv INSTALL_ROOTFS_FILENAME ${ROOTFS_FILENAME_SQFS};
 else
 	echo "ERROR: Could not find any rootfs image";
@@ -55,7 +58,7 @@ if test "${install_abort}" = "1"; then
 fi
 
 echo "############################################################"
-echo "#           Linux firmware install from micro SD           #"
+echo "#           Linux firmware install from media              #"
 echo "############################################################"
 echo ""
 echo " This process will erase your eMMC and will install the following files"
@@ -63,7 +66,12 @@ echo " on the partitions of the eMMC."
 echo ""
 echo "   PARTITION   FILENAME"
 echo "   ---------   --------"
-echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
+echo "   boot1       ${INSTALL_ATF_FILENAME}"
+echo "   boot2       ${INSTALL_ATF_FILENAME}"
+echo "   metadata1   ${INSTALL_METADATA_FILENAME}"
+echo "   metadata2   ${INSTALL_METADATA_FILENAME}"
+echo "   fip-a       ${INSTALL_FIP_FILENAME}"
+echo "   fip-b       ${INSTALL_FIP_FILENAME}"
 if test "${dualboot}" = "yes"; then
 	echo "   linux_a     ${INSTALL_LINUX_FILENAME}"
 	if test "${install_dualboot}" = "yes"; then
@@ -98,22 +106,63 @@ setenv bootdelay 0
 # Set target MMC device index to eMMC
 setenv mmcdev 0
 
-# Update U-Boot
+# Update ATF, METADATA and FIP images
 echo ""
 echo ""
-echo ">> Installing U-Boot boot loader image ${INSTALL_UBOOT_FILENAME} (target will reset)"
+echo ">> Installing ATF boot loader image ${INSTALL_ATF_FILENAME}"
 echo ""
 echo ""
-update uboot mmc ${INSTALL_MMCDEV} ${INSTALL_UBOOT_FILENAME}
+update boot1 ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_ATF_FILENAME}
 if test $? -eq 1; then
-	# Use old-style update with source file system argument
-	update uboot mmc ${INSTALL_MMCDEV} fat ${INSTALL_UBOOT_FILENAME}
-	if test $? -eq 1; then
-		echo "[ERROR] Failed to update U-Boot boot loader!";
-		echo "";
-		echo "Aborted.";
-		exit;
-	fi
+	echo "[ERROR] Failed to update boot1!";
+	echo "";
+	echo "Aborted.";
+	exit;
+fi
+update boot2 ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_ATF_FILENAME}
+if test $? -eq 1; then
+	echo "[ERROR] Failed to update boot2!";
+	echo "";
+	echo "Aborted.";
+	exit;
+fi
+echo ""
+echo ""
+echo ">> Installing METADATA boot loader image ${INSTALL_METADATA_FILENAME}"
+echo ""
+echo ""
+update metadata1 ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_METADATA_FILENAME}
+if test $? -eq 1; then
+	echo "[ERROR] Failed to update metadata1!";
+	echo "";
+	echo "Aborted.";
+	exit;
+fi
+update metadata2 ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_METADATA_FILENAME}
+if test $? -eq 1; then
+	echo "[ERROR] Failed to update metadata2!";
+	echo "";
+	echo "Aborted.";
+	exit;
+fi
+echo ""
+echo ""
+echo ">> Installing FIP boot loader image ${INSTALL_FIP_FILENAME} (target will reset)"
+echo ""
+echo ""
+update fip-a ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_FIP_FILENAME}
+if test $? -eq 1; then
+	echo "[ERROR] Failed to update fip-a!";
+	echo "";
+	echo "Aborted.";
+	exit;
+fi
+update fip-b ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_FIP_FILENAME}
+if test $? -eq 1; then
+	echo "[ERROR] Failed to update fip-b!";
+	echo "";
+	echo "Aborted.";
+	exit;
 fi
 
 # Set 'bootcmd' to the second part of the script that will
@@ -130,6 +179,7 @@ fi
 #     - Erase the 'update' partition
 #     - Configure recovery to wipe 'update' partition
 #     - Run 'recovery' and let the system boot after
+# NOTE: insert some 'usb reset' commands to avoid EHCI timeouts
 setenv bootcmd "
 	env default -a;
 	setenv dualboot ${dualboot};
@@ -148,13 +198,16 @@ setenv bootcmd "
 		echo \"Aborted.\";
 		exit;
 	fi;
+	if test  \"\$\{INSTALL_MEDIA\}\" = "usb"; then
+		usb start;
+	fi;
 	if test \"\$\{dualboot\}\" = yes; then
 		echo \"\";
 		echo \"\";
 		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_a\";
 		echo \"\";
 		echo \"\";
-		update linux_a mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
+		update linux_a ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_LINUX_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update linux_a!\";
 			echo \"\";
@@ -167,7 +220,7 @@ setenv bootcmd "
 			echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_b\";
 			echo \"\";
 			echo \"\";
-			update linux_b mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
+			update linux_b ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_LINUX_FILENAME};
 			if test \$? -eq 1; then
 				echo \"[ERROR] Failed to update linux_b!\";
 				echo \"\";
@@ -175,12 +228,15 @@ setenv bootcmd "
 				exit;
 			fi;
 		fi;
+		if test  \"\$\{INSTALL_MEDIA\}\" = "usb"; then
+			usb reset;
+		fi;
 		echo \"\";
 		echo \"\";
 		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_a\";
 		echo \"\";
 		echo \"\";
-		update rootfs_a mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
+		update rootfs_a ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_ROOTFS_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update rootfs_a partition!\";
 			echo \"\";
@@ -193,7 +249,7 @@ setenv bootcmd "
 			echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_b\";
 			echo \"\";
 			echo \"\";
-			update rootfs_b mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
+			update rootfs_b ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_ROOTFS_FILENAME};
 			if test \$? -eq 1; then
 				echo \"[ERROR] Failed to update rootfs_b partition!\";
 				echo \"\";
@@ -208,7 +264,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux\";
 		echo \"\";
 		echo \"\";
-		update linux mmc ${INSTALL_MMCDEV} ${INSTALL_LINUX_FILENAME};
+		update linux ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_LINUX_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update linux!\";
 			echo \"\";
@@ -220,7 +276,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_RECOVERY_FILENAME} on recovery\";
 		echo \"\";
 		echo \"\";
-		update recovery mmc ${INSTALL_MMCDEV} ${INSTALL_RECOVERY_FILENAME};
+		update recovery ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_RECOVERY_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update recovery partition!\";
 			echo \"\";
@@ -232,7 +288,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs\";
 		echo \"\";
 		echo \"\";
-		update rootfs mmc ${INSTALL_MMCDEV} ${INSTALL_ROOTFS_FILENAME};
+		update rootfs ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_ROOTFS_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update rootfs partition!\";
 			echo \"\";

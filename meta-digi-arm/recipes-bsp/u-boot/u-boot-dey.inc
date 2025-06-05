@@ -29,7 +29,8 @@ INSTALL_FW_UBOOT_SCRIPTS = " \
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
     file://boot.txt \
-    ${INSTALL_FW_UBOOT_SCRIPTS} \
+    file://install_linux_fw_media.txt \
+    file://install_linux_fw_uuu.sh \
 "
 
 BUILD_UBOOT_SCRIPTS ?= "true"
@@ -77,6 +78,15 @@ do_deploy[postfuncs] += " \
 "
 
 build_uboot_scripts() {
+	# Generate USB installer from media template
+	sed -e 's,##INSTALL_MEDIA##,usb,g' \
+	    -e 's,##INSTALL_MEDIA_INDEX##,${UBOOT_INSTALL_USB_INDEX},g' \
+	    ${WORKDIR}/install_linux_fw_media.txt > ${WORKDIR}/install_linux_fw_usb.txt
+	# Generate microSD installer from media template
+	sed -e 's,##INSTALL_MEDIA##,mmc,g' \
+	    -e 's,##INSTALL_MEDIA_INDEX##,${UBOOT_INSTALL_SD_INDEX},g' \
+	    ${WORKDIR}/install_linux_fw_media.txt > ${WORKDIR}/install_linux_fw_sd.txt
+
 	for f in $(echo ${INSTALL_FW_UBOOT_SCRIPTS} | sed -e 's,file\:\/\/,,g'); do
 		f_ext="${f##*.}"
 		TMP_INSTALL_SCR="$(mktemp ${WORKDIR}/${f}.XXXXXX)"

@@ -1,5 +1,5 @@
 #
-# U-Boot script for installing Linux images created by Yocto from a USB stick
+# U-Boot script for installing Linux images created by Yocto from external media
 # into the eMMC
 #
 
@@ -7,10 +7,45 @@
 install_abort=0
 BASEFILENAME=0
 
-setenv INSTALL_ATF_FILENAME tf-a-##MACHINE##-optee-emmc.stm32
-setenv INSTALL_METADATA_FILENAME metadata-##MACHINE##.bin
-setenv INSTALL_FIP_FILENAME fip-##MACHINE##-optee-emmc.bin
-setenv INSTALL_USBDEV 0
+# Determine U-Boot file to program basing on module variant
+# If module_variant is unknown or not set, return error asking the user
+if test "${module_variant}" = "0x12"; then
+	setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc2GB.imx;
+elif test "${module_variant}" = "0x02" || test "${module_variant}" = "0x04" || test "${module_variant}" = "0x05" || test "${module_variant}" = "0x0b" || test "${module_variant}" = "0x11" || test "${module_variant}" = "0x14" || test "${module_variant}" = "0x15" || test "${module_variant}" = "0x16"; then
+	setenv INSTALL_UBOOT_FILENAME u-boot-cc${soc_family}sbc.imx;
+elif test "${module_variant}" = "0x03" || test "${module_variant}" = "0x0c" || test "${module_variant}" = "0x0e" || test "${module_variant}" = "0x0f" || test "${module_variant}" = "0x13"; then
+	setenv INSTALL_UBOOT_FILENAME u-boot-cc${soc_family}sbc512MB.imx;
+fi
+
+# Use 'test -n ...' because 'test -z ...' does not work well on old versions of
+# u-boot when the checked value is empty.
+if test -n "${INSTALL_UBOOT_FILENAME}"; then
+	true;
+else
+	echo "";
+	echo "[ERROR] Cannot determine U-Boot file for this module!";
+	echo "";
+	echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 6 variant:";
+	echo "   - For a Quad/Dual CPU with 2GB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc2GB.imx";
+	echo "   - For a Quad/Dual CPU with 1GB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc.imx";
+	echo "   - For a Quad/Dual CPU with 512MB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc512MB.imx";
+	echo "   - For a DualLite/Solo CPU with 1GB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc.imx";
+	echo "   - For a DualLite/Solo CPU with 512MB DDR3, run:";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc512MB.imx";
+	echo "";
+	echo "2. Run the install script again.";
+	echo "";
+	echo "Aborted";
+	echo "";
+	exit;
+fi;
+
+setenv INSTALL_MEDIA_INDEX ##INSTALL_MEDIA_INDEX##
+setenv INSTALL_MEDIA ##INSTALL_MEDIA##
 
 if test -z "${image-name}"; then
 	setenv image-name ##DEFAULT_IMAGE_NAME##
@@ -27,13 +62,13 @@ fi
 setenv INSTALL_LINUX_FILENAME ${BASEFILENAME}-##MACHINE##.boot.vfat
 setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.vfat
 
-# Check for presence of firmware files on the USB
-FILES="${INSTALL_ATF_FILENAME} ${INSTALL_METADATA_FILENAME} ${INSTALL_FIP_FILENAME} ${INSTALL_LINUX_FILENAME}"
+# Check for presence of firmware files on the media
+FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME}"
 if test "${dualboot}" != "yes"; then
 	FILES="${FILES} ${INSTALL_RECOVERY_FILENAME}"
 fi
 for install_f in ${FILES}; do
-	if test ! -e usb ${INSTALL_USBDEV} ${install_f}; then
+	if test ! -e ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${install_f}; then
 		echo "ERROR: Could not find file ${install_f}";
 		install_abort=1;
 	fi;
@@ -41,9 +76,9 @@ done
 # Verify what kind of rootfs is going to be programmed
 ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.ext4"
 ROOTFS_FILENAME_SQFS="${BASEFILENAME}-##MACHINE##.squashfs"
-if test -e usb ${INSTALL_USBDEV} ${ROOTFS_FILENAME}; then
+if test -e ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${ROOTFS_FILENAME}; then
 	setenv INSTALL_ROOTFS_FILENAME ${ROOTFS_FILENAME};
-elif test -e usb ${INSTALL_USBDEV} ${ROOTFS_FILENAME_SQFS}; then
+elif test -e ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${ROOTFS_FILENAME_SQFS}; then
 	setenv INSTALL_ROOTFS_FILENAME ${ROOTFS_FILENAME_SQFS};
 else
 	echo "ERROR: Could not find any rootfs image";
@@ -57,7 +92,7 @@ if test "${install_abort}" = "1"; then
 fi
 
 echo "############################################################"
-echo "#           Linux firmware install from USB                #"
+echo "#           Linux firmware install from media              #"
 echo "############################################################"
 echo ""
 echo " This process will erase your eMMC and will install the following files"
@@ -65,12 +100,7 @@ echo " on the partitions of the eMMC."
 echo ""
 echo "   PARTITION   FILENAME"
 echo "   ---------   --------"
-echo "   boot1       ${INSTALL_ATF_FILENAME}"
-echo "   boot2       ${INSTALL_ATF_FILENAME}"
-echo "   metadata1   ${INSTALL_METADATA_FILENAME}"
-echo "   metadata2   ${INSTALL_METADATA_FILENAME}"
-echo "   fip-a       ${INSTALL_FIP_FILENAME}"
-echo "   fip-b       ${INSTALL_FIP_FILENAME}"
+echo "   bootloader  ${INSTALL_UBOOT_FILENAME}"
 if test "${dualboot}" = "yes"; then
 	echo "   linux_a     ${INSTALL_LINUX_FILENAME}"
 	if test "${install_dualboot}" = "yes"; then
@@ -105,60 +135,15 @@ setenv bootdelay 0
 # Set target MMC device index to eMMC
 setenv mmcdev 0
 
-# Update ATF, METADATA and FIP images
+# Update U-Boot
 echo ""
 echo ""
-echo ">> Installing ATF boot loader image ${INSTALL_ATF_FILENAME}"
+echo ">> Installing U-Boot boot loader image ${INSTALL_UBOOT_FILENAME} (target will reset)"
 echo ""
 echo ""
-update boot1 usb ${INSTALL_USBDEV} ${INSTALL_ATF_FILENAME}
+update uboot ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} fat ${INSTALL_UBOOT_FILENAME}
 if test $? -eq 1; then
-	echo "[ERROR] Failed to update boot1!";
-	echo "";
-	echo "Aborted.";
-	exit;
-fi
-update boot2 usb ${INSTALL_USBDEV} ${INSTALL_ATF_FILENAME}
-if test $? -eq 1; then
-	echo "[ERROR] Failed to update boot2!";
-	echo "";
-	echo "Aborted.";
-	exit;
-fi
-echo ""
-echo ""
-echo ">> Installing METADATA boot loader image ${INSTALL_METADATA_FILENAME}"
-echo ""
-echo ""
-update metadata1 usb ${INSTALL_USBDEV} ${INSTALL_METADATA_FILENAME}
-if test $? -eq 1; then
-	echo "[ERROR] Failed to update metadata1!";
-	echo "";
-	echo "Aborted.";
-	exit;
-fi
-update metadata2 usb ${INSTALL_USBDEV} ${INSTALL_METADATA_FILENAME}
-if test $? -eq 1; then
-	echo "[ERROR] Failed to update metadata2!";
-	echo "";
-	echo "Aborted.";
-	exit;
-fi
-echo ""
-echo ""
-echo ">> Installing FIP boot loader image ${INSTALL_FIP_FILENAME} (target will reset)"
-echo ""
-echo ""
-update fip-a usb ${INSTALL_USBDEV} ${INSTALL_FIP_FILENAME}
-if test $? -eq 1; then
-	echo "[ERROR] Failed to update fip-a!";
-	echo "";
-	echo "Aborted.";
-	exit;
-fi
-update fip-b usb ${INSTALL_USBDEV} ${INSTALL_FIP_FILENAME}
-if test $? -eq 1; then
-	echo "[ERROR] Failed to update fip-b!";
+	echo "[ERROR] Failed to update U-Boot boot loader!";
 	echo "";
 	echo "Aborted.";
 	exit;
@@ -168,7 +153,6 @@ fi
 #  - Reset environment to defaults
 #  - Restore 'dualboot' if previously set
 #  - Save the environment
-#  - Force on-the-fly updates to avoid possible verification errors
 #  - Partition the eMMC user data area for Linux
 #  - If Dual Boot
 #     - Update the system partitions: linux_a, linux_b, rootfs_a, rootfs_b
@@ -178,12 +162,12 @@ fi
 #     - Erase the 'update' partition
 #     - Configure recovery to wipe 'update' partition
 #     - Run 'recovery' and let the system boot after
+# NOTE: insert some 'usb reset' commands to avoid EHCI timeouts
 setenv bootcmd "
 	env default -a;
 	setenv dualboot ${dualboot};
 	setenv install_dualboot ${install_dualboot};
 	saveenv;
-	setenv otf-update yes;
 	echo \"\";
 	echo \"\";
 	echo \">> Creating Linux partition table on the eMMC\";
@@ -196,14 +180,16 @@ setenv bootcmd "
 		echo \"Aborted.\";
 		exit;
 	fi;
-	usb start;
+	if test  \"\$\{INSTALL_MEDIA\}\" = "usb"; then
+		usb start;
+	fi;
 	if test \"\$\{dualboot\}\" = yes; then
 		echo \"\";
 		echo \"\";
 		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_a\";
 		echo \"\";
 		echo \"\";
-		update linux_a usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
+		update linux_a ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_LINUX_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update linux_a!\";
 			echo \"\";
@@ -216,7 +202,7 @@ setenv bootcmd "
 			echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux_b\";
 			echo \"\";
 			echo \"\";
-			update linux_b usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
+			update linux_b ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_LINUX_FILENAME};
 			if test \$? -eq 1; then
 				echo \"[ERROR] Failed to update linux_b!\";
 				echo \"\";
@@ -224,12 +210,15 @@ setenv bootcmd "
 				exit;
 			fi;
 		fi;
+		if test  \"\$\{INSTALL_MEDIA\}\" = "usb"; then
+			usb reset;
+		fi;
 		echo \"\";
 		echo \"\";
 		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_a\";
 		echo \"\";
 		echo \"\";
-		update rootfs_a usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME};
+		update rootfs_a ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_ROOTFS_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update rootfs_a partition!\";
 			echo \"\";
@@ -242,7 +231,7 @@ setenv bootcmd "
 			echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs_b\";
 			echo \"\";
 			echo \"\";
-			update rootfs_b usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME};
+			update rootfs_b ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_ROOTFS_FILENAME};
 			if test \$? -eq 1; then
 				echo \"[ERROR] Failed to update rootfs_b partition!\";
 				echo \"\";
@@ -257,7 +246,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_LINUX_FILENAME} on linux\";
 		echo \"\";
 		echo \"\";
-		update linux usb ${INSTALL_USBDEV} ${INSTALL_LINUX_FILENAME};
+		update linux ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_LINUX_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update linux!\";
 			echo \"\";
@@ -269,7 +258,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_RECOVERY_FILENAME} on recovery\";
 		echo \"\";
 		echo \"\";
-		update recovery usb ${INSTALL_USBDEV} ${INSTALL_RECOVERY_FILENAME};
+		update recovery ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_RECOVERY_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update recovery partition!\";
 			echo \"\";
@@ -281,7 +270,7 @@ setenv bootcmd "
 		echo \">> Installing file ${INSTALL_ROOTFS_FILENAME} on rootfs\";
 		echo \"\";
 		echo \"\";
-		update rootfs usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME};
+		update rootfs ${INSTALL_MEDIA} ${INSTALL_MEDIA_INDEX} ${INSTALL_ROOTFS_FILENAME};
 		if test \$? -eq 1; then
 			echo \"[ERROR] Failed to update rootfs partition!\";
 			echo \"\";
@@ -292,7 +281,7 @@ setenv bootcmd "
 		setenv boot_recovery yes;
 		setenv recovery_command wipe_update;
 	fi;
-	setenv otf-update;
+	setenv bootcount 0;
 	saveenv;
 	echo \"\";
 	echo \"\";
@@ -303,10 +292,9 @@ setenv bootcmd "
 	echo \"\";
 	echo \"\";
 	sleep 1;
-	bootcount reset;
 	reset;
 "
 
-bootcount reset
+setenv bootcount 0
 saveenv
 reset
