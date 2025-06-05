@@ -39,7 +39,6 @@ if test "${BASEFILENAME}" = "0"; then
 fi
 setenv INSTALL_LINUX_FILENAME ${BASEFILENAME}-##MACHINE##.boot.vfat
 setenv INSTALL_RECOVERY_FILENAME ${BASEFILENAME}-##MACHINE##.recovery.vfat
-setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.ext4
 
 # Check for presence of firmware files on the USB
 FILES="${INSTALL_UBOOT_FILENAME} ${INSTALL_LINUX_FILENAME}"
@@ -53,14 +52,15 @@ for install_f in ${FILES}; do
 	fi;
 done
 # Verify what kind of rootfs is going to be programmed
-if test ! -e usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME}; then
-	echo "ERROR: Could not find file ${INSTALL_ROOTFS_FILENAME}";
-	setenv INSTALL_ROOTFS_FILENAME ${BASEFILENAME}-##MACHINE##.squashfs
-	echo "INFO: Trying with file ${INSTALL_ROOTFS_FILENAME}";
-	if test ! -e usb ${INSTALL_USBDEV} ${INSTALL_ROOTFS_FILENAME}; then
-		echo "ERROR: Could not find file ${INSTALL_ROOTFS_FILENAME}";
-		install_abort=1;
-	fi
+ROOTFS_FILENAME="${BASEFILENAME}-##MACHINE##.ext4"
+ROOTFS_FILENAME_SQFS="${BASEFILENAME}-##MACHINE##.squashfs"
+if test -e usb ${INSTALL_USBDEV} ${ROOTFS_FILENAME}; then
+	setenv INSTALL_ROOTFS_FILENAME ${ROOTFS_FILENAME};
+elif test -e usb ${INSTALL_USBDEV} ${ROOTFS_FILENAME_SQFS}; then
+	setenv INSTALL_ROOTFS_FILENAME ${ROOTFS_FILENAME_SQFS};
+else
+	echo "ERROR: Could not find any rootfs image";
+	install_abort=1;
 fi
 if test "${install_abort}" = "1"; then
 	echo "To install a different image, set variable 'image-name', e.g.:"
