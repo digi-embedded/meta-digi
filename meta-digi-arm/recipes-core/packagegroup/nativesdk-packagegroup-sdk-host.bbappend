@@ -1,6 +1,6 @@
 # Copyright (C) 2016-2025, Digi International Inc.
 
-IMX_OPTEE_SDK_RDEPENDS ?= "${@bb.utils.contains('MACHINE_FEATURES', 'optee', \
+IMX_OPTEE_SDK_RDEPENDS ?= "${@bb.utils.contains('SDK_MACHINE_FEATURES', 'optee', \
 					        'nativesdk-python3-cryptography nativesdk-python3-pyelftools', \
 					        '', d)}"
 

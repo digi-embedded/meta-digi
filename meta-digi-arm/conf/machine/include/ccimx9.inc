@@ -40,6 +40,10 @@ DDR_FIRMWARE_NAME = " \
 MACHINE_FEATURES += "pci wifi bluetooth"
 MACHINE_FEATURES:append:use-nxp-bsp = " optee jailhouse"
 
+# For nativesdk packages that need to go to the toolchain depending on an
+# specific machine feature.
+SDK_MACHINE_FEATURES:append = " optee"
+
 STORAGE_MEDIA = "mmc"
 WLAN_P2P_INTERFACE = "wfd0"
 
