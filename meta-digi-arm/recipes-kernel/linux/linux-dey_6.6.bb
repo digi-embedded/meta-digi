@@ -46,6 +46,10 @@ do_compile:append:stm32mpcommon() {
     fi
 }
 
+# Blacklist hci_uart module. It will be managed by the bluetooth-init script
+KERNEL_MODULE_PROBECONF:ccmp1 += "hci_uart"
+module_conf_hci_uart:ccmp1 = "blacklist hci_uart"
+
 do_install:append:stm32mpcommon() {
     if ${@bb.utils.contains('MACHINE_FEATURES','gpu','true','false',d)}; then
         # when ACCEPT_EULA are filled
