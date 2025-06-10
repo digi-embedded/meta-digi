@@ -24,6 +24,18 @@ SIGN_TOOL_EXTRA_soc:ccmp13 = " ${@bb.utils.contains('ENCRYPT_ENABLE', '1', '-of 
 # stm32mp2 = header-version 2.2
 SIGN_TOOL_EXTRA_soc:stm32mp2common = " --header-version 2.2 ${@bb.utils.contains('ENCRYPT_ENABLE', '1', '-of ${TF_A_ENCRYPT_OF}', '-of ${TF_A_SIGN_OF}', d)}"
 
+TF_A_CONFIG[optee-nand] = "\
+    ${STM32MP_DT_FILES_NAND},\
+    ${TF_A_CONFIG_OPTS_optee} ${TF_A_CONFIG_OPTS_features} ${TF_A_CONFIG_OPTS_fwupdate} STM32MP_RAW_NAND=1 STM32MP_USB_PROGRAMMER=1 ${@'STM32MP_FORCE_MTD_START_OFFSET=${TF_A_MTD_START_OFFSET_NAND}' if ${TF_A_MTD_START_OFFSET_NAND} else ''},\
+    ${TF_A_CONFIG_BASENAME_BIN},\
+    ${TF_A_CONFIG_MAKE_TARGET},\
+    ${TF_A_CONFIG_DEPLOY_FTYPE} ${TF_A_CONFIG_DEPLOY_EXTRA}"
+TF_A_CONFIG[opteemin-nand] ?= "\
+    ${STM32MP_DT_FILES_NAND},\
+    ${TF_A_CONFIG_OPTS_optee} ${TF_A_CONFIG_OPTS_features} ${TF_A_CONFIG_OPTS_fwupdate} STM32MP_RAW_NAND=1 STM32MP_USB_PROGRAMMER=1 ${@'STM32MP_FORCE_MTD_START_OFFSET=${TF_A_MTD_START_OFFSET_NAND}' if ${TF_A_MTD_START_OFFSET_NAND} else ''},\
+    ${TF_A_CONFIG_BASENAME_BIN},\
+    ${TF_A_CONFIG_MAKE_TARGET},\
+    ${TF_A_CONFIG_DEPLOY_FTYPE} ${TF_A_CONFIG_DEPLOY_EXTRA}"
 # TF_A_CONFIG[uart] (same as 'optee-programmer-uart')
 TF_A_CONFIG[uart] ?= "\
     ${STM32MP_DEVICETREE_PROGRAMMER},\
