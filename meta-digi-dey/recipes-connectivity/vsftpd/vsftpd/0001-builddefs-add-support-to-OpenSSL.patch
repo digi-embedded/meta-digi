@@ -1,0 +1,23 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Wed, 4 Jun 2025 09:15:27 +0200
+Subject: [PATCH] builddefs: add support to OpenSSL
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ builddefs.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/builddefs.h b/builddefs.h
+index 0106d1a..83de674 100644
+--- a/builddefs.h
++++ b/builddefs.h
+@@ -1,9 +1,9 @@
+ #ifndef VSF_BUILDDEFS_H
+ #define VSF_BUILDDEFS_H
+
+ #define VSF_BUILD_TCPWRAPPERS
+ #define VSF_BUILD_PAM
+-#undef VSF_BUILD_SSL
++#define VSF_BUILD_SSL
+
+ #endif /* VSF_BUILDDEFS_H */
