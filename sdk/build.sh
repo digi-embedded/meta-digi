@@ -58,6 +58,10 @@ ZIP_INSTALLER_CFG="
 DEY_IMAGE_INSTALLER = \"1\"
 "
 
+SDCARD_FSTYPE="
+IMAGE_FSTYPES:append = \" sdcard.gz\"
+"
+
 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(date +%s)}"
 BUILD_TIMESTAMP="
 SOURCE_DATE_EPOCH = \"${SOURCE_DATE_EPOCH}\"
@@ -275,6 +279,7 @@ for platform in ${DY_PLATFORMS}; do
 				printf "%s" "${RM_WORK_CFG}" >> conf/local.conf
 			fi
 			printf "%s" "${ZIP_INSTALLER_CFG}" >> conf/local.conf
+			printf "%s" "${SDCARD_FSTYPE}" >> conf/local.conf
 			# Append extra configuration macros if provided from build environment
 			if [ -n "${DY_EXTRA_LOCAL_CONF}" ]; then
 				printf "%s\n" "${DY_EXTRA_LOCAL_CONF}" >> conf/local.conf
