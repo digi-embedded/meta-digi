@@ -115,3 +115,17 @@ BOOTLOADER_SEEK_BOOTPART ?= "0"
 # This is otherwise forced by systemd because of hard-coded paths
 # in systemd source code.
 ROOT_HOME ?= "/root"
+
+# Default IMAGE_FSTYPES for eMMC/NAND
+IMAGE_FSTYPES ?= "${@ \
+	oe.utils.conditional('STORAGE_MEDIA', 'mmc', \
+		bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', \
+			'boot.vfat recovery.vfat squashfs tar.xz', \
+			'boot.vfat recovery.vfat ext4.gz tar.xz', d), \
+	oe.utils.conditional('STORAGE_MEDIA', 'mtd', \
+		bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', \
+			'boot.ubifs recovery.ubifs squashfs tar.xz', \
+			'boot.ubifs recovery.ubifs ubifs tar.xz', d), \
+		'' , d), \
+	d) \
+}"

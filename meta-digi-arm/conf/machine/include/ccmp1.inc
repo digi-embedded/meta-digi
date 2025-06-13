@@ -77,7 +77,11 @@ MACHINE_EXTRA_RRECOMMENDS:remove = "kernel-imagebootfs"
 # =========================================================================
 ALSA_LIST:stm32mp1common = ""
 
-# Image FS types
+# Image FS types (set by meta-st-stm32mp layer)
+# tar.xz is omitted here because it's already added by ST layer
+IMAGE_FSTYPES += '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", \
+                                       "boot.ubifs recovery.ubifs squashfs", \
+                                       "boot.ubifs recovery.ubifs ubifs", d)}'
 IMAGE_FSTYPES:remove = "ext4"
 IMAGE_FSTYPES:append = " ${@bb.utils.contains('BOOTDEVICE_LABELS', 'sdcard', 'boot.vfat ext4.gz', '', d)}"
 

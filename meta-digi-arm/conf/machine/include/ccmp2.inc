@@ -90,7 +90,11 @@ MACHINE_EXTRA_RDEPENDS += " \
 # =========================================================================
 ALSA_LIST:stm32mp2common = ""
 
-# Image FS types
+# Image FS types (set by meta-st-stm32mp layer)
+# tar.xz is omitted here because it's already added by ST layer
+IMAGE_FSTYPES += '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", \
+                                       "boot.vfat recovery.vfat squashfs", \
+                                       "boot.vfat recovery.vfat ext4.gz", d)}'
 IMAGE_FSTYPES:remove = "ext4"
 
 # =========================================================================
