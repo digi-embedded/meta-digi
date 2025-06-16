@@ -4,7 +4,6 @@ LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 
 inherit kernel
-inherit ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'fsl-kernel-localversion', '', d)}
 require ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'recipes-kernel/linux/linux-trustfence.inc', '', d)}
 
 # CONFIG_KERNEL_LZO in defconfig
@@ -18,7 +17,7 @@ SRC_URI = " \
 "
 S = "${WORKDIR}/git"
 
-LOCALVERSION = "-dey"
+KERNEL_LOCALVERSION = "-dey"
 
 # Create base DTB suitable for overlays
 OVERLAYS_DTC_FLAGS = "-@"
@@ -43,22 +42,7 @@ do_copy_defconfig () {
 		cp -f ${KERNEL_DEFCONFIG} ${WORKDIR}/defconfig
 	fi
 }
-
-python () {
-    if d.getVar('DEY_SOC_VENDOR') == "STM":
-        bb.build.addtask('copy_defconfig', 'do_configure', 'do_patch', d)
-    elif d.getVar('DEY_SOC_VENDOR') == "NXP":
-        bb.build.addtask('copy_defconfig', 'do_kernel_localversion', 'do_patch', d)
-}
-
-# This is needed because kernel_localversion (in fsl-kernel-localversion.bbclass)
-# creates a basic ${B}/.config file and because that file exists, kernel_do_configure
-# (in kernel.bbclass) does not apply our defconfig.
-do_configure:prepend:imx-nxp-bsp() {
-	if [ -f "${WORKDIR}/defconfig" ] && [ -f "${B}/.config" ]; then
-		cat "${WORKDIR}/defconfig" >> "${B}/.config"
-	fi
-}
+addtask copy_defconfig before do_configure after do_patch
 
 # Apply configuration fragments
 do_configure:append() {
