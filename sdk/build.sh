@@ -59,7 +59,10 @@ DEY_IMAGE_INSTALLER = \"1\"
 "
 
 SDCARD_FSTYPE="
-IMAGE_FSTYPES:append = \" sdcard.gz\"
+IMAGE_FSTYPES:append:ccimx6 = \" sdcard.gz\"
+IMAGE_FSTYPES:append:ccimx8x = \" sdcard.gz\"
+IMAGE_FSTYPES:append:ccimx8m = \" sdcard.gz\"
+IMAGE_FSTYPES:append:ccimx9 = \" sdcard.gz\"
 "
 
 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(date +%s)}"
