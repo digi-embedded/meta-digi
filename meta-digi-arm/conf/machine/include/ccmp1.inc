@@ -22,9 +22,9 @@ FIP_UBOOT_DTB = "u-boot"
 # Include boot script into the FIT image
 UBOOT_ENV = "boot"
 # For FIT image usage
-UBOOT_ENTRYPOINT = "0xc4000000"
-UBOOT_DTB_LOADADDRESS = "0xc6000000"
-UBOOT_DTBO_LOADADDRESS = "0xc6000000"
+UBOOT_ENTRYPOINT = "0xc2000000"
+UBOOT_DTB_LOADADDRESS = "0xc4000000"
+UBOOT_DTBO_LOADADDRESS = "0xc4000000"
 # Set InitRAMDisk load address to U-boot initrd_addr
 UBOOT_RD_LOADADDRESS = "0xc4400000"
 # U-Boot environment offset (within partition)
