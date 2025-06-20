@@ -310,8 +310,6 @@ do_compile() {
     fi
 }
 
-# This runs after 'tf_a_sysroot_populate()' which populates all
-# TF-A artifacts on the image deploy dir.
 # The purpose of this function is to create symlinks to the files needed
 # by the uuu installer that are located in subdirectories.
 deploy_symlinks_atf() {
@@ -325,21 +323,24 @@ deploy_symlinks_atf() {
 		tfa_basename=$(echo ${TF_A_BINARIES} | cut -d',' -f${i})
 		for dt in ${dt_config}; do
 			TF_A_FILENAME="${tfa_basename}-${dt}-${config}${TF_A_ENCRYPT_SUFFIX}${TF_A_SIGN_SUFFIX}.${TF_A_SUFFIX}"
-			if [ -f "${DEPLOY_DIR_IMAGE}/${TF_A_BASEDIR}/${TF_A_FILENAME}" ]; then
-				cd "${DEPLOY_DIR_IMAGE}"
+			if [ -f "${DEPLOYDIR}/${TF_A_BASEDIR}/${TF_A_FILENAME}" ]; then
 				# symlink TF-A
-				ln -sf "${TF_A_BASEDIR}/${TF_A_FILENAME}" "${DEPLOY_DIR_IMAGE}"
+				ln -sf "${TF_A_BASEDIR}/${TF_A_FILENAME}" "${DEPLOYDIR}"
 			fi
 		done
 	done
 
 	# Last value of 'dt' is good for metadata binary, so use that.
 	if [ "${TF_A_ENABLE_METADATA}" = "1" ]; then
-		if [ -f "${DEPLOY_DIR_IMAGE}/${TF_A_BASEDIR}/${TF_A_METADATA_BINARY}" ]; then
-			cd "${DEPLOY_DIR_IMAGE}"
+		if [ -f "${DEPLOYDIR}/${TF_A_BASEDIR}/${TF_A_METADATA_BINARY}" ]; then
 			# symlink metadata
-			ln -sf "${TF_A_BASEDIR}/${TF_A_METADATA_BINARY}" "${DEPLOY_DIR_IMAGE}/${TF_A_METADATA_NAME}-${MACHINE}.${TF_A_METADATA_SUFFIX}"
+			ln -sf "${TF_A_BASEDIR}/${TF_A_METADATA_BINARY}" "${DEPLOYDIR}/${TF_A_METADATA_NAME}-${MACHINE}.${TF_A_METADATA_SUFFIX}"
 		fi
 	fi
 }
-SYSROOT_PREPROCESS_FUNCS += "deploy_symlinks_atf"
+
+do_deploy[sstate-outputdirs] = "${DEPLOY_DIR_IMAGE}"
+do_deploy() {
+    export_binaries ${DEPLOYDIR}${FIP_DIR_TFA_BASE}
+    deploy_symlinks_atf
+}
