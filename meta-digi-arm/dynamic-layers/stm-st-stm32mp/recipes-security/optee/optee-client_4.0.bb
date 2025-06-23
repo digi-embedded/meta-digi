@@ -22,11 +22,15 @@ DEPENDS += "util-linux-libuuid"
 
 SYSTEMD_SERVICE:${PN} = "tee-supplicant.service"
 
+SECURE_STORAGE_PATH ?= "${@oe.utils.vartrue('TRUSTFENCE_FILE_BASED_ENCRYPT', \
+                                        '-DCFG_TEE_FS_PARENT_PATH=/mnt/data/tee', \
+                                        '${localstatedir}/lib/tee', d)}"
+
 EXTRA_OECMAKE = " \
-    -DCFG_TEE_FS_PARENT_PATH='${localstatedir}/lib/tee' \
+    -DCFG_TEE_FS_PARENT_PATH='${SECURE_STORAGE_PATH}' \
     -DCFG_WERROR=OFF \
     -DCFG_TEE_CLIENT_LOG_LEVEL=2 \
-    -DCFG_TEE_CLIENT_LOG_FILE='/data/tee/teec.log' \
+    -DCFG_TEE_CLIENT_LOG_FILE='${localstatedir}/log/tee/teec.log' \
     -DBUILD_SHARED_LIBS=ON \
     -DRPMB_EMU=0 \
     "
@@ -42,7 +46,7 @@ do_install:append() {
     fi
     install -d ${D}${sysconfdir}/udev/rules.d
     install -m 0644 ${WORKDIR}/optee-udev.rules ${D}${sysconfdir}/udev/rules.d/optee.rules
-    install -d -m770 -o root -g tee ${D}${localstatedir}/lib/tee
+    install -d -m770 -o root -g tee ${D}${SECURE_STORAGE_PATH}
 }
 FILES:${PN} += "${sysconfdir} ${localstatedir}"
 
