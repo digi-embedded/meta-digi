@@ -1,4 +1,4 @@
-# Copyright (C) 2019-2024, Digi International Inc.
+# Copyright (C) 2019-2025, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -57,6 +57,8 @@ SRC_URI:append:mx9-nxp-bsp = " \
 
 # Disable allow-autospawn-for-root as default
 PACKAGECONFIG:remove = "autospawn-for-root"
+PACKAGECONFIG[oss-output] = "-Doss-output=enabled,-Doss-output=disabled,"
+GLIBC_64BIT_TIME_FLAGS:pn-pulseaudio = " ${@bb.utils.contains('PACKAGECONFIG', 'oss-output', '', ' -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64', d)}"
 
 EXTRA_OECONF:append:ccimx6 = " --disable-memfd"
 
