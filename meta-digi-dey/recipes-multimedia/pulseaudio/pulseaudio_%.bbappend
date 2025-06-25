@@ -55,8 +55,6 @@ SRC_URI:append:mx9-nxp-bsp = " \
     file://default.pa \
 "
 
-# Disable allow-autospawn-for-root as default
-PACKAGECONFIG:remove = "autospawn-for-root"
 PACKAGECONFIG[oss-output] = "-Doss-output=enabled,-Doss-output=disabled,"
 GLIBC_64BIT_TIME_FLAGS:pn-pulseaudio = " ${@bb.utils.contains('PACKAGECONFIG', 'oss-output', '', ' -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64', d)}"
 
