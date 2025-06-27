@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2020-2024 by Digi International Inc.
+#  Copyright (C) 2020-2025 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -42,7 +42,6 @@ show_usage()
 	echo "   -k <dek-filename>      Update includes dek file."
 	echo "                          (implies -t)."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
-	echo "   -t                     Install TrustFence artifacts."
 	echo "   -u <u-boot-filename>   U-Boot filename."
 	echo "                          Auto-determined by variant if not provided."
 	exit 2
@@ -74,17 +73,20 @@ part_update()
 		ERASE="-e"
 	fi
 	uuu fb: download -f "${2}"
-	if [ "${TRUSTFENCE}" = "true" ] && [ "${1}" = "uboot" ]; then
+	if [ "${1}" = "bootloader" ] && [ "${ENCRYPTED}" = "true" ]; then
 		if [ -n "${DEK_FILE}" ]; then
+			# Encrypted bootloader + dek
 			uuu fb: ucmd setenv uboot_size \${filesize}
 			uuu fb: ucmd setenv fastboot_buffer \${initrd_addr}
 			uuu fb: download -f "${4}"
 			uuu fb: ucmd setenv dek_size \${filesize}
 			uuu "fb[-t ${3}]:" ucmd trustfence update ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
 		else
+			# Encrypted bootloader (re-use existing dek)
 			uuu "fb[-t ${3}]:" ucmd trustfence update ram \${fastboot_buffer} \${fastboot_bytes}
 		fi
 	else
+		# Rest of images (including non-encrypted bootloader)
 		uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${fastboot_bytes} ${ERASE}
 	fi
 }
@@ -99,7 +101,7 @@ echo "############################################################"
 # -i <image-name>
 # -u <u-boot-filename>
 # -k <dek-filename>
-while getopts ':bdhi:k:ntu:' c
+while getopts ':bdhi:k:nu:' c
 do
 	if [ "${c}" = ":" ]; then
 		c="${OPTARG}"
@@ -113,9 +115,8 @@ do
 	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
-	k) DEK_FILE=${OPTARG} && TRUSTFENCE=true ;;
+	k) DEK_FILE=${OPTARG} ;;
 	n) NOWAIT=true ;;
-	t) TRUSTFENCE=true ;;
 	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
 	esac
 done
@@ -182,6 +183,14 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 		echo ""
 		exit 1
 	fi
+fi
+
+# Determine if bootloader is signed and/or encrypted
+if echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "signed"; then
+	SIGNED=true
+fi
+if echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "encrypted"; then
+	ENCRYPTED=true
 fi
 
 # remove redirect

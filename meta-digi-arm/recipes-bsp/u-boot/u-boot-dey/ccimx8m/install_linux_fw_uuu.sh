@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2020-2024 by Digi International Inc.
+#  Copyright (C) 2020-2025 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -42,7 +42,6 @@ show_usage()
 	echo "   -k <dek-filename>      Update includes dek file."
 	echo "                          (implies -t)."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
-	echo "   -t                     Install TrustFence artifacts."
 	echo "   -u <u-boot-filename>   U-Boot filename."
 	echo "                          Auto-determined by variant if not provided."
 	exit 2
@@ -61,23 +60,27 @@ part_update()
 	echo "====================================================================================="
 	echo "\033[0m"
 
-	if [ "${TRUSTFENCE}" = "true" ] && [ "${1}" = "bootloader" ]; then
-		uuu fb: download -f "${2}"
-		if [ -n "${DEK_FILE}" ]; then
-			uuu fb: ucmd setenv uboot_size \${filesize}
-			uuu fb: ucmd setenv fastboot_buffer \${initrd_addr}
-			uuu fb: download -f "${3}"
-			uuu fb: ucmd setenv dek_size \${filesize}
-			uuu fb: ucmd trustfence update ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
+	if [ "${1}" = "bootloader" ]; then
+		if [ "${ENCRYPTED}" = "true" ]; then
+			uuu fb: download -f "${2}"
+			if [ -n "${DEK_FILE}" ]; then
+				# Encrypted bootloader + dek
+				uuu fb: ucmd setenv uboot_size \${filesize}
+				uuu fb: ucmd setenv fastboot_buffer \${initrd_addr}
+				uuu fb: download -f "${3}"
+				uuu fb: ucmd setenv dek_size \${filesize}
+				uuu fb: ucmd trustfence update ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
+			else
+				# Encrypted bootloader (re-use existing dek)
+				uuu fb: ucmd trustfence update ram \${fastboot_buffer} \${fastboot_bytes}
+			fi
 		else
-			uuu fb: ucmd trustfence update ram \${fastboot_buffer} \${fastboot_bytes}
+			# Non-encrypted bootloader (can be signed or not)
+			uuu fb: flash "${1}" "${2}"
 		fi
 	else
-		if [ "${1}" = "bootloader" ]; then
-			uuu fb: flash "${1}" "${2}"
-		else
-			uuu fb: flash -raw2sparse "${1}" "${2}"
-		fi
+		# Non-bootloader image
+		uuu fb: flash -raw2sparse "${1}" "${2}"
 	fi
 }
 
@@ -91,7 +94,7 @@ echo "############################################################"
 # -i <image-name>
 # -u <u-boot-filename>
 # -k <dek-filename>
-while getopts ':bdhi:k:ntu:' c
+while getopts ':bdhi:k:nu:' c
 do
 	if [ "${c}" = ":" ]; then
 		c="${OPTARG}"
@@ -105,9 +108,8 @@ do
 	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
-	k) DEK_FILE=${OPTARG} && TRUSTFENCE=true ;;
+	k) DEK_FILE=${OPTARG} ;;
 	n) NOWAIT=true ;;
-	t) TRUSTFENCE=true ;;
 	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
 	esac
 done
@@ -130,6 +132,14 @@ echo "Determining image files to use..."
 # Determine U-Boot file to program basing on SOM's SOC type (linked to bus width)
 if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 	INSTALL_UBOOT_FILENAME="imx-boot-##SIGNED##-##MACHINE##.bin"
+fi
+
+# Determine if bootloader is signed and/or encrypted
+if echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "signed"; then
+	SIGNED=true
+fi
+if echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "encrypted"; then
+	ENCRYPTED=true
 fi
 
 # Determine linux, recovery, and rootfs image filenames to update

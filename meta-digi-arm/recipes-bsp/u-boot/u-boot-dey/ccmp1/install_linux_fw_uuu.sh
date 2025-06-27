@@ -50,7 +50,6 @@ show_usage()
 	echo "                          'dey-image-webkit', 'core-image-base'..."
 	echo "                          Defaults to '##DEFAULT_IMAGE_NAME##' if not provided."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
-	echo "   -t                     Install TrustFence artifacts."
 	exit 2
 }
 
@@ -84,7 +83,7 @@ echo "############################################################"
 # -b, -d, -n (booleans)
 # -f <fip-filename>
 # -i <image-name>
-while getopts 'a:bdf:hi:nt' c
+while getopts 'a:bdf:hi:n' c
 do
 	case $c in
 	a) INSTALL_ATF_FILENAME=${OPTARG} ;;
@@ -94,7 +93,6 @@ do
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
 	n) NOWAIT=true ;;
-	t) TRUSTFENCE=true ;;
 	esac
 done
 
@@ -135,6 +133,11 @@ INSTALL_METADATA_FILENAME="metadata-##MACHINE##.bin"
 # Determine FIP file to program
 if [ -z "${INSTALL_FIP_FILENAME}" ]; then
 	INSTALL_FIP_FILENAME="fip-##MACHINE##-${module_ram}-##BOOTSCHEME_DEFAULT##-nand##SIGNED##.bin"
+fi
+
+# Determine if boot artifacts are signed
+if echo "$INSTALL_FIP_FILENAME" | grep -q -e "Signed"; then
+	SIGNED=true
 fi
 
 # Determine linux, recovery, and rootfs image filenames to update
@@ -320,7 +323,7 @@ else
 fi
 
 # Set the dboot_kernel_var to fitimage if Trustfence is enabled
-if [ "${TRUSTFENCE}" = "true" ] || echo "${INSTALL_FIP_FILENAME}" | grep -q -e "Signed"; then
+if [ "${SIGNED}" = "true" ]; then
 	uuu fb: ucmd setenv dboot_kernel_var fitimage
 	uuu fb: ucmd saveenv
 fi
