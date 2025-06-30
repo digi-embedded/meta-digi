@@ -27,6 +27,15 @@ getenv()
 	uuu -v fb: ucmd printenv "${1}" | sed -ne "s,^${1}=,,g;T;p"
 }
 
+# Grep for string in command output
+# Params:
+#  1. Command
+#  2. String to grep
+grep_string()
+{
+	uuu -v fb: ucmd ${1} | grep "${2}"
+}
+
 show_usage()
 {
 	echo "Usage: $0 [options]"
@@ -191,6 +200,27 @@ if echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "signed"; then
 fi
 if echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "encrypted"; then
 	ENCRYPTED=true
+fi
+
+if [ "${ENCRYPTED}" = "true" ]; then
+	tf_status=$(grep_string "trustfence status" "Secure boot:")
+	if echo "${tf_status}" | grep -q -e "OPEN"; then
+		echo "\033[93m"
+		echo "WARNING!"
+		echo "You are trying to program encrypted images but the device status is OPEN."
+		echo "An OPEN device requires manual procedure for installing an encrypted bootloader,"
+		echo "programming the secure keys, and closing the device."
+		echo "Continuing would result in a non-secure setup or a non-bootable device after the"
+		echo "close operation."
+		echo ""
+		echo "Check the online documentation for manual steps at:"
+		echo "https://docs.digi.com/resources/documentation/digidocs/embedded/trustfence_home.html"
+		echo ""
+		echo "You can run this installer to program encrypted artifacts when the device has been closed."
+		echo "\033[0m"
+		echo "Exiting."
+		exit 1
+	fi
 fi
 
 # remove redirect
