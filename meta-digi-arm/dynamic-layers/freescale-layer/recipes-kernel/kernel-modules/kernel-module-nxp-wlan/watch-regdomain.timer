@@ -1,0 +1,11 @@
+[Unit]
+Description=Check regdomain every 5 seconds
+
+[Timer]
+OnBootSec=5sec
+OnUnitInactiveSec=5sec
+AccuracySec=1s
+Unit=watch-regdomain.service
+
+[Install]
+WantedBy=timers.target

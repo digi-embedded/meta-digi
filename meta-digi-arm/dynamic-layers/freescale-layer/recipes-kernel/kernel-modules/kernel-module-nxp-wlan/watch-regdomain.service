@@ -1,0 +1,7 @@
+[Unit]
+Description=Monitor for global regulatory domain changes
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/watch_regdomain.sh
