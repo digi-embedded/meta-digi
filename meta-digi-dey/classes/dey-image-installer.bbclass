@@ -31,6 +31,50 @@ HAS_USB_DRIVER:ccimx9 = "true"
 HAS_USB_DRIVER:ccmp1 = "true"
 HAS_USB_DRIVER:ccmp2 = "true"
 
+BOOTLOADER_SIGNED_STRING ?= "-signed"
+BOOTLOADER_ENCRYPTED_STRING ?= "-encrypted"
+BOOTLOADER_SIGNED_USB_STRING ?= "-usb-signed"
+
+curate_bootloader_artifacts() {
+	for artifact in ${BOOTABLE_ARTIFACTS}; do
+		# NXP platforms may have a ##SIGNED## placeholder to replace
+		if [ "${DEY_SOC_VENDOR}" = "NXP" ] && echo "${artifact}" | grep -q -e "##SIGNED##"; then
+			if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
+				if [ "${DIGI_SOM}" = "ccimx6ul" ]; then
+					if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+						# Encrypted bootloader
+						curated_artifact=$(echo "${artifact}" | sed "s,##SIGNED##,${BOOTLOADER_ENCRYPTED_STRING},")
+						CURATED_BOOTABLE_ARTIFACTS="${CURATED_BOOTABLE_ARTIFACTS} ${curated_artifact}"
+					else
+						# Signed, non-encrypted bootloader
+						curated_artifact=$(echo "${artifact}" | sed "s,##SIGNED##,${BOOTLOADER_SIGNED_STRING},")
+						CURATED_BOOTABLE_ARTIFACTS="${CURATED_BOOTABLE_ARTIFACTS} ${curated_artifact}"
+					fi
+					# Signed, non-encrypted bootloader for USB recovery
+					curated_artifact=$(echo "${artifact}" | sed "s,##SIGNED##,${BOOTLOADER_SIGNED_USB_STRING},")
+					CURATED_BOOTABLE_ARTIFACTS="${CURATED_BOOTABLE_ARTIFACTS} ${curated_artifact}"
+				else
+					if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+						# Encrypted bootloader
+						curated_artifact=$(echo "${artifact}" | sed "s,##SIGNED##,${BOOTLOADER_ENCRYPTED_STRING},")
+						CURATED_BOOTABLE_ARTIFACTS="${CURATED_BOOTABLE_ARTIFACTS} ${curated_artifact}"
+					fi
+					# Signed, non-encrypted bootloader for USB recovery
+					curated_artifact=$(echo "${artifact}" | sed "s,##SIGNED##,${BOOTLOADER_SIGNED_STRING},")
+					CURATED_BOOTABLE_ARTIFACTS="${CURATED_BOOTABLE_ARTIFACTS} ${curated_artifact}"
+				fi
+			else
+				# Non-signed bootloader
+				curated_artifact=$(echo "${artifact}" | sed 's,##SIGNED##,,')
+				CURATED_BOOTABLE_ARTIFACTS="${CURATED_BOOTABLE_ARTIFACTS} ${curated_artifact}"
+			fi
+		else
+			CURATED_BOOTABLE_ARTIFACTS="${CURATED_BOOTABLE_ARTIFACTS} ${artifact}"
+		fi
+	done
+	export CURATED_BOOTABLE_ARTIFACTS="${CURATED_BOOTABLE_ARTIFACTS}"
+}
+
 generate_installer_zip () {
 	# Get list of files to pack
 	INSTALLER_FILELIST="${DEPLOY_DIR_IMAGE}/install_linux_fw_sd.scr \
@@ -53,7 +97,10 @@ generate_installer_zip () {
 			INSTALLER_FILELIST="${INSTALLER_FILELIST} ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.${ext}"
 		fi
 	done
-	for artifact in ${BOOTABLE_ARTIFACTS}; do
+
+	# Add bootable artifacts to installer
+	curate_bootloader_artifacts
+	for artifact in ${CURATED_BOOTABLE_ARTIFACTS}; do
 		if readlink -e "${DEPLOY_DIR_IMAGE}/${artifact}" >/dev/null; then
 			INSTALLER_FILELIST="${INSTALLER_FILELIST} ${DEPLOY_DIR_IMAGE}/${artifact}"
 		fi
