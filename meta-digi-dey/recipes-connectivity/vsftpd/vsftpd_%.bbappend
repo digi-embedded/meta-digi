@@ -77,7 +77,7 @@ FILES:${PN}-cert = " \
 
 INITSCRIPT_PACKAGES += "${@bb.utils.contains('PACKAGECONFIG', 'openssl', '${PN}-cert', '', d)}"
 INITSCRIPT_NAME:${PN}-cert = "vsftpd-cert"
-INITSCRIPT_PARAMS:${PN}-cert = "start 99 3 5 . stop 20 0 1 2 6 ."
+INITSCRIPT_PARAMS:${PN}-cert = "start 70 3 5 . stop 20 0 1 2 6 ."
 
 SYSTEMD_PACKAGES += "${@bb.utils.contains('PACKAGECONFIG', 'openssl', '${PN}-cert', '', d)}"
 SYSTEMD_SERVICE:${PN}-cert = "vsftpd-cert.service"
