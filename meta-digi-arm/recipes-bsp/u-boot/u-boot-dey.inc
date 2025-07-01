@@ -166,38 +166,28 @@ adapt_uboot_filenames() {
 }
 
 sign_uboot() {
-	# This function only applies to CC6, CC6Plus and CC6UL
-	if [ -n "${UBOOT_CONFIG}" ]
-	then
-		for config in ${UBOOT_MACHINE}; do
-			i=$(expr $i + 1);
-			for type in ${UBOOT_CONFIG}; do
-				j=$(expr $j + 1);
-				if [ $j -eq $i ]
-				then
-					cd ${DEPLOYDIR}
-					if [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
-						install ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
-						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
-
-						install ${B}/${config}/${UBOOT_BINARYNAME}-dtb-signed.imx ${UBOOT_BINARYNAME}-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-						ln -sf ${UBOOT_BINARYNAME}-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-dtb-signed-${type}.${UBOOT_SUFFIX}
-
-						install ${B}/${config}/${UBOOT_BINARYNAME}-dtb-usb-signed.imx ${UBOOT_BINARYNAME}-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-						ln -sf ${UBOOT_BINARYNAME}-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-dtb-usb-signed-${type}.${UBOOT_SUFFIX}
-
-						if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]
-						then
-							install ${B}/${config}/${UBOOT_BINARYNAME}-dtb-encrypted.imx ${UBOOT_BINARYNAME}-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-							ln -sf ${UBOOT_BINARYNAME}-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-dtb-encrypted-${type}.${UBOOT_SUFFIX}
-						fi
-					fi
-				fi
-			done
-			unset  j
-		done
-		unset  i
-	fi
+    # This function only applies to CC6, CC6Plus and CC6UL
+    [ -z "${UBOOT_CONFIG}" ] && return
+    for config in ${UBOOT_MACHINE}; do
+        i=$(expr $i + 1)
+        for type in ${UBOOT_CONFIG}; do
+            j=$(expr $j + 1)
+            if [ $j -eq $i ]; then
+                cd ${DEPLOYDIR}
+                cp -fp ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
+                ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
+                cp -fp ${B}/${config}/${UBOOT_BINARYNAME}-dtb-signed.imx ${UBOOT_BINARYNAME}-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+                ln -sf ${UBOOT_BINARYNAME}-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-signed-${type}.${UBOOT_SUFFIX}
+                cp -fp ${B}/${config}/${UBOOT_BINARYNAME}-dtb-usb-signed.imx ${UBOOT_BINARYNAME}-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+                ln -sf ${UBOOT_BINARYNAME}-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-usb-signed-${type}.${UBOOT_SUFFIX}
+                if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+                    cp -fp ${B}/${config}/${UBOOT_BINARYNAME}-dtb-encrypted.imx ${UBOOT_BINARYNAME}-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+                    ln -sf ${UBOOT_BINARYNAME}-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-encrypted-${type}.${UBOOT_SUFFIX}
+                fi
+            fi
+        done
+        unset j
+    done
 }
 
 # -----------------------------------------------------------------------------

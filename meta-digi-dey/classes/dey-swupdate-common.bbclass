@@ -100,8 +100,6 @@ SWUPDATE_UBOOT_SCRIPT_NAME = "${@os.path.basename(d.getVar('SWUPDATE_UBOOT_SCRIP
 def get_uboot_prefix(d):
     prefix = d.getVar('UBOOT_PREFIX')
     if d.getVar('DEY_SOC_VENDOR') == "NXP" and d.getVar('TRUSTFENCE_ENABLED') == "1":
-        if "ccimx6" in d.getVar('MACHINE'):
-            prefix = f"{prefix}-dtb"
         if d.getVar('TRUSTFENCE_DEK_PATH') and d.getVar('TRUSTFENCE_DEK_PATH') != "0":
             prefix = f"{prefix}-encrypted"
         else:
