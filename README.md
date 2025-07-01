@@ -121,7 +121,37 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 ## 5.0-r2
 
-TODO
+* ST-based platforms
+  * Added support to ConnectCore MP13
+  * Added support to ConnectCore MP15
+  * Updated BSP
+    * Trusted Firmware ARM v2.8 (based on tag 'v2.10-stm32mp-r1.2' by ST)
+    * OP-TEE v4.0.0 (based on tag '4.0.0-stm32mp-r1.2' by ST)
+    * U-Boot v2023.10 (based on tag 'v2023.10-stm32mp-r1.2' by ST)
+    * Updated X-LINUX-AI software package (based on tag 'v6.0.1' by ST)
+    * Updated Wifi driver (based on 'v6.1.110-2025_0602' release from Cypress)
+    * Updated Wifi firmware to 'imx-scarthgap-jaculus_r1.1' release from Murata
+      * 2FY Wireless chip: v28.10.387.16
+      * 2AE Wireless chip: v13.10.246.356
+  * Added initial TrustFence support for ConnectCore MP2
+  * Added Qt 6.8.4 support for ConnectCore MP1 platforms
+  * Added support to new countries on ConnectCore MP1 World CLM blob file
+  * Added real-time support
+* NXP-based platforms
+  * Added support to ConnectCore 8M Mini
+  * Added support to ConnectCore 8M Nano
+  * Added real-time support
+  * Updated i.MX GStreamer stack to 1.24.7.imx
+* TrustFence
+   * Added support to install signed/encrypted images from uuu install script
+* Added support to Flutter framework
+  * Added new image recipe for Flutter graphical applications
+* Removed Crank framework support
+* Added UBI health monitor service (for NAND-based SOMs)
+* BTRFS filesystem support for LXC incremental snapshots
+* Created installer ZIP by default, and not *.sdcard image
+* Enabled SSL/TLS support on vsftpd daemon by default
+* General bug fixing and improvements
 
 ## 5.0-r1
 
