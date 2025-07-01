@@ -13,6 +13,7 @@ SRC_URI = " \
     ${LINUX_GIT_URI};branch=${SRCBRANCH} \
     ${@oe.utils.conditional('KERNEL_DEFCONFIG', '', 'file://defconfig', '', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://docker_conf.cfg', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'tsn', 'file://tsn_conf.cfg', '', d)} \
     ${@oe.utils.vartrue('TRUSTFENCE_FILE_BASED_ENCRYPT', 'file://fscrypt.cfg', '', d)} \
 "
 S = "${WORKDIR}/git"
