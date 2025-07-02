@@ -142,7 +142,7 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		module_variant=$(getenv "module_variant")
 		# Determine U-Boot file to program basing on SOM's variant
 		if [ "$module_variant" = "0x12" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc2GB.imx"
+			INSTALL_UBOOT_FILENAME="u-boot-##SIGNED##-cc${soc_family}sbc2GB.imx"
 		elif [ "$module_variant" = "0x02" ] || \
 		     [ "$module_variant" = "0x04" ] || \
 		     [ "$module_variant" = "0x05" ] || \
@@ -151,13 +151,13 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		     [ "$module_variant" = "0x14" ] || \
 		     [ "$module_variant" = "0x15" ] || \
 		     [ "$module_variant" = "0x16" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc.imx"
+			INSTALL_UBOOT_FILENAME="u-boot-##SIGNED##-cc${soc_family}sbc.imx"
 		elif [ "$module_variant" = "0x03" ] || \
 		     [ "$module_variant" = "0x0c" ] || \
 		     [ "$module_variant" = "0x0e" ] || \
 		     [ "$module_variant" = "0x0f" ] || \
 		     [ "$module_variant" = "0x13" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-cc${soc_family}sbc512MB.imx"
+			INSTALL_UBOOT_FILENAME="u-boot-##SIGNED##-cc${soc_family}sbc512MB.imx"
 		fi
 	fi
 
@@ -173,15 +173,15 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		echo ""
 		echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 6 variant:"
 		echo "   - For a Quad/Dual CPU with 2GB DDR3, run:"
-		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc2GB.imx"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-ccimx6qsbc2GB.imx"
 		echo "   - For a Quad/Dual CPU with 1GB DDR3, run:"
-		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc.imx"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-ccimx6qsbc.imx"
 		echo "   - For a Quad/Dual CPU with 512MB DDR3, run:"
-		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6qsbc512MB.imx"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-ccimx6qsbc512MB.imx"
 		echo "   - For a DualLite/Solo CPU with 1GB DDR3, run:"
-		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc.imx"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-ccimx6dlsbc.imx"
 		echo "   - For a DualLite/Solo CPU with 512MB DDR3, run:"
-		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-ccimx6dlsbc512MB.imx"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-ccimx6dlsbc512MB.imx"
 		echo ""
 		echo "2. Run the install script again."
 		echo ""

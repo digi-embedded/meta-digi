@@ -142,9 +142,9 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 	# If module_variant is unknown or not set, return error asking the user
 	if [ "$module_variant" = "0x01" ] || \
 	   [ "$module_variant" = "0x02" ]; then
-		INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##2GB.imx"
+		INSTALL_UBOOT_FILENAME="u-boot-##SIGNED##-##MACHINE##2GB.imx"
 	elif [ "$module_variant" = "0x03" ]; then
-		INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##1GB.imx"
+		INSTALL_UBOOT_FILENAME="u-boot-##SIGNED##-##MACHINE##1GB.imx"
 	fi
 
 	# U-Boot when the checked value is empty.
@@ -159,9 +159,9 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		echo ""
 		echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 6 QuadPlus variant:"
 		echo "   - For a QuadPlus CPU with 2GB DDR3, run:"
-		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##2GB.imx"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-##MACHINE##2GB.imx"
 		echo "   - For a DualPlus CPU with 1GB DDR3, run:"
-		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-##MACHINE##1GB.imx"
 		echo ""
 		echo ""
 		echo "2. Run the install script again."

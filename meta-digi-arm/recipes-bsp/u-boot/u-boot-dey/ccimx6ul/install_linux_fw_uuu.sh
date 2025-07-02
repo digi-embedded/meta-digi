@@ -159,12 +159,12 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 		elif [ "$module_variant" = "0x04" ] || \
 		     [ "$module_variant" = "0x05" ] || \
 		     [ "$module_variant" = "0x07" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##1GB.imx"
+			INSTALL_UBOOT_FILENAME="u-boot-##SIGNED##-##MACHINE##1GB.imx"
 		elif [ "$module_variant" = "0x02" ] || \
 		     [ "$module_variant" = "0x03" ] || \
 		     [ "$module_variant" = "0x06" ] || \
 		     [ "$module_variant" = "0x09" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##.imx"
+			INSTALL_UBOOT_FILENAME="u-boot-##SIGNED##-##MACHINE##.imx"
 		fi
 	fi
 
@@ -180,11 +180,11 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 		echo ""
 		echo "1. Add U-boot file name, depending on your ConnectCore 6UL variant, to script command line:"
 		echo "   - For a SOM with 1GB DDR3, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##MACHINE##1GB.imx"
+		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##SIGNED##-##MACHINE##1GB.imx"
 		echo "   - For a SOM with 512MB DDR3, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##MACHINE##512MB.imx"
+		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##SIGNED##-##MACHINE##512MB.imx"
 		echo "   - For a SOM with 256MB DDR3, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##MACHINE##.imx"
+		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##SIGNED##-##MACHINE##.imx"
 		echo ""
 		echo "2. Run the install script again."
 		echo ""
