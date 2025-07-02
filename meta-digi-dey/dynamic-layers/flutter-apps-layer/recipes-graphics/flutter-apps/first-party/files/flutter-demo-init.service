@@ -1,0 +1,11 @@
+[Unit]
+Description=Flutter Demo Application
+
+[Service]
+Type=forking
+PIDFile=/run/##FLUTTER_DEMO_NAME##.pid
+ExecStart=/etc/flutter-demo-init start
+ExecStop=/etc/flutter-demo-init stop
+
+[Install]
+WantedBy=multi-user.target

@@ -24,9 +24,9 @@ EXTRA_USERS_PARAMS += "\
 "
 
 #
-# Generate ZIP installer if configured in the project's local.conf
+# Generate ZIP installer unless disabled in the project's local.conf
 #
-DEY_IMAGE_INSTALLER ?= "0"
+DEY_IMAGE_INSTALLER ?= "1"
 inherit ${@oe.utils.conditional("DEY_IMAGE_INSTALLER", "1", "dey-image-installer", "", d)}
 
 #

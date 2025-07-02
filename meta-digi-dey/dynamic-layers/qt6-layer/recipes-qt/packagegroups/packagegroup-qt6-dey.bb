@@ -27,9 +27,13 @@ QT6_IMAGE_INSTALL_CINEMATICEXPERIENCE:ccmp15 = "cinematicexperience-rhi cinemati
 QT6_IMAGE_INSTALL_CINEMATICEXPERIENCE:ccmp25 = "cinematicexperience-rhi cinematicexperience-rhi-tools"
 
 QT6_IMAGE_INSTALL_EXAMPLES = "qtbase-examples qtdeclarative-examples"
+# Make room in ccmp15-dvk Qt6 images by removing examples
+QT6_IMAGE_INSTALL_EXAMPLES:ccmp15 = ""
 
 QT6_IMAGE_INSTALL_FONTS = "ttf-dejavu-common ttf-dejavu-sans ttf-dejavu-sans-mono ttf-dejavu-serif "
 
 QT6_IMAGE_INSTALL_QUICK3D = "qtquick3d qtquick3d-examples"
 # Quick3d does not work on systems without a proper GPU
 QT6_IMAGE_INSTALL_QUICK3D:ccimx93 = ""
+# Make room in ccmp15-dvk Qt6 images by removing examples
+QT6_IMAGE_INSTALL_QUICK3D:ccmp15 = "qtquick3d"

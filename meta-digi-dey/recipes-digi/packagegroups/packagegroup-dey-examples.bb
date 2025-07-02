@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2024, Digi International Inc.
+# Copyright (C) 2013-2025, Digi International Inc.
 
 SUMMARY = "DEY examples packagegroup"
 
@@ -10,7 +10,6 @@ inherit packagegroup
 RDEPENDS:${PN} = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "alsa", "dey-examples-alsa", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt", "", d)} \
-	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt-gatt-server", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "cryptochip", "dey-examples-cryptochip", "", d)} \
@@ -24,7 +23,7 @@ RDEPENDS:${PN} = "\
 "
 RDEPENDS:${PN}:append:ccimx6 = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "accel-graphics", "dey-examples-opengles", "", d)} \
-	dey-examples-v4l2 \
+	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-btconfig", "", d)} \
 "
 
 COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx9)"

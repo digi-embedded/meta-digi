@@ -244,10 +244,10 @@ MACHINE_GSTREAMER_1_0_PLUGIN:mx9-nxp-bsp   ?= "imx-gst1.0-plugin"
 # to 'imx-nxp-bsp'
 #
 # GStreamer forked recipes
-PREFERRED_VERSION_gstreamer1.0:imx-nxp-bsp              ??= "1.24.0.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-bad:imx-nxp-bsp  ??= "1.24.0.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-base:imx-nxp-bsp ??= "1.24.0.imx"
-PREFERRED_VERSION_gstreamer1.0-plugins-good:imx-nxp-bsp ??= "1.24.0.imx"
+PREFERRED_VERSION_gstreamer1.0:imx-nxp-bsp              ??= "1.24.7.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-bad:imx-nxp-bsp  ??= "1.24.7.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-base:imx-nxp-bsp ??= "1.24.7.imx"
+PREFERRED_VERSION_gstreamer1.0-plugins-good:imx-nxp-bsp ??= "1.24.7.imx"
 
 # GStreamer copied recipes
 PREFERRED_VERSION_gst-devtools:imx-nxp-bsp              ??= "1.22.5.imx"
@@ -296,8 +296,6 @@ PREFERRED_VERSION_weston:mx7-nxp-bsp      ??= "10.0.5.imx"
 PREFERRED_VERSION_weston:imx-mainline-bsp   = ""
 
 PREFERRED_VERSION_wayland-protocols:imx-nxp-bsp  ??= "1.32.imx"
-
-PREFERRED_VERSION_xwayland:imx-nxp-bsp ??= "23.2.5.imx"
 
 # Use i.MX libdrm Version
 PREFERRED_VERSION_libdrm:imx-nxp-bsp ??= "2.4.116.imx"

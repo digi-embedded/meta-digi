@@ -13,7 +13,7 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
-index 5a96614..5901d5e 100644
+index f1b37a4f425a..ffd70af8ac7d 100644
 --- a/iMX8M/soc.mak
 +++ b/iMX8M/soc.mak
 @@ -1,5 +1,6 @@
@@ -32,7 +32,7 @@ index 5a96614..5901d5e 100644
  
  flash_evk_no_hdmi_dual_bootloader: $(MKIMG) u-boot-spl-ddr.bin u-boot.itb
  	./mkimage_imx8 -version $(VERSION) -fit -loader u-boot-spl-ddr.bin $(SPL_LOAD_ADDR) -out $(OUTIMG)
-@@ -325,12 +326,12 @@ flash_dp_spl_uboot: flash_dp_evk
+@@ -325,10 +326,10 @@ flash_dp_spl_uboot: flash_dp_evk
  flash_spl_uboot: flash_evk_no_hdmi
  
  print_fit_hab: u-boot-nodtb.bin bl31.bin $(dtb) $(supp_dtbs)
@@ -40,10 +40,8 @@ index 5a96614..5901d5e 100644
 +	./$(PAD_IMAGE) $(TEE) 2>&1 | tee $(MKIMAGE_LOG)
  	./$(PAD_IMAGE) bl31.bin
  	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb) $(supp_dtbs)
- 	FIT_DATA_POS=$(FIT_EXTERNAL_POSITION) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ../$(SOC_DIR)/print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtb) $(supp_dtbs)
- 	./$(PAD_IMAGE) u-boot-nodtb.bin $(dtb)
--	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ../$(SOC_DIR)/print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtb)
-+	{ echo $@; TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ../$(SOC_DIR)/print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtb) 2>&1; } | tee -a $(MKIMAGE_LOG)
+-	FIT_DATA_POS=$(FIT_EXTERNAL_POSITION) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ../$(SOC_DIR)/print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtb) $(supp_dtbs)
++	{ echo $@; FIT_DATA_POS=$(FIT_EXTERNAL_POSITION) TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) VERSION=$(VERSION) ../$(SOC_DIR)/print_fit_hab.sh $(PRINT_FIT_HAB_OFFSET) $(dtb) $(supp_dtbs)  2>&1; } | tee -a $(MKIMAGE_LOG)
+ 	@rm -f $(dtb)
  
  print_fit_hab_ddr4: u-boot-nodtb.bin bl31.bin $(dtb_ddr4_evk) $(supp_dtbs)
- 	./$(PAD_IMAGE) $(TEE)

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2024, Digi International Inc.
+# Copyright (C) 2015-2025, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:${THISDIR}/${BP}:"
 
@@ -71,5 +71,9 @@ PACKAGECONFIG:append = " health-profiles \
 "
 
 FILES:${PN} += " ${sysconfdir}/bluetooth/main.conf*"
+
+# bluez5's btconfig binary conflicts with dey-examples-btconfig. The tool
+# doesn't seem to do much anyway, so just remove it.
+NOINST_TOOLS_BT:remove:ccimx6 = "tools/btconfig"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

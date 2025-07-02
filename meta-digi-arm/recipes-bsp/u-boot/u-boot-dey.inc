@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2024, Digi International Inc.
+# Copyright (C) 2018-2025, Digi International Inc.
 
 require recipes-bsp/u-boot/u-boot.inc
 
@@ -29,7 +29,8 @@ INSTALL_FW_UBOOT_SCRIPTS = " \
 SRC_URI = " \
     ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
     file://boot.txt \
-    ${INSTALL_FW_UBOOT_SCRIPTS} \
+    file://install_linux_fw_media.txt \
+    file://install_linux_fw_uuu.sh \
 "
 
 BUILD_UBOOT_SCRIPTS ?= "true"
@@ -77,6 +78,15 @@ do_deploy[postfuncs] += " \
 "
 
 build_uboot_scripts() {
+	# Generate USB installer from media template
+	sed -e 's,##INSTALL_MEDIA##,usb,g' \
+	    -e 's,##INSTALL_MEDIA_INDEX##,${UBOOT_INSTALL_USB_INDEX},g' \
+	    ${WORKDIR}/install_linux_fw_media.txt > ${WORKDIR}/install_linux_fw_usb.txt
+	# Generate microSD installer from media template
+	sed -e 's,##INSTALL_MEDIA##,mmc,g' \
+	    -e 's,##INSTALL_MEDIA_INDEX##,${UBOOT_INSTALL_SD_INDEX},g' \
+	    ${WORKDIR}/install_linux_fw_media.txt > ${WORKDIR}/install_linux_fw_sd.txt
+
 	for f in $(echo ${INSTALL_FW_UBOOT_SCRIPTS} | sed -e 's,file\:\/\/,,g'); do
 		f_ext="${f##*.}"
 		TMP_INSTALL_SCR="$(mktemp ${WORKDIR}/${f}.XXXXXX)"
@@ -85,6 +95,9 @@ build_uboot_scripts() {
 			-e 's,##GRAPHICAL_IMAGES##,${GRAPHICAL_IMAGES},g' \
 			-e 's,##DEFAULT_IMAGE_NAME##,${DEFAULT_IMAGE_NAME},g' \
 			${WORKDIR}/${f} > ${TMP_INSTALL_SCR}
+		if [ "${DEY_SOC_VENDOR}" = "STM" ]; then
+			sed -i -e 's,##BOOTSCHEME_DEFAULT##,${BOOTSCHEME_DEFAULT},g' ${TMP_INSTALL_SCR}
+		fi
 		# Change the u-boot name when TrustFence is enabled
 		if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 			if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
@@ -95,13 +108,9 @@ build_uboot_scripts() {
 				fi
 			else
 				sed -i -e 's,##SIGNED##,_Signed,g' ${TMP_INSTALL_SCR}
-				sed -i -e 's,##SIGNED_TFA##,_signed,g' ${TMP_INSTALL_SCR}
 			fi
 		else
 			sed -i -e 's,-##SIGNED##,,g' -e 's,##SIGNED##,,g' ${TMP_INSTALL_SCR}
-			if [ "${DEY_SOC_VENDOR}" = "STM" ]; then
-				sed -i -e 's,##SIGNED_TFA##,,g' ${TMP_INSTALL_SCR}
-			fi
 		fi
 		if [ "${f_ext}" = "txt" ]; then
 			mkimage -T script -n "DEY firmware install script" -C none -d ${TMP_INSTALL_SCR} ${DEPLOYDIR}/${f%.*}.scr
@@ -146,7 +155,7 @@ adapt_uboot_filenames() {
 				if [ $j -eq $i ]
 				then
 					cd ${DEPLOYDIR}
-					rm -r ${UBOOT_BINARY}-${type}
+					rm -f ${UBOOT_BINARY}-${type}
 					ln -sf ${UBOOT_BINARYNAME}-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-${type}.${UBOOT_SUFFIX}
 				fi
 			done
@@ -157,38 +166,28 @@ adapt_uboot_filenames() {
 }
 
 sign_uboot() {
-	# This function only applies to CC6, CC6Plus and CC6UL
-	if [ -n "${UBOOT_CONFIG}" ]
-	then
-		for config in ${UBOOT_MACHINE}; do
-			i=$(expr $i + 1);
-			for type in ${UBOOT_CONFIG}; do
-				j=$(expr $j + 1);
-				if [ $j -eq $i ]
-				then
-					cd ${DEPLOYDIR}
-					if [ "${BOOTLOADER_IMAGE_RECIPE}" = "u-boot" ]; then
-						install ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
-						ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
-
-						install ${B}/${config}/${UBOOT_BINARYNAME}-dtb-signed.imx ${UBOOT_BINARYNAME}-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-						ln -sf ${UBOOT_BINARYNAME}-dtb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-dtb-signed-${type}.${UBOOT_SUFFIX}
-
-						install ${B}/${config}/${UBOOT_BINARYNAME}-dtb-usb-signed.imx ${UBOOT_BINARYNAME}-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-						ln -sf ${UBOOT_BINARYNAME}-dtb-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-dtb-usb-signed-${type}.${UBOOT_SUFFIX}
-
-						if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]
-						then
-							install ${B}/${config}/${UBOOT_BINARYNAME}-dtb-encrypted.imx ${UBOOT_BINARYNAME}-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
-							ln -sf ${UBOOT_BINARYNAME}-dtb-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-dtb-encrypted-${type}.${UBOOT_SUFFIX}
-						fi
-					fi
-				fi
-			done
-			unset  j
-		done
-		unset  i
-	fi
+    # This function only applies to CC6, CC6Plus and CC6UL
+    [ -z "${UBOOT_CONFIG}" ] && return
+    for config in ${UBOOT_MACHINE}; do
+        i=$(expr $i + 1)
+        for type in ${UBOOT_CONFIG}; do
+            j=$(expr $j + 1)
+            if [ $j -eq $i ]; then
+                cd ${DEPLOYDIR}
+                cp -fp ${B}/${config}/SRK_efuses.bin SRK_efuses-${PV}-${PR}.bin
+                ln -sf SRK_efuses-${PV}-${PR}.bin SRK_efuses.bin
+                cp -fp ${B}/${config}/${UBOOT_BINARYNAME}-dtb-signed.imx ${UBOOT_BINARYNAME}-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+                ln -sf ${UBOOT_BINARYNAME}-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-signed-${type}.${UBOOT_SUFFIX}
+                cp -fp ${B}/${config}/${UBOOT_BINARYNAME}-dtb-usb-signed.imx ${UBOOT_BINARYNAME}-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+                ln -sf ${UBOOT_BINARYNAME}-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-usb-signed-${type}.${UBOOT_SUFFIX}
+                if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+                    cp -fp ${B}/${config}/${UBOOT_BINARYNAME}-dtb-encrypted.imx ${UBOOT_BINARYNAME}-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
+                    ln -sf ${UBOOT_BINARYNAME}-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-encrypted-${type}.${UBOOT_SUFFIX}
+                fi
+            fi
+        done
+        unset j
+    done
 }
 
 # -----------------------------------------------------------------------------
@@ -219,7 +218,7 @@ do_compile:append:ccmp1() {
 }
 
 BOOT_TOOLS = "imx-boot-tools"
-BOOT_TOOLS:ccmp1 = "u-boot"
+BOOT_TOOLS:stm32mpcommon = "u-boot"
 
 do_deploy:append:ccimx8m() {
 	# Deploy u-boot-nodtb.bin and ccimx8m[m|n]-dvk.dtb, to be packaged in boot binary by imx-boot
@@ -242,32 +241,58 @@ do_deploy:append:ccimx8m() {
 	fi
 }
 
-do_deploy:append:ccmp1() {
+do_deploy:append:stm32mpcommon() {
 	# Deploy u-boot-nodtb.bin and ccmp1x-dvk-xxxx.dtb, to be packaged in fip binary by tf-a
 	install -d ${DEPLOYDIR}/${BOOT_TOOLS}
 	if [ -n "${UBOOT_DEVICETREE}" ]; then
 		for devicetree in ${UBOOT_DEVICETREE}; do
 			# Install u-boot dtb
 			install -m 644 ${B}/${config}/arch/arm/dts/${devicetree}.dtb ${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${devicetree}.dtb
+
+			if [ "${UBOOT_SIGN_ENABLE}" = "1" ]; then
+				# Keep u-boot devicetree without signature
+				ubootdevicetree="${B}/${config}/arch/arm/dts/${devicetree}.dtb"
+				namewithoutsignature=`echo $ubootdevicetree | sed "s/\.dtb/-without-signature.dtb/g"`
+				# Install unsigned U-Boot dtb
+				install -m 644 ${namewithoutsignature} ${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${devicetree}-without-signature.dtb
+			fi
 		done
 	fi
 	install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin
-
-	# Append signature to u-boot DT
-	if [ "x${UBOOT_SIGN_ENABLE}" = "x1" ] && [ -n "${UBOOT_DEVICETREE}" ] ; then
-		for devicetree in ${UBOOT_DEVICETREE}; do
-			# get name of u-boot devicetree without signature
-			ubootdevicetree="${DEPLOYDIR}/${BOOT_TOOLS}/${FIP_UBOOT_DTB}-${devicetree}.dtb"
-			namewithoutsignature=`echo $ubootdevicetree | sed "s/\.dtb/-without-signature.dtb/g"`
-			namewithsignature=`echo $ubootdevicetree | sed "s/\.dtb/-with-signature.dtb/g"`
-			mv $ubootdevicetree $namewithoutsignature
-			# get name of U-Boot device tree from DEPLOY_DIR
-			nameonkernel="${DEPLOY_DIR_IMAGE}/${FIP_UBOOT_DTB}-${devicetree}-with-signature.dtb"
-			cp $nameonkernel $namewithsignature
-			cp $nameonkernel $ubootdevicetree
-		done
-	fi
 }
+
+do_uboot_assemble_fitimage:append:stm32mpcommon() {
+	for config in ${UBOOT_MACHINE}; do
+		if [ -n "${UBOOT_DEVICETREE}" ] && [ "${UBOOT_SIGN_ENABLE}" = "1" ]; then
+			for devicetree in ${UBOOT_DEVICETREE}; do
+				# Keep u-boot devicetree without signature
+				ubootdevicetree="${B}/${config}/arch/arm/dts/${devicetree}.dtb"
+				namewithoutsignature=`echo $ubootdevicetree | sed "s/\.dtb/-without-signature.dtb/g"`
+				cp $ubootdevicetree $namewithoutsignature
+
+				# Add image public key in U-Boot dtb file
+				fdt_add_pubkey -a "${FIT_HASH_ALG},${FIT_SIGN_ALG}" \
+								-k "${UBOOT_SIGN_KEYDIR}" \
+								-n "${UBOOT_SIGN_IMG_KEYNAME}" \
+								-r "image" \
+								"${ubootdevicetree}"
+
+				# Add configuration public key in U-Boot dtb file
+				fdt_add_pubkey -a "${FIT_HASH_ALG},${FIT_SIGN_ALG}" \
+								-k "${UBOOT_SIGN_KEYDIR}" \
+								-n "${UBOOT_SIGN_KEYNAME}" \
+								-r "conf" \
+								"${ubootdevicetree}"
+			done
+		fi
+	done
+}
+# Add dependency to make sure that RSA keys generated to sign fitImage are available for u-boot
+do_uboot_assemble_fitimage[depends] += " \
+	${@'virtual/kernel:do_kernel_generate_rsa_keys' \
+	if "stm32mpcommon" in d.getVar('MACHINEOVERRIDES') \
+	and "fitImage" in d.getVar('KERNEL_IMAGETYPE') else ''} \
+"
 
 FIP_DIR_UBOOT  ?= "/u-boot"
 
@@ -281,12 +306,13 @@ u_boot_sysroot_populate() {
 			for devicetree in ${UBOOT_DEVICETREE}; do
 				# Install u-boot dtb
 				install -m 644 ${B}/${config}/arch/arm/dts/${devicetree}.dtb ${dest}/${FIP_UBOOT_DTB}-${devicetree}.dtb
+				# Install u-boot binary
+				install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${dest}/u-boot-nodtb-${devicetree}.bin
 			done
 		fi
-		install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${dest}/u-boot-nodtb-${devicetree}.bin
 	done
 }
-SYSROOT_PREPROCESS_FUNCS:ccmp2 =+ "u_boot_sysroot_populate"
-SYSROOT_DIRS:append:ccmp2 = " ${FIP_DIR_UBOOT}"
+SYSROOT_PREPROCESS_FUNCS:stm32mpcommon =+ "u_boot_sysroot_populate"
+SYSROOT_DIRS:append:stm32mpcommon = " ${FIP_DIR_UBOOT}"
 
 SYSROOT_DIRS += "/boot"

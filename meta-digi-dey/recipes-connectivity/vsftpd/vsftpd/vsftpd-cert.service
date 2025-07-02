@@ -1,0 +1,11 @@
+[Unit]
+Description=Vsftpd ftp daemon certificate generation
+Before=vsftpd.service
+ConditionPathExists=!/etc/##VSFTPD_PEM##
+
+[Service]
+Type=oneshot
+ExecStart=/etc/vsftpd-cert
+
+[Install]
+WantedBy=multi-user.target

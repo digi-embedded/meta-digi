@@ -1,0 +1,67 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Fri, 11 Apr 2025 15:01:33 +0200
+Subject: [PATCH] imx8mm: set BL32_BASE and map high DRAM for ccimx8mm support
+
+Set BL32_BASE to 0x7e000000 (32MiB below the first gigabyte of DDR) to
+align with the OP-TEE layout used across ccimx8mm variants. Add support
+for high-memory DDR by defining and mapping an extra 1GB mem at 0x100000000
+to support the 4GB variant.
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c    | 1 +
+ plat/imx/imx8m/imx8mm/include/platform_def.h | 6 ++++--
+ plat/imx/imx8m/imx8mm/platform.mk            | 2 +-
+ 3 files changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+index 388deae2b0e8..76f8a34d12fb 100644
+--- a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
++++ b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+@@ -51,6 +51,7 @@ static const mmap_region_t imx_mmap[] = {
+ 	MAP_REGION_FLAT(IMX_ROM_BASE, IMX_ROM_SIZE, MT_MEMORY | MT_RO), /* ROM code */
+ #ifndef PLAT_XLAT_TABLES_DYNAMIC
+ 	MAP_REGION_FLAT(IMX_DRAM_BASE, IMX_DRAM_SIZE, MT_MEMORY | MT_RW | MT_NS), /* DRAM */
++	MAP_REGION_FLAT(IMX_DRAM2_BASE, IMX_DRAM2_SIZE, MT_MEMORY | MT_RW | MT_NS), /* DRAM */
+ #endif
+ 	MAP_REGION_FLAT(IMX_TCM_BASE, IMX_TCM_SIZE, MT_MEMORY | MT_RW | MT_NS), /* TCM */
+ 	{0},
+diff --git a/plat/imx/imx8m/imx8mm/include/platform_def.h b/plat/imx/imx8m/imx8mm/include/platform_def.h
+index e721664087f8..44926451b2a2 100644
+--- a/plat/imx/imx8m/imx8mm/include/platform_def.h
++++ b/plat/imx/imx8m/imx8mm/include/platform_def.h
+@@ -69,8 +69,8 @@
+ #define PLAT_GICD_BASE			U(0x38800000)
+ #define PLAT_GICR_BASE			U(0x38880000)
+ 
+-#define PLAT_VIRT_ADDR_SPACE_SIZE	(1ull << 32)
+-#define PLAT_PHY_ADDR_SPACE_SIZE	(1ull << 32)
++#define PLAT_VIRT_ADDR_SPACE_SIZE	(1ull << 34)
++#define PLAT_PHY_ADDR_SPACE_SIZE	(1ull << 34)
+ 
+ #ifdef SPD_trusty
+ #define MAX_XLAT_TABLES			10
+@@ -125,6 +125,8 @@
+ #define IMX_CAAM_RAM_SIZE		U(0x10000)
+ #define IMX_DRAM_BASE			U(0x40000000)
+ #define IMX_DRAM_SIZE			U(0xc0000000)
++#define IMX_DRAM2_BASE			U(0x100000000)
++#define IMX_DRAM2_SIZE			U(0x40000000)
+ #define IMX_TCM_BASE			U(0x7E0000)
+ #define IMX_TCM_SIZE			U(0x40000)
+ 
+diff --git a/plat/imx/imx8m/imx8mm/platform.mk b/plat/imx/imx8m/imx8mm/platform.mk
+index 1de30f40f397..4fe3cca34065 100644
+--- a/plat/imx/imx8m/imx8mm/platform.mk
++++ b/plat/imx/imx8m/imx8mm/platform.mk
+@@ -166,7 +166,7 @@ ERRATA_A53_835769	:=	1
+ ERRATA_A53_843419	:=	1
+ ERRATA_A53_855873	:=	1
+ 
+-BL32_BASE		?=	0xbe000000
++BL32_BASE		?=	0x7e000000
+ $(eval $(call add_define,BL32_BASE))
+ 
+ BL32_SIZE		?=	0x2000000

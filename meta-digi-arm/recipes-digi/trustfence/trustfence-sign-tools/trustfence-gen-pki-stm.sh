@@ -3,7 +3,7 @@
 #
 #  trustfence-gen-pki-stm.sh
 #
-#  Copyright (C) 2023 by Digi International Inc.
+#  Copyright (C) 2023,2025 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -24,7 +24,6 @@ while ! mkdir "${SINGLE_PROCESS_LOCK}" > /dev/null 2>&1; do
 done
 
 SCRIPT_NAME="$(basename "${0}")"
-SUPPORTED_PLATFORMS="ccmp15, ccmp13"
 
 while getopts "p:" c; do
 	case "${c}" in
@@ -39,9 +38,8 @@ usage() {
 Usage: ${SCRIPT_NAME} <OPTIONS>
 
  Options:
-    -p <platform>    platform
+    -p <platform>    platform (such as ccmp15, ccmp13, ccmp25...)
 
-Supported platforms: ${SUPPORTED_PLATFORMS}
 
 EOF
 }
@@ -73,7 +71,7 @@ if [ "${PLATFORM}" = "ccmp15" ]; then
 		echo "${password}" > "${KEY_PASS_FILE}"
 		chmod 400 "${KEY_PASS_FILE}"
 	fi
-elif [ "${PLATFORM}" = "ccmp13" ]; then
+else
 	if [ "${N_PUBK}" = "8" ] && [ "${N_PRVK}" = "8" ] && [ "${N_PASS}" = "8" ]; then
 		# PKI tree already exists.
 		echo "Using existing PKI tree"
@@ -102,7 +100,4 @@ elif [ "${PLATFORM}" = "ccmp13" ]; then
 		echo "[ERROR] Could not generate PKI tree. An incomplete PKI tree may already exist."
 		exit 1
 	fi
-else
-	echo "Undefined platform"
-	exit 1
 fi

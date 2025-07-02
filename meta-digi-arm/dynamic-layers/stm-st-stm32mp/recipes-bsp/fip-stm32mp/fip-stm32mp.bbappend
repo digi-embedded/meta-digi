@@ -1,10 +1,32 @@
 #
-# Copyright (C) 2024, Digi International Inc.
+# Copyright (C) 2024,2025, Digi International Inc.
 #
 
+# Inherit custom DIGI sign class to skip signing tool and key parsing restrictions
+inherit sign-stm32mp-digi
+
+# Add optee-usb FIP configuration
+STM32MP_DEVICETREE_USB = " ${@' '.join('%s' % dt_file for dt_file in list(dict.fromkeys((d.getVar('STM32MP_DT_FILES_USB') or '').split())))} "
+FIP_CONFIG[optee-usb]  ?= "optee,${STM32MP_DEVICETREE_USB},default:optee,usb"
+FIP_CONFIG += "${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', bb.utils.contains('BOOTDEVICE_LABELS', 'usb', 'optee-usb', '', d), '', d)}"
+
+# Obtain password to use in FIP generation
+# Get password from file using the given key index
+do_deploy[prefuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'set_fip_sign_key', '', d)}"
+python set_fip_sign_key() {
+    passfile = d.getVar('TRUSTFENCE_PASSWORD_FILE')
+    if (os.path.isfile(passfile)):
+        with open(passfile, "r") as file:
+            p = file.read().strip()
+            if (p):
+                d.setVar('SIGN_KEY_PASS', p)
+}
+
 # Addons parameters for FIP_WRAPPER
-FIP_SOC_SEARCH ?= ""
-FIP_SOC_SEARCH:ccmp2 ?= " stm32mp25 "
+FIP_SOC_SEARCH ?= " ${STM32MP_SOC_NAME} "
+FIP_SOC_MATCH ?= " ${DIGI_SOM} "
+
+FWDDR_SUFFIX ?= "bin"
 
 # Deploy the fip binary for current target
 do_deploy() {
@@ -67,7 +89,9 @@ do_deploy() {
                     unset k
                     for soc in ${STM32MP_SOC_NAME}; do
                         k=$(expr $k + 1)
-                        [ "$(echo ${dt} | grep -c ${soc})" -eq 1 ] && sign_key=$(echo ${SIGN_KEY_PATH_LIST} | cut -d',' -f${k})
+                        if [ "$(echo ${dt} | grep -c ${soc})" -eq 1 ] || [ "$(echo ${dt} | grep -c ${FIP_SOC_MATCH})" -eq 1 ] ;then
+                            sign_key=$(echo ${SIGN_KEY_PATH_LIST} | cut -d',' -f${k})
+                        fi
                     done
                 fi
                 FIP_PARAM_SIGN="--sign --signature-key $sign_key --signature-key-pass $sign_single_key_pass"
@@ -134,37 +158,30 @@ do_deploy() {
                     --output ${DEPLOYDIR}/${FIP_DIR_FIP}
         done
     done
+
+    # Create symlinks in DEPLOYDIR
+
+    # Remove trailing slash (/) from ST variables
+    FIP_BASEDIR="$(echo ${FIP_DIR_FIP} | cut -c2-)"
+    unset i
+    for config in ${FIP_CONFIG}; do
+        i="$(expr ${i} + 1)"
+        dt_config=$(echo ${FIP_DEVICETREE} | cut -d',' -f${i})
+        for dt in ${dt_config}; do
+            FIP_FILENAME="${FIP_BASENAME}-${dt}-${config}${FIP_ENCRYPT_SUFFIX}${FIP_SIGN_SUFFIX}.${FIP_SUFFIX}"
+            if [ -f "${DEPLOYDIR}/${FIP_BASEDIR}/${FIP_FILENAME}" ]; then
+                cd "${DEPLOYDIR}"
+                # symlink FIP
+                ln -sf "${FIP_BASEDIR}/${FIP_FILENAME}" "${DEPLOYDIR}/"
+            fi
+
+            FIP_DDR_FILENAME="${FIP_BASENAME}-${dt}-ddr-${config}${FIP_ENCRYPT_SUFFIX}${FIP_SIGN_SUFFIX}.${FWDDR_SUFFIX}"
+            if [ -f "${DEPLOYDIR}/${FIP_BASEDIR}/${FIP_DDR_FILENAME}" ]; then
+                cd "${DEPLOYDIR}"
+                # symlink DDR firmware (needed for USB recovery)
+                ln -sf "${FIP_BASEDIR}/${FIP_DDR_FILENAME}" "${DEPLOYDIR}/"
+            fi
+        done
+    done
 }
 addtask deploy before do_build after do_compile
-
-FWDDR_SUFFIX ?= "bin"
-
-# This runs after 'sysroot_populate()' which populates all
-# FIP artifacts on the image deploy dir.
-# The purpose of this function is to create symlinks to the files needed
-# by the uuu installer that are located in subdirectories.
-deploy_symlinks_fip() {
-	# Create symlinks in DEPLOY_DIR_IMAGE
-
-	# Remove trailing slash (/) from ST variables
-	FIP_BASEDIR="$(echo ${FIP_DIR_FIP} | cut -c2-)"
-	unset i
-	for config in ${FIP_CONFIG}; do
-		i="$(expr ${i} + 1)"
-		dt_config=$(echo ${FIP_DEVICETREE} | cut -d',' -f${i})
-		for dt in ${dt_config}; do
-			FIP_FILENAME="${FIP_BASENAME}-${dt}-${config}${FIP_SIGN_SUFFIX}.${FIP_SUFFIX}"
-			if [ -f "${DEPLOY_DIR_IMAGE}/${FIP_BASEDIR}/${FIP_FILENAME}" ]; then
-				cd "${DEPLOY_DIR_IMAGE}"
-				# symlink FIP
-				ln -sf "${FIP_BASEDIR}/${FIP_FILENAME}" "${DEPLOY_DIR_IMAGE}/"
-			fi
-			if [ -f "${DEPLOY_DIR_IMAGE}/${FIP_BASEDIR}/${FIP_BASENAME}-${dt}-ddr-${config}.${FWDDR_SUFFIX}" ]; then
-				cd "${DEPLOY_DIR_IMAGE}"
-				# symlink DDR firmware (needed for USB recovery)
-				ln -sf "${FIP_BASEDIR}/${FIP_BASENAME}-${dt}-ddr-${config}.${FWDDR_SUFFIX}" "${DEPLOY_DIR_IMAGE}/"
-			fi
-		done
-	done
-}
-SYSROOT_PREPROCESS_FUNCS += "deploy_symlinks_fip"

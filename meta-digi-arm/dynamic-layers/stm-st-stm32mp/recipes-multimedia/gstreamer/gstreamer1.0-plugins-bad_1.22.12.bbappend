@@ -75,6 +75,11 @@ SRC_URI:append = " \
     file://0078-gtkwaylandsink-Add-gst_buffer_pool_config_set_params.patch \
     file://0079-waylandsink-config-buffer-pool-with-query-size-when-.patch \
     file://0080-gtkwaylandsink-config-buffer-pool-with-query-size-wh.patch \
+    file://0081-v4l2codecs-add-support-of-encoding-from-RGBA.patch \
+    file://0082-Revert-waylandsink-match-drm-kernel-driver-alignment.patch \
+    file://0083-Revert-gtkwaylandsink-match-drm-kernel-driver-alignm.patch \
+    file://0084-v4l2codecs-h264enc-add-support-of-DCT-8x8.patch \
+    file://0085-v4l2codecs-add-support-of-encoding-from-UYVY.patch \
 "
 
 PACKAGECONFIG_GL ?= "${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'gles2 egl', '', d)}"

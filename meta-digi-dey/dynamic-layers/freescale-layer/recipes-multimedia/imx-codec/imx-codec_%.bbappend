@@ -1,4 +1,4 @@
-# Copyright (C) 2017,2018, Digi International Inc.
+# Copyright (C) 2017-2025, Digi International Inc.
 
 # Empirically detected binaries that are not needed for a given platform
 REDUNDANT_BINS ?= ""
@@ -29,3 +29,5 @@ do_install:append() {
 		rm -f ${D}/${i}
 	done
 }
+
+INSANE_SKIP:append:mx6-nxp-bsp = " 32bit-time"

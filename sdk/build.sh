@@ -58,6 +58,13 @@ ZIP_INSTALLER_CFG="
 DEY_IMAGE_INSTALLER = \"1\"
 "
 
+SDCARD_FSTYPE="
+IMAGE_FSTYPES:append:ccimx6 = \" sdcard.gz\"
+IMAGE_FSTYPES:append:ccimx8x = \" sdcard.gz\"
+IMAGE_FSTYPES:append:ccimx8m = \" sdcard.gz\"
+IMAGE_FSTYPES:append:ccimx9 = \" sdcard.gz\"
+"
+
 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(date +%s)}"
 BUILD_TIMESTAMP="
 SOURCE_DATE_EPOCH = \"${SOURCE_DATE_EPOCH}\"
@@ -161,6 +168,7 @@ fi
 [ -z "${DY_USE_CVE_LAYER}" ] && DY_USE_CVE_LAYER="false"
 
 [ "${DY_CVE_REPORT}" = "true" ] && [ -z "${DY_VIGILES_DIR}" ] && error "DY_VIGILES_DIR not specified"
+[ "${DY_CVE_REPORT}" = "true" ] && [ -z "${DY_CODENAME}" ] && error "DY_CODENAME not specified"
 
 # Per-platform data
 while read -r _pl _tgt; do
@@ -171,9 +179,9 @@ while read -r _pl _tgt; do
 	# the fly with underscores.
 	eval "${_pl//-/_}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
-	ccimx8mm-dvk         dey-image-qt,dey-image-webkit,dey-image-lvgl
-	ccimx8mn-dvk         dey-image-qt,dey-image-webkit,dey-image-lvgl
-	ccimx8x-sbc-pro      dey-image-qt,dey-image-webkit,dey-image-lvgl
+	ccimx8mm-dvk         dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter
+	ccimx8mn-dvk         dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter
+	ccimx8x-sbc-pro      dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter
 	ccimx8x-sbc-express  dey-image-qt
 	ccimx6qpsbc          dey-image-qt,dey-image-webkit,dey-image-lvgl
 	ccimx6sbc            dey-image-qt,dey-image-webkit,dey-image-lvgl
@@ -183,7 +191,7 @@ done<<-_EOF_
 	ccimx6ulrftest       dey-image-mft-module-rf
 	ccmp15-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl
 	ccmp13-dvk           core-image-base
-	ccmp25-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl
+	ccmp25-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter
 	ccimx91-dvk          core-image-base
 	ccimx93-dvk          dey-image-qt,dey-image-lvgl
 _EOF_
@@ -205,6 +213,10 @@ fi
 printf "\n[INFO] Build Yocto \"%s\" for \"%s\" (cpus=%s)\n\n" "${DY_REVISION}" "${DY_PLATFORMS}" "${CPUS}"
 
 # Install/Update Digi's Yocto SDK
+if [ "${DY_BUILD_RELEASE}" = "true" ]; then
+	# Start a build release environment from scratch
+	rm -rf "${YOCTO_INST_DIR}"
+fi
 mkdir -p "${YOCTO_INST_DIR}"
 if pushd "${YOCTO_INST_DIR}"; then
 	# Use git ls-remote to check the revision type
@@ -270,6 +282,7 @@ for platform in ${DY_PLATFORMS}; do
 				printf "%s" "${RM_WORK_CFG}" >> conf/local.conf
 			fi
 			printf "%s" "${ZIP_INSTALLER_CFG}" >> conf/local.conf
+			printf "%s" "${SDCARD_FSTYPE}" >> conf/local.conf
 			# Append extra configuration macros if provided from build environment
 			if [ -n "${DY_EXTRA_LOCAL_CONF}" ]; then
 				printf "%s\n" "${DY_EXTRA_LOCAL_CONF}" >> conf/local.conf
@@ -290,7 +303,7 @@ for platform in ${DY_PLATFORMS}; do
 				status="non-patched"
 				bbclass="vigiles"
 				[ "${DY_USE_CVE_LAYER}" = "true" ] && { status="patched"; bbclass="digi_ccss"; }
-				VIGILES_CONF_PATH="${DY_VIGILES_DIR}/configs/${platform}_${status}_config"
+				VIGILES_CONF_PATH="${DY_VIGILES_DIR}/configs/${DY_CODENAME}/${platform}_${status}_config"
 				# Return error if config file doesn't exist
 				[ ! -f "${VIGILES_CONF_PATH}" ] && error "Cannot find Vigiles config file ${VIGILES_CONF_PATH}"
 				printf "%s" "${VIGILES_CFG}" | sed -e "s,##VIGILES_CONF_PATH##,${VIGILES_CONF_PATH},g" -e "s,##VIGILES_BBCLASS##,${bbclass},g" >> conf/local.conf

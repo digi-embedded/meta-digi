@@ -1,15 +1,17 @@
-# Copyright (C) 2014-2021, Digi International Inc.
+# Copyright (C) 2014-2025, Digi International Inc.
 
-# Disable network manager
-NETWORK_MANAGER = ""
+#
+# DEY only uses x11-sato based images on the CC6UL, so tweak the
+# recipe to fit in the small CC6UL rootfs.
+#
 
-RDEPENDS:${PN}-apps:remove:ccimx6ul = "gst-player"
+# Disable GTK-based gstreamer examples and network manager
+GSTEXAMPLES:dey = ""
+NETWORK_MANAGER:dey = ""
 
-matchbox-base = "${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', ' \
-                                         matchbox-desktop matchbox-session-sato  matchbox-keyboard matchbox-keyboard-applet matchbox-keyboard-im matchbox-config-gtk', '', d)}"
-matchbox-apps = "${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'matchbox-terminal', '', d)}"
+# Prevent installing ICU package
+RDEPENDS:${PN}-apps:remove:dey = "matchbox-terminal"
 
-RDEPENDS:${PN}-base:remove = "${matchbox-base}"
-RDEPENDS:${PN}-apps:remove = "${matchbox-apps} \
-                              gst-player-bin \
-"
+# Prevent launching a second instance of pulseaudio as
+# DEY uses system-wide pulseaudio
+RDEPENDS:${PN}-base:remove:dey = "pulseaudio-client-conf-sato"

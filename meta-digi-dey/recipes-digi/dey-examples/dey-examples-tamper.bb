@@ -1,4 +1,4 @@
-# Copyright (C) 2022, Digi International Inc.
+# Copyright (C) 2022-2025, Digi International Inc.
 
 SUMMARY = "DEY examples: Tamper test application"
 SECTION = "examples"
@@ -13,3 +13,5 @@ do_install() {
 	install -d ${D}${bindir}
 	install -m 0755 tamper_sample ${D}${bindir}
 }
+
+COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx8x)"

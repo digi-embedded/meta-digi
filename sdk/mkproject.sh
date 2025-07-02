@@ -28,7 +28,7 @@ MKP_NONE="\033[0m"
 MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/meta-digi/meta-digi-arm/conf/templates"
 
 # Blacklist platforms (not officially supported in a DEY release)
-MKP_BLACKLIST_PLATFORMS="ccimx6qpsbc ccimx6sbc ccimx8mm-dvk ccimx8mn-dvk ccimx8x-sbc-express ccmp13-dvk ccmp15-dvk"
+MKP_BLACKLIST_PLATFORMS="ccimx6qpsbc ccimx6sbc ccimx8x-sbc-express"
 
 MKP_SETUP_ENVIRONMENT='#!/bin/bash
 

@@ -11,14 +11,10 @@ SRC_URI:append:ccmp1 = " \
     file://99-ext-rtc-wakeup.rules \
 "
 
-do_install:append:ccimx9() {
-    # The IW61x, when enabled as AP or P2P (or bridge with AP), generates udev triggers that lead the wifi card to fail.
-    # The text to replace is 'echo "$INTERFACE" | grep -q wifi && exit 0'.
-    sed -i -e 's|grep -q wifi|grep -q "uap0\|wfd0\|br0"|g' ${D}${sysconfdir}/udev/scripts/network.sh
-}
+WLAN_AP_INTERFACE = "wlan1"
+WLAN_AP_INTERFACE:ccimx9 = "uap0"
 
 do_install:append() {
-
 	if [ -n "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', '1', '', d)}" ]; then
 		install -d ${D}/mnt
 		install -d ${D}/mnt/linux
@@ -61,6 +57,10 @@ do_install:append() {
 
 	# Fix mount.sh to force to find files in /tmp as symlink
 	sed -i -e 's|find /tmp|find -L /tmp|g' ${D}${sysconfdir}/udev/scripts/mount.sh
+
+	# When a WiFi driver adds AP or P2P (or bridge with AP), it generates udev triggers that lead the wifi card to fail.
+	# The grep argument is the list of ifaces to skip, in this case the AP, P2P, and bridge interfaces.
+	sed -i -e 's|grep -q wifi|grep -qE "${WLAN_AP_INTERFACE}\|${WLAN_P2P_INTERFACE}\|br0"|g' ${D}${sysconfdir}/udev/scripts/network.sh
 }
 
 do_install:append:ccmp1() {

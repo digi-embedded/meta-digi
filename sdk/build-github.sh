@@ -36,6 +36,13 @@ ZIP_INSTALLER_CFG="
 DEY_IMAGE_INSTALLER = \"1\"
 "
 
+SDCARD_FSTYPE="
+IMAGE_FSTYPES:append:ccimx6 = \" sdcard.gz\"
+IMAGE_FSTYPES:append:ccimx8x = \" sdcard.gz\"
+IMAGE_FSTYPES:append:ccimx8m = \" sdcard.gz\"
+IMAGE_FSTYPES:append:ccimx9 = \" sdcard.gz\"
+"
+
 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(date +%s)}"
 BUILD_TIMESTAMP="
 SOURCE_DATE_EPOCH = \"${SOURCE_DATE_EPOCH}\"
@@ -147,9 +154,13 @@ while read -r _pl _tgt; do
 	# the fly with underscores.
 	eval "${_pl//-/_}_tgt=\"${_tgt//,/ }\""
 done<<-_EOF_
+	ccimx8mm-dvk         dey-image-qt
+	ccimx8mn-dvk         dey-image-qt
 	ccimx8x-sbc-pro      dey-image-qt
 	ccimx6ulsbc          dey-image-qt
 	ccimx6ulstarter      core-image-base
+	ccmp15-dvk           dey-image-webkit
+	ccmp13-dvk           core-image-base
 	ccmp25-dvk           dey-image-webkit
 	ccimx91-dvk          core-image-base
 	ccimx93-dvk          dey-image-qt
@@ -172,6 +183,10 @@ fi
 printf "\n[INFO] Build Yocto \"%s\" for \"%s\" (cpus=%s)\n\n" "${DY_REVISION}" "${DY_PLATFORMS}" "${CPUS}"
 
 # Install/Update Digi's Yocto SDK
+if [ "${DY_BUILD_RELEASE}" = "true" ]; then
+	# Start a build release environment from scratch
+	rm -rf "${YOCTO_INST_DIR}"
+fi
 mkdir -p "${YOCTO_INST_DIR}"
 if pushd "${YOCTO_INST_DIR}"; then
 	# Use git ls-remote to check the revision type
@@ -227,6 +242,7 @@ for platform in ${DY_PLATFORMS}; do
 			{
 				printf "%s" "${RM_WORK_CFG}"
 				printf "%s" "${ZIP_INSTALLER_CFG}"
+				printf "%s" "${SDCARD_FSTYPE}"
 				printf "%s" "${BUILD_TIMESTAMP}"
 			} >> conf/local.conf
 			for target in ${platform_targets:?}; do

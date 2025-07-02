@@ -7,6 +7,7 @@ SRC_URI:append:ccimx8m = " \
     file://0002-imx8mm-Disable-M4-debug-console.patch \
     file://0003-imx8mn-Define-UART1-as-console-for-boot-stage.patch \
     file://0004-imx8mn-Disable-M7-debug-console.patch \
+    file://0005-imx8mm-set-BL32_BASE-and-map-high-DRAM-for-ccimx8mm-.patch \
 "
 SRC_URI:append:ccimx91 = " \
     file://0001-ccimx91-use-UART6-for-the-default-console.patch \

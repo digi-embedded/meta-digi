@@ -108,7 +108,7 @@ echo "Determining image files to use..."
 
 # Determine ATF file to program
 if [ -z "${INSTALL_ATF_FILENAME}" ]; then
-	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-optee-emmc.stm32##SIGNED_TFA##"
+	INSTALL_ATF_FILENAME="tf-a-##MACHINE##-optee-emmc##SIGNED##.stm32"
 fi
 INSTALL_METADATA_FILENAME="metadata-##MACHINE##.bin"
 
@@ -306,7 +306,7 @@ else
 fi
 
 # Set the dboot_kernel_var to fitimage if Trustfence is enabled
-if [ "${TRUSTFENCE}" = "true" ] || echo "${INSTALL_UBOOT_FILENAME}" | grep -q -e "signed"; then
+if [ "${TRUSTFENCE}" = "true" ] || echo "${INSTALL_FIP_FILENAME}" | grep -q -e "Signed"; then
 	uuu fb: ucmd setenv dboot_kernel_var fitimage
 	uuu fb: ucmd saveenv
 fi

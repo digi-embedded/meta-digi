@@ -2,6 +2,9 @@
 # Copyright (C) 2022-2025, Digi International Inc.
 #
 
+# Inherit custom DIGI sign class to skip signing tool and key parsing restrictions
+inherit sign-stm32mp-digi
+
 # Select internal or Github OPTEE repo
 OPTEE_URI_STASH = "${DIGI_MTK_GIT}/emp/optee_os.git;protocol=ssh"
 OPTEE_URI_GITHUB = "${DIGI_GITHUB_GIT}/optee_os.git;protocol=https"
@@ -14,6 +17,3 @@ SRC_URI = " \
     ${OPTEE_GIT_URI};branch=${SRCBRANCH};name=os \
     file://fonts.tar.gz;subdir=git;name=fonts \
 "
-
-# If TF enabled, force use of HUK in OTP bits
-EXTRA_OEMAKE += "${@oe.utils.conditional('TRUSTFENCE_ENABLED', '1', 'CFG_OTP_HUK=1', '', d)}"

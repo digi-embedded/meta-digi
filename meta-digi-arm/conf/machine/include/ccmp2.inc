@@ -21,6 +21,12 @@ UBOOT_PREFIX = "fip"
 UBOOT_SUFFIX = "bin"
 # Set U-Boot FIP settings
 FIP_UBOOT_DTB = "u-boot"
+# Include boot script into the FIT image
+UBOOT_ENV = "boot"
+# For FIT image usage
+UBOOT_ENTRYPOINT = "0x88000000"
+UBOOT_DTB_LOADADDRESS = "0x8a000000"
+UBOOT_DTBO_LOADADDRESS = "0x8a000000"
 
 # =========================================================================
 # trusted-firmware-a
@@ -36,12 +42,14 @@ TF_A_METADATA_TOOL_ARGS ?= "-g -i 1 -b 2 -v ${TF_A_METADATA_TOOL_VERSION} ${DEVI
 # optee-os
 # =========================================================================
 PREFERRED_PROVIDER_virtual/optee-os = "optee-os-stm32mp"
+# OPTEE runtime packages to install
+OPTEE_PKGS ??= "optee-client"
 
 # =========================================================================
 # Kernel
 # =========================================================================
-KERNEL_IMAGETYPE = "${@bb.utils.contains('TRUSTFENCE_FIT_IMG', '1', 'fitImage', 'Image.gz', d)}"
-KERNEL_CLASSES = "${@bb.utils.contains('TRUSTFENCE_FIT_IMG', '1', 'kernel-fitimage', 'kernel-uimage', d)}"
+KERNEL_IMAGETYPE = "${@bb.utils.contains('TRUSTFENCE_SIGN_FIT_STM', '1', 'fitImage', 'Image.gz', d)}"
+KERNEL_CLASSES = "kernel-fitimage"
 KERNEL_ALT_IMAGETYPE = "vmlinux"
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccmp2_defconfig"
 
@@ -63,7 +71,7 @@ ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS'
 STM32MP_DEVICETREE_PROGRAMMER_ENABLE ?= "0"
 
 # List of supported boot devices
-BOOTDEVICE_LABELS ?= "emmc"
+BOOTDEVICE_LABELS ?= "emmc usb"
 # Supported boot schemes
 BOOTSCHEME_LABELS ?= "optee"
 
@@ -77,7 +85,16 @@ MACHINE_EXTRA_RDEPENDS += " \
     xbee-init \
 "
 
-# Image FS types
+# =========================================================================
+# alsa
+# =========================================================================
+ALSA_LIST:stm32mp2common = ""
+
+# Image FS types (set by meta-st-stm32mp layer)
+# tar.xz is omitted here because it's already added by ST layer
+IMAGE_FSTYPES += '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", \
+                                       "boot.vfat recovery.vfat squashfs", \
+                                       "boot.vfat recovery.vfat ext4.gz", d)}'
 IMAGE_FSTYPES:remove = "ext4"
 
 # =========================================================================

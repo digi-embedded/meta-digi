@@ -54,6 +54,10 @@ MACHINE_EXTRA_RRECOMMENDS += "${WIRELESS_MODULE}"
 
 MACHINE_FEATURES += "accel-graphics wifi bluetooth cryptochip mca optee"
 
+# For nativesdk packages that need to go to the toolchain depending on an
+# specific machine feature.
+SDK_MACHINE_FEATURES:append = " optee"
+
 # TrustFence
 TRUSTFENCE_SIGN_MODE = "HAB"
 

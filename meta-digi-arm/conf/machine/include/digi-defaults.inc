@@ -14,12 +14,12 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 # ccimx6qp      5.15              2017.03
 # ccimx6ul      6.6               2024.04
 # ccimx8x       6.6               2024.04 (packaged in imx-boot)
-# ccimx8mn      5.15              2020.04 (packaged in imx-boot)
-# ccimx8mm      5.15              2020.04 (packaged in imx-boot)
+# ccimx8mn      6.6               2024.04 (packaged in imx-boot)
+# ccimx8mm      6.6               2024.04 (packaged in imx-boot)
 # ccimx91       6.6               2024.04 (packaged in imx-boot)
 # ccimx93       6.6               2024.04 (packaged in imx-boot)
-# ccmp15        5.15              2021.10
-# ccmp13        5.15              2021.10
+# ccmp15        6.6               2023.10
+# ccmp13        6.6               2023.10
 # ccmp25        6.6               2023.10
 #
 
@@ -115,3 +115,17 @@ BOOTLOADER_SEEK_BOOTPART ?= "0"
 # This is otherwise forced by systemd because of hard-coded paths
 # in systemd source code.
 ROOT_HOME ?= "/root"
+
+# Default IMAGE_FSTYPES for eMMC/NAND
+IMAGE_FSTYPES ?= "${@ \
+	oe.utils.conditional('STORAGE_MEDIA', 'mmc', \
+		bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', \
+			'boot.vfat recovery.vfat squashfs tar.xz', \
+			'boot.vfat recovery.vfat ext4.gz tar.xz', d), \
+	oe.utils.conditional('STORAGE_MEDIA', 'mtd', \
+		bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', \
+			'boot.ubifs recovery.ubifs squashfs tar.xz', \
+			'boot.ubifs recovery.ubifs ubifs tar.xz', d), \
+		'' , d), \
+	d) \
+}"

@@ -3,7 +3,7 @@
 #
 #  trustfence-sign-artifact.sh
 #
-#  Copyright (C) 2023 by Digi International Inc.
+#  Copyright (C) 2023,2025 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@ while ! mkdir "${SINGLE_PROCESS_LOCK}" > /dev/null 2>&1; do
 done
 
 SCRIPT_NAME="$(basename "${0}")"
-SUPPORTED_PLATFORMS="ccmp15, ccmp13"
 
 while getopts "p:t" c; do
 	case "${c}" in
@@ -42,10 +41,8 @@ usage() {
 Usage: ${SCRIPT_NAME} <OPTIONS> [<input-unsigned-image> <output-signed-image>]
 
  Options:
-    -p <platform>    platform
+    -p <platform>    platform (such as ccmp15, ccmp13, ccmp25...)
     -t               sign/encrypt TF-A artifact
-
-Supported platforms: ${SUPPORTED_PLATFORMS}
 
 EOF
 }
@@ -72,10 +69,11 @@ if [ "${PLATFORM}" = "ccmp15" ]; then
 	KEY_PASS_FILE="${CONFIG_SIGN_KEYS_PATH}/keys/key_pass.txt"
 	PUBLIC_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/publicKey.pem"
 	PRIVATE_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/privateKey.pem"
-elif [ "${PLATFORM}" = "ccmp13" ]; then
+else
 	KEY_PASS_FILE="${CONFIG_SIGN_KEYS_PATH}/keys/key_pass0${CONFIG_KEY_INDEX}.txt"
 	PUBLIC_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/publicKey0*.pem"
 	PRIVATE_KEY="${CONFIG_SIGN_KEYS_PATH}/keys/privateKey0${CONFIG_KEY_INDEX}.pem"
+	TF_A_SIGN_OF="0x00000001"
 else
 	echo "Undefined platform"
 	exit 1
@@ -95,11 +93,23 @@ PASS=$(cat "${KEY_PASS_FILE}")
 
 # Sign TF-A artifact
 if [ "${ARTIFACT_TFA}" = "y" ]; then
-	if [ "${PLATFORM}" = "ccmp15" ]; then
-		SOC_OPTIONS="-hv 1"
-	elif [ "${PLATFORM}" = "ccmp13" ]; then
-		SOC_OPTIONS="-hv 2 -of 0x00000001"
-	fi
+	case "${PLATFORM}" in
+		ccmp15)
+			SOC_OPTIONS="-hv 1"
+			;;
+		ccmp13)
+			SOC_OPTIONS="-hv 2 -of ${TF_A_SIGN_OF}"
+			;;
+		ccmp2*)
+			SOC_OPTIONS="-hv 2.2 -of ${TF_A_SIGN_OF}"
+			;;
+		*)
+			echo "Error: Undefined platform: ${PLATFORM}"
+			usage
+			exit 1
+			;;
+	esac
+
 	STM32MP_SigningTool_CLI -bin ${INPUT_FILE} \
 				--public-key ${PUBLIC_KEY} \
 				--private-key ${PRIVATE_KEY} \

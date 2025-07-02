@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2021, Digi International Inc.
+# Copyright (C) 2012-2025, Digi International Inc.
 #
 SUMMARY = "Wireless packagegroup for DEY image"
 
@@ -16,3 +16,4 @@ RDEPENDS:${PN} = "\
 "
 
 RDEPENDS:${PN}:append:ccimx6sbc = " ath-prop-tools"
+RDEPENDS:${PN}:append:ccimx9 = " nxp-wlan-utils"

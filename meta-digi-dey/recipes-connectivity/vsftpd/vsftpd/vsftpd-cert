@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Generate self-signed certificate and key if they don't already exist
+if [ ! -f "/etc/##VSFTPD_PEM##" ] || [ ! -f "/etc/##VSFTPD_KEY##" ]; then
+	openssl req ##VSFTPD_KEY_SIGN_PKCS## ##VSFTPD_KEY_REQ_ARGS## \
+		-out /etc/##VSFTPD_PEM## \
+		-keyout /etc/##VSFTPD_KEY##
+	chmod 400 /etc/##VSFTPD_KEY##
+	echo "SSL/TLS certificate generated"
+else
+	echo "SSL/TLS certificate already exists"
+fi
