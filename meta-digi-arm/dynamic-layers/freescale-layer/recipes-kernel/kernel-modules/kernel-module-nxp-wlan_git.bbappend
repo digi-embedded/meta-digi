@@ -8,6 +8,7 @@ SRC_URI:append = " \
     file://watch_regdomain.sh \
     file://watch-regdomain.service \
     file://watch-regdomain.timer \
+    file://0001-mxm_wifiex-do-not-process-countryIE-internally.patch \
 "
 
 do_install:append () {
