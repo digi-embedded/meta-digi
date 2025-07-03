@@ -72,7 +72,6 @@ SIGN_UBOOT:ccimx6 = "sign_uboot"
 SIGN_UBOOT:ccimx6ul = "sign_uboot"
 
 do_deploy[postfuncs] += " \
-    adapt_uboot_filenames \
     ${@oe.utils.ifelse(d.getVar('BUILD_UBOOT_SCRIPTS') == 'true', 'build_uboot_scripts', '')} \
     ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', '${SIGN_UBOOT}', '', d)} \
 "
@@ -140,29 +139,31 @@ build_uboot_scripts() {
 	fi
 }
 
-adapt_uboot_filenames() {
-	# Remove canonical U-Boot symlinks for ${UBOOT_CONFIG} currently in the form:
-	#    u-boot-<platform>.<ext>-<type>
-	#    u-boot-<type>
-	# and add a more suitable symlink in the form:
-	#    u-boot-<platform>-<config>.<ext>
-	if [ -n "${UBOOT_CONFIG}" ]
-	then
-		for config in ${UBOOT_MACHINE}; do
-			i=$(expr $i + 1);
-			for type in ${UBOOT_CONFIG}; do
-				j=$(expr $j + 1);
-				if [ $j -eq $i ]
-				then
-					cd ${DEPLOYDIR}
-					rm -f ${UBOOT_BINARY}-${type}
-					ln -sf ${UBOOT_BINARYNAME}-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-${type}.${UBOOT_SUFFIX}
-				fi
-			done
-			unset  j
-		done
-		unset  i
-	fi
+#
+# Clean Yocto generated u-boot symlinks.
+#
+# Left:
+#    u-boot-<defconfig>.<ext>
+#    u-boot-<platform>.<ext>-<defconfig>    (needed for imx-boot)
+#    u-boot-spl.bin-<platform>-<defconfig>  (needed for imx-boot)
+#
+uboot_deploy_config:append() {
+    rm -f ${DEPLOYDIR}/${UBOOT_SYMLINK} \
+        ${DEPLOYDIR}/${UBOOT_BINARY}-${type} \
+        ${DEPLOYDIR}/${UBOOT_BINARY}
+    ln -sf ${UBOOT_BINARYNAME}-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${DEPLOYDIR}/${UBOOT_BINARYNAME}-${type}.${UBOOT_SUFFIX}
+}
+uboot_deploy_spl_config:append() {
+    rm -f ${DEPLOYDIR}/${SPL_BINARYFILE}-${type} \
+        ${DEPLOYDIR}/${SPL_BINARYFILE} \
+        ${DEPLOYDIR}/${SPL_SYMLINK}
+}
+# Further cleaning for platforms not generating imx-boot
+uboot_deploy_config:append:ccimx6ul() {
+    rm -f ${DEPLOYDIR}/${UBOOT_SYMLINK}-${type}
+}
+uboot_deploy_spl_config:append:ccimx6ul() {
+    rm -f ${DEPLOYDIR}/${SPL_SYMLINK}-${type}
 }
 
 sign_uboot() {
