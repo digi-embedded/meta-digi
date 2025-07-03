@@ -189,7 +189,7 @@ done<<-_EOF_
 	ccimx6ulstarter      core-image-base
 	ccimx6ulsom          dey-image-mft-module-min
 	ccimx6ulrftest       dey-image-mft-module-rf
-	ccmp15-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl
+	ccmp15-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter
 	ccmp13-dvk           core-image-base
 	ccmp25-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter
 	ccimx91-dvk          core-image-base
