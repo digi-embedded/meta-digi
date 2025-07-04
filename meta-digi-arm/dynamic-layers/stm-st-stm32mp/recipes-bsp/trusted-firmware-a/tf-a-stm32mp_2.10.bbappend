@@ -11,10 +11,10 @@ TFA_URI_GITHUB = "${DIGI_GITHUB_GIT}/arm-trusted-firmware.git;protocol=https"
 TFA_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${TFA_URI_STASH}', '${TFA_URI_GITHUB}', d)}"
 
 SRCBRANCH = "v2.10/stm32mp/maint"
-SRCREV = "${AUTOREV}"
+SRCREV = "e22f7d89868db1d909d582be9bdd73679648a438"
 
 SRC_URI = " \
-    ${TFA_GIT_URI};branch=${SRCBRANCH} \
+    ${TFA_GIT_URI};nobranch=1 \
 "
 
 # stm32mp15 = header-version 1
