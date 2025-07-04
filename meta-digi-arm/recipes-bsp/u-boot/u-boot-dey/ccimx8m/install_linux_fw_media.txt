@@ -149,7 +149,7 @@ setenv bootcmd "
 		echo \"Aborted.\";
 		exit;
 	fi;
-	if test  \"\$\{INSTALL_MEDIA\}\" = "usb"; then
+	if test "${INSTALL_MEDIA}" = "usb"; then
 		usb start;
 	fi;
 	if test \"\$\{dualboot\}\" = yes; then
@@ -179,7 +179,7 @@ setenv bootcmd "
 				exit;
 			fi;
 		fi;
-		if test  \"\$\{INSTALL_MEDIA\}\" = "usb"; then
+		if test "${INSTALL_MEDIA}" = "usb"; then
 			usb reset;
 		fi;
 		echo \"\";
