@@ -23,6 +23,7 @@ if test "${soc_type}" = "imx93"; then
 	fi
 fi
 
+setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##${SOCREV}.bin
 setenv INSTALL_MEDIA_INDEX ##INSTALL_MEDIA_INDEX##
 setenv INSTALL_MEDIA ##INSTALL_MEDIA##
 

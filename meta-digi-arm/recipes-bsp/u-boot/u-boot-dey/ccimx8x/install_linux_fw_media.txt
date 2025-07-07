@@ -18,6 +18,7 @@ fi
 # the necessary logic to choose the correct imx-boot file for the target's SOC.
 setenv skip-uboot-check "yes"
 
+setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##-${soc_rev}.bin
 setenv INSTALL_MEDIA_INDEX ##INSTALL_MEDIA_INDEX##
 setenv INSTALL_MEDIA ##INSTALL_MEDIA##
 
