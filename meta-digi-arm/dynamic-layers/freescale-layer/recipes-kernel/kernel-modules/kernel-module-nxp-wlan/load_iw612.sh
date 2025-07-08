@@ -21,8 +21,7 @@ drv_mode=${DRIVER_MODE} \
 drvdbg=${DRIVER_DEBUG} \
 sta_name=wlan \
 country_ie_ignore=1 \
-txpwrlimit_cfg=nxp/txpower_US.bin \
-init_hostcmd_cfg=nxp/rutxpower_US.bin \
+cntry_txpwr=2 \
 fw_name=nxp/sd_w61x_v1.bin.se \
 "
 
