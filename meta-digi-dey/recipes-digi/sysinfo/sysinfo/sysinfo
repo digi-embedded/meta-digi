@@ -342,7 +342,7 @@ REPORT_PATH="/tmp/sysinfo-${DEY_VERSION}-${BOARD_SN}-${DATE}"
 	echo "-------------------------------------"
 	echo ""
 
-	echo "||*Component*||*Version*"
+	echo "|||:Component|:Version"
 	DUT_HEADER="SN-${BOARD_SN}, ${MACHINE} ${BOARD_VARIANT} ${BOARD_TYPE}v${BOARD_VERSION}"
 	if [ -n "${BOARD_ID}" ]; then
 		DUT_HEADER="${DUT_HEADER} board_ID=${BOARD_ID}"
