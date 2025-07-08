@@ -142,6 +142,7 @@ Documentation is available online at https://www.digi.com/resources/documentatio
   * Added support to ConnectCore 8M Nano
   * Added real-time support
   * Updated i.MX GStreamer stack to 1.24.7.imx
+  * Applied certified power limits on ConnectCore 93 and 91
 * TrustFence
    * Added support to install signed/encrypted images from uuu install script
 * Added support to Flutter framework
