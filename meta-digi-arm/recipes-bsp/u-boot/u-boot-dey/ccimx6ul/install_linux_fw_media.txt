@@ -112,7 +112,9 @@ else
 	echo "   linux       ${INSTALL_LINUX_FILENAME}"
 	echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
 	echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
+	echo "   update      --format--"
 fi
+echo "   data        --format--"
 echo ""
 echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
 echo " to continue."
@@ -158,9 +160,8 @@ fi
 #     - Set bootlimit to 3
 #  - If Normal Boot:
 #     - Update the system partitions: linux, recovery, rootfs
-#     - Erase the 'update' partition
-#     - Configure recovery to wipe 'update' partition
-#     - Run 'recovery' and let the system boot after
+#     - Format the 'update' partition
+#     - Format the 'data' partition
 setenv bootcmd "
 	env default -a;
 	setenv singlemtdsys ${singlemtdsys};
@@ -272,19 +273,33 @@ setenv bootcmd "
 			exit;
 		fi;
 		echo \"\";
-		if test \"\$\{singlemtdsys\}\" != yes; then
+	fi;
+	if test \"\$\{singlemtdsys\}\" != yes; then
+		if test \"\$\{dualboot\}\" != yes; then
+			echo \"\";
+			echo \"\";
+			echo \">> Formatting 'update' partition\";
+			echo \"\";
+			echo \"\";
 			nand erase.part update;
+			if ubi part update; then
+				ubi createvol update;
+			fi;
 		fi;
-		setenv boot_recovery yes;
-		setenv recovery_command wipe_update;
+		echo \"\";
+		echo \"\";
+		echo \">> Formatting 'data' partition\";
+		echo \"\";
+		echo \"\";
+		nand erase.part data;
+		if ubi part data; then
+			ubi createvol data;
+		fi;
 	fi;
 	saveenv;
 	echo \"\";
 	echo \"\";
 	echo \">> Firmware installation complete.\";
-	if test \"\$\{dualboot\}\" != yes; then
-		echo \"Rebooting into recovery mode for final deployment.\";
-	fi;
 	echo \"\";
 	echo \"\";
 	sleep 1;

@@ -100,6 +100,24 @@ part_update()
 	fi
 }
 
+# Format a partition
+#   Params:
+#	1. partition
+#   Description:
+#	- erases a partition
+#	- creates UBI volume with the same name as the partition
+format_part()
+{
+	echo "\033[36m"
+	echo "====================================================================================="
+	echo "Formatting '${1}' partition"
+	echo "====================================================================================="
+	echo "\033[0m"
+
+	uuu "fb[-t 20000]:" ucmd nand erase.part "${1}"
+	uuu "fb[-t 20000]:" ucmd if ubi part "${1}"\; then ubi createvol "${1}"\;fi
+}
+
 clear
 echo "############################################################"
 echo "#           Linux firmware install through USB OTG         #"
@@ -278,6 +296,9 @@ fi
 LINUX_NAME="linux"
 RECOVERY_NAME="recovery"
 ROOTFS_NAME="rootfs"
+UPDATE_NAME="update"
+DATA_NAME="data"
+
 # Print warning about storage media being deleted
 if [ "${NOWAIT}" != true ]; then
 	WAIT=10
@@ -304,6 +325,12 @@ if [ "${NOWAIT}" != true ]; then
 		printf "   ${LINUX_NAME}\t${INSTALL_LINUX_FILENAME}\n"
 		printf "   ${RECOVERY_NAME}\t${INSTALL_RECOVERY_FILENAME}\n"
 		printf "   ${ROOTFS_NAME}\t${INSTALL_ROOTFS_FILENAME}\n"
+	fi
+	if [ "${SINGLEMTDSYS}" != true ]; then
+		if [ "${DUALBOOT}" != true ]; then
+			printf "   ${UPDATE_NAME}\t--format--\n"
+		fi
+		printf "   ${DATA_NAME}\t\t--format--\n"
 	fi
 	printf "\n"
 	printf " Press CTRL+C now if you wish to abort.\n"
@@ -334,7 +361,8 @@ part_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000 "${DEK_FILE}"
 #  - Update the 'linux' partition
 #  - Update the 'recovery' partition
 #  - Update the 'rootfs' partition
-#  - Erase the 'update' partition
+#  - Format the 'update' partition
+#  - Format the 'data' partition
 uuu fb: ucmd setenv bootcmd "
 	env default -a;
 	setenv dualboot \${dualboot};
@@ -388,15 +416,11 @@ else
 	part_update "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}" 120000
 fi
 
-if [ "${SINGLEMTDSYS}" != true ] && [ "${DUALBOOT}" != true ]; then
-	# Erase the 'Update' partition
-	uuu "fb[-t 20000]:" ucmd nand erase.part update
-fi
-
-if [ "${DUALBOOT}" != true ]; then
-	# Configure u-boot to boot into recovery mode
-	uuu fb: ucmd setenv boot_recovery yes
-	uuu fb: ucmd setenv recovery_command wipe_update
+if [ "${SINGLEMTDSYS}" != true ]; then
+	if [ "${DUALBOOT}" != true ]; then
+		format_part "${UPDATE_NAME}"
+	fi
+	format_part "${DATA_NAME}"
 fi
 
 # Set the rootfstype if squashfs
