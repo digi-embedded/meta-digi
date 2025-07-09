@@ -1,3 +1,6 @@
+# Use new NXP package mirror
+FSL_MIRROR = "https://www.nxp.com/lgfiles/NMG/MAD/YOCTO/"
+
 PV_pn-c-ares = "1.13.0+gitrAUTOINC+3be1924221"
 SRC_URI_prepend_pn-c-ares = "git://github.com/c-ares/c-ares.git;branch=main "
 SRC_URI_remove_pn-c-ares = "git://github.com/c-ares/c-ares.git"
