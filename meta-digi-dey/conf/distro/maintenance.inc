@@ -1,3 +1,6 @@
+# Use new NXP package mirror
+FSL_MIRROR = "https://www.nxp.com/lgfiles/NMG/MAD/YOCTO/"
+
 SRC_URI_prepend_pn-hostapd = "https://w1.fi/releases/hostapd-${PV}.tar.gz "
 SRC_URI_remove_pn-hostapd = "http://hostap.epitest.fi/releases/hostapd-${PV}.tar.gz"
 SRC_URI_prepend_pn-libconfig = "https://sources.buildroot.net/${BPN}/${BP}.tar.gz "
