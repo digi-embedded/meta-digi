@@ -206,6 +206,18 @@ updated list can be found on the online documentation.
     not supported.
   * For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
     devices fail to join autonomous groups.
+* Mouse input does not work in Flutter-based applications. When launching
+  Flutter applications, the system fails to register mouse input. This
+  prevents interaction with graphical elements and UI components, impacting
+  use cases that rely on pointer input.
+  Using a panel with a touchscreen prevents the issue from appearing.
+  This issue has been reported to the community, and we are waiting for a fix.
+* Mouse clicks stop working in WebKit after running the Aquarium demo or
+  video settings icon. After executing the Aquarium WebGL demo in WebKit,
+  mouse click events are no longer recognized in subsequent browsing sessions.
+  An application restart is required to recover proper mouse functionality.
+  This issue has been reported to the community, and we are working together
+  on a fix.
 
 ## ConnectCore 93
 
@@ -224,6 +236,20 @@ updated list can be found on the online documentation.
     configured to operate at 115200 bps and without hardware flow control,
     reducing the maximum throughput of this interface.
   * The QCA6564 wireless chip does not support Wake On Wireless LAN.
+
+## ConnectCore MP25
+
+* MMC0 input/output errors may appear during extended suspend/resume cycles.
+* The system may fail to power off correctly, eventually falling back to a watchdog
+  reset.
+
+## ConnectCore MP13
+
+* The power button becomes unresponsive after one power-off/power-on cycle.
+  A system reboot is required to restore normal functionality.
+  The issue originates from the OP-TEE/ATF firmware and will be addressed in
+  the next DEY release.
+  If you need further assistance, please contact Digi Technical Support.
 
 # Support Contact Information
 
