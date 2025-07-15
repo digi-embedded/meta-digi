@@ -4,8 +4,8 @@ require recipes-kernel/linux/linux-dey.inc
 
 SRCBRANCH = "v6.6/nxp/dey-5.0/maint"
 SRCBRANCH:stm32mpcommon = "v6.6/stm/dey-5.0/maint"
-SRCREV = "${AUTOREV}"
-SRCREV:stm32mpcommon = "${AUTOREV}"
+SRCREV = "480779ca1cae17cb9de0af0f185634e5529c7c2e"
+SRCREV:stm32mpcommon = "dd850e7ac5870c41055d5e4c37694f86135a3e67"
 
 # Define RT patches per machine
 RT_FILES:use-nxp-bsp = " \
