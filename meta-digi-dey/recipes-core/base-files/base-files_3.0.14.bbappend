@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2024, Digi International Inc.
+# Copyright (C) 2013-2025, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -7,7 +7,12 @@ SRC_URI:append:dey = " \
 "
 
 do_install:append:dey() {
-	install -m 0644 ${WORKDIR}/sysctl.conf ${D}${sysconfdir}/
+    if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+        install -d ${D}${sysconfdir}/sysctl.d
+        install -m 0644 ${WORKDIR}/sysctl.conf ${D}${sysconfdir}/sysctl.d/console.conf
+    else
+        install -m 0644 ${WORKDIR}/sysctl.conf ${D}${sysconfdir}/
+    fi
 }
 
 pkg_postinst_ontarget:${PN}() {
@@ -56,4 +61,4 @@ pkg_postinst_ontarget:${PN}() {
 
 inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}
 
-CONFFILES:${PN}:dey += "${sysconfdir}/sysctl.conf"
+CONFFILES:${PN}:dey += "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '', '${sysconfdir}/sysctl.conf', d)}"

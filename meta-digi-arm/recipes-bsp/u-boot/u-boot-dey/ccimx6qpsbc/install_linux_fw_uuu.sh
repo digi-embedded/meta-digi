@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2021-2024 by Digi International Inc.
+#  Copyright (C) 2021-2025 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -27,6 +27,15 @@ getenv()
 	uuu -v fb: ucmd printenv "${1}" | sed -ne "s,^${1}=,,g;T;p"
 }
 
+# Grep for string in command output
+# Params:
+#  1. Command
+#  2. String to grep
+grep_string()
+{
+	uuu -v fb: ucmd ${1} | grep "${2}"
+}
+
 show_usage()
 {
 	echo "Usage: $0 [options]"
@@ -42,7 +51,6 @@ show_usage()
 	echo "   -k <dek-filename>      Update includes dek file."
 	echo "                          (implies -t)."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
-	echo "   -t                     Install Trustfence artifacts."
 	echo "   -u <u-boot-filename>   U-Boot filename."
 	echo "                          Auto-determined by variant if not provided."
 	exit 2
@@ -61,23 +69,27 @@ part_update()
 	echo "====================================================================================="
 	echo "\033[0m"
 
-	if [ "${TRUSTFENCE}" = "true" ] && [ "${1}" = "bootloader" ]; then
-		uuu fb: download -f "${2}"
-		if [ -n "${DEK_FILE}" ]; then
-			uuu fb: ucmd setenv uboot_size \${filesize}
-			uuu fb: ucmd setenv fastboot_buffer \${initrd_addr}
-			uuu fb: download -f "${3}"
-			uuu fb: ucmd setenv dek_size \${filesize}
-			uuu fb: ucmd trustfence update ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
+	if [ "${1}" = "bootloader" ]; then
+		if [ "${ENCRYPTED}" = "true" ]; then
+			uuu fb: download -f "${2}"
+			if [ -n "${DEK_FILE}" ]; then
+				# Encrypted bootloader + dek
+				uuu fb: ucmd setenv uboot_size \${filesize}
+				uuu fb: ucmd setenv fastboot_buffer \${initrd_addr}
+				uuu fb: download -f "${3}"
+				uuu fb: ucmd setenv dek_size \${filesize}
+				uuu fb: ucmd trustfence update ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
+			else
+				# Encrypted bootloader (re-use existing dek)
+				uuu fb: ucmd trustfence update ram \${fastboot_buffer} \${fastboot_bytes}
+			fi
 		else
-			uuu fb: ucmd trustfence update ram \${fastboot_buffer} \${fastboot_bytes}
+			# Non-encrypted bootloader (can be signed or not)
+			uuu fb: flash "${1}" "${2}"
 		fi
 	else
-		if [ "${1}" = "bootloader" ]; then
-			uuu fb: flash "${1}" "${2}"
-		else
-			uuu fb: flash -raw2sparse "${1}" "${2}"
-		fi
+		# Non-bootloader image
+		uuu fb: flash -raw2sparse "${1}" "${2}"
 	fi
 }
 
@@ -91,7 +103,7 @@ echo "############################################################"
 # -i <image-name>
 # -u <u-boot-filename>
 # -k <dek-filename>
-while getopts ':bdhi:k:ntu:' c
+while getopts ':bdhi:k:nu:' c
 do
 	if [ "${c}" = ":" ]; then
 		c="${OPTARG}"
@@ -107,7 +119,6 @@ do
 	i) IMAGE_NAME=${OPTARG} ;;
 	k) DEK_FILE=${OPTARG} ;;
 	n) NOWAIT=true ;;
-	t) TRUSTFENCE=true ;;
 	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
 	esac
 done
@@ -131,9 +142,9 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 	# If module_variant is unknown or not set, return error asking the user
 	if [ "$module_variant" = "0x01" ] || \
 	   [ "$module_variant" = "0x02" ]; then
-		INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##2GB.imx"
+		INSTALL_UBOOT_FILENAME="u-boot-##SIGNED##-##MACHINE##2GB.imx"
 	elif [ "$module_variant" = "0x03" ]; then
-		INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##1GB.imx"
+		INSTALL_UBOOT_FILENAME="u-boot-##SIGNED##-##MACHINE##1GB.imx"
 	fi
 
 	# U-Boot when the checked value is empty.
@@ -148,15 +159,44 @@ if [ -z ${INSTALL_UBOOT_FILENAME} ]; then
 		echo ""
 		echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 6 QuadPlus variant:"
 		echo "   - For a QuadPlus CPU with 2GB DDR3, run:"
-		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##2GB.imx"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-##MACHINE##2GB.imx"
 		echo "   - For a DualPlus CPU with 1GB DDR3, run:"
-		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx"
+		echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-##MACHINE##1GB.imx"
 		echo ""
 		echo ""
 		echo "2. Run the install script again."
 		echo ""
 		echo "Aborted"
 		echo ""
+		exit 1
+	fi
+fi
+
+# Determine if bootloader is signed and/or encrypted
+if echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "signed"; then
+	SIGNED=true
+fi
+if echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "encrypted"; then
+	ENCRYPTED=true
+fi
+
+if [ "${ENCRYPTED}" = "true" ]; then
+	tf_status=$(grep_string "trustfence status" "Secure boot:")
+	if echo "${tf_status}" | grep -q -e "OPEN"; then
+		echo "\033[93m"
+		echo "WARNING!"
+		echo "You are trying to program encrypted images but the device status is OPEN."
+		echo "An OPEN device requires manual procedure for installing an encrypted bootloader,"
+		echo "programming the secure keys, and closing the device."
+		echo "Continuing would result in a non-secure setup or a non-bootable device after the"
+		echo "close operation."
+		echo ""
+		echo "Check the online documentation for manual steps at:"
+		echo "https://docs.digi.com/resources/documentation/digidocs/embedded/trustfence_home.html"
+		echo ""
+		echo "You can run this installer to program encrypted artifacts when the device has been closed."
+		echo "\033[0m"
+		echo "Exiting."
 		exit 1
 	fi
 fi

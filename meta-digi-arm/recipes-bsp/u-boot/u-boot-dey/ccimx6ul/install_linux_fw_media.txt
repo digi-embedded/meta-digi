@@ -10,11 +10,11 @@ BASEFILENAME=0
 # Determine U-Boot file to program basing on module variant
 # If module_variant is unknown or not set, return error asking the user
 if test "${module_variant}" = "0x02" || test "${module_variant}" = "0x03" || test "${module_variant}" = "0x06" || test "${module_variant}" = "0x09"; then
-	setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##.imx;
+	setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-##MACHINE##.imx;
 elif test "${module_variant}" = "0x04" || test "${module_variant}" = "0x05" || test "${module_variant}" = "0x07"; then
-	setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx;
+	setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-##MACHINE##1GB.imx;
 elif test "${module_variant}" = "0x08" || test "${module_variant}" = "0x0a"; then
-	setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##512MB.imx
+	setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-##MACHINE##512MB.imx
 fi
 
 setenv INSTALL_MEDIA_INDEX ##INSTALL_MEDIA_INDEX##
@@ -30,11 +30,11 @@ else
 	echo "";
 	echo "1. Set variable 'INSTALL_UBOOT_FILENAME' depending on your ConnectCore 6UL variant:";
 	echo "   - For a SOM with 1GB DDR3, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##1GB.imx";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-##MACHINE##1GB.imx";
 	echo "   - For a SOM with 512MB DDR3, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##512MB.imx";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-##MACHINE##512MB.imx";
 	echo "   - For a SOM with 256MB DDR3, run:";
-	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##MACHINE##.imx";
+	echo "     => setenv INSTALL_UBOOT_FILENAME u-boot-##SIGNED##-##MACHINE##.imx";
 	echo "";
 	echo "2. Run the install script again.";
 	echo "";
@@ -112,7 +112,9 @@ else
 	echo "   linux       ${INSTALL_LINUX_FILENAME}"
 	echo "   recovery    ${INSTALL_RECOVERY_FILENAME}"
 	echo "   rootfs      ${INSTALL_ROOTFS_FILENAME}"
+	echo "   update      --format--"
 fi
+echo "   data        --format--"
 echo ""
 echo " Press CTRL+C now if you wish to abort or wait 10 seconds"
 echo " to continue."
@@ -158,9 +160,8 @@ fi
 #     - Set bootlimit to 3
 #  - If Normal Boot:
 #     - Update the system partitions: linux, recovery, rootfs
-#     - Erase the 'update' partition
-#     - Configure recovery to wipe 'update' partition
-#     - Run 'recovery' and let the system boot after
+#     - Format the 'update' partition
+#     - Format the 'data' partition
 setenv bootcmd "
 	env default -a;
 	setenv singlemtdsys ${singlemtdsys};
@@ -174,7 +175,7 @@ setenv bootcmd "
 	else
 		force_erase=\"-e\";
 	fi;
-	if test  \"\$\{INSTALL_MEDIA\}\" = "usb"; then
+	if test "${INSTALL_MEDIA}" = "usb"; then
 		usb start;
 	fi;
 	if test \"\$\{dualboot\}\" = yes; then
@@ -204,7 +205,7 @@ setenv bootcmd "
 				exit;
 			fi;
 		fi;
-		if test  \"\$\{INSTALL_MEDIA\}\" = "usb"; then
+		if test "${INSTALL_MEDIA}" = "usb"; then
 			usb reset;
 		fi;
 		echo \"\";
@@ -272,19 +273,33 @@ setenv bootcmd "
 			exit;
 		fi;
 		echo \"\";
-		if test \"\$\{singlemtdsys\}\" != yes; then
+	fi;
+	if test \"\$\{singlemtdsys\}\" != yes; then
+		if test \"\$\{dualboot\}\" != yes; then
+			echo \"\";
+			echo \"\";
+			echo \">> Formatting 'update' partition\";
+			echo \"\";
+			echo \"\";
 			nand erase.part update;
+			if ubi part update; then
+				ubi createvol update;
+			fi;
 		fi;
-		setenv boot_recovery yes;
-		setenv recovery_command wipe_update;
+		echo \"\";
+		echo \"\";
+		echo \">> Formatting 'data' partition\";
+		echo \"\";
+		echo \"\";
+		nand erase.part data;
+		if ubi part data; then
+			ubi createvol data;
+		fi;
 	fi;
 	saveenv;
 	echo \"\";
 	echo \"\";
 	echo \">> Firmware installation complete.\";
-	if test \"\$\{dualboot\}\" != yes; then
-		echo \"Rebooting into recovery mode for final deployment.\";
-	fi;
 	echo \"\";
 	echo \"\";
 	sleep 1;

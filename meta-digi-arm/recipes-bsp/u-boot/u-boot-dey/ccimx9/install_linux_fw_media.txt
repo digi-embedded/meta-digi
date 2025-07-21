@@ -23,6 +23,7 @@ if test "${soc_type}" = "imx93"; then
 	fi
 fi
 
+setenv INSTALL_UBOOT_FILENAME imx-boot-##MACHINE##${SOCREV}.bin
 setenv INSTALL_MEDIA_INDEX ##INSTALL_MEDIA_INDEX##
 setenv INSTALL_MEDIA ##INSTALL_MEDIA##
 
@@ -183,7 +184,7 @@ setenv bootcmd "
 		echo \"Aborted.\";
 		exit;
 	fi;
-	if test  \"\$\{INSTALL_MEDIA\}\" = "usb"; then
+	if test "${INSTALL_MEDIA}" = "usb"; then
 		usb start;
 	fi;
 	if test \"\$\{dualboot\}\" = yes; then
@@ -213,7 +214,7 @@ setenv bootcmd "
 				exit;
 			fi;
 		fi;
-		if test  \"\$\{INSTALL_MEDIA\}\" = "usb"; then
+		if test "${INSTALL_MEDIA}" = "usb"; then
 			usb reset;
 		fi;
 		echo \"\";

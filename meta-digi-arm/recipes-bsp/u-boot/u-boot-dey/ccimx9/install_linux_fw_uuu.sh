@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2020-2024 by Digi International Inc.
+#  Copyright (C) 2020-2025 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -27,6 +27,15 @@ getenv()
 	uuu -v fb: ucmd printenv "${1}" | sed -ne "s,^${1}=,,g;T;p"
 }
 
+# Grep for string in command output
+# Params:
+#  1. Command
+#  2. String to grep
+grep_string()
+{
+	uuu -v fb: ucmd ${1} | grep "${2}"
+}
+
 show_usage()
 {
 	echo "Usage: $0 [options]"
@@ -43,7 +52,6 @@ show_usage()
 	echo "                          (implies -t)."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
 	echo "   -u <u-boot-filename>   U-Boot filename."
-	echo "   -t                     Install TrustFence artifacts."
 	echo "                          Auto-determined by variant if not provided."
 	echo "   -U                     Update redundant bootloader partition."
 
@@ -63,23 +71,27 @@ part_update()
 	echo "====================================================================================="
 	echo "\033[0m"
 
-	if [ "${TRUSTFENCE}" = "true" ] && [ "${1}" = "bootloader" ]; then
-		uuu fb: download -f "${2}"
-		if [ -n "${DEK_FILE}" ]; then
-			uuu fb: ucmd setenv uboot_size \${filesize}
-			uuu fb: ucmd setenv fastboot_buffer \${initrd_addr}
-			uuu fb: download -f "${3}"
-			uuu fb: ucmd setenv dek_size \${filesize}
-			uuu fb: ucmd trustfence update ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
+	if [ "${1}" = "bootloader" ] || [ "${1}" = "bootloader_redundant" ]; then
+		if [ "${ENCRYPTED}" = "true" ]; then
+			uuu fb: download -f "${2}"
+			if [ -n "${DEK_FILE}" ]; then
+				# Encrypted bootloader + dek
+				uuu fb: ucmd setenv uboot_size \${filesize}
+				uuu fb: ucmd setenv fastboot_buffer \${initrd_addr}
+				uuu fb: download -f "${3}"
+				uuu fb: ucmd setenv dek_size \${filesize}
+				uuu fb: ucmd trustfence update ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
+			else
+				# Encrypted bootloader (re-use existing dek)
+				uuu fb: ucmd trustfence update ram \${fastboot_buffer} \${fastboot_bytes}
+			fi
 		else
-			uuu fb: ucmd trustfence update ram \${fastboot_buffer} \${fastboot_bytes}
+			# Non-encrypted bootloader (can be signed or not)
+			uuu fb: flash "${1}" "${2}"
 		fi
 	else
-		if [ "${1}" = "bootloader" ] || [ "${1}" = "bootloader_redundant" ]; then
-			uuu fb: flash "${1}" "${2}"
-		else
-			uuu fb: flash -raw2sparse "${1}" "${2}"
-		fi
+		# Non-bootloader image
+		uuu fb: flash -raw2sparse "${1}" "${2}"
 	fi
 }
 
@@ -93,7 +105,7 @@ echo "############################################################"
 # -i <image-name>
 # -u <u-boot-filename>
 # -k <dek-filename>
-while getopts ':bdhti:nu:Uk:' c
+while getopts ':bdhi:nu:Uk:' c
 do
 	if [ "${c}" = ":" ]; then
 		c="${OPTARG}"
@@ -107,10 +119,9 @@ do
 	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
-	k) DEK_FILE=${OPTARG} && TRUSTFENCE=true ;;
+	k) DEK_FILE=${OPTARG} ;;
 	n) NOWAIT=true ;;
 	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
-	t) TRUSTFENCE=true ;;
 	U) INSTALL_REDUNDANT_UBOOT=true ;;
 	esac
 done
@@ -143,6 +154,35 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 		fi
 	fi
 	INSTALL_UBOOT_FILENAME="imx-boot-##SIGNED##-##MACHINE##${SOCREV}.bin"
+fi
+
+# Determine if bootloader is signed and/or encrypted
+if echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "signed"; then
+	SIGNED=true
+fi
+if echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "encrypted"; then
+	ENCRYPTED=true
+fi
+
+if [ "${ENCRYPTED}" = "true" ]; then
+	tf_status=$(grep_string "trustfence status" "Secure boot:")
+	if echo "${tf_status}" | grep -q -e "OPEN"; then
+		echo "\033[93m"
+		echo "WARNING!"
+		echo "You are trying to program encrypted images but the device status is OPEN."
+		echo "An OPEN device requires manual procedure for installing an encrypted bootloader,"
+		echo "programming the secure keys, and closing the device."
+		echo "Continuing would result in a non-secure setup or a non-bootable device after the"
+		echo "close operation."
+		echo ""
+		echo "Check the online documentation for manual steps at:"
+		echo "https://docs.digi.com/resources/documentation/digidocs/embedded/trustfence_home.html"
+		echo ""
+		echo "You can run this installer to program encrypted artifacts when the device has been closed."
+		echo "\033[0m"
+		echo "Exiting."
+		exit 1
+	fi
 fi
 
 # remove redirect
@@ -344,7 +384,7 @@ if [ -f ${COMPRESSED_ROOTFS_IMAGE} ] && [ -f ${INSTALL_ROOTFS_FILENAME} ]; then
 	rm -f "${INSTALL_ROOTFS_FILENAME}"
 fi
 # Set the dboot_kernel_var to fitimage if Trustfence is enabled
-if [ "${TRUSTFENCE}" = "true" ] || echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "signed" -e "encrypted"; then
+if [ "${SIGNED}" = "true" ] || [ "${ENCRYPTED}" = "true" ]; then
 	uuu fb: ucmd setenv dboot_kernel_var fitimage
 fi
 

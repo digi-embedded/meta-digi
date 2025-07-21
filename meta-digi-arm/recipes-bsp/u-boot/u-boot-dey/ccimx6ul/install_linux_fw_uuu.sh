@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2020-2024 by Digi International Inc.
+#  Copyright (C) 2020-2025 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -27,6 +27,15 @@ getenv()
 	uuu -v fb: ucmd printenv "${1}" | sed -ne "s,^${1}=,,g;T;p"
 }
 
+# Grep for string in command output
+# Params:
+#  1. Command
+#  2. String to grep
+grep_string()
+{
+	uuu -v fb: ucmd ${1} | grep "${2}"
+}
+
 show_usage()
 {
 	echo "Usage: $0 [options]"
@@ -42,7 +51,6 @@ show_usage()
 	echo "   -k <dek-filename>      Update includes dek file."
 	echo "                          (implies -t)."
 	echo "   -n                     No wait. Skips 10 seconds delay to stop script."
-	echo "   -t                     Install TrustFence artifacts."
 	echo "   -u <u-boot-filename>   U-Boot filename."
 	echo "                          Auto-determined by variant if not provided."
 	exit 2
@@ -74,19 +82,40 @@ part_update()
 		ERASE="-e"
 	fi
 	uuu fb: download -f "${2}"
-	if [ "${TRUSTFENCE}" = "true" ] && [ "${1}" = "uboot" ]; then
+	if [ "${1}" = "bootloader" ] && [ "${ENCRYPTED}" = "true" ]; then
 		if [ -n "${DEK_FILE}" ]; then
+			# Encrypted bootloader + dek
 			uuu fb: ucmd setenv uboot_size \${filesize}
 			uuu fb: ucmd setenv fastboot_buffer \${initrd_addr}
 			uuu fb: download -f "${4}"
 			uuu fb: ucmd setenv dek_size \${filesize}
 			uuu "fb[-t ${3}]:" ucmd trustfence update ram \${loadaddr} \${uboot_size} \${initrd_addr} \${dek_size}
 		else
+			# Encrypted bootloader (re-use existing dek)
 			uuu "fb[-t ${3}]:" ucmd trustfence update ram \${fastboot_buffer} \${fastboot_bytes}
 		fi
 	else
+		# Rest of images (including non-encrypted bootloader)
 		uuu "fb[-t ${3}]:" ucmd update "${1}" ram \${fastboot_buffer} \${fastboot_bytes} ${ERASE}
 	fi
+}
+
+# Format a partition
+#   Params:
+#	1. partition
+#   Description:
+#	- erases a partition
+#	- creates UBI volume with the same name as the partition
+format_part()
+{
+	echo "\033[36m"
+	echo "====================================================================================="
+	echo "Formatting '${1}' partition"
+	echo "====================================================================================="
+	echo "\033[0m"
+
+	uuu "fb[-t 20000]:" ucmd nand erase.part "${1}"
+	uuu "fb[-t 20000]:" ucmd if ubi part "${1}"\; then ubi createvol "${1}"\;fi
 }
 
 clear
@@ -99,7 +128,7 @@ echo "############################################################"
 # -i <image-name>
 # -u <u-boot-filename>
 # -k <dek-filename>
-while getopts ':bdhi:k:ntu:' c
+while getopts ':bdhi:k:nu:' c
 do
 	if [ "${c}" = ":" ]; then
 		c="${OPTARG}"
@@ -113,9 +142,8 @@ do
 	d) INSTALL_DUALBOOT=true && BOOTCOUNT=true ;;
 	h) show_usage ;;
 	i) IMAGE_NAME=${OPTARG} ;;
-	k) DEK_FILE=${OPTARG} && TRUSTFENCE=true ;;
+	k) DEK_FILE=${OPTARG} ;;
 	n) NOWAIT=true ;;
-	t) TRUSTFENCE=true ;;
 	u) INSTALL_UBOOT_FILENAME=${OPTARG} ;;
 	esac
 done
@@ -149,12 +177,12 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 		elif [ "$module_variant" = "0x04" ] || \
 		     [ "$module_variant" = "0x05" ] || \
 		     [ "$module_variant" = "0x07" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##1GB.imx"
+			INSTALL_UBOOT_FILENAME="u-boot-##SIGNED##-##MACHINE##1GB.imx"
 		elif [ "$module_variant" = "0x02" ] || \
 		     [ "$module_variant" = "0x03" ] || \
 		     [ "$module_variant" = "0x06" ] || \
 		     [ "$module_variant" = "0x09" ]; then
-			INSTALL_UBOOT_FILENAME="u-boot-##MACHINE##.imx"
+			INSTALL_UBOOT_FILENAME="u-boot-##SIGNED##-##MACHINE##.imx"
 		fi
 	fi
 
@@ -170,16 +198,45 @@ if [ -z "${INSTALL_UBOOT_FILENAME}" ]; then
 		echo ""
 		echo "1. Add U-boot file name, depending on your ConnectCore 6UL variant, to script command line:"
 		echo "   - For a SOM with 1GB DDR3, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##MACHINE##1GB.imx"
+		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##SIGNED##-##MACHINE##1GB.imx"
 		echo "   - For a SOM with 512MB DDR3, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##MACHINE##512MB.imx"
+		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##SIGNED##-##MACHINE##512MB.imx"
 		echo "   - For a SOM with 256MB DDR3, run:"
-		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##MACHINE##.imx"
+		echo "     => ./install_linux_fw_uuu.sh -u u-boot-##SIGNED##-##MACHINE##.imx"
 		echo ""
 		echo "2. Run the install script again."
 		echo ""
 		echo "Aborted"
 		echo ""
+		exit 1
+	fi
+fi
+
+# Determine if bootloader is signed and/or encrypted
+if echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "signed"; then
+	SIGNED=true
+fi
+if echo "$INSTALL_UBOOT_FILENAME" | grep -q -e "encrypted"; then
+	ENCRYPTED=true
+fi
+
+if [ "${ENCRYPTED}" = "true" ]; then
+	tf_status=$(grep_string "trustfence status" "Secure boot:")
+	if echo "${tf_status}" | grep -q -e "OPEN"; then
+		echo "\033[93m"
+		echo "WARNING!"
+		echo "You are trying to program encrypted images but the device status is OPEN."
+		echo "An OPEN device requires manual procedure for installing an encrypted bootloader,"
+		echo "programming the secure keys, and closing the device."
+		echo "Continuing would result in a non-secure setup or a non-bootable device after the"
+		echo "close operation."
+		echo ""
+		echo "Check the online documentation for manual steps at:"
+		echo "https://docs.digi.com/resources/documentation/digidocs/embedded/trustfence_home.html"
+		echo ""
+		echo "You can run this installer to program encrypted artifacts when the device has been closed."
+		echo "\033[0m"
+		echo "Exiting."
 		exit 1
 	fi
 fi
@@ -239,6 +296,9 @@ fi
 LINUX_NAME="linux"
 RECOVERY_NAME="recovery"
 ROOTFS_NAME="rootfs"
+UPDATE_NAME="update"
+DATA_NAME="data"
+
 # Print warning about storage media being deleted
 if [ "${NOWAIT}" != true ]; then
 	WAIT=10
@@ -265,6 +325,12 @@ if [ "${NOWAIT}" != true ]; then
 		printf "   ${LINUX_NAME}\t${INSTALL_LINUX_FILENAME}\n"
 		printf "   ${RECOVERY_NAME}\t${INSTALL_RECOVERY_FILENAME}\n"
 		printf "   ${ROOTFS_NAME}\t${INSTALL_ROOTFS_FILENAME}\n"
+	fi
+	if [ "${SINGLEMTDSYS}" != true ]; then
+		if [ "${DUALBOOT}" != true ]; then
+			printf "   ${UPDATE_NAME}\t--format--\n"
+		fi
+		printf "   ${DATA_NAME}\t\t--format--\n"
 	fi
 	printf "\n"
 	printf " Press CTRL+C now if you wish to abort.\n"
@@ -295,7 +361,8 @@ part_update "uboot" "${INSTALL_UBOOT_FILENAME}" 5000 "${DEK_FILE}"
 #  - Update the 'linux' partition
 #  - Update the 'recovery' partition
 #  - Update the 'rootfs' partition
-#  - Erase the 'update' partition
+#  - Format the 'update' partition
+#  - Format the 'data' partition
 uuu fb: ucmd setenv bootcmd "
 	env default -a;
 	setenv dualboot \${dualboot};
@@ -349,15 +416,11 @@ else
 	part_update "${ROOTFS_NAME}" "${INSTALL_ROOTFS_FILENAME}" 120000
 fi
 
-if [ "${SINGLEMTDSYS}" != true ] && [ "${DUALBOOT}" != true ]; then
-	# Erase the 'Update' partition
-	uuu "fb[-t 20000]:" ucmd nand erase.part update
-fi
-
-if [ "${DUALBOOT}" != true ]; then
-	# Configure u-boot to boot into recovery mode
-	uuu fb: ucmd setenv boot_recovery yes
-	uuu fb: ucmd setenv recovery_command wipe_update
+if [ "${SINGLEMTDSYS}" != true ]; then
+	if [ "${DUALBOOT}" != true ]; then
+		format_part "${UPDATE_NAME}"
+	fi
+	format_part "${DATA_NAME}"
 fi
 
 # Set the rootfstype if squashfs

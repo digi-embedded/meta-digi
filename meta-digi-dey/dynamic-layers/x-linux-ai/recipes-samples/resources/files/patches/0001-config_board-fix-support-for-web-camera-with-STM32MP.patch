@@ -8,11 +8,11 @@ exclusive to cameras using the DCMIPP peripheral.
 
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
 ---
- .../files/resources-files/config_board_npu.sh | 29 ++++++++++++++++++-
- 1 file changed, 28 insertions(+), 1 deletion(-)
+ .../files/resources-files/config_board_npu.sh | 31 ++++++++++++++++++-
+ 1 file changed, 30 insertions(+), 1 deletion(-)
 
 diff --git a/resources-files/config_board_npu.sh b/resources-files/config_board_npu.sh
-index c89b5ca..38dda50 100644
+index c89b5ca..af95558 100644
 --- a/resources-files/config_board_npu.sh
 +++ b/resources-files/config_board_npu.sh
 @@ -16,10 +16,28 @@ STM32MP251="stm32mp251"
@@ -44,7 +44,7 @@ index c89b5ca..38dda50 100644
      echo "Software X-LINUX-AI installed is not compatible with the board, please install X-LINUX-AI CPU version for plateform without hardware accelerator"
      exit 1
    fi
-@@ -54,11 +72,20 @@ if [[ "$COMPATIBLE" == *"$STM32MP257"* ]] || [[ "$COMPATIBLE" == *"$STM32MP255"*
+@@ -54,11 +72,22 @@ if [[ "$COMPATIBLE" == *"$STM32MP257"* ]] || [[ "$COMPATIBLE" == *"$STM32MP255"*
    MACHINE=$STM32MP2_NPU
    DWIDTH=760
    DHEIGHT=568
@@ -59,6 +59,8 @@ index c89b5ca..38dda50 100644
 +  else
 +    # Web camera
 +    OPTIONS=""
++    DWIDTH=640
++    DHEIGHT=480
 +  fi
 +
    IMAGE_CLASSIFICATION_MODEL="mobilenet/mobilenet_v2_1.0_224_int8_per_tensor$NN_EXT"

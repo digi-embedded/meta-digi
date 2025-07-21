@@ -157,8 +157,6 @@ done<<-_EOF_
 	ccimx8mm-dvk         dey-image-qt
 	ccimx8mn-dvk         dey-image-qt
 	ccimx8x-sbc-pro      dey-image-qt
-	ccimx6qpsbc          dey-image-qt
-	ccimx6sbc            dey-image-qt
 	ccimx6ulsbc          dey-image-qt
 	ccimx6ulstarter      core-image-base
 	ccmp15-dvk           dey-image-webkit

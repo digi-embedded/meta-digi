@@ -118,7 +118,9 @@ do_compile:ccimx8x() {
 
 do_install:ccimx8x () {
 	install -d ${D}/boot
-	for bin in ${BOOTABLE_ARTIFACTS}; do
+	# Remove ##SIGNED## placeholder from variable (signing takes place later)
+	BOOT_ARTIFACTS=$(echo "${BOOTABLE_ARTIFACTS}" | sed -e 's,##SIGNED##,,g')
+	for bin in ${BOOT_ARTIFACTS}; do
 		for target in ${IMXBOOT_TARGETS}; do
 			install -m 0644 ${S}/${bin}-${target} ${D}/boot/
 		done

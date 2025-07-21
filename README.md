@@ -121,7 +121,38 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 ## 5.0-r2
 
-TODO
+* ST-based platforms
+  * Added support to ConnectCore MP13
+  * Added support to ConnectCore MP15
+  * Updated BSP
+    * Trusted Firmware ARM v2.8 (based on tag 'v2.10-stm32mp-r1.2' by ST)
+    * OP-TEE v4.0.0 (based on tag '4.0.0-stm32mp-r1.2' by ST)
+    * U-Boot v2023.10 (based on tag 'v2023.10-stm32mp-r1.2' by ST)
+    * Updated X-LINUX-AI software package (based on tag 'v6.0.1' by ST)
+    * Updated Wifi driver (based on 'v6.1.110-2025_0602' release from Cypress)
+    * Updated Wifi firmware to 'imx-scarthgap-jaculus_r1.1' release from Murata
+      * 2FY Wireless chip: v28.10.387.16
+      * 2AE Wireless chip: v13.10.246.356
+  * Added initial TrustFence support for ConnectCore MP2
+  * Added Qt 6.8.4 support for ConnectCore MP1 platforms
+  * Added support to new countries on ConnectCore MP1 World CLM blob file
+  * Added real-time support
+* NXP-based platforms
+  * Added support to ConnectCore 8M Mini
+  * Added support to ConnectCore 8M Nano
+  * Added real-time support
+  * Updated i.MX GStreamer stack to 1.24.7.imx
+  * Applied certified power limits on ConnectCore 93 and 91
+* TrustFence
+   * Added support to install signed/encrypted images from uuu install script
+* Added support to Flutter framework
+  * Added new image recipe for Flutter graphical applications
+* Removed Crank framework support
+* Added UBI health monitor service (for NAND-based SOMs)
+* BTRFS filesystem support for LXC incremental snapshots
+* Created installer ZIP by default, and not *.sdcard image
+* Enabled SSL/TLS support on vsftpd daemon by default
+* General bug fixing and improvements
 
 ## 5.0-r1
 
@@ -175,6 +206,18 @@ updated list can be found on the online documentation.
     not supported.
   * For P2P connections Digi recommends "Negotiated GO" modes. The QCA6564
     devices fail to join autonomous groups.
+* Mouse input does not work in Flutter-based applications. When launching
+  Flutter applications, the system fails to register mouse input. This
+  prevents interaction with graphical elements and UI components, impacting
+  use cases that rely on pointer input.
+  Using a panel with a touchscreen prevents the issue from appearing.
+  This issue has been reported to the community, and we are waiting for a fix.
+* Mouse clicks stop working in WebKit after running the Aquarium demo or
+  video settings icon. After executing the Aquarium WebGL demo in WebKit,
+  mouse click events are no longer recognized in subsequent browsing sessions.
+  An application restart is required to recover proper mouse functionality.
+  This issue has been reported to the community, and we are working together
+  on a fix.
 
 ## ConnectCore 93
 
@@ -193,6 +236,20 @@ updated list can be found on the online documentation.
     configured to operate at 115200 bps and without hardware flow control,
     reducing the maximum throughput of this interface.
   * The QCA6564 wireless chip does not support Wake On Wireless LAN.
+
+## ConnectCore MP25
+
+* MMC0 input/output errors may appear during extended suspend/resume cycles.
+* The system may fail to power off correctly, eventually falling back to a watchdog
+  reset.
+
+## ConnectCore MP13
+
+* The power button becomes unresponsive after one power-off/power-on cycle.
+  A system reboot is required to restore normal functionality.
+  The issue originates from the OP-TEE/ATF firmware and will be addressed in
+  the next DEY release.
+  If you need further assistance, please contact Digi Technical Support.
 
 # Support Contact Information
 
