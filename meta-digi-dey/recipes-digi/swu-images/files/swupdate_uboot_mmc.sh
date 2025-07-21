@@ -241,19 +241,14 @@ write_artifact_emmc ()
 {
 	local BLOCK_TO_WRITE="$1"
 	local FILE_TO_WRITE="$2"
-	local ENABLE_WRITE_ACCESS="$3"
 
-	if [ "${ENABLE_WRITE_ACCESS}" -eq 1 ]; then
-		# Enable write access in the partition.
-		echo 0 > "/sys/block/${BLOCK_TO_WRITE}/force_ro"
-	fi
+	# Enable write access in the partition.
+	echo 0 > "/sys/block/${BLOCK_TO_WRITE}/force_ro"
 	# Write the file into the eMMC.
 	dd if="${FILE_TO_WRITE}" of="/dev/${BLOCK_TO_WRITE}" seek="${UBOOT_SEEK_KB}" bs=1K 2>/dev/null
 	local rc=$?
-	if [ "${ENABLE_WRITE_ACCESS}" -eq 1 ]; then
-		# Disable write access in partition.
-		echo 1 > "/sys/block/${BLOCK_TO_WRITE}/force_ro"
-	fi
+	# Disable write access in partition.
+	echo 1 > "/sys/block/${BLOCK_TO_WRITE}/force_ro"
 	# Check update operation result.
 	if [ "${rc}" -ne 0 ]; then
 		exit_error "## ERROR: failed to write file ${FILE_TO_WRITE} to /dev/${BLOCK_TO_WRITE}" "${rc}"
@@ -269,19 +264,19 @@ fi
 # Write TFA.
 if expr "${PLATFORM}" : "ccmp2.*" >/dev/null; then
 	# Write TFA artifact into eMMC BOOT1 and BOOT2 partitions.
-	write_artifact_emmc ${UBOOT_BLOCK_MAIN} ${UBOOT_TFA_FILE} 1
+	write_artifact_emmc ${UBOOT_BLOCK_MAIN} ${UBOOT_TFA_FILE}
 	if [ "${UBOOT_REDUNDANT}" = "redundant" ]; then
-		write_artifact_emmc ${UBOOT_BLOCK_REDUNDANT} ${UBOOT_TFA_FILE} 1
+		write_artifact_emmc ${UBOOT_BLOCK_REDUNDANT} ${UBOOT_TFA_FILE}
 	fi
 	# Redefine block devices to write FIP artifact into 'fip-a' and 'fip-b' partitions.
 	UBOOT_BLOCK_MAIN="mmcblk0p3"
 	UBOOT_BLOCK_REDUNDANT="mmcblk0p4"
 fi
 # Write U-Boot
-write_artifact_emmc ${UBOOT_BLOCK_MAIN} ${UBOOT_FILE} 0
+write_artifact_emmc ${UBOOT_BLOCK_MAIN} ${UBOOT_FILE}
 # Check if redundant U-Boot update is requested.
 if [ "${UBOOT_REDUNDANT}" = "redundant" ]; then
-	write_artifact_emmc ${UBOOT_BLOCK_REDUNDANT} ${UBOOT_FILE} 0
+	write_artifact_emmc ${UBOOT_BLOCK_REDUNDANT} ${UBOOT_FILE}
 fi
 # Clean intermediate artifacts.
 clean_artifacts
