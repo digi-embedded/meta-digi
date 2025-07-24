@@ -107,7 +107,7 @@ do_compile() {
             soc_name=""
             if [ -n "${STM32MP_SOC_NAME}" ]; then
                 for soc in ${STM32MP_SOC_NAME}; do
-                    if [ "$(echo ${dt} | grep -c ${soc})" -eq 1 ]; then
+                    if [ "$(echo ${dt} | grep -c ${soc})" -eq 1 ] || [ "$(echo ${dt} | grep -c ${TF_A_SOC_MATCH})" -eq 1 ] ;then
                         soc_extra_opt="$(echo ${soc} | awk '{print toupper($0)}')=1"
                         soc_suffix="-${soc}"
 
