@@ -23,7 +23,7 @@ DEPENDS += "util-linux-libuuid"
 SYSTEMD_SERVICE:${PN} = "tee-supplicant.service"
 
 SECURE_STORAGE_PATH ?= "${@oe.utils.vartrue('TRUSTFENCE_FILE_BASED_ENCRYPT', \
-                                        '-DCFG_TEE_FS_PARENT_PATH=/mnt/data/tee', \
+                                        '/mnt/data/tee', \
                                         '${localstatedir}/lib/tee', d)}"
 
 EXTRA_OECMAKE = " \
@@ -48,7 +48,11 @@ do_install:append() {
     install -m 0644 ${WORKDIR}/optee-udev.rules ${D}${sysconfdir}/udev/rules.d/optee.rules
     install -d -m770 -o root -g tee ${D}${SECURE_STORAGE_PATH}
 }
-FILES:${PN} += "${sysconfdir} ${localstatedir}"
+FILES:${PN} += " \
+    ${sysconfdir} \
+    ${localstatedir} \
+    ${@oe.utils.vartrue('TRUSTFENCE_FILE_BASED_ENCRYPT', '/mnt/data/tee', '', d)} \
+"
 
 inherit useradd
 
