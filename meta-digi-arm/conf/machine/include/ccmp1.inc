@@ -40,6 +40,13 @@ UBOOT_ENV_RANGE ?= ""
 FIP_SIGN_SUFFIX ?= "${@bb.utils.contains('TRUSTFENCE_SIGN', '1', '_Signed', '', d)}"
 
 # =========================================================================
+# trusted-firmware-a
+# =========================================================================
+# Set custom TF-A config
+TF_A_CONFIG_ALL += " ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', bb.utils.contains('BOOTDEVICE_LABELS', 'usb', 'optee-usb', '', d), '', d)}"
+TF_A_CONFIG_ALL += " ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', bb.utils.contains('BOOTDEVICE_LABELS', 'uart', 'optee-uart', '', d), '', d)}"
+
+# =========================================================================
 # Kernel
 # =========================================================================
 KERNEL_IMAGETYPE = "${@bb.utils.contains('TRUSTFENCE_SIGN_FIT_STM', '1', 'fitImage', 'zImage', d)}"

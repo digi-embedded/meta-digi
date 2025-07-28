@@ -7,8 +7,8 @@ inherit sign-stm32mp-digi
 
 # Add optee-usb FIP configuration
 STM32MP_DEVICETREE_USB = " ${@' '.join('%s' % dt_file for dt_file in list(dict.fromkeys((d.getVar('STM32MP_DT_FILES_USB') or '').split())))} "
-FIP_CONFIG[optee-usb]  ?= "optee,${STM32MP_DEVICETREE_USB},default:optee,usb"
-FIP_CONFIG += "${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', bb.utils.contains('BOOTDEVICE_LABELS', 'usb', 'optee-usb', '', d), '', d)}"
+FIP_CONFIG[optee-usb]  ?= "optee,${STM32MP_DEVICETREE_USB},,default:optee,usb"
+FIP_CONFIG_ALL += "${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', bb.utils.contains('BOOTDEVICE_LABELS', 'usb', 'optee-usb', '', d), '', d)}"
 
 # Obtain password to use in FIP generation
 # Get password from file using the given key index
@@ -37,6 +37,8 @@ do_deploy() {
         i=$(expr $i + 1)
         bl32_conf=$(echo ${FIP_BL32_CONF} | cut -d',' -f${i})
         dt_config=$(echo ${FIP_DEVICETREE} | cut -d',' -f${i})
+        dt_suffix=$(echo ${FIP_DEVICETREE_SUFFIX} | cut -d',' -f${i})
+        [ "${EXTDT_USE_SUFFIX}" = "1" ] || dt_suffix=""
         search_conf=$(echo ${FIP_SEARCH_CONF} | cut -d',' -f${i})
         device_conf=$(echo ${FIP_DEVICE_CONF} | cut -d',' -f${i})
         for dt in ${dt_config}; do
@@ -101,21 +103,26 @@ do_deploy() {
             STORAGE_SEARCH=""
             [ -z "${device_conf}" ] || STORAGE_SEARCH="--search-storage ${device_conf}"
 
+            # Configure devicetree suffix search
+            DT_SUFFIX_SEARCH=""
+            [ -z "${dt_suffix}" ] || DT_SUFFIX_SEARCH="--search-devicetree-suffix ${dt_suffix}"
+
             FIP_PARAM_ddr=""
             if [ -d "${RECIPE_SYSROOT}/${FIP_DIR_TFA_BASE}/${FIP_DIR_FWDDR}" ]; then
                 FIP_PARAM_ddr="--use-ddr"
                 echo "********************************************"
                 bbnote "[fip-utils-stm32mp] FIP DDR command details:\
-                FIP_DEPLOYDIR_ROOT=${RECIPE_SYSROOT} \
-                ${FIP_WRAPPER} \
-                    ${FIP_PARAM_BLxx} \
-                    ${FIP_PARAM_SIGN} \
-                    ${STORAGE_SEARCH} \
-                    --use-ddr --generate-only-ddr \
-                    --search-configuration ${config}\
-                    --search-devicetree ${dt} \
-                    --search-soc-name ${soc_suffix} \
-                    --output ${DEPLOYDIR}/${FIP_DIR_FIP}"
+                \nFIP_DEPLOYDIR_ROOT=${RECIPE_SYSROOT} \
+                \n${FIP_WRAPPER} \
+                    \n${FIP_PARAM_BLxx} \
+                    \n${FIP_PARAM_SIGN} \
+                    \n${STORAGE_SEARCH} \
+                    \n--use-ddr --generate-only-ddr \
+                    \n--search-configuration ${config}\
+                    \n--search-devicetree ${dt} \
+                    \n${DT_SUFFIX_SEARCH} \
+                    \n--search-soc-name ${soc_suffix} \
+                    \n--output ${DEPLOYDIR}/${FIP_DIR_FIP}"
                 echo "********************************************"
                 FIP_DEPLOYDIR_ROOT="${RECIPE_SYSROOT}" \
                 ${FIP_WRAPPER} \
@@ -125,6 +132,7 @@ do_deploy() {
                     --use-ddr --generate-only-ddr \
                     --search-configuration ${config}\
                     --search-devicetree ${dt} \
+                    ${DT_SUFFIX_SEARCH} \
                     --search-soc-name ${soc_suffix} \
                     --output ${DEPLOYDIR}/${FIP_DIR_FIP}
             fi
@@ -142,6 +150,7 @@ do_deploy() {
                     \n${SECOND_CONFSEARCH} \
                     \n--search-configuration ${config} \
                     \n--search-devicetree ${dt} \
+                    \n${DT_SUFFIX_SEARCH} \
                     \n--search-soc-name ${soc_suffix} \
                     \n--output ${DEPLOYDIR}/${FIP_DIR_FIP}"
             echo "****************************************"
@@ -154,6 +163,7 @@ do_deploy() {
                     ${SECOND_CONFSEARCH} \
                     --search-configuration ${config} \
                     --search-devicetree ${dt} \
+                    ${DT_SUFFIX_SEARCH} \
                     --search-soc-name ${soc_suffix} \
                     --output ${DEPLOYDIR}/${FIP_DIR_FIP}
         done

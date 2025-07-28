@@ -32,6 +32,9 @@ UBOOT_DTBO_LOADADDRESS = "0x8a000000"
 # trusted-firmware-a
 # =========================================================================
 PREFERRED_PROVIDER_virtual/trusted-firmware-a = "tf-a-stm32mp"
+# Set custom TF-A config
+TF_A_CONFIG_ALL += " ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', bb.utils.contains('BOOTDEVICE_LABELS', 'usb', 'optee-usb', '', d), '', d)}"
+
 
 # Set metadata settings
 DEVICE_PARTUUID_FIP_A = "1c606ef5-f1ac-43b9-9bb5-d5c578580b6b"
