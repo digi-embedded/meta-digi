@@ -9,7 +9,7 @@ Signed-off-by: David Escalona <david.escalona@digi.com>
  2 files changed, 2 insertions(+), 14 deletions(-)
 
 diff --git a/stai-mpu/launch_python_pose_estimation.sh b/stai-mpu/launch_python_pose_estimation.sh
-index 61952cf..6c8b5b8 100644
+index c1cefd4..43e7892 100644
 --- a/stai-mpu/launch_python_pose_estimation.sh
 +++ b/stai-mpu/launch_python_pose_estimation.sh
 @@ -5,17 +5,11 @@
@@ -22,7 +22,7 @@ index 61952cf..6c8b5b8 100644
  FRAMEWORK=$1
  echo "stai wrapper used : "$FRAMEWORK
  source /usr/local/x-linux-ai/resources/config_board_npu.sh
- cmd="python3 /usr/local/x-linux-ai/pose-estimation/stai_mpu_pose_estimation.py -m /usr/local/x-linux-ai/pose-estimation/models/$POSE_ESTIMATION_MODEL --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT $OPTIONS"
+ cmd="python3 /usr/local/x-linux-ai/pose-estimation/stai_mpu_pose_estimation.py -m /usr/local/x-linux-ai/pose-estimation/models/$POSE_ESTIMATION_MODEL --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT --camera_src $CAMERA_SRC"
 
 -if [ "$weston_user" != "root" ]; then
 -	echo "user : "$weston_user

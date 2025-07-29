@@ -8,10 +8,12 @@ Signed-off-by: David Escalona <david.escalona@digi.com>
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/stai-mpu/stai_mpu_semantic_segmentation.py b/stai-mpu/stai_mpu_semantic_segmentation.py
-index 0c0f242..35b8bea 100644
+index 8252e1c..d0ee636 100644
 --- a/stai-mpu/stai_mpu_semantic_segmentation.py
 +++ b/stai-mpu/stai_mpu_semantic_segmentation.py
-@@ -475,8 +475,8 @@ class MainWindow(Gtk.Window):
+@@ -347,12 +347,12 @@ class MainWindow(Gtk.Window):
+                self.ui_icon_exit_size = '50'
+                self.ui_icon_st_size = '160'
                 self.ui_icon_label_size = '64'
          elif window_constraint <= 1080:
                 #Display 1920x1080
@@ -22,7 +24,11 @@ index 0c0f242..35b8bea 100644
                 self.ui_icon_exit_size = '50'
                 self.ui_icon_st_size = '160'
                 self.ui_icon_label_size = '64'
-@@ -711,8 +711,8 @@ class OverlayWindow(Gtk.Window):
+
+     def main_ui_creation(self,args):
+@@ -583,12 +583,12 @@ class OverlayWindow(Gtk.Window):
+                self.ui_icon_exit_size = '50'
+                self.ui_icon_st_size = '160'
                 self.ui_icon_label_size = '64'
          elif window_constraint <= 1080:
                 #Display 1920x1080
@@ -33,3 +39,5 @@ index 0c0f242..35b8bea 100644
                 self.ui_icon_exit_size = '50'
                 self.ui_icon_st_size = '160'
                 self.ui_icon_label_size = '64'
+
+     def overlay_ui_creation(self,args):

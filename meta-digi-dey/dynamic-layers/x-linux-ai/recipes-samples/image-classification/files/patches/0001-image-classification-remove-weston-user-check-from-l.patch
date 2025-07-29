@@ -10,7 +10,7 @@ Signed-off-by: David Escalona <david.escalona@digi.com>
  2 files changed, 2 insertions(+), 14 deletions(-)
 
 diff --git a/stai-mpu/launch_python_image_classification.sh b/stai-mpu/launch_python_image_classification.sh
-index 3cb5259..afbedf8 100755
+index efd5b19..f3e25aa 100755
 --- a/stai-mpu/launch_python_image_classification.sh
 +++ b/stai-mpu/launch_python_image_classification.sh
 @@ -5,18 +5,12 @@
@@ -24,7 +24,7 @@ index 3cb5259..afbedf8 100755
  echo "stai wrapper used : "$FRAMEWORK
  CONFIG=$(find /usr/local/x-linux-ai -name "config_board_*.sh")
  source $CONFIG
- cmd="python3 /usr/local/x-linux-ai/image-classification/stai_mpu_image_classification.py -m /usr/local/x-linux-ai/image-classification/models/$IMAGE_CLASSIFICATION_MODEL -l /usr/local/x-linux-ai/image-classification/models/$IMAGE_CLASSIFICATION_LABEL.txt --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT $OPTIONS"
+ cmd="python3 /usr/local/x-linux-ai/image-classification/stai_mpu_image_classification.py -m /usr/local/x-linux-ai/image-classification/models/$IMAGE_CLASSIFICATION_MODEL -l /usr/local/x-linux-ai/image-classification/models/$IMAGE_CLASSIFICATION_LABEL.txt --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT --camera_src $CAMERA_SRC"
 
 -if [ "$weston_user" != "root" ]; then
 -	echo "user : "$weston_user
