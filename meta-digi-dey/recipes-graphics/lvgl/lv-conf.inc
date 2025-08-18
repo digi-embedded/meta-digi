@@ -99,4 +99,7 @@ do_configure:append() {
         \
         -e "s|^([[:space:]]*#define LV_USE_LOTTIE[[:space:]]).*|\1${LVGL_CONFIG_USE_LOTTIE}|" \
         -i "${S}/lv_conf.h"
+    sed -i -e 's,##LVGL_CONFIG_DRM_CARD##,${LVGL_CONFIG_DRM_CARD},g' \
+        -i -e 's,##LVGL_CONFIG_FBDEV_DEVICE##,${LVGL_CONFIG_FBDEV_DEVICE},g' \
+        -i ${WORKDIR}/lvgl-demo-init
 }

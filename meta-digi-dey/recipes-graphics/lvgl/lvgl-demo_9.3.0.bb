@@ -7,8 +7,13 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=802d3d83ae80ef5f343050bf96cce3a4 \
 SRC_URI = "\
 	git://github.com/lvgl/lv_port_linux_frame_buffer.git;protocol=https;branch=release/v9.3;name=demo \
 	git://github.com/lvgl/lvgl;protocol=https;branch=release/v9.3;name=lvgl;subdir=git/lvgl \
+	file://0001-lvgl-demo-remove-demo-slideshow.patch \
 	file://lvgl-demo-init \
 	file://lvgl-demo-init.service \
+"
+
+SRC_URI:append:ccimx6ul += "\
+	file://0003-CMakefile-remove-libdrm-dependency-when-building-fbd.patch \
 "
 
 SRCREV_demo = "d07de027a8eb220f4e20f0e1b8be28729332e9ea"
@@ -18,6 +23,7 @@ SRCREV_FORMAT = "demo_lvgl"
 EXTRA_OEMAKE = "DESTDIR=${D}"
 
 LVGL_CONFIG_DRM_CARD ?= "/dev/dri/card0"
+LVGL_CONFIG_FBDEV_DEVICE ?= "/dev/fb0"
 # Change DRM card used for i.MX8-based platforms
 LVGL_CONFIG_DRM_CARD:mx8-generic-bsp = "/dev/dri/card1"
 LVGL_CONFIG_LV_USE_LOG    = "1"

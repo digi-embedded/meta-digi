@@ -109,11 +109,15 @@ start() {
 case "$1" in
 	start)
 		echo -n "Starting ${DEMO_TITLE}: "
+		export LV_LINUX_DRM_CARD="##LVGL_CONFIG_DRM_CARD##"
+		export LV_LINUX_FBDEV_DEVICE="##LVGL_CONFIG_FBDEV_DEVICE##"
 		start
 		echo "done."
 		;;
 	stop)
 		stop
+		unset LV_LINUX_DRM_CARD="##LVGL_CONFIG_DRM_CARD##"
+		unset LV_LINUX_FBDEV_DEVICE="##LVGL_CONFIG_FBDEV_DEVICE##"
 		echo -n "Stopping ${DEMO_TITLE}: "
 		if [ -n "`/bin/pidof ${DEMO_PATH}`" ] ; then
 			echo "FAIL"

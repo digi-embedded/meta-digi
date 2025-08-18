@@ -1,0 +1,29 @@
+From 1ffdfa2d0d36c566006b5b1f24d2a9e68888a5c1 Mon Sep 17 00:00:00 2001
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Tue, 2 Sep 2025 10:21:07 +0200
+Subject: [PATCH] lvgl-demo: remove demo slideshow
+
+This commit removes the demo slideshow function to
+avoid the application changes automatically between
+the different taps.
+
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
+---
+ main.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/main.c b/main.c
+index e02cef9..7ec513c 100644
+--- a/main.c
++++ b/main.c
+@@ -48,7 +48,6 @@ int main(void)
+ 
+     /*Create a Demo*/
+     lv_demo_widgets();
+-    lv_demo_widgets_start_slideshow();
+ 
+     /*Handle LVGL tasks*/
+     while(1) {
+-- 
+2.51.0
+

@@ -1,0 +1,27 @@
+From 49f99a403e36bb3bb54943d7a351d4aadffe3447 Mon Sep 17 00:00:00 2001
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Wed, 6 Aug 2025 16:59:28 +0200
+Subject: [PATCH] CMakefile: remove libdrm dependency when building fbdev demo
+
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
+---
+ CMakeLists.txt | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 658193f..c6a2b85 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,9 +12,6 @@ target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR})
+ 
+ add_executable(main main.c mouse_cursor_icon.c)
+ 
+-include(${CMAKE_CURRENT_LIST_DIR}/lvgl/tests/FindLibDRM.cmake)
+-include_directories(${Libdrm_INCLUDE_DIRS})
+-
+ find_package(SDL2)
+ find_package(SDL2_image)
+ include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
+-- 
+2.34.1
+
