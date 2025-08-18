@@ -13,7 +13,7 @@
 #
 #===============================================================================
 
-readonly DEMO_NAME="lvgl_demo"
+readonly DEMO_NAME="lvgl-demo"
 readonly DEMO_PATH="/usr/bin/${DEMO_NAME}"
 readonly DEMO_TITLE="LVGL Demo Application"
 readonly DEMO_DISPLAY="##LVGL_DEMO_DISPLAY##"

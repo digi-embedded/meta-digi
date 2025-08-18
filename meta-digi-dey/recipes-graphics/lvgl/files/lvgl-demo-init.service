@@ -1,13 +1,9 @@
 [Unit]
 Description=LVGL Demo Application
 
-# Make sure we are started after graphic service is available
-After=##WESTON_SERVICE##
-Requires=##WESTON_SERVICE##
-
 [Service]
 Type=forking
-PIDFile=/run/lvgl_demo.pid
+PIDFile=/run/lvgl-demo.pid
 ExecStart=/etc/lvgl-demo-init start
 ExecStop=/etc/lvgl-demo-init stop
 
