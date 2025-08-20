@@ -228,7 +228,7 @@ MACHINE_EXTRA_RRECOMMENDS:append:mx8-nxp-bsp = " ${@bb.utils.contains('DISTRO_FE
 MACHINE_EXTRA_RRECOMMENDS:append:mx9-nxp-bsp = " ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', '${IMX_ALSA_EXTRA}', '', d)}"
 
 # ELE extra Firmware
-SECOEXT_FIRMWARE_NAME ?= "UNDEFINED"
+SECOEXT_FIRMWARE_NAME ?= ""
 
 # GStreamer 1.0 plugins
 MACHINE_GSTREAMER_1_0_PLUGIN               ?= ""
