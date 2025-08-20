@@ -8,11 +8,16 @@ SRC_URI = "\
 	git://github.com/lvgl/lv_port_linux_frame_buffer.git;protocol=https;branch=release/v9.3;name=demo \
 	git://github.com/lvgl/lvgl;protocol=https;branch=release/v9.3;name=lvgl;subdir=git/lvgl \
 	file://0001-lvgl-demo-remove-demo-slideshow.patch \
+	file://0004-lvgl-demo-add-input-device-discovery-support-to-LVGL.patch \
 	file://lvgl-demo-init \
 	file://lvgl-demo-init.service \
 "
 
-SRC_URI:append:ccimx6ul += "\
+SRC_URI:append:ccimx6ul = "\
+	file://0003-CMakefile-remove-libdrm-dependency-when-building-fbd.patch \
+"
+
+SRC_URI:append:ccimx6 = "\
 	file://0003-CMakefile-remove-libdrm-dependency-when-building-fbd.patch \
 "
 
