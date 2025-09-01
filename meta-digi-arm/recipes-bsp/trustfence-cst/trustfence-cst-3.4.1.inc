@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2024, Digi International Inc.
+# Copyright (C) 2017-2025, Digi International Inc.
 
 SUMMARY = "NXP Code signing Tool for the High Assurance Boot library"
 DESCRIPTION = "Provides software code signing support designed for use with \
@@ -7,7 +7,7 @@ HOMEPAGE = "https://www.nxp.com/webapp/Download?colCode=IMX_CST_TOOL"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://LICENSE.bsd3;md5=14aba05f9fa6c25527297c8aac95fcf6"
 
-DEPENDS = "byacc-native flex-native openssl"
+DEPENDS = "byacc-native flex-native"
 
 SRC_URI = " \
     ${DIGI_PKG_SRC}/cst-${PV}.tgz;name=cst \
