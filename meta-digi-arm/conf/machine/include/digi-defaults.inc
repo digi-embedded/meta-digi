@@ -10,8 +10,8 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 #
 # Platform      Linux              U-Boot
 # -------------------------------------------------
-# ccimx6        6.6               2017.03
-# ccimx6qp      6.6               2017.03
+# ccimx6        6.6               2024.04
+# ccimx6qp      6.6               2024.04
 # ccimx6ul      6.6               2024.04
 # ccimx8x       6.6               2024.04 (packaged in imx-boot)
 # ccimx8mn      6.6               2024.04 (packaged in imx-boot)
