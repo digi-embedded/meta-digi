@@ -60,4 +60,4 @@ do_install:append:stm32mpcommon() {
 
 FILES:${KERNEL_PACKAGE_NAME}-modules:stm32mpcommon += "${sysconfdir}/modprobe.d"
 
-COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx8x|ccimx9|ccmp2|ccmp1)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx9|ccmp2|ccmp1)"
