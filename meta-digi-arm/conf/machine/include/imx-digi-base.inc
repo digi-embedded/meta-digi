@@ -274,25 +274,25 @@ SOC_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT:imxgpu = "1"
 #   1 - machine has Vivante GPU driver support
 MACHINE_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT ?= "${SOC_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT}"
 
-# Graphics libraries
-PREFERRED_PROVIDER_virtual/egl      ?= "mesa"
-PREFERRED_PROVIDER_virtual/libgl    ?= "mesa"
-PREFERRED_PROVIDER_virtual/libgles1 ?= "mesa"
-PREFERRED_PROVIDER_virtual/libgles2 ?= "mesa"
+# Override graphics for i.MX GPU
+IMXGPU_GRAPHICS_PROVIDER:imxviv  ?= "imx-gpu-viv"
 
-PREFERRED_PROVIDER_virtual/egl:imxgpu        ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/egl:imxgpu        ?= "${IMXGPU_GRAPHICS_PROVIDER}"
 PREFERRED_PROVIDER_virtual/libgl:imxgpu      ?= "mesa-gl"
 PREFERRED_PROVIDER_virtual/mesa:imxgpu       ?= "mesa-gl"
-PREFERRED_PROVIDER_virtual/libgles1:imxgpu3d ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/libgles2:imxgpu3d ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/libgles3:imxgpu3d ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/libgles1:imxgpu3d ?= "${IMXGPU_GRAPHICS_PROVIDER}"
+PREFERRED_PROVIDER_virtual/libgles2:imxgpu3d ?= "${IMXGPU_GRAPHICS_PROVIDER}"
+PREFERRED_PROVIDER_virtual/libgles3:imxgpu3d ?= "${IMXGPU_GRAPHICS_PROVIDER}"
+
+# The Vivante OpenCL implementation doesn't work with the standard headers and loader
+PREFERRED_PROVIDER_opencl-clhpp:imxviv         ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_opencl-headers:imxviv       ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_opencl-icd-loader:imxviv    ?= "imx-gpu-viv"
+PREFERRED_PROVIDER_virtual/opencl-icd:imxviv   ?= "imx-gpu-viv"
+
 PREFERRED_PROVIDER_virtual/libg2d            ?= "imx-gpu-g2d"
 PREFERRED_PROVIDER_virtual/libg2d:imxdpu     ?= "imx-dpu-g2d"
 PREFERRED_PROVIDER_virtual/libg2d:mx93-nxp-bsp ?= "imx-pxp-g2d"
-PREFERRED_PROVIDER_opencl-clhpp:imxgpu       ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_opencl-headers:imxgpu     ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_opencl-icd-loader:imxgpu  ?= "imx-gpu-viv"
-PREFERRED_PROVIDER_virtual/opencl-icd:imxgpu ?= "imx-gpu-viv"
 
 PREFERRED_VERSION_weston:imx-nxp-bsp      ??= "12.0.4.imx"
 # i.MX 6 & 7 stay on weston 10.0 for fbdev

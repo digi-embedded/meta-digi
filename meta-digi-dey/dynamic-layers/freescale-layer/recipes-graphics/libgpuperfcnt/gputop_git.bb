@@ -1,4 +1,4 @@
-# Copyright 2017-2024 NXP
+# Copyright 2017-2025 NXP
 
 DESCRIPTION = "Sample program to monitor i.MX GPU performance data"
 LICENSE = "MIT"
@@ -9,7 +9,7 @@ DEPENDS = "libgpuperfcnt"
 GPUTOP_SRC ?= "git://github.com/nxp-imx/imx-gputop.git;protocol=https"
 SRCBRANCH = "release"
 SRC_URI = "${GPUTOP_SRC};branch=${SRCBRANCH} "
-SRCREV = "627e8823e1ba17c6d12b408835029a1c065bea84"
+SRCREV = "10a5ca8f383ac1df9e4cd87c979d7e1db531acf2"
 
 S = "${WORKDIR}/git"
 
