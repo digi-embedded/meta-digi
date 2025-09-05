@@ -321,6 +321,7 @@ PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "4.4.0.imx"
 PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "4.4.0.imx"
 
 # Firmware from NXP's "lf-6.6.52-2.2.1" release
+PREFERRED_VERSION_firmware-imx:imx-nxp-bsp ??= "8.26.1"
 PREFERRED_VERSION_imx-boot-firmware-files:imx-nxp-bsp ??= "8.26.1"
 
 # Optee runtime packages to install
