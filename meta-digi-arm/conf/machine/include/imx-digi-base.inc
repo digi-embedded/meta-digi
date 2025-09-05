@@ -297,7 +297,7 @@ PREFERRED_PROVIDER_virtual/libg2d            ?= "imx-gpu-g2d"
 PREFERRED_PROVIDER_virtual/libg2d:imxdpu     ?= "imx-dpu-g2d"
 PREFERRED_PROVIDER_virtual/libg2d:mx93-nxp-bsp ?= "imx-pxp-g2d"
 
-PREFERRED_VERSION_weston:imx-nxp-bsp      ??= "12.0.4.imx"
+PREFERRED_VERSION_weston:imx-nxp-bsp      ??= "12.0.5.imx"
 # i.MX 6 & 7 stay on weston 10.0 for fbdev
 PREFERRED_VERSION_weston:mx6-nxp-bsp      ??= "10.0.5.imx"
 PREFERRED_VERSION_weston:mx7-nxp-bsp      ??= "10.0.5.imx"
