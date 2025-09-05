@@ -14,7 +14,7 @@ Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
-index 179b6226f..388deae2b 100644
+index 179b6226f00f..388deae2b0e8 100644
 --- a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
 +++ b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
 @@ -117,7 +117,7 @@ static const struct imx_rdc_cfg rdc[] = {

@@ -14,7 +14,7 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
-index 312eb32d1..9a82be010 100644
+index 312eb32d1cb5..9a82be010e49 100644
 --- a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
 +++ b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
 @@ -110,7 +110,7 @@ static const struct imx_rdc_cfg rdc[] = {
@@ -27,7 +27,7 @@ index 312eb32d1..9a82be010 100644
  
  	/* memory region */
 diff --git a/plat/imx/imx8m/imx8mn/platform.mk b/plat/imx/imx8m/imx8mn/platform.mk
-index 84519426c..964ed9e5c 100644
+index 84519426c68a..964ed9e5c2d1 100644
 --- a/plat/imx/imx8m/imx8mn/platform.mk
 +++ b/plat/imx/imx8m/imx8mn/platform.mk
 @@ -77,7 +77,7 @@ $(eval $(call add_define,BL32_BASE))

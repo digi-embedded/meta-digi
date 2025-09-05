@@ -17,22 +17,12 @@ SRC_URI:append:ccimx93 = " \
     file://0001-imx93-soc.mak-capture-commands-output-into-a-log-fil.patch \
     file://0002-imx93-soc.mak-add-makefile-target-to-build-A0-revisi.patch \
 "
-SRCBRANCH = "lf-6.6.52_2.2.0"
-SRCREV = "71b8c18af93a5eb972d80fbec290006066cff24f"
 
 DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 # Do not tag imx-boot
 UUU_BOOTLOADER:mx8-generic-bsp = ""
 UUU_BOOTLOADER:mx9-generic-bsp = ""
-BOOT_STAGING:mx91-generic-bsp  = "${S}/iMX91"
-BOOT_STAGING:mx93-generic-bsp  = "${S}/iMX93"
-
-# Add SOC family
-SOC_FAMILY:mx91-generic-bsp = "mx91"
-
-REV_OPTION:ccimx91 = "REV=A0"
-REV_OPTION:ccimx93 = "REV=A1"
 
 # Revert compile_mx8m() to how it was in kirkstone branch of meta-freescale,
 # otherwise, a dead symlink is created in place of the dtb
@@ -83,11 +73,6 @@ compile_mx93:append:ccimx93() {
 	fi
 }
 
-compile_mx91() {
-	bbnote i.MX 91 boot binary build
-	compile_mx93
-}
-
 do_compile:append:ccimx8m() {
 	bbnote "building ${IMX_BOOT_SOC_TARGET} - print_fit_hab"
 	make SOC=${IMX_BOOT_SOC_TARGET} dtbs=${UBOOT_DTB_NAME} print_fit_hab
@@ -125,10 +110,6 @@ do_install:ccimx8x () {
 			install -m 0644 ${S}/${bin}-${target} ${D}/boot/
 		done
 	done
-}
-
-deploy_mx91() {
-	deploy_mx93
 }
 
 generate_symlinks() {

@@ -17,8 +17,6 @@ SRC_URI:append:ccimx93 = " \
     file://0002-imx93-bring-back-ELE-clock-workaround-for-soc-revisi.patch \
 "
 
-SRCREV = "1b27ee3edbb40ef9432c69ccaa744d1ac5d54c5d"
-
 BOOT_TOOLS = "imx-boot-tools"
 
 EXTRA_OEMAKE += "${@oe.utils.conditional('TRUSTFENCE_CONSOLE_DISABLE', '1', 'LOG_LEVEL=0', '', d)}"

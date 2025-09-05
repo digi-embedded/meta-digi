@@ -26,10 +26,10 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  create mode 100644 ta/aes_huk/user_ta_header_defines.h
 
 diff --git a/core/arch/arm/plat-imx/conf.mk b/core/arch/arm/plat-imx/conf.mk
-index 8d065a3d3db3..de1cf45ca9b6 100644
+index 4e7b065ec180..4e8b351bd877 100644
 --- a/core/arch/arm/plat-imx/conf.mk
 +++ b/core/arch/arm/plat-imx/conf.mk
-@@ -498,12 +498,14 @@ endif
+@@ -499,12 +499,14 @@ endif
  ifneq (,$(filter $(PLATFORM_FLAVOR),ccimx93dvk))
  CFG_DDR_SIZE ?= 0x40000000
  CFG_UART_BASE ?= UART6_BASE

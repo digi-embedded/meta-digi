@@ -15,7 +15,7 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
-index 9a82be010..7f9a0f5f4 100644
+index 9a82be010e49..7f9a0f5f4c85 100644
 --- a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
 +++ b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
 @@ -109,7 +109,7 @@ static const struct imx_rdc_cfg rdc[] = {

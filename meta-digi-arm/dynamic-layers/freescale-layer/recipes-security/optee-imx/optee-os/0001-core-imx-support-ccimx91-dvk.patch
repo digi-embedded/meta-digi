@@ -11,7 +11,7 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  2 files changed, 7 insertions(+)
 
 diff --git a/core/arch/arm/plat-imx/conf.mk b/core/arch/arm/plat-imx/conf.mk
-index 33647835f2fb..ca0a718ba6e5 100644
+index d1fc2882e598..ffa39129e0be 100644
 --- a/core/arch/arm/plat-imx/conf.mk
 +++ b/core/arch/arm/plat-imx/conf.mk
 @@ -95,6 +95,7 @@ mx95-flavorlist = \
@@ -22,7 +22,7 @@ index 33647835f2fb..ca0a718ba6e5 100644
  	mx91evk \
  
  ifneq (,$(filter $(PLATFORM_FLAVOR),$(mx6ul-flavorlist)))
-@@ -493,6 +494,11 @@ CFG_DDR_SIZE ?= 0x80000000
+@@ -494,6 +495,11 @@ CFG_DDR_SIZE ?= 0x80000000
  CFG_UART_BASE ?= UART1_BASE
  endif
  

@@ -21,7 +21,7 @@ PLATFORM_FLAVOR:ccimx91 = "ccimx91dvk"
 PLATFORM_FLAVOR:ccimx93 = "ccimx93dvk"
 
 do_compile:append:ccimx93 () {
-    oe_runmake PLATFORM=imx-${PLATFORM_FLAVOR}_a0 O=${B}-A0 all
+    oe_runmake -C ${S} PLATFORM=imx-${PLATFORM_FLAVOR}_a0 O=${B}-A0
 }
 do_compile:ccimx93[cleandirs] += "${B}-A0"
 
@@ -29,10 +29,10 @@ do_deploy:append:ccimx93 () {
     cp ${B}-A0/core/tee-raw.bin ${DEPLOYDIR}/tee.${PLATFORM_FLAVOR}_a0.bin
 }
 
-do_install:append () {
-	mkdir -p ${D}/environment-setup.d
-	sed -e "s,#OPTEE_ARCH#,${OPTEE_ARCH},g" ${WORKDIR}/environment.d-optee-sdk.sh > ${D}/environment-setup.d/optee-sdk.sh
+do_install:append() {
+    mkdir -p ${D}/environment-setup.d
+    sed -e "s,#OPTEE_ARCH#,${OPTEE_ARCH},g" ${WORKDIR}/environment.d-optee-sdk.sh >${D}/environment-setup.d/optee-sdk.sh
 }
 
-FILES:${PN}-staticdev += " /environment-setup.d/"
+FILES:${PN}-staticdev += "/environment-setup.d/"
 INSANE_SKIP:${PN}-staticdev += "buildpaths"

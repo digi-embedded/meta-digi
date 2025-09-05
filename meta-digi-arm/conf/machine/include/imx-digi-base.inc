@@ -57,6 +57,11 @@ DEFAULTTUNE:mx93-nxp-bsp   ?= "armv8a-crc-crypto"
 
 INHERIT += "machine-overrides-extender"
 
+IMX_SOC_REV                  ??= "A0"
+IMX_SOC_REV:mx93-generic-bsp ??= "A1"
+IMX_SOC_REV_LOWER = "${@d.getVar('IMX_SOC_REV').lower()}"
+IMX_SOC_REV_UPPER = "${@d.getVar('IMX_SOC_REV').upper()}"
+
 #######
 ### NXP BSP specific overrides
 #######
@@ -314,6 +319,9 @@ PREFERRED_VERSION_optee-client:mx8-nxp-bsp ??= "4.4.0.imx"
 PREFERRED_VERSION_optee-client:mx9-nxp-bsp ??= "4.4.0.imx"
 PREFERRED_VERSION_optee-test:mx8-nxp-bsp   ??= "4.4.0.imx"
 PREFERRED_VERSION_optee-test:mx9-nxp-bsp   ??= "4.4.0.imx"
+
+# Firmware from NXP's "lf-6.6.52-2.2.1" release
+PREFERRED_VERSION_imx-boot-firmware-files:imx-nxp-bsp ??= "8.26.1"
 
 # Optee runtime packages to install
 OPTEE_PKGS ??= "optee-client optee-os"
