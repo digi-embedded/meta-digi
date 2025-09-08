@@ -1,5 +1,6 @@
 # Copyright 2019-20 NXP
 # Released under the MIT license (see COPYING.MIT for the terms)
+# Copyright (C) 2025, Digi International Inc.
 
 DESCRIPTION = "Package group for i.MX Qt6"
 LICENSE = "MIT"
@@ -29,11 +30,13 @@ QT6_IMAGE_INSTALL_CINEMATICEXPERIENCE:ccmp25 = "cinematicexperience-rhi cinemati
 QT6_IMAGE_INSTALL_EXAMPLES = "qtbase-examples qtdeclarative-examples"
 # Make room in ccmp15-dvk Qt6 images by removing examples
 QT6_IMAGE_INSTALL_EXAMPLES:ccmp15 = ""
+QT6_IMAGE_INSTALL_EXAMPLES:ccimx6ul = "qtbase-examples"
 
 QT6_IMAGE_INSTALL_FONTS = "ttf-dejavu-common ttf-dejavu-sans ttf-dejavu-sans-mono ttf-dejavu-serif "
 
 QT6_IMAGE_INSTALL_QUICK3D = "qtquick3d qtquick3d-examples"
 # Quick3d does not work on systems without a proper GPU
 QT6_IMAGE_INSTALL_QUICK3D:ccimx93 = ""
+QT6_IMAGE_INSTALL_QUICK3D:ccimx6ul = ""
 # Make room in ccmp15-dvk Qt6 images by removing examples
 QT6_IMAGE_INSTALL_QUICK3D:ccmp15 = "qtquick3d"
