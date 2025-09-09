@@ -16,7 +16,7 @@ Upstream-Status: Inappropriate [DEY specific]
  1 file changed, 5 insertions(+), 24 deletions(-)
 
 diff --git a/libweston/libinput-device.c b/libweston/libinput-device.c
-index 31b88ac4..207d0075 100644
+index 31b88ac43c3a..207d0075ebb7 100644
 --- a/libweston/libinput-device.c
 +++ b/libweston/libinput-device.c
 @@ -67,21 +67,6 @@ evdev_led_update(struct evdev_device *device, enum weston_led weston_leds)

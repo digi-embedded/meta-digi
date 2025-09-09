@@ -28,7 +28,7 @@ Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
  create mode 100644 libweston/desktop/wl-shell.c
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 99ad3dfb..51097b72 100644
+index abc151e24f86..abf054e8bfcd 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -1367,16 +1367,16 @@ resize_grab_motion(struct weston_pointer_grab *grab,
@@ -109,7 +109,7 @@ index 99ad3dfb..51097b72 100644
  	surface_resize(shsurf, pointer, edges);
  }
 diff --git a/libweston/backend-wayland/wayland.c b/libweston/backend-wayland/wayland.c
-index 48c21b99..7a82b1a6 100644
+index 48c21b99afec..7a82b1a61ee1 100644
 --- a/libweston/backend-wayland/wayland.c
 +++ b/libweston/backend-wayland/wayland.c
 @@ -85,6 +85,7 @@ struct wayland_backend {
@@ -324,7 +324,7 @@ index 48c21b99..7a82b1a6 100644
  		wayland_output_set_windowed(input->output);
  
 diff --git a/libweston/desktop/internal.h b/libweston/desktop/internal.h
-index c8d09272..41e81b13 100644
+index c8d09272c87d..41e81b1376ce 100644
 --- a/libweston/desktop/internal.h
 +++ b/libweston/desktop/internal.h
 @@ -249,6 +249,10 @@ weston_desktop_xdg_wm_base_create(struct weston_desktop *desktop,
@@ -339,7 +339,7 @@ index c8d09272..41e81b13 100644
  weston_desktop_xwayland_init(struct weston_desktop *desktop);
  void
 diff --git a/libweston/desktop/libweston-desktop.c b/libweston/desktop/libweston-desktop.c
-index 05240cfb..b74ee09f 100644
+index 05240cfbb32e..b74ee09fb021 100644
 --- a/libweston/desktop/libweston-desktop.c
 +++ b/libweston/desktop/libweston-desktop.c
 @@ -42,6 +42,7 @@ struct weston_desktop {
@@ -383,7 +383,7 @@ index 05240cfb..b74ee09f 100644
  		wl_global_destroy(desktop->xdg_shell_v6);
  	if (desktop->xdg_wm_base != NULL)
 diff --git a/libweston/desktop/meson.build b/libweston/desktop/meson.build
-index 4588ad10..d8e1a709 100644
+index 4588ad10676f..d8e1a709e04d 100644
 --- a/libweston/desktop/meson.build
 +++ b/libweston/desktop/meson.build
 @@ -4,6 +4,7 @@ srcs_libweston += files([
@@ -396,7 +396,7 @@ index 4588ad10..d8e1a709 100644
  ])
 diff --git a/libweston/desktop/wl-shell.c b/libweston/desktop/wl-shell.c
 new file mode 100644
-index 00000000..26360de9
+index 000000000000..26360de96bde
 --- /dev/null
 +++ b/libweston/desktop/wl-shell.c
 @@ -0,0 +1,497 @@
@@ -898,7 +898,7 @@ index 00000000..26360de9
 +				weston_desktop_wl_shell_bind);
 +}
 diff --git a/meson.build b/meson.build
-index 53dd670b..a6b2cb61 100644
+index 7ce2ae7bd0a0..fcc2f1622c28 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -137,6 +137,12 @@ if dep_xkbcommon.version().version_compare('>= 0.5.0')
@@ -915,7 +915,7 @@ index 53dd670b..a6b2cb61 100644
  dep_wayland_client = dependency('wayland-client', version: '>= 1.20.0')
  dep_pixman = dependency('pixman-1', version: '>= 0.25.2')
 diff --git a/meson_options.txt b/meson_options.txt
-index 643c6d61..cb833c2d 100644
+index 643c6d619371..cb833c2d5146 100644
 --- a/meson_options.txt
 +++ b/meson_options.txt
 @@ -144,6 +144,13 @@ option(
@@ -932,4 +932,3 @@ index 643c6d61..cb833c2d 100644
  option(
  	'color-management-lcms',
  	type: 'boolean',
-
