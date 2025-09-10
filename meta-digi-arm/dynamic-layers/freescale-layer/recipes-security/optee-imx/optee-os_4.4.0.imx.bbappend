@@ -3,17 +3,11 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += "file://environment.d-optee-sdk.sh"
 
-SRC_URI:append:ccimx8mm = " \
+SRC_URI:append:dey = " \
     file://0001-plat-imx-add-support-for-ConnectCore-8M-Mini.patch \
-"
-
-SRC_URI:append:ccimx91 = " \
-    file://0001-core-imx-support-ccimx91-dvk.patch \
-"
-
-SRC_URI:append:ccimx93 = " \
-    file://0001-core-imx-support-ccimx93-dvk.patch \
-    file://0002-core-ccimx93-enable-AES_HUK-trusted-application.patch \
+    file://0002-core-imx-support-ccimx91-dvk.patch \
+    file://0003-core-imx-support-ccimx93-dvk.patch \
+    file://0004-core-ccimx93-enable-AES_HUK-trusted-application.patch \
 "
 
 PLATFORM_FLAVOR:ccimx8mm = "ccimx8mmdvk"
