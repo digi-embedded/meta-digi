@@ -11,6 +11,7 @@ SRC_URI:append:dey = " \
     file://0006-ccimx93-use-UART6-for-the-default-console.patch \
     file://0007-imx93-bring-back-ELE-clock-workaround-for-soc-revisi.patch \
     file://0008-ccimx91-use-UART6-for-the-default-console.patch \
+    file://0009-ccimx95-set-DVK-console-to-LPUART6.patch \
 "
 
 BOOT_TOOLS = "imx-boot-tools"
