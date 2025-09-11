@@ -148,8 +148,12 @@ build_uboot_scripts() {
 #    u-boot-spl.bin-<platform>-<defconfig>  (needed for imx-boot)
 #
 uboot_deploy_config:append() {
-    rm -f ${DEPLOYDIR}/${UBOOT_SYMLINK} \
-        ${DEPLOYDIR}/${UBOOT_BINARY}-${type} \
+    if [ "${MACHINE}" != "ccimx6sbc" ] && [ "${MACHINE}" != "ccimx6qpsbc" ]; then
+        # U-Boot symlink is only required for ccimx6/ccimx6qp platforms during
+        # SD card image generation
+        rm -f ${DEPLOYDIR}/${UBOOT_SYMLINK}
+    fi
+    rm -f ${DEPLOYDIR}/${UBOOT_BINARY}-${type} \
         ${DEPLOYDIR}/${UBOOT_BINARY}
     ln -sf ${UBOOT_BINARYNAME}-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${DEPLOYDIR}/${UBOOT_BINARYNAME}-${type}.${UBOOT_SUFFIX}
 }
