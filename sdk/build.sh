@@ -3,7 +3,7 @@
 #
 #  build.sh
 #
-#  Copyright (C) 2013-2024 by Digi International Inc.
+#  Copyright (C) 2013-2025 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -203,6 +203,7 @@ YOCTO_IMGS_DIR="${WORKSPACE}/images"
 YOCTO_INST_DIR="${WORKSPACE}/digi-yocto-sdk.$(echo "${DY_REVISION}" | tr '/' '_')"
 YOCTO_DOWNLOAD_DIR="${DY_DOWNLOADS:-${WORKSPACE}}/downloads"
 YOCTO_PROJ_DIR="${WORKSPACE}/projects"
+YOCTO_SSTATE_DIR="${DY_SSTATE:-${YOCTO_PROJ_DIR}/sstate-cache}"
 
 # If CPUS is unset, set it with the machine cpus
 if [ -z "${CPUS}" ]; then
@@ -267,7 +268,7 @@ for platform in ${DY_PLATFORMS}; do
 			MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p "${platform}" ${DY_MACHINES_LAYER:+-m ${DY_MACHINES_LAYER}} <<< "y"
 			# Set a common DL_DIR and SSTATE_DIR for all platforms
 			sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_DOWNLOAD_DIR}\"" \
-				-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
+				-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_SSTATE_DIR}\"" \
 				conf/local.conf
 			# Set the DISTRO and remove 'meta-digi-dey' layer if distro is not DEY based
 			sed -i -e "/^DISTRO ?=/cDISTRO ?= \"${DY_DISTRO}\"" conf/local.conf
@@ -296,7 +297,7 @@ for platform in ${DY_PLATFORMS}; do
 				sed -i -e "/meta-digi-dey/a\  ${YOCTO_INST_DIR}/sources/meta-digi-mfg \\\\" conf/bblayers.conf
 			fi
 			# Apply CVE layer if needed (do so before potentially inheriting "digi_ccss" to avoid errors)
-			[ "${DY_USE_CVE_LAYER}" = "true" ] && bitbake-layers add-layer ${YOCTO_INST_DIR}/sources/meta-digi-security
+			[ "${DY_USE_CVE_LAYER}" = "true" ] && bitbake-layers add-layer "${YOCTO_INST_DIR}"/sources/meta-digi-security
 			# If we want to generate a CVE report, update conf/local.conf
 			if [ "${DY_CVE_REPORT}" = "true" ]; then
 				# Build Vigiles config path using platform and patch status
