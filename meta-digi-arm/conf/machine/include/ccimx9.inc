@@ -30,13 +30,6 @@ BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
 SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 BOOTLOADER_SEEK_USERDATA = "32"
 
-DDR_FIRMWARE_NAME = " \
-    lpddr4_dmem_1d_v202201.bin \
-    lpddr4_dmem_2d_v202201.bin \
-    lpddr4_imem_1d_v202201.bin \
-    lpddr4_imem_2d_v202201.bin \
-"
-
 MACHINE_FEATURES += "pci wifi bluetooth"
 MACHINE_FEATURES:append:use-nxp-bsp = " optee jailhouse"
 
