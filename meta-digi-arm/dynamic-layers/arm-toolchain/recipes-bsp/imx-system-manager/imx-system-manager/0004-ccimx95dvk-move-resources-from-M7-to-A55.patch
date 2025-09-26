@@ -1,0 +1,206 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Tue, 16 Sep 2025 17:51:14 +0200
+Subject: [PATCH] ccimx95dvk: move resources from M7 to A55
+
+Moved from M7 to A55 domain:
+* LPUART7
+* PIN_GPIO_IO14
+* PIN_GPIO_IO15
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ configs/ccimx95dvk.cfg           | 11 ++++-------
+ configs/ccimx95dvk/config_scmi.h | 15 ++++++++-------
+ configs/ccimx95dvk/config_test.h |  7 +------
+ configs/ccimx95dvk/config_trdc.h |  3 +--
+ 4 files changed, 14 insertions(+), 22 deletions(-)
+
+diff --git a/configs/ccimx95dvk.cfg b/configs/ccimx95dvk.cfg
+index 86d39e6e1fba..393c29436894 100755
+--- a/configs/ccimx95dvk.cfg
++++ b/configs/ccimx95dvk.cfg
+@@ -369,7 +369,6 @@ LPIT1               OWNER
+ LPTMR1              OWNER
+ LPTMR2              OWNER
+ LPTPM1              OWNER
+-LPUART3             OWNER, test
+ MSGINTR1            OWNER
+ MSGINTR2            OWNER
+ MU5_A               OWNER
+@@ -382,11 +381,6 @@ TSTMR2              OWNER
+ V2X_SHE1            OWNER
+ WDOG5               OWNER
+ 
+-# Pins
+-
+-PIN_GPIO_IO14       OWNER
+-PIN_GPIO_IO15       OWNER
+-
+ # Memory
+ 
+ M7MIX               DATA, begin=0x020380000, end=0x02047FFFF
+@@ -477,6 +471,7 @@ PERLPI_GPIO4        ALL
+ PERLPI_GPIO5        ALL
+ PERLPI_LPUART1      ALL
+ PERLPI_LPUART2      ALL
++PERLPI_LPUART3      ALL
+ PERLPI_LPUART4      ALL
+ PERLPI_LPUART5      ALL
+ PERLPI_LPUART6      ALL
+@@ -762,6 +757,7 @@ LPTPM5              OWNER
+ LPTPM6              OWNER
+ LPUART1             OWNER
+ LPUART2             OWNER
++LPUART3             OWNER
+ LPUART4             OWNER
+ LPUART5             OWNER
+ LPUART6             OWNER
+@@ -914,6 +910,8 @@ PIN_GPIO_IO10        OWNER
+ PIN_GPIO_IO11        OWNER
+ PIN_GPIO_IO12        OWNER
+ PIN_GPIO_IO13        OWNER
++PIN_GPIO_IO14        OWNER
++PIN_GPIO_IO15        OWNER
+ PIN_GPIO_IO16        OWNER
+ PIN_GPIO_IO17        OWNER
+ PIN_GPIO_IO18        OWNER
+@@ -993,4 +991,3 @@ OCRAM               EXEC, begin=0x0204C0000, size=96K
+ GPU                 DATA, begin=0x04D900000, end=0x04DD7FFFF
+ DDR                 EXEC, begin=0x088000000, end=0x089FFFFFF
+ DDR                 EXEC, begin=0x08E000000, end=0x87FFFFFFF
+-
+diff --git a/configs/ccimx95dvk/config_scmi.h b/configs/ccimx95dvk/config_scmi.h
+index c1cc90313174..0913c1339af0 100644
+--- a/configs/ccimx95dvk/config_scmi.h
++++ b/configs/ccimx95dvk/config_scmi.h
+@@ -69,7 +69,6 @@
+         .clkPerms[DEV_SM_CLK_CAN1] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_LPTMR1] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_LPTMR2] = SM_SCMI_PERM_ALL, \
+-        .clkPerms[DEV_SM_CLK_LPUART3] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_M7SYSTICK] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_M7] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_TSTMR2] = SM_SCMI_PERM_ALL, \
+@@ -81,9 +80,6 @@
+         .daisyPerms[DEV_SM_DAISY_LPTMR2_0] = SM_SCMI_PERM_ALL, \
+         .daisyPerms[DEV_SM_DAISY_LPTMR2_1] = SM_SCMI_PERM_ALL, \
+         .daisyPerms[DEV_SM_DAISY_LPTMR2_2] = SM_SCMI_PERM_ALL, \
+-        .daisyPerms[DEV_SM_DAISY_LPUART3_CTS] = SM_SCMI_PERM_ALL, \
+-        .daisyPerms[DEV_SM_DAISY_LPUART3_RXD] = SM_SCMI_PERM_ALL, \
+-        .daisyPerms[DEV_SM_DAISY_LPUART3_TXD] = SM_SCMI_PERM_ALL, \
+         .faultPerms[DEV_SM_FAULT_M7_LOCKUP] = SM_SCMI_PERM_ALL, \
+         .faultPerms[DEV_SM_FAULT_M7_RESET] = SM_SCMI_PERM_ALL, \
+         .faultPerms[DEV_SM_FAULT_SW0] = SM_SCMI_PERM_ALL, \
+@@ -94,10 +90,7 @@
+         .pdPerms[DEV_SM_PD_M7] = SM_SCMI_PERM_ALL, \
+         .perfPerms[DEV_SM_PERF_M7] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_CAN1] = SM_SCMI_PERM_ALL, \
+-        .perlpiPerms[DEV_SM_PERLPI_LPUART3] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_WDOG5] = SM_SCMI_PERM_ALL, \
+-        .pinPerms[DEV_SM_PIN_GPIO_IO14] = SM_SCMI_PERM_ALL, \
+-        .pinPerms[DEV_SM_PIN_GPIO_IO15] = SM_SCMI_PERM_ALL, \
+         .rtcPerms[BRD_SM_RTC_PCA2131] = SM_SCMI_PERM_ALL, \
+         .rtcPerms[DEV_SM_RTC_BBNSM] = SM_SCMI_PERM_PRIV, \
+         .sensorPerms[BRD_SM_SENSOR_TEMP_PF09] = SM_SCMI_PERM_SET, \
+@@ -199,6 +192,7 @@
+         .perlpiPerms[DEV_SM_PERLPI_GPIO5] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_LPUART1] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_LPUART2] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART3] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_LPUART4] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_LPUART5] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_LPUART6] = SM_SCMI_PERM_ALL, \
+@@ -291,6 +285,7 @@
+         .clkPerms[DEV_SM_CLK_LPSPI8] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_LPUART1] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_LPUART2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPUART3] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_LPUART4] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_LPUART5] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_LPUART6] = SM_SCMI_PERM_ALL, \
+@@ -398,6 +393,9 @@
+         .daisyPerms[DEV_SM_DAISY_LPSPI4_SCK] = SM_SCMI_PERM_ALL, \
+         .daisyPerms[DEV_SM_DAISY_LPSPI4_SDI] = SM_SCMI_PERM_ALL, \
+         .daisyPerms[DEV_SM_DAISY_LPSPI4_SDO] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART3_CTS] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART3_RXD] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART3_TXD] = SM_SCMI_PERM_ALL, \
+         .daisyPerms[DEV_SM_DAISY_LPUART4_CTS] = SM_SCMI_PERM_ALL, \
+         .daisyPerms[DEV_SM_DAISY_LPUART4_RXD] = SM_SCMI_PERM_ALL, \
+         .daisyPerms[DEV_SM_DAISY_LPUART4_TXD] = SM_SCMI_PERM_ALL, \
+@@ -482,6 +480,7 @@
+         .perlpiPerms[DEV_SM_PERLPI_GPIO5] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_LPUART1] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_LPUART2] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART3] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_LPUART4] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_LPUART5] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_LPUART6] = SM_SCMI_PERM_ALL, \
+@@ -536,6 +535,8 @@
+         .pinPerms[DEV_SM_PIN_GPIO_IO11] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_GPIO_IO12] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_GPIO_IO13] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO14] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO15] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_GPIO_IO16] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_GPIO_IO17] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_GPIO_IO18] = SM_SCMI_PERM_ALL, \
+diff --git a/configs/ccimx95dvk/config_test.h b/configs/ccimx95dvk/config_test.h
+index cb737f33eede..efc15c56ffe9 100644
+--- a/configs/ccimx95dvk/config_test.h
++++ b/configs/ccimx95dvk/config_test.h
+@@ -143,12 +143,11 @@
+ /*--------------------------------------------------------------------------*/
+ 
+ /*! Config for number of tests */
+-#define SM_SCMI_NUM_TEST  40U
++#define SM_SCMI_NUM_TEST  35U
+ 
+ /*! Config data array for tests */
+ #define SM_SCMI_TEST_CONFIG_DATA \
+     {.testId = TEST_BUTTON, .channel = 5U, .rsrc = DEV_SM_BUTTON_0}, \
+-    {.testId = TEST_CLK, .channel = 0U, .rsrc = DEV_SM_CLK_LPUART3}, \
+     {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_DISPOCRAM}, \
+     {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_ENETREF}, \
+     {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_ENETTIMER1}, \
+@@ -157,9 +156,6 @@
+     {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_SAI1}, \
+     {.testId = TEST_CTRL, .channel = 5U, .rsrc = DEV_SM_CTRL_MQS1_SETTINGS}, \
+     {.testId = TEST_CTRL, .channel = 5U, .rsrc = DEV_SM_CTRL_SAI1_MCLK}, \
+-    {.testId = TEST_DAISY, .channel = 0U, .rsrc = DEV_SM_DAISY_LPUART3_CTS}, \
+-    {.testId = TEST_DAISY, .channel = 0U, .rsrc = DEV_SM_DAISY_LPUART3_RXD}, \
+-    {.testId = TEST_DAISY, .channel = 0U, .rsrc = DEV_SM_DAISY_LPUART3_TXD}, \
+     {.testId = TEST_DAISY, .channel = 5U, .rsrc = DEV_SM_DAISY_NETC_EMDC}, \
+     {.testId = TEST_DAISY, .channel = 5U, .rsrc = DEV_SM_DAISY_NETC_EMDIO}, \
+     {.testId = TEST_DAISY, .channel = 5U, .rsrc = DEV_SM_DAISY_NETC_ETH0_RMII_RX_ER}, \
+@@ -182,7 +178,6 @@
+     {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_GPU}, \
+     {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_NPU}, \
+     {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_VPU}, \
+-    {.testId = TEST_PERLPI, .channel = 0U, .rsrc = DEV_SM_PERLPI_LPUART3}, \
+     {.testId = TEST_PERLPI, .channel = 5U, .rsrc = DEV_SM_PERLPI_LPUART8}, \
+     {.testId = TEST_PIN, .channel = 5U, .rsrc = DEV_SM_PIN_UART1_RXD}, \
+     {.testId = TEST_RTC, .channel = 5U, .rsrc = DEV_SM_RTC_BBNSM}, \
+diff --git a/configs/ccimx95dvk/config_trdc.h b/configs/ccimx95dvk/config_trdc.h
+index 47df6a7577d5..dc6245097316 100644
+--- a/configs/ccimx95dvk/config_trdc.h
++++ b/configs/ccimx95dvk/config_trdc.h
+@@ -1168,7 +1168,7 @@
+         SM_CFG_W1(0x0001065cU), 0x99999999U, \
+         SM_CFG_W1(0x00010660U), 0x00909099U, \
+         SM_CFG_W1(0x00010664U), 0x99090990U, \
+-        SM_CFG_W1(0x00010668U), 0x09999999U, \
++        SM_CFG_W1(0x00010668U), 0x99999999U, \
+         SM_CFG_W1(0x0001066cU), 0x09999999U, \
+         SM_CFG_W1(0x00010670U), 0x99900009U, \
+         SM_CFG_W1(0x00010674U), 0x99999909U, \
+@@ -1178,7 +1178,6 @@
+         SM_CFG_W1(0x000107a8U), 0x00000009U, \
+         SM_CFG_W1(0x00010860U), 0x00090000U, \
+         SM_CFG_W1(0x00010864U), 0x00909009U, \
+-        SM_CFG_W1(0x00010868U), 0x90000000U, \
+         SM_CFG_W1(0x00010878U), 0x00090000U, \
+         SM_CFG_Z1(0x00010a60U), \
+         SM_CFG_Z1(0x00010c60U), \

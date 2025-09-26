@@ -1,0 +1,254 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Mon, 15 Sep 2025 12:37:05 +0200
+Subject: [PATCH] ccimx95dvk: disable PCAL6408A expander and move GPIO1 to A55
+
+Our board does not populate that expander, so disable the initialization
+and assign GPIO1 to be used by the A55 cpu.
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ boards/ccimx95dvk/board.c              |  7 ---
+ boards/ccimx95dvk/pin_mux.c            |  4 --
+ boards/ccimx95dvk/sm/brd_sm.c          |  9 ---
+ boards/ccimx95dvk/sm/brd_sm_handlers.c | 82 --------------------------
+ configs/ccimx95dvk.cfg                 |  3 +-
+ configs/ccimx95dvk/config_scmi.h       |  2 +
+ configs/ccimx95dvk/config_trdc.h       |  2 +-
+ 7 files changed, 5 insertions(+), 104 deletions(-)
+
+diff --git a/boards/ccimx95dvk/board.c b/boards/ccimx95dvk/board.c
+index d4a671f6d7f8..012a04540fd1 100755
+--- a/boards/ccimx95dvk/board.c
++++ b/boards/ccimx95dvk/board.c
+@@ -337,9 +337,6 @@ void BOARD_InitHandlers(void)
+     /* Enable FCCU handler */
+     NVIC_SetPriority(FCCU_INT0_IRQn, IRQ_PRIO_NOPREEMPT_CRITICAL);
+     NVIC_EnableIRQ(FCCU_INT0_IRQn);
+-
+-    /* Enable GPIO1 handler */
+-    NVIC_EnableIRQ(GPIO1_0_IRQn);
+ }
+ 
+ /*--------------------------------------------------------------------------*/
+@@ -509,10 +506,6 @@ void BOARD_SystemSleepPrepare(uint32_t sleepMode, uint32_t sleepFlags)
+         (void) CPU_PerLpiConfigSet(CPU_IDX_M33P, s_uartConfig.perLpiId,
+             CPU_PER_LPI_ON_RUN_WAIT_STOP);
+     }
+-
+-    /* Configure LPI for GPIO1 */
+-    (void) CPU_PerLpiConfigSet(CPU_IDX_M33P, CPU_PER_LPI_IDX_GPIO1,
+-        CPU_PER_LPI_ON_RUN_WAIT_STOP);
+ }
+ 
+ /*--------------------------------------------------------------------------*/
+diff --git a/boards/ccimx95dvk/pin_mux.c b/boards/ccimx95dvk/pin_mux.c
+index 60f6d27c41c5..800126f3814b 100755
+--- a/boards/ccimx95dvk/pin_mux.c
++++ b/boards/ccimx95dvk/pin_mux.c
+@@ -57,9 +57,5 @@ void BOARD_InitPins(void)
+     IOMUXC_SetPinConfig(IOMUXC_PAD_I2C2_SDA__LPI2C2_SDA, IOMUXC_PAD_DSE(0xFU)
+         | IOMUXC_PAD_FSEL1(0x3U) | IOMUXC_PAD_PU(0x1U) | IOMUXC_PAD_OD(0x1U));
+ #endif
+-
+-    /* Configure GPIO1-10 (INT from the PCAL6408A */
+-    IOMUXC_SetPinMux(IOMUXC_PAD_PDM_BIT_STREAM1__GPIO1_IO_BIT10, 0U);
+-    IOMUXC_SetPinConfig(IOMUXC_PAD_PDM_BIT_STREAM1__GPIO1_IO_BIT10, 0U);
+ }
+ 
+diff --git a/boards/ccimx95dvk/sm/brd_sm.c b/boards/ccimx95dvk/sm/brd_sm.c
+index cd48b590cd26..48a8486a2acd 100755
+--- a/boards/ccimx95dvk/sm/brd_sm.c
++++ b/boards/ccimx95dvk/sm/brd_sm.c
+@@ -459,15 +459,6 @@ void BRD_SM_ShutdownRecordSave(dev_sm_rst_rec_t shutdownRec)
+ int32_t BRD_SM_SystemReset(void)
+ {
+     int32_t status = SM_ERR_SUCCESS;
+-    rgpio_pin_config_t gpioConfig =
+-    {
+-        kRGPIO_DigitalOutput,
+-        0U
+-    };
+-
+-    /* Drive WDOG_ANY to reset PMIC */
+-    RGPIO_PinInit(GPIO1, 15U, &gpioConfig);
+-    IOMUXC_SetPinMux(IOMUXC_PAD_WDOG_ANY__GPIO1_IO_BIT15, 0U);
+ 
+     /* Wait for PMIC to react */
+     SystemTimeDelay(1000U);
+diff --git a/boards/ccimx95dvk/sm/brd_sm_handlers.c b/boards/ccimx95dvk/sm/brd_sm_handlers.c
+index a96f6ce0e2f4..19ee28e93134 100755
+--- a/boards/ccimx95dvk/sm/brd_sm_handlers.c
++++ b/boards/ccimx95dvk/sm/brd_sm_handlers.c
+@@ -96,26 +96,6 @@ int32_t BRD_SM_SerialDevicesInit(void)
+ {
+     int32_t status = SM_ERR_SUCCESS;
+     LPI2C_Type *const s_i2cBases[] = LPI2C_BASE_PTRS;
+-    pcal6408a_config_t pcal6408Config;
+-
+-    /* Fill in PCAL6408A dev */
+-    g_pcal6408aDev.i2cBase = s_i2cBases[BOARD_I2C_INSTANCE];
+-    g_pcal6408aDev.devAddr = BOARD_PCAL6408A_DEV_ADDR;
+-
+-    /* Init the bus expander */
+-    PCAL6408A_GetDefaultConfig(&pcal6408Config);
+-    pcal6408Config.inputLatch = 0xFFU;
+-    if (!PCAL6408A_Init(&g_pcal6408aDev, &pcal6408Config))
+-    {
+-        status = SM_ERR_HARDWARE_ERROR;
+-    }
+-    else
+-    {
+-        if (!PCAL6408A_IntMaskSet(&g_pcal6408aDev, PCAL6408A_INITIAL_MASK))
+-        {
+-            status = SM_ERR_HARDWARE_ERROR;
+-        }
+-    }
+ 
+     if (status == SM_ERR_SUCCESS)
+     {
+@@ -254,20 +234,6 @@ int32_t BRD_SM_SerialDevicesInit(void)
+         }
+     }
+ 
+-    if (status == SM_ERR_SUCCESS)
+-    {
+-        rgpio_pin_config_t gpioConfig =
+-        {
+-            kRGPIO_DigitalInput,
+-            0U
+-        };
+-
+-        /* Init GPIO1-10 */
+-        RGPIO_PinInit(GPIO1, 10U, &gpioConfig);
+-        RGPIO_SetPinInterruptConfig(GPIO1, 10U, kRGPIO_InterruptOutput0,
+-            kRGPIO_InterruptLogicZero);
+-    }
+-
+     /* Return status */
+     return status;
+ }
+@@ -300,54 +266,6 @@ int32_t BRD_SM_BusExpMaskSet(uint8_t val, uint8_t mask)
+     return status;
+ }
+ 
+-/*--------------------------------------------------------------------------*/
+-/* GPIO1 handler                                                            */
+-/*--------------------------------------------------------------------------*/
+-void GPIO1_0_IRQHandler(void)
+-{
+-    uint32_t flags;
+-    uint8_t status, val;
+-
+-    /* Get GPIO status */
+-    flags = RGPIO_GetPinsInterruptFlags(GPIO1, kRGPIO_InterruptOutput0);
+-
+-    /* Get PCAL6408A status */
+-    (void) PCAL6408A_IntStatusGet(&g_pcal6408aDev, &status);
+-
+-    /* Get value and Clear PCAL6408A interrupts */
+-    (void) PCAL6408A_InputGet(&g_pcal6408aDev, &val);
+-
+-    /* Clear GPIO interrupts */
+-    RGPIO_ClearPinsInterruptFlags(GPIO1, kRGPIO_InterruptOutput0, flags);
+-
+-    /* Handle PF09 interrupt */
+-    if ((status & BIT8(PCAL6408A_INPUT_PF09_INT)) != 0U)
+-    {
+-        /* Asserts low */
+-        if ((val & BIT8(PCAL6408A_INPUT_PF09_INT)) == 0U)
+-        {
+-            BRD_SM_Pf09Handler();
+-        }
+-    }
+-
+-    /* Handle PCA2131 interrupt */
+-    if (g_pca2131Used && ((status & BIT8(PCAL6408A_INPUT_PCA2131_INT))
+-        != 0U))
+-    {
+-        /* Asserts low */
+-        if ((val & BIT8(PCAL6408A_INPUT_PCA2131_INT)) == 0U)
+-        {
+-            BRD_SM_BbmHandler();
+-        }
+-    }
+-
+-    /* Handle controls interrupts */
+-    BRD_SM_ControlHandler(status, val);
+-
+-    /* Adjust dynamic IRQ priority */
+-    (void) DEV_SM_IrqPrioUpdate();
+-}
+-
+ /*==========================================================================*/
+ 
+ /*--------------------------------------------------------------------------*/
+diff --git a/configs/ccimx95dvk.cfg b/configs/ccimx95dvk.cfg
+index da383aab036c..86d39e6e1fba 100755
+--- a/configs/ccimx95dvk.cfg
++++ b/configs/ccimx95dvk.cfg
+@@ -197,7 +197,6 @@ ELE                 OWNER
+ FSB                 READONLY
+ GIC                 ACCESS
+ GPC                 OWNER
+-GPIO1               OWNER
+ GPR0                OWNER
+ GPR1                OWNER
+ GPR2                OWNER
+@@ -482,6 +481,7 @@ PERLPI_LPUART4      ALL
+ PERLPI_LPUART5      ALL
+ PERLPI_LPUART6      ALL
+ PERLPI_LPUART8      ALL
++PERLPI_GPIO1        ALL
+ PERLPI_WDOG3        ALL
+ PERLPI_WDOG4        ALL
+ SYS                 ALL
+@@ -715,6 +715,7 @@ FLEXIO2             OWNER
+ FLEXSPI1            OWNER
+ FSB                 READONLY
+ GIC                 OWNER
++GPIO1               OWNER
+ GPIO2               OWNER
+ GPIO3               OWNER
+ GPIO4               OWNER
+diff --git a/configs/ccimx95dvk/config_scmi.h b/configs/ccimx95dvk/config_scmi.h
+index e1b81cc03f58..c1cc90313174 100644
+--- a/configs/ccimx95dvk/config_scmi.h
++++ b/configs/ccimx95dvk/config_scmi.h
+@@ -192,6 +192,7 @@
+         .perlpiPerms[DEV_SM_PERLPI_CAN3] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_CAN4] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_CAN5] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_GPIO1] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_GPIO2] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_GPIO3] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_GPIO4] = SM_SCMI_PERM_ALL, \
+@@ -474,6 +475,7 @@
+         .perlpiPerms[DEV_SM_PERLPI_CAN3] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_CAN4] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_CAN5] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_GPIO1] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_GPIO2] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_GPIO3] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_GPIO4] = SM_SCMI_PERM_ALL, \
+diff --git a/configs/ccimx95dvk/config_trdc.h b/configs/ccimx95dvk/config_trdc.h
+index 1d8ed0b6fc95..47df6a7577d5 100644
+--- a/configs/ccimx95dvk/config_trdc.h
++++ b/configs/ccimx95dvk/config_trdc.h
+@@ -116,7 +116,6 @@
+         SM_CFG_W1(0x00010470U), 0x33333333U, \
+         SM_CFG_W1(0x00010474U), 0x00003000U, \
+         SM_CFG_W1(0x00010580U), 0x000003C0U, \
+-        SM_CFG_W1(0x000105a8U), 0x00000003U, \
+         SM_CFG_W1(0x00010640U), 0x99999999U, \
+         SM_CFG_W1(0x00010644U), 0x99999999U, \
+         SM_CFG_W1(0x00010648U), 0x99999999U, \
+@@ -129,6 +128,7 @@
+         SM_CFG_W1(0x0001066cU), 0x90909000U, \
+         SM_CFG_W1(0x00010670U), 0x00009000U, \
+         SM_CFG_W1(0x00010780U), 0x099330C0U, \
++        SM_CFG_W1(0x000107a8U), 0x00000009U, \
+         SM_CFG_Z1(0x00010850U), \
+         SM_CFG_W1(0x00010854U), 0x9000C000U, \
+         SM_CFG_W1(0x00010858U), 0x00000099U, \

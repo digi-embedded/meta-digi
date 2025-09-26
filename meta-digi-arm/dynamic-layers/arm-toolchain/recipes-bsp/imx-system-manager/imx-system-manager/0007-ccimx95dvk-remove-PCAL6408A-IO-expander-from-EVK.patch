@@ -1,0 +1,453 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Thu, 25 Sep 2025 11:11:20 +0200
+Subject: [PATCH 7/8] ccimx95dvk: remove PCAL6408A IO expander from EVK
+
+NXP used this I2C IO expander on their EVK to process
+wakeup interrupt lines.
+This chip is not available on the DVK.
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+---
+ boards/ccimx95dvk/board.c              |  1 +
+ boards/ccimx95dvk/sm/Makefile          |  4 +-
+ boards/ccimx95dvk/sm/brd_sm_bbm.c      |  5 +-
+ boards/ccimx95dvk/sm/brd_sm_control.c  | 96 +-------------------------
+ boards/ccimx95dvk/sm/brd_sm_control.h  | 12 ++--
+ boards/ccimx95dvk/sm/brd_sm_handlers.c | 36 +---------
+ boards/ccimx95dvk/sm/brd_sm_handlers.h | 21 +-----
+ configs/ccimx95dvk.cfg                 |  6 --
+ configs/ccimx95dvk/config_scmi.h       |  6 --
+ 9 files changed, 12 insertions(+), 175 deletions(-)
+
+diff --git a/boards/ccimx95dvk/board.c b/boards/ccimx95dvk/board.c
+index 012a04540fd1..1f3c8cd3fdb9 100755
+--- a/boards/ccimx95dvk/board.c
++++ b/boards/ccimx95dvk/board.c
+@@ -1,5 +1,6 @@
+ /*
+  * Copyright 2023-2025 NXP
++ * Copyright 2025 Digi International Inc.
+  *
+  * SPDX-License-Identifier: BSD-3-Clause
+  */
+diff --git a/boards/ccimx95dvk/sm/Makefile b/boards/ccimx95dvk/sm/Makefile
+index d5b576737636..db27ea922733 100755
+--- a/boards/ccimx95dvk/sm/Makefile
++++ b/boards/ccimx95dvk/sm/Makefile
+@@ -1,6 +1,7 @@
+ ## ###################################################################
+ ##
+ ## Copyright 2023 NXP
++## Copyright 2025 Digi International Inc.
+ ##
+ ## Redistribution and use in source and binary forms, with or without modification,
+ ## are permitted provided that the following conditions are met:
+@@ -40,7 +41,6 @@ INCLUDE +=  \
+ 	-I$(BOARDS_DIR)  \
+ 	-I$(BOARD_DIR)  \
+ 	-I$(BOARD_DIR)/sm \
+-	-I$(COMPONENTS_DIR)/pcal6408a  \
+ 	-I$(COMPONENTS_DIR)/pf09  \
+ 	-I$(COMPONENTS_DIR)/pf53  \
+ 	-I$(COMPONENTS_DIR)/pca2131
+@@ -50,7 +50,6 @@ VPATH +=  \
+ 	$(BOARDS_DIR)  \
+ 	$(BOARD_DIR)  \
+ 	$(BOARD_DIR)/sm  \
+-	$(COMPONENTS_DIR)/pcal6408a  \
+ 	$(COMPONENTS_DIR)/pf09  \
+ 	$(COMPONENTS_DIR)/pf53  \
+ 	$(COMPONENTS_DIR)/pca2131
+@@ -63,7 +62,6 @@ OBJS += \
+ 	$(OUT)/brd_sm_sensor.o  \
+ 	$(OUT)/brd_sm_voltage.o  \
+ 	$(OUT)/brd_sm_bbm.o  \
+-	$(OUT)/fsl_pcal6408a.o  \
+ 	$(OUT)/fsl_pf09.o  \
+ 	$(OUT)/fsl_pf53.o  \
+ 	$(OUT)/fsl_pca2131.o
+diff --git a/boards/ccimx95dvk/sm/brd_sm_bbm.c b/boards/ccimx95dvk/sm/brd_sm_bbm.c
+index c2e5cd61dc9f..2b13931c7749 100755
+--- a/boards/ccimx95dvk/sm/brd_sm_bbm.c
++++ b/boards/ccimx95dvk/sm/brd_sm_bbm.c
+@@ -2,6 +2,7 @@
+ ** ###################################################################
+ **
+ ** Copyright 2025 NXP
++** Copyright 2025 Digi International Inc.
+ **
+ ** Redistribution and use in source and binary forms, with or without modification,
+ ** are permitted provided that the following conditions are met:
+@@ -415,8 +416,6 @@ int32_t BRD_SM_BbmRtcAlarmSet(uint32_t rtcId, bool enable, uint64_t val)
+                     /* Enable interrupt */
+                     if (PCA2131_IntEnable(&g_pca2131Dev, true))
+                     {
+-                        /* Enable bus expander interrupt */
+-                        status = BRD_SM_BusExpMaskSet(0U, BIT8(6));
+                     }
+                     else
+                     {
+@@ -440,8 +439,6 @@ int32_t BRD_SM_BbmRtcAlarmSet(uint32_t rtcId, bool enable, uint64_t val)
+             /* Disable interrupt */
+             if (PCA2131_IntEnable(&g_pca2131Dev, false))
+             {
+-                /* Disable bus expander interrupt */
+-                status = BRD_SM_BusExpMaskSet(BIT8(6), BIT8(6));
+             }
+             else
+             {
+diff --git a/boards/ccimx95dvk/sm/brd_sm_control.c b/boards/ccimx95dvk/sm/brd_sm_control.c
+index 5b36c66c593c..8484a6895a3d 100755
+--- a/boards/ccimx95dvk/sm/brd_sm_control.c
++++ b/boards/ccimx95dvk/sm/brd_sm_control.c
+@@ -2,6 +2,7 @@
+ ** ###################################################################
+ **
+ **     Copyright 2023-2024 NXP
++**     Copyright 2025 Digi International Inc.
+ **
+ **     Redistribution and use in source and binary forms, with or without modification,
+ **     are permitted provided that the following conditions are met:
+@@ -44,13 +45,6 @@
+ 
+ /* Local defines */
+ 
+-/* PCAL6408A input signals */
+-#define PCAL6408A_INPUT_SD3_WAKE     0U
+-#define PCAL6408A_INPUT_PCIE1_WAKE   4U
+-#define PCAL6408A_INPUT_BT_WAKE      5U
+-#define PCAL6408A_INPUT_PCIE2_WAKE   6U
+-#define PCAL6408A_INPUT_BUTTON       7U
+-
+ /* Local types */
+ 
+ /* Local variables */
+@@ -117,26 +111,7 @@ int32_t BRD_SM_ControlGet(uint32_t ctrlId, uint32_t *numRtn, uint32_t *rtn)
+         }
+         else
+         {
+-            uint8_t data;
+-
+-            /* Read expander data input */
+-            if (PCAL6408A_InputGet(&g_pcal6408aDev, &data))
+-            {
+-                uint32_t shift = ctrlId - DEV_SM_NUM_CTRL;
+-
+-                /* Adjust bit position */
+-                if (shift > 0U)
+-                {
+-                    shift += 3U;
+-                }
+-
+-                *numRtn = 1U;
+-                rtn[0] = (((uint32_t) data) >> shift) & 0x1UL;
+-            }
+-            else
+-            {
+-                status = SM_ERR_HARDWARE_ERROR;
+-            }
++            status = SM_ERR_HARDWARE_ERROR;
+         }
+     }
+     else
+@@ -231,41 +206,12 @@ int32_t BRD_SM_ControlFlagsSet(uint32_t ctrlId, uint32_t flags)
+     }
+     else
+     {
+-        uint8_t mask;
+-        uint32_t val;
+-        uint32_t enb = (flags != 0U) ? 0U : 1U;
+-
+         switch (ctrlId)
+         {
+-            case BRD_SM_CTRL_SD3_WAKE:
+-                mask = BIT8(PCAL6408A_INPUT_SD3_WAKE);
+-                val = (enb & 0x1U) << PCAL6408A_INPUT_SD3_WAKE;
+-                break;
+-            case BRD_SM_CTRL_PCIE1_WAKE:
+-                mask = BIT8(PCAL6408A_INPUT_PCIE1_WAKE);
+-                val = (enb & 0x1U) << PCAL6408A_INPUT_PCIE1_WAKE;
+-                break;
+-            case BRD_SM_CTRL_BT_WAKE:
+-                mask = BIT8(PCAL6408A_INPUT_BT_WAKE);
+-                val = (enb & 0x1U) << PCAL6408A_INPUT_BT_WAKE;
+-                break;
+-            case BRD_SM_CTRL_PCIE2_WAKE:
+-                mask = BIT8(PCAL6408A_INPUT_PCIE2_WAKE);
+-                val = (enb & 0x1U) << PCAL6408A_INPUT_PCIE2_WAKE;
+-                break;
+-            case BRD_SM_CTRL_BUTTON:
+-                mask = BIT8(PCAL6408A_INPUT_BUTTON);
+-                val = (enb & 0x1U) << PCAL6408A_INPUT_BUTTON;
+-                break;
+             default:
+                 status = SM_ERR_NOT_FOUND;
+                 break;
+         }
+-
+-        if (status == SM_ERR_SUCCESS)
+-        {
+-            status = BRD_SM_BusExpMaskSet((uint8_t) val, mask);
+-        }
+     }
+ 
+     return status;
+@@ -276,42 +222,6 @@ int32_t BRD_SM_ControlFlagsSet(uint32_t ctrlId, uint32_t flags)
+ /*--------------------------------------------------------------------------*/
+ void BRD_SM_ControlHandler(uint8_t status, uint8_t val)
+ {
+-    uint32_t data = (uint32_t) val;
+-
+-    /* Handle SD3 wake */
+-    if ((status & BIT8(PCAL6408A_INPUT_SD3_WAKE)) != 0U)
+-    {
+-        LMM_MiscControlEvent(BRD_SM_CTRL_SD3_WAKE,
+-            ((data >> PCAL6408A_INPUT_SD3_WAKE) & 0x1U) + 1U);
+-    }
+-
+-    /* Handle PCIe1 wake */
+-    if ((status & BIT8(PCAL6408A_INPUT_PCIE1_WAKE)) != 0U)
+-    {
+-        LMM_MiscControlEvent(BRD_SM_CTRL_PCIE1_WAKE,
+-            ((data >> PCAL6408A_INPUT_PCIE1_WAKE) & 0x1U) + 1U);
+-    }
+-
+-    /* Handle BT wake */
+-    if ((status & BIT8(PCAL6408A_INPUT_BT_WAKE)) != 0U)
+-    {
+-        LMM_MiscControlEvent(BRD_SM_CTRL_BT_WAKE,
+-            ((data >> PCAL6408A_INPUT_BT_WAKE) & 0x1U) + 1U);
+-    }
+-
+-    /* Handle PCIe2 wake */
+-    if (((status & BIT8(PCAL6408A_INPUT_PCIE2_WAKE)) != 0U)
+-        && !g_pca2131Used)
+-    {
+-        LMM_MiscControlEvent(BRD_SM_CTRL_PCIE2_WAKE,
+-            ((data >> PCAL6408A_INPUT_PCIE2_WAKE) & 0x1U) + 1U);
+-    }
+-
+-    /* Handle button */
+-    if ((status & BIT8(PCAL6408A_INPUT_BUTTON)) != 0U)
+-    {
+-        LMM_MiscControlEvent(BRD_SM_CTRL_BUTTON,
+-            ((data >> PCAL6408A_INPUT_BUTTON) & 0x1U) + 1U);
+-    }
++    // Call pertinent LMM_MiscControlEvent()
+ }
+ 
+diff --git a/boards/ccimx95dvk/sm/brd_sm_control.h b/boards/ccimx95dvk/sm/brd_sm_control.h
+index bf893782e1d7..12365e56d7e4 100755
+--- a/boards/ccimx95dvk/sm/brd_sm_control.h
++++ b/boards/ccimx95dvk/sm/brd_sm_control.h
+@@ -2,6 +2,7 @@
+ ** ###################################################################
+ **
+ **     Copyright 2023-2024 NXP
++**     Copyright 2025 Digi International Inc.
+ **
+ **     Redistribution and use in source and binary forms, with or without modification,
+ **     are permitted provided that the following conditions are met:
+@@ -66,7 +67,7 @@
+ /** @} */
+ 
+ /*! Number of board controls */
+-#define BRD_SM_NUM_CTRL  7UL
++#define BRD_SM_NUM_CTRL  2UL
+ 
+ /*! Total number of controls */
+ #define SM_NUM_CTRL  (DEV_SM_NUM_CTRL + BRD_SM_NUM_CTRL)
+@@ -75,13 +76,8 @@
+  * @name BRD_SM control domain indexes
+  */
+ /** @{ */
+-#define BRD_SM_CTRL_SD3_WAKE    (DEV_SM_NUM_CTRL + 0U)  /*!< PCAL6408A-0 */
+-#define BRD_SM_CTRL_PCIE1_WAKE  (DEV_SM_NUM_CTRL + 1U)  /*!< PCAL6408A-4 */
+-#define BRD_SM_CTRL_BT_WAKE     (DEV_SM_NUM_CTRL + 2U)  /*!< PCAL6408A-5 */
+-#define BRD_SM_CTRL_PCIE2_WAKE  (DEV_SM_NUM_CTRL + 3U)  /*!< PCAL6408A-6 */
+-#define BRD_SM_CTRL_BUTTON      (DEV_SM_NUM_CTRL + 4U)  /*!< PCAL6408A-7 */
+-#define BRD_SM_CTRL_TEST        (DEV_SM_NUM_CTRL + 5U)  /*!< Test */
+-#define BRD_SM_CTRL_PCA2131     (DEV_SM_NUM_CTRL + 6U)  /*!< PCA2131 raw access */
++#define BRD_SM_CTRL_TEST        (DEV_SM_NUM_CTRL + 0U)  /*!< Test */
++#define BRD_SM_CTRL_PCA2131     (DEV_SM_NUM_CTRL + 1U)  /*!< PCA2131 raw access */
+ /** @} */
+ 
+ /* Types */
+diff --git a/boards/ccimx95dvk/sm/brd_sm_handlers.c b/boards/ccimx95dvk/sm/brd_sm_handlers.c
+index 19ee28e93134..a42359f15e8b 100755
+--- a/boards/ccimx95dvk/sm/brd_sm_handlers.c
++++ b/boards/ccimx95dvk/sm/brd_sm_handlers.c
+@@ -2,6 +2,7 @@
+ ** ###################################################################
+ **
+ ** Copyright 2023-2025 NXP
++** Copyright 2025 Digi International Inc.
+ **
+ ** Redistribution and use in source and binary forms, with or without modification,
+ ** are permitted provided that the following conditions are met:
+@@ -48,23 +49,16 @@
+ 
+ /* I2C device addresses */
+ #define BOARD_PF09_DEV_ADDR         0x08U
+-#define BOARD_PCAL6408A_DEV_ADDR    0x20U
+ #define BOARD_PF5301_DEV_ADDR       0x2AU
+ #define BOARD_PF5302_DEV_ADDR       0x29U
+ #define BOARD_PCA2131_DEV_ADDR      0x53U
+ 
+-#define PCAL6408A_INPUT_PF53_ARM_PG  1U
+-#define PCAL6408A_INPUT_PF53_SOC_PG  2U
+-#define PCAL6408A_INPUT_PF09_INT     3U
+-#define PCAL6408A_INPUT_PCA2131_INT  6U
+-
+ /* Local types */
+ 
+ /* Local variables */
+ 
+ /* Global variables */
+ 
+-PCAL6408A_Type g_pcal6408aDev;
+ PF09_Type g_pf09Dev;
+ PF53_Type g_pf5301Dev;
+ PF53_Type g_pf5302Dev;
+@@ -238,34 +232,6 @@ int32_t BRD_SM_SerialDevicesInit(void)
+     return status;
+ }
+ 
+-/*--------------------------------------------------------------------------*/
+-/* Set bus expander interrupt mask                                          */
+-/*--------------------------------------------------------------------------*/
+-int32_t BRD_SM_BusExpMaskSet(uint8_t val, uint8_t mask)
+-{
+-    int32_t status = SM_ERR_SUCCESS;
+-    static uint8_t cachedMask = PCAL6408A_INITIAL_MASK;
+-    uint8_t newMask = (cachedMask & ~mask);
+-
+-    newMask |= val;
+-
+-    /* Mask changed? */
+-    if (cachedMask != newMask)
+-    {
+-        if (PCAL6408A_IntMaskSet(&g_pcal6408aDev, newMask))
+-        {
+-            cachedMask = newMask;
+-        }
+-        else
+-        {
+-            status = SM_ERR_HARDWARE_ERROR;
+-        }
+-    }
+-
+-    /* Return status */
+-    return status;
+-}
+-
+ /*==========================================================================*/
+ 
+ /*--------------------------------------------------------------------------*/
+diff --git a/boards/ccimx95dvk/sm/brd_sm_handlers.h b/boards/ccimx95dvk/sm/brd_sm_handlers.h
+index e34d52b50f7a..781a443e8444 100755
+--- a/boards/ccimx95dvk/sm/brd_sm_handlers.h
++++ b/boards/ccimx95dvk/sm/brd_sm_handlers.h
+@@ -2,6 +2,7 @@
+ ** ###################################################################
+ **
+ ** Copyright 2023-2024 NXP
++** Copyright 2025 Digi International Inc.
+ **
+ ** Redistribution and use in source and binary forms, with or without modification,
+ ** are permitted provided that the following conditions are met:
+@@ -52,16 +53,12 @@
+ 
+ #include "sm.h"
+ #include "dev_sm.h"
+-#include "fsl_pcal6408a.h"
+ #include "fsl_pf09.h"
+ #include "fsl_pf53.h"
+ #include "fsl_pca2131.h"
+ 
+ /* Defines */
+ 
+-/*! Initial PCAL6408A interrupt mask */
+-#define PCAL6408A_INITIAL_MASK  0xF7U
+-
+ /*! Number of board IRQs participating dynamic prioritization */
+ #define BOARD_NUM_IRQ_PRIO_IDX                 1U
+ 
+@@ -72,9 +69,6 @@
+ 
+ /* External variables */
+ 
+-/*! Handle to access PCAL6408A */
+-extern PCAL6408A_Type g_pcal6408aDev;
+-
+ /*! Handle to access PF09 */
+ extern PF09_Type g_pf09Dev;
+ 
+@@ -105,19 +99,6 @@ extern uint32_t g_pmicFaultFlags;
+  */
+ int32_t BRD_SM_SerialDevicesInit(void);
+ 
+-/*!
+- * Enable/disable bus expander interrupts.
+- *
+- * @param[in]     val      Value to write
+- * @param[in]     mask     Mask of bits to modify
+- *
+- * This function allows a caller to configure the bus expander.
+- * interrupts.
+- *
+- * @return Returns the status (::SM_ERR_SUCCESS = success).
+- */
+-int32_t BRD_SM_BusExpMaskSet(uint8_t val, uint8_t mask);
+-
+ /*!
+  * GPIO 1 interrupt 0 handler.
+  */
+diff --git a/configs/ccimx95dvk.cfg b/configs/ccimx95dvk.cfg
+index afec8eb5b738..4af5cea789d9 100755
+--- a/configs/ccimx95dvk.cfg
++++ b/configs/ccimx95dvk.cfg
+@@ -345,7 +345,6 @@ CHANNEL             db=2, xport=smt, check=crc32, rpc=scmi, \
+ 
+ # API
+ 
+-BRD_SM_CTRL_BUTTON        NOTIFY
+ BRD_SM_CTRL_PCA2131       ALL
+ BRD_SM_CTRL_TEST          ALL
+ BRD_SM_RTC_PCA2131        ALL
+@@ -532,11 +531,6 @@ CHANNEL             db=1, xport=smt, rpc=scmi, type=p2a_notify
+ 
+ AUDIO_PLL1                ALL
+ AUDIO_PLL2                ALL
+-BRD_SM_CTRL_BT_WAKE       NOTIFY
+-BRD_SM_CTRL_BUTTON        NOTIFY
+-BRD_SM_CTRL_PCIE1_WAKE    NOTIFY
+-BRD_SM_CTRL_PCIE2_WAKE    NOTIFY
+-BRD_SM_CTRL_SD3_WAKE      NOTIFY
+ BRD_SM_RTC_PCA2131        PRIV
+ BRD_SM_SENSOR_TEMP_PF09   ALL
+ BRD_SM_SENSOR_TEMP_PF5301 SET
+diff --git a/configs/ccimx95dvk/config_scmi.h b/configs/ccimx95dvk/config_scmi.h
+index 36cbb06126fe..d251f7910b39 100644
+--- a/configs/ccimx95dvk/config_scmi.h
++++ b/configs/ccimx95dvk/config_scmi.h
+@@ -72,7 +72,6 @@
+         .clkPerms[DEV_SM_CLK_M7] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_TSTMR2] = SM_SCMI_PERM_ALL, \
+         .cpuPerms[DEV_SM_CPU_M7P] = SM_SCMI_PERM_ALL, \
+-        .ctrlPerms[BRD_SM_CTRL_BUTTON] = SM_SCMI_PERM_NOTIFY, \
+         .ctrlPerms[BRD_SM_CTRL_PCA2131] = SM_SCMI_PERM_ALL, \
+         .ctrlPerms[BRD_SM_CTRL_TEST] = SM_SCMI_PERM_ALL, \
+         .daisyPerms[DEV_SM_DAISY_LPTMR2_0] = SM_SCMI_PERM_ALL, \
+@@ -314,11 +313,6 @@
+         .clkPerms[DEV_SM_CLK_VIDEOPLL1_VCO] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_VPUDSP] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_XSPISLVROOT] = SM_SCMI_PERM_ALL, \
+-        .ctrlPerms[BRD_SM_CTRL_BT_WAKE] = SM_SCMI_PERM_NOTIFY, \
+-        .ctrlPerms[BRD_SM_CTRL_BUTTON] = SM_SCMI_PERM_NOTIFY, \
+-        .ctrlPerms[BRD_SM_CTRL_PCIE1_WAKE] = SM_SCMI_PERM_NOTIFY, \
+-        .ctrlPerms[BRD_SM_CTRL_PCIE2_WAKE] = SM_SCMI_PERM_NOTIFY, \
+-        .ctrlPerms[BRD_SM_CTRL_SD3_WAKE] = SM_SCMI_PERM_NOTIFY, \
+         .ctrlPerms[DEV_SM_CTRL_ADC_TEST] = SM_SCMI_PERM_ALL, \
+         .ctrlPerms[DEV_SM_CTRL_MQS1_SETTINGS] = SM_SCMI_PERM_ALL, \
+         .ctrlPerms[DEV_SM_CTRL_PDM_CLK_SEL] = SM_SCMI_PERM_ALL, \
