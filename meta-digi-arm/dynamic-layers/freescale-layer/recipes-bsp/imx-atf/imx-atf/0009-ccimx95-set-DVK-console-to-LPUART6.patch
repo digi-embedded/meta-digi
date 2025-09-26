@@ -2,6 +2,8 @@ From: Hector Palacios <hector.palacios@digi.com>
 Date: Wed, 10 Sep 2025 09:21:43 +0200
 Subject: [PATCH] ccimx95: set DVK console to LPUART6
 
+Upstream-Status: Inappropriate [DEY specific]
+
 Signed-off-by: Hector Palacios <hector.palacios@digi.com>
 Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
