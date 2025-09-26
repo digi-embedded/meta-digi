@@ -8,11 +8,13 @@ SRC_URI:append:dey = " \
     file://0002-core-imx-support-ccimx91-dvk.patch \
     file://0003-core-imx-support-ccimx93-dvk.patch \
     file://0004-core-ccimx93-enable-AES_HUK-trusted-application.patch \
+    file://0005-core-imx-support-ccimx95-dvk.patch \
 "
 
-PLATFORM_FLAVOR:ccimx8mm = "ccimx8mmdvk"
-PLATFORM_FLAVOR:ccimx91 = "ccimx91dvk"
-PLATFORM_FLAVOR:ccimx93 = "ccimx93dvk"
+OPTEEMACHINE:ccimx8mm = "imx-ccimx8mmdvk"
+OPTEEMACHINE:ccimx91 = "imx-ccimx91dvk"
+OPTEEMACHINE:ccimx93 = "imx-ccimx93dvk"
+OPTEEMACHINE:ccimx95 = "imx-ccimx95dvk"
 
 do_compile:append:ccimx93 () {
     oe_runmake -C ${S} PLATFORM=imx-${PLATFORM_FLAVOR}_a0 O=${B}-A0
