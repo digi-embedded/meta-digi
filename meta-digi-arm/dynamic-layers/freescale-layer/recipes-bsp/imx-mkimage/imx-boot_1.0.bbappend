@@ -2,27 +2,31 @@
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-SRC_URI:append:ccimx8m = " \
+DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
+
+SRC_URI:append:dey = " \
+    file://0001-iMX8QX-soc.mak-capture-commands-output-into-a-log-fi.patch \
     file://0002-imx8m-soc.mak-capture-commands-output-into-a-log-fil.patch \
     file://0003-imx8m-print_fit_hab-follow-symlinks.patch \
     file://0004-imx8mm-adjust-TEE_LOAD_ADDR-for-ccimx8mm.patch \
+    file://0005-imx93-soc.mak-capture-commands-output-into-a-log-fil.patch \
+    file://0006-imx93-soc.mak-add-makefile-target-to-build-A0-revisi.patch \
+    file://0007-imx91-soc.mak-capture-commands-output-into-a-log-fil.patch \
+    file://0008-imx95-soc.mak-capture-commands-output-into-a-log-fil.patch \
 "
-SRC_URI:append:ccimx8x = " \
-    file://0001-iMX8QX-soc.mak-capture-commands-output-into-a-log-fi.patch \
-"
-SRC_URI:append:ccimx91 = " \
-    file://0001-imx91-soc.mak-capture-commands-output-into-a-log-fil.patch \
-"
-SRC_URI:append:ccimx93 = " \
-    file://0001-imx93-soc.mak-capture-commands-output-into-a-log-fil.patch \
-    file://0002-imx93-soc.mak-add-makefile-target-to-build-A0-revisi.patch \
-"
-
-DEPENDS += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence-sign-tools-native', '', d)}"
 
 # Do not tag imx-boot
 UUU_BOOTLOADER:mx8-generic-bsp = ""
 UUU_BOOTLOADER:mx9-generic-bsp = ""
+
+IMX_CORTEXM_DEMOS = ""
+IMX_CORTEXM_DEMOS:ccimx95 = "imx-m7-demos:do_deploy"
+
+do_compile[depends] += "${IMX_CORTEXM_DEMOS}"
+
+compile_mx95:append:ccimx95() {
+	cp ${DEPLOY_DIR_IMAGE}/mcore-demos/imx95-19x19-evk_m7_TCM_power_mode_switch.bin ${BOOT_STAGING}/m7_image.bin
+}
 
 # Revert compile_mx8m() to how it was in kirkstone branch of meta-freescale,
 # otherwise, a dead symlink is created in place of the dtb
@@ -152,6 +156,13 @@ do_deploy:append:ccimx93() {
 		# Filename must match the deployed one in "optee-os" recipe for A0 SOC revision
 		install -m 0644 ${DEPLOY_DIR_IMAGE}/tee.ccimx93dvk_a0.bin ${DEPLOYDIR}/${BOOT_TOOLS}
 	fi
+}
+
+do_deploy:append:ccimx95() {
+    generate_symlinks
+    for target in ${IMXBOOT_TARGETS}; do
+        install -m 0644 ${BOOT_STAGING}/mkimage-${target}.log ${DEPLOYDIR}/${BOOT_TOOLS}
+    done
 }
 
 do_deploy:ccimx8x () {

@@ -13,7 +13,7 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
-index f1b37a4f425a..ffd70af8ac7d 100644
+index e7c762b748a1..3b0b6b603cd5 100644
 --- a/iMX8M/soc.mak
 +++ b/iMX8M/soc.mak
 @@ -1,5 +1,6 @@
