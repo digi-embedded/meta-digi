@@ -108,6 +108,10 @@ ENCRYPT_SUFFIX ?= "_Encrypted"
 
 SIGN_ENABLE ?= "0"
 SIGN_SUFFIX ?= "_Signed"
+# Disable signature of coprocessor firmware
+SIGN_COPRO_ENABLE = "0"
+# Disable encryption of coprocessor firmware
+ENCRYPT_COPRO_ENABLE = "0"
 
 # =========================================================================
 # Debug trace
