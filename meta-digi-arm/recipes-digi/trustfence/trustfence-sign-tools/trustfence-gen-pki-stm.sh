@@ -101,3 +101,29 @@ else
 		exit 1
 	fi
 fi
+
+if [ -n "${CONFIG_DEK_PATH}" ]; then
+	[ -d "${CONFIG_DEK_PATH}" ] || mkdir "${CONFIG_DEK_PATH}"
+	# Generate random keys if they don't exist
+	if [ "${PLATFORM}" = "ccmp25" ]; then
+		if [ ! -f "${CONFIG_DEK_PATH}/encryption_key_fsbl.bin" ]; then
+			echo "Generating random encryption key for FSBL"
+			if ! STM32MP_KeyGen_CLI -rand 16 "${CONFIG_DEK_PATH}/encryption_key_fsbl.bin"; then
+				echo "[ERROR] Failed to generate 16-byte FSBL encryption key"
+				exit 1
+			fi
+			chmod 444 "${CONFIG_DEK_PATH}/encryption_key_fsbl.bin"
+		fi
+		if [ ! -f "${CONFIG_DEK_PATH}/encryption_key_fip.bin" ]; then
+			echo "Generating random encryption key for FIP"
+			if ! STM32MP_KeyGen_CLI -rand 32 "${CONFIG_DEK_PATH}/encryption_key_fip.bin"; then
+				echo "[ERROR] Failed to generate 32-byte FIP encryption key"
+				exit 1
+			fi
+			chmod 444 "${CONFIG_DEK_PATH}/encryption_key_fip.bin"
+		fi
+	else
+		echo "[ERROR] Could not generate encryption keys. Platform not supported."
+		exit 1
+	fi
+fi

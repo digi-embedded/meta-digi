@@ -203,7 +203,9 @@ do_compile() {
                         unset k
                         for soc in ${STM32MP_ENCRYPT_SOC_NAME}; do
                             k=$(expr $k + 1)
-                            [ "$(echo ${dt} | grep -c ${soc})" -eq 1 ] && encrypt_key=$(echo ${ENCRYPT_FIP_KEY_PATH_LIST} | cut -d',' -f${k})
+                            if [ "$(echo ${dt} | grep -c ${soc})" -eq 1 ] || [ "$(echo ${dt} | grep -c ${TF_A_SOC_MATCH})" -eq 1 ] ;then
+                                encrypt_key=$(echo ${ENCRYPT_FIP_KEY_PATH_LIST} | cut -d',' -f${k})
+                            fi
                         done
                     fi
                     if [ "$(file "${encrypt_key}" | sed 's#.*: \(.*\)$#\1#')" = "ASCII text" ]; then
@@ -247,7 +249,9 @@ do_compile() {
                             unset k
                             for soc in ${STM32MP_ENCRYPT_SOC_NAME}; do
                                 k=$(expr $k + 1)
-                                [ "$(echo ${dt} | grep -c ${soc})" -eq 1 ] && encrypt_key=$(echo ${ENCRYPT_FSBL_KEY_PATH_LIST} | cut -d',' -f${k})
+                                if [ "$(echo ${dt} | grep -c ${soc})" -eq 1 ] || [ "$(echo ${dt} | grep -c ${TF_A_SOC_MATCH})" -eq 1 ] ;then
+                                    encrypt_key=$(echo ${ENCRYPT_FSBL_KEY_PATH_LIST} | cut -d',' -f${k})
+                                fi
                             done
                         fi
                         # Set encryption options for signing tools

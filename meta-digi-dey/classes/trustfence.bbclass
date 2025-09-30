@@ -49,7 +49,6 @@ TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-onl
 TF_DEK_PATH = "default"
 TF_DEK_PATH:ccimx9 = "0"
 TF_DEK_PATH:ccmp1 = "0"
-TF_DEK_PATH:ccmp2 = "0"
 TF_FILE_BASED_ENCRYPT = "0"
 TF_FILE_BASED_ENCRYPT:ccimx9 = "1"
 TF_FILE_BASED_ENCRYPT:ccmp1 = "1"
@@ -78,6 +77,9 @@ gen_pki_tree() {
 			trustfence-gen-pki.sh ${TRUSTFENCE_SIGN_KEYS_PATH}
 		elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
 			export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+			if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+				export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
+			fi
 			trustfence-gen-pki.sh -p ${DIGI_SOM}
 		fi
 		rm -rf ${GENPKI_LOCK_DIR}
@@ -174,6 +176,9 @@ python () {
     if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
         if (d.getVar("TRUSTFENCE_DEK_PATH") == "default"):
             d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/dek.bin");
+    elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
+        if (d.getVar("TRUSTFENCE_DEK_PATH") == "default"):
+            d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"));
 
     if (d.getVar("TRUSTFENCE_SIGN") == "1"):
         # Set STM-specific variables for signing images
@@ -208,7 +213,13 @@ python () {
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_DEK_PATH="%s" ' % d.getVar("TRUSTFENCE_DEK_PATH"))
             if d.getVar("TRUSTFENCE_SIGN_MODE"):
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_SIGN_MODE="%s" ' % d.getVar("TRUSTFENCE_SIGN_MODE"))
-
+        elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
+            if (d.getVar("TRUSTFENCE_DEK_PATH") not in [None, "0"]):
+                d.setVar("ENCRYPT_ENABLE", "1")
+                d.setVar("ENCRYPT_FSBL_KEY", '%s/encryption_key_fsbl.bin' % d.getVar("TRUSTFENCE_DEK_PATH"))
+                d.setVar("ENCRYPT_FSBL_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("ENCRYPT_FSBL_KEY"))
+                d.setVar("ENCRYPT_FIP_KEY", '%s/encryption_key_fip.bin' % d.getVar("TRUSTFENCE_DEK_PATH"))
+                d.setVar("ENCRYPT_FIP_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("ENCRYPT_FIP_KEY"))
 
         if (d.getVar("TRUSTFENCE_SIGN_FIT_STM") == "1"):
             # FIT-related variables

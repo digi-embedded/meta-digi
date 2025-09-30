@@ -106,7 +106,11 @@ build_uboot_scripts() {
 					sed -i -e 's,##SIGNED##,signed,g' ${TMP_INSTALL_SCR}
 				fi
 			else
-				sed -i -e 's,##SIGNED##,_Signed,g' ${TMP_INSTALL_SCR}
+				if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+					sed -i -e 's,##SIGNED##,_Encrypted_Signed,g' ${TMP_INSTALL_SCR}
+				else
+					sed -i -e 's,##SIGNED##,_Signed,g' ${TMP_INSTALL_SCR}
+				fi
 			fi
 		else
 			sed -i -e 's,-##SIGNED##,,g' -e 's,##SIGNED##,,g' ${TMP_INSTALL_SCR}
