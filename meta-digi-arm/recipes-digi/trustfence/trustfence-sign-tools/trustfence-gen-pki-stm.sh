@@ -102,6 +102,41 @@ else
 	fi
 fi
 
+# Default values
+RPROC_KEY_PASS_FILE="${CONFIG_SIGN_KEYS_PATH}/rproc-keys/key_pass.txt"
+
+# Generate random keys for Cortex-M coprocessor if they don't exist
+if [ "${PLATFORM}" = "ccmp25" ]; then
+	N_PUBK="$(ls -l ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/publicKey*.pem 2>/dev/null | wc -l)"
+	N_PRVK="$(ls -l ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/privateKey*.pem 2>/dev/null | wc -l)"
+	N_DERK="$(ls -l ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/publicKey*.der 2>/dev/null | wc -l)"
+	install -d "${CONFIG_SIGN_KEYS_PATH}/rproc-keys/"
+	if [ "${N_PUBK}" = "1" ] && [ "${N_PRVK}" = "1" ] && [ "${N_DERK}" = "1" ] && [ -f "${RPROC_KEY_PASS_FILE}" ]; then
+		# PKI tree already exists.
+		echo "Using existing PKI tree for Cortex-M coprocessor"
+	elif [ "${N_PUBK}" != "1" ] && [ "${N_PRVK}" != 1 ] && [ "${N_DERK}" != "1" ] && [ ! -f "${RPROC_KEY_PASS_FILE}" ]; then
+		# Random password
+		password="$(openssl rand -base64 32)"
+		echo "Generating random key"
+		if ! STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/rproc-keys/" -pwd ${password}; then
+			echo "[ERROR] Could not generate PKI tree for Cortex-M coprocessor"
+			exit 1
+		fi
+		echo "${password}" > "${RPROC_KEY_PASS_FILE}"
+		chmod 400 "${RPROC_KEY_PASS_FILE}"
+		# Generate DER version of public key
+		if ! openssl ec -pubin -in ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/publicKey.pem \
+		           -outform DER -pubout \
+		           -out ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/publicKey.der; then
+			echo "[ERROR] Could not generate DER public key for Cortex-M coprocessor"
+			exit 1
+		fi
+	else
+		echo "[ERROR] Could not generate PKI tree for Cortex-M coprocessor. An incomplete PKI tree may already exist."
+		exit 1
+	fi
+fi
+
 if [ -n "${CONFIG_DEK_PATH}" ]; then
 	[ -d "${CONFIG_DEK_PATH}" ] || mkdir "${CONFIG_DEK_PATH}"
 	# Generate random keys if they don't exist
@@ -121,6 +156,14 @@ if [ -n "${CONFIG_DEK_PATH}" ]; then
 				exit 1
 			fi
 			chmod 444 "${CONFIG_DEK_PATH}/encryption_key_fip.bin"
+		fi
+		if [ ! -f "${CONFIG_DEK_PATH}/encryption_key_rproc.bin" ]; then
+			echo "Generating random encryption keys for Cortex-M coprocessor"
+			if ! STM32MP_KeyGen_CLI -rand 32 "${CONFIG_DEK_PATH}/encryption_key_rproc.bin"; then
+				echo "[ERROR] Failed to generate 32-byte Cortex-M encryption key"
+				exit 1
+			fi
+			chmod 444 "${CONFIG_DEK_PATH}/encryption_key_rproc.bin"
 		fi
 	else
 		echo "[ERROR] Could not generate encryption keys. Platform not supported."

@@ -192,6 +192,13 @@ python () {
             else:
                 d.setVar("SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey0%s.pem" % d.getVar("TRUSTFENCE_KEY_INDEX"));
                 d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/key_pass0%s.txt" % d.getVar("TRUSTFENCE_KEY_INDEX"))
+                if (d.getVar("SIGN_COPRO_ENABLE") == "1" ):
+                    d.setVar("SIGN_COPRO_ECC_PRIVKEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/rproc-keys/privateKey.pem")
+                    d.setVar("SIGN_COPRO_ECC_PRIVKEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("SIGN_COPRO_ECC_PRIVKEY"))
+                    d.setVar("SIGN_COPRO_ECC_INFOKEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/rproc-keys/publicKey.der")
+                    d.setVar("SIGN_COPRO_ECC_INFOKEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("SIGN_COPRO_ECC_INFOKEY"))
+                    d.setVar("TRUSTFENCE_COPRO_PASSWORD_FILE", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "rproc-keys/key_pass.txt")
+                    d.setVar("SIGN_COPRO_ECC_PASS_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), "UNDEFINED");
             d.setVar("SIGN_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("SIGN_KEY"));
 
         d.appendVar("UBOOT_TF_CONF", "CONFIG_SIGN_IMAGE=y ")
@@ -220,6 +227,9 @@ python () {
                 d.setVar("ENCRYPT_FSBL_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("ENCRYPT_FSBL_KEY"))
                 d.setVar("ENCRYPT_FIP_KEY", '%s/encryption_key_fip.bin' % d.getVar("TRUSTFENCE_DEK_PATH"))
                 d.setVar("ENCRYPT_FIP_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("ENCRYPT_FIP_KEY"))
+                if (d.getVar("ENCRYPT_COPRO_ENABLE") == "1"):
+                    d.setVar("ENCRYPT_COPRO_KEY", '%s/encryption_key_rproc.bin' % d.getVar("TRUSTFENCE_DEK_PATH"))
+                    d.setVar("ENCRYPT_COPRO_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("ENCRYPT_COPRO_KEY"))
 
         if (d.getVar("TRUSTFENCE_SIGN_FIT_STM") == "1"):
             # FIT-related variables
