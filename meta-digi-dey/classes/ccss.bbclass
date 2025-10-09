@@ -15,7 +15,7 @@ inherit vigiles
 
 CCSS_API_VERSION = "0.1"
 CCSS_IMAGE_TYPE ?= "dev"
-CCSS_ENABLE ?= "0"
+CCSS_ENABLE ?= "1"
 
 python do_ccss_generate_sbom() {
     import json
