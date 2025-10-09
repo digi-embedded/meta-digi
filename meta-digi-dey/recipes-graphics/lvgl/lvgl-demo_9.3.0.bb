@@ -86,4 +86,4 @@ INITSCRIPT_PARAMS:${PN}-init = "start 99 3 5 . stop 20 0 1 2 6 ."
 SYSTEMD_PACKAGES = "${PN}-init"
 SYSTEMD_SERVICE:${PN}-init = "lvgl-demo-init.service"
 
-COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx93|ccmp15|ccmp2)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx93|ccimx95|ccmp15|ccmp2)"
