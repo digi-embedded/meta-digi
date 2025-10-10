@@ -43642,6 +43642,7 @@ index 000000000000..13c003e2ba45
 +#include <linux/pagemap.h>
 +#include <linux/init.h>
 +#include <linux/list.h>
++#include <linux/math64.h>
 +#include <linux/poll.h>
 +#include <linux/sched.h>
 +#include <linux/slab.h>
@@ -43815,8 +43816,11 @@ index 000000000000..13c003e2ba45
 +		}
 +
 +		spin_lock(&vt->txvq_lock);
-+		virttrans_queue_txbuf(vt, &vt->tx_sgl[idx % vt->tx_vring_size],
-+				      buf, vt->pkt_size);
++		u64 tmp_idx = idx;
++		u32 tmp_rem;
++		div_u64_rem(tmp_idx, vt->tx_vring_size, &tmp_rem);
++		virttrans_queue_txbuf(vt, &vt->tx_sgl[tmp_rem],
++					buf, vt->pkt_size);
 +		idx++;
 +		spin_unlock(&vt->txvq_lock);
 +
@@ -43952,8 +43956,11 @@ index 000000000000..13c003e2ba45
 +		}
 +
 +		spin_lock(&vt->rxvq_lock);
-+		virttrans_queue_rxbuf(vt, &vt->rx_sgl[idx % vt->rx_vring_size],
-+				      buf, vt->pkt_size);
++		u64 tmp_idx = idx;
++		u32 tmp_rem;
++		div_u64_rem(tmp_idx, vt->rx_vring_size, &tmp_rem);
++		virttrans_queue_rxbuf(vt, &vt->rx_sgl[tmp_rem],
++					buf, vt->pkt_size);
 +		idx++;
 +		spin_unlock(&vt->rxvq_lock);
 +
