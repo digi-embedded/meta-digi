@@ -12,3 +12,6 @@ SRC_URI:append:dey = " \
     file://0007-ccimx95dvk-remove-PCAL6408A-IO-expander-from-EVK.patch \
     file://0008-ccimx95dvk-remove-PCA2123-RTC-from-EVK.patch \
 "
+
+# Disable debug monitor by default
+PACKAGECONFIG ??= "m0"
