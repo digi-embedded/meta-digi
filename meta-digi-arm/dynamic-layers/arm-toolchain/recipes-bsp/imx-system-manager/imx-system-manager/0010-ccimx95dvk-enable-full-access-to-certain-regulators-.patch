@@ -1,0 +1,47 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Thu, 9 Oct 2025 13:16:00 +0200
+Subject: [PATCH 10/11] ccimx95dvk: enable full access to certain regulators
+ from non-secure LVM
+
+The following PMIC regulators are used by the DVK:
+- VDD_3V3 (SW1)
+- VDD_1V8 (SW3)
+- VDD_LDO1 (LDO1)
+- VDD_SDIO2 (LDO2)
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+---
+ configs/ccimx95dvk.cfg           | 4 ++++
+ configs/ccimx95dvk/config_scmi.h | 4 ++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/configs/ccimx95dvk.cfg b/configs/ccimx95dvk.cfg
+index b324e0fb0e45..b7c33f8d7e9a 100755
+--- a/configs/ccimx95dvk.cfg
++++ b/configs/ccimx95dvk.cfg
+@@ -532,6 +532,10 @@ AUDIO_PLL2                ALL
+ BRD_SM_SENSOR_TEMP_PF09   ALL
+ BRD_SM_SENSOR_TEMP_PF5301 SET
+ BRD_SM_SENSOR_TEMP_PF5302 SET
++BRD_SM_VOLT_SW1_VDD_3V3      ALL
++BRD_SM_VOLT_SW3_VDD_1V8      ALL
++BRD_SM_VOLT_LDO1_VDD_LDO1    ALL
++BRD_SM_VOLT_LDO2_VDD_SDIO2   ALL
+ BUTTON                    ALL, test
+ CLOCK_DISP1PIX            ALL
+ CLOCK_DISP2PIX            ALL
+diff --git a/configs/ccimx95dvk/config_scmi.h b/configs/ccimx95dvk/config_scmi.h
+index b23958f33138..18a4e5ef6360 100644
+--- a/configs/ccimx95dvk/config_scmi.h
++++ b/configs/ccimx95dvk/config_scmi.h
+@@ -610,6 +610,10 @@
+         .sensorPerms[DEV_SM_SENSOR_TEMP_A55] = SM_SCMI_PERM_ALL, \
+         .sensorPerms[DEV_SM_SENSOR_TEMP_ANA] = SM_SCMI_PERM_SET, \
+         .sysPerms = SM_SCMI_PERM_NOTIFY, \
++        .voltPerms[BRD_SM_VOLT_LDO1_VDD_LDO1] = SM_SCMI_PERM_ALL, \
++        .voltPerms[BRD_SM_VOLT_LDO2_VDD_SDIO2] = SM_SCMI_PERM_ALL, \
++        .voltPerms[BRD_SM_VOLT_SW1_VDD_3V3] = SM_SCMI_PERM_ALL, \
++        .voltPerms[BRD_SM_VOLT_SW3_VDD_1V8] = SM_SCMI_PERM_ALL, \
+     }
+ 
+ /*! Config for SCMI channel 5 */

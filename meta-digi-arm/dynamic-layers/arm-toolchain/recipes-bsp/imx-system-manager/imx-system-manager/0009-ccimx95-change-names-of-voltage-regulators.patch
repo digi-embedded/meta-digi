@@ -1,0 +1,274 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Mon, 29 Sep 2025 13:02:02 +0200
+Subject: [PATCH 09/11] ccimx95: change names of voltage regulators
+
+Change the names of voltage regulators for easier identification.
+Use the PMIC regulator (SW1, SW2, LDO1...) and then the name of the power
+rail used in the SOM.
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+---
+ boards/ccimx95dvk/sm/brd_sm_voltage.c | 85 ++++++++++++++-------------
+ boards/ccimx95dvk/sm/brd_sm_voltage.h | 15 ++---
+ 2 files changed, 51 insertions(+), 49 deletions(-)
+
+diff --git a/boards/ccimx95dvk/sm/brd_sm_voltage.c b/boards/ccimx95dvk/sm/brd_sm_voltage.c
+index b81ffd970294..d7e7c9b3ea27 100755
+--- a/boards/ccimx95dvk/sm/brd_sm_voltage.c
++++ b/boards/ccimx95dvk/sm/brd_sm_voltage.c
+@@ -2,6 +2,7 @@
+ ** ###################################################################
+ **
+ **     Copyright 2023-2025 NXP
++**     Copyright 2025 Digi International Inc.
+ **
+ **     Redistribution and use in source and binary forms, with or without modification,
+ **     are permitted provided that the following conditions are met:
+@@ -63,13 +64,13 @@ int32_t BRD_SM_VoltageNameGet(uint32_t domainId, string *voltNameAddr,
+ 
+     static string const s_name[BRD_SM_NUM_VOLT] =
+     {
+-        "vdd_gpio_3p3",
+-        "vdd_ana_0p8",
+-        "vdd_gpio_1p8",
+-        "vddq_ddr",
+-        "vdd2_ddr",
+-        "sd_card",
+-        "nvcc_sd2"
++        "vdd_3v3",
++        "vdd_ana_0v8",
++        "vdd_1v8",
++        "lpd5_vddq",
++        "lpd5_vdd2",
++        "vdd_ldo1",
++        "vdd_sdio2"
+     };
+ 
+     /* Get max string width */
+@@ -117,25 +118,25 @@ int32_t BRD_SM_VoltageDescribe(uint32_t domainId,
+         case DEV_SM_VOLT_ARM:
+             status = DEV_SM_VoltageDescribe(domainId, range);
+             break;
+-        case BRD_SM_VOLT_VDD_GPIO_3P3:
++        case BRD_SM_VOLT_SW1_VDD_3V3:
+             rc = PF09_RegulatorInfoGet(PF09_REG_SW1, &info);
+             break;
+-        case BRD_SM_VOLT_VDD_ANA_0P8:
++        case BRD_SM_VOLT_SW2_VDD_ANA_0V8:
+             rc = PF09_RegulatorInfoGet(PF09_REG_SW2, &info);
+             break;
+-        case BRD_SM_VOLT_VDD_GPIO_1P8:
++        case BRD_SM_VOLT_SW3_VDD_1V8:
+             rc = PF09_RegulatorInfoGet(PF09_REG_SW3, &info);
+             break;
+-        case BRD_SM_VOLT_VDDQ_DDR:
++        case BRD_SM_VOLT_SW4_LPD5_VDDQ:
+             rc = PF09_RegulatorInfoGet(PF09_REG_SW4, &info);
+             break;
+-        case BRD_SM_VOLT_VDD2_DDR:
++        case BRD_SM_VOLT_SW5_LPD5_VDD2:
+             rc = PF09_RegulatorInfoGet(PF09_REG_SW5, &info);
+             break;
+-        case BRD_SM_VOLT_SD_CARD:
++        case BRD_SM_VOLT_LDO1_VDD_LDO1:
+             rc = PF09_RegulatorInfoGet(PF09_REG_LDO1, &info);
+             break;
+-        case BRD_SM_VOLT_NVCC_SD2:
++        case BRD_SM_VOLT_LDO2_VDD_SDIO2:
+             rc = PF09_RegulatorInfoGet(PF09_REG_LDO2, &info);
+             break;
+         default:
+@@ -206,31 +207,31 @@ int32_t BRD_SM_VoltageModeSet(uint32_t domainId, uint8_t voltMode)
+                 s_modeArm = voltMode;
+             }
+             break;
+-        case BRD_SM_VOLT_VDD_GPIO_3P3:
++        case BRD_SM_VOLT_SW1_VDD_3V3:
+             rc = PF09_SwModeSet(&g_pf09Dev, PF09_REG_SW1, PF09_STATE_VRUN,
+                 mode);
+             break;
+-        case BRD_SM_VOLT_VDD_ANA_0P8:
++        case BRD_SM_VOLT_SW2_VDD_ANA_0V8:
+             rc = PF09_SwModeSet(&g_pf09Dev, PF09_REG_SW2, PF09_STATE_VRUN,
+                 mode);
+             break;
+-        case BRD_SM_VOLT_VDD_GPIO_1P8:
++        case BRD_SM_VOLT_SW3_VDD_1V8:
+             rc = PF09_SwModeSet(&g_pf09Dev, PF09_REG_SW3, PF09_STATE_VRUN,
+                 mode);
+             break;
+-        case BRD_SM_VOLT_VDDQ_DDR:
++        case BRD_SM_VOLT_SW4_LPD5_VDDQ:
+             rc = PF09_SwModeSet(&g_pf09Dev, PF09_REG_SW4, PF09_STATE_VRUN,
+                 mode);
+             break;
+-        case BRD_SM_VOLT_VDD2_DDR:
++        case BRD_SM_VOLT_SW5_LPD5_VDD2:
+             rc = PF09_SwModeSet(&g_pf09Dev, PF09_REG_SW5, PF09_STATE_VRUN,
+                 mode);
+             break;
+-        case BRD_SM_VOLT_SD_CARD:
++        case BRD_SM_VOLT_LDO1_VDD_LDO1:
+             rc = PF09_LdoEnable(&g_pf09Dev, PF09_REG_LDO1, PF09_STATE_VRUN,
+                 enable);
+             break;
+-        case BRD_SM_VOLT_NVCC_SD2:
++        case BRD_SM_VOLT_LDO2_VDD_SDIO2:
+             rc = PF09_LdoEnable(&g_pf09Dev, PF09_REG_LDO2, PF09_STATE_VRUN,
+                 enable);
+             break;
+@@ -271,36 +272,36 @@ int32_t BRD_SM_VoltageModeGet(uint32_t domainId, uint8_t *voltMode)
+             rc = PF09_GpioCtrlGet(&g_pf09Dev, PF09_GPIO4, PF53_STATE_VRUN,
+                 &enable);
+             break;
+-        case BRD_SM_VOLT_VDD_GPIO_3P3:
++        case BRD_SM_VOLT_SW1_VDD_3V3:
+             rc = PF09_SwModeGet(&g_pf09Dev, PF09_REG_SW1, PF09_STATE_VRUN,
+                 &mode);
+             enable = (mode != PF09_SW_MODE_OFF);
+             break;
+-        case BRD_SM_VOLT_VDD_ANA_0P8:
++        case BRD_SM_VOLT_SW2_VDD_ANA_0V8:
+             rc = PF09_SwModeGet(&g_pf09Dev, PF09_REG_SW2, PF09_STATE_VRUN,
+                 &mode);
+             enable = (mode != PF09_SW_MODE_OFF);
+             break;
+-        case BRD_SM_VOLT_VDD_GPIO_1P8:
++        case BRD_SM_VOLT_SW3_VDD_1V8:
+             rc = PF09_SwModeGet(&g_pf09Dev, PF09_REG_SW3, PF09_STATE_VRUN,
+                 &mode);
+             enable = (mode != PF09_SW_MODE_OFF);
+             break;
+-        case BRD_SM_VOLT_VDDQ_DDR:
++        case BRD_SM_VOLT_SW4_LPD5_VDDQ:
+             rc = PF09_SwModeGet(&g_pf09Dev, PF09_REG_SW4, PF09_STATE_VRUN,
+                 &mode);
+             enable = (mode != PF09_SW_MODE_OFF);
+             break;
+-        case BRD_SM_VOLT_VDD2_DDR:
++        case BRD_SM_VOLT_SW5_LPD5_VDD2:
+             rc = PF09_SwModeGet(&g_pf09Dev, PF09_REG_SW5, PF09_STATE_VRUN,
+                 &mode);
+             enable = (mode != PF09_SW_MODE_OFF);
+             break;
+-        case BRD_SM_VOLT_SD_CARD:
++        case BRD_SM_VOLT_LDO1_VDD_LDO1:
+             rc = PF09_LdoIsEnabled(&g_pf09Dev, PF09_REG_LDO1, PF09_STATE_VRUN,
+                 &enable);
+             break;
+-        case BRD_SM_VOLT_NVCC_SD2:
++        case BRD_SM_VOLT_LDO2_VDD_SDIO2:
+             rc = PF09_LdoIsEnabled(&g_pf09Dev, PF09_REG_LDO2, PF09_STATE_VRUN,
+                 &enable);
+             break;
+@@ -359,31 +360,31 @@ int32_t BRD_SM_VoltageLevelSet(uint32_t domainId, int32_t voltageLevel)
+                 s_levelArm = (int32_t) level;
+                 rc = true;
+                 break;
+-            case BRD_SM_VOLT_VDD_GPIO_3P3:
++            case BRD_SM_VOLT_SW1_VDD_3V3:
+                 rc = PF09_VoltageSet(&g_pf09Dev, PF09_REG_SW1, PF09_STATE_VRUN,
+                     level);
+                 break;
+-            case BRD_SM_VOLT_VDD_ANA_0P8:
++            case BRD_SM_VOLT_SW2_VDD_ANA_0V8:
+                 rc = PF09_VoltageSet(&g_pf09Dev, PF09_REG_SW2, PF09_STATE_VRUN,
+                     level);
+                 break;
+-            case BRD_SM_VOLT_VDD_GPIO_1P8:
++            case BRD_SM_VOLT_SW3_VDD_1V8:
+                 rc = PF09_VoltageSet(&g_pf09Dev, PF09_REG_SW3, PF09_STATE_VRUN,
+                     level);
+                 break;
+-            case BRD_SM_VOLT_VDDQ_DDR:
++            case BRD_SM_VOLT_SW4_LPD5_VDDQ:
+                 rc = PF09_VoltageSet(&g_pf09Dev, PF09_REG_SW4, PF09_STATE_VRUN,
+                     level);
+                 break;
+-            case BRD_SM_VOLT_VDD2_DDR:
++            case BRD_SM_VOLT_SW5_LPD5_VDD2:
+                 rc = PF09_VoltageSet(&g_pf09Dev, PF09_REG_SW5, PF09_STATE_VRUN,
+                     level);
+                 break;
+-            case BRD_SM_VOLT_SD_CARD:
++            case BRD_SM_VOLT_LDO1_VDD_LDO1:
+                 rc = PF09_VoltageSet(&g_pf09Dev, PF09_REG_LDO1, PF09_STATE_VRUN,
+                     level);
+                 break;
+-            case BRD_SM_VOLT_NVCC_SD2:
++            case BRD_SM_VOLT_LDO2_VDD_SDIO2:
+                 rc = PF09_VoltageSet(&g_pf09Dev, PF09_REG_LDO2, PF09_STATE_VRUN,
+                     level);
+                 break;
+@@ -458,31 +459,31 @@ int32_t BRD_SM_VoltageLevelGet(uint32_t domainId, int32_t *voltageLevel)
+                 }
+             }
+             break;
+-        case BRD_SM_VOLT_VDD_GPIO_3P3:
++        case BRD_SM_VOLT_SW1_VDD_3V3:
+             rc = PF09_VoltageGet(&g_pf09Dev, PF09_REG_SW1, PF09_STATE_VRUN,
+                 &level);
+             break;
+-        case BRD_SM_VOLT_VDD_ANA_0P8:
++        case BRD_SM_VOLT_SW2_VDD_ANA_0V8:
+             rc = PF09_VoltageGet(&g_pf09Dev, PF09_REG_SW2, PF09_STATE_VRUN,
+                 &level);
+             break;
+-        case BRD_SM_VOLT_VDD_GPIO_1P8:
++        case BRD_SM_VOLT_SW3_VDD_1V8:
+             rc = PF09_VoltageGet(&g_pf09Dev, PF09_REG_SW3, PF09_STATE_VRUN,
+                 &level);
+             break;
+-        case BRD_SM_VOLT_VDDQ_DDR:
++        case BRD_SM_VOLT_SW4_LPD5_VDDQ:
+             rc = PF09_VoltageGet(&g_pf09Dev, PF09_REG_SW4, PF09_STATE_VRUN,
+                 &level);
+             break;
+-        case BRD_SM_VOLT_VDD2_DDR:
++        case BRD_SM_VOLT_SW5_LPD5_VDD2:
+             rc = PF09_VoltageGet(&g_pf09Dev, PF09_REG_SW5, PF09_STATE_VRUN,
+                 &level);
+             break;
+-        case BRD_SM_VOLT_SD_CARD:
++        case BRD_SM_VOLT_LDO1_VDD_LDO1:
+             rc = PF09_VoltageGet(&g_pf09Dev, PF09_REG_LDO1, PF09_STATE_VRUN,
+                 &level);
+             break;
+-        case BRD_SM_VOLT_NVCC_SD2:
++        case BRD_SM_VOLT_LDO2_VDD_SDIO2:
+             rc = PF09_VoltageGet(&g_pf09Dev, PF09_REG_LDO2, PF09_STATE_VRUN,
+                 &level);
+             break;
+diff --git a/boards/ccimx95dvk/sm/brd_sm_voltage.h b/boards/ccimx95dvk/sm/brd_sm_voltage.h
+index 6c9e01286e7e..46ddc9d89096 100755
+--- a/boards/ccimx95dvk/sm/brd_sm_voltage.h
++++ b/boards/ccimx95dvk/sm/brd_sm_voltage.h
+@@ -2,6 +2,7 @@
+ ** ###################################################################
+ **
+ **     Copyright 2023-2024 NXP
++**     Copyright 2025 Digi International Inc.
+ **
+ **     Redistribution and use in source and binary forms, with or without modification,
+ **     are permitted provided that the following conditions are met:
+@@ -76,13 +77,13 @@
+  * @name BRD_SM voltage domains
+  */
+ /** @{ */
+-#define BRD_SM_VOLT_VDD_GPIO_3P3  (DEV_SM_NUM_VOLT + 0U)  /*!< VDD GPIO 3.3v */
+-#define BRD_SM_VOLT_VDD_ANA_0P8   (DEV_SM_NUM_VOLT + 1U)  /*!< VDD ANA 0.8v */
+-#define BRD_SM_VOLT_VDD_GPIO_1P8  (DEV_SM_NUM_VOLT + 2U)  /*!< VDD GPIO 1.8v */
+-#define BRD_SM_VOLT_VDDQ_DDR      (DEV_SM_NUM_VOLT + 3U)  /*!< DDR VDDQ */
+-#define BRD_SM_VOLT_VDD2_DDR      (DEV_SM_NUM_VOLT + 4U)  /*!< DDR VDD2 */
+-#define BRD_SM_VOLT_SD_CARD       (DEV_SM_NUM_VOLT + 5U)  /*!< SD1 */
+-#define BRD_SM_VOLT_NVCC_SD2      (DEV_SM_NUM_VOLT + 6U)  /*!< SD2 */
++#define BRD_SM_VOLT_SW1_VDD_3V3     (DEV_SM_NUM_VOLT + 0U)  /*!< VDD 3V3 */
++#define BRD_SM_VOLT_SW2_VDD_ANA_0V8 (DEV_SM_NUM_VOLT + 1U)  /*!< VDD ANA 0V8 */
++#define BRD_SM_VOLT_SW3_VDD_1V8     (DEV_SM_NUM_VOLT + 2U)  /*!< VDD 1V8 */
++#define BRD_SM_VOLT_SW4_LPD5_VDDQ   (DEV_SM_NUM_VOLT + 3U)  /*!< DDR VDDQ */
++#define BRD_SM_VOLT_SW5_LPD5_VDD2   (DEV_SM_NUM_VOLT + 4U)  /*!< DDR VDD2 */
++#define BRD_SM_VOLT_LDO1_VDD_LDO1   (DEV_SM_NUM_VOLT + 5U)  /*!< LDO1 */
++#define BRD_SM_VOLT_LDO2_VDD_SDIO2  (DEV_SM_NUM_VOLT + 6U)  /*!< LDO2 (VDD_SDIO2) */
+ /** @} */
+ 
+ /* Types */

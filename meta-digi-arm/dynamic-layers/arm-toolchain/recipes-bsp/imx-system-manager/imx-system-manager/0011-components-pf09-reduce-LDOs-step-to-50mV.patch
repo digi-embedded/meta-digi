@@ -1,0 +1,37 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Mon, 13 Oct 2025 08:49:57 +0200
+Subject: [PATCH 11/11] components: pf09: reduce LDOs step to 50mV
+
+The voltage values that can be programmed to the LDOs are not linear.
+For low voltages, the step is 50mV, but for higher voltages it is 100mV.
+Setting the step as 100mV fools the Linux kernel regulator framework
+which does not properly calculate the selector it must call when using
+the SCMI regulator framework, resulting in -EINVAL errors.
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+---
+ components/pf09/fsl_pf09.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/components/pf09/fsl_pf09.c b/components/pf09/fsl_pf09.c
+index 21a0b5557244..3e1887158d7d 100755
+--- a/components/pf09/fsl_pf09.c
++++ b/components/pf09/fsl_pf09.c
+@@ -528,7 +528,7 @@ bool PF09_RegulatorInfoGet(uint8_t regulator, PF09_RegInfo *regInfo)
+                     /* set min/max/step in microvolts */
+                     regInfo->minV = 750000U;
+                     regInfo->maxV = 3300000U;
+-                    regInfo->stepV = 100000U;
++                    regInfo->stepV = 50000U;
+                 }
+                 break;
+             case PF09_REG_LDO2:
+@@ -537,7 +537,7 @@ bool PF09_RegulatorInfoGet(uint8_t regulator, PF09_RegInfo *regInfo)
+                     /* set min/max/step in microvolts */
+                     regInfo->minV = 650000U;
+                     regInfo->maxV = 3300000U;
+-                    regInfo->stepV = 100000U;
++                    regInfo->stepV = 50000U;
+                 }
+                 break;
+             default:

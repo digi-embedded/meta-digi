@@ -11,6 +11,9 @@ SRC_URI:append:dey = " \
     file://0006-ccimx95dvk-move-CAN1-to-be-used-by-A55.patch \
     file://0007-ccimx95dvk-remove-PCAL6408A-IO-expander-from-EVK.patch \
     file://0008-ccimx95dvk-remove-PCA2123-RTC-from-EVK.patch \
+    file://0009-ccimx95-change-names-of-voltage-regulators.patch \
+    file://0010-ccimx95dvk-enable-full-access-to-certain-regulators-.patch \
+    file://0011-components-pf09-reduce-LDOs-step-to-50mV.patch \
 "
 
 # Disable debug monitor by default
