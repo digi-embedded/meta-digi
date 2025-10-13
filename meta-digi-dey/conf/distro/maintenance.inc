@@ -1,3 +1,6 @@
+# Use GNU mirror instead of main server for GNU packages
+GNU_MIRROR = "https://ftpmirror.gnu.org/gnu"
+
 SRC_URI_append_pn-c-ares = " git://github.com/c-ares/c-ares.git;branch=main"
 SRC_URI_remove_pn-c-ares = "git://github.com/c-ares/c-ares.git"
 SRC_URI_append_pn-puzzles = " git://git.tartarus.org/simon/puzzles.git;branch=main"
@@ -10,3 +13,5 @@ SRC_URI_append_pn-tesseract-lang = " git://github.com/tesseract-ocr/tessdata.git
 SRC_URI_remove_pn-tesseract-lang = "git://github.com/tesseract-ocr/tessdata.git"
 SRC_URI_append_pn-thin-provisioning-tools = " git://github.com/jthornber/thin-provisioning-tools;branch=main"
 SRC_URI_remove_pn-thin-provisioning-tools = "git://github.com/jthornber/thin-provisioning-tools"
+SRC_URI_prepend_pn-gdb = "${GNU_MIRROR}/gdb/gdb-${PV}.tar.xz "
+SRC_URI_remove_pn-gdb = "http://ftp.gnu.org/gnu/gdb/gdb-${PV}.tar.xz"
