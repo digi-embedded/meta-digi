@@ -1,3 +1,6 @@
+# Use GNU mirror instead of main server for GNU packages
+GNU_MIRROR = "https://ftpmirror.gnu.org/gnu"
+
 SRC_URI_append_pn-c-ares = " git://github.com/c-ares/c-ares.git;branch=main"
 SRC_URI_remove_pn-c-ares = "git://github.com/c-ares/c-ares.git"
 SRC_URI_append_pn-libvpx = " git://chromium.googlesource.com/webm/libvpx;protocol=https;branch=main"
