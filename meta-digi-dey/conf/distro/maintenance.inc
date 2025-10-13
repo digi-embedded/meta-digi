@@ -1,8 +1,13 @@
 # Use new NXP package mirror
 FSL_MIRROR = "https://www.nxp.com/lgfiles/NMG/MAD/YOCTO/"
 
+# Use GNU mirror instead of main server for GNU packages
+GNU_MIRROR = "https://ftpmirror.gnu.org/gnu"
+
 SRC_URI_prepend_pn-c-ares = "https://c-ares.org/archive/${BP}.tar.gz "
 SRC_URI_remove_pn-c-ares = "http://c-ares.haxx.se/download/${BP}.tar.gz"
+SRC_URI_prepend_pn-gdb = "${GNU_MIRROR}/gdb/gdb-${PV}.tar.xz "
+SRC_URI_remove_pn-gdb = "http://ftp.gnu.org/gnu/gdb/gdb-${PV}.tar.xz"
 SRC_URI_prepend_pn-libconfig = "https://sources.buildroot.net/${BPN}/${BP}.tar.gz "
 SRC_URI_remove_pn-libconfig = "http://www.hyperrealm.com/${BPN}/${BP}.tar.gz"
 SRC_URI_prepend_pn-lvm2 = "https://sourceware.org/pub/lvm2/old/LVM2.${PV}.tgz "
