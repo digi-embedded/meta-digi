@@ -44,7 +44,7 @@ TF_A_METADATA_TOOL_ARGS ?= "-g -i 1 -b 2 -v ${TF_A_METADATA_TOOL_VERSION} ${DEVI
 # =========================================================================
 # optee-os
 # =========================================================================
-PREFERRED_PROVIDER_virtual/optee-os = "optee-os-stm32mp"
+PREFERRED_PROVIDER_virtual-optee-os = "optee-os-stm32mp"
 # OPTEE runtime packages to install
 OPTEE_PKGS ??= "optee-client"
 
@@ -122,7 +122,7 @@ ST_OPTEE_DEBUG_LOG_LEVEL = "1"
 WKS_FILE_DEPENDS ?= " \
     virtual/bootloader \
     virtual/trusted-firmware-a \
-    ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', 'virtual/optee-os', '', d)} \
+    ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', 'virtual-optee-os', '', d)} \
 "
 
 # Disable the generation of flashlayout files

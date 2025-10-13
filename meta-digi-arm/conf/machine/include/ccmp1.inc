@@ -104,7 +104,7 @@ IMAGE_FSTYPES:remove = "multiubi"
 WKS_FILE_DEPENDS ?= " \
     virtual/bootloader \
     virtual/trusted-firmware-a \
-    ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', 'virtual/optee-os', '', d)} \
+    ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', 'virtual-optee-os', '', d)} \
 "
 
 # Disable the generation of flashlayout files
