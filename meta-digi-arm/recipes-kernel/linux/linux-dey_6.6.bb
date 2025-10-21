@@ -13,9 +13,10 @@ RT_FILES:use-nxp-bsp = " \
     file://fragment-nxp-rt.config \
 "
 RT_FILES:stm32mpcommon = " \
-    file://0010-Rebase-on-v6.6.48-rt40.patch \
-    file://0011-v6.6-stm32mp-rt-r1.patch \
+    file://0010-Rebase-on-v6.6.78-rt51.patch \
+    file://0011-v6.6-stm32mp-rt-r2.patch \
     file://fragment-08-deactivate-rng.config \
+    file://fragment-10-network-improvment.config \
 "
 SRC_URI:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${RT_FILES}', '', d)} \
@@ -31,6 +32,7 @@ RT_CONFIG_FRAGS:stm32mpcommon = " \
     ${S}/arch/arm64/configs/fragment-07-rt.config \
     ${S}/arch/arm64/configs/fragment-07-rt-sysvinit.config \
     ${WORKDIR}/fragment-08-deactivate-rng.config \
+    ${WORKDIR}/fragment-10-network-improvment.config \
 "
 KERNEL_CONFIG_FRAGMENTS:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${RT_CONFIG_FRAGS}', '', d)} \

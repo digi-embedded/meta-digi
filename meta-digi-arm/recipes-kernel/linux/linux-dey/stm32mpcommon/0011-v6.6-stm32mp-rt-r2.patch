@@ -1,0 +1,515 @@
+From 57e65e96ba3f5350f7ec305a8ea4318b2c6d88b9 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
+Date: Thu, 5 Jun 2025 11:10:31 +0200
+Subject: [PATCH] v6.6-stm32mp-rt-r2
+
+---
+Upstream-Status: Pending [specific to ST boards]
+
+ .../configs/fragment-07-rt-sysvinit.config    | 12 ++++
+ arch/arm/configs/fragment-07-rt.config        |  9 +++
+ arch/arm/configs/fragment-10-rt-perf.config   | 40 +++++++++++++
+ .../configs/fragment-07-rt-sysvinit.config    | 12 ++++
+ arch/arm64/configs/fragment-07-rt.config      |  9 +++
+ arch/arm64/configs/fragment-10-rt-perf.config | 40 +++++++++++++
+ drivers/clocksource/timer-stm32-lp.c          | 36 +++++++++++-
+ drivers/hwtracing/coresight/coresight-cti.h   | 10 ++++
+ drivers/input/keyboard/gpio_keys.c            |  7 ++-
+ drivers/mfd/syscon.c                          |  3 +
+ drivers/tty/serial/stm32-usart.c              | 56 +++++--------------
+ 11 files changed, 188 insertions(+), 46 deletions(-)
+ create mode 100644 arch/arm/configs/fragment-07-rt-sysvinit.config
+ create mode 100644 arch/arm/configs/fragment-07-rt.config
+ create mode 100644 arch/arm/configs/fragment-10-rt-perf.config
+ create mode 100644 arch/arm64/configs/fragment-07-rt-sysvinit.config
+ create mode 100644 arch/arm64/configs/fragment-07-rt.config
+ create mode 100644 arch/arm64/configs/fragment-10-rt-perf.config
+
+diff --git a/arch/arm/configs/fragment-07-rt-sysvinit.config b/arch/arm/configs/fragment-07-rt-sysvinit.config
+new file mode 100644
+index 000000000..49a4baf60
+--- /dev/null
++++ b/arch/arm/configs/fragment-07-rt-sysvinit.config
+@@ -0,0 +1,12 @@
++CONFIG_CGROUPS=y
++# CONFIG_CGROUP_SCHED is not set
++# CONFIG_CGROUP_PIDS is not set
++# CONFIG_CGROUP_RDMA is not set
++# CONFIG_CGROUP_FREEZER is not set
++# CONFIG_CGROUP_DEVICE is not set
++# CONFIG_CGROUP_CPUACCT is not set
++# CONFIG_CGROUP_PERF is not set
++# CONFIG_CGROUP_DEBUG is not set
++# CONFIG_CGROUP_NET_PRIO is not set
++# CONFIG_CGROUP_NET_CLASSID is not set
++
+diff --git a/arch/arm/configs/fragment-07-rt.config b/arch/arm/configs/fragment-07-rt.config
+new file mode 100644
+index 000000000..aba9d8c25
+--- /dev/null
++++ b/arch/arm/configs/fragment-07-rt.config
+@@ -0,0 +1,9 @@
++CONFIG_EXPERT=y
++CONFIG_PREEMPT_RT=y
++
++# Force to have HIGH_RES_TIMERS
++CONFIG_HIGH_RES_TIMERS=y
++
++# Disable CPUFREQ and CPUIDLE
++# CONFIG_CPU_FREQ is not set
++# CONFIG_CPU_IDLE is not set
+diff --git a/arch/arm/configs/fragment-10-rt-perf.config b/arch/arm/configs/fragment-10-rt-perf.config
+new file mode 100644
+index 000000000..46e67dba9
+--- /dev/null
++++ b/arch/arm/configs/fragment-10-rt-perf.config
+@@ -0,0 +1,40 @@
++# avoid degrading from-idle transition latencies, disable dyntick
++CONFIG_HZ_PERIODIC=y
++
++# Disable OPTEE RNG over PTA support
++# CONFIG_HW_RANDOM_OPTEE is not set
++
++# Remove power domains management
++# CONFIG_SUSPEND_FREEZER is not set
++# CONFIG_HIBERNATE_CALLBACKS is not set
++# CONFIG_PM_SLEEP is not set
++# CONFIG_PM_TRACE_RTC is not set
++# CONFIG_PM_GENERIC_DOMAINS is not set
++
++#Debugging features
++CONFIG_DEBUG_KERNEL=y
++# CONFIG_PROFILING is not set
++# CONFIG_PSI is not set
++# to Enable ftrace, you need to enable the following configuration:
++# CONFIG_TRACING is not set
++# CONFIG_FTRACE is not set
++# CONFIG_IRQSOFF_TRACER is not set
++# CONFIG_PREEMPT_TRACER is not set
++# CONFIG_SCHED_TRACER is not set
++# CONFIG_FUNCTION_TRACER is not set
++# CONFIG_FTRACE_SYSCALLS is not set
++# CONFIG_STACK_TRACER is not set
++# CONFIG_FUNCTION_PROFILER is not set
++# CONFIG_TIMERLAT_TRACER is not set
++
++#Lockdep activation
++# CONFIG_DEBUG_ATOMIC_SLEEP is not set
++# CONFIG_DEBUG_LOCK_ALLOC is not set
++# CONFIG_DEBUG_MUTEXES is not set
++# CONFIG_DEBUG_SPINLOCK is not set
++# CONFIG_LOCKDEP is not set
++# CONFIG_LOCKUP_DETECTOR is not set
++# CONFIG_PROVE_LOCKING is not set
++# CONFIG_SLUB_DEBUG_ON is not set
++
++# CONFIG_ARM_SMC_WATCHDOG is not set
+diff --git a/arch/arm64/configs/fragment-07-rt-sysvinit.config b/arch/arm64/configs/fragment-07-rt-sysvinit.config
+new file mode 100644
+index 000000000..49a4baf60
+--- /dev/null
++++ b/arch/arm64/configs/fragment-07-rt-sysvinit.config
+@@ -0,0 +1,12 @@
++CONFIG_CGROUPS=y
++# CONFIG_CGROUP_SCHED is not set
++# CONFIG_CGROUP_PIDS is not set
++# CONFIG_CGROUP_RDMA is not set
++# CONFIG_CGROUP_FREEZER is not set
++# CONFIG_CGROUP_DEVICE is not set
++# CONFIG_CGROUP_CPUACCT is not set
++# CONFIG_CGROUP_PERF is not set
++# CONFIG_CGROUP_DEBUG is not set
++# CONFIG_CGROUP_NET_PRIO is not set
++# CONFIG_CGROUP_NET_CLASSID is not set
++
+diff --git a/arch/arm64/configs/fragment-07-rt.config b/arch/arm64/configs/fragment-07-rt.config
+new file mode 100644
+index 000000000..aba9d8c25
+--- /dev/null
++++ b/arch/arm64/configs/fragment-07-rt.config
+@@ -0,0 +1,9 @@
++CONFIG_EXPERT=y
++CONFIG_PREEMPT_RT=y
++
++# Force to have HIGH_RES_TIMERS
++CONFIG_HIGH_RES_TIMERS=y
++
++# Disable CPUFREQ and CPUIDLE
++# CONFIG_CPU_FREQ is not set
++# CONFIG_CPU_IDLE is not set
+diff --git a/arch/arm64/configs/fragment-10-rt-perf.config b/arch/arm64/configs/fragment-10-rt-perf.config
+new file mode 100644
+index 000000000..46e67dba9
+--- /dev/null
++++ b/arch/arm64/configs/fragment-10-rt-perf.config
+@@ -0,0 +1,40 @@
++# avoid degrading from-idle transition latencies, disable dyntick
++CONFIG_HZ_PERIODIC=y
++
++# Disable OPTEE RNG over PTA support
++# CONFIG_HW_RANDOM_OPTEE is not set
++
++# Remove power domains management
++# CONFIG_SUSPEND_FREEZER is not set
++# CONFIG_HIBERNATE_CALLBACKS is not set
++# CONFIG_PM_SLEEP is not set
++# CONFIG_PM_TRACE_RTC is not set
++# CONFIG_PM_GENERIC_DOMAINS is not set
++
++#Debugging features
++CONFIG_DEBUG_KERNEL=y
++# CONFIG_PROFILING is not set
++# CONFIG_PSI is not set
++# to Enable ftrace, you need to enable the following configuration:
++# CONFIG_TRACING is not set
++# CONFIG_FTRACE is not set
++# CONFIG_IRQSOFF_TRACER is not set
++# CONFIG_PREEMPT_TRACER is not set
++# CONFIG_SCHED_TRACER is not set
++# CONFIG_FUNCTION_TRACER is not set
++# CONFIG_FTRACE_SYSCALLS is not set
++# CONFIG_STACK_TRACER is not set
++# CONFIG_FUNCTION_PROFILER is not set
++# CONFIG_TIMERLAT_TRACER is not set
++
++#Lockdep activation
++# CONFIG_DEBUG_ATOMIC_SLEEP is not set
++# CONFIG_DEBUG_LOCK_ALLOC is not set
++# CONFIG_DEBUG_MUTEXES is not set
++# CONFIG_DEBUG_SPINLOCK is not set
++# CONFIG_LOCKDEP is not set
++# CONFIG_LOCKUP_DETECTOR is not set
++# CONFIG_PROVE_LOCKING is not set
++# CONFIG_SLUB_DEBUG_ON is not set
++
++# CONFIG_ARM_SMC_WATCHDOG is not set
+diff --git a/drivers/clocksource/timer-stm32-lp.c b/drivers/clocksource/timer-stm32-lp.c
+index 815abee7c..4191d38c3 100644
+--- a/drivers/clocksource/timer-stm32-lp.c
++++ b/drivers/clocksource/timer-stm32-lp.c
+@@ -43,7 +43,8 @@ static int stm32_clkevent_lp_shutdown(struct clock_event_device *clkevt)
+ 	struct stm32_lp_private *priv = to_priv(clkevt);
+ 	int ret;
+ 
+-	if (clockevent_state_oneshot(clkevt) || clockevent_state_periodic(clkevt)) {
++	if (!IS_ENABLED(CONFIG_PREEMPT_RT) &&
++	    (clockevent_state_oneshot(clkevt) || clockevent_state_periodic(clkevt))) {
+ 		ret = pm_runtime_put(priv->dev);
+ 		if (ret < 0) {
+ 			dev_err(priv->dev, "pm runtime get returned %d\n", ret);
+@@ -147,6 +148,13 @@ static int stm32_clkevent_lp_pm_runtime_get(struct clock_event_device *clkevt)
+ 	struct stm32_lp_private *priv = to_priv(clkevt);
+ 	int ret;
+ 
++	/*
++	 * When in PREEMPT_RT, pm_runtime acquires a spinlock, that's not allowed in
++	 * atomic context. Workaround it by enabling runtime PM upon probe.
++	 */
++	if (IS_ENABLED(CONFIG_PREEMPT_RT))
++		return 0;
++
+ 	/* Rely on old clockevent state, to balance pm_runtime_get() / pm_runtime_put() calls */
+ 	if (clockevent_state_detached(clkevt) || clockevent_state_shutdown(clkevt)) {
+ 		ret = pm_runtime_get(priv->dev);
+@@ -160,6 +168,17 @@ static int stm32_clkevent_lp_pm_runtime_get(struct clock_event_device *clkevt)
+ 	return 0;
+ }
+ 
++static void stm32_clkevent_lp_pm_runtime_err(struct clock_event_device *clkevt)
++{
++	struct stm32_lp_private *priv = to_priv(clkevt);
++
++	if (IS_ENABLED(CONFIG_PREEMPT_RT))
++		return;
++
++	if (clockevent_state_detached(clkevt) || clockevent_state_shutdown(clkevt))
++		pm_runtime_put(priv->dev);
++}
++
+ static int stm32_clkevent_lp_set_periodic(struct clock_event_device *clkevt)
+ {
+ 	struct stm32_lp_private *priv = to_priv(clkevt);
+@@ -171,7 +190,7 @@ static int stm32_clkevent_lp_set_periodic(struct clock_event_device *clkevt)
+ 
+ 	ret = stm32_clkevent_lp_set_timer(priv->period, clkevt, true);
+ 	if (ret < 0)
+-		pm_runtime_put(priv->dev);
++		stm32_clkevent_lp_pm_runtime_err(clkevt);
+ 
+ 	return ret;
+ }
+@@ -187,7 +206,7 @@ static int stm32_clkevent_lp_set_oneshot(struct clock_event_device *clkevt)
+ 
+ 	ret = stm32_clkevent_lp_set_timer(priv->period, clkevt, false);
+ 	if (ret < 0)
+-		pm_runtime_put(priv->dev);
++		stm32_clkevent_lp_pm_runtime_err(clkevt);
+ 
+ 	return ret;
+ }
+@@ -311,6 +330,17 @@ static int stm32_clkevent_lp_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		return ret;
+ 
++	/*
++	 * When in PREEMPT_RT, pm_runtime acquires a spinlock, that's not allowed in atomic
++	 * context. Runtime PM is used to acquire the parent's PM domain, when there's one.
++	 * That's not necessarily the case on all instances, so it seems an acceptable trade-off.
++	 */
++	if (IS_ENABLED(CONFIG_PREEMPT_RT)) {
++		ret = pm_runtime_resume_and_get(&pdev->dev);
++		if (ret)
++			return ret;
++	}
++
+ 	priv->dev = &pdev->dev;
+ 
+ 	stm32_clkevent_lp_init(priv, pdev->dev.parent->of_node, rate);
+diff --git a/drivers/hwtracing/coresight/coresight-cti.h b/drivers/hwtracing/coresight/coresight-cti.h
+index cb9ee616d..9f9eaaf29 100644
+--- a/drivers/hwtracing/coresight/coresight-cti.h
++++ b/drivers/hwtracing/coresight/coresight-cti.h
+@@ -17,6 +17,16 @@
+ 
+ #include "coresight-priv.h"
+ 
++#ifdef CONFIG_PREEMPT_RT
++#undef  spin_lock_init
++#define spin_lock_init raw_spin_lock_init
++#define spin_lock raw_spin_lock
++#define spin_unlock raw_spin_unlock
++#undef  spin_lock_irqsave
++#define spin_lock_irqsave raw_spin_lock_irqsave
++#define spin_unlock_irqrestore raw_spin_unlock_irqrestore
++#define spinlock_t raw_spinlock_t
++#endif
+ /*
+  * Device registers
+  * 0x000 - 0x144: CTI programming and status
+diff --git a/drivers/input/keyboard/gpio_keys.c b/drivers/input/keyboard/gpio_keys.c
+index 2e7c2c046..b96a85460 100644
+--- a/drivers/input/keyboard/gpio_keys.c
++++ b/drivers/input/keyboard/gpio_keys.c
+@@ -454,12 +454,15 @@ static enum hrtimer_restart gpio_keys_irq_timer(struct hrtimer *t)
+ 						      struct gpio_button_data,
+ 						      release_timer);
+ 	struct input_dev *input = bdata->input;
++	unsigned long flags;
+ 
++	spin_lock_irqsave(&bdata->lock, flags);
+ 	if (bdata->key_pressed) {
+ 		input_report_key(input, *bdata->code, 0);
+ 		input_sync(input);
+ 		bdata->key_pressed = false;
+ 	}
++	spin_unlock_irqrestore(&bdata->lock, flags);
+ 
+ 	return HRTIMER_NORESTART;
+ }
+@@ -493,7 +496,7 @@ static irqreturn_t gpio_keys_irq_isr(int irq, void *dev_id)
+ 	if (bdata->release_delay)
+ 		hrtimer_start(&bdata->release_timer,
+ 			      ms_to_ktime(bdata->release_delay),
+-			      HRTIMER_MODE_REL_HARD);
++			      HRTIMER_MODE_REL);
+ out:
+ 	spin_unlock_irqrestore(&bdata->lock, flags);
+ 	return IRQ_HANDLED;
+@@ -630,7 +633,7 @@ static int gpio_keys_setup_key(struct platform_device *pdev,
+ 
+ 		bdata->release_delay = button->debounce_interval;
+ 		hrtimer_init(&bdata->release_timer,
+-			     CLOCK_REALTIME, HRTIMER_MODE_REL_HARD);
++			     CLOCK_REALTIME, HRTIMER_MODE_REL);
+ 		bdata->release_timer.function = gpio_keys_irq_timer;
+ 
+ 		isr = gpio_keys_irq_isr;
+diff --git a/drivers/mfd/syscon.c b/drivers/mfd/syscon.c
+index 729e79e1b..233712c70 100644
+--- a/drivers/mfd/syscon.c
++++ b/drivers/mfd/syscon.c
+@@ -42,6 +42,9 @@ static const struct regmap_config syscon_regmap_config = {
+ 	.reg_bits = 32,
+ 	.val_bits = 32,
+ 	.reg_stride = 4,
++#ifdef CONFIG_PREEMPT_RT
++	.use_raw_spinlock = true,
++#endif
+ };
+ 
+ static struct syscon *of_syscon_register(struct device_node *np, bool check_res)
+diff --git a/drivers/tty/serial/stm32-usart.c b/drivers/tty/serial/stm32-usart.c
+index 1c949774f..b56d3b77c 100644
+--- a/drivers/tty/serial/stm32-usart.c
++++ b/drivers/tty/serial/stm32-usart.c
+@@ -58,7 +58,6 @@ static struct stm32_usart_info __maybe_unused stm32f4_info = {
+ 	.cfg = {
+ 		.uart_enable_bit = 13,
+ 		.has_7bits_data = false,
+-		.fifosize = 1,
+ 	}
+ };
+ 
+@@ -82,7 +81,6 @@ static struct stm32_usart_info __maybe_unused stm32f7_info = {
+ 		.uart_enable_bit = 0,
+ 		.has_7bits_data = true,
+ 		.has_swap = true,
+-		.fifosize = 1,
+ 	}
+ };
+ 
+@@ -109,7 +107,6 @@ static struct stm32_usart_info __maybe_unused stm32h7_info = {
+ 		.has_swap = true,
+ 		.has_wakeup = true,
+ 		.has_fifo = true,
+-		.fifosize = 16,
+ 	}
+ };
+ 
+@@ -192,7 +189,6 @@ static void stm32_usart_config_reg_rs485(u32 *cr1, u32 *cr3, u32 delay_ADE,
+ 					 u32 delay_DDE, u32 baud)
+ {
+ 	u32 rs485_deat_dedt;
+-	u32 rs485_deat_dedt_max = (USART_CR1_DEAT_MASK >> USART_CR1_DEAT_SHIFT);
+ 	bool over8;
+ 
+ 	*cr3 |= USART_CR3_DEM;
+@@ -205,24 +201,18 @@ static void stm32_usart_config_reg_rs485(u32 *cr1, u32 *cr3, u32 delay_ADE,
+ 	else
+ 		rs485_deat_dedt = delay_ADE * baud * 16;
+ 
+-	rs485_deat_dedt = DIV_ROUND_CLOSEST(rs485_deat_dedt, 1000);
+-	rs485_deat_dedt = rs485_deat_dedt > rs485_deat_dedt_max ?
+-			  rs485_deat_dedt_max : rs485_deat_dedt;
+-	rs485_deat_dedt = (rs485_deat_dedt << USART_CR1_DEAT_SHIFT) &
+-			   USART_CR1_DEAT_MASK;
+-	*cr1 |= rs485_deat_dedt;
++	rs485_deat_dedt = DIV_ROUND_UP(rs485_deat_dedt, 1000);
++	rs485_deat_dedt = min_t(u32, rs485_deat_dedt, FIELD_MAX(USART_CR1_DEAT_MASK));
++	*cr1 |= FIELD_PREP(USART_CR1_DEAT_MASK, rs485_deat_dedt);
+ 
+ 	if (over8)
+ 		rs485_deat_dedt = delay_DDE * baud * 8;
+ 	else
+ 		rs485_deat_dedt = delay_DDE * baud * 16;
+ 
+-	rs485_deat_dedt = DIV_ROUND_CLOSEST(rs485_deat_dedt, 1000);
+-	rs485_deat_dedt = rs485_deat_dedt > rs485_deat_dedt_max ?
+-			  rs485_deat_dedt_max : rs485_deat_dedt;
+-	rs485_deat_dedt = (rs485_deat_dedt << USART_CR1_DEDT_SHIFT) &
+-			   USART_CR1_DEDT_MASK;
+-	*cr1 |= rs485_deat_dedt;
++	rs485_deat_dedt = DIV_ROUND_UP(rs485_deat_dedt, 1000);
++	rs485_deat_dedt = min_t(u32, rs485_deat_dedt, FIELD_MAX(USART_CR1_DEDT_MASK));
++	*cr1 |= FIELD_PREP(USART_CR1_DEDT_MASK, rs485_deat_dedt);
+ }
+ 
+ static int stm32_usart_config_rs485(struct uart_port *port, struct ktermios *termios,
+@@ -850,9 +840,9 @@ static void stm32_usart_tx_dma_complete(void *arg)
+ 	pm_runtime_get(port->dev);
+ 
+ 	/* Let's see if we have pending data to send */
+-	spin_lock_irqsave(&port->lock, flags);
++	uart_port_lock_irqsave(port, &flags);
+ 	stm32_usart_transmit_chars(port);
+-	spin_unlock_irqrestore(&port->lock, flags);
++	uart_port_unlock_irqrestore(port, flags);
+ 
+ 	pm_runtime_mark_last_busy(port->dev);
+ 	pm_runtime_put_autosuspend(port->dev);
+@@ -1142,7 +1132,7 @@ static irqreturn_t stm32_usart_interrupt(int irq, void *ptr)
+ 		if (!stm32_port->throttled) {
+ 			if (((sr & USART_SR_RXNE) && !stm32_usart_rx_dma_started(stm32_port)) ||
+ 			    ((sr & USART_SR_ERR_MASK) && stm32_usart_rx_dma_started(stm32_port))) {
+-				spin_lock(&port->lock);
++				uart_port_lock(port);
+ 				size = stm32_usart_receive_chars(port, false);
+ 				uart_unlock_and_check_sysrq(port);
+ 				if (size)
+@@ -1153,15 +1143,15 @@ static irqreturn_t stm32_usart_interrupt(int irq, void *ptr)
+ 	}
+ 
+ 	if ((sr & USART_SR_TXE) && !(stm32_port->tx_ch)) {
+-		spin_lock(&port->lock);
++		uart_port_lock(port);
+ 		stm32_usart_transmit_chars(port);
+-		spin_unlock(&port->lock);
++		uart_port_unlock(port);
+ 		ret = IRQ_HANDLED;
+ 	}
+ 
+ 	/* Receiver timeout irq for DMA RX */
+ 	if (stm32_usart_rx_dma_started(stm32_port) && !stm32_port->throttled) {
+-		spin_lock(&port->lock);
++		uart_port_lock(port);
+ 		size = stm32_usart_receive_chars(port, (sr & USART_SR_RTOF));
+ 		uart_unlock_and_check_sysrq(port);
+ 		if (size)
+@@ -1319,7 +1309,7 @@ static void stm32_usart_unthrottle(struct uart_port *port)
+ 	if (stm32_port->rx_ch)
+ 		stm32_usart_rx_dma_start_or_resume(port);
+ 
+-	spin_unlock_irqrestore(&port->lock, flags);
++	uart_port_unlock_irqrestore(port, flags);
+ 
+ 	/* Port is unthrottled, balance pm_runtime */
+ 	pm_runtime_mark_last_busy(port->dev);
+@@ -1345,7 +1335,6 @@ static void stm32_usart_stop_rx(struct uart_port *port)
+ 	pm_runtime_put_autosuspend(port->dev);
+ }
+ 
+-/* Handle breaks - ignored by us */
+ static void stm32_usart_break_ctl(struct uart_port *port, int break_state)
+ {
+ 	struct stm32_port *stm32_port = to_stm32_port(port);
+@@ -1701,12 +1690,6 @@ static void stm32_usart_set_termios(struct uart_port *port,
+ 		cr1 &= ~(USART_CR1_DEDT_MASK | USART_CR1_DEAT_MASK);
+ 	}
+ 
+-	/* Configure wake up from low power on start bit detection */
+-	if (stm32_port->wakeup_src) {
+-		cr3 &= ~USART_CR3_WUS_MASK;
+-		cr3 |= USART_CR3_WUS_START_BIT;
+-	}
+-
+ 	writel_relaxed(cr3, port->membase + ofs->cr3);
+ 	writel_relaxed(cr2, port->membase + ofs->cr2);
+ 	writel_relaxed(cr1, port->membase + ofs->cr1);
+@@ -1765,9 +1748,9 @@ static void stm32_usart_pm(struct uart_port *port, unsigned int state,
+ 		clk_prepare_enable(stm32port->clk);
+ 		break;
+ 	case UART_PM_STATE_OFF:
+-		spin_lock_irqsave(&port->lock, flags);
++		uart_port_lock_irqsave(port, &flags);
+ 		stm32_usart_clr_bits(port, ofs->cr1, BIT(cfg->uart_enable_bit));
+-		spin_unlock_irqrestore(&port->lock, flags);
++		uart_port_unlock_irqrestore(port, flags);
+ 
+ 		clk_disable_unprepare(stm32port->clk);
+ 		break;
+@@ -1910,7 +1893,6 @@ static int stm32_usart_init_port(struct stm32_port *stm32port,
+ 	port->flags	= UPF_BOOT_AUTOCONF;
+ 	port->ops	= &stm32_uart_ops;
+ 	port->dev	= &pdev->dev;
+-	port->fifosize	= stm32port->info->cfg.fifosize;
+ 	port->has_sysrq = IS_ENABLED(CONFIG_SERIAL_STM32_CONSOLE);
+ 	port->irq = irq;
+ 	port->rs485_config = stm32_usart_config_rs485;
+@@ -1928,14 +1910,6 @@ static int stm32_usart_init_port(struct stm32_port *stm32port,
+ 	stm32port->swap = stm32port->info->cfg.has_swap &&
+ 		of_property_read_bool(pdev->dev.of_node, "rx-tx-swap");
+ 
+-	stm32port->fifoen = stm32port->info->cfg.has_fifo;
+-	if (stm32port->fifoen) {
+-		stm32_usart_get_ftcfg(pdev, "rx-threshold",
+-				      &stm32port->rxftcfg);
+-		stm32_usart_get_ftcfg(pdev, "tx-threshold",
+-				      &stm32port->txftcfg);
+-	}
+-
+ 	port->membase = devm_platform_get_and_ioremap_resource(pdev, 0, &res);
+ 	if (IS_ERR(port->membase))
+ 		return PTR_ERR(port->membase);
+-- 
+2.43.0
+
