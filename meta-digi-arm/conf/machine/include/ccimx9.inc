@@ -25,7 +25,6 @@ KERNEL_IMAGETYPE:ccimx9 = "${@oe.utils.vartrue('TRUSTFENCE_SIGN_ARTIFACTS', 'fit
 
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS += "imx-boot"
-BOOTLOADER_IMAGE_RECIPE = "imx-boot"
 
 MACHINE_FEATURES += "pci wifi bluetooth"
 MACHINE_FEATURES:append:use-nxp-bsp = " optee jailhouse"

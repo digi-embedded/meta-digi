@@ -3,8 +3,6 @@ inherit image_types
 ################################################################################
 #                                 BOOT IMAGES                                  #
 ################################################################################
-BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
-
 # Boot partition size in KiB, (default 64MiB)
 BOARD_BOOTIMAGE_PARTITION_SIZE ?= "65536"
 
@@ -16,7 +14,7 @@ do_image_boot_vfat[depends] += " \
     coreutils-native:do_populate_sysroot \
     dosfstools-native:do_populate_sysroot \
     mtools-native:do_populate_sysroot \
-    ${BOOTLOADER_IMAGE_RECIPE}:do_deploy \
+    virtual/bootloader:do_deploy \
     virtual/kernel:do_deploy \
     ${@TRUSTFENCE_BOOTIMAGE_DEPENDS(d)} \
 "
@@ -85,7 +83,7 @@ do_image_boot_vfat[imgsuffix] = "."
 
 do_image_boot_ubifs[depends] += " \
     mtd-utils-native:do_populate_sysroot \
-    ${BOOTLOADER_IMAGE_RECIPE}:do_deploy \
+    virtual/bootloader:do_deploy \
     virtual/kernel:do_deploy \
     ${@TRUSTFENCE_BOOTIMAGE_DEPENDS(d)} \
 "
@@ -164,7 +162,7 @@ IMAGE_TYPEDEP:recovery.vfat = "boot.vfat"
 
 do_image_recovery_ubifs[depends] += " \
     mtd-utils-native:do_populate_sysroot \
-    ${BOOTLOADER_IMAGE_RECIPE}:do_deploy \
+    virtual/bootloader:do_deploy \
     virtual/kernel:do_deploy \
     ${RECOVERY_INITRAMFS_IMAGE}:do_image_complete \
 "

@@ -13,7 +13,6 @@ UBOOT_SUFFIX = "bin"
 
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS += "imx-boot"
-BOOTLOADER_IMAGE_RECIPE = "imx-boot"
 
 # Set InitRAMDisk load address to U-boot initramfs_addr
 UBOOT_RD_LOADADDRESS = "0x43800000"

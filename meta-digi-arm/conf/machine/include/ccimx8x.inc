@@ -18,7 +18,6 @@ UBOOT_RD_LOADADDRESS = "0x8A100000"
 
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS += "imx-boot"
-BOOTLOADER_IMAGE_RECIPE = "imx-boot"
 
 # The original variable used by NXP to store the mkimage "REV" parameter,
 # REV_OPTION, has a format of "REV=X0". Since we are interested in building

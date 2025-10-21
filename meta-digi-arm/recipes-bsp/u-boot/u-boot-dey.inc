@@ -35,8 +35,6 @@ SRC_URI = " \
 
 BUILD_UBOOT_SCRIPTS ?= "true"
 
-BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
-
 LOCALVERSION ?= ""
 inherit ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'fsl-u-boot-localversion uuu_bootloader_tag', '', d)}
 
