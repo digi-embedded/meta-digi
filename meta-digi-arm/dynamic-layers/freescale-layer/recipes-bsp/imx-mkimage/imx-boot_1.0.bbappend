@@ -22,10 +22,13 @@ UUU_BOOTLOADER:mx9-generic-bsp = ""
 IMX_CORTEXM_DEMOS = ""
 IMX_CORTEXM_DEMOS:ccimx95 = "imx-m7-demos:do_deploy"
 
+CORTEXM_DEFAULT_IMAGE = ""
+CORTEXM_DEFAULT_IMAGE:ccimx95 = "imx95-19x19-evk_m7_TCM_power_mode_switch.bin"
+
 do_compile[depends] += "${IMX_CORTEXM_DEMOS}"
 
 compile_mx95:append:ccimx95() {
-	cp ${DEPLOY_DIR_IMAGE}/mcore-demos/imx95-19x19-evk_m7_TCM_power_mode_switch.bin ${BOOT_STAGING}/m7_image.bin
+    cp ${DEPLOY_DIR_IMAGE}/mcore-demos/${CORTEXM_DEFAULT_IMAGE} ${BOOT_STAGING}/m7_image.bin
 }
 
 # Revert compile_mx8m() to how it was in kirkstone branch of meta-freescale,
@@ -125,6 +128,10 @@ generate_symlinks() {
 	done
 	ln -sf imx-boot-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/imx-boot-${MACHINE}.bin
 	ln -sf imx-boot-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/imx-boot
+}
+
+deploy_mx95:append:ccimx95() {
+    install -m 0644 ${DEPLOY_DIR_IMAGE}/mcore-demos/${CORTEXM_DEFAULT_IMAGE} ${DEPLOYDIR}/${BOOT_TOOLS}
 }
 
 do_deploy:append:ccimx8m() {
