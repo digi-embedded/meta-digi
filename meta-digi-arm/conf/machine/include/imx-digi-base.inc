@@ -5,6 +5,8 @@ include conf/machine/include/digi-defaults.inc
 # IMX_DEFAULT_BSP = "nxp"
 # include conf/machine/include/imx-base.inc
 
+require conf/machine/include/utilities.inc
+
 # Machines or distros can define which BSP it should use by default. We are
 # intending to default for mainline BSP by default and specific machines or
 # DISTROs might change it if need.
@@ -12,6 +14,15 @@ include conf/machine/include/digi-defaults.inc
 # Two values are considered valid: mainline, nxp
 IMX_DEFAULT_BSP ?= "nxp"
 MACHINEOVERRIDES =. "use-${IMX_DEFAULT_BSP}-bsp:"
+
+# UBOOT_BINARY is used inside the wks files to dynamically find the required
+# U-Boot file.
+UBOOT_BINARY ?= "u-boot.${UBOOT_SUFFIX}"
+
+# Some SoC can utilize the boot container provided by U-Boot,
+# below variable sets that those SoC do use this rather than
+# assembling it in the imx-boot recipe.
+UBOOT_PROVIDES_BOOT_CONTAINER = "0"
 
 # Allow setting the UART used during the boot by ATF.
 
@@ -348,6 +359,28 @@ PREFERRED_VERSION_opencv:mx8-nxp-bsp ??= "4.10.0.imx"
 PREFERRED_VERSION_opencv:mx9-nxp-bsp ??= "4.10.0.imx"
 
 EXTRA_IMAGEDEPENDS += "u-boot"
+
+# Do not update fstab file when using wic images
+WIC_CREATE_EXTRA_ARGS ?= "--no-fstab-update"
+
+IMAGE_BOOT_FILES ?= " \
+    ${KERNEL_IMAGETYPE}-${MACHINE}.bin \
+    ${@bb.utils.contains('KERNEL_IMAGETYPE', 'fitImage', '', '${@make_dtb_boot_files(d)} boot.scr', d)} \
+"
+
+WKS_FILE_DEPENDS ?= " \
+    virtual/bootloader \
+    e2fsprogs-native \
+    bmaptool-native \
+"
+WKS_FILE_DEPENDS:append:mx8-nxp-bsp = " imx-boot"
+WKS_FILE_DEPENDS:append:mx9-nxp-bsp = " imx-boot"
+
+SOC_DEFAULT_WKS_FILE                 ?= "imx-uboot-bootpart.wks.in"
+SOC_DEFAULT_WKS_FILE:mx8-generic-bsp ?= "imx-imx-boot-bootpart.wks.in"
+SOC_DEFAULT_WKS_FILE:mx9-generic-bsp ?= "imx-imx-boot-bootpart.wks.in"
+
+WKS_FILE ?= "${SOC_DEFAULT_WKS_FILE}"
 
 KERNEL_IMAGETYPE = "zImage"
 KERNEL_IMAGETYPE:aarch64 = "Image.gz"

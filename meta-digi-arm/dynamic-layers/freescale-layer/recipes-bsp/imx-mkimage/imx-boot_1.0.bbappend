@@ -15,10 +15,6 @@ SRC_URI:append:dey = " \
     file://0008-imx95-soc.mak-capture-commands-output-into-a-log-fil.patch \
 "
 
-# Do not tag imx-boot
-UUU_BOOTLOADER:mx8-generic-bsp = ""
-UUU_BOOTLOADER:mx9-generic-bsp = ""
-
 IMX_CORTEXM_DEMOS = ""
 IMX_CORTEXM_DEMOS:ccimx95 = "imx-m7-demos:do_deploy"
 
@@ -200,6 +196,9 @@ do_deploy:ccimx8x () {
 		ln -sf ${UBOOT_PREFIX}-${MACHINE}-${rev}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
 		cd -
 	done
+
+    # Generate an imx-boot symlink to the last SOC_REVISION. This is required for WIC images
+    ln -sf ${UBOOT_PREFIX}-${MACHINE}-${rev}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/imx-boot
 }
 
 do_deploy[postfuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence_sign_imxboot', '', d)}"

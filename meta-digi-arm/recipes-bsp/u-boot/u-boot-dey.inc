@@ -38,7 +38,11 @@ BUILD_UBOOT_SCRIPTS ?= "true"
 BOOTLOADER_IMAGE_RECIPE ?= "u-boot"
 
 LOCALVERSION ?= ""
-inherit ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'fsl-u-boot-localversion', '', d)}
+inherit ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'fsl-u-boot-localversion uuu_bootloader_tag', '', d)}
+
+# Disable u-boot tagging for imx8/9, as the boot image is imx-boot
+UUU_BOOTLOADER:mx8-generic-bsp = ""
+UUU_BOOTLOADER:mx9-generic-bsp = ""
 
 # Disable u-boot environment artifacts
 UBOOT_INITIAL_ENV = ""
@@ -157,8 +161,7 @@ uboot_deploy_config:append() {
         # SD card image generation
         rm -f ${DEPLOYDIR}/${UBOOT_SYMLINK}
     fi
-    rm -f ${DEPLOYDIR}/${UBOOT_BINARY}-${type} \
-        ${DEPLOYDIR}/${UBOOT_BINARY}
+    rm -f ${DEPLOYDIR}/${UBOOT_BINARY}-${type}
     ln -sf ${UBOOT_BINARYNAME}-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${DEPLOYDIR}/${UBOOT_BINARYNAME}-${type}.${UBOOT_SUFFIX}
 }
 uboot_deploy_spl_config:append() {
