@@ -26,9 +26,6 @@ KERNEL_IMAGETYPE:ccimx9 = "${@oe.utils.vartrue('TRUSTFENCE_SIGN_ARTIFACTS', 'fit
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS += "imx-boot"
 BOOTLOADER_IMAGE_RECIPE = "imx-boot"
-BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
-SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
-BOOTLOADER_SEEK_USERDATA = "32"
 
 MACHINE_FEATURES += "pci wifi bluetooth"
 MACHINE_FEATURES:append:use-nxp-bsp = " optee jailhouse"

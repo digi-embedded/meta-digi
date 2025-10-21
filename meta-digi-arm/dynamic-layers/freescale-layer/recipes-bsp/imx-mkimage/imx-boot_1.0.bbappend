@@ -191,9 +191,6 @@ do_deploy:ccimx8x () {
 		done
 		cd ${DEPLOYDIR}
 		ln -sf ${UBOOT_PREFIX}-${MACHINE}-${rev}.bin-${IMAGE_IMXBOOT_TARGET} ${UBOOT_PREFIX}-${MACHINE}-${rev}.bin
-		# Link to default bootable U-Boot filename. It gets overwritten
-		# on every loop so the only last RAM_CONFIG will survive.
-		ln -sf ${UBOOT_PREFIX}-${MACHINE}-${rev}.bin-${IMAGE_IMXBOOT_TARGET} ${BOOTABLE_FILENAME}
 		cd -
 	done
 
