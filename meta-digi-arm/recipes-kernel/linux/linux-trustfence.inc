@@ -5,10 +5,10 @@ DEPENDS += "${@oe.utils.vartrue('TRUSTFENCE_SIGN_ARTIFACTS', 'trustfence-sign-to
 do_deploy[postfuncs] += "${@oe.utils.vartrue('TRUSTFENCE_SIGN_ARTIFACTS', 'trustfence_sign', '', d)}"
 trustfence_sign() {
 	# Set environment variables for trustfence configuration
-	export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+	export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_KEYS_PATH}"
 	[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 	[ -n "${TRUSTFENCE_SRK_REVOKE_MASK}" ] && export SRK_REVOKE_MASK="${TRUSTFENCE_SRK_REVOKE_MASK}"
-	[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
+	[ "${TRUSTFENCE_ENCRYPT}" = "1" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_KEYS_PATH}/${TRUSTFENCE_DEK_ENCRYPT_KEYNAME}"
 
 	# Sign/encrypt the kernel images
 	for type in ${KERNEL_IMAGETYPES}; do
@@ -52,5 +52,5 @@ trustfence_sign() {
 }
 trustfence_sign[dirs] = "${DEPLOYDIR}"
 
-do_deploy[vardeps] += "TRUSTFENCE_SIGN_KEYS_PATH TRUSTFENCE_KEY_INDEX TRUSTFENCE_DEK_PATH"
+do_deploy[vardeps] += "TRUSTFENCE_KEYS_PATH TRUSTFENCE_KEY_INDEX"
 

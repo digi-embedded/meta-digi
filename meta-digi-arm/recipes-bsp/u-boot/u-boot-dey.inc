@@ -46,8 +46,8 @@ UUU_BOOTLOADER:mx9-generic-bsp = ""
 UBOOT_INITIAL_ENV = ""
 
 python __anonymous() {
-    if (d.getVar("TRUSTFENCE_DEK_PATH") not in ["0", None]) and (d.getVar("TRUSTFENCE_SIGN") != "1"):
-        bb.fatal("Only signed U-Boot images can be encrypted. Generate signed images (TRUSTFENCE_SIGN = \"1\") or remove encryption (TRUSTFENCE_DEK_PATH = \"0\")")
+    if (d.getVar("TRUSTFENCE_ENCRYPT") == "1") and (d.getVar("TRUSTFENCE_SIGN") != "1"):
+        bb.fatal("Only signed U-Boot images can be encrypted. Generate signed images (TRUSTFENCE_SIGN = \"1\") or remove encryption (TRUSTFENCE_ENCRYPT = \"0\")")
 }
 
 do_configure[prefuncs] += "${@oe.utils.ifelse(d.getVar('UBOOT_TF_CONF'), 'trustfence_config', '')}"
@@ -102,13 +102,13 @@ build_uboot_scripts() {
 		# Change the u-boot name when TrustFence is enabled
 		if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 			if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
-				if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+				if [ "${TRUSTFENCE_ENCRYPT}" = "1" ]; then
 					sed -i -e 's,##SIGNED##,encrypted,g' ${TMP_INSTALL_SCR}
 				else
 					sed -i -e 's,##SIGNED##,signed,g' ${TMP_INSTALL_SCR}
 				fi
 			else
-				if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+				if [ "${TRUSTFENCE_ENCRYPT}" = "1" ]; then
 					sed -i -e 's,##SIGNED##,_Encrypted_Signed,g' ${TMP_INSTALL_SCR}
 				else
 					sed -i -e 's,##SIGNED##,_Signed,g' ${TMP_INSTALL_SCR}
@@ -133,10 +133,10 @@ build_uboot_scripts() {
 
 	# Sign the boot script if not contained in a FIT image
 	if [ "${TRUSTFENCE_SIGN_ARTIFACTS}" = "1" ] && [ "${TRUSTFENCE_SIGN_FIT_NXP}" = "0" ]; then
-		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 		[ -n "${TRUSTFENCE_SRK_REVOKE_MASK}" ] && export SRK_REVOKE_MASK="${TRUSTFENCE_SRK_REVOKE_MASK}"
-		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
+		[ "${TRUSTFENCE_ENCRYPT}" = "1" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_KEYS_PATH}/${TRUSTFENCE_DEK_ENCRYPT_KEYNAME}"
 
 		# Sign boot script
 		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
@@ -190,7 +190,7 @@ sign_uboot() {
                 ln -sf ${UBOOT_BINARYNAME}-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-signed-${type}.${UBOOT_SUFFIX}
                 cp -fp ${B}/${config}/${UBOOT_BINARYNAME}-dtb-usb-signed.imx ${UBOOT_BINARYNAME}-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
                 ln -sf ${UBOOT_BINARYNAME}-usb-signed-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-usb-signed-${type}.${UBOOT_SUFFIX}
-                if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+                if [ "${TRUSTFENCE_ENCRYPT}" = "1" ]; then
                     cp -fp ${B}/${config}/${UBOOT_BINARYNAME}-dtb-encrypted.imx ${UBOOT_BINARYNAME}-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX}
                     ln -sf ${UBOOT_BINARYNAME}-encrypted-${type}-${PV}-${PR}.${UBOOT_SUFFIX} ${UBOOT_BINARYNAME}-encrypted-${type}.${UBOOT_SUFFIX}
                 fi

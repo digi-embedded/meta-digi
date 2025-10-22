@@ -14,6 +14,12 @@
 #  Description:
 #    Script for generating PKI tree using STM tools
 #
+#    The following environment variables define the script behaviour:
+#      CONFIG_SIGN_KEYS_PATH: (mandatory) Path to the folder to hold the generated PKI tree keys.
+#      CONFIG_FIP_ENCRYPT_KEYNAME: (optional) Encryption key filename for FIP
+#      CONFIG_FSBL_ENCRYPT_KEYNAME: (optional) Encryption key filename for FSBL
+#      CONFIG_RPROC_ENCRYPT_KEYNAME: (optional) Encryption key filename for RPROC
+#
 #===============================================================================
 
 # Avoid parallel execution of this script
@@ -137,33 +143,33 @@ if [ "${PLATFORM}" = "ccmp25" ]; then
 	fi
 fi
 
-if [ -n "${CONFIG_DEK_PATH}" ]; then
-	[ -d "${CONFIG_DEK_PATH}" ] || mkdir "${CONFIG_DEK_PATH}"
+if [ -n "${CONFIG_FSBL_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_FIP_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_RPROC_ENCRYPT_KEYNAME}" ]; then
+
 	# Generate random keys if they don't exist
 	if [ "${PLATFORM}" = "ccmp25" ]; then
-		if [ ! -f "${CONFIG_DEK_PATH}/encryption_key_fsbl.bin" ]; then
+		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" ]; then
 			echo "Generating random encryption key for FSBL"
-			if ! STM32MP_KeyGen_CLI -rand 16 "${CONFIG_DEK_PATH}/encryption_key_fsbl.bin"; then
+			if ! STM32MP_KeyGen_CLI -rand 16 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}"; then
 				echo "[ERROR] Failed to generate 16-byte FSBL encryption key"
 				exit 1
 			fi
-			chmod 444 "${CONFIG_DEK_PATH}/encryption_key_fsbl.bin"
+			chmod 444 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}"
 		fi
-		if [ ! -f "${CONFIG_DEK_PATH}/encryption_key_fip.bin" ]; then
+		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}" ]; then
 			echo "Generating random encryption key for FIP"
-			if ! STM32MP_KeyGen_CLI -rand 32 "${CONFIG_DEK_PATH}/encryption_key_fip.bin"; then
+			if ! STM32MP_KeyGen_CLI -rand 32 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"; then
 				echo "[ERROR] Failed to generate 32-byte FIP encryption key"
 				exit 1
 			fi
-			chmod 444 "${CONFIG_DEK_PATH}/encryption_key_fip.bin"
+			chmod 444 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"
 		fi
-		if [ ! -f "${CONFIG_DEK_PATH}/encryption_key_rproc.bin" ]; then
+		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_RPROC_ENCRYPT_KEYNAME}" ]; then
 			echo "Generating random encryption keys for Cortex-M coprocessor"
-			if ! STM32MP_KeyGen_CLI -rand 32 "${CONFIG_DEK_PATH}/encryption_key_rproc.bin"; then
+			if ! STM32MP_KeyGen_CLI -rand 32 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_RPROC_ENCRYPT_KEYNAME}"; then
 				echo "[ERROR] Failed to generate 32-byte Cortex-M encryption key"
 				exit 1
 			fi
-			chmod 444 "${CONFIG_DEK_PATH}/encryption_key_rproc.bin"
+			chmod 444 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_RPROC_ENCRYPT_KEYNAME}"
 		fi
 	else
 		echo "[ERROR] Could not generate encryption keys. Platform not supported."

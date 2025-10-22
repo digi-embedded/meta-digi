@@ -41,7 +41,7 @@ curate_bootloader_artifacts() {
 		if [ "${DEY_SOC_VENDOR}" = "NXP" ] && echo "${artifact}" | grep -q -e "##SIGNED##"; then
 			if [ "${TRUSTFENCE_SIGN}" = "1" ]; then
 				if [ "${DIGI_SOM}" = "ccimx6ul" ]; then
-					if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+					if [ "${TRUSTFENCE_ENCRYPT}" = "1" ]; then
 						# Encrypted bootloader
 						curated_artifact=$(echo "${artifact}" | sed "s,##SIGNED##,${BOOTLOADER_ENCRYPTED_STRING},")
 						CURATED_BOOTABLE_ARTIFACTS="${CURATED_BOOTABLE_ARTIFACTS} ${curated_artifact}"
@@ -54,7 +54,7 @@ curate_bootloader_artifacts() {
 					curated_artifact=$(echo "${artifact}" | sed "s,##SIGNED##,${BOOTLOADER_SIGNED_USB_STRING},")
 					CURATED_BOOTABLE_ARTIFACTS="${CURATED_BOOTABLE_ARTIFACTS} ${curated_artifact}"
 				else
-					if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+					if [ "${TRUSTFENCE_ENCRYPT}" = "1" ]; then
 						# Encrypted bootloader
 						curated_artifact=$(echo "${artifact}" | sed "s,##SIGNED##,${BOOTLOADER_ENCRYPTED_STRING},")
 						CURATED_BOOTABLE_ARTIFACTS="${CURATED_BOOTABLE_ARTIFACTS} ${curated_artifact}"

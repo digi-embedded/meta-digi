@@ -59,7 +59,7 @@ compile_mx8m() {
 
 compile_mx8m:append:ccimx8m() {
 	# Create dummy DEK blob to support building with encrypted u-boot
-	if [ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+	if [ "${TRUSTFENCE_ENCRYPT}" = "1" ]; then
 		dd if=/dev/zero of=${BOOT_STAGING}/dek_blob_fit_dummy.bin bs=96 count=1 oflag=sync
 	fi
 }
@@ -200,7 +200,7 @@ do_deploy:ccimx8x () {
 
 do_deploy[postfuncs] += "${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'trustfence_sign_imxboot', '', d)}"
 trustfence_sign_imxboot() {
-	TF_SIGN_ENV="CONFIG_SIGN_KEYS_PATH=${TRUSTFENCE_SIGN_KEYS_PATH}"
+	TF_SIGN_ENV="CONFIG_SIGN_KEYS_PATH=${TRUSTFENCE_KEYS_PATH}"
 	TF_SIGN_ENV="$TF_SIGN_ENV CONFIG_FIT_HAB_LOG_PATH=${DEPLOYDIR}/${BOOT_TOOLS}/mkimage-print_fit_hab.log"
 	[ -n "${TRUSTFENCE_KEY_INDEX}" ] && TF_SIGN_ENV="$TF_SIGN_ENV CONFIG_KEY_INDEX=${TRUSTFENCE_KEY_INDEX}"
 	[ -n "${TRUSTFENCE_SIGN_MODE}" ] && TF_SIGN_ENV="$TF_SIGN_ENV CONFIG_SIGN_MODE=${TRUSTFENCE_SIGN_MODE}"
@@ -216,21 +216,21 @@ trustfence_sign_imxboot() {
 		fi
 		TF_SIGN_ENV="$TF_SIGN_ENV CONFIG_MKIMAGE_LOG_PATH=${DEPLOYDIR}/${BOOT_TOOLS}/mkimage-${target}.log"
 		env $TF_SIGN_ENV trustfence-sign-uboot.sh imx-boot-${MACHINE}.bin-${target} imx-boot-signed-${MACHINE}.bin-${target}
-		if [ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
-			TF_ENC_ENV="CONFIG_DEK_PATH=${TRUSTFENCE_DEK_PATH} ENABLE_ENCRYPTION=y"
+		if [ "${TRUSTFENCE_ENCRYPT}" = "1" ]; then
+			TF_ENC_ENV="CONFIG_DEK_PATH=${TRUSTFENCE_KEYS_PATH}/${TRUSTFENCE_DEK_ENCRYPT_KEYNAME} ENABLE_ENCRYPTION=y"
 			env $TF_SIGN_ENV $TF_ENC_ENV trustfence-sign-uboot.sh imx-boot-${MACHINE}.bin-${target} imx-boot-encrypted-${MACHINE}.bin-${target}
 		fi
 	done
 
 	# Generate symlinks for trustfence artifacts.
 	ln -sf imx-boot-signed-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/imx-boot-signed-${MACHINE}.bin
-	if [ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+	if [ "${TRUSTFENCE_ENCRYPT}" = "1" ]; then
 		ln -sf imx-boot-encrypted-${MACHINE}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/imx-boot-encrypted-${MACHINE}.bin
 	fi
 }
 
 trustfence_sign_imxboot:ccimx8x() {
-	TF_SIGN_ENV="CONFIG_SIGN_KEYS_PATH=${TRUSTFENCE_SIGN_KEYS_PATH}"
+	TF_SIGN_ENV="CONFIG_SIGN_KEYS_PATH=${TRUSTFENCE_KEYS_PATH}"
 	[ -n "${TRUSTFENCE_KEY_INDEX}" ] && TF_SIGN_ENV="$TF_SIGN_ENV CONFIG_KEY_INDEX=${TRUSTFENCE_KEY_INDEX}"
 	[ -n "${TRUSTFENCE_SIGN_MODE}" ] && TF_SIGN_ENV="$TF_SIGN_ENV CONFIG_SIGN_MODE=${TRUSTFENCE_SIGN_MODE}"
 	[ -n "${TRUSTFENCE_SRK_REVOKE_MASK}" ] && TF_SIGN_ENV="$TF_SIGN_ENV SRK_REVOKE_MASK=${TRUSTFENCE_SRK_REVOKE_MASK}"
@@ -245,8 +245,8 @@ trustfence_sign_imxboot:ccimx8x() {
 		for rev in ${SOC_REVISIONS}; do
 			TF_SIGN_ENV="$TF_SIGN_ENV CONFIG_MKIMAGE_LOG_PATH=${DEPLOYDIR}/${BOOT_TOOLS}/mkimage-${rev}-${target}.log"
 			env $TF_SIGN_ENV trustfence-sign-uboot.sh imx-boot-${MACHINE}-${rev}.bin-${target} imx-boot-signed-${MACHINE}-${rev}.bin-${target}
-			if [ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
-				TF_ENC_ENV="CONFIG_DEK_PATH=${TRUSTFENCE_DEK_PATH} ENABLE_ENCRYPTION=y"
+			if [ "${TRUSTFENCE_ENCRYPT}" = "1" ]; then
+				TF_ENC_ENV="CONFIG_DEK_PATH=${TRUSTFENCE_KEYS_PATH}/${TRUSTFENCE_DEK_ENCRYPT_KEYNAME} ENABLE_ENCRYPTION=y"
 				env $TF_SIGN_ENV $TF_ENC_ENV trustfence-sign-uboot.sh imx-boot-${MACHINE}-${rev}.bin-${target} imx-boot-encrypted-${MACHINE}-${rev}.bin-${target}
 			fi
 		done
@@ -255,11 +255,11 @@ trustfence_sign_imxboot:ccimx8x() {
 	# Generate symlinks for trustfence artifacts.
 	for rev in ${SOC_REVISIONS}; do
 		ln -sf ${UBOOT_PREFIX}-signed-${MACHINE}-${rev}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${UBOOT_PREFIX}-signed-${MACHINE}-${rev}.bin
-		if [ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
+		if [ "${TRUSTFENCE_ENCRYPT}" = "1" ]; then
 			ln -sf ${UBOOT_PREFIX}-encrypted-${MACHINE}-${rev}.bin-${IMAGE_IMXBOOT_TARGET} ${DEPLOYDIR}/${UBOOT_PREFIX}-encrypted-${MACHINE}-${rev}.bin
 		fi
 	done
 }
 
 trustfence_sign_imxboot[dirs] = "${DEPLOYDIR}"
-trustfence_sign_imxboot[vardeps] += "TRUSTFENCE_SIGN_KEYS_PATH TRUSTFENCE_KEY_INDEX TRUSTFENCE_DEK_PATH TRUSTFENCE_SIGN_MODE TRUSTFENCE_SRK_REVOKE_MASK TRUSTFENCE_UNLOCK_KEY_REVOCATION"
+trustfence_sign_imxboot[vardeps] += "TRUSTFENCE_KEYS_PATH TRUSTFENCE_KEY_INDEX TRUSTFENCE_ENCRYPT TRUSTFENCE_SIGN_MODE TRUSTFENCE_SRK_REVOKE_MASK TRUSTFENCE_UNLOCK_KEY_REVOCATION"

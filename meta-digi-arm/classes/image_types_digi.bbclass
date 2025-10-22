@@ -230,10 +230,10 @@ trustence_sign_cpio() {
 	#
 	if [ "${TRUSTFENCE_SIGN_ARTIFACTS}" = "1" ] && [ "${TRUSTFENCE_SIGN_FIT_NXP}" = "0" ]; then
 		# Set environment variables for trustfence configuration
-		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+		export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_KEYS_PATH}"
 		[ -n "${TRUSTFENCE_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 		[ -n "${TRUSTFENCE_SRK_REVOKE_MASK}" ] && export SRK_REVOKE_MASK="${TRUSTFENCE_SRK_REVOKE_MASK}"
-		[ -n "${TRUSTFENCE_DEK_PATH}" ] && [ "${TRUSTFENCE_DEK_PATH}" != "0" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
+		[ "${TRUSTFENCE_ENCRYPT}" = "1" ] && export CONFIG_DEK_PATH="${TRUSTFENCE_KEYS_PATH}/${TRUSTFENCE_DEK_ENCRYPT_KEYNAME}"
 		# Sign/encrypt the ramdisk
 		trustfence-sign-artifact.sh -p "${DIGI_SOM}" -i "${1}" "${1}.tf"
 	else
@@ -252,7 +252,7 @@ IMAGE_TYPES += "cpio.gz.u-boot.tf"
 do_image_squashfs[postfuncs] += "${@oe.utils.vartrue('TRUSTFENCE_SIGN_ARTIFACTS', 'rootfs_sign', '', d)}"
 rootfs_sign() {
 	# Set environment variables for trustfence configuration
-	export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
+	export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_KEYS_PATH}"
 	[ -n "${CONFIG_KEY_INDEX}" ] && export CONFIG_KEY_INDEX="${TRUSTFENCE_KEY_INDEX}"
 
 	ROOTFS_IMAGE="${IMGDEPLOYDIR}/${IMAGE_NAME}.squashfs"
@@ -263,4 +263,4 @@ rootfs_sign() {
 }
 rootfs_sign[dirs] = "${DEPLOY_DIR_IMAGE}"
 
-do_image_squashfs[vardeps] += "TRUSTFENCE_SIGN_KEYS_PATH TRUSTFENCE_KEY_INDEX"
+do_image_squashfs[vardeps] += "TRUSTFENCE_KEYS_PATH TRUSTFENCE_KEY_INDEX"

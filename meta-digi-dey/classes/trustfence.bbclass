@@ -16,8 +16,15 @@ TRUSTFENCE_CONSOLE_DISABLE ?= "0"
 
 # Default secure boot configuration
 TRUSTFENCE_SIGN ?= "1"
-TRUSTFENCE_SIGN_KEYS_PATH ?= "default"
-TRUSTFENCE_DEK_PATH ?= "${TF_DEK_PATH}"
+TRUSTFENCE_ENCRYPT ?= "${TF_ENCRYPT}"
+TRUSTFENCE_KEYS_PATH ?= "${TOPDIR}/trustfence"
+# NXP keys
+TRUSTFENCE_DEK_ENCRYPT_KEYNAME ?= "dek.bin"
+# STM keys
+TRUSTFENCE_FIP_ENCRYPT_KEYNAME ?= "encryption_key_fip.bin"
+TRUSTFENCE_FSBL_ENCRYPT_KEYNAME ?= "encryption_key_fsbl.bin"
+TRUSTFENCE_RPROC_ENCRYPT_KEYNAME ?= "encryption_key_rproc.bin"
+
 TRUSTFENCE_ENCRYPT_ENVIRONMENT ?= "1"
 TRUSTFENCE_SRK_REVOKE_MASK ?= "0x0"
 TRUSTFENCE_KEY_INDEX ?= "0"
@@ -46,9 +53,9 @@ TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-onl
 #
 
 # Platform specific defaults
-TF_DEK_PATH = "default"
-TF_DEK_PATH:ccimx9 = "0"
-TF_DEK_PATH:ccmp1 = "0"
+TF_ENCRYPT = "1"
+TF_ENCRYPT:ccimx9 = "0"
+TF_ENCRYPT:ccmp1 = "0"
 TF_FILE_BASED_ENCRYPT = "0"
 TF_FILE_BASED_ENCRYPT:ccimx9 = "1"
 TF_FILE_BASED_ENCRYPT:ccmp1 = "1"
@@ -70,15 +77,17 @@ TRUSTFENCE_FIT_CFG_SIGN_KEYNAME ?= "fitcfg"
 TRUSTFENCE_FIT_IMG_SIGN_KEYNAME ?= "fitimg"
 
 # Function to generate a PKI tree (with lock dir protection)
-GENPKI_LOCK_DIR = "${TRUSTFENCE_SIGN_KEYS_PATH}/.genpki.lock"
+GENPKI_LOCK_DIR = "${TRUSTFENCE_KEYS_PATH}/.genpki.lock"
 gen_pki_tree() {
 	if mkdir -p ${GENPKI_LOCK_DIR}; then
 		if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
-			trustfence-gen-pki.sh ${TRUSTFENCE_SIGN_KEYS_PATH}
+			trustfence-gen-pki.sh ${TRUSTFENCE_KEYS_PATH}
 		elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
-			export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_SIGN_KEYS_PATH}"
-			if [ "${TRUSTFENCE_DEK_PATH}" != "0" ]; then
-				export CONFIG_DEK_PATH="${TRUSTFENCE_DEK_PATH}"
+			export CONFIG_SIGN_KEYS_PATH="${TRUSTFENCE_KEYS_PATH}"
+			if [ "${TRUSTFENCE_ENCRYPT}" = "1" ]; then
+				export CONFIG_FIP_ENCRYPT_KEYNAME="${TRUSTFENCE_FIP_ENCRYPT_KEYNAME}"
+				export CONFIG_FSBL_ENCRYPT_KEYNAME="${TRUSTFENCE_FSBL_ENCRYPT_KEYNAME}"
+				export CONFIG_RPROC_ENCRYPT_KEYNAME="${TRUSTFENCE_RPROC_ENCRYPT_KEYNAME}"
 			fi
 			trustfence-gen-pki.sh -p ${DIGI_SOM}
 		fi
@@ -91,7 +100,7 @@ gen_pki_tree() {
 # Function that generates a PKI tree if there isn't one
 check_gen_pki_tree() {
 	if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
-		SRK_KEYS="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK*crt.pem | sed s/\ /\,/g)"
+		SRK_KEYS="$(echo ${TRUSTFENCE_KEYS_PATH}/crts/SRK*crt.pem | sed s/\ /\,/g)"
 		n_commas="$(echo ${SRK_KEYS} | grep -o "," | wc -l)"
 		if [ "${n_commas}" -eq 0 ]; then
 			gen_pki_tree
@@ -112,7 +121,7 @@ copy_public_key() {
 
 		if [ "${DEY_SOC_VENDOR}" = "NXP" ]; then
 			KEY_INDEX="$(expr ${TRUSTFENCE_KEY_INDEX} + 1)"
-			PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/crts/key${KEY_INDEX}.pub"
+			PUBLIC_KEY="${TRUSTFENCE_KEYS_PATH}/crts/key${KEY_INDEX}.pub"
 			# The new hab/ahab_pki_tree.sh script extracts the public keys after the PKI
 			# generation and leaves them in the crts/ folder. However, the PKI tree may
 			# already exist, the PKI generation script not called, and then the public
@@ -120,9 +129,9 @@ copy_public_key() {
 			# selected public key.
 			if [ ! -f "${PUBLIC_KEY}" ]; then
 				if [ "${TRUSTFENCE_SIGN_MODE}" = "HAB" ]; then
-					CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/IMG${KEY_INDEX}*crt.pem)"
+					CERT_IMG="$(echo ${TRUSTFENCE_KEYS_PATH}/crts/IMG${KEY_INDEX}*crt.pem)"
 				elif [ "${TRUSTFENCE_SIGN_MODE}" = "AHAB" ]; then
-					CERT_IMG="$(echo ${TRUSTFENCE_SIGN_KEYS_PATH}/crts/SRK${KEY_INDEX}*crt.pem)"
+					CERT_IMG="$(echo ${TRUSTFENCE_KEYS_PATH}/crts/SRK${KEY_INDEX}*crt.pem)"
 				else
 					bberror "Unknown TRUSTFENCE_SIGN_MODE value"
 					exit 1
@@ -132,9 +141,9 @@ copy_public_key() {
 			fi
 		elif [ "${DEY_SOC_VENDOR}" = "STM" ]; then
 			if [ "${DIGI_SOM}" = "ccmp15" ]; then
-				PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey.pem"
+				PUBLIC_KEY="${TRUSTFENCE_KEYS_PATH}/keys/publicKey.pem"
 			else
-				PUBLIC_KEY="${TRUSTFENCE_SIGN_KEYS_PATH}/keys/publicKey0${TRUSTFENCE_KEY_INDEX}.pem"
+				PUBLIC_KEY="${TRUSTFENCE_KEYS_PATH}/keys/publicKey0${TRUSTFENCE_KEY_INDEX}.pem"
 			fi
 		else
 			echo "ERROR: Cannot determine the public key"
@@ -151,6 +160,14 @@ python () {
     import binascii
     import hashlib
     import os
+
+    # Check backwards compatibility
+    if d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"):
+        d.setVar("TRUSTFENCE_KEYS_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"))
+        if d.getVar("TRUSTFENCE_DEK_PATH"):
+            DEK_PATH = os.path.dirname(d.getVar("TRUSTFENCE_DEK_PATH"))
+            if (d.getVar("TRUSTFENCE_KEYS_PATH") != DEK_PATH):
+                bb.fatal('[trustfence] TRUSTFENCE_DEK_PATH is deprecated; Set new variable TRUSTFENCE_KEYS_PATH to the directory containing both your sign and encryption keys.')
 
     # Secure console configuration
     if (d.getVar("TRUSTFENCE_CONSOLE_DISABLE") == "1"):
@@ -170,16 +187,6 @@ python () {
                     d.appendVar("UBOOT_TF_CONF", '"# CONFIG_CONSOLE_ENABLE_GPIO_ACTIVE_LOW is not set" ')
 
     # Secure boot configuration
-    if (d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") == "default"):
-        d.setVar("TRUSTFENCE_SIGN_KEYS_PATH", d.getVar("TOPDIR") + "/trustfence");
-
-    if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
-        if (d.getVar("TRUSTFENCE_DEK_PATH") == "default"):
-            d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/dek.bin");
-    elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
-        if (d.getVar("TRUSTFENCE_DEK_PATH") == "default"):
-            d.setVar("TRUSTFENCE_DEK_PATH", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"));
-
     if (d.getVar("TRUSTFENCE_SIGN") == "1"):
         # Set STM-specific variables for signing images
         if (d.getVar("DEY_SOC_VENDOR") == "STM"):
@@ -187,17 +194,17 @@ python () {
             d.setVar("EXTERNAL_KEY_CONF", "1")
             d.setVar("SIGN_TOOL", "STM32MP_SigningTool_CLI")
             if (d.getVar("DIGI_SOM") == "ccmp15" ):
-                d.setVar("SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey.pem");
-                d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/key_pass.txt")
+                d.setVar("SIGN_KEY", d.getVar("TRUSTFENCE_KEYS_PATH") + "/keys/privateKey.pem");
+                d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_KEYS_PATH") + "/keys/key_pass.txt")
             else:
-                d.setVar("SIGN_KEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/privateKey0%s.pem" % d.getVar("TRUSTFENCE_KEY_INDEX"));
-                d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/keys/key_pass0%s.txt" % d.getVar("TRUSTFENCE_KEY_INDEX"))
+                d.setVar("SIGN_KEY", d.getVar("TRUSTFENCE_KEYS_PATH") + "/keys/privateKey0%s.pem" % d.getVar("TRUSTFENCE_KEY_INDEX"));
+                d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_KEYS_PATH") + "/keys/key_pass0%s.txt" % d.getVar("TRUSTFENCE_KEY_INDEX"))
                 if (d.getVar("SIGN_COPRO_ENABLE") == "1" ):
-                    d.setVar("SIGN_COPRO_ECC_PRIVKEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/rproc-keys/privateKey.pem")
+                    d.setVar("SIGN_COPRO_ECC_PRIVKEY", d.getVar("TRUSTFENCE_KEYS_PATH") + "/rproc-keys/privateKey.pem")
                     d.setVar("SIGN_COPRO_ECC_PRIVKEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("SIGN_COPRO_ECC_PRIVKEY"))
-                    d.setVar("SIGN_COPRO_ECC_INFOKEY", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "/rproc-keys/publicKey.der")
+                    d.setVar("SIGN_COPRO_ECC_INFOKEY", d.getVar("TRUSTFENCE_KEYS_PATH") + "/rproc-keys/publicKey.der")
                     d.setVar("SIGN_COPRO_ECC_INFOKEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("SIGN_COPRO_ECC_INFOKEY"))
-                    d.setVar("TRUSTFENCE_COPRO_PASSWORD_FILE", d.getVar("TRUSTFENCE_SIGN_KEYS_PATH") + "rproc-keys/key_pass.txt")
+                    d.setVar("TRUSTFENCE_COPRO_PASSWORD_FILE", d.getVar("TRUSTFENCE_KEYS_PATH") + "rproc-keys/key_pass.txt")
                     d.setVar("SIGN_COPRO_ECC_PASS_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), "UNDEFINED");
             d.setVar("SIGN_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("SIGN_KEY"));
 
@@ -209,26 +216,26 @@ python () {
                 d.appendVar("UBOOT_TF_CONF", '"# CONFIG_LEGACY_IMAGE_FORMAT is not set" ')
         if (d.getVar("TRUSTFENCE_READ_ONLY_ROOTFS") == "1"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_AUTHENTICATE_SQUASHFS_ROOTFS=y ")
-        if d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"):
-            d.appendVar("UBOOT_TF_CONF", 'CONFIG_SIGN_KEYS_PATH="%s" ' % d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"))
+        if d.getVar("TRUSTFENCE_KEYS_PATH"):
+            d.appendVar("UBOOT_TF_CONF", 'CONFIG_SIGN_KEYS_PATH="%s" ' % d.getVar("TRUSTFENCE_KEYS_PATH"))
         if (d.getVar("TRUSTFENCE_UNLOCK_KEY_REVOCATION") == "1"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_UNLOCK_SRK_REVOKE=y ")
         if d.getVar("TRUSTFENCE_KEY_INDEX"):
             d.appendVar("UBOOT_TF_CONF", "CONFIG_KEY_INDEX=%s " % d.getVar("TRUSTFENCE_KEY_INDEX"))
         if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
-            if (d.getVar("TRUSTFENCE_DEK_PATH") not in [None, "0"]):
-                d.appendVar("UBOOT_TF_CONF", 'CONFIG_DEK_PATH="%s" ' % d.getVar("TRUSTFENCE_DEK_PATH"))
+            if (d.getVar("TRUSTFENCE_ENCRYPT") == "1"):
+                d.appendVar("UBOOT_TF_CONF", 'CONFIG_DEK_PATH="%s/%s" ' % (d.getVar("TRUSTFENCE_KEYS_PATH"), d.getVar("TRUSTFENCE_DEK_ENCRYPT_KEYNAME")))
             if d.getVar("TRUSTFENCE_SIGN_MODE"):
                 d.appendVar("UBOOT_TF_CONF", 'CONFIG_SIGN_MODE="%s" ' % d.getVar("TRUSTFENCE_SIGN_MODE"))
         elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
-            if (d.getVar("TRUSTFENCE_DEK_PATH") not in [None, "0"]):
+            if (d.getVar("TRUSTFENCE_ENCRYPT") == "1"):
                 d.setVar("ENCRYPT_ENABLE", "1")
-                d.setVar("ENCRYPT_FSBL_KEY", '%s/encryption_key_fsbl.bin' % d.getVar("TRUSTFENCE_DEK_PATH"))
+                d.setVar("ENCRYPT_FSBL_KEY", '%s/%s' % (d.getVar("TRUSTFENCE_KEYS_PATH"), d.getVar("TRUSTFENCE_FSBL_ENCRYPT_KEYNAME")))
                 d.setVar("ENCRYPT_FSBL_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("ENCRYPT_FSBL_KEY"))
-                d.setVar("ENCRYPT_FIP_KEY", '%s/encryption_key_fip.bin' % d.getVar("TRUSTFENCE_DEK_PATH"))
+                d.setVar("ENCRYPT_FIP_KEY", '%s/%s' % (d.getVar("TRUSTFENCE_KEYS_PATH"), d.getVar("TRUSTFENCE_FIP_ENCRYPT_KEYNAME")))
                 d.setVar("ENCRYPT_FIP_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("ENCRYPT_FIP_KEY"))
                 if (d.getVar("ENCRYPT_COPRO_ENABLE") == "1"):
-                    d.setVar("ENCRYPT_COPRO_KEY", '%s/encryption_key_rproc.bin' % d.getVar("TRUSTFENCE_DEK_PATH"))
+                    d.setVar("ENCRYPT_COPRO_KEY", '%s/%s' % (d.getVar("TRUSTFENCE_KEYS_PATH"), d.getVar("TRUSTFENCE_RPROC_ENCRYPT_KEYNAME")))
                     d.setVar("ENCRYPT_COPRO_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("ENCRYPT_COPRO_KEY"))
 
         if (d.getVar("TRUSTFENCE_SIGN_FIT_STM") == "1"):
@@ -244,7 +251,7 @@ python () {
             # Enable FIT signing support
             d.setVar("UBOOT_SIGN_ENABLE", d.getVar("TRUSTFENCE_SIGN"))
             # Set path to FIT signing keys
-            d.setVar("UBOOT_SIGN_KEYDIR", "%s/fit" % d.getVar("TRUSTFENCE_SIGN_KEYS_PATH"))
+            d.setVar("UBOOT_SIGN_KEYDIR", "%s/fit" % d.getVar("TRUSTFENCE_KEYS_PATH"))
 
     else:
         # Disable signing artifacts if TRUSTFENCE_SIGN != 1
@@ -262,7 +269,7 @@ python () {
         d.setVar("SWUPDATE_SIGNING", "RSA")
 
         # Retrieve the keys path to use.
-        keys_path = d.getVar("TRUSTFENCE_SIGN_KEYS_PATH")
+        keys_path = d.getVar("TRUSTFENCE_KEYS_PATH")
 
         # Retrieve the key index to use.
         key_index = 0
