@@ -54,15 +54,11 @@ VIGILES_SUBFOLDER_NAME = \"${DY_REVISION}\"
 INHERIT += \"##VIGILES_BBCLASS##\"
 "
 
-ZIP_INSTALLER_CFG="
-DEY_IMAGE_INSTALLER = \"1\"
-"
-
 SDCARD_FSTYPE="
-IMAGE_FSTYPES:append:ccimx6 = \" sdcard.gz\"
-IMAGE_FSTYPES:append:ccimx8x = \" sdcard.gz\"
-IMAGE_FSTYPES:append:ccimx8m = \" sdcard.gz\"
-IMAGE_FSTYPES:append:ccimx9 = \" sdcard.gz\"
+IMAGE_FSTYPES:append:ccimx6 = \" wic.bmap wic.gz\"
+IMAGE_FSTYPES:append:ccimx8x = \" wic.bmap wic.gz\"
+IMAGE_FSTYPES:append:ccimx8m = \" wic.bmap wic.gz\"
+IMAGE_FSTYPES:append:ccimx9 = \" wic.bmap wic.gz\"
 "
 
 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(date +%s)}"
@@ -107,31 +103,6 @@ copy_images() {
 	find "${1}" -type l -delete
 	find "${1}" -type f -name 'README_-_DO_NOT_DELETE*' -delete
 	find "${1}" -type f -not -name MD5SUMS -print0 | xargs -r -0 md5sum | sed -e "s,${1}/,,g" | sort -k2,2 > "${1}"/MD5SUMS
-}
-
-#
-# In the buildserver we share the state-cache for all the different platforms
-# we build in a jenkins job. This may cause problems with some packages that
-# have different runtime dependences depending on the platform.
-#
-# Purge then the state cache of those problematic packages between platform
-# builds.
-#
-purge_sstate() {
-	local PURGE_PKGS=" \
-		packagegroup-dey-audio \
-		packagegroup-dey-bluetooth \
-		packagegroup-dey-core \
-		packagegroup-dey-debug \
-		packagegroup-dey-examples \
-		packagegroup-dey-gstreamer \
-		packagegroup-dey-lvgl \
-		packagegroup-dey-network \
-		packagegroup-dey-qt \
-		packagegroup-dey-webkit \
-		packagegroup-dey-wireless \
-	"
-	bitbake -k -c cleansstate "${PURGE_PKGS}" >/dev/null 2>&1 || true
 }
 
 #
@@ -283,7 +254,6 @@ for platform in ${DY_PLATFORMS}; do
 			if [ "${DY_RM_WORK}" = "true" ]; then
 				printf "%s" "${RM_WORK_CFG}" >> conf/local.conf
 			fi
-			printf "%s" "${ZIP_INSTALLER_CFG}" >> conf/local.conf
 			printf "%s" "${SDCARD_FSTYPE}" >> conf/local.conf
 			# Append extra configuration macros if provided from build environment
 			if [ -n "${DY_EXTRA_LOCAL_CONF}" ]; then
@@ -323,7 +293,6 @@ for platform in ${DY_PLATFORMS}; do
 				printf "\n[INFO] Building the toolchain for %s.\n" "${platform}"
 				time bitbake -c populate_sdk dey-toolchain
 			fi
-			purge_sstate
 		)
 		copy_images "${_this_img_dir}"
 		popd
