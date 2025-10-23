@@ -180,7 +180,7 @@ while getopts "lp:m:" c; do
 	case "${c}" in
 		l) MKP_LIST_PLATFORMS="y";;
 		p) MKP_PLATFORM="${OPTARG}";;
-		m) MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/${OPTARG}/meta-digi-arm/conf/templates";;
+		m) MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/${OPTARG}/conf/templates";;
 	esac
 done
 
