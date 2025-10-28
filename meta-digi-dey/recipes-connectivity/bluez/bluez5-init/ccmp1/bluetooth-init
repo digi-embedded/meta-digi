@@ -40,6 +40,16 @@ bt_power() {
 	gpioset "${GPIO_CHIP}" "${GPIO_NUMBER}"="${1}"
 }
 
+set_btaddr() {
+	hciconfig hci0 up
+	sleep 0.2
+	bt_addr=$(echo "$(fw_printenv -n btaddr)" | awk -F ":" '{ for(i=NF;i>=1;i--) printf "0x%s ", $i }')
+	hcitool -i hci0 cmd 0x3f 0x0001 ${bt_addr}
+	hciconfig hci0 down
+	sleep 0.2
+	hciconfig hci0 up
+}
+
 is_kernel_module_loaded() {
 	lsmod | grep -qs -w "^${MODULE_NAME}"
 }
@@ -57,7 +67,8 @@ bt_init() {
 		# Load manually the kernel module
 		modprobe "${MODULE_NAME}"
 		sleep 1
-		is_kernel_module_loaded && log info "Bluetooth activated" && return 0
+		# Reconfigure the HCI interface with the expected MAC address
+		is_kernel_module_loaded && set_btaddr && log info "Bluetooth activated" && return 0
 
 		log err "Cannot initialize Bluetooth, retrying..."
 	done
