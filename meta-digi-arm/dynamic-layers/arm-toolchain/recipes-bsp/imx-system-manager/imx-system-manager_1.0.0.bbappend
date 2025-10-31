@@ -14,6 +14,7 @@ SRC_URI:append:dey = " \
     file://0009-ccimx95-change-names-of-voltage-regulators.patch \
     file://0010-ccimx95dvk-enable-full-access-to-certain-regulators-.patch \
     file://0011-components-pf09-reduce-LDOs-step-to-50mV.patch \
+    file://0012-ccimx95dvk-remove-access-to-VDD_3V3-and-VDD_1V8-from.patch \
 "
 
 # Disable debug monitor by default

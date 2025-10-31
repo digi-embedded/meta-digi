@@ -1,0 +1,58 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Wed, 29 Oct 2025 16:54:45 +0100
+Subject: [PATCH] ccimx95dvk: remove access to VDD_3V3 and VDD_1V8 from
+ non-secure world
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+There doesn't seem to be a clear registered handler for reboot or shutdown
+path from Linux to SM.
+When a 'reboot' is requested, Linux falls back to run the global
+device_shutdown() path.
+The SM will turn these regulators off in their shutdown path or via a
+global “disable regulators on reboot” policy. The current SM firmware
+doesn't get to know if Linux has marked these regulators as "always-on".
+
+Powering these regulators off removes power to the SOM who is then not
+able to continue the reset (it is not powered).
+
+By removing access to Linux, we fully rely on SM managing these regulators,
+though apparently support is incomplete (for instance they are not powered
+off on the poweroff path from Linux), so this may need to be revisited in
+future BSP upgrades.
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+
+https://onedigi.atlassian.net/browse/DEL-9804
+---
+ configs/ccimx95dvk.cfg           | 2 --
+ configs/ccimx95dvk/config_scmi.h | 2 --
+ 2 files changed, 4 deletions(-)
+
+diff --git a/configs/ccimx95dvk.cfg b/configs/ccimx95dvk.cfg
+index b7c33f8d7e9a..19d3b0ab27b4 100755
+--- a/configs/ccimx95dvk.cfg
++++ b/configs/ccimx95dvk.cfg
+@@ -532,8 +532,6 @@ AUDIO_PLL2                ALL
+ BRD_SM_SENSOR_TEMP_PF09   ALL
+ BRD_SM_SENSOR_TEMP_PF5301 SET
+ BRD_SM_SENSOR_TEMP_PF5302 SET
+-BRD_SM_VOLT_SW1_VDD_3V3      ALL
+-BRD_SM_VOLT_SW3_VDD_1V8      ALL
+ BRD_SM_VOLT_LDO1_VDD_LDO1    ALL
+ BRD_SM_VOLT_LDO2_VDD_SDIO2   ALL
+ BUTTON                    ALL, test
+diff --git a/configs/ccimx95dvk/config_scmi.h b/configs/ccimx95dvk/config_scmi.h
+index 18a4e5ef6360..8094e9a9ef77 100644
+--- a/configs/ccimx95dvk/config_scmi.h
++++ b/configs/ccimx95dvk/config_scmi.h
+@@ -612,8 +612,6 @@
+         .sysPerms = SM_SCMI_PERM_NOTIFY, \
+         .voltPerms[BRD_SM_VOLT_LDO1_VDD_LDO1] = SM_SCMI_PERM_ALL, \
+         .voltPerms[BRD_SM_VOLT_LDO2_VDD_SDIO2] = SM_SCMI_PERM_ALL, \
+-        .voltPerms[BRD_SM_VOLT_SW1_VDD_3V3] = SM_SCMI_PERM_ALL, \
+-        .voltPerms[BRD_SM_VOLT_SW3_VDD_1V8] = SM_SCMI_PERM_ALL, \
+     }
+ 
+ /*! Config for SCMI channel 5 */
