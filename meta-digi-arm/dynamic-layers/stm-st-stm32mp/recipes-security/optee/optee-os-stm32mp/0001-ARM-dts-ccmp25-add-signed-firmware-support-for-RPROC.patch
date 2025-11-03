@@ -1,0 +1,76 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Fri, 31 Oct 2025 09:26:02 +0100
+Subject: [PATCH] ARM: dts: ccmp25: add signed firmware support for RPROC
+
+Enable device-tree bindings required to load/authenticate signed
+Cortex-M33 firmware via remoteproc.
+
+https://onedigi.atlassian.net/browse/DEL-9813
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ core/arch/arm/dts/ccmp25-dvk-rif.dtsi | 12 ++++++++++++
+ core/arch/arm/dts/ccmp25-dvk.dts      |  4 ++++
+ 2 files changed, 16 insertions(+)
+
+diff --git a/core/arch/arm/dts/ccmp25-dvk-rif.dtsi b/core/arch/arm/dts/ccmp25-dvk-rif.dtsi
+index f2f31dcdf..15121de46 100644
+--- a/core/arch/arm/dts/ccmp25-dvk-rif.dtsi
++++ b/core/arch/arm/dts/ccmp25-dvk-rif.dtsi
+@@ -869,6 +869,8 @@
+ 
+ &cm33_sram2 {
+ 	st,protreg = <RISABPROT(RIF_DDCID_DIS, RIF_UNUSED, RIF_NSEC, RIF_NPRIV, RIF_CFDIS, RIF_UNUSED, RIF_UNUSED, RIF_UNUSED)>;
++	access-controllers-conf-default = <&risab4 RISABPROT(RIF_DDCID_DIS, RIF_UNUSED, RIF_NSEC, RIF_UNUSED, RIF_CFEN, RIF_CID2_BF, RIF_CID2_BF, 0)>;
++	access-controllers-conf-load = <&risab4 RISABPROT(RIF_DDCID_DIS, RIF_UNUSED, RIF_SEC, RIF_PRIV, RIF_CFEN, RIF_CID1_BF, RIF_CID1_BF, RIF_CID1_BF)>;
+ };
+ 
+ &cm33_retram {
+@@ -948,22 +950,32 @@
+ 
+ &tfm_code {
+ 	st,protreg = <RISAFPROT(RISAF_REG_ID(1), RIF_CID2_BF, RIF_CID2_BF, RIF_UNUSED, RIF_SEC, RIF_ENC_EN, RIF_BREN_EN)>;
++	access-controllers-conf-default = <&risaf4 RISAFPROT(RISAF_REG_ID(1), RIF_CID2_BF, RIF_CID2_BF, RIF_UNUSED, RIF_NSEC, RIF_ENC_DIS, RIF_BREN_EN)>;
++	access-controllers-conf-load = <&risaf4 RISAFPROT(RISAF_REG_ID(1), RIF_CID1_BF, RIF_CID1_BF, RIF_PRIV, RIF_SEC, RIF_ENC_DIS, RIF_BREN_EN)>;
+ };
+ 
+ &cm33_cube_fw {
+ 	st,protreg = <RISAFPROT(RISAF_REG_ID(2), RIF_CID0_BF|RIF_CID1_BF|RIF_CID2_BF, RIF_CID0_BF|RIF_CID1_BF|RIF_CID2_BF, RIF_UNUSED, RIF_NSEC, RIF_ENC_DIS, RIF_BREN_EN)>;
++	access-controllers-conf-default = <&risaf4 RISAFPROT(RISAF_REG_ID(2), RIF_CID2_BF, RIF_CID2_BF, RIF_UNUSED, RIF_NSEC, RIF_ENC_DIS, RIF_BREN_EN)>;
++	access-controllers-conf-load = <&risaf4 RISAFPROT(RISAF_REG_ID(2), RIF_CID1_BF, RIF_CID1_BF, RIF_PRIV, RIF_SEC, RIF_ENC_DIS, RIF_BREN_EN)>;
+ };
+ 
+ &tfm_data {
+ 	st,protreg = <RISAFPROT(RISAF_REG_ID(3), RIF_CID2_BF, RIF_CID2_BF, RIF_UNUSED, RIF_SEC, RIF_ENC_EN, RIF_BREN_EN)>;
++	access-controllers-conf-default = <&risaf4 RISAFPROT(RISAF_REG_ID(3), RIF_CID2_BF, RIF_CID2_BF, RIF_UNUSED, RIF_NSEC, RIF_ENC_DIS, RIF_BREN_EN)>;
++	access-controllers-conf-load = <&risaf4 RISAFPROT(RISAF_REG_ID(3), RIF_CID1_BF, RIF_CID1_BF, RIF_PRIV, RIF_SEC, RIF_ENC_DIS, RIF_BREN_EN)>;
+ };
+ 
+ &cm33_cube_data {
+ 	st,protreg = <RISAFPROT(RISAF_REG_ID(4), RIF_CID0_BF|RIF_CID1_BF|RIF_CID2_BF, RIF_CID0_BF|RIF_CID1_BF|RIF_CID2_BF, RIF_UNUSED, RIF_NSEC, RIF_ENC_DIS, RIF_BREN_EN)>;
++	access-controllers-conf-default = <&risaf4 RISAFPROT(RISAF_REG_ID(4), RIF_CID2_BF, RIF_CID2_BF, RIF_UNUSED, RIF_NSEC, RIF_ENC_DIS, RIF_BREN_EN)>;
++	access-controllers-conf-load = <&risaf4 RISAFPROT(RISAF_REG_ID(4), RIF_CID1_BF, RIF_CID1_BF, RIF_PRIV, RIF_SEC, RIF_ENC_DIS, RIF_BREN_EN)>;
+ };
+ 
+ &ipc_shmem {
+ 	st,protreg = <RISAFPROT(RISAF_REG_ID(5), RIF_CID0_BF|RIF_CID1_BF|RIF_CID2_BF, RIF_CID0_BF|RIF_CID1_BF|RIF_CID2_BF, RIF_UNUSED, RIF_NSEC, RIF_ENC_DIS, RIF_BREN_EN)>;
++	access-controllers-conf-default = <&risaf4 RISAFPROT(RISAF_REG_ID(5), RIF_CID1_BF|RIF_CID2_BF, RIF_CID1_BF|RIF_CID2_BF, RIF_UNUSED, RIF_NSEC, RIF_ENC_DIS, RIF_BREN_EN)>;
++	access-controllers-conf-load = <&risaf4 RISAFPROT(RISAF_REG_ID(5), RIF_CID1_BF, RIF_CID1_BF, RIF_PRIV, RIF_SEC, RIF_ENC_DIS, RIF_BREN_EN)>;
+ };
+ 
+ &spare1 {
+diff --git a/core/arch/arm/dts/ccmp25-dvk.dts b/core/arch/arm/dts/ccmp25-dvk.dts
+index 7292b9be8..3ce64ccff 100644
+--- a/core/arch/arm/dts/ccmp25-dvk.dts
++++ b/core/arch/arm/dts/ccmp25-dvk.dts
+@@ -437,6 +437,10 @@
+ 
+ &m33_rproc {
+ 	status = "okay";
++	compatible = "st,stm32mp2-m33-tee";
++	memory-region = <&cm33_cube_fw>, <&cm33_cube_data>,
++			<&ipc_shmem>, <&tfm_code>, <&tfm_data>,
++			<&cm33_sram2>;
+ };
+ 
+ &ommanager {

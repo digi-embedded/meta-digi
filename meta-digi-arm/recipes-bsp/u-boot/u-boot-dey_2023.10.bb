@@ -13,6 +13,10 @@ SRC_URI += " \
     ${@oe.utils.conditional('TRUSTFENCE_SIGN_FIT_STM', '1', 'file://fit_signature.cfg', '', d)} \
 "
 
+SRC_URI:append:ccmp25 = " \
+    ${@oe.utils.conditional('TRUSTFENCE_ENABLED', '1' , 'file://0001-ARM-dts-ccmp25-add-signed-firmware-support-for-RPROC.patch', '', d)} \
+"
+
 install_helper_files() {
 	# Install dtbs from UBOOT_DEVICETREE to datadir, so that kernel
 	# can use it for signing, and kernel will deploy after signs it.

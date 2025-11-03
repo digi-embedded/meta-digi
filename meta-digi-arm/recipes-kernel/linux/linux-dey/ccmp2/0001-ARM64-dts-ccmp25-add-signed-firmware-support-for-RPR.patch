@@ -1,0 +1,32 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Thu, 30 Oct 2025 14:15:14 +0100
+Subject: [PATCH] ARM64: dts: ccmp25: add signed firmware support for RPROC
+
+Declare only the shared memory used for inter-processor communication
+(including the resource table) to allow remoteproc to load/authenticate signed
+Cortex-M33 firmware.
+
+https://onedigi.atlassian.net/browse/DEL-9813
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ arch/arm64/boot/dts/digi/ccmp25.dtsi | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/digi/ccmp25.dtsi b/arch/arm64/boot/dts/digi/ccmp25.dtsi
+index 153726203533..89f5bf75fd9f 100644
+--- a/arch/arm64/boot/dts/digi/ccmp25.dtsi
++++ b/arch/arm64/boot/dts/digi/ccmp25.dtsi
+@@ -346,11 +346,8 @@ &m0_rproc {
+ &m33_rproc {
+ 	mboxes = <&ipcc1 0x100>, <&ipcc1 0x101>, <&ipcc1 2>;
+ 	mbox-names = "vq0", "vq1", "shutdown";
+-	memory-region = <&cm33_cube_fw>, <&cm33_cube_data>,
+-			<&ipc_shmem_1>, <&vdev0vring0>,
+-			<&vdev0vring1>, <&vdev0buffer>,
+-			<&cm33_sram2>;
+-	st,syscfg-nsvtor = <&a35ss_syscfg 0xa8 0xffffff80>;
++	compatible = "st,stm32mp2-m33-tee";
++	memory-region = <&vdev0vring0>, <&vdev0vring1>, <&vdev0buffer>, <&ipc_shmem_1>;
+ 	status = "okay";
+ };
