@@ -18,4 +18,4 @@ do_install () {
 
 FILES:${PN} = "${datadir}/nxp_wireless"
 
-COMPATIBLE_MACHINE = "(mx93-nxp-bsp)"
+COMPATIBLE_MACHINE = "(mx9-nxp-bsp)"
