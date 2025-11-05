@@ -22,6 +22,11 @@ SRC_URI:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${RT_FILES}', '', d)} \
 "
 
+SRC_URI:append:ccmp15 = " \
+    ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1' , 'file://0001-ARM-dts-ccmp15-add-signed-firmware-support-for-RPROC.patch \
+                                                               file://0002-remoteproc-stm32_rproc-make-reset-and-hold-boot-opti.patch', '', d)} \
+"
+
 SRC_URI:append:ccmp25 = " \
     ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1' , 'file://0001-ARM64-dts-ccmp25-add-signed-firmware-support-for-RPR.patch', '', d)} \
 "

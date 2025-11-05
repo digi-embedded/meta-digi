@@ -199,6 +199,7 @@ python () {
             if (d.getVar("DIGI_SOM") == "ccmp15" ):
                 d.setVar("SIGN_KEY", d.getVar("TRUSTFENCE_KEYS_PATH") + "/keys/privateKey.pem");
                 d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_KEYS_PATH") + "/keys/key_pass.txt")
+                d.setVar("TRUSTFENCE_COPRO_SIGN_KEY", d.getVar("TRUSTFENCE_KEYS_PATH") + "/rproc-keys/publicKey.pem")
             else:
                 d.setVar("SIGN_KEY", d.getVar("TRUSTFENCE_KEYS_PATH") + "/keys/privateKey0%s.pem" % d.getVar("TRUSTFENCE_KEY_INDEX"));
                 d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_KEYS_PATH") + "/keys/key_pass0%s.txt" % d.getVar("TRUSTFENCE_KEY_INDEX"))

@@ -1,0 +1,38 @@
+From: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Date: Thu, 8 Jan 2026 10:20:20 +0100
+Subject: [PATCH] drivers: firewall: stm32_etzpc: remove trace when rcc mckprot
+ is not activated
+
+The RCC MCKPROT is deactivated even for remoteproc with secure loading
+embedded in the platform, so stm32_rcc_is_mckprot always returns false
+and a WARNING traces are displayed.
+
+I/TC: WARNING: RCC tzen:1 mckprot:0, insecure ETZPC hardening
+81:ETZPC_DECPROT_MCU_ISOLATION
+
+This patch temporarily removes this trace in OpenSTLinux V6.X
+as mckprot is not managed.
+
+NOT_UPSTREAMABLE only avoid warning message.
+
+https://onedigi.atlassian.net/browse/DEL-9920
+
+Signed-off-by: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Change-Id: If8cbec0bc2d5ad65b2f5e716c561f9598728d4e0
+---
+ core/drivers/firewall/stm32_etzpc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/drivers/firewall/stm32_etzpc.c b/core/drivers/firewall/stm32_etzpc.c
+index 257bcd76e..9d588b1c3 100644
+--- a/core/drivers/firewall/stm32_etzpc.c
++++ b/core/drivers/firewall/stm32_etzpc.c
+@@ -184,7 +184,7 @@ sanitize_decprot_config(uint32_t decprot_id __maybe_unused,
+ 		}
+ 		break;
+ 	case ETZPC_DECPROT_MCU_ISOLATION:
+-		if (!stm32_rcc_is_secure() || !stm32_rcc_is_mckprot()) {
++		if (!stm32_rcc_is_secure()) {
+ 			IMSG("WARNING: RCC tzen:%u mckprot:%u, insecure ETZPC hardening %"PRIu32":%s",
+ 			     stm32_rcc_is_secure(), stm32_rcc_is_mckprot(),
+ 			     decprot_id, etzpc_decprot_strings[attr]);

@@ -13,6 +13,10 @@ SRC_URI += " \
     ${@oe.utils.conditional('TRUSTFENCE_SIGN_FIT_STM', '1', 'file://fit_signature.cfg', '', d)} \
 "
 
+SRC_URI:append:ccmp15 = " \
+    ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1' , 'file://0001-ARM-dts-ccmp15-add-signed-firmware-support-for-RPROC.patch', '', d)} \
+"
+
 SRC_URI:append:ccmp25 = " \
     ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1' , 'file://0001-ARM-dts-ccmp25-add-signed-firmware-support-for-RPROC.patch', '', d)} \
 "
