@@ -45,6 +45,17 @@ UBOOT_INITIAL_ENV = ""
 python __anonymous() {
     if (d.getVar("TRUSTFENCE_DEK_PATH") not in ["0", None]) and (d.getVar("TRUSTFENCE_SIGN") != "1"):
         bb.fatal("Only signed U-Boot images can be encrypted. Generate signed images (TRUSTFENCE_SIGN = \"1\") or remove encryption (TRUSTFENCE_DEK_PATH = \"0\")")
+
+    # Port poky scarthgap uboot-config.bbclass logic to adjust menuconfig directory
+    ubootconfig = (d.getVar('UBOOT_CONFIG') or "").split()
+    if len(ubootconfig) == 1:
+        d.setVar('KCONFIG_CONFIG_ROOTDIR', os.path.join(d.getVar("B"), d.getVar("UBOOT_MACHINE").strip()))
+    else:
+        d.appendVarFlag('do_menuconfig', 'prefuncs', ' prohibit_menuconfig')
+}
+
+prohibit_menuconfig() {
+    bbfatal "do_menuconfig is disabled for platforms with multiple U-Boot configurations"
 }
 
 do_configure[prefuncs] += "${@oe.utils.ifelse(d.getVar('UBOOT_TF_CONF'), 'trustfence_config', '')}"
