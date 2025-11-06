@@ -8,3 +8,8 @@ Digi Embedded Yocto provides the following image recipes:
   * dey-image-lvgl: graphical LVGL image
 
     A DRM-based image including an LVGL demo application.
+
+  * dey-image-flutter: graphical Flutter image
+
+    Expansion of custom Digi core-image-base including full Flutter
+    framework support.
