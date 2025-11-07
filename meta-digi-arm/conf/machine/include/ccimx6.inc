@@ -45,6 +45,10 @@ MACHINE_DISTRO_FEATURES_REMOVE = "vulkan"
 BOOTFS_EXT ?= ".boot.vfat"
 ROOTFS_EXT ?= '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", ".squashfs", ".ext4.gz", d)}'
 
+# i.MX6 platforms use weston 10.0.5.imx, which uses the wayland-0 socket
+# instead of wayland-1
+WAYLAND_DISPLAY = "wayland-0"
+
 BOOT_DEV_NAME ?= "/dev/mmcblk0p1"
 ROOTFS_DEV_NAME ?= "/dev/mmcblk0p3"
 ROOTFS_ENC_DEV = "/dev/mapper/cryptrootfs"
