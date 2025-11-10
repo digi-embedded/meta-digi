@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2024, Digi International Inc.
+# Copyright (C) 2022-2025, Digi International Inc.
 
 require dey-examples-src.inc
 
@@ -13,20 +13,10 @@ SRC_URI += " \
     file://connectcore-demo-server.service \
     file://suspendtarget-connectcore-demo-server.service \
 "
+S = "${WORKDIR}/git/connectcore-demo-example"
 
-RDEPENDS:${PN}-server = " \
-    busybox-httpd \
-    libdigiapix-python3 \
-    mpg123 \
-    python3-connectcore-ble \
-    python3-core \
-    python3-httplib2 \
-    python3-json \
-    python3-logging \
-    python3-netserver \
-"
-
-S = "${WORKDIR}/connectcore-demo-example"
+do_configure[noexec] = "1"
+do_compile[noexec] = "1"
 
 inherit systemd update-rc.d
 
@@ -37,11 +27,11 @@ BOARD_IMAGE_FILE:ccimx6qpsbc = "ccimx6sbc_board.png"
 BOARD_IMAGE_FILE:ccimx91-dvk = "ccimx93-dvk_board.png"
 
 do_install() {
-	install -d ${D}/srv/www
-	cp -r ${WORKDIR}/git/connectcore-demo-example/* ${D}/srv/www/
+	install -d ${D}${servicedir}/www
+	\cp --remove-destination -r * ${D}${servicedir}/www/
 
 	# Remove unused images
-	find ${D}/srv/www/static/images/ -type f -name '*_board.png' -not -name '${BOARD_IMAGE_FILE}' -delete
+	find ${D}${servicedir}/www/static/images/ -type f -name '*_board.png' -not -name '${BOARD_IMAGE_FILE}' -delete
 
 	# Install systemd service
 	if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
@@ -57,28 +47,29 @@ do_install() {
 	ln -sf ${sysconfdir}/connectcore-demo-server ${D}${sysconfdir}/init.d/connectcore-demo-server
 }
 
+PACKAGE_ARCH = "${MACHINE_ARCH}"
 PACKAGES =+ "${PN}-server ${PN}-multimedia"
 
 FILES:${PN} += " \
-    /srv/www/* \
+    ${servicedir}/www/* \
 "
 
 FILES:${PN}-multimedia += " \
-    /srv/www/multimedia* \
-    /srv/www/static/images/aquarium.jpg \
-    /srv/www/static/images/big_buck_bunny.jpg \
-    /srv/www/static/images/blob.jpg \
-    /srv/www/static/images/cpu.png \
-    /srv/www/static/images/electricflower.jpg \
-    /srv/www/static/images/multiple-views.jpg \
-    /srv/www/static/images/ram.png \
-    /srv/www/static/images/spacerocks.jpg \
-    /srv/www/static/images/toon-shading.jpg \
-    /srv/www/static/js/multimedia.js \
+    ${servicedir}/www/multimedia* \
+    ${servicedir}/www/static/images/aquarium.jpg \
+    ${servicedir}/www/static/images/big_buck_bunny.jpg \
+    ${servicedir}/www/static/images/blob.jpg \
+    ${servicedir}/www/static/images/cpu.png \
+    ${servicedir}/www/static/images/electricflower.jpg \
+    ${servicedir}/www/static/images/multiple-views.jpg \
+    ${servicedir}/www/static/images/ram.png \
+    ${servicedir}/www/static/images/spacerocks.jpg \
+    ${servicedir}/www/static/images/toon-shading.jpg \
+    ${servicedir}/www/static/js/multimedia.js \
 "
 
-FILES:${PN}-server = " \
-    /srv/www/demoserver.py \
+FILES:${PN}-server += " \
+    ${servicedir}/www/demoserver.py \
     ${systemd_unitdir}/system/connectcore-demo-server.service \
     ${systemd_unitdir}/system/suspendtarget-connectcore-demo-server.service \
     ${sysconfdir}/connectcore-demo-server \
@@ -87,6 +78,17 @@ FILES:${PN}-server = " \
 
 RDEPENDS:${PN} = "${PN}-server"
 RDEPENDS:${PN}-multimedia = "${PN}"
+RDEPENDS:${PN}-server = " \
+    busybox-httpd \
+    libdigiapix-python3 \
+    mpg123 \
+    python3-connectcore-ble \
+    python3-core \
+    python3-httplib2 \
+    python3-json \
+    python3-logging \
+    python3-netserver \
+"
 
 INITSCRIPT_PACKAGES = "${PN}-server"
 INITSCRIPT_NAME:${PN}-server = "connectcore-demo-server"
@@ -97,5 +99,3 @@ SYSTEMD_SERVICE:${PN}-server = " \
     connectcore-demo-server.service \
     suspendtarget-connectcore-demo-server.service \
 "
-
-PACKAGE_ARCH = "${MACHINE_ARCH}"
