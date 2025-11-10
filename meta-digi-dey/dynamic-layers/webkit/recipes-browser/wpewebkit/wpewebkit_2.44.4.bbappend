@@ -1,5 +1,5 @@
 # Copyright (C) 2025, Digi International Inc.
-FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BP}:"
 
 # Backport patch to fix build with "lbse" disabled
 SRC_URI:append = " \
