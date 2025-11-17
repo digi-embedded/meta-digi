@@ -222,9 +222,9 @@ if pushd "${YOCTO_INST_DIR}"; then
 	fi
 	# shellcheck disable=SC2086
 	yes "" 2>/dev/null | ${REPO} init --depth=1 --no-repo-verify -u ${MANIFEST_URL} ${repo_revision} ${DY_MANIFEST:+-m ${DY_MANIFEST}}
-	${REPO} --no-pager forall -j4 -p -c 'git clean -fdx'
+	${REPO} --no-pager forall --ignore-missing -j4 -p -c 'git clean -fdx'
 	# shellcheck disable=SC2016
-	${REPO} --no-pager forall -j4 -p -c 'git remote prune $(git remote)' || true
+	${REPO} --no-pager forall --ignore-missing -j4 -p -c 'git remote prune $(git remote)' || true
 	# shellcheck disable=SC2086
 	time ${REPO} sync -d ${MAKE_JOBS}
 	popd
