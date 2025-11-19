@@ -19,6 +19,7 @@ SRCREV = "aee16c06913422a0ac84ee3217f87a9795e3c2d9"
 
 SRC_URI += " \
         file://0001-0.3.0-stm32mp-add-dcmipp-ipa.patch \
+        file://0002-dcmipp-Fix-configureAwbAlgo-encapsulation-under-EVIS.patch \
 "
 PV = "v0.3.0-stm32mp"
 
