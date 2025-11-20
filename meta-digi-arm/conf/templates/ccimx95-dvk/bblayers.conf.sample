@@ -24,6 +24,7 @@ BBLAYERS ?= " \
   ##DIGIBASE##/meta-flutter \
   ##DIGIBASE##/meta-flutter/meta-flutter-apps \
   ##DIGIBASE##/meta-clang \
+  ##DIGIBASE##/meta-browser/meta-chromium \
   ##DIGIBASE##/meta-digi/meta-digi-arm \
   ##DIGIBASE##/meta-digi/meta-digi-dey \
   "

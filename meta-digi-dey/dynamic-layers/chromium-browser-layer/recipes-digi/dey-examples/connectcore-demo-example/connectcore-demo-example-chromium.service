@@ -1,0 +1,26 @@
+[Unit]
+Description=ConnectCore demo example running on Chromium
+After=weston.service graphical.target
+Requires=weston.service
+ConditionPathExists=/run/wayland-0
+
+[Service]
+Type=simple
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
+Environment=WAYLAND_DISPLAY=wayland-0
+Environment=XDG_RUNTIME_DIR=/run
+ExecStart=/usr/bin/chromium \
+    --allow-file-access-from-files \
+    --enable-features=UseOzonePlatform \
+    --in-process-gpu \
+    --incognito \
+    --kiosk \
+    --no-sandbox \
+    --ozone-platform=wayland \
+    file:///srv/www/index.html
+
+Restart=on-failure
+RestartSec=30s
+
+[Install]
+WantedBy=graphical.target

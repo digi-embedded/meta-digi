@@ -5,6 +5,11 @@ Digi Embedded Yocto provides the following image recipes:
     By default the image is XWayland-based so it provides a full Weston
     desktop environment.
 
+  * dey-image-chromium: graphical Chromium image
+
+    By default the image is XWayland-based so it provides a full Weston
+    desktop environment.
+
   * dey-image-lvgl: graphical LVGL image
 
     A DRM-based image including an LVGL demo application.
