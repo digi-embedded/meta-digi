@@ -165,7 +165,7 @@ done<<-_EOF_
 	ccmp25-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter
 	ccimx91-dvk          core-image-base
 	ccimx93-dvk          dey-image-qt,dey-image-lvgl
-	ccimx95-dvk          dey-image-qt,dey-image-lvgl,dey-image-flutter
+	ccimx95-dvk          dey-image-qt,dey-image-chromium,dey-image-lvgl,dey-image-flutter
 _EOF_
 
 # Set default values if not provided by Jenkins
