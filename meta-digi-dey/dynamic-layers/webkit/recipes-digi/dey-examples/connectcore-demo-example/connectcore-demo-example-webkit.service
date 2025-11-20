@@ -8,8 +8,8 @@ Requires=##WESTON_SERVICE##
 
 [Service]
 Type=forking
-ExecStart=/etc/connectcore-demo-example start
-ExecStop=/etc/connectcore-demo-example stop
+ExecStart=/etc/connectcore-demo-example-webkit start
+ExecStop=/etc/connectcore-demo-example-webkit stop
 
 [Install]
 WantedBy=multi-user.target
