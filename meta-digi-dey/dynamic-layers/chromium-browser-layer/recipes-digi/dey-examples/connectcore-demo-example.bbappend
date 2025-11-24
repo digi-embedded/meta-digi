@@ -14,7 +14,7 @@ do_install:append() {
 
 PACKAGES =+ "${PN}-chromium"
 FILES:${PN}-chromium += "${systemd_system_unitdir}/connectcore-demo-example-chromium.service"
-RDEPENDS:${PN}-chromium = "${PN}-multimedia chromium-ozone-wayland"
+RDEPENDS:${PN}-chromium = "${PN}-multimedia"
 
 SYSTEMD_PACKAGES += "${PN}-chromium"
 SYSTEMD_SERVICE:${PN}-chromium = "connectcore-demo-example-chromium.service"

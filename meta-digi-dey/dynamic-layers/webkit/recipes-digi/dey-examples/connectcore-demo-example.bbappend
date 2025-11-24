@@ -40,7 +40,7 @@ FILES:${PN}-webkit += "\
     ${sysconfdir}/init.d/connectcore-demo-example-webkit \
 "
 
-RDEPENDS:${PN}-webkit = "cog initscripts-functions"
+RDEPENDS:${PN}-webkit = "initscripts-functions"
 
 INITSCRIPT_PACKAGES += "${PN}-webkit"
 INITSCRIPT_NAME:${PN}-webkit = "connectcore-demo-example-webkit"
