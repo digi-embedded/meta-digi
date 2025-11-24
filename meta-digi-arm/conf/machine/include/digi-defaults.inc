@@ -85,7 +85,7 @@ DEFAULT_IMAGE_NAME ??= "dey-image-qt"
 IMAGE_LINK_NAME = "${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}"
 
 # List of graphical images names (for install scripts)
-GRAPHICAL_IMAGES ?= "dey-image-qt dey-image-webkit dey-image-lvgl"
+GRAPHICAL_IMAGES ?= "dey-image-qt dey-image-webkit dey-image-lvgl dey-image-chromium"
 
 # Default wayland socket
 WAYLAND_DISPLAY ?= "wayland-1"
