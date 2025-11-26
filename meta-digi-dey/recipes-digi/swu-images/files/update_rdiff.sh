@@ -170,8 +170,8 @@ validate_base_image() {
 	fs_size=$(( (fs_size + 0xfff) & 0xfffff000 ))
 	local n_blocks=$(( fs_size/BLOCK_SIZE ))
 	local checksum="$(dd if="${ROOTFS_SOURCE_ENDPOINT}" bs="${BLOCK_SIZE}" count="${n_blocks}" 2> /dev/null | sha256sum | cut -d " " -f1)"
-	
-	if [ "${checksum}" != "${1}" ]; then		
+
+	if [ "${checksum}" != "${1}" ]; then
 		echo "[ERROR] Base image is not the expected one or has been modified. Aborting update..."
 		exit 1
 	fi
