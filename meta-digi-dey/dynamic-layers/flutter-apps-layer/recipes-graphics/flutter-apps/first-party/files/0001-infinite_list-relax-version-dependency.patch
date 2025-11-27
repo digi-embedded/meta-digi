@@ -1,0 +1,22 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Thu, 27 Nov 2025 11:44:35 +0100
+Subject: [PATCH] infinite_list: relax version dependency
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ infinite_list/pubspec.yaml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/infinite_list/pubspec.yaml b/infinite_list/pubspec.yaml
+index e439b822fd0a..fc6b8319916c 100644
+--- a/infinite_list/pubspec.yaml
++++ b/infinite_list/pubspec.yaml
+@@ -12,7 +12,7 @@ dependencies:
+   flutter:
+     sdk: flutter
+   cupertino_icons: ^1.0.2
+-  meta: 1.16.0
++  meta: ^1.16.0
+   provider: ^6.0.2
+   window_size:
+     git:

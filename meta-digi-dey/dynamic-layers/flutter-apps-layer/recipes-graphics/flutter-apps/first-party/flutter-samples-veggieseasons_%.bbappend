@@ -3,6 +3,7 @@
 FILESEXTRAPATHS:prepend:dey := "${THISDIR}/files:"
 
 SRC_URI:append = " \
+    file://0001-infinite_list-relax-version-dependency.patch \
     file://flutter-demo-init \
     file://flutter-demo-init.service \
 "
