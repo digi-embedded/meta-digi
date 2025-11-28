@@ -20,6 +20,8 @@ PACKAGECONFIG_PLATFORM_EGLFS:mx9-nxp-bsp = " \
 PACKAGECONFIG_VULKAN_IMX_GPU:mx8mm-nxp-bsp = "vulkan"
 PACKAGECONFIG_VULKAN_IMX_GPU:mx9-nxp-bsp   = "vulkan"
 
+PACKAGECONFIG_DEFAULT:remove:ccimx6ul = "icu"
+
 do_install:append () {
     install -d ${D}${sysconfdir}/profile.d/
     install -m 0755 ${WORKDIR}/qt-${IMX_BACKEND}.sh ${D}${sysconfdir}/profile.d/qt.sh

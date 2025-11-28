@@ -3,7 +3,7 @@
 #
 #  build.sh
 #
-#  Copyright (C) 2013-2024 by Digi International Inc.
+#  Copyright (C) 2013-2025 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -54,15 +54,11 @@ VIGILES_SUBFOLDER_NAME = \"${DY_REVISION}\"
 INHERIT += \"##VIGILES_BBCLASS##\"
 "
 
-ZIP_INSTALLER_CFG="
-DEY_IMAGE_INSTALLER = \"1\"
-"
-
 SDCARD_FSTYPE="
-IMAGE_FSTYPES:append:ccimx6 = \" sdcard.gz\"
-IMAGE_FSTYPES:append:ccimx8x = \" sdcard.gz\"
-IMAGE_FSTYPES:append:ccimx8m = \" sdcard.gz\"
-IMAGE_FSTYPES:append:ccimx9 = \" sdcard.gz\"
+IMAGE_FSTYPES:append:ccimx6 = \" wic.bmap wic.gz\"
+IMAGE_FSTYPES:append:ccimx8x = \" wic.bmap wic.gz\"
+IMAGE_FSTYPES:append:ccimx8m = \" wic.bmap wic.gz\"
+IMAGE_FSTYPES:append:ccimx9 = \" wic.bmap wic.gz\"
 "
 
 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(date +%s)}"
@@ -107,31 +103,6 @@ copy_images() {
 	find "${1}" -type l -delete
 	find "${1}" -type f -name 'README_-_DO_NOT_DELETE*' -delete
 	find "${1}" -type f -not -name MD5SUMS -print0 | xargs -r -0 md5sum | sed -e "s,${1}/,,g" | sort -k2,2 > "${1}"/MD5SUMS
-}
-
-#
-# In the buildserver we share the state-cache for all the different platforms
-# we build in a jenkins job. This may cause problems with some packages that
-# have different runtime dependences depending on the platform.
-#
-# Purge then the state cache of those problematic packages between platform
-# builds.
-#
-purge_sstate() {
-	local PURGE_PKGS=" \
-		packagegroup-dey-audio \
-		packagegroup-dey-bluetooth \
-		packagegroup-dey-core \
-		packagegroup-dey-debug \
-		packagegroup-dey-examples \
-		packagegroup-dey-gstreamer \
-		packagegroup-dey-lvgl \
-		packagegroup-dey-network \
-		packagegroup-dey-qt \
-		packagegroup-dey-webkit \
-		packagegroup-dey-wireless \
-	"
-	bitbake -k -c cleansstate "${PURGE_PKGS}" >/dev/null 2>&1 || true
 }
 
 #
@@ -194,6 +165,7 @@ done<<-_EOF_
 	ccmp25-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter
 	ccimx91-dvk          core-image-base
 	ccimx93-dvk          dey-image-qt,dey-image-lvgl
+	ccimx95-dvk          dey-image-qt,dey-image-chromium,dey-image-lvgl,dey-image-flutter
 _EOF_
 
 # Set default values if not provided by Jenkins
@@ -203,6 +175,7 @@ YOCTO_IMGS_DIR="${WORKSPACE}/images"
 YOCTO_INST_DIR="${WORKSPACE}/digi-yocto-sdk.$(echo "${DY_REVISION}" | tr '/' '_')"
 YOCTO_DOWNLOAD_DIR="${DY_DOWNLOADS:-${WORKSPACE}}/downloads"
 YOCTO_PROJ_DIR="${WORKSPACE}/projects"
+YOCTO_SSTATE_DIR="${DY_SSTATE:-${YOCTO_PROJ_DIR}/sstate-cache}"
 
 # If CPUS is unset, set it with the machine cpus
 if [ -z "${CPUS}" ]; then
@@ -233,9 +206,9 @@ if pushd "${YOCTO_INST_DIR}"; then
 	fi
 	# shellcheck disable=SC2086
 	yes "" 2>/dev/null | ${REPO} init --depth=1 --no-repo-verify -u ${MANIFEST_URL} ${repo_revision} ${DY_MANIFEST:+-m ${DY_MANIFEST}}
-	${REPO} --no-pager forall -j4 -p -c 'git clean -fdx'
+	${REPO} --no-pager forall --ignore-missing -j4 -p -c 'git clean -fdx'
 	# shellcheck disable=SC2016
-	${REPO} --no-pager forall -j4 -p -c 'git remote prune $(git remote)' || true
+	${REPO} --no-pager forall --ignore-missing -j4 -p -c 'git remote prune $(git remote)' || true
 	# shellcheck disable=SC2086
 	time ${REPO} sync -d ${MAKE_JOBS}
 	popd
@@ -267,7 +240,7 @@ for platform in ${DY_PLATFORMS}; do
 			MKP_PAGER="" . ${YOCTO_INST_DIR}/mkproject.sh -p "${platform}" ${DY_MACHINES_LAYER:+-m ${DY_MACHINES_LAYER}} <<< "y"
 			# Set a common DL_DIR and SSTATE_DIR for all platforms
 			sed -i  -e "/^#DL_DIR ?=/cDL_DIR ?= \"${YOCTO_DOWNLOAD_DIR}\"" \
-				-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_PROJ_DIR}/sstate-cache\"" \
+				-e "/^#SSTATE_DIR ?=/cSSTATE_DIR ?= \"${YOCTO_SSTATE_DIR}\"" \
 				conf/local.conf
 			# Set the DISTRO and remove 'meta-digi-dey' layer if distro is not DEY based
 			sed -i -e "/^DISTRO ?=/cDISTRO ?= \"${DY_DISTRO}\"" conf/local.conf
@@ -281,7 +254,6 @@ for platform in ${DY_PLATFORMS}; do
 			if [ "${DY_RM_WORK}" = "true" ]; then
 				printf "%s" "${RM_WORK_CFG}" >> conf/local.conf
 			fi
-			printf "%s" "${ZIP_INSTALLER_CFG}" >> conf/local.conf
 			printf "%s" "${SDCARD_FSTYPE}" >> conf/local.conf
 			# Append extra configuration macros if provided from build environment
 			if [ -n "${DY_EXTRA_LOCAL_CONF}" ]; then
@@ -296,7 +268,7 @@ for platform in ${DY_PLATFORMS}; do
 				sed -i -e "/meta-digi-dey/a\  ${YOCTO_INST_DIR}/sources/meta-digi-mfg \\\\" conf/bblayers.conf
 			fi
 			# Apply CVE layer if needed (do so before potentially inheriting "digi_ccss" to avoid errors)
-			[ "${DY_USE_CVE_LAYER}" = "true" ] && bitbake-layers add-layer ${YOCTO_INST_DIR}/sources/meta-digi-security
+			[ "${DY_USE_CVE_LAYER}" = "true" ] && bitbake-layers add-layer "${YOCTO_INST_DIR}"/sources/meta-digi-security
 			# If we want to generate a CVE report, update conf/local.conf
 			if [ "${DY_CVE_REPORT}" = "true" ]; then
 				# Build Vigiles config path using platform and patch status
@@ -321,7 +293,6 @@ for platform in ${DY_PLATFORMS}; do
 				printf "\n[INFO] Building the toolchain for %s.\n" "${platform}"
 				time bitbake -c populate_sdk dey-toolchain
 			fi
-			purge_sstate
 		)
 		copy_images "${_this_img_dir}"
 		popd

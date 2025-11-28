@@ -2,7 +2,7 @@
 #
 # Generates a 'tar.gz' file with the files and folders to be included in the update package
 # as part of discrete files SWUpdate installation process.
-# 
+#
 # Usage:
 #
 #      In your "local.conf" file, fill the "SWUPDATE_FILES_LIST" variable with the list of

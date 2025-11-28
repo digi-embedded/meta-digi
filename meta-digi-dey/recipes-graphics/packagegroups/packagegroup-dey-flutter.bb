@@ -13,5 +13,5 @@ RDEPENDS:${PN} += " \
 "
 
 RDEPENDS:${PN}:append:imxgpu = " \
-    imx-gpu-viv \
+    ${IMXGPU_GRAPHICS_PROVIDER} \
 "

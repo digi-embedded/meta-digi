@@ -2,6 +2,8 @@
 # Copyright (C) 2022-2025, Digi International Inc.
 #
 
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
+
 # Inherit custom DIGI sign class to skip signing tool and key parsing restrictions
 inherit sign-stm32mp-digi
 
@@ -17,3 +19,10 @@ SRC_URI = " \
     ${OPTEE_GIT_URI};branch=${SRCBRANCH};name=os \
     file://fonts.tar.gz;subdir=git;name=fonts \
 "
+
+SRC_URI:append:ccmp25 = " \
+    ${@oe.utils.conditional('TRUSTFENCE_ENABLED', '1' , 'file://0001-ARM-dts-ccmp25-add-signed-firmware-support-for-RPROC.patch', '', d)} \
+"
+
+# Enable remoteproc OTP public key verification for signed firmware support
+EXTRA_OEMAKE:append:ccmp25 = " ${@oe.utils.conditional('TRUSTFENCE_ENABLED', '1', 'CFG_REMOTEPROC_PUB_KEY_VERIFY=y', '', d)}"

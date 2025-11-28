@@ -1,0 +1,60 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Wed, 24 Sep 2025 18:27:36 +0200
+Subject: [PATCH] imx95: soc.mak: capture commands output into a log file
+
+This is later used to get the needed information for the signing of the
+boot artifacts.
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ iMX95/soc.mak | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/iMX95/soc.mak b/iMX95/soc.mak
+index a3eaa2e93b98..a7cf6c4363a3 100644
+--- a/iMX95/soc.mak
++++ b/iMX95/soc.mak
+@@ -1,4 +1,5 @@
+ MKIMG = ../mkimage_imx8
++MKIMAGE_LOG = "mkimage-$(firstword $(MAKECMDGOALS)).log"
+ 
+ CC ?= gcc
+ REV ?= A1
+@@ -182,7 +183,7 @@ define append_container
+ 	@flashbin_size=`wc -c flash.bin | awk '{print $$1}'`; \
+                    psize=$$((0x400 * $(2))); \
+                    pad_cnt=$$(((flashbin_size + psize - 1) / psize)); \
+-                   echo "append $(1) at $$((pad_cnt * $(2))) KB, psize=$$psize"; \
++                   echo "append $(1) at $$((pad_cnt * $(2))) KB, psize=$$psize" | tee -a $(MKIMAGE_LOG); \
+                    dd if=$(1) of=flash.bin bs=1K seek=$$((pad_cnt * $(2)));
+ endef
+ 
+@@ -271,7 +272,7 @@ u-boot-atf-container.img: bl31.bin u-boot-hash.bin
+ 			   -ap bl31.bin a55 $(ATF_LOAD_ADDR) \
+ 			   -ap u-boot-hash.bin a55 $(UBOOT_LOAD_ADDR) \
+ 			   -out u-boot-atf-container.img; \
+-	fi
++	fi | tee $(MKIMAGE_LOG)
+ 
+ u-boot-atf-container-spinand.img: bl31.bin u-boot-hash.bin
+ 	if [ -f $(TEE) ]; then \
+@@ -335,7 +336,7 @@ flash_lpboot_flexspi_xip: $(MKIMG) $(AHAB_IMG) $(MCU_IMG) $(OEI_IMG_M33)
+ flash_a55: $(MKIMG) $(AHAB_IMG) $(MCU_IMG) u-boot-atf-container.img $(SPL_A55_IMG) $(OEI_IMG_M33) $(OEI_M33_DDR_IMG)
+ 	./$(MKIMG) -soc IMX9 -cntr_version $(CTNR_VERSION) $(MMC_FAST_HASH) -append $(AHAB_IMG) -c $(OEI_OPT_M33) -msel $(MSEL) \
+ 		   -m33 $(MCU_IMG) 0 $(MCU_TCM_ADDR) \
+-		   -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR_M33_VIEW) $(V2X_DUMMY) -out flash.bin
++		   -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR_M33_VIEW) $(V2X_DUMMY) -out flash.bin | tee -a $(MKIMAGE_LOG)
+ 	$(call append_container,u-boot-atf-container.img,1)
+ 
+ flash_a55_no_ahabfw: $(MKIMG) $(MCU_IMG) u-boot-atf-container.img $(SPL_A55_IMG) $(OEI_IMG_M33)
+@@ -386,7 +387,7 @@ flash_all: $(MKIMG) $(AHAB_IMG) $(MCU_IMG) $(M7_IMG) u-boot-atf-container.img $(
+ 	./$(MKIMG) -soc IMX9 -cntr_version $(CTNR_VERSION) $(MMC_FAST_HASH) -append $(AHAB_IMG) -c $(OEI_OPT_M33) -msel $(MSEL) \
+ 		   -m33 $(MCU_IMG) 0 $(MCU_TCM_ADDR) \
+ 		   -m7 $(M7_IMG) 0 $(M7_TCM_ADDR) $(M7_TCM_ADDR_ALIAS)  \
+-		   -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR_M33_VIEW) $(V2X_DUMMY) -out flash.bin
++		   -ap $(SPL_A55_IMG) a55 $(SPL_LOAD_ADDR_M33_VIEW) $(V2X_DUMMY) -out flash.bin | tee -a $(MKIMAGE_LOG)
+ 	$(call append_container,u-boot-atf-container.img,1)
+ 
+ flash_all_ddr: $(MKIMG) $(AHAB_IMG) $(MCU_IMG) $(M7_IMG) u-boot-atf-container.img $(SPL_A55_IMG) $(OEI_IMG_M33)

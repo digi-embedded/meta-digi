@@ -1,0 +1,51 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Wed, 10 Sep 2025 14:19:01 +0200
+Subject: [PATCH] core: imx: support ccimx95-dvk
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ core/arch/arm/plat-imx/conf.mk           | 9 +++++++++
+ core/arch/arm/plat-imx/registers/imx95.h | 1 +
+ 2 files changed, 10 insertions(+)
+
+diff --git a/core/arch/arm/plat-imx/conf.mk b/core/arch/arm/plat-imx/conf.mk
+index 916b6b6a1fbb..55f4c21d0321 100644
+--- a/core/arch/arm/plat-imx/conf.mk
++++ b/core/arch/arm/plat-imx/conf.mk
+@@ -95,6 +95,7 @@ mx93-flavorlist = \
+ 	mx93evk \
+ 
+ mx95-flavorlist = \
++	ccimx95dvk \
+ 	mx95evk \
+ 
+ mx91-flavorlist = \
+@@ -525,6 +526,14 @@ $(call force,CFG_SOC_REV_A0,y)
+ CFG_IN_TREE_EARLY_TAS += aes_huk/c2fad363-5d9f-4fc4-a417-555841e05745
+ endif
+ 
++ifneq (,$(filter $(PLATFORM_FLAVOR),ccimx95dvk))
++CFG_DDR_SIZE ?= 0x80000000
++CFG_UART_BASE ?= UART6_BASE
++CFG_NSEC_DDR_1_BASE ?= 0x100000000UL
++CFG_NSEC_DDR_1_SIZE ?= 0x180000000UL
++CFG_CORE_ARM64_PA_BITS ?= 40
++endif
++
+ ifneq (,$(filter $(PLATFORM_FLAVOR),mx95evk))
+ CFG_DDR_SIZE ?= 0x80000000
+ CFG_UART_BASE ?= UART1_BASE
+diff --git a/core/arch/arm/plat-imx/registers/imx95.h b/core/arch/arm/plat-imx/registers/imx95.h
+index b0382e682c17..05d8efad2cdc 100644
+--- a/core/arch/arm/plat-imx/registers/imx95.h
++++ b/core/arch/arm/plat-imx/registers/imx95.h
+@@ -9,6 +9,7 @@
+ #define GICR_BASE 0x48060000
+ 
+ #define UART1_BASE 0x44380000
++#define UART6_BASE 0x425A0000
+ 
+ #define MU_BASE 0x47530000
+ #define MU_SIZE 0x10000

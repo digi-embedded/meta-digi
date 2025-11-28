@@ -32,6 +32,9 @@ UBOOT_DTBO_LOADADDRESS = "0x8a000000"
 # trusted-firmware-a
 # =========================================================================
 PREFERRED_PROVIDER_virtual/trusted-firmware-a = "tf-a-stm32mp"
+# Set custom TF-A config
+TF_A_CONFIG_ALL += " ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', bb.utils.contains('BOOTDEVICE_LABELS', 'usb', 'optee-usb', '', d), '', d)}"
+
 
 # Set metadata settings
 DEVICE_PARTUUID_FIP_A = "1c606ef5-f1ac-43b9-9bb5-d5c578580b6b"
@@ -41,7 +44,7 @@ TF_A_METADATA_TOOL_ARGS ?= "-g -i 1 -b 2 -v ${TF_A_METADATA_TOOL_VERSION} ${DEVI
 # =========================================================================
 # optee-os
 # =========================================================================
-PREFERRED_PROVIDER_virtual/optee-os = "optee-os-stm32mp"
+PREFERRED_PROVIDER_virtual-optee-os = "optee-os-stm32mp"
 # OPTEE runtime packages to install
 OPTEE_PKGS ??= "optee-client"
 
@@ -119,7 +122,7 @@ ST_OPTEE_DEBUG_LOG_LEVEL = "1"
 WKS_FILE_DEPENDS ?= " \
     virtual/bootloader \
     virtual/trusted-firmware-a \
-    ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', 'virtual/optee-os', '', d)} \
+    ${@bb.utils.contains('BOOTSCHEME_LABELS', 'optee', 'virtual-optee-os', '', d)} \
 "
 
 # Disable the generation of flashlayout files

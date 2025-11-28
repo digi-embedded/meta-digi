@@ -1,0 +1,33 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Wed, 19 Nov 2025 11:58:43 +0100
+Subject: [PATCH] dcmipp: Fix configureAwbAlgo() encapsulation under
+ EVISION_ALGO_ENABLED
+
+Awb::queueRequest() unconditionally calls configureAwbAlgo(), but it is
+compiled only when EVISION_ALGO_ENABLED is defined. With EVISION_ALGO_ENABLED
+disabled, this leads to an undefined symbol at runtime when loading the DCMIPP
+IPA. This commit guards the call under EVISION_ALGO_ENABLED so that non-EVISION
+builds no longer reference the helper.
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ src/ipa/dcmipp/algorithms/awb.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/ipa/dcmipp/algorithms/awb.cpp b/src/ipa/dcmipp/algorithms/awb.cpp
+index 006ad4b8..4444ac98 100644
+--- a/src/ipa/dcmipp/algorithms/awb.cpp
++++ b/src/ipa/dcmipp/algorithms/awb.cpp
+@@ -652,10 +652,12 @@ void Awb::queueRequest([[maybe_unused]] IPAContext &context,
+ 		LOG(DcmippAwb, Debug) << "Updating AwbColourConv to " << (*cconv)[0] << "...";
+ 	}
+
++#ifdef EVISION_ALGO_ENABLED
+ 	if (internal_.profileDirty && !configureAwbAlgo()) {
+ 		LOG(DcmippAwb, Error) << "Cannot reconfigure awb algorithm";
+ 		return;
+ 	}
++#endif /* EVISION_ALGO_ENABLED */
+
+ 	/* Static config: update params_ and if applicable force config_ update now */
+ 	const auto &customColorTemp = controls.get(controls::draft::AwbCustomColorTemperature);

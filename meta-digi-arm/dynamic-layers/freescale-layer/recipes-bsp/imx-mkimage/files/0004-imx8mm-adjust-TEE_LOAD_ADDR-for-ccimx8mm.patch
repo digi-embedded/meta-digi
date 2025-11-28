@@ -12,7 +12,7 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/iMX8M/soc.mak b/iMX8M/soc.mak
-index ffd70af8ac7d..7ab1ea099894 100644
+index 3b0b6b603cd5..aea1dbef3f85 100644
 --- a/iMX8M/soc.mak
 +++ b/iMX8M/soc.mak
 @@ -35,7 +35,7 @@ PLAT = imx8mm

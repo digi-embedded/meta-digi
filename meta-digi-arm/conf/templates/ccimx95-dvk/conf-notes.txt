@@ -1,0 +1,20 @@
+Digi Embedded Yocto provides the following image recipes:
+
+  * dey-image-qt: graphical QT image
+
+    By default the image is XWayland-based so it provides a full Weston
+    desktop environment.
+
+  * dey-image-chromium: graphical Chromium image
+
+    By default the image is XWayland-based so it provides a full Weston
+    desktop environment.
+
+  * dey-image-lvgl: graphical LVGL image
+
+    A DRM-based image including an LVGL demo application.
+
+  * dey-image-flutter: graphical Flutter image
+
+    Expansion of custom Digi core-image-base including full Flutter
+    framework support.

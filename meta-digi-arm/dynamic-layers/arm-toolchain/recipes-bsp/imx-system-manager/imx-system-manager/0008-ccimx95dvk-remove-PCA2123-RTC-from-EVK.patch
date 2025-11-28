@@ -1,0 +1,1197 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Thu, 25 Sep 2025 11:41:51 +0200
+Subject: [PATCH 8/8] ccimx95dvk: remove PCA2123 RTC from EVK
+
+NXP used this external RTC on its 15x15 EVK.
+This chip is not present on the DVK.
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+---
+ boards/ccimx95dvk/sm/Makefile          |  11 +-
+ boards/ccimx95dvk/sm/brd_sm.h          |   2 +-
+ boards/ccimx95dvk/sm/brd_sm_bbm.c      | 671 -------------------------
+ boards/ccimx95dvk/sm/brd_sm_bbm.h      | 242 ---------
+ boards/ccimx95dvk/sm/brd_sm_control.c  |  15 +-
+ boards/ccimx95dvk/sm/brd_sm_control.h  |   3 +-
+ boards/ccimx95dvk/sm/brd_sm_handlers.c |  17 -
+ boards/ccimx95dvk/sm/brd_sm_handlers.h |   7 -
+ configs/ccimx95dvk.cfg                 |   3 -
+ configs/ccimx95dvk/config_scmi.h       |   3 -
+ 10 files changed, 6 insertions(+), 968 deletions(-)
+ delete mode 100755 boards/ccimx95dvk/sm/brd_sm_bbm.c
+ delete mode 100755 boards/ccimx95dvk/sm/brd_sm_bbm.h
+
+diff --git a/boards/ccimx95dvk/sm/Makefile b/boards/ccimx95dvk/sm/Makefile
+index db27ea922733..05fc7febba4c 100755
+--- a/boards/ccimx95dvk/sm/Makefile
++++ b/boards/ccimx95dvk/sm/Makefile
+@@ -42,8 +42,7 @@ INCLUDE +=  \
+ 	-I$(BOARD_DIR)  \
+ 	-I$(BOARD_DIR)/sm \
+ 	-I$(COMPONENTS_DIR)/pf09  \
+-	-I$(COMPONENTS_DIR)/pf53  \
+-	-I$(COMPONENTS_DIR)/pca2131
++	-I$(COMPONENTS_DIR)/pf53
+ 
+ VPATH +=  \
+ 	$(BRD_SM_API_DIR)  \
+@@ -51,8 +50,7 @@ VPATH +=  \
+ 	$(BOARD_DIR)  \
+ 	$(BOARD_DIR)/sm  \
+ 	$(COMPONENTS_DIR)/pf09  \
+-	$(COMPONENTS_DIR)/pf53  \
+-	$(COMPONENTS_DIR)/pca2131
++	$(COMPONENTS_DIR)/pf53
+ 
+ OBJS += \
+ 	$(OUT)/board.o  \
+@@ -61,8 +59,5 @@ OBJS += \
+ 	$(OUT)/brd_sm_control.o  \
+ 	$(OUT)/brd_sm_sensor.o  \
+ 	$(OUT)/brd_sm_voltage.o  \
+-	$(OUT)/brd_sm_bbm.o  \
+ 	$(OUT)/fsl_pf09.o  \
+-	$(OUT)/fsl_pf53.o  \
+-	$(OUT)/fsl_pca2131.o
+-
++	$(OUT)/fsl_pf53.o
+diff --git a/boards/ccimx95dvk/sm/brd_sm.h b/boards/ccimx95dvk/sm/brd_sm.h
+index ce758e1e4c64..0c8050646fba 100755
+--- a/boards/ccimx95dvk/sm/brd_sm.h
++++ b/boards/ccimx95dvk/sm/brd_sm.h
+@@ -2,6 +2,7 @@
+ ** ###################################################################
+ **
+ ** Copyright 2023-2024 NXP
++** Copyright 2025 Digi International Inc.
+ **
+ ** Redistribution and use in source and binary forms, with or without modification,
+ ** are permitted provided that the following conditions are met:
+@@ -54,7 +55,6 @@
+ #include "brd_sm_control.h"
+ #include "brd_sm_sensor.h"
+ #include "brd_sm_voltage.h"
+-#include "brd_sm_bbm.h"
+ #include "board.h"
+ #include "brd_sm_api.h"
+ 
+diff --git a/boards/ccimx95dvk/sm/brd_sm_bbm.c b/boards/ccimx95dvk/sm/brd_sm_bbm.c
+deleted file mode 100755
+index 2b13931c7749..000000000000
+--- a/boards/ccimx95dvk/sm/brd_sm_bbm.c
++++ /dev/null
+@@ -1,671 +0,0 @@
+-/*
+-** ###################################################################
+-**
+-** Copyright 2025 NXP
+-** Copyright 2025 Digi International Inc.
+-**
+-** Redistribution and use in source and binary forms, with or without modification,
+-** are permitted provided that the following conditions are met:
+-**
+-** o Redistributions of source code must retain the above copyright notice, this list
+-**   of conditions and the following disclaimer.
+-**
+-** o Redistributions in binary form must reproduce the above copyright notice, this
+-**   list of conditions and the following disclaimer in the documentation and/or
+-**   other materials provided with the distribution.
+-**
+-** o Neither the name of the copyright holder nor the names of its
+-**   contributors may be used to endorse or promote products derived from this
+-**   software without specific prior written permission.
+-**
+-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+-** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+-** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+-** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+-** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+-** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+-** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+-** ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+-** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-**
+-**
+-** ###################################################################
+-*/
+-
+-/*==========================================================================*/
+-/* File containing the implementation of the PCA2131 RTC.                   */
+-/*==========================================================================*/
+-
+-/* Note this code is an example. The conversion functions between date and
+-   seconds have not been fully tested to match The PCA2131 and calling
+-   agents. */
+-
+-/* Includes */
+-
+-#include "sm.h"
+-#include "brd_sm.h"
+-#include "lmm.h"
+-
+-/* Local defines */
+-
+-/* Local types */
+-
+-/* Local variables */
+-
+-/* Local functions */
+-
+-static bool days2date(uint32_t days, uint32_t *year, uint32_t *month,
+-    uint32_t *day, uint32_t *weekday);
+-static void date2days(uint32_t year, uint32_t month, uint32_t day,
+-    uint32_t *days);
+-
+-/*--------------------------------------------------------------------------*/
+-/* Write RTC raw data                                                       */
+-/*--------------------------------------------------------------------------*/
+-int32_t BRD_SM_BbmRtcWrite(uint32_t addr, uint32_t numVal,
+-    const uint32_t *val)
+-{
+-    int32_t status = SM_ERR_SUCCESS;
+-
+-    /* Check read size */
+-    if (numVal > 24U)
+-    {
+-        status = SM_ERR_INVALID_PARAMETERS;
+-    }
+-    else
+-    {
+-        uint8_t buf[24];
+-
+-        /* Copy buffer (convert to 8-bit) */
+-        for (uint32_t idx = 0U; idx < numVal; idx++)
+-        {
+-            buf[idx] = U32_U8(val[idx]);
+-        }
+-
+-        /* Write data */
+-        if (!PCA2131_RtcWrite(&g_pca2131Dev, U32_U8(addr),
+-            U32_U8(numVal), buf))
+-        {
+-            status = SM_ERR_HARDWARE_ERROR;
+-        }
+-    }
+-
+-    /* Return status */
+-    return status;
+-}
+-
+-/*--------------------------------------------------------------------------*/
+-/* Read RTC raw data                                                        */
+-/*--------------------------------------------------------------------------*/
+-int32_t BRD_SM_BbmRtcRead(uint32_t addr, uint32_t numVal, uint32_t *val)
+-{
+-    int32_t status = SM_ERR_SUCCESS;
+-
+-    /* Check read size */
+-    if (numVal > 24U)
+-    {
+-        status = SM_ERR_INVALID_PARAMETERS;
+-    }
+-    else
+-    {
+-        uint8_t buf[24] = { 0 };
+-
+-        /* Read data */
+-        if (PCA2131_RtcRead(&g_pca2131Dev, U32_U8(addr),
+-            U32_U8(numVal), buf))
+-        {
+-            /* Copy buffer (convert to 32-bit) */
+-            for (uint32_t idx = 0U; idx < numVal; idx++)
+-            {
+-                val[idx] = (uint32_t) buf[idx];
+-            }
+-        }
+-        else
+-        {
+-            status = SM_ERR_HARDWARE_ERROR;
+-        }
+-    }
+-
+-    /* Return status */
+-    return status;
+-}
+-
+-/*--------------------------------------------------------------------------*/
+-/* Return RTC name                                                          */
+-/*--------------------------------------------------------------------------*/
+-int32_t BRD_SM_BbmRtcNameGet(uint32_t rtcId, string *rtcNameAddr,
+-    int32_t *len)
+-{
+-    int32_t status = SM_ERR_SUCCESS;
+-    static int32_t s_maxLen = 0;
+-
+-    static string const s_name[BRD_SM_NUM_RTC] =
+-    {
+-        "pca2131"
+-    };
+-
+-    /* Get max string width */
+-    DEV_SM_MaxStringGet(len, &s_maxLen, s_name, BRD_SM_NUM_RTC);
+-
+-    if (rtcId < DEV_SM_NUM_RTC)
+-    {
+-        status = DEV_SM_BbmRtcNameGet(rtcId, rtcNameAddr, len);
+-    }
+-    else
+-    {
+-        /* Return pointer to name */
+-        *rtcNameAddr = s_name[rtcId - DEV_SM_NUM_RTC];
+-    }
+-
+-    /* Return status */
+-    return status;
+-}
+-
+-/*--------------------------------------------------------------------------*/
+-/* Return RTC info                                                          */
+-/*--------------------------------------------------------------------------*/
+-int32_t BRD_SM_BbmRtcDescribe(uint32_t rtcId, uint32_t *secWidth,
+-    uint32_t *tickWidth, uint32_t *ticksPerSec)
+-{
+-    int32_t status = SM_ERR_SUCCESS;
+-
+-    if (rtcId < DEV_SM_NUM_RTC)
+-    {
+-        status = DEV_SM_BbmRtcDescribe(rtcId, secWidth, tickWidth,
+-            ticksPerSec);
+-    }
+-    else
+-    {
+-        /* Return RTC info */
+-        *secWidth = 32U;
+-        *tickWidth = 39U;
+-        *ticksPerSec = 100U;
+-    }
+-
+-    /* Return status */
+-    return status;
+-}
+-
+-/*--------------------------------------------------------------------------*/
+-/* Set RTC time                                                             */
+-/*--------------------------------------------------------------------------*/
+-int32_t BRD_SM_BbmRtcTimeSet(uint32_t rtcId, uint64_t val, bool ticks)
+-{
+-    int32_t status = SM_ERR_SUCCESS;
+-
+-    if (rtcId < DEV_SM_NUM_RTC)
+-    {
+-        status = DEV_SM_BbmRtcTimeSet(rtcId, val, ticks);
+-    }
+-    else
+-    {
+-        uint32_t year, month, day, hour, min, sec, hun, weekday;
+-        uint32_t days, hours, mins, secs;
+-
+-        /* Convert to hundredths of seconds */
+-        if (ticks)
+-        {
+-            uint64_t sec64, hun64;
+-
+-            sec64 = val / 100U;
+-            hun64 = val - (sec64 * 100U);
+-
+-            secs = U64_U32(sec64);
+-            hun = U64_U32(hun64);
+-        }
+-        else
+-        {
+-            hun = 0U;
+-            secs = U64_U32(val);
+-        }
+-
+-        /* Calculate totals */
+-        mins = secs / 60U;
+-        hours = secs / 3600U;
+-        days = secs / 86400U;
+-
+-        /* Calculate time */
+-        sec = secs % 60U;
+-        min = mins % 60U;
+-        hour = hours % 24U;
+-
+-        /* Convert to date */
+-        if (days2date(days, &year, &month, &day, &weekday)
+-            && (year <= 2069U))
+-        {
+-            /* Convert year */
+-            year %= 100U;
+-
+-            /* Write RTC */
+-            if (!PCA2131_RtcSet(&g_pca2131Dev, year, month, day, hour,
+-                min, sec, hun, weekday))
+-            {
+-                status = SM_ERR_HARDWARE_ERROR;
+-            }
+-        }
+-        else
+-        {
+-            status = SM_ERR_INVALID_PARAMETERS;
+-        }
+-    }
+-
+-    if (status == SM_ERR_SUCCESS)
+-    {
+-        /* Enable battery */
+-        (void) PCA2131_PowerModeSet(&g_pca2131Dev, 0U);
+-    }
+-
+-    /* Return status */
+-    return status;
+-}
+-
+-/*--------------------------------------------------------------------------*/
+-/* Get RTC time                                                             */
+-/*--------------------------------------------------------------------------*/
+-int32_t BRD_SM_BbmRtcTimeGet(uint32_t rtcId, uint64_t *val, bool ticks)
+-{
+-    int32_t status = SM_ERR_SUCCESS;
+-
+-    if (rtcId < DEV_SM_NUM_RTC)
+-    {
+-        status = DEV_SM_BbmRtcTimeGet(rtcId, val, ticks);
+-    }
+-    else
+-    {
+-        uint32_t year, month, day, hour, min, sec, hun, weekday;
+-
+-        /* Read RTC */
+-        if (PCA2131_RtcGet(&g_pca2131Dev, &year, &month, &day, &hour, &min,
+-            &sec, &hun, &weekday))
+-        {
+-            uint32_t days, secs;
+-
+-            /* Convert year */
+-            if (year >= 70U)
+-            {
+-                year = year + 1900U;
+-            }
+-            else
+-            {
+-                year = year + 2000U;
+-            }
+-
+-            /* Convert to days */
+-            date2days(year, month, day, &days);
+-
+-            /* Calculate seconds */
+-            secs = sec + (min * 60U) + (hour * 3600U);
+-            secs += (days * 86400U);
+-
+-            /* Check time format */
+-            if (ticks)
+-            {
+-                *val = (((uint64_t) secs) * 100U) + hun;
+-            }
+-            else
+-            {
+-                *val = ((uint64_t) secs);
+-            }
+-        }
+-        else
+-        {
+-            status = SM_ERR_HARDWARE_ERROR;
+-        }
+-    }
+-
+-    /* Return status */
+-    return status;
+-}
+-
+-/*--------------------------------------------------------------------------*/
+-/* Get BBM RTC state                                                        */
+-/*--------------------------------------------------------------------------*/
+-int32_t BRD_SM_BbmRtcStateGet(uint32_t rtcId, uint32_t *state)
+-{
+-    int32_t status = SM_ERR_SUCCESS;
+-
+-    if (rtcId < DEV_SM_NUM_RTC)
+-    {
+-        status = DEV_SM_BbmRtcStateGet(rtcId, state);
+-    }
+-    else
+-    {
+-        bool st;
+-
+-        /* Default state */
+-        *state = 0U;
+-
+-        /* Enable battery */
+-        (void) PCA2131_PowerModeSet(&g_pca2131Dev, 0U);
+-
+-        /* Get battery state */
+-        if (PCA2131_TimeStatusGet(&g_pca2131Dev, &st))
+-        {
+-            if (st)
+-            {
+-                *state |= LMM_BBM_STATE_RESET;
+-            }
+-        }
+-        else
+-        {
+-            status = SM_ERR_HARDWARE_ERROR;
+-        }
+-
+-        /* Get battery state */
+-        if (PCA2131_BattStatusGet(&g_pca2131Dev, &st))
+-        {
+-            if (st)
+-            {
+-                *state |= LMM_BBM_STATE_BATT_LOW;
+-            }
+-        }
+-        else
+-        {
+-            status = SM_ERR_HARDWARE_ERROR;
+-        }
+-    }
+-
+-    /* Return status */
+-    return status;
+-}
+-
+-/*--------------------------------------------------------------------------*/
+-/* Set RTC alarm                                                            */
+-/*--------------------------------------------------------------------------*/
+-int32_t BRD_SM_BbmRtcAlarmSet(uint32_t rtcId, bool enable, uint64_t val)
+-{
+-    int32_t status = SM_ERR_SUCCESS;
+-
+-    if (rtcId < DEV_SM_NUM_RTC)
+-    {
+-        status = DEV_SM_BbmRtcAlarmSet(rtcId, enable, val);
+-    }
+-    else
+-    {
+-        /* Enable? */
+-        if (enable)
+-        {
+-            uint32_t year, month, day, hour, min, sec, weekday;
+-            uint32_t days, hours, mins, secs;
+-
+-            /* Convert to seconds */
+-            secs = U64_U32(val);
+-
+-            /* Calculate totals */
+-            mins = secs / 60U;
+-            hours = secs / 3600U;
+-            days = secs / 86400U;
+-
+-            /* Calculate time */
+-            sec = secs % 60U;
+-            min = mins % 60U;
+-            hour = hours % 24U;
+-
+-            /* Convert to date */
+-            if (days2date(days, &year, &month, &day, &weekday)
+-                && (year <= 2069U))
+-            {
+-                /* Convert year */
+-                year %= 100U;
+-
+-                /* Write to RTC */
+-                if (PCA2131_AlarmSet(&g_pca2131Dev, day, hour, min, sec,
+-                    weekday))
+-                {
+-                    /* Enable interrupt */
+-                    if (PCA2131_IntEnable(&g_pca2131Dev, true))
+-                    {
+-                    }
+-                    else
+-                    {
+-                        status = SM_ERR_HARDWARE_ERROR;
+-                    }
+-                }
+-            }
+-            else
+-            {
+-                status = SM_ERR_INVALID_PARAMETERS;
+-            }
+-
+-            /* Track if enabled for PCA2131 use */
+-            if (status == SM_ERR_SUCCESS)
+-            {
+-                g_pca2131Used = true;
+-            }
+-        }
+-        else
+-        {
+-            /* Disable interrupt */
+-            if (PCA2131_IntEnable(&g_pca2131Dev, false))
+-            {
+-            }
+-            else
+-            {
+-                status = SM_ERR_HARDWARE_ERROR;
+-            }
+-        }
+-    }
+-
+-    /* Return status */
+-    return status;
+-}
+-
+-/*--------------------------------------------------------------------------*/
+-/* PCA2131 interrupt handler                                                */
+-/*--------------------------------------------------------------------------*/
+-void BRD_SM_BbmHandler(void)
+-{
+-    /* Handle alarm */
+-    LMM_BbmRtcAlarmEvent(BRD_SM_RTC_PCA2131);
+-
+-    /* Clear status flags */
+-    (void) PCA2131_IntClear(&g_pca2131Dev);
+-}
+-
+-/*==========================================================================*/
+-
+-/*--------------------------------------------------------------------------*/
+-/* Convert days since 1-1-1970 to date/time                                 */
+-/*--------------------------------------------------------------------------*/
+-static bool days2date(uint32_t days, uint32_t *year, uint32_t *month,
+-    uint32_t *day, uint32_t *weekday)
+-{
+-    bool rc = true;
+-    uint32_t newDays = 0U;
+-    uint32_t era = 0U;
+-    uint32_t doe = 0U;
+-    uint32_t yoe = 0U;
+-    uint32_t doy = 0U;
+-    uint32_t moy = 0U;
+-
+-    /* Check days value doesn't wrap */
+-    if (days <= (UINT32_MAX - 719468U))
+-    {
+-        /* Adjust to 1-1-1970) */
+-        newDays = days + 719468U;
+-    }
+-    else
+-    {
+-        /* Set the return code incase value wraps */
+-        rc = false;
+-    }
+-
+-    if (rc)
+-    {
+-        /* Calculate the era */
+-        era = newDays / 146097U;
+-
+-        /* Check the expression doesn't wrap due to negative value */
+-        if (newDays >= (era * 146097U))
+-        {
+-            /* Calculate the day in the era */
+-            doe = newDays - (era * 146097U);
+-        }
+-        else
+-        {
+-            /* Set the return code if the expression value wraps */
+-            rc = false;
+-        }
+-    }
+-
+-    if (rc)
+-    {
+-        /* Check the expression doesn't wrap due to negative value */
+-        if (doe >= (doe / 1460U))
+-        {
+-            /* Calculate the year of era */
+-            yoe = (doe - (doe / 1460U) + (doe / 36524U));
+-
+-            /* Check the expression doesn't wrap due to negative value */
+-            if (yoe >= (doe / 146096U))
+-            {
+-                yoe -= (doe / 146096U);
+-                yoe /= 365U;
+-            }
+-            else
+-            {
+-                /* Set the return code if the expression value wraps */
+-                rc = false;
+-            }
+-        }
+-        else
+-        {
+-            /* Set the return code if the expression value wraps */
+-            rc = false;
+-        }
+-    }
+-
+-    if (rc)
+-    {
+-        /* Check the expression doesn't wrap due to negative value */
+-        if (yoe <= (UINT32_MAX - (era * 400U)))
+-        {
+-            /* Calculate year */
+-            *year = yoe + (era * 400U);
+-        }
+-        else
+-        {
+-            /* Set the return code if the expression value wraps */
+-            rc = false;
+-        }
+-    }
+-
+-    if (rc)
+-    {
+-        /* Check the expression doesn't wrap due to negative value */
+-        if (doe >= (365U * yoe))
+-        {
+-            /* Calculate day of the year */
+-            doy = doe - (365U * yoe);
+-
+-            /* Check the expression doesn't wrap due to negative  value */
+-            if (doy >= (yoe / 4U))
+-            {
+-                doy -= (yoe / 4U);
+-                doy += (yoe / 100U);
+-            }
+-            else
+-            {
+-                /* Set the return code if the expression value wraps */
+-                rc = false;
+-            }
+-        }
+-        else
+-        {
+-            /* Set the return code if the expression value wraps */
+-            rc = false;
+-        }
+-    }
+-
+-    if (rc)
+-    {
+-        /* Check the expression doesn't wrap due to negative value */
+-        if (doy <= (UINT32_MAX / 5U))
+-        {
+-            /* Calculate month of year */
+-            moy = ((5U * doy) + 2U) / 153U;
+-        }
+-        else
+-        {
+-            /* Set the return code if the expression value wraps */
+-            rc = false;
+-        }
+-    }
+-
+-
+-    if (rc)
+-    {
+-        /* Check the expression doesn't wrap due to negative value */
+-        if (moy <= ((UINT32_MAX - 2U) / 153U))
+-        {
+-            /* Calculate day */
+-            *day = (((153U * moy) + 2U) / 5U) - 1U;
+-            if (doy >= *day)
+-            {
+-                *day = doy - *day;
+-            }
+-            else
+-            {
+-                /* Set the return code if the expression value wraps */
+-                rc = false;
+-            }
+-        }
+-        else
+-        {
+-            /* Set the return code if the expression value wraps */
+-            rc = false;
+-        }
+-    }
+-
+-    if (rc)
+-    {
+-        /* Calculate month */
+-        *month= (moy < 10U) ? (moy + 3U) : (moy - 9U);
+-
+-        /* Calculate day of the week */
+-        *weekday = (days + 4U) % 7U;
+-
+-        /* Adjust year */
+-        *year += (*month <= 2U) ? 1U : 0U;
+-    }
+-
+-    /* Return code */
+-    return rc;
+-}
+-
+-/*--------------------------------------------------------------------------*/
+-/* Convert date/time to days since 1-1-1970                                 */
+-/*--------------------------------------------------------------------------*/
+-static void date2days(uint32_t year, uint32_t month, uint32_t day,
+-    uint32_t *days)
+-{
+-    uint32_t newYear;
+-    uint32_t era;
+-    uint32_t doe;
+-    uint32_t yoe;
+-    uint32_t doy;
+-    uint32_t moy;
+-
+-    /* Adjust year */
+-    newYear = year - ((month <= 2U) ? 1U : 0U);
+-
+-    /* Calculate era */
+-    era = newYear / 400U;
+-
+-    /* Calculate the year of era */
+-    yoe = newYear - (era * 400U);
+-
+-    /* Calculate month of year */
+-    moy = (month > 2U) ? (month - 3U) : (month + 9U);
+-
+-    /* Calculate day of the year */
+-    doy = (((153U * moy) + 2U) / 5U) + (day - 1U);
+-
+-    /* Calculate the day in the era */
+-    doe = (yoe * 365U) + (yoe / 4U) - (yoe / 100U) + doy;
+-
+-    /* Calculate days */
+-    *days = (era * 146097U) + doe - 719468U;
+-}
+-
+diff --git a/boards/ccimx95dvk/sm/brd_sm_bbm.h b/boards/ccimx95dvk/sm/brd_sm_bbm.h
+deleted file mode 100755
+index a96a8e1cc901..000000000000
+--- a/boards/ccimx95dvk/sm/brd_sm_bbm.h
++++ /dev/null
+@@ -1,242 +0,0 @@
+-/*
+-** ###################################################################
+-**
+-** Copyright 2024 NXP
+-**
+-** Redistribution and use in source and binary forms, with or without modification,
+-** are permitted provided that the following conditions are met:
+-**
+-** o Redistributions of source code must retain the above copyright notice, this list
+-**   of conditions and the following disclaimer.
+-**
+-** o Redistributions in binary form must reproduce the above copyright notice, this
+-**   list of conditions and the following disclaimer in the documentation and/or
+-**   other materials provided with the distribution.
+-**
+-** o Neither the name of the copyright holder nor the names of its
+-**   contributors may be used to endorse or promote products derived from this
+-**   software without specific prior written permission.
+-**
+-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+-** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+-** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+-** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+-** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+-** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+-** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+-** ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+-** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-**
+-**
+-** ###################################################################
+-*/
+-
+-/*==========================================================================*/
+-/*!
+- * @addtogroup BRD_SM_MX95EVK
+- * @{
+- *
+- * @file
+- * @brief
+- *
+- * Header file containing the SM API for the board PCA2131.
+- */
+-/*==========================================================================*/
+-
+-#ifndef BRD_SM_BBM_H
+-#define BRD_SM_BBM_H
+-
+-/* Includes */
+-
+-#include "sm.h"
+-#include "dev_sm.h"
+-#include "fsl_pca2131.h"
+-
+-/* Defines */
+-
+-/*!
+- * @name Board redirection defines
+- * @{
+- */
+-#define SM_BBMRTCNAMEGET       BRD_SM_BbmRtcNameGet       /*!< RTC name */
+-#define SM_BBMRTCDESCRIBE      BRD_SM_BbmRtcDescribe      /*!< RTC describe */
+-#define SM_BBMRTCTIMESET       BRD_SM_BbmRtcTimeSet       /*!< RTC time set */
+-#define SM_BBMRTCTIMEGET       BRD_SM_BbmRtcTimeGet       /*!< RTC time get */
+-#define SM_BBMRTCSTATEGET      BRD_SM_BbmRtcStateGet      /*!< RTC state get */
+-#define SM_BBMRTCALARMSET      BRD_SM_BbmRtcAlarmSet      /*!< RTC alarm set */
+-/** @} */
+-
+-/*! Number of board RTC */
+-#define BRD_SM_NUM_RTC  1UL
+-
+-/*! Total number of RTC */
+-#define SM_NUM_RTC  (DEV_SM_NUM_RTC + BRD_SM_NUM_RTC)
+-
+-/*!
+- * @name BRD_SM bbm domain indexes
+- */
+-/** @{ */
+-#define BRD_SM_RTC_PCA2131  (BRD_SM_NUM_RTC + 0U)   /*!< PCA2131 RTC */
+-/** @} */
+-
+-/* Types */
+-
+-/* Functions */
+-
+-/*!
+- * @name Board sensor functions
+- * @{
+- */
+-
+-/*!
+- * Read raw byte data from the RTC.
+- *
+- * @param[in]     addr    I2C address to read
+- * @param[in]     numVal  Number of bytes to read
+- * @param[out]    val     Return pointer for data
+- *
+- * @return Returns the status (::SM_ERR_SUCCESS = success).
+- *
+- * Return errors (see @ref STATUS "SM error codes"):
+- * - ::SM_ERR_INVALID_PARAMETERS: if \a numVal is invalid.
+- * - ::SM_ERR_HARDWARE_ERROR: if I2C transfer fails.
+- */
+-int32_t BRD_SM_BbmRtcWrite(uint32_t addr, uint32_t numVal,
+-    const uint32_t *val);
+-
+-/*!
+- * Write raw byte data to the RTC.
+- *
+- * @param[in]     addr    I2C address to write
+- * @param[in]     numVal  Number of bytes to write
+- * @param[in]     val     Pointer to data
+- *
+- * @return Returns the status (::SM_ERR_SUCCESS = success).
+- *
+- * Return errors (see @ref STATUS "SM error codes"):
+- * - ::SM_ERR_INVALID_PARAMETERS: if \a numVal is invalid.
+- * - ::SM_ERR_HARDWARE_ERROR: if I2C transfer fails.
+- */
+-int32_t BRD_SM_BbmRtcRead(uint32_t addr, uint32_t numVal, uint32_t *val);
+-
+-/*!
+- * Get a board RTC name.
+- *
+- * @param[in]     rtcId        RTC name to get
+- * @param[out]    rtcNameAddr  Return pointer to name
+- * @param[out]    len          Return max length of all RTC names
+- *
+- * This function allows the caller to get the name of an RTC.
+- *
+- * @return Returns the status (::SM_ERR_SUCCESS = success).
+- *
+- * Return errors (see @ref STATUS "SM error codes"):
+- * - ::SM_ERR_NOT_FOUND: if \a rtcId is invalid.
+- */
+-int32_t BRD_SM_BbmRtcNameGet(uint32_t rtcId, string *rtcNameAddr,
+-    int32_t *len);
+-
+-/*!
+- * Get a board RTC description.
+- *
+- * @param[in]     rtcId        RTC description to get
+- * @param[out]    secWidth     Return pointer to seconds width
+- * @param[out]    tickWidth    Return pointer to tick width
+- * @param[out]    ticksPerSec  Return pointer to ticks per second
+- *
+- * This function allows the caller to get the description of an RTC.
+- *
+- * @return Returns the status (::SM_ERR_SUCCESS = success).
+- *
+- * Return errors (see @ref STATUS "SM error codes"):
+- * - ::SM_ERR_NOT_FOUND: if \a rtcId is invalid.
+- */
+-int32_t BRD_SM_BbmRtcDescribe(uint32_t rtcId, uint32_t *secWidth,
+-    uint32_t *tickWidth, uint32_t *ticksPerSec);
+-
+-/*!
+- * Set a board RTC time.
+- *
+- * @param[in]     rtcId    Identifier of the RTC
+- * @param[in]     val      Time in seconds/ticks to write to the RTC
+- * @param[in]     ticks    true = ticks, false = seconds
+- *
+- * This function allows a caller to set the RTC time. Time can be set in units
+- * of ticks or seconds.
+- *
+- * @return Returns the status (::SM_ERR_SUCCESS = success).
+- *
+- * Return errors (see @ref STATUS "SM error codes"):
+- * - ::SM_ERR_SUCCESS: if the RTC time was successfully set.
+- * - ::SM_ERR_NOT_FOUND: if \a rtcId pertains to a non-existent RTC.
+- * - ::SM_ERR_INVALID_PARAMETERS: if the time is not valid (beyond the
+- *   range of the RTC).
+- */
+-int32_t BRD_SM_BbmRtcTimeSet(uint32_t rtcId, uint64_t val, bool ticks);
+-
+-/*!
+- * Get a board RTC time.
+- *
+- * @param[in]     rtcId    Identifier of the RTC
+- * @param[out]    val      Time in seconds/ticks read from the RTC
+- * @param[in]     ticks    true = ticks, false = seconds
+- *
+- * This function allows a caller to read the RTC time. Time can be read in
+- * units of ticks or seconds.
+- *
+- * @return Returns the status (::SM_ERR_SUCCESS = success).
+- *
+- * Return errors (see @ref STATUS "SM error codes"):
+- * - ::SM_ERR_SUCCESS: if the RTC time was successfully read.
+- * - ::SM_ERR_NOT_FOUND: if \a rtcId pertains to a non-existent RTC.
+- */
+-int32_t BRD_SM_BbmRtcTimeGet(uint32_t rtcId, uint64_t *val, bool ticks);
+-
+-/*!
+- * Get a board RTC state.
+- *
+- * @param[in]     rtcId    Identifier of the RTC
+- * @param[out]    state    Bit mask of state flags
+- *
+- * This function allows a caller to read the RTC state.
+- *
+- * @return Returns the status (::SM_ERR_SUCCESS = success).
+- *
+- * Return errors (see @ref STATUS "SM error codes"):
+- * - ::SM_ERR_SUCCESS: if the RTC state was successfully read.
+- * - ::SM_ERR_NOT_FOUND: if \a rtcId pertains to a non-existent RTC.
+- */
+-int32_t BRD_SM_BbmRtcStateGet(uint32_t rtcId, uint32_t *state);
+-
+-/*!
+- * Set a board RTC alarm.
+- *
+- * @param[in]     rtcId    Identifier of the RTC
+- * @param[in]     enable   Enable flag (1=enabled, 0=disabled)
+- * @param[in]     val      Alarm time in seconds to write to the RTC
+- *
+- * This function allows a caller to enable/disable and set the time for the RTC
+- * alarm. The alarm can be set in seconds only.
+- *
+- * @return Returns the status (::SM_ERR_SUCCESS = success).
+- *
+- * Return errors (see @ref STATUS "SM error codes"):
+- * - ::SM_ERR_SUCCESS: if the alarm was successfully set.
+- * - ::SM_ERR_NOT_FOUND: if \a rtcId pertains to a non-existent RTC.
+- * - ::SM_ERR_INVALID_PARAMETERS: if the time is not valid (beyond the
+- *   range of the RTC alarm).
+- */
+-int32_t BRD_SM_BbmRtcAlarmSet(uint32_t rtcId, bool enable, uint64_t val);
+-
+-/*!
+- * Handle PCA2131 interrupt.
+- */
+-void BRD_SM_BbmHandler(void);
+-
+-/** @} */
+-
+-#endif /* BRD_SM_BBM_H */
+-
+-/** @} */
+-
+diff --git a/boards/ccimx95dvk/sm/brd_sm_control.c b/boards/ccimx95dvk/sm/brd_sm_control.c
+index 8484a6895a3d..564159c1ad7b 100755
+--- a/boards/ccimx95dvk/sm/brd_sm_control.c
++++ b/boards/ccimx95dvk/sm/brd_sm_control.c
+@@ -65,10 +65,6 @@ int32_t BRD_SM_ControlSet(uint32_t ctrlId, uint32_t numVal,
+         {
+             status = DEV_SM_ControlSet(ctrlId, numVal, val);
+         }
+-        else if (ctrlId == BRD_SM_CTRL_PCA2131)
+-        {
+-            status = SM_ERR_NOT_SUPPORTED;
+-        }
+         else if (ctrlId == BRD_SM_CTRL_TEST)
+         {
+             /* Test response to an reported SM error */
+@@ -103,8 +99,7 @@ int32_t BRD_SM_ControlGet(uint32_t ctrlId, uint32_t *numRtn, uint32_t *rtn)
+         {
+             status = DEV_SM_ControlGet(ctrlId, numRtn, rtn);
+         }
+-        else if ((ctrlId == BRD_SM_CTRL_PCA2131)
+-            || (ctrlId == BRD_SM_CTRL_TEST))
++        else if (ctrlId == BRD_SM_CTRL_TEST)
+         {
+             *numRtn = 0U;
+             status = SM_ERR_NOT_SUPPORTED;
+@@ -140,10 +135,6 @@ int32_t BRD_SM_ControlExtSet(uint32_t ctrlId, uint32_t addr,
+         {
+             status = DEV_SM_ControlExtSet(ctrlId, addr, numVal, val);
+         }
+-        else if (ctrlId == BRD_SM_CTRL_PCA2131)
+-        {
+-            status = BRD_SM_BbmRtcWrite(addr, numVal, val);
+-        }
+         else
+         {
+             status = SM_ERR_NOT_SUPPORTED;
+@@ -174,10 +165,6 @@ int32_t BRD_SM_ControlExtGet(uint32_t ctrlId, uint32_t addr,
+         {
+             status = DEV_SM_ControlExtGet(ctrlId, addr, numRtn, rtn);
+         }
+-        else if (ctrlId == BRD_SM_CTRL_PCA2131)
+-        {
+-            status = BRD_SM_BbmRtcRead(addr, numRtn, rtn);
+-        }
+         else
+         {
+             status = SM_ERR_NOT_SUPPORTED;
+diff --git a/boards/ccimx95dvk/sm/brd_sm_control.h b/boards/ccimx95dvk/sm/brd_sm_control.h
+index 12365e56d7e4..be764f4cb1e7 100755
+--- a/boards/ccimx95dvk/sm/brd_sm_control.h
++++ b/boards/ccimx95dvk/sm/brd_sm_control.h
+@@ -67,7 +67,7 @@
+ /** @} */
+ 
+ /*! Number of board controls */
+-#define BRD_SM_NUM_CTRL  2UL
++#define BRD_SM_NUM_CTRL  1UL
+ 
+ /*! Total number of controls */
+ #define SM_NUM_CTRL  (DEV_SM_NUM_CTRL + BRD_SM_NUM_CTRL)
+@@ -77,7 +77,6 @@
+  */
+ /** @{ */
+ #define BRD_SM_CTRL_TEST        (DEV_SM_NUM_CTRL + 0U)  /*!< Test */
+-#define BRD_SM_CTRL_PCA2131     (DEV_SM_NUM_CTRL + 1U)  /*!< PCA2131 raw access */
+ /** @} */
+ 
+ /* Types */
+diff --git a/boards/ccimx95dvk/sm/brd_sm_handlers.c b/boards/ccimx95dvk/sm/brd_sm_handlers.c
+index a42359f15e8b..1c02541a589b 100755
+--- a/boards/ccimx95dvk/sm/brd_sm_handlers.c
++++ b/boards/ccimx95dvk/sm/brd_sm_handlers.c
+@@ -51,7 +51,6 @@
+ #define BOARD_PF09_DEV_ADDR         0x08U
+ #define BOARD_PF5301_DEV_ADDR       0x2AU
+ #define BOARD_PF5302_DEV_ADDR       0x29U
+-#define BOARD_PCA2131_DEV_ADDR      0x53U
+ 
+ /* Local types */
+ 
+@@ -62,7 +61,6 @@
+ PF09_Type g_pf09Dev;
+ PF53_Type g_pf5301Dev;
+ PF53_Type g_pf5302Dev;
+-PCA2131_Type g_pca2131Dev;
+ 
+ irq_prio_info_t g_brdIrqPrioInfo[BOARD_NUM_IRQ_PRIO_IDX] =
+ {
+@@ -75,8 +73,6 @@ irq_prio_info_t g_brdIrqPrioInfo[BOARD_NUM_IRQ_PRIO_IDX] =
+     }
+ };
+ 
+-bool g_pca2131Used = false;
+-
+ uint32_t g_pmicFaultFlags = 0U;
+ 
+ /* Local functions */
+@@ -215,19 +211,6 @@ int32_t BRD_SM_SerialDevicesInit(void)
+         }
+     }
+ 
+-    if (status == SM_ERR_SUCCESS)
+-    {
+-        /* Fill in PCA2131 RTC handle */
+-        g_pca2131Dev.i2cBase = s_i2cBases[BOARD_I2C_INSTANCE];
+-        g_pca2131Dev.devAddr = BOARD_PCA2131_DEV_ADDR;
+-
+-        /* Initialize PCA2131 RTC */
+-        if (!PCA2131_Init(&g_pca2131Dev))
+-        {
+-            status = SM_ERR_HARDWARE_ERROR;
+-        }
+-    }
+-
+     /* Return status */
+     return status;
+ }
+diff --git a/boards/ccimx95dvk/sm/brd_sm_handlers.h b/boards/ccimx95dvk/sm/brd_sm_handlers.h
+index 781a443e8444..967d41d61b53 100755
+--- a/boards/ccimx95dvk/sm/brd_sm_handlers.h
++++ b/boards/ccimx95dvk/sm/brd_sm_handlers.h
+@@ -55,7 +55,6 @@
+ #include "dev_sm.h"
+ #include "fsl_pf09.h"
+ #include "fsl_pf53.h"
+-#include "fsl_pca2131.h"
+ 
+ /* Defines */
+ 
+@@ -78,15 +77,9 @@ extern PF53_Type g_pf5301Dev;
+ /*! Handle to access PF5302 */
+ extern PF53_Type g_pf5302Dev;
+ 
+-/*! Handle to access PCA2131 */
+-extern PCA2131_Type g_pca2131Dev;
+-
+ /*! Array of dynamic priority info for board IRQs */
+ extern irq_prio_info_t g_brdIrqPrioInfo[BOARD_NUM_IRQ_PRIO_IDX];
+ 
+-/*! Indicator if bus expander bit[6] is used for the PF2131 RTC */
+-extern bool g_pca2131Used;
+-
+ /*! Fault flags from the PMICs */
+ extern uint32_t g_pmicFaultFlags;
+ 
+diff --git a/configs/ccimx95dvk.cfg b/configs/ccimx95dvk.cfg
+index 4af5cea789d9..b324e0fb0e45 100755
+--- a/configs/ccimx95dvk.cfg
++++ b/configs/ccimx95dvk.cfg
+@@ -345,9 +345,7 @@ CHANNEL             db=2, xport=smt, check=crc32, rpc=scmi, \
+ 
+ # API
+ 
+-BRD_SM_CTRL_PCA2131       ALL
+ BRD_SM_CTRL_TEST          ALL
+-BRD_SM_RTC_PCA2131        ALL
+ BRD_SM_SENSOR_TEMP_PF09   SET
+ BRD_SM_SENSOR_TEMP_PF5301 SET
+ BRD_SM_SENSOR_TEMP_PF5302 SET
+@@ -531,7 +529,6 @@ CHANNEL             db=1, xport=smt, rpc=scmi, type=p2a_notify
+ 
+ AUDIO_PLL1                ALL
+ AUDIO_PLL2                ALL
+-BRD_SM_RTC_PCA2131        PRIV
+ BRD_SM_SENSOR_TEMP_PF09   ALL
+ BRD_SM_SENSOR_TEMP_PF5301 SET
+ BRD_SM_SENSOR_TEMP_PF5302 SET
+diff --git a/configs/ccimx95dvk/config_scmi.h b/configs/ccimx95dvk/config_scmi.h
+index d251f7910b39..b23958f33138 100644
+--- a/configs/ccimx95dvk/config_scmi.h
++++ b/configs/ccimx95dvk/config_scmi.h
+@@ -72,7 +72,6 @@
+         .clkPerms[DEV_SM_CLK_M7] = SM_SCMI_PERM_ALL, \
+         .clkPerms[DEV_SM_CLK_TSTMR2] = SM_SCMI_PERM_ALL, \
+         .cpuPerms[DEV_SM_CPU_M7P] = SM_SCMI_PERM_ALL, \
+-        .ctrlPerms[BRD_SM_CTRL_PCA2131] = SM_SCMI_PERM_ALL, \
+         .ctrlPerms[BRD_SM_CTRL_TEST] = SM_SCMI_PERM_ALL, \
+         .daisyPerms[DEV_SM_DAISY_LPTMR2_0] = SM_SCMI_PERM_ALL, \
+         .daisyPerms[DEV_SM_DAISY_LPTMR2_1] = SM_SCMI_PERM_ALL, \
+@@ -87,7 +86,6 @@
+         .pdPerms[DEV_SM_PD_M7] = SM_SCMI_PERM_ALL, \
+         .perfPerms[DEV_SM_PERF_M7] = SM_SCMI_PERM_ALL, \
+         .perlpiPerms[DEV_SM_PERLPI_WDOG5] = SM_SCMI_PERM_ALL, \
+-        .rtcPerms[BRD_SM_RTC_PCA2131] = SM_SCMI_PERM_ALL, \
+         .rtcPerms[DEV_SM_RTC_BBNSM] = SM_SCMI_PERM_PRIV, \
+         .sensorPerms[BRD_SM_SENSOR_TEMP_PF09] = SM_SCMI_PERM_SET, \
+         .sensorPerms[BRD_SM_SENSOR_TEMP_PF5301] = SM_SCMI_PERM_SET, \
+@@ -605,7 +603,6 @@
+         .pinPerms[DEV_SM_PIN_XSPI1_SCLK] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_XSPI1_SS0_B] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_XSPI1_SS1_B] = SM_SCMI_PERM_ALL, \
+-        .rtcPerms[BRD_SM_RTC_PCA2131] = SM_SCMI_PERM_PRIV, \
+         .rtcPerms[DEV_SM_RTC_BBNSM] = SM_SCMI_PERM_ALL, \
+         .sensorPerms[BRD_SM_SENSOR_TEMP_PF09] = SM_SCMI_PERM_ALL, \
+         .sensorPerms[BRD_SM_SENSOR_TEMP_PF5301] = SM_SCMI_PERM_SET, \

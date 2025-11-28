@@ -13,12 +13,17 @@ RT_FILES:use-nxp-bsp = " \
     file://fragment-nxp-rt.config \
 "
 RT_FILES:stm32mpcommon = " \
-    file://0010-Rebase-on-v6.6.48-rt40.patch \
-    file://0011-v6.6-stm32mp-rt-r1.patch \
+    file://0010-Rebase-on-v6.6.78-rt51.patch \
+    file://0011-v6.6-stm32mp-rt-r2.patch \
     file://fragment-08-deactivate-rng.config \
+    file://fragment-10-network-improvment.config \
 "
 SRC_URI:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${RT_FILES}', '', d)} \
+"
+
+SRC_URI:append:ccmp25 = " \
+    ${@oe.utils.conditional('TRUSTFENCE_ENABLED', '1' , 'file://0001-ARM64-dts-ccmp25-add-signed-firmware-support-for-RPR.patch', '', d)} \
 "
 
 # Define RT config fragments per machine
@@ -27,6 +32,7 @@ RT_CONFIG_FRAGS:stm32mpcommon = " \
     ${S}/arch/arm64/configs/fragment-07-rt.config \
     ${S}/arch/arm64/configs/fragment-07-rt-sysvinit.config \
     ${WORKDIR}/fragment-08-deactivate-rng.config \
+    ${WORKDIR}/fragment-10-network-improvment.config \
 "
 KERNEL_CONFIG_FRAGMENTS:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${RT_CONFIG_FRAGS}', '', d)} \
@@ -60,4 +66,4 @@ do_install:append:stm32mpcommon() {
 
 FILES:${KERNEL_PACKAGE_NAME}-modules:stm32mpcommon += "${sysconfdir}/modprobe.d"
 
-COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx8x|ccimx9|ccmp2|ccmp1)"
+COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx9|ccmp2|ccmp1)"

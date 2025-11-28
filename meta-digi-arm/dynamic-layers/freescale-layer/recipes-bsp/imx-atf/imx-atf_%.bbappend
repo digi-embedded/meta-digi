@@ -2,22 +2,18 @@
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
-SRC_URI:append:ccimx8m = " \
+SRC_URI:append:dey = " \
     file://0001-imx8mm-Define-UART1-as-console-for-boot-stage.patch \
     file://0002-imx8mm-Disable-M4-debug-console.patch \
     file://0003-imx8mn-Define-UART1-as-console-for-boot-stage.patch \
     file://0004-imx8mn-Disable-M7-debug-console.patch \
     file://0005-imx8mm-set-BL32_BASE-and-map-high-DRAM-for-ccimx8mm-.patch \
+    file://0006-ccimx93-use-UART6-for-the-default-console.patch \
+    file://0007-imx93-bring-back-ELE-clock-workaround-for-soc-revisi.patch \
+    file://0008-ccimx91-use-UART6-for-the-default-console.patch \
+    file://0009-ccimx95-set-DVK-console-to-LPUART6.patch \
+    file://0010-ccimx95-enable-non-secure-non-privilege-access-to-GP.patch \
 "
-SRC_URI:append:ccimx91 = " \
-    file://0001-ccimx91-use-UART6-for-the-default-console.patch \
-"
-SRC_URI:append:ccimx93 = " \
-    file://0001-ccimx93-use-UART6-for-the-default-console.patch \
-    file://0002-imx93-bring-back-ELE-clock-workaround-for-soc-revisi.patch \
-"
-
-SRCREV = "1b27ee3edbb40ef9432c69ccaa744d1ac5d54c5d"
 
 BOOT_TOOLS = "imx-boot-tools"
 

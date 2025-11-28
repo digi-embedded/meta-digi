@@ -10,14 +10,15 @@ PREFERRED_PROVIDER_virtual/xserver = "xserver-xorg"
 #
 # Platform      Linux              U-Boot
 # -------------------------------------------------
-# ccimx6        5.15              2017.03
-# ccimx6qp      5.15              2017.03
+# ccimx6        6.6               2024.04
+# ccimx6qp      6.6               2024.04
 # ccimx6ul      6.6               2024.04
 # ccimx8x       6.6               2024.04 (packaged in imx-boot)
 # ccimx8mn      6.6               2024.04 (packaged in imx-boot)
 # ccimx8mm      6.6               2024.04 (packaged in imx-boot)
 # ccimx91       6.6               2024.04 (packaged in imx-boot)
 # ccimx93       6.6               2024.04 (packaged in imx-boot)
+# ccimx95       6.6               2024.04 (packaged in imx-boot)
 # ccmp15        6.6               2023.10
 # ccmp13        6.6               2023.10
 # ccmp25        6.6               2023.10
@@ -84,7 +85,7 @@ DEFAULT_IMAGE_NAME ??= "dey-image-qt"
 IMAGE_LINK_NAME = "${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}"
 
 # List of graphical images names (for install scripts)
-GRAPHICAL_IMAGES ?= "dey-image-qt dey-image-webkit dey-image-lvgl"
+GRAPHICAL_IMAGES ?= "dey-image-qt dey-image-webkit dey-image-lvgl dey-image-chromium"
 
 # Default wayland socket
 WAYLAND_DISPLAY ?= "wayland-1"

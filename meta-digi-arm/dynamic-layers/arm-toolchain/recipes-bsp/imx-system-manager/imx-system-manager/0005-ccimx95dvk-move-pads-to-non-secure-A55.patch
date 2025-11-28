@@ -1,0 +1,75 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Wed, 24 Sep 2025 12:26:07 +0200
+Subject: [PATCH] ccimx95dvk: move pads to non-secure A55
+
+The following pads are multiplexed and used by A55 in Linux:
+- PIN_UART2_RXD is used as LPUART1 CTS
+- PIN_UART2_TXD is used as LPUART1 RTS
+- PIN_PDM_BIT_STREAM1 is used as MIKROBUS_RST
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+---
+ configs/ccimx95dvk.cfg           | 5 ++++-
+ configs/ccimx95dvk/config_scmi.h | 3 +++
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/configs/ccimx95dvk.cfg b/configs/ccimx95dvk.cfg
+index 393c29436894..bf5f0739f526 100755
+--- a/configs/ccimx95dvk.cfg
++++ b/configs/ccimx95dvk.cfg
+@@ -1,6 +1,7 @@
+ ## ###################################################################
+ ##
+ ## Copyright 2023-2025 NXP
++## Copyright 2025 Digi International Inc.
+ ##
+ ## Redistribution and use in source and binary forms, with or without modification,
+ ## are permitted provided that the following conditions are met:
+@@ -285,7 +286,6 @@ L_STCU_NPUMIX       OWNER
+ PIN_FCCU_ERR0         OWNER
+ PIN_I2C1_SCL          OWNER
+ PIN_I2C1_SDA          OWNER
+-PIN_PDM_BIT_STREAM1   OWNER
+ PIN_GPIO_IO08         OWNER  # LPUART7_TX
+ PIN_GPIO_IO09         OWNER  # LPUART7_RX
+ PIN_WDOG_ANY          OWNER
+@@ -937,6 +937,7 @@ PIN_GPIO_IO37        OWNER
+ PIN_I2C2_SCL         OWNER
+ PIN_I2C2_SDA         OWNER
+ PIN_PDM_BIT_STREAM0  OWNER
++PIN_PDM_BIT_STREAM1  OWNER
+ PIN_PDM_CLK          OWNER
+ PIN_SAI1_RXD0        OWNER
+ PIN_SAI1_TXC         OWNER
+@@ -970,6 +971,8 @@ PIN_SD3_DATA2        OWNER
+ PIN_SD3_DATA3        OWNER
+ PIN_UART1_RXD        OWNER, test
+ PIN_UART1_TXD        OWNER
++PIN_UART2_RXD        OWNER
++PIN_UART2_TXD        OWNER
+ PIN_XSPI1_DATA0      OWNER
+ PIN_XSPI1_DATA1      OWNER
+ PIN_XSPI1_DATA2      OWNER
+diff --git a/configs/ccimx95dvk/config_scmi.h b/configs/ccimx95dvk/config_scmi.h
+index 0913c1339af0..510de3d252a2 100644
+--- a/configs/ccimx95dvk/config_scmi.h
++++ b/configs/ccimx95dvk/config_scmi.h
+@@ -562,6 +562,7 @@
+         .pinPerms[DEV_SM_PIN_I2C2_SCL] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_I2C2_SDA] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_PDM_BIT_STREAM0] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_PDM_BIT_STREAM1] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_PDM_CLK] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_SAI1_RXD0] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_SAI1_TXC] = SM_SCMI_PERM_ALL, \
+@@ -595,6 +596,8 @@
+         .pinPerms[DEV_SM_PIN_SD3_DATA3] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_UART1_RXD] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_UART1_TXD] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_UART2_RXD] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_UART2_TXD] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_XSPI1_DATA0] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_XSPI1_DATA1] = SM_SCMI_PERM_ALL, \
+         .pinPerms[DEV_SM_PIN_XSPI1_DATA2] = SM_SCMI_PERM_ALL, \

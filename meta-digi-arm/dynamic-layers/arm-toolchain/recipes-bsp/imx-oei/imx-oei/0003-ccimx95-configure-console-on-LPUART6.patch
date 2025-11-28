@@ -1,0 +1,56 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Mon, 15 Sep 2025 11:38:55 +0200
+Subject: [PATCH] ccimx95: configure console on LPUART6
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ boards/ccimx95/config_board.h  | 2 +-
+ boards/ccimx95/pin_mux.c       | 7 +++++++
+ devices/MIMX95/oei/soc_clock.c | 2 ++
+ 3 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/boards/ccimx95/config_board.h b/boards/ccimx95/config_board.h
+index 3095ebf1d8ce..ec97626a2a28 100644
+--- a/boards/ccimx95/config_board.h
++++ b/boards/ccimx95/config_board.h
+@@ -52,7 +52,7 @@
+ /* Defines */
+ 
+ /*! Config for UART instance */
+-#define BOARD_DEBUG_UART_INSTANCE    2U
++#define BOARD_DEBUG_UART_INSTANCE    6U
+ /*! Config for UART baudrate */
+ #define BOARD_DEBUG_UART_BAUDRATE    115200U
+ 
+diff --git a/boards/ccimx95/pin_mux.c b/boards/ccimx95/pin_mux.c
+index a8c15513b578..3cb33909f740 100644
+--- a/boards/ccimx95/pin_mux.c
++++ b/boards/ccimx95/pin_mux.c
+@@ -29,5 +29,12 @@ void BOARD_InitPins(void)
+ 
+     IOMUXC_SetPinMux(IOMUXC_PAD_UART2_TXD__LPUART2_TX, 0);
+     IOMUXC_SetPinConfig(IOMUXC_PAD_UART2_TXD__LPUART2_TX, IOMUXC_PAD_DSE(0xFU));
++#elif (BOARD_DEBUG_UART_INSTANCE == 6U)
++    /* Configure LPUART 6 */
++    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO05__LPUART6_RX, 0);
++    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO05__LPUART6_RX, IOMUXC_PAD_PD(1U));
++
++    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO04__LPUART6_TX, 0);
++    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO04__LPUART6_TX, IOMUXC_PAD_DSE(0xFU));
+ #endif
+ }
+diff --git a/devices/MIMX95/oei/soc_clock.c b/devices/MIMX95/oei/soc_clock.c
+index 3421e3efe143..9205b9a12782 100644
+--- a/devices/MIMX95/oei/soc_clock.c
++++ b/devices/MIMX95/oei/soc_clock.c
+@@ -25,6 +25,8 @@ static struct clk_root_cfg clk_root_cfgs[] = {
+ 	{ CLOCK_ROOT_LPUART1, CLOCK_SRC_OSC24M, 1}, /* 24MHz */
+ #elif (BOARD_DEBUG_UART_INSTANCE == 2)
+ 	{ CLOCK_ROOT_LPUART2, CLOCK_SRC_OSC24M, 1}, /* 24MHz */
++#elif (BOARD_DEBUG_UART_INSTANCE == 6)
++	{ CLOCK_ROOT_LPUART6, CLOCK_SRC_OSC24M, 1}, /* 24MHz */
+ #endif
+ #endif
+ };

@@ -13,8 +13,6 @@ BOOTLOADER_SEEK_BOOTPART = "1"
 # Platform u-boot settings
 UBOOT_PREFIX = "u-boot"
 UBOOT_SUFFIX = "imx"
-BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.${UBOOT_SUFFIX}"
-SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
 
 # Set InitRAMDisk load address to U-boot initramfs_addr
 UBOOT_RD_LOADADDRESS = "0x19000000"
@@ -46,6 +44,10 @@ MACHINE_DISTRO_FEATURES_REMOVE = "vulkan"
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"
 ROOTFS_EXT ?= '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", ".squashfs", ".ext4.gz", d)}'
+
+# i.MX6 platforms use weston 10.0.5.imx, which uses the wayland-0 socket
+# instead of wayland-1
+WAYLAND_DISPLAY = "wayland-0"
 
 BOOT_DEV_NAME ?= "/dev/mmcblk0p1"
 ROOTFS_DEV_NAME ?= "/dev/mmcblk0p3"

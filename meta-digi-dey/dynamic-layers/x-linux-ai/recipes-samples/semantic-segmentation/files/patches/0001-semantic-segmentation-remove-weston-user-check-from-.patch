@@ -10,10 +10,10 @@ Signed-off-by: David Escalona <david.escalona@digi.com>
  2 files changed, 2 insertions(+), 14 deletions(-)
 
 diff --git a/stai-mpu/launch_python_semantic_segmentation.sh b/stai-mpu/launch_python_semantic_segmentation.sh
-index a1c2479..94cd540 100755
+index e5bcb26..dee9b2c 100755
 --- a/stai-mpu/launch_python_semantic_segmentation.sh
 +++ b/stai-mpu/launch_python_semantic_segmentation.sh
-@@ -5,17 +5,11 @@
+@@ -5,18 +5,12 @@
  #
  # This software is licensed under terms that can be found in the LICENSE file
  # in the root directory of this software component.
@@ -22,8 +22,9 @@ index a1c2479..94cd540 100755
 -weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
  FRAMEWORK=$1
  echo "stai-mpu wrapper used : "$FRAMEWORK
+
  source /usr/local/x-linux-ai/resources/config_board_npu.sh
- cmd="python3 /usr/local/x-linux-ai/semantic-segmentation/stai_mpu_semantic_segmentation.py -m /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_MODEL -l /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_LABEL.txt --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT $OPTIONS"
+ cmd="python3 /usr/local/x-linux-ai/semantic-segmentation/stai_mpu_semantic_segmentation.py -m /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_MODEL -l /usr/local/x-linux-ai/semantic-segmentation/models/$SEMANTIC_SEGMENTATION_LABEL.txt --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT --camera_src $CAMERA_SRC"
 
 -if [ "$weston_user" != "root" ]; then
 -	echo "user : "$weston_user

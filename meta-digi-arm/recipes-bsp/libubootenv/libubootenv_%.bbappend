@@ -41,9 +41,9 @@ UBOOT_ENV_PARTITION = "environment"
 UBOOT_ENV_PARTITION:ccmp1 = "UBI"
 
 pkg_postinst_ontarget:${PN}() {
-	CONFIG_FILE="/etc/fw_env.config"
+	CONFIG_FILE="${sysconfdir}/fw_env.config"
 	MMCDEV="$(sed -ne 's,.*root=/dev/mmcblk\([0-9]\)p.*,\1,g;T;p' /proc/cmdline)"
-	if [ -n "${MMCDEV}" ]; then
+	if [ -n "${MMCDEV}" ] && ! [ -b "/dev/mmcblk${MMCDEV}boot0" ]; then
 		sed -i -e "s,^/dev/mmcblk[^[:blank:]]\+,/dev/mmcblk${MMCDEV},g" ${CONFIG_FILE}
 	fi
 
@@ -90,4 +90,4 @@ pkg_postinst_ontarget:${PN}() {
 	sync ${CONFIG_FILE}
 }
 
-inherit ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}
+inherit_defer ${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "remove-pkg-postinst-ontarget", "", d)}

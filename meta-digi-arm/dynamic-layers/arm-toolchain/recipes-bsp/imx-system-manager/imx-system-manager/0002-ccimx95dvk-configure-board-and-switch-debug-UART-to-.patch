@@ -1,0 +1,3541 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Mon, 15 Sep 2025 12:17:01 +0200
+Subject: [PATCH] ccimx95dvk: configure board and switch debug UART to LPUART7
+
+Assign the UART7 resources to the M33 CPU and the UART2 resources to the
+AP CPU.
+
+Generate configuration tree (configs/ccimx95dvk) with:
+
+  make CONFIG=ccimx95dvk cfg
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ boards/ccimx95dvk/pin_mux.c       |    7 +
+ configs/ccimx95dvk.cfg            |   18 +-
+ configs/ccimx95dvk/config.dox     |   49 +
+ configs/ccimx95dvk/config.mak     |   44 +
+ configs/ccimx95dvk/config_bctrl.h |  100 +++
+ configs/ccimx95dvk/config_board.h |   69 ++
+ configs/ccimx95dvk/config_dev.h   |   65 ++
+ configs/ccimx95dvk/config_lmm.h   |  223 +++++
+ configs/ccimx95dvk/config_mb_mu.h |  118 +++
+ configs/ccimx95dvk/config_scmi.h  |  695 +++++++++++++++
+ configs/ccimx95dvk/config_smt.h   |  168 ++++
+ configs/ccimx95dvk/config_test.h  |  197 +++++
+ configs/ccimx95dvk/config_trdc.h  | 1373 +++++++++++++++++++++++++++++
+ configs/ccimx95dvk/config_user.h  |  230 +++++
+ 14 files changed, 3346 insertions(+), 10 deletions(-)
+ create mode 100644 configs/ccimx95dvk/config.dox
+ create mode 100644 configs/ccimx95dvk/config.mak
+ create mode 100644 configs/ccimx95dvk/config_bctrl.h
+ create mode 100644 configs/ccimx95dvk/config_board.h
+ create mode 100644 configs/ccimx95dvk/config_dev.h
+ create mode 100644 configs/ccimx95dvk/config_lmm.h
+ create mode 100644 configs/ccimx95dvk/config_mb_mu.h
+ create mode 100644 configs/ccimx95dvk/config_scmi.h
+ create mode 100644 configs/ccimx95dvk/config_smt.h
+ create mode 100644 configs/ccimx95dvk/config_test.h
+ create mode 100644 configs/ccimx95dvk/config_trdc.h
+ create mode 100644 configs/ccimx95dvk/config_user.h
+
+diff --git a/boards/ccimx95dvk/pin_mux.c b/boards/ccimx95dvk/pin_mux.c
+index b40d897fbcdc..60f6d27c41c5 100755
+--- a/boards/ccimx95dvk/pin_mux.c
++++ b/boards/ccimx95dvk/pin_mux.c
+@@ -29,6 +29,13 @@ void BOARD_InitPins(void)
+ 
+     IOMUXC_SetPinMux(IOMUXC_PAD_UART2_TXD__LPUART2_TX, 0);
+     IOMUXC_SetPinConfig(IOMUXC_PAD_UART2_TXD__LPUART2_TX, IOMUXC_PAD_DSE(0xFU));
++#elif (BOARD_DEBUG_UART_INSTANCE == 7U)
++    /* Configure LPUART 7 */
++    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO09__LPUART7_RX, 0);
++    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO09__LPUART7_RX, IOMUXC_PAD_PD(1U));
++
++    IOMUXC_SetPinMux(IOMUXC_PAD_GPIO_IO08__LPUART7_TX, 0);
++    IOMUXC_SetPinConfig(IOMUXC_PAD_GPIO_IO08__LPUART7_TX, IOMUXC_PAD_DSE(0xFU));
+ #endif
+ 
+ #if (BOARD_I2C_INSTANCE == 1U)
+diff --git a/configs/ccimx95dvk.cfg b/configs/ccimx95dvk.cfg
+index d05e1214df8a..da383aab036c 100755
+--- a/configs/ccimx95dvk.cfg
++++ b/configs/ccimx95dvk.cfg
+@@ -32,8 +32,8 @@
+ 
+ # SM configuration file for the MX95 EVK
+ 
+-MAKE    soc=MIMX95, board=mcimx95evk, build=gcc_cross
+-DOX     name=MX95EVK, desc="i.MX95 EVK Configuration Data"
++MAKE    soc=MIMX95, board=ccimx95dvk, build=gcc_cross
++DOX     name=CCIMX95DVK, desc="ConnectCore 95 DVK Configuration Data"
+ 
+ include ../devices/MIMX95/configtool/device.cfg
+ 
+@@ -41,7 +41,7 @@ include ../devices/MIMX95/configtool/device.cfg
+ # Board                                                                    #
+ #==========================================================================#
+ 
+-BOARD               DEBUG_UART_INSTANCE=2
++BOARD               DEBUG_UART_INSTANCE=7
+ BOARD               DEBUG_UART_BAUDRATE=115200
+ 
+ BOARD               I2C_INSTANCE=1
+@@ -213,7 +213,7 @@ IOMUXC              OWNER
+ IOMUX_GPR           OWNER
+ JTAG                OWNER
+ LPI2C1              OWNER
+-LPUART2             OWNER
++LPUART7             OWNER
+ M33_CACHE_CTRL      OWNER
+ M33_PCF             OWNER
+ M33_PSF             OWNER
+@@ -287,8 +287,8 @@ PIN_FCCU_ERR0         OWNER
+ PIN_I2C1_SCL          OWNER
+ PIN_I2C1_SDA          OWNER
+ PIN_PDM_BIT_STREAM1   OWNER
+-PIN_UART2_RXD         OWNER
+-PIN_UART2_TXD         OWNER
++PIN_GPIO_IO08         OWNER  # LPUART7_TX
++PIN_GPIO_IO09         OWNER  # LPUART7_RX
+ PIN_WDOG_ANY          OWNER
+ 
+ # Memory
+@@ -477,10 +477,10 @@ PERLPI_GPIO3        ALL
+ PERLPI_GPIO4        ALL
+ PERLPI_GPIO5        ALL
+ PERLPI_LPUART1      ALL
++PERLPI_LPUART2      ALL
+ PERLPI_LPUART4      ALL
+ PERLPI_LPUART5      ALL
+ PERLPI_LPUART6      ALL
+-PERLPI_LPUART7      ALL
+ PERLPI_LPUART8      ALL
+ PERLPI_WDOG3        ALL
+ PERLPI_WDOG4        ALL
+@@ -760,10 +760,10 @@ LPTPM4              OWNER
+ LPTPM5              OWNER
+ LPTPM6              OWNER
+ LPUART1             OWNER
++LPUART2             OWNER
+ LPUART4             OWNER
+ LPUART5             OWNER
+ LPUART6             OWNER
+-LPUART7             OWNER
+ LPUART8             OWNER, test
+ LVDS                OWNER
+ MIPI_CSI0           OWNER
+@@ -909,8 +909,6 @@ PIN_GPIO_IO04        OWNER
+ PIN_GPIO_IO05        OWNER
+ PIN_GPIO_IO06        OWNER
+ PIN_GPIO_IO07        OWNER
+-PIN_GPIO_IO08        OWNER
+-PIN_GPIO_IO09        OWNER
+ PIN_GPIO_IO10        OWNER
+ PIN_GPIO_IO11        OWNER
+ PIN_GPIO_IO12        OWNER
+diff --git a/configs/ccimx95dvk/config.dox b/configs/ccimx95dvk/config.dox
+new file mode 100644
+index 000000000000..09aa69cf4697
+--- /dev/null
++++ b/configs/ccimx95dvk/config.dox
+@@ -0,0 +1,49 @@
++/*
++** ###################################################################
++**
++** Copyright 2023-2025 NXP
++**
++** Redistribution and use in source and binary forms, with or without modification,
++** are permitted provided that the following conditions are met:
++**
++** o Redistributions of source code must retain the above copyright notice, this list
++**   of conditions and the following disclaimer.
++**
++** o Redistributions in binary form must reproduce the above copyright notice, this
++**   list of conditions and the following disclaimer in the documentation and/or
++**   other materials provided with the distribution.
++**
++** o Neither the name of the copyright holder nor the names of its
++**   contributors may be used to endorse or promote products derived from this
++**   software without specific prior written permission.
++**
++** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++** ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++**
++**
++** ###################################################################
++*/
++
++/*!
++ * @addtogroup SM_CONFIG
++ * @{
++ */
++
++/*!
++
++@defgroup CONFIG_CCIMX95DVK CONFIG_CCIMX95DVK: ConnectCore 95 DVK Configuration Data
++
++@brief Module for ConnectCore 95 DVK Configuration Data.
++
++*/
++
++/** @} */
++
+diff --git a/configs/ccimx95dvk/config.mak b/configs/ccimx95dvk/config.mak
+new file mode 100644
+index 000000000000..01730d54a9b3
+--- /dev/null
++++ b/configs/ccimx95dvk/config.mak
+@@ -0,0 +1,44 @@
++## ###################################################################
++##
++## Copyright 2023-2025 NXP
++##
++## Redistribution and use in source and binary forms, with or without modification,
++## are permitted provided that the following conditions are met:
++##
++## o Redistributions of source code must retain the above copyright notice, this list
++##   of conditions and the following disclaimer.
++##
++## o Redistributions in binary form must reproduce the above copyright notice, this
++##   list of conditions and the following disclaimer in the documentation and/or
++##   other materials provided with the distribution.
++##
++## o Neither the name of the copyright holder nor the names of its
++##   contributors may be used to endorse or promote products derived from this
++##   software without specific prior written permission.
++##
++## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++## WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++## DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++## ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++## (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++## LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++## ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++## (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++## SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++##
++##
++## ###################################################################
++
++GEN_CONFIG_VER ?= 2U
++BOARD ?= ccimx95dvk
++USES_FUSA ?= 1
++
++include ./devices/MIMX95/sm/Makefile
++include ./boards/$(BOARD)/sm/Makefile
++include ./sm/lmm/Makefile
++include ./sm/rpc/mb_mu/Makefile
++include ./sm/rpc/scmi/Makefile
++include ./sm/rpc/smt/Makefile
++include ./sm/makefiles/gcc_cross.mak
++
+diff --git a/configs/ccimx95dvk/config_bctrl.h b/configs/ccimx95dvk/config_bctrl.h
+new file mode 100644
+index 000000000000..a757834c32ab
+--- /dev/null
++++ b/configs/ccimx95dvk/config_bctrl.h
+@@ -0,0 +1,100 @@
++/*
++** ###################################################################
++**
++** Copyright 2023-2025 NXP
++**
++** Redistribution and use in source and binary forms, with or without modification,
++** are permitted provided that the following conditions are met:
++**
++** o Redistributions of source code must retain the above copyright notice, this list
++**   of conditions and the following disclaimer.
++**
++** o Redistributions in binary form must reproduce the above copyright notice, this
++**   list of conditions and the following disclaimer in the documentation and/or
++**   other materials provided with the distribution.
++**
++** o Neither the name of the copyright holder nor the names of its
++**   contributors may be used to endorse or promote products derived from this
++**   software without specific prior written permission.
++**
++** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++** ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++**
++**
++** ###################################################################
++*/
++
++/*==========================================================================*/
++/*!
++ * @addtogroup CONFIG_CCIMX95DVK
++ * @{
++ *
++ * @file
++ * @brief
++ *
++ * Header file containing configuration info for the device block controls.
++ */
++/*==========================================================================*/
++
++#ifndef CONFIG_BCTRL_H
++#define CONFIG_BCTRL_H
++
++/* Includes */
++
++#include "config_user.h"
++
++/* Defines */
++
++/*--------------------------------------------------------------------------*/
++/* BCTRL A Config                                                           */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for BCTRL A */
++#define SM_BCTRL_A_CONFIG \
++    { \
++        SM_CFG_W1(0x00000008U), 0x00001804U, \
++        SM_CFG_W1(0x0000000CU), 0x0000E56AU, \
++        SM_CFG_W1(0x00000010U), 0x0000E56AU, \
++        SM_CFG_W1(0x00000014U), 0x0000E56AU, \
++        SM_CFG_W1(0x00000018U), 0x0000E56AU, \
++        SM_CFG_W1(0x0000001CU), 0x0000E56AU, \
++        SM_CFG_W1(0x00000020U), 0x0000E56AU, \
++        SM_CFG_W1(0x00000024U), 0x00000291U, \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* BCTRL W Config                                                           */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for BCTRL W */
++#define SM_BCTRL_W_CONFIG \
++    { \
++        SM_CFG_W1(0x00000030U), 0xFBF7FFFFU, \
++        SM_CFG_W1(0x00000034U), 0xFBF7FFFFU, \
++        SM_CFG_W1(0x00000038U), 0xFBF7FFFFU, \
++        SM_CFG_W1(0x0000003CU), 0xFBF7FFFFU, \
++        SM_CFG_W1(0x00000040U), 0xFBF7FFFFU, \
++        SM_CFG_W1(0x00000044U), 0xFBF7FFFFU, \
++        SM_CFG_W1(0x00000048U), 0x04080000U, \
++        SM_CFG_W1(0x00000050U), 0x00000001U, \
++        SM_CFG_W1(0x00000054U), 0x00000001U, \
++        SM_CFG_W1(0x00000058U), 0x00000001U, \
++        SM_CFG_W1(0x0000005CU), 0x00000001U, \
++        SM_CFG_W1(0x00000060U), 0x00000001U, \
++        SM_CFG_W1(0x00000064U), 0x00000001U, \
++        SM_CFG_END \
++    }
++
++#endif /* CONFIG_BCTRL_H */
++
++/** @} */
++
+diff --git a/configs/ccimx95dvk/config_board.h b/configs/ccimx95dvk/config_board.h
+new file mode 100644
+index 000000000000..23ecae56cf78
+--- /dev/null
++++ b/configs/ccimx95dvk/config_board.h
+@@ -0,0 +1,69 @@
++/*
++** ###################################################################
++**
++** Copyright 2023-2025 NXP
++**
++** Redistribution and use in source and binary forms, with or without modification,
++** are permitted provided that the following conditions are met:
++**
++** o Redistributions of source code must retain the above copyright notice, this list
++**   of conditions and the following disclaimer.
++**
++** o Redistributions in binary form must reproduce the above copyright notice, this
++**   list of conditions and the following disclaimer in the documentation and/or
++**   other materials provided with the distribution.
++**
++** o Neither the name of the copyright holder nor the names of its
++**   contributors may be used to endorse or promote products derived from this
++**   software without specific prior written permission.
++**
++** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++** ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++**
++**
++** ###################################################################
++*/
++
++/*==========================================================================*/
++/*!
++ * @addtogroup CONFIG_CCIMX95DVK
++ * @{
++ *
++ * @file
++ * @brief
++ *
++ * Header file containing configuration info for the board abstraction.
++ */
++/*==========================================================================*/
++
++#ifndef CONFIG_BOARD_H
++#define CONFIG_BOARD_H
++
++/* Includes */
++
++#include "config_user.h"
++
++/* Defines */
++
++/*! Config for UART instance */
++#define BOARD_DEBUG_UART_INSTANCE    7U
++/*! Config for UART baudrate */
++#define BOARD_DEBUG_UART_BAUDRATE    115200U
++
++/*! Config for PMIC I2C instance */
++#define BOARD_I2C_INSTANCE           1U
++/*! Config for PMIC I2C baudrate */
++#define BOARD_I2C_BAUDRATE           400000U
++
++#endif /* CONFIG_BOARD_H */
++
++/** @} */
++
+diff --git a/configs/ccimx95dvk/config_dev.h b/configs/ccimx95dvk/config_dev.h
+new file mode 100644
+index 000000000000..1768fa8b16ab
+--- /dev/null
++++ b/configs/ccimx95dvk/config_dev.h
+@@ -0,0 +1,65 @@
++/*
++** ###################################################################
++**
++** Copyright 2023-2025 NXP
++**
++** Redistribution and use in source and binary forms, with or without modification,
++** are permitted provided that the following conditions are met:
++**
++** o Redistributions of source code must retain the above copyright notice, this list
++**   of conditions and the following disclaimer.
++**
++** o Redistributions in binary form must reproduce the above copyright notice, this
++**   list of conditions and the following disclaimer in the documentation and/or
++**   other materials provided with the distribution.
++**
++** o Neither the name of the copyright holder nor the names of its
++**   contributors may be used to endorse or promote products derived from this
++**   software without specific prior written permission.
++**
++** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++** ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++**
++**
++** ###################################################################
++*/
++
++/*==========================================================================*/
++/*!
++ * @addtogroup CONFIG_CCIMX95DVK
++ * @{
++ *
++ * @file
++ * @brief
++ *
++ * Header file containing configuration info for the device abstraction.
++ */
++/*==========================================================================*/
++
++#ifndef CONFIG_DEV_H
++#define CONFIG_DEV_H
++
++/* Includes */
++
++#include "config_user.h"
++
++/* Defines */
++
++/*! Config for device */
++#define SM_DEV_CONFIG_DATA \
++    { \
++        .cpuSemaAddr[DEV_SM_CPU_A55P] = 0x442313F8U, \
++    }
++
++#endif /* CONFIG_DEV_H */
++
++/** @} */
++
+diff --git a/configs/ccimx95dvk/config_lmm.h b/configs/ccimx95dvk/config_lmm.h
+new file mode 100644
+index 000000000000..4c7693ee8b81
+--- /dev/null
++++ b/configs/ccimx95dvk/config_lmm.h
+@@ -0,0 +1,223 @@
++/*
++** ###################################################################
++**
++** Copyright 2023-2025 NXP
++**
++** Redistribution and use in source and binary forms, with or without modification,
++** are permitted provided that the following conditions are met:
++**
++** o Redistributions of source code must retain the above copyright notice, this list
++**   of conditions and the following disclaimer.
++**
++** o Redistributions in binary form must reproduce the above copyright notice, this
++**   list of conditions and the following disclaimer in the documentation and/or
++**   other materials provided with the distribution.
++**
++** o Neither the name of the copyright holder nor the names of its
++**   contributors may be used to endorse or promote products derived from this
++**   software without specific prior written permission.
++**
++** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++** ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++**
++**
++** ###################################################################
++*/
++
++/*==========================================================================*/
++/*!
++ * @addtogroup CONFIG_CCIMX95DVK
++ * @{
++ *
++ * @file
++ * @brief
++ *
++ * Header file containing configuration info for the logical machine manager.
++ */
++/*==========================================================================*/
++
++#ifndef CONFIG_LMM_H
++#define CONFIG_LMM_H
++
++/* Includes */
++
++#include "config_user.h"
++
++/* Defines */
++
++/*--------------------------------------------------------------------------*/
++/* LM0 Config (SM)                                                          */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for LM0 */
++#define SM_LM0_CONFIG \
++    { \
++        .name = "SM", \
++        .rpcType = SM_RPC_NONE, \
++        .boot[0] = 1U, \
++        .safeType = LMM_SAFE_TYPE_FEENV, \
++        .boot[1] = 1U, \
++        .boot[2] = 1U, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* LM1 Config (M7)                                                          */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for LM1 */
++#define SM_LM1_CONFIG \
++    { \
++        .name = "M7", \
++        .rpcType = SM_RPC_SCMI, \
++        .rpcInst = 0U, \
++        .boot[0] = 2U, \
++        .bootSkip[0] = 1U, \
++        .safeType = LMM_SAFE_TYPE_SEENV, \
++        .start = 1U, \
++        .stop = 1U, \
++        .boot[1] = 2U, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* LM2 Config (AP)                                                          */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for LM2 */
++#define SM_LM2_CONFIG \
++    { \
++        .name = "AP", \
++        .rpcType = SM_RPC_SCMI, \
++        .rpcInst = 1U, \
++        .boot[0] = 3U, \
++        .bootSkip[0] = 1U, \
++        .start = 7U, \
++        .stop = 7U, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* LM Config                                                                */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for number of LM */
++#define SM_NUM_LM  3U
++
++/*! Config data array for LM */
++#define SM_LM_CONFIG_DATA \
++    SM_LM0_CONFIG, \
++    SM_LM1_CONFIG, \
++    SM_LM2_CONFIG
++
++/*! Number of  mSel */
++#define SM_LM_NUM_MSEL  3U
++
++/*! Number of  S-EENV */
++#define SM_LM_NUM_SEENV  1U
++
++/*! Config name */
++#define SM_LM_CFG_NAME  "ccimx95dvk"
++
++/*! Default LM for monitor */
++#define SM_LM_DEFAULT  2U
++
++/*--------------------------------------------------------------------------*/
++/* LM Start/Stop Lists                                                      */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for number of start */
++#define SM_LM_NUM_START  18U
++
++/*! LM start list */
++#define SM_LM_START_DATA \
++    {.lmId = 1U, .mSel = 0U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_M7}, \
++    {.lmId = 1U, .mSel = 1U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_M7}, \
++    {.lmId = 1U, .mSel = 2U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_M7}, \
++    {.lmId = 1U, .mSel = 0U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_M7P}, \
++    {.lmId = 1U, .mSel = 1U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_M7P}, \
++    {.lmId = 1U, .mSel = 2U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_M7P}, \
++    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_VOLT, .rsrc = DEV_SM_VOLT_ARM, \
++     .numArg = 1, .arg[0] = 1U,}, \
++    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_VOLT, .rsrc = DEV_SM_VOLT_ARM, \
++     .numArg = 1, .arg[0] = 1U,}, \
++    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_VOLT, .rsrc = DEV_SM_VOLT_ARM, \
++     .numArg = 1, .arg[0] = 1U,}, \
++    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55P}, \
++    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55P}, \
++    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55P}, \
++    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_PERF, .rsrc = DEV_SM_PERF_A55, \
++     .numArg = 1, .arg[0] = 3U,}, \
++    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_PERF, .rsrc = DEV_SM_PERF_A55, \
++     .numArg = 1, .arg[0] = 3U,}, \
++    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_PERF, .rsrc = DEV_SM_PERF_A55, \
++     .numArg = 1, .arg[0] = 3U,}, \
++    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_A55C0}, \
++    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_A55C0}, \
++    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_A55C0},
++
++/*! Config for number of stop */
++#define SM_LM_NUM_STOP  33U
++
++/*! LM stop list */
++#define SM_LM_STOP_DATA \
++    {.lmId = 1U, .mSel = 0U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_M7P}, \
++    {.lmId = 1U, .mSel = 1U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_M7P}, \
++    {.lmId = 1U, .mSel = 2U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_M7P}, \
++    {.lmId = 1U, .mSel = 0U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_M7}, \
++    {.lmId = 1U, .mSel = 1U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_M7}, \
++    {.lmId = 1U, .mSel = 2U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_M7}, \
++    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_A55P}, \
++    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_A55P}, \
++    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_A55P}, \
++    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C5}, \
++    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C5}, \
++    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C5}, \
++    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C4}, \
++    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C4}, \
++    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C4}, \
++    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C3}, \
++    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C3}, \
++    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C3}, \
++    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C2}, \
++    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C2}, \
++    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C2}, \
++    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C1}, \
++    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C1}, \
++    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C1}, \
++    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C0}, \
++    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C0}, \
++    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55C0}, \
++    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55P}, \
++    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55P}, \
++    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55P}, \
++    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_VOLT, .rsrc = DEV_SM_VOLT_ARM}, \
++    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_VOLT, .rsrc = DEV_SM_VOLT_ARM}, \
++    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_VOLT, .rsrc = DEV_SM_VOLT_ARM},
++
++/*--------------------------------------------------------------------------*/
++/* LM Fault Lists                                                           */
++/*--------------------------------------------------------------------------*/
++
++/*! LM fault reactions */
++#define SM_LM_FAULT_DATA \
++    [DEV_SM_FAULT_SW3] = {.reaction = LMM_REACT_GRP_RESET, .lm = 0U}, \
++    [DEV_SM_FAULT_SW4] = {.reaction = LMM_REACT_SYS_RESET, .lm = 0U}, \
++    [DEV_SM_FAULT_M7_LOCKUP] = {.reaction = LMM_REACT_LM_RESET, .lm = 1U}, \
++    [DEV_SM_FAULT_M7_RESET] = {.reaction = LMM_REACT_LM_RESET, .lm = 1U}, \
++    [DEV_SM_FAULT_SW0] = {.reaction = LMM_REACT_FUSA, .lm = 1U}, \
++    [DEV_SM_FAULT_SW1] = {.reaction = LMM_REACT_LM_RESET, .lm = 1U}, \
++    [DEV_SM_FAULT_WDOG5] = {.reaction = LMM_REACT_LM_RESET, .lm = 1U}, \
++    [DEV_SM_FAULT_SW2] = {.reaction = LMM_REACT_LM_RESET, .lm = 2U}, \
++    [DEV_SM_FAULT_WDOG3] = {.reaction = LMM_REACT_LM_RESET, .lm = 2U}, \
++    [DEV_SM_FAULT_WDOG4] = {.reaction = LMM_REACT_LM_RESET, .lm = 2U},
++
++#endif /* CONFIG_LMM_H */
++
++/** @} */
++
+diff --git a/configs/ccimx95dvk/config_mb_mu.h b/configs/ccimx95dvk/config_mb_mu.h
+new file mode 100644
+index 000000000000..e78f2dca1216
+--- /dev/null
++++ b/configs/ccimx95dvk/config_mb_mu.h
+@@ -0,0 +1,118 @@
++/*
++** ###################################################################
++**
++** Copyright 2023-2025 NXP
++**
++** Redistribution and use in source and binary forms, with or without modification,
++** are permitted provided that the following conditions are met:
++**
++** o Redistributions of source code must retain the above copyright notice, this list
++**   of conditions and the following disclaimer.
++**
++** o Redistributions in binary form must reproduce the above copyright notice, this
++**   list of conditions and the following disclaimer in the documentation and/or
++**   other materials provided with the distribution.
++**
++** o Neither the name of the copyright holder nor the names of its
++**   contributors may be used to endorse or promote products derived from this
++**   software without specific prior written permission.
++**
++** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++** ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++**
++**
++** ###################################################################
++*/
++
++/*==========================================================================*/
++/*!
++ * @addtogroup CONFIG_CCIMX95DVK
++ * @{
++ *
++ * @file
++ * @brief
++ *
++ * Header file containing configuration info for the MB_MU.
++ */
++/*==========================================================================*/
++
++#ifndef CONFIG_MB_MU_H
++#define CONFIG_MB_MU_H
++
++/* Includes */
++
++#include "config_user.h"
++#include "mb_mu_config.h"
++
++/* Defines */
++
++/*--------------------------------------------------------------------------*/
++/* LM0 MB_MU Config (SM)                                                    */
++/*--------------------------------------------------------------------------*/
++
++/*--------------------------------------------------------------------------*/
++/* LM1 MB_MU Config (M7)                                                    */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for MU9 MB */
++#define SM_MB_MU9_CONFIG \
++    { \
++        .mu = 9U, \
++        .priority = IRQ_PRIO_NOPREEMPT_HIGH, \
++        .xportType[0] = SM_XPORT_SMT, \
++        .xportChannel[0] = 0U, \
++        .xportType[1] = SM_XPORT_SMT, \
++        .xportChannel[1] = 1U, \
++        .xportType[2] = SM_XPORT_SMT, \
++        .xportChannel[2] = 2U, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* LM2 MB_MU Config (AP)                                                    */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for MU1 MB */
++#define SM_MB_MU1_CONFIG \
++    { \
++        .mu = 1U, \
++        .xportType[0] = SM_XPORT_SMT, \
++        .xportChannel[0] = 3U, \
++        .xportType[1] = SM_XPORT_SMT, \
++        .xportChannel[1] = 4U, \
++    }
++
++/*! Config for MU3 MB */
++#define SM_MB_MU3_CONFIG \
++    { \
++        .mu = 3U, \
++        .xportType[0] = SM_XPORT_SMT, \
++        .xportChannel[0] = 5U, \
++        .xportType[1] = SM_XPORT_SMT, \
++        .xportChannel[1] = 6U, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* MB MU Config                                                             */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for number of MU MB */
++#define SM_NUM_MB_MU  3U
++
++/*! Config data array for MU MB */
++#define SM_MB_MU_CONFIG_DATA \
++    SM_MB_MU9_CONFIG, \
++    SM_MB_MU1_CONFIG, \
++    SM_MB_MU3_CONFIG
++
++#endif /* CONFIG_MB_MU_H */
++
++/** @} */
++
+diff --git a/configs/ccimx95dvk/config_scmi.h b/configs/ccimx95dvk/config_scmi.h
+new file mode 100644
+index 000000000000..e1b81cc03f58
+--- /dev/null
++++ b/configs/ccimx95dvk/config_scmi.h
+@@ -0,0 +1,695 @@
++/*
++** ###################################################################
++**
++** Copyright 2023-2025 NXP
++**
++** Redistribution and use in source and binary forms, with or without modification,
++** are permitted provided that the following conditions are met:
++**
++** o Redistributions of source code must retain the above copyright notice, this list
++**   of conditions and the following disclaimer.
++**
++** o Redistributions in binary form must reproduce the above copyright notice, this
++**   list of conditions and the following disclaimer in the documentation and/or
++**   other materials provided with the distribution.
++**
++** o Neither the name of the copyright holder nor the names of its
++**   contributors may be used to endorse or promote products derived from this
++**   software without specific prior written permission.
++**
++** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++** ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++**
++**
++** ###################################################################
++*/
++
++/*==========================================================================*/
++/*!
++ * @addtogroup CONFIG_CCIMX95DVK
++ * @{
++ *
++ * @file
++ * @brief
++ *
++ * Header file containing configuration info for the SCMI RPC.
++ */
++/*==========================================================================*/
++
++#ifndef CONFIG_SCMI_H
++#define CONFIG_SCMI_H
++
++/* Includes */
++
++#include "config_user.h"
++
++/* Defines */
++
++/*--------------------------------------------------------------------------*/
++/* SCMI AGENT0 Config (M7)                                                  */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for SCMI agent 0 */
++#define SM_SCMI_AGNT0_CONFIG \
++    { \
++        .name = "M7", \
++        .scmiInst = 0U, \
++        .domId = 4U, \
++        .secure = 0U, \
++        .seenvId = 1U, \
++        .buttonPerms[DEV_SM_BUTTON_0] = SM_SCMI_PERM_NOTIFY, \
++        .clkPerms[DEV_SM_CLK_CAN1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPTMR1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPTMR2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPUART3] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_M7SYSTICK] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_M7] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_TSTMR2] = SM_SCMI_PERM_ALL, \
++        .cpuPerms[DEV_SM_CPU_M7P] = SM_SCMI_PERM_ALL, \
++        .ctrlPerms[BRD_SM_CTRL_BUTTON] = SM_SCMI_PERM_NOTIFY, \
++        .ctrlPerms[BRD_SM_CTRL_PCA2131] = SM_SCMI_PERM_ALL, \
++        .ctrlPerms[BRD_SM_CTRL_TEST] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_CAN1_RX] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPTMR2_0] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPTMR2_1] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPTMR2_2] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART3_CTS] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART3_RXD] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART3_TXD] = SM_SCMI_PERM_ALL, \
++        .faultPerms[DEV_SM_FAULT_M7_LOCKUP] = SM_SCMI_PERM_ALL, \
++        .faultPerms[DEV_SM_FAULT_M7_RESET] = SM_SCMI_PERM_ALL, \
++        .faultPerms[DEV_SM_FAULT_SW0] = SM_SCMI_PERM_ALL, \
++        .faultPerms[DEV_SM_FAULT_SW1] = SM_SCMI_PERM_ALL, \
++        .faultPerms[DEV_SM_FAULT_WDOG5] = SM_SCMI_PERM_ALL, \
++        .fusaPerms = SM_SCMI_PERM_ALL, \
++        .lmmPerms[2] = SM_SCMI_PERM_ALL, \
++        .pdPerms[DEV_SM_PD_M7] = SM_SCMI_PERM_ALL, \
++        .perfPerms[DEV_SM_PERF_M7] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_CAN1] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART3] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_WDOG5] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO14] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO15] = SM_SCMI_PERM_ALL, \
++        .rtcPerms[BRD_SM_RTC_PCA2131] = SM_SCMI_PERM_ALL, \
++        .rtcPerms[DEV_SM_RTC_BBNSM] = SM_SCMI_PERM_PRIV, \
++        .sensorPerms[BRD_SM_SENSOR_TEMP_PF09] = SM_SCMI_PERM_SET, \
++        .sensorPerms[BRD_SM_SENSOR_TEMP_PF5301] = SM_SCMI_PERM_SET, \
++        .sensorPerms[BRD_SM_SENSOR_TEMP_PF5302] = SM_SCMI_PERM_SET, \
++        .sensorPerms[DEV_SM_SENSOR_TEMP_ANA] = SM_SCMI_PERM_ALL, \
++        .sysPerms = SM_SCMI_PERM_ALL, \
++    }
++
++/*! Config for SCMI channel 0 */
++#define SM_SCMI_CHN0_CONFIG \
++    { \
++        .agentId = 0U, \
++        .type = SM_SCMI_CHN_A2P, \
++        .xportType = SM_XPORT_SMT, \
++        .xportChannel = 0U, \
++    }
++
++/*! Config for SCMI channel 1 */
++#define SM_SCMI_CHN1_CONFIG \
++    { \
++        .agentId = 0U, \
++        .type = SM_SCMI_CHN_P2A_NOTIFY, \
++        .xportType = SM_XPORT_SMT, \
++        .xportChannel = 1U, \
++    }
++
++/*! Config for SCMI channel 2 */
++#define SM_SCMI_CHN2_CONFIG \
++    { \
++        .agentId = 0U, \
++        .type = SM_SCMI_CHN_P2A_PRIORITY, \
++        .xportType = SM_XPORT_SMT, \
++        .xportChannel = 2U, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* SCMI Instance 0 Config (M7)                                              */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for SCMI instance 0 */
++#define SM_SCMI0_CONFIG \
++    { \
++        .lmId = 1U, \
++        .numAgents = 1U, \
++        .firstAgent = 0U, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* SCMI AGENT1 Config (AP-S)                                                */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for SCMI agent 1 */
++#define SM_SCMI_AGNT1_CONFIG \
++    { \
++        .name = "AP-S", \
++        .scmiInst = 1U, \
++        .domId = 3U, \
++        .secure = 1U, \
++        .clkPerms[DEV_SM_CLK_A55C0_GPR_SEL] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_A55C1_GPR_SEL] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_A55C2_GPR_SEL] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_A55C3_GPR_SEL] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_A55C4_GPR_SEL] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_A55C5_GPR_SEL] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_A55PERIPH] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_A55P_GPR_SEL] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_A55] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_ARMPLL_PFD0] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_ARMPLL_PFD0_UNGATED] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_ARMPLL_PFD1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_ARMPLL_PFD1_UNGATED] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_ARMPLL_PFD2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_ARMPLL_PFD2_UNGATED] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_ARMPLL_PFD3] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_ARMPLL_PFD3_UNGATED] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_ARMPLL_VCO] = SM_SCMI_PERM_ALL, \
++        .cpuPerms[DEV_SM_CPU_A55C0] = SM_SCMI_PERM_ALL, \
++        .cpuPerms[DEV_SM_CPU_A55C1] = SM_SCMI_PERM_ALL, \
++        .cpuPerms[DEV_SM_CPU_A55C2] = SM_SCMI_PERM_ALL, \
++        .cpuPerms[DEV_SM_CPU_A55C3] = SM_SCMI_PERM_ALL, \
++        .cpuPerms[DEV_SM_CPU_A55C4] = SM_SCMI_PERM_ALL, \
++        .cpuPerms[DEV_SM_CPU_A55C5] = SM_SCMI_PERM_ALL, \
++        .cpuPerms[DEV_SM_CPU_A55P] = SM_SCMI_PERM_ALL, \
++        .faultPerms[DEV_SM_FAULT_SW2] = SM_SCMI_PERM_ALL, \
++        .faultPerms[DEV_SM_FAULT_WDOG3] = SM_SCMI_PERM_ALL, \
++        .faultPerms[DEV_SM_FAULT_WDOG4] = SM_SCMI_PERM_ALL, \
++        .pdPerms[DEV_SM_PD_A55P] = SM_SCMI_PERM_ALL, \
++        .perfPerms[DEV_SM_PERF_A55] = SM_SCMI_PERM_ALL, \
++        .perfPerms[DEV_SM_PERF_DRAM] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_CAN2] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_CAN3] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_CAN4] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_CAN5] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_GPIO2] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_GPIO3] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_GPIO4] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_GPIO5] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART1] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART2] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART4] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART5] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART6] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART8] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_WDOG3] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_WDOG4] = SM_SCMI_PERM_ALL, \
++        .sysPerms = SM_SCMI_PERM_ALL, \
++    }
++
++/*! Config for SCMI channel 3 */
++#define SM_SCMI_CHN3_CONFIG \
++    { \
++        .agentId = 1U, \
++        .type = SM_SCMI_CHN_A2P, \
++        .xportType = SM_XPORT_SMT, \
++        .xportChannel = 3U, \
++    }
++
++/*! Config for SCMI channel 4 */
++#define SM_SCMI_CHN4_CONFIG \
++    { \
++        .agentId = 1U, \
++        .type = SM_SCMI_CHN_P2A_NOTIFY, \
++        .xportType = SM_XPORT_SMT, \
++        .xportChannel = 4U, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* SCMI AGENT2 Config (AP-NS)                                               */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for SCMI agent 2 */
++#define SM_SCMI_AGNT2_CONFIG \
++    { \
++        .name = "AP-NS", \
++        .scmiInst = 1U, \
++        .domId = 3U, \
++        .secure = 0U, \
++        .buttonPerms[DEV_SM_BUTTON_0] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_AUDIOPLL1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_AUDIOPLL1_VCO] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_AUDIOPLL2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_AUDIOPLL2_VCO] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_AUDIOXCVR] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_CAN2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_CAN3] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_CAN4] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_CAN5] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_CCMCKO1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_CCMCKO2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_CCMCKO3] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_CCMCKO4] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_DISP1PIX] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_DISP2PIX] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_DISP3PIX] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_DISPOCRAM] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_ENETREF] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_ENETTIMER1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_EXT1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_EXT2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_EXT] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_EXT_GPR_SEL] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_FLEXIO1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_FLEXIO2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_FLEXSPI1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_GPU_CGC] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_HSIOPCIEAUX] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_HSIOPLL] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_HSIOPLL_VCO] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_I3C1SLOW] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_I3C1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_I3C2SLOW] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_I3C2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LDBPLL] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LDBPLL_VCO] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPI2C2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPI2C3] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPI2C4] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPI2C5] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPI2C6] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPI2C7] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPI2C8] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPSPI1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPSPI2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPSPI3] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPSPI4] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPSPI5] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPSPI6] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPSPI7] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPSPI8] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPUART1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPUART2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPUART4] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPUART5] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPUART6] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_LPUART8] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_MIPIPHYCFG] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_MIPIPHYPLLBYPASS] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_MIPIPHYPLLREF] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_MIPITESTBYTE] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_MQS1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_MQS2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_PDM] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_SAI1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_SAI2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_SAI3] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_SAI4] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_SAI5] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_SPDIF] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_TPM2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_TPM4] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_TPM5] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_TPM6] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_USBPHYBURUNIN] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_USDHC1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_USDHC2] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_USDHC3] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_VIDEOPLL1] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_VIDEOPLL1_VCO] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_VPUDSP] = SM_SCMI_PERM_ALL, \
++        .clkPerms[DEV_SM_CLK_XSPISLVROOT] = SM_SCMI_PERM_ALL, \
++        .ctrlPerms[BRD_SM_CTRL_BT_WAKE] = SM_SCMI_PERM_NOTIFY, \
++        .ctrlPerms[BRD_SM_CTRL_BUTTON] = SM_SCMI_PERM_NOTIFY, \
++        .ctrlPerms[BRD_SM_CTRL_PCIE1_WAKE] = SM_SCMI_PERM_NOTIFY, \
++        .ctrlPerms[BRD_SM_CTRL_PCIE2_WAKE] = SM_SCMI_PERM_NOTIFY, \
++        .ctrlPerms[BRD_SM_CTRL_SD3_WAKE] = SM_SCMI_PERM_NOTIFY, \
++        .ctrlPerms[DEV_SM_CTRL_ADC_TEST] = SM_SCMI_PERM_ALL, \
++        .ctrlPerms[DEV_SM_CTRL_MQS1_SETTINGS] = SM_SCMI_PERM_ALL, \
++        .ctrlPerms[DEV_SM_CTRL_PDM_CLK_SEL] = SM_SCMI_PERM_ALL, \
++        .ctrlPerms[DEV_SM_CTRL_SAI1_MCLK] = SM_SCMI_PERM_ALL, \
++        .ctrlPerms[DEV_SM_CTRL_SAI3_MCLK] = SM_SCMI_PERM_ALL, \
++        .ctrlPerms[DEV_SM_CTRL_SAI4_MCLK] = SM_SCMI_PERM_ALL, \
++        .ctrlPerms[DEV_SM_CTRL_SAI5_MCLK] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_CAN2_RX] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_CAN3_RX] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_CAN4_RX] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_CAN5_RX] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_EARC_PHY_SPDIF] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_EXT1_CLK] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_0] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_10] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_11] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_12] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_13] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_14] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_15] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_16] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_17] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_18] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_19] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_1] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_20] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_21] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_22] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_23] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_24] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_25] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_26] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_27] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_2] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_30] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_31] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_3] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_4] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_5] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_6] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_7] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_8] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXIO1_9] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXSPI1_0] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXSPI1_1] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXSPI1_2] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXSPI1_3] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXSPI1_4] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXSPI1_5] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXSPI1_6] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXSPI1_7] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXSPI1_DQS] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_FLEXSPI1_SCK] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_I3C2_SCL] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_I3C2_SDA] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPI2C3_SCL] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPI2C3_SDA] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPI2C4_SCL] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPI2C4_SDA] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPI2C5_SCL] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPI2C5_SDA] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPI2C6_SCL] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPI2C6_SDA] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPI2C7_SCL] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPI2C7_SDA] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPI2C8_SCL] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPI2C8_SDA] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPSPI4_PCS_0] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPSPI4_PCS_1] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPSPI4_PCS_2] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPSPI4_SCK] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPSPI4_SDI] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPSPI4_SDO] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART4_CTS] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART4_RXD] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART4_TXD] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART5_CTS] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART5_RXD] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART5_TXD] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART6_CTS] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART6_RXD] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_LPUART6_TXD] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_NETC_EMDC] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_NETC_EMDIO] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_NETC_ETH0_RMII_RX_ER] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_NETC_ETH1_RMII_RX_ER] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_NETC_TMR_1588_TRIG1] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_NETC_TMR_1588_TRIG2] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_PDM_BITSTREAM_0] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_PDM_BITSTREAM_1] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_PDM_BITSTREAM_2] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_PDM_BITSTREAM_3] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI1_MCLK] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI2_RXDATA_6] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI2_RXDATA_7] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI3_RXBCLK] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI3_RXSYNC] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI4_RXBCLK] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI4_RXDATA_0] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI4_RXSYNC] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI4_TXBCLK] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI4_TXSYNC] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI5_RXBCLK] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI5_RXDATA_0] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI5_RXDATA_1] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI5_RXDATA_2] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI5_RXDATA_3] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI5_RXSYNC] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI5_TXBCLK] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_SAI5_TXSYNC] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_USDHC3_CLK] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_USDHC3_CMD] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_USDHC3_DAT0] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_USDHC3_DAT1] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_USDHC3_DAT2] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_USDHC3_DAT3] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_XSPI_0] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_XSPI_1] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_XSPI_2] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_XSPI_3] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_XSPI_4] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_XSPI_5] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_XSPI_6] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_XSPI_7] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_XSPI_CS] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_XSPI_DQS] = SM_SCMI_PERM_ALL, \
++        .daisyPerms[DEV_SM_DAISY_XSPI_SCK] = SM_SCMI_PERM_ALL, \
++        .gprPerms[DEV_SM_GPR_4] = SM_SCMI_PERM_ALL, \
++        .gprPerms[DEV_SM_GPR_5] = SM_SCMI_PERM_ALL, \
++        .gprPerms[DEV_SM_GPR_6] = SM_SCMI_PERM_ALL, \
++        .gprPerms[DEV_SM_GPR_7] = SM_SCMI_PERM_ALL, \
++        .lmmPerms[1] = SM_SCMI_PERM_NOTIFY, \
++        .pdPerms[DEV_SM_PD_CAMERA] = SM_SCMI_PERM_ALL, \
++        .pdPerms[DEV_SM_PD_DISPLAY] = SM_SCMI_PERM_ALL, \
++        .pdPerms[DEV_SM_PD_GPU] = SM_SCMI_PERM_ALL, \
++        .pdPerms[DEV_SM_PD_HSIO_TOP] = SM_SCMI_PERM_ALL, \
++        .pdPerms[DEV_SM_PD_NETC] = SM_SCMI_PERM_ALL, \
++        .pdPerms[DEV_SM_PD_NPU] = SM_SCMI_PERM_ALL, \
++        .pdPerms[DEV_SM_PD_VPU] = SM_SCMI_PERM_ALL, \
++        .perfPerms[DEV_SM_PERF_A55] = SM_SCMI_PERM_ALL, \
++        .perfPerms[DEV_SM_PERF_CAM] = SM_SCMI_PERM_ALL, \
++        .perfPerms[DEV_SM_PERF_DISP] = SM_SCMI_PERM_ALL, \
++        .perfPerms[DEV_SM_PERF_DRAM] = SM_SCMI_PERM_ALL, \
++        .perfPerms[DEV_SM_PERF_GPU] = SM_SCMI_PERM_ALL, \
++        .perfPerms[DEV_SM_PERF_NPU] = SM_SCMI_PERM_ALL, \
++        .perfPerms[DEV_SM_PERF_VPU] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_CAN2] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_CAN3] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_CAN4] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_CAN5] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_GPIO2] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_GPIO3] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_GPIO4] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_GPIO5] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART1] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART2] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART4] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART5] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART6] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_LPUART8] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_WDOG3] = SM_SCMI_PERM_ALL, \
++        .perlpiPerms[DEV_SM_PERLPI_WDOG4] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_CCM_CLKO1] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_CCM_CLKO2] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_CCM_CLKO3] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_CCM_CLKO4] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_DAP_TCLK_SWCLK] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_DAP_TDI] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_DAP_TDO_TRACESWO] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_DAP_TMS_SWDIO] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_MDC] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_MDIO] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_RD0] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_RD1] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_RD2] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_RD3] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_RXC] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_RX_CTL] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_TD0] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_TD1] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_TD2] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_TD3] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_TXC] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET1_TX_CTL] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_MDC] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_MDIO] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_RD0] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_RD1] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_RD2] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_RD3] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_RXC] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_RX_CTL] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_TD0] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_TD1] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_TD2] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_TD3] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_TXC] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_ENET2_TX_CTL] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO00] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO01] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO02] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO03] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO04] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO05] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO06] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO07] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO10] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO11] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO12] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO13] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO16] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO17] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO18] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO19] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO20] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO21] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO22] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO23] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO24] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO25] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO26] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO27] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO28] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO29] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO30] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO31] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO32] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO33] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO34] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO35] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO36] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_GPIO_IO37] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_I2C2_SCL] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_I2C2_SDA] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_PDM_BIT_STREAM0] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_PDM_CLK] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SAI1_RXD0] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SAI1_TXC] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SAI1_TXD0] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SAI1_TXFS] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD1_CLK] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD1_CMD] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD1_DATA0] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD1_DATA1] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD1_DATA2] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD1_DATA3] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD1_DATA4] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD1_DATA5] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD1_DATA6] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD1_DATA7] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD1_STROBE] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD2_CD_B] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD2_CLK] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD2_CMD] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD2_DATA0] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD2_DATA1] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD2_DATA2] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD2_DATA3] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD2_RESET_B] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD2_VSELECT] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD3_CLK] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD3_CMD] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD3_DATA0] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD3_DATA1] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD3_DATA2] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_SD3_DATA3] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_UART1_RXD] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_UART1_TXD] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_XSPI1_DATA0] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_XSPI1_DATA1] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_XSPI1_DATA2] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_XSPI1_DATA3] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_XSPI1_DATA4] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_XSPI1_DATA5] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_XSPI1_DATA6] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_XSPI1_DATA7] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_XSPI1_DQS] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_XSPI1_SCLK] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_XSPI1_SS0_B] = SM_SCMI_PERM_ALL, \
++        .pinPerms[DEV_SM_PIN_XSPI1_SS1_B] = SM_SCMI_PERM_ALL, \
++        .rtcPerms[BRD_SM_RTC_PCA2131] = SM_SCMI_PERM_PRIV, \
++        .rtcPerms[DEV_SM_RTC_BBNSM] = SM_SCMI_PERM_ALL, \
++        .sensorPerms[BRD_SM_SENSOR_TEMP_PF09] = SM_SCMI_PERM_ALL, \
++        .sensorPerms[BRD_SM_SENSOR_TEMP_PF5301] = SM_SCMI_PERM_SET, \
++        .sensorPerms[BRD_SM_SENSOR_TEMP_PF5302] = SM_SCMI_PERM_SET, \
++        .sensorPerms[DEV_SM_SENSOR_TEMP_A55] = SM_SCMI_PERM_ALL, \
++        .sensorPerms[DEV_SM_SENSOR_TEMP_ANA] = SM_SCMI_PERM_SET, \
++        .sysPerms = SM_SCMI_PERM_NOTIFY, \
++    }
++
++/*! Config for SCMI channel 5 */
++#define SM_SCMI_CHN5_CONFIG \
++    { \
++        .agentId = 2U, \
++        .type = SM_SCMI_CHN_A2P, \
++        .xportType = SM_XPORT_SMT, \
++        .xportChannel = 5U, \
++    }
++
++/*! Config for SCMI channel 6 */
++#define SM_SCMI_CHN6_CONFIG \
++    { \
++        .agentId = 2U, \
++        .type = SM_SCMI_CHN_P2A_NOTIFY, \
++        .xportType = SM_XPORT_SMT, \
++        .xportChannel = 6U, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* SCMI Instance 1 Config (AP)                                              */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for SCMI instance 1 */
++#define SM_SCMI1_CONFIG \
++    { \
++        .lmId = 2U, \
++        .numAgents = 2U, \
++        .firstAgent = 1U, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* SCMI Agent Config                                                        */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for number of SCMI agents */
++#define SM_SCMI_NUM_AGNT  3U
++
++/*! Config data array for SCMI agents */
++#define SM_SCMI_AGNT_CONFIG_DATA \
++    SM_SCMI_AGNT0_CONFIG, \
++    SM_SCMI_AGNT1_CONFIG, \
++    SM_SCMI_AGNT2_CONFIG
++
++/*--------------------------------------------------------------------------*/
++/* SCMI Channel Config                                                      */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for number of SCMI channels */
++#define SM_SCMI_NUM_CHN  7U
++
++/*! Config data array for SCMI channels */
++#define SM_SCMI_CHN_CONFIG_DATA \
++    SM_SCMI_CHN0_CONFIG, \
++    SM_SCMI_CHN1_CONFIG, \
++    SM_SCMI_CHN2_CONFIG, \
++    SM_SCMI_CHN3_CONFIG, \
++    SM_SCMI_CHN4_CONFIG, \
++    SM_SCMI_CHN5_CONFIG, \
++    SM_SCMI_CHN6_CONFIG
++
++/*--------------------------------------------------------------------------*/
++/* SCMI Config                                                              */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for number of SCMI instances */
++#define SM_NUM_SCMI  2U
++
++/*! Config data array for SCMI instances */
++#define SM_SCMI_CONFIG_DATA \
++    SM_SCMI0_CONFIG, \
++    SM_SCMI1_CONFIG
++
++/*! Max words to buffer for notification messages */
++#define SM_SCMI_MAX_NOTIFY  24U
++
++#endif /* CONFIG_SCMI_H */
++
++/** @} */
++
+diff --git a/configs/ccimx95dvk/config_smt.h b/configs/ccimx95dvk/config_smt.h
+new file mode 100644
+index 000000000000..7da4e43af886
+--- /dev/null
++++ b/configs/ccimx95dvk/config_smt.h
+@@ -0,0 +1,168 @@
++/*
++** ###################################################################
++**
++** Copyright 2023-2025 NXP
++**
++** Redistribution and use in source and binary forms, with or without modification,
++** are permitted provided that the following conditions are met:
++**
++** o Redistributions of source code must retain the above copyright notice, this list
++**   of conditions and the following disclaimer.
++**
++** o Redistributions in binary form must reproduce the above copyright notice, this
++**   list of conditions and the following disclaimer in the documentation and/or
++**   other materials provided with the distribution.
++**
++** o Neither the name of the copyright holder nor the names of its
++**   contributors may be used to endorse or promote products derived from this
++**   software without specific prior written permission.
++**
++** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++** ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++**
++**
++** ###################################################################
++*/
++
++/*==========================================================================*/
++/*!
++ * @addtogroup CONFIG_CCIMX95DVK
++ * @{
++ *
++ * @file
++ * @brief
++ *
++ * Header file containing configuration info for the SMT.
++ */
++/*==========================================================================*/
++
++#ifndef CONFIG_SMT_H
++#define CONFIG_SMT_H
++
++/* Includes */
++
++#include "config_user.h"
++#include "rpc_smt_config.h"
++
++/* Defines */
++
++/*--------------------------------------------------------------------------*/
++/* LM0 SMT Config (SM)                                                      */
++/*--------------------------------------------------------------------------*/
++
++/*--------------------------------------------------------------------------*/
++/* LM1 SMT Config (M7)                                                      */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for SMT channel 0 */
++#define SM_SMT_CHN0_CONFIG \
++    { \
++        .rpcType = SM_RPC_SCMI, \
++        .rpcChannel = 0U, \
++        .mbType = SM_MB_MU, \
++        .mbInst = 0U, \
++        .mbDoorbell = 0U, \
++        .crc = SM_SMT_CRC_CRC32, \
++    }
++
++/*! Config for SMT channel 1 */
++#define SM_SMT_CHN1_CONFIG \
++    { \
++        .rpcType = SM_RPC_SCMI, \
++        .rpcChannel = 1U, \
++        .mbType = SM_MB_MU, \
++        .mbInst = 0U, \
++        .mbDoorbell = 1U, \
++        .crc = SM_SMT_CRC_CRC32, \
++    }
++
++/*! Config for SMT channel 2 */
++#define SM_SMT_CHN2_CONFIG \
++    { \
++        .rpcType = SM_RPC_SCMI, \
++        .rpcChannel = 2U, \
++        .mbType = SM_MB_MU, \
++        .mbInst = 0U, \
++        .mbDoorbell = 2U, \
++        .crc = SM_SMT_CRC_CRC32, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* LM2 SMT Config (AP)                                                      */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for SMT channel 3 */
++#define SM_SMT_CHN3_CONFIG \
++    { \
++        .rpcType = SM_RPC_SCMI, \
++        .rpcChannel = 3U, \
++        .mbType = SM_MB_MU, \
++        .mbInst = 1U, \
++        .mbDoorbell = 0U, \
++    }
++
++/*! Config for SMT channel 4 */
++#define SM_SMT_CHN4_CONFIG \
++    { \
++        .rpcType = SM_RPC_SCMI, \
++        .rpcChannel = 4U, \
++        .mbType = SM_MB_MU, \
++        .mbInst = 1U, \
++        .mbDoorbell = 1U, \
++    }
++
++/*! Config for SMT channel 5 */
++#define SM_SMT_CHN5_CONFIG \
++    { \
++        .rpcType = SM_RPC_SCMI, \
++        .rpcChannel = 5U, \
++        .mbType = SM_MB_MU, \
++        .mbInst = 2U, \
++        .mbDoorbell = 0U, \
++    }
++
++/*! Config for SMT channel 6 */
++#define SM_SMT_CHN6_CONFIG \
++    { \
++        .rpcType = SM_RPC_SCMI, \
++        .rpcChannel = 6U, \
++        .mbType = SM_MB_MU, \
++        .mbInst = 2U, \
++        .mbDoorbell = 1U, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* SMT Config                                                               */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for number of SMT channels */
++#define SM_NUM_SMT_CHN  7U
++
++/*! Config data array for SMT channels */
++#define SM_SMT_CHN_CONFIG_DATA \
++    SM_SMT_CHN0_CONFIG, \
++    SM_SMT_CHN1_CONFIG, \
++    SM_SMT_CHN2_CONFIG, \
++    SM_SMT_CHN3_CONFIG, \
++    SM_SMT_CHN4_CONFIG, \
++    SM_SMT_CHN5_CONFIG, \
++    SM_SMT_CHN6_CONFIG
++
++/* Mailbox and CRC types to support */
++/*! Config for MB_MU USE */
++#define USES_MB_MU
++/*! Config for CRC32 CRC USE */
++#define USES_CRC_CRC32
++
++#endif /* CONFIG_SMT_H */
++
++/** @} */
++
+diff --git a/configs/ccimx95dvk/config_test.h b/configs/ccimx95dvk/config_test.h
+new file mode 100644
+index 000000000000..cb737f33eede
+--- /dev/null
++++ b/configs/ccimx95dvk/config_test.h
+@@ -0,0 +1,197 @@
++/*
++** ###################################################################
++**
++** Copyright 2023-2025 NXP
++**
++** Redistribution and use in source and binary forms, with or without modification,
++** are permitted provided that the following conditions are met:
++**
++** o Redistributions of source code must retain the above copyright notice, this list
++**   of conditions and the following disclaimer.
++**
++** o Redistributions in binary form must reproduce the above copyright notice, this
++**   list of conditions and the following disclaimer in the documentation and/or
++**   other materials provided with the distribution.
++**
++** o Neither the name of the copyright holder nor the names of its
++**   contributors may be used to endorse or promote products derived from this
++**   software without specific prior written permission.
++**
++** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++** ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++**
++**
++** ###################################################################
++*/
++
++/*==========================================================================*/
++/*!
++ * @addtogroup CONFIG_CCIMX95DVK
++ * @{
++ *
++ * @file
++ * @brief
++ *
++ * Header file containing configuration info for the unit tests.
++ */
++/*==========================================================================*/
++
++#ifndef CONFIG_TEST_H
++#define CONFIG_TEST_H
++
++/* Includes */
++
++#include "config_user.h"
++
++/* Defines */
++
++/*--------------------------------------------------------------------------*/
++/* LM0 Test Config (SM)                                                     */
++/*--------------------------------------------------------------------------*/
++
++/*--------------------------------------------------------------------------*/
++/* LM1 Test Config (M7)                                                     */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for test channel 0 */
++#define SM_TEST_CHN0_CONFIG \
++    { \
++        .mbInst = 8U, \
++        .mbDoorbell = 0U, \
++        .agentId = 0U, \
++    }
++
++/*! Config for test channel 1 */
++#define SM_TEST_CHN1_CONFIG \
++    { \
++        .mbInst = 8U, \
++        .mbDoorbell = 1U, \
++        .agentId = 0U, \
++    }
++
++/*! Config for test channel 2 */
++#define SM_TEST_CHN2_CONFIG \
++    { \
++        .mbInst = 8U, \
++        .mbDoorbell = 2U, \
++        .agentId = 0U, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* LM2 Test Config (AP)                                                     */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for test channel 3 */
++#define SM_TEST_CHN3_CONFIG \
++    { \
++        .mbInst = 0U, \
++        .mbDoorbell = 0U, \
++        .agentId = 1U, \
++    }
++
++/*! Config for test channel 4 */
++#define SM_TEST_CHN4_CONFIG \
++    { \
++        .mbInst = 0U, \
++        .mbDoorbell = 1U, \
++        .agentId = 1U, \
++    }
++
++/*! Config for test channel 5 */
++#define SM_TEST_CHN5_CONFIG \
++    { \
++        .mbInst = 2U, \
++        .mbDoorbell = 0U, \
++        .agentId = 2U, \
++    }
++
++/*! Config for test channel 6 */
++#define SM_TEST_CHN6_CONFIG \
++    { \
++        .mbInst = 2U, \
++        .mbDoorbell = 1U, \
++        .agentId = 2U, \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* Test Channel Config                                                      */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for number of test channels */
++#define SM_NUM_TEST_CHN  7U
++
++/*! Config data array for test channels */
++#define SM_TEST_CHN_CONFIG_DATA \
++    SM_TEST_CHN0_CONFIG, \
++    SM_TEST_CHN1_CONFIG, \
++    SM_TEST_CHN2_CONFIG, \
++    SM_TEST_CHN3_CONFIG, \
++    SM_TEST_CHN4_CONFIG, \
++    SM_TEST_CHN5_CONFIG, \
++    SM_TEST_CHN6_CONFIG
++
++/*--------------------------------------------------------------------------*/
++/* Test Config                                                              */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for number of tests */
++#define SM_SCMI_NUM_TEST  40U
++
++/*! Config data array for tests */
++#define SM_SCMI_TEST_CONFIG_DATA \
++    {.testId = TEST_BUTTON, .channel = 5U, .rsrc = DEV_SM_BUTTON_0}, \
++    {.testId = TEST_CLK, .channel = 0U, .rsrc = DEV_SM_CLK_LPUART3}, \
++    {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_DISPOCRAM}, \
++    {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_ENETREF}, \
++    {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_ENETTIMER1}, \
++    {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_LPUART8}, \
++    {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_MQS1}, \
++    {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_SAI1}, \
++    {.testId = TEST_CTRL, .channel = 5U, .rsrc = DEV_SM_CTRL_MQS1_SETTINGS}, \
++    {.testId = TEST_CTRL, .channel = 5U, .rsrc = DEV_SM_CTRL_SAI1_MCLK}, \
++    {.testId = TEST_DAISY, .channel = 0U, .rsrc = DEV_SM_DAISY_LPUART3_CTS}, \
++    {.testId = TEST_DAISY, .channel = 0U, .rsrc = DEV_SM_DAISY_LPUART3_RXD}, \
++    {.testId = TEST_DAISY, .channel = 0U, .rsrc = DEV_SM_DAISY_LPUART3_TXD}, \
++    {.testId = TEST_DAISY, .channel = 5U, .rsrc = DEV_SM_DAISY_NETC_EMDC}, \
++    {.testId = TEST_DAISY, .channel = 5U, .rsrc = DEV_SM_DAISY_NETC_EMDIO}, \
++    {.testId = TEST_DAISY, .channel = 5U, .rsrc = DEV_SM_DAISY_NETC_ETH0_RMII_RX_ER}, \
++    {.testId = TEST_DAISY, .channel = 5U, .rsrc = DEV_SM_DAISY_NETC_ETH1_RMII_RX_ER}, \
++    {.testId = TEST_DAISY, .channel = 5U, .rsrc = DEV_SM_DAISY_NETC_TMR_1588_TRIG1}, \
++    {.testId = TEST_DAISY, .channel = 5U, .rsrc = DEV_SM_DAISY_NETC_TMR_1588_TRIG2}, \
++    {.testId = TEST_DAISY, .channel = 5U, .rsrc = DEV_SM_DAISY_SAI1_MCLK}, \
++    {.testId = TEST_GPR, .channel = 5U, .rsrc = DEV_SM_GPR_4}, \
++    {.testId = TEST_PD, .channel = 0U, .rsrc = DEV_SM_PD_A55P}, \
++    {.testId = TEST_PD, .channel = 0U, .rsrc = DEV_SM_PD_M7}, \
++    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_CAMERA}, \
++    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_CAMERA}, \
++    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_DISPLAY}, \
++    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_GPU}, \
++    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_HSIO_TOP}, \
++    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_NPU}, \
++    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_VPU}, \
++    {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_CAM}, \
++    {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_DISP}, \
++    {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_GPU}, \
++    {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_NPU}, \
++    {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_VPU}, \
++    {.testId = TEST_PERLPI, .channel = 0U, .rsrc = DEV_SM_PERLPI_LPUART3}, \
++    {.testId = TEST_PERLPI, .channel = 5U, .rsrc = DEV_SM_PERLPI_LPUART8}, \
++    {.testId = TEST_PIN, .channel = 5U, .rsrc = DEV_SM_PIN_UART1_RXD}, \
++    {.testId = TEST_RTC, .channel = 5U, .rsrc = DEV_SM_RTC_BBNSM}, \
++    {.testId = TEST_SENSOR, .channel = 0U, .rsrc = DEV_SM_SENSOR_TEMP_ANA}
++
++/*! Default channel for non-agent specific tests */
++#define SM_TEST_DEFAULT_CHN  0U
++
++#endif /* CONFIG_TEST_H */
++
++/** @} */
++
+diff --git a/configs/ccimx95dvk/config_trdc.h b/configs/ccimx95dvk/config_trdc.h
+new file mode 100644
+index 000000000000..1d8ed0b6fc95
+--- /dev/null
++++ b/configs/ccimx95dvk/config_trdc.h
+@@ -0,0 +1,1373 @@
++/*
++** ###################################################################
++**
++** Copyright 2023-2025 NXP
++**
++** Redistribution and use in source and binary forms, with or without modification,
++** are permitted provided that the following conditions are met:
++**
++** o Redistributions of source code must retain the above copyright notice, this list
++**   of conditions and the following disclaimer.
++**
++** o Redistributions in binary form must reproduce the above copyright notice, this
++**   list of conditions and the following disclaimer in the documentation and/or
++**   other materials provided with the distribution.
++**
++** o Neither the name of the copyright holder nor the names of its
++**   contributors may be used to endorse or promote products derived from this
++**   software without specific prior written permission.
++**
++** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++** ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++**
++**
++** ###################################################################
++*/
++
++/*==========================================================================*/
++/*!
++ * @addtogroup CONFIG_CCIMX95DVK
++ * @{
++ *
++ * @file
++ * @brief
++ *
++ * Header file containing configuration info for the TRDC SM abstraction.
++ */
++/*==========================================================================*/
++
++#ifndef CONFIG_TRDC_H
++#define CONFIG_TRDC_H
++
++/* Includes */
++
++#include "config_user.h"
++
++/* Defines */
++
++/*--------------------------------------------------------------------------*/
++/* TRDC A Config                                                            */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for TRDC A */
++#define SM_TRDC_A_CONFIG \
++    { \
++        SM_CFG_W1(0x00000800U), 0xB00000A0U, \
++        SM_CFG_W1(0x00000820U), 0xB0000012U, \
++        SM_CFG_W1(0x00000840U), 0xB0000013U, \
++        SM_CFG_W1(0x00000860U), 0xB0000013U, \
++        SM_CFG_W1(0x00000880U), 0xB0000053U, \
++        SM_CFG_W1(0x000008a0U), 0xB0000053U, \
++        SM_CFG_W1(0x000008c0U), 0xB0000014U, \
++        SM_CFG_W1(0x00000a00U), 0x90000002U, \
++        SM_CFG_W1(0x00000a04U), 0x90000002U, \
++        SM_CFG_W1(0x00000a08U), 0x90000002U, \
++        SM_CFG_W1(0x00000a20U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a40U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a60U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a80U), 0xB0000053U, \
++        SM_CFG_W1(0x00000aa0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ac0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ae0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b00U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b20U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b40U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b60U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b80U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ba0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000bc0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000be0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000c00U), 0xB0000053U, \
++        SM_CFG_W1(0x00000c20U), 0xB0000053U, \
++        SM_CFG_W1(0x00000c40U), 0xB0000053U, \
++        SM_CFG_W1(0x00000c60U), 0xB0000053U, \
++        SM_CFG_W1(0x00000c80U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ca0U), 0xB00000A1U, \
++        SM_CFG_W1(0x00000cc0U), 0xB00000A1U, \
++        SM_CFG_W1(0x00010024U), 0x6666U, \
++        SM_CFG_W1(0x00010028U), 0x7777U, \
++        SM_CFG_W1(0x0001002cU), 0x6600U, \
++        SM_CFG_W1(0x00010030U), 0x4444U, \
++        SM_CFG_Z1(0x00010050U), \
++        SM_CFG_Z1(0x00010054U), \
++        SM_CFG_W1(0x00010064U), 0x00000003U, \
++        SM_CFG_W1(0x00010068U), 0x00000003U, \
++        SM_CFG_W1(0x00010180U), 0x000000C0U, \
++        SM_CFG_Z1(0x00010250U), \
++        SM_CFG_Z1(0x00010254U), \
++        SM_CFG_W1(0x00010264U), 0x00000900U, \
++        SM_CFG_W1(0x00010380U), 0x000000C0U, \
++        SM_CFG_W1(0x00010450U), 0x30003330U, \
++        SM_CFG_W1(0x00010454U), 0x03333033U, \
++        SM_CFG_W1(0x00010458U), 0x00030000U, \
++        SM_CFG_W1(0x0001045cU), 0x33330000U, \
++        SM_CFG_W1(0x00010460U), 0x33333333U, \
++        SM_CFG_W1(0x00010464U), 0x30000003U, \
++        SM_CFG_W1(0x00010468U), 0x33330030U, \
++        SM_CFG_W1(0x0001046cU), 0x33333333U, \
++        SM_CFG_W1(0x00010470U), 0x33333333U, \
++        SM_CFG_W1(0x00010474U), 0x00003000U, \
++        SM_CFG_W1(0x00010580U), 0x000003C0U, \
++        SM_CFG_W1(0x000105a8U), 0x00000003U, \
++        SM_CFG_W1(0x00010640U), 0x99999999U, \
++        SM_CFG_W1(0x00010644U), 0x99999999U, \
++        SM_CFG_W1(0x00010648U), 0x99999999U, \
++        SM_CFG_W1(0x0001064cU), 0x99999999U, \
++        SM_CFG_W1(0x00010650U), 0x09000309U, \
++        SM_CFG_W1(0x00010654U), 0x0000C900U, \
++        SM_CFG_W1(0x00010658U), 0x99909900U, \
++        SM_CFG_W1(0x0001065cU), 0x00009099U, \
++        SM_CFG_W1(0x00010668U), 0x00009900U, \
++        SM_CFG_W1(0x0001066cU), 0x90909000U, \
++        SM_CFG_W1(0x00010670U), 0x00009000U, \
++        SM_CFG_W1(0x00010780U), 0x099330C0U, \
++        SM_CFG_Z1(0x00010850U), \
++        SM_CFG_W1(0x00010854U), 0x9000C000U, \
++        SM_CFG_W1(0x00010858U), 0x00000099U, \
++        SM_CFG_W1(0x0001085cU), 0x00000900U, \
++        SM_CFG_W1(0x00010870U), 0x00000090U, \
++        SM_CFG_W1(0x00010874U), 0x00000999U, \
++        SM_CFG_W1(0x00010980U), 0x900000C0U, \
++        SM_CFG_Z1(0x00010a50U), \
++        SM_CFG_Z1(0x00010a54U), \
++        SM_CFG_W1(0x00010b80U), 0x000000C0U, \
++        SM_CFG_Z1(0x00010c50U), \
++        SM_CFG_Z1(0x00010c54U), \
++        SM_CFG_W1(0x00010d80U), 0x000000C0U, \
++        SM_CFG_Z1(0x00010e50U), \
++        SM_CFG_Z1(0x00010e54U), \
++        SM_CFG_W1(0x00010f80U), 0x000000C0U, \
++        SM_CFG_Z1(0x00011050U), \
++        SM_CFG_Z1(0x00011054U), \
++        SM_CFG_W1(0x00011064U), 0x09999000U, \
++        SM_CFG_W1(0x00011180U), 0x000000C0U, \
++        SM_CFG_W1(0x00011240U), 0x99999999U, \
++        SM_CFG_W1(0x00011244U), 0x99999999U, \
++        SM_CFG_W1(0x00011248U), 0x99999999U, \
++        SM_CFG_W1(0x0001124cU), 0x99999999U, \
++        SM_CFG_W1(0x00011250U), 0x99009999U, \
++        SM_CFG_W1(0x00011254U), 0x99999999U, \
++        SM_CFG_W1(0x00011258U), 0x99999999U, \
++        SM_CFG_W1(0x0001125cU), 0x99999999U, \
++        SM_CFG_W1(0x00011260U), 0x99999999U, \
++        SM_CFG_W1(0x00011264U), 0x99999909U, \
++        SM_CFG_W1(0x00011268U), 0x99999999U, \
++        SM_CFG_W1(0x0001126cU), 0x99999999U, \
++        SM_CFG_W1(0x00011270U), 0x99999999U, \
++        SM_CFG_W1(0x00011274U), 0x00009999U, \
++        SM_CFG_W1(0x00011380U), 0x99999990U, \
++        SM_CFG_W1(0x000113a8U), 0x00000009U, \
++        SM_CFG_Z1(0x00011450U), \
++        SM_CFG_Z1(0x00011454U), \
++        SM_CFG_W1(0x00011580U), 0x000000C0U, \
++        SM_CFG_Z1(0x00011650U), \
++        SM_CFG_Z1(0x00011654U), \
++        SM_CFG_W1(0x00011780U), 0x000000C0U, \
++        SM_CFG_Z1(0x00011850U), \
++        SM_CFG_Z1(0x00011854U), \
++        SM_CFG_W1(0x00011980U), 0x000000C0U, \
++        SM_CFG_Z1(0x00011a50U), \
++        SM_CFG_Z1(0x00011a54U), \
++        SM_CFG_W1(0x00011b80U), 0x000000C0U, \
++        SM_CFG_Z1(0x00011c50U), \
++        SM_CFG_Z1(0x00011c54U), \
++        SM_CFG_W1(0x00011d80U), 0x000000C0U, \
++        SM_CFG_Z1(0x00011e50U), \
++        SM_CFG_Z1(0x00011e54U), \
++        SM_CFG_W1(0x00011f80U), 0x000000C0U, \
++        SM_CFG_W1(0x00012024U), 0x6666U, \
++        SM_CFG_W1(0x00012028U), 0x7777U, \
++        SM_CFG_W1(0x0001202cU), 0x7700U, \
++        SM_CFG_W1(0x00012180U), 0x99999999U, \
++        SM_CFG_W1(0x00012184U), 0x99999999U, \
++        SM_CFG_W1(0x00012188U), 0x99999999U, \
++        SM_CFG_W1(0x0001218cU), 0x99999999U, \
++        SM_CFG_Z1(0x00012240U), \
++        SM_CFG_Z1(0x00012244U), \
++        SM_CFG_Z1(0x00012248U), \
++        SM_CFG_Z1(0x0001224cU), \
++        SM_CFG_Z1(0x00012380U), \
++        SM_CFG_Z1(0x00012384U), \
++        SM_CFG_Z1(0x00012388U), \
++        SM_CFG_Z1(0x0001238cU), \
++        SM_CFG_W1(0x00012440U), 0x33333333U, \
++        SM_CFG_W1(0x00012444U), 0x33333333U, \
++        SM_CFG_W1(0x00012448U), 0x33333333U, \
++        SM_CFG_W1(0x0001244cU), 0x33333333U, \
++        SM_CFG_W1(0x00012580U), 0x33333333U, \
++        SM_CFG_W1(0x00012584U), 0x33333333U, \
++        SM_CFG_W1(0x00012588U), 0x33333333U, \
++        SM_CFG_W1(0x0001258cU), 0x33333333U, \
++        SM_CFG_Z1(0x00012640U), \
++        SM_CFG_Z1(0x00012644U), \
++        SM_CFG_Z1(0x00012648U), \
++        SM_CFG_Z1(0x0001264cU), \
++        SM_CFG_Z1(0x00012780U), \
++        SM_CFG_Z1(0x00012784U), \
++        SM_CFG_Z1(0x00012788U), \
++        SM_CFG_Z1(0x0001278cU), \
++        SM_CFG_Z1(0x00012840U), \
++        SM_CFG_Z1(0x00012844U), \
++        SM_CFG_Z1(0x00012848U), \
++        SM_CFG_Z1(0x0001284cU), \
++        SM_CFG_Z1(0x00012980U), \
++        SM_CFG_Z1(0x00012984U), \
++        SM_CFG_Z1(0x00012988U), \
++        SM_CFG_Z1(0x0001298cU), \
++        SM_CFG_Z1(0x00012a40U), \
++        SM_CFG_Z1(0x00012a44U), \
++        SM_CFG_Z1(0x00012a48U), \
++        SM_CFG_Z1(0x00012a4cU), \
++        SM_CFG_Z1(0x00012b80U), \
++        SM_CFG_Z1(0x00012b84U), \
++        SM_CFG_Z1(0x00012b88U), \
++        SM_CFG_Z1(0x00012b8cU), \
++        SM_CFG_Z1(0x00012c40U), \
++        SM_CFG_Z1(0x00012c44U), \
++        SM_CFG_Z1(0x00012c48U), \
++        SM_CFG_Z1(0x00012c4cU), \
++        SM_CFG_Z1(0x00012d80U), \
++        SM_CFG_Z1(0x00012d84U), \
++        SM_CFG_Z1(0x00012d88U), \
++        SM_CFG_Z1(0x00012d8cU), \
++        SM_CFG_Z1(0x00012e40U), \
++        SM_CFG_Z1(0x00012e44U), \
++        SM_CFG_Z1(0x00012e48U), \
++        SM_CFG_Z1(0x00012e4cU), \
++        SM_CFG_Z1(0x00012f80U), \
++        SM_CFG_Z1(0x00012f84U), \
++        SM_CFG_Z1(0x00012f88U), \
++        SM_CFG_Z1(0x00012f8cU), \
++        SM_CFG_Z1(0x00013040U), \
++        SM_CFG_Z1(0x00013044U), \
++        SM_CFG_Z1(0x00013048U), \
++        SM_CFG_Z1(0x0001304cU), \
++        SM_CFG_Z1(0x00013180U), \
++        SM_CFG_Z1(0x00013184U), \
++        SM_CFG_Z1(0x00013188U), \
++        SM_CFG_Z1(0x0001318cU), \
++        SM_CFG_W1(0x00013240U), 0x99999999U, \
++        SM_CFG_W1(0x00013244U), 0x99999999U, \
++        SM_CFG_W1(0x00013248U), 0x99999999U, \
++        SM_CFG_W1(0x0001324cU), 0x99999999U, \
++        SM_CFG_W1(0x00013380U), 0x99999999U, \
++        SM_CFG_W1(0x00013384U), 0x99999999U, \
++        SM_CFG_W1(0x00013388U), 0x99999999U, \
++        SM_CFG_W1(0x0001338cU), 0x99999999U, \
++        SM_CFG_Z1(0x00013440U), \
++        SM_CFG_Z1(0x00013444U), \
++        SM_CFG_Z1(0x00013448U), \
++        SM_CFG_Z1(0x0001344cU), \
++        SM_CFG_Z1(0x00013580U), \
++        SM_CFG_Z1(0x00013584U), \
++        SM_CFG_Z1(0x00013588U), \
++        SM_CFG_Z1(0x0001358cU), \
++        SM_CFG_Z1(0x00013640U), \
++        SM_CFG_Z1(0x00013644U), \
++        SM_CFG_Z1(0x00013648U), \
++        SM_CFG_Z1(0x0001364cU), \
++        SM_CFG_Z1(0x00013780U), \
++        SM_CFG_Z1(0x00013784U), \
++        SM_CFG_Z1(0x00013788U), \
++        SM_CFG_Z1(0x0001378cU), \
++        SM_CFG_Z1(0x00013840U), \
++        SM_CFG_Z1(0x00013844U), \
++        SM_CFG_Z1(0x00013848U), \
++        SM_CFG_Z1(0x0001384cU), \
++        SM_CFG_Z1(0x00013980U), \
++        SM_CFG_Z1(0x00013984U), \
++        SM_CFG_Z1(0x00013988U), \
++        SM_CFG_Z1(0x0001398cU), \
++        SM_CFG_W1(0x00014024U), 0x6666U, \
++        SM_CFG_Z1(0x00014240U), \
++        SM_CFG_W1(0x00014244U), 0x0003C001U, \
++        SM_CFG_Z1(0x0001424cU), \
++        SM_CFG_Z1(0x00014254U), \
++        SM_CFG_Z1(0x0001425cU), \
++        SM_CFG_W1(0x00014940U), 0x00000001U, \
++        SM_CFG_W1(0x00014944U), 0x0003C011U, \
++        SM_CFG_Z1(0x0001494cU), \
++        SM_CFG_Z1(0x00014954U), \
++        SM_CFG_Z1(0x0001495cU), \
++        SM_CFG_Z1(0x00010020U), \
++        SM_CFG_Z1(0x00012020U), \
++        SM_CFG_W1(0x00014020U), 0x7700U, \
++        SM_CFG_C1(0x00000000U), 0x0000C001U, \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* TRDC C Config                                                            */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for TRDC C */
++#define SM_TRDC_C_CONFIG \
++    { \
++        SM_CFG_W1(0x00000800U), 0xB0000053U, \
++        SM_CFG_W1(0x00000820U), 0xB0000053U, \
++        SM_CFG_W1(0x00000840U), 0xB0000053U, \
++        SM_CFG_W1(0x00000860U), 0xB0000053U, \
++        SM_CFG_W1(0x00000880U), 0xB0000053U, \
++        SM_CFG_W1(0x000008a0U), 0xB0000053U, \
++        SM_CFG_W1(0x000008c0U), 0xB0000053U, \
++        SM_CFG_W1(0x000008e0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000900U), 0xB0000053U, \
++        SM_CFG_W1(0x00000920U), 0xB0000053U, \
++        SM_CFG_W1(0x00000940U), 0xB0000053U, \
++        SM_CFG_W1(0x00000960U), 0xB0000053U, \
++        SM_CFG_W1(0x00000980U), 0xB0000053U, \
++        SM_CFG_W1(0x000009a0U), 0xB0000053U, \
++        SM_CFG_W1(0x000009c0U), 0xB0000053U, \
++        SM_CFG_W1(0x000009e0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a00U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a20U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a40U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a60U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a80U), 0xB0000053U, \
++        SM_CFG_W1(0x00000aa0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ac0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ae0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b00U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b20U), 0xB0000053U, \
++        SM_CFG_W1(0x00010024U), 0x6666U, \
++        SM_CFG_W1(0x00010028U), 0x7777U, \
++        SM_CFG_W1(0x0001002cU), 0x6600U, \
++        SM_CFG_W1(0x00010040U), 0x00003000U, \
++        SM_CFG_W1(0x00010240U), 0x00000900U, \
++        SM_CFG_W1(0x00010440U), 0x00330000U, \
++        SM_CFG_W1(0x00010640U), 0x99000090U, \
++        SM_CFG_W1(0x00010644U), 0x99999999U, \
++        SM_CFG_W1(0x00010648U), 0x99999999U, \
++        SM_CFG_W1(0x0001064cU), 0x09999999U, \
++        SM_CFG_W1(0x00010650U), 0x99999999U, \
++        SM_CFG_W1(0x00010654U), 0x99999999U, \
++        SM_CFG_W1(0x00010658U), 0x00000999U, \
++        SM_CFG_Z1(0x00010840U), \
++        SM_CFG_Z1(0x00010a40U), \
++        SM_CFG_Z1(0x00010c40U), \
++        SM_CFG_Z1(0x00010e40U), \
++        SM_CFG_W1(0x00011040U), 0x00000009U, \
++        SM_CFG_W1(0x00011240U), 0x99999999U, \
++        SM_CFG_W1(0x00011244U), 0x99999999U, \
++        SM_CFG_W1(0x00011248U), 0x99999999U, \
++        SM_CFG_W1(0x0001124cU), 0x09999999U, \
++        SM_CFG_W1(0x00011250U), 0x99999999U, \
++        SM_CFG_W1(0x00011254U), 0x99999999U, \
++        SM_CFG_W1(0x00011258U), 0x00000999U, \
++        SM_CFG_Z1(0x00011440U), \
++        SM_CFG_Z1(0x00011640U), \
++        SM_CFG_Z1(0x00011840U), \
++        SM_CFG_Z1(0x00011a40U), \
++        SM_CFG_Z1(0x00011c40U), \
++        SM_CFG_Z1(0x00011e40U), \
++        SM_CFG_W1(0x00012024U), 0x6666U, \
++        SM_CFG_W1(0x00012028U), 0x7777U, \
++        SM_CFG_W1(0x0001202cU), 0x6600U, \
++        SM_CFG_W1(0x00012440U), 0x00000003U, \
++        SM_CFG_W1(0x00013240U), 0x00000009U, \
++        SM_CFG_W1(0x00014024U), 0x6666U, \
++        SM_CFG_W1(0x00014028U), 0x7777U, \
++        SM_CFG_W1(0x00014640U), 0x00000009U, \
++        SM_CFG_W1(0x00015240U), 0x00000009U, \
++        SM_CFG_W1(0x00016024U), 0x6666U, \
++        SM_CFG_W1(0x00016340U), 0x01000000U, \
++        SM_CFG_W1(0x00016344U), 0x01014011U, \
++        SM_CFG_Z1(0x0001634cU), \
++        SM_CFG_W1(0x00016940U), 0x01000001U, \
++        SM_CFG_W1(0x00016944U), 0x01014011U, \
++        SM_CFG_Z1(0x0001694cU), \
++        SM_CFG_Z1(0x00010020U), \
++        SM_CFG_Z1(0x00012020U), \
++        SM_CFG_Z1(0x00014020U), \
++        SM_CFG_W1(0x00016020U), 0x7777U, \
++        SM_CFG_C1(0x00000000U), 0x0000C001U, \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* TRDC D Config                                                            */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for TRDC D */
++#define SM_TRDC_D_CONFIG \
++    { \
++        SM_CFG_W1(0x00000800U), 0xB0000053U, \
++        SM_CFG_W1(0x00000820U), 0xB0000053U, \
++        SM_CFG_W1(0x00000840U), 0xB0000053U, \
++        SM_CFG_W1(0x00000860U), 0xB0000053U, \
++        SM_CFG_W1(0x00000880U), 0xB0000053U, \
++        SM_CFG_W1(0x000008a0U), 0xB0000053U, \
++        SM_CFG_W1(0x000008c0U), 0xB0000053U, \
++        SM_CFG_W1(0x000008e0U), 0xB0000053U, \
++        SM_CFG_W1(0x00010024U), 0x6666U, \
++        SM_CFG_W1(0x00010028U), 0x7777U, \
++        SM_CFG_W1(0x0001002cU), 0x6600U, \
++        SM_CFG_W1(0x00010040U), 0x00003000U, \
++        SM_CFG_W1(0x00010180U), 0x00003000U, \
++        SM_CFG_W1(0x00010240U), 0x00000900U, \
++        SM_CFG_W1(0x00010380U), 0x00000900U, \
++        SM_CFG_W1(0x00010440U), 0x00330000U, \
++        SM_CFG_W1(0x0001045cU), 0x30000000U, \
++        SM_CFG_W1(0x00010580U), 0x00330000U, \
++        SM_CFG_W1(0x0001059cU), 0x30000000U, \
++        SM_CFG_W1(0x00010640U), 0x90000090U, \
++        SM_CFG_W1(0x00010644U), 0x99999999U, \
++        SM_CFG_W1(0x00010648U), 0x00000009U, \
++        SM_CFG_W1(0x00010658U), 0x00000009U, \
++        SM_CFG_W1(0x00010780U), 0x90000090U, \
++        SM_CFG_W1(0x00010784U), 0x99999999U, \
++        SM_CFG_W1(0x00010788U), 0x00000009U, \
++        SM_CFG_W1(0x00010798U), 0x00000009U, \
++        SM_CFG_W1(0x000107a8U), 0x99999999U, \
++        SM_CFG_W1(0x000107acU), 0x99999999U, \
++        SM_CFG_W1(0x000107b0U), 0x99999999U, \
++        SM_CFG_W1(0x000107b4U), 0x99999999U, \
++        SM_CFG_W1(0x000107b8U), 0x99999999U, \
++        SM_CFG_W1(0x000107bcU), 0x99999999U, \
++        SM_CFG_W1(0x000107c0U), 0x99999999U, \
++        SM_CFG_W1(0x000107c4U), 0x99999999U, \
++        SM_CFG_W1(0x000107d0U), 0x99999999U, \
++        SM_CFG_W1(0x000107d4U), 0x99999999U, \
++        SM_CFG_W1(0x000107d8U), 0x99999999U, \
++        SM_CFG_W1(0x000107dcU), 0x99999999U, \
++        SM_CFG_W1(0x000107e0U), 0x99999999U, \
++        SM_CFG_W1(0x000107e4U), 0x99999999U, \
++        SM_CFG_W1(0x000107e8U), 0x99999999U, \
++        SM_CFG_W1(0x000107ecU), 0x99999999U, \
++        SM_CFG_Z1(0x00010840U), \
++        SM_CFG_Z1(0x00010980U), \
++        SM_CFG_Z1(0x00010a40U), \
++        SM_CFG_Z1(0x00010b80U), \
++        SM_CFG_Z1(0x00010c40U), \
++        SM_CFG_Z1(0x00010d80U), \
++        SM_CFG_Z1(0x00010e40U), \
++        SM_CFG_Z1(0x00010f80U), \
++        SM_CFG_W1(0x00011040U), 0x00000009U, \
++        SM_CFG_W1(0x00011180U), 0x00000009U, \
++        SM_CFG_W1(0x00011240U), 0x90999999U, \
++        SM_CFG_W1(0x00011244U), 0x99999999U, \
++        SM_CFG_W1(0x00011248U), 0x00000009U, \
++        SM_CFG_W1(0x00011258U), 0x00000009U, \
++        SM_CFG_W1(0x0001125cU), 0x90000000U, \
++        SM_CFG_W1(0x00011380U), 0x90999999U, \
++        SM_CFG_W1(0x00011384U), 0x99999999U, \
++        SM_CFG_W1(0x00011388U), 0x00000009U, \
++        SM_CFG_W1(0x00011398U), 0x00000009U, \
++        SM_CFG_W1(0x0001139cU), 0x90000000U, \
++        SM_CFG_W1(0x000113a8U), 0x99999999U, \
++        SM_CFG_W1(0x000113acU), 0x99999999U, \
++        SM_CFG_W1(0x000113b0U), 0x99999999U, \
++        SM_CFG_W1(0x000113b4U), 0x99999999U, \
++        SM_CFG_W1(0x000113b8U), 0x99999999U, \
++        SM_CFG_W1(0x000113bcU), 0x99999999U, \
++        SM_CFG_W1(0x000113c0U), 0x99999999U, \
++        SM_CFG_W1(0x000113c4U), 0x99999999U, \
++        SM_CFG_W1(0x000113d0U), 0x99999999U, \
++        SM_CFG_W1(0x000113d4U), 0x99999999U, \
++        SM_CFG_W1(0x000113d8U), 0x99999999U, \
++        SM_CFG_W1(0x000113dcU), 0x99999999U, \
++        SM_CFG_W1(0x000113e0U), 0x99999999U, \
++        SM_CFG_W1(0x000113e4U), 0x99999999U, \
++        SM_CFG_W1(0x000113e8U), 0x99999999U, \
++        SM_CFG_W1(0x000113ecU), 0x99999999U, \
++        SM_CFG_Z1(0x00011440U), \
++        SM_CFG_Z1(0x00011580U), \
++        SM_CFG_Z1(0x00011640U), \
++        SM_CFG_Z1(0x00011780U), \
++        SM_CFG_Z1(0x00011840U), \
++        SM_CFG_Z1(0x00011980U), \
++        SM_CFG_Z1(0x00011a40U), \
++        SM_CFG_Z1(0x00011b80U), \
++        SM_CFG_Z1(0x00011c40U), \
++        SM_CFG_Z1(0x00011d80U), \
++        SM_CFG_Z1(0x00011e40U), \
++        SM_CFG_Z1(0x00011f80U), \
++        SM_CFG_Z1(0x00010020U), \
++        SM_CFG_C1(0x00000000U), 0x0000C001U, \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* TRDC E Config                                                            */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for TRDC E */
++#define SM_TRDC_E_CONFIG \
++    { \
++        SM_CFG_W1(0x00000800U), 0xA8000053U, \
++        SM_CFG_W1(0x00000820U), 0xA8400053U, \
++        SM_CFG_W1(0x00000840U), 0xA8800053U, \
++        SM_CFG_W1(0x00000860U), 0xA8C00053U, \
++        SM_CFG_W1(0x00000880U), 0xA9000053U, \
++        SM_CFG_W1(0x000008a0U), 0xA9400053U, \
++        SM_CFG_W1(0x000008c0U), 0xA9800053U, \
++        SM_CFG_W1(0x000008e0U), 0xA9C00053U, \
++        SM_CFG_W1(0x00010024U), 0x6666U, \
++        SM_CFG_W1(0x00010028U), 0x7777U, \
++        SM_CFG_W1(0x0001002cU), 0x6600U, \
++        SM_CFG_W1(0x000101a8U), 0x00003000U, \
++        SM_CFG_W1(0x000103a8U), 0x00000900U, \
++        SM_CFG_W1(0x000105a8U), 0x00330000U, \
++        SM_CFG_W1(0x00010640U), 0x99999999U, \
++        SM_CFG_W1(0x00010644U), 0x99999999U, \
++        SM_CFG_W1(0x00010648U), 0x99999999U, \
++        SM_CFG_W1(0x0001064cU), 0x99999999U, \
++        SM_CFG_W1(0x00010780U), 0x99999999U, \
++        SM_CFG_W1(0x000107a8U), 0x00000090U, \
++        SM_CFG_W1(0x000107acU), 0x00009909U, \
++        SM_CFG_Z1(0x000109a8U), \
++        SM_CFG_Z1(0x00010ba8U), \
++        SM_CFG_Z1(0x00010da8U), \
++        SM_CFG_Z1(0x00010fa8U), \
++        SM_CFG_W1(0x000111a8U), 0x00000009U, \
++        SM_CFG_W1(0x00011240U), 0x99999999U, \
++        SM_CFG_W1(0x00011244U), 0x99999999U, \
++        SM_CFG_W1(0x00011248U), 0x99999999U, \
++        SM_CFG_W1(0x0001124cU), 0x99999999U, \
++        SM_CFG_W1(0x00011380U), 0x99999999U, \
++        SM_CFG_W1(0x000113a8U), 0x00999999U, \
++        SM_CFG_W1(0x000113acU), 0x00009909U, \
++        SM_CFG_Z1(0x000115a8U), \
++        SM_CFG_Z1(0x000117a8U), \
++        SM_CFG_Z1(0x000119a8U), \
++        SM_CFG_Z1(0x00011ba8U), \
++        SM_CFG_Z1(0x00011da8U), \
++        SM_CFG_Z1(0x00011fa8U), \
++        SM_CFG_Z1(0x00010020U), \
++        SM_CFG_C1(0x00000000U), 0x0000C001U, \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* TRDC G Config                                                            */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for TRDC G */
++#define SM_TRDC_G_CONFIG \
++    { \
++        SM_CFG_W1(0x00000800U), 0xB0000053U, \
++        SM_CFG_W1(0x00000820U), 0xB0000053U, \
++        SM_CFG_W1(0x00010024U), 0x6666U, \
++        SM_CFG_W1(0x00010028U), 0x7777U, \
++        SM_CFG_W1(0x0001002cU), 0x6600U, \
++        SM_CFG_W1(0x00010040U), 0x00003000U, \
++        SM_CFG_W1(0x00010240U), 0x00000900U, \
++        SM_CFG_W1(0x00010440U), 0x00330030U, \
++        SM_CFG_Z1(0x00010640U), \
++        SM_CFG_Z1(0x00010840U), \
++        SM_CFG_Z1(0x00010a40U), \
++        SM_CFG_Z1(0x00010c40U), \
++        SM_CFG_Z1(0x00010e40U), \
++        SM_CFG_W1(0x00011040U), 0x00000009U, \
++        SM_CFG_W1(0x00011240U), 0x00999999U, \
++        SM_CFG_Z1(0x00011440U), \
++        SM_CFG_Z1(0x00011640U), \
++        SM_CFG_Z1(0x00011840U), \
++        SM_CFG_Z1(0x00011a40U), \
++        SM_CFG_Z1(0x00011c40U), \
++        SM_CFG_Z1(0x00011e40U), \
++        SM_CFG_W1(0x00012340U), 0x4D900000U, \
++        SM_CFG_W1(0x00012344U), 0x4DD7C011U, \
++        SM_CFG_Z1(0x0001234cU), \
++        SM_CFG_Z1(0x00012354U), \
++        SM_CFG_Z1(0x0001235cU), \
++        SM_CFG_W1(0x00012940U), 0x4D900000U, \
++        SM_CFG_W1(0x00012944U), 0x4DD7C011U, \
++        SM_CFG_Z1(0x0001294cU), \
++        SM_CFG_Z1(0x00012954U), \
++        SM_CFG_Z1(0x0001295cU), \
++        SM_CFG_Z1(0x00010020U), \
++        SM_CFG_W1(0x00012020U), 0x6666U, \
++        SM_CFG_C1(0x00000000U), 0x0000C001U, \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* TRDC H Config                                                            */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for TRDC H */
++#define SM_TRDC_H_CONFIG \
++    { \
++        SM_CFG_W1(0x00000800U), 0xA3800053U, \
++        SM_CFG_W1(0x00000820U), 0xA3C00053U, \
++        SM_CFG_W1(0x00000840U), 0xA4000053U, \
++        SM_CFG_W1(0x00000860U), 0xA4400053U, \
++        SM_CFG_W1(0x00000880U), 0xA4800053U, \
++        SM_CFG_W1(0x000008a0U), 0xA4C00053U, \
++        SM_CFG_W1(0x000008c0U), 0xA5000053U, \
++        SM_CFG_W1(0x000008e0U), 0xA5400053U, \
++        SM_CFG_W1(0x00000900U), 0xA5800053U, \
++        SM_CFG_W1(0x00000920U), 0xA5C00053U, \
++        SM_CFG_W1(0x00000940U), 0xA6000053U, \
++        SM_CFG_W1(0x00000960U), 0xA6400053U, \
++        SM_CFG_W1(0x00000980U), 0xA6800053U, \
++        SM_CFG_W1(0x000009a0U), 0xA6C00053U, \
++        SM_CFG_W1(0x000009c0U), 0xA7000053U, \
++        SM_CFG_W1(0x000009e0U), 0xA7400053U, \
++        SM_CFG_W1(0x00000a00U), 0xA7800053U, \
++        SM_CFG_W1(0x00000a20U), 0xA7C00053U, \
++        SM_CFG_W1(0x00010024U), 0x6666U, \
++        SM_CFG_W1(0x00010028U), 0x7777U, \
++        SM_CFG_W1(0x0001002cU), 0x6600U, \
++        SM_CFG_W1(0x000101a8U), 0x00003000U, \
++        SM_CFG_W1(0x000103a8U), 0x00000900U, \
++        SM_CFG_W1(0x000105a8U), 0x03330000U, \
++        SM_CFG_W1(0x00010640U), 0x99999999U, \
++        SM_CFG_W1(0x00010644U), 0x99999999U, \
++        SM_CFG_W1(0x00010780U), 0x99999999U, \
++        SM_CFG_W1(0x00010784U), 0x99999999U, \
++        SM_CFG_W1(0x000107a8U), 0x00000090U, \
++        SM_CFG_W1(0x000107d0U), 0x99999999U, \
++        SM_CFG_W1(0x000107d4U), 0x99999999U, \
++        SM_CFG_W1(0x000107d8U), 0x99999999U, \
++        SM_CFG_Z1(0x000109a8U), \
++        SM_CFG_Z1(0x00010ba8U), \
++        SM_CFG_Z1(0x00010da8U), \
++        SM_CFG_Z1(0x00010fa8U), \
++        SM_CFG_W1(0x000111a8U), 0x00000009U, \
++        SM_CFG_W1(0x00011240U), 0x99999999U, \
++        SM_CFG_W1(0x00011244U), 0x99999999U, \
++        SM_CFG_W1(0x00011380U), 0x99999999U, \
++        SM_CFG_W1(0x00011384U), 0x99999999U, \
++        SM_CFG_W1(0x000113a8U), 0x09999999U, \
++        SM_CFG_W1(0x000113d0U), 0x99999999U, \
++        SM_CFG_W1(0x000113d4U), 0x99999999U, \
++        SM_CFG_W1(0x000113d8U), 0x99999999U, \
++        SM_CFG_Z1(0x000115a8U), \
++        SM_CFG_Z1(0x000117a8U), \
++        SM_CFG_Z1(0x000119a8U), \
++        SM_CFG_Z1(0x00011ba8U), \
++        SM_CFG_Z1(0x00011da8U), \
++        SM_CFG_Z1(0x00011fa8U), \
++        SM_CFG_W1(0x00012024U), 0x6666U, \
++        SM_CFG_W1(0x00012028U), 0x7777U, \
++        SM_CFG_W1(0x00012640U), 0x00099999U, \
++        SM_CFG_W1(0x00012780U), 0x00099999U, \
++        SM_CFG_W1(0x000127a8U), 0x00099999U, \
++        SM_CFG_W1(0x000127d0U), 0x00099999U, \
++        SM_CFG_W1(0x00013240U), 0x00099999U, \
++        SM_CFG_W1(0x00013380U), 0x00099999U, \
++        SM_CFG_W1(0x000133a8U), 0x00099999U, \
++        SM_CFG_W1(0x000133d0U), 0x00099999U, \
++        SM_CFG_W1(0x00014024U), 0x6666U, \
++        SM_CFG_W1(0x00014028U), 0x7777U, \
++        SM_CFG_W1(0x00014640U), 0x99999999U, \
++        SM_CFG_W1(0x00014644U), 0x99999999U, \
++        SM_CFG_W1(0x00014648U), 0x99999999U, \
++        SM_CFG_W1(0x00015240U), 0x99999999U, \
++        SM_CFG_W1(0x00015244U), 0x99999999U, \
++        SM_CFG_W1(0x00015248U), 0x99999999U, \
++        SM_CFG_Z1(0x00010020U), \
++        SM_CFG_Z1(0x00012020U), \
++        SM_CFG_Z1(0x00014020U), \
++        SM_CFG_C1(0x00000000U), 0x0000C001U, \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* TRDC M Config                                                            */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for TRDC M */
++#define SM_TRDC_M_CONFIG \
++    { \
++        SM_CFG_W1(0x00000800U), 0xA0400053U, \
++        SM_CFG_W1(0x00000820U), 0xA0800053U, \
++        SM_CFG_W1(0x00000840U), 0xB00000A8U, \
++        SM_CFG_W1(0x00000860U), 0xA0C00053U, \
++        SM_CFG_W1(0x00000880U), 0xB0000053U, \
++        SM_CFG_W1(0x000008a0U), 0xB00000A9U, \
++        SM_CFG_W1(0x000008c0U), 0xB00000A9U, \
++        SM_CFG_W1(0x000008e0U), 0xB00000ACU, \
++        SM_CFG_W1(0x00000900U), 0x90000004U, \
++        SM_CFG_W1(0x00000920U), 0xB0000053U, \
++        SM_CFG_W1(0x00000940U), 0xB0000053U, \
++        SM_CFG_W1(0x00000960U), 0xB0000053U, \
++        SM_CFG_W1(0x00000980U), 0xB0000053U, \
++        SM_CFG_W1(0x000009a0U), 0xB0000053U, \
++        SM_CFG_W1(0x000009c0U), 0xB0000053U, \
++        SM_CFG_W1(0x000009e0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a00U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a20U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a40U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a60U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a80U), 0xB0000053U, \
++        SM_CFG_W1(0x00000aa0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ac0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ae0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b00U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b20U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b40U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b60U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b80U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ba0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000bc0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000be0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000c00U), 0xB0000053U, \
++        SM_CFG_W1(0x00000c20U), 0xB0000053U, \
++        SM_CFG_W1(0x00000c40U), 0xB0000053U, \
++        SM_CFG_W1(0x00000c60U), 0xB0000053U, \
++        SM_CFG_W1(0x00000c80U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ca0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000cc0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ce0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000d00U), 0xB0000053U, \
++        SM_CFG_W1(0x00000d20U), 0xB0000053U, \
++        SM_CFG_W1(0x00000d40U), 0xB0000053U, \
++        SM_CFG_W1(0x00000d60U), 0xB00000ACU, \
++        SM_CFG_W1(0x00000d80U), 0xB0000053U, \
++        SM_CFG_W1(0x00000da0U), 0xB0000014U, \
++        SM_CFG_W1(0x00000dc0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000de0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000e00U), 0xB0000053U, \
++        SM_CFG_W1(0x00000e20U), 0xB0000053U, \
++        SM_CFG_C1(0x00000000U), 0x0000C001U, \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* TRDC N Config                                                            */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for TRDC N */
++#define SM_TRDC_N_CONFIG \
++    { \
++        SM_CFG_W1(0x00000800U), 0x90008003U, \
++        SM_CFG_W1(0x00000804U), 0x90008003U, \
++        SM_CFG_W1(0x00000808U), 0x90008003U, \
++        SM_CFG_W1(0x0000080cU), 0x90008003U, \
++        SM_CFG_W1(0x00000820U), 0x90008003U, \
++        SM_CFG_W1(0x00000824U), 0x90008003U, \
++        SM_CFG_W1(0x00000828U), 0x90008003U, \
++        SM_CFG_W1(0x0000082cU), 0x90008003U, \
++        SM_CFG_W1(0x00000840U), 0x90008003U, \
++        SM_CFG_W1(0x00000844U), 0x90008003U, \
++        SM_CFG_W1(0x00000848U), 0x90008003U, \
++        SM_CFG_W1(0x0000084cU), 0x90008003U, \
++        SM_CFG_W1(0x00000860U), 0x90008003U, \
++        SM_CFG_W1(0x00000864U), 0x90008003U, \
++        SM_CFG_W1(0x00000868U), 0x90008003U, \
++        SM_CFG_W1(0x0000086cU), 0x90008003U, \
++        SM_CFG_W1(0x00000880U), 0xA3400053U, \
++        SM_CFG_W1(0x000008a0U), 0xB0000053U, \
++        SM_CFG_W1(0x000008c0U), 0xB0000053U, \
++        SM_CFG_W1(0x00010024U), 0x6666U, \
++        SM_CFG_W1(0x00010028U), 0x7777U, \
++        SM_CFG_W1(0x0001002cU), 0x6600U, \
++        SM_CFG_W1(0x00010040U), 0x00300000U, \
++        SM_CFG_W1(0x00010180U), 0x00300000U, \
++        SM_CFG_W1(0x000101a8U), 0x00003000U, \
++        SM_CFG_W1(0x000101d0U), 0x00003000U, \
++        SM_CFG_W1(0x00010240U), 0x00009000U, \
++        SM_CFG_W1(0x00010380U), 0x00009000U, \
++        SM_CFG_W1(0x000103a8U), 0x00000900U, \
++        SM_CFG_W1(0x000103d0U), 0x00000900U, \
++        SM_CFG_W1(0x00010440U), 0x33000333U, \
++        SM_CFG_W1(0x00010444U), 0x00033303U, \
++        SM_CFG_W1(0x00010450U), 0x30000000U, \
++        SM_CFG_W1(0x00010580U), 0x33000333U, \
++        SM_CFG_W1(0x00010584U), 0x00033303U, \
++        SM_CFG_W1(0x00010590U), 0x30000000U, \
++        SM_CFG_W1(0x000105a8U), 0x00030000U, \
++        SM_CFG_W1(0x000105d0U), 0x00030000U, \
++        SM_CFG_Z1(0x00010640U), \
++        SM_CFG_W1(0x00010644U), 0x99900000U, \
++        SM_CFG_W1(0x00010648U), 0x99999990U, \
++        SM_CFG_W1(0x0001064cU), 0x99999999U, \
++        SM_CFG_W1(0x00010650U), 0x09999999U, \
++        SM_CFG_Z1(0x00010780U), \
++        SM_CFG_W1(0x00010784U), 0x99900000U, \
++        SM_CFG_W1(0x00010788U), 0x99999990U, \
++        SM_CFG_W1(0x0001078cU), 0x99999999U, \
++        SM_CFG_W1(0x00010790U), 0x09999999U, \
++        SM_CFG_Z1(0x00010840U), \
++        SM_CFG_Z1(0x00010980U), \
++        SM_CFG_Z1(0x00010a40U), \
++        SM_CFG_Z1(0x00010b80U), \
++        SM_CFG_Z1(0x00010c40U), \
++        SM_CFG_Z1(0x00010d80U), \
++        SM_CFG_Z1(0x00010e40U), \
++        SM_CFG_Z1(0x00010f80U), \
++        SM_CFG_W1(0x00011040U), 0x00090000U, \
++        SM_CFG_W1(0x00011180U), 0x00090000U, \
++        SM_CFG_W1(0x000111a8U), 0x00000009U, \
++        SM_CFG_W1(0x000111d0U), 0x00000009U, \
++        SM_CFG_W1(0x00011240U), 0x99999999U, \
++        SM_CFG_W1(0x00011244U), 0x99999909U, \
++        SM_CFG_W1(0x00011248U), 0x99999990U, \
++        SM_CFG_W1(0x0001124cU), 0x99999999U, \
++        SM_CFG_W1(0x00011250U), 0x99999999U, \
++        SM_CFG_W1(0x00011380U), 0x99999999U, \
++        SM_CFG_W1(0x00011384U), 0x99999909U, \
++        SM_CFG_W1(0x00011388U), 0x99999990U, \
++        SM_CFG_W1(0x0001138cU), 0x99999999U, \
++        SM_CFG_W1(0x00011390U), 0x99999999U, \
++        SM_CFG_W1(0x000113a8U), 0x00099909U, \
++        SM_CFG_W1(0x000113d0U), 0x00099909U, \
++        SM_CFG_Z1(0x00011440U), \
++        SM_CFG_Z1(0x00011580U), \
++        SM_CFG_Z1(0x00011640U), \
++        SM_CFG_Z1(0x00011780U), \
++        SM_CFG_Z1(0x00011840U), \
++        SM_CFG_Z1(0x00011980U), \
++        SM_CFG_Z1(0x00011a40U), \
++        SM_CFG_Z1(0x00011b80U), \
++        SM_CFG_Z1(0x00011c40U), \
++        SM_CFG_Z1(0x00011d80U), \
++        SM_CFG_Z1(0x00011e40U), \
++        SM_CFG_Z1(0x00011f80U), \
++        SM_CFG_W1(0x00012024U), 0x6666U, \
++        SM_CFG_W1(0x00012028U), 0x7777U, \
++        SM_CFG_W1(0x0001202cU), 0x6600U, \
++        SM_CFG_W1(0x00012440U), 0x33333333U, \
++        SM_CFG_W1(0x00012444U), 0x33333333U, \
++        SM_CFG_W1(0x00012448U), 0x00000333U, \
++        SM_CFG_W1(0x00012580U), 0x33333333U, \
++        SM_CFG_W1(0x00012584U), 0x33333333U, \
++        SM_CFG_W1(0x00012588U), 0x00000333U, \
++        SM_CFG_W1(0x00012640U), 0x99999999U, \
++        SM_CFG_W1(0x00012644U), 0x99999999U, \
++        SM_CFG_W1(0x00012648U), 0x00000999U, \
++        SM_CFG_W1(0x00012780U), 0x99999999U, \
++        SM_CFG_W1(0x00012784U), 0x99999999U, \
++        SM_CFG_W1(0x00012788U), 0x00000999U, \
++        SM_CFG_W1(0x00013240U), 0x99999999U, \
++        SM_CFG_W1(0x00013244U), 0x99999999U, \
++        SM_CFG_W1(0x00013248U), 0x00000999U, \
++        SM_CFG_W1(0x00013380U), 0x99999999U, \
++        SM_CFG_W1(0x00013384U), 0x99999999U, \
++        SM_CFG_W1(0x00013388U), 0x00000999U, \
++        SM_CFG_W1(0x00014024U), 0x6666U, \
++        SM_CFG_W1(0x00014028U), 0x7777U, \
++        SM_CFG_W1(0x0001402cU), 0x7700U, \
++        SM_CFG_W1(0x00014040U), 0x99999999U, \
++        SM_CFG_W1(0x00014044U), 0x99999999U, \
++        SM_CFG_W1(0x00014048U), 0x00999999U, \
++        SM_CFG_W1(0x00014180U), 0x99999999U, \
++        SM_CFG_W1(0x00014184U), 0x99999999U, \
++        SM_CFG_W1(0x00014188U), 0x00999999U, \
++        SM_CFG_Z1(0x00014440U), \
++        SM_CFG_Z1(0x00014444U), \
++        SM_CFG_Z1(0x00014448U), \
++        SM_CFG_Z1(0x00014580U), \
++        SM_CFG_Z1(0x00014584U), \
++        SM_CFG_Z1(0x00014588U), \
++        SM_CFG_W1(0x00014640U), 0x33333333U, \
++        SM_CFG_W1(0x00014644U), 0x33333333U, \
++        SM_CFG_W1(0x00014648U), 0x00AAAAAAU, \
++        SM_CFG_W1(0x00014780U), 0x33333333U, \
++        SM_CFG_W1(0x00014784U), 0x33333333U, \
++        SM_CFG_W1(0x00014788U), 0x00AAAAAAU, \
++        SM_CFG_W1(0x000147a8U), 0x99999999U, \
++        SM_CFG_W1(0x000147acU), 0x00000009U, \
++        SM_CFG_W1(0x000147d0U), 0x99999999U, \
++        SM_CFG_W1(0x000147d4U), 0x00000009U, \
++        SM_CFG_Z1(0x00014840U), \
++        SM_CFG_Z1(0x00014844U), \
++        SM_CFG_Z1(0x00014848U), \
++        SM_CFG_Z1(0x00014980U), \
++        SM_CFG_Z1(0x00014984U), \
++        SM_CFG_Z1(0x00014988U), \
++        SM_CFG_Z1(0x00014a40U), \
++        SM_CFG_Z1(0x00014a44U), \
++        SM_CFG_Z1(0x00014a48U), \
++        SM_CFG_Z1(0x00014b80U), \
++        SM_CFG_Z1(0x00014b84U), \
++        SM_CFG_Z1(0x00014b88U), \
++        SM_CFG_Z1(0x00014c40U), \
++        SM_CFG_Z1(0x00014c44U), \
++        SM_CFG_Z1(0x00014c48U), \
++        SM_CFG_Z1(0x00014d80U), \
++        SM_CFG_Z1(0x00014d84U), \
++        SM_CFG_Z1(0x00014d88U), \
++        SM_CFG_Z1(0x00014e40U), \
++        SM_CFG_Z1(0x00014e44U), \
++        SM_CFG_Z1(0x00014e48U), \
++        SM_CFG_Z1(0x00014f80U), \
++        SM_CFG_Z1(0x00014f84U), \
++        SM_CFG_Z1(0x00014f88U), \
++        SM_CFG_W1(0x00015240U), 0x99999999U, \
++        SM_CFG_W1(0x00015244U), 0x99999999U, \
++        SM_CFG_W1(0x00015248U), 0x00999999U, \
++        SM_CFG_W1(0x00015380U), 0x99999999U, \
++        SM_CFG_W1(0x00015384U), 0x99999999U, \
++        SM_CFG_W1(0x00015388U), 0x00999999U, \
++        SM_CFG_W1(0x000153a8U), 0x99999999U, \
++        SM_CFG_W1(0x000153acU), 0x00000009U, \
++        SM_CFG_W1(0x000153d0U), 0x99999999U, \
++        SM_CFG_W1(0x000153d4U), 0x00000009U, \
++        SM_CFG_Z1(0x00015440U), \
++        SM_CFG_Z1(0x00015444U), \
++        SM_CFG_Z1(0x00015448U), \
++        SM_CFG_Z1(0x00015580U), \
++        SM_CFG_Z1(0x00015584U), \
++        SM_CFG_Z1(0x00015588U), \
++        SM_CFG_Z1(0x00015640U), \
++        SM_CFG_Z1(0x00015644U), \
++        SM_CFG_Z1(0x00015648U), \
++        SM_CFG_Z1(0x00015780U), \
++        SM_CFG_Z1(0x00015784U), \
++        SM_CFG_Z1(0x00015788U), \
++        SM_CFG_W1(0x00016024U), 0x6666U, \
++        SM_CFG_W1(0x00016028U), 0x7777U, \
++        SM_CFG_W1(0x0001602cU), 0x6600U, \
++        SM_CFG_W1(0x000161a8U), 0x00003000U, \
++        SM_CFG_W1(0x000161d0U), 0x00003000U, \
++        SM_CFG_W1(0x00016240U), 0x00000900U, \
++        SM_CFG_W1(0x00016380U), 0x00000900U, \
++        SM_CFG_W1(0x000163a8U), 0x00000900U, \
++        SM_CFG_W1(0x000163d0U), 0x00000900U, \
++        SM_CFG_W1(0x00016440U), 0x33300030U, \
++        SM_CFG_W1(0x00016444U), 0x00000033U, \
++        SM_CFG_W1(0x00016580U), 0x33300030U, \
++        SM_CFG_W1(0x00016584U), 0x00000033U, \
++        SM_CFG_W1(0x000165a8U), 0x33300000U, \
++        SM_CFG_W1(0x000165d0U), 0x33300000U, \
++        SM_CFG_W1(0x00016644U), 0x00000090U, \
++        SM_CFG_W1(0x00016784U), 0x00000090U, \
++        SM_CFG_W1(0x000167a8U), 0x00000090U, \
++        SM_CFG_W1(0x000167d0U), 0x00000090U, \
++        SM_CFG_W1(0x00017040U), 0x00000009U, \
++        SM_CFG_W1(0x00017180U), 0x00000009U, \
++        SM_CFG_W1(0x000171a8U), 0x00000009U, \
++        SM_CFG_W1(0x000171d0U), 0x00000009U, \
++        SM_CFG_W1(0x00017240U), 0x99900999U, \
++        SM_CFG_W1(0x00017244U), 0x00000099U, \
++        SM_CFG_W1(0x00017380U), 0x99900999U, \
++        SM_CFG_W1(0x00017384U), 0x00000099U, \
++        SM_CFG_W1(0x000173a8U), 0x99909999U, \
++        SM_CFG_W1(0x000173d0U), 0x99909999U, \
++        SM_CFG_W1(0x00018024U), 0x6666U, \
++        SM_CFG_W1(0x00018028U), 0x7777U, \
++        SM_CFG_W1(0x0001802cU), 0x6600U, \
++        SM_CFG_W1(0x00018440U), 0x33333333U, \
++        SM_CFG_W1(0x00018580U), 0x33333333U, \
++        SM_CFG_W1(0x00019240U), 0x99999999U, \
++        SM_CFG_W1(0x00019380U), 0x99999999U, \
++        SM_CFG_W1(0x0001a024U), 0x7777U, \
++        SM_CFG_W1(0x0001a028U), 0x7700U, \
++        SM_CFG_W1(0x0001a040U), 0x08000000U, \
++        SM_CFG_W1(0x0001a044U), 0x87FFFC11U, \
++        SM_CFG_Z1(0x0001a04cU), \
++        SM_CFG_Z1(0x0001a054U), \
++        SM_CFG_Z1(0x0001a05cU), \
++        SM_CFG_Z1(0x0001a244U), \
++        SM_CFG_Z1(0x0001a24cU), \
++        SM_CFG_Z1(0x0001a254U), \
++        SM_CFG_Z1(0x0001a25cU), \
++        SM_CFG_W1(0x0001a340U), 0x08800001U, \
++        SM_CFG_W1(0x0001a344U), 0x089FFC11U, \
++        SM_CFG_W1(0x0001a348U), 0x08A00002U, \
++        SM_CFG_W1(0x0001a34cU), 0x08DFFC01U, \
++        SM_CFG_W1(0x0001a350U), 0x08E00001U, \
++        SM_CFG_W1(0x0001a354U), 0x87FFFC11U, \
++        SM_CFG_Z1(0x0001a35cU), \
++        SM_CFG_W1(0x0001a440U), 0x08000001U, \
++        SM_CFG_W1(0x0001a444U), 0x089FFC11U, \
++        SM_CFG_Z1(0x0001a44cU), \
++        SM_CFG_Z1(0x0001a454U), \
++        SM_CFG_Z1(0x0001a45cU), \
++        SM_CFG_Z1(0x0001a544U), \
++        SM_CFG_Z1(0x0001a54cU), \
++        SM_CFG_Z1(0x0001a554U), \
++        SM_CFG_Z1(0x0001a55cU), \
++        SM_CFG_Z1(0x0001a644U), \
++        SM_CFG_Z1(0x0001a64cU), \
++        SM_CFG_Z1(0x0001a654U), \
++        SM_CFG_Z1(0x0001a65cU), \
++        SM_CFG_Z1(0x0001a744U), \
++        SM_CFG_Z1(0x0001a74cU), \
++        SM_CFG_Z1(0x0001a754U), \
++        SM_CFG_Z1(0x0001a75cU), \
++        SM_CFG_Z1(0x0001a844U), \
++        SM_CFG_Z1(0x0001a84cU), \
++        SM_CFG_Z1(0x0001a854U), \
++        SM_CFG_Z1(0x0001a85cU), \
++        SM_CFG_W1(0x0001a940U), 0x08000000U, \
++        SM_CFG_W1(0x0001a944U), 0x089FFC11U, \
++        SM_CFG_W1(0x0001a948U), 0x08800000U, \
++        SM_CFG_W1(0x0001a94cU), 0x089FFC11U, \
++        SM_CFG_W1(0x0001a950U), 0x08A00000U, \
++        SM_CFG_W1(0x0001a954U), 0x08DFFC11U, \
++        SM_CFG_W1(0x0001a958U), 0x08E00000U, \
++        SM_CFG_W1(0x0001a95cU), 0x87FFFC11U, \
++        SM_CFG_Z1(0x0001aa44U), \
++        SM_CFG_Z1(0x0001aa4cU), \
++        SM_CFG_Z1(0x0001aa54U), \
++        SM_CFG_Z1(0x0001aa5cU), \
++        SM_CFG_Z1(0x0001ab44U), \
++        SM_CFG_Z1(0x0001ab4cU), \
++        SM_CFG_Z1(0x0001ab54U), \
++        SM_CFG_Z1(0x0001ab5cU), \
++        SM_CFG_W1(0x0001ac40U), 0x08B00000U, \
++        SM_CFG_W1(0x0001ac44U), 0x08BFFC11U, \
++        SM_CFG_Z1(0x0001ac4cU), \
++        SM_CFG_Z1(0x0001ac54U), \
++        SM_CFG_Z1(0x0001ac5cU), \
++        SM_CFG_Z1(0x00010020U), \
++        SM_CFG_Z1(0x00012020U), \
++        SM_CFG_Z1(0x00014020U), \
++        SM_CFG_Z1(0x00016020U), \
++        SM_CFG_Z1(0x00018020U), \
++        SM_CFG_W1(0x0001a020U), 0x6666U, \
++        SM_CFG_C1(0x00000000U), 0x0000C001U, \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* TRDC V Config                                                            */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for TRDC V */
++#define SM_TRDC_V_CONFIG \
++    { \
++        SM_CFG_W1(0x00000800U), 0xB0000053U, \
++        SM_CFG_W1(0x00000820U), 0xB0000053U, \
++        SM_CFG_W1(0x00000840U), 0xB0000053U, \
++        SM_CFG_W1(0x00000860U), 0xB0000053U, \
++        SM_CFG_W1(0x00000880U), 0xB0000053U, \
++        SM_CFG_W1(0x000008a0U), 0xB0000053U, \
++        SM_CFG_W1(0x000008c0U), 0xB0000053U, \
++        SM_CFG_W1(0x000008e0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000900U), 0xB0000053U, \
++        SM_CFG_W1(0x00000920U), 0xB0000053U, \
++        SM_CFG_W1(0x00000940U), 0xB0000053U, \
++        SM_CFG_W1(0x00000960U), 0xB0000053U, \
++        SM_CFG_W1(0x00000980U), 0xB0000053U, \
++        SM_CFG_W1(0x000009a0U), 0xB0000053U, \
++        SM_CFG_W1(0x000009c0U), 0xB0000053U, \
++        SM_CFG_W1(0x000009e0U), 0xB0000053U, \
++        SM_CFG_W1(0x00010024U), 0x6666U, \
++        SM_CFG_W1(0x00010028U), 0x7777U, \
++        SM_CFG_W1(0x0001002cU), 0x6600U, \
++        SM_CFG_W1(0x00010040U), 0x00003000U, \
++        SM_CFG_W1(0x00010180U), 0x00003000U, \
++        SM_CFG_W1(0x00010240U), 0x00000900U, \
++        SM_CFG_W1(0x00010380U), 0x00000900U, \
++        SM_CFG_W1(0x00010440U), 0x00330000U, \
++        SM_CFG_W1(0x00010450U), 0x00000003U, \
++        SM_CFG_W1(0x00010580U), 0x00330000U, \
++        SM_CFG_W1(0x00010590U), 0x00000003U, \
++        SM_CFG_W1(0x00010640U), 0x00000090U, \
++        SM_CFG_W1(0x00010644U), 0x00099999U, \
++        SM_CFG_W1(0x00010648U), 0x99999999U, \
++        SM_CFG_W1(0x0001064cU), 0x00000099U, \
++        SM_CFG_W1(0x00010780U), 0x00000090U, \
++        SM_CFG_W1(0x00010784U), 0x00099999U, \
++        SM_CFG_W1(0x00010788U), 0x99999999U, \
++        SM_CFG_W1(0x0001078cU), 0x00000099U, \
++        SM_CFG_Z1(0x00010840U), \
++        SM_CFG_Z1(0x00010980U), \
++        SM_CFG_Z1(0x00010a40U), \
++        SM_CFG_Z1(0x00010b80U), \
++        SM_CFG_Z1(0x00010c40U), \
++        SM_CFG_Z1(0x00010d80U), \
++        SM_CFG_Z1(0x00010e40U), \
++        SM_CFG_Z1(0x00010f80U), \
++        SM_CFG_W1(0x00011040U), 0x00000009U, \
++        SM_CFG_W1(0x00011180U), 0x00000009U, \
++        SM_CFG_W1(0x00011240U), 0x00999999U, \
++        SM_CFG_W1(0x00011244U), 0x00099999U, \
++        SM_CFG_W1(0x00011248U), 0x99999999U, \
++        SM_CFG_W1(0x0001124cU), 0x00000099U, \
++        SM_CFG_W1(0x00011250U), 0x00000009U, \
++        SM_CFG_W1(0x00011380U), 0x00999999U, \
++        SM_CFG_W1(0x00011384U), 0x00099999U, \
++        SM_CFG_W1(0x00011388U), 0x99999999U, \
++        SM_CFG_W1(0x0001138cU), 0x00000099U, \
++        SM_CFG_W1(0x00011390U), 0x00000009U, \
++        SM_CFG_Z1(0x00011440U), \
++        SM_CFG_Z1(0x00011580U), \
++        SM_CFG_Z1(0x00011640U), \
++        SM_CFG_Z1(0x00011780U), \
++        SM_CFG_Z1(0x00011840U), \
++        SM_CFG_Z1(0x00011980U), \
++        SM_CFG_Z1(0x00011a40U), \
++        SM_CFG_Z1(0x00011b80U), \
++        SM_CFG_Z1(0x00011c40U), \
++        SM_CFG_Z1(0x00011d80U), \
++        SM_CFG_Z1(0x00011e40U), \
++        SM_CFG_Z1(0x00011f80U), \
++        SM_CFG_Z1(0x00010020U), \
++        SM_CFG_C1(0x00000000U), 0x0000C001U, \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* TRDC W Config                                                            */
++/*--------------------------------------------------------------------------*/
++
++/*! Config for TRDC W */
++#define SM_TRDC_W_CONFIG \
++    { \
++        SM_CFG_W1(0x00000800U), 0x90000004U, \
++        SM_CFG_W1(0x00000820U), 0xB0000053U, \
++        SM_CFG_W1(0x00000840U), 0xB0000053U, \
++        SM_CFG_W1(0x00000860U), 0xB0000053U, \
++        SM_CFG_W1(0x00000880U), 0xB0000053U, \
++        SM_CFG_W1(0x000008a0U), 0xB0000053U, \
++        SM_CFG_W1(0x000008c0U), 0xB0000053U, \
++        SM_CFG_W1(0x000008e0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000900U), 0xB0000053U, \
++        SM_CFG_W1(0x00000920U), 0xB0000053U, \
++        SM_CFG_W1(0x00000940U), 0xB0000053U, \
++        SM_CFG_W1(0x00000960U), 0xB0000053U, \
++        SM_CFG_W1(0x00000980U), 0xB0000053U, \
++        SM_CFG_W1(0x000009a0U), 0xB0000053U, \
++        SM_CFG_W1(0x000009c0U), 0xB0000053U, \
++        SM_CFG_W1(0x000009e0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a00U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a20U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a40U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a60U), 0xB0000053U, \
++        SM_CFG_W1(0x00000a80U), 0xB0000053U, \
++        SM_CFG_W1(0x00000aa0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ac0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ae0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b00U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b20U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b40U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b60U), 0xB0000053U, \
++        SM_CFG_W1(0x00000b80U), 0xB0000053U, \
++        SM_CFG_W1(0x00000ba0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000bc0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000be0U), 0xB0000053U, \
++        SM_CFG_W1(0x00000c00U), 0xB0000053U, \
++        SM_CFG_W1(0x00000c20U), 0xB0000053U, \
++        SM_CFG_W1(0x00000c40U), 0xB0000053U, \
++        SM_CFG_W1(0x00010024U), 0x6666U, \
++        SM_CFG_W1(0x00010028U), 0x7777U, \
++        SM_CFG_W1(0x0001002cU), 0x6600U, \
++        SM_CFG_Z1(0x00010060U), \
++        SM_CFG_W1(0x00010070U), 0x00003000U, \
++        SM_CFG_Z1(0x00010260U), \
++        SM_CFG_W1(0x00010270U), 0x00000090U, \
++        SM_CFG_W1(0x00010460U), 0x33000300U, \
++        SM_CFG_W1(0x00010474U), 0x00000030U, \
++        SM_CFG_W1(0x00010478U), 0x33300000U, \
++        SM_CFG_W1(0x0001047cU), 0x00003333U, \
++        SM_CFG_W1(0x000105d0U), 0x33333333U, \
++        SM_CFG_W1(0x000105d4U), 0x33333333U, \
++        SM_CFG_W1(0x000105d8U), 0x00000003U, \
++        SM_CFG_W1(0x00010640U), 0x99999999U, \
++        SM_CFG_W1(0x00010644U), 0x99999999U, \
++        SM_CFG_W1(0x00010648U), 0x99999999U, \
++        SM_CFG_W1(0x0001064cU), 0x99999999U, \
++        SM_CFG_W1(0x00010650U), 0x99999999U, \
++        SM_CFG_W1(0x00010654U), 0x99999999U, \
++        SM_CFG_W1(0x00010658U), 0x99999999U, \
++        SM_CFG_W1(0x0001065cU), 0x99999999U, \
++        SM_CFG_W1(0x00010660U), 0x00909099U, \
++        SM_CFG_W1(0x00010664U), 0x99090990U, \
++        SM_CFG_W1(0x00010668U), 0x09999999U, \
++        SM_CFG_W1(0x0001066cU), 0x09999999U, \
++        SM_CFG_W1(0x00010670U), 0x99900009U, \
++        SM_CFG_W1(0x00010674U), 0x99999909U, \
++        SM_CFG_W1(0x00010678U), 0x00009999U, \
++        SM_CFG_W1(0x0001067cU), 0x00990000U, \
++        SM_CFG_W1(0x00010780U), 0x00000009U, \
++        SM_CFG_W1(0x000107a8U), 0x00000009U, \
++        SM_CFG_W1(0x00010860U), 0x00090000U, \
++        SM_CFG_W1(0x00010864U), 0x00909009U, \
++        SM_CFG_W1(0x00010868U), 0x90000000U, \
++        SM_CFG_W1(0x00010878U), 0x00090000U, \
++        SM_CFG_Z1(0x00010a60U), \
++        SM_CFG_Z1(0x00010c60U), \
++        SM_CFG_Z1(0x00010e60U), \
++        SM_CFG_Z1(0x00011060U), \
++        SM_CFG_W1(0x00011070U), 0x00000900U, \
++        SM_CFG_W1(0x00011240U), 0x99999999U, \
++        SM_CFG_W1(0x00011244U), 0x99999999U, \
++        SM_CFG_W1(0x00011248U), 0x99999999U, \
++        SM_CFG_W1(0x0001124cU), 0x99999999U, \
++        SM_CFG_W1(0x00011250U), 0x99999999U, \
++        SM_CFG_W1(0x00011254U), 0x99999999U, \
++        SM_CFG_W1(0x00011258U), 0x99999999U, \
++        SM_CFG_W1(0x0001125cU), 0x99999999U, \
++        SM_CFG_W1(0x00011260U), 0x99999999U, \
++        SM_CFG_W1(0x00011264U), 0x99999999U, \
++        SM_CFG_W1(0x00011268U), 0x99999999U, \
++        SM_CFG_W1(0x0001126cU), 0x09999999U, \
++        SM_CFG_W1(0x00011270U), 0x99909999U, \
++        SM_CFG_W1(0x00011274U), 0x99999999U, \
++        SM_CFG_W1(0x00011278U), 0x99999999U, \
++        SM_CFG_W1(0x0001127cU), 0x00999999U, \
++        SM_CFG_W1(0x00011380U), 0x00000009U, \
++        SM_CFG_W1(0x000113a8U), 0x00000009U, \
++        SM_CFG_W1(0x000113d0U), 0x99999999U, \
++        SM_CFG_W1(0x000113d4U), 0x99999999U, \
++        SM_CFG_W1(0x000113d8U), 0x00000009U, \
++        SM_CFG_Z1(0x00011460U), \
++        SM_CFG_Z1(0x00011660U), \
++        SM_CFG_Z1(0x00011860U), \
++        SM_CFG_Z1(0x00011a60U), \
++        SM_CFG_Z1(0x00011c60U), \
++        SM_CFG_Z1(0x00011e60U), \
++        SM_CFG_W1(0x00012024U), 0x6666U, \
++        SM_CFG_W1(0x00012028U), 0x7777U, \
++        SM_CFG_W1(0x0001202cU), 0x6600U, \
++        SM_CFG_Z1(0x00012040U), \
++        SM_CFG_W1(0x00012180U), 0x00000003U, \
++        SM_CFG_W1(0x00012240U), 0x90000000U, \
++        SM_CFG_W1(0x00012440U), 0x00003330U, \
++        SM_CFG_W1(0x000125a8U), 0x00000003U, \
++        SM_CFG_W1(0x00012640U), 0x09900000U, \
++        SM_CFG_W1(0x00012644U), 0x00009900U, \
++        SM_CFG_W1(0x000127d0U), 0x00000099U, \
++        SM_CFG_Z1(0x00012840U), \
++        SM_CFG_Z1(0x00012a40U), \
++        SM_CFG_Z1(0x00012c40U), \
++        SM_CFG_Z1(0x00012e40U), \
++        SM_CFG_Z1(0x00013040U), \
++        SM_CFG_W1(0x00013240U), 0x99909990U, \
++        SM_CFG_W1(0x00013244U), 0x00009900U, \
++        SM_CFG_W1(0x00013380U), 0x00000009U, \
++        SM_CFG_W1(0x000133a8U), 0x00000009U, \
++        SM_CFG_W1(0x000133d0U), 0x00000099U, \
++        SM_CFG_Z1(0x00013440U), \
++        SM_CFG_Z1(0x00013640U), \
++        SM_CFG_Z1(0x00013840U), \
++        SM_CFG_Z1(0x00013a40U), \
++        SM_CFG_Z1(0x00013c40U), \
++        SM_CFG_Z1(0x00013e40U), \
++        SM_CFG_W1(0x00014024U), 0x6666U, \
++        SM_CFG_W1(0x00014028U), 0x7777U, \
++        SM_CFG_W1(0x00014640U), 0x00999909U, \
++        SM_CFG_W1(0x00014780U), 0x00999909U, \
++        SM_CFG_W1(0x00014840U), 0x00000090U, \
++        SM_CFG_W1(0x00014980U), 0x00000090U, \
++        SM_CFG_W1(0x00015240U), 0x00999999U, \
++        SM_CFG_W1(0x00015380U), 0x00999999U, \
++        SM_CFG_W1(0x00017024U), 0x6666U, \
++        SM_CFG_Z1(0x00017244U), \
++        SM_CFG_Z1(0x0001724cU), \
++        SM_CFG_Z1(0x00017254U), \
++        SM_CFG_Z1(0x0001725cU), \
++        SM_CFG_Z1(0x00017340U), \
++        SM_CFG_W1(0x00017344U), 0xFFFFC011U, \
++        SM_CFG_Z1(0x0001734cU), \
++        SM_CFG_Z1(0x00017354U), \
++        SM_CFG_Z1(0x0001735cU), \
++        SM_CFG_Z1(0x00017444U), \
++        SM_CFG_Z1(0x0001744cU), \
++        SM_CFG_Z1(0x00017454U), \
++        SM_CFG_Z1(0x0001745cU), \
++        SM_CFG_Z1(0x00017544U), \
++        SM_CFG_Z1(0x0001754cU), \
++        SM_CFG_Z1(0x00017554U), \
++        SM_CFG_Z1(0x0001755cU), \
++        SM_CFG_Z1(0x00017644U), \
++        SM_CFG_Z1(0x0001764cU), \
++        SM_CFG_Z1(0x00017654U), \
++        SM_CFG_Z1(0x0001765cU), \
++        SM_CFG_Z1(0x00017744U), \
++        SM_CFG_Z1(0x0001774cU), \
++        SM_CFG_Z1(0x00017754U), \
++        SM_CFG_Z1(0x0001775cU), \
++        SM_CFG_Z1(0x00017844U), \
++        SM_CFG_Z1(0x0001784cU), \
++        SM_CFG_Z1(0x00017854U), \
++        SM_CFG_Z1(0x0001785cU), \
++        SM_CFG_W1(0x00017940U), 0x00000001U, \
++        SM_CFG_W1(0x00017944U), 0xFFFFC011U, \
++        SM_CFG_Z1(0x0001794cU), \
++        SM_CFG_Z1(0x00017954U), \
++        SM_CFG_Z1(0x0001795cU), \
++        SM_CFG_Z1(0x00017a44U), \
++        SM_CFG_Z1(0x00017a4cU), \
++        SM_CFG_Z1(0x00017a54U), \
++        SM_CFG_Z1(0x00017a5cU), \
++        SM_CFG_Z1(0x00017b44U), \
++        SM_CFG_Z1(0x00017b4cU), \
++        SM_CFG_Z1(0x00017b54U), \
++        SM_CFG_Z1(0x00017b5cU), \
++        SM_CFG_Z1(0x00017c44U), \
++        SM_CFG_Z1(0x00017c4cU), \
++        SM_CFG_Z1(0x00017c54U), \
++        SM_CFG_Z1(0x00017c5cU), \
++        SM_CFG_W1(0x00018024U), 0x6666U, \
++        SM_CFG_W1(0x00018040U), 0x4A030000U, \
++        SM_CFG_W1(0x00018044U), 0x4A03C001U, \
++        SM_CFG_Z1(0x0001804cU), \
++        SM_CFG_Z1(0x00018054U), \
++        SM_CFG_Z1(0x0001805cU), \
++        SM_CFG_W1(0x00018140U), 0x4A020001U, \
++        SM_CFG_W1(0x00018144U), 0x4A02C011U, \
++        SM_CFG_Z1(0x0001814cU), \
++        SM_CFG_Z1(0x00018154U), \
++        SM_CFG_Z1(0x0001815cU), \
++        SM_CFG_W1(0x00018240U), 0x4A050000U, \
++        SM_CFG_W1(0x00018244U), 0x4A0AC001U, \
++        SM_CFG_Z1(0x0001824cU), \
++        SM_CFG_Z1(0x00018254U), \
++        SM_CFG_Z1(0x0001825cU), \
++        SM_CFG_Z1(0x00018344U), \
++        SM_CFG_Z1(0x0001834cU), \
++        SM_CFG_Z1(0x00018354U), \
++        SM_CFG_Z1(0x0001835cU), \
++        SM_CFG_W1(0x00018440U), 0x4A060001U, \
++        SM_CFG_W1(0x00018444U), 0x4A09C011U, \
++        SM_CFG_W1(0x00018448U), 0x20380001U, \
++        SM_CFG_W1(0x0001844cU), 0x2047C011U, \
++        SM_CFG_Z1(0x00018454U), \
++        SM_CFG_Z1(0x0001845cU), \
++        SM_CFG_Z1(0x00018544U), \
++        SM_CFG_Z1(0x0001854cU), \
++        SM_CFG_Z1(0x00018554U), \
++        SM_CFG_Z1(0x0001855cU), \
++        SM_CFG_Z1(0x00018644U), \
++        SM_CFG_Z1(0x0001864cU), \
++        SM_CFG_Z1(0x00018654U), \
++        SM_CFG_Z1(0x0001865cU), \
++        SM_CFG_Z1(0x00018744U), \
++        SM_CFG_Z1(0x0001874cU), \
++        SM_CFG_Z1(0x00018754U), \
++        SM_CFG_Z1(0x0001875cU), \
++        SM_CFG_Z1(0x00018844U), \
++        SM_CFG_Z1(0x0001884cU), \
++        SM_CFG_Z1(0x00018854U), \
++        SM_CFG_Z1(0x0001885cU), \
++        SM_CFG_W1(0x00018940U), 0x4A020001U, \
++        SM_CFG_W1(0x00018944U), 0x4A02C011U, \
++        SM_CFG_W1(0x00018948U), 0x4A030001U, \
++        SM_CFG_W1(0x0001894cU), 0x4A03C011U, \
++        SM_CFG_W1(0x00018950U), 0x4A050001U, \
++        SM_CFG_W1(0x00018954U), 0x4A0AC011U, \
++        SM_CFG_W1(0x00018958U), 0x4A060001U, \
++        SM_CFG_W1(0x0001895cU), 0x4A09C011U, \
++        SM_CFG_W1(0x00018960U), 0x20380001U, \
++        SM_CFG_W1(0x00018964U), 0x2047C011U, \
++        SM_CFG_Z1(0x00018a44U), \
++        SM_CFG_Z1(0x00018a4cU), \
++        SM_CFG_Z1(0x00018a54U), \
++        SM_CFG_Z1(0x00018a5cU), \
++        SM_CFG_Z1(0x00018b44U), \
++        SM_CFG_Z1(0x00018b4cU), \
++        SM_CFG_Z1(0x00018b54U), \
++        SM_CFG_Z1(0x00018b5cU), \
++        SM_CFG_Z1(0x00018c44U), \
++        SM_CFG_Z1(0x00018c4cU), \
++        SM_CFG_Z1(0x00018c54U), \
++        SM_CFG_Z1(0x00018c5cU), \
++        SM_CFG_Z1(0x00010020U), \
++        SM_CFG_Z1(0x00012020U), \
++        SM_CFG_Z1(0x00014020U), \
++        SM_CFG_W1(0x00017020U), 0x7777U, \
++        SM_CFG_W1(0x00018020U), 0x6600U, \
++        SM_CFG_C1(0x00000000U), 0x0000C001U, \
++        SM_CFG_END \
++    }
++
++#endif /* CONFIG_TRDC_H */
++
++/** @} */
++
+diff --git a/configs/ccimx95dvk/config_user.h b/configs/ccimx95dvk/config_user.h
+new file mode 100644
+index 000000000000..bb1bdba57765
+--- /dev/null
++++ b/configs/ccimx95dvk/config_user.h
+@@ -0,0 +1,230 @@
++/*
++** ###################################################################
++**
++** Copyright 2023-2025 NXP
++**
++** Redistribution and use in source and binary forms, with or without modification,
++** are permitted provided that the following conditions are met:
++**
++** o Redistributions of source code must retain the above copyright notice, this list
++**   of conditions and the following disclaimer.
++**
++** o Redistributions in binary form must reproduce the above copyright notice, this
++**   list of conditions and the following disclaimer in the documentation and/or
++**   other materials provided with the distribution.
++**
++** o Neither the name of the copyright holder nor the names of its
++**   contributors may be used to endorse or promote products derived from this
++**   software without specific prior written permission.
++**
++** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++** ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++** ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++** (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++** LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++** ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++** SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++**
++**
++** ###################################################################
++*/
++
++/*==========================================================================*/
++/*!
++ * @addtogroup CONFIG_CCIMX95DVK
++ * @{
++ *
++ * @file
++ * @brief
++ *
++ * Header file containing configuration info for the manual user settings.
++ */
++/*==========================================================================*/
++
++#ifndef CONFIG_USER_H
++#define CONFIG_USER_H
++
++/* Includes */
++
++#include "config.h"
++
++/* Defines */
++
++
++/*--------------------------------------------------------------------------*/
++/* CAMERA Config                                                            */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the CAMERA mix */
++#define SM_CAMERA_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* A55P Config                                                              */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the A55P mix */
++#define SM_A55P_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* DDR Config                                                               */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the DDR mix */
++#define SM_DDR_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* DISPLAY Config                                                           */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the DISPLAY mix */
++#define SM_DISPLAY_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* GPU Config                                                               */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the GPU mix */
++#define SM_GPU_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* HSIO_TOP Config                                                          */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the HSIO_TOP mix */
++#define SM_HSIO_TOP_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* HSIO_WAON Config                                                         */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the HSIO_WAON mix */
++#define SM_HSIO_WAON_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* M7 Config                                                                */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the M7 mix */
++#define SM_M7_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* NETC Config                                                              */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the NETC mix */
++#define SM_NETC_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* NOC Config                                                               */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the NOC mix */
++#define SM_NOC_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* NPU Config                                                               */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the NPU mix */
++#define SM_NPU_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* VPU Config                                                               */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the VPU mix */
++#define SM_VPU_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* WKUP Config                                                              */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the WKUP mix */
++#define SM_WKUP_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* ANA Config                                                               */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the ANA mix */
++#define SM_ANA_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* AON Config                                                               */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the AON mix */
++#define SM_AON_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* BBSM Config                                                              */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the BBSM mix */
++#define SM_BBSM_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++/*--------------------------------------------------------------------------*/
++/* CCMSRCGPC Config                                                         */
++/*--------------------------------------------------------------------------*/
++
++/*! Data load config for the CCMSRCGPC mix */
++#define SM_CCMSRCGPC_CONFIG \
++    { \
++        SM_CFG_END \
++    }
++
++#endif /* CONFIG_USER_H */
++
++/** @} */
++

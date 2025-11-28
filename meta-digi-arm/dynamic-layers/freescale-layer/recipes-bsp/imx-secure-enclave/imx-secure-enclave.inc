@@ -1,4 +1,4 @@
-# Copyright 2021-2024 NXP
+# Copyright 2021-2025 NXP
 
 SUMMARY = "NXP i.MX SECURE ENCLAVE library"
 DESCRIPTION = "NXP IMX SECURE ENCLAVE library"
@@ -10,8 +10,11 @@ DEPENDS = " mbedtls openssl"
 
 SRC_URI = "${SECURE_ENCLAVE_LIB_SRC};branch=${SRCBRANCH}"
 SECURE_ENCLAVE_LIB_SRC ?= "git://github.com/NXP/imx-secure-enclave.git;protocol=https"
-SRCBRANCH = "lf-6.6.52_2.2.0"
-SRCREV = "dffbb844e86f4a49058ffbb40548474059969c27"
+SRCBRANCH = "lf-6.6.52_2.2.1"
+SRCREV = "4f0340fb4cf6b16a64c7d65281b4880c5d1cd453"
+
+# Set package version to the release, so it overrides the recipe in meta-freescale
+PV = "lf-6.6.52_2.2.1"
 
 S = "${WORKDIR}/git"
 

@@ -67,15 +67,12 @@ RDEPENDS:${PN} = "\
     ${VIRTUAL-RUNTIME_update-alternatives} \
     ${MACHINE_ESSENTIAL_EXTRA_RDEPENDS} \
     ${MACHINE_EXTRA_RDEPENDS} \
+    ${MULTIMEDIA_PKGS} \
 "
 
-RDEPENDS:${PN}:append:ccmp15 = " \
-    v4l-utils \
-"
-
-RDEPENDS:${PN}:append:ccmp2 = " \
-    v4l-utils \
-"
+MULTIMEDIA_PKGS = "v4l-utils"
+MULTIMEDIA_PKGS:ccimx91 = ""
+MULTIMEDIA_PKGS:ccmp13 = ""
 
 # The rootfs in the CC6UL is not big enough for graphic images (QT) and the
 # connectcore demo, so we restrict the demo only for the 'core-image-base'

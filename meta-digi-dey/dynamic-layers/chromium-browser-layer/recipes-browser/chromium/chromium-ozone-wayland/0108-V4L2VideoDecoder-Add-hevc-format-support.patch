@@ -1,0 +1,63 @@
+From d297967d980eb8fa6f67ee723a625f35cec403ee Mon Sep 17 00:00:00 2001
+From: Hou Qi <qi.hou@nxp.com>
+Date: Fri, 13 Sep 2024 22:50:43 +0900
+Subject: [PATCH 08/19] V4L2VideoDecoder: Add hevc format support
+
+Upstream-Status: Inappropriate [NXP specific]
+---
+ media/base/supported_types.cc | 2 +-
+ media/gpu/v4l2/v4l2_utils.cc  | 4 +++-
+ media/media_options.gni       | 2 +-
+ 3 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/media/base/supported_types.cc b/media/base/supported_types.cc
+index de9d4be3b92e8..11ef3357e2376 100644
+--- a/media/base/supported_types.cc
++++ b/media/base/supported_types.cc
+@@ -387,7 +387,7 @@ bool IsDefaultSupportedVideoType(const VideoType& type) {
+     case VideoCodec::kVP9:
+       return IsVp9ProfileSupported(type);
+     case VideoCodec::kHEVC:
+-      return IsHevcProfileSupported(type);
++      return true;
+     case VideoCodec::kDolbyVision:
+       return IsDolbyVisionProfileSupported(type);
+     case VideoCodec::kUnknown:
+diff --git a/media/gpu/v4l2/v4l2_utils.cc b/media/gpu/v4l2/v4l2_utils.cc
+index 06b4329764b3f..8fbd4cfa10561 100644
+--- a/media/gpu/v4l2/v4l2_utils.cc
++++ b/media/gpu/v4l2/v4l2_utils.cc
+@@ -537,7 +537,7 @@ void GetSupportedResolution(const IoctlAsCallback& ioctl_cb,
+                             uint32_t pixelformat,
+                             gfx::Size* min_resolution,
+                             gfx::Size* max_resolution) {
+-  constexpr gfx::Size kDefaultMaxCodedSize(1920, 1088);
++  constexpr gfx::Size kDefaultMaxCodedSize(4096, 4096);
+   *max_resolution = kDefaultMaxCodedSize;
+   constexpr gfx::Size kDefaultMinCodedSize(16, 16);
+   *min_resolution = kDefaultMinCodedSize;
+@@ -580,6 +580,8 @@ uint32_t VideoCodecProfileToV4L2PixFmt(VideoCodecProfile profile,
+     return V4L2_PIX_FMT_VP8;
+   } else if (profile >= VP9PROFILE_MIN && profile <= VP9PROFILE_MAX) {
+     return V4L2_PIX_FMT_VP9;
++  } else if (profile >= HEVCPROFILE_MIN && profile <= HEVCPROFILE_MAX) {
++    return V4L2_PIX_FMT_HEVC;
+   } else if (profile == HEVCPROFILE_MAIN) {
+     return V4L2_PIX_FMT_HEVC;
+   } else {
+diff --git a/media/media_options.gni b/media/media_options.gni
+index 1924017f9e7dd..0f1be96bf308e 100644
+--- a/media/media_options.gni
++++ b/media/media_options.gni
+@@ -138,7 +138,7 @@ declare_args() {
+   # applies to video-capable devices.
+   enable_platform_hevc =
+       proprietary_codecs && (enable_hevc_parser_and_hw_decoder ||
+-                             is_cast_media_device || is_chromeos_lacros)
++                             is_cast_media_device || is_chromeos_lacros || use_v4l2_codec)
+ 
+   enable_mse_mpeg2ts_stream_parser =
+       proprietary_codecs &&
+-- 
+2.34.1
+

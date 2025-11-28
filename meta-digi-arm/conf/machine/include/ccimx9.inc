@@ -25,17 +25,6 @@ KERNEL_IMAGETYPE:ccimx9 = "${@oe.utils.vartrue('TRUSTFENCE_SIGN_ARTIFACTS', 'fit
 
 # The bootloader image that gets flashed consists of U-Boot and several fw binaries
 EXTRA_IMAGEDEPENDS += "imx-boot"
-BOOTLOADER_IMAGE_RECIPE = "imx-boot"
-BOOTABLE_FILENAME = "${UBOOT_PREFIX}-${MACHINE}.bin"
-SDIMG_BOOTLOADER = "${DEPLOY_DIR_IMAGE}/${BOOTABLE_FILENAME}"
-BOOTLOADER_SEEK_USERDATA = "32"
-
-DDR_FIRMWARE_NAME = " \
-    lpddr4_dmem_1d_v202201.bin \
-    lpddr4_dmem_2d_v202201.bin \
-    lpddr4_imem_1d_v202201.bin \
-    lpddr4_imem_2d_v202201.bin \
-"
 
 MACHINE_FEATURES += "pci wifi bluetooth"
 MACHINE_FEATURES:append:use-nxp-bsp = " optee jailhouse"
@@ -68,10 +57,6 @@ SERIAL_CONSOLES = "115200;ttyLP5"
 
 # Bluetooth tty
 BT_TTY ?= "ttyLP0"
-
-# Per-machine DISTRO_FEATURES customization
-MACHINE_DISTRO_FEATURES_REMOVE = "vulkan"
-MACHINE_DISTRO_FEATURES_REMOVE:ccimx91 = "gstreamer opengl vulkan wayland x11"
 
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"

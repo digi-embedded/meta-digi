@@ -1,0 +1,30 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Fri, 21 Nov 2025 11:30:35 +0100
+Subject: [PATCH] ccimx95: enable non-secure, non-privilege access to GPIO1
+
+GPIO1 port is reserved on NXP EVK but we want to enable
+full access to the port from the non-secure world.
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+
+https://onedigi.atlassian.net/browse/DEL-9839
+---
+ plat/imx/imx95/imx95_bl31_setup.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/plat/imx/imx95/imx95_bl31_setup.c b/plat/imx/imx95/imx95_bl31_setup.c
+index 175a78a20021..fcf41a0ffa5b 100644
+--- a/plat/imx/imx95/imx95_bl31_setup.c
++++ b/plat/imx/imx95/imx95_bl31_setup.c
+@@ -108,6 +108,11 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ void bl31_plat_arch_setup(void)
+ {
+ 	/* Assign all the GPIO pins to non-secure world by default */
++	mmio_write_32(GPIO1_BASE + 0x10, 0xffffffff);
++	mmio_write_32(GPIO1_BASE + 0x14, 0x3);
++	mmio_write_32(GPIO1_BASE + 0x18, 0xffffffff);
++	mmio_write_32(GPIO1_BASE + 0x1c, 0x3);
++
+ 	mmio_write_32(GPIO2_BASE + 0x10, 0xffffffff);
+ 	mmio_write_32(GPIO2_BASE + 0x14, 0x3);
+ 	mmio_write_32(GPIO2_BASE + 0x18, 0xffffffff);

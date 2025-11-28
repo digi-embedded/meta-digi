@@ -1,0 +1,47 @@
+From: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
+Date: Fri, 25 Jul 2025 09:44:32 +0200
+Subject: [PATCH 1/1] mxm_wifiex: do not process countryIE internally
+
+Driver does not support processing countryIE, however when argument
+'country_ie_ignore=0' was set, driver could receive and store the
+country code but not apply the country power table.
+
+If a regulatory change was issued afterwards by the user (i.e. iw reg
+set) for the same country, change request was ignored and the power
+table was still not applied.
+
+Correct that by ignoring the countryIE when there is a self-managed
+wiphy registered.
+
+Patch provided by NXP.
+
+Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
+---
+ mlinux/moal_sta_cfg80211.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/mlinux/moal_sta_cfg80211.c b/mlinux/moal_sta_cfg80211.c
+index f30134c..32822ac 100644
+--- a/mlinux/moal_sta_cfg80211.c
++++ b/mlinux/moal_sta_cfg80211.c
+@@ -1847,6 +1847,20 @@ static int woal_process_country_ie(moal_private *priv, struct cfg80211_bss *bss)
+ 	mlan_status status = MLAN_STATUS_SUCCESS;
+ 
+ 	ENTER();
++
++	if (!priv) {
++		PRINTM(MERROR, "%s(): priv is NULL!\n", __func__);
++		LEAVE();
++		return 0;
++	}
++#if CFG80211_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)
++	if (priv->wdev && priv->wdev->wiphy &&
++		(priv->wdev->wiphy->regulatory_flags & REGULATORY_WIPHY_SELF_MANAGED)) {
++		LEAVE();
++		return 0;
++	}
++#endif
++
+ 	rcu_read_lock();
+ 	country_ie = (u8 *)ieee80211_bss_get_ie(bss, WLAN_EID_COUNTRY);
+ 	if (!country_ie) {

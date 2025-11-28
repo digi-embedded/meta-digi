@@ -15,6 +15,8 @@
 #    Script for building signed and encrypted artifacts using STM sign tools.
 #
 #    The following environment variables define the script behaviour:
+#      CONFIG_SIGN_KEYS_PATH: (mandatory) Path to the folder with the PKI tree keys generated.
+#      CONFIG_KEY_INDEX: (optional) key index to use for signing. Default is 0.
 #
 #===============================================================================
 

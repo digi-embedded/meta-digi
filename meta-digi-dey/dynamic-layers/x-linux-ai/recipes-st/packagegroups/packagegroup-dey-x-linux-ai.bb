@@ -8,6 +8,8 @@ inherit packagegroup python3-dir
 COMMON_PACKAGES = " \
     stai-mpu-tools \
     tim-vx-tools \
+    libcamera-stm32mp \
+    libcamera-stm32mp-gst \
 "
 
 TFLITE_PACKAGES = " \

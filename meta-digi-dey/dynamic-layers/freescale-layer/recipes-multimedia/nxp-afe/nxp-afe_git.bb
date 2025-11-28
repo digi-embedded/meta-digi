@@ -4,7 +4,7 @@ DESCRIPTION = "NXP Audio Front End (AFE) for incorporating Voice Assistants"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=7bdef19938f3503cfc4c586461f99012"
 
-PV = "1.0+git${SRCPV}" 
+PV = "1.0+git${SRCPV}"
 
 SRCBRANCH = "MM_04.09.02_2410_L6.6.y"
 NXPAFE_SRC ?= "git://github.com/nxp-imx/nxp-afe.git;protocol=https"

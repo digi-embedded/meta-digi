@@ -7,7 +7,7 @@ HOMEPAGE = "https://www.nxp.com/webapp/Download?colCode=IMX_CST_TOOL"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://LICENSE.bsd3;md5=14aba05f9fa6c25527297c8aac95fcf6"
 
-DEPENDS = "byacc-native flex-native openssl-native"
+DEPENDS = "byacc-native flex-native"
 
 SRC_URI = " \
     ${DIGI_PKG_SRC}/cst-${PV}.tgz;name=cst \

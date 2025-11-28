@@ -3,7 +3,7 @@
 #
 #  mkproject.sh
 #
-#  Copyright (C) 2013-2024 by Digi International Inc.
+#  Copyright (C) 2013-2025 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -28,7 +28,7 @@ MKP_NONE="\033[0m"
 MKP_CONFIGPATH="${MKP_SCRIPTPATH}/sources/meta-digi/meta-digi-arm/conf/templates"
 
 # Blacklist platforms (not officially supported in a DEY release)
-MKP_BLACKLIST_PLATFORMS="ccimx6qpsbc ccimx6sbc ccimx8x-sbc-express"
+MKP_BLACKLIST_PLATFORMS="ccimx8x-sbc-express"
 
 MKP_SETUP_ENVIRONMENT='#!/bin/bash
 

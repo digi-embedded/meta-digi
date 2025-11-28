@@ -100,7 +100,7 @@ SWUPDATE_UBOOT_SCRIPT_NAME = "${@os.path.basename(d.getVar('SWUPDATE_UBOOT_SCRIP
 def get_uboot_prefix(d):
     prefix = d.getVar('UBOOT_PREFIX')
     if d.getVar('DEY_SOC_VENDOR') == "NXP" and d.getVar('TRUSTFENCE_ENABLED') == "1":
-        if d.getVar('TRUSTFENCE_DEK_PATH') and d.getVar('TRUSTFENCE_DEK_PATH') != "0":
+        if d.getVar('TRUSTFENCE_ENCRYPT') == "1":
             prefix = f"{prefix}-encrypted"
         else:
             prefix = f"{prefix}-signed"
@@ -124,7 +124,7 @@ SWUPDATE_UBOOT_OFFSET ?= "${BOOTLOADER_SEEK_BOOTPART}"
 
 # Retrieve the correct encryption type.
 def get_swupdate_uboot_enc(d):
-    if d.getVar('TRUSTFENCE_DEK_PATH') and d.getVar('TRUSTFENCE_DEK_PATH') != "0" :
+    if d.getVar('TRUSTFENCE_ENCRYPT') == "1" :
         return "enc"
     return "normal"
 

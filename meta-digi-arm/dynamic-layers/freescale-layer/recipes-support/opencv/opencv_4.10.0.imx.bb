@@ -1,6 +1,7 @@
-# This recipe is for the i.MX fork of opencv. For ease of
-# maintenance, the top section is a verbatim copy of an OE-core
-# recipe. The second section customizes the recipe for i.MX.
+# This recipe is modified for i.MX.
+# For ease of maintenance, the top section is a verbatim copy
+# of an OE-core recipe, and the second section customizes the
+# recipe for i.MX.
 
 ########## meta-openembedded copy ###########
 # Upstream hash: b149b1e6a1de2bdea10b0a6de34d5a5bbba4a657
@@ -17,7 +18,7 @@ ARM_INSTRUCTION_SET:armv5 = "arm"
 
 DEPENDS = "libtool swig-native bzip2 zlib glib-2.0 libwebp"
 
-SRCREV_opencv = "93bb210db7cb5ae3dcd80dd6e3f8e5cfb42aa5fa"
+SRCREV_opencv = "1ebbfb4aeeb558d03a76f3efa5bd9020f3e4397c"
 SRCREV_contrib = "c7602a8f74205e44389bd6a4e8d727d32e7e27b4"
 SRCREV_boostdesc = "34e4206aef44d50e6bbcd0ab06354b52e7466d26"
 SRCREV_vgg = "fccf7cd6a4b12079f73bbfb21745f9babcd4eb1d"
@@ -224,12 +225,15 @@ SUMMARY = "Opencv : The Open Computer Vision Library, i.MX Fork"
 
 LIC_FILES_CHKSUM = "file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 
-# Replace the opencv URL with the fork
-SRC_URI:remove = "git://github.com/opencv/opencv.git;name=opencv;branch=4.x;protocol=https"
-SRC_URI =+ "${OPENCV_SRC};branch=${SRCBRANCH_opencv};name=opencv"
-OPENCV_SRC ?= "git://github.com/nxp-imx/opencv-imx.git;protocol=https;branch=master"
-SRCBRANCH_opencv = "4.10.0_imx"
-SRCREV_opencv = "93bb210db7cb5ae3dcd80dd6e3f8e5cfb42aa5fa"
+# i.MX patches
+SRC_URI += " \
+    file://0101-MGS-6470-ccc-Modify-host-ptr-alignment-size-in-UMAT.patch \
+    file://0102-MGS-6470-ccc-Add-configuration-parameter-to-force-en.patch \
+    file://0103-MGS-6470-ccc-Change-configuration-to-enable-hostptr-.patch \
+    file://0104-MGS-8011-ccc-Fix-the-problem-of-syntax-error-at-doub.patch \
+"
+
+SRCREV_opencv = "71d3237a093b60a27601c20e9ee6c3e52154e8b1"
 SRCREV_contrib = "1ed3dd2c53888e3289afdb22ec4e9ebbff3dba87"
 
 # Add opencv_extra
