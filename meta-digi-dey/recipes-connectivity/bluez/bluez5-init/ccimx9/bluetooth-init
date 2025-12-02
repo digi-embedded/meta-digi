@@ -33,7 +33,9 @@ power() {
 set_btaddr() {
 	hciconfig ${HCI_IFACE} up
 	sleep 0.2
-	bt_addr=$(echo "$(fw_printenv -n btaddr)" | awk -F ":" '{ for(i=NF;i>=1;i--) printf "0x%s ", $i }')
+	bt_addr=$(hexdump -v -e '1/1 "%02X "' /proc/device-tree/bluetooth/mac-address \
+			| awk '{ for(i=NF; i>0; i--) printf "0x%s ", $i }' \
+			| sed 's/ $//')
 	hcitool -i ${HCI_IFACE} cmd 0x3f 0x0022 0xfe 0x06 ${bt_addr}
 	hciconfig ${HCI_IFACE} down
 	sleep 0.2
