@@ -8,9 +8,6 @@ include conf/machine/include/digi-defaults.inc
 
 DIGI_FAMILY = "ccmp1"
 
-# Platform T-FA settings
-TFA_SIGN_SUFFIX ?= "${@bb.utils.contains('TRUSTFENCE_SIGN', '1', '_signed', '', d)}"
-
 # =========================================================================
 # U-Boot
 # =========================================================================
