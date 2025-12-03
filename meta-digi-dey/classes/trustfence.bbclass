@@ -45,6 +45,9 @@ TRUSTFENCE_ENCRYPT_ROOTFS:ccmp1 ?= "0"
 TRUSTFENCE_ENCRYPT_ROOTFS:ccmp2 ?= "0"
 TRUSTFENCE_FILE_BASED_ENCRYPT ?= "${TF_FILE_BASED_ENCRYPT}"
 
+# Co-processor settings
+TRUSTFENCE_COPRO_ENABLED ?= "1"
+
 # Read-only rootfs
 TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "1", "0", d)}"
 

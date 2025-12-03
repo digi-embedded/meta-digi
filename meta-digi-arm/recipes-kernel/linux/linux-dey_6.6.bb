@@ -23,7 +23,7 @@ SRC_URI:append = " \
 "
 
 SRC_URI:append:ccmp25 = " \
-    ${@oe.utils.conditional('TRUSTFENCE_ENABLED', '1' , 'file://0001-ARM64-dts-ccmp25-add-signed-firmware-support-for-RPR.patch', '', d)} \
+    ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1' , 'file://0001-ARM64-dts-ccmp25-add-signed-firmware-support-for-RPR.patch', '', d)} \
 "
 
 SRC_URI:append:ccimx95 = " \
