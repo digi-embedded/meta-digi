@@ -291,7 +291,7 @@ python () {
             # Set the key password.
             d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
         elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
-            d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", d.getVar("FIP_SIGN_KEY"))
+            d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", d.getVar("SIGN_KEY"))
             # Set the key password.
             if (d.getVar("DIGI_SOM") == "ccmp15"):
                 d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
