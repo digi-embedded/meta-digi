@@ -22,15 +22,15 @@ diff --git a/Makefile b/Makefile
 index cdcab69..9065a40 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -364,6 +364,7 @@ include $(srctree)/Makefile.flags
+@@ -371,6 +371,7 @@ include $(srctree)/Makefile.flags
  
- objs-y		:= core handlers bootloader suricatta
+ objs-y		:= core handlers crypto bootloader suricatta
  libs-y		:= corelib mongoose parser fs containers
 +libs-y		+= ipc-static
  bindings-y	:= bindings
  tools-y		:= tools
  
-@@ -479,6 +480,7 @@ install: all
+@@ -486,6 +487,7 @@ install: all
  	install -m 0644 $(srctree)/include/progress_ipc.h ${DESTDIR}/${INCLUDEDIR}
  	install -m 0755 $(objtree)/${swupdate-ipc-lib} ${DESTDIR}/${LIBDIR}
  	ln -sfr ${DESTDIR}/${LIBDIR}/${swupdate-ipc-lib} ${DESTDIR}/${LIBDIR}/libswupdate.so
