@@ -1,0 +1,48 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Fri, 21 Nov 2025 10:12:53 +0100
+Subject: [PATCH] CC95: early prototypes: enable wireless interfaces
+
+As the HWID is not completed yet, is needed to fill that info manually.
+This is just temporal for the initial prototypes.
+Additionally, in U-Boot, is needed to set the overlays as:
+   setenv overlays ccimx9_wifi.dtbo,ccimx9_bt.dtbo
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ arch/arm64/boot/dts/digi/ccimx9_bt.dtso   | 1 +
+ arch/arm64/boot/dts/digi/ccimx9_wifi.dtso | 3 +++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/digi/ccimx9_bt.dtso b/arch/arm64/boot/dts/digi/ccimx9_bt.dtso
+index 6b4ca6229706..e073fe328dea 100644
+--- a/arch/arm64/boot/dts/digi/ccimx9_bt.dtso
++++ b/arch/arm64/boot/dts/digi/ccimx9_bt.dtso
+@@ -23,6 +23,7 @@ __overlay__ {
+ 			overlay-description = "SOM: Bluetooth";
+ 			bluetooth {
+ 				/* U-Boot will fill in the MAC address here */
++				mac-address = [00 04 f3 ff ff fc];
+ 			};
+ 		};
+ 	};
+diff --git a/arch/arm64/boot/dts/digi/ccimx9_wifi.dtso b/arch/arm64/boot/dts/digi/ccimx9_wifi.dtso
+index 7d73c4c7764d..80d766215ee0 100644
+--- a/arch/arm64/boot/dts/digi/ccimx9_wifi.dtso
++++ b/arch/arm64/boot/dts/digi/ccimx9_wifi.dtso
+@@ -25,6 +25,7 @@ __overlay__ {
+ 			overlay-description = "SOM: Wi-Fi";
+ 			wireless {
+ 				/* U-Boot will fill in the MAC address here */
++				mac-address = [00 04 f3 ff ff fb];
+ 			};
+ 		};
+ 	};
+@@ -42,6 +43,8 @@ __overlay__ {
+ 			bus-width = <4>;
+ 			non-removable;
+ 			wakeup-source;
++			// Workaround: limit max freq to 100MHz
++			max-frequency = <100000000>;
+ 			status = "okay";
+ 		};
+ 	};

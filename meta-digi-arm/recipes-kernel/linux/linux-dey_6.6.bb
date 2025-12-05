@@ -26,6 +26,10 @@ SRC_URI:append:ccmp25 = " \
     ${@oe.utils.conditional('TRUSTFENCE_ENABLED', '1' , 'file://0001-ARM64-dts-ccmp25-add-signed-firmware-support-for-RPR.patch', '', d)} \
 "
 
+SRC_URI:append:ccimx95 = " \
+    file://0001-CC95-early-prototypes-enable-wireless-interfaces.patch \
+"
+
 # Define RT config fragments per machine
 RT_CONFIG_FRAGS:use-nxp-bsp = " ${WORKDIR}/fragment-nxp-rt.config"
 RT_CONFIG_FRAGS:stm32mpcommon = " \
