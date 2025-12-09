@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2022-2024 by Digi International Inc.
+#  Copyright (C) 2022-2025 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -257,8 +257,8 @@ write_artifact_emmc ()
 }
 
 # If U-Boot is encrypted, the DEK key blob needs to be extracted from existing U-Boot
-# and appended to the new U-Boot before writing it.
-if [ "${UBOOT_ENC}" = "enc" ]; then
+# and appended to the new U-Boot before writing it for NXP platforms.
+if [ "${UBOOT_ENC}" = "enc" ] && [[ "${PLATFORM}" != ccmp2* ]]; then
 	append_dek
 fi
 # Write TFA.
