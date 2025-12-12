@@ -63,6 +63,9 @@ do_install:append() {
 	# Install wrapper bootscript to launch LVGL demo on boot
 	install -d ${D}${sysconfdir}/init.d
 	install -m 0755 ${WORKDIR}/lvgl-demo-init ${D}${sysconfdir}/lvgl-demo-init
+	sed -i -e 's,##LVGL_CONFIG_DRM_CARD##,${LVGL_CONFIG_DRM_CARD},g' \
+	    -i -e 's,##LVGL_CONFIG_FBDEV_DEVICE##,${LVGL_CONFIG_FBDEV_DEVICE},g' \
+	    -i ${D}${sysconfdir}/lvgl-demo-init
 	ln -sf ${sysconfdir}/lvgl-demo-init ${D}${sysconfdir}/init.d/lvgl-demo-init
 }
 
