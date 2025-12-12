@@ -16,8 +16,6 @@
 readonly DEMO_NAME="lvgl-demo"
 readonly DEMO_PATH="/usr/bin/${DEMO_NAME}"
 readonly DEMO_TITLE="LVGL Demo Application"
-readonly DEMO_DISPLAY="##LVGL_DEMO_DISPLAY##"
-readonly DEMO_ENV="##LVGL_DEMO_ENV##"
 readonly PID_FILE="/run/${DEMO_NAME}.pid"
 
 log() {
@@ -54,21 +52,6 @@ check_is_running() {
 	return 1
 }
 
-wait_for_wayland() {
-	local count=20
-	local wayland_socket="/run/user/0/${DEMO_DISPLAY}"
-
-	while [ ! -S "${wayland_socket}" ]; do
-		sleep 1
-		count=$((count-1))
-		if [ "${count}" = 0 ]; then
-			return 1
-		fi
-	done
-	sleep 1
-	return 0
-}
-
 stop() {
 	check_is_running || return
 
@@ -89,15 +72,11 @@ stop() {
 start() {
 	check_is_running && { log warning "start: ${DEMO_NAME} ALREADY running"; exit 0; }
 
-	if [ -d "/usr/share/wayland" ]; then
-		wait_for_wayland
-	else
-		# Disable the cursor when displaying at full screen on fbdev
-		echo "0" > /sys/class/graphics/fbcon/cursor_blink
-	fi
+	# Disable the cursor when displaying at full screen on fbdev
+	echo "0" > /sys/class/graphics/fbcon/cursor_blink
 
 	# Launch demo
-	env ${DEMO_ENV} ${DEMO_PATH} >/dev/null 2>&1 &
+	env ${DEMO_PATH} >/dev/null 2>&1 &
 
 	if [ $? -eq 0 ]; then
 		echo $! > ${PID_FILE}
