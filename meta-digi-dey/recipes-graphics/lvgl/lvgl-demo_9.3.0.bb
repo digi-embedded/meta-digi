@@ -28,9 +28,11 @@ SRCREV_FORMAT = "demo_lvgl"
 EXTRA_OEMAKE = "DESTDIR=${D}"
 
 LVGL_CONFIG_DRM_CARD ?= "/dev/dri/card0"
-LVGL_CONFIG_FBDEV_DEVICE ?= "/dev/fb0"
 # Change DRM card used for i.MX8-based platforms
 LVGL_CONFIG_DRM_CARD:mx8-generic-bsp = "/dev/dri/card1"
+LVGL_CONFIG_FBDEV_DEVICE ?= "/dev/fb0"
+# Change framebuffer used for the ccimx6/ccimx6qp (HDMI display)
+LVGL_CONFIG_FBDEV_DEVICE:ccimx6 = "/dev/fb3"
 LVGL_CONFIG_LV_USE_LOG    = "1"
 LVGL_CONFIG_LV_LOG_PRINTF = "1"
 LVGL_CONFIG_LV_MEM_SIZE = "(256 * 1024U)"
