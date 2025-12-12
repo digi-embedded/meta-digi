@@ -87,6 +87,13 @@ do_install() {
 	fi
 }
 
+do_install:append:ccimx6ul() {
+	if [ -z "${CCCS_CONF_PATH}" ]; then
+		sed -i "/url = \"edp12.devicecloud.com\"/c\url = \"remotemanager.digi.com\"" ${D}${sysconfdir}/cccs.conf
+		sed -i "/client_cert_path = \"\/mnt\/data\/drm_cert.pem\"/c\client_cert_path = \"\/etc\/ssl\/certs\/drm_cert.pem\"" ${D}${sysconfdir}/cccs.conf
+	fi
+}
+
 pkg_postinst_ontarget:${PN}-daemon() {
 	# If dualboot is enabled, change the CCCSD download path and set on the fly to yes on the first boot
 	if [ "$(fw_printenv -n dualboot 2>/dev/null)" = "yes" ]; then
