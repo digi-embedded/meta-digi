@@ -90,7 +90,6 @@ do_install() {
 do_install:append:ccimx6ul() {
 	if [ -z "${CCCS_CONF_PATH}" ]; then
 		sed -i "/url = \"edp12.devicecloud.com\"/c\url = \"remotemanager.digi.com\"" ${D}${sysconfdir}/cccs.conf
-		sed -i "/client_cert_path = \"\/mnt\/data\/drm_cert.pem\"/c\client_cert_path = \"\/etc\/ssl\/certs\/drm_cert.pem\"" ${D}${sysconfdir}/cccs.conf
 	fi
 }
 
