@@ -21,6 +21,13 @@ OS versions:
 
 Software for the following hardware platforms is in production support:
 
+## ConnectCore 95
+* ConnectCore 95 System-on-Module (SOM)
+  * [CC-WMX-B30F-B1](https://www.digi.com/products/models/cc-wmx-b30f-b1)
+  * [CC-MX-B30F-B1](https://www.digi.com/products/models/cc-mx-b30f-b1)
+* ConnectCore 95 Development Kit (DVK)
+  * [CC-WMX95-KIT](https://www.digi.com/products/models/cc-wmx95-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/5.0/cc95/yocto-gs_index))
+
 ## ConnectCore MP25
 * ConnectCore MP25 System-on-Module (SOM)
   * [CC-WST-J17D-NK](https://www.digi.com/products/models/cc-wst-j17d-nk)
@@ -101,6 +108,32 @@ Software for the following hardware platforms is in production support:
   * [CC-SBP-WMX-JN58](https://www.digi.com/products/models/cc-sbp-wmx-jn58)
   * [CC-SBP-WMX-JN7A](https://www.digi.com/products/models/cc-sbp-wmx-jn7a)
 
+## ConnectCore 6 Plus
+* ConnectCore 6 Plus System-on-Module (SOM)
+  * [CC-WMX-KK8D-TN](https://www.digi.com/products/models/cc-wmx-kk8d-tn)
+* ConnectCore 6 Plus professional development kit
+  * [CC-WMX6P-KIT](https://www.digi.com/products/models/cc-wmx6p-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc6plus/yocto-gs_index))
+
+## ConnectCore 6
+* ConnectCore 6 System-on-Module (SOM)
+  * [CC-WMX-J97C-TN](https://www.digi.com/products/models/cc-wmx-j97c-tn)
+  * [CC-WMX-L96C-TE](https://www.digi.com/products/models/cc-wmx-l96c-te)
+  * [CC-WMX-L87C-TE](https://www.digi.com/products/models/cc-wmx-l87c-te)
+  * [CC-MX-L76C-Z1](https://www.digi.com/products/models/cc-mx-l76c-z1)
+  * [CC-MX-L86C-Z1](https://www.digi.com/products/models/cc-mx-l86c-z1)
+  * [CC-MX-L96C-Z1](https://www.digi.com/products/models/cc-mx-l96c-z1)
+  * [CC-WMX-L76C-TE](https://www.digi.com/products/models/cc-wmx-l76c-te)
+  * CC-WMX-K87C-FJA
+  * CC-WMX-K77C-TE
+  * CC-WMX-L97D-TN
+  * CC-WMX-J98C-FJA
+  * CC-WMX-J98C-FJA-1
+* ConnectCore 6 Jumpstart Development Kit (SBC with Connectore 6 module)
+  * [CC-WMX6-KIT](https://www.digi.com/products/models/cc-wmx6-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc6/yocto-gs_index))
+  * [CC-SB-WMX-J97C-1](https://www.digi.com/products/models/cc-sb-wmx-j97c-1)
+  * [CC-SB-WMX-L87C-1](https://www.digi.com/products/models/cc-sb-wmx-l87c-1)
+  * [CC-SB-WMX-L76C-1](https://www.digi.com/products/models/cc-sb-wmx-l76c-1)
+
 # Installation
 
 Digi Embedded Yocto is composed of a set of different Yocto layers that work in
@@ -121,7 +154,28 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 ## 5.0-r3
 
-TODO
+* ST-based platforms
+  * Updated BSP
+    * Trusted Firmware ARM v2.10 (based on tag 'v2.10-stm32mp-r2' by ST)
+    * OP-TEE v4.0.0 (based on tag '4.0.0-stm32mp-r2' by ST)
+    * U-Boot v2023.10 (based on tag 'v2023.10-stm32mp-r2' by ST)
+    * Linux kernel v6.6.78 (based on tag 'v6.6-stm32mp-r2' by ST)
+    * Updated X-LINUX-AI software package (based on tag 'v6.1.1' by ST)
+  * Complete TrustFence support for ConnectCore MP25
+  * Added support to sign/encrypt RPROC firmware for ConnectCore MP25
+  * Added VREFBUF internal voltage reference for ADC on ConnectCore MP25
+* NXP-based platforms
+  * Added support for ConnectCore 6/6N and ConnectCore 6 Plus
+  * Added support for ConnectCore 95 (beta)
+  * Updated BSP
+    * Trusted Firmware ARM v2.10 (based on tag 'lf-6.6.52-2.2.1' by NXP)
+    * OP-TEE v4.4.0 (based on tag 'lf-6.6.52-2.2.1' by NXP)
+    * OEI v1.0 (based on tag 'lf-6.6.52-2.2.1' by NXP)
+    * System Manager 2025q2 (based on tag 'lf-6.6.52-2.2.1' by NXP)
+    * U-Boot v2024.04 (based on tag 'lf-6.6.52-2.2.1' by NXP)
+    * Linux kernel v6.6.52 (based on tag 'lf-6.6.52-2.2.1' by NXP)
+  * Added 'dey-image-chromium' image recipe for ConnectCore 95
+  * Added WIC templates for sdcard image generation
 
 ## 5.0-r2
 

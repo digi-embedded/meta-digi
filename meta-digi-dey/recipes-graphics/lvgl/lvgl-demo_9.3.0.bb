@@ -28,9 +28,11 @@ SRCREV_FORMAT = "demo_lvgl"
 EXTRA_OEMAKE = "DESTDIR=${D}"
 
 LVGL_CONFIG_DRM_CARD ?= "/dev/dri/card0"
-LVGL_CONFIG_FBDEV_DEVICE ?= "/dev/fb0"
 # Change DRM card used for i.MX8-based platforms
 LVGL_CONFIG_DRM_CARD:mx8-generic-bsp = "/dev/dri/card1"
+LVGL_CONFIG_FBDEV_DEVICE ?= "/dev/fb0"
+# Change framebuffer used for the ccimx6/ccimx6qp (HDMI display)
+LVGL_CONFIG_FBDEV_DEVICE:ccimx6 = "/dev/fb3"
 LVGL_CONFIG_LV_USE_LOG    = "1"
 LVGL_CONFIG_LV_LOG_PRINTF = "1"
 LVGL_CONFIG_LV_MEM_SIZE = "(256 * 1024U)"
@@ -41,9 +43,6 @@ require lv-conf.inc
 inherit cmake systemd update-rc.d
 
 S = "${WORKDIR}/git"
-
-LVGL_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\$\{DEMO_DISPLAY\}"
-LVGL_DEMO_ENV:ccimx6ul ?= ""
 
 do_configure:prepend() {
 	if [ "${LVGL_CONFIG_USE_SDL}" -eq 1 ] ; then
@@ -66,9 +65,9 @@ do_install:append() {
 	# Install wrapper bootscript to launch LVGL demo on boot
 	install -d ${D}${sysconfdir}/init.d
 	install -m 0755 ${WORKDIR}/lvgl-demo-init ${D}${sysconfdir}/lvgl-demo-init
-	sed -i -e "s@##LVGL_DEMO_DISPLAY##@${WAYLAND_DISPLAY}@g" \
-                   -e "s@##LVGL_DEMO_ENV##@${LVGL_DEMO_ENV}@g" \
-                   "${D}${sysconfdir}/lvgl-demo-init"
+	sed -i -e 's,##LVGL_CONFIG_DRM_CARD##,${LVGL_CONFIG_DRM_CARD},g' \
+	    -i -e 's,##LVGL_CONFIG_FBDEV_DEVICE##,${LVGL_CONFIG_FBDEV_DEVICE},g' \
+	    -i ${D}${sysconfdir}/lvgl-demo-init
 	ln -sf ${sysconfdir}/lvgl-demo-init ${D}${sysconfdir}/init.d/lvgl-demo-init
 }
 

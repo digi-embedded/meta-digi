@@ -45,6 +45,9 @@ TRUSTFENCE_ENCRYPT_ROOTFS:ccmp1 ?= "0"
 TRUSTFENCE_ENCRYPT_ROOTFS:ccmp2 ?= "0"
 TRUSTFENCE_FILE_BASED_ENCRYPT ?= "${TF_FILE_BASED_ENCRYPT}"
 
+# Co-processor settings
+TRUSTFENCE_COPRO_ENABLED ?= "1"
+
 # Read-only rootfs
 TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", "1", "0", d)}"
 
@@ -288,7 +291,7 @@ python () {
             # Set the key password.
             d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
         elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
-            d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", d.getVar("FIP_SIGN_KEY"))
+            d.setVar("SWUPDATE_PRIVATE_KEY_TEMPLATE", d.getVar("SIGN_KEY"))
             # Set the key password.
             if (d.getVar("DIGI_SOM") == "ccmp15"):
                 d.setVar("SWUPDATE_PASSWORD_FILE", keys_path + "/keys/key_pass.txt")
