@@ -1,0 +1,21 @@
+[Unit]
+Description=Secure storage init (fscrypt)
+After=local-fs.target
+Before=multi-user.target
+Before=shutdown.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+RuntimeDirectory=secure-storage
+RuntimeDirectoryMode=0700
+EnvironmentFile=/etc/default/secure-storage
+ExecStart=/usr/sbin/secure-storage-init.sh start
+ExecStop=/usr/sbin/secure-storage-init.sh stop
+RemainAfterExit=yes
+
+# Make shutdown not wait forever
+TimeoutStopSec=2s
+
+[Install]
+WantedBy=multi-user.target
