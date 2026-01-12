@@ -1,4 +1,4 @@
-# Copyright (C) 2024,2025, Digi International Inc.
+# Copyright (C) 2024-2026, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/../common:${THISDIR}/files:"
 
@@ -8,6 +8,7 @@ SRC_URI += " \
     file://patches/0002-semantic-segmentation-reduce-font-size-for-big-scree.patch \
     file://patches/0003-semantic-segmentation-adapt-sample-for-root-user.patch \
     file://patches/0004-semantic-segmentation-set-camera-preview-to-640x480.patch \
+    ${@bb.utils.contains("BBFILE_COLLECTIONS", "x-linux-isp", "file://patches/0005-semantic-segmentation-fix-initialization-issue-with-.patch", "", d)} \
 "
 
 do_install:append () {

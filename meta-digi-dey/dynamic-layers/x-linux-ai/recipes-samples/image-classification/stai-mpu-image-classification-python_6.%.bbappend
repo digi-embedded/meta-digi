@@ -1,4 +1,4 @@
-# Copyright (C) 2024,2025, Digi International Inc.
+# Copyright (C) 2024-2026, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/../common:${THISDIR}/files:"
 
@@ -7,6 +7,7 @@ SRC_URI += " \
     file://patches/0001-image-classification-remove-weston-user-check-from-l.patch \
     file://patches/0002-image-classification-reduce-font-size-for-big-screen.patch \
     file://patches/0003-image-classification-set-camera-preview-to-640x480.patch \
+    ${@bb.utils.contains("BBFILE_COLLECTIONS", "x-linux-isp", "file://patches/0004-image-classification-fix-initialization-issue-with-x.patch", "", d)} \
 "
 
 do_install:append () {

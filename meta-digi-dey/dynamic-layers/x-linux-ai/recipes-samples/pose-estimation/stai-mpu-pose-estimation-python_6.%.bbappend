@@ -1,4 +1,4 @@
-# Copyright (C) 2024,2025, Digi International Inc.
+# Copyright (C) 2024-2026, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/../common:${THISDIR}/files:"
 
@@ -7,6 +7,7 @@ SRC_URI += " \
     file://patches/0001-pose-estimation-remove-weston-user-check-from-launch.patch \
     file://patches/0002-pose-estimation-reduce-font-size-for-big-screens.patch \
     file://patches/0003-pose-estimation-set-camera-preview-to-640x480.patch \
+    ${@bb.utils.contains("BBFILE_COLLECTIONS", "x-linux-isp", "file://patches/0004-pose-estimation-fix-initialization-issue-with-x-linu.patch", "", d)} \
 "
 
 do_install:append () {
