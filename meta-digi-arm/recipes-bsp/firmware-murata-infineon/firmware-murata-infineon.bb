@@ -73,8 +73,11 @@ do_install:append:ccmp1 () {
 
 	# Install Bluetooth patch *.HCD file
 	# For Murata 2AE (LBEE5PK2AE-564)
-	install -m 444 ${S}/cyw-bt-patch/BCM4373A0_001.001.025.0103.0155.FCC.CE.2AE.hcd ${D}${base_libdir}/firmware/brcm/BCM4373A0_FCC.CE.hcd
-	install -m 444 ${S}/cyw-bt-patch/BCM4373A0_001.001.025.0103.0156.JRL.2AE.hcd ${D}${base_libdir}/firmware/brcm/BCM4373A0_JRL.hcd
+	install -m 444 ${S}/cyw-bt-patch/BCM4373A0_001.001.025.0103.0155.FCC.CE.2AE.hcd ${D}${base_libdir}/firmware/brcm/
+	install -m 444 ${S}/cyw-bt-patch/BCM4373A0_001.001.025.0103.0156.JRL.2AE.hcd ${D}${base_libdir}/firmware/brcm/
+	ln -sf BCM4373A0_001.001.025.0103.0155.FCC.CE.2AE.hcd ${D}${base_libdir}/firmware/brcm/BCM4373A0_FCC.hcd
+	ln -sf BCM4373A0_001.001.025.0103.0155.FCC.CE.2AE.hcd ${D}${base_libdir}/firmware/brcm/BCM4373A0_CE.hcd
+	ln -sf BCM4373A0_001.001.025.0103.0156.JRL.2AE.hcd ${D}${base_libdir}/firmware/brcm/BCM4373A0_JRL.hcd
 
 	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
 	# For Murata 2AE (LBEE5PK2AE-564)
@@ -93,13 +96,17 @@ do_install:append:ccmp2 () {
 
 	# Install Bluetooth patch *.HCD file
 	# For Murata 2GY (LBEE5HY2GY) and Murata 2FY (LBEE5HY2FY)
-	install -m 444 ${S}/cyw-bt-patch/CYW55500A1_001.002.032.0040.0033.FCC.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1.hcd
-	install -m 444 ${S}/cyw-bt-patch/CYW55500A1_001.002.032.0040.0032.CE.JP.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1_CE.JP.hcd
+	install -m 444 ${S}/cyw-bt-patch/CYW55500A1_001.002.032.0040.0033.FCC.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/
+	install -m 444 ${S}/cyw-bt-patch/CYW55500A1_001.002.032.0040.0032.CE.JP.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/
+	ln -sf CYW55500A1_001.002.032.0040.0033.FCC.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1_FCC.hcd
+	ln -sf CYW55500A1_001.002.032.0040.0032.CE.JP.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1_CE.hcd
+	ln -sf CYW55500A1_001.002.032.0040.0032.CE.JP.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1_JP.hcd
 
 	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
 	# For Murata 2GY (LBEE5HY2GY) and Murata 2FY (LBEE5HY2FY)
 	install -m 444 ${S}/ifx-linux-firmware-release-v6.1.110-2025_0718/firmware/cyfmac55500-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.trxse
-	install -m 444 ${S}/cyw-fmac-fw/cyfmac55500-sdio.2FY.STAIndoor.clm_blob  ${D}/${base_libdir}/firmware/cypress/cyfmac55500-sdio_US.clm_blob
+	install -m 444 ${S}/cyw-fmac-fw/cyfmac55500-sdio.2FY.STAIndoor.clm_blob  ${D}/${base_libdir}/firmware/cypress/
+	ln -sf cyfmac55500-sdio.2FY.STAIndoor.clm_blob ${D}/${base_libdir}/firmware/cypress/cyfmac55500-sdio_US.clm_blob
 
 	# Install NVRAM files (*.txt)
 	# For Murata 2GY (LBEE5HY2GY) and Murata 2FY (LBEE5HY2FY)
