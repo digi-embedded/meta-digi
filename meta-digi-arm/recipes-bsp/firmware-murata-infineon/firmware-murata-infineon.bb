@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2025, Digi International Inc.
+# Copyright (C) 2022-2026, Digi International Inc.
 
 SUMMARY = "Murata Infineon firmware binaries"
 SECTION = "base"
@@ -115,6 +115,29 @@ do_install:append:ccmp2 () {
 	install -m 755 mbt ${D}${sbindir}
 }
 
+do_install:append:ccimx95 () {
+	install -d ${D}${base_libdir}/firmware/cypress
+	install -d ${D}${base_libdir}/firmware/brcm
+
+	# Install Bluetooth patch *.HCD file
+	# For Murata 2EC (LBEE5XV2EC)
+	install -m 444 ${S}/cyw-bt-patch/CYW55560A1_001.002.087.0269.0100.FCC.2EA.sAnt.hcd ${D}${base_libdir}/firmware/brcm/
+	install -m 444 ${S}/cyw-bt-patch/CYW55560A1_001.002.087.0269.0106.EU.JP.2EA.sAnt.hcd ${D}${base_libdir}/firmware/brcm/
+	ln -sf CYW55560A1_001.002.087.0269.0100.FCC.2EA.sAnt.hcd ${D}${base_libdir}/firmware/brcm/CYW55560A1_FCC.hcd
+	ln -sf CYW55560A1_001.002.087.0269.0106.EU.JP.2EA.sAnt.hcd ${D}${base_libdir}/firmware/brcm/CYW55560A1_CE.hcd
+	ln -sf CYW55560A1_001.002.087.0269.0106.EU.JP.2EA.sAnt.hcd ${D}${base_libdir}/firmware/brcm/CYW55560A1_JP.hcd
+
+	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
+	# For Murata 2EC (LBEE5XV2EC)
+	install -m 444 ${S}/ifx-linux-firmware-release-v6.1.110-2025_0718/firmware/cyfmac55572-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55572-sdio.trxse
+	install -m 444 ${S}/cyw-fmac-fw/cyfmac55572-sdio.2EA.clm_blob_STAIndoor  ${D}/${base_libdir}/firmware/cypress/
+	ln -sf cyfmac55572-sdio.2EA.clm_blob_STAIndoor ${D}/${base_libdir}/firmware/cypress/cyfmac55572-sdio_US.clm_blob
+
+	# Install NVRAM files (*.txt)
+	# For Murata 2EC (LBEE5XV2EC)
+	install -m 444 ${S}/cyw-fmac-nvram/cyfmac5557x-pcie_sdio.sant.2EA_2EC.txt ${D}${base_libdir}/firmware/cypress/cyfmac55572-sdio.txt
+}
+
 inherit update-rc.d systemd
 
 INITSCRIPT_PACKAGES += "${PN}-autocountry"
@@ -154,4 +177,4 @@ INSANE_SKIP:${PN} += "build-deps"
 INSANE_SKIP:${PN} += "file-rdeps"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccmp1|ccmp2)"
+COMPATIBLE_MACHINE = "(ccmp1|ccmp2|ccimx95)"
