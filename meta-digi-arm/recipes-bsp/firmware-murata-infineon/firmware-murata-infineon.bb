@@ -22,7 +22,6 @@ SRC_URI:append:ccmp1 = " \
 "
 
 SRC_URI:append:ccmp2 = " \
-    file://cyfmac55500-sdio.txt \
     file://mbt \
 "
 
@@ -95,7 +94,7 @@ do_install:append:ccmp2 () {
 	install -d ${D}${base_libdir}/firmware/brcm
 
 	# Install Bluetooth patch *.HCD file
-	# For Murata 2GY (LBEE5HY2GY) and Murata 2FY (LBEE5HY2FY)
+	# For Murata 2FY (LBEE5HY2FY)
 	install -m 444 ${S}/cyw-bt-patch/CYW55500A1_001.002.032.0040.0033.FCC.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/
 	install -m 444 ${S}/cyw-bt-patch/CYW55500A1_001.002.032.0040.0032.CE.JP.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/
 	ln -sf CYW55500A1_001.002.032.0040.0033.FCC.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1_FCC.hcd
@@ -103,14 +102,14 @@ do_install:append:ccmp2 () {
 	ln -sf CYW55500A1_001.002.032.0040.0032.CE.JP.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1_JP.hcd
 
 	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
-	# For Murata 2GY (LBEE5HY2GY) and Murata 2FY (LBEE5HY2FY)
+	# For Murata 2FY (LBEE5HY2FY)
 	install -m 444 ${S}/ifx-linux-firmware-release-v6.1.110-2025_0718/firmware/cyfmac55500-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.trxse
 	install -m 444 ${S}/cyw-fmac-fw/cyfmac55500-sdio.2FY.STAIndoor.clm_blob  ${D}/${base_libdir}/firmware/cypress/
 	ln -sf cyfmac55500-sdio.2FY.STAIndoor.clm_blob ${D}/${base_libdir}/firmware/cypress/cyfmac55500-sdio_US.clm_blob
 
 	# Install NVRAM files (*.txt)
-	# For Murata 2GY (LBEE5HY2GY) and Murata 2FY (LBEE5HY2FY)
-	install -m 444 ${S}/cyfmac55500-sdio.txt ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.txt
+	# For Murata 2FY (LBEE5HY2FY)
+	install -m 444 ${S}/cyw-fmac-nvram/cyfmac55500-sdio.2FY.txt ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.txt
 
 	# Install Manufacturing Bluetooth Test tool (MBT)
 	install -m 755 mbt ${D}${sbindir}
