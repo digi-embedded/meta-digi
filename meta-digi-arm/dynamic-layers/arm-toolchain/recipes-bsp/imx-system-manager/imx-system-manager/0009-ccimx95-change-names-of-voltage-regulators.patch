@@ -1,10 +1,12 @@
 From: Hector Palacios <hector.palacios@digi.com>
 Date: Mon, 29 Sep 2025 13:02:02 +0200
-Subject: [PATCH 09/11] ccimx95: change names of voltage regulators
+Subject: [PATCH] ccimx95: change names of voltage regulators
 
 Change the names of voltage regulators for easier identification.
 Use the PMIC regulator (SW1, SW2, LDO1...) and then the name of the power
 rail used in the SOM.
+
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Hector Palacios <hector.palacios@digi.com>
 ---

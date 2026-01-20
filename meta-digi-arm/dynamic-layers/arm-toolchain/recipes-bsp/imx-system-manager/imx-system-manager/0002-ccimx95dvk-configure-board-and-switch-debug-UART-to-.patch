@@ -22,12 +22,12 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  configs/ccimx95dvk/config_dev.h   |   65 ++
  configs/ccimx95dvk/config_lmm.h   |  223 +++++
  configs/ccimx95dvk/config_mb_mu.h |  118 +++
- configs/ccimx95dvk/config_scmi.h  |  695 +++++++++++++++
+ configs/ccimx95dvk/config_scmi.h  |  686 ++++++++++++++
  configs/ccimx95dvk/config_smt.h   |  168 ++++
- configs/ccimx95dvk/config_test.h  |  197 +++++
+ configs/ccimx95dvk/config_test.h  |  199 +++++
  configs/ccimx95dvk/config_trdc.h  | 1373 +++++++++++++++++++++++++++++
  configs/ccimx95dvk/config_user.h  |  230 +++++
- 14 files changed, 3346 insertions(+), 10 deletions(-)
+ 14 files changed, 3339 insertions(+), 10 deletions(-)
  create mode 100644 configs/ccimx95dvk/config.dox
  create mode 100644 configs/ccimx95dvk/config.mak
  create mode 100644 configs/ccimx95dvk/config_bctrl.h
@@ -42,7 +42,7 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  create mode 100644 configs/ccimx95dvk/config_user.h
 
 diff --git a/boards/ccimx95dvk/pin_mux.c b/boards/ccimx95dvk/pin_mux.c
-index b40d897fbcdc..60f6d27c41c5 100755
+index d98df874beca..ff2b9540ea7a 100755
 --- a/boards/ccimx95dvk/pin_mux.c
 +++ b/boards/ccimx95dvk/pin_mux.c
 @@ -29,6 +29,13 @@ void BOARD_InitPins(void)
@@ -60,7 +60,7 @@ index b40d897fbcdc..60f6d27c41c5 100755
  
  #if (BOARD_I2C_INSTANCE == 1U)
 diff --git a/configs/ccimx95dvk.cfg b/configs/ccimx95dvk.cfg
-index d05e1214df8a..da383aab036c 100755
+index a0207dec3b67..557bba3cecf2 100755
 --- a/configs/ccimx95dvk.cfg
 +++ b/configs/ccimx95dvk.cfg
 @@ -32,8 +32,8 @@
@@ -83,7 +83,7 @@ index d05e1214df8a..da383aab036c 100755
  BOARD               DEBUG_UART_BAUDRATE=115200
  
  BOARD               I2C_INSTANCE=1
-@@ -213,7 +213,7 @@ IOMUXC              OWNER
+@@ -233,7 +233,7 @@ IOMUXC              OWNER
  IOMUX_GPR           OWNER
  JTAG                OWNER
  LPI2C1              OWNER
@@ -92,7 +92,7 @@ index d05e1214df8a..da383aab036c 100755
  M33_CACHE_CTRL      OWNER
  M33_PCF             OWNER
  M33_PSF             OWNER
-@@ -287,8 +287,8 @@ PIN_FCCU_ERR0         OWNER
+@@ -307,8 +307,8 @@ PIN_FCCU_ERR0         OWNER
  PIN_I2C1_SCL          OWNER
  PIN_I2C1_SDA          OWNER
  PIN_PDM_BIT_STREAM1   OWNER
@@ -103,7 +103,7 @@ index d05e1214df8a..da383aab036c 100755
  PIN_WDOG_ANY          OWNER
  
  # Memory
-@@ -477,10 +477,10 @@ PERLPI_GPIO3        ALL
+@@ -498,10 +498,10 @@ PERLPI_GPIO3        ALL
  PERLPI_GPIO4        ALL
  PERLPI_GPIO5        ALL
  PERLPI_LPUART1      ALL
@@ -115,7 +115,7 @@ index d05e1214df8a..da383aab036c 100755
  PERLPI_LPUART8      ALL
  PERLPI_WDOG3        ALL
  PERLPI_WDOG4        ALL
-@@ -760,10 +760,10 @@ LPTPM4              OWNER
+@@ -782,10 +782,10 @@ LPTPM4              OWNER
  LPTPM5              OWNER
  LPTPM6              OWNER
  LPUART1             OWNER
@@ -127,7 +127,7 @@ index d05e1214df8a..da383aab036c 100755
  LPUART8             OWNER, test
  LVDS                OWNER
  MIPI_CSI0           OWNER
-@@ -909,8 +909,6 @@ PIN_GPIO_IO04        OWNER
+@@ -931,8 +931,6 @@ PIN_GPIO_IO04        OWNER
  PIN_GPIO_IO05        OWNER
  PIN_GPIO_IO06        OWNER
  PIN_GPIO_IO07        OWNER
@@ -495,7 +495,7 @@ index 000000000000..1768fa8b16ab
 +
 diff --git a/configs/ccimx95dvk/config_lmm.h b/configs/ccimx95dvk/config_lmm.h
 new file mode 100644
-index 000000000000..4c7693ee8b81
+index 000000000000..1affe62ce4c4
 --- /dev/null
 +++ b/configs/ccimx95dvk/config_lmm.h
 @@ -0,0 +1,223 @@
@@ -644,20 +644,20 @@ index 000000000000..4c7693ee8b81
 +    {.lmId = 1U, .mSel = 1U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_M7P}, \
 +    {.lmId = 1U, .mSel = 2U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_M7P}, \
 +    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_VOLT, .rsrc = DEV_SM_VOLT_ARM, \
-+     .numArg = 1, .arg[0] = 1U,}, \
++     .numArg = 1, .arg[0] = 1U, }, \
 +    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_VOLT, .rsrc = DEV_SM_VOLT_ARM, \
-+     .numArg = 1, .arg[0] = 1U,}, \
++     .numArg = 1, .arg[0] = 1U, }, \
 +    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_VOLT, .rsrc = DEV_SM_VOLT_ARM, \
-+     .numArg = 1, .arg[0] = 1U,}, \
++     .numArg = 1, .arg[0] = 1U, }, \
 +    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55P}, \
 +    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55P}, \
 +    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_PD, .rsrc = DEV_SM_PD_A55P}, \
 +    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_PERF, .rsrc = DEV_SM_PERF_A55, \
-+     .numArg = 1, .arg[0] = 3U,}, \
++     .numArg = 1, .arg[0] = 3U, }, \
 +    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_PERF, .rsrc = DEV_SM_PERF_A55, \
-+     .numArg = 1, .arg[0] = 3U,}, \
++     .numArg = 1, .arg[0] = 3U, }, \
 +    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_PERF, .rsrc = DEV_SM_PERF_A55, \
-+     .numArg = 1, .arg[0] = 3U,}, \
++     .numArg = 1, .arg[0] = 3U, }, \
 +    {.lmId = 2U, .mSel = 0U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_A55C0}, \
 +    {.lmId = 2U, .mSel = 1U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_A55C0}, \
 +    {.lmId = 2U, .mSel = 2U, .ss = LMM_SS_CPU, .rsrc = DEV_SM_CPU_A55C0},
@@ -848,10 +848,10 @@ index 000000000000..e78f2dca1216
 +
 diff --git a/configs/ccimx95dvk/config_scmi.h b/configs/ccimx95dvk/config_scmi.h
 new file mode 100644
-index 000000000000..e1b81cc03f58
+index 000000000000..7032a0efc948
 --- /dev/null
 +++ b/configs/ccimx95dvk/config_scmi.h
-@@ -0,0 +1,695 @@
+@@ -0,0 +1,686 @@
 +/*
 +** ###################################################################
 +**
@@ -925,12 +925,12 @@ index 000000000000..e1b81cc03f58
 +        .clkPerms[DEV_SM_CLK_LPTMR2] = SM_SCMI_PERM_ALL, \
 +        .clkPerms[DEV_SM_CLK_LPUART3] = SM_SCMI_PERM_ALL, \
 +        .clkPerms[DEV_SM_CLK_M7SYSTICK] = SM_SCMI_PERM_ALL, \
-+        .clkPerms[DEV_SM_CLK_M7] = SM_SCMI_PERM_ALL, \
 +        .clkPerms[DEV_SM_CLK_TSTMR2] = SM_SCMI_PERM_ALL, \
 +        .cpuPerms[DEV_SM_CPU_M7P] = SM_SCMI_PERM_ALL, \
 +        .ctrlPerms[BRD_SM_CTRL_BUTTON] = SM_SCMI_PERM_NOTIFY, \
 +        .ctrlPerms[BRD_SM_CTRL_PCA2131] = SM_SCMI_PERM_ALL, \
 +        .ctrlPerms[BRD_SM_CTRL_TEST] = SM_SCMI_PERM_ALL, \
++        .ctrlPerms[BRD_SM_CTRL_TEST_A] = SM_SCMI_PERM_ALL, \
 +        .daisyPerms[DEV_SM_DAISY_CAN1_RX] = SM_SCMI_PERM_ALL, \
 +        .daisyPerms[DEV_SM_DAISY_LPTMR2_0] = SM_SCMI_PERM_ALL, \
 +        .daisyPerms[DEV_SM_DAISY_LPTMR2_1] = SM_SCMI_PERM_ALL, \
@@ -1011,15 +1011,6 @@ index 000000000000..e1b81cc03f58
 +        .scmiInst = 1U, \
 +        .domId = 3U, \
 +        .secure = 1U, \
-+        .clkPerms[DEV_SM_CLK_A55C0_GPR_SEL] = SM_SCMI_PERM_ALL, \
-+        .clkPerms[DEV_SM_CLK_A55C1_GPR_SEL] = SM_SCMI_PERM_ALL, \
-+        .clkPerms[DEV_SM_CLK_A55C2_GPR_SEL] = SM_SCMI_PERM_ALL, \
-+        .clkPerms[DEV_SM_CLK_A55C3_GPR_SEL] = SM_SCMI_PERM_ALL, \
-+        .clkPerms[DEV_SM_CLK_A55C4_GPR_SEL] = SM_SCMI_PERM_ALL, \
-+        .clkPerms[DEV_SM_CLK_A55C5_GPR_SEL] = SM_SCMI_PERM_ALL, \
-+        .clkPerms[DEV_SM_CLK_A55PERIPH] = SM_SCMI_PERM_ALL, \
-+        .clkPerms[DEV_SM_CLK_A55P_GPR_SEL] = SM_SCMI_PERM_ALL, \
-+        .clkPerms[DEV_SM_CLK_A55] = SM_SCMI_PERM_ALL, \
 +        .clkPerms[DEV_SM_CLK_ARMPLL_PFD0] = SM_SCMI_PERM_ALL, \
 +        .clkPerms[DEV_SM_CLK_ARMPLL_PFD0_UNGATED] = SM_SCMI_PERM_ALL, \
 +        .clkPerms[DEV_SM_CLK_ARMPLL_PFD1] = SM_SCMI_PERM_ALL, \
@@ -1107,7 +1098,6 @@ index 000000000000..e1b81cc03f58
 +        .clkPerms[DEV_SM_CLK_DISP1PIX] = SM_SCMI_PERM_ALL, \
 +        .clkPerms[DEV_SM_CLK_DISP2PIX] = SM_SCMI_PERM_ALL, \
 +        .clkPerms[DEV_SM_CLK_DISP3PIX] = SM_SCMI_PERM_ALL, \
-+        .clkPerms[DEV_SM_CLK_DISPOCRAM] = SM_SCMI_PERM_ALL, \
 +        .clkPerms[DEV_SM_CLK_ENETREF] = SM_SCMI_PERM_ALL, \
 +        .clkPerms[DEV_SM_CLK_ENETTIMER1] = SM_SCMI_PERM_ALL, \
 +        .clkPerms[DEV_SM_CLK_EXT1] = SM_SCMI_PERM_ALL, \
@@ -1178,6 +1168,7 @@ index 000000000000..e1b81cc03f58
 +        .ctrlPerms[BRD_SM_CTRL_PCIE1_WAKE] = SM_SCMI_PERM_NOTIFY, \
 +        .ctrlPerms[BRD_SM_CTRL_PCIE2_WAKE] = SM_SCMI_PERM_NOTIFY, \
 +        .ctrlPerms[BRD_SM_CTRL_SD3_WAKE] = SM_SCMI_PERM_NOTIFY, \
++        .ctrlPerms[BRD_SM_CTRL_TEST_A] = SM_SCMI_PERM_ALL, \
 +        .ctrlPerms[DEV_SM_CTRL_ADC_TEST] = SM_SCMI_PERM_ALL, \
 +        .ctrlPerms[DEV_SM_CTRL_MQS1_SETTINGS] = SM_SCMI_PERM_ALL, \
 +        .ctrlPerms[DEV_SM_CTRL_PDM_CLK_SEL] = SM_SCMI_PERM_ALL, \
@@ -1723,10 +1714,10 @@ index 000000000000..7da4e43af886
 +
 diff --git a/configs/ccimx95dvk/config_test.h b/configs/ccimx95dvk/config_test.h
 new file mode 100644
-index 000000000000..cb737f33eede
+index 000000000000..e667d2d5bf36
 --- /dev/null
 +++ b/configs/ccimx95dvk/config_test.h
-@@ -0,0 +1,197 @@
+@@ -0,0 +1,199 @@
 +/*
 +** ###################################################################
 +**
@@ -1872,15 +1863,15 @@ index 000000000000..cb737f33eede
 +/*--------------------------------------------------------------------------*/
 +
 +/*! Config for number of tests */
-+#define SM_SCMI_NUM_TEST  40U
++#define SM_SCMI_NUM_TEST  42U
 +
 +/*! Config data array for tests */
 +#define SM_SCMI_TEST_CONFIG_DATA \
 +    {.testId = TEST_BUTTON, .channel = 5U, .rsrc = DEV_SM_BUTTON_0}, \
 +    {.testId = TEST_CLK, .channel = 0U, .rsrc = DEV_SM_CLK_LPUART3}, \
-+    {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_DISPOCRAM}, \
 +    {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_ENETREF}, \
 +    {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_ENETTIMER1}, \
++    {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_GPU_CGC}, \
 +    {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_LPUART8}, \
 +    {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_MQS1}, \
 +    {.testId = TEST_CLK, .channel = 5U, .rsrc = DEV_SM_CLK_SAI1}, \
@@ -1903,11 +1894,13 @@ index 000000000000..cb737f33eede
 +    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_CAMERA}, \
 +    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_DISPLAY}, \
 +    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_GPU}, \
++    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_GPU}, \
 +    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_HSIO_TOP}, \
 +    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_NPU}, \
 +    {.testId = TEST_PD, .channel = 5U, .rsrc = DEV_SM_PD_VPU}, \
 +    {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_CAM}, \
 +    {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_DISP}, \
++    {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_GPU}, \
 +    {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_GPU}, \
 +    {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_NPU}, \
 +    {.testId = TEST_PERF, .channel = 5U, .rsrc = DEV_SM_PERF_VPU}, \

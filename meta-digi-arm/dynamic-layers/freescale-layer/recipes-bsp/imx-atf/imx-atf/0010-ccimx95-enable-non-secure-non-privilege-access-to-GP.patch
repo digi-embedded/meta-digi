@@ -5,6 +5,8 @@ Subject: [PATCH] ccimx95: enable non-secure, non-privilege access to GPIO1
 GPIO1 port is reserved on NXP EVK but we want to enable
 full access to the port from the non-secure world.
 
+Upstream-Status: Inappropriate [DEY specific]
+
 Signed-off-by: Hector Palacios <hector.palacios@digi.com>
 
 https://onedigi.atlassian.net/browse/DEL-9839

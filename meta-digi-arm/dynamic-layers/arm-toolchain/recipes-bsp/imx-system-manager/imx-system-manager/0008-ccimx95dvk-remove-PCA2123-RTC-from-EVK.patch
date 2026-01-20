@@ -1,23 +1,25 @@
 From: Hector Palacios <hector.palacios@digi.com>
 Date: Thu, 25 Sep 2025 11:41:51 +0200
-Subject: [PATCH 8/8] ccimx95dvk: remove PCA2123 RTC from EVK
+Subject: [PATCH] ccimx95dvk: remove PCA2123 RTC from EVK
 
 NXP used this external RTC on its 15x15 EVK.
 This chip is not present on the DVK.
+
+Upstream-Status: Inappropriate [DEY specific]
 
 Signed-off-by: Hector Palacios <hector.palacios@digi.com>
 ---
  boards/ccimx95dvk/sm/Makefile          |  11 +-
  boards/ccimx95dvk/sm/brd_sm.h          |   2 +-
- boards/ccimx95dvk/sm/brd_sm_bbm.c      | 671 -------------------------
+ boards/ccimx95dvk/sm/brd_sm_bbm.c      | 718 -------------------------
  boards/ccimx95dvk/sm/brd_sm_bbm.h      | 242 ---------
- boards/ccimx95dvk/sm/brd_sm_control.c  |  15 +-
- boards/ccimx95dvk/sm/brd_sm_control.h  |   3 +-
+ boards/ccimx95dvk/sm/brd_sm_control.c  |   8 -
+ boards/ccimx95dvk/sm/brd_sm_control.h  |   5 +-
  boards/ccimx95dvk/sm/brd_sm_handlers.c |  17 -
  boards/ccimx95dvk/sm/brd_sm_handlers.h |   7 -
  configs/ccimx95dvk.cfg                 |   3 -
  configs/ccimx95dvk/config_scmi.h       |   3 -
- 10 files changed, 6 insertions(+), 968 deletions(-)
+ 10 files changed, 6 insertions(+), 1010 deletions(-)
  delete mode 100755 boards/ccimx95dvk/sm/brd_sm_bbm.c
  delete mode 100755 boards/ccimx95dvk/sm/brd_sm_bbm.h
 
@@ -77,10 +79,10 @@ index ce758e1e4c64..0c8050646fba 100755
  
 diff --git a/boards/ccimx95dvk/sm/brd_sm_bbm.c b/boards/ccimx95dvk/sm/brd_sm_bbm.c
 deleted file mode 100755
-index 2b13931c7749..000000000000
+index 2c5cc953b1e2..000000000000
 --- a/boards/ccimx95dvk/sm/brd_sm_bbm.c
 +++ /dev/null
-@@ -1,671 +0,0 @@
+@@ -1,718 +0,0 @@
 -/*
 -** ###################################################################
 -**
@@ -140,7 +142,7 @@ index 2b13931c7749..000000000000
 -
 -static bool days2date(uint32_t days, uint32_t *year, uint32_t *month,
 -    uint32_t *day, uint32_t *weekday);
--static void date2days(uint32_t year, uint32_t month, uint32_t day,
+-static bool date2days(uint32_t year, uint32_t month, uint32_t day,
 -    uint32_t *days);
 -
 -/*--------------------------------------------------------------------------*/
@@ -237,8 +239,16 @@ index 2b13931c7749..000000000000
 -    }
 -    else
 -    {
--        /* Return pointer to name */
--        *rtcNameAddr = s_name[rtcId - DEV_SM_NUM_RTC];
+-        if ((rtcId - DEV_SM_NUM_RTC) < BRD_SM_NUM_RTC)
+-        {
+-            /* Return pointer to name */
+-            *rtcNameAddr = s_name[rtcId - DEV_SM_NUM_RTC];
+-        }
+-        else
+-        {
+-            /* Set the status */
+-            status = SM_ERR_INVALID_PARAMETERS;
+-        }
 -    }
 -
 -    /* Return status */
@@ -331,12 +341,12 @@ index 2b13931c7749..000000000000
 -        {
 -            status = SM_ERR_INVALID_PARAMETERS;
 -        }
--    }
 -
--    if (status == SM_ERR_SUCCESS)
--    {
--        /* Enable battery */
--        (void) PCA2131_PowerModeSet(&g_pca2131Dev, 0U);
+-        if (status == SM_ERR_SUCCESS)
+-        {
+-            /* Enable battery */
+-            (void) PCA2131_PowerModeSet(&g_pca2131Dev, 0U);
+-        }
 -    }
 -
 -    /* Return status */
@@ -362,7 +372,7 @@ index 2b13931c7749..000000000000
 -        if (PCA2131_RtcGet(&g_pca2131Dev, &year, &month, &day, &hour, &min,
 -            &sec, &hun, &weekday))
 -        {
--            uint32_t days, secs;
+-            uint32_t days = 0U;
 -
 -            /* Convert year */
 -            if (year >= 70U)
@@ -375,25 +385,37 @@ index 2b13931c7749..000000000000
 -            }
 -
 -            /* Convert to days */
--            date2days(year, month, day, &days);
--
--            /* Calculate seconds */
--            secs = sec + (min * 60U) + (hour * 3600U);
--            secs += (days * 86400U);
--
--            /* Check time format */
--            if (ticks)
+-            if (date2days(year, month, day, &days))
 -            {
--                *val = (((uint64_t) secs) * 100U) + hun;
+-
+-                /* Calculate seconds */
+-                uint32_t secs = sec + (min * 60U) + (hour * 3600U);
+-                secs += (days * 86400U);
+-
+-                /* Check time format */
+-                if (ticks)
+-                {
+-                    *val = (((uint64_t) secs) * 100U) + hun;
+-                }
+-                else
+-                {
+-                    *val = ((uint64_t) secs);
+-                }
 -            }
 -            else
 -            {
--                *val = ((uint64_t) secs);
+-                status = SM_ERR_HARDWARE_ERROR;
 -            }
 -        }
 -        else
 -        {
 -            status = SM_ERR_HARDWARE_ERROR;
+-        }
+-
+-        if (status == SM_ERR_SUCCESS)
+-        {
+-            /* Enable battery */
+-            (void) PCA2131_PowerModeSet(&g_pca2131Dev, 0U);
 -        }
 -    }
 -
@@ -419,10 +441,7 @@ index 2b13931c7749..000000000000
 -        /* Default state */
 -        *state = 0U;
 -
--        /* Enable battery */
--        (void) PCA2131_PowerModeSet(&g_pca2131Dev, 0U);
--
--        /* Get battery state */
+-        /* Get time status */
 -        if (PCA2131_TimeStatusGet(&g_pca2131Dev, &st))
 -        {
 -            if (st)
@@ -704,7 +723,7 @@ index 2b13931c7749..000000000000
 -    if (rc)
 -    {
 -        /* Calculate month */
--        *month= (moy < 10U) ? (moy + 3U) : (moy - 9U);
+-        *month = (moy < 10U) ? (moy + 3U) : (moy - 9U);
 -
 -        /* Calculate day of the week */
 -        *weekday = (days + 4U) % 7U;
@@ -720,36 +739,66 @@ index 2b13931c7749..000000000000
 -/*--------------------------------------------------------------------------*/
 -/* Convert date/time to days since 1-1-1970                                 */
 -/*--------------------------------------------------------------------------*/
--static void date2days(uint32_t year, uint32_t month, uint32_t day,
+-static bool date2days(uint32_t year, uint32_t month, uint32_t day,
 -    uint32_t *days)
 -{
--    uint32_t newYear;
--    uint32_t era;
--    uint32_t doe;
--    uint32_t yoe;
--    uint32_t doy;
--    uint32_t moy;
+-    bool rc = true;
+-    uint32_t newYear = 0U;
+-    uint32_t era = 0U;
+-    uint32_t yoe = 0U;
 -
--    /* Adjust year */
+-    /*
+-     * False Positive: The value of variable year cann't be zero
+-     */
+-    // coverity[cert_int30_c_violation:FALSE]
 -    newYear = year - ((month <= 2U) ? 1U : 0U);
 -
 -    /* Calculate era */
 -    era = newYear / 400U;
 -
--    /* Calculate the year of era */
--    yoe = newYear - (era * 400U);
+-    /* Check the expression value doesn't wrap */
+-    if (newYear >= (era * 400U))
+-    {
+-        /* Calculate the year of era */
+-        yoe = newYear - (era * 400U);
+-    }
+-    else
+-    {
+-        /* Handling if value wraps */
+-        rc = false;
+-    }
 -
--    /* Calculate month of year */
--    moy = (month > 2U) ? (month - 3U) : (month + 9U);
+-    if (rc == true)
+-    {
+-        /* Calculate month of year */
+-        uint32_t moy = (month > 2U) ? (month - 3U) : (month + 9U);
 -
--    /* Calculate day of the year */
--    doy = (((153U * moy) + 2U) / 5U) + (day - 1U);
+-        /*
+-         * False Positive: moy value will range 1 <=moy <= 12.
+-         * Hence, the multiplication with 153 cann't overflow
+-         */
+-        // coverity[cert_int30_c_violation:FALSE]
+-        uint32_t doy = (((153U * moy) + 2U) / 5U) + (day - 1U);
 -
--    /* Calculate the day in the era */
--    doe = (yoe * 365U) + (yoe / 4U) - (yoe / 100U) + doy;
+-        /*
+-         * False Positive: yoe is remainder value which will be always
+-         * less than 400.
+-         * Hence, the multiplication with 365 cann't overflow
+-         */
+-        // coverity[cert_int30_c_violation:FALSE]
+-        uint32_t doe = (yoe * 365U) + (yoe / 4U) - (yoe / 100U) + doy;
 -
--    /* Calculate days */
--    *days = (era * 146097U) + doe - 719468U;
+-        /*
+-         * False Positive: era is quotient value dividing newYear with 400.
+-         * The newYear variable will range from 1970 <= newYear <= 2070.
+-         * Hence, the multiplication can't overflow.
+-         */
+-        // coverity[cert_int30_c_violation:FALSE]
+-        *days = (era * 146097U) + doe - 719468U;
+-    }
+-
+-    /* Return code */
+-    return rc;
 -}
 -
 diff --git a/boards/ccimx95dvk/sm/brd_sm_bbm.h b/boards/ccimx95dvk/sm/brd_sm_bbm.h
@@ -1001,31 +1050,10 @@ index a96a8e1cc901..000000000000
 -/** @} */
 -
 diff --git a/boards/ccimx95dvk/sm/brd_sm_control.c b/boards/ccimx95dvk/sm/brd_sm_control.c
-index 8484a6895a3d..564159c1ad7b 100755
+index 76de9fad9e86..500a8a8f9a8d 100755
 --- a/boards/ccimx95dvk/sm/brd_sm_control.c
 +++ b/boards/ccimx95dvk/sm/brd_sm_control.c
-@@ -65,10 +65,6 @@ int32_t BRD_SM_ControlSet(uint32_t ctrlId, uint32_t numVal,
-         {
-             status = DEV_SM_ControlSet(ctrlId, numVal, val);
-         }
--        else if (ctrlId == BRD_SM_CTRL_PCA2131)
--        {
--            status = SM_ERR_NOT_SUPPORTED;
--        }
-         else if (ctrlId == BRD_SM_CTRL_TEST)
-         {
-             /* Test response to an reported SM error */
-@@ -103,8 +99,7 @@ int32_t BRD_SM_ControlGet(uint32_t ctrlId, uint32_t *numRtn, uint32_t *rtn)
-         {
-             status = DEV_SM_ControlGet(ctrlId, numRtn, rtn);
-         }
--        else if ((ctrlId == BRD_SM_CTRL_PCA2131)
--            || (ctrlId == BRD_SM_CTRL_TEST))
-+        else if (ctrlId == BRD_SM_CTRL_TEST)
-         {
-             *numRtn = 0U;
-             status = SM_ERR_NOT_SUPPORTED;
-@@ -140,10 +135,6 @@ int32_t BRD_SM_ControlExtSet(uint32_t ctrlId, uint32_t addr,
+@@ -131,10 +131,6 @@ int32_t BRD_SM_ControlExtSet(uint32_t ctrlId, uint32_t addr,
          {
              status = DEV_SM_ControlExtSet(ctrlId, addr, numVal, val);
          }
@@ -1036,7 +1064,7 @@ index 8484a6895a3d..564159c1ad7b 100755
          else
          {
              status = SM_ERR_NOT_SUPPORTED;
-@@ -174,10 +165,6 @@ int32_t BRD_SM_ControlExtGet(uint32_t ctrlId, uint32_t addr,
+@@ -165,10 +161,6 @@ int32_t BRD_SM_ControlExtGet(uint32_t ctrlId, uint32_t addr,
          {
              status = DEV_SM_ControlExtGet(ctrlId, addr, numRtn, rtn);
          }
@@ -1048,23 +1076,25 @@ index 8484a6895a3d..564159c1ad7b 100755
          {
              status = SM_ERR_NOT_SUPPORTED;
 diff --git a/boards/ccimx95dvk/sm/brd_sm_control.h b/boards/ccimx95dvk/sm/brd_sm_control.h
-index 12365e56d7e4..be764f4cb1e7 100755
+index 9c61bce72f8e..e19c8975a0b4 100755
 --- a/boards/ccimx95dvk/sm/brd_sm_control.h
 +++ b/boards/ccimx95dvk/sm/brd_sm_control.h
-@@ -67,7 +67,7 @@
+@@ -68,7 +68,7 @@
  /** @} */
  
  /*! Number of board controls */
--#define BRD_SM_NUM_CTRL  2UL
-+#define BRD_SM_NUM_CTRL  1UL
+-#define BRD_SM_NUM_CTRL  3UL
++#define BRD_SM_NUM_CTRL  2UL
  
  /*! Total number of controls */
  #define SM_NUM_CTRL  (DEV_SM_NUM_CTRL + BRD_SM_NUM_CTRL)
-@@ -77,7 +77,6 @@
+@@ -78,8 +78,7 @@
   */
  /** @{ */
  #define BRD_SM_CTRL_TEST        (DEV_SM_NUM_CTRL + 0U)  /*!< Test */
 -#define BRD_SM_CTRL_PCA2131     (DEV_SM_NUM_CTRL + 1U)  /*!< PCA2131 raw access */
+-#define BRD_SM_CTRL_TEST_A      (DEV_SM_NUM_CTRL + 2U)  /*!< Test action */
++#define BRD_SM_CTRL_TEST_A      (DEV_SM_NUM_CTRL + 1U)  /*!< Test action */
  /** @} */
  
  /* Types */
@@ -1146,39 +1176,40 @@ index 781a443e8444..967d41d61b53 100755
  extern uint32_t g_pmicFaultFlags;
  
 diff --git a/configs/ccimx95dvk.cfg b/configs/ccimx95dvk.cfg
-index 4af5cea789d9..b324e0fb0e45 100755
+index c3c280d275b0..c160dbce0b85 100755
 --- a/configs/ccimx95dvk.cfg
 +++ b/configs/ccimx95dvk.cfg
-@@ -345,9 +345,7 @@ CHANNEL             db=2, xport=smt, check=crc32, rpc=scmi, \
+@@ -365,10 +365,8 @@ CHANNEL             db=2, xport=smt, check=crc32, rpc=scmi, \
  
  # API
  
 -BRD_SM_CTRL_PCA2131       ALL
  BRD_SM_CTRL_TEST          ALL
+ BRD_SM_CTRL_TEST_A        ALL
 -BRD_SM_RTC_PCA2131        ALL
  BRD_SM_SENSOR_TEMP_PF09   SET
  BRD_SM_SENSOR_TEMP_PF5301 SET
  BRD_SM_SENSOR_TEMP_PF5302 SET
-@@ -531,7 +529,6 @@ CHANNEL             db=1, xport=smt, rpc=scmi, type=p2a_notify
- 
+@@ -553,7 +551,6 @@ CHANNEL             db=1, xport=smt, rpc=scmi, type=p2a_notify
  AUDIO_PLL1                ALL
  AUDIO_PLL2                ALL
+ BRD_SM_CTRL_TEST_A        ALL
 -BRD_SM_RTC_PCA2131        PRIV
  BRD_SM_SENSOR_TEMP_PF09   ALL
  BRD_SM_SENSOR_TEMP_PF5301 SET
  BRD_SM_SENSOR_TEMP_PF5302 SET
 diff --git a/configs/ccimx95dvk/config_scmi.h b/configs/ccimx95dvk/config_scmi.h
-index d251f7910b39..b23958f33138 100644
+index 83d7bd94bcd1..87de1fd591ca 100644
 --- a/configs/ccimx95dvk/config_scmi.h
 +++ b/configs/ccimx95dvk/config_scmi.h
-@@ -72,7 +72,6 @@
-         .clkPerms[DEV_SM_CLK_M7] = SM_SCMI_PERM_ALL, \
+@@ -71,7 +71,6 @@
+         .clkPerms[DEV_SM_CLK_M7SYSTICK] = SM_SCMI_PERM_ALL, \
          .clkPerms[DEV_SM_CLK_TSTMR2] = SM_SCMI_PERM_ALL, \
          .cpuPerms[DEV_SM_CPU_M7P] = SM_SCMI_PERM_ALL, \
 -        .ctrlPerms[BRD_SM_CTRL_PCA2131] = SM_SCMI_PERM_ALL, \
          .ctrlPerms[BRD_SM_CTRL_TEST] = SM_SCMI_PERM_ALL, \
+         .ctrlPerms[BRD_SM_CTRL_TEST_A] = SM_SCMI_PERM_ALL, \
          .daisyPerms[DEV_SM_DAISY_LPTMR2_0] = SM_SCMI_PERM_ALL, \
-         .daisyPerms[DEV_SM_DAISY_LPTMR2_1] = SM_SCMI_PERM_ALL, \
 @@ -87,7 +86,6 @@
          .pdPerms[DEV_SM_PD_M7] = SM_SCMI_PERM_ALL, \
          .perfPerms[DEV_SM_PERF_M7] = SM_SCMI_PERM_ALL, \
@@ -1187,7 +1218,7 @@ index d251f7910b39..b23958f33138 100644
          .rtcPerms[DEV_SM_RTC_BBNSM] = SM_SCMI_PERM_PRIV, \
          .sensorPerms[BRD_SM_SENSOR_TEMP_PF09] = SM_SCMI_PERM_SET, \
          .sensorPerms[BRD_SM_SENSOR_TEMP_PF5301] = SM_SCMI_PERM_SET, \
-@@ -605,7 +603,6 @@
+@@ -596,7 +594,6 @@
          .pinPerms[DEV_SM_PIN_XSPI1_SCLK] = SM_SCMI_PERM_ALL, \
          .pinPerms[DEV_SM_PIN_XSPI1_SS0_B] = SM_SCMI_PERM_ALL, \
          .pinPerms[DEV_SM_PIN_XSPI1_SS1_B] = SM_SCMI_PERM_ALL, \

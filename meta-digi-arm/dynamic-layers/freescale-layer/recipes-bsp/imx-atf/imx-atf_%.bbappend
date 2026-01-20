@@ -15,6 +15,8 @@ SRC_URI:append:dey = " \
     file://0010-ccimx95-enable-non-secure-non-privilege-access-to-GP.patch \
 "
 
+SRCREV = "8ec7e38031f8c022a9760a8da77bdc6e1938db8c"
+
 BOOT_TOOLS = "imx-boot-tools"
 
 EXTRA_OEMAKE += "${@oe.utils.conditional('TRUSTFENCE_CONSOLE_DISABLE', '1', 'LOG_LEVEL=0', '', d)}"

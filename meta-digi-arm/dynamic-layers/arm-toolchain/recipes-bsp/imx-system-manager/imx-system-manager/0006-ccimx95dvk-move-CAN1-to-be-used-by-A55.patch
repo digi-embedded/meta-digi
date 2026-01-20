@@ -16,10 +16,10 @@ Signed-off-by: Hector Palacios <hector.palacios@digi.com>
  4 files changed, 14 insertions(+), 13 deletions(-)
 
 diff --git a/configs/ccimx95dvk.cfg b/configs/ccimx95dvk.cfg
-index bf5f0739f526..afec8eb5b738 100755
+index 78fad32b4513..c1374d4684a9 100755
 --- a/configs/ccimx95dvk.cfg
 +++ b/configs/ccimx95dvk.cfg
-@@ -362,7 +362,6 @@ SYS                       ALL
+@@ -383,7 +383,6 @@ SYS                       ALL
  # Resources
  
  M7P                 OWNER  # CPUs must be first
@@ -27,7 +27,7 @@ index bf5f0739f526..afec8eb5b738 100755
  FSB                 READONLY
  IRQSTEER_M7         OWNER
  LPIT1               OWNER
-@@ -461,6 +460,7 @@ CHANNEL             db=1, xport=smt, rpc=scmi, type=p2a_notify
+@@ -482,6 +481,7 @@ CHANNEL             db=1, xport=smt, rpc=scmi, type=p2a_notify
  
  PERF_A55            ALL
  PERF_DRAM           ALL
@@ -35,7 +35,7 @@ index bf5f0739f526..afec8eb5b738 100755
  PERLPI_CAN2         ALL
  PERLPI_CAN3         ALL
  PERLPI_CAN4         ALL
-@@ -582,6 +582,7 @@ CAMERA5             OWNER
+@@ -604,6 +604,7 @@ CAMERA5             OWNER
  CAMERA6             OWNER
  CAMERA7             OWNER
  CAMERA8             OWNER
@@ -69,7 +69,7 @@ index a757834c32ab..a55abe03ec02 100644
      }
  
 diff --git a/configs/ccimx95dvk/config_scmi.h b/configs/ccimx95dvk/config_scmi.h
-index 510de3d252a2..36cbb06126fe 100644
+index 3d4b9cad69ad..45114d0002f4 100644
 --- a/configs/ccimx95dvk/config_scmi.h
 +++ b/configs/ccimx95dvk/config_scmi.h
 @@ -66,7 +66,6 @@
@@ -81,9 +81,9 @@ index 510de3d252a2..36cbb06126fe 100644
          .clkPerms[DEV_SM_CLK_LPTMR2] = SM_SCMI_PERM_ALL, \
          .clkPerms[DEV_SM_CLK_M7SYSTICK] = SM_SCMI_PERM_ALL, \
 @@ -76,7 +75,6 @@
-         .ctrlPerms[BRD_SM_CTRL_BUTTON] = SM_SCMI_PERM_NOTIFY, \
          .ctrlPerms[BRD_SM_CTRL_PCA2131] = SM_SCMI_PERM_ALL, \
          .ctrlPerms[BRD_SM_CTRL_TEST] = SM_SCMI_PERM_ALL, \
+         .ctrlPerms[BRD_SM_CTRL_TEST_A] = SM_SCMI_PERM_ALL, \
 -        .daisyPerms[DEV_SM_DAISY_CAN1_RX] = SM_SCMI_PERM_ALL, \
          .daisyPerms[DEV_SM_DAISY_LPTMR2_0] = SM_SCMI_PERM_ALL, \
          .daisyPerms[DEV_SM_DAISY_LPTMR2_1] = SM_SCMI_PERM_ALL, \
@@ -96,7 +96,7 @@ index 510de3d252a2..36cbb06126fe 100644
          .perlpiPerms[DEV_SM_PERLPI_WDOG5] = SM_SCMI_PERM_ALL, \
          .rtcPerms[BRD_SM_RTC_PCA2131] = SM_SCMI_PERM_ALL, \
          .rtcPerms[DEV_SM_RTC_BBNSM] = SM_SCMI_PERM_PRIV, \
-@@ -181,6 +178,7 @@
+@@ -172,6 +169,7 @@
          .pdPerms[DEV_SM_PD_A55P] = SM_SCMI_PERM_ALL, \
          .perfPerms[DEV_SM_PERF_A55] = SM_SCMI_PERM_ALL, \
          .perfPerms[DEV_SM_PERF_DRAM] = SM_SCMI_PERM_ALL, \
@@ -104,7 +104,7 @@ index 510de3d252a2..36cbb06126fe 100644
          .perlpiPerms[DEV_SM_PERLPI_CAN2] = SM_SCMI_PERM_ALL, \
          .perlpiPerms[DEV_SM_PERLPI_CAN3] = SM_SCMI_PERM_ALL, \
          .perlpiPerms[DEV_SM_PERLPI_CAN4] = SM_SCMI_PERM_ALL, \
-@@ -237,6 +235,7 @@
+@@ -228,6 +226,7 @@
          .clkPerms[DEV_SM_CLK_AUDIOPLL2] = SM_SCMI_PERM_ALL, \
          .clkPerms[DEV_SM_CLK_AUDIOPLL2_VCO] = SM_SCMI_PERM_ALL, \
          .clkPerms[DEV_SM_CLK_AUDIOXCVR] = SM_SCMI_PERM_ALL, \
@@ -112,7 +112,7 @@ index 510de3d252a2..36cbb06126fe 100644
          .clkPerms[DEV_SM_CLK_CAN2] = SM_SCMI_PERM_ALL, \
          .clkPerms[DEV_SM_CLK_CAN3] = SM_SCMI_PERM_ALL, \
          .clkPerms[DEV_SM_CLK_CAN4] = SM_SCMI_PERM_ALL, \
-@@ -327,6 +326,7 @@
+@@ -318,6 +317,7 @@
          .ctrlPerms[DEV_SM_CTRL_SAI3_MCLK] = SM_SCMI_PERM_ALL, \
          .ctrlPerms[DEV_SM_CTRL_SAI4_MCLK] = SM_SCMI_PERM_ALL, \
          .ctrlPerms[DEV_SM_CTRL_SAI5_MCLK] = SM_SCMI_PERM_ALL, \
@@ -120,7 +120,7 @@ index 510de3d252a2..36cbb06126fe 100644
          .daisyPerms[DEV_SM_DAISY_CAN2_RX] = SM_SCMI_PERM_ALL, \
          .daisyPerms[DEV_SM_DAISY_CAN3_RX] = SM_SCMI_PERM_ALL, \
          .daisyPerms[DEV_SM_DAISY_CAN4_RX] = SM_SCMI_PERM_ALL, \
-@@ -469,6 +469,7 @@
+@@ -460,6 +460,7 @@
          .perfPerms[DEV_SM_PERF_GPU] = SM_SCMI_PERM_ALL, \
          .perfPerms[DEV_SM_PERF_NPU] = SM_SCMI_PERM_ALL, \
          .perfPerms[DEV_SM_PERF_VPU] = SM_SCMI_PERM_ALL, \

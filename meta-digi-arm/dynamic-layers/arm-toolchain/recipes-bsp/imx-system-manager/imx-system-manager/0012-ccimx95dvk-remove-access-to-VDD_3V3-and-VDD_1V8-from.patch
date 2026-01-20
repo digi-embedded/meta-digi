@@ -22,6 +22,8 @@ though apparently support is incomplete (for instance they are not powered
 off on the poweroff path from Linux), so this may need to be revisited in
 future BSP upgrades.
 
+Upstream-Status: Inappropriate [DEY specific]
+
 Signed-off-by: Hector Palacios <hector.palacios@digi.com>
 
 https://onedigi.atlassian.net/browse/DEL-9804
@@ -31,10 +33,10 @@ https://onedigi.atlassian.net/browse/DEL-9804
  2 files changed, 4 deletions(-)
 
 diff --git a/configs/ccimx95dvk.cfg b/configs/ccimx95dvk.cfg
-index b7c33f8d7e9a..19d3b0ab27b4 100755
+index d7ee4d0115fa..b73401792592 100755
 --- a/configs/ccimx95dvk.cfg
 +++ b/configs/ccimx95dvk.cfg
-@@ -532,8 +532,6 @@ AUDIO_PLL2                ALL
+@@ -554,8 +554,6 @@ BRD_SM_CTRL_TEST_A        ALL
  BRD_SM_SENSOR_TEMP_PF09   ALL
  BRD_SM_SENSOR_TEMP_PF5301 SET
  BRD_SM_SENSOR_TEMP_PF5302 SET
@@ -44,10 +46,10 @@ index b7c33f8d7e9a..19d3b0ab27b4 100755
  BRD_SM_VOLT_LDO2_VDD_SDIO2   ALL
  BUTTON                    ALL, test
 diff --git a/configs/ccimx95dvk/config_scmi.h b/configs/ccimx95dvk/config_scmi.h
-index 18a4e5ef6360..8094e9a9ef77 100644
+index 83084a9d1fbd..506cb750af65 100644
 --- a/configs/ccimx95dvk/config_scmi.h
 +++ b/configs/ccimx95dvk/config_scmi.h
-@@ -612,8 +612,6 @@
+@@ -603,8 +603,6 @@
          .sysPerms = SM_SCMI_PERM_NOTIFY, \
          .voltPerms[BRD_SM_VOLT_LDO1_VDD_LDO1] = SM_SCMI_PERM_ALL, \
          .voltPerms[BRD_SM_VOLT_LDO2_VDD_SDIO2] = SM_SCMI_PERM_ALL, \

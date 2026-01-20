@@ -42,7 +42,7 @@ index a8c15513b578..3cb33909f740 100644
  #endif
  }
 diff --git a/devices/MIMX95/oei/soc_clock.c b/devices/MIMX95/oei/soc_clock.c
-index 3421e3efe143..9205b9a12782 100644
+index 17493b08e1b8..c1f5cecfa9b6 100644
 --- a/devices/MIMX95/oei/soc_clock.c
 +++ b/devices/MIMX95/oei/soc_clock.c
 @@ -25,6 +25,8 @@ static struct clk_root_cfg clk_root_cfgs[] = {
