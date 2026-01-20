@@ -1,0 +1,34 @@
+From 24254454e5f5fc503b5e4cc1fa8c6d9b1a3ae9ba Mon Sep 17 00:00:00 2001
+From: Gaurav Jain <gaurav.jain@nxp.com>
+Date: Wed, 19 Jan 2022 15:45:29 +0530
+Subject: [PATCH] openssl 3.0: add Kernel TLS configuration
+
+Upstream-Status: Inappropriate [i.MX, Layerscape specific]
+Signed-off-by: Gaurav Jain <gaurav.jain@nxp.com>
+---
+ apps/openssl.cnf | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/apps/openssl.cnf b/apps/openssl.cnf
+index 03330e0120..ec18df388e 100644
+--- a/apps/openssl.cnf
++++ b/apps/openssl.cnf
+@@ -30,6 +30,15 @@ oid_section = new_oids
+ # (Alternatively, use a configuration file that has only
+ # X.509v3 extensions in its main [= default] section.)
+ 
++[ openssl_init ]
++ssl_conf = ssl_configuration
++
++[ ssl_configuration ]
++ktls = ktls_conf
++
++[ ktls_conf ]
++Options = KTLS
++
+ [ new_oids ]
+ # We can add new OIDs in here for use by 'ca', 'req' and 'ts'.
+ # Add a simple OID like this:
+-- 
+2.25.1
+
