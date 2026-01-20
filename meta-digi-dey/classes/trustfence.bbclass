@@ -207,7 +207,7 @@ python () {
                     d.setVar("SIGN_COPRO_ECC_PRIVKEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("SIGN_COPRO_ECC_PRIVKEY"))
                     d.setVar("SIGN_COPRO_ECC_INFOKEY", d.getVar("TRUSTFENCE_KEYS_PATH") + "/rproc-keys/publicKey.der")
                     d.setVar("SIGN_COPRO_ECC_INFOKEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("SIGN_COPRO_ECC_INFOKEY"))
-                    d.setVar("TRUSTFENCE_COPRO_PASSWORD_FILE", d.getVar("TRUSTFENCE_KEYS_PATH") + "rproc-keys/key_pass.txt")
+                    d.setVar("TRUSTFENCE_COPRO_PASSWORD_FILE", d.getVar("TRUSTFENCE_KEYS_PATH") + "/rproc-keys/key_pass.txt")
                     d.setVar("SIGN_COPRO_ECC_PASS_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), "UNDEFINED");
             d.setVar("SIGN_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("SIGN_KEY"));
 
