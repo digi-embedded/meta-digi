@@ -11,3 +11,5 @@ SRC_URI:append:dey = " \
 "
 # NXP's 'lf-6.6.52_2.2.2' release
 SRCREV = "49bfaa93e9d1fe213866bcb9507927a59a9ede5a"
+
+OEI_DEBUG:dey = "1"
