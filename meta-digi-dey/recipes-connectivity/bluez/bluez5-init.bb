@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2025, Digi International Inc.
+# Copyright (C) 2022-2026, Digi International Inc.
 
 SUMMARY = "Bluetooth init scripts"
 LICENSE = "GPL-2.0-only"
@@ -59,10 +59,12 @@ SYSTEMD_SERVICE:${PN} = "bluetooth-init.service"
 RDEPENDS:${PN} = "initscripts-functions"
 
 # IW61x Bluetooth support requires the WiFi FW support
-RDEPENDS:${PN}:append:ccimx9 = " firmware-nxp-wifi-nxpiw612-sdio"
+RDEPENDS:${PN}:append:ccimx91 = " firmware-nxp-wifi-nxpiw612-sdio"
+RDEPENDS:${PN}:append:ccimx93 = " firmware-nxp-wifi-nxpiw612-sdio"
 # Murata - Infineon combo chip requires both WiFi and Bluetooth firmware
 RDEPENDS:${PN}:append:ccmp1 = " firmware-murata-infineon"
 RDEPENDS:${PN}:append:ccmp2 = " firmware-murata-infineon"
+RDEPENDS:${PN}:append:ccimx95 = " firmware-murata-infineon"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx9|ccmp1|ccmp2)"
