@@ -3,7 +3,7 @@
 #
 #  recovery-initramfs-init
 #
-#  Copyright (C) 2016, 2017 by Digi International Inc.
+#  Copyright (C) 2016, 2026 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -364,29 +364,23 @@ swu_package_path() {
 	# Check whether the package is local and get the absolute path.
 	if echo "${1}" | grep -qs '^file://'; then
 		local pkg_name="$(basename ${1})"
-		local success=false
-		local retries=1
-		local max_retries=10
+		local MAX_RETRIES="10"
 
-		while [ $success = false ] && [ $retries -le $max_retries ]; do
+		for _ in $(seq ${MAX_RETRIES}); do
 			for i in ${UPDATE_MOUNT_DIR} $(echo ${USB_MOUNT_DIR}/*); do
 				echo $i | grep -qs "${USB_MOUNT_DIR}/\*" && continue
 				if [ -f "${i}/${pkg_name}" ]; then
 					swu_abspath="${i}/${pkg_name}"
-					break
+					break 2
 				fi
 			done
-
-			if [ -n "${swu_abspath}" ]; then
-				echo "${swu_abspath}"
-				success=true
-			else
-				sleep 1
-				retries=$(( retries + 1 ))
-			fi
+			sleep 1
 		done
-		if [ -z "${swu_abspath}" ]; then
-			quit_with_error "Unable to find update package '${pkg_name}' after ${max_retries} retries"
+
+		if [ -n "${swu_abspath}" ]; then
+			echo "${swu_abspath}"
+		else
+			quit_with_error "Unable to find update package '${pkg_name}' after ${MAX_RETRIES} retries"
 		fi
 	else
 		echo "${1}"
