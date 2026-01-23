@@ -4,8 +4,16 @@ SUMMARY = "Bluetooth init scripts"
 LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6"
 
+BT_INIT_FILE = "bluetooth-init"
+BT_INIT_FILE:ccimx8m = "bluetooth-init_btdigi_qca65x4"
+BT_INIT_FILE:ccimx8x = "bluetooth-init_btdigi_qca65x4"
+BT_INIT_FILE:ccimx91 = "bluetooth-init_btnxpuart"
+BT_INIT_FILE:ccimx93 = "bluetooth-init_btnxpuart"
+BT_INIT_FILE:ccimx95 = "bluetooth-init_btbcm_hciuart"
+BT_INIT_FILE:ccmp1 = "bluetooth-init_btbcm_hciuart"
+
 SRC_URI = " \
-    file://bluetooth-init \
+    file://${BT_INIT_FILE} \
     file://bluetooth-init.service \
 "
 
@@ -18,7 +26,7 @@ inherit update-rc.d systemd
 do_install() {
 	# INITSCRIPT
 	install -d ${D}${sysconfdir}/init.d/
-	install -m 0755 ${WORKDIR}/bluetooth-init ${D}${sysconfdir}/bluetooth-init
+	install -m 0755 ${WORKDIR}/${BT_INIT_FILE} ${D}${sysconfdir}/bluetooth-init
 	ln -sf /etc/bluetooth-init ${D}${sysconfdir}/init.d/bluetooth-init
 	# SYSTEMD
 	install -d ${D}${systemd_unitdir}/system/
