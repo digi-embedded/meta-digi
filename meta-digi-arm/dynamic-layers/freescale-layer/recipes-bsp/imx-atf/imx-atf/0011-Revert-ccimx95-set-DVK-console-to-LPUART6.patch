@@ -1,0 +1,29 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Wed, 14 Jan 2026 17:47:38 +0100
+Subject: [PATCH] Revert "ccimx95: set DVK console to LPUART6"
+
+On v2 of the SOM, the console has been changed to LPUART1.
+This reverts commit 3c0e275d1b1286505dd57591dcf0cd34bd2d1849.
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+
+https://onedigi.atlassian.net/browse/DEL-9915
+---
+ plat/imx/imx95/include/platform_def.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plat/imx/imx95/include/platform_def.h b/plat/imx/imx95/include/platform_def.h
+index 3f0a43e49694..d2eff001f548 100644
+--- a/plat/imx/imx95/include/platform_def.h
++++ b/plat/imx/imx95/include/platform_def.h
+@@ -55,7 +55,7 @@
+ #ifdef IMX_EMU
+ #define IMX_LPUART_BASE			0x42570000
+ #else
+-#define IMX_LPUART_BASE			0x425A0000	/* LPUART6 */
++#define IMX_LPUART_BASE			0x44380000
+ #endif
+ 
+ #define IMX_BOOT_UART_CLK_IN_HZ		24000000 /* Select 24MHz oscillator */

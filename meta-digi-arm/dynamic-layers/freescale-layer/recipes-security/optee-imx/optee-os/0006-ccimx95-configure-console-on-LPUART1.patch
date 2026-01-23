@@ -1,0 +1,29 @@
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Wed, 14 Jan 2026 17:15:53 +0100
+Subject: [PATCH] ccimx95: configure console on LPUART1
+
+On version 2 of the SOM, the console has been changed
+to LPUART1.
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+
+https://onedigi.atlassian.net/browse/DEL-9915
+---
+ core/arch/arm/plat-imx/conf.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/arch/arm/plat-imx/conf.mk b/core/arch/arm/plat-imx/conf.mk
+index 55f4c21d0321..7c674e6f99a2 100644
+--- a/core/arch/arm/plat-imx/conf.mk
++++ b/core/arch/arm/plat-imx/conf.mk
+@@ -528,7 +528,7 @@ endif
+ 
+ ifneq (,$(filter $(PLATFORM_FLAVOR),ccimx95dvk))
+ CFG_DDR_SIZE ?= 0x80000000
+-CFG_UART_BASE ?= UART6_BASE
++CFG_UART_BASE ?= UART1_BASE
+ CFG_NSEC_DDR_1_BASE ?= 0x100000000UL
+ CFG_NSEC_DDR_1_SIZE ?= 0x180000000UL
+ CFG_CORE_ARM64_PA_BITS ?= 40

@@ -1,4 +1,4 @@
-# Copyright (C) 2025, Digi International Inc.
+# Copyright (C) 2025, 2026, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -15,6 +15,8 @@ SRC_URI:append:dey = " \
     file://0010-ccimx95dvk-enable-full-access-to-certain-regulators-.patch \
     file://0011-components-pf09-reduce-LDOs-step-to-50mV.patch \
     file://0012-ccimx95dvk-remove-access-to-VDD_3V3-and-VDD_1V8-from.patch \
+    file://0013-ccimx95dvk-change-SM-console-from-LPUART7-to-LPUART2.patch \
+    file://0014-ccimx95dvk-PF09-PMIC-interrupt-moved-to-PDM_BIT_STRE.patch \
 "
 
 # Disable debug monitor by default
