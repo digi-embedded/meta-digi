@@ -47,9 +47,15 @@ KERNEL_CONFIG_FRAGMENTS:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${RT_CONFIG_FRAGS}', '', d)} \
 "
 
-# Blacklist btnxpuart module. It will be managed by the bluetooth-init script
-KERNEL_MODULE_PROBECONF:ccimx9 += "btnxpuart"
-module_conf_btnxpuart:ccimx9 = "blacklist btnxpuart"
+# Blacklist BT driver (as module). They will be managed by the bluetooth-init script
+KERNEL_MODULE_PROBECONF:ccimx91 += "btnxpuart"
+KERNEL_MODULE_PROBECONF:ccimx93 += "btnxpuart"
+KERNEL_MODULE_PROBECONF:ccimx95 += "hci_uart"
+KERNEL_MODULE_PROBECONF:ccmp1 += "hci_uart"
+module_conf_btnxpuart:ccimx91 = "blacklist btnxpuart"
+module_conf_btnxpuart:ccimx93 = "blacklist btnxpuart"
+module_conf_hci_uart:ccimx95 = "blacklist hci_uart"
+module_conf_hci_uart:ccmp1 = "blacklist hci_uart"
 
 # ---------------------------------------------------------------------
 # stub for devicetree which are located on digi directory
@@ -60,10 +66,6 @@ do_compile:append:stm32mpcommon() {
         done
     fi
 }
-
-# Blacklist hci_uart module. It will be managed by the bluetooth-init script
-KERNEL_MODULE_PROBECONF:ccmp1 += "hci_uart"
-module_conf_hci_uart:ccmp1 = "blacklist hci_uart"
 
 do_install:append:stm32mpcommon() {
     if ${@bb.utils.contains('MACHINE_FEATURES','gpu','true','false',d)}; then
