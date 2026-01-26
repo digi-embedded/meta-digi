@@ -53,11 +53,6 @@ TRUSTFENCE_SIGN_MODE = "AHAB"
 
 IMX_BOOT_SEEK = "32"
 
-SERIAL_CONSOLES = "115200;ttyLP5"
-
-# Bluetooth tty
-BT_TTY ?= "ttyLP0"
-
 # SWUpdate sw-description configuration
 BOOTFS_EXT ?= ".boot.vfat"
 ROOTFS_EXT ?= '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs", ".squashfs", ".ext4.gz", d)}'
@@ -66,21 +61,6 @@ BOOT_DEV_NAME ?= "/dev/mmcblk0p1"
 ROOTFS_DEV_NAME ?= "/dev/mmcblk0p3"
 ROOTFS_ENC_DEV = "/dev/mapper/cryptrootfs"
 ROOTFS_DEV_NAME_FINAL = "${@oe.utils.ifelse(d.getVar('TRUSTFENCE_ENCRYPT_ROOTFS') == '1', '${ROOTFS_ENC_DEV}', '${ROOTFS_DEV_NAME}')}"
-
-# Wireless external module
-WIRELESS_MODULE ?= ""
-WIRELESS_MODULE:append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-nxp-wlan', '', d)}"
-HAS_WIFI_VIRTWLANS = "true"
-
-# Machine firmware
-MACHINE_FIRMWARE:append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'firmware-nxp-wifi-nxpiw612-sdio firmware-murata-nxp', '', d)}"
-
-MACHINE_EXTRA_RRECOMMENDS += "${WIRELESS_MODULE}"
-
-# XBee
-XBEE_RESET_N_GPIO ?= "gpio2@19"
-XBEE_SLEEP_RQ_GPIO ?= ""
-XBEE_TTY ?= "ttyLP3"
 
 # Default overlayfs_etc mount point and type
 OVERLAYFS_ETC_MOUNT_POINT ?= "/mnt/data"
