@@ -289,7 +289,7 @@ PREFERRED_VERSION_gstreamer1.0-vaapi:imx-nxp-bsp        ??= "1.24.0.imx"
 PREFERRED_VERSION_ffmpeg:imx-nxp-bsp ??= "4.4.1"
 
 # Use newer libvpx from 'meta-oe' (otherwise uses older from 'meta-webkit)
-PREFERRED_VERSION_libvpx:imx-nxp-bsp ??= "1.14.0"
+PREFERRED_VERSION_libvpx:imx-nxp-bsp ??= "1.14.%"
 
 # Determines if the SoC has support for Vivante kernel driver
 SOC_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT        = "0"
