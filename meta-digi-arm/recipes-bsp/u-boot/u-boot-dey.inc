@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2025, Digi International Inc.
+# Copyright (C) 2018-2026, Digi International Inc.
 
 require recipes-bsp/u-boot/u-boot.inc
 
@@ -31,6 +31,7 @@ SRC_URI = " \
     file://boot.txt \
     file://install_linux_fw_media.txt \
     file://install_linux_fw_uuu.sh \
+    file://fit-install-template.its \
 "
 
 BUILD_UBOOT_SCRIPTS ?= "true"
@@ -117,10 +118,33 @@ build_uboot_scripts() {
 		else
 			sed -i -e 's,-##SIGNED##,,g' -e 's,##SIGNED##,,g' ${TMP_INSTALL_SCR}
 		fi
+
 		if [ "${f_ext}" = "txt" ]; then
 			mkimage -T script -n "DEY firmware install script" -C none -d ${TMP_INSTALL_SCR} ${DEPLOYDIR}/${f%.*}.scr
 		else
 			install -m 775 ${TMP_INSTALL_SCR} ${DEPLOYDIR}/${f}
+		fi
+
+		# Create FIT image installer when Trustfence is enabled
+		if [ "${TRUSTFENCE_SIGN_FIT_STM}" = "1" ] || [ "${TRUSTFENCE_SIGN_FIT_NXP}" = "1" ]; then
+			# We only need the txt scripts
+			if [ "${f_ext}" = "txt" ]; then
+				cp ${TMP_INSTALL_SCR} ${WORKDIR}/${f%.*}.fit
+				INSTALL_LINUX_FW="${f%.*}"
+				INSTALL_LINUX_FW_DEV="${INSTALL_LINUX_FW##*_}"
+				TMP_FIT_ITS="$(mktemp ${WORKDIR}/fit-install-template.its.XXXXXX)"
+				sed -e 's,##INSTALL_LINUX_FW##,'${INSTALL_LINUX_FW}',g' \
+					-e 's,##INSTALL_LINUX_FW_DEV##,'${INSTALL_LINUX_FW_DEV}',g' \
+					-e 's,##INSTALL_LINUX_FW_FILE##,'${f%.*}',g' \
+					${WORKDIR}/fit-install-template.its > ${TMP_FIT_ITS}
+
+				# Generate the signed FIT image	
+				mkimage -f ${TMP_FIT_ITS} ${DEPLOYDIR}/install_linux_fw.scr
+				mkimage -F -k ${TRUSTFENCE_SIGN_KEYS_PATH}/fit -r ${DEPLOYDIR}/install_linux_fw.scr
+				# copy FIT image installer using the same names we use for the normal script
+				cp ${DEPLOYDIR}/install_linux_fw.scr ${DEPLOYDIR}/${f%.*}.scr
+				rm -f ${TMP_FIT_ITS}
+			fi
 		fi
 		rm -f ${TMP_INSTALL_SCR}
 	done
@@ -142,6 +166,16 @@ build_uboot_scripts() {
 		TMP_SIGNED_BOOTSCR="$(mktemp ${WORKDIR}/bootscr-signed.XXXXXX)"
 		trustfence-sign-artifact.sh -p "${DIGI_SOM}" -b "${DEPLOYDIR}/boot.scr" "${TMP_SIGNED_BOOTSCR}"
 		mv "${TMP_SIGNED_BOOTSCR}" "${DEPLOYDIR}/boot.scr"
+
+		# Sign USB installer script
+		TMP_SIGN_INSTALLSCR="$(mktemp ${WORKDIR}/install_linux_fw_usb-signed.XXXXXX)"
+		trustfence-sign-artifact.sh -p "${DIGI_SOM}" -b "${DEPLOYDIR}/install_linux_fw_usb.scr" "${TMP_SIGN_INSTALLSCR}"
+		mv "${TMP_SIGN_INSTALLSCR}" "${DEPLOYDIR}/install_linux_fw_usb.scr"
+
+		# Sign uSD installer script
+		TMP_SIGN_INSTALLSCR="$(mktemp ${WORKDIR}/install_linux_fw_sd-signed.XXXXXX)"
+		trustfence-sign-artifact.sh -p "${DIGI_SOM}" -b "${DEPLOYDIR}/install_linux_fw_sd.scr" "${TMP_SIGN_INSTALLSCR}"
+		mv "${TMP_SIGN_INSTALLSCR}" "${DEPLOYDIR}/install_linux_fw_sd.scr"
 	fi
 }
 
