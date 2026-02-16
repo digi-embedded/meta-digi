@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2024, Digi International Inc.
+# Copyright (C) 2016-2026, Digi International Inc.
 
 SUMMARY = "MCA firmware management tool"
 SECTION = "console/tools"
@@ -32,4 +32,4 @@ do_install:append() {
 
 INSANE_SKIP:${PN} = "already-stripped"
 
-COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx8x|ccmp1)"
+COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx8x|ccmp1|ccimx95)"
