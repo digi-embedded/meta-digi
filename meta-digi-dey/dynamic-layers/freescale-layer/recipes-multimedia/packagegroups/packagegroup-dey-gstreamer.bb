@@ -38,6 +38,7 @@ MACHINE_GSTREAMER_1_0_EXTRA_INSTALL ?= " \
     gstreamer1.0-libav \
 "
 MACHINE_GSTREAMER_1_0_EXTRA_INSTALL:ccimx6ul ?= ""
+MACHINE_GSTREAMER_1_0_EXTRA_INSTALL:append:ccimx95 = " libcamera-gst"
 
 RDEPENDS:${PN} = " \
     ${MACHINE_GSTREAMER_1_0_PKGS} \
