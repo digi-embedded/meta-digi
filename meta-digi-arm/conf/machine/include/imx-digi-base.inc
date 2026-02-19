@@ -358,6 +358,19 @@ OPTEE_PKGS ??= "optee-client optee-os"
 PREFERRED_VERSION_opencv:mx8-nxp-bsp ??= "4.10.0.imx"
 PREFERRED_VERSION_opencv:mx9-nxp-bsp ??= "4.10.0.imx"
 
+# ML on ccimx95 (backport from NXP's lf-6.12.49-2.2.0)
+PREFERRED_VERSION_flatbuffers-native:mx95-nxp-bsp ??= "24.3.25"
+PREFERRED_VERSION_flatbuffers:mx95-nxp-bsp ??= "24.3.25"
+PREFERRED_VERSION_neutron:mx95-nxp-bsp ??= "2.2.1"
+PREFERRED_VERSION_nnstreamer-edge:mx95-nxp-bsp ??= "0.2.6"
+PREFERRED_VERSION_nnstreamer:mx95-nxp-bsp ??= "2.4.2"
+PREFERRED_VERSION_onnxruntime:mx95-nxp-bsp ??= "1.22.0"
+PREFERRED_VERSION_python3-flatbuffers:mx95-nxp-bsp ??= "24.3.25"
+PREFERRED_VERSION_tensorflow-lite-host-tools-native:mx95-nxp-bsp ??= "2.19.0"
+PREFERRED_VERSION_tensorflow-lite-host-tools:mx95-nxp-bsp ??= "2.19.0"
+PREFERRED_VERSION_tensorflow-lite-neutron-delegate:mx95-nxp-bsp ??= "2.19.0"
+PREFERRED_VERSION_tensorflow-lite:mx95-nxp-bsp ??= "2.19.0"
+
 EXTRA_IMAGEDEPENDS += "u-boot"
 
 # Do not update fstab file when using wic images
