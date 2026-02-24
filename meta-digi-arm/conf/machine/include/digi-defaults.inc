@@ -130,3 +130,7 @@ IMAGE_FSTYPES ?= "${@ \
 		'' , d), \
 	d) \
 }"
+
+# Systemd logind power key event
+LOGIND_HANDLE_POWER_KEY ??= "suspend"
+LOGIND_HANDLE_POWER_KEY_LONGPRESS ??= "poweroff"
