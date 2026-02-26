@@ -172,6 +172,11 @@ python () {
             DEK_PATH = os.path.dirname(d.getVar("TRUSTFENCE_DEK_PATH"))
             if (d.getVar("TRUSTFENCE_KEYS_PATH") != DEK_PATH):
                 bb.fatal('[trustfence] TRUSTFENCE_DEK_PATH is deprecated; Set new variable TRUSTFENCE_KEYS_PATH to the directory containing both your sign and encryption keys.')
+    if d.getVar("TRUSTFENCE_DEK_PATH"):
+        if (d.getVar("TRUSTFENCE_DEK_PATH") != "0"):
+            bb.warnonce('[trustfence] TRUSTFENCE_DEK_PATH is deprecated; Set new variable TRUSTFENCE_KEYS_PATH to the directory containing both your sign and encryption keys.')
+        else:
+            bb.fatal('[trustfence] TRUSTFENCE_DEK_PATH is deprecated; To disable encryption set new variable TRUSTFENCE_ENCRYPT.')
 
     # Secure console configuration
     if (d.getVar("TRUSTFENCE_CONSOLE_DISABLE") == "1"):
