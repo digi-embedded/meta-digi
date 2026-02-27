@@ -1,14 +1,16 @@
-# By default, use drm backend if possible.
+# By default, use wayland backend if possible.
 # If unavailable, fall back to a secondary backend
-PACKAGECONFIG ?= "drm"
-PACKAGECONFIG:ccimx6ul = "fbdev"
-PACKAGECONFIG:ccimx6 = "fbdev"
+MINIMAL_LVGL_BACKEND ?= "drm"
+MINIMAL_LVGL_BACKEND:ccimx6 = "fbdev"
+MINIMAL_LVGL_BACKEND:ccimx6ul = "fbdev"
+PACKAGECONFIG = "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'wayland', '${MINIMAL_LVGL_BACKEND}', d)}"
 
 PACKAGECONFIG[drm] = ",,libdrm"
 PACKAGECONFIG[fbdev] = ",,"
 PACKAGECONFIG[gridnav] = ",,"
 PACKAGECONFIG[thorvg] = ",,"
 PACKAGECONFIG[sdl] = ",,virtual/libsdl2 libsdl2-image"
+PACKAGECONFIG[wayland] = ",,libxkbcommon wayland wayland-native,weston weston-init"
 
 # Add libdrm include if drm is selected in PACKAGECONFIG
 TARGET_CFLAGS += "${@bb.utils.contains('PACKAGECONFIG', 'drm', '-I${STAGING_INCDIR}/libdrm', '', d)}"
@@ -20,6 +22,8 @@ LVGL_CONFIG_USE_EVDEV = "${@bb.utils.contains_any('PACKAGECONFIG', 'drm fbdev', 
 LVGL_CONFIG_USE_FBDEV = "${@bb.utils.contains('PACKAGECONFIG', 'fbdev', '1', '0', d)}"
 
 LVGL_CONFIG_USE_SDL = "${@bb.utils.contains('PACKAGECONFIG', 'sdl', '1', '0', d)}"
+
+LVGL_CONFIG_USE_WAYLAND = "${@bb.utils.contains('PACKAGECONFIG', 'wayland', '1', '0', d)}"
 
 LVGL_CONFIG_SDL_FULLSCREEN ?= "0"
 
@@ -67,6 +71,8 @@ do_configure:append() {
         -e "s|^([[:space:]]*#define LV_USE_DRAW_SDL[[:space:]]).*|\1${LVGL_CONFIG_USE_SDL}|" \
         -e "s|^([[:space:]]*#define LV_SDL_BUF_COUNT[[:space:]]).*|\1 2|" \
         -e "s|^([[:space:]]*#define LV_SDL_FULLSCREEN[[:space:]]).*|\1${LVGL_CONFIG_SDL_FULLSCREEN}|" \
+        \
+        -e "s|^([[:space:]]*#define LV_USE_WAYLAND[[:space:]]).*|\1${LVGL_CONFIG_USE_WAYLAND}|" \
         \
         -e "s|^([[:space:]]*#define LV_COLOR_DEPTH[[:space:]]).*|\1${LVGL_CONFIG_LV_COLOR_DEPTH}|" \
         -e "s|^([[:space:]]*#define LV_MEM_CUSTOM[[:space:]]).*|\1${LVGL_CONFIG_LV_MEM_CUSTOM}|" \
