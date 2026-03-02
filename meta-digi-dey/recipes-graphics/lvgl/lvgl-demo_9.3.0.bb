@@ -7,18 +7,21 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=802d3d83ae80ef5f343050bf96cce3a4 \
 SRC_URI = "\
 	git://github.com/lvgl/lv_port_linux_frame_buffer.git;protocol=https;branch=release/v9.3;name=demo \
 	git://github.com/lvgl/lvgl;protocol=https;branch=release/v9.3;name=lvgl;subdir=git/lvgl \
-	file://0001-lvgl-demo-remove-demo-slideshow.patch \
-	file://0004-lvgl-demo-add-input-device-discovery-support-to-LVGL.patch \
+	file://digi_main.c \
+	file://CMakeLists.txt_fbdev \
+	file://CMakeLists.txt_drm \
+	file://CMakeLists.txt_wayland \
 	file://lvgl-demo-init \
 	file://lvgl-demo-init.service \
 "
 
-SRC_URI:append:ccimx6ul = "\
-	file://0003-CMakefile-remove-libdrm-dependency-when-building-fbd.patch \
+SRC_URI:remove:ccimx6 = "\
+	file://CMakeLists.txt_drm \
 "
 
-SRC_URI:append:ccimx6 = "\
-	file://0003-CMakefile-remove-libdrm-dependency-when-building-fbd.patch \
+SRC_URI:remove:ccimx6ul = "\
+	file://CMakeLists.txt_drm \
+	file://CMakeLists.txt_wayland \
 "
 
 SRCREV_demo = "d07de027a8eb220f4e20f0e1b8be28729332e9ea"
@@ -35,17 +38,26 @@ LVGL_CONFIG_FBDEV_DEVICE ?= "/dev/fb0"
 LVGL_CONFIG_FBDEV_DEVICE:ccimx6 = "/dev/fb3"
 LVGL_CONFIG_LV_USE_LOG    = "1"
 LVGL_CONFIG_LV_LOG_PRINTF = "1"
-LVGL_CONFIG_LV_MEM_SIZE = "(256 * 1024U)"
+LVGL_CONFIG_LV_MEM_SIZE = "(2 * 1024U * 1024U)"
 LVGL_CONFIG_LV_USE_FONT_COMPRESSED = "1"
 
 require lv-conf.inc
 
-inherit cmake systemd update-rc.d
+inherit cmake systemd update-rc.d pkgconfig
 
 S = "${WORKDIR}/git"
 
 LVGL_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\$\{DEMO_DISPLAY\}"
 LVGL_DEMO_ENV:ccimx6ul ?= ""
+
+do_configure:prepend() {
+	cp ${WORKDIR}/digi_main.c ${S}/main.c
+	if [ -f "${WORKDIR}/CMakeLists.txt_${LVGL_BACKEND}" ] ; then
+		cp ${WORKDIR}/CMakeLists.txt_${LVGL_BACKEND} ${S}/CMakeLists.txt
+	else
+		bbfatal "Unsupported LVGL demo backend '${LVGL_BACKEND}'"
+	fi
+}
 
 do_install:append() {
 	install -d ${D}${bindir}

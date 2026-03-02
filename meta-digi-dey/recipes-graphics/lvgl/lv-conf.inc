@@ -3,7 +3,9 @@
 MINIMAL_LVGL_BACKEND ?= "drm"
 MINIMAL_LVGL_BACKEND:ccimx6 = "fbdev"
 MINIMAL_LVGL_BACKEND:ccimx6ul = "fbdev"
-PACKAGECONFIG = "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'wayland', '${MINIMAL_LVGL_BACKEND}', d)}"
+LVGL_BACKEND ?= "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'wayland', '${MINIMAL_LVGL_BACKEND}', d)}"
+
+PACKAGECONFIG ?= "${LVGL_BACKEND}"
 
 PACKAGECONFIG[drm] = ",,libdrm"
 PACKAGECONFIG[fbdev] = ",,"
