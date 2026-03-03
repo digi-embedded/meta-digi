@@ -35,10 +35,15 @@ SRC_URI:append:ccmp25 = " \
 RT_CONFIG_FRAGS:use-nxp-bsp = " ${WORKDIR}/fragment-nxp-rt.config"
 RT_CONFIG_FRAGS:stm32mpcommon = " \
     ${S}/arch/arm64/configs/fragment-07-rt.config \
-    ${S}/arch/arm64/configs/fragment-07-rt-sysvinit.config \
     ${WORKDIR}/fragment-08-deactivate-rng.config \
     ${WORKDIR}/fragment-10-network-improvment.config \
 "
+RT_CONFIG_FRAGS:stm32mpcommon:append = " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'sysvinit', \
+        '${S}/arch/arm64/configs/fragment-07-rt-sysvinit.config', \
+        '', d)} \
+"
+
 KERNEL_CONFIG_FRAGMENTS:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'rt', '${RT_CONFIG_FRAGS}', '', d)} \
 "
