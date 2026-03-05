@@ -21,7 +21,7 @@ TRUSTFENCE_KEYS_PATH ?= "${TOPDIR}/trustfence"
 # NXP keys
 TRUSTFENCE_DEK_ENCRYPT_KEYNAME ?= "dek.bin"
 # STM keys
-TRUSTFENCE_FIP_ENCRYPT_KEYNAME ?= "encryption_key_fip.bin"
+TRUSTFENCE_FIP_ENCRYPT_KEYNAME ?= "${TF_FIP_ENCRYPT_KEYNAME}"
 TRUSTFENCE_FSBL_ENCRYPT_KEYNAME ?= "encryption_key_fsbl.bin"
 TRUSTFENCE_RPROC_ENCRYPT_KEYNAME ?= "encryption_key_rproc.bin"
 
@@ -59,7 +59,9 @@ TRUSTFENCE_READ_ONLY_ROOTFS ?= "${@bb.utils.contains("IMAGE_FEATURES", "read-onl
 # Platform specific defaults
 TF_ENCRYPT = "1"
 TF_ENCRYPT:ccimx9 = "0"
-TF_ENCRYPT:ccmp1 = "0"
+TF_ENCRYPT:ccmp15 = "0"
+TF_FIP_ENCRYPT_KEYNAME = "encryption_key_fip.bin"
+TF_FIP_ENCRYPT_KEYNAME:ccmp13 = "encryption_key_fip.txt"
 TF_FILE_BASED_ENCRYPT = "0"
 TF_FILE_BASED_ENCRYPT:ccimx9 = "1"
 TF_FILE_BASED_ENCRYPT:ccmp1 = "1"
@@ -91,7 +93,9 @@ gen_pki_tree() {
 			if [ "${TRUSTFENCE_ENCRYPT}" = "1" ]; then
 				export CONFIG_FIP_ENCRYPT_KEYNAME="${TRUSTFENCE_FIP_ENCRYPT_KEYNAME}"
 				export CONFIG_FSBL_ENCRYPT_KEYNAME="${TRUSTFENCE_FSBL_ENCRYPT_KEYNAME}"
-				export CONFIG_RPROC_ENCRYPT_KEYNAME="${TRUSTFENCE_RPROC_ENCRYPT_KEYNAME}"
+				if [ "${DIGI_SOM}" = "ccmp25" ]; then
+					export CONFIG_RPROC_ENCRYPT_KEYNAME="${TRUSTFENCE_RPROC_ENCRYPT_KEYNAME}"
+				fi
 			fi
 			trustfence-gen-pki.sh -p ${DIGI_SOM}
 		fi

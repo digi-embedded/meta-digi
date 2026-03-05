@@ -168,10 +168,33 @@ if [ "${PLATFORM}" = "ccmp15" ] || [ "${PLATFORM}" = "ccmp25" ]; then
 	fi
 fi
 
-if [ -n "${CONFIG_FSBL_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_FIP_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_RPROC_ENCRYPT_KEYNAME}" ]; then
-
-	# Generate random keys if they don't exist
-	if [ "${PLATFORM}" = "ccmp25" ]; then
+# Generate random keys if they don't exist
+if [ "${PLATFORM}" = "ccmp13" ]; then
+	if [ -n "${CONFIG_FSBL_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_FIP_ENCRYPT_KEYNAME}" ]; then
+		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" ]; then
+			echo "Generating random encryption key for FSBL"
+			if ! STM32MP_KeyGen_CLI -rand 16 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}"; then
+				echo "[ERROR] Failed to generate 16-byte FSBL encryption key"
+				exit 1
+			fi
+			chmod 444 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}"
+		fi
+		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}" ]; then
+			echo "Generating encryption key for FIP"
+			if ! hexdump -e '/1 "%02x"' "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" > "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"; then
+				echo "[ERROR] Failed to generate 32-byte FIP encryption key"
+				exit 1
+			fi
+			if ! hexdump -e '/1 "%02x"' "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" >> "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"; then
+				echo "[ERROR] Failed to generate 32-byte FIP encryption key"
+				exit 1
+			fi
+			printf "\n" >> "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"
+			chmod 444 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"
+		fi
+	fi
+elif [ "${PLATFORM}" = "ccmp25" ]; then
+	if [ -n "${CONFIG_FSBL_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_FIP_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_RPROC_ENCRYPT_KEYNAME}" ]; then
 		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" ]; then
 			echo "Generating random encryption key for FSBL"
 			if ! STM32MP_KeyGen_CLI -rand 16 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}"; then
@@ -196,8 +219,8 @@ if [ -n "${CONFIG_FSBL_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_FIP_ENCRYPT_KEYNAME
 			fi
 			chmod 444 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_RPROC_ENCRYPT_KEYNAME}"
 		fi
-	else
-		echo "[ERROR] Could not generate encryption keys. Platform not supported."
-		exit 1
 	fi
+else
+	echo "[ERROR] Could not generate encryption keys. Platform not supported."
+	exit 1
 fi
