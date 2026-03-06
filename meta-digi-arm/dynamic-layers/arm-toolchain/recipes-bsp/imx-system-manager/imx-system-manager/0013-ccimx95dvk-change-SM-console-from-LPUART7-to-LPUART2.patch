@@ -1,6 +1,6 @@
 From: Hector Palacios <hector.palacios@digi.com>
 Date: Wed, 14 Jan 2026 16:03:29 +0100
-Subject: [PATCH 13/14] ccimx95dvk: change SM console from LPUART7 to LPUART2
+Subject: [PATCH] ccimx95dvk: change SM console from LPUART7 to LPUART2
 
 On version 2 of the SOM, the SM console has changed to LPUART2.
 

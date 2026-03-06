@@ -1,7 +1,6 @@
 From: Hector Palacios <hector.palacios@digi.com>
 Date: Wed, 14 Jan 2026 14:05:57 +0100
-Subject: [PATCH 14/14] ccimx95dvk: PF09 PMIC interrupt moved to
- PDM_BIT_STREAM1
+Subject: [PATCH] ccimx95dvk: PF09 PMIC interrupt moved to PDM_BIT_STREAM1
 
 Upstream-Status: Inappropriate [DEY specific]
 
