@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2024, Digi International Inc.
+# Copyright (C) 2012-2026, Digi International Inc.
 #
 SUMMARY = "Gstreamer framework packagegroup for DEY image"
 
@@ -38,7 +38,7 @@ MACHINE_GSTREAMER_1_0_EXTRA_INSTALL ?= " \
     gstreamer1.0-libav \
 "
 MACHINE_GSTREAMER_1_0_EXTRA_INSTALL:ccimx6ul ?= ""
-MACHINE_GSTREAMER_1_0_EXTRA_INSTALL:append:ccimx95 = " libcamera-gst"
+MACHINE_GSTREAMER_1_0_EXTRA_INSTALL:append:ccimx95 = " libcamera-gst neo-ipa-uguzzi"
 
 RDEPENDS:${PN} = " \
     ${MACHINE_GSTREAMER_1_0_PKGS} \
