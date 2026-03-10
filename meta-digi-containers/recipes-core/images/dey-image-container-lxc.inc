@@ -25,7 +25,7 @@ do_image_lxc_bundle() {
 
     config_in="${LXC_CONFIG_FILE}"
     if [ ! -f "${config_in}" ]; then
-        bbfatal "LXC config file not found for CONTAINER_TYPE='${CONTAINER_TYPE}' and platform='${LXC_PLATFORM}': ${config_in}"
+        bbfatal "LXC config file not found for CONTAINER_TYPE='${CONTAINER_TYPE}' and MACHINE='${MACHINE}': ${config_in}"
     fi
 
     sed \

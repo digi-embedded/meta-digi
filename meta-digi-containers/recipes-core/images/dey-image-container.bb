@@ -48,11 +48,10 @@ PODMAN_ARTIFACT_OUTPUT_NAME ?= "${CONTAINER_NAME}_artifact_podman_${MACHINE}.tar
 ########################
 CONTAINERS_DIR ?= "${THISDIR}/../../containers"
 LXC_FOLDER ?= "/var/lib/lxc"
-LXC_PLATFORM ?= "${@d.getVar('MACHINE').split('-')[0]}"
 LXC_OUTPUT_NAME ?= "${CONTAINER_NAME}_lxc_${MACHINE}.tar.xz"
 LXC_ARTIFACT_OUTPUT_NAME ?= "${CONTAINER_NAME}_artifact_lxc_${MACHINE}.tar.gz"
 LXC_CONFIG_DIR ?= "${CONTAINER_PROFILE_DIR}/configs_lxc"
-LXC_CONFIG_FILE ?= "${LXC_CONFIG_DIR}/config_lxc_${LXC_PLATFORM}"
+LXC_CONFIG_FILE ?= "${LXC_CONFIG_DIR}/config_lxc_${MACHINE}"
 
 ########################
 # Artifact layout knobs
@@ -94,4 +93,34 @@ IMAGE_INSTALL = " \
     busybox \
     netbase \
     tini \
+"
+
+########################
+# Container type customizations LVGL
+########################
+CONTAINER_INIT_SCRIPT:container-lvgl = "/start-lvgl-demo.sh"
+IMAGE_INSTALL:append:container-lvgl = " lvgl-demo weston"
+DISTRO_FEATURES:remove:container-lvgl = " wayland"
+
+########################
+# Container type customizations webkit
+########################
+CONTAINER_INIT_SCRIPT:container-webkit = "/start-webkit-demo.sh"
+IMAGE_INSTALL:append:container-webkit = " \
+    alsa-utils \
+    bluez5 \
+    connectcore-demo-example \
+    dbus \
+    libdrm \
+    libgpiod-tools \
+    libinput \
+    libubootenv-bin \
+    mesa \
+    networkmanager-nmcli \
+    packagegroup-dey-webkit \
+    pulseaudio-server \
+    python3-dbus \
+    wayland \
+    wayland-protocols \
+    weston \
 "
