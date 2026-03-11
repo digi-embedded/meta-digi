@@ -1,0 +1,13 @@
+[Unit]
+Description=Digi ConnectCore Container Manager daemon
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/cc-containerd --config-file /etc/cc-container/cc-container-mng.conf
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
