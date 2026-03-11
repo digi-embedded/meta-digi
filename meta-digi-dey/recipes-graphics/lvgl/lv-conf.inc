@@ -24,6 +24,8 @@ LVGL_CONFIG_USE_FBDEV = "${@bb.utils.contains('PACKAGECONFIG', 'fbdev', '1', '0'
 
 LVGL_CONFIG_USE_WAYLAND = "${@bb.utils.contains('PACKAGECONFIG', 'wayland', '1', '0', d)}"
 
+LVGL_CONFIG_USE_GESTURE_RECOGNITION = "${@bb.utils.contains('PACKAGECONFIG', 'wayland', '1', '0', d)}"
+
 LVGL_CONFIG_LV_MEM_CUSTOM ?= "0"
 LVGL_CONFIG_LV_MEM_SIZE ?= "(64 * 1024U)"
 LVGL_CONFIG_LV_COLOR_DEPTH ?= "32"
@@ -46,7 +48,7 @@ LVGL_CONFIG_USE_THORVG_INTERNAL = "${@bb.utils.contains('PACKAGECONFIG', 'thorvg
 
 LVGL_CONFIG_USE_MATRIX = "${@bb.utils.contains('PACKAGECONFIG', 'thorvg', '1', '0', d)}"
 
-LVGL_CONFIG_USE_FLOAT = "${@bb.utils.contains('PACKAGECONFIG', 'thorvg', '1', '0', d)}"
+LVGL_CONFIG_USE_FLOAT = "${@bb.utils.contains('PACKAGECONFIG', 'thorvg', '1', '${LVGL_CONFIG_USE_GESTURE_RECOGNITION}', d)}"
 
 DEBUG_BUILD ??= "0"
 
@@ -65,6 +67,7 @@ do_configure:append() {
         -e "s|^([[:space:]]*#define LV_USE_LINUX_FBDEV[[:space:]]).*|\1${LVGL_CONFIG_USE_FBDEV}|" \
         \
         -e "s|^([[:space:]]*#define LV_USE_WAYLAND[[:space:]]).*|\1${LVGL_CONFIG_USE_WAYLAND}|" \
+        -e "s|^([[:space:]]*#define LV_USE_GESTURE_RECOGNITION[[:space:]]).*|\1${LVGL_CONFIG_USE_GESTURE_RECOGNITION}|" \
         \
         -e "s|^([[:space:]]*#define LV_COLOR_DEPTH[[:space:]]).*|\1${LVGL_CONFIG_LV_COLOR_DEPTH}|" \
         -e "s|^([[:space:]]*#define LV_MEM_CUSTOM[[:space:]]).*|\1${LVGL_CONFIG_LV_MEM_CUSTOM}|" \
