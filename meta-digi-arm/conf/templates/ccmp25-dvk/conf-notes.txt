@@ -19,6 +19,12 @@ Digi Embedded Yocto provides the following image recipes:
     Expansion of custom Digi core-image-base including full Flutter
     framework support.
 
+  * dey-image-container-manager: container management image
+
+    Minimal image including the trimmed Podman and LXC runtimes used to
+    manage container artifacts on target.
+    Requires DISTRO_FEATURES:append = " virtualization" in local.conf.
+
   * core-image-base: a console-only image
 
     Expansion of native core-image-base by including all the support for the

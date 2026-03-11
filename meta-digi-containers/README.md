@@ -2,7 +2,20 @@
 
 Yocto layer for Digi container-focused image generation and packaging.
 
-This layer provides the `dey-image-container` image recipe and related logic to produce:
+This layer provides:
+
+- `dey-image-container` to generate container artifacts
+- `dey-image-container-manager` to run and manage Podman/LXC containers on target
+
+`dey-image-container-manager` installs dedicated `lxc-trimmed` and `podman-trimmed`
+recipes, so it does not require `DISTROOVERRIDES` changes in `local.conf`
+and does not affect other DEY images built in the same environment.
+
+The layer explicitly depends on `meta-virtualization`, and
+`dey-image-container-manager`
+requires `DISTRO_FEATURES:append = " virtualization"` in `local.conf`.
+
+The `dey-image-container` workflow produces:
 
 - A base rootfs (`tar.xz`)
 - An OCI image output
@@ -20,9 +33,10 @@ that OCI artifact into a `docker-archive` tar using `skopeo`.
 
 ## Layer Scope
 
-Main recipe:
+Main recipes:
 
 - `recipes-core/images/dey-image-container.bb`
+- `recipes-core/images/dey-image-container-manager.bb`
 
 Recipe includes:
 
@@ -36,6 +50,11 @@ Container support files:
 - `containers/<profile>/configs_lxc/` (profile LXC config fragments)
 - `containers/<profile>/rootfs_files/` (profile rootfs overlays)
 - `containers/<profile>/artifact/` (optional artifact metadata template)
+
+Container runtime recipes:
+
+- `recipes-containers/lxc/lxc-trimmed_git.bb`
+- `recipes-containers/podman/podman-trimmed_git.bb`
 
 ## Add The Layer
 
