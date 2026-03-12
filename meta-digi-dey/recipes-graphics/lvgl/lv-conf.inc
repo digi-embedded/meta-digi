@@ -9,7 +9,6 @@ PACKAGECONFIG[drm] = ",,libdrm"
 PACKAGECONFIG[fbdev] = ",,"
 PACKAGECONFIG[gridnav] = ",,"
 PACKAGECONFIG[thorvg] = ",,"
-PACKAGECONFIG[sdl] = ",,virtual/libsdl2 libsdl2-image"
 PACKAGECONFIG[wayland] = ",,libxkbcommon wayland wayland-native,weston weston-init"
 
 # Add libdrm include if drm is selected in PACKAGECONFIG
@@ -21,11 +20,7 @@ LVGL_CONFIG_USE_EVDEV = "${@bb.utils.contains_any('PACKAGECONFIG', 'drm fbdev', 
 
 LVGL_CONFIG_USE_FBDEV = "${@bb.utils.contains('PACKAGECONFIG', 'fbdev', '1', '0', d)}"
 
-LVGL_CONFIG_USE_SDL = "${@bb.utils.contains('PACKAGECONFIG', 'sdl', '1', '0', d)}"
-
 LVGL_CONFIG_USE_WAYLAND = "${@bb.utils.contains('PACKAGECONFIG', 'wayland', '1', '0', d)}"
-
-LVGL_CONFIG_SDL_FULLSCREEN ?= "0"
 
 LVGL_CONFIG_LV_MEM_CUSTOM ?= "0"
 LVGL_CONFIG_LV_MEM_SIZE ?= "(64 * 1024U)"
@@ -66,11 +61,6 @@ do_configure:append() {
         -e "s|^([[:space:]]*#define LV_USE_LINUX_DRM[[:space:]]).*|\1${LVGL_CONFIG_USE_DRM}|" \
         \
         -e "s|^([[:space:]]*#define LV_USE_LINUX_FBDEV[[:space:]]).*|\1${LVGL_CONFIG_USE_FBDEV}|" \
-        \
-        -e "s|^([[:space:]]*#define LV_USE_SDL[[:space:]]).*|\1${LVGL_CONFIG_USE_SDL}|" \
-        -e "s|^([[:space:]]*#define LV_USE_DRAW_SDL[[:space:]]).*|\1${LVGL_CONFIG_USE_SDL}|" \
-        -e "s|^([[:space:]]*#define LV_SDL_BUF_COUNT[[:space:]]).*|\1 2|" \
-        -e "s|^([[:space:]]*#define LV_SDL_FULLSCREEN[[:space:]]).*|\1${LVGL_CONFIG_SDL_FULLSCREEN}|" \
         \
         -e "s|^([[:space:]]*#define LV_USE_WAYLAND[[:space:]]).*|\1${LVGL_CONFIG_USE_WAYLAND}|" \
         \

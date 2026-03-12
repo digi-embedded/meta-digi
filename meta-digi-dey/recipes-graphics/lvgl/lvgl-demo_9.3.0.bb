@@ -47,13 +47,6 @@ S = "${WORKDIR}/git"
 LVGL_DEMO_ENV ?= "DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/0 WAYLAND_DISPLAY=\$\{DEMO_DISPLAY\}"
 LVGL_DEMO_ENV:ccimx6ul ?= ""
 
-do_configure:prepend() {
-	if [ "${LVGL_CONFIG_USE_SDL}" -eq 1 ] ; then
-		# Add libsdl build dependency, SDL2_image has no cmake file
-		sed -i '/^target_link_libraries/ s@pthread@& SDL2_image@' "${S}/CMakeLists.txt"
-	fi
-}
-
 do_install:append() {
 	install -d ${D}${bindir}
 	install -m 0755 ${S}/bin/main ${D}${bindir}/lvgl-demo
