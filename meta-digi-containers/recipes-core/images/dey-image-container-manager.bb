@@ -72,6 +72,7 @@ CORE_TOOLS = " \
 
 # Tools to manage containers
 CONTAINER_MANAGEMENT = " \
+	cc-container-mng \
 	lxc-trimmed \
 	podman-trimmed \
 "
