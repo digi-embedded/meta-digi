@@ -26,15 +26,14 @@ LVGL_CONFIG_USE_WAYLAND = "${@bb.utils.contains('PACKAGECONFIG', 'wayland', '1',
 
 LVGL_CONFIG_USE_GESTURE_RECOGNITION = "${@bb.utils.contains('PACKAGECONFIG', 'wayland', '1', '0', d)}"
 
-LVGL_CONFIG_LV_MEM_CUSTOM ?= "0"
-LVGL_CONFIG_LV_MEM_SIZE ?= "(64 * 1024U)"
+LVGL_CONFIG_LV_MEM_SIZE ?= "(2 * 1024U * 1024U)"
 LVGL_CONFIG_LV_COLOR_DEPTH ?= "32"
 
-LVGL_CONFIG_LV_USE_LOG    ?= "0"
+LVGL_CONFIG_LV_USE_LOG    ?= "1"
 LVGL_CONFIG_LV_LOG_LEVEL  ?= "LV_LOG_LEVEL_WARN"
-LVGL_CONFIG_LV_LOG_PRINTF ?= "0"
+LVGL_CONFIG_LV_LOG_PRINTF ?= "1"
 
-LVGL_CONFIG_LV_USE_FONT_COMPRESSED ?= "0"
+LVGL_CONFIG_LV_USE_FONT_COMPRESSED ?= "1"
 
 LVGL_CONFIG_LV_USE_GRIDNAV = "${@bb.utils.contains('PACKAGECONFIG', 'gridnav', '1', '0', d)}"
 
@@ -70,12 +69,7 @@ do_configure:append() {
         -e "s|^([[:space:]]*#define LV_USE_GESTURE_RECOGNITION[[:space:]]).*|\1${LVGL_CONFIG_USE_GESTURE_RECOGNITION}|" \
         \
         -e "s|^([[:space:]]*#define LV_COLOR_DEPTH[[:space:]]).*|\1${LVGL_CONFIG_LV_COLOR_DEPTH}|" \
-        -e "s|^([[:space:]]*#define LV_MEM_CUSTOM[[:space:]]).*|\1${LVGL_CONFIG_LV_MEM_CUSTOM}|" \
         -e "s|^([[:space:]]*#define LV_MEM_SIZE[[:space:]]).*|\1${LVGL_CONFIG_LV_MEM_SIZE}|" \
-        \
-        -e "s|^([[:space:]]*#define LV_TICK_CUSTOM[[:space:]]).*|\1 1|" \
-        -e "s|^([[:space:]]*#define LV_TICK_CUSTOM_INCLUDE[[:space:]]).*|\1 <stdint.h>|" \
-        -e "s|^([[:space:]]*#define LV_TICK_CUSTOM_SYS_TIME_EXPR[[:space:]]).*|extern uint32_t custom_tick_get(void);\n\1 (custom_tick_get())|" \
         \
         -e "s|^([[:space:]]*#define LV_USE_EVDEV[[:space:]]).*|\1${LVGL_CONFIG_USE_EVDEV}|" \
         \

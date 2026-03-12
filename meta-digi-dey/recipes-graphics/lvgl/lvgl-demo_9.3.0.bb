@@ -36,10 +36,6 @@ LVGL_CONFIG_DRM_CARD:mx8-generic-bsp = "/dev/dri/card1"
 LVGL_CONFIG_FBDEV_DEVICE ?= "/dev/fb0"
 # Change framebuffer used for the ccimx6/ccimx6qp (HDMI display)
 LVGL_CONFIG_FBDEV_DEVICE:ccimx6 = "/dev/fb3"
-LVGL_CONFIG_LV_USE_LOG    = "1"
-LVGL_CONFIG_LV_LOG_PRINTF = "1"
-LVGL_CONFIG_LV_MEM_SIZE = "(2 * 1024U * 1024U)"
-LVGL_CONFIG_LV_USE_FONT_COMPRESSED = "1"
 
 require lv-conf.inc
 
