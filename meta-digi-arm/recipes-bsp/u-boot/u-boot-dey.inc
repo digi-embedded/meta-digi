@@ -35,9 +35,12 @@ SRC_URI = " \
 "
 
 BUILD_UBOOT_SCRIPTS ?= "true"
+UBOOT_LOGO_BMP ?= ""
 
 LOCALVERSION ?= ""
 inherit ${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'fsl-u-boot-localversion uuu_bootloader_tag', '', d)}
+
+EXTRA_OEMAKE:append = "${@' LOGO_BMP=%s' % d.getVar('UBOOT_LOGO_BMP') if d.getVar('UBOOT_LOGO_BMP') else ''}"
 
 # Disable u-boot tagging for imx8/9, as the boot image is imx-boot
 UUU_BOOTLOADER:mx8-generic-bsp = ""
