@@ -130,3 +130,6 @@ ENABLE_FLASHLAYOUT_CONFIG = "0"
 
 # Remove custom kernel headers from toolchain
 ST_TOOLS_FOR_TARGET_SDK:remove = " kernel-headers "
+
+# Disable partitions configuration from ST layer
+ENABLE_PARTITIONS_IMAGE ??= "0"
