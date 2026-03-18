@@ -2,6 +2,14 @@
 
 require recipes-kernel/linux/linux-dey.inc
 
+KERNEL_LOGO_PPM ?= ""
+
+do_compile[prefuncs] += "${@'kernel_prepare_logo' if d.getVar('KERNEL_LOGO_PPM') else ''}"
+
+kernel_prepare_logo() {
+    install -m 0644 "${KERNEL_LOGO_PPM}" "${S}/drivers/video/logo/logo_custom_clut224.ppm"
+}
+
 SRCBRANCH = "v6.6.52/nxp/master"
 SRCBRANCH:stm32mpcommon = "v6.6.116/stm/master"
 SRCREV = "${AUTOREV}"
