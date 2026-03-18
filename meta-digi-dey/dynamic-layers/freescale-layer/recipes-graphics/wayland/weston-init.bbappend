@@ -1,9 +1,10 @@
-# Copyright (C) 2019-2024, Digi International Inc.
+# Copyright (C) 2019-2026, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
+WESTON_BACKGROUND_PNG ?= "${WORKDIR}/background.png"
 
 SRC_URI += " \
-    file://digi_background.png \
+    file://background.png \
     file://profile \
 "
 
@@ -30,8 +31,9 @@ do_install:append() {
 
 # DEY customizations
 do_install:append() {
+    install -d ${D}${datadir}/weston/backgrounds
     install -Dm0755 ${WORKDIR}/profile ${D}${sysconfdir}/profile.d/weston.sh
-    install -Dm0644 ${WORKDIR}/digi_background.png ${D}${datadir}/weston/digi_background.png
+    install -Dm0644 "${WESTON_BACKGROUND_PNG}" ${D}${datadir}/weston/backgrounds/background.png
 
     printf "\n[launcher]\nicon=${datadir}/weston/terminal.png\npath=${bindir}/weston-terminal\n" >> ${D}${sysconfdir}/xdg/weston/weston.ini
 }
@@ -41,4 +43,4 @@ do_install:append:ccimx93() {
     echo "QMLSCENE_DEVICE=softwarecontext" >> ${D}${sysconfdir}/default/weston
 }
 
-FILES:${PN} += "${datadir}/weston/digi_background.png"
+FILES:${PN} += "${datadir}/weston/backgrounds/background.png"

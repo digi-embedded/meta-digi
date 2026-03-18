@@ -1,10 +1,13 @@
+# Copyright (C) 2026, Digi International Inc.
+
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
+WESTON_BACKGROUND_PNG ?= "${WORKDIR}/background.png"
 
 DEPENDS += "${@oe.utils.conditional('DISTRO_FEATURES', 'pulseaudio', 'pulseaudio', '', d)}"
 
 SRC_URI += " \
             file://weston.ini \
-            file://digi_background.png \
+            file://background.png \
             file://weston-launch.service \
             file://weston-checkgpu.service \
             file://weston_profile.sh \
@@ -42,7 +45,7 @@ do_install() {
 
     install -m 0644 ${WORKDIR}/weston.ini ${D}${sysconfdir}/xdg/weston
 
-    install -m 0644 ${WORKDIR}/digi_background.png ${D}${datadir}/weston/backgrounds/digi_background.png
+    install -m 0644 "${WESTON_BACKGROUND_PNG}" ${D}${datadir}/weston/backgrounds/background.png
     printf "\n[launcher]\nicon=${datadir}/weston/terminal.png\npath=${bindir}/weston-terminal\n" >> ${D}${sysconfdir}/xdg/weston/weston.ini
 
     install -d ${D}${systemd_system_unitdir} ${D}${sbindir}
