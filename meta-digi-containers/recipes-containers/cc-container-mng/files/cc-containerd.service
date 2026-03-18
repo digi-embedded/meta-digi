@@ -6,6 +6,8 @@ Wants=network.target
 [Service]
 Type=simple
 ExecStart=/usr/bin/cc-containerd --config-file /etc/cc-container/cc-container-mng.conf
+# Stop only the daemon process; keep managed containers running.
+KillMode=process
 Restart=on-failure
 RestartSec=2
 
