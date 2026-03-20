@@ -23,8 +23,7 @@ SRC_URI:append = " \
 "
 
 SRC_URI:append:ccmp15 = " \
-    ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1' , 'file://0001-ARM-dts-ccmp15-add-signed-firmware-support-for-RPROC.patch \
-                                                               file://0002-remoteproc-stm32_rproc-make-reset-and-hold-boot-opti.patch', '', d)} \
+    ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1' , 'file://0001-ARM-dts-ccmp15-add-signed-firmware-support-for-RPROC.patch', '', d)} \
 "
 
 SRC_URI:append:ccmp25 = " \

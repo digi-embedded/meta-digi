@@ -21,9 +21,7 @@ SRC_URI = " \
 "
 
 SRC_URI:append:ccmp15 = " \
-    ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1' , 'file://0001-ARM-dts-ccmp15-add-signed-firmware-support-for-RPROC.patch \
-                                                               file://0002-Revert-drivers-remoteproc-stm32mp15-check-Cortex-M-i.patch \
-                                                               file://0003-drivers-firewall-stm32_etzpc-remove-trace-when-rcc-m.patch', '', d)} \
+    ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1' , 'file://0001-ARM-dts-ccmp15-add-signed-firmware-support-for-RPROC.patch', '', d)} \
 "
 
 SRC_URI:append:ccmp25 = " \

@@ -1,5 +1,5 @@
 From: Arturo Buzarra <arturo.buzarra@digi.com>
-Date: Mon, 3 Nov 2025 23:00:27 +0100
+Date: Wed, 18 Mar 2026 22:07:56 +0100
 Subject: [PATCH] ARM: dts: ccmp15: add signed firmware support for RPROC
 
 Enable the Cortex-M4 inter-processor communication node so remoteproc can
@@ -9,24 +9,19 @@ https://onedigi.atlassian.net/browse/DEL-9920
 
 Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
 ---
- core/arch/arm/dts/ccmp15-dvk.dtsi | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ core/arch/arm/dts/ccmp15-dvk.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/core/arch/arm/dts/ccmp15-dvk.dtsi b/core/arch/arm/dts/ccmp15-dvk.dtsi
-index 7ea04b659..53533bd36 100644
+index ff7ee6504..ea88e3e1e 100644
 --- a/core/arch/arm/dts/ccmp15-dvk.dtsi
 +++ b/core/arch/arm/dts/ccmp15-dvk.dtsi
-@@ -263,9 +263,12 @@
+@@ -259,7 +259,7 @@
+
+ &m4_rproc {
  	memory-region = <&retram>, <&mcusram1>, <&mcusram2>, <&mcusram3>;
- 	mboxes = <&ipcc 0>, <&ipcc 1>, <&ipcc 2>, <&ipcc 3>;
- 	mbox-names = "vq0", "vq1", "shutdown", "detach";
-+	resets = <&rcc MCU_R>, <&rcc MCU_HOLD_BOOT_R>;
-+	reset-names = "mcu_rst", "hold_boot";
-+	#reset-cells = <1>;
- 	interrupt-parent = <&exti>;
- 	interrupts = <68 1>;
 -	status = "disabled";
 +	status = "okay";
  };
- 
+
  &mcusram1 {
