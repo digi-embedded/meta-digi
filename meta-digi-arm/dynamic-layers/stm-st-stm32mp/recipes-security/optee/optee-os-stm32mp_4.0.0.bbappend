@@ -32,3 +32,4 @@ SRC_URI:append:ccmp25 = " \
 EXTRA_OEMAKE:append:ccmp25 = " ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1', 'CFG_REMOTEPROC_PUB_KEY_VERIFY=y', '', d)}"
 # Enable remoteproc custom public key verification for signed firmware support
 EXTRA_OEMAKE:append:ccmp15 = " ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1' , 'CFG_STM32MP_REMOTEPROC=y RPROC_SIGN_KEY=%s' % (d.getVar('TRUSTFENCE_COPRO_SIGN_KEY') or ''), '', d)}"
+EXTRA_OEMAKE:remove:ccmp15 = " ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1' , 'CFG_REMOTEPROC_PUB_KEY_VERIFY=y', '', d)}"
