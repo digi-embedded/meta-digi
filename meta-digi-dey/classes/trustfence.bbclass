@@ -221,6 +221,13 @@ python () {
                     d.setVar("TRUSTFENCE_COPRO_PASSWORD_FILE", d.getVar("TRUSTFENCE_KEYS_PATH") + "/rproc-keys/key_pass.txt")
                     d.setVar("SIGN_COPRO_ECC_PASS_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), "UNDEFINED");
             d.setVar("SIGN_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), d.getVar("SIGN_KEY"));
+            # Set a dummy value to avoid a build issue in ST sign-stm32mp class
+            d.setVar('SIGN_KEY_PASS', "UNDEFINED")
+            d.setVar("SIGN_KEY_PUB_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), "UNDEFINED");
+            d.setVar("SIGN_M33DDR_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), "UNDEFINED");
+            d.setVar("SIGN_M33FW_KEY_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), "UNDEFINED");
+            d.setVar("SIGN_M33DDR_KEY_PASS_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), "UNDEFINED");
+            d.setVar("SIGN_M33FW_KEY_PASS_%s" % (d.getVar("STM32MP_SOC_NAME").strip()), "UNDEFINED");
 
         d.appendVar("UBOOT_TF_CONF", "CONFIG_SIGN_IMAGE=y ")
         if (d.getVar("TRUSTFENCE_SIGN_ARTIFACTS") == "1"):
