@@ -220,7 +220,4 @@ elif [ "${PLATFORM}" = "ccmp25" ]; then
 			chmod 444 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_RPROC_ENCRYPT_KEYNAME}"
 		fi
 	fi
-else
-	echo "[ERROR] Could not generate encryption keys. Platform not supported."
-	exit 1
 fi
