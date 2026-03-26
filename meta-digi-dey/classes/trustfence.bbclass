@@ -266,10 +266,7 @@ python () {
         d.setVar("TRUSTFENCE_SIGN_ARTIFACTS", "0")
 
     if (d.getVar("TRUSTFENCE_ENCRYPT_ENVIRONMENT") == "1"):
-        if (d.getVar("DEY_SOC_VENDOR") == "NXP"):
-            d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES=y CONFIG_ENV_AES_CAAM_KEY=y CONFIG_ENV_ENCRYPT=y ")
-        elif (d.getVar("DEY_SOC_VENDOR") == "STM"):
-            d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_AES_CCMP1=y ")
+        d.appendVar("UBOOT_TF_CONF", "CONFIG_ENV_ENCRYPT=y ")
 
     # Provide sane default values for SWUPDATE class in case Trustfence is enabled
     if (d.getVar("TRUSTFENCE_SIGN") == "1"):
