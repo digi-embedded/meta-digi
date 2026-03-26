@@ -20,16 +20,6 @@ S = "${WORKDIR}/${PKGNAME}-${PV}"
 
 inherit bin_package
 
-HAS_USRMERGE = "${@bb.utils.contains('DISTRO_FEATURES', 'usrmerge', '1', '0', d)}"
-
-do_install:append() {
-	# Move binaries from /sbin to /usr/sbin to avoid usrmerge QA error.
-	if [ "${HAS_USRMERGE}" = "1" ]; then
-		install -d ${D}${base_sbindir}
-		mv ${D}/sbin/* ${D}${base_sbindir} && rmdir ${D}/sbin
-	fi
-}
-
 INSANE_SKIP:${PN} = "already-stripped"
 
 COMPATIBLE_MACHINE = "(ccimx6ul|ccimx8m|ccimx8x|ccmp1|ccimx95)"
