@@ -77,10 +77,19 @@ CONTAINER_MANAGEMENT = " \
 	podman-trimmed \
 "
 
+# Keep the systemd/udev hotplug support packages that are otherwise
+# dropped when recommendations are disabled.
+HOTPLUG_SUPPORT = " \
+	systemd-conf \
+	systemd-extra-utils \
+	udev-hwdb \
+"
+
 NO_RECOMMENDATIONS = "1"
 
 IMAGE_INSTALL = " \
 	${CORE_ESSENTIALS} \
 	${CORE_TOOLS} \
 	${CONTAINER_MANAGEMENT} \
+	${HOTPLUG_SUPPORT} \
 "
