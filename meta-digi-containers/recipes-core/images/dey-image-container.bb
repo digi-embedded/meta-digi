@@ -99,7 +99,11 @@ IMAGE_INSTALL = " \
 # Container type customizations LVGL
 ########################
 CONTAINER_INIT_SCRIPT:container-lvgl = "/start-lvgl-demo.sh"
-IMAGE_INSTALL:append:container-lvgl = " lvgl-demo weston"
+IMAGE_INSTALL:append:container-lvgl = " \
+    lvgl-demo \
+    weston \
+    weston-init \
+"
 DISTRO_FEATURES:remove:container-lvgl = " wayland"
 
 ########################
@@ -123,4 +127,5 @@ IMAGE_INSTALL:append:container-webkit = " \
     wayland \
     wayland-protocols \
     weston \
+    weston-init \
 "
