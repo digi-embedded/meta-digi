@@ -51,3 +51,23 @@ lxc.mount.entry = devpts dev/pts devpts rw,nosuid,noexec,relatime,mode=0620,ptmx
 
 # gpiochip access for webkit demo
 lxc.mount.entry = /dev/gpiochip5 dev/gpiochip5 none bind,create=file
+
+# Video nodes (camera)
+lxc.mount.entry = /dev/video0 dev/video0 none bind,optional,create=file
+lxc.mount.entry = /dev/video1 dev/video1 none bind,optional,create=file
+lxc.mount.entry = /dev/video2 dev/video2 none bind,optional,create=file
+lxc.mount.entry = /dev/video3 dev/video3 none bind,optional,create=file
+lxc.mount.entry = /dev/video4 dev/video4 none bind,optional,create=file
+lxc.mount.entry = /dev/video5 dev/video5 none bind,optional,create=file
+lxc.mount.entry = /dev/video6 dev/video6 none bind,optional,create=file
+lxc.mount.entry = /dev/media0 dev/media0 none bind,optional,create=file
+lxc.mount.entry = /dev/media1 dev/media1 none bind,optional,create=file
+lxc.mount.entry = /dev/media2 dev/media2 none bind,optional,create=file
+lxc.mount.entry = /dev/v4l-subdev0 dev/v4l-subdev0 none bind,optional,create=file
+lxc.mount.entry = /dev/v4l-subdev1 dev/v4l-subdev1 none bind,optional,create=file
+lxc.mount.entry = /dev/v4l-subdev2 dev/v4l-subdev2 none bind,optional,create=file
+lxc.mount.entry = /dev/v4l-subdev3 dev/v4l-subdev3 none bind,optional,create=file
+lxc.mount.entry = /dev/v4l-subdev4 dev/v4l-subdev4 none bind,optional,create=file
+lxc.mount.entry = /dev/v4l-subdev5 dev/v4l-subdev5 none bind,optional,create=file
+lxc.mount.entry = /dev/v4l-subdev6 dev/v4l-subdev6 none bind,optional,create=file
+lxc.mount.entry = /dev/v4l-subdev7 dev/v4l-subdev7 none bind,optional,create=file
