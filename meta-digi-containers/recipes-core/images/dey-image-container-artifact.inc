@@ -11,8 +11,13 @@ do_image_container_artifacts() {
     default_template_dir="${CONTAINER_DEFAULT_ARTIFACT_TEMPLATE_DIR}"
     generator_script="${THISDIR}/../../scripts/generate-dcp.py"
     image_prefix="${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}"
-    workdir="$(mktemp -d)"
-    trap 'rm -rf "${workdir}"' EXIT
+    mkdir -p "${T}"
+    export TMPDIR="${T}"
+    workdir="$(mktemp -d "${T}/dey-image-container-artifact.XXXXXX")"
+    cleanup_workdir() {
+        rm -rf "${workdir}"
+    }
+    trap cleanup_workdir EXIT HUP INT TERM
 
     if [ -z "${template_dir}" ] && [ -d "${default_template_dir}" ]; then
         template_dir="${default_template_dir}"

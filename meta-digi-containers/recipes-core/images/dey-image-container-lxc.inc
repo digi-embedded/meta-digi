@@ -10,8 +10,13 @@ do_image_lxc_bundle() {
         rootfs_tar="${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.tar.xz"
     fi
     lxc_tar="${DEPLOY_DIR_IMAGE}/${LXC_OUTPUT_NAME}"
-    workdir="$(mktemp -d)"
-    trap 'rm -rf "${workdir}"' EXIT
+    mkdir -p "${T}"
+    export TMPDIR="${T}"
+    workdir="$(mktemp -d "${T}/dey-image-container-lxc.XXXXXX")"
+    cleanup_workdir() {
+        rm -rf "${workdir}"
+    }
+    trap cleanup_workdir EXIT HUP INT TERM
 
     if [ ! -f "${rootfs_tar}" ]; then
         bbfatal "Expected rootfs tarball not found: ${rootfs_tar}"
