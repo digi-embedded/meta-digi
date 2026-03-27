@@ -111,21 +111,37 @@ DISTRO_FEATURES:remove:container-lvgl = " wayland"
 ########################
 CONTAINER_INIT_SCRIPT:container-webkit = "/start-webkit-demo.sh"
 IMAGE_INSTALL:append:container-webkit = " \
+    adwaita-icon-theme-symbolic \
     alsa-utils \
     bluez5 \
     connectcore-demo-example \
     dbus \
+    fontconfig-utils \
+    hicolor-icon-theme \
     libdrm \
+    liberation-fonts \
     libgpiod-tools \
     libinput \
     libubootenv-bin \
-    mesa \
     networkmanager-nmcli \
+    packagegroup-dey-gstreamer \
     packagegroup-dey-webkit \
+    packagegroup-core-weston \
     pulseaudio-server \
     python3-dbus \
+    ttf-dejavu-sans \
+    ttf-dejavu-sans-mono \
+    ttf-dejavu-serif \
     wayland \
     wayland-protocols \
     weston \
     weston-init \
+"
+
+IMAGE_INSTALL:append:container-webkit:ccmp25 = " \
+    gcnano-userland-multi-binary-stm32mp \
+    libgles1-gcnano \
+    libopenvg-gcnano \
+    libvulkan-driver-gcnano \
+    packagegroup-dey-x-linux-ai \
 "
