@@ -51,6 +51,7 @@ CORE_ESSENTIALS = " \
 CORE_TOOLS = " \
 	bluez5 \
 	dropbear \
+	dualboot \
 	ethtool \
 	init-ifupdown \
 	iproute2 \
