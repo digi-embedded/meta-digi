@@ -27,6 +27,3 @@ RDEPENDS:${PN} += " \
 FILES:${PN} += " \
     ${systemd_unitdir}/demos/scripts/* \
 "
-
-# Make this recipe available only for the CCMP25 platform.
-COMPATIBLE_MACHINE = "(ccmp25)"
