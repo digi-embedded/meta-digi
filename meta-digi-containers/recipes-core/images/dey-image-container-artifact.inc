@@ -77,6 +77,9 @@ do_image_container_artifacts() {
         fw_versions_esc="$(json_escape "${CONTAINER_FIRMWARE_VERSIONS}")"
         description_esc="$(json_escape "${CONTAINER_ARTIFACT_DESCRIPTION}")"
         build_id_esc="$(json_escape "${build_id}")"
+        autostart_value="$(printf '%s' "${CONTAINER_AUTOSTART}" | tr '[:upper:]' '[:lower:]')"
+        monitor_value="$(printf '%s' "${CONTAINER_MONITOR}" | tr '[:upper:]' '[:lower:]')"
+        restart_enabled_value="$(printf '%s' "${CONTAINER_RESTART_ENABLED}" | tr '[:upper:]' '[:lower:]')"
 
         printf '%s\n' \
             '{' \
@@ -89,6 +92,19 @@ do_image_container_artifacts() {
         if [ -n "${create_args}" ]; then
             printf '%s\n' "  \"create_args\": \"${create_args_esc}\"," >> "${artifact_dir}/manifest.json"
         fi
+
+        printf '%s\n' \
+            '  "registration_defaults": {' \
+            "    \"autostart\": ${autostart_value}," \
+            "    \"monitor\": ${monitor_value}," \
+            '    "restart": {' \
+            "      \"enabled\": ${restart_enabled_value}," \
+            "      \"max_retries\": ${CONTAINER_RESTART_MAX_RETRIES}," \
+            "      \"window\": ${CONTAINER_RESTART_WINDOW}," \
+            "      \"retry_delay\": ${CONTAINER_RESTART_RETRY_DELAY}" \
+            '    }' \
+            '  },' \
+            >> "${artifact_dir}/manifest.json"
 
         printf '%s\n' \
             "  \"created_at\": \"${created_at}\"," \
