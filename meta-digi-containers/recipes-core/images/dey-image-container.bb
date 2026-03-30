@@ -99,6 +99,20 @@ IMAGE_INSTALL = " \
 # Container type customizations LVGL
 ########################
 CONTAINER_INIT_SCRIPT:container-lvgl = "/start-lvgl-demo.sh"
+CONTAINER_CREATE_ARGS_PODMAN:container-lvgl:ccmp25 = " \
+    --privileged \
+    --network none \
+    --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 \
+    --device /dev/dri \
+    --device /dev/input \
+    --device /dev/galcore \
+    --device /dev/tty \
+    --device /dev/tty0 \
+    --device /dev/tty1 \
+    --device /dev/tty7 \
+    --volume /run/udev:/run/udev:ro \
+    --tty \
+"
 IMAGE_INSTALL:append:container-lvgl = " \
     lvgl-demo \
     weston \
@@ -110,6 +124,51 @@ DISTRO_FEATURES:remove:container-lvgl = " wayland"
 # Container type customizations webkit
 ########################
 CONTAINER_INIT_SCRIPT:container-webkit = "/start-webkit-demo.sh"
+CONTAINER_CREATE_ARGS_PODMAN:container-webkit:ccmp25 = " \
+    --privileged \
+    --network host \
+    --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 \
+    --device /dev/dri \
+    --device /dev/input \
+    --device /dev/galcore \
+    --device /dev/fb0 \
+    --device /dev/snd \
+    --device /dev/tty \
+    --device /dev/tty0 \
+    --device /dev/tty1 \
+    --device /dev/tty7 \
+    --device /dev/gpiochip5 \
+    --device /dev/mmcblk0boot0 \
+    --device /dev/mmcblk0boot1 \
+    --device /dev/mailbox0 \
+    --device /dev/video0 \
+    --device /dev/video1 \
+    --device /dev/video2 \
+    --device /dev/video3 \
+    --device /dev/video4 \
+    --device /dev/video5 \
+    --device /dev/video6 \
+    --device /dev/media0 \
+    --device /dev/media1 \
+    --device /dev/media2 \
+    --device /dev/v4l-subdev0 \
+    --device /dev/v4l-subdev1 \
+    --device /dev/v4l-subdev2 \
+    --device /dev/v4l-subdev3 \
+    --device /dev/v4l-subdev4 \
+    --device /dev/v4l-subdev5 \
+    --device /dev/v4l-subdev6 \
+    --device /dev/v4l-subdev7 \
+    --volume /run/udev:/run/udev:ro \
+    --volume /etc/asound.conf:/etc/asound.conf:ro \
+    --volume /run/pulse:/run/pulse \
+    --volume /run/dbus/system_bus_socket:/run/dbus/system_bus_socket \
+    --volume /dev/log:/dev/log \
+    --volume /run/systemd/journal:/run/systemd/journal \
+    --volume /etc/fw_env.config:/etc/fw_env.config:ro \
+    --env PULSE_SERVER=unix:/run/pulse/native \
+    --tty \
+"
 IMAGE_INSTALL:append:container-webkit = " \
     adwaita-icon-theme-symbolic \
     alsa-utils \

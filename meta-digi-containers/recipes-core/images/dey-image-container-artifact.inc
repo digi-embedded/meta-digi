@@ -44,6 +44,22 @@ do_image_container_artifacts() {
         printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
     }
 
+    compose_podman_create_args() {
+        base_args="$1"
+
+        if [ -n "${CONTAINER_INIT_MANAGER}" ] && [ -n "${CONTAINER_INIT_SCRIPT}" ]; then
+            entrypoint_json="[\"${CONTAINER_INIT_MANAGER}\",\"${CONTAINER_INIT_SCRIPT}\"]"
+            if [ -n "${base_args}" ]; then
+                printf "%s --entrypoint '%s'" "${base_args}" "${entrypoint_json}"
+            else
+                printf "%s" "--entrypoint '${entrypoint_json}'"
+            fi
+            return 0
+        fi
+
+        printf '%s' "${base_args}"
+    }
+
     write_manifest() {
         artifact_dir="$1"
         runtime="$2"
@@ -123,6 +139,9 @@ do_image_container_artifacts() {
         digest="$(sha256sum "${artifact_dir}/payload/${payload_name}" | awk '{print $1}')"
         size_bytes="$(stat -c %s "${artifact_dir}/payload/${payload_name}")"
         created_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        if [ "${runtime}" = "podman" ]; then
+            create_args="$(compose_podman_create_args "${create_args}")"
+        fi
         build_id="${CONTAINER_ARTIFACT_BUILD_ID}"
         if [ -z "${build_id}" ]; then
             if command -v git >/dev/null 2>&1; then
