@@ -6,7 +6,7 @@ LICENSE = "CYPRESS-EULA"
 LIC_FILES_CHKSUM = "file://${S}/cyw-bt-patch/LICENCE.cypress;md5=cbc5f665d04f741f1e006d2096236ba7"
 
 SRC_URI = " \
-    https://github.com/Infineon/ifx-linux-firmware/archive/refs/tags/release-v6.1.145-2026_0108.tar.gz;destsuffix=cyw-fmac-fw-ifx;name=cyw-fmac-fw-ifx \
+    git://github.com/Infineon/ifx-linux-firmware;protocol=http;branch=master;destsuffix=ifx-linux-firmware-longma;name=ifx-linux-firmware-longma \
     git://github.com/murata-wireless/cyw-fmac-fw;protocol=http;branch=longma;destsuffix=cyw-fmac-fw;name=cyw-fmac-fw \
     git://github.com/murata-wireless/cyw-fmac-nvram;protocol=http;branch=longma;destsuffix=cyw-fmac-nvram;name=cyw-fmac-nvram \
     git://github.com/murata-wireless/cyw-bt-patch;protocol=http;branch=master;destsuffix=cyw-bt-patch;name=cyw-bt-patch \
@@ -25,8 +25,8 @@ SRC_URI:append:ccmp2 = " \
     file://mbt \
 "
 
-SRC_URI[cyw-fmac-fw-ifx.sha256sum]="54928426f0b060ed680d649cc3a4db0643f82f8c33810ee8a3359322e1e5e565"
-SRCREV_cyw-fmac-fw="f2884c410d7d60f5283e05c4549abc35633b60e0"
+SRCREV_ifx-linux-firmware-longma="f24790e6fa2f05a0f974236bed7da7fa493b9ad2"
+SRCREV_cyw-fmac-fw="8cdb1886852e0b5f9876654619a8371b952bf248"
 SRCREV_cyw-fmac-nvram="411c87d4cf924a1a5415273265fd54d7d7d4044f"
 SRCREV_cyw-bt-patch="64ac86708253e12d7089cf75ef8dcc9b30594958"
 SRCREV_cyw-fmac-utils-imx32="dad9ed86bf6691910197bc91d42a45ea8175180c"
@@ -80,7 +80,7 @@ do_install:append:ccmp1 () {
 
 	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
 	# For Murata 2AE (LBEE5PK2AE-564)
-	install -m 444 ${S}/ifx-linux-firmware-release-v6.1.145-2026_0108/firmware/cyfmac4373-sdio.industrial.bin ${D}${base_libdir}/firmware/cypress/cyfmac4373-sdio.bin
+	install -m 444 ${S}/ifx-linux-firmware-longma/firmware/cyfmac4373-sdio.industrial.bin ${D}${base_libdir}/firmware/cypress/cyfmac4373-sdio.bin
 	install -m 444 cyfmac4373-sdio_US.clm_blob ${D}${base_libdir}/firmware/cypress/cyfmac4373-sdio_US.clm_blob
 	install -m 444 cyfmac4373-sdio_World.clm_blob ${D}${base_libdir}/firmware/cypress/cyfmac4373-sdio_World.clm_blob
 
@@ -103,7 +103,7 @@ do_install:append:ccmp2 () {
 
 	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
 	# For Murata 2FY (LBEE5HY2FY)
-	install -m 444 ${S}/ifx-linux-firmware-release-v6.1.145-2026_0108/firmware/cyfmac55500-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.trxse
+	install -m 444 ${S}/ifx-linux-firmware-longma/firmware/cyfmac55500-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.trxse
 	install -m 444 ${S}/cyw-fmac-fw/cyfmac55500-sdio.2FY.STAIndoor.clm_blob  ${D}/${base_libdir}/firmware/cypress/
 	ln -sf cyfmac55500-sdio.2FY.STAIndoor.clm_blob ${D}/${base_libdir}/firmware/cypress/cyfmac55500-sdio_US.clm_blob
 
@@ -129,7 +129,7 @@ do_install:append:ccimx95 () {
 
 	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
 	# For Murata 2EC (LBEE5XV2EC)
-	install -m 444 ${S}/ifx-linux-firmware-release-v6.1.145-2026_0108/firmware/cyfmac55572-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55572-sdio.trxse
+	install -m 444 ${S}/ifx-linux-firmware-longma/firmware/cyfmac55572-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55572-sdio.trxse
 	install -m 444 ${S}/cyw-fmac-fw/cyfmac55572-sdio.2EA.clm_blob_STAIndoor  ${D}/${base_libdir}/firmware/cypress/
 	ln -sf cyfmac55572-sdio.2EA.clm_blob_STAIndoor ${D}/${base_libdir}/firmware/cypress/cyfmac55572-sdio_US.clm_blob
 
