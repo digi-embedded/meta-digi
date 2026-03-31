@@ -9,6 +9,7 @@ DESCRIPTION = "Trimmed Podman runtime for dey-image-container-manager"
 # No CNI implies no isolated or custom network support, no NAT and no forwarding.
 # Host networking still works, and Podman uses netavark/aardvark-dns in this setup.
 VIRTUAL-RUNTIME_container_networking = ""
+PODMAN_NETWORK_BACKEND = "netavark"
 
 RDEPENDS:${PN}:append = " \
     netavark \
