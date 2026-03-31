@@ -1,7 +1,7 @@
 [Unit]
 Description=Interface initialization via ifupdown
-After=systemd-udev-settle.service
-Requires=systemd-udev-settle.service
+After=systemd-udevd.service
+Wants=systemd-udevd.service
 
 [Service]
 Type=oneshot

@@ -28,6 +28,9 @@ do_install() {
 	install -d ${D}${sysconfdir}/init.d/
 	install -m 0755 ${WORKDIR}/${BT_INIT_FILE} ${D}${sysconfdir}/bluetooth-init
 	ln -sf /etc/bluetooth-init ${D}${sysconfdir}/init.d/bluetooth-init
+	# Set BT UART device
+	sed -i -e "s,##BT_TTY##,dev-${BT_TTY}.device,g" \
+                ${WORKDIR}/bluetooth-init.service
 	# SYSTEMD
 	install -d ${D}${systemd_unitdir}/system/
 	install -m 0644 ${WORKDIR}/bluetooth-init.service ${D}${systemd_unitdir}/system/bluetooth-init.service
