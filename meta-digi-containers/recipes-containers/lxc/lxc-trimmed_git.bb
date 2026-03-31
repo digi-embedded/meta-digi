@@ -19,6 +19,8 @@ RDEPENDS:${PN}:remove = " \
 
 PACKAGECONFIG:remove = "templates systemd selinux"
 
+RCONFLICTS:${PN}:append = " lxc"
+
 SYSTEMD_PACKAGES = ""
 SYSTEMD_SERVICE:${PN} = ""
 SYSTEMD_SERVICE:${PN}-networking = ""

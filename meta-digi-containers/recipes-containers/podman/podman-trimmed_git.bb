@@ -23,6 +23,8 @@ RDEPENDS:${PN}:remove = " \
 
 PACKAGECONFIG:remove = "rootless docker"
 
+RCONFLICTS:${PN}:append = " podman"
+
 do_install:append() {
     rm -f ${D}${bindir}/docker
     rm -f ${D}${bindir}/docker-runc
