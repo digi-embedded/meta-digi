@@ -21,7 +21,7 @@ NO_RECOMMENDATIONS = "1"
 ########################
 # Container profile
 ########################
-# Select profile in local.conf (e.g. CONTAINER_TYPE = "lvgl" or "webkit").
+# Select profile in local.conf (e.g. CONTAINER_TYPE = "lvgl", "webkit" or "flutter").
 CONTAINER_TYPE ?= "base"
 OVERRIDES:append = ":container-${CONTAINER_TYPE}"
 
@@ -145,3 +145,45 @@ IMAGE_INSTALL:append:container-webkit:ccmp25 = " \
     libvulkan-driver-gcnano \
     packagegroup-dey-x-linux-ai \
 "
+
+########################
+# Container type customizations flutter
+########################
+CONTAINER_INIT_SCRIPT:container-flutter = "/start-flutter-demo.sh"
+CONTAINER_CREATE_ARGS_PODMAN:container-flutter:ccmp25 = " \
+    --privileged \
+    --network none \
+    --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 \
+    --device /dev/dri \
+    --device /dev/input \
+    --device /dev/galcore \
+    --device /dev/tty \
+    --device /dev/tty0 \
+    --device /dev/tty1 \
+    --device /dev/tty7 \
+    --volume /run/udev:/run/udev:ro \
+    --tty \
+"
+CONTAINER_CREATE_ARGS_PODMAN:container-flutter:ccimx95 = " \
+    --privileged \
+    --network none \
+    --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 \
+    --device /dev/dri \
+    --device /dev/input \
+    --device /dev/mali0 \
+    --device /dev/tty \
+    --device /dev/tty0 \
+    --device /dev/tty1 \
+    --device /dev/tty7 \
+    --volume /run/udev:/run/udev:ro \
+    --tty \
+"
+IMAGE_INSTALL:append:container-flutter = " \
+    liberation-fonts \
+    packagegroup-dey-flutter \
+"
+IMAGE_INSTALL:append:container-flutter:ccmp25 = " \
+    gcnano-userland-multi-binary-stm32mp \
+    libgles2-gcnano \
+"
+DISTRO_FEATURES:remove:container-flutter = " wayland"

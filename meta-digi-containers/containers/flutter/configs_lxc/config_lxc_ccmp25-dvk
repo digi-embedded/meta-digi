@@ -1,0 +1,28 @@
+# LXC config for Flutter on CCMP25.
+# Placeholders are replaced by the image recipe.
+lxc.arch = @LXC_ARCH@
+lxc.rootfs.path = dir:@LXC_FOLDER@/@CONTAINER_NAME@/rootfs
+lxc.uts.name = @CONTAINER_NAME@
+
+lxc.mount.auto = cgroup:mixed proc:mixed
+lxc.mount.entry = /sys sys none bind,create=dir
+lxc.mount.entry = tmpfs run tmpfs rw,nosuid,nodev,mode=0755,create=dir
+
+# custom prompt
+lxc.environment = 'PS1=flutter-ccmp25:\w$ '
+
+# no network
+lxc.net.0.type = empty
+
+lxc.init.cmd = @CONTAINER_INIT_MANAGER@ @CONTAINER_INIT_SCRIPT@
+lxc.mount.entry = tmpfs dev/shm tmpfs rw,nosuid,nodev,mode=1777,create=dir
+lxc.mount.entry = /dev/dri dev/dri none bind,create=dir
+lxc.mount.entry = /dev/input dev/input none bind,create=dir
+lxc.mount.entry = /dev/galcore dev/galcore none bind,create=file
+lxc.mount.entry = /dev/tty dev/tty none bind,create=file
+lxc.mount.entry = /dev/tty0 dev/tty0 none bind,create=file
+lxc.mount.entry = /dev/tty1 dev/tty1 none bind,create=file
+lxc.mount.entry = /dev/tty7 dev/tty7 none bind,create=file
+lxc.mount.entry = /run/udev run/udev none bind,ro,create=dir
+lxc.pty.max = 1024
+lxc.mount.entry = devpts dev/pts devpts rw,nosuid,noexec,relatime,mode=0620,ptmxmode=0666,newinstance 0 0

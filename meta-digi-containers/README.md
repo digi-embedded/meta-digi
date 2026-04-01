@@ -74,7 +74,7 @@ Set profile and naming in `conf/local.conf`:
 
 ```conf
 DISTRO_FEATURES:append = " virtualization"
-CONTAINER_TYPE = "webkit"         # or: lvgl, base, custom profile
+CONTAINER_TYPE = "webkit"         # or: lvgl, flutter, base, custom profile
 CONTAINER_NAME = "webkit-example"
 # PODMAN_TAG defaults to "${CONTAINER_NAME}-tag"
 ```
@@ -107,6 +107,7 @@ Profile-specific behavior is controlled with:
 Current built-in profile examples:
 
 - `container-lvgl`
+- `container-flutter`
 - `container-webkit`
 
 You can add new profiles by appending variables with `:container-<name>` overrides.
@@ -229,6 +230,10 @@ Each profile is self-contained under `containers/`:
 ```text
 containers/
   lvgl/
+    rootfs_files/
+    configs_lxc/
+    artifact/
+  flutter/
     rootfs_files/
     configs_lxc/
     artifact/
