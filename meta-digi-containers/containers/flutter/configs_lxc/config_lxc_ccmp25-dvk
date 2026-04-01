@@ -15,6 +15,7 @@ lxc.environment = 'PS1=flutter-ccmp25:\w$ '
 lxc.net.0.type = empty
 
 lxc.init.cmd = @CONTAINER_INIT_MANAGER@ @CONTAINER_INIT_SCRIPT@
+lxc.console.logfile = @LXC_FOLDER@/@CONTAINER_NAME@/console.log
 lxc.mount.entry = tmpfs dev/shm tmpfs rw,nosuid,nodev,mode=1777,create=dir
 lxc.mount.entry = /dev/dri dev/dri none bind,create=dir
 lxc.mount.entry = /dev/input dev/input none bind,create=dir

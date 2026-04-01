@@ -12,6 +12,7 @@ lxc.mount.entry = tmpfs run tmpfs rw,nosuid,nodev,mode=0755,create=dir
 lxc.net.0.type = none
 
 lxc.init.cmd = @CONTAINER_INIT_MANAGER@ @CONTAINER_INIT_SCRIPT@
+lxc.console.logfile = @LXC_FOLDER@/@CONTAINER_NAME@/console.log
 lxc.environment = 'PS1=webkit-ccmp25:\w$ '
 
 # audio
