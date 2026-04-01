@@ -46,6 +46,6 @@ until nc -w 1 localhost 9090 </dev/null >/dev/null 2>&1; do
 done
 
 /etc/connectcore-demo-example-webkit start
-# We need a process waiting indefinetily, if not the "init" process dies
-#  and there is not any remaining process
-exec /usr/bin/docker-init -- sleep infinity
+# Keep one foreground process alive; the container entrypoint already runs
+# docker-init, so there is no need to chain a second instance here.
+exec sleep infinity
