@@ -11,11 +11,8 @@ if test "${bootlimit}" -gt 0 && test "${bootcount}" -gt 0; then
 	bootattempt="(boot attempt ${bootcount}/${bootlimit})"
 fi
 
-# Pre step: check if we boot from uSD.
-if test "${mmcbootdev}" = "1"; then
-	# We are booting from the SD card.
-	setenv mmcroot /dev/mmcblk${mmcbootdev}p2
-elif test "${dualboot}" = "yes"; then
+# Dual boot (only on EMMC)
+if test "${mmcbootdev}" = "${emmc_dev}" && test "${dualboot}" = "yes"; then
 	if test "${active_system}" = "linux_a"; then
 		echo "Booting from system A ${bootattempt}"
 		part number mmc ${mmcbootdev} linux_a tmp_mmcpart
@@ -50,6 +47,9 @@ else
 		# We are booting from the eMMC using 'recovery'.
 		setenv boot_initrd true
 		setenv initrd_file uramdisk-recovery.img
+	else
+		# SD boot (use SD specific rootfs partition uuid)
+		setenv mmcroot PARTUUID=b74d3700-a3c2-4806-8cb6-4e0fed784c7f
 	fi
 fi
 

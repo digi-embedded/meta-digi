@@ -12,8 +12,8 @@ if test "${bootlimit}" -gt 0 && test "${bootcount}" -gt 0; then
 	bootattempt="(boot attempt ${bootcount}/${bootlimit})"
 fi
 
-# Dual boot update verification
-if test "${dualboot}" = "yes"; then
+# Dual boot update verification (only on EMMC)
+if test "${mmcbootdev}" = "${emmc_dev}" && test "${dualboot}" = "yes"; then
 	if test "${upgrade_available}" = "1"; then
 		echo "Update detected; Booting new system in ${active_system} ${bootattempt}"
 	else
@@ -52,7 +52,7 @@ else
 		setenv boot_initrd true
 		setenv initrd_file uramdisk-recovery.img
 	else
-		# We are booting from the SD card.
+		# SD boot (MBR partition table)
 		setenv mmcroot /dev/mmcblk${mmcbootdev}p2
 	fi
 	if test "${upgrade_available}" = "1"; then
