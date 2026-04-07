@@ -31,6 +31,66 @@ Note: Podman archive generation requires an OCI image output as intermediate inp
 The recipe keeps `oci` in `IMAGE_FSTYPES` because `do_image_podman_archive` converts
 that OCI artifact into a `docker-archive` tar using `skopeo`.
 
+## External Digi Container Package (DCP) generation
+
+Use the following Python script to generate a DCP out of Yocto workspace:
+
+- `meta-digi-containers/scripts/generate-dcp.py`
+
+This script requires:
+
+- `manifest.json`
+- payload artifact, which may be one of:
+  - Podman: `image.tar`
+  - LXC: a Yocto-style LXC bundle (`.tar.xz`) containing `rootfs/` and `config`
+
+Usage:
+
+```bash
+python3 meta-digi-containers/scripts/generate-dcp.py \
+  --manifest /path/to/manifest.json \
+  --payload /path/to/payload \
+  [--output-dir /path/to/outdir] \
+  [--readme /path/to/README.txt] \
+  [--changelog /path/to/changelog.txt]
+```
+
+and generates a final DCP bundle with the same layout used today by the Yocto recipe:
+
+- `manifest.json`
+- `payload/`
+- `checksums/sha256sums.txt`
+- `metadata/README.txt`
+- `metadata/changelog.txt`
+
+The script generates exactly one runtime artifact per execution.
+
+Notes:
+
+- `--output-dir` is optional. If omitted, the script writes the DCP to the current directory.
+- The output file name is always derived from manifest fields as:
+  - `<package_id>_artifact_<runtime>_<device_types[0]>.tar.gz`
+- For Podman payloads, the final internal payload name is always `payload/image.tar`
+- For LXC payloads, the generator requires a Yocto-style `.tar.gz` bundle, validates its layout,
+  and stores it inside the DCP using the original file name and format without re-packaging it.
+
+Example manifests are provided at:
+
+- `meta-digi-containers/examples/manifest-lxc.json`
+- `meta-digi-containers/examples/manifest-podman.json`
+
+Example:
+
+```bash
+python3 meta-digi-containers/scripts/generate-dcp.py \
+  --manifest meta-digi-containers/examples/manifest-podman.json \
+  --payload /tmp/image.tar
+```
+
+This generates:
+
+- `./flutter-demo_artifact_podman_ccmp25-dvk.tar.gz`
+
 ## Layer Scope
 
 Main recipes:
@@ -91,8 +151,14 @@ Outputs are generated in:
 
 Final outputs:
 
-- `${CONTAINER_NAME}_artifact_podman_${MACHINE}.tar.gz`
-- `${CONTAINER_NAME}_artifact_lxc_${MACHINE}.tar.gz`
+- `${CONTAINER_PACKAGE_ID}_artifact_podman_<device_types[0]>.tar.gz`
+- `${CONTAINER_PACKAGE_ID}_artifact_lxc_<device_types[0]>.tar.gz`
+
+Notes:
+
+- The generator script makes the DCP filename using `package_id`, `runtime`, and
+  `device_types[0]` fields from the manifest file.
+- In Yocto builds, `CONTAINER_PACKAGE_ID` defaults to `${CONTAINER_NAME}`
 
 Intermediate outputs generated during the build (LXC bundle, Podman archive, OCI/rootfs files)
 are removed automatically at the end of artifact creation.

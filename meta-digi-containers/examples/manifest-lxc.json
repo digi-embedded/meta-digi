@@ -1,0 +1,20 @@
+{
+  "package_id": "flutter-demo",
+  "version": "1.0",
+  "runtime": "lxc",
+  "registration_defaults": {
+    "autostart": true,
+    "monitor": true,
+    "restart": {
+      "enabled": true,
+      "max_retries": 3,
+      "window": 60,
+      "retry_delay": 3
+    }
+  },
+  "device_types": ["ccmp25-dvk"],
+  "firmware_versions": "",
+  "build_id": "",
+  "description": "",
+  "labels": {}
+}
