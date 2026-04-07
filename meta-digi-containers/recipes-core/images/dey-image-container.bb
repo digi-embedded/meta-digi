@@ -41,7 +41,6 @@ CONTAINER_ROOTFS_OVERLAY_TARBALLS ?= ""
 ########################
 PODMAN_TAG     ?= "${CONTAINER_NAME}-tag"
 PODMAN_OUTPUT_NAME ?= "${CONTAINER_NAME}_podman_${MACHINE}.tar"
-PODMAN_ARTIFACT_OUTPUT_NAME ?= "${CONTAINER_NAME}_artifact_podman_${MACHINE}.tar.gz"
 
 ########################
 # LXC output knobs
@@ -49,7 +48,6 @@ PODMAN_ARTIFACT_OUTPUT_NAME ?= "${CONTAINER_NAME}_artifact_podman_${MACHINE}.tar
 CONTAINERS_DIR ?= "${THISDIR}/../../containers"
 LXC_FOLDER ?= "/var/lib/lxc"
 LXC_OUTPUT_NAME ?= "${CONTAINER_NAME}_lxc_${MACHINE}.tar.xz"
-LXC_ARTIFACT_OUTPUT_NAME ?= "${CONTAINER_NAME}_artifact_lxc_${MACHINE}.tar.gz"
 LXC_CONFIG_DIR ?= "${CONTAINER_PROFILE_DIR}/configs_lxc"
 LXC_CONFIG_FILE ?= "${LXC_CONFIG_DIR}/config_lxc_${MACHINE}"
 
