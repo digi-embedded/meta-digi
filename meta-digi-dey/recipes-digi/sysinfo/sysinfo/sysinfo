@@ -16,6 +16,253 @@
 #===============================================================================
 
 FW_PRINTENV="$(which fw_printenv)"
+QRENCODE="$(which qrencode)"
+WESTON_IMAGE="$(which weston-image)"
+FBSPLASH="$(which fbsplash)"
+QR_PREFIX="50000000-01;A"
+QR_TEMP_FILES=""
+QR_VIEWER_PID=""
+
+usage() {
+	echo "Usage:"
+	echo "  sysinfo"
+	echo "  sysinfo --qr_display"
+}
+
+add_temp_file() {
+	QR_TEMP_FILES="${QR_TEMP_FILES} $1"
+}
+
+cleanup_temp_files() {
+	for f in ${QR_TEMP_FILES}; do
+		[ -n "${f}" ] && rm -f "${f}"
+	done
+}
+
+# Compose the compact payload encoded in the QR from U-Boot environment data.
+get_qr_payload() {
+	if [ -x "${FW_PRINTENV}" ]; then
+		QR_SERIAL="$("${FW_PRINTENV}" -n "serial#" 2>/dev/null)"
+		QR_MACADDR="$("${FW_PRINTENV}" -n "ethaddr" 2>/dev/null)"
+	fi
+
+	if [ -z "${QR_SERIAL}" ]; then
+		echo "Error: unable to read 'serial#' from fw_printenv" >&2
+		return 1
+	fi
+
+	if [ -z "${QR_MACADDR}" ]; then
+		echo "Error: unable to read 'ethaddr' from fw_printenv" >&2
+		return 1
+	fi
+
+	printf "%s;%s;MAC%s\n" "${QR_PREFIX}" "${QR_SERIAL}" "$(echo "${QR_MACADDR}" | tr -d ':')"
+}
+
+get_framebuffer_device() {
+	if [ -e "/dev/fb0" ]; then
+		echo "/dev/fb0"
+		return 0
+	fi
+
+	ls /dev/fb* 2>/dev/null | grep -m 1 '^/dev/fb'
+}
+
+get_framebuffer_size() {
+	FB_DEVICE="$1"
+	FB_NAME="$(basename "${FB_DEVICE}")"
+	FB_SIZE_PATH="/sys/class/graphics/${FB_NAME}/virtual_size"
+
+	if [ -r "${FB_SIZE_PATH}" ]; then
+		tr ',' ' ' < "${FB_SIZE_PATH}"
+		return 0
+	fi
+
+	return 1
+}
+
+is_weston_running() {
+	pidof weston >/dev/null 2>&1
+}
+
+wait_for_keypress() {
+	if [ ! -t 0 ]; then
+		return 0
+	fi
+
+	echo "Press any key to close the QR code"
+	old_stty="$(stty -g 2>/dev/null)" || return 0
+	stty -echo -icanon min 1 time 0 2>/dev/null || return 0
+	dd bs=1 count=1 >/dev/null 2>&1
+	stty "${old_stty}" 2>/dev/null || true
+}
+
+print_qr() {
+	if [ ! -x "${QRENCODE}" ]; then
+		echo "Error: qrencode is not installed" >&2
+		return 1
+	fi
+
+	QR_PAYLOAD="$(get_qr_payload)" || return 1
+	echo "Payload: ${QR_PAYLOAD}"
+	printf "%s" "${QR_PAYLOAD}" | "${QRENCODE}" -t ANSIUTF8
+	echo ""
+	echo "This QR code is used to provision the device in Digi Device Cloud."
+}
+
+# PNG output is used by the Wayland/Weston path.
+generate_qr_png() {
+	QR_PAYLOAD="$(get_qr_payload)" || return 1
+	QR_PNG_PATH="/tmp/sysinfo-qr.png"
+
+	"${QRENCODE}" -o "${QR_PNG_PATH}" -s 8 -m 2 "${QR_PAYLOAD}" || return 1
+	echo "${QR_PNG_PATH}"
+}
+
+# fbsplash only accepts raw PPM images, so convert qrencode ASCII output into
+# a binary P6 image and generate a small ini file to center it on screen.
+generate_qr_ppm() {
+	FB_DEVICE="$1"
+	QR_PAYLOAD="$(get_qr_payload)" || return 1
+	QR_ASCII_PATH="/tmp/sysinfo-qr.txt"
+	QR_MATRIX_PATH="/tmp/sysinfo-qr.matrix"
+	QR_PPM_PATH="/tmp/sysinfo-qr.ppm"
+	QR_INI_PATH="/tmp/sysinfo-qr.ini"
+	FB_SIZE="$(get_framebuffer_size "${FB_DEVICE}")"
+	add_temp_file "${QR_ASCII_PATH}"
+	add_temp_file "${QR_MATRIX_PATH}"
+	add_temp_file "${QR_PPM_PATH}"
+	add_temp_file "${QR_INI_PATH}"
+
+	if [ -n "${FB_SIZE}" ]; then
+		FB_WIDTH="$(echo "${FB_SIZE}" | awk '{print $1}')"
+		FB_HEIGHT="$(echo "${FB_SIZE}" | awk '{print $2}')"
+	fi
+
+	"${QRENCODE}" -t ASCII -o "${QR_ASCII_PATH}" "${QR_PAYLOAD}" || return 1
+
+	awk '
+	BEGIN {
+		height = 0
+		width = 0
+	}
+	{
+		line = $0
+		if (length(line) > width) {
+			width = length(line)
+		}
+		lines[++height] = line
+	}
+	END {
+		if (height == 0) {
+			exit 1
+		}
+		# qrencode ASCII uses double-width horizontal cells. Collapse each pair
+		# into a single logical QR module encoded as 1/0.
+		module_width = int((width + 1) / 2)
+		print module_width, height
+		for (y = 1; y <= height; y++) {
+			line = lines[y]
+			while (length(line) < module_width * 2) {
+				line = line " "
+			}
+			row = ""
+			for (x = 1; x <= module_width * 2; x += 2) {
+				pair = substr(line, x, 2)
+				row = row (index(pair, "#") ? "1" : "0")
+			}
+			print row
+		}
+	}
+	' "${QR_ASCII_PATH}" > "${QR_MATRIX_PATH}" || return 1
+
+	IFS=' ' read -r QR_WIDTH QR_HEIGHT < "${QR_MATRIX_PATH}" || return 1
+	QR_SCALE=4
+	IMG_WIDTH=$((QR_WIDTH * QR_SCALE))
+	IMG_HEIGHT=$((QR_HEIGHT * QR_SCALE))
+
+	IMG_LEFT=0
+	IMG_TOP=0
+	if [ -n "${FB_WIDTH}" ] && [ "${FB_WIDTH}" -gt "${IMG_WIDTH}" ] 2>/dev/null; then
+		IMG_LEFT=$(((FB_WIDTH - IMG_WIDTH) / 2))
+	fi
+	if [ -n "${FB_HEIGHT}" ] && [ "${FB_HEIGHT}" -gt "${IMG_HEIGHT}" ] 2>/dev/null; then
+		IMG_TOP=$(((FB_HEIGHT - IMG_HEIGHT) / 2))
+	fi
+
+	{
+		echo "BAR_LEFT=0"
+		echo "BAR_TOP=0"
+		echo "BAR_WIDTH=0"
+		echo "BAR_HEIGHT=0"
+		echo "BAR_R=0"
+		echo "BAR_G=0"
+		echo "BAR_B=0"
+		echo "IMG_LEFT=${IMG_LEFT}"
+		echo "IMG_TOP=${IMG_TOP}"
+	} > "${QR_INI_PATH}" || return 1
+
+	printf 'P6\n%s %s\n255\n' "${IMG_WIDTH}" "${IMG_HEIGHT}" > "${QR_PPM_PATH}" || return 1
+
+	awk -v scale="${QR_SCALE}" -v width="${QR_WIDTH}" '
+	NR == 1 { next }
+	{
+		row = $0
+		# Expand each logical QR module into a scale x scale pixel block.
+		for (repeat_y = 0; repeat_y < scale; repeat_y++) {
+			for (i = 1; i <= width; i++) {
+				pixel = substr(row, i, 1)
+				color = (pixel == "1") ? 0 : 255
+				for (repeat_x = 0; repeat_x < scale; repeat_x++) {
+					printf "%c%c%c", color, color, color
+				}
+			}
+		}
+	}
+	' "${QR_MATRIX_PATH}" >> "${QR_PPM_PATH}" || return 1
+
+	echo "${QR_PPM_PATH}"
+}
+
+# On graphical images, rely on Weston to render the PNG in a proper window.
+display_qr_wayland() {
+	if [ -x "${WESTON_IMAGE}" ] && [ -n "${WAYLAND_DISPLAY}" ] && is_weston_running; then
+		QR_PNG_PATH="$(generate_qr_png)" || return 1
+		"${WESTON_IMAGE}" "${QR_PNG_PATH}" >/dev/null 2>/dev/null &
+		QR_VIEWER_PID=$!
+		return 0
+	fi
+
+	return 1
+}
+
+# Select the most suitable display backend for the current runtime.
+display_qr() {
+	FB_DEVICE="$(get_framebuffer_device)"
+
+	if [ -n "${SYSINFO_QR_DISPLAY_HOOK}" ] && [ -x "${SYSINFO_QR_DISPLAY_HOOK}" ]; then
+		QR_PNG_PATH="$(generate_qr_png)" || return 1
+		"${SYSINFO_QR_DISPLAY_HOOK}" "${QR_PNG_PATH}"
+		return $?
+	fi
+
+	display_qr_wayland && return 0
+
+	if [ -x "${FBSPLASH}" ] && [ -n "${FB_DEVICE}" ]; then
+		QR_PPM_PATH="$(generate_qr_ppm "${FB_DEVICE}")" || return 1
+		QR_INI_PATH="/tmp/sysinfo-qr.ini"
+		echo "Framebuffer device: ${FB_DEVICE}"
+		"${FBSPLASH}" -s "${QR_PPM_PATH}" -d "${FB_DEVICE}" -i "${QR_INI_PATH}" -c
+		return $?
+	fi
+
+	echo "Error: no display backend available" >&2
+	echo "Detected framebuffer: ${FB_DEVICE:-[NONE]}" >&2
+	echo "Set SYSINFO_QR_DISPLAY_HOOK or use Weston/fbsplash-capable images" >&2
+	return 1
+}
+
+trap cleanup_temp_files EXIT INT TERM
 
 make_report(){
 	echo "--------------------------------------"
@@ -336,6 +583,28 @@ fi
 DATE="$(date "+%Y%m%d%H%M%S")"
 REPORT_PATH="/tmp/sysinfo-${DEY_VERSION}-${BOARD_SN}-${DATE}"
 
+DISPLAY_QR="0"
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--qr_display)
+			DISPLAY_QR="1"
+			shift
+			;;
+		-h|--help)
+			usage
+			exit 0
+			;;
+		*)
+			echo "Error: unknown argument '$1'" >&2
+			usage >&2
+			exit 1
+			;;
+	esac
+done
+
+print_qr || exit $?
+
 (
 	echo "-------------------------------------"
 	echo "-                                   -"
@@ -368,3 +637,12 @@ tar -zhcf "${REPORT_PATH}.tar.gz" -C $(dirname ${REPORT_PATH}) $(basename "${REP
 echo "Report generated in ${REPORT_PATH}.tar.gz"
 
 rm -rf "${REPORT_PATH}.txt"
+
+if [ "${DISPLAY_QR}" = "1" ]; then
+	display_qr || exit $?
+	wait_for_keypress
+	if [ -n "${QR_VIEWER_PID}" ]; then
+		kill "${QR_VIEWER_PID}" >/dev/null 2>&1 || true
+		wait "${QR_VIEWER_PID}" 2>/dev/null || true
+	fi
+fi
