@@ -36,7 +36,7 @@ do_image_lxc_bundle() {
         -e "s|@CONTAINER_INIT_SCRIPT@|${CONTAINER_INIT_SCRIPT}|g" \
         "${config_in}" > "${lxc_dir}/config"
 
-    tar -C "${workdir}" -cJf "${lxc_tar}" "${CONTAINER_NAME}"
+    tar -C "${workdir}" -czf "${lxc_tar}" "${CONTAINER_NAME}"
 
     if [ ! -s "${lxc_tar}" ]; then
         bbfatal "LXC bundle was not generated correctly: ${lxc_tar}"

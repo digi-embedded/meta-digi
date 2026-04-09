@@ -146,8 +146,8 @@ def validate_payload(path: Path, runtime: str) -> None:
         if not lowered.endswith(".tar"):
             fail("invalid payload: runtime podman requires a .tar file")
         return
-    if not lowered.endswith(".tar.xz"):
-        fail("invalid payload: runtime lxc requires a .tar.xz file")
+    if not lowered.endswith(".tar.gz"):
+        fail("invalid payload: runtime lxc requires a .tar.gz file")
 
 
 def tar_mode_for_path(path: Path, *, writing: bool = False) -> str:
@@ -188,8 +188,6 @@ def ensure_lxc_layout(payload: Path) -> tuple[str, str]:
             return dirs[0].name, dirs[0].name
 
     fail("invalid payload: LXC archive must contain rootfs/ and config")
-
-
 def write_default_readme(path: Path, manifest: dict, *, created_at: str, payload_name: str) -> None:
     content = (
         f"Package: {manifest['package_id']}\n"

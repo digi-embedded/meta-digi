@@ -20,7 +20,7 @@ The `dey-image-container` workflow produces:
 - A base rootfs (`tar.xz`)
 - An OCI image output
 - A Podman archive (`*.tar`)
-- An LXC bundle (`*.tar.xz`)
+- An LXC bundle (`*.tar.gz`)
 - Final container artifacts (`*.tar.gz`) with:
   - `manifest.json`
   - `payload/`
@@ -42,7 +42,7 @@ This script requires:
 - `manifest.json`
 - payload artifact, which may be one of:
   - Podman: `image.tar`
-  - LXC: a Yocto-style LXC bundle (`.tar.xz`) containing `rootfs/` and `config`
+  - LXC: a Yocto-style LXC bundle (`.tar.gz`) containing `rootfs/` and `config`
 
 Usage:
 

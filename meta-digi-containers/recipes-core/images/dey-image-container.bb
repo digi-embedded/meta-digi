@@ -47,7 +47,7 @@ PODMAN_OUTPUT_NAME ?= "${CONTAINER_NAME}_podman_${MACHINE}.tar"
 ########################
 CONTAINERS_DIR ?= "${THISDIR}/../../containers"
 LXC_FOLDER ?= "/var/lib/lxc"
-LXC_OUTPUT_NAME ?= "${CONTAINER_NAME}_lxc_${MACHINE}.tar.xz"
+LXC_OUTPUT_NAME ?= "${CONTAINER_NAME}_lxc_${MACHINE}.tar.gz"
 LXC_CONFIG_DIR ?= "${CONTAINER_PROFILE_DIR}/configs_lxc"
 LXC_CONFIG_FILE ?= "${LXC_CONFIG_DIR}/config_lxc_${MACHINE}"
 
