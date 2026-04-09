@@ -7,7 +7,7 @@ IMX_SYSTEM_MANAGER_SRC:dey = "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1', 
 
 SRCBRANCH:dey = "dey/scarthgap/lf-6.6.52-2.2.2"
 # NXP's 'lf-6.6.52_2.2.2' release + patches
-SRCREV:dey = "421dfb2c1d760fb877284b0b2f1ee80b7ce37480"
+SRCREV:dey = "ecd89d0bc35687c7e1e19b47cf6bcdefc3a3fe68"
 
 # Disable debug monitor by default
 PACKAGECONFIG ??= "m0"
