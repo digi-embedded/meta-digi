@@ -6,18 +6,16 @@ require recipes-containers/podman/podman_git.bb
 
 DESCRIPTION = "Trimmed Podman runtime for dey-image-container-manager"
 
-# No CNI implies no isolated or custom network support, no NAT and no forwarding.
-# Host networking still works, and Podman uses netavark/aardvark-dns in this setup.
-VIRTUAL-RUNTIME_container_networking = ""
-PODMAN_NETWORK_BACKEND = "netavark"
+# Enable Podman bridge networking with netavark
+VIRTUAL-RUNTIME_container_networking = "netavark"
 
 RDEPENDS:${PN}:append = " \
     netavark \
     aardvark-dns \
+    iptables-modules \
 "
 
 RDEPENDS:${PN}:remove = " \
-    iptables \
     libdevmapper \
 "
 
