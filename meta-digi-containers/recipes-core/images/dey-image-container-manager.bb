@@ -51,6 +51,7 @@ CORE_ESSENTIALS = " \
 CORE_TOOLS = " \
 	bluez5 \
 	cccs-daemon \
+	curl \
 	dropbear \
 	dualboot \
 	ethtool \
