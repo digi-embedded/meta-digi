@@ -50,6 +50,7 @@ CORE_ESSENTIALS = " \
 # Tools and libraries
 CORE_TOOLS = " \
 	bluez5 \
+	cccs-daemon \
 	dropbear \
 	dualboot \
 	ethtool \
@@ -57,6 +58,7 @@ CORE_TOOLS = " \
 	iproute2 \
 	iw \
 	libdigiapix \
+	libdigiapix-python3 \
 	libgpiod \
 	libgpiod-tools \
 	ncurses-terminfo-base \
