@@ -91,6 +91,24 @@ This generates:
 
 - `./flutter-demo_artifact_podman_ccmp25-dvk.tar.gz`
 
+## Digi Remote Manager metrics support
+
+`dey-image-container-manager` includes `cc-container-mng` that has the capability to
+publish container statistics through the local CCCS Python API.
+For generated DCPs, per-container DRM sampling is enabled
+through `registration_defaults.stats_publish` in the artifact manifest.
+The image recipe generates the DCP automatically from the following variables:
+
+- `CONTAINER_STATS_PUBLISH_ENABLED`
+- `CONTAINER_STATS_PUBLISH_SAMPLE_INTERVAL`
+
+Example:
+
+```conf
+CONTAINER_STATS_PUBLISH_ENABLED = "true"
+CONTAINER_STATS_PUBLISH_SAMPLE_INTERVAL = "30"
+```
+
 ## Layer Scope
 
 Main recipes:
@@ -267,6 +285,8 @@ Relevant variables:
 - `CONTAINER_PACKAGE_ID`
 - `CONTAINER_ARTIFACT_VERSION`
 - `CONTAINER_CREATE_ARGS_PODMAN`
+- `CONTAINER_STATS_PUBLISH_ENABLED`
+- `CONTAINER_STATS_PUBLISH_SAMPLE_INTERVAL`
 - `CONTAINER_FIRMWARE_VERSIONS`
 - `CONTAINER_DEVICE_TYPES_JSON`
 - `CONTAINER_ARTIFACT_DESCRIPTION`
