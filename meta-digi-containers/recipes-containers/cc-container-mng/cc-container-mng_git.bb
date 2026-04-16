@@ -41,20 +41,20 @@ do_install:append() {
     install -m 0644 ${WORKDIR}/cc-containerd.service ${D}${systemd_system_unitdir}/cc-containerd.service
     install -m 0644 ${WORKDIR}/cc-containerd-shutdown.service ${D}${systemd_system_unitdir}/cc-containerd-shutdown.service
 
-    install -d ${D}${sysconfdir}/cc-container
-    install -m 0644 ${S}/cc-container-mng.conf ${D}${sysconfdir}/cc-container/cc-container-mng.conf
+    install -d ${D}${sysconfdir}
+    install -m 0644 ${S}/cc-container-mng.conf ${D}${sysconfdir}/cc-container-mng.conf
 
     sed -i \
         -e 's|"/var/lib/cc-container/cc-containers.conf"|"/mnt/data/cc-container/cc-containers.conf"|' \
         -e 's|"/var/lib/cc-container/state.json"|"/mnt/data/cc-container/state.json"|' \
         -e 's|"/var/lib/cc-container"|"/mnt/data/cc-container"|' \
-        ${D}${sysconfdir}/cc-container/cc-container-mng.conf
+        ${D}${sysconfdir}/cc-container-mng.conf
 }
 
 FILES:${PN}:append = " \
     ${systemd_system_unitdir}/cc-containerd.service \
     ${systemd_system_unitdir}/cc-containerd-shutdown.service \
-    ${sysconfdir}/cc-container/cc-container-mng.conf \
+    ${sysconfdir}/cc-container-mng.conf \
 "
 
-CONFFILES:${PN} += "${sysconfdir}/cc-container/cc-container-mng.conf"
+CONFFILES:${PN} += "${sysconfdir}/cc-container-mng.conf"
