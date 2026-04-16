@@ -1,0 +1,15 @@
+[Unit]
+Description=Stop managed containers during system shutdown
+DefaultDependencies=no
+Before=shutdown.target reboot.target halt.target poweroff.target kexec.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/cc-containerd --config-file /etc/cc-container/cc-container-mng.conf --stop-managed-containers
+RemainAfterExit=yes
+
+[Install]
+WantedBy=reboot.target
+WantedBy=halt.target
+WantedBy=poweroff.target
+WantedBy=kexec.target

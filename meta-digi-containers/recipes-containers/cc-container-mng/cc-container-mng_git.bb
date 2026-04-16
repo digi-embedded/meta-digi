@@ -19,13 +19,14 @@ CC_CONTAINER_MNG_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1', '
 SRC_URI = " \
     ${CC_CONTAINER_MNG_GIT_URI};branch=${SRCBRANCH} \
     file://cc-containerd.service \
+    file://cc-containerd-shutdown.service \
 "
 
 S = "${WORKDIR}/git"
 
 inherit python_setuptools_build_meta systemd
 
-SYSTEMD_SERVICE:${PN} = "cc-containerd.service"
+SYSTEMD_SERVICE:${PN} = "cc-containerd.service cc-containerd-shutdown.service"
 SYSTEMD_AUTO_ENABLE ?= "enable"
 
 RDEPENDS:${PN} += " \
@@ -38,6 +39,7 @@ RDEPENDS:${PN} += " \
 do_install:append() {
     install -d ${D}${systemd_system_unitdir}
     install -m 0644 ${WORKDIR}/cc-containerd.service ${D}${systemd_system_unitdir}/cc-containerd.service
+    install -m 0644 ${WORKDIR}/cc-containerd-shutdown.service ${D}${systemd_system_unitdir}/cc-containerd-shutdown.service
 
     install -d ${D}${sysconfdir}/cc-container
     install -m 0644 ${S}/cc-container-mng.conf ${D}${sysconfdir}/cc-container/cc-container-mng.conf
@@ -51,6 +53,7 @@ do_install:append() {
 
 FILES:${PN}:append = " \
     ${systemd_system_unitdir}/cc-containerd.service \
+    ${systemd_system_unitdir}/cc-containerd-shutdown.service \
     ${sysconfdir}/cc-container/cc-container-mng.conf \
 "
 
