@@ -1,7 +1,7 @@
 [Unit]
 Description=Stop managed containers during system shutdown
 DefaultDependencies=no
-Before=shutdown.target reboot.target halt.target poweroff.target kexec.target
+Before=cccsd.service shutdown.target reboot.target halt.target poweroff.target kexec.target
 
 [Service]
 Type=oneshot

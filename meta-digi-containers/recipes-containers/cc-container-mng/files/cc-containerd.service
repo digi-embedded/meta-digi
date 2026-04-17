@@ -1,7 +1,7 @@
 [Unit]
 Description=Digi ConnectCore Container Manager daemon
-After=network.target
-Wants=network.target
+After=network.target cccsd.service
+Wants=network.target cccsd.service
 
 [Service]
 Type=simple
