@@ -4,6 +4,9 @@ SUMMARY = "DEY examples packagegroup"
 
 DEPENDS = "virtual/kernel"
 
+DEY_EXAMPLES_MCA = "dey-examples-adc-cmp dey-examples-tamper"
+DEY_EXAMPLES_MCA:ccimx95 = ""
+
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
@@ -13,8 +16,7 @@ RDEPENDS:${PN} = "\
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-bt-gatt-server", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "bluetooth", "dey-examples-hdp", "", d)} \
 	${@bb.utils.contains("MACHINE_FEATURES", "cryptochip", "dey-examples-cryptochip", "", d)} \
-	${@bb.utils.contains("MACHINE_FEATURES", "mca", "dey-examples-adc-cmp \
-							 dey-examples-tamper", "", d)} \
+	${@bb.utils.contains("MACHINE_FEATURES", "mca", "${DEY_EXAMPLES_MCA}", "", d)} \
 	dey-examples-caamblob \
 	dey-examples-cccs \
 	dey-examples-digiapix \
