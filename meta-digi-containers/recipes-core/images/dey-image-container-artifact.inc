@@ -109,14 +109,14 @@ open(sys.argv[1], "w", encoding="utf-8").write(json.dumps(payload, indent=2) + "
             changelog_arg="--changelog ${template_dir}/metadata/changelog.txt"
         fi
 
-        python3 "${generator_script}" \
+        generated_output="$(python3 "${generator_script}" \
             --manifest "${manifest_path}" \
             --payload "${src_payload}" \
             --output-dir "${DEPLOY_DIR_IMAGE}" \
             ${readme_arg} \
-            ${changelog_arg}
+            ${changelog_arg})"
 
-        generated_output="${DEPLOY_DIR_IMAGE}/${CONTAINER_PACKAGE_ID}_artifact_${runtime}_${primary_device_type}.tar.gz"
+        generated_output="$(printf '%s' "${generated_output}" | tail -n 1)"
         if [ ! -s "${generated_output}" ]; then
             bbfatal "Container artifact bundle not generated correctly: ${generated_output}"
         fi

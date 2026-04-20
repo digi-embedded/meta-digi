@@ -15,9 +15,31 @@ import sys
 import tarfile
 import tempfile
 
+BASE36_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
+
 
 def fail(message: str) -> "NoReturn":
     raise SystemExit(f"error: {message}")
+
+
+def to_base36(value: int) -> str:
+    if value < 0:
+        fail("cannot convert negative values to base36")
+    if value == 0:
+        return "0"
+    result: list[str] = []
+    while value:
+        value, remainder = divmod(value, 36)
+        result.append(BASE36_ALPHABET[remainder])
+    return "".join(reversed(result))
+
+
+def format_created_at(timestamp: datetime) -> str:
+    return timestamp.astimezone(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+
+def build_generated_package_id(base_package_id: str, *, created_at_ms: int) -> str:
+    return f"{base_package_id}-{to_base36(created_at_ms)}"
 
 
 def load_manifest(path: Path) -> dict:
@@ -167,8 +189,8 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def build_output_name(manifest: dict) -> str:
-    return f"{manifest['package_id']}_artifact_{manifest['runtime']}_{manifest['device_types'][0]}.tar.gz"
+def build_output_name(*, package_id: str, runtime: str, device_type: str) -> str:
+    return f"{package_id}_artifact_{runtime}_{device_type}.tar.gz"
 
 
 def ensure_lxc_layout(payload: Path) -> tuple[str, str]:
@@ -188,9 +210,16 @@ def ensure_lxc_layout(payload: Path) -> tuple[str, str]:
             return dirs[0].name, dirs[0].name
 
     fail("invalid payload: LXC archive must contain rootfs/ and config")
-def write_default_readme(path: Path, manifest: dict, *, created_at: str, payload_name: str) -> None:
+def write_default_readme(
+    path: Path,
+    manifest: dict,
+    *,
+    package_id: str,
+    created_at: str,
+    payload_name: str,
+) -> None:
     content = (
-        f"Package: {manifest['package_id']}\n"
+        f"Package: {package_id}\n"
         f"Version: {manifest['version']}\n"
         f"Runtime: {manifest['runtime']}\n"
         f"Platform: {manifest['device_types'][0]}\n"
@@ -218,9 +247,17 @@ def write_manifest(path: Path, manifest: dict) -> None:
     path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
 
-def build_final_manifest(base: dict, *, artifact_type: str, digest: str, size_bytes: int, created_at: str) -> dict:
+def build_final_manifest(
+    base: dict,
+    *,
+    package_id: str,
+    artifact_type: str,
+    digest: str,
+    size_bytes: int,
+    created_at: str,
+) -> dict:
     output = {
-        "package_id": base["package_id"],
+        "package_id": package_id,
         "version": base["version"],
         "runtime": base["runtime"],
         "artifact_type": artifact_type,
@@ -281,9 +318,19 @@ def main() -> int:
     except OSError as exc:
         fail(f"cannot create output directory {output_dir}: {exc}")
 
-    output_name = build_output_name(manifest)
+    created_at_dt = datetime.now(timezone.utc)
+    created_at_ms = int(created_at_dt.timestamp() * 1000)
+    created_at = format_created_at(created_at_dt)
+    generated_package_id = build_generated_package_id(
+        manifest["package_id"],
+        created_at_ms=created_at_ms,
+    )
+    output_name = build_output_name(
+        package_id=generated_package_id,
+        runtime=manifest["runtime"],
+        device_type=manifest["device_types"][0],
+    )
     output_path = output_dir / output_name
-    created_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     with tempfile.TemporaryDirectory(prefix="dcp-bundle-") as tmpdir:
         staging_root = Path(tmpdir)
@@ -311,6 +358,7 @@ def main() -> int:
 
         final_manifest = build_final_manifest(
             manifest,
+            package_id=generated_package_id,
             artifact_type=artifact_type,
             digest=digest,
             size_bytes=size_bytes,
@@ -321,7 +369,13 @@ def main() -> int:
         stage_metadata(
             readme_path,
             metadata_dir / "README.txt",
-            lambda dst: write_default_readme(dst, manifest, created_at=created_at, payload_name=payload_name),
+            lambda dst: write_default_readme(
+                dst,
+                manifest,
+                package_id=generated_package_id,
+                created_at=created_at,
+                payload_name=payload_name,
+            ),
         )
         stage_metadata(changelog_path, metadata_dir / "changelog.txt", write_default_changelog)
 

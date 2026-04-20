@@ -68,8 +68,11 @@ The script generates exactly one runtime artifact per execution.
 Notes:
 
 - `--output-dir` is optional. If omitted, the script writes the DCP to the current directory.
-- The output file name is always derived from manifest fields as:
-  - `<package_id>_artifact_<runtime>_<device_types[0]>.tar.gz`
+- The generator appends a unique suffix to the input `package_id` using the
+  `created_at` timestamp encoded in base36 milliseconds.
+- The output file name is always derived from the generated package ID and
+  manifest fields as:
+  - `<generated_package_id>_artifact_<runtime>_<device_types[0]>.tar.gz`
 - For Podman payloads, the final internal payload name is always `payload/image.tar`
 - For LXC payloads, the generator requires a Yocto-style `.tar.gz` bundle, validates its layout,
   and stores it inside the DCP using the original file name and format without re-packaging it.
@@ -87,9 +90,9 @@ python3 meta-digi-containers/scripts/generate-dcp.py \
   --payload /tmp/image.tar
 ```
 
-This generates:
+This generates a bundle named like:
 
-- `./flutter-demo_artifact_podman_ccmp25-dvk.tar.gz`
+- `./flutter-demo-<base36_created_at_ms>_artifact_podman_ccmp25-dvk.tar.gz`
 
 ## Digi Remote Manager metrics support
 
@@ -97,6 +100,10 @@ This generates:
 publish container statistics through the local CCCS Python API.
 For generated DCPs, per-container DRM sampling is enabled
 through `registration_defaults.stats_publish` in the artifact manifest.
+Those manifest defaults establish the initial runtime policy on the target.
+After installation, mutable policy such as `autostart`, `monitor`, `restart`, and
+`stats_publish` can be inspected or updated through the container manager `config`
+`get` and `set` operations without regenerating the DCP.
 The image recipe generates the DCP automatically from the following variables:
 
 - `CONTAINER_STATS_PUBLISH_ENABLED`
@@ -169,14 +176,16 @@ Outputs are generated in:
 
 Final outputs:
 
-- `${CONTAINER_PACKAGE_ID}_artifact_podman_<device_types[0]>.tar.gz`
-- `${CONTAINER_PACKAGE_ID}_artifact_lxc_<device_types[0]>.tar.gz`
+- `${CONTAINER_PACKAGE_ID}-<base36_created_at_ms>_artifact_podman_<device_types[0]>.tar.gz`
+- `${CONTAINER_PACKAGE_ID}-<base36_created_at_ms>_artifact_lxc_<device_types[0]>.tar.gz`
 
 Notes:
 
-- The generator script makes the DCP filename using `package_id`, `runtime`, and
-  `device_types[0]` fields from the manifest file.
-- In Yocto builds, `CONTAINER_PACKAGE_ID` defaults to `${CONTAINER_NAME}`
+- The generator script appends a base36-encoded millisecond timestamp suffix to
+  the input `package_id`, stores that generated value in the final
+  `manifest.json`, and uses it in the DCP file name.
+- In Yocto builds, `CONTAINER_PACKAGE_ID` defaults to `${CONTAINER_NAME}` before
+  the generator adds the unique suffix.
 
 Intermediate outputs generated during the build (LXC bundle, Podman archive, OCI/rootfs files)
 are removed automatically at the end of artifact creation.
