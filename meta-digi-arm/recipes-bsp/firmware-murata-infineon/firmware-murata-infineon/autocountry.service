@@ -1,0 +1,13 @@
+[Unit]
+Description=Infineon autocountry (802.11d)
+Wants=systemd-udev-settle.service
+After=systemd-udev-settle.service network.target suspend.target
+
+[Service]
+Type=oneshot
+ExecStart=/etc/autocountry
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target suspend.target

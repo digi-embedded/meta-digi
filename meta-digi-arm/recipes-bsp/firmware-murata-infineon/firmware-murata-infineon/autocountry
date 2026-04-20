@@ -1,7 +1,7 @@
 #!/bin/sh
 #===============================================================================
 #
-#  Copyright (C) 2024 by Digi International Inc.
+#  Copyright (C) 2024-2026, Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -9,7 +9,7 @@
 #  the Free Software Foundation.
 #
 #
-#  !Description: Enable Wireless autocountry feature (802.11d)
+#  !Description: Enable Infineon Wireless autocountry feature (802.11d)
 #
 #===============================================================================
 
@@ -23,14 +23,45 @@ log() {
 	fi
 }
 
+wait_for_wifi() {
+	timeout="${1:-30}"
+	count=0
+
+	while [ "${count}" -lt "${timeout}" ]; do
+		if wl country list >/dev/null 2>&1; then
+			return 0
+		fi
+
+		sleep 1
+		count=$((count + 1))
+	done
+
+	return 1
+}
+
 # Only for Wireless variants
 if [ -d "/proc/device-tree/wireless" ]; then
-	# Check if WorldWide regulatory domain is available
+	if ! wait_for_wifi 30; then
+		log warning "Wireless device not ready after waiting 30 seconds"
+		exit 1
+	fi
+
+	# Check if 'XZ' WorldWide regulatory domain is available
 	if wl country list | grep -qs ^XZ; then
 		# Select WorldWide Country Code as driver operational region
 		wl country XZ/0 agg
 		# Select WorldWide Country Code for use with Auto Contry Discovery
 		wl autocountry_default XZ
+		# Enable 802.11d
+		wl autocountry 1
+		log info "Set WorldWide regulatory domain"
+	fi
+	# Check if 'WW' WorldWide regulatory domain is available
+	if wl country list | grep -qs ^WW; then
+		# Select WorldWide Country Code as driver operational region
+		wl country WW/0 agg
+		# Select WorldWide Country Code for use with Auto Contry Discovery
+		wl autocountry_default WW
 		# Enable 802.11d
 		wl autocountry 1
 		log info "Set WorldWide regulatory domain"

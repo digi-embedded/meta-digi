@@ -12,8 +12,8 @@ SRC_URI = " \
     git://github.com/murata-wireless/cyw-bt-patch;protocol=http;branch=master;destsuffix=cyw-bt-patch;name=cyw-bt-patch \
     git://github.com/murata-wireless/cyw-fmac-utils-imx32;protocol=http;branch=master;destsuffix=cyw-fmac-utils-imx32;name=cyw-fmac-utils-imx32 \
     git://github.com/murata-wireless/cyw-fmac-utils-imx64;protocol=http;branch=master;destsuffix=cyw-fmac-utils-imx64;name=cyw-fmac-utils-imx64 \
-    file://cyw4373-autocountry \
-    file://cyw4373-autocountry.service \
+    file://autocountry \
+    file://autocountry.service \
 "
 
 SRC_URI:append:ccmp1 = " \
@@ -57,14 +57,14 @@ do_install () {
 	if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
 		# Install systemd unit files
 		install -d ${D}${systemd_unitdir}/system/
-		install -m 0644 ${WORKDIR}/cyw4373-autocountry.service ${D}${systemd_unitdir}/system/cyw4373-autocountry.service
+		install -m 0644 ${WORKDIR}/autocountry.service ${D}${systemd_unitdir}/system/autocountry.service
 	fi
 
 	install -d ${D}${sysconfdir}/init.d/
 
 	# Install autocountry service
-	install -m 0755 ${WORKDIR}/cyw4373-autocountry ${D}${sysconfdir}/cyw4373-autocountry
-	ln -sf /etc/cyw4373-autocountry ${D}${sysconfdir}/init.d/cyw4373-autocountry
+	install -m 0755 ${WORKDIR}/autocountry ${D}${sysconfdir}/autocountry
+	ln -sf /etc/autocountry ${D}${sysconfdir}/init.d/autocountry
 
 	# Install WLAN client utility binary based on 32-bit/64-bit arch
 	if [ ${TARGET_ARCH} = "aarch64" ]; then
@@ -151,10 +151,10 @@ do_install:append:ccimx95 () {
 inherit update-rc.d systemd
 
 INITSCRIPT_PACKAGES += "${PN}-autocountry"
-INITSCRIPT_NAME:${PN}-autocountry = "cyw4373-autocountry"
+INITSCRIPT_NAME:${PN}-autocountry = "autocountry"
 INITSCRIPT_PARAMS:${PN}-autocountry = "start 19 2 3 4 5 . stop 21 0 1 6 ."
 
-SYSTEMD_SERVICE:${PN}-autocountry = "cyw4373-autocountry.service"
+SYSTEMD_SERVICE:${PN}-autocountry = "autocountry.service"
 SYSTEMD_PACKAGES = "${PN}-autocountry"
 
 PACKAGES =+ " \
@@ -171,16 +171,16 @@ FILES:${PN}-mfgtest = " \
 "
 
 FILES:${PN}-autocountry = " \
-    ${sysconfdir}/cyw4373-autocountry \
-    ${sysconfdir}/init.d/cyw4373-autocountry \
-    ${systemd_unitdir}/system/cyw4373-autocountry.service \
+    ${sysconfdir}/autocountry \
+    ${sysconfdir}/init.d/autocountry \
+    ${systemd_unitdir}/system/autocountry.service \
 "
 
 FILES:${PN}:append:ccmp2 = " \
     ${sbindir}/mbt \
 "
 
-RDEPENDS:${PN}:append:ccmp1 = " ${PN}-autocountry"
+RDEPENDS:${PN}:append = " ${PN}-autocountry"
 RDEPENDS:${PN}-autocountry:append = " ${PN}-mfgtest"
 
 INSANE_SKIP:${PN} += "build-deps"
