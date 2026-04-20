@@ -22,6 +22,14 @@ SRC_URI:append:ccmp1 = " \
 "
 
 SRC_URI:append:ccmp2 = " \
+    file://cyfmac55500-sdio_US.APIndoor.clm_blob \
+    file://cyfmac55500-sdio_US.APOutdoor.clm_blob \
+    file://cyfmac55500-sdio_US.STAIndoor.clm_blob \
+    file://cyfmac55500-sdio_US.STAOutdoor.clm_blob \
+    file://cyfmac55500-sdio_World.APIndoor.clm_blob \
+    file://cyfmac55500-sdio_World.APOutdoor.clm_blob \
+    file://cyfmac55500-sdio_World.STAIndoor.clm_blob \
+    file://cyfmac55500-sdio_World.STAOutdoor.clm_blob \
     file://mbt \
 "
 
@@ -104,8 +112,10 @@ do_install:append:ccmp2 () {
 	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
 	# For Murata 2FY (LBEE5HY2FY)
 	install -m 444 ${S}/ifx-linux-firmware-longma/firmware/cyfmac55500-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.trxse
-	install -m 444 ${S}/cyw-fmac-fw/cyfmac55500-sdio.2FY.STAIndoor.clm_blob  ${D}/${base_libdir}/firmware/cypress/
-	ln -sf cyfmac55500-sdio.2FY.STAIndoor.clm_blob ${D}/${base_libdir}/firmware/cypress/cyfmac55500-sdio_US.clm_blob
+	install -m 444 cyfmac55500-sdio_US.*.clm_blob ${D}${base_libdir}/firmware/cypress/
+	install -m 444 cyfmac55500-sdio_World.*.clm_blob ${D}${base_libdir}/firmware/cypress/
+	ln -sf cyfmac55500-sdio_US.STAIndoor.clm_blob ${D}/${base_libdir}/firmware/cypress/cyfmac55500-sdio_US.clm_blob
+	ln -sf cyfmac55500-sdio_World.STAIndoor.clm_blob ${D}/${base_libdir}/firmware/cypress/cyfmac55500-sdio_World.clm_blob
 
 	# Install NVRAM files (*.txt)
 	# For Murata 2FY (LBEE5HY2FY)
