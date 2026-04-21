@@ -16,6 +16,16 @@ import tarfile
 import tempfile
 
 BASE36_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
+SUPPORTED_STATS_METRICS = (
+    "uptime",
+    "cpu",
+    "mem",
+    "net/rx",
+    "net/tx",
+    "disk/read",
+    "disk/write",
+)
+SUPPORTED_STATS_METRICS_SET = set(SUPPORTED_STATS_METRICS)
 
 
 def fail(message: str) -> "NoReturn":
@@ -100,6 +110,34 @@ def validate_labels(value: object) -> dict:
     return value
 
 
+def validate_string_list(value: object, *, path: str, allowed: set[str]) -> list[str]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        fail(f"invalid manifest: {path} must be an array")
+    result: list[str] = []
+    seen: set[str] = set()
+    for item in value:
+        if not isinstance(item, str) or not item.strip():
+            fail(f"invalid manifest: {path} entries must be non-empty strings")
+        metric = item.strip()
+        if metric not in allowed:
+            fail(f"invalid manifest: {path} contains unsupported metric {metric}")
+        if metric in seen:
+            continue
+        seen.add(metric)
+        result.append(metric)
+    if "all" in result and len(result) > 1:
+        fail(f"invalid manifest: {path} cannot combine all with specific metrics")
+    return result
+
+
+def normalize_drm_stats_metrics(metrics: list[str]) -> list[str]:
+    if "all" in metrics:
+        return list(SUPPORTED_STATS_METRICS)
+    return metrics
+
+
 def validate_manifest(data: dict) -> dict:
     package_id = validate_string(data, "package_id", path="manifest")
     version = validate_string(data, "version", path="manifest")
@@ -114,6 +152,9 @@ def validate_manifest(data: dict) -> dict:
     restart = registration_defaults.get("restart")
     if not isinstance(restart, dict):
         fail("invalid manifest: registration_defaults.restart must be an object")
+    drm = registration_defaults.get("drm", {})
+    if not isinstance(drm, dict):
+        fail("invalid manifest: registration_defaults.drm must be an object")
 
     create_args = data.get("create_args")
     if runtime == "podman":
@@ -135,7 +176,7 @@ def validate_manifest(data: dict) -> dict:
     if description is not None and not isinstance(description, str):
         fail("invalid manifest: description must be a string")
 
-    return {
+    validated = {
         "package_id": package_id,
         "version": version,
         "runtime": runtime,
@@ -143,6 +184,20 @@ def validate_manifest(data: dict) -> dict:
         "registration_defaults": {
             "autostart": validate_bool(registration_defaults, "autostart", path="registration_defaults"),
             "monitor": validate_bool(registration_defaults, "monitor", path="registration_defaults"),
+            "drm": {
+                "enabled": validate_bool(drm, "enabled", path="registration_defaults.drm"),
+                "stats_sample_interval_s": validate_int(
+                    drm,
+                    "stats_sample_interval_s",
+                    path="registration_defaults.drm",
+                    minimum=1,
+                ),
+                "stats_list_of_metrics": validate_string_list(
+                    drm.get("stats_list_of_metrics"),
+                    path="registration_defaults.drm.stats_list_of_metrics",
+                    allowed=SUPPORTED_STATS_METRICS_SET | {"all"},
+                ),
+            },
             "restart": {
                 "enabled": validate_bool(restart, "enabled", path="registration_defaults.restart"),
                 "max_retries": validate_int(restart, "max_retries", path="registration_defaults.restart", minimum=0),
@@ -156,6 +211,10 @@ def validate_manifest(data: dict) -> dict:
         "description": description or "",
         "labels": validate_labels(data.get("labels")),
     }
+    validated["registration_defaults"]["drm"]["stats_list_of_metrics"] = normalize_drm_stats_metrics(
+        validated["registration_defaults"]["drm"]["stats_list_of_metrics"]
+    )
+    return validated
 
 
 def validate_payload(path: Path, runtime: str) -> None:

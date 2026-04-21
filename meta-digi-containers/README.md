@@ -98,23 +98,35 @@ This generates a bundle named like:
 
 `dey-image-container-manager` includes `cc-container-mng` that has the capability to
 publish container statistics through the local CCCS Python API.
-For generated DCPs, per-container DRM sampling is enabled
-through `registration_defaults.stats_publish` in the artifact manifest.
+For generated DCPs, DRM behavior is controlled through `registration_defaults.drm`
+in the artifact manifest.
 Those manifest defaults establish the initial runtime policy on the target.
 After installation, mutable policy such as `autostart`, `monitor`, `restart`, and
-`stats_publish` can be inspected or updated through the container manager `config`
+`drm` can be inspected or updated through the container manager `config`
 `get` and `set` operations without regenerating the DCP.
 The image recipe generates the DCP automatically from the following variables:
 
-- `CONTAINER_STATS_PUBLISH_ENABLED`
-- `CONTAINER_STATS_PUBLISH_SAMPLE_INTERVAL`
+- `CONTAINER_DRM_ENABLED`
+- `CONTAINER_DRM_STATS_SAMPLE_INTERVAL`
+- `CONTAINER_DRM_STATS_LIST_OF_METRICS`
 
 Example:
 
 ```conf
-CONTAINER_STATS_PUBLISH_ENABLED = "true"
-CONTAINER_STATS_PUBLISH_SAMPLE_INTERVAL = "30"
+CONTAINER_DRM_ENABLED = "true"
+CONTAINER_DRM_STATS_SAMPLE_INTERVAL = "30"
+CONTAINER_DRM_STATS_LIST_OF_METRICS = "[\"cpu\", \"mem\"]"
 ```
+
+`CONTAINER_DRM_STATS_LIST_OF_METRICS` follows the same semantics as the target
+manager:
+
+- `["all"]` is accepted as a shorthand input for all periodic metrics.
+- `[]` publishes no periodic metrics.
+- any other list publishes only the selected metrics.
+
+Generated manifests and target-side effective configuration use the explicit
+metric list.
 
 ## Layer Scope
 
@@ -294,8 +306,9 @@ Relevant variables:
 - `CONTAINER_PACKAGE_ID`
 - `CONTAINER_ARTIFACT_VERSION`
 - `CONTAINER_CREATE_ARGS_PODMAN`
-- `CONTAINER_STATS_PUBLISH_ENABLED`
-- `CONTAINER_STATS_PUBLISH_SAMPLE_INTERVAL`
+- `CONTAINER_DRM_ENABLED`
+- `CONTAINER_DRM_STATS_SAMPLE_INTERVAL`
+- `CONTAINER_DRM_STATS_LIST_OF_METRICS`
 - `CONTAINER_FIRMWARE_VERSIONS`
 - `CONTAINER_DEVICE_TYPES_JSON`
 - `CONTAINER_ARTIFACT_DESCRIPTION`

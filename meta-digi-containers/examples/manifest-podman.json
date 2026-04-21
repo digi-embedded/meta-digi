@@ -6,6 +6,19 @@
   "registration_defaults": {
     "autostart": true,
     "monitor": true,
+    "drm": {
+      "enabled": true,
+      "stats_sample_interval_s": 30,
+      "stats_list_of_metrics": [
+        "uptime",
+        "cpu",
+        "mem",
+        "net/rx",
+        "net/tx",
+        "disk/read",
+        "disk/write"
+      ]
+    },
     "restart": {
       "enabled": true,
       "max_retries": 3,
