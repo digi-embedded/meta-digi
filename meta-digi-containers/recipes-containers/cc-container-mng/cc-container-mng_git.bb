@@ -45,9 +45,7 @@ do_install:append() {
     install -m 0644 ${S}/cc-container-mng.conf ${D}${sysconfdir}/cc-container-mng.conf
 
     sed -i \
-        -e 's|"/var/lib/cc-container/cc-containers.conf"|"/mnt/data/cc-container/cc-containers.conf"|' \
-        -e 's|"/var/lib/cc-container/state.json"|"/mnt/data/cc-container/state.json"|' \
-        -e 's|"/var/lib/cc-container"|"/mnt/data/cc-container"|' \
+        -e "s|\"/opt/cc-container|\"${CC_CONTAINER_PATH}|g" \
         ${D}${sysconfdir}/cc-container-mng.conf
 }
 
