@@ -142,6 +142,7 @@ IMAGE_INSTALL:append:container-lvgl = " \
     weston \
     weston-init \
 "
+
 DISTRO_FEATURES:remove:container-lvgl = " wayland"
 
 ########################
@@ -228,6 +229,74 @@ IMAGE_INSTALL:append:container-webkit:ccmp25 = " \
     libopenvg-gcnano \
     libvulkan-driver-gcnano \
     packagegroup-dey-x-linux-ai \
+"
+
+########################
+# Container type customizations chromium
+########################
+CONTAINER_INIT_SCRIPT:container-chromium = "/start-chromium-demo.sh"
+CONTAINER_CREATE_ARGS_PODMAN:container-chromium = " \
+    --privileged \
+    --network host \
+    --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 \
+    --volume /etc/resolv.conf:/etc/resolv.conf:ro \
+    --device /dev/dri \
+    --device /dev/input \
+    --device /dev/mali0 \
+    --device /dev/dma_heap \
+    --device /dev/fb0 \
+    --device /dev/snd \
+    --device /dev/tty \
+    --device /dev/tty0 \
+    --device /dev/tty1 \
+    --device /dev/tty7 \
+    --device /dev/gpiochip5 \
+    --device /dev/mmcblk0boot0 \
+    --device /dev/mmcblk0boot1 \
+    --device /dev/mailbox0 \
+    --device /dev/video0 \
+    --device /dev/video1 \
+    --device /dev/video2 \
+    --device /dev/video3 \
+    --device /dev/video4 \
+    --device /dev/media0 \
+    --volume /run/udev:/run/udev:ro \
+    --volume /etc/asound.conf:/etc/asound.conf:ro \
+    --volume /run/pulse:/run/pulse \
+    --volume /run/dbus/system_bus_socket:/run/dbus/system_bus_socket \
+    --volume /dev/log:/dev/log \
+    --volume /run/systemd/journal:/run/systemd/journal \
+    --volume /etc/fw_env.config:/etc/fw_env.config:ro \
+    --env PULSE_SERVER=unix:/run/pulse/native \
+    --tty \
+"
+IMAGE_INSTALL:append:container-chromium = " \
+    adwaita-icon-theme-symbolic \
+    alsa-utils \
+    bluez5 \
+    connectcore-demo-example \
+    dbus \
+    fontconfig-utils \
+    hicolor-icon-theme \
+    libdrm \
+    liberation-fonts \
+    libgpiod-tools \
+    libinput \
+    libubootenv-bin \
+    networkmanager-nmcli \
+    packagegroup-dey-gstreamer \
+    packagegroup-core-weston \
+    packagegroup-dey-chromium \
+    pulseaudio-server \
+    python3-dbus \
+    qtvirtualkeyboard \
+    ttf-dejavu-sans \
+    ttf-dejavu-sans-mono \
+    ttf-dejavu-serif \
+    wayland \
+    wayland-protocols \
+    weston \
+    weston-init \
 "
 
 ########################
