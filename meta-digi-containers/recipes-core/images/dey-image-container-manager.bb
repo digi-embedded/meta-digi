@@ -97,3 +97,6 @@ IMAGE_INSTALL = " \
 	${CONTAINER_MANAGEMENT} \
 	${HOTPLUG_SUPPORT} \
 "
+
+# GPU firmware for ccimx95, it needs to be located in the image
+IMAGE_INSTALL:append:ccimx95-dvk = " mali-imx"

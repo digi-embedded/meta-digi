@@ -21,6 +21,7 @@ lxc.mount.entry = /dev/input dev/input none bind,create=dir
 lxc.mount.entry = tmpfs dev/shm tmpfs rw,nosuid,nodev,mode=1777,create=dir
 lxc.mount.entry = /dev/dri dev/dri none bind,create=dir
 lxc.mount.entry = /dev/mali0 dev/mali0 none bind,create=file
+lxc.mount.entry = /dev/dma_heap dev/dma_heap none bind,create=dir
 lxc.mount.entry = /dev/input dev/input none bind,create=dir
 lxc.mount.entry = /dev/tty dev/tty none bind,create=file
 lxc.mount.entry = /dev/tty0 dev/tty0 none bind,create=file

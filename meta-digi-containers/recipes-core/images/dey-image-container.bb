@@ -122,6 +122,21 @@ CONTAINER_CREATE_ARGS_PODMAN:container-lvgl:ccmp25 = " \
     --volume /run/udev:/run/udev:ro \
     --tty \
 "
+CONTAINER_CREATE_ARGS_PODMAN:container-lvgl:ccimx95 = " \
+    --privileged \
+    --network none \
+    --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 \
+    --device /dev/dri \
+    --device /dev/input \
+    --device /dev/mali0 \
+    --device /dev/dma_heap \
+    --device /dev/tty \
+    --device /dev/tty0 \
+    --device /dev/tty1 \
+    --device /dev/tty7 \
+    --volume /run/udev:/run/udev:ro \
+    --tty \
+"
 IMAGE_INSTALL:append:container-lvgl = " \
     lvgl-demo \
     weston \
@@ -241,6 +256,7 @@ CONTAINER_CREATE_ARGS_PODMAN:container-flutter:ccimx95 = " \
     --device /dev/dri \
     --device /dev/input \
     --device /dev/mali0 \
+    --device /dev/dma_heap \
     --device /dev/tty \
     --device /dev/tty0 \
     --device /dev/tty1 \
