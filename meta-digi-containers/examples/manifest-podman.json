@@ -1,5 +1,7 @@
 {
   "package_id": "flutter-demo",
+  "name": "flutter-demo",
+  "friendly_name": "Flutter Demo",
   "version": "1.0",
   "runtime": "podman",
   "create_args": "--privileged --network none --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 --device /dev/dri --device /dev/input --device /dev/galcore --device /dev/tty --device /dev/tty0 --device /dev/tty1 --device /dev/tty7 --volume /run/udev:/run/udev:ro --tty --entrypoint '[\"/usr/bin/docker-init\",\"/start-flutter-demo.sh\"]'",

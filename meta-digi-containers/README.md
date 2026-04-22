@@ -94,6 +94,12 @@ This generates a bundle named like:
 
 - `./flutter-demo-<base36_created_at_ms>_artifact_podman_ccmp25-dvk.tar.gz`
 
+In those manifests:
+
+- `package_id` is the base identifier used to derive the final unique DCP package ID.
+- `name` is the stable logical container name stored on the target.
+- `friendly_name` is the user-facing label shown by DRM and the manager output when available.
+
 ## Digi Remote Manager metrics support
 
 `dey-image-container-manager` includes `cc-container-mng` that has the capability to
@@ -127,6 +133,12 @@ manager:
 
 Generated manifests and target-side effective configuration use the explicit
 metric list.
+
+`dey-image-container-manager` also overrides the manager persistent base path
+through `CC_CONTAINER_PATH`, which defaults to `${ROOT_HOME}/cc-container` in
+the Digi platform defaults. This makes the effective target paths live under
+`/root/cc-container` in DEY images, while the upstream `cc-container-mng`
+project keeps `/opt/cc-container` as its built-in default.
 
 ## Layer Scope
 
@@ -283,6 +295,8 @@ Supported placeholders in LXC config fragments:
 The artifact manifest is generated automatically and includes:
 
 - `package_id`
+- `name` [stable logical container name]
+- `friendly_name` [optional user-facing display name]
 - `version`
 - `runtime`
 - `artifact_type`
@@ -303,7 +317,9 @@ The artifact manifest is generated automatically and includes:
 
 Relevant variables:
 
+- `CONTAINER_NAME`
 - `CONTAINER_PACKAGE_ID`
+- `CONTAINER_FRIENDLY_NAME`
 - `CONTAINER_ARTIFACT_VERSION`
 - `CONTAINER_CREATE_ARGS_PODMAN`
 - `CONTAINER_DRM_ENABLED`

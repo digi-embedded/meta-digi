@@ -175,9 +175,21 @@ def validate_manifest(data: dict) -> dict:
     description = data.get("description", "")
     if description is not None and not isinstance(description, str):
         fail("invalid manifest: description must be a string")
+    name = data.get("name")
+    if name is not None:
+        if not isinstance(name, str) or not name.strip():
+            fail("invalid manifest: name must be a non-empty string")
+        name = name.strip()
+    friendly_name = data.get("friendly_name")
+    if friendly_name is not None:
+        if not isinstance(friendly_name, str) or not friendly_name.strip():
+            fail("invalid manifest: friendly_name must be a non-empty string")
+        friendly_name = friendly_name.strip()
 
     validated = {
         "package_id": package_id,
+        "name": name,
+        "friendly_name": friendly_name,
         "version": version,
         "runtime": runtime,
         "create_args": create_args,
@@ -317,6 +329,8 @@ def build_final_manifest(
 ) -> dict:
     output = {
         "package_id": package_id,
+        "name": base["name"],
+        "friendly_name": base["friendly_name"],
         "version": base["version"],
         "runtime": base["runtime"],
         "artifact_type": artifact_type,

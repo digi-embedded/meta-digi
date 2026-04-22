@@ -58,6 +58,7 @@ CONTAINER_ARTIFACT_TEMPLATE_DIR ?= ""
 CONTAINER_DEFAULT_ARTIFACT_TEMPLATE_DIR ?= "${CONTAINER_PROFILE_DIR}/artifact"
 META_DIGI_REPO_DIR ?= "${THISDIR}/../../.."
 CONTAINER_PACKAGE_ID ?= "${CONTAINER_NAME}"
+CONTAINER_FRIENDLY_NAME ?= "${CONTAINER_NAME}"
 CONTAINER_ARTIFACT_VERSION ?= "${PV}"
 CONTAINER_CREATE_ARGS ?= ""
 CONTAINER_CREATE_ARGS_PODMAN ?= "${CONTAINER_CREATE_ARGS}"
@@ -107,6 +108,7 @@ IMAGE_INSTALL = " \
 # Container type customizations LVGL
 ########################
 CONTAINER_INIT_SCRIPT:container-lvgl = "/start-lvgl-demo.sh"
+CONTAINER_FRIENDLY_NAME:container-lvgl = "LVGL Demo"
 CONTAINER_CREATE_ARGS_PODMAN:container-lvgl:ccmp25 = " \
     --privileged \
     --network none \
@@ -132,6 +134,7 @@ DISTRO_FEATURES:remove:container-lvgl = " wayland"
 # Container type customizations webkit
 ########################
 CONTAINER_INIT_SCRIPT:container-webkit = "/start-webkit-demo.sh"
+CONTAINER_FRIENDLY_NAME:container-webkit = "WebKit Demo"
 CONTAINER_CREATE_ARGS_PODMAN:container-webkit:ccmp25 = " \
     --privileged \
     --network host \
@@ -217,6 +220,7 @@ IMAGE_INSTALL:append:container-webkit:ccmp25 = " \
 # Container type customizations flutter
 ########################
 CONTAINER_INIT_SCRIPT:container-flutter = "/start-flutter-demo.sh"
+CONTAINER_FRIENDLY_NAME:container-flutter = "Flutter Demo"
 CONTAINER_CREATE_ARGS_PODMAN:container-flutter:ccmp25 = " \
     --privileged \
     --network none \
