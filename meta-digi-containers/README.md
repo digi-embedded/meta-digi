@@ -68,8 +68,10 @@ The script generates exactly one runtime artifact per execution.
 Notes:
 
 - `--output-dir` is optional. If omitted, the script writes the DCP to the current directory.
-- The generator appends a unique suffix to the input `package_id` using the
-  `created_at` timestamp encoded in base36 milliseconds.
+- If the input manifest omits `package_id`, the generator derives the final
+  `package_id` from `name` and appends a unique suffix using the `created_at`
+  timestamp encoded in base36 milliseconds.
+- If the input manifest provides `package_id`, that value is kept unchanged.
 - The output file name is always derived from the generated package ID and
   manifest fields as:
   - `<generated_package_id>_artifact_<runtime>_<device_types[0]>.tar.gz`
@@ -96,9 +98,10 @@ This generates a bundle named like:
 
 In those manifests:
 
-- `package_id` is the base identifier used to derive the final unique DCP package ID.
 - `name` is the stable logical container name stored on the target.
 - `friendly_name` is the user-facing label shown by DRM and the manager output when available.
+- the final `package_id` is generated automatically from `name` unless the
+  input manifest provides an explicit `package_id`
 
 ## Digi Remote Manager metrics support
 
@@ -200,16 +203,18 @@ Outputs are generated in:
 
 Final outputs:
 
-- `${CONTAINER_PACKAGE_ID}-<base36_created_at_ms>_artifact_podman_<device_types[0]>.tar.gz`
-- `${CONTAINER_PACKAGE_ID}-<base36_created_at_ms>_artifact_lxc_<device_types[0]>.tar.gz`
+- `${CONTAINER_NAME}-<base36_created_at_ms>_artifact_podman_<device_types[0]>.tar.gz`
+- `${CONTAINER_NAME}-<base36_created_at_ms>_artifact_lxc_<device_types[0]>.tar.gz`
 
 Notes:
 
-- The generator script appends a base36-encoded millisecond timestamp suffix to
-  the input `package_id`, stores that generated value in the final
-  `manifest.json`, and uses it in the DCP file name.
-- In Yocto builds, `CONTAINER_PACKAGE_ID` defaults to `${CONTAINER_NAME}` before
-  the generator adds the unique suffix.
+- The generator script derives `package_id` from the input `name` only when the
+  manifest does not provide one explicitly. In that default case it appends a
+  base36-encoded millisecond timestamp suffix, stores the generated `package_id`
+  in the final `manifest.json`, and uses it in the DCP file name.
+- In Yocto builds, `dey-image-container` does not set `package_id`, so the
+  generated value always starts from `${CONTAINER_NAME}` before the generator
+  adds the unique suffix.
 
 Intermediate outputs generated during the build (LXC bundle, Podman archive, OCI/rootfs files)
 are removed automatically at the end of artifact creation.
@@ -318,7 +323,6 @@ The artifact manifest is generated automatically and includes:
 Relevant variables:
 
 - `CONTAINER_NAME`
-- `CONTAINER_PACKAGE_ID`
 - `CONTAINER_FRIENDLY_NAME`
 - `CONTAINER_ARTIFACT_VERSION`
 - `CONTAINER_CREATE_ARGS_PODMAN`

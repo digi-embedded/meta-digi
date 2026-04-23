@@ -47,7 +47,6 @@ do_image_container_artifacts() {
         manifest_path="$2"
         create_args="$3"
         build_id="$4"
-        PACKAGE_ID="${CONTAINER_PACKAGE_ID}" \
         NAME="${CONTAINER_NAME}" \
         FRIENDLY_NAME="${CONTAINER_FRIENDLY_NAME}" \
         VERSION="${CONTAINER_ARTIFACT_VERSION}" \
@@ -69,7 +68,7 @@ do_image_container_artifacts() {
         LABELS_JSON="${CONTAINER_ARTIFACT_LABELS_JSON}" \
         python3 -c 'import json, os, sys; \
 parse_bool = lambda name: os.environ[name].strip().lower() == "true"; \
-payload = {"package_id": os.environ["PACKAGE_ID"], "name": os.environ["NAME"], "friendly_name": os.environ["FRIENDLY_NAME"], "version": os.environ["VERSION"], "runtime": os.environ["RUNTIME"], "registration_defaults": {"autostart": parse_bool("AUTOSTART"), "monitor": parse_bool("MONITOR"), "drm": {"enabled": parse_bool("DRM_ENABLED"), "stats_sample_interval_s": int(os.environ["DRM_STATS_SAMPLE_INTERVAL"]), "stats_list_of_metrics": json.loads(os.environ["DRM_STATS_LIST_OF_METRICS"])}, "restart": {"enabled": parse_bool("RESTART_ENABLED"), "max_retries": int(os.environ["RESTART_MAX_RETRIES"]), "window": int(os.environ["RESTART_WINDOW"]), "retry_delay": int(os.environ["RESTART_RETRY_DELAY"]) } }, "device_types": json.loads(os.environ["DEVICE_TYPES_JSON"]), "firmware_versions": os.environ["FIRMWARE_VERSIONS"], "build_id": os.environ["BUILD_ID"], "description": os.environ["DESCRIPTION"], "labels": json.loads(os.environ["LABELS_JSON"])}; \
+payload = {"name": os.environ["NAME"], "friendly_name": os.environ["FRIENDLY_NAME"], "version": os.environ["VERSION"], "runtime": os.environ["RUNTIME"], "registration_defaults": {"autostart": parse_bool("AUTOSTART"), "monitor": parse_bool("MONITOR"), "drm": {"enabled": parse_bool("DRM_ENABLED"), "stats_sample_interval_s": int(os.environ["DRM_STATS_SAMPLE_INTERVAL"]), "stats_list_of_metrics": json.loads(os.environ["DRM_STATS_LIST_OF_METRICS"])}, "restart": {"enabled": parse_bool("RESTART_ENABLED"), "max_retries": int(os.environ["RESTART_MAX_RETRIES"]), "window": int(os.environ["RESTART_WINDOW"]), "retry_delay": int(os.environ["RESTART_RETRY_DELAY"]) } }, "device_types": json.loads(os.environ["DEVICE_TYPES_JSON"]), "firmware_versions": os.environ["FIRMWARE_VERSIONS"], "build_id": os.environ["BUILD_ID"], "description": os.environ["DESCRIPTION"], "labels": json.loads(os.environ["LABELS_JSON"])}; \
 create_args = os.environ["CREATE_ARGS"].strip(); \
 payload.update({"create_args": create_args} if create_args else {}); \
 open(sys.argv[1], "w", encoding="utf-8").write(json.dumps(payload, indent=2) + "\n")' \

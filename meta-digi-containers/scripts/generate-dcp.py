@@ -48,8 +48,8 @@ def format_created_at(timestamp: datetime) -> str:
     return timestamp.astimezone(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
-def build_generated_package_id(base_package_id: str, *, created_at_ms: int) -> str:
-    return f"{base_package_id}-{to_base36(created_at_ms)}"
+def build_generated_package_id(base_name: str, *, created_at_ms: int) -> str:
+    return f"{base_name}-{to_base36(created_at_ms)}"
 
 
 def load_manifest(path: Path) -> dict:
@@ -139,7 +139,11 @@ def normalize_drm_stats_metrics(metrics: list[str]) -> list[str]:
 
 
 def validate_manifest(data: dict) -> dict:
-    package_id = validate_string(data, "package_id", path="manifest")
+    package_id = data.get("package_id")
+    if package_id is not None:
+        if not isinstance(package_id, str) or not package_id.strip():
+            fail("invalid manifest: package_id must be a non-empty string")
+        package_id = package_id.strip()
     version = validate_string(data, "version", path="manifest")
     runtime = validate_string(data, "runtime", path="manifest")
     if runtime not in {"lxc", "podman"}:
@@ -175,11 +179,7 @@ def validate_manifest(data: dict) -> dict:
     description = data.get("description", "")
     if description is not None and not isinstance(description, str):
         fail("invalid manifest: description must be a string")
-    name = data.get("name")
-    if name is not None:
-        if not isinstance(name, str) or not name.strip():
-            fail("invalid manifest: name must be a non-empty string")
-        name = name.strip()
+    name = validate_string(data, "name", path="manifest")
     friendly_name = data.get("friendly_name")
     if friendly_name is not None:
         if not isinstance(friendly_name, str) or not friendly_name.strip():
@@ -394,9 +394,13 @@ def main() -> int:
     created_at_dt = datetime.now(timezone.utc)
     created_at_ms = int(created_at_dt.timestamp() * 1000)
     created_at = format_created_at(created_at_dt)
-    generated_package_id = build_generated_package_id(
-        manifest["package_id"],
-        created_at_ms=created_at_ms,
+    generated_package_id = (
+        manifest["package_id"]
+        if manifest["package_id"]
+        else build_generated_package_id(
+            manifest["name"],
+            created_at_ms=created_at_ms,
+        )
     )
     output_name = build_output_name(
         package_id=generated_package_id,
