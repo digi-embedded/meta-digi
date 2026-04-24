@@ -116,6 +116,114 @@ swu_recipe_name() {
 	fi
 }
 
+#
+# For a given image recipe add/remove additional Yocto local.conf configuration
+#
+#  $1: image recipe
+#  $2: action (add or remove)
+#  $3: path to conf file
+#
+handle_extra_yocto_conf() {
+	local target="$1"
+	local action="$2"
+	local conf_file="$3"
+	local conf_string
+	local start_marker
+	local end_marker
+
+	if [[ ! -v EXTRA_YOCTO_CONF["$target"] ]]; then
+		return 0
+	fi
+
+	conf_string="${EXTRA_YOCTO_CONF[$target]}"
+
+	start_marker="# BEGIN extra config for ${target}"
+	end_marker="# END extra config for ${target}"
+
+	case "$action" in
+		add)
+			printf "\n[INFO] Adding extra local.conf configuration for target '%s'\n" "$target"
+
+			{
+				printf "\n%s\n" "$start_marker"
+				printf "%s\n" "$conf_string"
+				printf "%s\n" "$end_marker"
+			} >> "$conf_file"
+			;;
+
+		remove)
+			printf "\n[INFO] Removing extra local.conf configuration for target '%s'\n" "$target"
+
+			if grep -Fq "$start_marker" "$conf_file"; then
+				sed -i "\|${start_marker}|,\|${end_marker}|d" "$conf_file"
+			else
+				printf "\n[INFO] No extra local.conf configuration found for target '%s'\n" "$target"
+			fi
+			;;
+
+		*)
+			printf "\n[ERROR] Invalid Yocto conf action: %s\n" "$action"
+			return 1
+			;;
+	esac
+}
+
+#
+# For a given image recipe add/remove additional yocto layers required
+#
+#  $1: image recipe
+#  $2: action (add or remove)
+#
+handle_extra_yocto_layers() {
+	local target="$1"
+	local action="$2"
+	local items_string
+	local item
+	local layer_path
+
+	if [[ ! -v EXTRA_YOCTO_LAYERS["$target"] ]]; then
+		return 0
+	fi
+
+	items_string="${EXTRA_YOCTO_LAYERS[$target]}"
+
+	if [[ "$action" == "remove" ]]; then
+		reversed=""
+
+		# Convert string to array using spaces as separator
+		items=($items_string)
+
+		for (( i=${#items[@]} - 1; i >= 0; i-- )); do
+			reversed+="${items[$i]} "
+		done
+
+		items_string="$reversed"
+	fi
+
+	printf "\n[INFO] '%s' requires manage additional Yocto layers\n" "$target"
+
+	for item in $items_string; do
+		layer_path="${YOCTO_INST_DIR}/sources/${item}"
+
+		case "$action" in
+			add)
+				printf "\n[INFO] Adding layer '%s' for '%s'\n" "$item" "$target"
+				bitbake-layers add-layer "$layer_path"
+				;;
+
+			remove)
+				printf "\n[INFO] Removing layer: '%s' for '%s'\n" "$item" "$target"
+				bitbake-layers remove-layer "$layer_path"
+				;;
+
+			*)
+				printf "\n[ERROR] Invalid Yocto layer action: %s\n" "$action"
+				return 1
+				;;
+		esac
+	done
+}
+
 # Sanity check (Jenkins environment)
 [ -z "${DY_REVISION}" ]       && error "DY_REVISION not specified"
 [ -z "${DY_RM_WORK}" ]        && error "DY_RM_WORK not specified"
@@ -162,11 +270,24 @@ done<<-_EOF_
 	ccimx6ulrftest       dey-image-mft-module-rf
 	ccmp15-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter
 	ccmp13-dvk           core-image-base
-	ccmp25-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter
+	ccmp25-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter,dey-image-container-manager
 	ccimx91-dvk          core-image-base
 	ccimx93-dvk          dey-image-qt,dey-image-lvgl
-	ccimx95-dvk          dey-image-qt,dey-image-chromium,dey-image-lvgl,dey-image-flutter
+	ccimx95-dvk          dey-image-qt,dey-image-chromium,dey-image-lvgl,dey-image-flutter,dey-image-container-manager
 _EOF_
+
+# Set additional layers required for yocto images
+declare -A EXTRA_YOCTO_LAYERS
+EXTRA_YOCTO_LAYERS["dey-image-container-manager"]="\
+    meta-openembedded/meta-filesystems \
+    meta-virtualization \
+    meta-digi/meta-digi-containers"
+
+# Set additional configurations required for yocto images
+declare -A EXTRA_YOCTO_CONF
+EXTRA_YOCTO_CONF["dey-image-container-manager"]="\
+DISTRO_FEATURES:append = \" virtualization\" \
+"
 
 # Set default values if not provided by Jenkins
 DY_PLATFORMS="${DY_PLATFORMS:-${AVAILABLE_PLATFORMS}}"
@@ -284,10 +405,20 @@ for platform in ${DY_PLATFORMS}; do
 			cat conf/local.conf
 
 			for target in ${platform_targets:?}; do
+				# Add additional layers and configs required by this image
+				handle_extra_yocto_layers "$target" add
+				handle_extra_yocto_conf "$target" add "conf/local.conf"
+
 				printf "\n[INFO] Building the %s target.\n" "${target}"
 				# shellcheck disable=SC2046
 				time bitbake "${target}" $(swu_recipe_name "${target}")
+				printf "\n[INFO] Building the %s target was finished.\n" "${target}"
+
+				# Remove additional layers and configs after the build
+				handle_extra_yocto_conf "$target" remove "conf/local.conf"
+				handle_extra_yocto_layers "$target" remove
 			done
+
 			# Build the toolchain for DEY images
 			if [ "${DY_BUILD_TCHAIN}" = "true" ]; then
 				printf "\n[INFO] Building the toolchain for %s.\n" "${platform}"
