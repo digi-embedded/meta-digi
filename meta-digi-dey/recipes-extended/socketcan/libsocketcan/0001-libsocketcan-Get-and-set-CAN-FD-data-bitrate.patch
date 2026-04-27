@@ -12,12 +12,12 @@ https://www.spinics.net/lists/linux-can/msg00388.html
 
 Signed-off-by: Mike Engel <Mike.Engel@digi.com>
 ---
- include/libsocketcan.h |   5 ++
- src/libsocketcan.c     | 235 +++++++++++++++++++++++++++++++++++++++++++++++--
+ include/libsocketcan.h |   5 +
+ src/libsocketcan.c     | 235 ++++++++++++++++++++++++++++++++++++++++-
  2 files changed, 235 insertions(+), 5 deletions(-)
 
 diff --git a/include/libsocketcan.h b/include/libsocketcan.h
-index 1603a7b..f503ebc 100644
+index 1603a7b7e89b..f503ebc1e148 100644
 --- a/include/libsocketcan.h
 +++ b/include/libsocketcan.h
 @@ -43,6 +43,9 @@ int can_set_bittiming(const char *name, struct can_bittiming *bt);
@@ -40,7 +40,7 @@ index 1603a7b..f503ebc 100644
  int can_get_link_stats(const char *name, struct rtnl_link_stats64 *rls);
  
 diff --git a/src/libsocketcan.c b/src/libsocketcan.c
-index c802849..648b9cf 100644
+index 60142ccf6713..1f5be864a8e4 100644
 --- a/src/libsocketcan.c
 +++ b/src/libsocketcan.c
 @@ -66,6 +66,8 @@
@@ -100,10 +100,11 @@ index c802849..648b9cf 100644
  		if (req_info->ctrlmode != NULL) {
  			addattr_l(&req.n, 1024, IFLA_CAN_CTRLMODE,
  				  req_info->ctrlmode,
-@@ -870,6 +899,73 @@ int can_set_ctrlmode(const char *name, struct can_ctrlmode *cm)
+@@ -869,6 +898,73 @@ int can_set_ctrlmode(const char *name, struct can_ctrlmode *cm)
+ 	return set_link(name, 0, &req_info);
  }
  
- /**
++/**
 + * @internal
 + * set_bittiming - common helper function to setup the bittiming for
 + * can_set_bittiming() and can_set_data_bittiming().
@@ -170,10 +171,9 @@ index c802849..648b9cf 100644
 +	return set_link(name, 0, &req_info);
 +}
 +
-+/**
+ /**
   * @ingroup extern
   * can_set_bittiming - setup the bittiming.
-  *
 @@ -909,11 +1005,7 @@ int can_set_ctrlmode(const char *name, struct can_ctrlmode *cm)
  
  int can_set_bittiming(const char *name, struct can_bittiming *bt)
@@ -187,10 +187,12 @@ index c802849..648b9cf 100644
  }
  
  /**
-@@ -976,6 +1068,81 @@ int can_set_bitrate_samplepoint(const char *name, __u32 bitrate,
+@@ -974,6 +1066,81 @@ int can_set_bitrate_samplepoint(const char *name, __u32 bitrate,
+ 	return can_set_bittiming(name, &bt);
+ }
  
- /**
-  * @ingroup extern
++/**
++ * @ingroup extern
 + * can_set_data_bittiming - setup the data bittiming.
 + *
 + * @param name name of the can device. This is the netdev name, as ifconfig -a shows
@@ -264,11 +266,9 @@ index c802849..648b9cf 100644
 +	return can_set_data_bittiming(name, &bt);
 +}
 +
-+/**
-+ * @ingroup extern
+ /**
+  * @ingroup extern
   * can_get_state - get the current state of the device
-  *
-  * @param name name of the can device. This is the netdev name, as ifconfig -a shows
 @@ -1205,3 +1372,61 @@ int can_get_link_stats(const char *name, struct rtnl_link_stats64 *rls)
  {
  	return get_link(name, GET_LINK_STATS, rls);
