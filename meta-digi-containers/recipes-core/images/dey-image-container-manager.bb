@@ -34,6 +34,7 @@ CORE_ESSENTIALS = " \
 	base-passwd \
 	bluez5-init \
 	busybox \
+	busybox-syslog \
 	ca-certificates \
 	cryptodev-module \
 	firmwared \
