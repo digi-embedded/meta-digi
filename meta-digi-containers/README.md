@@ -99,43 +99,11 @@ This generates a bundle named like:
 In those manifests:
 
 - `name` is the stable logical container name stored on the target.
-- `friendly_name` is the user-facing label shown by DRM and the manager output when available.
+- `friendly_name` is the user-facing label shown by the manager output when available.
 - the final `package_id` is generated automatically from `name` unless the
   input manifest provides an explicit `package_id`
-
-## Digi Remote Manager metrics support
-
-`dey-image-container-manager` includes `cc-container-mng` that has the capability to
-publish container statistics through the local CCCS Python API.
-For generated DCPs, DRM behavior is controlled through `registration_defaults.drm`
-in the artifact manifest.
-Those manifest defaults establish the initial runtime policy on the target.
-After installation, mutable policy such as `autostart`, `monitor`, `restart`, and
-`drm` can be inspected or updated through the container manager `config`
-`get` and `set` operations without regenerating the DCP.
-The image recipe generates the DCP automatically from the following variables:
-
-- `CONTAINER_DRM_ENABLED`
-- `CONTAINER_DRM_STATS_SAMPLE_INTERVAL`
-- `CONTAINER_DRM_STATS_LIST_OF_METRICS`
-
-Example:
-
-```conf
-CONTAINER_DRM_ENABLED = "true"
-CONTAINER_DRM_STATS_SAMPLE_INTERVAL = "30"
-CONTAINER_DRM_STATS_LIST_OF_METRICS = "[\"cpu\", \"mem\"]"
-```
-
-`CONTAINER_DRM_STATS_LIST_OF_METRICS` follows the same semantics as the target
-manager:
-
-- `["all"]` is accepted as a shorthand input for all periodic metrics.
-- `[]` publishes no periodic metrics.
-- any other list publishes only the selected metrics.
-
-Generated manifests and target-side effective configuration use the explicit
-metric list.
+- `registration_defaults` is limited to local manager policy such as `autostart`,
+  `monitor`, and `restart`; this release does not generate DRM-specific defaults
 
 `dey-image-container-manager` also overrides the manager persistent base path
 through `CC_CONTAINER_PATH`, which defaults to `${ROOT_HOME}/cc-container` in
@@ -326,9 +294,6 @@ Relevant variables:
 - `CONTAINER_FRIENDLY_NAME`
 - `CONTAINER_ARTIFACT_VERSION`
 - `CONTAINER_CREATE_ARGS_PODMAN`
-- `CONTAINER_DRM_ENABLED`
-- `CONTAINER_DRM_STATS_SAMPLE_INTERVAL`
-- `CONTAINER_DRM_STATS_LIST_OF_METRICS`
 - `CONTAINER_FIRMWARE_VERSIONS`
 - `CONTAINER_DEVICE_TYPES_JSON`
 - `CONTAINER_ARTIFACT_DESCRIPTION`
