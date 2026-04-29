@@ -51,7 +51,7 @@ bt_init() {
 		# Load Bluetooth firmware on device
 		if MBT_TRANSPORT=/dev/ttySTM1 timeout 10 mbt download /lib/firmware/brcm/CYW55500A1_FCC.hcd; then
 			# Attach serial UART to the Bluetooth stack
-			btattach -B /dev/ttySTM1 -P bcm -S 921600 &
+			btattach -B /dev/ttySTM1 -P bcm -S 3000000 &
 			sleep 2
 
 			# Reconfigure the HCI interface with the expected MAC address
