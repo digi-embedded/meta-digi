@@ -14,7 +14,7 @@
 #===============================================================================
 
 # Bluetooth power GPIO
-BT_PWR_GPIO_NR="da9063-gpio 4"
+BT_PWR_GPIO_NR=##BT_GPIO##
 
 # set_gpio_value <gpio_nr> <value>
 set_gpio_value() {

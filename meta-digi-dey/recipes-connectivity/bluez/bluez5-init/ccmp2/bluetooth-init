@@ -26,7 +26,7 @@ log() {
 
 bt_power() {
 	#CCMP2 BT_REG_EN GPIO PZ5
-	gpioset gpiochip11 5="${1}"
+	gpioset ##BT_GPIO##="${1}"
 }
 
 set_btaddr() {

@@ -26,6 +26,9 @@ inherit update-rc.d systemd
 do_install() {
 	# INITSCRIPT
 	install -d ${D}${sysconfdir}/init.d/
+	# Set BT GPIO
+	sed -i -e "s,##BT_GPIO##,${BT_GPIO},g" \
+                ${WORKDIR}/${BT_INIT_FILE}
 	install -m 0755 ${WORKDIR}/${BT_INIT_FILE} ${D}${sysconfdir}/bluetooth-init
 	ln -sf /etc/bluetooth-init ${D}${sysconfdir}/init.d/bluetooth-init
 	# Set BT UART device

@@ -14,7 +14,7 @@
 #===============================================================================
 
 # Bluetooth power GPIO
-BT_EN_QCA_GPIO_NR="gpio5 9"
+BT_EN_QCA_GPIO_NR=##BT_GPIO##
 
 # set_gpio_value <gpio_nr> <value>
 set_gpio_value() {

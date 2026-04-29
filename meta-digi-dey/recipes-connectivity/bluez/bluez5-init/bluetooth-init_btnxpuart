@@ -27,7 +27,7 @@ is_not_wifi() {
 }
 
 power() {
-	is_not_wifi && gpioset 1 7="${1}"
+	is_not_wifi && gpioset ##BT_GPIO##="${1}"
 }
 
 set_btaddr() {
