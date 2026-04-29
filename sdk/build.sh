@@ -78,31 +78,36 @@ error() {
 # Copy buildresults (images, licenses, packages)
 #
 #  $1: destination directoy
+#  $2: action (full or partial)
 #
 copy_images() {
+	local action="$2"
+
 	# Copy individual packages only for 'release' builds, not for 'daily'.
 	# For 'daily' builds just copy the firmware images (the buildserver
 	# cannot afford such amount of disk space)
 	if [ "${DY_BUILD_RELEASE}" = "true" ]; then
-		cp -r tmp/deploy/* "${1}"/
+		cp -u -r tmp/deploy/* "${1}"/
 	else
-		cp -r tmp/deploy/images "${1}"/
+		cp -u -r tmp/deploy/images "${1}"/
 		if [ "${DY_BUILD_TCHAIN}" = "true" ]; then
 			if [ -d tmp/deploy/sdk ]; then
-				cp -r tmp/deploy/sdk "${1}"/
+				cp -u -r tmp/deploy/sdk "${1}"/
 			fi
 		fi
 	fi
 
-	# Images directory post-processing
-	#  - Jenkins artifact archiver does not copy symlinks, so remove them
-	#    beforehand to avoid ending up with several duplicates of the same
-	#    files.
-	#  - Remove 'README_-_DO_NOT_DELETE_FILES_IN_THIS_DIRECTORY.txt' files
-	#  - Create MD5SUMS file
-	find "${1}" -type l -delete
-	find "${1}" -type f -name 'README_-_DO_NOT_DELETE*' -delete
-	find "${1}" -type f -not -name MD5SUMS -print0 | xargs -r -0 md5sum | sed -e "s,${1}/,,g" | sort -k2,2 > "${1}"/MD5SUMS
+	if [ "${action}" = "full" ]; then
+		# Images directory post-processing
+		#  - Jenkins artifact archiver does not copy symlinks, so remove them
+		#    beforehand to avoid ending up with several duplicates of the same
+		#    files.
+		#  - Remove 'README_-_DO_NOT_DELETE_FILES_IN_THIS_DIRECTORY.txt' files
+		#  - Create MD5SUMS file
+		find "${1}" -type l -delete
+		find "${1}" -type f -name 'README_-_DO_NOT_DELETE*' -delete
+		find "${1}" -type f -not -name MD5SUMS -print0 | xargs -r -0 md5sum | sed -e "s,${1}/,,g" | sort -k2,2 > "${1}"/MD5SUMS
+	fi
 }
 
 #
@@ -417,6 +422,9 @@ for platform in ${DY_PLATFORMS}; do
 				# Remove additional layers and configs after the build
 				handle_extra_yocto_conf "$target" remove "conf/local.conf"
 				handle_extra_yocto_layers "$target" remove
+
+				# Partial build artifacts copy to destination path
+				copy_images "${_this_img_dir}" partial
 			done
 
 			# Build the toolchain for DEY images
@@ -425,7 +433,9 @@ for platform in ${DY_PLATFORMS}; do
 				time bitbake -c populate_sdk dey-toolchain
 			fi
 		)
-		copy_images "${_this_img_dir}"
+
+		# Full build artifacts copy to destination path
+		copy_images "${_this_img_dir}" full
 		popd
 	fi
 done
