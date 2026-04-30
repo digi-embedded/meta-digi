@@ -1,6 +1,7 @@
 [Unit]
 Description=CCCS daemon
-After=network.target
+Wants=network-online.target
+After=network-online.target
 # Do not limit the number of restarting times
 StartLimitIntervalSec=0
 
