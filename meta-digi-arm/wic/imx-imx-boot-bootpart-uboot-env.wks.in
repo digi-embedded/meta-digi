@@ -1,0 +1,19 @@
+# short-description: Create a bootable SD card image
+# long-description: Create a bootable SD card image with bootloader,
+# environment partition, and boot and rootfs partitions.
+#
+# The disk layout used is:
+#  - ---------- ------------ -------------- --------------
+# | | imx-boot | u-boot-env |     boot     |    rootfs    |
+#  - ---------- ------------ -------------- --------------
+# ^ ^          ^            ^              ^
+# | |          |            |              |
+# 0 |        8MiB - 32kiB   8MiB           264MiB
+#   ${IMX_BOOT_SEEK} 32 or 33kiB, see reference manual
+#
+part imxboot --source rawcopy --sourceparams="file=imx-boot.tagged" --ondisk mmcblk --no-table --align ${IMX_BOOT_SEEK}
+part u-boot-env --source empty --ondisk mmcblk --size 32k --offset 8160k --part-name u-boot-env --part-type 3DE21764-95BD-54BD-A5C3-4ABE786F38A8
+part /boot --source bootimg-partition --ondisk mmcblk --fstype=vfat --label boot --active --align 8192 --fixed-size 256
+part / --source rootfs --ondisk mmcblk --fstype=ext4 --label root --align 8192 --uuid b74d3700-a3c2-4806-8cb6-4e0fed784c7f
+
+bootloader --ptable gpt

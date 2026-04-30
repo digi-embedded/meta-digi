@@ -442,7 +442,7 @@ index 1c949774f..b56d3b77c 100644
  	if (stm32_usart_rx_dma_started(stm32_port) && !stm32_port->throttled) {
 -		spin_lock(&port->lock);
 +		uart_port_lock(port);
- 		size = stm32_usart_receive_chars(port, (sr & USART_SR_RTOF));
+ 		size = stm32_usart_receive_chars(port, false);
  		uart_unlock_and_check_sysrq(port);
  		if (size)
 @@ -1319,7 +1309,7 @@ static void stm32_usart_unthrottle(struct uart_port *port)

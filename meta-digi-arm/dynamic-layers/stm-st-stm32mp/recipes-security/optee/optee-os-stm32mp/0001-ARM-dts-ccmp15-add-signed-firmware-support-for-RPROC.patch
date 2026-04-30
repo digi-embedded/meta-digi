@@ -1,0 +1,27 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Wed, 18 Mar 2026 22:07:56 +0100
+Subject: [PATCH] ARM: dts: ccmp15: add signed firmware support for RPROC
+
+Enable the Cortex-M4 inter-processor communication node so remoteproc can
+load and authenticate signed firmware binaries.
+
+https://onedigi.atlassian.net/browse/DEL-9920
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ core/arch/arm/dts/ccmp15-dvk.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/arch/arm/dts/ccmp15-dvk.dtsi b/core/arch/arm/dts/ccmp15-dvk.dtsi
+index ff7ee6504..ea88e3e1e 100644
+--- a/core/arch/arm/dts/ccmp15-dvk.dtsi
++++ b/core/arch/arm/dts/ccmp15-dvk.dtsi
+@@ -259,7 +259,7 @@
+
+ &m4_rproc {
+ 	memory-region = <&retram>, <&mcusram1>, <&mcusram2>, <&mcusram3>;
+-	status = "disabled";
++	status = "okay";
+ };
+
+ &mcusram1 {

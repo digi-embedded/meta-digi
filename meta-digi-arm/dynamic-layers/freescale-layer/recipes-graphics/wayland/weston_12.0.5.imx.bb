@@ -12,4 +12,4 @@ require recipes-graphics/wayland/weston_12.0.4.imx.bb
 FILESEXTRAPATHS:prepend := "${COREBASE}/../meta-freescale/recipes-graphics/wayland/weston:"
 
 SRCBRANCH = "weston-imx-12.0.5"
-SRCREV = "fce3595b96eab0b2b432ceae070a65db7d16d866"
+SRCREV = "a29bbd0f65e68b9beda47a94144bd9b2801c42cb"

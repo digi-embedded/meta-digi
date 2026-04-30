@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2025, Digi International Inc.
+# Copyright (C) 2022-2026, Digi International Inc.
 
 SUMMARY = "Murata Infineon firmware binaries"
 SECTION = "base"
@@ -6,9 +6,9 @@ LICENSE = "CYPRESS-EULA"
 LIC_FILES_CHKSUM = "file://${S}/cyw-bt-patch/LICENCE.cypress;md5=cbc5f665d04f741f1e006d2096236ba7"
 
 SRC_URI = " \
-    https://github.com/Infineon/ifx-linux-firmware/archive/refs/tags/release-v6.1.97-2025_0219.tar.gz;destsuffix=cyw-fmac-fw-ifx;name=cyw-fmac-fw-ifx \
-    git://github.com/murata-wireless/cyw-fmac-fw;protocol=http;branch=jaculus;destsuffix=cyw-fmac-fw;name=cyw-fmac-fw \
-    git://github.com/murata-wireless/cyw-fmac-nvram;protocol=http;branch=jaculus;destsuffix=cyw-fmac-nvram;name=cyw-fmac-nvram \
+    git://github.com/Infineon/ifx-linux-firmware;protocol=http;branch=master;destsuffix=ifx-linux-firmware-longma;name=ifx-linux-firmware-longma \
+    git://github.com/murata-wireless/cyw-fmac-fw;protocol=http;branch=longma;destsuffix=cyw-fmac-fw;name=cyw-fmac-fw \
+    git://github.com/murata-wireless/cyw-fmac-nvram;protocol=http;branch=longma;destsuffix=cyw-fmac-nvram;name=cyw-fmac-nvram \
     git://github.com/murata-wireless/cyw-bt-patch;protocol=http;branch=master;destsuffix=cyw-bt-patch;name=cyw-bt-patch \
     git://github.com/murata-wireless/cyw-fmac-utils-imx32;protocol=http;branch=master;destsuffix=cyw-fmac-utils-imx32;name=cyw-fmac-utils-imx32 \
     git://github.com/murata-wireless/cyw-fmac-utils-imx64;protocol=http;branch=master;destsuffix=cyw-fmac-utils-imx64;name=cyw-fmac-utils-imx64 \
@@ -22,14 +22,13 @@ SRC_URI:append:ccmp1 = " \
 "
 
 SRC_URI:append:ccmp2 = " \
-    file://cyfmac55500-sdio.txt \
     file://mbt \
 "
 
-SRC_URI[cyw-fmac-fw-ifx.sha256sum]="1ff021a1b3ef1608f5c0ad4b39fec8e0f5cb8c204d178f1de0f8215d06abc8d9"
-SRCREV_cyw-fmac-fw="a5cb86a5d11192ba6e7738f82b4d2dc9eeeca679"
-SRCREV_cyw-fmac-nvram="146d1438372b6c4857f92b8769b91c1801d3ede2"
-SRCREV_cyw-bt-patch="23de75a4e5384d16e8478f668b769b0d24ede0de"
+SRCREV_ifx-linux-firmware-longma="f24790e6fa2f05a0f974236bed7da7fa493b9ad2"
+SRCREV_cyw-fmac-fw="8cdb1886852e0b5f9876654619a8371b952bf248"
+SRCREV_cyw-fmac-nvram="411c87d4cf924a1a5415273265fd54d7d7d4044f"
+SRCREV_cyw-bt-patch="64ac86708253e12d7089cf75ef8dcc9b30594958"
 SRCREV_cyw-fmac-utils-imx32="dad9ed86bf6691910197bc91d42a45ea8175180c"
 SRCREV_cyw-fmac-utils-imx64="368bd9a4163e115468d79c238192b41f6266c523"
 
@@ -73,12 +72,15 @@ do_install:append:ccmp1 () {
 
 	# Install Bluetooth patch *.HCD file
 	# For Murata 2AE (LBEE5PK2AE-564)
-	install -m 444 ${S}/cyw-bt-patch/BCM4373A0_001.001.025.0103.0155.FCC.CE.2AE.hcd ${D}${base_libdir}/firmware/brcm/BCM4373A0_FCC.CE.hcd
-	install -m 444 ${S}/cyw-bt-patch/BCM4373A0_001.001.025.0103.0156.JRL.2AE.hcd ${D}${base_libdir}/firmware/brcm/BCM4373A0_JRL.hcd
+	install -m 444 ${S}/cyw-bt-patch/BCM4373A0_001.001.025.0103.0155.FCC.CE.2AE.hcd ${D}${base_libdir}/firmware/brcm/
+	install -m 444 ${S}/cyw-bt-patch/BCM4373A0_001.001.025.0103.0156.JRL.2AE.hcd ${D}${base_libdir}/firmware/brcm/
+	ln -sf BCM4373A0_001.001.025.0103.0155.FCC.CE.2AE.hcd ${D}${base_libdir}/firmware/brcm/BCM4373A0_FCC.hcd
+	ln -sf BCM4373A0_001.001.025.0103.0155.FCC.CE.2AE.hcd ${D}${base_libdir}/firmware/brcm/BCM4373A0_CE.hcd
+	ln -sf BCM4373A0_001.001.025.0103.0156.JRL.2AE.hcd ${D}${base_libdir}/firmware/brcm/BCM4373A0_JRL.hcd
 
 	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
 	# For Murata 2AE (LBEE5PK2AE-564)
-	install -m 444 ${S}/ifx-linux-firmware-release-v6.1.97-2025_0219/firmware/cyfmac4373-sdio.industrial.bin ${D}${base_libdir}/firmware/cypress/cyfmac4373-sdio.bin
+	install -m 444 ${S}/ifx-linux-firmware-longma/firmware/cyfmac4373-sdio.industrial.bin ${D}${base_libdir}/firmware/cypress/cyfmac4373-sdio.bin
 	install -m 444 cyfmac4373-sdio_US.clm_blob ${D}${base_libdir}/firmware/cypress/cyfmac4373-sdio_US.clm_blob
 	install -m 444 cyfmac4373-sdio_World.clm_blob ${D}${base_libdir}/firmware/cypress/cyfmac4373-sdio_World.clm_blob
 
@@ -92,20 +94,48 @@ do_install:append:ccmp2 () {
 	install -d ${D}${base_libdir}/firmware/brcm
 
 	# Install Bluetooth patch *.HCD file
-	# For Murata 2GY (LBEE5HY2GY) and Murata 2FY (LBEE5HY2FY)
-	install -m 444 ${S}/cyw-bt-patch/CYW55500A1_001.002.032.0040.0033.2FY.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1.hcd
+	# For Murata 2FY (LBEE5HY2FY)
+	install -m 444 ${S}/cyw-bt-patch/CYW55500A1_001.002.032.0040.0033.FCC.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/
+	install -m 444 ${S}/cyw-bt-patch/CYW55500A1_001.002.032.0040.0032.CE.JP.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/
+	ln -sf CYW55500A1_001.002.032.0040.0033.FCC.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1_FCC.hcd
+	ln -sf CYW55500A1_001.002.032.0040.0032.CE.JP.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1_CE.hcd
+	ln -sf CYW55500A1_001.002.032.0040.0032.CE.JP.2FY.2GY.hcd ${D}${base_libdir}/firmware/brcm/CYW55500A1_JP.hcd
 
 	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
-	# For Murata 2GY (LBEE5HY2GY) and Murata 2FY (LBEE5HY2FY)
-	install -m 444 ${S}/ifx-linux-firmware-release-v6.1.97-2025_0219/firmware/cyfmac55500-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.trxse
-	install -m 444 ${S}/cyw-fmac-fw/cyfmac55500-sdio.2FY.clm_blob ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio_US.clm_blob
+	# For Murata 2FY (LBEE5HY2FY)
+	install -m 444 ${S}/ifx-linux-firmware-longma/firmware/cyfmac55500-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.trxse
+	install -m 444 ${S}/cyw-fmac-fw/cyfmac55500-sdio.2FY.STAIndoor.clm_blob  ${D}/${base_libdir}/firmware/cypress/
+	ln -sf cyfmac55500-sdio.2FY.STAIndoor.clm_blob ${D}/${base_libdir}/firmware/cypress/cyfmac55500-sdio_US.clm_blob
 
 	# Install NVRAM files (*.txt)
-	# For Murata 2GY (LBEE5HY2GY) and Murata 2FY (LBEE5HY2FY)
-	install -m 444 ${S}/cyfmac55500-sdio.txt ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.txt
+	# For Murata 2FY (LBEE5HY2FY)
+	install -m 444 ${S}/cyw-fmac-nvram/cyfmac55500-sdio.2FY.txt ${D}${base_libdir}/firmware/cypress/cyfmac55500-sdio.txt
 
 	# Install Manufacturing Bluetooth Test tool (MBT)
 	install -m 755 mbt ${D}${sbindir}
+}
+
+do_install:append:ccimx95 () {
+	install -d ${D}${base_libdir}/firmware/cypress
+	install -d ${D}${base_libdir}/firmware/brcm
+
+	# Install Bluetooth patch *.HCD file
+	# For Murata 2EC (LBEE5XV2EC)
+	install -m 444 ${S}/cyw-bt-patch/CYW55560A1_001.002.087.0269.0100.FCC.2EA.sAnt.hcd ${D}${base_libdir}/firmware/brcm/
+	install -m 444 ${S}/cyw-bt-patch/CYW55560A1_001.002.087.0269.0106.EU.JP.2EA.sAnt.hcd ${D}${base_libdir}/firmware/brcm/
+	ln -sf CYW55560A1_001.002.087.0269.0100.FCC.2EA.sAnt.hcd ${D}${base_libdir}/firmware/brcm/CYW55560A1_FCC.hcd
+	ln -sf CYW55560A1_001.002.087.0269.0106.EU.JP.2EA.sAnt.hcd ${D}${base_libdir}/firmware/brcm/CYW55560A1_CE.hcd
+	ln -sf CYW55560A1_001.002.087.0269.0106.EU.JP.2EA.sAnt.hcd ${D}${base_libdir}/firmware/brcm/CYW55560A1_JP.hcd
+
+	# Install WLAN firmware file (*.bin) and Regulatory binary file (*.clm_blob)
+	# For Murata 2EC (LBEE5XV2EC)
+	install -m 444 ${S}/ifx-linux-firmware-longma/firmware/cyfmac55572-sdio.trxse ${D}${base_libdir}/firmware/cypress/cyfmac55572-sdio.trxse
+	install -m 444 ${S}/cyw-fmac-fw/cyfmac55572-sdio.2EA.clm_blob_STAIndoor  ${D}/${base_libdir}/firmware/cypress/
+	ln -sf cyfmac55572-sdio.2EA.clm_blob_STAIndoor ${D}/${base_libdir}/firmware/cypress/cyfmac55572-sdio_US.clm_blob
+
+	# Install NVRAM files (*.txt)
+	# For Murata 2EC (LBEE5XV2EC)
+	install -m 444 ${S}/cyw-fmac-nvram/cyfmac5557x-pcie_sdio.sant.2EA_2EC.txt ${D}${base_libdir}/firmware/cypress/cyfmac55572-sdio.txt
 }
 
 inherit update-rc.d systemd
@@ -147,4 +177,4 @@ INSANE_SKIP:${PN} += "build-deps"
 INSANE_SKIP:${PN} += "file-rdeps"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ccmp1|ccmp2)"
+COMPATIBLE_MACHINE = "(ccmp1|ccmp2|ccimx95)"

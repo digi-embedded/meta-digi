@@ -1,0 +1,51 @@
+cmake_minimum_required(VERSION 3.10)
+project(lvgl)
+
+set(CMAKE_C_STANDARD 99)#C99 # lvgl officially support C99 and above
+set(CMAKE_CXX_STANDARD 17)#C17
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+
+find_package(PkgConfig)
+pkg_check_modules(PKG_WAYLAND wayland-client wayland-cursor xkbcommon)
+
+# Wayland protocols
+find_program(WAYLAND_SCANNER_EXECUTABLE NAMES wayland-scanner)
+pkg_check_modules(WAYLAND_PROTOCOLS REQUIRED wayland-protocols>=1.25)
+pkg_get_variable(WAYLAND_PROTOCOLS_BASE wayland-protocols pkgdatadir)
+
+macro(wayland_generate protocol_xml_file output_dir output_name target)
+    set(output_file_noext "${output_dir}/${output_name}")
+    add_custom_command(OUTPUT "${output_file_noext}.h"
+        COMMAND "${WAYLAND_SCANNER_EXECUTABLE}" client-header "${protocol_xml_file}" "${output_file_noext}.h"
+        DEPENDS "${protocol_xml_file}"
+        VERBATIM)
+
+    add_custom_command(OUTPUT "${output_file_noext}.c"
+        COMMAND "${WAYLAND_SCANNER_EXECUTABLE}" private-code "${protocol_xml_file}" "${output_file_noext}.c"
+        DEPENDS "${protocol_xml_file}"
+        VERBATIM)
+
+    if(NOT EXISTS ${protocol_xml_file})
+        message("Protocol XML file not found: " ${protocol_xml_file})
+    else()
+        set_property(TARGET ${target} APPEND PROPERTY SOURCES  "${output_file_noext}.h" "${output_file_noext}.c")
+    endif()
+endmacro()
+
+set(WAYLAND_PROTOCOLS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/wl_protocols")
+file(MAKE_DIRECTORY ${WAYLAND_PROTOCOLS_DIR})
+
+add_custom_target(generate_xdg_shell_protocol ALL)
+wayland_generate("${WAYLAND_PROTOCOLS_BASE}/stable/xdg-shell/xdg-shell.xml" "${WAYLAND_PROTOCOLS_DIR}" "wayland_xdg_shell"  generate_xdg_shell_protocol)
+
+add_subdirectory(lvgl)
+target_include_directories(lvgl PRIVATE ${WAYLAND_PROTOCOLS_DIR})
+target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR})
+
+add_executable(main main.c mouse_cursor_icon.c ${WAYLAND_PROTOCOLS_DIR}/wayland_xdg_shell.c)
+
+target_link_libraries(main lvgl lvgl::examples lvgl::demos ${PKG_WAYLAND_LIBRARIES} m pthread)
+add_custom_target (run COMMAND ${EXECUTABLE_OUTPUT_PATH}/main DEPENDS main)
+

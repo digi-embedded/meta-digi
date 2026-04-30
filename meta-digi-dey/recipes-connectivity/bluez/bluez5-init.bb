@@ -1,11 +1,19 @@
-# Copyright (C) 2022-2025, Digi International Inc.
+# Copyright (C) 2022-2026, Digi International Inc.
 
 SUMMARY = "Bluetooth init scripts"
 LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6"
 
+BT_INIT_FILE = "bluetooth-init"
+BT_INIT_FILE:ccimx8m = "bluetooth-init_btdigi_qca65x4"
+BT_INIT_FILE:ccimx8x = "bluetooth-init_btdigi_qca65x4"
+BT_INIT_FILE:ccimx91 = "bluetooth-init_btnxpuart"
+BT_INIT_FILE:ccimx93 = "bluetooth-init_btnxpuart"
+BT_INIT_FILE:ccimx95 = "bluetooth-init_btbcm_hciuart"
+BT_INIT_FILE:ccmp1 = "bluetooth-init_btbcm_hciuart"
+
 SRC_URI = " \
-    file://bluetooth-init \
+    file://${BT_INIT_FILE} \
     file://bluetooth-init.service \
 "
 
@@ -18,8 +26,11 @@ inherit update-rc.d systemd
 do_install() {
 	# INITSCRIPT
 	install -d ${D}${sysconfdir}/init.d/
-	install -m 0755 ${WORKDIR}/bluetooth-init ${D}${sysconfdir}/bluetooth-init
+	install -m 0755 ${WORKDIR}/${BT_INIT_FILE} ${D}${sysconfdir}/bluetooth-init
 	ln -sf /etc/bluetooth-init ${D}${sysconfdir}/init.d/bluetooth-init
+	# Set BT UART device
+	sed -i -e "s,##BT_TTY##,dev-${BT_TTY}.device,g" \
+                ${WORKDIR}/bluetooth-init.service
 	# SYSTEMD
 	install -d ${D}${systemd_unitdir}/system/
 	install -m 0644 ${WORKDIR}/bluetooth-init.service ${D}${systemd_unitdir}/system/bluetooth-init.service
@@ -59,10 +70,12 @@ SYSTEMD_SERVICE:${PN} = "bluetooth-init.service"
 RDEPENDS:${PN} = "initscripts-functions"
 
 # IW61x Bluetooth support requires the WiFi FW support
-RDEPENDS:${PN}:append:ccimx9 = " firmware-nxp-wifi-nxpiw612-sdio"
+RDEPENDS:${PN}:append:ccimx91 = " firmware-nxp-wifi-nxpiw612-sdio"
+RDEPENDS:${PN}:append:ccimx93 = " firmware-nxp-wifi-nxpiw612-sdio"
 # Murata - Infineon combo chip requires both WiFi and Bluetooth firmware
 RDEPENDS:${PN}:append:ccmp1 = " firmware-murata-infineon"
 RDEPENDS:${PN}:append:ccmp2 = " firmware-murata-infineon"
+RDEPENDS:${PN}:append:ccimx95 = " firmware-murata-infineon"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ccimx6$|ccimx6ul|ccimx8m|ccimx8x|ccimx9|ccmp1|ccmp2)"

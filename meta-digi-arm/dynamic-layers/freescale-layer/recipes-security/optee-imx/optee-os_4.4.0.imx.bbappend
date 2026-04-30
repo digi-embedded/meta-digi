@@ -1,4 +1,4 @@
-# Copyright (C) 2024, 2025, Digi International Inc.
+# Copyright (C) 2024-2026, Digi International Inc.
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += "file://environment.d-optee-sdk.sh"
@@ -9,6 +9,7 @@ SRC_URI:append:dey = " \
     file://0003-core-imx-support-ccimx93-dvk.patch \
     file://0004-core-ccimx93-enable-AES_HUK-trusted-application.patch \
     file://0005-core-imx-support-ccimx95-dvk.patch \
+    file://0006-ccimx95-configure-console-on-LPUART1.patch \
 "
 
 OPTEEMACHINE:ccimx8mm = "imx-ccimx8mmdvk"

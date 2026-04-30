@@ -116,6 +116,7 @@ BOOTLOADER_SEEK_BOOTPART ?= "0"
 # This is otherwise forced by systemd because of hard-coded paths
 # in systemd source code.
 ROOT_HOME ?= "/root"
+CC_CONTAINER_PATH ?= "${ROOT_HOME}/cc-container"
 
 # Default IMAGE_FSTYPES for eMMC/NAND
 IMAGE_FSTYPES ?= "${@ \
@@ -130,3 +131,7 @@ IMAGE_FSTYPES ?= "${@ \
 		'' , d), \
 	d) \
 }"
+
+# Systemd logind power key event
+LOGIND_HANDLE_POWER_KEY ??= "suspend"
+LOGIND_HANDLE_POWER_KEY_LONGPRESS ??= "poweroff"

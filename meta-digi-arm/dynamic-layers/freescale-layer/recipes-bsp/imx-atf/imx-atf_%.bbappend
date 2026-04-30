@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2025, Digi International Inc.
+# Copyright (C) 2022-2026, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -13,7 +13,10 @@ SRC_URI:append:dey = " \
     file://0008-ccimx91-use-UART6-for-the-default-console.patch \
     file://0009-ccimx95-set-DVK-console-to-LPUART6.patch \
     file://0010-ccimx95-enable-non-secure-non-privilege-access-to-GP.patch \
+    file://0011-Revert-ccimx95-set-DVK-console-to-LPUART6.patch \
 "
+
+SRCREV = "8ec7e38031f8c022a9760a8da77bdc6e1938db8c"
 
 BOOT_TOOLS = "imx-boot-tools"
 

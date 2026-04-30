@@ -1,4 +1,4 @@
-# Copyright (C) 2025, Digi International Inc.
+# Copyright (C) 2025-2026, Digi International Inc.
 
 DESCRIPTION = "Prebuilt Wi-Fi tools for NXP IW61x chip"
 SECTION = "Binaries"
@@ -20,4 +20,4 @@ do_install() {
     install -m 0755 ${WORKDIR}/nanapp ${D}${bindir}
 }
 
-COMPATIBLE_MACHINE = "(ccimx9)"
+COMPATIBLE_MACHINE = "(ccimx91|ccimx93)"

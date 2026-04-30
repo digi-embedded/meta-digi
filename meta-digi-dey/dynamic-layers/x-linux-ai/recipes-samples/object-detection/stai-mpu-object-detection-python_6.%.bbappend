@@ -1,4 +1,4 @@
-# Copyright (C) 2024,2025, Digi International Inc.
+# Copyright (C) 2024-2026, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/../common:${THISDIR}/files:"
 
@@ -7,6 +7,7 @@ SRC_URI += " \
     file://patches/0001-object-detection-remove-weston-user-check-from-launc.patch \
     file://patches/0002-object-detection-reduce-font-size-for-big-screens.patch \
     file://patches/0003-object-detection-set-camera-preview-to-640x480.patch \
+    ${@bb.utils.contains("BBFILE_COLLECTIONS", "x-linux-isp", "file://patches/0004-object-detection-fix-initialization-issue-with-x-lin.patch", "", d)} \
 "
 
 do_install:append () {
@@ -25,6 +26,3 @@ RDEPENDS:${PN} += " \
 FILES:${PN} += " \
     ${systemd_unitdir}/demos/scripts/* \
 "
-
-# Make this recipe available only for the CCMP25 platform.
-COMPATIBLE_MACHINE = "(ccmp25)"

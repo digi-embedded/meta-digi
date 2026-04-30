@@ -112,41 +112,89 @@ fi
 RPROC_KEY_PASS_FILE="${CONFIG_SIGN_KEYS_PATH}/rproc-keys/key_pass.txt"
 
 # Generate random keys for Cortex-M coprocessor if they don't exist
-if [ "${PLATFORM}" = "ccmp25" ]; then
+if [ "${PLATFORM}" = "ccmp15" ] || [ "${PLATFORM}" = "ccmp25" ]; then
 	N_PUBK="$(ls -l ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/publicKey*.pem 2>/dev/null | wc -l)"
 	N_PRVK="$(ls -l ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/privateKey*.pem 2>/dev/null | wc -l)"
 	N_DERK="$(ls -l ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/publicKey*.der 2>/dev/null | wc -l)"
 	install -d "${CONFIG_SIGN_KEYS_PATH}/rproc-keys/"
-	if [ "${N_PUBK}" = "1" ] && [ "${N_PRVK}" = "1" ] && [ "${N_DERK}" = "1" ] && [ -f "${RPROC_KEY_PASS_FILE}" ]; then
-		# PKI tree already exists.
-		echo "Using existing PKI tree for Cortex-M coprocessor"
-	elif [ "${N_PUBK}" != "1" ] && [ "${N_PRVK}" != 1 ] && [ "${N_DERK}" != "1" ] && [ ! -f "${RPROC_KEY_PASS_FILE}" ]; then
-		# Random password
-		password="$(openssl rand -base64 32)"
-		echo "Generating random key"
-		if ! STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/rproc-keys/" -pwd ${password}; then
-			echo "[ERROR] Could not generate PKI tree for Cortex-M coprocessor"
-			exit 1
-		fi
-		echo "${password}" > "${RPROC_KEY_PASS_FILE}"
-		chmod 400 "${RPROC_KEY_PASS_FILE}"
-		# Generate DER version of public key
-		if ! openssl ec -pubin -in ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/publicKey.pem \
-		           -outform DER -pubout \
-		           -out ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/publicKey.der; then
-			echo "[ERROR] Could not generate DER public key for Cortex-M coprocessor"
+
+	if [ "${PLATFORM}" = "ccmp15" ]; then
+		if [ "${N_PUBK}" = "1" ] && [ "${N_PRVK}" = "1" ]; then
+			# PKI tree already exists.
+			echo "Using existing PKI tree for Cortex-M coprocessor"
+		elif [ "${N_PUBK}" = "0" ] && [ "${N_PRVK}" = "0" ]; then
+			echo "Generating random key"
+			if ! openssl genrsa -out "${CONFIG_SIGN_KEYS_PATH}/rproc-keys/privateKey.pem" 2048; then
+				echo "[ERROR] Could not generate private key for Cortex-M coprocessor"
+				exit 1
+			fi
+			chmod 444 "${CONFIG_SIGN_KEYS_PATH}/rproc-keys/privateKey.pem"
+			# Generate public key
+			if ! openssl rsa -pubout -in ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/privateKey.pem \
+				-out ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/publicKey.pem; then
+				echo "[ERROR] Could not generate public key for Cortex-M coprocessor"
+				exit 1
+			fi
+			chmod 400 "${CONFIG_SIGN_KEYS_PATH}/rproc-keys/publicKey.pem"
+		else
+			echo "[ERROR] Could not generate PKI tree for Cortex-M coprocessor. An incomplete PKI tree may already exist."
 			exit 1
 		fi
 	else
-		echo "[ERROR] Could not generate PKI tree for Cortex-M coprocessor. An incomplete PKI tree may already exist."
-		exit 1
+		if [ "${N_PUBK}" = "1" ] && [ "${N_PRVK}" = "1" ] && [ "${N_DERK}" = "1" ] && [ -f "${RPROC_KEY_PASS_FILE}" ]; then
+			# PKI tree already exists.
+			echo "Using existing PKI tree for Cortex-M coprocessor"
+		elif [ "${N_PUBK}" = "0" ] && [ "${N_PRVK}" = "0" ] && [ "${N_DERK}" = "0" ] && [ ! -f "${RPROC_KEY_PASS_FILE}" ]; then
+			# Random password
+			password="$(openssl rand -base64 32)"
+			echo "Generating random key"
+			if ! STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/rproc-keys/" -pwd ${password}; then
+				echo "[ERROR] Could not generate PKI tree for Cortex-M coprocessor"
+				exit 1
+			fi
+			echo "${password}" > "${RPROC_KEY_PASS_FILE}"
+			chmod 400 "${RPROC_KEY_PASS_FILE}"
+			# Generate DER version of public key
+			if ! openssl ec -pubin -in ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/publicKey.pem \
+				-outform DER -pubout \
+				-out ${CONFIG_SIGN_KEYS_PATH}/rproc-keys/publicKey.der; then
+				echo "[ERROR] Could not generate DER public key for Cortex-M coprocessor"
+				exit 1
+			fi
+		else
+			echo "[ERROR] Could not generate PKI tree for Cortex-M coprocessor. An incomplete PKI tree may already exist."
+			exit 1
+		fi
 	fi
 fi
 
-if [ -n "${CONFIG_FSBL_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_FIP_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_RPROC_ENCRYPT_KEYNAME}" ]; then
-
-	# Generate random keys if they don't exist
-	if [ "${PLATFORM}" = "ccmp25" ]; then
+# Generate random keys if they don't exist
+if [ "${PLATFORM}" = "ccmp13" ]; then
+	if [ -n "${CONFIG_FSBL_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_FIP_ENCRYPT_KEYNAME}" ]; then
+		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" ]; then
+			echo "Generating random encryption key for FSBL"
+			if ! STM32MP_KeyGen_CLI -rand 16 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}"; then
+				echo "[ERROR] Failed to generate 16-byte FSBL encryption key"
+				exit 1
+			fi
+			chmod 444 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}"
+		fi
+		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}" ]; then
+			echo "Generating encryption key for FIP"
+			if ! hexdump -e '/1 "%02x"' "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" > "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"; then
+				echo "[ERROR] Failed to generate 32-byte FIP encryption key"
+				exit 1
+			fi
+			if ! hexdump -e '/1 "%02x"' "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" >> "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"; then
+				echo "[ERROR] Failed to generate 32-byte FIP encryption key"
+				exit 1
+			fi
+			printf "\n" >> "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"
+			chmod 444 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"
+		fi
+	fi
+elif [ "${PLATFORM}" = "ccmp25" ]; then
+	if [ -n "${CONFIG_FSBL_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_FIP_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_RPROC_ENCRYPT_KEYNAME}" ]; then
 		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" ]; then
 			echo "Generating random encryption key for FSBL"
 			if ! STM32MP_KeyGen_CLI -rand 16 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}"; then
@@ -171,8 +219,5 @@ if [ -n "${CONFIG_FSBL_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_FIP_ENCRYPT_KEYNAME
 			fi
 			chmod 444 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_RPROC_ENCRYPT_KEYNAME}"
 		fi
-	else
-		echo "[ERROR] Could not generate encryption keys. Platform not supported."
-		exit 1
 	fi
 fi

@@ -1,4 +1,4 @@
-# Copyright (C) 2024,2025 Digi International Inc.
+# Copyright (C) 2024-2026 Digi International Inc.
 
 SUMMARY = "Trustfence fscrypt command line tool"
 SECTION = "console/tools"
@@ -20,9 +20,37 @@ SRC_URI[aarch64-libteecv1.sha256sum] = "43c2e900ca8d0aaac15963ffb5a7c57e3dd07613
 SRC_URI[arm-libteecv1.md5sum] = "6b153a51a4c3b77d8172ce37c6542c59"
 SRC_URI[arm-libteecv1.sha256sum] = "bc65a13d234da8d4a9c0cfd6d0a8672e8fe1c1c884180f47121d41bd7dcefafe"
 
+SRC_URI:append = " \
+    file://secure-storage-init.service \
+    file://secure-storage-init.sh \
+    file://secure-storage \
+"
+
+# Install secure storage service and script
+do_install:append() {
+    # systemd unit
+    install -d ${D}${systemd_unitdir}/system
+    install -m 0644 ${WORKDIR}/secure-storage-init.service \
+        ${D}${systemd_unitdir}/system/secure-storage-init.service
+
+    # script
+    install -d ${D}${sbindir}
+    install -m 0755 ${WORKDIR}/secure-storage-init.sh \
+        ${D}${sbindir}/secure-storage-init.sh
+
+    # environment
+    install -d ${D}${sysconfdir}/default/
+    install -m 0644 ${WORKDIR}/secure-storage \
+        ${D}${sysconfdir}/default/secure-storage
+    sed -i -e 's,@TRUSTFENCE_SECURE_STORAGE_DIR@,${TRUSTFENCE_FILE_BASED_ENCRYPT_DIR},g' ${D}${sysconfdir}/default/secure-storage
+}
+
+SYSTEMD_SERVICE:${PN} = "secure-storage-init.service"
+SYSTEMD_AUTO_ENABLE:${PN} = "${@oe.utils.vartrue('TRUSTFENCE_FILE_BASED_ENCRYPT', 'enable', 'disable', d)}"
+
 # Needed to resolve dependencies to libteec
 RDEPENDS:${PN} += "optee-client"
 
-inherit bin_package
+inherit bin_package systemd
 
 INSANE_SKIP:${PN} = "already-stripped"

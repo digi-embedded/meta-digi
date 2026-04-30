@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016-2024, Digi International Inc.
+# Copyright (C) 2016-2026, Digi International Inc.
 #
 
 IMAGE_FEATURES += " \
@@ -12,8 +12,8 @@ IMAGE_FEATURES += " \
     ${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'dey-wireless', '', d)} \
 "
 
-# Remove graphical packages for non-graphical platforms
-IMAGE_FEATURES:remove = "${@oe.utils.conditional('IS_HEADLESS', 'true', ' splash ', '', d)}"
+# Remove splash from poky core-image-base
+IMAGE_FEATURES:remove = "splash"
 
 CORE_IMAGE_BASE_INSTALL += "dey-examples-digiapix"
 

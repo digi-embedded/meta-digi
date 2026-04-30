@@ -3,7 +3,7 @@
 #
 #  recovery-initramfs-init
 #
-#  Copyright (C) 2016, 2017 by Digi International Inc.
+#  Copyright (C) 2016, 2026 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -364,19 +364,23 @@ swu_package_path() {
 	# Check whether the package is local and get the absolute path.
 	if echo "${1}" | grep -qs '^file://'; then
 		local pkg_name="$(basename ${1})"
+		local MAX_RETRIES="10"
 
-		for i in ${UPDATE_MOUNT_DIR} $(echo ${USB_MOUNT_DIR}/*); do
-			echo $i | grep -qs "${USB_MOUNT_DIR}/\*" && continue
-			if [ -f "${i}/${pkg_name}" ]; then
-				swu_abspath="${i}/${pkg_name}"
-				break
-			fi
+		for _ in $(seq ${MAX_RETRIES}); do
+			for i in ${UPDATE_MOUNT_DIR} $(echo ${USB_MOUNT_DIR}/*); do
+				echo $i | grep -qs "${USB_MOUNT_DIR}/\*" && continue
+				if [ -f "${i}/${pkg_name}" ]; then
+					swu_abspath="${i}/${pkg_name}"
+					break 2
+				fi
+			done
+			sleep 1
 		done
 
 		if [ -n "${swu_abspath}" ]; then
 			echo "${swu_abspath}"
 		else
-			quit_with_error "Unable to find update package '${pkg_name}'"
+			quit_with_error "Unable to find update package '${pkg_name}' after ${MAX_RETRIES} retries"
 		fi
 	else
 		echo "${1}"
@@ -512,9 +516,6 @@ mount -t tmpfs tmpfs /tmp
 echo > /dev/mdev.seq
 echo > /dev/mdev.log
 mdev -d
-
-# Give some time for the devices to settle down so mdev can mount all of them
-sleep 2
 
 # Run all shell scripts in postinstall folder
 run-parts /etc/*-postinsts

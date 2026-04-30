@@ -14,10 +14,10 @@ Signed-off-by: Javier Viguera <javier.viguera@digi.com>
  2 files changed, 14 insertions(+)
 
 diff --git a/plat/imx/imx93/imx93_psci.c b/plat/imx/imx93/imx93_psci.c
-index ccd82d1d2bdc..325fcf75911a 100644
+index 526c876e7333..33d9cb6daf07 100644
 --- a/plat/imx/imx93/imx93_psci.c
 +++ b/plat/imx/imx93/imx93_psci.c
-@@ -747,6 +747,11 @@ void imx_pwr_domain_suspend(const psci_power_state_t *target_state)
+@@ -755,6 +755,11 @@ void imx_pwr_domain_suspend(const psci_power_state_t *target_state)
  		if (is_local_state_retn(CLUSTER_PWR_STATE(target_state))) {
  			write_clusterpwrdn(DSU_CLUSTER_PWR_OFF | BIT(1));
  		}
@@ -29,7 +29,7 @@ index ccd82d1d2bdc..325fcf75911a 100644
  	}
  
  	if (is_local_state_retn(SYSTEM_PWR_STATE(target_state))) {
-@@ -878,6 +883,11 @@ void imx_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
+@@ -888,6 +893,11 @@ void imx_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
  	if (!is_local_state_run(CLUSTER_PWR_STATE(target_state))) {
  		/* set the cluster's target mode to RUN */
  		gpc_set_cpu_mode(CPU_A55_PLAT, CM_MODE_RUN);

@@ -1,0 +1,42 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Tue, 13 Jan 2026 15:57:33 +0100
+Subject: [PATCH] object-detection: fix initialization issue with x-linux-isp
+ support
+
+This commit fixes the following runtime error:
+
+Traceback (most recent call last):
+  File "/usr/local/x-linux-ai/object-detection/stai_mpu_object_detection.py", line 61, in _on_realize
+    self.camera_dual_pipeline_creation()
+  File "/usr/local/x-linux-ai/object-detection/stai_mpu_object_detection.py", line 267, in camera_dual_pipeline_creation
+    src_pad.link(queue_sink_pad)
+  File "/usr/lib/python3.12/site-packages/gi/overrides/Gst.py", line 204, in link
+    raise LinkError(ret)
+gi.overrides.Gst.LinkError: <enum GST_PAD_LINK_WAS_LINKED of type Gst.PadLinkReturn>
+
+https://onedigi.atlassian.net/browse/DEL-9890
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ .../files/stai-mpu/stai_mpu_object_detection.py               | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/stai-mpu/stai_mpu_object_detection.py b/stai-mpu/stai_mpu_object_detection.py
+index 6a40ad4..53a7576 100644
+--- a/stai-mpu/stai_mpu_object_detection.py
++++ b/stai-mpu/stai_mpu_object_detection.py
+@@ -262,12 +262,12 @@ class GstWidget(Gtk.Box):
+         src_pad = self.libcamerasrc.get_static_pad("src")
+         src_pad.set_property("stream-role", 3)
+         # still-capture
+         src_request_pad0.set_property("stream-role", 1)
+ 
+-        src_pad.link(queue_sink_pad)
+-        src_request_pad0.link(queue0_sink_pad)
++        #src_pad.link(queue_sink_pad)
++        #src_request_pad0.link(queue0_sink_pad)
+ 
+         # getting pipeline bus
+         self.bus_pipeline = self.pipeline_preview.get_bus()
+         self.bus_pipeline.add_signal_watch()
+         self.bus_pipeline.connect('message::error', self.msg_error_cb)

@@ -1,0 +1,38 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Tue, 4 Nov 2025 09:03:31 +0100
+Subject: [PATCH] ARM: dts: ccmp15: add signed firmware support for RPROC
+
+Declare only the shared memory used for inter-processor communication
+(including the resource table) to allow remoteproc to load/authenticate signed
+Cortex-M4 firmware.
+
+https://onedigi.atlassian.net/browse/DEL-9920
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ arch/arm/boot/dts/digi/ccmp15.dtsi | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/boot/dts/digi/ccmp15.dtsi b/arch/arm/boot/dts/digi/ccmp15.dtsi
+index 6f636dbf6ece..dd26d6d3d420 100644
+--- a/arch/arm/boot/dts/digi/ccmp15.dtsi
++++ b/arch/arm/boot/dts/digi/ccmp15.dtsi
+@@ -414,14 +414,13 @@ &ipcc {
+ };
+ 
+ &m4_rproc {
+-	memory-region = <&retram>, <&mcuram>, <&mcuram2>, <&vdev0vring0>,
+-			<&vdev0vring1>, <&vdev0buffer>, <&mcu_rsc_table>;
++	compatible = "st,stm32mp1-m4-tee";
++	memory-region = <&vdev0vring0>, <&vdev0vring1>, <&vdev0buffer>, <&mcu_rsc_table>;
+ 	mboxes = <&ipcc 0>, <&ipcc 1>, <&ipcc 2>, <&ipcc 3>;
+ 	mbox-names = "vq0", "vq1", "shutdown", "detach";
+-	resets = <&scmi_reset RST_SCMI_MCU>,
+-		 <&scmi_reset RST_SCMI_MCU_HOLD_BOOT>;
+-	reset-names = "mcu_rst", "hold_boot";
+ 	/delete-property/ st,syscfg-holdboot;
++	/delete-property/ resets;
++	/delete-property/ reset-names;
+ 	interrupt-parent = <&exti>;
+ 	interrupts = <68 1>;
+ 	wakeup-source;

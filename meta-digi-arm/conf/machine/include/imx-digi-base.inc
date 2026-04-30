@@ -236,13 +236,13 @@ IMX_EXTRA_FIRMWARE:mx95-generic-bsp   = "imx-boot-firmware-files firmware-ele-im
 
 # Firmware
 MACHINE_FIRMWARE ?= ""
-MACHINE_FIRMWARE:append:mx6-generic-bsp      = " firmware-imx-sdma-imx6q"
+MACHINE_FIRMWARE:append:mx6-generic-bsp      = " linux-firmware-imx-sdma-imx6q"
 MACHINE_FIRMWARE:append:mx6q-generic-bsp     = " firmware-imx-vpu-imx6q"
 MACHINE_FIRMWARE:append:mx6dl-generic-bsp    = " firmware-imx-vpu-imx6d firmware-imx-epdc"
-MACHINE_FIRMWARE:append:mx8mm-generic-bsp    = " firmware-imx-sdma-imx7d"
-MACHINE_FIRMWARE:append:mx8mn-generic-bsp    = " firmware-imx-sdma-imx7d firmware-imx-easrc-imx8mn"
-MACHINE_FIRMWARE:append:mx8qxp-generic-bsp   = " firmware-imx-sdma-imx7d firmware-imx-vpu-amphion"
-MACHINE_FIRMWARE:append:mx8dx-generic-bsp    = " firmware-imx-sdma-imx7d firmware-imx-vpu-amphion"
+MACHINE_FIRMWARE:append:mx8mm-generic-bsp    = " linux-firmware-imx-sdma-imx7d"
+MACHINE_FIRMWARE:append:mx8mn-generic-bsp    = " linux-firmware-imx-sdma-imx7d firmware-imx-easrc-imx8mn"
+MACHINE_FIRMWARE:append:mx8qxp-generic-bsp   = " linux-firmware-imx-sdma-imx7d firmware-imx-vpu-amphion"
+MACHINE_FIRMWARE:append:mx8dx-generic-bsp    = " linux-firmware-imx-sdma-imx7d firmware-imx-vpu-amphion"
 MACHINE_FIRMWARE:append:mx95-generic-bsp     = " firmware-imx-vpu-wave"
 
 MACHINE_EXTRA_RRECOMMENDS += "${MACHINE_FIRMWARE}"
@@ -289,7 +289,7 @@ PREFERRED_VERSION_gstreamer1.0-vaapi:imx-nxp-bsp        ??= "1.24.0.imx"
 PREFERRED_VERSION_ffmpeg:imx-nxp-bsp ??= "4.4.1"
 
 # Use newer libvpx from 'meta-oe' (otherwise uses older from 'meta-webkit)
-PREFERRED_VERSION_libvpx:imx-nxp-bsp ??= "1.14.0"
+PREFERRED_VERSION_libvpx:imx-nxp-bsp ??= "1.14.%"
 
 # Determines if the SoC has support for Vivante kernel driver
 SOC_HAS_VIVANTE_KERNEL_DRIVER_SUPPORT        = "0"
@@ -390,8 +390,8 @@ WKS_FILE_DEPENDS:append:mx8-nxp-bsp = " imx-boot"
 WKS_FILE_DEPENDS:append:mx9-nxp-bsp = " imx-boot"
 
 SOC_DEFAULT_WKS_FILE                 ?= "imx-uboot-bootpart.wks.in"
-SOC_DEFAULT_WKS_FILE:mx8-generic-bsp ?= "imx-imx-boot-bootpart.wks.in"
-SOC_DEFAULT_WKS_FILE:mx9-generic-bsp ?= "imx-imx-boot-bootpart.wks.in"
+SOC_DEFAULT_WKS_FILE:mx8-generic-bsp ?= "imx-imx-boot-bootpart-uboot-env.wks.in"
+SOC_DEFAULT_WKS_FILE:mx9-generic-bsp ?= "imx-imx-boot-bootpart-uboot-env.wks.in"
 
 WKS_FILE ?= "${SOC_DEFAULT_WKS_FILE}"
 

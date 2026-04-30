@@ -1,0 +1,15 @@
+[Unit]
+Description=Digi ConnectCore Container Manager daemon
+After=network.target cccsd.service
+Wants=network.target cccsd.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/cc-containerd --config-file /etc/cc-container-mng.conf
+# Stop only the daemon process; keep managed containers running.
+KillMode=process
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

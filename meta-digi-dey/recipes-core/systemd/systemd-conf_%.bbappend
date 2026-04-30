@@ -20,8 +20,12 @@ do_install:append() {
 
 do_install:append:stm32mpcommon() {
 	install -D -m0644 ${WORKDIR}/logind.conf-digi ${D}${systemd_unitdir}/logind.conf.d/01-${PN}.conf
+	sed -i -e 's,##HANDLEPOWERKEY##,${LOGIND_HANDLE_POWER_KEY},g' \
+	       -e 's,##HANDLEPOWERKEYLONGPRESS##,${LOGIND_HANDLE_POWER_KEY_LONGPRESS},g' ${D}${systemd_unitdir}/logind.conf.d/01-${PN}.conf
 }
 
 do_install:append:ccimx9() {
 	install -D -m0644 ${WORKDIR}/logind.conf-digi ${D}${systemd_unitdir}/logind.conf.d/01-${PN}.conf
+	sed -i -e 's,##HANDLEPOWERKEY##,${LOGIND_HANDLE_POWER_KEY},g' \
+	       -e 's,##HANDLEPOWERKEYLONGPRESS##,${LOGIND_HANDLE_POWER_KEY_LONGPRESS},g' ${D}${systemd_unitdir}/logind.conf.d/01-${PN}.conf
 }

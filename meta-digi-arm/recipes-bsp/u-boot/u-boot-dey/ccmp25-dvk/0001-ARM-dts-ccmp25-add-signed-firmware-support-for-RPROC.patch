@@ -1,5 +1,5 @@
 From: Arturo Buzarra <arturo.buzarra@digi.com>
-Date: Thu, 30 Oct 2025 14:35:29 +0100
+Date: Wed, 18 Mar 2026 15:26:07 +0100
 Subject: [PATCH] ARM: dts: ccmp25: add signed firmware support for RPROC
 
 Declare only the shared memory used for inter-processor communication
@@ -14,7 +14,7 @@ Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
  1 file changed, 2 insertions(+), 5 deletions(-)
 
 diff --git a/arch/arm/dts/ccmp25.dtsi b/arch/arm/dts/ccmp25.dtsi
-index 913eac366b9..51b65f2408a 100644
+index cdbc26efabc..b0a91cb0180 100644
 --- a/arch/arm/dts/ccmp25.dtsi
 +++ b/arch/arm/dts/ccmp25.dtsi
 @@ -246,11 +246,8 @@
@@ -25,7 +25,7 @@ index 913eac366b9..51b65f2408a 100644
 -			<&ipc_shmem_1>, <&vdev0vring0>,
 -			<&vdev0vring1>, <&vdev0buffer>,
 -			<&cm33_sram2>;
--	st,syscfg-nsvtor = <&a35ss_syscfg 0xa8 0xffffff80>;
+-	st,syscfg-nsvtor = <&a35ss_syscfg 0x20a8 0xffffff80>;
 +	compatible = "st,stm32mp2-m33-tee";
 +	memory-region = <&vdev0vring0>, <&vdev0vring1>, <&vdev0buffer>, <&ipc_shmem_1>;
  	status = "okay";

@@ -24,7 +24,7 @@ diff --git a/Makefile.flags b/Makefile.flags
 index 95c785c..5bdf520 100644
 --- a/Makefile.flags
 +++ b/Makefile.flags
-@@ -207,6 +207,10 @@ ifeq ($(CONFIG_RDIFFHANDLER),y)
+@@ -227,6 +227,10 @@ ifeq ($(CONFIG_RDIFFHANDLER),y)
  LDLIBS += rsync
  endif
  
@@ -39,7 +39,7 @@ diff --git a/configs/all_handlers_defconfig b/configs/all_handlers_defconfig
 index da4b28f..5da2d0d 100644
 --- a/configs/all_handlers_defconfig
 +++ b/configs/all_handlers_defconfig
-@@ -29,5 +29,6 @@ CONFIG_SHELLSCRIPTHANDLER=y
+@@ -30,5 +30,6 @@ CONFIG_SHELLSCRIPTHANDLER=y
  CONFIG_SWUFORWARDER_HANDLER=y
  CONFIG_SSBLSWITCH=y
  CONFIG_UBIVOL=y

@@ -49,7 +49,7 @@ bt_init() {
 		bt_power 1
 
 		# Load Bluetooth firmware on device
-		if MBT_TRANSPORT=/dev/ttySTM1 timeout 10 mbt download /lib/firmware/brcm/CYW55500A1.hcd; then
+		if MBT_TRANSPORT=/dev/ttySTM1 timeout 10 mbt download /lib/firmware/brcm/CYW55500A1_FCC.hcd; then
 			# Attach serial UART to the Bluetooth stack
 			btattach -B /dev/ttySTM1 -P bcm -S 921600 &
 			sleep 2

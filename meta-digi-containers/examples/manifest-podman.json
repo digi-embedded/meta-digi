@@ -1,0 +1,35 @@
+{
+  "name": "flutter-demo",
+  "friendly_name": "Flutter Demo",
+  "version": "1.0",
+  "runtime": "podman",
+  "create_args": "--privileged --network none --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 --device /dev/dri --device /dev/input --device /dev/galcore --device /dev/tty --device /dev/tty0 --device /dev/tty1 --device /dev/tty7 --volume /run/udev:/run/udev:ro --tty --entrypoint '[\"/usr/bin/docker-init\",\"/start-flutter-demo.sh\"]'",
+  "registration_defaults": {
+    "autostart": true,
+    "monitor": true,
+    "drm": {
+      "enabled": true,
+      "stats_sample_interval_s": 30,
+      "stats_list_of_metrics": [
+        "uptime",
+        "cpu",
+        "mem",
+        "net/rx",
+        "net/tx",
+        "disk/read",
+        "disk/write"
+      ]
+    },
+    "restart": {
+      "enabled": true,
+      "max_retries": 3,
+      "window": 60,
+      "retry_delay": 3
+    }
+  },
+  "device_types": ["ccmp25-dvk"],
+  "firmware_versions": "",
+  "build_id": "",
+  "description": "",
+  "labels": {}
+}

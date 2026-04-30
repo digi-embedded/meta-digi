@@ -114,6 +114,9 @@ SWUPDATE_MTD_BLACKLIST = "0 1 2 3 4 5"
 # Remove custom kernel headers from toolchain
 ST_TOOLS_FOR_TARGET_SDK:remove = "kernel-headers"
 
+# Disable partitions configuration from ST layer
+ENABLE_PARTITIONS_IMAGE ??= "0"
+
 # Skip warnings for packages using 32-bit APIs
 INSANE_SKIP:append:pn-alsa-lib = " 32bit-time"
 INSANE_SKIP:append:pn-ir-keytable = " 32bit-time"

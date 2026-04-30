@@ -1,0 +1,49 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Mon, 12 Jan 2026 21:44:34 +0100
+Subject: [PATCH] stm32_isp_iqtune: add support to ConnectCore MP2
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ .../stm32-isp-iqtune-application/stm32_isp_iqtune_app.py     | 5 ++---
+ .../stm32-isp-iqtune-application/stm32_isp_iqtune_com.py     | 2 +-
+ 2 files changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/stm32-isp-iqtune-application/stm32_isp_iqtune_app.py b/stm32-isp-iqtune-application/stm32_isp_iqtune_app.py
+index d9b6564..0a5501d 100644
+--- a/stm32-isp-iqtune-application/stm32_isp_iqtune_app.py
++++ b/stm32-isp-iqtune-application/stm32_isp_iqtune_app.py
+@@ -666,15 +666,14 @@ class Application:
+         version = subprocess.run(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+         if version.returncode == 0:
+             self.ostl_version = version.stdout.strip()
+         else:
+             print("Fail to get OSTL version")
+-            print("The application cannot start")
+-            os._exit(1)
++            self.ostl_version = 6.1
+ 
+         #Get device(machine) (eg "STM32MP257F-EV1")
+-        command = r"cat /sys/firmware/devicetree/base/model | awk '{print $2}'"
++        command = r"cat /sys/firmware/devicetree/base/digi,machine,name"
+         device = subprocess.run(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+         if device.returncode == 0:
+             self.device = device.stdout.strip()
+         else:
+             print("Fail to get device")
+diff --git a/stm32-isp-iqtune-application/stm32_isp_iqtune_com.py b/stm32-isp-iqtune-application/stm32_isp_iqtune_com.py
+index cfe132b..fe8ed17 100644
+--- a/stm32-isp-iqtune-application/stm32_isp_iqtune_com.py
++++ b/stm32-isp-iqtune-application/stm32_isp_iqtune_com.py
+@@ -666,11 +666,11 @@ class IQTuneCom():
+             # 03 - HasGamma. Not supported.
+             read_values = read_values + pack('<I', False)
+             # 04 - HasAntiFlicker. Not supported for the time being.
+             read_values = read_values + pack('<I', True)
+             # 05 - DeviceId (N6=0x00  -  MP25/23=0x01 - MP21=0x2 ...   0xFFFFFF = unknown)
+-            if self._app.device.startswith("STM32MP25") or self._app.device.startswith("STM32MP23"):
++            if self._app.device.startswith("ccmp2"):
+                 device = 0x01
+             elif self._app.device.startswith("STM32MP21"):
+                 device = 0x02
+             else:
+                 device = 0xFFFFFFFF

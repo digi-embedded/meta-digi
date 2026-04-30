@@ -1,7 +1,8 @@
-# Copyright (C) 2024,2025, Digi International Inc.
+# Copyright (C) 2024-2026, Digi International Inc.
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BP}:"
 
 SRC_URI += " \
+    file://0002-Revert-libweston-libinput-device-Enable-Set-pointer-.patch \
     file://0003-Revert-g2d-renderer-Support-solid-colour-weston_buff.patch \
 "
 

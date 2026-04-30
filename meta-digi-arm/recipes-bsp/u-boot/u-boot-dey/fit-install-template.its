@@ -1,0 +1,42 @@
+/dts-v1/;
+
+/ {
+        description = "Installer fitImage for Digi Embedded Yocto";
+        #address-cells = <1>;
+
+        images {
+                ##INSTALL_LINUX_FW## {
+                        description = "U-boot ##INSTALL_LINUX_FW_DEV## installer script";
+                        data = /incbin/("##INSTALL_LINUX_FW_FILE##.fit");
+                        type = "script";
+                        arch = "arm";
+                        compression = "none";
+                        hash-1 {
+                                algo = "sha256";
+                        };
+                        signature-1 {
+                                algo = "sha256,rsa2048";
+                                key-name-hint = "fitimg";
+                        };
+                };
+        };
+
+        configurations {
+                default = "conf-##INSTALL_LINUX_FW##";
+                conf-##INSTALL_LINUX_FW## {
+                        description = "u-boot ##INSTALL_LINUX_FW_DEV## installer script";
+
+                        bootscr = "##INSTALL_LINUX_FW##";
+
+                        hash-1 {
+                                algo = "sha256";
+                        };
+                        signature-1 {
+                                algo = "sha256,rsa2048";
+                                key-name-hint = "fitcfg";
+                                padding = "pkcs-1.5";
+                                sign-images = "bootscr";
+                        };
+                };
+        };
+};

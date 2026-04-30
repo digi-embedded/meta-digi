@@ -1,14 +1,17 @@
-# By default, use drm backend if possible.
+# By default, use wayland backend if possible.
 # If unavailable, fall back to a secondary backend
-PACKAGECONFIG ?= "drm"
-PACKAGECONFIG:ccimx6ul = "fbdev"
-PACKAGECONFIG:ccimx6 = "fbdev"
+MINIMAL_LVGL_BACKEND ?= "drm"
+MINIMAL_LVGL_BACKEND:ccimx6 = "fbdev"
+MINIMAL_LVGL_BACKEND:ccimx6ul = "fbdev"
+LVGL_BACKEND ?= "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'wayland', '${MINIMAL_LVGL_BACKEND}', d)}"
+
+PACKAGECONFIG ?= "${LVGL_BACKEND}"
 
 PACKAGECONFIG[drm] = ",,libdrm"
 PACKAGECONFIG[fbdev] = ",,"
 PACKAGECONFIG[gridnav] = ",,"
 PACKAGECONFIG[thorvg] = ",,"
-PACKAGECONFIG[sdl] = ",,virtual/libsdl2 libsdl2-image"
+PACKAGECONFIG[wayland] = ",,libxkbcommon wayland wayland-native,weston weston-init"
 
 # Add libdrm include if drm is selected in PACKAGECONFIG
 TARGET_CFLAGS += "${@bb.utils.contains('PACKAGECONFIG', 'drm', '-I${STAGING_INCDIR}/libdrm', '', d)}"
@@ -19,19 +22,18 @@ LVGL_CONFIG_USE_EVDEV = "${@bb.utils.contains_any('PACKAGECONFIG', 'drm fbdev', 
 
 LVGL_CONFIG_USE_FBDEV = "${@bb.utils.contains('PACKAGECONFIG', 'fbdev', '1', '0', d)}"
 
-LVGL_CONFIG_USE_SDL = "${@bb.utils.contains('PACKAGECONFIG', 'sdl', '1', '0', d)}"
+LVGL_CONFIG_USE_WAYLAND = "${@bb.utils.contains('PACKAGECONFIG', 'wayland', '1', '0', d)}"
 
-LVGL_CONFIG_SDL_FULLSCREEN ?= "0"
+LVGL_CONFIG_USE_GESTURE_RECOGNITION = "${@bb.utils.contains('PACKAGECONFIG', 'wayland', '1', '0', d)}"
 
-LVGL_CONFIG_LV_MEM_CUSTOM ?= "0"
-LVGL_CONFIG_LV_MEM_SIZE ?= "(64 * 1024U)"
+LVGL_CONFIG_LV_MEM_SIZE ?= "(2 * 1024U * 1024U)"
 LVGL_CONFIG_LV_COLOR_DEPTH ?= "32"
 
-LVGL_CONFIG_LV_USE_LOG    ?= "0"
+LVGL_CONFIG_LV_USE_LOG    ?= "1"
 LVGL_CONFIG_LV_LOG_LEVEL  ?= "LV_LOG_LEVEL_WARN"
-LVGL_CONFIG_LV_LOG_PRINTF ?= "0"
+LVGL_CONFIG_LV_LOG_PRINTF ?= "1"
 
-LVGL_CONFIG_LV_USE_FONT_COMPRESSED ?= "0"
+LVGL_CONFIG_LV_USE_FONT_COMPRESSED ?= "1"
 
 LVGL_CONFIG_LV_USE_GRIDNAV = "${@bb.utils.contains('PACKAGECONFIG', 'gridnav', '1', '0', d)}"
 
@@ -45,7 +47,7 @@ LVGL_CONFIG_USE_THORVG_INTERNAL = "${@bb.utils.contains('PACKAGECONFIG', 'thorvg
 
 LVGL_CONFIG_USE_MATRIX = "${@bb.utils.contains('PACKAGECONFIG', 'thorvg', '1', '0', d)}"
 
-LVGL_CONFIG_USE_FLOAT = "${@bb.utils.contains('PACKAGECONFIG', 'thorvg', '1', '0', d)}"
+LVGL_CONFIG_USE_FLOAT = "${@bb.utils.contains('PACKAGECONFIG', 'thorvg', '1', '${LVGL_CONFIG_USE_GESTURE_RECOGNITION}', d)}"
 
 DEBUG_BUILD ??= "0"
 
@@ -63,18 +65,11 @@ do_configure:append() {
         \
         -e "s|^([[:space:]]*#define LV_USE_LINUX_FBDEV[[:space:]]).*|\1${LVGL_CONFIG_USE_FBDEV}|" \
         \
-        -e "s|^([[:space:]]*#define LV_USE_SDL[[:space:]]).*|\1${LVGL_CONFIG_USE_SDL}|" \
-        -e "s|^([[:space:]]*#define LV_USE_DRAW_SDL[[:space:]]).*|\1${LVGL_CONFIG_USE_SDL}|" \
-        -e "s|^([[:space:]]*#define LV_SDL_BUF_COUNT[[:space:]]).*|\1 2|" \
-        -e "s|^([[:space:]]*#define LV_SDL_FULLSCREEN[[:space:]]).*|\1${LVGL_CONFIG_SDL_FULLSCREEN}|" \
+        -e "s|^([[:space:]]*#define LV_USE_WAYLAND[[:space:]]).*|\1${LVGL_CONFIG_USE_WAYLAND}|" \
+        -e "s|^([[:space:]]*#define LV_USE_GESTURE_RECOGNITION[[:space:]]).*|\1${LVGL_CONFIG_USE_GESTURE_RECOGNITION}|" \
         \
         -e "s|^([[:space:]]*#define LV_COLOR_DEPTH[[:space:]]).*|\1${LVGL_CONFIG_LV_COLOR_DEPTH}|" \
-        -e "s|^([[:space:]]*#define LV_MEM_CUSTOM[[:space:]]).*|\1${LVGL_CONFIG_LV_MEM_CUSTOM}|" \
         -e "s|^([[:space:]]*#define LV_MEM_SIZE[[:space:]]).*|\1${LVGL_CONFIG_LV_MEM_SIZE}|" \
-        \
-        -e "s|^([[:space:]]*#define LV_TICK_CUSTOM[[:space:]]).*|\1 1|" \
-        -e "s|^([[:space:]]*#define LV_TICK_CUSTOM_INCLUDE[[:space:]]).*|\1 <stdint.h>|" \
-        -e "s|^([[:space:]]*#define LV_TICK_CUSTOM_SYS_TIME_EXPR[[:space:]]).*|extern uint32_t custom_tick_get(void);\n\1 (custom_tick_get())|" \
         \
         -e "s|^([[:space:]]*#define LV_USE_EVDEV[[:space:]]).*|\1${LVGL_CONFIG_USE_EVDEV}|" \
         \

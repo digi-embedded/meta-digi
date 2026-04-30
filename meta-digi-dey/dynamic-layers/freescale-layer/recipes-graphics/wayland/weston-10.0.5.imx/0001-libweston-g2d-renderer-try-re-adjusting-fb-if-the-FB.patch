@@ -1,0 +1,88 @@
+From: Gabriel Valcazar <gabriel.valcazar@digi.com>
+Date: Thu, 17 Sep 2020 13:16:04 +0200
+Subject: [PATCH] libweston: g2d-renderer: try re-adjusting fb if the
+ FBIOPAN_DISPLAY ioctl fails
+
+By default, the g2d renderer works with 3 buffers, and uses the FBIOPAN_DISPLAY
+ioctl to have the kernel switch between them every time the output has to be
+shown. Because of this, when the renderer is initialized, it will increase the
+framebuffer's yres_virtual parameter so it is 3 times the size of yres
+(vertical resolution).
+
+However, when the system goes through a suspend/resume iteration, the
+framebuffer's yres_virtual parameter will change back to its original value,
+causing the FBIOPAN_DISPLAY ioctl to fail when using the 2nd and 3rd buffers,
+which is 2 out of 3 times whenever something changes in the output. This has
+three direct effects:
+
+* Constant "FBIOPAN_DISPLAY failed" messages in the weston log
+* Choppy framerate (due to the renderer only being able to show 1/3 of the
+  total output frames)
+* A 2/3 chance that the desktop will not show after resuming from suspend until
+  there's movement on the screen
+
+To avoid this, whenever a FBIOPAN_DISPLAY ioctl fails, check if the
+yres_virtual attribute read from the kernel is different from the one saved in
+the renderer and, if so, update it once again and retry the ioctl. This adds
+some additional overhead in case of a FBIOPAN_DISPLAY failure, but these have
+only been observed in the specific suspend/resume scenario, not in an average
+use case.
+
+The only drawback to this workaround is that there's a 1/3 chance that the
+display will go blank for a very small period of time when resuming from
+suspend. This is due to the framebuffer being reconfigured and, although
+undesireable, is much less bothersome than the original issue.
+
+NOTE FOR DEY 5.0: although this patch's description was accurate back when it
+was first introduced in DEY 3.0-r2.1, the reproducibility in DEY 5.0 is much
+smaller, but the workaround remains the same.
+
+Upstream-Status: Inappropriate [DEY specific]
+
+https://jira.digi.com/browse/DEL-7236
+
+Signed-off-by: Gabriel Valcazar <gabriel.valcazar@digi.com>
+---
+ libweston/renderer-g2d/g2d-renderer.c | 23 ++++++++++++++++++++++-
+ 1 file changed, 22 insertions(+), 1 deletion(-)
+
+diff --git a/libweston/renderer-g2d/g2d-renderer.c b/libweston/renderer-g2d/g2d-renderer.c
+index 3e2d0791..d390ea17 100644
+--- a/libweston/renderer-g2d/g2d-renderer.c
++++ b/libweston/renderer-g2d/g2d-renderer.c
+@@ -456,13 +456,34 @@ g2d_flip_surface(struct weston_output *output)
+ {
+ 	int i;
+ 	struct g2d_output_state *go = get_output_state(output);
++	struct fb_var_screeninfo aux_varinfo;
+ 	go->fb_info.varinfo.yoffset  = go->activebuffer * go->fb_info.y_resolution;
+ 
+ 	if(ioctl(go->fb_info.fb_fd, FBIOPAN_DISPLAY, &(go->fb_info.varinfo)) < 0)
+ 	{
+-		weston_log("FBIOPAN_DISPLAY Failed\n");
++		/* Check if yres_virtual has changed (it happens on suspend/resume) */
++		if (ioctl(go->fb_info.fb_fd, FBIOGET_VSCREENINFO, &aux_varinfo) < 0) {
++			weston_log("FBIOGET_VSCREENINFO Failed\n");
++			goto out;
++		}
++
++		/* If yres_virtual has changed, adjust it and try flipping the surface again */
++		if (aux_varinfo.yres_virtual != go->fb_info.varinfo.yres_virtual) {
++			aux_varinfo.yres_virtual = aux_varinfo.yres * go->nNumBuffers;
++			if (ioctl(go->fb_info.fb_fd, FBIOPUT_VSCREENINFO, &aux_varinfo) < 0) {
++				weston_log("FBIOPUT_VSCREENINFO Failed\n");
++				goto out;
++			}
++
++			if(ioctl(go->fb_info.fb_fd, FBIOPAN_DISPLAY, &(go->fb_info.varinfo)) < 0) {
++				weston_log("FBIOPAN_DISPLAY Failed\n");
++			}
++		} else {
++			weston_log("FBIOPAN_DISPLAY Failed\n");
++		}
+ 	}
+ 
++out:
+ 	for (i = 0; i < go->clone_display_num; i++)
+ 	{
+ 		go->mirror_fb_info[i].varinfo.yoffset  = go->activebuffer * go->mirror_fb_info[i].y_resolution;

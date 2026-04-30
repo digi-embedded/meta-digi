@@ -8,10 +8,10 @@ Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/download_models.py b/download_models.py
-index 462f7b755eea..fc5ab234ae47 100644
+index 30c660fe4477..2e60f42c17a2 100644
 --- a/download_models.py
 +++ b/download_models.py
-@@ -103,7 +103,11 @@ def convert_model(model_dir, vela_dir):
+@@ -96,7 +96,11 @@ def convert_model(model_dir, vela_dir):
          if name.endswith(".tflite"):
              print('Converting', name)
              model = os.path.join(model_dir, name)

@@ -22,12 +22,6 @@ SRC_URI:append = " \
     ${@oe.utils.conditional('HAS_WIFI_VIRTWLANS', 'true', '${WIFI_VIRTWLANS_FILES}', '', d)} \
 "
 
-SRC_URI:append:ccimx6sbc = " \
-    file://interfaces.wlan1.atheros.static \
-    file://interfaces.wlan1.atheros.dhcp \
-    file://interfaces.br0.atheros.example \
-"
-
 SYSTEMD_SERVICE:${PN} = "ifupdown.service"
 
 WPA_DRIVER ?= "nl80211"
@@ -71,11 +65,6 @@ do_install:append() {
 	fi
 
 	cat ${WORKDIR}/interfaces.br0.example >> ${D}${sysconfdir}/network/interfaces
-	if [ "${MACHINE}" = "ccimx6sbc" ]; then
-		# On ccimx6, append also the Atheros fragments so the user can
-		# decide which one to use depending on the wireless MAC used on the SOM.
-		cat ${WORKDIR}/interfaces.br0.atheros.example >> ${D}${sysconfdir}/network/interfaces
-	fi
 }
 
 install_virtwlans() {
@@ -97,9 +86,7 @@ WLAN1_PRE_DOWN_ACTION:ccimx9 = "systemctl stop hostapd@uap0.service"
 
 install_wlan1() {
 	cat ${WORKDIR}/interfaces.wlan1.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
-	if [ "${MACHINE}" = "ccimx6sbc" ]; then
-		cat ${WORKDIR}/interfaces.wlan1.atheros.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces
-	fi
+
 	[ -n "${WLAN1_AUTO}" ] && sed -i -e 's/^#auto wlan1/auto wlan1/g' ${D}${sysconfdir}/network/interfaces
 
 	# Remove config entries if corresponding variable is not defined

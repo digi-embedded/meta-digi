@@ -49,15 +49,35 @@ Generalize the code to make room for Optee-based encryption.
   Optee) implementation.
 
 Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+
+ # This is the commit message #4:
+
+crypt: read HWID from 'digi,hwid_fuse_n' dt properties
+
+Now that U-Boot supports overriding the HWID, it inserts the local,
+variable HWID into the 'digi,hwid_n' properties and the fused,
+stable HWID into the 'digi,hwid_fuse_n' properties.
+
+Read the HWID to compute the key modifier from 'digi,hwid_fuse_n'
+as a preferred method. If those properties do not exist, fall back
+to the previous method, 'digi,hwid_n'.
+
+An outdated U-Boot that does not create the 'digi,hwid_fuse_n'
+properties does not support HWID overriding either, so we can trust
+'digi,hwid_n' to have the contents from the fuses.
+
+https://onedigi.atlassian.net/browse/DEL-9123
+
+Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
 ---
  src/CMakeLists.txt |   4 +
  src/caam_keyblob.h |  42 +++++++
- src/crypt.c        | 179 +++++++++++++++++++++++++++++
+ src/crypt.c        | 194 ++++++++++++++++++++++++++++++++
  src/crypt.h        |  10 ++
  src/md5.c          | 275 +++++++++++++++++++++++++++++++++++++++++++++
  src/md5.h          |  24 ++++
  src/uboot_env.c    |  18 +++
- 7 files changed, 552 insertions(+)
+ 7 files changed, 567 insertions(+)
  create mode 100644 src/caam_keyblob.h
  create mode 100644 src/crypt.c
  create mode 100644 src/crypt.h
@@ -129,10 +149,10 @@ index 0000000..e313e87
 +#endif /* CAAM_KEYBLOB_H */
 diff --git a/src/crypt.c b/src/crypt.c
 new file mode 100644
-index 0000000..213cffd
+index 0000000..565d13d
 --- /dev/null
 +++ b/src/crypt.c
-@@ -0,0 +1,179 @@
+@@ -0,0 +1,194 @@
 +/*
 + * Copyright 2024 Digi International Inc
 + *
@@ -192,10 +212,25 @@ index 0000000..213cffd
 +	int len;
 +	int fd;
 +	uint32_t ocotp_hwid[MAX_HWID_WORDS];
-+	char dt_prop[32];
++	char dt_prop[40];
 +	char buf[sizeof(uint32_t)];
 +
 +	for (i = 0; i < MAX_HWID_WORDS; i++) {
++		sprintf(dt_prop, "/proc/device-tree/digi,hwid_fuse_%d", i);
++		if (access(dt_prop, F_OK) != -1) {
++			fd = open(dt_prop, O_RDONLY);
++			if (fd < 0)
++				return fd;
++			len = read(fd, buf, sizeof(uint32_t));
++			if (len < 0) {
++				close(fd);
++				return -1;
++			}
++			ocotp_hwid[i] = ntohl(*(uint32_t *) buf);
++			close(fd);
++			continue;
++		}
++
 +		sprintf(dt_prop, "/proc/device-tree/digi,hwid_%d", i);
 +		if (access(dt_prop, F_OK) != -1) {
 +			fd = open(dt_prop, O_RDONLY);

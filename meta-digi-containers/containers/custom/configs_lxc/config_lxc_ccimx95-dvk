@@ -1,0 +1,17 @@
+# LXC base config for custom profile on CCIMX95.
+# Placeholders are replaced by the image recipe.
+lxc.arch = @LXC_ARCH@
+lxc.rootfs.path = dir:@LXC_FOLDER@/@CONTAINER_NAME@/rootfs
+lxc.uts.name = @CONTAINER_NAME@
+
+lxc.mount.auto = cgroup:mixed proc:mixed
+lxc.mount.entry = /sys sys none bind,create=dir
+lxc.mount.entry = tmpfs run tmpfs rw,nosuid,nodev,mode=0755,create=dir
+
+# custom prompt
+lxc.environment = 'PS1=\h:\w$ '
+
+# no network
+lxc.net.0.type = empty
+
+lxc.init.cmd = @CONTAINER_INIT_MANAGER@ @CONTAINER_INIT_SCRIPT@

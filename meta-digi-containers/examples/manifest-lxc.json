@@ -1,0 +1,34 @@
+{
+  "name": "flutter-demo",
+  "friendly_name": "Flutter Demo",
+  "version": "1.0",
+  "runtime": "lxc",
+  "registration_defaults": {
+    "autostart": true,
+    "monitor": true,
+    "drm": {
+      "enabled": true,
+      "stats_sample_interval_s": 30,
+      "stats_list_of_metrics": [
+        "uptime",
+        "cpu",
+        "mem",
+        "net/rx",
+        "net/tx",
+        "disk/read",
+        "disk/write"
+      ]
+    },
+    "restart": {
+      "enabled": true,
+      "max_retries": 3,
+      "window": 60,
+      "retry_delay": 3
+    }
+  },
+  "device_types": ["ccmp25-dvk"],
+  "firmware_versions": "",
+  "build_id": "",
+  "description": "",
+  "labels": {}
+}

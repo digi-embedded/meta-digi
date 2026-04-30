@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2022, Digi International Inc.
+# Copyright (C) 2016-2026, Digi International Inc.
 
 SUMMARY = "Digi's system info utility"
 SECTION = "base"
@@ -8,6 +8,8 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171d
 SRC_URI = "file://sysinfo"
 
 S = "${WORKDIR}"
+
+RDEPENDS:${PN} += "qrencode"
 
 do_install() {
 	install -d ${D}${bindir}

@@ -1,0 +1,16 @@
+[Unit]
+Description=Stop managed containers during system shutdown
+DefaultDependencies=no
+After=cc-containerd.service network.target cccsd.service
+Before=shutdown.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/true
+ExecStop=/usr/bin/cc-containerd --config-file /etc/cc-container-mng.conf --stop-managed-containers
+RemainAfterExit=yes
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
