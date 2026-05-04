@@ -2,6 +2,8 @@
 Description=Digi ConnectCore Container Manager daemon
 After=network.target cccsd.service
 Wants=network.target cccsd.service
+Before=shutdown.target
+Conflicts=shutdown.target
 
 [Service]
 Type=simple
