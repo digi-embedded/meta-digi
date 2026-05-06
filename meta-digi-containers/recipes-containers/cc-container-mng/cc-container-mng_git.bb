@@ -6,7 +6,7 @@ HOMEPAGE = "https://github.com/digi-embedded/cc-container-mng"
 SECTION = "base"
 
 LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://LICENSE;md5=b9f6fb44826f22358130c433cdf487a0"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=266029e5b51b2fa808364134ee8ec673"
 
 SRCBRANCH ?= "master"
 SRCREV = "${AUTOREV}"
