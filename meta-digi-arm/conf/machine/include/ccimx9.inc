@@ -34,7 +34,6 @@ MACHINE_FEATURES:append:use-nxp-bsp = " optee jailhouse"
 SDK_MACHINE_FEATURES:append = " optee"
 
 STORAGE_MEDIA = "mmc"
-WLAN_P2P_INTERFACE = "wfd0"
 
 # Linux kernel configuration
 KERNEL_DEFCONFIG ?= "arch/arm64/configs/ccimx9_defconfig"
