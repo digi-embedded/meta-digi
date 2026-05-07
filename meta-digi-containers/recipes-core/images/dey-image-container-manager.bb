@@ -58,7 +58,6 @@ CORE_TOOLS = " \
 	ethtool \
 	init-ifupdown \
 	iproute2 \
-	iw \
 	libdigiapix \
 	libdigiapix-python3 \
 	libgpiod \
@@ -71,6 +70,7 @@ CORE_TOOLS = " \
 	os-release \
 	openssl \
 	packagegroup-dey-audio \
+	${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'packagegroup-dey-wireless', '', d)} \
 	sysinfo \
 	vsftpd \
 "
