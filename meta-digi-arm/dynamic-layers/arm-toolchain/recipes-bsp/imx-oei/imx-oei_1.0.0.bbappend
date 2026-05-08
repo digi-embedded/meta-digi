@@ -7,6 +7,6 @@ IMX_OEI_SRC:dey = "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1', '${IMX_OEI_
 
 SRCBRANCH:dey = "dey/scarthgap/lf-6.6.52-2.2.2"
 # NXP's 'lf-6.6.52_2.2.2' release + patches
-SRCREV:dey = "0a1fbc5ce9c4bed08d0add95c911749e56a7d57a"
+SRCREV:dey = "1dd57d4c97c1597dcab4b0cdba6eee188af9e33d"
 
 OEI_DEBUG:dey = "1"
