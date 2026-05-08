@@ -39,16 +39,11 @@ cleanup_temp_files() {
 	done
 }
 
-# Compose the compact payload encoded in the QR from U-Boot environment data.
+# Compose the compact payload encoded in the QR from runtime device data.
 get_qr_payload() {
+	QR_MACADDR=""
 	if [ -x "${FW_PRINTENV}" ]; then
-		QR_SERIAL="$("${FW_PRINTENV}" -n "serial#" 2>/dev/null)"
-		QR_MACADDR="$("${FW_PRINTENV}" -n "ethaddr" 2>/dev/null)"
-	fi
-
-	if [ -z "${QR_SERIAL}" ]; then
-		echo "Error: unable to read 'serial#' from fw_printenv" >&2
-		return 1
+		QR_MACADDR="$("${FW_PRINTENV}" -n "ethaddr" 2>/dev/null | tr -d ':')"
 	fi
 
 	if [ -z "${QR_MACADDR}" ]; then
@@ -56,7 +51,14 @@ get_qr_payload() {
 		return 1
 	fi
 
-	printf "%s;%s;MAC%s\n" "${QR_PREFIX}" "${QR_SERIAL}" "$(echo "${QR_MACADDR}" | tr -d ':')"
+	QR_SERIAL="$(cat /proc/device-tree/serial-number 2>/dev/null | tr -d '\0')"
+	if [ -z "${QR_SERIAL}" ]; then
+		echo "Error: unable to read 'serial-number' from /proc/device-tree" >&2
+		return 1
+	fi
+
+	QR_DRM_IC="$(cat /proc/device-tree/digi,drm-ic 2>/dev/null | tr -d '\0')"
+	printf "%s;%s;MAC%s%s\n" "${QR_PREFIX}" "${QR_SERIAL}" "${QR_MACADDR}" "${QR_DRM_IC:+;${QR_DRM_IC}}"
 }
 
 get_framebuffer_device() {
@@ -103,11 +105,22 @@ print_qr() {
 		return 1
 	fi
 
+	QR_SERIAL="$(cat /proc/device-tree/serial-number 2>/dev/null | tr -d '\0')"
+	QR_MACADDR=""
+	if [ -x "${FW_PRINTENV}" ]; then
+		QR_MACADDR="$("${FW_PRINTENV}" -n "ethaddr" 2>/dev/null | tr -d ':')"
+	fi
+	QR_DRM_IC="$(cat /proc/device-tree/digi,drm-ic 2>/dev/null | tr -d '\0')"
 	QR_PAYLOAD="$(get_qr_payload)" || return 1
-	echo "Payload: ${QR_PAYLOAD}"
+
+	echo "MAC Address: ${QR_MACADDR}"
+	echo "Serial Number: ${QR_SERIAL}"
+	if [ -n "${QR_DRM_IC}" ]; then
+		echo "Device Default Password: ${QR_DRM_IC}"
+	fi
 	printf "%s" "${QR_PAYLOAD}" | "${QRENCODE}" -t ANSIUTF8
 	echo ""
-	echo "This QR code is used to provision the device in Digi Device Cloud."
+	echo "This QR code is used to provision the device in Digi Remote Manager."
 }
 
 # PNG output is used by the Wayland/Weston path.
