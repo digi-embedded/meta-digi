@@ -22,7 +22,7 @@ do_image_lxc_bundle() {
         bbfatal "Expected rootfs tarball not found: ${rootfs_tar}"
     fi
 
-    lxc_dir="${workdir}/${CONTAINER_NAME}"
+    lxc_dir="${workdir}/lxc-payload"
     mkdir -p "${lxc_dir}/rootfs"
 
     bbnote "Extracting rootfs for LXC bundle..."
@@ -41,7 +41,7 @@ do_image_lxc_bundle() {
         -e "s|@CONTAINER_INIT_SCRIPT@|${CONTAINER_INIT_SCRIPT}|g" \
         "${config_in}" > "${lxc_dir}/config"
 
-    tar -C "${workdir}" -czf "${lxc_tar}" "${CONTAINER_NAME}"
+    tar -C "${lxc_dir}" -czf "${lxc_tar}" config rootfs
 
     if [ ! -s "${lxc_tar}" ]; then
         bbfatal "LXC bundle was not generated correctly: ${lxc_tar}"
