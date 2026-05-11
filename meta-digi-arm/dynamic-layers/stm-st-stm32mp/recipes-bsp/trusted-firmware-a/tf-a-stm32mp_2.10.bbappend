@@ -212,7 +212,7 @@ do_compile() {
                         # The encryption key is already available in hexadecimal format, so just extract it from file
                         encrypt_key="$(cat ${encrypt_key})"
                     else
-                        encrypt_key="$(hexdump -e '/1 "%02x"' ${encrypt_key})"
+                        encrypt_key="$(hexdump -ve '/1 "%02x"' "${encrypt_key}")"
                     fi
                     encrypt_extra_opt="ENC_KEY=${encrypt_key}"
             fi
