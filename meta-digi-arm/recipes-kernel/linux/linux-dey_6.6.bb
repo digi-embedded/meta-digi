@@ -21,8 +21,8 @@ RT_FILES:use-nxp-bsp = " \
     file://fragment-nxp-rt.config \
 "
 RT_FILES:stm32mpcommon = " \
-    file://0010-Rebase-on-v6.6.78-rt51.patch \
-    file://0011-v6.6-stm32mp-rt-r2.patch \
+    file://0010-Rebase-on-v6.6.116-rt66.patch \
+    file://0011-v6.6-stm32mp-rt-r3.patch \
     file://fragment-08-deactivate-rng.config \
     file://fragment-10-network-improvment.config \
 "

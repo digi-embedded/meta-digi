@@ -1,0 +1,321 @@
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Tue, 12 May 2026 13:15:38 +0200
+Subject: [PATCH 2/2] v6.6-stm32mp-rt-r3
+
+Patch doesn't apply cleanly on our kernel due to changes in
+the serial driver.
+Original patch:
+From f6587496f2c5894abf9bcfbd136a9693d0e97f11 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
+Date: Tue, 16 Dec 2025 13:49:21 +0100
+
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
+
+Upstream-Status: Pending [specific to ST boards]
+---
+ .../configs/fragment-07-rt-sysvinit.config    | 11 +++++
+ arch/arm/configs/fragment-07-rt.config        |  9 +++++
+ arch/arm/configs/fragment-10-rt-perf.config   | 40 +++++++++++++++++++
+ .../configs/fragment-07-rt-sysvinit.config    | 11 +++++
+ arch/arm64/configs/fragment-07-rt.config      |  9 +++++
+ arch/arm64/configs/fragment-10-rt-perf.config | 40 +++++++++++++++++++
+ drivers/clocksource/timer-stm32-lp.c          | 24 ++++++++++-
+ drivers/hwtracing/coresight/coresight-cti.h   | 10 +++++
+ drivers/mfd/syscon.c                          |  3 ++
+ drivers/tty/serial/stm32-usart.c              |  8 ++--
+ 10 files changed, 160 insertions(+), 5 deletions(-)
+ create mode 100644 arch/arm/configs/fragment-07-rt-sysvinit.config
+ create mode 100644 arch/arm/configs/fragment-07-rt.config
+ create mode 100644 arch/arm/configs/fragment-10-rt-perf.config
+ create mode 100644 arch/arm64/configs/fragment-07-rt-sysvinit.config
+ create mode 100644 arch/arm64/configs/fragment-07-rt.config
+ create mode 100644 arch/arm64/configs/fragment-10-rt-perf.config
+
+diff --git a/arch/arm/configs/fragment-07-rt-sysvinit.config b/arch/arm/configs/fragment-07-rt-sysvinit.config
+new file mode 100644
+index 000000000000..4a858d74d97d
+--- /dev/null
++++ b/arch/arm/configs/fragment-07-rt-sysvinit.config
+@@ -0,0 +1,11 @@
++CONFIG_CGROUPS=y
++# CONFIG_CGROUP_SCHED is not set
++# CONFIG_CGROUP_PIDS is not set
++# CONFIG_CGROUP_RDMA is not set
++# CONFIG_CGROUP_FREEZER is not set
++# CONFIG_CGROUP_DEVICE is not set
++# CONFIG_CGROUP_CPUACCT is not set
++# CONFIG_CGROUP_PERF is not set
++# CONFIG_CGROUP_DEBUG is not set
++# CONFIG_CGROUP_NET_PRIO is not set
++# CONFIG_CGROUP_NET_CLASSID is not set
+diff --git a/arch/arm/configs/fragment-07-rt.config b/arch/arm/configs/fragment-07-rt.config
+new file mode 100644
+index 000000000000..aba9d8c25610
+--- /dev/null
++++ b/arch/arm/configs/fragment-07-rt.config
+@@ -0,0 +1,9 @@
++CONFIG_EXPERT=y
++CONFIG_PREEMPT_RT=y
++
++# Force to have HIGH_RES_TIMERS
++CONFIG_HIGH_RES_TIMERS=y
++
++# Disable CPUFREQ and CPUIDLE
++# CONFIG_CPU_FREQ is not set
++# CONFIG_CPU_IDLE is not set
+diff --git a/arch/arm/configs/fragment-10-rt-perf.config b/arch/arm/configs/fragment-10-rt-perf.config
+new file mode 100644
+index 000000000000..46e67dba9ef8
+--- /dev/null
++++ b/arch/arm/configs/fragment-10-rt-perf.config
+@@ -0,0 +1,40 @@
++# avoid degrading from-idle transition latencies, disable dyntick
++CONFIG_HZ_PERIODIC=y
++
++# Disable OPTEE RNG over PTA support
++# CONFIG_HW_RANDOM_OPTEE is not set
++
++# Remove power domains management
++# CONFIG_SUSPEND_FREEZER is not set
++# CONFIG_HIBERNATE_CALLBACKS is not set
++# CONFIG_PM_SLEEP is not set
++# CONFIG_PM_TRACE_RTC is not set
++# CONFIG_PM_GENERIC_DOMAINS is not set
++
++#Debugging features
++CONFIG_DEBUG_KERNEL=y
++# CONFIG_PROFILING is not set
++# CONFIG_PSI is not set
++# to Enable ftrace, you need to enable the following configuration:
++# CONFIG_TRACING is not set
++# CONFIG_FTRACE is not set
++# CONFIG_IRQSOFF_TRACER is not set
++# CONFIG_PREEMPT_TRACER is not set
++# CONFIG_SCHED_TRACER is not set
++# CONFIG_FUNCTION_TRACER is not set
++# CONFIG_FTRACE_SYSCALLS is not set
++# CONFIG_STACK_TRACER is not set
++# CONFIG_FUNCTION_PROFILER is not set
++# CONFIG_TIMERLAT_TRACER is not set
++
++#Lockdep activation
++# CONFIG_DEBUG_ATOMIC_SLEEP is not set
++# CONFIG_DEBUG_LOCK_ALLOC is not set
++# CONFIG_DEBUG_MUTEXES is not set
++# CONFIG_DEBUG_SPINLOCK is not set
++# CONFIG_LOCKDEP is not set
++# CONFIG_LOCKUP_DETECTOR is not set
++# CONFIG_PROVE_LOCKING is not set
++# CONFIG_SLUB_DEBUG_ON is not set
++
++# CONFIG_ARM_SMC_WATCHDOG is not set
+diff --git a/arch/arm64/configs/fragment-07-rt-sysvinit.config b/arch/arm64/configs/fragment-07-rt-sysvinit.config
+new file mode 100644
+index 000000000000..4a858d74d97d
+--- /dev/null
++++ b/arch/arm64/configs/fragment-07-rt-sysvinit.config
+@@ -0,0 +1,11 @@
++CONFIG_CGROUPS=y
++# CONFIG_CGROUP_SCHED is not set
++# CONFIG_CGROUP_PIDS is not set
++# CONFIG_CGROUP_RDMA is not set
++# CONFIG_CGROUP_FREEZER is not set
++# CONFIG_CGROUP_DEVICE is not set
++# CONFIG_CGROUP_CPUACCT is not set
++# CONFIG_CGROUP_PERF is not set
++# CONFIG_CGROUP_DEBUG is not set
++# CONFIG_CGROUP_NET_PRIO is not set
++# CONFIG_CGROUP_NET_CLASSID is not set
+diff --git a/arch/arm64/configs/fragment-07-rt.config b/arch/arm64/configs/fragment-07-rt.config
+new file mode 100644
+index 000000000000..aba9d8c25610
+--- /dev/null
++++ b/arch/arm64/configs/fragment-07-rt.config
+@@ -0,0 +1,9 @@
++CONFIG_EXPERT=y
++CONFIG_PREEMPT_RT=y
++
++# Force to have HIGH_RES_TIMERS
++CONFIG_HIGH_RES_TIMERS=y
++
++# Disable CPUFREQ and CPUIDLE
++# CONFIG_CPU_FREQ is not set
++# CONFIG_CPU_IDLE is not set
+diff --git a/arch/arm64/configs/fragment-10-rt-perf.config b/arch/arm64/configs/fragment-10-rt-perf.config
+new file mode 100644
+index 000000000000..46e67dba9ef8
+--- /dev/null
++++ b/arch/arm64/configs/fragment-10-rt-perf.config
+@@ -0,0 +1,40 @@
++# avoid degrading from-idle transition latencies, disable dyntick
++CONFIG_HZ_PERIODIC=y
++
++# Disable OPTEE RNG over PTA support
++# CONFIG_HW_RANDOM_OPTEE is not set
++
++# Remove power domains management
++# CONFIG_SUSPEND_FREEZER is not set
++# CONFIG_HIBERNATE_CALLBACKS is not set
++# CONFIG_PM_SLEEP is not set
++# CONFIG_PM_TRACE_RTC is not set
++# CONFIG_PM_GENERIC_DOMAINS is not set
++
++#Debugging features
++CONFIG_DEBUG_KERNEL=y
++# CONFIG_PROFILING is not set
++# CONFIG_PSI is not set
++# to Enable ftrace, you need to enable the following configuration:
++# CONFIG_TRACING is not set
++# CONFIG_FTRACE is not set
++# CONFIG_IRQSOFF_TRACER is not set
++# CONFIG_PREEMPT_TRACER is not set
++# CONFIG_SCHED_TRACER is not set
++# CONFIG_FUNCTION_TRACER is not set
++# CONFIG_FTRACE_SYSCALLS is not set
++# CONFIG_STACK_TRACER is not set
++# CONFIG_FUNCTION_PROFILER is not set
++# CONFIG_TIMERLAT_TRACER is not set
++
++#Lockdep activation
++# CONFIG_DEBUG_ATOMIC_SLEEP is not set
++# CONFIG_DEBUG_LOCK_ALLOC is not set
++# CONFIG_DEBUG_MUTEXES is not set
++# CONFIG_DEBUG_SPINLOCK is not set
++# CONFIG_LOCKDEP is not set
++# CONFIG_LOCKUP_DETECTOR is not set
++# CONFIG_PROVE_LOCKING is not set
++# CONFIG_SLUB_DEBUG_ON is not set
++
++# CONFIG_ARM_SMC_WATCHDOG is not set
+diff --git a/drivers/clocksource/timer-stm32-lp.c b/drivers/clocksource/timer-stm32-lp.c
+index dedf59187352..4feb2b79b5eb 100644
+--- a/drivers/clocksource/timer-stm32-lp.c
++++ b/drivers/clocksource/timer-stm32-lp.c
+@@ -45,7 +45,8 @@ static int stm32_clkevent_lp_shutdown(struct clock_event_device *clkevt)
+ 	int loop_limit = 500;
+ 	u32 val;
+ 
+-	if (clockevent_state_oneshot(clkevt) || clockevent_state_periodic(clkevt)) {
++	if (!IS_ENABLED(CONFIG_PREEMPT_RT) &&
++	    (clockevent_state_oneshot(clkevt) || clockevent_state_periodic(clkevt))) {
+ 		ret = pm_runtime_put(priv->dev);
+ 		if (ret < 0) {
+ 			dev_err(priv->dev, "pm runtime get returned %d\n", ret);
+@@ -179,6 +180,13 @@ static int stm32_clkevent_lp_pm_runtime_get(struct clock_event_device *clkevt)
+ 	struct stm32_lp_private *priv = to_priv(clkevt);
+ 	int ret;
+ 
++	/*
++	 * When in PREEMPT_RT, pm_runtime acquires a spinlock, that's not allowed in
++	 * atomic context. Workaround it by enabling runtime PM upon probe.
++	 */
++	if (IS_ENABLED(CONFIG_PREEMPT_RT))
++		return 0;
++
+ 	/* Rely on old clockevent state, to balance pm_runtime_get() / pm_runtime_put() calls */
+ 	if (clockevent_state_detached(clkevt) || clockevent_state_shutdown(clkevt)) {
+ 		ret = pm_runtime_get(priv->dev);
+@@ -196,6 +204,9 @@ static void stm32_clkevent_lp_pm_runtime_err(struct clock_event_device *clkevt)
+ {
+ 	struct stm32_lp_private *priv = to_priv(clkevt);
+ 
++	if (IS_ENABLED(CONFIG_PREEMPT_RT))
++		return;
++
+ 	if (clockevent_state_detached(clkevt) || clockevent_state_shutdown(clkevt))
+ 		pm_runtime_put(priv->dev);
+ }
+@@ -351,6 +362,17 @@ static int stm32_clkevent_lp_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		return ret;
+ 
++	/*
++	 * When in PREEMPT_RT, pm_runtime acquires a spinlock, that's not allowed in atomic
++	 * context. Runtime PM is used to acquire the parent's PM domain, when there's one.
++	 * That's not necessarily the case on all instances, so it seems an acceptable trade-off.
++	 */
++	if (IS_ENABLED(CONFIG_PREEMPT_RT)) {
++		ret = pm_runtime_resume_and_get(&pdev->dev);
++		if (ret)
++			return ret;
++	}
++
+ 	priv->dev = &pdev->dev;
+ 
+ 	stm32_clkevent_lp_init(priv, pdev->dev.parent->of_node, rate);
+diff --git a/drivers/hwtracing/coresight/coresight-cti.h b/drivers/hwtracing/coresight/coresight-cti.h
+index cb9ee616d01f..9f9eaaf29add 100644
+--- a/drivers/hwtracing/coresight/coresight-cti.h
++++ b/drivers/hwtracing/coresight/coresight-cti.h
+@@ -17,6 +17,16 @@
+ 
+ #include "coresight-priv.h"
+ 
++#ifdef CONFIG_PREEMPT_RT
++#undef  spin_lock_init
++#define spin_lock_init raw_spin_lock_init
++#define spin_lock raw_spin_lock
++#define spin_unlock raw_spin_unlock
++#undef  spin_lock_irqsave
++#define spin_lock_irqsave raw_spin_lock_irqsave
++#define spin_unlock_irqrestore raw_spin_unlock_irqrestore
++#define spinlock_t raw_spinlock_t
++#endif
+ /*
+  * Device registers
+  * 0x000 - 0x144: CTI programming and status
+diff --git a/drivers/mfd/syscon.c b/drivers/mfd/syscon.c
+index df2e456430d4..7bb8eb972433 100644
+--- a/drivers/mfd/syscon.c
++++ b/drivers/mfd/syscon.c
+@@ -36,6 +36,9 @@ static const struct regmap_config syscon_regmap_config = {
+ 	.reg_bits = 32,
+ 	.val_bits = 32,
+ 	.reg_stride = 4,
++#ifdef CONFIG_PREEMPT_RT
++	.use_raw_spinlock = true,
++#endif
+ };
+ 
+ static struct syscon *of_syscon_register(struct device_node *np, bool check_res)
+diff --git a/drivers/tty/serial/stm32-usart.c b/drivers/tty/serial/stm32-usart.c
+index f13c1bba5fe7..d22de65d7dc7 100644
+--- a/drivers/tty/serial/stm32-usart.c
++++ b/drivers/tty/serial/stm32-usart.c
+@@ -847,7 +847,7 @@ static void stm32_usart_tx_dma_complete(void *arg)
+ 	/* Let's see if we have pending data to send */
+ 	stm32_usart_transmit_chars(port);
+ 
+-	uart_port_lock_irqsave(port, &flags);
++	uart_port_unlock_irqrestore(port, flags);
+ 
+ 	pm_runtime_mark_last_busy(port->dev);
+ 	pm_runtime_put_autosuspend(port->dev);
+@@ -1353,7 +1353,7 @@ static void stm32_usart_break_ctl(struct uart_port *port, int break_state)
+ 
+ 	pm_runtime_get(port->dev);
+ 
+-	spin_lock_irqsave(&port->lock, flags);
++	uart_port_lock_irqsave(port, &flags);
+ 
+ 	if (break_state) {
+ 		if (long_break) {
+@@ -1370,7 +1370,7 @@ static void stm32_usart_break_ctl(struct uart_port *port, int break_state)
+ 			stm32_usart_clr_bits(port, ofs->rqr, USART_RQR_SBKRQ);
+ 	}
+ 
+-	spin_unlock_irqrestore(&port->lock, flags);
++	uart_port_unlock_irqrestore(port, flags);
+ 
+ 	pm_runtime_mark_last_busy(port->dev);
+ 	pm_runtime_put_autosuspend(port->dev);
+@@ -2500,7 +2500,7 @@ static int __maybe_unused stm32_usart_serial_en_wakeup(struct uart_port *port,
+ 		}
+ 
+ 		/* Poll data from RX FIFO if any */
+-		spin_lock_irqsave(&port->lock, flags);
++		uart_port_lock_irqsave(port, &flags);
+ 		size = stm32_usart_receive_chars(port, false);
+ 		if (size)
+ 			tty_flip_buffer_push(tport);
+-- 
