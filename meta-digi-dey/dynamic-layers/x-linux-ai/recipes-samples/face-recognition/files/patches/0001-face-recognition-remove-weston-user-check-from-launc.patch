@@ -1,0 +1,58 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Tue, 12 May 2026 13:58:31 +0200
+Subject: [PATCH] face-recognition: remove weston user check from launch
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ stai-mpu/launch_bin_face_recognition.sh          | 8 +-------
+ stai-mpu/launch_bin_face_recognition_testdata.sh | 8 +-------
+ 2 files changed, 2 insertions(+), 14 deletions(-)
+
+diff --git a/stai-mpu/launch_bin_face_recognition.sh b/stai-mpu/launch_bin_face_recognition.sh
+index d7c9238..44e954c 100755
+--- a/stai-mpu/launch_bin_face_recognition.sh
++++ b/stai-mpu/launch_bin_face_recognition.sh
+@@ -5,17 +5,11 @@
+ #
+ # This software is licensed under terms that can be found in the LICENSE file
+ # in the root directory of this software component.
+ # If no LICENSE file comes with this software, it is provided AS-IS.
+ 
+-weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
+ FRAMEWORK=$1
+ echo "stai wrapper used : "$FRAMEWORK
+ source /usr/local/x-linux-ai/resources/config_board_npu.sh
+ cmd="/usr/local/x-linux-ai/face-recognition/stai_mpu_face_recognition -m /usr/local/x-linux-ai/face-recognition/models/$FACE_DETECTION_MODEL -f /usr/local/x-linux-ai/face-recognition/models/$FACE_RECO_MODEL -d /usr/local/x-linux-ai/face-recognition/$FACE_DATABASE --framerate $DFPS --frame_width $DWIDTH --frame_height $DHEIGHT --camera_src $CAMERA_SRC"
+ 
+-if [ "$weston_user" != "root" ]; then
+-	echo "user : "$weston_user
+-	script -qc "su -l $weston_user -c '$cmd'"
+-else
+-	$cmd
+-fi
++$cmd
+diff --git a/stai-mpu/launch_bin_face_recognition_testdata.sh b/stai-mpu/launch_bin_face_recognition_testdata.sh
+index 026e9c2..7fcce7d 100755
+--- a/stai-mpu/launch_bin_face_recognition_testdata.sh
++++ b/stai-mpu/launch_bin_face_recognition_testdata.sh
+@@ -5,17 +5,11 @@
+ #
+ # This software is licensed under terms that can be found in the LICENSE file
+ # in the root directory of this software component.
+ # If no LICENSE file comes with this software, it is provided AS-IS.
+ 
+-weston_user=$(ps aux | grep '/usr/bin/weston '|grep -v 'grep'|awk '{print $1}')
+ FRAMEWORK=$1
+ echo "stai wrapper used : "$FRAMEWORK
+ source /usr/local/x-linux-ai/resources/config_board_npu.sh
+ cmd="/usr/local/x-linux-ai/face-recognition/stai_mpu_face_recognition -m /usr/local/x-linux-ai/face-recognition/models/$FACE_DETECTION_MODEL -i /usr/local/x-linux-ai/face-recognition/models/$FACE_RECO_DATA -f /usr/local/x-linux-ai/face-recognition/models/$FACE_RECO_MODEL -d /usr/local/x-linux-ai/face-recognition/$FACE_DATABASE"
+ 
+-if [ "$weston_user" != "root" ]; then
+-	echo "user : "$weston_user
+-	script -qc "su -l $weston_user -c '$cmd'"
+-else
+-	$cmd
+-fi
++$cmd
+-- 
+2.34.1

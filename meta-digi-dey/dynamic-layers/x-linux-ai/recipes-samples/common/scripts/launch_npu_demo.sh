@@ -57,5 +57,13 @@ DEMO_DIR="/usr/local/x-linux-ai/${DEMO_FOLDER_NAME}"
 # Verify that the demo directory exists.
 [ -d "${DEMO_DIR}" ] || { echo "Error: Demo ${DEMO} does not exist"; exit 1; }
 
+# Verify demo type
+DEMO_TYPE="python"
+case "$DEMO" in
+  face_recognition)
+    DEMO_TYPE="bin"
+    ;;
+esac
+
 # Execute the demo.
-"${DEMO_DIR}/launch_python_${DEMO}.sh"
+"${DEMO_DIR}/launch_${DEMO_TYPE}_${DEMO}.sh"
