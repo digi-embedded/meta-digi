@@ -9,6 +9,7 @@ SRC_URI += " \
     file://patches/0003-semantic-segmentation-adapt-sample-for-root-user.patch \
     file://patches/0004-semantic-segmentation-set-camera-preview-to-640x480.patch \
     ${@bb.utils.contains("BBFILE_COLLECTIONS", "x-linux-isp", "file://patches/0005-semantic-segmentation-fix-initialization-issue-with-.patch", "", d)} \
+    file://patches/0006-semantic-segmentation-restore-V4L2SRC-pipeline-for-U.patch \
 "
 
 do_install:append () {

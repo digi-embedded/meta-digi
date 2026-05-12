@@ -1,0 +1,43 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Tue, 12 May 2026 10:07:34 +0200
+Subject: [PATCH] setup_camera: fix support for web camera with STM32MP255
+ processor
+
+This commit fixes the function to obtain the video node for USB cameras.
+
+https://onedigi.atlassian.net/browse/DEL-10040
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ resources-files/setup_camera.sh | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/resources-files/setup_camera.sh b/resources-files/setup_camera.sh
+index 9d460a1..6f039e4 100644
+--- a/resources-files/setup_camera.sh
++++ b/resources-files/setup_camera.sh
+@@ -47,15 +47,16 @@ is_dcmipp_present() {
+ get_webcam_device() {
+     echo "get_webcam_device function"
+     found="NOTFOUND"
+     for video in $(find /sys/class/video4linux -name "video*" -type l | sort);
+     do
+-        if [ "$(cat $video/name)" = "dcmipp_dump_capture" ]; then
+-            found="FOUND"
+-        else
+-            V4L_DEVICE="$(basename $video)"
+-            break;
++        if ! $(cat "$video/name" | grep -q "dcmi") ; then
++            if ! $(cat "$video/name" | grep -q "stm32mp") ; then
++                V4L_DEVICE="$(basename "$video")"
++                found="FOUND"
++                break;
++            fi
+         fi
+     done
+ }
+ 
+ # ------------------------------
+-- 
+2.34.1
+

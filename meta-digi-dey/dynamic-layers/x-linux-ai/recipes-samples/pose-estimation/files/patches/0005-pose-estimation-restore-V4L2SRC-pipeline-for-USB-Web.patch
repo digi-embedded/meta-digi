@@ -1,0 +1,233 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Tue, 12 May 2026 11:23:56 +0200
+Subject: [PATCH] pose-estimation: restore V4L2SRC pipeline for USB Web cameras
+
+Backport the previous V4L2SRC-based capture path so MP2x platforms can use USB
+webcams again.
+
+https://onedigi.atlassian.net/browse/DEL-10040
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ stai-mpu/stai_mpu_pose_estimation.py | 157 ++++++++++++++++++++++++++-
+ 1 file changed, 154 insertions(+), 3 deletions(-)
+
+diff --git a/stai-mpu/stai_mpu_pose_estimation.py b/stai-mpu/stai_mpu_pose_estimation.py
+index fbbcfa7..94dde53 100644
+--- a/stai-mpu/stai_mpu_pose_estimation.py
++++ b/stai-mpu/stai_mpu_pose_estimation.py
+@@ -57,12 +57,125 @@ class GstWidget(Gtk.Box):
+ 
+     def _on_realize(self, widget):
+         if(args.camera_src == "LIBCAMERA"):
+             self.camera_dual_pipeline_creation()
+             self.pipeline_preview.set_state(Gst.State.PLAYING)
++        elif(args.camera_src == "V4L2SRC"):
++            self.camera_pipeline_creation()
+         else:
+-            print("Camera source used not supported use LIBCAMERA \n")
++            print("Camera source used not supported use LIBCAMERA or V4L2SRC\n")
++
++    def camera_pipeline_creation(self):
++        """
++        Creation of the gstreamer pipeline when gstwidget is created dedicated to handle
++        camera stream and NN inference (mode single pipeline)
++        """
++        # gstreamer pipeline creation
++        self.pipeline_preview = Gst.Pipeline()
++
++        # creation of the source v4l2src
++        self.v4lsrc1 = Gst.ElementFactory.make("v4l2src", "source")
++        video_device = "/dev/" + str(self.app.video_device_prev)
++        self.v4lsrc1.set_property("device", video_device)
++
++        #creation of the v4l2src caps
++        caps = "video/x-raw,width=" + str(self.app.frame_width) + ",height=" + str(self.app.frame_height) + ", framerate=" + str(args.framerate)+ "/1"
++        print("Camera pipeline configuration : ",caps)
++        camera1caps = Gst.Caps.from_string(caps)
++        self.camerafilter1 = Gst.ElementFactory.make("capsfilter", "filter1")
++        self.camerafilter1.set_property("caps", camera1caps)
++
++        # creation of capsfilter to force RGB16 on preview branch
++        self.rgb16_filter = Gst.ElementFactory.make("capsfilter", "rgb16-filter")
++        rgb16_caps = Gst.Caps.from_string("video/x-raw,format=RGB16")
++        self.rgb16_filter.set_property("caps", rgb16_caps)
++
++        # creation of the videoconvert elements
++        self.videoformatconverter1 = Gst.ElementFactory.make("videoconvert", "video_convert1")
++        self.videoformatconverter2 = Gst.ElementFactory.make("videoconvert", "video_convert2")
++
++        self.tee = Gst.ElementFactory.make("tee", "tee")
++
++        # creation and configuration of the queue elements
++        self.queue1 = Gst.ElementFactory.make("queue", "queue-1")
++        self.queue2 = Gst.ElementFactory.make("queue", "queue-2")
++        self.queue1.set_property("max-size-buffers", 1)
++        self.queue1.set_property("leaky", 2)
++        self.queue2.set_property("max-size-buffers", 1)
++        self.queue2.set_property("leaky", 2)
++
++        # creation and configuration of the appsink element
++        self.appsink = Gst.ElementFactory.make("appsink", "appsink")
++        nn_caps = "video/x-raw,width=" + str(self.app.nn_input_width) + ",height=" + str(self.app.nn_input_height) + ",format=RGB, framerate=" + str(args.framerate)+ "/1"
++        print("Aux pipe configuration:  ", nn_caps)
++        nncaps = Gst.Caps.from_string(nn_caps)
++        self.appsink.set_property("caps", nncaps)
++        self.appsink.set_property("emit-signals", True)
++        self.appsink.set_property("sync", False)
++        self.appsink.set_property("max-buffers", 1)
++        self.appsink.set_property("drop", True)
++        self.appsink.connect("new-sample", self.new_sample)
++
++        # creation of the gtkwaylandsink element to handle the gestreamer video stream
++        self.gtkwaylandsink = Gst.ElementFactory.make("gtkwaylandsink")
++        self.pack_start(self.gtkwaylandsink.props.widget, True, True, 0)
++        self.gtkwaylandsink.props.widget.show()
++
++        # creation and configuration of the fpsdisplaysink element to measure display fps
++        self.fps_disp_sink = Gst.ElementFactory.make("fpsdisplaysink", "fpsmeasure1")
++        self.fps_disp_sink.set_property("signal-fps-measurements", True)
++        self.fps_disp_sink.set_property("fps-update-interval", 2000)
++        self.fps_disp_sink.set_property("text-overlay", False)
++        self.fps_disp_sink.set_property("video-sink", self.gtkwaylandsink)
++        self.fps_disp_sink.connect("fps-measurements",self.get_fps_display)
++
++        # creation of the video rate and video scale elements
++        self.video_rate = Gst.ElementFactory.make("videorate", "video-rate")
++        self.video_scale = Gst.ElementFactory.make("videoscale", "video-scale")
++
++        # Add all elements to the pipeline
++        self.pipeline_preview.add(self.v4lsrc1)
++        self.pipeline_preview.add(self.camerafilter1)
++        self.pipeline_preview.add(self.videoformatconverter1)
++        self.pipeline_preview.add(self.videoformatconverter2)
++        self.pipeline_preview.add(self.rgb16_filter)
++        self.pipeline_preview.add(self.tee)
++        self.pipeline_preview.add(self.queue1)
++        self.pipeline_preview.add(self.queue2)
++        self.pipeline_preview.add(self.appsink)
++        self.pipeline_preview.add(self.fps_disp_sink)
++        self.pipeline_preview.add(self.video_rate)
++        self.pipeline_preview.add(self.video_scale)
++
++        # linking elements together
++        #                              -> queue 1 -> videoconvert -> fpsdisplaysink
++        # v4l2src -> video rate -> tee
++        #                              -> queue 2 -> videoconvert -> video scale -> appsink
++        self.v4lsrc1.link(self.video_rate)
++        self.video_rate.link(self.camerafilter1)
++        self.camerafilter1.link(self.tee)
++        self.queue1.link(self.videoformatconverter1)
++        self.videoformatconverter1.link(self.rgb16_filter)
++        self.rgb16_filter.link(self.fps_disp_sink)
++        self.queue2.link(self.videoformatconverter2)
++        self.videoformatconverter2.link(self.video_scale)
++        self.video_scale.link(self.appsink)
++        self.tee.link(self.queue1)
++        self.tee.link(self.queue2)
++
++        # set pipeline playing mode
++        self.pipeline_preview.set_state(Gst.State.PLAYING)
++        # getting pipeline bus
++        self.bus_preview = self.pipeline_preview.get_bus()
++        self.bus_preview.add_signal_watch()
++        self.bus_preview.connect('message::error', self.msg_error_cb)
++        self.bus_preview.connect('message::eos', self.msg_eos_cb)
++        self.bus_preview.connect('message::info', self.msg_info_cb)
++        self.bus_preview.connect('message::application', self.msg_application_cb)
++        self.bus_preview.connect('message::state-changed', self.msg_state_changed_cb)
++
++        return True
+ 
+     def camera_dual_pipeline_creation(self):
+         """
+         creation of the gstreamer pipeline when gstwidget is created dedicated to camera stream
+         (in dual camera pipeline mode)
+@@ -270,11 +383,14 @@ class GstWidget(Gtk.Box):
+             self.app.nn_inference_time = stop_time - start_time
+             self.app.nn_inference_fps = (1000/(self.app.nn_inference_time*1000))
+             self.app.keypoint_loc, self.app.keypoint_edges, self.app.edge_colors = self.app.nn.get_results()
+             struc = Gst.Structure.new_empty("inference-done")
+             msg = Gst.Message.new_application(None, struc)
+-            self.bus_pipeline.post(msg)
++            if (args.camera_src == "LIBCAMERA"):
++                self.bus_pipeline.post(msg)
++            elif(args.camera_src == "V4L2SRC"):
++                self.bus_preview.post(msg)
+         return Gst.FlowReturn.OK
+ 
+     def get_fps_display(self,fpsdisplaysink,fps,droprate,avgfps):
+         """
+         measure and recover display fps
+@@ -733,10 +849,12 @@ class Application:
+             check_camera_cmd = RESOURCES_DIRECTORY + "check_camera_preview.sh"
+             check_camera = subprocess.run(check_camera_cmd)
+             if check_camera.returncode==1:
+                 print("no camera connected")
+                 exit(1)
++            if (args.camera_src == "V4L2SRC"):
++                self.video_device_prev,self.camera_caps_prev,self.dcmipp_sensor, self.main_postproc = self.setup_camera()
+         else:
+             print("still picture mode activate")
+             self.enable_camera_preview = False
+             self.still_picture_next = False
+         # initialize the list of the file to be processed (used with the
+@@ -785,10 +903,43 @@ class Application:
+         print("display resolution is : ",display_width, " x ", display_height)
+         self.window_width = int(display_width)
+         self.window_height = int(display_height)
+         return 0
+ 
++
++    def setup_camera(self):
++        """
++        Used to configure the camera based on resolution passed as application arguments
++        """
++        width = str(args.frame_width)
++        height = str(args.frame_height)
++        framerate = str(args.framerate)
++        device = str(args.video_device)
++        nn_input_width = str(self.nn_input_width)
++        nn_input_height = str(self.nn_input_height)
++        config_camera = RESOURCES_DIRECTORY + "setup_camera.sh " + width + " " + height + " " + framerate + " " + device
++        x = subprocess.check_output(config_camera,shell=True)
++        x = x.decode("utf-8")
++        x = x.split("\n")
++        for i in x :
++            if "V4L_DEVICE_PREV" in i:
++                video_device_prev = i.lstrip('V4L_DEVICE_PREV=')
++            if "V4L2_CAPS_PREV" in i:
++                camera_caps_prev = i.lstrip('V4L2_CAPS_PREV=')
++            if "V4L_DEVICE_NN" in i:
++                video_device_nn = i.lstrip('V4L_DEVICE_NN=')
++            if "V4L2_CAPS_NN" in i:
++                camera_caps_nn = i.lstrip('V4L2_CAPS_NN=')
++            if "DCMIPP_SENSOR" in i:
++                dcmipp_sensor = i.lstrip('DCMIPP_SENSOR=')
++            if "MAIN_POSTPROC" in i:
++                main_postproc = i.lstrip('MAIN_POSTPROC=')
++            if "AUX_POSTPROC" in i:
++                aux_postproc = i.lstrip('AUX_POSTPROC=')
++        return video_device_prev, camera_caps_prev, dcmipp_sensor, main_postproc
++
++
+     def valid_timeout_callback(self):
+         """
+         if timeout occurs that means that camera preview and the gtk is not
+         behaving as expected
+         """
+@@ -1059,11 +1210,11 @@ if __name__ == '__main__':
+     parser.add_argument("--input_mean", default=255, help="input mean")
+     parser.add_argument("--input_std", default=0, help="input standard deviation")
+     parser.add_argument("--normalize", default=False, help="input standard deviation")
+     parser.add_argument("--validation", action='store_true', help="enable the validation mode")
+     parser.add_argument("--val_run", default=50, help="set the number of draws in the validation mode")
+-    parser.add_argument("--camera_src", default="LIBCAMERA", help="use V4L2SRC for MP1x and LIBCAMERA for MP2x")
++    parser.add_argument("--camera_src", default="LIBCAMERA", help="use V4L2SRC for MP1x or USB camera and LIBCAMERA for MP2x")
+     parser.add_argument("--debug", default=False, action='store_true', help=argparse.SUPPRESS)
+     args = parser.parse_args()
+ 
+     try:
+         application = Application(args)
+-- 
+2.34.1
