@@ -1,0 +1,37 @@
+From: Javier Viguera <javier.viguera@digi.com>
+Date: Tue, 12 May 2026 14:09:40 +0200
+Subject: [PATCH] create_st_fip_binary: use verbose hexdump for encryption key
+
+hexdump may collapse repeated binary data into '*'. This corrupts the
+hex string passed to encrypt_fw and makes the key size invalid. Pass -v
+so the full encryption key is always emitted.
+
+Fix error:
+
+CMD> encrypt_fw \
+        --key 13eb911dfcc316b1b99bbbbf10a7000c3055e863*
+166d3c8c9cd6f888b720a9 \
+        --nonce 1234567890abcdef12345678 \
+        --fw-enc-status 0 \
+        --in <abs-path>/recipe-sysroot/optee/tee-header_v2-ccmp25-dvk-optee.bin \
+        --out <abs-path>/recipe-sysroot/optee/tee-header_v2-ccmp25-dvk-optee_Encrypted.bin
+ERROR:   Unsupported key size: 41
+
+Signed-off-by: Javier Viguera <javier.viguera@digi.com>
+---
+ create_st_fip_binary.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/create_st_fip_binary.sh b/create_st_fip_binary.sh
+index 8664b1b94093..b491c4e59356 100755
+--- a/create_st_fip_binary.sh
++++ b/create_st_fip_binary.sh
+@@ -757,7 +757,7 @@ else
+             # The encryption key is already available in hexadecimal format, so just extract it from file
+             encrypt_key="$(cat ${encrypt_key})"
+         else
+-            encrypt_key="$(hexdump -e '/1 "%02x"' ${encrypt_key})"
++            encrypt_key="$(hexdump -ve '/1 "%02x"' ${encrypt_key})"
+         fi
+ 
+         if [ $USE_BL32 -eq 0 ]; then
