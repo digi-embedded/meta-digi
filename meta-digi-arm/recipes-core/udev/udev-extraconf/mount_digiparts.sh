@@ -38,12 +38,20 @@ get_active_system() {
 		fi
 	else
 		local MMCROOT_DEV
+		local devname
+		local label
+		local uevent
 
 		MMCROOT_DEV="$(stat -c%D /)"
 
-		for label in /dev/disk/by-partlabel/*; do
-			if [ "$(stat -c"%02t%02T" "$(realpath "${label}")")" = "${MMCROOT_DEV}" ]; then
-				ACTIVE_SYSTEM="$(basename "${label}")"
+		for uevent in /sys/class/block/*/uevent; do
+			devname="$(sed -ne 's/^DEVNAME=//p' "${uevent}")"
+			label="$(sed -ne 's/^PARTNAME=//p' "${uevent}")"
+			[ -n "${devname}" ] || continue
+			[ -n "${label}" ] || continue
+
+			if [ "$(stat -c"%02t%02T" "/dev/${devname}")" = "${MMCROOT_DEV}" ]; then
+				ACTIVE_SYSTEM="${label}"
 				break
 			fi
 		done
@@ -89,10 +97,10 @@ if grep -qs "${MOUNTPOINT}" /proc/mounts; then
 	exit 0
 fi
 
-# Get from proc/cmdline the active system "a" or "b"
-get_active_system || exit
-
 if [ "${PARTNAME}" = "linux_a" ] || [ "${PARTNAME}" = "linux_b" ]; then
+	# Get from proc/cmdline the active system "a" or "b"
+	get_active_system || exit
+
 	PARTINDEX="${PARTNAME#linux_}"
 	if [ "${ACTIVE_SYSTEM}" != "${PARTINDEX}" ]; then
 		logger "Skip mount partition '${PARTNAME}', because it is not the active system"
