@@ -4,6 +4,23 @@
 ########################
 # Unified artifact bundles
 ########################
+do_clean_old_container_artifacts() {
+    if [ "${RM_OLD_IMAGE}" != "1" ]; then
+        exit 0
+    fi
+
+    primary_device_type="$(DEVICE_TYPES_JSON="${CONTAINER_DEVICE_TYPES_JSON}" python3 -c 'import json, os; data = json.loads(os.environ["DEVICE_TYPES_JSON"]); print(data[0])' 2>/dev/null)"
+    if [ -z "${primary_device_type}" ]; then
+        bbfatal "Unable to determine primary device type from CONTAINER_DEVICE_TYPES_JSON=${CONTAINER_DEVICE_TYPES_JSON}"
+    fi
+
+    for runtime in lxc podman; do
+        old_artifact_glob="${DEPLOY_DIR_IMAGE}/${CONTAINER_NAME}-*_artifact_${runtime}_${primary_device_type}.tar.gz"
+        bbnote "Removing old ${runtime} container artifacts matching ${old_artifact_glob}"
+        rm -f ${old_artifact_glob}
+    done
+}
+
 do_image_container_artifacts() {
     lxc_bundle="${DEPLOY_DIR_IMAGE}/${LXC_OUTPUT_NAME}"
     podman_archive="${DEPLOY_DIR_IMAGE}/${PODMAN_OUTPUT_NAME}"
@@ -141,4 +158,5 @@ open(sys.argv[1], "w", encoding="utf-8").write(json.dumps(payload, indent=2) + "
     rm -rf "${image_prefix}.rootfs-oci"
 }
 
+addtask clean_old_container_artifacts after do_image_lxc_bundle do_image_podman_archive before do_image_container_artifacts
 addtask image_container_artifacts after do_image_lxc_bundle do_image_podman_archive before do_build
