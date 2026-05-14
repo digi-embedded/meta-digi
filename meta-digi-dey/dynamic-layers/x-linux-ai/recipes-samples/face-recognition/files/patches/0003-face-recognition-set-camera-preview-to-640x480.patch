@@ -1,0 +1,206 @@
+From: Isaac Hermida <isaac.hermida@digi.com>
+Date: Thu, 14 May 2026 17:00:00 +0200
+Subject: [PATCH] face-recognition: set camera preview to 640x480
+
+The face recognition sample lets the camera preview expand with the
+display resolution. This makes the camera demo larger than the other
+NPU demos, which keep their camera preview at 640x480.
+
+Set the video widget and its overlay drawing area to 640x480, and keep
+them centered in the existing maximized windows.
+
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ stai-mpu/stai_mpu_face_recognition.cc | 70 ++++++++++++++++++++++++----------
+ 1 file changed, 51 insertions(+), 19 deletions(-)
+
+diff --git a/stai-mpu/stai_mpu_face_recognition.cc b/stai-mpu/stai_mpu_face_recognition.cc
+index 756139a..e9a8360 100644
+--- a/stai-mpu/stai_mpu_face_recognition.cc
++++ b/stai-mpu/stai_mpu_face_recognition.cc
+@@ -48,6 +48,9 @@
+ #define FACE_IDENTITY_CLASSES 512
+ #define MAX_HISTORY_THUMBNAILS  11 /* for 720p display */
+ 
++#define CAMERA_PREVIEW_WIDTH 640
++#define CAMERA_PREVIEW_HEIGHT 480
++
+ #include "stai_mpu_wrapper.hpp"
+ #include "blazeface_pp.hpp"
+ #include "facenet_pp.hpp"
+@@ -1126,6 +1129,17 @@ static gboolean gui_press_event_cb(GtkWidget *widget,
+ 				   CustomData *data)
+ {
+ 	if (event->button == GDK_BUTTON_PRIMARY) {
++		/*
++		 * In camera preview mode, click events are relative to the
++		 * overlay drawing widget. In still image mode, drawing is
++		 * translated by data->offset, so keep the legacy adjustment.
++		 */
++		int click_x = event->x;
++		if (!data->preview_enabled)
++			click_x -= data->offset;
++
++		int click_y = event->y;
++
+ 		/* event occurs on one of the thumbnail face */
+ 		unsigned int nb_registered_faces = data->registered_faces.size();
+ 		if (nb_registered_faces != 0) {
+@@ -1134,10 +1149,10 @@ static gboolean gui_press_event_cb(GtkWidget *widget,
+ 						     data->nb_history_thumbnails);
+ 			std::vector<Position> thumb_pos = data->history_thumb_position[nb_thumbnails - 1];
+ 			for (unsigned int i = 0 ; i < thumb_pos.size() ; i++) {
+-				if ((event->x - data->offset > thumb_pos[i].x) &&
+-				    (event->x - data->offset< thumb_pos[i].x + thumb_pos[i].width) &&
+-				    (event->y > thumb_pos[i].y) &&
+-				    (event->y < thumb_pos[i].y + thumb_pos[i].height)) {
++				if ((click_x > thumb_pos[i].x) &&
++				    (click_x < thumb_pos[i].x + thumb_pos[i].width) &&
++				    (click_y > thumb_pos[i].y) &&
++				    (click_y < thumb_pos[i].y + thumb_pos[i].height)) {
+ 					gui_delete_registered_face(i, data);
+ 					if (!data->preview_enabled) {
+ 						data->new_inference = true;
+@@ -1151,10 +1166,10 @@ static gboolean gui_press_event_cb(GtkWidget *widget,
+ 		 * not been registered */
+ 		for (unsigned int i = 0 ; i < data->screen_face_position.size() ; i++) {
+ 			if (!data->screen_face_position[i].registered &&
+-			    (event->x - data->offset > data->screen_face_position[i].pos.x) &&
+-			    (event->x - data->offset < data->screen_face_position[i].pos.x + data->screen_face_position[i].pos.width) &&
+-			    (event->y > data->screen_face_position[i].pos.y) &&
+-			    (event->y < data->screen_face_position[i].pos.y + data->screen_face_position[i].pos.height)) {
++			    (click_x > data->screen_face_position[i].pos.x) &&
++			    (click_x < data->screen_face_position[i].pos.x + data->screen_face_position[i].pos.width) &&
++			    (click_y > data->screen_face_position[i].pos.y) &&
++			    (click_y < data->screen_face_position[i].pos.y + data->screen_face_position[i].pos.height)) {
+ 				gui_register_new_face(i, data);
+ 				goto end;
+ 			}
+@@ -1194,18 +1209,17 @@ static void gui_compute_history_thumbnail_position(CustomData *data)
+ {
+ 	if(data->preview_enabled){
+-		float ratio = (float)data->frame_width/(float)data->frame_height;
+-		float width_preview = (ratio*(float)(data->widget_draw_height));
+-		data->face_banner.width = width_preview;
++		data->face_banner.width = data->widget_draw_ov_width;
+ 		data->face_banner.height = data->ui_face_thumb_size + data->ui_face_thumb_spacing ;
+ 		data->face_banner.x = 0;
+-		data->face_banner.y = data->widget_draw_height - data->face_banner.height;
++		data->face_banner.y = data->widget_draw_ov_height -
++			data->face_banner.height;
+ 	} else {
+ 		data->face_banner.width = data->frame_disp_pos.width;
+ 		data->face_banner.height = data->ui_face_thumb_size + data->ui_face_thumb_spacing;
+ 		data->face_banner.x = 0;
+ 		data->face_banner.y = data->frame_disp_pos.height - data->face_banner.height;
+ 	}
+-	data->nb_history_thumbnails = (data->widget_draw_width - data->ui_face_thumb_spacing)
++	data->nb_history_thumbnails = (data->face_banner.width - data->ui_face_thumb_spacing)
+ 		/ (data->ui_face_thumb_size + data->ui_face_thumb_spacing);
+ 
+ 	/* Clip to the MAX_HISTORY_THUMBNAILS value if needed */
+@@ -1254,20 +1265,15 @@ static void gui_draw_face_positions(cairo_t *cr,
+ 		new_screen_face_position.registered = false;
+ 
+ 		if (data->preview_enabled){
+-			/* Get drawing area informations */
+-			float ratio = (float)data->frame_width/(float)data->frame_height;
+-			float width_preview = (ratio*(float)(data->widget_draw_height));
+ 			/* compute rectangle position and dimensions */
+-			/*  Offset to draw on the preview */
+-			data->offset = ((data->widget_draw_ov_width - (int)width_preview)/2);
+-			new_screen_face_position.pos.x = width_preview  *
+-				data->detected_faces[i].bbox.top_left.x + data->offset;
+-			new_screen_face_position.pos.y = data->frame_disp_pos.height *
++			new_screen_face_position.pos.x = data->widget_draw_ov_width *
++				data->detected_faces[i].bbox.top_left.x;
++			new_screen_face_position.pos.y = data->widget_draw_ov_height *
+ 				data->detected_faces[i].bbox.top_left.y;
+-			new_screen_face_position.pos.width  = width_preview  *
++			new_screen_face_position.pos.width = data->widget_draw_ov_width *
+ 				(data->detected_faces[i].bbox.bot_right.x -
+ 				 data->detected_faces[i].bbox.top_left.x);
+-			new_screen_face_position.pos.height = data->frame_disp_pos.height *
++			new_screen_face_position.pos.height = data->widget_draw_ov_height *
+ 				(data->detected_faces[i].bbox.bot_right.y -
+ 				 data->detected_faces[i].bbox.top_left.y);
+ 		} else {
+@@ -1380,7 +1393,7 @@ static void gui_set_ui_parameters(CustomData *data)
+ 		data->ui_face_thumb_spacing = 20;
+ 		data->ui_box_line_width = 2.0;
+ 		data->ui_thumb_box_line_width = 3.0;
+-		data->keyboard_config = "window_1080p";
++		data->keyboard_config = "window_720p";
+ 	} else {
+ 		/* Default UI parameter */
+ 		g_print("Display config fallback \n");
+
+@@ -1492,5 +1505,5 @@ static gboolean gui_draw_overlay_cb(GtkWidget *widget,
+ 				0);
+ 	} else {
+-		data->offset = ((data->widget_draw_ov_width - (int)width_preview)/2);
++		data->offset = 0;
+ 	}
+ 
+@@ -1504,11 +1511,8 @@ static gboolean gui_draw_overlay_cb(GtkWidget *widget,
+ 
+ 	/* Draw a black transparent banner to display the registered faces */
+ 	cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.60);
+-	if (!data->preview_enabled){
+-		cairo_rectangle(cr,data->face_banner.x, data->face_banner.y,data->face_banner.width, data->face_banner.height);
+-	} else {
+-		cairo_rectangle(cr,data->face_banner.x + data->offset, data->face_banner.y,data->face_banner.width, data->face_banner.height);
+-	}
++	cairo_rectangle(cr, data->face_banner.x, data->face_banner.y,
++			data->widget_draw_ov_width, data->face_banner.height);
+ 	cairo_fill_preserve(cr);
+ 	cairo_stroke(cr);
+ 
+@@ -1644,6 +1652,8 @@ static void gui_create_overlay(CustomData *data)
+ 		/* Create the drawing area to draw text on it using cairo */
+ 		drawing_area = gtk_drawing_area_new();
+ 		gtk_widget_set_app_paintable(drawing_area, TRUE);
++		gtk_widget_set_size_request(drawing_area, CAMERA_PREVIEW_WIDTH,
++					    CAMERA_PREVIEW_HEIGHT);
+ 		gtk_widget_add_events(drawing_area, GDK_BUTTON_PRESS_MASK);
+ 		g_signal_connect(G_OBJECT(drawing_area), "draw",G_CALLBACK(gui_draw_overlay_cb), data);
+ 		g_signal_connect(G_OBJECT(drawing_area), "button-press-event",G_CALLBACK(gui_press_event_cb), data);
+@@ -1696,7 +1701,7 @@ static void gui_create_overlay(CustomData *data)
+ 	gtk_widget_set_name(drawing_box, "gui_overlay_draw");
+ 	if (data->preview_enabled){
+ 		/* Camera preview use case */
+-		gtk_box_pack_start(GTK_BOX(drawing_box), drawing_area, TRUE, TRUE, 0);
++		gtk_box_set_center_widget(GTK_BOX(drawing_box), drawing_area);
+ 	} else {
+ 		/*  Still picture use case */
+ 		gtk_box_pack_start(GTK_BOX(drawing_box), still_pict_draw, TRUE, TRUE, 0);
+@@ -1828,6 +1834,8 @@ static void gui_create_main(CustomData *data)
+ 		g_assert (!g_strcmp0 (G_OBJECT_TYPE_NAME (sink), "GstGtkWaylandSink"));
+ 		g_object_get (sink, "widget", &data->video, NULL);
+         gtk_widget_set_app_paintable(GTK_WIDGET(data->video), TRUE);
++		gtk_widget_set_size_request(GTK_WIDGET(data->video),
++					    CAMERA_PREVIEW_WIDTH, CAMERA_PREVIEW_HEIGHT);
+ 
+ 		data->info_inf_time_main = gtk_label_new(NULL);
+ 		gtk_label_set_justify(GTK_LABEL(data->info_inf_time_main),GTK_JUSTIFY_CENTER);
+@@ -1871,7 +1879,7 @@ static void gui_create_main(CustomData *data)
+ 	gtk_widget_set_name(video_box, "gui_main_video");
+ 	if (data->preview_enabled){
+ 		/*  Camera preview use case  */
+-		gtk_box_pack_start(GTK_BOX(video_box), GTK_WIDGET(data->video), TRUE, TRUE, 0);
++		gtk_box_set_center_widget(GTK_BOX(video_box), GTK_WIDGET(data->video));
+ 	} else {
+ 		/*  Still picture use case */
+ 		gtk_box_pack_start(GTK_BOX(video_box), still_pict_draw, TRUE, TRUE, 0);
+@@ -2424,9 +2435,9 @@ static int gst_pipeline_camera_creation(CustomData *data)
+ 						    "format", G_TYPE_STRING,
+ 						    "RGB16",
+ 						    "width", G_TYPE_INT,
+-						    data->frame_width,
++						    CAMERA_PREVIEW_WIDTH,
+ 						    "height", G_TYPE_INT,
+-						    data->frame_height,
++						    CAMERA_PREVIEW_HEIGHT,
+ 						    NULL);
+ 
+ 	GstCaps *caps_fr = gst_caps_new_simple("video/x-raw",

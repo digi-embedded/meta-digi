@@ -5,6 +5,8 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/../common:${THISDIR}/files:"
 SRC_URI += " \
     file://scripts/launch_npu_demo.sh \
     file://patches/0001-face-recognition-remove-weston-user-check-from-launc.patch \
+    file://patches/0002-face-recognition-add-V4L2SRC-camera-support.patch \
+    file://patches/0003-face-recognition-set-camera-preview-to-640x480.patch \
 "
 
 do_install:append () {
