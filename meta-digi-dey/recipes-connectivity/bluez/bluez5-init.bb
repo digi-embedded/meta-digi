@@ -26,9 +26,6 @@ inherit update-rc.d systemd
 do_install() {
 	# INITSCRIPT
 	install -d ${D}${sysconfdir}/init.d/
-	# Set BT GPIO
-	sed -i -e "s,##BT_GPIO##,${BT_GPIO},g" \
-                ${WORKDIR}/${BT_INIT_FILE}
 	install -m 0755 ${WORKDIR}/${BT_INIT_FILE} ${D}${sysconfdir}/bluetooth-init
 	ln -sf /etc/bluetooth-init ${D}${sysconfdir}/init.d/bluetooth-init
 	# Set BT UART device
@@ -41,6 +38,12 @@ do_install() {
 
 do_install:append:ccimx6sbc() {
 	install -m 0755 ${WORKDIR}/bluetooth-init_atheros ${D}${sysconfdir}/bluetooth-init_atheros
+}
+
+do_install:append() {
+	# Set BT GPIO
+	sed -i -e "s,##BT_GPIO##,${BT_GPIO},g" \
+                ${D}${sysconfdir}/bluetooth-init*
 }
 
 pkg_postinst_ontarget:${PN}:ccimx6sbc() {
