@@ -48,12 +48,16 @@ bt_init() {
 
 	for i in $(seq ${RETRIES}); do
 		# Load manually the kernel module
-		modprobe "${MODULE_NAME}"
+		timeout 3 modprobe "${MODULE_NAME}"
 		sleep 1
-		# Reconfigure the HCI interface with the expected MAC address
-		is_kernel_module_loaded && set_btaddr && log info "Bluetooth activated" && return 0
+		is_kernel_module_loaded || continue
+		# Validate that the controller is available through the
+		# kernel management interface used by bluetoothd.
+		if timeout 3 btmgmt --index 0 info >/dev/null 2>&1; then
+			# Reconfigure the HCI interface with the expected MAC address
+			set_btaddr && log info "Bluetooth activated" && return 0
+		fi
 		bt_stop
-
 		if [ "$i" -lt "$RETRIES" ]; then
 			log err "Cannot initialize Bluetooth, retrying..."
 		fi

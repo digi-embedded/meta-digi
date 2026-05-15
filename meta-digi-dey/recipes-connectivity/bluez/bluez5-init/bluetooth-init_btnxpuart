@@ -50,6 +50,10 @@ is_kernel_module_loaded() {
 	lsmod | grep -qs -w "^${MODULE_NAME}"
 }
 
+unload_module() {
+	hciconfig "${HCI_IFACE}" up && rmmod "${MODULE_NAME}"
+}
+
 bluetooth_start() {
 	if ! [ -e "/proc/device-tree/bluetooth/mac-address" ]; then
 		log "[ERROR] Bluetooth mac-address not found"
@@ -59,18 +63,31 @@ bluetooth_start() {
 	# If module is already loaded, skip
 	is_kernel_module_loaded && log "[ERROR] kernel module already present, skipping" && return 1
 
-	power 0 && sleep 0.2 && power 1
-	# Load manually the kernel module
-	modprobe "${MODULE_NAME}"
-	# Reconfigure the HCI interface with the expected MAC address and power levels
-	is_kernel_module_loaded && set_btaddr && set_power_config && log "Bluetooth activated" && return 0
+	for RETRY in $(seq 1 3)
+	do
+		power 0 && sleep 0.2 && power 1
+		# Load manually the kernel module
+		timeout 3 modprobe "${MODULE_NAME}"
+		is_kernel_module_loaded || continue
+		# Validate that the controller is available through the
+		# kernel management interface used by bluetoothd.
+		if timeout 3 btmgmt --index 0 info >/dev/null 2>&1; then
+			# Reconfigure the HCI interface with the expected MAC address and power levels
+			if set_btaddr && set_power_config; then
+				log "Bluetooth activated"
+				return 0
+			fi
+		fi
+		unload_module
+		power 0
+	done
 	log "[ERROR] Cannot initialize Bluetooth correctly" && return 1
 }
 
 is_system_running() {
 	state=$(systemctl is-system-running 2>/dev/null)
 	case "$state" in
-		running|degraded)
+		starting|running|degraded)
 			return 0 ;; # System is operational
 		*)
 			return 1 ;; # Assume not running
@@ -84,7 +101,7 @@ bluetooth_stop() {
 	# sure the interface is UP before unloading the module.
 	#
 	if is_system_running; then
-		hciconfig "${HCI_IFACE}" up && rmmod "${MODULE_NAME}"
+		unload_module
 		power 0
 	else
 		log "System rebooting... not taking any action"

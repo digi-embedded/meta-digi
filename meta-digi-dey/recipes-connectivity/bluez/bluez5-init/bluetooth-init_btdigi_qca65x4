@@ -26,9 +26,15 @@ bluetooth_init() {
 	for RETRY in $(seq 1 5)
 	do
 		killproc hciattach
-		modprobe btdigi
+		timeout 3 modprobe btdigi
 		if hciattach ttyBt qca ${BT_RATE:-3000000} -t30 ${BT_FLOW:-flow} unused ${BT_MACADDR} >${HCIATTACH_LOG} 2>&1; then
-			return
+			# hciattach performs a reset to load the new firmware and needs some time to be ready
+			sleep 1
+			# Validate that the controller is available through the
+			# kernel management interface used by bluetoothd.
+			if timeout 3 btmgmt --index 0 info >/dev/null 2>&1; then
+				return
+			fi
 		fi
 		rmmod btdigi
 		sleep 1
