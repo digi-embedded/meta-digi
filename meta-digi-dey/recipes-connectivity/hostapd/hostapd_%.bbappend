@@ -2,14 +2,14 @@
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
+HOSTAPD_AP_IFACE ?= "wlan1"
+HOSTAPD_AP_IFACE:ccimx91 = "uap0"
+HOSTAPD_AP_IFACE:ccimx93 = "uap0"
+
 SRC_URI:append = " \
     file://hostapd_wlan0.conf \
     file://hostapd@.service \
-    ${@oe.utils.conditional('HAS_WIFI_VIRTWLANS', 'true', 'file://hostapd_wlan1.conf', '', d)} \
-"
-
-SRC_URI:append:ccimx9 = " \
-    file://hostapd_uap0.conf \
+    ${@oe.utils.conditional('HAS_WIFI_VIRTWLANS', 'true', 'file://hostapd_${HOSTAPD_AP_IFACE}.conf', '', d)} \
 "
 
 # Patch series from Murata release
@@ -89,12 +89,8 @@ add_hostapd_files() {
 
 	if ${HAS_WIFI_VIRTWLANS}; then
 		# Install custom hostapd_IFACE.conf file
-		install -m 0644 ${WORKDIR}/hostapd_wlan1.conf ${D}${sysconfdir}
+		install -m 0644 ${WORKDIR}/hostapd_${HOSTAPD_AP_IFACE}.conf ${D}${sysconfdir}
 	fi
-}
-
-add_hostapd_files:ccimx9() {
-	install -m 0644 ${WORKDIR}/hostapd_uap0.conf ${D}${sysconfdir}
 }
 
 pkg_postinst_ontarget:${PN}() {

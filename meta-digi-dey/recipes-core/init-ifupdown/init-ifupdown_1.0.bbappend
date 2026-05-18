@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2024, Digi International Inc.
+# Copyright (C) 2013-2026, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BP}:"
 
@@ -73,7 +73,12 @@ install_virtwlans() {
 	ln -s ../if-pre-up.d/virtwlans ${D}${sysconfdir}/network/if-post-down.d/virtwlans
 }
 
-install_virtwlans:ccimx9() {
+install_virtwlans:ccimx91() {
+	# Skip
+	:
+}
+
+install_virtwlans:ccimx93() {
 	# Skip
 	:
 }
@@ -83,6 +88,9 @@ WLAN1_PRE_DOWN_ACTION = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'sys
 
 WLAN1_POST_UP_ACTION:ccimx9 = "systemctl start hostapd@uap0.service"
 WLAN1_PRE_DOWN_ACTION:ccimx9 = "systemctl stop hostapd@uap0.service"
+
+WLAN1_POST_UP_ACTION:ccimx95 = "systemctl start hostapd@wlan1.service"
+WLAN1_PRE_DOWN_ACTION:ccimx95 = "systemctl stop hostapd@wlan1.service"
 
 install_wlan1() {
 	cat ${WORKDIR}/interfaces.wlan1.${WLAN1_MODE} >> ${D}${sysconfdir}/network/interfaces

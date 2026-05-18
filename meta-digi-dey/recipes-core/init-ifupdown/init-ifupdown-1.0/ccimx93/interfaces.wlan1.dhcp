@@ -1,0 +1,8 @@
+
+# Wi-Fi AP interface (NXP IW612)
+#auto uap0
+iface uap0 inet dhcp
+       udhcpc_opts -S -b >/dev/null &
+       pre-up [ -d /proc/device-tree/wireless ]
+       post-up ##WLAN1_POST_UP_ACTION##
+       pre-down ##WLAN1_PRE_DOWN_ACTION##
