@@ -22,11 +22,20 @@ OS versions:
 Software for the following hardware platforms is in production support:
 
 ## ConnectCore 95
-* ConnectCore 95 System-on-Module (SOM)
+* ConnectCore 95 SMT System-on-Module (SOM)
   * [CC-WMX-B30F-B1](https://www.digi.com/products/models/cc-wmx-b30f-b1)
   * [CC-MX-B30F-B1](https://www.digi.com/products/models/cc-mx-b30f-b1)
+  * [CC-WMX-B38E-B1](https://www.digi.com/products/models/cc-wmx-b38e-b1)
+  * [CC-MX-B38E-B1](https://www.digi.com/products/models/cc-mx-b38e-b1)
+  * [CC-WMX-B88D-B1](https://www.digi.com/products/models/cc-wmx-b88d-b1)
+  * [CC-MX-B88D-B1](https://www.digi.com/products/models/cc-mx-b88d-b1)
+* ConnectCore 95 SMARC System-on-Module (SOM)
+  * [CC-MX-B88D-BS](https://www.digi.com/products/models/cc-mx-b88d-bs)
+  * [CC-WMX-B30F-BS](https://www.digi.com/products/models/cc-wmx-b30f-bs)
+  * [CC-WMX-B38E-BS](https://www.digi.com/products/models/cc-wmx-b38e-bs)
 * ConnectCore 95 Development Kit (DVK)
   * [CC-WMX95-KIT](https://www.digi.com/products/models/cc-wmx95-kit) ([Get Started](https://www.digi.com/resources/documentation/digidocs/embedded/dey/5.0/cc95/yocto-gs_index))
+  * [CC-WMX95-2G-KIT](https://www.digi.com/products/models/cc-wmx95-2g-kit)
 
 ## ConnectCore MP25
 * ConnectCore MP25 System-on-Module (SOM)
@@ -154,7 +163,42 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 ## 5.0-r4
 
-TODO
+* ST-based platforms
+  * Updated BSP
+    * Trusted Firmware ARM v2.10 (based on tag 'v2.10-stm32mp-r3' by ST)
+    * OP-TEE v4.0.0 (based on tag '4.0.0-stm32mp-r3' by ST)
+    * U-Boot v2023.10 (based on tag 'v2023.10-stm32mp-r3' by ST)
+    * Linux kernel v6.6.116 (based on tag 'v6.6-stm32mp-r3' by ST)
+    * Updated X-LINUX-AI software package (based on tag 'v6.2.0' by ST)
+      * Added new face recognition demo
+    * Updated Wifi firmware to 'imx-scarthgap-longma_r1.0' release from Murata
+      * 2FY Wireless chip: v28.10.590.3
+  * Added initial country support to the ConnectCore MP2 World CLM blob file
+  * Fix U-Boot environment encryption support for ConnectCore MP25
+  * Cortex-M4 signing and authentication support for ConnectCore MP15
+  * Encryption support for ConnectCore MP13
+* NXP-based platforms
+  * Added support for ConnectCore 95 SMARC
+  * Updated BSP
+    * Trusted Firmware ARM v2.10 (based on tag 'lf-6.6.52-2.2.2' by NXP)
+    * OP-TEE v4.4.0 (based on tag 'lf-6.6.52-2.2.2' by NXP)
+    * OEI v1.0 (based on tag 'lf-6.6.52-2.2.2' by NXP)
+    * System Manager 2025q3 (based on tag 'lf-6.6.52-2.2.2' by NXP)
+    * U-Boot v2024.04 (based on tag 'lf-6.6.52-2.2.2' by NXP)
+    * Linux kernel v6.6.52 (based on tag 'lf-6.6.52-2.2.2' by NXP)
+    * Updated Wifi firmware to 'imx-scarthgap-longma_r1.0' release from Murata
+      * 2EC Wireless chip: v18.53.546.29
+  * Added WIC support
+  * Added Flutter image support for ConnectCore 95
+* Added Digi Embedded Yocto containers framework through new 'meta-digi-containers' layer
+* Added systemd service to start/mount encrypted folders
+* Added support for customization of boot logos
+* Generation of provisioning QR code in sysinfo
+* Upgrade LVGL version to 9.3
+* TrustFence
+  * Sign installer boot scripts
+  * Improve log messages during artifacts authentication
+* General bug fixing and improvements
 
 ## 5.0-r3
 
@@ -301,17 +345,16 @@ updated list can be found on the online documentation.
 
 ## ConnectCore MP25
 
-* MMC0 input/output errors may appear during extended suspend/resume cycles.
-* The system may fail to power off correctly, eventually falling back to a watchdog
-  reset.
+* ConnectCore MP25 System-on-Module (SOM)
+  * The UART connected to the Bluetooth chip may not operate reliably at higher
+    baud rates. As a workaround, USART1 is configured to run at 115200 bps, which
+    limits the maximum throughput of this interface.
 
-## ConnectCore MP13
+## ConnectCore 95
 
-* The power button becomes unresponsive after one power-off/power-on cycle.
-  A system reboot is required to restore normal functionality.
-  The issue originates from the OP-TEE/ATF firmware and will be addressed in
-  the next DEY release.
-  If you need further assistance, please contact Digi Technical Support.
+* ConnectCore 95 Development Kit (DVK)
+  * RS485 is disabled on DVKv2 because DE/RE# line is an MCA_IO that cannot be
+    toggled in interrupt context.
 
 # Support Contact Information
 
