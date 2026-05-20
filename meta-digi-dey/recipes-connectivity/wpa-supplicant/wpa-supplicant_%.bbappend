@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2025, Digi International Inc.
+# Copyright (C) 2013-2026, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -78,6 +78,7 @@ MURATA_COMMON_PATCHES = " \
 
 SRC_URI:append:ccimx6sbc = " file://wpa_supplicant_p2p.conf_atheros"
 SRC_URI:append:stm32mpcommon = " ${MURATA_COMMON_PATCHES}"
+SRC_URI:append:ccimx95 = " ${MURATA_COMMON_PATCHES}"
 
 # Re-define do_configure() to be able to use our own defconfig while
 # maintaining the logic of the original recipe. This is the exact same as it is

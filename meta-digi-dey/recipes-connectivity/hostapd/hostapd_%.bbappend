@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2025, Digi International Inc.
+# Copyright (C) 2016-2026, Digi International Inc.
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
@@ -63,6 +63,7 @@ MURATA_COMMON_PATCHES = " \
 "
 
 SRC_URI:append:stm32mpcommon = " ${MURATA_COMMON_PATCHES}"
+SRC_URI:append:ccimx95 = " ${MURATA_COMMON_PATCHES}"
 
 SYSTEMD_SERVICE:${PN}:append = " hostapd@.service"
 
