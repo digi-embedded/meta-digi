@@ -34,7 +34,6 @@ STORAGE_MEDIA = "mmc"
 # Wireless external module
 WIRELESS_MODULE ?= ""
 WIRELESS_MODULE:append = " ${@oe.utils.conditional('HAVE_WIFI', '1', 'kernel-module-qualcomm', '', d)}"
-HAS_WIFI_VIRTWLANS = "true"
 
 # Machine firmware
 MACHINE_FIRMWARE:append = " ${@oe.utils.conditional('HAVE_BT', '1', 'firmware-qualcomm-qca6564-bt', '', d)}"
