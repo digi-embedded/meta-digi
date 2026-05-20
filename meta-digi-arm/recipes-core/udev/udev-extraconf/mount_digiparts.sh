@@ -17,10 +17,61 @@
 BASE_INIT="$(readlink -f "@base_sbindir@/init")"
 BASE_INIT_ORIG="$(readlink -f "@base_sbindir@/init.orig")"
 INIT_SYSTEMD="@systemd_unitdir@/systemd"
-EMMCROOTFS="$(grep -qs 'root=PARTUUID.*' /proc/cmdline 2>/dev/null && echo 1)"
+
+get_block_disk() {
+	local dev
+	local syspath
+
+	dev="${1##*/}"
+	syspath="$(readlink -f "/sys/class/block/${dev}")"
+	[ -n "${syspath}" ] || return
+
+	if [ -f "${syspath}/partition" ]; then
+		basename "$(dirname "${syspath}")"
+	else
+		basename "${syspath}"
+	fi
+}
+
+get_root_disk() {
+	local ROOT_DEV
+	local devname
+	local uevent
+
+	ROOT_DEV="$(stat -c%D /)"
+
+	for uevent in /sys/class/block/*/uevent; do
+		devname="$(sed -ne 's/^DEVNAME=//p' "${uevent}")"
+		[ -n "${devname}" ] || continue
+
+		if [ "$(stat -c"%02t%02T" "/dev/${devname}")" = "${ROOT_DEV}" ]; then
+			get_block_disk "${devname}"
+			break
+		fi
+	done
+}
 
 get_active_system() {
-	if [ -z "${EMMCROOTFS}" ]; then
+	local ROOT_DEV
+	local devname
+	local label
+	local uevent
+
+	ROOT_DEV="$(stat -c%D /)"
+
+	for uevent in /sys/class/block/*/uevent; do
+		devname="$(sed -ne 's/^DEVNAME=//p' "${uevent}")"
+		label="$(sed -ne 's/^PARTNAME=//p' "${uevent}")"
+		[ -n "${devname}" ] || continue
+		[ -n "${label}" ] || continue
+
+		if [ "$(stat -c"%02t%02T" "/dev/${devname}")" = "${ROOT_DEV}" ]; then
+			ACTIVE_SYSTEM="${label}"
+			break
+		fi
+	done
+
+	if [ -z "${ACTIVE_SYSTEM}" ]; then
 		# For a read-only filesystem this will be /dev/ubiblock0_X
 		# For an ubifs filesystem this will be ubiX:rootfs_X
 		ACTIVE_SYSTEM="$(sed -e 's/^.*root=\([^ ]*\) .*$/\1/' /proc/cmdline 2>/dev/null)"
@@ -36,25 +87,6 @@ get_active_system() {
 			#Character device major/minor: 242:6
 			ACTIVE_SYSTEM="$(ubinfo "${ACTIVE_SYSTEM}" | sed -ne '/^Name/s,.* \([^[:blank:]]\+\)$,\1,g;T;p')"
 		fi
-	else
-		local MMCROOT_DEV
-		local devname
-		local label
-		local uevent
-
-		MMCROOT_DEV="$(stat -c%D /)"
-
-		for uevent in /sys/class/block/*/uevent; do
-			devname="$(sed -ne 's/^DEVNAME=//p' "${uevent}")"
-			label="$(sed -ne 's/^PARTNAME=//p' "${uevent}")"
-			[ -n "${devname}" ] || continue
-			[ -n "${label}" ] || continue
-
-			if [ "$(stat -c"%02t%02T" "/dev/${devname}")" = "${MMCROOT_DEV}" ]; then
-				ACTIVE_SYSTEM="${label}"
-				break
-			fi
-		done
 	fi
 
 	if [ -z "${ACTIVE_SYSTEM}" ]; then
@@ -80,6 +112,17 @@ elif [ "${SUBSYSTEM}" = "ubi" ]; then
 	# "mtd" subsystem rule
 	result="$(grep \"${PARTNAME}\"$ /proc/mtd)"
 	[ -n "${result}" ] && exit 0
+fi
+
+if [ "${SUBSYSTEM}" = "block" ]; then
+	ROOT_DISK="$(get_root_disk)"
+	DEV_DISK="$(get_block_disk "${DEVNAME}")"
+
+	if [ -n "${ROOT_DISK}" ] && [ -n "${DEV_DISK}" ] &&
+	   [ "${ROOT_DISK}" != "${DEV_DISK}" ]; then
+		logger "Skip mounting partition '${PARTNAME}', because it does not belong to the root disk"
+		exit 0
+	fi
 fi
 
 MOUNT_FOLDER=${PARTNAME}
