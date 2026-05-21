@@ -11,12 +11,12 @@ CC_CONTAINER_WHEEL = "digi_cc_container-${PV}-py3-none-any.whl"
 SRC_URI = " \
     ${DIGI_PKG_SRC}/${BP}.tar.gz;name=archive \
     file://cc-containerd \
-    file://cc-containerctl \
+    file://containerctl \
     file://cc-containerd.service \
     file://cc-containerd-shutdown.service \
 "
-SRC_URI[archive.md5sum] = "4429f2178682a57198d35a208c5eff4b"
-SRC_URI[archive.sha256sum] = "fed41d48b422f9af4f681c5b0457140f33edd177cf974fdec935e1c6ffeb128c"
+SRC_URI[archive.md5sum] = "6d84c6f5ec9dc94d542c91001ff5fd36"
+SRC_URI[archive.sha256sum] = "ce24c4fde041a69a7646eb9bad4891d2eb91291f3534e71444552d3830247aaa"
 
 S = "${WORKDIR}/${BP}"
 
@@ -47,7 +47,7 @@ do_install() {
 
     install -d ${D}${bindir}
     install -m 0755 ${WORKDIR}/cc-containerd ${D}${bindir}/cc-containerd
-    install -m 0755 ${WORKDIR}/cc-containerctl ${D}${bindir}/cc-containerctl
+    install -m 0755 ${WORKDIR}/containerctl ${D}${bindir}/containerctl
 
     install -d ${D}${systemd_system_unitdir}
     install -m 0644 ${WORKDIR}/cc-containerd.service \
@@ -65,13 +65,10 @@ do_install() {
 }
 
 FILES:${PN}:append = " \
-    ${bindir}/cc-containerd \
-    ${bindir}/cc-containerctl \
     ${PYTHON_SITEPACKAGES_DIR}/digi \
     ${PYTHON_SITEPACKAGES_DIR}/digi_cc_container-*.dist-info \
     ${systemd_system_unitdir}/cc-containerd.service \
     ${systemd_system_unitdir}/cc-containerd-shutdown.service \
-    ${sysconfdir}/cc-container-mng.conf \
 "
 
 CONFFILES:${PN} += "${sysconfdir}/cc-container-mng.conf"
