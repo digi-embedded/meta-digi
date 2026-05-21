@@ -68,6 +68,7 @@ CORE_TOOLS = " \
 	networkmanager-nmcli \
 	networkmanager-wifi \
 	os-release \
+	openssh-sftp-server \
 	openssl \
 	packagegroup-dey-audio \
 	${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'packagegroup-dey-wireless', '', d)} \
