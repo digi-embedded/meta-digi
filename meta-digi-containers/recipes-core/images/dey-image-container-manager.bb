@@ -77,10 +77,9 @@ CORE_TOOLS = " \
 "
 
 # Tools to manage containers
+CONTAINERS_BACKEND_TOOLS:pn-cc-container-mng = "lxc-trimmed podman-trimmed"
 CONTAINER_MANAGEMENT = " \
 	cc-container-mng \
-	lxc-trimmed \
-	podman-trimmed \
 "
 
 # Keep the systemd/udev hotplug support packages that are otherwise

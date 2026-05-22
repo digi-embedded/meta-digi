@@ -7,9 +7,18 @@ This layer provides:
 - `dey-image-container` to generate container artifacts
 - `dey-image-container-manager` to run and manage Podman/LXC containers on target
 
-`dey-image-container-manager` installs dedicated `lxc-trimmed` and `podman-trimmed`
-recipes, so it does not require `DISTROOVERRIDES` changes in `local.conf`
-and does not affect other DEY images built in the same environment.
+`cc-container-mng` depends on the container runtime packages listed in
+`CONTAINERS_BACKEND_TOOLS`, which defaults to `podman lxc`. Override it to select
+different runtimes or a single engine, for example:
+
+```bitbake
+CONTAINERS_BACKEND_TOOLS = "podman-trimmed lxc-trimmed"
+CONTAINERS_BACKEND_TOOLS = "podman-trimmed"
+CONTAINERS_BACKEND_TOOLS = "lxc"
+```
+
+`dey-image-container-manager` overrides `CONTAINERS_BACKEND_TOOLS` to install
+the trimmed runtime packages to keep the image smaller.
 
 The layer explicitly depends on `meta-virtualization`, and
 `dey-image-container-manager`
