@@ -351,7 +351,7 @@ CONFIG_TLS_ADD_DL=y
 # For more details refer to:
 # https://wireless.wiki.kernel.org/en/users/documentation/acs
 #
-#CONFIG_ACS=y
+CONFIG_ACS=y
 
 # Multiband Operation support
 # These extensions facilitate efficient use of multiple frequency bands
