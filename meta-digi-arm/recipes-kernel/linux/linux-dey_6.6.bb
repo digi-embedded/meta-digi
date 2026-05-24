@@ -12,8 +12,8 @@ kernel_prepare_logo() {
 
 SRCBRANCH = "v6.6/nxp/dey-5.0/maint"
 SRCBRANCH:stm32mpcommon = "v6.6/stm/dey-5.0/maint"
-SRCREV = "${AUTOREV}"
-SRCREV:stm32mpcommon = "${AUTOREV}"
+SRCREV = "15f548b16f43137d2d65b18f4cdd606aca452ab1"
+SRCREV:stm32mpcommon = "8a656726bb371669748fafadb11c91c71a21c946"
 
 # Define RT patches per machine
 RT_FILES:use-nxp-bsp = " \

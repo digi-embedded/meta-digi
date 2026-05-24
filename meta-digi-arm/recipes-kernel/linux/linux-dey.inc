@@ -10,7 +10,7 @@ require ${@oe.utils.conditional('TRUSTFENCE_SIGN', '1', 'recipes-kernel/linux/li
 DEPENDS += "${@oe.utils.conditional('DEY_SOC_VENDOR', 'NXP', 'lzop-native', '', d)}"
 
 SRC_URI = " \
-    ${LINUX_GIT_URI};branch=${SRCBRANCH} \
+    ${LINUX_GIT_URI};nobranch=1 \
     ${@oe.utils.conditional('KERNEL_DEFCONFIG', '', 'file://defconfig', '', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://docker_conf.cfg', '', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'tsn', 'file://tsn_conf.cfg', '', d)} \
