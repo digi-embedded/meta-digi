@@ -22,7 +22,8 @@ NO_RECOMMENDATIONS = "1"
 # Container profile
 ########################
 # Select profile in local.conf (e.g. CONTAINER_TYPE = "lvgl", "webkit" or "flutter").
-CONTAINER_TYPE ?= "base"
+# Defaults to "lvgl" when not set by the build configuration.
+CONTAINER_TYPE ?= "lvgl"
 OVERRIDES:append = ":container-${CONTAINER_TYPE}"
 
 ########################

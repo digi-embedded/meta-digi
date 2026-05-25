@@ -163,10 +163,12 @@ Set profile and naming in `conf/local.conf`:
 
 ```conf
 DISTRO_FEATURES:append = " virtualization"
-CONTAINER_TYPE = "webkit"         # or: lvgl, flutter, base, custom profile
+CONTAINER_TYPE = "webkit"         # or: lvgl, flutter, custom profile
 CONTAINER_NAME = "webkit-example"
 # PODMAN_TAG defaults to "${CONTAINER_NAME}-tag"
 ```
+
+If `CONTAINER_TYPE` is not set, `dey-image-container` now defaults to `lvgl`.
 
 Build:
 
@@ -189,9 +191,10 @@ Notes:
   manifest does not provide one explicitly. In that default case it appends a
   base36-encoded millisecond timestamp suffix, stores the generated `package_id`
   in the final `manifest.json`, and uses it in the DCP file name.
-- In Yocto builds, `dey-image-container` does not set `package_id`, so the
-  generated value always starts from `${CONTAINER_NAME}` before the generator
-  adds the unique suffix.
+- In Yocto builds, `dey-image-container` keeps that unique-name behavior and
+  removes older DCP artifacts with the same `${CONTAINER_NAME}` prefix before
+  generating the new one, so the deploy directory does not keep accumulating
+  previous builds of the same container/runtime.
 
 Intermediate outputs generated during the build (LXC bundle, Podman archive, OCI/rootfs files)
 are removed automatically at the end of artifact creation.
