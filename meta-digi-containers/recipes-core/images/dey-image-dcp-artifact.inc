@@ -30,7 +30,7 @@ do_image_container_artifacts() {
     image_prefix="${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}"
     mkdir -p "${T}"
     export TMPDIR="${T}"
-    workdir="$(mktemp -d "${T}/dey-image-container-artifact.XXXXXX")"
+    workdir="$(mktemp -d "${T}/dey-image-dcp-artifact.XXXXXX")"
     cleanup_workdir() {
         rm -rf "${workdir}"
     }

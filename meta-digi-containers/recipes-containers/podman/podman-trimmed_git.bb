@@ -4,7 +4,7 @@ FILESEXTRAPATHS:prepend := "${COREBASE}/../meta-virtualization/recipes-container
 
 require recipes-containers/podman/podman_git.bb
 
-DESCRIPTION = "Trimmed Podman runtime for dey-image-container-manager"
+DESCRIPTION = "Trimmed Podman runtime for dey-image-containers"
 
 # Enable Podman bridge networking with netavark
 VIRTUAL-RUNTIME_container_networking = "netavark"

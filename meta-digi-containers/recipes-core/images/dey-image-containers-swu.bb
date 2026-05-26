@@ -6,4 +6,4 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/../../../meta-digi-dey/recipes-digi/swu-i
 
 require recipes-digi/swu-images/swu.inc
 
-IMG_NAME = "dey-image-container-manager"
+IMG_NAME = "dey-image-containers"

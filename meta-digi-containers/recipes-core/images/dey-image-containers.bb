@@ -1,7 +1,7 @@
 #
 # Copyright (C) 2026, Digi International Inc.
 #
-DESCRIPTION = "Minimal DEY container manager image"
+DESCRIPTION = "Minimal DEY containers image"
 
 LICENSE = "MIT"
 

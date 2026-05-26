@@ -12,7 +12,7 @@ do_image_lxc_bundle() {
     lxc_tar="${DEPLOY_DIR_IMAGE}/${LXC_OUTPUT_NAME}"
     mkdir -p "${T}"
     export TMPDIR="${T}"
-    workdir="$(mktemp -d "${T}/dey-image-container-lxc.XXXXXX")"
+    workdir="$(mktemp -d "${T}/dey-image-dcp-lxc.XXXXXX")"
     cleanup_workdir() {
         rm -rf "${workdir}"
     }

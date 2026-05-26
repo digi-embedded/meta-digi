@@ -4,8 +4,9 @@ Yocto layer for Digi container-focused image generation and packaging.
 
 This layer provides:
 
-- `dey-image-container` to generate container artifacts
-- `dey-image-container-manager` to run and manage Podman/LXC containers on target
+- `dey-image-dcp`: generates Digi Container Package (DCP) artifacts
+- `dey-image-containers`: generates a minimal root file system with the Container
+Manager and everything it requires to run and manage containers
 
 `cc-container-mng` depends on the container runtime packages listed in
 `CONTAINERS_BACKEND_TOOLS`, which defaults to `podman lxc`. Override it to select
@@ -17,14 +18,14 @@ CONTAINERS_BACKEND_TOOLS = "podman-trimmed"
 CONTAINERS_BACKEND_TOOLS = "lxc"
 ```
 
-`dey-image-container-manager` overrides `CONTAINERS_BACKEND_TOOLS` to install
+`dey-image-containers` overrides `CONTAINERS_BACKEND_TOOLS` to install
 the trimmed runtime packages to keep the image smaller.
 
-The layer explicitly depends on `meta-virtualization`, and
-`dey-image-container-manager`
-requires `DISTRO_FEATURES:append = " virtualization"` in `local.conf`.
+The layer explicitly depends on `meta-virtualization`.
+`dey-image-dcp` and`dey-image-containers` requires
+`DISTRO_FEATURES:append = " virtualization"` in `local.conf`.
 
-The `dey-image-container` workflow produces:
+The `dey-image-dcp` workflow produces:
 
 - A base rootfs (`tar.xz`)
 - An OCI image output
@@ -114,7 +115,7 @@ In those manifests:
 - `registration_defaults` is limited to local manager policy such as `autostart`,
   `monitor`, and `restart`; this release does not generate DRM-specific defaults
 
-`dey-image-container-manager` also overrides the manager persistent base path
+`dey-image-containers` also overrides the manager persistent base path
 through `CC_CONTAINER_PATH`, which defaults to `${ROOT_HOME}/cc-container` in
 the Digi platform defaults. This makes the effective target paths live under
 `/root/cc-container` in DEY images, while the upstream `cc-container-mng`
@@ -124,15 +125,15 @@ project keeps `/opt/cc-container` as its built-in default.
 
 Main recipes:
 
-- `recipes-core/images/dey-image-container.bb`
-- `recipes-core/images/dey-image-container-manager.bb`
+- `recipes-core/images/dey-image-dcp.bb`
+- `recipes-core/images/dey-image-containers.bb`
 
 Recipe includes:
 
-- `dey-image-container-fragments.inc`
-- `dey-image-container-lxc.inc`
-- `dey-image-container-podman.inc`
-- `dey-image-container-artifact.inc`
+- `dey-image-dcp-fragments.inc`
+- `dey-image-dcp-lxc.inc`
+- `dey-image-dcp-podman.inc`
+- `dey-image-dcp-artifact.inc`
 
 Container support files:
 
@@ -168,12 +169,12 @@ CONTAINER_NAME = "webkit-example"
 # PODMAN_TAG defaults to "${CONTAINER_NAME}-tag"
 ```
 
-If `CONTAINER_TYPE` is not set, `dey-image-container` now defaults to `lvgl`.
+If `CONTAINER_TYPE` is not set, `dey-image-dcp` now defaults to `lvgl`.
 
 Build:
 
 ```bash
-bitbake dey-image-container
+bitbake dey-image-dcp
 ```
 
 Outputs are generated in:
@@ -191,13 +192,14 @@ Notes:
   manifest does not provide one explicitly. In that default case it appends a
   base36-encoded millisecond timestamp suffix, stores the generated `package_id`
   in the final `manifest.json`, and uses it in the DCP file name.
-- In Yocto builds, `dey-image-container` keeps that unique-name behavior and
+- In Yocto builds, `dey-image-dcp` keeps that unique-name behavior and
   removes older DCP artifacts with the same `${CONTAINER_NAME}` prefix before
   generating the new one, so the deploy directory does not keep accumulating
   previous builds of the same container/runtime.
 
-Intermediate outputs generated during the build (LXC bundle, Podman archive, OCI/rootfs files)
-are removed automatically at the end of artifact creation.
+Intermediate rootfs and OCI outputs are kept available for incremental rebuilds.
+The LXC bundle and Podman archive are generated as temporary payloads while
+creating the final DCP artifacts, then removed at the end of artifact creation.
 
 ## Profiles
 
@@ -362,4 +364,5 @@ To create a new profile:
 ## Notes
 
 - Intermediate container artifacts from the current build are removed at the end of the artifact task.
-- If `dey-image-container` is not found, verify the layer is present in `BBLAYERS`.
+- If `dey-image-dcp` or `dey-image-containers` is not found, verify the layer is present in `BBLAYERS`
+and `DISTRO_FEATURES:append = " virtualization"` is defined in `local.conf`.

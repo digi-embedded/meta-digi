@@ -1,12 +1,12 @@
 # Copyright (C) 2026, Digi International Inc.
 
-SUMMARY = "Minimal LXC container image"
+SUMMARY = "Recipe to build Digi Container Packages (DCP) in LXC and Podman/Docker variants"
 LICENSE = "MIT"
 
-require dey-image-container-artifact.inc
-require dey-image-container-fragments.inc
-require dey-image-container-lxc.inc
-require dey-image-container-podman.inc
+require dey-image-dcp-artifact.inc
+require dey-image-dcp-fragments.inc
+require dey-image-dcp-lxc.inc
+require dey-image-dcp-podman.inc
 
 inherit core-image image-container image-oci
 

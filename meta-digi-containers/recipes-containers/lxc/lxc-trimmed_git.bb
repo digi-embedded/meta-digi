@@ -4,7 +4,7 @@ FILESEXTRAPATHS:prepend := "${COREBASE}/../meta-virtualization/recipes-container
 
 require recipes-containers/lxc/lxc_git.bb
 
-DESCRIPTION = "Trimmed LXC runtime for dey-image-container-manager"
+DESCRIPTION = "Trimmed LXC runtime for dey-image-containers"
 
 FILES:${PN} += "${libdir}/lxc/rootfs"
 
