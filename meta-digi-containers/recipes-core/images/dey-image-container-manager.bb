@@ -32,7 +32,6 @@ CONTAINER_MANAGER_MACHINE_EXTRA_RRECOMMENDS = "${@' '.join( \
 CORE_ESSENTIALS = " \
 	base-files \
 	base-passwd \
-	bluez5-init \
 	busybox \
 	busybox-syslog \
 	ca-certificates \
@@ -50,7 +49,6 @@ CORE_ESSENTIALS = " \
 
 # Tools and libraries
 CORE_TOOLS = " \
-	bluez5 \
 	cccs-daemon \
 	curl \
 	dropbear \
@@ -71,6 +69,7 @@ CORE_TOOLS = " \
 	openssh-sftp-server \
 	openssl \
 	packagegroup-dey-audio \
+	${@bb.utils.contains('MACHINE_FEATURES', 'bluetooth', 'packagegroup-dey-bluetooth', '', d)} \
 	${@bb.utils.contains('MACHINE_FEATURES', 'wifi', 'packagegroup-dey-wireless', '', d)} \
 	sysinfo \
 	vsftpd \
