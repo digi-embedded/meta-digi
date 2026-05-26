@@ -63,7 +63,7 @@ do_install() {
         ${D}${sysconfdir}/cc-container-mng.conf
 
     sed -i \
-        -e "s|\"/opt/cc-container|\"${CC_CONTAINER_PATH}|g" \
+        's|"working_path".*|"working_path": "${CC_CONTAINER_PATH}",|' \
         ${D}${sysconfdir}/cc-container-mng.conf
 }
 

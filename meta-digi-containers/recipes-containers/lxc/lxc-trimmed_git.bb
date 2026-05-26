@@ -3,6 +3,7 @@
 FILESEXTRAPATHS:prepend := "${COREBASE}/../meta-virtualization/recipes-containers/lxc/files:"
 
 require recipes-containers/lxc/lxc_git.bb
+require recipes-containers/lxc/lxc-cc-container-path.inc
 
 DESCRIPTION = "Trimmed LXC runtime for dey-image-containers"
 
