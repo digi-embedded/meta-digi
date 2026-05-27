@@ -14,6 +14,8 @@ SRC_URI += "\
     file://connectcore-demo-server.service \
     file://suspendtarget-connectcore-demo-server.service \
 "
+SRC_URI:append:ccimx95 = " file://0001-multimedia-replace-MOV-video-with-MP4.patch;patchdir=${WORKDIR}/git"
+
 S = "${WORKDIR}/git/connectcore-demo-example"
 
 do_configure[noexec] = "1"

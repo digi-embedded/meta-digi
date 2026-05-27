@@ -1,0 +1,30 @@
+From: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
+Date: Wed, 27 May 2026 16:33:46 +0200
+Subject: [PATCH 1/1] multimedia: replace MOV video with MP4
+
+This is required for Chromium demo.
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Gonzalo Ruiz <Gonzalo.Ruiz@digi.com>
+---
+ connectcore-demo-example/multimedia.html | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/connectcore-demo-example/multimedia.html b/connectcore-demo-example/multimedia.html
+index 4073ff0..0327c1a 100644
+--- a/connectcore-demo-example/multimedia.html
++++ b/connectcore-demo-example/multimedia.html
+@@ -189,9 +189,9 @@ Digi Demo - Multimedia
+                                 <div class="row">
+                                     <div class="col-xl-2 multimedia-container">
+                                         <div class="d-flex justify-content-center align-items-center multimedia-box">
+-                                            <div class="multimedia-item" onclick="location.href='multimedia_viewer.html?exampleURL=videos/big_buck_bunny.mov'">
+-                                                <div class="multimedia-title">Big Buck Bunny (MOV)</div>
+-                                                <img src="./static/images/big_buck_bunny.jpg" alt="Big Buck Bunny (MOV)">
++                                            <div class="multimedia-item" onclick="location.href='multimedia_viewer.html?exampleURL=videos/big_buck_bunny.mp4'">
++                                                <div class="multimedia-title">Big Buck Bunny (MP4)</div>
++                                                <img src="./static/images/big_buck_bunny.jpg" alt="Big Buck Bunny (MP4)">
+                                             </div>
+                                         </div>
+                                     </div>
