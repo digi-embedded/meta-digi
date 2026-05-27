@@ -22,7 +22,7 @@ CONTAINERS_BACKEND_TOOLS = "lxc"
 the trimmed runtime packages to keep the image smaller.
 
 The layer explicitly depends on `meta-virtualization`.
-`dey-image-dcp` and`dey-image-containers` requires
+`dey-image-dcp` and `dey-image-containers` require
 `DISTRO_FEATURES:append = " virtualization"` in `local.conf`.
 
 The `dey-image-dcp` workflow produces:

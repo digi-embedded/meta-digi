@@ -19,7 +19,7 @@ Digi Embedded Yocto provides the following image recipes:
     Expansion of custom Digi core-image-base including full Flutter
     framework support.
 
-  * dey-image-container-manager: container management image
+  * dey-image-containers: container management image
 
     Minimal image including the trimmed Podman and LXC runtimes used to
     manage container artifacts on target.
