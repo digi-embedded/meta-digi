@@ -179,7 +179,6 @@ fi
 #     - Erase the 'update' partition
 #     - Configure recovery to wipe 'update' partition
 #     - Run 'recovery' and let the system boot after
-# NOTE: insert some 'usb reset' commands to avoid EHCI timeouts
 setenv bootcmd "
 	env default -a;
 	setenv dualboot ${dualboot};
@@ -227,9 +226,6 @@ setenv bootcmd "
 				echo \"Aborted.\";
 				exit;
 			fi;
-		fi;
-		if test "${INSTALL_MEDIA}" = "usb"; then
-			usb reset;
 		fi;
 		echo \"\";
 		echo \"\";
