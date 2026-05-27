@@ -1,6 +1,6 @@
 #!/bin/sh
 export XDG_RUNTIME_DIR="/run/user/0"
-export WAYLAND_DISPLAY="wayland-0"
+export WAYLAND_DISPLAY="@WAYLAND_DISPLAY@"
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/dbus/system_bus_socket"
 
 COMPATIBLE="$(tr '\0' ' ' </proc/device-tree/compatible 2>/dev/null || true)"
