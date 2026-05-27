@@ -21,18 +21,18 @@ NO_RECOMMENDATIONS = "1"
 ########################
 # Container profile
 ########################
-# Select profile in local.conf (e.g. CONTAINER_TYPE = "lvgl", "webkit" or "flutter").
-# Defaults to "lvgl" when not set by the build configuration.
-CONTAINER_TYPE ?= "lvgl"
-OVERRIDES:append = ":container-${CONTAINER_TYPE}"
+# Select the profile in local.conf (e.g. DCP_NAME = "lvgl", "webkit",
+# "chromium" or "flutter"). Defaults to "lvgl" when not set by the build
+# configuration.
+DCP_NAME ?= "lvgl"
+OVERRIDES:append = ":container-${DCP_NAME}"
 
 ########################
 # Container runtime knobs
 ########################
 CONTAINER_INIT_MANAGER ?= "/usr/bin/docker-init"
 CONTAINER_INIT_SCRIPT ?= "sleep infinity"
-CONTAINER_NAME ?= "${CONTAINER_TYPE}-container"
-CONTAINER_PROFILE_DIR ?= "${CONTAINERS_DIR}/${CONTAINER_TYPE}"
+CONTAINER_PROFILE_DIR ?= "${CONTAINERS_DIR}/${DCP_NAME}"
 CONTAINER_ROOTFS_OVERLAY_DIRS ?= ""
 CONTAINER_DEFAULT_ROOTFS_DIR ?= "${CONTAINER_PROFILE_DIR}/rootfs_files"
 CONTAINER_ROOTFS_OVERLAY_TARBALLS ?= ""
@@ -40,15 +40,15 @@ CONTAINER_ROOTFS_OVERLAY_TARBALLS ?= ""
 ########################
 # Podman output knobs
 ########################
-PODMAN_TAG     ?= "${CONTAINER_NAME}-tag"
-PODMAN_OUTPUT_NAME ?= "${CONTAINER_NAME}_podman_${MACHINE}.tar"
+PODMAN_TAG     ?= "${DCP_NAME}-tag"
+PODMAN_OUTPUT_NAME ?= "${DCP_NAME}_podman_${MACHINE}.tar"
 
 ########################
 # LXC output knobs
 ########################
 CONTAINERS_DIR ?= "${THISDIR}/../../containers"
 LXC_FOLDER ?= "/var/lib/lxc"
-LXC_OUTPUT_NAME ?= "${CONTAINER_NAME}_lxc_${MACHINE}.tar.gz"
+LXC_OUTPUT_NAME ?= "${DCP_NAME}_lxc_${MACHINE}.tar.gz"
 LXC_CONFIG_DIR ?= "${CONTAINER_PROFILE_DIR}/configs_lxc"
 LXC_CONFIG_FILE ?= "${LXC_CONFIG_DIR}/config_lxc_${MACHINE}"
 
@@ -58,7 +58,7 @@ LXC_CONFIG_FILE ?= "${LXC_CONFIG_DIR}/config_lxc_${MACHINE}"
 CONTAINER_ARTIFACT_TEMPLATE_DIR ?= ""
 CONTAINER_DEFAULT_ARTIFACT_TEMPLATE_DIR ?= "${CONTAINER_PROFILE_DIR}/artifact"
 META_DIGI_REPO_DIR ?= "${THISDIR}/../../.."
-CONTAINER_FRIENDLY_NAME ?= "${CONTAINER_NAME}"
+CONTAINER_FRIENDLY_NAME ?= "${DCP_NAME}"
 CONTAINER_ARTIFACT_VERSION ?= "${PV}"
 CONTAINER_CREATE_ARGS ?= ""
 CONTAINER_CREATE_ARGS_PODMAN ?= "${CONTAINER_CREATE_ARGS}"

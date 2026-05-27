@@ -1,8 +1,8 @@
 # LXC config for WebKit on CCIMX95.
 # Placeholders are replaced by the image recipe.
 lxc.arch = @LXC_ARCH@
-lxc.rootfs.path = dir:@LXC_FOLDER@/@CONTAINER_NAME@/rootfs
-lxc.uts.name = @CONTAINER_NAME@
+lxc.rootfs.path = dir:@LXC_FOLDER@/@DCP_NAME@/rootfs
+lxc.uts.name = @DCP_NAME@
 
 lxc.mount.auto = cgroup:mixed proc:mixed
 lxc.mount.entry = /sys sys none bind,create=dir
@@ -12,7 +12,7 @@ lxc.mount.entry = tmpfs run tmpfs rw,nosuid,nodev,mode=0755,create=dir
 lxc.net.0.type = none
 
 lxc.init.cmd = @CONTAINER_INIT_MANAGER@ @CONTAINER_INIT_SCRIPT@
-lxc.console.logfile = @LXC_FOLDER@/@CONTAINER_NAME@/console.log
+lxc.console.logfile = @LXC_FOLDER@/@DCP_NAME@/console.log
 lxc.environment = 'PS1=webkit-ccimx95:\w$ '
 
 # audio

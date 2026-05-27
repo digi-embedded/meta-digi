@@ -46,12 +46,17 @@ apply_container_rootfs_overlays() {
 
 ROOTFS_POSTPROCESS_COMMAND += "apply_container_rootfs_runtime_defaults; "
 apply_container_rootfs_runtime_defaults() {
-    if [ -n "${CONTAINER_INIT_SCRIPT}" ] && \
-       [ -f "${IMAGE_ROOTFS}${CONTAINER_INIT_SCRIPT}" ] && \
-       grep -q "@WAYLAND_DISPLAY@" "${IMAGE_ROOTFS}${CONTAINER_INIT_SCRIPT}"; then
+    placeholder_files="$(grep -rl "@WAYLAND_DISPLAY@" "${IMAGE_ROOTFS}" 2>/dev/null || true)"
+
+    if [ -z "${placeholder_files}" ]; then
+        return 0
+    fi
+
+    printf '%s\n' "${placeholder_files}" | while IFS= read -r placeholder_file; do
+        [ -n "${placeholder_file}" ] || continue
         sed -i \
             -e "s|@WAYLAND_DISPLAY@|${WAYLAND_DISPLAY}|g" \
-            "${IMAGE_ROOTFS}${CONTAINER_INIT_SCRIPT}"
-        bbnote "Applied WAYLAND_DISPLAY='${WAYLAND_DISPLAY}' to ${IMAGE_ROOTFS}${CONTAINER_INIT_SCRIPT}"
-    fi
+            "${placeholder_file}"
+        bbnote "Applied WAYLAND_DISPLAY='${WAYLAND_DISPLAY}' to ${placeholder_file}"
+    done
 }

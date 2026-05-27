@@ -11,7 +11,7 @@ do_image_podman_archive() {
         src_tar="${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs-oci.tar"
     fi
     dst_tar="${DEPLOY_DIR_IMAGE}/${PODMAN_OUTPUT_NAME}"
-    image_ref="${CONTAINER_NAME}:${PODMAN_TAG}"
+    image_ref="${DCP_NAME}:${PODMAN_TAG}"
 
     if [ ! -f "${src_tar}" ]; then
         bbfatal "Expected OCI tarball not found: ${src_tar}"

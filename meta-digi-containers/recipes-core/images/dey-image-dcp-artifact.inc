@@ -15,7 +15,7 @@ do_clean_old_container_artifacts() {
     fi
 
     for runtime in lxc podman; do
-        old_artifact_glob="${DEPLOY_DIR_IMAGE}/${CONTAINER_NAME}-*_artifact_${runtime}_${primary_device_type}.tar.gz"
+        old_artifact_glob="${DEPLOY_DIR_IMAGE}/${DCP_NAME}-*-${runtime}-${primary_device_type}.tar.gz"
         bbnote "Removing old ${runtime} container artifacts matching ${old_artifact_glob}"
         rm -f ${old_artifact_glob}
     done
@@ -69,7 +69,7 @@ do_image_container_artifacts() {
         manifest_path="$2"
         create_args="$3"
         build_id="$4"
-        NAME="${CONTAINER_NAME}" \
+        NAME="${DCP_NAME}" \
         FRIENDLY_NAME="${CONTAINER_FRIENDLY_NAME}" \
         VERSION="${CONTAINER_ARTIFACT_VERSION}" \
         RUNTIME="${runtime}" \

@@ -201,7 +201,7 @@ def sha256(path: Path) -> str:
 
 
 def build_output_name(*, package_id: str, runtime: str, device_type: str) -> str:
-    return f"{package_id}_artifact_{runtime}_{device_type}.tar.gz"
+    return f"{package_id}-{runtime}-{device_type}.tar.gz"
 
 
 def ensure_lxc_layout(payload: Path) -> tuple[str, str]:

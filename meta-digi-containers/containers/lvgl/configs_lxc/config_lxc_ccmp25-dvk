@@ -1,8 +1,8 @@
 # LXC config for LVGL on CCMP25.
 # Placeholders are replaced by the image recipe.
 lxc.arch = @LXC_ARCH@
-lxc.rootfs.path = dir:@LXC_FOLDER@/@CONTAINER_NAME@/rootfs
-lxc.uts.name = @CONTAINER_NAME@
+lxc.rootfs.path = dir:@LXC_FOLDER@/@DCP_NAME@/rootfs
+lxc.uts.name = @DCP_NAME@
 
 lxc.mount.auto = cgroup:mixed proc:mixed
 lxc.mount.entry = /sys sys none bind,create=dir
@@ -15,7 +15,7 @@ lxc.environment = 'PS1=\h:\w$ '
 lxc.net.0.type = empty
 
 lxc.init.cmd = @CONTAINER_INIT_MANAGER@ @CONTAINER_INIT_SCRIPT@
-lxc.console.logfile = @LXC_FOLDER@/@CONTAINER_NAME@/console.log
+lxc.console.logfile = @LXC_FOLDER@/@DCP_NAME@/console.log
 lxc.mount.entry = tmpfs dev/shm tmpfs rw,nosuid,nodev,mode=1777,create=dir
 lxc.mount.entry = /dev/dri dev/dri none bind,create=dir
 lxc.mount.entry = /dev/input dev/input none bind,create=dir

@@ -84,7 +84,7 @@ Notes:
 - If the input manifest provides `package_id`, that value is kept unchanged.
 - The output file name is always derived from the generated package ID and
   manifest fields as:
-  - `<generated_package_id>_artifact_<runtime>_<device_types[0]>.tar.gz`
+  - `<generated_package_id>-<runtime>-<device_types[0]>.tar.gz`
 - For Podman payloads, the final internal payload name is always `payload/image.tar`
 - For LXC payloads, the generator requires a Yocto-style `.tar.gz` bundle, validates its layout,
   and stores it inside the DCP using the original file name and format without re-packaging it.
@@ -104,7 +104,7 @@ python3 meta-digi-containers/scripts/generate-dcp.py \
 
 This generates a bundle named like:
 
-- `./flutter-demo-<base36_created_at_ms>_artifact_podman_ccmp25-dvk.tar.gz`
+- `./flutter-demo-<base36_created_at_ms>-podman-ccmp25-dvk.tar.gz`
 
 In those manifests:
 
@@ -164,12 +164,11 @@ Set profile and naming in `conf/local.conf`:
 
 ```conf
 DISTRO_FEATURES:append = " virtualization"
-CONTAINER_TYPE = "webkit"         # or: lvgl, flutter, custom profile
-CONTAINER_NAME = "webkit-example"
-# PODMAN_TAG defaults to "${CONTAINER_NAME}-tag"
+DCP_NAME = "webkit"               # or: lvgl, chromium, flutter, custom profile
+# PODMAN_TAG defaults to "${DCP_NAME}-tag"
 ```
 
-If `CONTAINER_TYPE` is not set, `dey-image-dcp` now defaults to `lvgl`.
+If `DCP_NAME` is not set, `dey-image-dcp` now defaults to `lvgl`.
 
 Build:
 
@@ -183,8 +182,8 @@ Outputs are generated in:
 
 Final outputs:
 
-- `${CONTAINER_NAME}-<base36_created_at_ms>_artifact_podman_<device_types[0]>.tar.gz`
-- `${CONTAINER_NAME}-<base36_created_at_ms>_artifact_lxc_<device_types[0]>.tar.gz`
+- `${DCP_NAME}-<base36_created_at_ms>-podman-<device_types[0]>.tar.gz`
+- `${DCP_NAME}-<base36_created_at_ms>-lxc-<device_types[0]>.tar.gz`
 
 Notes:
 
@@ -193,7 +192,7 @@ Notes:
   base36-encoded millisecond timestamp suffix, stores the generated `package_id`
   in the final `manifest.json`, and uses it in the DCP file name.
 - In Yocto builds, `dey-image-dcp` keeps that unique-name behavior and
-  removes older DCP artifacts with the same `${CONTAINER_NAME}` prefix before
+  removes older DCP artifacts with the same `${DCP_NAME}` prefix before
   generating the new one, so the deploy directory does not keep accumulating
   previous builds of the same container/runtime.
 
@@ -205,8 +204,8 @@ creating the final DCP artifacts, then removed at the end of artifact creation.
 
 Profile-specific behavior is controlled with:
 
-- `CONTAINER_TYPE`
-- `OVERRIDES:append = ":container-${CONTAINER_TYPE}"` (handled in recipe)
+- `DCP_NAME`
+- `OVERRIDES:append = ":container-${DCP_NAME}"` (handled in recipe)
 
 Current built-in profile examples:
 
@@ -219,9 +218,8 @@ You can add new profiles by appending variables with `:container-<name>` overrid
 For customer-defined profiles, use:
 
 ```conf
-CONTAINER_TYPE = "myprofile"
-CONTAINER_NAME = "myprofile-demo"
-PODMAN_TAG = "myprofile-demo-tag"
+DCP_NAME = "myprofile"
+PODMAN_TAG = "myprofile-tag"
 
 IMAGE_INSTALL:append:container-myprofile = " package-a package-b"
 CONTAINER_INIT_MANAGER:container-myprofile = "/usr/bin/docker-init"
@@ -250,14 +248,14 @@ Notes:
 - Multiple entries are supported (space-separated).
 - `*.sh` files copied from overlay directories are marked executable automatically.
 - If `CONTAINER_ROOTFS_OVERLAY_DIRS` is not set
-  and `containers/${CONTAINER_TYPE}/rootfs_files` exists,
+  and `containers/${DCP_NAME}/rootfs_files` exists,
   it is used automatically.
 
 ## LXC Fragment Configuration
 
 LXC fragments are loaded from:
 
-- `containers/${CONTAINER_TYPE}/configs_lxc/`
+- `containers/${DCP_NAME}/configs_lxc/`
 
 Config file naming:
 
@@ -273,7 +271,7 @@ Supported placeholders in LXC config fragments:
 
 - `@LXC_ARCH@`
 - `@LXC_FOLDER@`
-- `@CONTAINER_NAME@`
+- `@DCP_NAME@`
 - `@CONTAINER_INIT_MANAGER@`
 - `@CONTAINER_INIT_SCRIPT@`
 
@@ -304,7 +302,7 @@ The artifact manifest is generated automatically and includes:
 
 Relevant variables:
 
-- `CONTAINER_NAME`
+- `DCP_NAME`
 - `CONTAINER_FRIENDLY_NAME`
 - `CONTAINER_ARTIFACT_VERSION`
 - `CONTAINER_CREATE_ARGS_PODMAN`
@@ -327,7 +325,7 @@ and the template contains `metadata/`, it is copied into final artifact bundles.
 `manifest.json`, `payload/*`, and `checksums/sha256sums.txt` are always generated during
 build time and should not be pre-created in the template.
 
-If `CONTAINER_ARTIFACT_TEMPLATE_DIR` is not set and `containers/${CONTAINER_TYPE}/artifact` exists,
+If `CONTAINER_ARTIFACT_TEMPLATE_DIR` is not set and `containers/${DCP_NAME}/artifact` exists,
 it is used automatically.
 
 ## Container Folder Layout
@@ -358,7 +356,7 @@ To create a new profile:
 
 1. Create `containers/<profile>/configs_lxc/config_lxc_<machine>`.
 2. Optionally add `containers/<profile>/rootfs_files/` for rootfs content.
-3. Set `CONTAINER_TYPE = "<profile>"` in `local.conf`.
+3. Set `DCP_NAME = "<profile>"` in `local.conf`.
 4. Add profile packages with `IMAGE_INSTALL:append:container-<profile> = " ... "`.
 
 ## Notes

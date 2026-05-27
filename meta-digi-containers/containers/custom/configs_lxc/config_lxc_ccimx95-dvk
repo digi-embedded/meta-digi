@@ -1,8 +1,8 @@
 # LXC base config for custom profile on CCIMX95.
 # Placeholders are replaced by the image recipe.
 lxc.arch = @LXC_ARCH@
-lxc.rootfs.path = dir:@LXC_FOLDER@/@CONTAINER_NAME@/rootfs
-lxc.uts.name = @CONTAINER_NAME@
+lxc.rootfs.path = dir:@LXC_FOLDER@/@DCP_NAME@/rootfs
+lxc.uts.name = @DCP_NAME@
 
 lxc.mount.auto = cgroup:mixed proc:mixed
 lxc.mount.entry = /sys sys none bind,create=dir

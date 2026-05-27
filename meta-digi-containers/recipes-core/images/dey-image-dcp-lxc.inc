@@ -30,15 +30,16 @@ do_image_lxc_bundle() {
 
     config_in="${LXC_CONFIG_FILE}"
     if [ ! -f "${config_in}" ]; then
-        bbfatal "LXC config file not found for CONTAINER_TYPE='${CONTAINER_TYPE}' and MACHINE='${MACHINE}': ${config_in}"
+        bbfatal "LXC config file not found for DCP_NAME='${DCP_NAME}' and MACHINE='${MACHINE}': ${config_in}"
     fi
 
     sed \
         -e "s|@LXC_ARCH@|${TARGET_ARCH}|g" \
         -e "s|@LXC_FOLDER@|${LXC_FOLDER}|g" \
-        -e "s|@CONTAINER_NAME@|${CONTAINER_NAME}|g" \
+        -e "s|@DCP_NAME@|${DCP_NAME}|g" \
         -e "s|@CONTAINER_INIT_MANAGER@|${CONTAINER_INIT_MANAGER}|g" \
         -e "s|@CONTAINER_INIT_SCRIPT@|${CONTAINER_INIT_SCRIPT}|g" \
+        -e "s|@WAYLAND_DISPLAY@|${WAYLAND_DISPLAY}|g" \
         "${config_in}" > "${lxc_dir}/config"
 
     tar -C "${lxc_dir}" -czf "${lxc_tar}" config rootfs
