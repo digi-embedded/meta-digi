@@ -15,8 +15,8 @@ SRC_URI = " \
     file://cc-containerd.service \
     file://cc-containerd-shutdown.service \
 "
-SRC_URI[archive.md5sum] = "6d84c6f5ec9dc94d542c91001ff5fd36"
-SRC_URI[archive.sha256sum] = "ce24c4fde041a69a7646eb9bad4891d2eb91291f3534e71444552d3830247aaa"
+SRC_URI[archive.md5sum] = "2ae2c3c09e9bf223e7de4ec0994376f3"
+SRC_URI[archive.sha256sum] = "627d90eb53a48bf978fb6993f661af3dba8e6bf091d295ff481457e4c0cb96a0"
 
 S = "${WORKDIR}/${BP}"
 

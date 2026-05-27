@@ -1,5 +1,5 @@
 {
-  "name": "flutter-demo",
+  "package_id": "flutter-demo",
   "friendly_name": "Flutter Demo",
   "version": "1.0",
   "runtime": "lxc",

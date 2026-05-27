@@ -78,13 +78,11 @@ The script generates exactly one runtime artifact per execution.
 Notes:
 
 - `--output-dir` is optional. If omitted, the script writes the DCP to the current directory.
-- If the input manifest omits `package_id`, the generator derives the final
-  `package_id` from `name` and appends a unique suffix using the `created_at`
-  timestamp encoded in base36 milliseconds.
-- If the input manifest provides `package_id`, that value is kept unchanged.
-- The output file name is always derived from the generated package ID and
+- The input manifest must provide `package_id`, which becomes the stable target
+  identifier.
+- The output file name is always derived from the package ID and
   manifest fields as:
-  - `<generated_package_id>-<runtime>-<device_types[0]>.tar.gz`
+  - `<package_id>-<runtime>-<device_types[0]>.tar.gz`
 - For Podman payloads, the final internal payload name is always `payload/image.tar`
 - For LXC payloads, the generator requires a Yocto-style `.tar.gz` bundle, validates its layout,
   and stores it inside the DCP using the original file name and format without re-packaging it.
@@ -104,14 +102,13 @@ python3 meta-digi-containers/scripts/generate-dcp.py \
 
 This generates a bundle named like:
 
-- `./flutter-demo-<base36_created_at_ms>-podman-ccmp25-dvk.tar.gz`
+- `./flutter-demo-podman-ccmp25-dvk.tar.gz`
 
 In those manifests:
 
-- `name` is the stable logical container name stored on the target.
+- `package_id` is the stable target identifier.
 - `friendly_name` is the user-facing label shown by the manager output when available.
-- the final `package_id` is generated automatically from `name` unless the
-  input manifest provides an explicit `package_id`
+- the final DCP manifest does not include a second container identifier
 - `registration_defaults` is limited to local manager policy such as `autostart`,
   `monitor`, and `restart`; this release does not generate DRM-specific defaults
 
@@ -182,19 +179,12 @@ Outputs are generated in:
 
 Final outputs:
 
-- `${DCP_NAME}-<base36_created_at_ms>-podman-<device_types[0]>.tar.gz`
-- `${DCP_NAME}-<base36_created_at_ms>-lxc-<device_types[0]>.tar.gz`
+- `${DCP_NAME}-podman-<device_types[0]>.tar.gz`
+- `${DCP_NAME}-lxc-<device_types[0]>.tar.gz`
 
 Notes:
 
-- The generator script derives `package_id` from the input `name` only when the
-  manifest does not provide one explicitly. In that default case it appends a
-  base36-encoded millisecond timestamp suffix, stores the generated `package_id`
-  in the final `manifest.json`, and uses it in the DCP file name.
-- In Yocto builds, `dey-image-dcp` keeps that unique-name behavior and
-  removes older DCP artifacts with the same `${DCP_NAME}` prefix before
-  generating the new one, so the deploy directory does not keep accumulating
-  previous builds of the same container/runtime.
+- In Yocto builds, `dey-image-dcp` sets `package_id` to `${DCP_NAME}`.
 
 Intermediate rootfs and OCI outputs are kept available for incremental rebuilds.
 The LXC bundle and Podman archive are generated as temporary payloads while
@@ -281,7 +271,6 @@ Supported placeholders in LXC config fragments:
 The artifact manifest is generated automatically and includes:
 
 - `package_id`
-- `name` [stable logical container name]
 - `friendly_name` [optional user-facing display name]
 - `version`
 - `runtime`
