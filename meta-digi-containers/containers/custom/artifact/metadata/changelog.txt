@@ -1,1 +1,0 @@
-Placeholder changelog for custom container artifacts.

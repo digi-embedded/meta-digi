@@ -164,7 +164,7 @@ Set profile and naming in `conf/local.conf`:
 
 ```conf
 DISTRO_FEATURES:append = " virtualization"
-DCP_NAME = "webkit-demo"          # or: lvgl-demo, chromium-demo, flutter-demo, custom profile
+DCP_NAME = "webkit-demo"          # or: lvgl-demo, chromium-demo, flutter-demo
 # PODMAN_TAG defaults to "${DCP_NAME}-tag"
 ```
 
@@ -216,7 +216,7 @@ Current built-in profile examples:
 
 You can add new profiles by appending variables with `:container-<name>` overrides.
 
-For customer-defined profiles, use:
+To define your own profile, use:
 
 ```conf
 DCP_NAME = "myprofile"
@@ -348,10 +348,6 @@ containers/
     configs_lxc/
     artifact/
   webkit-demo/
-    rootfs_files/
-    configs_lxc/
-    artifact/
-  custom/
     rootfs_files/
     configs_lxc/
     artifact/
