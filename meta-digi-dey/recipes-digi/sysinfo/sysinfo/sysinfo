@@ -567,8 +567,14 @@ if grep -qs 'DVK' /proc/device-tree/model; then
 else
 	BOARD_TYPE="SBC"
 fi
-BOARD_VARIANT="$(cat /proc/device-tree/digi,hwid,variant | tr -d '\0')"
-BOARD_SN="$(cat /proc/device-tree/digi,hwid,sn | tr -d '\0')"
+SOM_SN="$(cat /proc/device-tree/digi,hwid,sn | tr -d '\0')"
+SOM_VARIANT="$(cat /proc/device-tree/digi,hwid,variant | tr -d '\0')"
+SOM_VERSION="$(($(cat /proc/device-tree/digi,hwid,hv | tr -d '\0' )))"
+if [ -e /proc/device-tree/digi,smarcid,variant ]; then
+	SMARC_SN="$(cat /proc/device-tree/digi,smarcid,sn | tr -d '\0')"
+	SMARC_VARIANT="$(cat /proc/device-tree/digi,smarcid,variant | tr -d '\0')"
+	SMARC_VERSION="$(($(cat /proc/device-tree/digi,smarcid,hv | tr -d '\0' )))"
+fi
 BOARD_VERSION="$(cat /proc/device-tree/digi,carrierboard,version | tr -d '\0')"
 [ -e "/proc/device-tree/digi,carrierboard,id" ] && BOARD_ID="$(cat /proc/device-tree/digi,carrierboard,id | tr -d '\0')"
 [ -e "/proc/device-tree/cpus/rev" ] && SOC_REV="$(cat /proc/device-tree/cpus/rev | tr -d '\0')"
@@ -627,7 +633,14 @@ print_qr || exit $?
 	echo ""
 
 	echo "|||:Component|:Version"
-	DUT_HEADER="SN-${BOARD_SN}, ${MACHINE} ${BOARD_VARIANT} ${BOARD_TYPE}v${BOARD_VERSION}"
+	if [ -n "${SMARC_VARIANT}" ]; then
+		DUT_HEADER="SN-${SMARC_SN}, ${MACHINE} ${SMARC_VARIANT} SMARCv${SMARC_VERSION}"
+	else
+		DUT_HEADER="SN-${SOM_SN}, ${MACHINE} ${SOM_VARIANT} SOMv${SOM_VERSION}"
+	fi
+
+	DUT_HEADER="${DUT_HEADER} ${BOARD_TYPE}v${BOARD_VERSION}"
+
 	if [ -n "${BOARD_ID}" ]; then
 		DUT_HEADER="${DUT_HEADER} board_ID=${BOARD_ID}"
 	fi
