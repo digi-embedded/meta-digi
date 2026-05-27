@@ -3,7 +3,7 @@
 #
 #  build.sh
 #
-#  Copyright (C) 2013-2025 by Digi International Inc.
+#  Copyright (C) 2013-2026 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -275,22 +275,22 @@ done<<-_EOF_
 	ccimx6ulrftest       dey-image-mft-module-rf
 	ccmp15-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter
 	ccmp13-dvk           core-image-base
-	ccmp25-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter,dey-image-container-manager
+	ccmp25-dvk           dey-image-qt,dey-image-webkit,dey-image-lvgl,dey-image-flutter,dey-image-containers
 	ccimx91-dvk          core-image-base
 	ccimx93-dvk          dey-image-qt,dey-image-lvgl
-	ccimx95-dvk          dey-image-qt,dey-image-chromium,dey-image-lvgl,dey-image-flutter,dey-image-container-manager
+	ccimx95-dvk          dey-image-qt,dey-image-chromium,dey-image-lvgl,dey-image-flutter,dey-image-containers
 _EOF_
 
 # Set additional layers required for yocto images
 declare -A EXTRA_YOCTO_LAYERS
-EXTRA_YOCTO_LAYERS["dey-image-container-manager"]="\
+EXTRA_YOCTO_LAYERS["dey-image-containers"]="\
     meta-openembedded/meta-filesystems \
     meta-virtualization \
     meta-digi/meta-digi-containers"
 
 # Set additional configurations required for yocto images
 declare -A EXTRA_YOCTO_CONF
-EXTRA_YOCTO_CONF["dey-image-container-manager"]="\
+EXTRA_YOCTO_CONF["dey-image-containers"]="\
 DISTRO_FEATURES:append = \" virtualization\" \
 "
 
