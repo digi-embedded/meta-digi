@@ -164,11 +164,11 @@ Set profile and naming in `conf/local.conf`:
 
 ```conf
 DISTRO_FEATURES:append = " virtualization"
-DCP_NAME = "webkit"               # or: lvgl, chromium, flutter, custom profile
+DCP_NAME = "webkit-demo"          # or: lvgl-demo, chromium-demo, flutter-demo, custom profile
 # PODMAN_TAG defaults to "${DCP_NAME}-tag"
 ```
 
-If `DCP_NAME` is not set, `dey-image-dcp` now defaults to `lvgl`.
+If `DCP_NAME` is not set, `dey-image-dcp` now defaults to `lvgl-demo`.
 
 Build:
 
@@ -209,9 +209,10 @@ Profile-specific behavior is controlled with:
 
 Current built-in profile examples:
 
-- `container-lvgl`
-- `container-flutter`
-- `container-webkit`
+- `container-lvgl-demo`
+- `container-flutter-demo`
+- `container-webkit-demo`
+- `container-chromium-demo`
 
 You can add new profiles by appending variables with `:container-<name>` overrides.
 
@@ -334,15 +335,19 @@ Each profile is self-contained under `containers/`:
 
 ```text
 containers/
-  lvgl/
+  lvgl-demo/
     rootfs_files/
     configs_lxc/
     artifact/
-  flutter/
+  chromium-demo/
     rootfs_files/
     configs_lxc/
     artifact/
-  webkit/
+  flutter-demo/
+    rootfs_files/
+    configs_lxc/
+    artifact/
+  webkit-demo/
     rootfs_files/
     configs_lxc/
     artifact/

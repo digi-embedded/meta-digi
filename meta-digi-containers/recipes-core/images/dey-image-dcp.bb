@@ -21,10 +21,10 @@ NO_RECOMMENDATIONS = "1"
 ########################
 # Container profile
 ########################
-# Select the profile in local.conf (e.g. DCP_NAME = "lvgl", "webkit",
-# "chromium" or "flutter"). Defaults to "lvgl" when not set by the build
-# configuration.
-DCP_NAME ?= "lvgl"
+# Select the profile in local.conf (e.g. DCP_NAME = "lvgl-demo",
+# "webkit-demo", "chromium-demo" or "flutter-demo"). Defaults to
+# "lvgl-demo" when not set by the build configuration.
+DCP_NAME ?= "lvgl-demo"
 OVERRIDES:append = ":container-${DCP_NAME}"
 
 ########################
@@ -104,9 +104,9 @@ IMAGE_INSTALL = " \
 ########################
 # Container type customizations LVGL
 ########################
-CONTAINER_INIT_SCRIPT:container-lvgl = "/start-lvgl-demo.sh"
-CONTAINER_FRIENDLY_NAME:container-lvgl = "LVGL Demo"
-CONTAINER_CREATE_ARGS_PODMAN:container-lvgl:ccmp25 = " \
+CONTAINER_INIT_SCRIPT:container-lvgl-demo = "/start-lvgl-demo.sh"
+CONTAINER_FRIENDLY_NAME:container-lvgl-demo = "LVGL Demo"
+CONTAINER_CREATE_ARGS_PODMAN:container-lvgl-demo:ccmp25 = " \
     --privileged \
     --network none \
     --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 \
@@ -120,7 +120,7 @@ CONTAINER_CREATE_ARGS_PODMAN:container-lvgl:ccmp25 = " \
     --volume /run/udev:/run/udev:ro \
     --tty \
 "
-CONTAINER_CREATE_ARGS_PODMAN:container-lvgl:ccimx95 = " \
+CONTAINER_CREATE_ARGS_PODMAN:container-lvgl-demo:ccimx95 = " \
     --privileged \
     --network none \
     --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 \
@@ -135,20 +135,20 @@ CONTAINER_CREATE_ARGS_PODMAN:container-lvgl:ccimx95 = " \
     --volume /run/udev:/run/udev:ro \
     --tty \
 "
-IMAGE_INSTALL:append:container-lvgl = " \
+IMAGE_INSTALL:append:container-lvgl-demo = " \
     lvgl-demo \
     weston \
     weston-init \
 "
 
-DISTRO_FEATURES:remove:container-lvgl = " wayland"
+DISTRO_FEATURES:remove:container-lvgl-demo = " wayland"
 
 ########################
 # Container type customizations webkit
 ########################
-CONTAINER_INIT_SCRIPT:container-webkit = "/start-webkit-demo.sh"
-CONTAINER_FRIENDLY_NAME:container-webkit = "WebKit Demo"
-CONTAINER_CREATE_ARGS_PODMAN:container-webkit:ccmp25 = " \
+CONTAINER_INIT_SCRIPT:container-webkit-demo = "/start-webkit-demo.sh"
+CONTAINER_FRIENDLY_NAME:container-webkit-demo = "WebKit Demo"
+CONTAINER_CREATE_ARGS_PODMAN:container-webkit-demo:ccmp25 = " \
     --privileged \
     --network host \
     --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 \
@@ -193,7 +193,7 @@ CONTAINER_CREATE_ARGS_PODMAN:container-webkit:ccmp25 = " \
     --env PULSE_SERVER=unix:/run/pulse/native \
     --tty \
 "
-IMAGE_INSTALL:append:container-webkit = " \
+IMAGE_INSTALL:append:container-webkit-demo = " \
     adwaita-icon-theme-symbolic \
     alsa-utils \
     bluez5 \
@@ -221,7 +221,7 @@ IMAGE_INSTALL:append:container-webkit = " \
     weston-init \
 "
 
-IMAGE_INSTALL:append:container-webkit:ccmp25 = " \
+IMAGE_INSTALL:append:container-webkit-demo:ccmp25 = " \
     gcnano-userland-multi-binary-stm32mp \
     libgles1-gcnano \
     libopenvg-gcnano \
@@ -232,8 +232,8 @@ IMAGE_INSTALL:append:container-webkit:ccmp25 = " \
 ########################
 # Container type customizations chromium
 ########################
-CONTAINER_INIT_SCRIPT:container-chromium = "/start-chromium-demo.sh"
-CONTAINER_CREATE_ARGS_PODMAN:container-chromium = " \
+CONTAINER_INIT_SCRIPT:container-chromium-demo = "/start-chromium-demo.sh"
+CONTAINER_CREATE_ARGS_PODMAN:container-chromium-demo = " \
     --privileged \
     --network host \
     --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 \
@@ -268,7 +268,7 @@ CONTAINER_CREATE_ARGS_PODMAN:container-chromium = " \
     --env PULSE_SERVER=unix:/run/pulse/native \
     --tty \
 "
-IMAGE_INSTALL:append:container-chromium = " \
+IMAGE_INSTALL:append:container-chromium-demo = " \
     adwaita-icon-theme-symbolic \
     alsa-utils \
     bluez5 \
@@ -300,9 +300,9 @@ IMAGE_INSTALL:append:container-chromium = " \
 ########################
 # Container type customizations flutter
 ########################
-CONTAINER_INIT_SCRIPT:container-flutter = "/start-flutter-demo.sh"
-CONTAINER_FRIENDLY_NAME:container-flutter = "Flutter Demo"
-CONTAINER_CREATE_ARGS_PODMAN:container-flutter:ccmp25 = " \
+CONTAINER_INIT_SCRIPT:container-flutter-demo = "/start-flutter-demo.sh"
+CONTAINER_FRIENDLY_NAME:container-flutter-demo = "Flutter Demo"
+CONTAINER_CREATE_ARGS_PODMAN:container-flutter-demo:ccmp25 = " \
     --privileged \
     --network none \
     --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 \
@@ -316,7 +316,7 @@ CONTAINER_CREATE_ARGS_PODMAN:container-flutter:ccmp25 = " \
     --volume /run/udev:/run/udev:ro \
     --tty \
 "
-CONTAINER_CREATE_ARGS_PODMAN:container-flutter:ccimx95 = " \
+CONTAINER_CREATE_ARGS_PODMAN:container-flutter-demo:ccimx95 = " \
     --privileged \
     --network none \
     --tmpfs /dev/shm:rw,nosuid,nodev,mode=1777 \
@@ -331,12 +331,12 @@ CONTAINER_CREATE_ARGS_PODMAN:container-flutter:ccimx95 = " \
     --volume /run/udev:/run/udev:ro \
     --tty \
 "
-IMAGE_INSTALL:append:container-flutter = " \
+IMAGE_INSTALL:append:container-flutter-demo = " \
     liberation-fonts \
     packagegroup-dey-flutter \
 "
-IMAGE_INSTALL:append:container-flutter:ccmp25 = " \
+IMAGE_INSTALL:append:container-flutter-demo:ccmp25 = " \
     gcnano-userland-multi-binary-stm32mp \
     libgles2-gcnano \
 "
-DISTRO_FEATURES:remove:container-flutter = " wayland"
+DISTRO_FEATURES:remove:container-flutter-demo = " wayland"

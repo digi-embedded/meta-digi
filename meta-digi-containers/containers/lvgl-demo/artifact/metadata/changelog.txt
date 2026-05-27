@@ -1,0 +1,1 @@
+Placeholder changelog for lvgl-demo container artifacts.
