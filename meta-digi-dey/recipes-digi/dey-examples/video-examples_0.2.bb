@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2022, Digi International Inc.
+# Copyright (C) 2020-2026, Digi International Inc.
 
 SUMMARY = "Short videos to demonstrate video playback on the WPE WebKit"
 DESCRIPTION = "This package contains fragments of the short film 'Big Buck Bunny', which are used to demonstrate how WebKit makes use of hardware acceleration for video decoding"
@@ -8,8 +8,8 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/CC-BY-3.0;md5=dfa02b5755629022e
 
 SRC_URI = "${DIGI_PKG_SRC}/${BPN}-${PV}.tar.gz"
 
-SRC_URI[md5sum] = "d22cc0fa20fde187455b27a799d2f9e6"
-SRC_URI[sha256sum] = "97389f33d98c52d4311117366f0aa8dc78d00f51a787697af349de4668ccdbf6"
+SRC_URI[md5sum] = "5b4cf8fe878adc6105df88866038e6db"
+SRC_URI[sha256sum] = "18d64ec814d1a318641b1afc2ff51f93326390fc07dc2b79e53fb92477a0e8bd"
 
 S = "${WORKDIR}/${PN}-${PV}"
 
@@ -18,6 +18,10 @@ WEBSERVER_ROOT = "srv/www"
 # List of video sample formats
 VIDEO_FORMATS = " \
     mov \
+    webm \
+"
+VIDEO_FORMATS:ccimx95 = " \
+    mp4 \
     webm \
 "
 # Name of the video sample
@@ -41,3 +45,5 @@ FILES:${PN} = "/${WEBSERVER_ROOT}/*"
 
 # Don't generate dbg or dev packages
 PACKAGES = "${PN}"
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"
