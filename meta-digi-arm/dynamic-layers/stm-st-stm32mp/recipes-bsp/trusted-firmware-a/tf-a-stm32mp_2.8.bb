@@ -13,10 +13,10 @@ TFA_URI_GITHUB = "${DIGI_GITHUB_GIT}/arm-trusted-firmware.git;protocol=https"
 TFA_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${TFA_URI_STASH}', '${TFA_URI_GITHUB}', d)}"
 
 SRCBRANCH = "v2.8/stm32mp/maint_ccmp2-beta"
-SRCREV = "779078679e4714addd14e58efb2564e050a0f016"
+SRCREV = "${AUTOREV}"
 
 SRC_URI = " \
-    ${TFA_GIT_URI};nobranch=1 \
+    ${TFA_GIT_URI};branch=${SRCBRANCH} \
 "
 
 TF_A_VERSION = "v2.8.12"
