@@ -1,5 +1,5 @@
 # Digi Embedded Yocto (DEY) 4.0
-## Release 4.0-r7
+## Release 4.0-r8
 
 This document provides information about Digi Embedded Yocto,
 Digi International's professional embedded Yocto development environment.
@@ -137,10 +137,22 @@ Documentation is available online at https://www.digi.com/resources/documentatio
 
 # Downloads
 
-* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/4.0/r7/images/
-* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/4.0/r7/sdk/
+* Demo images: https://ftp1.digi.com/support/digiembeddedyocto/4.0/r8/images/
+* Software Development Kit (SDK): https://ftp1.digi.com/support/digiembeddedyocto/4.0/r8/sdk/
 
 # Release Changelog
+
+## 4.0-r8
+
+* Linux kernel v5.15 updated to v5.15.204
+* Added a UBI health monitor service for NAND platforms
+* ST-based platforms
+  * Added more countries support to the ConnectCore MP1 CLM blob file
+  * Fix GLIBC issue on ConnectCore MP15 platform
+* NXP-based platforms
+  * SCU firmware update to v1.5.0.2
+  * Adjust 2.4GHz TxPower for ConnectCore 6UL platform
+  * Update firmware-nxp-wifi to NXP release lf-6.6.36-2.1.0 driver version 437.p30
 
 ## 4.0-r7
 
