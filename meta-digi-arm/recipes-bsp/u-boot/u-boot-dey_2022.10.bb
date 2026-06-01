@@ -7,7 +7,7 @@ DEPENDS += "flex-native bison-native"
 DEPENDS += "python3-setuptools-native"
 
 SRCBRANCH = "v2022.10/maint_ccmp2-beta"
-SRCREV = "${AUTOREV}"
+SRCREV = "020c0fc63a86b4d9dbc49ea9cf8f8895f56d5883"
 
 SRC_URI += " \
     ${@oe.utils.conditional('TRUSTFENCE_SIGN_FIT_STM', '1', 'file://fit_signature.cfg', '', d)} \

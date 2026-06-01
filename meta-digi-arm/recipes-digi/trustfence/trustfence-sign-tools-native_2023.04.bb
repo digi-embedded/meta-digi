@@ -3,4 +3,4 @@
 require trustfence-sign-tools-native_git.bb
 
 SRCBRANCH = "v2023.04/maint"
-SRCREV = "${AUTOREV}"
+SRCREV = "b04f8a114dde1ac86efa220eb5356a72d32bdbb6"
