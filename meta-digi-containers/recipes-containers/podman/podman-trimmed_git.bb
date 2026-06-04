@@ -21,6 +21,8 @@ RDEPENDS:${PN}:remove = " \
 
 PACKAGECONFIG:remove = "rootless docker"
 
+RPROVIDES:${PN}:append = " podman"
+RREPLACES:${PN}:append = " podman"
 RCONFLICTS:${PN}:append = " podman"
 
 do_install:append() {

@@ -27,10 +27,9 @@ SYSTEMD_AUTO_ENABLE ?= "enable"
 
 DEPENDS += "python3-pip-native"
 
-CONTAINERS_BACKEND_TOOLS ?= "podman lxc"
-
 RDEPENDS:${PN} += " \
-    ${CONTAINERS_BACKEND_TOOLS} \
+    lxc \
+    podman \
     python3-core \
     python3-asyncio \
     python3-json \

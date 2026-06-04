@@ -8,19 +8,6 @@ This layer provides:
 - `dey-image-containers`: generates a minimal root file system with the Container
 Manager and everything it requires to run and manage containers
 
-`cc-container-mng` depends on the container runtime packages listed in
-`CONTAINERS_BACKEND_TOOLS`, which defaults to `podman lxc`. Override it to select
-different runtimes or a single engine, for example:
-
-```bitbake
-CONTAINERS_BACKEND_TOOLS = "podman-trimmed lxc-trimmed"
-CONTAINERS_BACKEND_TOOLS = "podman-trimmed"
-CONTAINERS_BACKEND_TOOLS = "lxc"
-```
-
-`dey-image-containers` overrides `CONTAINERS_BACKEND_TOOLS` to install
-the trimmed runtime packages to keep the image smaller.
-
 The layer explicitly depends on `meta-virtualization`.
 `dey-image-dcp` and `dey-image-containers` require
 `DISTRO_FEATURES:append = " virtualization"` in `local.conf`.

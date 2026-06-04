@@ -75,11 +75,14 @@ CORE_TOOLS = " \
 	vsftpd \
 "
 
-# Tools to manage containers
-CONTAINERS_BACKEND_TOOLS:pn-cc-container-mng = "lxc-trimmed podman-trimmed"
 CONTAINER_MANAGEMENT = " \
+	lxc-trimmed \
+	podman-trimmed \
 	cc-container-mng \
 "
+
+PREFERRED_RPROVIDER_lxc = "lxc-trimmed"
+PREFERRED_RPROVIDER_podman = "podman-trimmed"
 
 # Keep the systemd/udev hotplug support packages that are otherwise
 # dropped when recommendations are disabled.
