@@ -43,7 +43,8 @@ UBOOT_ENV_PARTITION:ccmp1 = "UBI"
 
 pkg_postinst_ontarget:${PN}() {
 	CONFIG_FILE="${sysconfdir}/fw_env.config"
-	MMCDEV="$(sed -ne 's,.*root=/dev/mmcblk\([0-9]\)p.*,\1,g;T;p' /proc/cmdline)"
+	RDEV="$(mountpoint -d / | sed 's,:, ,g')"
+	MMCDEV="$(cat /proc/partitions | tr -s " " | sed -n "s,^ ${RDEV} [0-9]\+ mmcblk\([0-9]\)p.*,\1,p")"
 	if [ -n "${MMCDEV}" ] && ! [ -b "/dev/mmcblk${MMCDEV}boot0" ]; then
 		sed -i -e "s,^/dev/mmcblk[^[:blank:]]\+,/dev/mmcblk${MMCDEV},g" ${CONFIG_FILE}
 	fi
