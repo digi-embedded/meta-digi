@@ -18,6 +18,10 @@ FW_CONFIG_FILE:ccmp1 = "${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs
 FW_CONFIG_FILE:ccimx9 = "${STORAGE_MEDIA}/fw_env_boot1_boot2.config"
 FW_CONFIG_FILE:ccmp2 = "${STORAGE_MEDIA}/fw_env_boot1_boot2.config"
 
+FW_CONFIG_FILE_USD ?= ""
+FW_CONFIG_FILE_USD:mx8-generic-bsp = "${STORAGE_MEDIA}/fw_env.config_usd"
+FW_CONFIG_FILE_USD:ccimx9 = "${STORAGE_MEDIA}/fw_env.config_usd"
+
 DEPENDS += "${@oe.utils.conditional('OPTEE_PATCHES', '', '', 'optee-client', d)}"
 
 OPTEE_PATCHES = ""
@@ -32,10 +36,15 @@ SRC_URI += " \
     file://0003-Implement-support-for-environment-encryption-by-CAAM.patch \
     ${@bb.utils.contains('MACHINE_FEATURES', 'optee', '${OPTEE_PATCHES}', '', d)} \
 "
+SRC_URI:append:mx8-generic-bsp = " file://${FW_CONFIG_FILE_USD}"
+SRC_URI:append:ccimx9 = " file://${FW_CONFIG_FILE_USD}"
 
 do_install:append() {
 	install -d ${D}${sysconfdir}
 	install -m 0644 ${WORKDIR}/${FW_CONFIG_FILE} ${D}${sysconfdir}/fw_env.config
+	if [ -n "${FW_CONFIG_FILE_USD}" ]; then
+		install -m 0644 ${WORKDIR}/${FW_CONFIG_FILE_USD} ${D}${sysconfdir}/fw_env.config_usd
+	fi
 }
 
 UBOOT_ENV_PARTITION = "environment"
@@ -46,7 +55,11 @@ pkg_postinst_ontarget:${PN}() {
 	RDEV="$(mountpoint -d / | sed 's,:, ,g')"
 	MMCDEV="$(cat /proc/partitions | tr -s " " | sed -n "s,^ ${RDEV} [0-9]\+ mmcblk\([0-9]\)p.*,\1,p")"
 	if [ -n "${MMCDEV}" ] && ! [ -b "/dev/mmcblk${MMCDEV}boot0" ]; then
+		# If available, replace default config with uSD config
+		[ -f "${CONFIG_FILE}_usd" ] && mv ${CONFIG_FILE}_usd ${CONFIG_FILE}
 		sed -i -e "s,^/dev/mmcblk[^[:blank:]]\+,/dev/mmcblk${MMCDEV},g" ${CONFIG_FILE}
+	elif [ -f "${CONFIG_FILE}_usd" ]; then
+		rm ${CONFIG_FILE}_usd
 	fi
 
 	PARTTABLE="/proc/mtd"
