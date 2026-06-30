@@ -1,0 +1,40 @@
+From: Mike Engel <Mike.Engel@digi.com>
+Date: Tue, 30 Jun 2026 12:09:58 +0200
+Subject: [PATCH] plat-imx: add MMU check in plat_console_init when enabling
+ OP-TEE debugging
+
+This commit adds MMU enable check in the plat_console_init()
+to avoid access violation and system crash when enabling OP-TEE
+debugging. This is needed, because during early boot, the console
+init is called before MMU enable and before relocation, meaning
+the A55 issues the console access as a secure transaction
+(no MMU = no NS bit translation).
+TRDC sees a secure transaction hitting a non-secure-only block
+and raises a violation fault.
+This ensures all console transactions are issued as non-secure,
+consistent with the TRDC configuration.
+
+https://onedigi.atlassian.net/browse/DEL-10001
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Mike Engel <Mike.Engel@digi.com>
+---
+ core/arch/arm/plat-imx/main.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/core/arch/arm/plat-imx/main.c b/core/arch/arm/plat-imx/main.c
+index 6e4d4cfaf..0c5bfeca9 100644
+--- a/core/arch/arm/plat-imx/main.c
++++ b/core/arch/arm/plat-imx/main.c
+@@ -104,6 +104,8 @@ register_ddr(CFG_NSEC_DDR_1_BASE, CFG_NSEC_DDR_1_SIZE);
+ void plat_console_init(void)
+ {
+ #ifdef CONSOLE_UART_BASE
++	if (!cpu_mmu_enabled())
++		return;
+ 	imx_uart_init(&console_data, CONSOLE_UART_BASE);
+ 	register_serial_console(&console_data.chip);
+ #endif
+-- 
+

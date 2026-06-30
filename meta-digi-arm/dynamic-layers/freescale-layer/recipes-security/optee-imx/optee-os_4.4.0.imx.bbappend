@@ -10,6 +10,7 @@ SRC_URI:append:dey = " \
     file://0004-core-ccimx93-enable-AES_HUK-trusted-application.patch \
     file://0005-core-imx-support-ccimx95-dvk.patch \
     file://0006-ccimx95-configure-console-on-LPUART1.patch \
+    file://0007-plat-imx-add-MMU-check-in-plat_console_init-when-ena.patch \
 "
 
 OPTEEMACHINE:ccimx8mm = "imx-ccimx8mmdvk"
