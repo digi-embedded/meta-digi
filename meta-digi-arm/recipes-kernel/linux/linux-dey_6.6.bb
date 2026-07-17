@@ -60,10 +60,12 @@ KERNEL_MODULE_PROBECONF:ccimx91 += "btnxpuart"
 KERNEL_MODULE_PROBECONF:ccimx93 += "btnxpuart"
 KERNEL_MODULE_PROBECONF:ccimx95 += "hci_uart"
 KERNEL_MODULE_PROBECONF:ccmp1 += "hci_uart"
+KERNEL_MODULE_PROBECONF:ccmp2 += "hci_uart"
 module_conf_btnxpuart:ccimx91 = "blacklist btnxpuart"
 module_conf_btnxpuart:ccimx93 = "blacklist btnxpuart"
 module_conf_hci_uart:ccimx95 = "blacklist hci_uart"
 module_conf_hci_uart:ccmp1 = "blacklist hci_uart"
+module_conf_hci_uart:ccmp2 = "blacklist hci_uart"
 
 # ---------------------------------------------------------------------
 # stub for devicetree which are located on digi directory

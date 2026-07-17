@@ -11,6 +11,7 @@ BT_INIT_FILE:ccimx91 = "bluetooth-init_btnxpuart"
 BT_INIT_FILE:ccimx93 = "bluetooth-init_btnxpuart"
 BT_INIT_FILE:ccimx95 = "bluetooth-init_btbcm_hciuart"
 BT_INIT_FILE:ccmp1 = "bluetooth-init_btbcm_hciuart"
+BT_INIT_FILE:ccmp2 = "bluetooth-init_btbcm_hciuart"
 
 SRC_URI = " \
     file://${BT_INIT_FILE} \
