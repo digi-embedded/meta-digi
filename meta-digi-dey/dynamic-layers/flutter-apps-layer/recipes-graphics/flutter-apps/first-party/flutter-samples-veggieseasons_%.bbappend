@@ -1,4 +1,4 @@
-# Copyright (C) 2025, Digi International Inc.
+# Copyright (C) 2025,2026, Digi International Inc.
 
 FILESEXTRAPATHS:prepend:dey := "${THISDIR}/files:"
 
@@ -10,6 +10,9 @@ SRC_URI:append = " \
 
 FLUTTER_DEMO_NAME ?= "${PN}"
 FLUTTER_MODE ?= "${FLUTTER_APP_RUNTIME_MODES}"
+
+# Flutter 3.38 does not accept linux-arm as a bundle target.
+FLUTTER_BUILD_ARGS:remove:ccmp15 = " --target-platform linux-arm"
 
 inherit update-rc.d systemd
 
