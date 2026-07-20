@@ -14,6 +14,7 @@ SRC_URI:append:dey = " \
     file://0009-ccimx95-set-DVK-console-to-LPUART6.patch \
     file://0010-ccimx95-enable-non-secure-non-privilege-access-to-GP.patch \
     file://0011-Revert-ccimx95-set-DVK-console-to-LPUART6.patch \
+    file://0012-fix-nxp-imx_trdc.h-header-guard.patch \
 "
 
 SRCREV = "8ec7e38031f8c022a9760a8da77bdc6e1938db8c"

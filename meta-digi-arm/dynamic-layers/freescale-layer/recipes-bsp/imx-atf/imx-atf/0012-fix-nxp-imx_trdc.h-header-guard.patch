@@ -1,0 +1,31 @@
+From: Peter Robinson <pbrobinson@gmail.com>
+Date: Wed, 29 Jan 2025 09:40:15 +0000
+Subject: [PATCH] fix(nxp): imx_trdc.h header guard
+
+The header guard define is IMX_XRDC_H where everything
+else is IMX_TRDC_H, gcc-15 complains about this so
+update the define to what it should be.
+
+Fixes: 293529100 ("feat(imx93): add the trdc driver")
+Change-Id: I4767dc4d1c26ebe95d417be724f5cb848f54a524
+Signed-off-by: Peter Robinson <pbrobinson@gmail.com>
+
+(cherry picked from commit 2e9198d0e0cbe9546348dd0a71ff6c3d2061d4eb)
+Signed-off-by: Isaac Hermida <isaac.hermida@digi.com>
+---
+ include/drivers/nxp/trdc/imx_trdc.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/drivers/nxp/trdc/imx_trdc.h b/include/drivers/nxp/trdc/imx_trdc.h
+index 7a6200c8d783..8c759c65d46c 100644
+--- a/include/drivers/nxp/trdc/imx_trdc.h
++++ b/include/drivers/nxp/trdc/imx_trdc.h
+@@ -5,7 +5,7 @@
+  */
+ 
+ #ifndef IMX_TRDC_H
+-#define IMX_XRDC_H
++#define IMX_TRDC_H
+ 
+ #define MBC_BLK_ALL	U(255)
+ #define MRC_REG_ALL	U(16)
