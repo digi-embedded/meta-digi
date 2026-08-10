@@ -51,6 +51,7 @@ RDEPENDS:${PN} = "\
     netbase \
     networkmanager \
     networkmanager-nmcli \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'cellular', 'networkmanager-wwan', '', d)} \
     os-release \
     ${@bb.utils.contains('MACHINE_FEATURES', 'pci', 'pciutils', '',d)} \
     recovery-utils \
