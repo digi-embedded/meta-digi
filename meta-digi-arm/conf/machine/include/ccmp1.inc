@@ -73,6 +73,7 @@ OPTEE_PKGS ??= "optee-client"
 
 MACHINE_EXTRA_RDEPENDS += " \
     mtd-utils-ubifs \
+    xbee-init \
 "
 MACHINE_EXTRA_RRECOMMENDS:remove = "kernel-imagebootfs"
 
