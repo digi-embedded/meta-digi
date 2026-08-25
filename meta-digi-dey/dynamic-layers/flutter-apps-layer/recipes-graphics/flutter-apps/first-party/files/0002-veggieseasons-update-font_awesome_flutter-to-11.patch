@@ -1,0 +1,50 @@
+From: Arturo Buzarra <arturo.buzarra@digi.com>
+Date: Tue, 25 Aug 2026 10:44:42 +0200
+Subject: [PATCH] veggieseasons: update font_awesome_flutter to 11
+
+Update the dependency to version 11 and replace Icon with FaIcon
+to support the new FaIconData type.
+
+Upstream-Status: Inappropriate [DEY specific]
+
+Signed-off-by: Arturo Buzarra <arturo.buzarra@digi.com>
+---
+ veggieseasons/lib/screens/details.dart | 3 ++-
+ veggieseasons/pubspec.yaml             | 2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/veggieseasons/lib/screens/details.dart b/veggieseasons/lib/screens/details.dart
+index 1d2b59e68..4af30603a 100644
+--- a/veggieseasons/lib/screens/details.dart
++++ b/veggieseasons/lib/screens/details.dart
+@@ -3,6 +3,7 @@
+ // found in the LICENSE file.
+ 
+ import 'package:flutter/cupertino.dart';
++import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+ import 'package:go_router/go_router.dart';
+ import 'package:provider/provider.dart';
+ import '../data/app_state.dart';
+@@ -162,7 +163,7 @@ class DetailsScreen extends StatelessWidget {
+                 Column(
+                   mainAxisSize: MainAxisSize.min,
+                   children: [
+-                    Icon(
++                    FaIcon(
+                       Styles.seasonIconData[season],
+                       color: veggie.seasons.contains(season)
+                           ? Styles.seasonColors[season]
+
+diff --git a/veggieseasons/pubspec.yaml b/veggieseasons/pubspec.yaml
+index cd87de0ef..e07294779 100644
+--- a/veggieseasons/pubspec.yaml
++++ b/veggieseasons/pubspec.yaml
+@@ -11,7 +11,7 @@ dependencies:
+   flutter:
+     sdk: flutter
+   cupertino_icons: ^1.0.2
+-  font_awesome_flutter: ^10.1.0
++  font_awesome_flutter: ^11.0.0
+   intl: ^0.20.0
+   provider: ^6.0.1
+   shared_preferences: ^2.0.14
