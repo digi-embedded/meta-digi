@@ -14,6 +14,8 @@ FLUTTER_MODE ?= "${FLUTTER_APP_RUNTIME_MODES}"
 
 # Flutter 3.38 does not accept linux-arm as a bundle target.
 FLUTTER_BUILD_ARGS:remove:ccmp15 = " --target-platform linux-arm"
+# Add Flutter legacy support for ARM32
+FLUTTER_APP_SUPPORTED_ARCHS:append:arm = " arm"
 
 inherit update-rc.d systemd
 
