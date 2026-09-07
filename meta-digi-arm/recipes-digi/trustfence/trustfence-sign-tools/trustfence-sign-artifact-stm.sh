@@ -3,7 +3,7 @@
 #
 #  trustfence-sign-artifact.sh
 #
-#  Copyright (C) 2023,2025 by Digi International Inc.
+#  Copyright (C) 2023-2026 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -112,7 +112,7 @@ if [ "${ARTIFACT_TFA}" = "y" ]; then
 			;;
 	esac
 
-	STM32MP_SigningTool_CLI -bin ${INPUT_FILE} \
+	STM32_SigningTool_CLI -bin ${INPUT_FILE} \
 				--public-key ${PUBLIC_KEY} \
 				--private-key ${PRIVATE_KEY} \
 				-t fsbl \

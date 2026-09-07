@@ -205,7 +205,7 @@ python () {
         if (d.getVar("DEY_SOC_VENDOR") == "STM"):
             d.setVar("SIGN_ENABLE", "1")
             d.setVar("EXTERNAL_KEY_CONF", "1")
-            d.setVar("SIGN_TOOL", "STM32MP_SigningTool_CLI")
+            d.setVar("SIGN_TOOL", "STM32_SigningTool_CLI")
             if (d.getVar("DIGI_SOM") == "ccmp15" ):
                 d.setVar("SIGN_KEY", d.getVar("TRUSTFENCE_KEYS_PATH") + "/keys/privateKey.pem");
                 d.setVar("TRUSTFENCE_PASSWORD_FILE", d.getVar("TRUSTFENCE_KEYS_PATH") + "/keys/key_pass.txt")

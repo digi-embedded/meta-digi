@@ -3,7 +3,7 @@
 #
 #  trustfence-gen-pki-stm.sh
 #
-#  Copyright (C) 2023,2025 by Digi International Inc.
+#  Copyright (C) 2023-2026 by Digi International Inc.
 #  All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -70,7 +70,7 @@ if [ "${PLATFORM}" = "ccmp15" ]; then
 		# Random password
 		password="$(openssl rand -base64 32)"
 		echo "Generating random key"
-		if ! STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/keys/" -pwd ${password}; then
+		if ! STM32_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/keys/" -pwd ${password}; then
 			echo "[ERROR] Could not generate PKI tree"
 			exit 1
 		fi
@@ -98,7 +98,7 @@ else
 			passwords="${passwords} ${pass}"
 		done
 		echo "Generating random keys"
-		if ! STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/keys/" -pwd ${passwords} -n 8; then
+		if ! STM32_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/keys/" -pwd ${passwords} -n 8; then
 			echo "[ERROR] Could not generate PKI tree"
 			exit 1
 		fi
@@ -148,7 +148,7 @@ if [ "${PLATFORM}" = "ccmp15" ] || [ "${PLATFORM}" = "ccmp25" ]; then
 			# Random password
 			password="$(openssl rand -base64 32)"
 			echo "Generating random key"
-			if ! STM32MP_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/rproc-keys/" -pwd ${password}; then
+			if ! STM32_KeyGen_CLI -abs "${CONFIG_SIGN_KEYS_PATH}/rproc-keys/" -pwd ${password}; then
 				echo "[ERROR] Could not generate PKI tree for Cortex-M coprocessor"
 				exit 1
 			fi
@@ -173,7 +173,7 @@ if [ "${PLATFORM}" = "ccmp13" ]; then
 	if [ -n "${CONFIG_FSBL_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_FIP_ENCRYPT_KEYNAME}" ]; then
 		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" ]; then
 			echo "Generating random encryption key for FSBL"
-			if ! STM32MP_KeyGen_CLI -rand 16 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}"; then
+			if ! STM32_KeyGen_CLI -rand 16 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}"; then
 				echo "[ERROR] Failed to generate 16-byte FSBL encryption key"
 				exit 1
 			fi
@@ -197,7 +197,7 @@ elif [ "${PLATFORM}" = "ccmp25" ]; then
 	if [ -n "${CONFIG_FSBL_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_FIP_ENCRYPT_KEYNAME}" ] && [ -n "${CONFIG_RPROC_ENCRYPT_KEYNAME}" ]; then
 		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" ]; then
 			echo "Generating random encryption key for FSBL"
-			if ! STM32MP_KeyGen_CLI -rand 16 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}"; then
+			if ! STM32_KeyGen_CLI -rand 16 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}"; then
 				echo "[ERROR] Failed to generate 16-byte FSBL encryption key"
 				exit 1
 			fi
@@ -205,7 +205,7 @@ elif [ "${PLATFORM}" = "ccmp25" ]; then
 		fi
 		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}" ]; then
 			echo "Generating random encryption key for FIP"
-			if ! STM32MP_KeyGen_CLI -rand 32 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"; then
+			if ! STM32_KeyGen_CLI -rand 32 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"; then
 				echo "[ERROR] Failed to generate 32-byte FIP encryption key"
 				exit 1
 			fi
@@ -213,7 +213,7 @@ elif [ "${PLATFORM}" = "ccmp25" ]; then
 		fi
 		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_RPROC_ENCRYPT_KEYNAME}" ]; then
 			echo "Generating random encryption keys for Cortex-M coprocessor"
-			if ! STM32MP_KeyGen_CLI -rand 32 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_RPROC_ENCRYPT_KEYNAME}"; then
+			if ! STM32_KeyGen_CLI -rand 32 "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_RPROC_ENCRYPT_KEYNAME}"; then
 				echo "[ERROR] Failed to generate 32-byte Cortex-M encryption key"
 				exit 1
 			fi
