@@ -12,4 +12,5 @@ Digi Embedded Yocto provides the following image recipes:
 
   * dey-image-lvgl: graphical LVGL image
 
-    A framebuffer-based image including an LVGL demo application.
+    By default the image is XWayland-based so it provides a full Weston
+    desktop environment.
