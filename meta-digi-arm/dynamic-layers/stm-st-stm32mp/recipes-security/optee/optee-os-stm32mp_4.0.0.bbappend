@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2022-2025, Digi International Inc.
+# Copyright (C) 2022-2026, Digi International Inc.
 #
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
@@ -33,3 +33,9 @@ EXTRA_OEMAKE:append:ccmp25 = " ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED
 # Enable remoteproc custom public key verification for signed firmware support
 EXTRA_OEMAKE:append:ccmp15 = " ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1' , 'CFG_STM32MP_REMOTEPROC=y RPROC_SIGN_KEY=%s' % (d.getVar('TRUSTFENCE_COPRO_SIGN_KEY') or ''), '', d)}"
 EXTRA_OEMAKE:remove:ccmp15 = " ${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1' , 'CFG_REMOTEPROC_PUB_KEY_VERIFY=y', '', d)}"
+
+# OP-TEE embeds the coprocessor signing public key on ccmp15.
+# Wait until TF-A has generated the TrustFence keys.
+OPTEE_PKI_DEPENDS = ""
+OPTEE_PKI_DEPENDS:ccmp15 = "${@oe.utils.conditional('TRUSTFENCE_COPRO_ENABLED', '1', 'tf-a-stm32mp:do_generate_pki_tree', '', d)}"
+do_compile[depends] += "${OPTEE_PKI_DEPENDS}"
