@@ -181,11 +181,11 @@ if [ "${PLATFORM}" = "ccmp13" ]; then
 		fi
 		if [ ! -f "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}" ]; then
 			echo "Generating encryption key for FIP"
-			if ! hexdump -e '/1 "%02x"' "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" > "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"; then
+			if ! hexdump -ve '/1 "%02x"' "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" > "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"; then
 				echo "[ERROR] Failed to generate 32-byte FIP encryption key"
 				exit 1
 			fi
-			if ! hexdump -e '/1 "%02x"' "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" >> "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"; then
+			if ! hexdump -ve '/1 "%02x"' "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FSBL_ENCRYPT_KEYNAME}" >> "${CONFIG_SIGN_KEYS_PATH}/${CONFIG_FIP_ENCRYPT_KEYNAME}"; then
 				echo "[ERROR] Failed to generate 32-byte FIP encryption key"
 				exit 1
 			fi
