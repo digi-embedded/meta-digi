@@ -121,6 +121,22 @@ swu_recipe_name() {
 	fi
 }
 
+# Clean configured recipes before building an image.
+# $1: image recipe
+handle_extra_yocto_clean_recipes() {
+	local target="$1"
+	local recipes_string="${EXTRA_YOCTO_CLEAN_RECIPES[$target]:-}"
+
+	if [ -z "$recipes_string" ]; then
+		return 0
+	fi
+
+	printf "\n[INFO] Cleaning sstate for recipes %s before building %s.\n" \
+		"$recipes_string" "$target"
+	# shellcheck disable=SC2086
+	bitbake -c cleansstate $recipes_string
+}
+
 #
 # For a given image recipe add/remove additional Yocto local.conf configuration
 #
@@ -294,6 +310,13 @@ EXTRA_YOCTO_CONF["dey-image-containers"]="\
 DISTRO_FEATURES:append = \" virtualization\" \
 "
 
+# Recipes to clean before building each image
+declare -A EXTRA_YOCTO_CLEAN_RECIPES
+EXTRA_YOCTO_CLEAN_RECIPES["dey-image-containers"]="\
+    u-boot-dey \
+    linux-dey \
+"
+
 # Set default values if not provided by Jenkins
 DY_PLATFORMS="${DY_PLATFORMS:-${AVAILABLE_PLATFORMS}}"
 
@@ -413,6 +436,7 @@ for platform in ${DY_PLATFORMS}; do
 				# Add additional layers and configs required by this image
 				handle_extra_yocto_layers "$target" add
 				handle_extra_yocto_conf "$target" add "conf/local.conf"
+				handle_extra_yocto_clean_recipes "$target" || exit 1
 
 				printf "\n[INFO] Building the %s target.\n" "${target}"
 				# shellcheck disable=SC2046
