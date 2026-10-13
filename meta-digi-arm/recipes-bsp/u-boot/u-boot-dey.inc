@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2024, Digi International Inc.
+# Copyright (C) 2018-2026, Digi International Inc.
 
 require recipes-bsp/u-boot/u-boot.inc
 
@@ -27,7 +27,7 @@ INSTALL_FW_UBOOT_SCRIPTS = " \
 "
 
 SRC_URI = " \
-    ${UBOOT_GIT_URI};branch=${SRCBRANCH} \
+    ${UBOOT_GIT_URI};nobranch=1 \
     file://boot.txt \
     ${INSTALL_FW_UBOOT_SCRIPTS} \
 "
