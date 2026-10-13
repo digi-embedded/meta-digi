@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2022-2025, Digi International Inc.
+# Copyright (C) 2022-2026, Digi International Inc.
 #
 
 # Inherit custom DIGI sign class to skip signing tool and key parsing restrictions
@@ -11,10 +11,10 @@ TFA_URI_GITHUB = "${DIGI_GITHUB_GIT}/arm-trusted-firmware.git;protocol=https"
 TFA_GIT_URI ?= "${@oe.utils.conditional('DIGI_INTERNAL_GIT', '1' , '${TFA_URI_STASH}', '${TFA_URI_GITHUB}', d)}"
 
 SRCBRANCH = "v2.10/stm32mp/maint"
-SRCREV = "${AUTOREV}"
+SRCREV = "32f7451cae34bb315f57b54ccc068436f25be5d9"
 
 SRC_URI = " \
-    ${TFA_GIT_URI};branch=${SRCBRANCH} \
+    ${TFA_GIT_URI};nobranch=1 \
 "
 
 # stm32mp15 = header-version 1
